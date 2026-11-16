@@ -8,7 +8,7 @@ export { PROPORTION }
 /**
  * DIMENSIONS, kinds of measure, as the compiler knows them (epic `language` P23):
  * a dimension is a type whose record holds its units (`P.TypeScope.units`), e.g. `Length`'s meter, inch, foot.
- * - Spell's built-in six (length, weight, temperature, volume, speed, proportion) are written in spell, in the core's
+ * - Spell's built-in seven (length, weight, temperature, volume, speed, duration, proportion) are written in spell, in the core's
  *   `dimensions/dimensions.spell` and its Spanish twin, compiled ONCE by `yarn core:gen:templates` into the kit's
  *   `spell/util/measures/dimensions.generated.ts`:  every language's words for each, which each root loads
  *   (`loadBuiltInDimensions()`), and the runtimes convert by.
@@ -142,4 +142,44 @@ export function shownMeasureAST(match: P.Match | undefined, ast: P.ASTExpression
     methodName: "measureShown",
     args: [ast, text(measure.dimension), text(measure.unit)]
   })
+}
+
+////////////////
+// ## Durations
+////////////////
+
+/** The built-in dimension of how long something takes:  `pause for 300 msec`, `check it every 5 minutes` (T140). */
+export const DURATION = "Duration"
+
+/**
+ * The core's name for each duration unit, by the unit's id:  a key of `core.TIME_UNITS_MAP`, what `core.pauseFor()` and
+ * `core.notify()` are handed -- `pause for 300 msec` compiles to `core.pauseFor(300, "msec")`.
+ * - Python's core has the same keys, `RuntimeMethods.TIME_UNITS_MAP`.
+ */
+export const CORE_TIME_UNITS: Readonly<Record<string, string>> = {
+  millisecond: "msec",
+  second: "seconds",
+  tick: "ticks",
+  minute: "minutes",
+  hour: "hours",
+  day: "days"
+}
+
+/**
+ * The duration unit an amount is in -- `undefined` if it isn't a duration:
+ * - `unit` written after it (`unit_words`), `pause for (10 + 10) sec`:  that unit, if it's a duration's
+ * - else `amount` itself, a measure (`SP.measureOf()`):  `300 msec`, `1 minute 30 seconds`, `the delay`
+ *   (`its "delay" is a duration in msec`)
+ * - A lookup:  call it WHILE PARSING, into `match.data`.
+ */
+export function durationUnitOf(amount: P.Match, unit?: P.Match): P.DimensionUnit | undefined {
+  if (unit) {
+    const said = unit.data as { dimension?: P.TypeScope; unit?: P.DimensionUnit }
+    return said.dimension?.name === DURATION ? said.unit : undefined
+  }
+  const measure = measureOf(amount)
+  if (measure?.dimension !== DURATION) return undefined
+  return dimensionsIn(amount.scope)
+    .find((dimension) => dimension.name === DURATION)
+    ?.units?.find((each) => each.id === measure.unit)
 }

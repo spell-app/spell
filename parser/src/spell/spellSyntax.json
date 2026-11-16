@@ -816,7 +816,7 @@
           "ruleNames": ["measure_literal"],
           "internal": false,
           "file": "src/spell/rules/expressions/MeasureLiteral.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`, `18%`.",
           "syntaxes": [
             {
@@ -1653,11 +1653,9 @@
             "create_method",
             "create_hook_words",
             "cancel_when",
-            "pause_units",
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
-            "check_unit",
             "day_half",
             "clock_zone",
             "size_unit",
@@ -1767,9 +1765,6 @@
               "syntax": "((if:if)|(unless:unless))"
             },
             {
-              "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
-            },
-            {
               "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:json file)|(plain_file:file)|(room:room)|(sheet:sheet|spreadsheet|csv file)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
             },
             {
@@ -1777,9 +1772,6 @@
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
-            },
-            {
-              "syntax": "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
             },
             {
               "syntax": "((am:am|AM)|(pm:pm|PM))"
@@ -6985,12 +6977,12 @@
           "ruleNames": ["pause"],
           "internal": false,
           "file": "src/spell/rules/async/Pause.ts",
-          "line": 14,
-          "purpose": "Delay for a certain amount of time, e.g. `pause for 2 seconds`.",
+          "line": 18,
+          "purpose": "Wait a while, e.g. `pause for 2 seconds`, `pause for 3 ticks`, `pause for the delay`.",
           "syntaxes": [
             {
-              "syntax": "pause for {number:expression} {units:pause_units}",
-              "example": "pause for 2 seconds\"",
+              "syntax": "pause for {duration:expression} {unit:unit_words}?",
+              "example": "pause for 2 seconds",
               "outputs": {
                 "js": {
                   "code": "await core.pauseFor(2, \"seconds\")"
@@ -8345,14 +8337,17 @@
           "ruleNames": ["checked_every"],
           "internal": false,
           "file": "src/spell/rules/places/CheckedEvery.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "How often to ask a place that can't announce what changed.",
           "syntaxes": [
             {
-              "syntax": "check {type:subject_it} every {number} {unit:check_unit}?"
+              "syntax": "check {type:subject_it} every {interval:measure_literal}"
             },
             {
-              "syntax": "check {type:subject_it} every {unit:check_unit}"
+              "syntax": "check {type:subject_it} every {number}"
+            },
+            {
+              "syntax": "check {type:subject_it} every {unit:unit_words}"
             }
           ],
           "aliases": ["statement"]
@@ -10015,7 +10010,7 @@
           "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for ({time:measure_literal}|{time:expression} {unit:unit_words}))|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
               "example": "notify \"Yo!\"",
               "outputs": {
                 "js": {

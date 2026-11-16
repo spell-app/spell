@@ -451,11 +451,9 @@ places.addRule(KeyGoesInAddress, {
     }
   ]
 })
-places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
-  syntax: "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
-})
-places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} {unit:check_unit}?" })
-places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:check_unit}" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {interval:measure_literal}" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number}" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:unit_words}" })
 places.addRule(Wording.specialize({ ruleName: "day_half", meanings: ["am", "pm"] }), {
   syntax: "((am:am|AM)|(pm:pm|PM))"
 })

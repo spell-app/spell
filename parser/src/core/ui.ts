@@ -100,13 +100,20 @@ export const uiMethods = defineCoreModule({
     msec: 1,
     // a "tick" (from hypercard) is 1/60th of a second
     tick: 1000 / 60,
-    ticks: 1000 / 60
+    ticks: 1000 / 60,
+
+    minute: 60_000,
+    minutes: 60_000,
+    hour: 3_600_000,
+    hours: 3_600_000,
+    day: 86_400_000,
+    days: 86_400_000
   } as Record<string, number>,
 
   /**
    * Return promise which resolves after `number` `units` have elapsed.
    * - `units` looked up in `TIME_UNITS_MAP`; unrecognized `units` fall back to seconds.
-   * - Compiles from spell `pause for {number} {units}` (see `rules/async/Pause.ts`); caller `await`s it.
+   * - Compiles from spell `pause for 300 msec`, any duration (see `rules/async/Pause.ts`);  caller `await`s it.
    * - NEVER resolves while a recompiled program loads to take over the last run's things (`isCarryingOver`):
    *   - what its top level sets going stops at its first pause, e.g. `reset the game`'s new deal
    *   - and the game in progress carries on instead

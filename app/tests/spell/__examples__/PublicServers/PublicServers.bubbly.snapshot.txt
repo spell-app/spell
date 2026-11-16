@@ -1,0 +1,2099 @@
+==== /GitHub.api.spell
+⟪## GitHub:  a repository's issues, the people who wrote it, anyone by their login, and a search of people and repositories⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in GitHub.spell.⟧
+⟦// `github` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://api.github.com --into GitHub.api.spell --name github --no-ai --key-secret GITHUB_TOKEN⟧
+⟦//     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name},⟧
+⟦//       users=/search/users?q=ryansolid,repositories=/search/repositories?q=solid"⟧
+⟦//     --samples ryansolid,solidjs,octocat⟧
+⟦// `spell place update GitHub.api.spell` looks again, and changes only this file and GitHub.api.json5.⟧
+⟦// Its key is your own, named GITHUB_TOKEN, read from the environment and never written here (`gh auth token` gives one).⟧
+⟦// Without it, GitHub answers 60 requests an hour;  with it, 5000.  A page in a browser always goes without.⟧
+⟦// Its searches have a limit of their own:  10 a minute without a key, 30 with one.⟧
+⟦// People and organizations are both users here:  their "kind" says which.⟧
+
+[thing create_place L0]
+| «github» is a web server at «"https://api.github.com"»
+|   its optional key is the secret _"GITHUB_TOKEN"_
+|   its next page is in its _"Link"_ header
+|   it gives up to _100_ at a time, asked for with _"per_page"_
+|   check it every _40_ minutes    ‾quantity(40 minutes)
+|   it writes names like _"repository_url"_
+|   **issues** live at _"/repos/solidjs/solid/issues"_
+|   **contributors** live at _"/repos/solidjs/solid/contributors"_
+|   **users** are found at _"/users/{name}"_
+|   a **user**'s **id** is its _"login"_
+|   **users** are searched with _"q"_ at _"/search/users"_
+|   **repositories** are searched with _"q"_ at _"/search/repositories"_
+
+[thing create_type L0]
+| an «"issue"» is a **thing**
+|   it lives in **github**    ‾value(github)
+|   [property define_property_has L1]
+|   | its «"url"» is an **issue**
+|   [property define_property_has L1]
+|   | its «"repository url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"labels url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"comments url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"user"» is an **issue user**
+|   [property define_property_has L1]
+|   | its «"labels"» is a list of **labels**
+|   [property define_property_has L1]
+|   | its «"state"» is **text**
+|   [property define_property_has L1]
+|   | its «"locked"» is yes or no
+|   [property define_property_has L1]
+|   | its «"assignees"» is a list of **assignees**
+|   [property define_property_has L1]
+|   | its «"comments"» is a **number**
+|   [property define_property_has L1]
+|   | its «"created at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"updated at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"author association"» is **text**
+|   [property define_property_has L1]
+|   | its «"issue field values"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"sub issues summary"» is a **sub issues summary**
+|   [property define_property_has L1]
+|   | its «"issue dependencies summary"» is an **issue dependencies summary**
+|   [property define_property_has L1]
+|   | its «"body"» is **text**
+|   [property define_property_has L1]
+|   | its «"reactions"» is a **reaction**
+|   [property define_property_has L1]
+|   | its «"timeline url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"performed via github app"» is a **performed via github app**
+|   [property define_property_has L1]
+|   | its «"state reason"» is **text**
+|   [property define_property_has L1]
+|   | its «"draft"» is yes or no
+|   [property define_property_has L1]
+|   | its «"pull request"» is a **pull request**
+|   [property define_property_has L1]
+|   | its «"assignee"» is an **assignee**
+
+[thing create_type L0]
+| a «"contributor"» is a **thing**
+|   it lives in **github**    ‾value(github)
+|   [property define_property_has L1]
+|   | its «"login"» is **text**
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gravatar id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"following url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"user view type"» is **text**
+|   [property define_property_has L1]
+|   | its «"site admin"» is yes or no
+|   [property define_property_has L1]
+|   | its «"contributions"» is a **number**
+
+[thing create_type L0]
+| a «"user"» is a **thing**
+|   it lives in **github**    ‾value(github)
+|   [property define_property_has L1]
+|   | its «"login"» is **text**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gravatar id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"following url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"user view type"» is **text**
+|   [property define_property_has L1]
+|   | its «"site admin"» is yes or no
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"company"» is **text**
+|   [property define_property_has L1]
+|   | its «"blog"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"location"» is **text**
+|   [property define_property_has L1]
+|   | its «"email"» is **text**
+|   [property define_property_has L1]
+|   | its «"twitter username"» is **text**
+|   [property define_property_has L1]
+|   | its «"public repos"» is a **number**
+|   [property define_property_has L1]
+|   | its «"public gists"» is a **number**
+|   [property define_property_has L1]
+|   | its «"followers"» is a **number**
+|   [property define_property_has L1]
+|   | its «"following"» is a **number**
+|   [property define_property_has L1]
+|   | its «"created at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"updated at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"bio"» is **text**
+
+[thing create_type L0]
+| an «"issue user"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"login"» is **text**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gravatar id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"following url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"user view type"» is **text**
+|   [property define_property_has L1]
+|   | its «"site admin"» is yes or no
+
+[thing create_type L0]
+| a «"label"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"color"» is **text**
+|   [property define_property_has L1]
+|   | its «"default"» is yes or no
+|   [property define_property_has L1]
+|   | its «"description"» is **text**
+
+[thing create_type L0]
+| a «"sub issues summary"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"total"» is a **number**
+|   [property define_property_has L1]
+|   | its «"completed"» is a **number**
+|   [property define_property_has L1]
+|   | its «"percent completed"» is a **number**
+
+[thing create_type L0]
+| an «"issue dependencies summary"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"blocked by"» is a **number**
+|   [property define_property_has L1]
+|   | its «"total blocked by"» is a **number**
+|   [property define_property_has L1]
+|   | its «"blocking"» is a **number**
+|   [property define_property_has L1]
+|   | its «"total blocking"» is a **number**
+
+[thing create_type L0]
+| a «"reaction"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"total count"» is a **number**
+|   [property define_property_has L1]
+|   | its «"laugh"» is a **number**
+|   [property define_property_has L1]
+|   | its «"hooray"» is a **number**
+|   [property define_property_has L1]
+|   | its «"confused"» is a **number**
+|   [property define_property_has L1]
+|   | its «"heart"» is a **number**
+|   [property define_property_has L1]
+|   | its «"rocket"» is a **number**
+|   [property define_property_has L1]
+|   | its «"eyes"» is a **number**
+
+[thing create_type L0]
+| a «"performed via github app"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"client id"» is **text**
+|   [property define_property_has L1]
+|   | its «"slug"» is **text**
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"owner"» is an **owner**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"description"» is **text**
+|   [property define_property_has L1]
+|   | its «"external url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"created at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"updated at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"permissions"» is a **permission**
+|   [property define_property_has L1]
+|   | its «"events"» is a list of **text**
+
+[thing create_type L0]
+| an «"owner"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"login"» is **text**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gravatar id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"following url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"user view type"» is **text**
+|   [property define_property_has L1]
+|   | its «"site admin"» is yes or no
+
+[thing create_type L0]
+| a «"permission"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"actions"» is **text**
+|   [property define_property_has L1]
+|   | its «"administration"» is **text**
+|   [property define_property_has L1]
+|   | its «"checks"» is **text**
+|   [property define_property_has L1]
+|   | its «"contents"» is **text**
+|   [property define_property_has L1]
+|   | its «"discussions"» is **text**
+|   [property define_property_has L1]
+|   | its «"issues"» is **text**
+|   [property define_property_has L1]
+|   | its «"members"» is **text**
+|   [property define_property_has L1]
+|   | its «"merge queues"» is **text**
+|   [property define_property_has L1]
+|   | its «"metadata"» is **text**
+|   [property define_property_has L1]
+|   | its «"pull requests"» is **text**
+|   [property define_property_has L1]
+|   | its «"repository hooks"» is **text**
+|   [property define_property_has L1]
+|   | its «"statuses"» is **text**
+|   [property define_property_has L1]
+|   | its «"workflows"» is **text**
+|   [property define_property_has L1]
+|   | its «"repository creation"» is **text**
+
+[thing create_type L0]
+| a «"pull request"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"diff url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"patch url"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| a «"repository"» is a **thing**
+|   it lives in **github**    ‾value(github)
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"full name"» is **text**
+|   [property define_property_has L1]
+|   | its «"private"» is yes or no
+|   [property define_property_has L1]
+|   | its «"owner"» is an **owner**
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"description"» is **text**
+|   [property define_property_has L1]
+|   | its «"fork"» is yes or no
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"forks url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"keys url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"collaborators url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"teams url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"hooks url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"issue events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"assignees url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"branches url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"tags url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"blobs url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"git tags url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"git refs url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"trees url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"statuses url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"languages url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"stargazers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"contributors url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscribers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscription url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"commits url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"git commits url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"comments url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"issue comment url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"contents url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"compare url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"merges url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"archive url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"downloads url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"issues url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"pulls url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"milestones url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"notifications url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"labels url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"releases url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"deployments url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"created at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"updated at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"pushed at"» is a **date**
+|   [property define_property_has L1]
+|   | its «"git url"» is **text**
+|   [property define_property_has L1]
+|   | its «"ssh url"» is **text**
+|   [property define_property_has L1]
+|   | its «"clone url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"svn url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"homepage"» is **text**
+|   [property define_property_has L1]
+|   | its «"size"» is a **number**
+|   [property define_property_has L1]
+|   | its «"stargazers count"» is a **number**
+|   [property define_property_has L1]
+|   | its «"watchers count"» is a **number**
+|   [property define_property_has L1]
+|   | its «"language"» is **text**
+|   [property define_property_has L1]
+|   | its «"issues"» is yes or no, stored as «"has_issues"»
+|   [property define_property_has L1]
+|   | its «"projects"» is yes or no, stored as «"has_projects"»
+|   [property define_property_has L1]
+|   | its «"downloads"» is yes or no, stored as «"has_downloads"»
+|   [property define_property_has L1]
+|   | its «"wiki"» is yes or no, stored as «"has_wiki"»
+|   [property define_property_has L1]
+|   | its «"pages"» is yes or no, stored as «"has_pages"»
+|   [property define_property_has L1]
+|   | its «"discussions"» is yes or no, stored as «"has_discussions"»
+|   [property define_property_has L1]
+|   | its «"forks count"» is a **number**
+|   [property define_property_has L1]
+|   | its «"archived"» is yes or no
+|   [property define_property_has L1]
+|   | its «"disabled"» is yes or no
+|   [property define_property_has L1]
+|   | its «"open issues count"» is a **number**
+|   [property define_property_has L1]
+|   | its «"license"» is a **license**
+|   [property define_property_has L1]
+|   | its «"allow forking"» is yes or no
+|   [property define_property_has L1]
+|   | its «"template"» is yes or no, stored as «"is_template"»
+|   [property define_property_has L1]
+|   | its «"web commit signoff required"» is yes or no
+|   [property define_property_has L1]
+|   | its «"pull requests"» is yes or no, stored as «"has_pull_requests"»
+|   [property define_property_has L1]
+|   | its «"pull request creation policy"» is **text**
+|   [property define_property_has L1]
+|   | its «"topics"» is a list of **users**
+|   [property define_property_has L1]
+|   | its «"visibility"» is **text**
+|   [property define_property_has L1]
+|   | its «"forks"» is a **number**
+|   [property define_property_has L1]
+|   | its «"open issues"» is a **number**
+|   [property define_property_has L1]
+|   | its «"watchers"» is a **number**
+|   [property define_property_has L1]
+|   | its «"default branch"» is **text**
+|   [property define_property_has L1]
+|   | its «"permissions"» is a **permission**
+|   [property define_property_has L1]
+|   | its «"score"» is a **number**
+
+[thing create_type L0]
+| an «"assignee"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"login"» is **text**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+|   [property define_property_has L1]
+|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gravatar id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"html url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"following url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"user view type"» is **text**
+|   [property define_property_has L1]
+|   | its «"site admin"» is yes or no
+
+[thing create_type L0]
+| a «"license"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"key"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"spdx id"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"node id"» is **text**
+
+==== /GitHub.spell
+⟪# GitHub⟫
+⟦// Anyone on GitHub, a person or an org⟧_anization, and _⟦any repository, found by what you type.⟧
+⟦// Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
+⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
+⟦// A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.⟧
+
+[thing create_type L0]
+| a «"github page"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [property define_property_has L1]
+|   | its «"showing"» is a **user**
+|   [action create_hook L1]
+|   | when «creating a github page»    ‾value(a github page) bold(github page)
+|   |   set its **search** to _"solid"_    ‾value(its search)
+
+|   [action to_do_something L1]
+|   | to «try (words as text)»    ‾value(words as text) bold(words) bold(text)
+|   |   set its **showing** to nothing    ‾value(its showing) ‾value(nothing)
+|   |   set its **search** to **words**    ‾value(its search) ‾value(words)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨form⟩ value={it}>    code({it})
+|   |       <⟨stack⟩ spacing=«"sm"»>
+|   |         <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"between"» spacing=«"sm"»>
+|   |           <⟨header⟩ size=«"large"»>People and code, on GitHub</⟨header⟩>
+|   |           <⟨ui-search⟩ name=«"search"» parameter=«"who"» icon=«"search"» placeholder=«"A person, an organization, a repository"» aria-label=«"Search GitHub"» />
+|   |         </⟨stack⟩>
+|   |         <⟨toolbar⟩ appearance=«"secondary"» size=«"small"» aria-label=«"Try a search"»>
+|   |           <⟨text⟩ slot=«"title"» size=«"small"» color=«"grey"»>Try</⟨text⟩>
+|   |           <⟨item⟩ onClick={try _"ryansolid"_}>ryansolid</⟨item⟩>    code({try "ryansolid"})
+|   |           <⟨item⟩ onClick={try _"solidjs"_}>solidjs</⟨item⟩>    code({try "solidjs"})
+|   |           <⟨item⟩ onClick={try _"vite"_}>vite</⟨item⟩>    code({try "vite"})
+|   |           <⟨item⟩ onClick={try _"torvalds"_}>torvalds</⟨item⟩>    code({try "torvalds"})
+|   |           <⟨item⟩ onClick={try _"spreadsheet"_}>spreadsheet</⟨item⟩>    code({try "spreadsheet"})
+|   |         </⟨toolbar⟩>
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     {draw the **found** of it}
+|   |     {draw the **issues** of it}
+|   |     <⟨text⟩ size=«"small"» paragraph>
+|   |       From <link link=_"https://docs.github.com/en/rest"_>GitHub's REST API</link>, asked for as you look.
+|   |     </⟨text⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **issues**
+|   |   ⟦// Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request⟧
+|   |   <⟨stack⟩ spacing=«"sm"»>
+|   |     <⟨header⟩ size=«"medium"»>Solid's issues</⟨header⟩>
+|   |     <⟨for⟩ the first 6 issues where its pull request is nothing as=«"cards"» columns=«"3"» doubling stackable loading=«"Asking GitHub"» empty=«"No open issues."» />
+|   |     <⟨header⟩ size=«"medium"»>Solid's pull requests</⟨header⟩>
+|   |     <⟨for⟩ the first 6 issues where its pull request is not nothing as=«"cards"» columns=«"3"» doubling stackable loading=«"Asking GitHub"» empty=«"No open pull requests."» />
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **found**
+|   |   ⟦// Someone's own page, while one is picked;  else what the search finds⟧
+|   |   [control if L2]
+|   |   | if its **showing**    ‾value(its showing)
+|   |   |   draw the **page** of (the **user** whose id is the **login** of its **showing**)    ‾value(draw the page of (the user whose id is the login of its showing))
+|   |   |   [control while_waiting L3]
+|   |   |   | while waiting
+|   |   |   |   <⟨loader⟩ visible inline text>Asking GitHub</⟨loader⟩>
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   <⟨stack⟩ spacing=«"xl"»>
+|   |   |     <⟨stack⟩ spacing=«"sm"»>
+|   |   |       <⟨header⟩ size=«"medium"»>People and organizations</⟨header⟩>
+|   |   |       <⟨for⟩ every user matching its search as=«"cards"» columns=«"4"» doubling stackable paging=«"pages"» loading=«"Asking GitHub"» empty=«"Nobody on GitHub goes by that."» />
+|   |   |     </⟨stack⟩>
+|   |   |     <⟨stack⟩ spacing=«"sm"»>
+|   |   |       <⟨header⟩ size=«"medium"»>Repositories</⟨header⟩>
+|   |   |       <⟨for⟩ every repository matching its search as=«"cards"» columns=«"3"» doubling stackable paging=«"pages"» loading=«"Asking GitHub"» empty=«"No repository matches that."» />
+|   |   |     </⟨stack⟩>
+|   |   |   </⟨stack⟩>
+
+⟪# Someone on GitHub⟫
+⟦// A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.⟧
+⟦// A search gives only a little of each:  their page reads them whole, by their login.⟧
+
+[thing reopen_type L0]
+| a **user**
+|   [action to_do_something L1]
+|   | to «look at it»
+|   |   ⟦// Their own page, in the GitHub tab⟧
+|   |   set the **showing** of the **github** of the **public servers** to it    ‾value(the showing of the github of the public servers) ‾value(it)
+
+|   [action to_do_something L1]
+|   | to «look away from it»
+|   |   ⟦// Put their page away again, with its Back button⟧
+|   |   set the **showing** of the **github** of the **public servers** to nothing    ‾value(the showing of the github of the public servers) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-card⟩ onClick={look at it}>    code({look at it})
+|   |     <⟨content⟩>
+|   |       <⟨stack⟩ direction=«"horizontal"» align=«"center"» spacing=«"sm"»>
+|   |         <⟨image⟩ src={its **avatar url**} alt=«""» size=«"mini"» appearance=«"circular"» />    code({its avatar url})
+|   |         <⟨stack⟩ spacing=«"none"» align=«"start"»>
+|   |           <⟨header⟩>
+|   |             {its **login**} <link link={its **html url**} target=_"_blank"_ aria-label=_"On GitHub"_><icon name=_"github"_ /></link>
+|   |           </⟨header⟩>
+|   |           <⟨meta⟩>{its **kind**}</⟨meta⟩>    code({its kind})
+|   |         </⟨stack⟩>
+|   |       </⟨stack⟩>
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨stack⟩ direction=«"horizontal"» align=«"center"» spacing=«"sm"»>
+|   |       <⟨button⟩ icon=«"arrow left"» appearance=«"basic"» aria-label=«"Back"» title=«"Back"» onClick={look away from it} />    code({look away from it})
+|   |       <⟨header⟩ size=«"large"»>
+|   |         {its **name** if its **name** otherwise its **login**} <link link={its **html url**} target=_"_blank"_ aria-label=_"On GitHub"_><icon name=_"github"_ /></link>
+|   |       </⟨header⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨stack⟩ direction=«"horizontal"» wrap align=«"start"» spacing=«"md"»>
+|   |       <⟨image⟩ src={its **avatar url**} alt=«""» size=«"small"» appearance=«"rounded"» />    code({its avatar url})
+|   |       <⟨stack⟩ spacing=«"sm"»>
+|   |         <⟨text⟩ color=«"grey"»>{its **login**} · {its **kind**}</⟨text⟩>    code({its login}) code({its kind})
+|   |         <⟨if⟩ its bio>
+|   |           <⟨text⟩>{its **bio**}</⟨text⟩>    code({its bio})
+|   |         </⟨if⟩>
+|   |         // A search gives no counts:  only the record read by its login has them, and its date with them
+|   |         <⟨if⟩ its created at>
+|   |           <⟨text⟩ size=«"small"» color=«"grey"»>{its **public repos**} public repositories · {its **followers**} followers</⟨text⟩>    code({its public repos}) code({its followers})
+|   |         </⟨if⟩>
+|   |       </⟨stack⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨header⟩ size=«"medium"»>Most popular</⟨header⟩>
+|   |       <⟨for⟩ every repository matching («"user:"» + its login + «" sort:stars"») as=«"cards"» columns=«"3"» doubling stackable paging=«"pages"» loading=«"Asking GitHub"» empty=«"Nothing public yet."» />
+|   |     </⟨stack⟩>
+|   |   </⟨stack⟩>
+
+⟪# An issue⟫
+⟦// GitHub lists a pull request among a repository's issues:  this page tells them apart by its "pull request".⟧
+
+[thing reopen_type L0]
+| an **issue**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-card⟩>
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>
+|   |         {its **title**} <link link={its **html url**} target=_"_blank"_ aria-label=_"On GitHub"_><icon name=_"github"_ /></link>
+|   |       </⟨header⟩>
+|   |       <⟨meta⟩>#{its **number**} · {its **state**}</⟨meta⟩>    code({its number}) code({its state})
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+⟪# A repository⟫
+⟦// Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.⟧
+
+[thing reopen_type L0]
+| a **repository**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-card⟩>
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>
+|   |         {its **full name**} <link link={its **html url**} target=_"_blank"_ aria-label=_"On GitHub"_><icon name=_"github"_ /></link>
+|   |       </⟨header⟩>
+|   |       <⟨meta⟩>★ {its **stargazers count**}<⟨if⟩ its language> · {its **language**}</⟨if⟩></⟨meta⟩>    code({its stargazers count}) code({its language})
+|   |       <⟨description⟩>{its **description**}</⟨description⟩>    code({its description})
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+==== /OpenLibrary.api.spell
+⟪## Open Library:  books by what they're called, who wrote them, and their covers⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spell.⟧
+⟦// `open library` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://openlibrary.org --into OpenLibrary.api.spell --name "open library" --no-ai⟧
+⟦//     --collections "books=/search.json?q=dune,authors=/authors/{name}.json,editions=/books/{name}.json"⟧
+⟦//     --samples authors=OL79034A,editions=OL32848840M --pictures "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"⟧
+⟦// `spell place update OpenLibrary.api.spell` looks again, and changes only this file and OpenLibrary.api.json5.⟧
+⟦// It has no list of every book:  a program searches it, `every book where its title includes ...`.⟧
+⟦// A book's editions are read from its own list of them, when its page shows them.⟧
+⟦// Each book's authors are their ids, each read from the author's own record when something reads it;⟧
+⟦// its cover is a picture on another server, covers.openlibrary.org, its address built from the book's cover id.⟧
+
+[thing create_place L0]
+| «open library» is a web server at «"https://openlibrary.org"»
+|   its id is its _"key"_
+|   its rows are its _"docs"_
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   it writes names like _"author_key"_
+|   it searches **titles** with _"q"_
+|   **books** are searched at _"/search.json"_
+|   **authors** are found at _"/authors/{name}.json"_
+|   **editions** are found at _"/books/{name}.json"_
+|   a **book**'s _"cover i"_ is a picture at _"https://covers.openlibrary.org/b/id/{id}-M.jpg"_
+|   a **book**'s **editions** live at _"{id}/editions.json"_
+
+[thing create_type L0]
+| a «"book"» is a **thing**
+|   it lives in **open library**    ‾value(open library)
+|   [property define_property_has L1]
+|   | its «"authors"» is a list of **authors**, stored as «"author_key"»
+|   [property define_property_has L1]
+|   | its «"author name"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"cover edition"» is an **edition**, stored as «"cover_edition_key"»
+|   [property define_property_has L1]
+|   | its «"cover height"» is a **number**
+|   [property define_property_has L1]
+|   | its «"cover i"» is **text**  ⟦// a picture's address⟧
+|   [property define_property_has L1]
+|   | its «"cover width"» is a **number**
+|   [property define_property_has L1]
+|   | its «"ebook access"» is **text**
+|   [property define_property_has L1]
+|   | its «"edition count"» is a **number**
+|   [property define_property_has L1]
+|   | its «"first publish year"» is a **number**
+|   [property define_property_has L1]
+|   | its «"fulltext"» is yes or no, stored as «"has_fulltext"»
+|   [property define_property_has L1]
+|   | its «"ia"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"ia collection"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"language"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"lending edition s"» is **text**
+|   [property define_property_has L1]
+|   | its «"lending identifier s"» is **text**
+|   [property define_property_has L1]
+|   | its «"public scan b"» is yes or no
+|   [property define_property_has L1]
+|   | its «"editions"» is a list of **editions**
+|   [property define_property_has L1]
+|   | its «"series key"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"series name"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"series position"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"subtitle"» is **text**
+
+[thing create_type L0]
+| an «"author"» is a **thing**
+|   it lives in **open library**    ‾value(open library)
+|   [property define_property_has L1]
+|   | its «"links"» is a list of **links**
+|   [property define_property_has L1]
+|   | its «"kind"» is a **kind**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"key"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"source records"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"birth date"» is **text**
+|   [property define_property_has L1]
+|   | its «"bio"» is **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"alternate names"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"remote ids"» is a **remote id**
+|   [property define_property_has L1]
+|   | its «"photos"» is a list of **numbers**
+|   [property define_property_has L1]
+|   | its «"death date"» is **text**
+|   [property define_property_has L1]
+|   | its «"personal name"» is **text**
+|   [property define_property_has L1]
+|   | its «"latest revision"» is a **number**
+|   [property define_property_has L1]
+|   | its «"revision"» is a **number**
+|   [property define_property_has L1]
+|   | its «"created"» is a **created**
+|   [property define_property_has L1]
+|   | its «"last modified"» is a **last modified**
+
+[thing create_type L0]
+| an «"edition"» is a **thing**
+|   it lives in **open library**    ‾value(open library)
+|   [property define_property_has L1]
+|   | its «"kind"» is a **kind**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"authors"» is a list of **edition authors**
+|   [property define_property_has L1]
+|   | its «"publish date"» is **text**
+|   [property define_property_has L1]
+|   | its «"source records"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"number of pages"» is a **number**
+|   [property define_property_has L1]
+|   | its «"publishers"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"physical format"» is **text**
+|   [property define_property_has L1]
+|   | its «"notes"» is a **note**
+|   [property define_property_has L1]
+|   | its «"full title"» is **text**
+|   [property define_property_has L1]
+|   | its «"covers"» is a list of **numbers**
+|   [property define_property_has L1]
+|   | its «"works"» is a list of **works**
+|   [property define_property_has L1]
+|   | its «"key"» is **text**
+|   [property define_property_has L1]
+|   | its «"local id"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"latest revision"» is a **number**
+|   [property define_property_has L1]
+|   | its «"revision"» is a **number**
+|   [property define_property_has L1]
+|   | its «"created"» is a **created**
+|   [property define_property_has L1]
+|   | its «"last modified"» is a **last modified**
+
+[thing create_type L0]
+| a «"link"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"kind"» is a **kind**, stored as «"type"»
+
+[thing create_type L0]
+| a «"kind"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"key"» is **text**
+
+[thing create_type L0]
+| a «"remote id"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"viaf"» is a **number**
+|   [property define_property_has L1]
+|   | its «"wikidata"» is **text**
+|   [property define_property_has L1]
+|   | its «"isni"» is a **number**
+|   [property define_property_has L1]
+|   | its «"amazon"» is **text**
+|   [property define_property_has L1]
+|   | its «"bookbrainz"» is **text**
+|   [property define_property_has L1]
+|   | its «"goodreads"» is a **number**
+|   [property define_property_has L1]
+|   | its «"gnd"» is a **number**
+|   [property define_property_has L1]
+|   | its «"imdb"» is **text**
+|   [property define_property_has L1]
+|   | its «"lc naf"» is **text**
+|   [property define_property_has L1]
+|   | its «"librarything"» is **text**
+|   [property define_property_has L1]
+|   | its «"musicbrainz"» is **text**
+|   [property define_property_has L1]
+|   | its «"storygraph"» is **text**
+|   [property define_property_has L1]
+|   | its «"inventaire"» is **text**
+|   [property define_property_has L1]
+|   | its «"librivox"» is a **number**
+|   [property define_property_has L1]
+|   | its «"project gutenberg"» is a **number**
+|   [property define_property_has L1]
+|   | its «"opac sbn"» is **text**
+
+[thing create_type L0]
+| a «"created"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"value"» is a **date**
+
+[thing create_type L0]
+| a «"last modified"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"value"» is a **date**
+
+[thing create_type L0]
+| an «"edition author"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"key"» is **text**
+
+[thing create_type L0]
+| a «"note"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"value"» is **text**
+
+[thing create_type L0]
+| a «"work"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"key"» is **text**
+
+==== /OpenLibrary.spell
+⟪# Open Library⟫
+⟦// Books by what they're called, ⟧_who wrote them, and their covers._
+_// E_very thing it shows is in OpenLibrary.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
+⟦// Open Library has no list of every book, only a search:  so the page always searches, for what's typed.⟧
+
+[thing create_type L0]
+| an «"open library page"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [property define_property_has L1]
+|   | its «"showing"» is a **book**
+|   [action create_hook L1]
+|   | when «creating an open library page»    ‾value(an open library page) bold(open library page)
+|   |   set its **search** to _"dune"_    ‾value(its search)
+|   [property property_value_getter L1]
+|   | its «"found"» is every **book** where its **title** includes the **search**
+|   |   ⟦// What the search finds:  Open Library looks, by the title, and gives back the first hundred⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨form⟩ value={it}>    code({it})
+|   |       <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"between"» spacing=«"sm"»>
+|   |         <⟨header⟩ size=«"large"»>Books, from Open Library</⟨header⟩>
+|   |         <⟨ui-search⟩ name=«"search"» parameter=«"book"» icon=«"search"» placeholder=«"A book, by its title"» aria-label=«"Search Open Library"» />
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     {draw the **shelf** of it}
+|   |     <⟨text⟩ size=«"small"» paragraph>
+|   |       From <link link=_"https://openlibrary.org/developers/api"_>Open Library's API</link>, asked for as you look;  its covers from its covers server.
+|   |     </⟨text⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **shelf**
+|   |   ⟦// A book's own page, while one is open;  else what the search finds⟧
+|   |   [control if L2]
+|   |   | if its **showing**    ‾value(its showing)
+|   |   |   draw its **showing's page**    ‾value(draw its showing's page)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   draw the **book list** of it    ‾value(draw the book list of it)
+
+|   [action draw_it L1]
+|   | to **draw** its **book list**
+|   |   for its **found**    ‾value(its found)
+|   |   while waiting: <loader visible inline text>{_"Asking Open Library"_}</loader>    ‾value(<loader visible inline text>{"Asking Open Library"}</loader>)
+|   |   if there are none: <text>{_"No book is called that."_}</text>    ‾value(<text>{"No book is called that."}</text>)
+|   |   if that fails say _"Open Library can't be reached just now."_
+|   |   show them in pages
+|   |   show them in: <cards columns=_"5"_ doubling></cards>    ‾value(<cards columns="5" doubling></cards>)
+
+⟪# A book⟫
+⟦// Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.⟧
+
+[thing reopen_type L0]
+| a **book**
+|   [property property_value_getter L1]
+|   | its «"writer"» is the first **item** of its **authors**
+|   |   ⟦// Who wrote it first:  read from Open Library's record of them, by their id⟧
+
+|   [action to_do_something L1]
+|   | to «open it»
+|   |   ⟦// Its own page, on the library's tab⟧
+|   |   set the **showing** of the **library** of the **public servers** to it    ‾value(the showing of the library of the public servers) ‾value(it)
+
+|   [action to_do_something L1]
+|   | to «close it»
+|   |   ⟦// Back to what the search found⟧
+|   |   set the **showing** of the **library** of the **public servers** to nothing    ‾value(the showing of the library of the public servers) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-card⟩ class=«"book"» onClick={open it}>    code({open it})
+|   |     <⟨image⟩ src={its **cover i**} alt=«""» aspect-ratio=«"2:3"» crop />    code({its cover i})
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>{its **title**}</⟨header⟩>    code({its title})
+|   |       <⟨meta⟩>{its **author name**} · {its **first publish year**}</⟨meta⟩>    code({its author name}) code({its first publish year})
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨stack⟩ direction=«"horizontal"» align=«"center"» spacing=«"sm"»>
+|   |       <⟨button⟩ icon=«"arrow left"» appearance=«"basic"» aria-label=«"Back"» title=«"Back"» onClick={close it} />    code({close it})
+|   |       <⟨header⟩ size=«"large"»>{its **title**}</⟨header⟩>    code({its title})
+|   |     </⟨stack⟩>
+|   |     <⟨stack⟩ direction=«"horizontal"» wrap align=«"start"» spacing=«"md"»>
+|   |       <⟨image⟩ src={its **cover i**} alt=«""» size=«"small"» />    code({its cover i})
+|   |       <⟨stack⟩ spacing=«"sm"»>
+|   |         <⟨text⟩>First published in {its **first publish year**} · {its **edition count**} editions</⟨text⟩>    code({its first publish year}) code({its edition count})
+|   |         {draw the **writing** of it}
+|   |       </⟨stack⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨header⟩ size=«"medium"»>Editions</⟨header⟩>
+|   |       <⟨for⟩ its editions as=«"cards"» columns=«"4"» doubling stackable paging=«"pages"» loading=«"Asking Open Library for its editions"» empty=«"No editions listed."» />
+|   |     </⟨stack⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **writing**
+|   |   [control if L2]
+|   |   | if its **writer**    ‾value(its writer)
+|   |   |   draw the **card** of its **writer**    ‾value(draw the card of its writer)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Asking Open Library who wrote it</⟨loader⟩>
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   <⟨text⟩>Open Library can't say who wrote it just now.</⟨text⟩>
+
+⟪# An edition⟫
+⟦// One printing of a book:  read from the book's own list of editions, when its page is open.⟧
+
+[thing reopen_type L0]
+| an **edition**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-card⟩>
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>{its **title**}</⟨header⟩>    code({its title})
+|   |       <⟨meta⟩>{its **publish date**} · {the first **item** of its **publishers**}</⟨meta⟩>    code({its publish date}) code({the first item of its publishers})
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+⟪# Who wrote it⟫
+
+[thing reopen_type L0]
+| an **author**
+|   [action draw_it L1]
+|   | to **draw** its **card**
+|   |   <⟨ui-card⟩>
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>{its **name**}</⟨header⟩>    code({its name})
+|   |       <⟨meta⟩>Born {its **birth date**}</⟨meta⟩>    code({its birth date})
+|   |       <⟨description⟩>{its **bio**}</⟨description⟩>    code({its bio})
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+==== /JSONPlaceholder.api.spell
+⟪## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spell.⟧
+⟦// `jsonplaceholder` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder⟧
+⟦//     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"⟧
+⟦// `spell place update JSONPlaceholder.api.spell` looks again, and changes only this file and JSONPlaceholder.api.json5.⟧
+⟦// It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:⟧
+⟦// what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").⟧
+
+[thing create_place L0]
+| «jsonplaceholder» is a web server at «"https://jsonplaceholder.typicode.com"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   it searches **names** and **titles** with _"q"_
+|   **posts** live at _"/posts"_
+|   **comments** live at _"/comments"_
+|   **jsonplaceholder users** live at _"/users"_
+|   **todos** live at _"/todos"_
+|   a **post**'s **comments** live at _"/posts/{id}/comments"_
+|   a **jsonplaceholder user**'s **posts** live at _"/users/{id}/posts"_
+|   a **jsonplaceholder user**'s **todos** live at _"/users/{id}/todos"_
+
+[thing create_type L0]
+| a «"post"» is a **thing**
+|   it lives in **jsonplaceholder**    ‾value(jsonplaceholder)
+|   [property define_property_has L1]
+|   | its «"user id"» is a **number**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"body"» is **text**
+|   [property define_property_has L1]
+|   | its «"comments"» is a list of **comments**
+
+[thing create_type L0]
+| a «"comment"» is a **thing**
+|   it lives in **jsonplaceholder**    ‾value(jsonplaceholder)
+|   [property define_property_has L1]
+|   | its «"post id"» is a **number**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"email"» is **text**
+|   [property define_property_has L1]
+|   | its «"body"» is **text**
+
+[thing create_type L0]
+| a «"jsonplaceholder user"» is a **thing**
+|   it lives in **jsonplaceholder**    ‾value(jsonplaceholder)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"username"» is **text**
+|   [property define_property_has L1]
+|   | its «"email"» is **text**
+|   [property define_property_has L1]
+|   | its «"address"» is an **address**
+|   [property define_property_has L1]
+|   | its «"phone"» is **text**
+|   [property define_property_has L1]
+|   | its «"website"» is **text**
+|   [property define_property_has L1]
+|   | its «"company"» is a **company**
+|   [property define_property_has L1]
+|   | its «"posts"» is a list of **posts**
+|   [property define_property_has L1]
+|   | its «"todos"» is a list of **todos**
+
+[thing create_type L0]
+| a «"todo"» is a **thing**
+|   it lives in **jsonplaceholder**    ‾value(jsonplaceholder)
+|   [property define_property_has L1]
+|   | its «"user id"» is a **number**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"completed"» is yes or no
+
+[thing create_type L0]
+| an «"address"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"street"» is **text**
+|   [property define_property_has L1]
+|   | its «"suite"» is **text**
+|   [property define_property_has L1]
+|   | its «"city"» is **text**
+|   [property define_property_has L1]
+|   | its «"zipcode"» is **text**
+|   [property define_property_has L1]
+|   | its «"geo"» is a **geo**
+
+[thing create_type L0]
+| a «"geo"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"lat"» is a **number**
+|   [property define_property_has L1]
+|   | its «"lng"» is a **number**
+
+[thing create_type L0]
+| a «"company"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"catch phrase"» is **text**
+|   [property define_property_has L1]
+|   | its «"bs"» is **text**
+
+==== /JSONPlaceholder.spell
+⟪# JSONPlaceholder⟫
+⟦// A server for practice:  someone's todos to tick, add and remove, and posts with their comments.⟧
+⟦// Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
+⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
+⟦// It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.⟧
+
+[thing create_type L0]
+| a «"jsonplaceholder page"» is a **thing**
+|   [property define_property_has L1]
+|   | «"new todo"» is **a new todo** with **user id** = «1»
+|   [property property_value_getter L1]
+|   | its «"person"» is the **jsonplaceholder user** whose id is «1»
+|   |   ⟦// Whose todos and posts these are:  the first person it has⟧
+|   [property property_value_getter L1]
+|   | its «"todos"» is every **todo** where its **user id** is «1»
+|   |   ⟦// Theirs, from every todo⟧
+
+|   [action to_do_something L1]
+|   | to «add the new todo»
+|   |   add its **new todo** to the saved **todos**    ‾value(its new todo) ‾value(the saved todos)
+|   |   set its **new todo** to **a new todo** with **user id** = _1_    ‾value(its new todo) ‾value(a new todo with user id = 1)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨header⟩ size=«"large"»>Practice, on JSONPlaceholder</⟨header⟩>
+|   |       <⟨text⟩ color=«"grey"»>Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing.</⟨text⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨header⟩ size=«"medium"»>Their todos</⟨header⟩>
+|   |       {draw the **checklist** of it}
+|   |     </⟨stack⟩>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨header⟩ size=«"medium"»>What they wrote</⟨header⟩>
+|   |       {draw the **post list** of it}
+|   |     </⟨stack⟩>
+|   |     <⟨text⟩ size=«"small"» paragraph>
+|   |       From <link link=_"https://jsonplaceholder.typicode.com"_>JSONPlaceholder</link>, asked for as you look.
+|   |     </⟨text⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **checklist**
+|   |   <⟨stack⟩ spacing=«"sm"»>
+|   |     <⟨form⟩ value={its **new todo**}>    code({its new todo})
+|   |       <⟨input⟩ name=«"title"» placeholder=«"Water the plants"» aria-label=«"Something to do"» fluid action>
+|   |         <⟨button⟩ slot=«"action"» color=«"primary"» disabled={its **new todo's title** is _""_} onClick={add the new todo}>Add</⟨button⟩>    code({its new todo's title is ""}) code({add the new todo})
+|   |       </⟨input⟩>
+|   |     </⟨form⟩>
+|   |     {draw the **todo list** of it}
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **todo list**
+|   |   for **todo** in its **todos**    ‾value(its todos)
+|   |   while waiting: <loader visible inline text>{_"Asking JSONPlaceholder"_}</loader>    ‾value(<loader visible inline text>{"Asking JSONPlaceholder"}</loader>)
+|   |   if that fails say _"JSONPlaceholder can't be reached just now."_
+
+|   [action draw_it L1]
+|   | to **draw** its **post list**
+|   |   for **post** in its **person's posts**    ‾value(its person's posts)
+|   |   while waiting: <loader visible inline text>{_"Asking JSONPlaceholder"_}</loader>    ‾value(<loader visible inline text>{"Asking JSONPlaceholder"}</loader>)
+|   |   if that fails say _"JSONPlaceholder can't be reached just now."_
+
+⟪# A todo⟫
+⟦// Ticked as it's done;  each tick, and each removal, goes to the server at once.⟧
+
+[thing reopen_type L0]
+| a **todo**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨form⟩ value={it}>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» align=«"center"» justify=«"between"» spacing=«"sm"»>
+|   |       <⟨ui-checkbox⟩ name=«"completed"» label={its **title**} />    code({its title})
+|   |       <⟨button⟩ icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Remove"» title=«"Remove"» onClick={remove it from the saved **todos**}/>    code({remove it from the saved todos})
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+⟪# A post⟫
+⟦// Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.⟧
+
+[thing reopen_type L0]
+| a **post**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨header⟩ size=«"small"»>{its **title**}</⟨header⟩>    code({its title})
+|   |   <⟨text⟩>{its **body**}</⟨text⟩>    code({its body})
+|   |   for **comment** in its **comments**    ‾value(its comments)
+|   |   while waiting: <loader visible inline text>{_"Asking for its comments"_}</loader>    ‾value(<loader visible inline text>{"Asking for its comments"}</loader>)
+
+⟦// Each comment, as Spell UI draws one:  named in full, `<ui-comment>`.⟧
+
+[thing reopen_type L0]
+| a **comment**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-comment⟩>
+|   |     <⟨content⟩>
+|   |       <⟨author⟩>{its **email**}</⟨author⟩>    code({its email})
+|   |       <⟨description⟩>{its **body**}</⟨description⟩>    code({its body})
+|   |     </⟨content⟩>
+|   |   </⟨ui-comment⟩>
+
+==== /OpenMeteo.api.spell
+⟪## Open-Meteo:  the weather to come, hour by hour, for anywhere on Earth⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in OpenMeteo.spell.⟧
+⟦// `open meteo` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://api.open-meteo.com --into OpenMeteo.api.spell --name "open meteo" --no-ai⟧
+⟦//     --collections "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2"⟧
+⟦// `spell place update OpenMeteo.api.spell` looks again, and changes only this file and OpenMeteo.api.json5.⟧
+⟦// It has no list of forecasts:  each is asked for by where it's for, `every forecast where its latitude is ... and its longitude is ...`.⟧
+⟦// Its hours come as lists side by side, one of times and one of each measure:  each hour is read as one of each.⟧
+⟦// Each measure is in the unit its answer names, and shows in the reader's own:  a temperature in °F in the US.⟧
+
+[thing create_place L0]
+| «open meteo» is a web server at «"https://api.open-meteo.com"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   it writes names like _"generationtime_ms"_
+|   **forecasts** live at _"/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2"_
+|   **forecasts** are asked for by their **latitude** and **longitude**
+
+[thing create_type L0]
+| a «"forecast"» is a **thing**
+|   it lives in **open meteo**    ‾value(open meteo)
+|   [property define_property_has L1]
+|   | its «"latitude"» is a **number**
+|   [property define_property_has L1]
+|   | its «"longitude"» is a **number**
+|   [property define_property_has L1]
+|   | its «"generationtime ms"» is a **number**
+|   [property define_property_has L1]
+|   | its «"utc offset seconds"» is a **number**
+|   [property define_property_has L1]
+|   | its «"timezone"» is **text**
+|   [property define_property_has L1]
+|   | its «"timezone abbreviation"» is **text**
+|   [property define_property_has L1]
+|   | its «"elevation"» is a **number**
+|   [property define_property_has L1]
+|   | its «"hours"» is a list of **hours**, stored as «"hourly"»
+
+[thing create_type L0]
+| an «"hour"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"time"» is a **date**
+|   [property define_property_has L1]
+|   | its «"temperature"» is a **temperature** in °C, stored as «"temperature_2m"»
+|   [property define_property_has L1]
+|   | its «"precipitation"» is a **length** in mm
+|   [property define_property_has L1]
+|   | its «"wind speed"» is a **speed** in km/h, stored as «"wind_speed_10m"»
+
+==== /OpenMeteo.spell
+⟪# Open-Meteo⟫
+⟦// The weather to come, hour by hour, today and tomorrow, for a few cities.⟧
+⟦// Every thing it shows is in OpenMeteo.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
+⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
+⟦// Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.⟧
+
+[thing create_type L0]
+| an «"open meteo page"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"cities"» is a list of **cities**
+|   [property define_property_has L1]
+|   | its «"city"» is a **city**
+|   [action create_hook L1]
+|   | when «creating an open meteo page»    ‾value(an open meteo page) bold(open meteo page)
+|   |   add **a new city** with **name** _"Berlin"_, **latitude** = _52.52_, **longitude** = _13.41_ to its **cities**    ‾value(a new city with name "Berlin", latitude = 52.52, longitude = 13.41) ‾value(its cities)
+|   |   add **a new city** with **name** _"New York"_, **latitude** = _40.71_, **longitude** = _-74.01_ to its **cities**    ‾value(a new city with name "New York", latitude = 40.71, longitude = -74.01) ‾value(its cities)
+|   |   add **a new city** with **name** _"Tokyo"_, **latitude** = _35.68_, **longitude** = _139.69_ to its **cities**    ‾value(a new city with name "Tokyo", latitude = 35.68, longitude = 139.69) ‾value(its cities)
+|   |   add **a new city** with **name** _"Buenos Aires"_, **latitude** = _-34.6_, **longitude** = _-58.38_ to its **cities**    ‾value(a new city with name "Buenos Aires", latitude = -34.6, longitude = -58.38) ‾value(its cities)
+|   |   set its **city** to the first **item** of its **cities**    ‾value(its city) ‾value(the first item of its cities)
+|   [property property_value_getter L1]
+|   | its «"forecasts"» is every **forecast** where its **latitude** is the **latitude** of the **city** and its **longitude** is the **longitude** of the **city**
+|   |   ⟦// The city's, from Open-Meteo:  asked for by where it is, with no list of them all⟧
+|   [property property_value_getter L1]
+|   | its «"forecast"» is the first **item** of its **forecasts**
+|   |   ⟦// Its one forecast:  Open-Meteo answers with one, for the nearest place it has⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨header⟩ size=«"large"»>The weather, from Open-Meteo</⟨header⟩>
+|   |       <⟨toolbar⟩ appearance=«"secondary"» aria-label=«"Cities"»>
+|   |         {draw each **city** in its **cities**}
+|   |       </⟨toolbar⟩>
+|   |     </⟨stack⟩>
+|   |     {draw the **forecast table** of it}
+|   |     <⟨text⟩ size=«"small"» paragraph>
+|   |       From <link link=_"https://open-meteo.com/en/docs"_>Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
+|   |     </⟨text⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **forecast table**
+|   |   [control if L2]
+|   |   | if its **forecast**    ‾value(its forecast)
+|   |   |   <⟨stack⟩ spacing=«"sm"»>
+|   |   |     <⟨text⟩ color=«"grey"»>The next two days in {its **forecast's timezone**}, hour by hour.</⟨text⟩>    code({its forecast's timezone})
+|   |   |     {draw the **hour table** of its **forecast**}
+|   |   |   </⟨stack⟩>
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Asking Open-Meteo</⟨loader⟩>
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   <⟨text⟩>Open-Meteo can't be reached just now.</⟨text⟩>
+
+⟪# A city⟫
+⟦// Where it is on Earth:  what its forecast is asked for by.⟧
+
+[thing create_type L0]
+| a «"city"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"latitude"» is a **number**
+|   [property define_property_has L1]
+|   | its «"longitude"» is a **number**
+
+|   [action to_do_something L1]
+|   | to «pick it»
+|   |   ⟦// The city the weather's for⟧
+|   |   set the **city** of the **weather** of the **public servers** to it    ‾value(the city of the weather of the public servers) ‾value(it)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨item⟩ active={it is the **public servers' weather's city**} onClick={pick it}>{its **name**}</⟨item⟩>    code({it is the public servers' weather's city}) code({pick it}) code({its name})
+
+⟪# Its hours⟫
+⟦// A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.⟧
+
+[thing reopen_type L0]
+| a **forecast**
+|   [action draw_it L1]
+|   | to **draw** its **hour table**
+|   |   [control list_iteration L2]
+|   |   | for **hour** in its **hours**    ‾value(its hours)
+|   |   |   <⟨cell⟩ «"Day"»><⟨if⟩ the hour of its time is 0>{its **time**}</⟨if⟩></⟨cell⟩>    code({its time})
+|   |   |   <⟨cell⟩ «"Hour"» align=«"right"»>{the **hour** of its **time**}:00</⟨cell⟩>    code({the hour of its time})
+|   |   |   <⟨cell⟩ «"Temperature"» align=«"right"»>{its **temperature**}</⟨cell⟩>    code({its temperature})
+|   |   |   <⟨cell⟩ «"Rain"» align=«"right"»>{its **precipitation**}</⟨cell⟩>    code({its precipitation})
+|   |   |   <⟨cell⟩ «"Wind"» align=«"right"»>{its **wind speed**}</⟨cell⟩>    code({its wind speed})
+|   |   show them in: <table appearance=_"very-basic"_ padding=_"compact"_ collapsing unstackable><row></row></table>    ‾value(<table appearance="very-basic" padding="compact" collapsing unstackable><row></row></table>)
+
+==== /MetMuseum.api.spell
+⟪## The Met Museum:  every artwork in its collection, and a search of all of it⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spell.⟧
+⟦// `met museum` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://collectionapi.metmuseum.org/public/collection --kind "web server" --docs https://metmuseum.github.io⟧
+⟦//     --into MetMuseum.api.spell --name "met museum" --no-ai --collections "artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers"⟧
+⟦// `spell place update MetMuseum.api.spell` looks again, and changes only this file and MetMuseum.api.json5.⟧
+⟦// Its list is only ids, over 500,000 of them:  each artwork is read whole from its own address, only when something reads it.⟧
+⟦// Its search finds ids too, looking at all of each artwork, its tags too:  `every artwork matching ...`.⟧
+⟦// It asks for 80 requests a second at most, in its docs:  a program keeps to that.⟧
+⟦// Its search pages by "limit" and "offset", up to 500 at a time;  its list of every id takes neither, and comes whole.⟧
+
+[thing create_place L0]
+| «met museum» is a web server at «"https://collectionapi.metmuseum.org/public/collection"»
+|   its id is its _"objectID"_
+|   its rows are its _"objectIDs"_
+|   its lists give only each one's _"objectID"_
+|   its next page is asked for with _"limit"_ and _"offset"_
+|   it gives up to _500_ at a time
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   it takes up to _80_ requests a second
+|   it searches everything with _"q"_ at _"/v1.1/search"_
+|   **artworks** live at _"/v1/objects"_
+
+[thing create_type L0]
+| an «"artwork"» is a **thing**
+|   it lives in **met museum**    ‾value(met museum)
+|   [property define_property_has L1]
+|   | its «"highlight"» is yes or no, stored as «"isHighlight"»
+|   [property define_property_has L1]
+|   | its «"accession number"» is **text**
+|   [property define_property_has L1]
+|   | its «"accession year"» is a **number**
+|   [property define_property_has L1]
+|   | its «"public domain"» is yes or no, stored as «"isPublicDomain"»
+|   [property define_property_has L1]
+|   | its «"primary image"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"primary image small"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"additional images"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"constituents"» is a list of **constituents**
+|   [property define_property_has L1]
+|   | its «"department"» is **text**
+|   [property define_property_has L1]
+|   | its «"object name"» is **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"culture"» is **text**
+|   [property define_property_has L1]
+|   | its «"period"» is **text**
+|   [property define_property_has L1]
+|   | its «"dynasty"» is **text**
+|   [property define_property_has L1]
+|   | its «"reign"» is **text**
+|   [property define_property_has L1]
+|   | its «"portfolio"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist role"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist prefix"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist display name"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist display bio"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist suffix"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist alpha sort"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist nationality"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist begin date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"artist end date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"artist gender"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist wikidata url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"artist ulan url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"object date"» is **text**
+|   [property define_property_has L1]
+|   | its «"object begin date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"object end date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"medium"» is **text**
+|   [property define_property_has L1]
+|   | its «"dimensions"» is **text**
+|   [property define_property_has L1]
+|   | its «"measurements"» is a list of **measurements**
+|   [property define_property_has L1]
+|   | its «"credit line"» is **text**
+|   [property define_property_has L1]
+|   | its «"geography type"» is **text**
+|   [property define_property_has L1]
+|   | its «"city"» is **text**
+|   [property define_property_has L1]
+|   | its «"state"» is **text**
+|   [property define_property_has L1]
+|   | its «"county"» is **text**
+|   [property define_property_has L1]
+|   | its «"country"» is **text**
+|   [property define_property_has L1]
+|   | its «"region"» is **text**
+|   [property define_property_has L1]
+|   | its «"subregion"» is **text**
+|   [property define_property_has L1]
+|   | its «"locale"» is **text**
+|   [property define_property_has L1]
+|   | its «"locus"» is **text**
+|   [property define_property_has L1]
+|   | its «"excavation"» is **text**
+|   [property define_property_has L1]
+|   | its «"river"» is **text**
+|   [property define_property_has L1]
+|   | its «"classification"» is **text**
+|   [property define_property_has L1]
+|   | its «"rights and reproduction"» is **text**
+|   [property define_property_has L1]
+|   | its «"link resource"» is **text**
+|   [property define_property_has L1]
+|   | its «"metadata date"» is a **date**
+|   [property define_property_has L1]
+|   | its «"repository"» is **text**
+|   [property define_property_has L1]
+|   | its «"object url"» is **text**, stored as «"objectURL"»  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"tags"» is a list of **tags**
+|   [property define_property_has L1]
+|   | its «"object wikidata url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"timeline work"» is yes or no, stored as «"isTimelineWork"»
+|   [property define_property_has L1]
+|   | its «"gallery number"» is a **number**
+
+[thing create_type L0]
+| a «"constituent"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"constituent id"» is a **number**, stored as «"constituentID"»
+|   [property define_property_has L1]
+|   | its «"role"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"constituent ulan url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"constituent wikidata url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gender"» is **text**
+
+[thing create_type L0]
+| a «"measurement"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"element name"» is **text**
+|   [property define_property_has L1]
+|   | its «"element description"» is **text**
+|   [property define_property_has L1]
+|   | its «"element measurements"» is an **element measurement**
+
+[thing create_type L0]
+| an «"element measurement"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"diameter"» is a **number**
+|   [property define_property_has L1]
+|   | its «"height"» is a **number**
+|   [property define_property_has L1]
+|   | its «"width"» is a **number**
+|   [property define_property_has L1]
+|   | its «"depth"» is a **number**
+
+[thing create_type L0]
+| a «"tag"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"term"» is **text**
+|   [property define_property_has L1]
+|   | its «"aat url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"wikidata url"» is **text**  ⟦// an address⟧
+
+==== /MetMuseum.spell
+⟪# The Met Museum⟫
+⟦// Artworks of the Metropolitan Museum of Art, found by what you type.⟧
+⟦// Every thing it shows is in MetMuseum.api.spell, as `spell place ingest` wrote it;  the type below adds to its type there,⟧
+⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
+⟦// Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.⟧
+
+[thing create_type L0]
+| a «"met museum page"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [action create_hook L1]
+|   | when «creating a met museum page»    ‾value(a met museum page) bold(met museum page)
+|   |   set its **search** to _"sunflowers"_    ‾value(its search)
+|   [property property_value_getter L1]
+|   | its «"found"» is every **artwork** matching the **search**
+|   |   ⟦// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn⟧
+
+|   [action to_do_something L1]
+|   | to «try (words as text)»    ‾value(words as text) bold(words) bold(text)
+|   |   set its **search** to **words**    ‾value(its search) ‾value(words)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨form⟩ value={it} class=«"find"»>    code({it})
+|   |       <⟨stack⟩ spacing=«"sm"»>
+|   |         <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"between"» spacing=«"sm"»>
+|   |           <⟨header⟩ size=«"large"»>Artworks, from the Met</⟨header⟩>
+|   |           <⟨ui-search⟩ name=«"search"» parameter=«"art"» icon=«"search"» placeholder=«"A title, an artist, a subject"» aria-label=«"Search the Met"» />
+|   |         </⟨stack⟩>
+|   |         <⟨toolbar⟩ appearance=«"secondary"» size=«"small"» aria-label=«"Try a search"»>
+|   |           <⟨text⟩ slot=«"title"» size=«"small"» color=«"grey"»>Try</⟨text⟩>
+|   |           <⟨item⟩ onClick={try _"sunflowers"_}>Sunflowers</⟨item⟩>    code({try "sunflowers"})
+|   |           <⟨item⟩ onClick={try _"van gogh"_}>Van Gogh</⟨item⟩>    code({try "van gogh"})
+|   |           <⟨item⟩ onClick={try _"armor"_}>Armor</⟨item⟩>    code({try "armor"})
+|   |           <⟨item⟩ onClick={try _"egypt"_}>Egypt</⟨item⟩>    code({try "egypt"})
+|   |           <⟨item⟩ onClick={try _"cats"_}>Cats</⟨item⟩>    code({try "cats"})
+|   |           <⟨item⟩ onClick={try _"hokusai"_}>Hokusai</⟨item⟩>    code({try "hokusai"})
+|   |         </⟨toolbar⟩>
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ its found as=«"cards"» layout=«"mosaic"» columns=«"4"» doubling paging=«"pages"» loading=«"Asking the Met"» failed=«"The Met can't be reached just now."» empty=«"The Met has nothing for that."» />
+|   |     <⟨text⟩ class=«"credits"» size=«"small"» paragraph>
+|   |       From <link link=_"https://metmuseum.github.io"_>the Met Museum's API</link>, each artwork asked for as it's shown.  Press a picture to turn it over.
+|   |     </⟨text⟩>
+|   |   </⟨stack⟩>
+
+⟪# An artwork⟫
+⟦// A card that turns over:  its picture on the front, what the Met knows of it on the back.⟧
+⟦// Each is read from its own address the first time it's drawn;  one the Met won't give is left out.⟧
+⟦// Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.⟧
+
+[thing reopen_type L0]
+| an **artwork**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control if L2]
+|   |   | if its **title** and its **primary image small**    ‾value(its title) ‾value(its primary image small)
+|   |   |   <⟨shape⟩ class=«"artwork"» direction=«"over"» flip-on=«"click"» aria-label={its **title**}>    code({its title})
+|   |   |     <⟨side⟩>
+|   |   |       <⟨ui-card⟩ fluid>
+|   |   |         <⟨image⟩ src={its **primary image small**} alt={its **title**} />    code({its primary image small}) code({its title})
+|   |   |         <⟨content⟩>
+|   |   |           <⟨header⟩>{its **title**}</⟨header⟩>    code({its title})
+|   |   |           <⟨meta⟩>{its **artist display name**}</⟨meta⟩>    code({its artist display name})
+|   |   |         </⟨content⟩>
+|   |   |       </⟨ui-card⟩>
+|   |   |     </⟨side⟩>
+|   |   |     <⟨side⟩>{draw the **about card** of it}</⟨side⟩>    code({draw the about card of it})
+|   |   |   </⟨shape⟩>
+|   |   [control else_if L2]
+|   |   | otherwise if its **title**    ‾value(its title)
+|   |   |   draw its **about card**    ‾value(draw its about card)
+
+|   [action draw_it L1]
+|   | to **draw** its **about card**
+|   |   ⟦// What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture⟧
+|   |   <⟨ui-card⟩ fluid>
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>{its **title**}</⟨header⟩>    code({its title})
+|   |       <⟨meta⟩>{its **artist display name**} · {its **object date**}</⟨meta⟩>    code({its artist display name}) code({its object date})
+|   |       <⟨description⟩>
+|   |         <⟨text⟩ paragraph>{its **medium**}</⟨text⟩>    code({its medium})
+|   |         <⟨text⟩ paragraph>{its **dimensions**}</⟨text⟩>    code({its dimensions})
+|   |         <⟨text⟩ paragraph color=«"grey"»>{its **department**} · {its **credit line**}</⟨text⟩>    code({its department}) code({its credit line})
+|   |       </⟨description⟩>
+|   |     </⟨content⟩>
+|   |     <⟨extra⟩>
+|   |       <⟨link⟩ link={its **object url**} target=«"_blank"»>On the Met's own pages</⟨link⟩>    code({its object url})
+|   |     </⟨extra⟩>
+|   |   </⟨ui-card⟩>
+
+==== /RestCountries.api.spell
+⟪## REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spell.⟧
+⟦// `rest countries` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0 --into RestCountries.api.spell⟧
+⟦//     --name "rest countries" --no-ai --collections "countries=/countries.json"⟧
+⟦// `spell place update RestCountries.api.spell` looks again, and changes only this file and RestCountries.api.json5.⟧
+⟦// It's the data restcountries.com serves, from the repository that keeps it:  every country in one answer, with no paging.⟧
+⟦// Its money, its languages and its names come keyed by a code, `"EUR": { ... }`, `"fra": "French"`:⟧
+⟦// each is a list of things, each with its code, `the first translation in its translations where its code is "fra"`.⟧
+
+[thing create_place L0]
+| «rest countries» is a web server at «"https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   **countries** live at _"/countries.json"_
+
+[thing create_type L0]
+| a «"country"» is a **thing**
+|   it lives in **rest countries**    ‾value(rest countries)
+|   [property define_property_has L1]
+|   | its «"name"» is a **name**
+|   [property define_property_has L1]
+|   | its «"tld"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"cca2"» is **text**
+|   [property define_property_has L1]
+|   | its «"ccn3"» is **text**
+|   [property define_property_has L1]
+|   | its «"cca3"» is **text**
+|   [property define_property_has L1]
+|   | its «"cioc"» is **text**
+|   [property define_property_has L1]
+|   | its «"independent"» is yes or no
+|   [property define_property_has L1]
+|   | its «"status"» is **text**
+|   [property define_property_has L1]
+|   | its «"un member"» is yes or no
+|   [property define_property_has L1]
+|   | its «"un regional group"» is **text**
+|   [property define_property_has L1]
+|   | its «"currencies"» is a list of **currencies**
+|   [property define_property_has L1]
+|   | its «"idd"» is an **idd**
+|   [property define_property_has L1]
+|   | its «"capital"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"alt spellings"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"region"» is **text**
+|   [property define_property_has L1]
+|   | its «"subregion"» is **text**
+|   [property define_property_has L1]
+|   | its «"languages"» is a list of **languages**
+|   [property define_property_has L1]
+|   | its «"translations"» is a list of **translations**
+|   [property define_property_has L1]
+|   | its «"latlng"» is a list of **numbers**
+|   [property define_property_has L1]
+|   | its «"landlocked"» is yes or no
+|   [property define_property_has L1]
+|   | its «"borders"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"area"» is a **number**
+|   [property define_property_has L1]
+|   | its «"flag"» is **text**
+|   [property define_property_has L1]
+|   | its «"demonyms"» is a **demonym**
+
+[thing create_type L0]
+| a «"name"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"common"» is **text**
+|   [property define_property_has L1]
+|   | its «"official"» is **text**
+|   [property define_property_has L1]
+|   | its «"native"» is a list of **natives**
+
+[thing create_type L0]
+| a «"native"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"code"» is **text**
+|   [property define_property_has L1]
+|   | its «"official"» is **text**
+|   [property define_property_has L1]
+|   | its «"common"» is **text**
+
+[thing create_type L0]
+| a «"currency"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"code"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"symbol"» is **text**
+
+[thing create_type L0]
+| an «"idd"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"root"» is **text**
+|   [property define_property_has L1]
+|   | its «"suffixes"» is a list of **text**
+
+[thing create_type L0]
+| a «"language"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"code"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+
+[thing create_type L0]
+| a «"translation"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"code"» is **text**
+|   [property define_property_has L1]
+|   | its «"official"» is **text**
+|   [property define_property_has L1]
+|   | its «"common"» is **text**
+
+[thing create_type L0]
+| a «"demonym"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"eng"» is an **eng**
+|   [property define_property_has L1]
+|   | its «"fra"» is a **fra**
+
+[thing create_type L0]
+| an «"eng"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"f"» is **text**
+|   [property define_property_has L1]
+|   | its «"m"» is **text**
+
+[thing create_type L0]
+| a «"fra"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"f"» is **text**
+|   [property define_property_has L1]
+|   | its «"m"» is **text**
+
+==== /RestCountries.spell
+⟪# REST Countries⟫
+⟦// Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.⟧
+⟦// Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
+⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
+⟦// All 250 come in one request, with no paging:  picking a region only looks through them again.⟧
+
+[thing create_type L0]
+| a «"rest countries page"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"region"» is **text**
+|   [property define_property_has L1]
+|   | its «"language"» is **text**  ⟦// its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`⟧
+|   [action create_hook L1]
+|   | when «creating a rest countries page»    ‾value(a rest countries page) bold(rest countries page)
+|   |   set its **region** to _"Europe"_    ‾value(its region)
+|   |   set its **language** to _"fra"_    ‾value(its language)
+|   [property property_value_getter L1]
+|   | its «"countries"» is every **country** where its **region** is the **region**, sorted by its **name's common**
+|   |   ⟦// The region's, looked through here:  REST Countries sends every one at once⟧
+
+|   [action to_do_something L1]
+|   | to «pick region (region as text)»    ‾value(region as text) bold(region) bold(text)
+|   |   set its **region** to **region**    ‾value(its region) ‾value(region)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xl"»>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"between"» spacing=«"sm"»>
+|   |           <⟨header⟩ size=«"large"»>The world's countries, from REST Countries</⟨header⟩>
+|   |           <⟨select⟩ name=«"language"» aria-label=«"Names in"»>
+|   |             <⟨item⟩ value=«"fra"»>Français</⟨item⟩>
+|   |             <⟨item⟩ value=«"spa"»>Español</⟨item⟩>
+|   |             <⟨item⟩ value=«"deu"»>Deutsch</⟨item⟩>
+|   |             <⟨item⟩ value=«"jpn"»>日本語</⟨item⟩>
+|   |           </⟨select⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨form⟩>
+|   |       <⟨toolbar⟩ appearance=«"secondary"» aria-label=«"Regions"»>
+|   |         <⟨item⟩ active={its **region** is _"Africa"_} onClick={pick region _"Africa"_}>Africa</⟨item⟩>    code({its region is "Africa"}) code({pick region "Africa"})
+|   |         <⟨item⟩ active={its **region** is _"Americas"_} onClick={pick region _"Americas"_}>The Americas</⟨item⟩>    code({its region is "Americas"}) code({pick region "Americas"})
+|   |         <⟨item⟩ active={its **region** is _"Asia"_} onClick={pick region _"Asia"_}>Asia</⟨item⟩>    code({its region is "Asia"}) code({pick region "Asia"})
+|   |         <⟨item⟩ active={its **region** is _"Europe"_} onClick={pick region _"Europe"_}>Europe</⟨item⟩>    code({its region is "Europe"}) code({pick region "Europe"})
+|   |         <⟨item⟩ active={its **region** is _"Oceania"_} onClick={pick region _"Oceania"_}>Oceania</⟨item⟩>    code({its region is "Oceania"}) code({pick region "Oceania"})
+|   |         <⟨item⟩ active={its **region** is _"Antarctic"_} onClick={pick region _"Antarctic"_}>The Antarctic</⟨item⟩>    code({its region is "Antarctic"}) code({pick region "Antarctic"})
+|   |       </⟨toolbar⟩>
+|   |     </⟨stack⟩>
+|   |     {draw the **countries table** of it}
+|   |     <⟨text⟩ size=«"small"» paragraph>
+|   |       From <link link=_"https://github.com/mledoze/countries"_>the data REST Countries serves</link>, every country in one request.
+|   |     </⟨text⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **countries table**
+|   |   ⟦// A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code⟧
+|   |   [control list_iteration L2]
+|   |   | for **country** in its **countries**    ‾value(its countries)
+|   |   |   <⟨cell⟩ «"Flag"» align=«"center"»><⟨text⟩ size=«"big"»>{its **flag**}</⟨text⟩></⟨cell⟩>    code({its flag})
+|   |   |   <⟨cell⟩ «"Country"» header>{its **name's common**}</⟨cell⟩>    code({its name's common})
+|   |   |   <⟨cell⟩ «"Its name there"»>{the **common** of the first **translation** in its **translations** where its **code** is the **public servers' atlas's language**}</⟨cell⟩>    code({the common of the first translation in its translations where its code is the public servers' atlas's language})
+|   |   |   <⟨cell⟩ «"Capital"»>{the first **item** of its **capital**}</⟨cell⟩>    code({the first item of its capital})
+|   |   |   <⟨cell⟩ «"Money"»><⟨stack⟩ spacing=«"none"»>{draw each **currency** in its **currencies**}</⟨stack⟩></⟨cell⟩>    code({draw each currency in its currencies})
+|   |   |   <⟨cell⟩ «"Languages"»><⟨stack⟩ direction=«"horizontal"» wrap spacing=«"xs"»>{draw each **language** in its **languages**}</⟨stack⟩></⟨cell⟩>    code({draw each language in its languages})
+|   |   while waiting: <loader visible inline text>{_"Asking REST Countries"_}</loader>    ‾value(<loader visible inline text>{"Asking REST Countries"}</loader>)
+|   |   if that fails say _"REST Countries can't be reached just now."_
+|   |   show them in: <table appearance=_"very-basic"_ padding=_"compact"_ vertical-align=_"top"_><row></row></table>    ‾value(<table appearance="very-basic" padding="compact" vertical-align="top"><row></row></table>)
+
+⟪# Its money⟫
+⟦// Its name, its symbol and its code:  `Euro`, `€`, `EUR`.⟧
+
+[thing reopen_type L0]
+| a **currency**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨text⟩>{its **name**} ({its **symbol**}) <⟨text⟩ color=«"grey"»>{its **code**}</⟨text⟩></⟨text⟩>    code({its name}) code({its symbol}) code({its code})
+
+⟪# A language⟫
+⟦// Its name in English, keyed by its code:  `French`, `fra`.⟧
+
+[thing reopen_type L0]
+| a **language**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨text⟩>{its **name**}</⟨text⟩>    code({its name})
+
+==== /PublicServers.spell
+⟪# Public Servers⟫
+⟦// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab, in one centred column.⟧
+⟦// The tab chosen, and each page's search, are kept in the page's address (`?server=met&art=van+gogh`), so Back steps through them.⟧
+⟦// GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.⟧
+
+[thing create_one_of_a_kind L0]
+| «public servers» is an **app**
+|   [property define_property_has L1]
+|   | its «"tab"» is **text**
+|   [property define_property_has L1]
+|   | «"github"» is **a new github page**
+|   [property define_property_has L1]
+|   | «"library"» is **a new open library page**
+|   [property define_property_has L1]
+|   | «"weather"» is **a new open meteo page**
+|   [property define_property_has L1]
+|   | «"museum"» is **a new met museum page**
+|   [property define_property_has L1]
+|   | «"atlas"» is **a new rest countries page**
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   set its **tab** to _"github"_    ‾value(its tab)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩>
+|   |     <⟨stack⟩ spacing=«"lg"»>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨tabs⟩ name=«"tab"» parameter=«"server"» appearance=«"secondary pointing basic"» aria-label=«"Servers"»>
+|   |           <⟨tab⟩ label=«"GitHub"» value=«"github"» />
+|   |           <⟨tab⟩ label=«"Open Library"» value=«"library"» />
+|   |           <⟨tab⟩ label=«"JSONPlaceholder"» value=«"jsonplaceholder"» />
+|   |           <⟨tab⟩ label=«"Open-Meteo"» value=«"weather"» />
+|   |           <⟨tab⟩ label=«"The Met"» value=«"met"» />
+|   |           <⟨tab⟩ label=«"REST Countries"» value=«"countries"» />
+|   |         </⟨tabs⟩>
+|   |       </⟨form⟩>
+|   |       {draw the **server** of it}
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **server**
+|   |   ⟦// The tab's page:  its own drawing, so its `if` picks just one, and only that one asks its server⟧
+|   |   [control if L2]
+|   |   | if its **tab** is _"github"_    ‾value(its tab)
+|   |   |   draw its **github**    ‾value(its github)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"library"_    ‾value(its tab)
+|   |   |   draw its **library**    ‾value(its library)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"jsonplaceholder"_    ‾value(its tab)
+|   |   |   draw (**a new jsonplaceholder page**)    ‾value(a new jsonplaceholder page)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"weather"_    ‾value(its tab)
+|   |   |   draw its **weather**    ‾value(its weather)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"met"_    ‾value(its tab)
+|   |   |   draw its **museum**    ‾value(its museum)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"countries"_    ‾value(its tab)
+|   |   |   draw its **atlas**    ‾value(its atlas)

@@ -1,0 +1,1040 @@
+==== /StarWars.api.spell
+⟪## Star Wars:  where it all lives⟫
+⟦// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spell;⟧
+⟦// the pictures and what they're of come from Wikipedia, in Wikipedia.api.spell.⟧
+⟦// `star wars` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"⟧
+⟦// `spell place update StarWars.api.spell` looks again, and changes only this file and StarWars.api.json5.⟧
+⟦// A height, a mass and a diameter say their units, cm, kg and km, as swapi's docs give them:⟧
+⟦// so each shows in the reader's own, 5 ft 8 in in the US.⟧
+⟦//⟧
+⟦// Star Wars belongs to Lucasfilm and Disney.⟧
+⟦// It's asked for as it runs, and kept only on the device of whoever's looking, until 5am;⟧
+⟦// the page says where it comes from.⟧
+
+[thing create_place L0]
+| «star wars» is a web server at «"https://swapi.py4e.com/api"»
+|   its id is its _"url"_
+|   its rows are its _"results"_
+|   its next page is its _"next"_
+|   it writes names like _"hair_color"_
+|   it searches **names** and **titles** with _"search"_
+|   check it once a day at _5_am
+|   keep a copy on this device
+|   **characters** live at _"/people/"_
+|   **planets** live at _"/planets/"_
+|   **films** live at _"/films/"_
+|   **species** live at _"/species/"_
+|   **vehicles** live at _"/vehicles/"_
+|   **starships** live at _"/starships/"_
+
+[thing create_type L0]
+| a «"character"» is a **thing**
+|   it lives in **star wars**    ‾value(star wars)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"height"» is a **length** in cm or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"mass"» is a **weight** in kg or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"hair color"» is **text**
+|   [property define_property_has L1]
+|   | its «"skin color"» is **text**
+|   [property define_property_has L1]
+|   | its «"eye color"» is **text**
+|   [property define_property_has L1]
+|   | its «"birth year"» is **text**
+|   [property define_property_has L1]
+|   | its «"gender"» is **text**
+|   [property define_property_has L1]
+|   | its «"homeworld"» is a **planet**
+|   [property define_property_has L1]
+|   | its «"films"» is a list of **films**
+|   [property define_property_has L1]
+|   | its «"species"» is a list of **species**
+|   [property define_property_has L1]
+|   | its «"vehicles"» is a list of **vehicles**
+|   [property define_property_has L1]
+|   | its «"starships"» is a list of **starships**
+|   [property define_property_has L1]
+|   | its «"created"» is a **date**
+|   [property define_property_has L1]
+|   | its «"edited"» is a **date**
+
+[thing create_type L0]
+| a «"planet"» is a **thing**
+|   it lives in **star wars**    ‾value(star wars)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"rotation period"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"orbital period"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"diameter"» is a **length** in km
+|   [property define_property_has L1]
+|   | its «"climate"» is **text**
+|   [property define_property_has L1]
+|   | its «"gravity"» is **text**
+|   [property define_property_has L1]
+|   | its «"terrain"» is **text**
+|   [property define_property_has L1]
+|   | its «"surface water"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"population"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"residents"» is a list of **characters**
+|   [property define_property_has L1]
+|   | its «"films"» is a list of **films**
+|   [property define_property_has L1]
+|   | its «"created"» is a **date**
+|   [property define_property_has L1]
+|   | its «"edited"» is a **date**
+
+[thing create_type L0]
+| a «"film"» is a **thing**
+|   it lives in **star wars**    ‾value(star wars)
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"episode id"» is a **number**
+|   [property define_property_has L1]
+|   | its «"opening crawl"» is **text**
+|   [property define_property_has L1]
+|   | its «"director"» is **text**
+|   [property define_property_has L1]
+|   | its «"producer"» is **text**
+|   [property define_property_has L1]
+|   | its «"release date"» is a **date**
+|   [property define_property_has L1]
+|   | its «"characters"» is a list of **characters**
+|   [property define_property_has L1]
+|   | its «"planets"» is a list of **planets**
+|   [property define_property_has L1]
+|   | its «"starships"» is a list of **starships**
+|   [property define_property_has L1]
+|   | its «"vehicles"» is a list of **vehicles**
+|   [property define_property_has L1]
+|   | its «"species"» is a list of **species**
+|   [property define_property_has L1]
+|   | its «"created"» is a **date**
+|   [property define_property_has L1]
+|   | its «"edited"» is a **date**
+
+[thing create_type L0]
+| a «"species"» is a **thing**
+|   it lives in **star wars**    ‾value(star wars)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"classification"» is **text**
+|   [property define_property_has L1]
+|   | its «"designation"» is **text**
+|   [property define_property_has L1]
+|   | its «"average height"» is a **number** or «"n/a"» or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"skin colors"» is **text**
+|   [property define_property_has L1]
+|   | its «"hair colors"» is **text**
+|   [property define_property_has L1]
+|   | its «"eye colors"» is **text**
+|   [property define_property_has L1]
+|   | its «"average lifespan"» is **text**
+|   [property define_property_has L1]
+|   | its «"homeworld"» is a **planet**
+|   [property define_property_has L1]
+|   | its «"language"» is **text**
+|   [property define_property_has L1]
+|   | its «"people"» is a list of **characters**
+|   [property define_property_has L1]
+|   | its «"films"» is a list of **films**
+|   [property define_property_has L1]
+|   | its «"created"» is a **date**
+|   [property define_property_has L1]
+|   | its «"edited"» is a **date**
+
+[thing create_type L0]
+| a «"vehicle"» is a **thing**
+|   it lives in **star wars**    ‾value(star wars)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"model"» is **text**
+|   [property define_property_has L1]
+|   | its «"manufacturer"» is **text**
+|   [property define_property_has L1]
+|   | its «"cost in credits"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"length"» is a **number**
+|   [property define_property_has L1]
+|   | its «"max atmosphering speed"» is a **number**
+|   [property define_property_has L1]
+|   | its «"crew"» is a **number**
+|   [property define_property_has L1]
+|   | its «"passengers"» is a **number**
+|   [property define_property_has L1]
+|   | its «"cargo capacity"» is a **number** or «"none"» or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"consumables"» is **text**
+|   [property define_property_has L1]
+|   | its «"vehicle class"» is **text**
+|   [property define_property_has L1]
+|   | its «"pilots"» is a list of **characters**
+|   [property define_property_has L1]
+|   | its «"films"» is a list of **films**
+|   [property define_property_has L1]
+|   | its «"created"» is a **date**
+|   [property define_property_has L1]
+|   | its «"edited"» is a **date**
+
+[thing create_type L0]
+| a «"starship"» is a **thing**
+|   it lives in **star wars**    ‾value(star wars)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"model"» is **text**
+|   [property define_property_has L1]
+|   | its «"manufacturer"» is **text**
+|   [property define_property_has L1]
+|   | its «"cost in credits"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"length"» is a **number**
+|   [property define_property_has L1]
+|   | its «"max atmosphering speed"» is **text**
+|   [property define_property_has L1]
+|   | its «"crew"» is **text**
+|   [property define_property_has L1]
+|   | its «"passengers"» is a **number** or «"n/a"» or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"cargo capacity"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"consumables"» is **text**
+|   [property define_property_has L1]
+|   | its «"hyperdrive rating"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"mglt"» is a **number** or «"unknown"»
+|   [property define_property_has L1]
+|   | its «"starship class"» is **text**
+|   [property define_property_has L1]
+|   | its «"pilots"» is a list of **characters**
+|   [property define_property_has L1]
+|   | its «"films"» is a list of **films**
+|   [property define_property_has L1]
+|   | its «"created"» is a **date**
+|   [property define_property_has L1]
+|   | its «"edited"» is a **date**
+
+==== /Wikipedia.api.spell
+⟪## Wikipedia:  a page each, by its name.  Not every name has one⟫
+⟦// A server other people run:  what Star Wars shows of a character, a planet or a ship, and its picture.⟧
+⟦// `wikipedia` is what this wrote, from reading a few pages by name, as there's no list of them all:⟧
+⟦//   spell place ingest https://en.wikipedia.org/api/rest_v1 --kind "web server" --into Wikipedia.api.spell⟧
+⟦//     --name wikipedia --collections "wiki pages=/page/summary/{name}" --samples "Luke Skywalker,Tatooine,Millennium Falcon"⟧
+⟦// `spell place update Wikipedia.api.spell` looks again, by the same names, and changes only this file and Wikipedia.api.json5.⟧
+⟦// A wiki page's "about" and "summary" are Star Wars' words for Wikipedia's "description" and "extract".⟧
+⟦//⟧
+⟦// Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.⟧
+
+[thing create_place L0]
+| «wikipedia» is a web server at «"https://en.wikipedia.org/api/rest_v1"»
+|   its id is its _"title"_
+|   check it once a day
+|   it writes names like _"wikibase_item"_
+|   **wiki pages** are found at _"/page/summary/{name}"_
+
+[thing create_type L0]
+| a «"wiki page"» is a **thing**
+|   it lives in **wikipedia**    ‾value(wikipedia)
+|   [property define_property_has L1]
+|   | its «"kind"» is **text**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"displaytitle"» is **text**
+|   [property define_property_has L1]
+|   | its «"namespace"» is a **namespace**
+|   [property define_property_has L1]
+|   | its «"wikibase item"» is **text**
+|   [property define_property_has L1]
+|   | its «"titles"» is a **title**
+|   [property define_property_has L1]
+|   | its «"pageid"» is a **number**
+|   [property define_property_has L1]
+|   | its «"thumbnail"» is a **thumbnail**
+|   [property define_property_has L1]
+|   | its «"originalimage"» is an **originalimage**
+|   [property define_property_has L1]
+|   | its «"lang"» is **text**
+|   [property define_property_has L1]
+|   | its «"dir"» is **text**
+|   [property define_property_has L1]
+|   | its «"revision"» is a **number**
+|   [property define_property_has L1]
+|   | its «"tid"» is **text**
+|   [property define_property_has L1]
+|   | its «"timestamp"» is a **date**
+|   [property define_property_has L1]
+|   | its «"about"» is **text**, stored as «"description"»
+|   [property define_property_has L1]
+|   | its «"description source"» is **text**
+|   [property define_property_has L1]
+|   | its «"content urls"» is a **content url**
+|   [property define_property_has L1]
+|   | its «"summary"» is **text**, stored as «"extract"»
+|   [property define_property_has L1]
+|   | its «"extract html"» is **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+
+[thing create_type L0]
+| a «"namespace"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"text"» is **text**
+
+[thing create_type L0]
+| a «"title"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"canonical"» is **text**
+|   [property define_property_has L1]
+|   | its «"normalized"» is **text**
+|   [property define_property_has L1]
+|   | its «"display"» is **text**
+
+[thing create_type L0]
+| a «"thumbnail"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"source"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"width"» is a **number**
+|   [property define_property_has L1]
+|   | its «"height"» is a **number**
+
+[thing create_type L0]
+| an «"originalimage"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"source"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"width"» is a **number**
+|   [property define_property_has L1]
+|   | its «"height"» is a **number**
+
+[thing create_type L0]
+| a «"content url"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"desktop"» is a **desktop**
+|   [property define_property_has L1]
+|   | its «"mobile"» is a **mobile**
+
+[thing create_type L0]
+| a «"desktop"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"page"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"revisions"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"edit"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"talk"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| a «"mobile"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"page"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"revisions"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"edit"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"talk"» is **text**  ⟦// an address⟧
+
+==== /StarWars.spell
+# St**ar War**s
+⟦// A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWars.api.spell, as `spell place ingest` wrote it:⟧
+⟦// say what a field links to, and reading it follows the link, `the name of its homeworld`.⟧
+⟦// Each type below adds to its type there, with `<extend>`:  so looking again at the server never touches a line of this.⟧
+
+[thing create_one_of_a_kind L0]
+| «guide» is an **app**
+|   [property define_property_has L1]
+|   | its «"tab"» is **text**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   set its **tab** to _"films"_    ‾value(its tab)
+|   |   set its **search** to _""_    ‾value(its search)
+|   [property define_property_has L1]
+|   | its «"showing"» is a **thing**
+|   [property define_property_has L1]
+|   | «"trail"» is a new list of **things**
+|   [property define_property_has L1]
+|   | its «"playing"» is a **film**
+|   [property define_property_has L1]
+|   | its «"jumping"» is yes or no
+
+|   [property property_value_getter L1]
+|   | its «"found"» is
+|   |   ⟦// Whatever's found:  the film, character, planet, ship or anything else with that in its name⟧
+|   |   set **matches** to a new list of **things**    ‾value(matches) ‾value(a new list of things)
+|   |   [control list_iteration L2]
+|   |   | for **film** in every **film** where its **title** includes the **guide's search**    ‾value(every film where its title includes the guide's search)
+|   |   |   add the **film** to **matches**    ‾value(the film) ‾value(matches)
+|   |   [control list_iteration L2]
+|   |   | for **character** in every **character** where its **name** includes the **guide's search**    ‾value(every character where its name includes the guide's search)
+|   |   |   add the **character** to **matches**    ‾value(the character) ‾value(matches)
+|   |   [control list_iteration L2]
+|   |   | for **planet** in every **planet** where its **name** includes the **guide's search**    ‾value(every planet where its name includes the guide's search)
+|   |   |   add the **planet** to **matches**    ‾value(the planet) ‾value(matches)
+|   |   [control list_iteration L2]
+|   |   | for **starship** in every **starship** where its **name** includes the **guide's search**    ‾value(every starship where its name includes the guide's search)
+|   |   |   add the **starship** to **matches**    ‾value(the starship) ‾value(matches)
+|   |   [control list_iteration L2]
+|   |   | for **vehicle** in every **vehicle** where its **name** includes the **guide's search**    ‾value(every vehicle where its name includes the guide's search)
+|   |   |   add the **vehicle** to **matches**    ‾value(the vehicle) ‾value(matches)
+|   |   [control list_iteration L2]
+|   |   | for **one** in every **species** where its **name** includes the **guide's search**    ‾value(every species where its name includes the guide's search)
+|   |   |   add the **one** to **matches**    ‾value(the one) ‾value(matches)
+|   |   return **matches**    ‾value(matches)
+
+|   [action to_do_something L1]
+|   | to «go back»
+|   |   [control if L2]
+|   |   | if its **trail** is empty    ‾question(its trail is empty)
+|   |   |   set its **showing** to nothing    ‾value(its showing) ‾value(nothing)
+|   |   |   return
+|   |   set its **showing** to the last **item** of its **trail**    ‾value(its showing) ‾value(the last item of its trail)
+|   |   remove the last **item** of its **trail**    ‾value(its trail)
+|   |   scroll to the top
+
+|   [action to_do_something L1]
+|   | to «go to (where as text)»    ‾value(where as text) bold(where) bold(text)
+|   |   set its **tab** to **where**    ‾value(its tab) ‾value(where)
+|   |   set its **search** to _""_    ‾value(its search)
+|   |   set its **showing** to nothing    ‾value(its showing) ‾value(nothing)
+|   |   clear its **trail**    ‾value(its trail)
+|   |   scroll to the top
+
+|   [action to_do_something L1]
+|   | to «play the opening»
+|   |   set its **playing** to the first **film**    ‾value(its playing) ‾value(the first film)
+
+|   [action to_do_something L1]
+|   | to «punch it»
+|   |   ⟦// A jump to light speed, and wherever it lands⟧
+|   |   set its **jumping** to _yes_    ‾value(its jumping)
+|   |   set **landing** to a random **character** in (every **character**)    ‾value(landing) ‾value(a random character in (every character))
+|   |   pause for _2600_ msec    ‾quantity(2600 msec)
+|   |   open **landing**    ‾call(open landing)
+|   |   set its **jumping** to _no_    ‾value(its jumping)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control if L2]
+|   |   | if its **jumping**    ‾value(its jumping)
+|   |   |   draw (**a new jump**)    ‾value(a new jump)
+|   |   <⟨stack⟩ direction=«"horizontal"» wrap align=«"end"» justify=«"between"»>
+|   |     <⟨button⟩ class=«"logo"» appearance=«"transparent"» font=«"all-caps"» onClick={go to _"films"_}>Star Wars</⟨button⟩>    code({go to "films"})
+|   |     <⟨form⟩ value={it} class=«"find"»>    code({it})
+|   |       <⟨field⟩ label=«"Search the galaxy"»>
+|   |         <⟨input⟩ name=«"search"» icon=«"search"» placeholder=«"Luke, Hoth, Falcon"»/>
+|   |       </⟨field⟩>
+|   |     </⟨form⟩>
+|   |     <⟨button⟩ class=«"punch"» color=«"primary"» font=«"all-caps"» onClick={punch it} title=«"Jump to light speed, and land on someone"»>Punch it</⟨button⟩>    code({punch it})
+|   |   </⟨stack⟩>
+|   |   <⟨toolbar⟩ appearance=«"secondary pointing"» aria-label=«"Browse"»>
+|   |     <⟨item⟩ active={its **tab** is _"films"_} onClick={go to _"films"_}>Films</⟨item⟩>    code({its tab is "films"}) code({go to "films"})
+|   |     <⟨item⟩ active={its **tab** is _"characters"_} onClick={go to _"characters"_}>Characters</⟨item⟩>    code({its tab is "characters"}) code({go to "characters"})
+|   |     <⟨item⟩ active={its **tab** is _"planets"_} onClick={go to _"planets"_}>Planets</⟨item⟩>    code({its tab is "planets"}) code({go to "planets"})
+|   |     <⟨item⟩ active={its **tab** is _"ships"_} onClick={go to _"ships"_}>Ships</⟨item⟩>    code({its tab is "ships"}) code({go to "ships"})
+|   |     <⟨item⟩ active={its **tab** is _"vehicles"_} onClick={go to _"vehicles"_}>Vehicles</⟨item⟩>    code({its tab is "vehicles"}) code({go to "vehicles"})
+|   |     <⟨item⟩ active={its **tab** is _"species"_} onClick={go to _"species"_}>Species</⟨item⟩>    code({its tab is "species"}) code({go to "species"})
+|   |   </⟨toolbar⟩>
+|   |   draw its **shelf**    ‾value(draw its shelf)
+|   |   <⟨text⟩ paragraph size=«"small"»>
+|   |     Films, characters, planets and ships from <link link=_"https://swapi.py4e.com/"_>swapi.py4e.com</link>.
+|   |     Pictures and what they're of from <link link=_"https://en.wikipedia.org/"_>Wikipedia</link>, asked for as you look.
+|   |     Star Wars belongs to Lucasfilm and Disney.
+|   |   </⟨text⟩>
+|   |   [control if L2]
+|   |   | if its **playing**    ‾value(its playing)
+|   |   |   draw the **crawl** of its **playing**    ‾value(draw the crawl of its playing)
+
+|   [action draw_it L1]
+|   | to **draw** its **shelf**
+|   |   ⟦// Each tab's list says nothing of how long it is:  a long one draws what fits, and more as you scroll⟧
+|   |   [control if L2]
+|   |   | if its **showing** and its **search** is _""_    ‾value(its showing) ‾value(its search)
+|   |   |   draw its **showing's page**    ‾value(draw its showing's page)
+|   |   [control else_if L2]
+|   |   | otherwise if its **search** is not _""_    ‾value(its search)
+|   |   |   <⟨header⟩ size=«"medium"»>Searching for “{its **search**}”</⟨header⟩>    code({its search})
+|   |   |   for its **found**    ‾value(its found)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if there are none: <text>{_"Nobody and nothing by that name, in this galaxy."_}</text>    ‾value(<text>{"Nobody and nothing by that name, in this galaxy."}</text>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"films"_    ‾value(its tab)
+|   |   |   <⟨segment⟩ class=«"opening"» inverted align=«"center"»>
+|   |   |     <⟨text⟩ class=«"long-ago"» size=«"large"»>A long time ago in a galaxy far, far away....</⟨text⟩>
+|   |   |     <⟨button⟩ class=«"play-opening"» size=«"massive"» font=«"all-caps"» onClick={play the opening of the **guide**}>Play the opening</⟨button⟩>    code({play the opening of the guide})
+|   |   |   </⟨segment⟩>
+|   |   |   for every **film**    ‾value(every film)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"characters"_    ‾value(its tab)
+|   |   |   for every **character**    ‾value(every character)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"planets"_    ‾value(its tab)
+|   |   |   for every **planet**    ‾value(every planet)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"vehicles"_    ‾value(its tab)
+|   |   |   for every **vehicle**    ‾value(every vehicle)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"species"_    ‾value(its tab)
+|   |   |   for every **species**    ‾value(every species)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   for every **starship**    ‾value(every starship)
+|   |   |   while waiting: <loader visible inline text>{its **signal**}</loader>    ‾value(<loader visible inline text>{its signal}</loader>)
+|   |   |   if that fails say its **lost signal**    ‾value(its lost signal)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+
+|   [property property_value_getter L1]
+|   | its «"signal"» is «"Waiting for a signal from the galaxy"»
+|   [property property_value_getter L1]
+|   | its «"lost signal"» is «"The signal from swapi.py4e.com is lost."»
+
+⟪# What everything here can do⟫
+⟦// It's on `a thing`, not a base type of the program's own:  each type below is simply `a thing`.⟧
+⟦// Spell has no mixins yet (epic `mixins`), and a thing here shares by HOLDING a card, and drawing it.⟧
+
+[action to_do_something L0]
+| to «open (a thing)»    ‾value(a thing) bold(thing)
+|   [control if L1]
+|   | if the **guide's showing**    ‾value(the guide's showing)
+|   |   add the **guide's showing** to the **guide's trail**    ‾value(the guide's showing) ‾value(the guide's trail)
+|   set the **guide's search** to _""_    ‾value(the guide's search)
+|   set the **guide's showing** to it    ‾value(the guide's showing) ‾value(it)
+|   scroll to the top
+
+[action to_do_something L0]
+| to «measure (amount as a number) in (unit as text)»    ‾value(amount as a number) ‾value(unit as text) bold(amount) bold(number) bold(unit) bold(text)
+|   ⟦// A number for people to read:  with none, nothing, so its row doesn't show⟧
+|   [control if L1]
+|   | if **amount** is nothing    ‾value(amount) ‾value(nothing)
+|   |   return _""_
+|   return **amount** with commas + _" "_ + **unit**    ‾value(amount with commas) ‾value(unit)
+
+⟪# A card:  a picture, a name, what kind, and a click anywhere on it opens the thing⟫
+⟦// Every type holds one of these, with its own words.⟧
+
+[thing create_type L0]
+| a «"card"» is a **thing**
+|   [property define_property_has L1]
+|   | it has a **label**
+|   [property define_property_has L1]
+|   | it has a **kind**
+|   [property define_property_has L1]
+|   | it has a **shape**
+|   [property define_property_has L1]
+|   | it has a **colour**
+|   |   ⟦// What colour a picture's background is:  from its name, unless it says⟧
+|   [property property_value_getter L1]
+|   | its «"hue"» is
+|   |   [control if L2]
+|   |   | if its **colour** is not nothing    ‾value(its colour) ‾value(nothing)
+|   |   |   return its **colour**    ‾value(its colour)
+|   |   return the **length** of its **label** * _47_    ‾value(the length of its label)
+|   [property define_property_has L1]
+|   | its «"subject"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"species"» is a **species**
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨ui-card⟩ onClick={open its **subject**}>    code({open its subject})
+|   |     {draw its **portrait**}
+|   |     <⟨content⟩>
+|   |       <⟨header⟩>{its **label**}</⟨header⟩>    code({its label})
+|   |       <⟨meta⟩>{its **kind**}</⟨meta⟩>    code({its kind})
+|   |     </⟨content⟩>
+|   |   </⟨ui-card⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **portrait**
+|   |   draw (**a new portrait** with **name** = its **label**, **hue** = its **hue**, **shape** = its **shape**, **species** = its **species**)    ‾value(a new portrait with name = its label, hue = its hue, shape = its shape, species = its species)
+
+|   [action draw_it L1]
+|   | to **draw** its **top**
+|   |   <⟨button⟩ appearance=«"transparent"» icon=«"arrow left"» onClick={go back}>Back</⟨button⟩>    code({go back})
+|   |   <⟨stack⟩ class=«"hero"» direction=«"horizontal"» wrap align=«"start"»>
+|   |     {draw its **portrait**}
+|   |     <⟨stack⟩ class=«"about"»>
+|   |       <⟨header⟩ class=«"title"» font=«"all-caps"»>{its **label**}</⟨header⟩>    code({its label})
+|   |       <⟨text⟩ color=«"grey"»>{its **kind**}</⟨text⟩>    code({its kind})
+|   |       {draw (**a new wiki note** with **name** = its **label**)}
+|   |     </⟨stack⟩>
+|   |   </⟨stack⟩>
+
+⟪# What Wikipedia says of it, and where to read the rest⟫
+⟦// Not every name has a page, and a name may be someone else's:  Zolan is a medicine.⟧
+
+[thing reopen_type L0]
+| a **wiki page**
+|   [property property_value_getter L1]
+|   | its «"fits"» is
+|   |   [control if L2]
+|   |   | if its **title** includes _"List of"_    ‾value(its title)
+|   |   |   return _no_
+|   |   return its **about** includes _"star wars"_ or its **about** includes _"fictional"_ or its **about** includes _" film "_    ‾value(its about) ‾value(its about) ‾value(its about)
+
+[thing create_type L0]
+| a «"wiki note"» is a **thing**
+|   [property define_property_has L1]
+|   | it has a **name**
+|   [property property_value_getter L1]
+|   | its «"page"» is the **wiki page** whose id is its **name**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **words**    ‾value(draw its words)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨text⟩ color=«"grey"»>Asking Wikipedia</⟨text⟩>
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   <⟨text⟩ color=«"grey"»>Wikipedia can't be reached just now.</⟨text⟩>
+|   [action draw_it L1]
+|   | to **draw** its **words**
+|   |   [control if L2]
+|   |   | if its **page** and its **page's fits**    ‾value(its page) ‾value(its page's fits)
+|   |   |   <⟨text⟩ paragraph>{its **page's summary**} <⟨link⟩ link={the **page** of the **desktop** of the **content urls** of its **page**} target=«"_blank"»>Read the rest on Wikipedia</⟨link⟩></⟨text⟩>    code({its page's summary}) code({the page of the desktop of the content urls of its page})
+
+⟪# A page's parts⟫
+⟦// A table of what's known, leaving out what isn't;  a list under its heading, or nothing if it's empty.⟧
+
+[thing create_type L0]
+| a «"fact"» is a **thing**
+|   [property define_property_has L1]
+|   | it has a **label**
+|   [property define_property_has L1]
+|   | it has a **value**
+|   [property define_property_has L1]
+|   | its «"date"» is a **date**
+|   [property quoted_type_expression L1]
+|   | it «"is known"»
+|   |   ⟦// What a server writes when nothing's known isn't worth a row⟧
+|   |   [control if L2]
+|   |   | if its **date**    ‾value(its date)
+|   |   |   return _yes_
+|   |   [control if L2]
+|   |   | if its **value** is nothing or its **value** is _""_    ‾value(its value) ‾value(nothing) ‾value(its value)
+|   |   |   return _no_
+|   |   return its **value** is not _"unknown"_ and its **value** is not _"n/a"_ and its **value** is not _"none"_    ‾value(its value) ‾value(its value) ‾value(its value)
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨row⟩>
+|   |     <⟨cell⟩ header>{its **label**}</⟨cell⟩>    code({its label})
+|   |     <⟨cell⟩>{its **value**}{its **date**}</⟨cell⟩>    code({its value}) code({its date})
+|   |   </⟨row⟩>
+
+[thing create_type L0]
+| a «"fact table"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"facts"» is a list of **facts**
+|   [property property_value_getter L1]
+|   | its «"shown"» is the **facts** in its **facts** where it is known
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control if L2]
+|   |   | if its **shown** is not empty    ‾question(its shown is not empty)
+|   |   |   <⟨table⟩ class=«"facts"» appearance=«"very-basic"» inverted unstackable>
+|   |   |     {draw each **fact** in its **shown**}
+|   |   |   </⟨table⟩>
+
+[thing create_type L0]
+| a «"section"» is a **thing**
+|   [property define_property_has L1]
+|   | it has a **heading**
+|   [property define_property_has L1]
+|   | its «"things"» is a list of **things**
+|   [property define_property_has L1]
+|   | its «"single"» is a **thing**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control if L2]
+|   |   | if its **single**    ‾value(its single)
+|   |   |   <⟨header⟩ class=«"section"» size=«"small"» font=«"all-caps"»>{its **heading**}</⟨header⟩>    code({its heading})
+|   |   |   <⟨cards⟩ columns=«"4"» doubling>{draw its **single**}</⟨cards⟩>    code({draw its single})
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   for its **things**    ‾value(its things)
+|   |   |   show it all in: <ui-section label={its **heading**} hide-empty=_""_></ui-section>    ‾value(<ui-section label={its heading} hide-empty=""></ui-section>)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+
+⟪# A film⟫
+
+[thing reopen_type L0]
+| a **film**
+|   [property property_value_getter L1]
+|   | «"card"» is **a new card** with **label** = its **title**, **kind** = «"Episode "» + its **episode id**, **subject** = it
+|   [action to_do_something L1]
+|   | to «play it»
+|   |   set the **guide's playing** to it    ‾value(the guide's playing) ‾value(it)
+|   [action to_do_something L1]
+|   | to «end it»
+|   |   set the **guide's playing** to nothing    ‾value(the guide's playing) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **card**    ‾value(its card)
+
+|   [property property_value_getter L1]
+|   | its «"facts"» is
+|   |   set **known** to a new list of **facts**    ‾value(known) ‾value(a new list of facts)
+|   |   add (**a new fact** with **label** _"Directed by"_, **value** = its **director**) to **known**    ‾value(a new fact with label "Directed by", value = its director) ‾value(known)
+|   |   add (**a new fact** with **label** _"Produced by"_, **value** = its **producer**) to **known**    ‾value(a new fact with label "Produced by", value = its producer) ‾value(known)
+|   |   add (**a new fact** with **label** _"Released"_, **date** = its **release date**) to **known**    ‾value(a new fact with label "Released", date = its release date) ‾value(known)
+|   |   return **known**    ‾value(known)
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   draw the **top** of its **card**    ‾value(draw the top of its card)
+|   |   <⟨button⟩ class=«"play-opening"» font=«"all-caps"» onClick={play it}>Play the opening</⟨button⟩>    code({play it})
+|   |   draw (**a new fact table** with **facts** = its **facts**)    ‾value(a new fact table with facts = its facts)
+|   |   draw its **links**    ‾value(draw its links)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Following the links</⟨loader⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **links**
+|   |   draw (**a new section** with **heading** _"Who's in it"_, **things** = its **characters**)    ‾value(a new section with heading "Who's in it", things = its characters)
+|   |   draw (**a new section** with **heading** _"Where it happens"_, **things** = its **planets**)    ‾value(a new section with heading "Where it happens", things = its planets)
+|   |   draw (**a new section** with **heading** _"What they fly"_, **things** = its **starships**)    ‾value(a new section with heading "What they fly", things = its starships)
+
+⟪# A character⟫
+
+[thing reopen_type L0]
+| a **character**
+|   [property property_value_getter L1]
+|   | «"card"» is **a new card** with **label** = its **name**, **kind** = «"Born "» + its **birth year**, **subject** = it
+|   [property property_value_getter L1]
+|   | its «"page"» is the **wiki page** whose id is its **name**
+|   [property property_value_getter L1]
+|   | its «"picture"» is
+|   |   ⟦// Their own picture on Wikipedia, or nothing⟧
+|   |   [control if L2]
+|   |   | if its **page** and its **page's fits** and its **page's thumbnail**    ‾value(its page) ‾value(its page's fits) ‾value(its page's thumbnail)
+|   |   |   return its **page's thumbnail's source**    ‾value(its page's thumbnail's source)
+|   |   return _""_
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **card**    ‾value(its card)
+
+|   [property property_value_getter L1]
+|   | its «"facts"» is
+|   |   set **known** to a new list of **facts**    ‾value(known) ‾value(a new list of facts)
+|   |   add (**a new fact** with **label** _"Height"_, **value** = _"[its height]"_) to **known**    ‾value(a new fact with label "Height", value = "[its height]") ‾value(known)
+|   |   add (**a new fact** with **label** _"Mass"_, **value** = _"[its mass]"_) to **known**    ‾value(a new fact with label "Mass", value = "[its mass]") ‾value(known)
+|   |   add (**a new fact** with **label** _"Born"_, **value** = its **birth year**) to **known**    ‾value(a new fact with label "Born", value = its birth year) ‾value(known)
+|   |   add (**a new fact** with **label** _"Hair"_, **value** = its **hair color**) to **known**    ‾value(a new fact with label "Hair", value = its hair color) ‾value(known)
+|   |   add (**a new fact** with **label** _"Eyes"_, **value** = its **eye color**) to **known**    ‾value(a new fact with label "Eyes", value = its eye color) ‾value(known)
+|   |   return **known**    ‾value(known)
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   draw the **top** of its **card**    ‾value(draw the top of its card)
+|   |   draw (**a new fact table** with **facts** = its **facts**)    ‾value(a new fact table with facts = its facts)
+|   |   draw its **links**    ‾value(draw its links)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Following the links</⟨loader⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **links**
+|   |   draw (**a new section** with **heading** _"Home"_, **single** = its **homeworld**)    ‾value(a new section with heading "Home", single = its homeworld)
+|   |   draw (**a new section** with **heading** _"Films"_, **things** = its **films**)    ‾value(a new section with heading "Films", things = its films)
+|   |   draw (**a new section** with **heading** _"What they are"_, **things** = its **species**)    ‾value(a new section with heading "What they are", things = its species)
+|   |   draw (**a new section** with **heading** _"What they fly"_, **things** = its **starships**)    ‾value(a new section with heading "What they fly", things = its starships)
+|   |   draw (**a new section** with **heading** _"What they drive"_, **things** = its **vehicles**)    ‾value(a new section with heading "What they drive", things = its vehicles)
+
+⟪# A planet⟫
+
+[thing reopen_type L0]
+| a **planet**
+|   [property property_value_getter L1]
+|   | «"card"» is **a new card** with **label** = its **name**, **kind** = its **climate**, **shape** = «"world"», **colour** = its **hue**, **subject** = it
+|   [property property_value_getter L1]
+|   | its «"hue"» is
+|   |   ⟦// What colour a world is, from its weather⟧
+|   |   [control if L2]
+|   |   | if its **climate** includes _"frozen"_    ‾value(its climate)
+|   |   |   return _200_
+|   |   [control if L2]
+|   |   | if its **climate** includes _"arid"_    ‾value(its climate)
+|   |   |   return _38_
+|   |   [control if L2]
+|   |   | if its **climate** includes _"murky"_ or its **climate** includes _"polluted"_    ‾value(its climate) ‾value(its climate)
+|   |   |   return _95_
+|   |   [control if L2]
+|   |   | if its **climate** includes _"tropical"_ or its **climate** includes _"temperate"_    ‾value(its climate) ‾value(its climate)
+|   |   |   return _130_ + the **length** of its **name** * _9_    ‾value(the length of its name)
+|   |   return _280_
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **card**    ‾value(its card)
+
+|   [property property_value_getter L1]
+|   | its «"facts"» is
+|   |   set **known** to a new list of **facts**    ‾value(known) ‾value(a new list of facts)
+|   |   add (**a new fact** with **label** _"Climate"_, **value** = its **climate**) to **known**    ‾value(a new fact with label "Climate", value = its climate) ‾value(known)
+|   |   add (**a new fact** with **label** _"Terrain"_, **value** = its **terrain**) to **known**    ‾value(a new fact with label "Terrain", value = its terrain) ‾value(known)
+|   |   add (**a new fact** with **label** _"Diameter"_, **value** = _"[its diameter]"_) to **known**    ‾value(a new fact with label "Diameter", value = "[its diameter]") ‾value(known)
+|   |   add (**a new fact** with **label** _"Population"_, **value** = measure its **population** in _"people"_) to **known**    ‾value(a new fact with label "Population", value = measure its population in "people") ‾value(known)
+|   |   add (**a new fact** with **label** _"A day"_, **value** = measure its **rotation period** in _"hours"_) to **known**    ‾value(a new fact with label "A day", value = measure its rotation period in "hours") ‾value(known)
+|   |   add (**a new fact** with **label** _"A year"_, **value** = measure its **orbital period** in _"days"_) to **known**    ‾value(a new fact with label "A year", value = measure its orbital period in "days") ‾value(known)
+|   |   return **known**    ‾value(known)
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   draw the **top** of its **card**    ‾value(draw the top of its card)
+|   |   draw (**a new fact table** with **facts** = its **facts**)    ‾value(a new fact table with facts = its facts)
+|   |   draw its **links**    ‾value(draw its links)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Following the links</⟨loader⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **links**
+|   |   draw (**a new section** with **heading** _"Who's from here"_, **things** = its **residents**)    ‾value(a new section with heading "Who's from here", things = its residents)
+|   |   draw (**a new section** with **heading** _"Seen in"_, **things** = its **films**)    ‾value(a new section with heading "Seen in", things = its films)
+
+⟪# A ship, and a vehicle:  much the same to look at⟫
+⟦// Their pages share `to draw a craft`'s words, handed what differs.⟧
+
+[thing create_type L0]
+| a «"craft page"» is a **thing**
+|   [property define_property_has L1]
+|   | it has a **model**
+|   [property define_property_has L1]
+|   | it has a **maker**
+|   [property define_property_has L1]
+|   | its «"length"» is a **length** in m
+|   [property define_property_has L1]
+|   | it has a **crew**
+|   [property define_property_has L1]
+|   | it has a **passengers**
+|   [property define_property_has L1]
+|   | it has a **cost**
+|   [property property_value_getter L1]
+|   | its «"x-wings long"» is
+|   |   ⟦// How long it is, in something you can picture:  an X-wing is 12.5 metres⟧
+|   |   [control if L2]
+|   |   | if its **length** is nothing    ‾value(its length) ‾value(nothing)
+|   |   |   return nothing    ‾value(nothing)
+|   |   return round (its **length** / _12.5_)    ‾value(round (its length / 12.5))
+|   [property property_value_getter L1]
+|   | its «"facts"» is
+|   |   set **known** to a new list of **facts**    ‾value(known) ‾value(a new list of facts)
+|   |   add (**a new fact** with **label** _"Model"_, **value** = its **model**) to **known**    ‾value(a new fact with label "Model", value = its model) ‾value(known)
+|   |   add (**a new fact** with **label** _"Made by"_, **value** = its **maker**) to **known**    ‾value(a new fact with label "Made by", value = its maker) ‾value(known)
+|   |   add (**a new fact** with **label** _"Length"_, **value** = _"[its length]"_) to **known**    ‾value(a new fact with label "Length", value = "[its length]") ‾value(known)
+|   |   add (**a new fact** with **label** _"As long as"_, **value** = measure its **x-wings long** in _"X-wings"_) to **known**    ‾value(a new fact with label "As long as", value = measure its x-wings long in "X-wings") ‾value(known)
+|   |   add (**a new fact** with **label** _"Crew"_, **value** = its **crew**) to **known**    ‾value(a new fact with label "Crew", value = its crew) ‾value(known)
+|   |   add (**a new fact** with **label** _"Passengers"_, **value** = measure its **passengers** in _"people"_) to **known**    ‾value(a new fact with label "Passengers", value = measure its passengers in "people") ‾value(known)
+|   |   add (**a new fact** with **label** _"Costs"_, **value** = measure its **cost** in _"credits"_) to **known**    ‾value(a new fact with label "Costs", value = measure its cost in "credits") ‾value(known)
+|   |   return **known**    ‾value(known)
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw (**a new fact table** with **facts** = its **facts**)    ‾value(a new fact table with facts = its facts)
+
+[thing reopen_type L0]
+| a **starship**
+|   [property property_value_getter L1]
+|   | «"card"» is **a new card** with **label** = its **name**, **kind** = its **starship class**, **subject** = it
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **card**    ‾value(its card)
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   draw the **top** of its **card**    ‾value(draw the top of its card)
+|   |   draw (**a new craft page** with **model** = its **model**, **maker** = its **manufacturer**, **length** = its **length**, **crew** = its **crew**, **passengers** = its **passengers**, **cost** = its **cost in credits**)    ‾value(a new craft page with model = its model, maker = its manufacturer, length = its length, crew = its crew, passengers = its passengers, cost = its cost in credits)
+|   |   draw its **links**    ‾value(draw its links)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Following the links</⟨loader⟩>
+|   [action draw_it L1]
+|   | to **draw** its **links**
+|   |   draw (**a new section** with **heading** _"Who flew it"_, **things** = its **pilots**)    ‾value(a new section with heading "Who flew it", things = its pilots)
+|   |   draw (**a new section** with **heading** _"Seen in"_, **things** = its **films**)    ‾value(a new section with heading "Seen in", things = its films)
+
+[thing reopen_type L0]
+| a **vehicle**
+|   [property property_value_getter L1]
+|   | «"card"» is **a new card** with **label** = its **name**, **kind** = its **vehicle class**, **subject** = it
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **card**    ‾value(its card)
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   draw the **top** of its **card**    ‾value(draw the top of its card)
+|   |   draw (**a new craft page** with **model** = its **model**, **maker** = its **manufacturer**, **length** = its **length**, **crew** = its **crew**, **passengers** = its **passengers**, **cost** = its **cost in credits**)    ‾value(a new craft page with model = its model, maker = its manufacturer, length = its length, crew = its crew, passengers = its passengers, cost = its cost in credits)
+|   |   draw its **links**    ‾value(draw its links)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Following the links</⟨loader⟩>
+|   [action draw_it L1]
+|   | to **draw** its **links**
+|   |   draw (**a new section** with **heading** _"Who flew it"_, **things** = its **pilots**)    ‾value(a new section with heading "Who flew it", things = its pilots)
+|   |   draw (**a new section** with **heading** _"Seen in"_, **things** = its **films**)    ‾value(a new section with heading "Seen in", things = its films)
+
+⟪# A species⟫
+⟦// A species with no picture takes the first of its people who has one.⟧
+
+[thing reopen_type L0]
+| a **species**
+|   [property property_value_getter L1]
+|   | «"card"» is **a new card** with **label** = its **name**, **kind** = its **classification**, **subject** = it, **species** = it
+|   [property property_value_getter L1]
+|   | its «"picture"» is
+|   |   ⟦// Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing⟧
+|   |   set **everyone** to every **character**    ‾value(everyone) ‾value(every character)
+|   |   set **found** to _""_    ‾value(found)
+|   |   [control list_iteration L2]
+|   |   | for **character** in its **people**    ‾value(its people)
+|   |   |   [control if L3]
+|   |   |   | if **found** is _""_    ‾value(found)
+|   |   |   |   set **found** to the **character's picture**    ‾value(found) ‾value(the character's picture)
+|   |   return **found**    ‾value(found)
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **card**    ‾value(its card)
+
+|   [property property_value_getter L1]
+|   | its «"facts"» is
+|   |   set **known** to a new list of **facts**    ‾value(known) ‾value(a new list of facts)
+|   |   add (**a new fact** with **label** _"Language"_, **value** = its **language**) to **known**    ‾value(a new fact with label "Language", value = its language) ‾value(known)
+|   |   add (**a new fact** with **label** _"Lives for"_, **value** = its **average lifespan**) to **known**    ‾value(a new fact with label "Lives for", value = its average lifespan) ‾value(known)
+|   |   return **known**    ‾value(known)
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   draw the **top** of its **card**    ‾value(draw the top of its card)
+|   |   draw (**a new fact table** with **facts** = its **facts**)    ‾value(a new fact table with facts = its facts)
+|   |   draw its **links**    ‾value(draw its links)
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨loader⟩ visible inline text>Following the links</⟨loader⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **links**
+|   |   draw (**a new section** with **heading** _"Home"_, **single** = its **homeworld**)    ‾value(a new section with heading "Home", single = its homeworld)
+|   |   draw (**a new section** with **heading** _"Who's one"_, **things** = its **people**)    ‾value(a new section with heading "Who's one", things = its people)
+
+start the **guide**    ‾value(the guide)
+
+==== /StarWarsCrawl.spell
+⟪# The opening:  yellow, receding, and it stops when you say⟫
+⟦// A widget of its own:  `ui-modal` is the cinema, and no `ui-*` tilts words away into the distance.⟧
+
+[thing reopen_type L0]
+| a **film**
+|   [action draw_it L1]
+|   | to **draw** its **crawl**
+|   |   <⟨modal⟩ class=«"crawl"» visible overlay fullscreen on-ui-closed={end it} aria-label={_"The opening of "_ + its **title**}>    code({end it}) code({"The opening of " + its title})
+|   |     <⟨text⟩ class=«"long-ago"» size=«"big"»>A long time ago in a galaxy far, far away....</⟨text⟩>
+|   |     <⟨segment⟩ class=«"stage"» appearance=«"basic"»>
+|   |       <⟨segment⟩ class=«"words"» appearance=«"basic"»>
+|   |         <⟨header⟩ class=«"episode"» font=«"all-caps"»>Episode {its **episode id**}</⟨header⟩>    code({its episode id})
+|   |         <⟨header⟩ class=«"crawl-title"» font=«"all-caps"»>{its **title**}</⟨header⟩>    code({its title})
+|   |         <⟨text⟩ paragraph class=«"crawl-text"»>{its **opening crawl**}</⟨text⟩>    code({its opening crawl})
+|   |       </⟨segment⟩>
+|   |     </⟨segment⟩>
+|   |     <⟨button⟩ class=«"stop"» onClick={end it}>Stop</⟨button⟩>    code({end it})
+|   |   </⟨modal⟩>
+
+==== /StarWarsJump.spell
+⟪# The jump to light speed⟫
+⟦// Each star stays where it is and stretches straight out from the middle of the view, faster and faster;  a white flash;  the blue tunnel;  a sudden stop.⟧
+⟦// A widget of its own, as no `ui-*` stretches a star:  `ui-space` is the bare box each star is drawn on, and the rest is in styles.css.⟧
+
+[thing create_type L0]
+| a «"jump"» is a **thing**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨segment⟩ class=«"jump"» appearance=«"basic"» aria-hidden=«"true"»>
+|   |     <⟨space⟩ class=«"jump-tunnel"» />
+|   |     {draw its **stars**}
+|   |     <⟨space⟩ class=«"jump-flash"» />
+|   |   </⟨segment⟩>
+|   [action draw_it L1]
+|   | to **draw** its **stars**
+|   |   [control list_range_iteration L2]
+|   |   | for **stars** from _1_ to _240_
+|   |   |   <⟨space⟩ class=«"streak"» style={_"--n: "_ + **star**} />    code({"--n: " + star})
+
+==== /StarWarsPortrait.spell
+⟪# A picture:  its own page on Wikipedia, if it has one, else an initial on a colour⟫
+⟦// A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.⟧
+⟦// A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.⟧
+
+[thing create_type L0]
+| a «"portrait"» is a **thing**
+|   [property define_property_has L1]
+|   | it has a **name**
+|   [property define_property_has L1]
+|   | it has a **hue**
+|   [property define_property_has L1]
+|   | it has a **shape**
+|   [property define_property_has L1]
+|   | its «"species"» is a **species**
+|   [property property_value_getter L1]
+|   | its «"page"» is the **wiki page** whose id is its **name**
+|   [property property_value_getter L1]
+|   | its «"initial"» is the first **letter** of its **name**
+|   [property property_value_getter L1]
+|   | its «"picture"» is
+|   |   [control if L2]
+|   |   | if its **page** and its **page's fits** and its **page's thumbnail**    ‾value(its page) ‾value(its page's fits) ‾value(its page's thumbnail)
+|   |   |   return its **page's thumbnail's source**    ‾value(its page's thumbnail's source)
+|   |   [control if L2]
+|   |   | if its **species**    ‾value(its species)
+|   |   |   return its **species' picture**    ‾value(its species' picture)
+|   |   return _""_
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨segment⟩ class={_"portrait "_ + its **shape**} style={_"--hue: "_ + its **hue**} appearance=«"basic"»>    code({"portrait " + its shape}) code({"--hue: " + its hue})
+|   |     <⟨header⟩ class=«"initial"»>{its **initial**}</⟨header⟩>    code({its initial})
+|   |     {draw its **photo**}
+|   |   </⟨segment⟩>
+|   [action draw_it L1]
+|   | to **draw** its **photo**
+|   |   ⟦// Waiting for it, or if Wikipedia can't be reached, the initial stays⟧
+|   |   [control if L2]
+|   |   | if its **picture** is not _""_    ‾value(its picture)
+|   |   |   <⟨image⟩ src={its **picture**} alt=«""» crop=«"top"» />    code({its picture})
+|   |   [control while_waiting L2]
+|   |   | while waiting
+|   |   |   <⟨space⟩ />
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   <⟨space⟩ />

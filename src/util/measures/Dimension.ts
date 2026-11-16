@@ -3,7 +3,7 @@
  * (epic `language` P23, P24;  Owen's C5).
  * - Generic:  no Spell words, no core.  Spell's runtime (`spell/parser/core`) and Spell UI's `<ui-dimension>` both
  *   convert and write measures with it, from the same table, so a page and a program never disagree.
- * - Its units are written in Spell:  the built-in six in the parser's `core/dimensions/dimensions.spell`, compiled into
+ * - Its units are written in Spell:  the built-in seven in the parser's `core/dimensions/dimensions.spell`, compiled into
  *   [dimensions.generated.ts](dimensions.generated.ts);  a program's own, `data size is a dimension:`, compile to
  *   `core.defineDimension()`.
  * - Taken by file, `spell/util/measures/Dimension`, in no barrel:  a page that shows no measure pays nothing.
@@ -129,5 +129,5 @@ function roundForPeople(value: number): number {
  */
 export const PROPORTION = "Proportion"
 
-/** Spell's built-in dimensions, by name:  `Length`, `Weight`, `Temperature`, `Volume`, `Speed`, `Proportion`. */
+/** Spell's built-in dimensions, by name:  `Length`, `Weight`, `Temperature`, `Volume`, `Speed`, `Duration`, `Proportion`. */
 export const BUILT_IN = new Map(BUILT_IN_DIMENSIONS.map((data) => [data.name, Dimension.fromTable(data)]))

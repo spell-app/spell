@@ -6,7 +6,7 @@ exports[`testing spell module async, in Spanish > rule group specs > match snaps
   "await": "expression?",
   "check_process": "name|operator",
   "meanwhile": "body?",
-  "pause": "number|units",
+  "pause": "duration|unit?",
   "start_process": "operator?|name",
   "stop_process": "name",
   "without_waiting": "call",

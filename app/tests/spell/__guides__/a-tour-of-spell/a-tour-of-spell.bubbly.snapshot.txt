@@ -1,0 +1,121 @@
+==== /TourOfSpell.spell
+⟪## A tour of Spell⟫
+⟦// What is a program, when it's written in sentences?⟧
+⟦//⟧
+⟦// Think of the labels on the pots in a garden centre.⟧
+⟦// Each one names a plant, says a few things about it, and says how to look after it:⟧
+⟦// "Basil.  Water every 2 days.  Needs sun."⟧
+⟦//⟧
+⟦// A spell is labels like that, which the computer can follow.⟧
+⟦// This file is a small one:  a windowsill of plants, on the right, that tell you when they need water.⟧
+⟦// It's made of four ideas, one per part below:  things, properties, rules and drawing.⟧
+
+
+⟪## 1. Things⟫
+⟦// A THING is anything your program is about:  a plant, a card, a task, a person.⟧
+⟦// You say what kind of thing it is once, and then you can make as many of them as you like.⟧
+⟦// A "view" can show itself on the page;  more on that in part 4.⟧
+[thing create_type L0]
+| a «"plant"» is a **view**
+
+|   ⟪## 2. Properties⟫
+|   ⟦// A PROPERTY is something a thing keeps:  a plant has a name, and so on.⟧
+|   ⟦// Each line says the property's name, in quotes, then what kind of value it holds:⟧
+|   ⟦// text, a number, or yes or no.⟧
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"days between waterings"» is a **number**
+|   [property define_property_has L1]
+|   | its «"days since watered"» is a **number**
+
+|   ⟪## 3. Rules⟫
+|   ⟦// A RULE is a property the program works out for itself, from the others.⟧
+|   ⟦// You never set it:  it's always up to date, so when a plant is watered, it stops being thirsty.⟧
+|   [property quoted_type_expression L1]
+|   | it «"is thirsty"» if its **days since watered** is greater than or equal to its **days between waterings**    ‾value(its days since watered) ‾value(its days between waterings)
+|   [property property_value_getter L1]
+|   | its «"status"» is
+|   |   _"needs water!"_ if it is thirsty    ‾question(it is thirsty)
+|   |   _"fine for now"_ otherwise
+
+|   [action to_do_something L1]
+|   | to «water it»
+|   |   ⟦// A rule can also be something the thing DOES, when asked:  an ACTION.⟧
+|   |   set its **days since watered** to _0_    ‾value(its days since watered)
+
+|   ⟪## 4. Drawing⟫
+|   ⟦// DRAWING is how a thing shows itself on the page.⟧
+|   ⟦// The lines in <angle brackets> are the page's pieces;  {curly brackets} fill in a property.⟧
+|   ⟦// Because the page is drawn from the properties, it changes by itself whenever they do.⟧
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   return <ui-segment color={_"orange"_ if it is thirsty otherwise _"green"_}>    ‾value(<ui-segment color={"orange" if it is thirsty otherwise "green"}>)
+|   |     <⟨h3⟩>{its **name**}</⟨h3⟩>    ‾value(<h3>{its name}</h3>) code({its name})
+|   |     <⟨p⟩>{its **status**}</⟨p⟩>    ‾value(<p>{its status}</p>) code({its status})
+|   |     <⟨ui-button⟩ appearance=«"basic"» size=«"small"» icon=«"tint"» onClick={water it}>Water</⟨ui-button⟩>    ‾value(<ui-button appearance="basic" size="small" icon="tint" onClick={water it}>Water</ui-button>) code({water it})
+|   |   </⟨ui-segment⟩>    ‾value(</ui-segment>)
+
+
+⟪## Many things together:  a windowsill⟫
+⟦// A list of things can be a view too:  a viewable list draws each one in turn.⟧
+[thing create_viewable_list_type L0]
+| a «"windowsill"» is a **viewable list of plants**
+
+[property belongs_to_one L0]
+| a **plant** belongs to one **windowsill**
+|   ⟦// a plant sits on one windowsill⟧
+
+[thing create_one_of_a_kind L0]
+| «garden» is an **app**
+|   ⟦// the app:  the page on the right⟧
+|   [property define_property_has L1]
+|   | its «"sill"» is **a new windowsill**
+|   ⟦// a day goes by:  every plant is one day drier⟧
+|   ⟦// (`the plant's days since watered` is `the days since watered of the plant`, said the other way)⟧
+|   [action to_do_something L1]
+|   | to «wait a day»
+|   |   [control list_iteration L2]
+|   |   | for **plant** in its **sill**    ‾value(its sill)
+|   |   |   set the **plant's days since watered** to the **plant's days since watered** + _1_    ‾value(the plant's days since watered) ‾value(the plant's days since watered)
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   return <div class=_"Garden"_>    ‾value(<div class="Garden">)
+|   |     <⟨ui-button⟩ color=«"primary"» onClick={wait a day}>A day goes by</⟨ui-button⟩>    ‾value(<ui-button color="primary" onClick={wait a day}>A day goes by</ui-button>) code({wait a day})
+|   |     {draw its **sill**}    ‾value({draw its sill})
+|   |   </⟨div⟩>    ‾value(</div>)
+
+
+⟪## Start:  three plants, one of them thirsty⟫
+add (**a new plant** with **name** = _"Basil"_, **days between waterings** = _2_, **days since watered** = _2_) to the **sill** of **garden**    ‾value(a new plant with name = "Basil", days between waterings = 2, days since watered = 2) ‾value(the sill of garden)
+add (**a new plant** with **name** = _"Cactus"_, **days between waterings** = _14_, **days since watered** = _3_) to the **sill** of **garden**    ‾value(a new plant with name = "Cactus", days between waterings = 14, days since watered = 3) ‾value(the sill of garden)
+add (**a new plant** with **name** = _"Fern"_, **days between waterings** = _3_, **days since watered** = _1_) to the **sill** of **garden**    ‾value(a new plant with name = "Fern", days between waterings = 3, days since watered = 1) ‾value(the sill of garden)
+
+
+⟪## Tests:  the rule, checked⟫
+⟦// Each time the spell runs, these lines run too, and Program Output shows a tick if they came out right.⟧
+[action to_do_something L0]
+| to «test thirst»
+|   set the **pot** to **a new plant** with **name** = _"Mint"_, **days between waterings** = _2_, **days since watered** = _2_    ‾value(the pot) ‾value(a new plant with name = "Mint", days between waterings = 2, days since watered = 2)
+|   the **pot** is thirsty should be _yes_    ‾question(the pot is thirsty)
+|   water the **pot**    ‾call(water the pot)
+|   the **pot** is thirsty should be _no_    ‾question(the pot is thirsty)
+|   the **status** of the **pot** should be _"fine for now"_    ‾value(the status of the pot)
+
+
+⟪## What it means for you⟫
+⟦// Every spell, from this windowsill to the Solitaire example, is these four ideas:⟧
+⟦// - things:  what it's about⟧
+⟦// - properties:  what each thing keeps⟧
+⟦// - rules:  what each thing works out, or does⟧
+⟦// - drawing:  how each thing looks⟧
+⟦//⟧
+⟦// Try it:⟧
+⟦// - Click "A day goes by" on the right a few times, and watch which plants get thirsty first.⟧
+⟦// - Add a fourth plant:  copy one of the lines under Start, and change its name and its numbers.⟧
+⟦// - Make the Cactus thirsty sooner:  change its 14 to a 4.⟧
+⟦//⟧
+⟦// Where it stops:  the words Spell knows are growing, and not every sentence you'd write is one it reads yet.⟧
+⟦// When it can't read a line, it puts a wavy red line under it and says so in Program Output.⟧
+⟦//⟧
+⟦// Where next:  the Examples.  Each has a "how it works" guide beside this one.⟧

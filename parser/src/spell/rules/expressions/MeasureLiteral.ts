@@ -15,6 +15,9 @@ import { SpellExpression } from "./SpellExpression"
  *   digit as a mark, not text (`SpellParser`), and `'` after a word is still a possessive.
  * - A unit that's also one of the language's own words (`in`, an inch) reads only after another part, `5 ft 8 in`:
  *   so `3 in the list` stays `3`, in the list.
+ * - Each unit in words is a `unit_words` match inside it, so it's coloured as a unit is, not as its number:
+ *   `pause for 300 msec` draws `msec` plain, as `in feet` does (epic `language` T140);  a mark stays with its number,
+ *   `18%`.
  */
 export class MeasureLiteral extends SpellExpression {
   @proto static datatype = "number"
@@ -34,7 +37,9 @@ export class MeasureLiteral extends SpellExpression {
     if (this.test(scope, tokens) === false) return undefined
     const dimensions = SP.dimensionsIn(scope)
     const { memberStopWords } = SP.Language.of(scope).words
-    const parts: Array<{ amount: number; unit: P.DimensionUnit }> = []
+    const parts: Array<{ amount: number; unit: P.DimensionUnit; numbers: P.Token[]; said: Array<P.Token | P.Match> }> =
+      []
+    const unitWords = scope.getRuleOrDie("unit_words")
     let dimension: P.TypeScope | undefined
     let at = 0
     while (at < tokens.length) {
@@ -48,8 +53,11 @@ export class MeasureLiteral extends SpellExpression {
       if ((said === "'" || said === '"') && tokens[amount.end - 1]!.end < words[0]!.start) break
       // `in`:  only after another part
       if (memberStopWords.has(said.toLowerCase()) && !parts.length) break
+      // a unit in words is a `unit_words` match;  a mark (`%`, `°C`, `"`) stays a token, drawn with its number
+      const unitMatch = words.every((token) => token instanceof P.WordToken) && unitWords.parse(scope, words)
       dimension = found.dimension
-      parts.push({ amount: amount.value, unit: found.unit })
+      const written = unitMatch ? [unitMatch] : words
+      parts.push({ amount: amount.value, unit: found.unit, numbers: tokens.slice(at, amount.end), said: written })
       at = amount.end + found.length
     }
     if (!parts.length || !dimension) return undefined
@@ -64,9 +72,11 @@ export class MeasureLiteral extends SpellExpression {
     const keptUnit = dimension.units!.find((unit) => unit.id === measure.unit)!
     const kept = keptUnit === last ? value : (value * last.factor) / keptUnit.factor
     const matched = tokens.slice(0, at)
+    // each part's number tokens, then its unit's match
+    const items = parts.flatMap((part): Array<P.Token | P.Match> => [...part.numbers, ...part.said])
     const match = new P.Match({
       rule: this,
-      matched,
+      matched: items,
       raw: matched.map((token) => token.value).join(" "),
       value: Number(kept.toFixed(10)),
       tokens: matched,

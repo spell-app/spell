@@ -6,13 +6,13 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
 import { SpellParser } from "spell/parser/spell/SpellParser"
-import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
+import { Negatable } from "spell/parser/spell/rules/expressions"
 
 import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
 import { Meanwhile } from "./Meanwhile"
-import { Pause, PAUSE_UNITS } from "./Pause"
+import { Pause } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
 import { WithoutWaiting } from "./WithoutWaiting"
@@ -62,24 +62,19 @@ asyncEs.addRule(Await, {
   ]
 })
 
-// a pause's unit, each meaning the runtime's name for it:  `segundos` means `seconds`
-asyncEs.addRule(Wording.specialize({ ruleName: "pause_units", meanings: PAUSE_UNITS }), {
-  syntax:
-    "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
-})
-
 asyncEs.addRule(Pause, {
-  syntax: "pausar (por|durante)? {number:expression} {units:pause_units}",
+  syntax: "pausar (por|durante)? {duration:expression} {unit:unit_words}?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`pausar 2 segundos`, 'await core.pauseFor(2, "seconds")'],
-        [`pausar por 1 segundo`, 'await core.pauseFor(1, "second")'],
+        [`pausar por 1 segundo`, 'await core.pauseFor(1, "seconds")'],
         [`pausar 500 mseg`, 'await core.pauseFor(500, "msec")'],
-        [`pausar durante 500 milisegundos`, 'await core.pauseFor(500, "milliseconds")'],
+        [`pausar durante 500 milisegundos`, 'await core.pauseFor(500, "msec")'],
         [`pausar 10 tics`, 'await core.pauseFor(10, "ticks")'],
-        [`pausar (10 + 10) seg`, 'await core.pauseFor(10 + 10, "sec")']
+        [`pausar 1 minuto 30 segundos`, 'await core.pauseFor(90, "seconds")'],
+        [`pausar (10 + 10) seg`, 'await core.pauseFor(10 + 10, "seconds")']
       ]
     }
   ]

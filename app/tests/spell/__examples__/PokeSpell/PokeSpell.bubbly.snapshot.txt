@@ -1,0 +1,1066 @@
+==== /PokeSpell.api.spell
+⟪## PokéAPI:  every pokemon, and all about it⟫
+⟦// A server other people run, and what it holds.  No game yet:  its lists give only names, each one's page the rest.⟧
+⟦// `poke api` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://pokeapi.co/api/v2 --into PokeSpell.api.spell --name "poke api" --no-ai⟧
+⟦//     --collections pokemon,pokemon-species,type,ability,move,evolution-chain,generation⟧
+⟦// `spell place update PokeSpell.api.spell` looks again, and changes only this file and PokeSpell.api.json5.⟧
+⟦// A height is in tenths of a metre, a weight in tenths of a kilogram, as PokéAPI keeps them.⟧
+⟦//⟧
+⟦// Pokémon belongs to Nintendo, Game Freak and Creatures.⟧
+
+[thing create_place L0]
+| «poke api» is a web server at «"https://pokeapi.co/api/v2"»
+|   its id is its _"url"_
+|   its rows are its _"results"_
+|   its next page is its _"next"_
+|   it gives up to _2000_ at a time
+|   its lists give only each one's _"name"_
+|   check it once a day
+|   keep a copy on this device
+|   it writes names like _"base_experience"_
+|   **pokemon** live at _"/pokemon"_
+|   **pokemon species** live at _"/pokemon-species"_
+|   **types** live at _"/type"_
+|   **abilities** live at _"/ability"_
+|   **moves** live at _"/move"_
+|   **evolution chains** live at _"/evolution-chain"_
+|   **generations** live at _"/generation"_
+
+[thing create_type L0]
+| a «"pokemon"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"base experience"» is a **number**
+|   [property define_property_has L1]
+|   | its «"height"» is a **number**
+|   [property define_property_has L1]
+|   | its «"default"» is yes or no, stored as «"is_default"»
+|   [property define_property_has L1]
+|   | its «"order"» is a **number**
+|   [property define_property_has L1]
+|   | its «"weight"» is a **number**
+|   [property define_property_has L1]
+|   | its «"abilities"» is a list of **pokemon abilities**
+|   [property define_property_has L1]
+|   | its «"past abilities"» is a list of **past abilities**
+|   [property define_property_has L1]
+|   | its «"forms"» is a list of **poke api names**
+|   [property define_property_has L1]
+|   | its «"game indices"» is a list of **game indices**
+|   [property define_property_has L1]
+|   | its «"held items"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"location area encounters"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"moves"» is a list of **pokemon moves**
+|   [property define_property_has L1]
+|   | its «"species"» is a **pokemon species**
+|   [property define_property_has L1]
+|   | its «"sprites"» is a **sprite**
+|   [property define_property_has L1]
+|   | its «"cries"» is a **cry**
+|   [property define_property_has L1]
+|   | its «"stats"» is a list of **stats**
+|   [property define_property_has L1]
+|   | its «"past stats"» is a list of **past stats**
+|   [property define_property_has L1]
+|   | its «"types"» is a list of **pokemon types**
+|   [property define_property_has L1]
+|   | its «"past types"» is a list of **text**
+
+[thing create_type L0]
+| a «"pokemon species"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"order"» is a **number**
+|   [property define_property_has L1]
+|   | its «"gender rate"» is a **number**
+|   [property define_property_has L1]
+|   | its «"capture rate"» is a **number**
+|   [property define_property_has L1]
+|   | its «"base happiness"» is a **number**
+|   [property define_property_has L1]
+|   | its «"baby"» is yes or no, stored as «"is_baby"»
+|   [property define_property_has L1]
+|   | its «"legendary"» is yes or no, stored as «"is_legendary"»
+|   [property define_property_has L1]
+|   | its «"mythical"» is yes or no, stored as «"is_mythical"»
+|   [property define_property_has L1]
+|   | its «"hatch counter"» is a **number**
+|   [property define_property_has L1]
+|   | its «"gender differences"» is yes or no, stored as «"has_gender_differences"»
+|   [property define_property_has L1]
+|   | its «"forms switchable"» is yes or no
+|   [property define_property_has L1]
+|   | its «"growth rate"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"pokedex numbers"» is a list of **pokedex numbers**
+|   [property define_property_has L1]
+|   | its «"egg groups"» is a list of **poke api names**
+|   [property define_property_has L1]
+|   | its «"color"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"shape"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"evolves from species"» is a **pokemon species**
+|   [property define_property_has L1]
+|   | its «"evolution chain"» is an **evolution chain**
+|   [property define_property_has L1]
+|   | its «"habitat"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"generation"» is a **generation**
+|   [property define_property_has L1]
+|   | its «"names"» is a list of **names**
+|   [property define_property_has L1]
+|   | its «"pal park encounters"» is a list of **pal park encounters**
+|   [property define_property_has L1]
+|   | its «"form descriptions"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"flavor text entries"» is a list of **flavor text entries**
+|   [property define_property_has L1]
+|   | its «"genera"» is a list of **genera**
+|   [property define_property_has L1]
+|   | its «"varieties"» is a list of **varieties**
+
+[thing create_type L0]
+| a «"type"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"damage relations"» is a **damage relation**
+|   [property define_property_has L1]
+|   | its «"past damage relations"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"game indices"» is a list of **game indices**
+|   [property define_property_has L1]
+|   | its «"generation"» is a **generation**
+|   [property define_property_has L1]
+|   | its «"move damage class"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"names"» is a list of **names**
+|   [property define_property_has L1]
+|   | its «"pokemon"» is a list of **type pokemon**
+|   [property define_property_has L1]
+|   | its «"moves"» is a list of **moves**
+
+[thing create_type L0]
+| an «"ability"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"main series"» is yes or no, stored as «"is_main_series"»
+|   [property define_property_has L1]
+|   | its «"generation"» is a **generation**
+|   [property define_property_has L1]
+|   | its «"names"» is a list of **names**
+|   [property define_property_has L1]
+|   | its «"effect entries"» is a list of **effect entries**
+|   [property define_property_has L1]
+|   | its «"effect changes"» is a list of **effect changes**
+|   [property define_property_has L1]
+|   | its «"flavor text entries"» is a list of **flavor text entries**
+|   [property define_property_has L1]
+|   | its «"pokemon"» is a list of **ability pokemon**
+
+[thing create_type L0]
+| a «"move"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"accuracy"» is a **number**
+|   [property define_property_has L1]
+|   | its «"pp"» is a **number**
+|   [property define_property_has L1]
+|   | its «"priority"» is a **number**
+|   [property define_property_has L1]
+|   | its «"power"» is a **number**
+|   [property define_property_has L1]
+|   | its «"contest combos"» is a **contest combo**
+|   [property define_property_has L1]
+|   | its «"contest type"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"contest effect"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"damage class"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"effect entries"» is a list of **effect entries**
+|   [property define_property_has L1]
+|   | its «"effect changes"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"generation"» is a **generation**
+|   [property define_property_has L1]
+|   | its «"meta"» is a **meta**
+|   [property define_property_has L1]
+|   | its «"names"» is a list of **names**
+|   [property define_property_has L1]
+|   | its «"past values"» is a list of **past values**
+|   [property define_property_has L1]
+|   | its «"stat changes"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"super contest effect"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"target"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"kind"» is a **type**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"machines"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"flavor text entries"» is a list of **flavor text entries**
+|   [property define_property_has L1]
+|   | its «"learned by pokemon"» is a list of **pokemon**
+
+[thing create_type L0]
+| an «"evolution chain"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"chain"» is a **chain**
+
+[thing create_type L0]
+| a «"generation"» is a **thing**
+|   it lives in **poke api**    ‾value(poke api)
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**, stored as «"id"»
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"abilities"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"main region"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"moves"» is a list of **moves**
+|   [property define_property_has L1]
+|   | its «"names"» is a list of **names**
+|   [property define_property_has L1]
+|   | its «"pokemon species"» is a list of **pokemon species**
+|   [property define_property_has L1]
+|   | its «"types"» is a list of **types**
+|   [property define_property_has L1]
+|   | its «"version groups"» is a list of **poke api names**
+
+[thing create_type L0]
+| a «"pokemon ability"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"hidden"» is yes or no, stored as «"is_hidden"»
+|   [property define_property_has L1]
+|   | its «"slot"» is a **number**
+|   [property define_property_has L1]
+|   | its «"ability"» is an **ability**
+
+[thing create_type L0]
+| a «"past ability"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"generation"» is a **generation**
+|   [property define_property_has L1]
+|   | its «"abilities"» is a list of **past ability abilities**
+
+[thing create_type L0]
+| a «"past ability ability"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"hidden"» is yes or no, stored as «"is_hidden"»
+|   [property define_property_has L1]
+|   | its «"slot"» is a **number**
+
+[thing create_type L0]
+| a «"game index"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"game index"» is a **number**
+|   [property define_property_has L1]
+|   | its «"version"» is a **poke api name**
+
+[thing create_type L0]
+| a «"pokemon move"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"move"» is a **move**
+|   [property define_property_has L1]
+|   | its «"version group details"» is a list of **version group details**
+
+[thing create_type L0]
+| a «"version group detail"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"level learned at"» is a **number**
+|   [property define_property_has L1]
+|   | its «"version group"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"move learn method"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"order"» is a **number**
+
+[thing create_type L0]
+| a «"sprite"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"other"» is an **other**
+|   [property define_property_has L1]
+|   | its «"back shiny"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"back default"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"front default"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| an «"other"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"home"» is a **home**
+|   [property define_property_has L1]
+|   | its «"showdown"» is a **showdown**
+|   [property define_property_has L1]
+|   | its «"dream world"» is a **dream world**
+|   [property define_property_has L1]
+|   | its «"official artwork"» is an **official artwork**
+
+[thing create_type L0]
+| a «"home"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"front default"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| a «"showdown"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"back shiny"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"back default"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"front default"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| a «"dream world"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"front default"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| an «"official artwork"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"front default"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| a «"cry"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"latest"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"legacy"» is **text**  ⟦// an address⟧
+
+[thing create_type L0]
+| a «"stat"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"base stat"» is a **number**
+|   [property define_property_has L1]
+|   | its «"effort"» is a **number**
+|   [property define_property_has L1]
+|   | its «"stat"» is a **poke api name**
+
+[thing create_type L0]
+| a «"past stat"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"generation"» is a **generation**
+|   [property define_property_has L1]
+|   | its «"stats"» is a list of **stats**
+
+[thing create_type L0]
+| a «"pokemon type"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"slot"» is a **number**
+|   [property define_property_has L1]
+|   | its «"kind"» is a **type**, stored as «"type"»
+
+[thing create_type L0]
+| a «"pokedex number"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"entry number"» is a **number**
+|   [property define_property_has L1]
+|   | its «"pokedex"» is a **poke api name**
+
+[thing create_type L0]
+| a «"name"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"language"» is a **poke api name**
+
+[thing create_type L0]
+| a «"pal park encounter"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"base score"» is a **number**
+|   [property define_property_has L1]
+|   | its «"rate"» is a **number**
+|   [property define_property_has L1]
+|   | its «"area"» is a **poke api name**
+
+[thing create_type L0]
+| a «"flavor text entry"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"flavor text"» is **text**
+|   [property define_property_has L1]
+|   | its «"language"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"version"» is a **poke api name**
+
+[thing create_type L0]
+| a «"genus"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"genus"» is **text**
+|   [property define_property_has L1]
+|   | its «"language"» is a **poke api name**
+
+[thing create_type L0]
+| a «"variety"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"default"» is yes or no, stored as «"is_default"»
+|   [property define_property_has L1]
+|   | its «"pokemon"» is a **pokemon**
+
+[thing create_type L0]
+| a «"damage relation"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"no damage to"» is a list of **types**
+|   [property define_property_has L1]
+|   | its «"half damage to"» is a list of **types**
+|   [property define_property_has L1]
+|   | its «"double damage to"» is a list of **types**
+|   [property define_property_has L1]
+|   | its «"no damage from"» is a list of **types**
+|   [property define_property_has L1]
+|   | its «"half damage from"» is a list of **types**
+|   [property define_property_has L1]
+|   | its «"double damage from"» is a list of **types**
+
+[thing create_type L0]
+| a «"type pokemon"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"slot"» is a **number**
+|   [property define_property_has L1]
+|   | its «"pokemon"» is a **pokemon**
+
+[thing create_type L0]
+| an «"effect entry"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"effect"» is **text**
+|   [property define_property_has L1]
+|   | its «"short effect"» is **text**
+|   [property define_property_has L1]
+|   | its «"language"» is a **poke api name**
+
+[thing create_type L0]
+| an «"effect change"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"version group"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"effect entries"» is a list of **effect entries**
+
+[thing create_type L0]
+| an «"ability pokemon"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"hidden"» is yes or no, stored as «"is_hidden"»
+|   [property define_property_has L1]
+|   | its «"slot"» is a **number**
+|   [property define_property_has L1]
+|   | its «"pokemon"» is a **pokemon**
+
+[thing create_type L0]
+| a «"contest combo"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"normal"» is a **normal**
+|   [property define_property_has L1]
+|   | its «"super"» is a **super**
+
+[thing create_type L0]
+| a «"normal"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"use before"» is a list of **moves**
+|   [property define_property_has L1]
+|   | its «"use after"» is a list of **moves**
+
+[thing create_type L0]
+| a «"super"» is a **thing**
+
+[thing create_type L0]
+| a «"meta"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"ailment"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"category"» is a **poke api name**
+|   [property define_property_has L1]
+|   | its «"drain"» is a **number**
+|   [property define_property_has L1]
+|   | its «"healing"» is a **number**
+|   [property define_property_has L1]
+|   | its «"crit rate"» is a **number**
+|   [property define_property_has L1]
+|   | its «"ailment chance"» is a **number**
+|   [property define_property_has L1]
+|   | its «"flinch chance"» is a **number**
+|   [property define_property_has L1]
+|   | its «"stat chance"» is a **number**
+
+[thing create_type L0]
+| a «"past value"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"effect entries"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"kind"» is a **type**, stored as «"type"»
+|   [property define_property_has L1]
+|   | its «"version group"» is a **poke api name**
+
+[thing create_type L0]
+| a «"chain"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"baby"» is yes or no, stored as «"is_baby"»
+|   [property define_property_has L1]
+|   | its «"species"» is a **pokemon species**
+|   [property define_property_has L1]
+|   | its «"evolution details"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"evolves to"» is a list of **chains**
+
+[thing create_type L0]
+| a «"poke api name"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"address"» is **text**, stored as «"url"»  ⟦// never read:  its collection wasn't asked for⟧
+
+==== /Favourites.api.spell
+⟪## Your favourites:  kept on this device⟫
+⟦// The Pokémon you love, kept in this browser, beside PokéAPI's own:  one program shows both.⟧
+⟦// Change the next line to keep them somewhere else, and nothing else changes.⟧
+[thing stored_on_this_device L0]
+| «my favourites» is stored on this device
+
+[thing create_type L0]
+| a «"favourite"» is a **thing**
+|   it lives in **my favourites**    ‾value(my favourites)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"address"» is **text**  ⟦// the pokemon's own, at PokéAPI⟧
+
+==== /Pokemon.spell
+# A **Pokémo**n:  its card, its own page, and its family
+⟦// Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at PokéAPI again never touches a line of this.⟧
+
+[thing reopen_type L0]
+| a **pokemon**
+|   [property property_value_getter L1]
+|   | its «"picture"» is
+|   |   ⟦// Its big picture, the official artwork⟧
+|   |   return the **front default** of the **official artwork** of the **other** of its **sprites**    ‾value(the front default of the official artwork of the other of its sprites)
+|   [property property_value_getter L1]
+|   | its «"sound"» is
+|   |   ⟦// What it says:  its cry, a sound file⟧
+|   |   return the **latest** of its **cries**    ‾value(the latest of its cries)
+|   [property property_value_getter L1]
+|   | its «"number tag"» is
+|   |   ⟦// Its number as the games write it, four figures:  #0001⟧
+|   |   [control if L2]
+|   |   | if its **number** < _10_    ‾value(its number)
+|   |   |   return _"#000[its number]"_
+|   |   [control if L2]
+|   |   | if its **number** < _100_    ‾value(its number)
+|   |   |   return _"#00[its number]"_
+|   |   [control if L2]
+|   |   | if its **number** < _1000_    ‾value(its number)
+|   |   |   return _"#0[its number]"_
+|   |   return _"#[its number]"_
+|   [property property_value_getter L1]
+|   | its «"evolutions"» is
+|   |   ⟦// Its family, from the first:  its species' evolution chain⟧
+|   |   return the **chain** of the **evolution chain** of its **species**    ‾value(the chain of the evolution chain of its species)
+|   [property property_value_getter L1]
+|   | its «"loved"» is
+|   |   ⟦// Is it one of your favourites?⟧
+|   |   set **address** to its **id**    ‾value(address) ‾value(its id)
+|   |   return there is a **favourite** where its **address** is **address**    ‾value(there is a favourite where its address is address)
+
+|   [action to_do_something L1]
+|   | to «open it»
+|   |   ⟦// Its own page:  the page before it is kept, for Back⟧
+|   |   [control if L2]
+|   |   | if the **pokedex's showing** is it    ‾value(the pokedex's showing) ‾value(it)
+|   |   |   return
+|   |   [control if L2]
+|   |   | if the **pokedex's showing**    ‾value(the pokedex's showing)
+|   |   |   stop the **pokedex's showing's sound**  ⟦// the last one's cry ends with its page⟧    ‾value(the pokedex's showing's sound)
+|   |   |   add the **pokedex's showing** to the **pokedex's trail**    ‾value(the pokedex's showing) ‾value(the pokedex's trail)
+|   |   set the **pokedex's search** to _""_    ‾value(the pokedex's search)
+|   |   set the **pokedex's showing** to it    ‾value(the pokedex's showing) ‾value(it)
+|   |   load its **sound**  ⟦// so Hear it plays it at once⟧    ‾value(its sound)
+|   |   scroll to the top
+
+|   [action to_do_something L1]
+|   | to «hear it»
+|   |   ⟦// Its cry, from the start:  played by the click itself, so every browser lets it⟧
+|   |   play its **sound**    ‾value(its sound)
+
+|   [action to_do_something L1]
+|   | to «love it»
+|   |   ⟦// Its heart:  keep it as a favourite, or let it go⟧
+|   |   set **address** to its **id**    ‾value(address) ‾value(its id)
+|   |   [control if L2]
+|   |   | if there is a **favourite** where its **address** is **address**    ‾value(there is a favourite where its address is address)
+|   |   |   remove saved **favourites** with the same **address**    ‾value(saved favourites with the same address)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   add (**a new favourite** with **name** = its **name**, **address** = **address**) to the **favourites**    ‾value(a new favourite with name = its name, address = address) ‾value(the favourites)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// Its card:  a click anywhere on it opens its page⟧
+|   |   <⟨card⟩ appearance=«"link raised"» onClick={open it}>    code({open it})
+|   |     <⟨image⟩ appearance=«"circular"» background=«"yellow"» src={its **picture**} alt=«""» aspect-ratio=«"1"» />    code({its picture})
+|   |     <⟨content⟩>
+|   |       <⟨header⟩ size=«"large"» font=«"title-caps"»>{its **name**}</⟨header⟩>    code({its name})
+|   |       <⟨meta⟩>Number {its **number**}</⟨meta⟩>    code({its number})
+|   |     </⟨content⟩>
+|   |   </⟨card⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **page**
+|   |   <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"»>
+|   |     <⟨image⟩ appearance=«"circular"» background=«"yellow"» size=«"large"» src={its **picture**} alt={its **name**} aspect-ratio=«"1"» />    code({its picture}) code({its name})
+|   |     <⟨stack⟩ fluid align=«"start"»>
+|   |       <⟨header⟩ size=«"poster"» color=«"red"» font=«"title-caps heavy"»>{its **name**}</⟨header⟩>    code({its name})
+|   |       <⟨text⟩ size=«"huge"»>Number {its **number**}</⟨text⟩>    code({its number})
+|   |       <⟨stack⟩ direction=«"horizontal"» wrap>
+|   |         {draw its **kinds**}
+|   |       </⟨stack⟩>
+|   |       <⟨text⟩ size=«"large"»><⟨dimension⟩ value={its **height** * _10_} dimension=«"length"» unit=«"cm"» /> tall, and <⟨dimension⟩ value={its **weight** / _10_} dimension=«"weight"» unit=«"kg"» /> heavy</⟨text⟩>    code({its height * 10}) code({its weight / 10})
+|   |       <⟨stack⟩ direction=«"horizontal"» align=«"center"»>
+|   |         {draw its **heart**}
+|   |         <⟨button⟩ color=«"blue"» appearance=«"circular"» size=«"massive"» icon=«"volume up"» onClick={hear it} title=«"Hear it"» aria-label=«"Hear it"» />    code({hear it})
+|   |       </⟨stack⟩>
+|   |     </⟨stack⟩>
+|   |   </⟨stack⟩>
+|   |   <⟨header⟩ size=«"large"»>How strong is it?</⟨header⟩>
+|   |   draw its **strengths**    ‾value(draw its strengths)
+|   |   <⟨header⟩ class=«"section"» size=«"large"»>Evolutions</⟨header⟩>
+|   |   draw its **family**    ‾value(draw its family)
+
+|   [action draw_it L1]
+|   | to **draw** its **family**
+|   |   ⟦// Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI⟧
+|   |   draw its **evolutions**    ‾value(its evolutions)
+
+|   [action draw_it L1]
+|   | to **draw** its **evolution**
+|   |   ⟦// Its place in its family:  a round picture, its name, number and kinds;  a click opens its page⟧
+|   |   <⟨card⟩ appearance=«"link"» width=«"10em"» onClick={open it}>    code({open it})
+|   |     <⟨image⟩ appearance=«"circular"» background=«"yellow"» aspect-ratio=«"1"» size=«"small"» align=«"center"» src={its **picture**} alt=«""» />    code({its picture})
+|   |     <⟨content⟩ align=«"center"»>
+|   |       <⟨header⟩>{its **name**}</⟨header⟩>    code({its name})
+|   |       <⟨meta⟩>{its **number tag**}</⟨meta⟩>    code({its number tag})
+|   |       {draw its **pills**}
+|   |     </⟨content⟩>
+|   |   </⟨card⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **pills**
+|   |   ⟦// Its kinds, small:  a group of labels sizes them all⟧
+|   |   for its **types**    ‾value(its types)
+|   |   show them in: <labels size=_"small"_></labels>    ‾value(<labels size="small"></labels>)
+
+|   [action draw_it L1]
+|   | to **draw** its **heart**
+|   |   ⟦// Full and red when it's a favourite;  press it to change⟧
+|   |   [control if L2]
+|   |   | if its **loved**    ‾value(its loved)
+|   |   |   <⟨button⟩ color=«"red"» appearance=«"circular"» size=«"massive"» icon=«"heart"» onClick={love it} title=«"One of my favourites"» aria-label=«"One of my favourites"» />    code({love it})
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   <⟨button⟩ appearance=«"circular"» size=«"massive"» icon=«"heart outline"» onClick={love it} title=«"Keep it as a favourite"» aria-label=«"Keep it as a favourite"» />    code({love it})
+
+|   [action draw_it L1]
+|   | to **draw** its **kinds**
+|   |   ⟦// Its kinds, big:  a group of labels sizes them all⟧
+|   |   for its **types**    ‾value(its types)
+|   |   show them in: <labels size=_"huge"_></labels>    ‾value(<labels size="huge"></labels>)
+
+|   [action draw_it L1]
+|   | to **draw** its **strengths**
+|   |   ⟦// A bar for each of its six numbers:  255 is as strong as any Pokémon gets⟧
+|   |   [control list_iteration L2]
+|   |   | for **stat** in its **stats**    ‾value(its stats)
+|   |   |   <⟨progress⟩ max-width=«"36em"» value={**stat's base stat**} total=«"255"» color=«"green"» size=«"large"» label={**stat's word** + _":  {value}"_} />    code({stat's base stat}) code({stat's word + ":  {value}"})
+
+⟪# One of a Pokémon's six numbers⟫
+
+[thing reopen_type L0]
+| a **stat**
+|   [property property_value_getter L1]
+|   | its «"word"» is
+|   |   ⟦// What it means, in plain words, by the name PokéAPI gives it⟧
+|   |   set **name** to the **name** of its **stat**    ‾value(name) ‾value(the name of its stat)
+|   |   [control if L2]
+|   |   | if **name** is _"hp"_    ‾value(name)
+|   |   |   return _"Health"_
+|   |   [control if L2]
+|   |   | if **name** is _"attack"_    ‾value(name)
+|   |   |   return _"Attack"_
+|   |   [control if L2]
+|   |   | if **name** is _"defense"_    ‾value(name)
+|   |   |   return _"Defence"_
+|   |   [control if L2]
+|   |   | if **name** is _"special-attack"_    ‾value(name)
+|   |   |   return _"Special attack"_
+|   |   [control if L2]
+|   |   | if **name** is _"special-defense"_    ‾value(name)
+|   |   |   return _"Special defence"_
+|   |   return _"Speed"_
+
+⟪# A kind of Pokémon:  fire, water, grass ...⟫
+
+[thing reopen_type L0]
+| a **type**
+|   [property quoted_type_expression L1]
+|   | it «"is real"»
+|   |   ⟦// Two kinds no Pokémon is:  only in the games' code⟧
+|   |   return its **name** is not _"unknown"_ and its **name** is not _"shadow"_ and its **name** is not _"stellar"_    ‾value(its name) ‾value(its name) ‾value(its name)
+
+|   [property property_value_getter L1]
+|   | its «"colour"» is
+|   |   ⟦// Each kind's colour, as the games paint it⟧
+|   |   [control if L2]
+|   |   | if its **name** is _"fire"_    ‾value(its name)
+|   |   |   return _"red"_
+|   |   [control if L2]
+|   |   | if its **name** is _"water"_ or its **name** is _"ice"_    ‾value(its name) ‾value(its name)
+|   |   |   return _"blue"_
+|   |   [control if L2]
+|   |   | if its **name** is _"grass"_ or its **name** is _"bug"_    ‾value(its name) ‾value(its name)
+|   |   |   return _"green"_
+|   |   [control if L2]
+|   |   | if its **name** is _"electric"_    ‾value(its name)
+|   |   |   return _"yellow"_
+|   |   [control if L2]
+|   |   | if its **name** is _"psychic"_ or its **name** is _"fairy"_    ‾value(its name) ‾value(its name)
+|   |   |   return _"pink"_
+|   |   [control if L2]
+|   |   | if its **name** is _"poison"_ or its **name** is _"ghost"_    ‾value(its name) ‾value(its name)
+|   |   |   return _"purple"_
+|   |   [control if L2]
+|   |   | if its **name** is _"dragon"_    ‾value(its name)
+|   |   |   return _"violet"_
+|   |   [control if L2]
+|   |   | if its **name** is _"ground"_ or its **name** is _"rock"_ or its **name** is _"fighting"_    ‾value(its name) ‾value(its name) ‾value(its name)
+|   |   |   return _"brown"_
+|   |   [control if L2]
+|   |   | if its **name** is _"flying"_    ‾value(its name)
+|   |   |   return _"teal"_
+|   |   [control if L2]
+|   |   | if its **name** is _"dark"_    ‾value(its name)
+|   |   |   return _"black"_
+|   |   [control if L2]
+|   |   | if its **name** is _"steel"_    ‾value(its name)
+|   |   |   return _"grey"_
+|   |   return _"orange"_
+
+|   [action to_do_something L1]
+|   | to «pick it»
+|   |   ⟦// See every Pokémon of this kind⟧
+|   |   set the **pokedex's picked kind** to it    ‾value(the pokedex's picked kind) ‾value(it)
+|   |   set the **pokedex's showing** to nothing    ‾value(the pokedex's showing) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// A big button:  press it to see every Pokémon of this kind⟧
+|   |   <⟨button⟩ class=«"kind"» color={its **colour**} size=«"large"» font=«"title-caps"» onClick={pick it}>{its **name**}</⟨button⟩>    code({its colour}) code({pick it}) code({its name})
+
+[thing reopen_type L0]
+| a **pokemon type**
+|   ⟦// One of a Pokémon's kinds:  a label of its colour⟧
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨label⟩ class=«"kind"» color={its **kind's colour**} size=«"huge"» font=«"title-caps"»>{its **kind's name**}</⟨label⟩>    code({its kind's colour}) code({its kind's name})
+
+[thing reopen_type L0]
+| a **type pokemon**
+|   ⟦// One Pokémon of a kind⟧
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **pokemon**    ‾value(its pokemon)
+
+⟪# A family:  how a Pokémon evolves⟫
+⟦// PokéAPI keeps a family as a chain:  its first species, and the chains each one becomes, each with the chains it becomes.⟧
+⟦// So a chain draws its species, then an arrow and the chains it becomes, side by side:⟧
+⟦// Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit together after its arrow.⟧
+
+[thing reopen_type L0]
+| a **chain**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ direction=«"horizontal"» align=«"center"» spacing=«"sm"» stackable=«"34em"»>
+|   |     {draw its **species**}
+|   |     <⟨if⟩ its evolves to is not empty>
+|   |       <⟨icon⟩ name=«"chevron right"» size=«"large"» rotated=«"when stacked"» />
+|   |       <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"center"» spacing=«"sm"»>
+|   |         {draw its **branches**}
+|   |       </⟨stack⟩>
+|   |     </⟨if⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **branches**
+|   |   ⟦// What it becomes:  one, or several side by side, wrapping when they don't fit⟧
+|   |   for its **evolves to**    ‾value(its evolves to)
+
+[thing reopen_type L0]
+| a **pokemon species**
+|   [property property_value_getter L1]
+|   | its «"pokemon"» is
+|   |   ⟦// The Pokémon it is, as the games show it first⟧
+|   |   return the **pokemon** of the first **item** of its **varieties**    ‾value(the pokemon of the first item of its varieties)
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw the **evolution** of its **pokemon**    ‾value(draw the evolution of its pokemon)
+
+⟪# A favourite:  kept on this device, it draws the Pokémon it's of⟫
+
+[thing reopen_type L0]
+| a **favourite**
+|   [property property_value_getter L1]
+|   | its «"pokemon"» is the **pokemon** whose id is its **address**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   draw its **pokemon**    ‾value(its pokemon)
+
+==== /WhosThat.spell
+⟪# Who's that Pokémon?⟫
+⟦// A Pokémon hides in its shadow:  pick its name from four, and it steps into the light.⟧
+⟦// Only the first 151, from the very first games:  their names are the ones most kids know.⟧
+
+[thing create_type L0]
+| a «"guess"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"hiding"» is a **pokemon**
+|   [property define_property_has L1]
+|   | «"choices"» is a new list of **pokemon**
+|   [property define_property_has L1]
+|   | its «"guessed"» is a **pokemon**
+
+|   [property property_value_getter L1]
+|   | its «"found out"» is its **guessed** is not nothing
+|   [property property_value_getter L1]
+|   | its «"right"» is its **guessed** is its **hiding**
+|   [property property_value_getter L1]
+|   | its «"look"» is
+|   |   ⟦// In the shadow, until you've guessed⟧
+|   |   [control if L2]
+|   |   | if its **found out**    ‾value(its found out)
+|   |   |   return _"shadow found"_
+|   |   return _"shadow"_
+
+|   [action to_do_something L1]
+|   | to «play again»
+|   |   ⟦// Four from the first 151, and one of them hides⟧
+|   |   set **first ones** to first _151_ **pokemon** of (every **pokemon**)    ‾value(first ones) ‾value(first 151 pokemon of (every pokemon))
+|   |   set its **choices** to _4_ random **pokemon** in **first ones**    ‾value(its choices) ‾value(4 random pokemon in first ones)
+|   |   set its **hiding** to a random **pokemon** in its **choices**    ‾value(its hiding) ‾value(a random pokemon in its choices)
+|   |   set its **guessed** to nothing    ‾value(its guessed) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control if L2]
+|   |   | if its **hiding**    ‾value(its hiding)
+|   |   |   <⟨segment⟩ class={its **look**} align=«"center"»>    code({its look})
+|   |   |     <⟨image⟩ class=«"art"» align=«"center"» src={its **hiding's picture**} alt=«"A Pokémon, hiding"» />    code({its hiding's picture})
+|   |   |   </⟨segment⟩>
+|   |   |   draw its **answer**    ‾value(draw its answer)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   <⟨segment⟩ class=«"shadow"» align=«"center"»>
+|   |   |     <⟨header⟩ size=«"huge"»>Who's that Pokémon?</⟨header⟩>
+|   |   |     <⟨button⟩ color=«"yellow"» size=«"massive"» appearance=«"pill raised"» onClick={play again}>Let's play!</⟨button⟩>    code({play again})
+|   |   |   </⟨segment⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **answer**
+|   |   [control if L2]
+|   |   | if its **found out**    ‾value(its found out)
+|   |   |   [control if L3]
+|   |   |   | if its **right**    ‾value(its right)
+|   |   |   |   <⟨header⟩ class=«"said"» size=«"huge"» align=«"center"» font=«"title-caps"»>Yes!  It's {its **hiding's name**}!</⟨header⟩>    code({its hiding's name})
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   <⟨header⟩ class=«"said"» size=«"huge"» align=«"center"» font=«"title-caps"»>It's {its **hiding's name**}!</⟨header⟩>    code({its hiding's name})
+|   |   |   <⟨stack⟩ direction=«"horizontal"» justify=«"center"»>
+|   |   |     <⟨button⟩ color=«"yellow"» size=«"massive"» appearance=«"pill raised"» onClick={play again}>Play again</⟨button⟩>    code({play again})
+|   |   |   </⟨stack⟩>
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   <⟨stack⟩ direction=«"horizontal"» wrap justify=«"center"»>
+|   |   |     {draw its **choice buttons**}
+|   |   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **choice buttons**
+|   |   [control list_iteration L2]
+|   |   | for **choice** in its **choices**    ‾value(its choices)
+|   |   |   <⟨button⟩ color=«"yellow"» size=«"huge"» appearance=«"pill raised"» font=«"title-caps"» onClick={set its **guessed** to **choice**}>{**choice's name**}</⟨button⟩>    code({set its guessed to choice}) code({choice's name})
+
+==== /PokeSpell.spell
+⟪# PokéSpell⟫
+⟦// A Pokédex for kids:  look through every Pokémon, find one by name, keep your favourites, and guess who's hiding.⟧
+⟦// Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.⟧
+⟦// How a Pokémon looks is in Pokemon.spell, and the guessing game in WhosThat.spell.⟧
+
+⟦// Every button is a round-ended pill, unless it says otherwise⟧
+<⟨ui-defaults⟩>
+  <⟨ui-button⟩ appearance=«"pill"»/>
+</⟨ui-defaults⟩>
+
+[thing create_one_of_a_kind L0]
+| «pokedex» is an **app**
+|   [property define_property_has L1]
+|   | its «"tab"» is **text**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [property define_property_has L1]
+|   | its «"showing"» is a **pokemon**
+|   [property define_property_has L1]
+|   | «"trail"» is a new list of **pokemon**
+|   [property define_property_has L1]
+|   | its «"picked kind"» is a **type**
+|   [property define_property_has L1]
+|   | «"game"» is **a new guess**
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   set its **tab** to _"everyone"_    ‾value(its tab)
+|   |   set its **search** to _""_    ‾value(its search)
+
+|   [action to_do_something L1]
+|   | to «go to (where as text)»    ‾value(where as text) bold(where) bold(text)
+|   |   set its **tab** to **where**    ‾value(its tab) ‾value(where)
+|   |   set its **search** to _""_    ‾value(its search)
+|   |   set its **showing** to nothing    ‾value(its showing) ‾value(nothing)
+|   |   clear its **trail**    ‾value(its trail)
+|   |   scroll to the top
+
+|   [action to_do_something L1]
+|   | to «go back»
+|   |   [control if L2]
+|   |   | if its **trail** is empty    ‾question(its trail is empty)
+|   |   |   set its **showing** to nothing    ‾value(its showing) ‾value(nothing)
+|   |   |   return
+|   |   set its **showing** to the last **item** of its **trail**    ‾value(its showing) ‾value(the last item of its trail)
+|   |   remove the last **item** of its **trail**    ‾value(its trail)
+|   |   scroll to the top
+
+|   [action to_do_something L1]
+|   | to «surprise me»
+|   |   ⟦// Any Pokémon at all⟧
+|   |   open (a random **pokemon** in (every **pokemon**))    ‾call(open (a random pokemon in (every pokemon)))
+
+|   [property property_value_getter L1]
+|   | its «"kinds to pick"» is every **type** where it is real
+
+|   [property property_value_getter L1]
+|   | its «"found"» is
+|   |   ⟦// Pokémon names are all small letters:  so the search is too⟧
+|   |   set **looking for** to its **search** as lower case    ‾value(looking for) ‾value(its search as lower case)
+|   |   return every **pokemon** where its **name** includes **looking for**    ‾value(every pokemon where its name includes looking for)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"between"»>
+|   |     <⟨button⟩ appearance=«"tertiary"» color=«"red"» padding=«"none"» size=«"poster"» font=«"heavy"» shadow=«"yellow"» onClick={go to _"everyone"_}>PokéSpell</⟨button⟩>    code({go to "everyone"})
+|   |     <⟨form⟩ value={it} fluid min-width=«"16em"» max-width=«"26em"»>    code({it})
+|   |       <⟨field⟩ label=«"Find a Pokémon"»>
+|   |         <⟨input⟩ name=«"search"» icon=«"search"» size=«"large"» placeholder=«"Pikachu"»/>
+|   |       </⟨field⟩>
+|   |     </⟨form⟩>
+|   |     <⟨button⟩ color=«"yellow"» size=«"huge"» appearance=«"pill raised"» icon=«"wand magic sparkles"» onClick={surprise me}>Surprise me!</⟨button⟩>    code({surprise me})
+|   |   </⟨stack⟩>
+|   |   <⟨toolbar⟩ appearance=«"secondary pointing"» size=«"huge"» aria-label=«"Look through"»>
+|   |     <⟨item⟩ selected={its **tab** is _"everyone"_} onClick={go to _"everyone"_}>Everyone</⟨item⟩>    code({its tab is "everyone"}) code({go to "everyone"})
+|   |     <⟨item⟩ selected={its **tab** is _"kinds"_} onClick={go to _"kinds"_}>Kinds</⟨item⟩>    code({its tab is "kinds"}) code({go to "kinds"})
+|   |     <⟨item⟩ selected={its **tab** is _"favourites"_} onClick={go to _"favourites"_}>Favourites</⟨item⟩>    code({its tab is "favourites"}) code({go to "favourites"})
+|   |     <⟨item⟩ selected={its **tab** is _"guess"_} onClick={go to _"guess"_}>Who's that Pokémon?</⟨item⟩>    code({its tab is "guess"}) code({go to "guess"})
+|   |   </⟨toolbar⟩>
+|   |   draw its **shelf**    ‾value(draw its shelf)
+|   |   <⟨text⟩ paragraph size=«"small"»>
+|   |     Every Pokémon, its pictures and its sounds, from <link link=_"https://pokeapi.co/"_>PokéAPI</link>.
+|   |     Pokémon belongs to Nintendo, Game Freak and Creatures.
+|   |   </⟨text⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **shelf**
+|   |   ⟦// What shows under the tabs:  only the tab that's open reads anything⟧
+|   |   [control if L2]
+|   |   | if its **showing** and its **search** is _""_    ‾value(its showing) ‾value(its search)
+|   |   |   <⟨button⟩ appearance=«"basic"» icon=«"arrow left"» size=«"large"» onClick={go back}>Back</⟨button⟩>    code({go back})
+|   |   |   draw its **showing's page**    ‾value(draw its showing's page)
+|   |   [control else_if L2]
+|   |   | otherwise if its **search** is not _""_    ‾value(its search)
+|   |   |   for its **found**    ‾value(its found)
+|   |   |   while waiting: <loader visible inline text>{_"Looking…"_}</loader>    ‾value(<loader visible inline text>{"Looking…"}</loader>)
+|   |   |   if there are none: <text>{_"Nobody's called that.  Try another name!"_}</text>    ‾value(<text>{"Nobody's called that.  Try another name!"}</text>)
+|   |   |   show them in pages
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"kinds"_    ‾value(its tab)
+|   |   |   draw its **kinds**    ‾value(draw its kinds)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"favourites"_    ‾value(its tab)
+|   |   |   for every **favourite**    ‾value(every favourite)
+|   |   |   if there are none: <text>{_"No favourites yet.  Press a Pokémon's heart to keep it here!"_}</text>    ‾value(<text>{"No favourites yet.  Press a Pokémon's heart to keep it here!"}</text>)
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else_if L2]
+|   |   | otherwise if its **tab** is _"guess"_    ‾value(its tab)
+|   |   |   draw its **game**    ‾value(its game)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   for every **pokemon**    ‾value(every pokemon)
+|   |   |   while waiting: <loader visible inline text>{_"Waking up the Pokémon…"_}</loader>    ‾value(<loader visible inline text>{"Waking up the Pokémon…"}</loader>)
+|   |   |   show them in pages
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+
+|   [action draw_it L1]
+|   | to **draw** its **kinds**
+|   |   ⟦// A button for every kind, and the Pokémon of the one you pick⟧
+|   |   <⟨stack⟩ direction=«"horizontal"» wrap justify=«"center"»>
+|   |     {draw its **kind buttons**}
+|   |   </⟨stack⟩>
+|   |   [control if L2]
+|   |   | if its **picked kind**    ‾value(its picked kind)
+|   |   |   <⟨header⟩ class=«"kind-heading"» size=«"large"» font=«"title-caps"»>{its **picked kind's name**} Pokémon</⟨header⟩>    code({its picked kind's name})
+|   |   |   for the **pokemon** of its **picked kind**    ‾value(the pokemon of its picked kind)
+|   |   |   while waiting: <loader visible inline text>{_"Finding them…"_}</loader>    ‾value(<loader visible inline text>{"Finding them…"}</loader>)
+|   |   |   show them in pages
+|   |   |   show them in: <cards columns=_"4"_ doubling></cards>    ‾value(<cards columns="4" doubling></cards>)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   <⟨header⟩ size=«"small"» align=«"center"»>Pick a kind, and see who's that kind.</⟨header⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **kind buttons**
+|   |   for its **kinds to pick**    ‾value(its kinds to pick)
+
+⟪# Start it⟫
+⟦// This file is the project's last:  every kind of thing the pokedex holds, a guess and the rest, is made by then.⟧
+
+start the **pokedex**    ‾value(the pokedex)
