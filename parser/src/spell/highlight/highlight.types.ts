@@ -69,7 +69,10 @@ export type BubblyLine = {
   depth: number
   /** its pieces, in order */
   pieces: BubblyPiece[]
-  /** the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does */
+  /**
+   * the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does,
+   * but an action's blanks, inside its pill (`to play <a card>`;  epic `language` I109)
+   */
   underlines: BubblyUnderline[]
   /**
    * a drawing's markup line's CODE, each `{…}` in it (`onClick={count up}`, `<text>{its name}</text>`):
@@ -175,23 +178,29 @@ export type BubblyRulePresentation = {
   /** its child rules that are a person's words, each a pill (`quoted_member`:  `its "rank"`) */
   inputs?: readonly string[]
   /**
-   * an action's head:  everything after its first word (`to`, `para`), to the end of its last input, is what a
-   * person typed, ONE pill:  `to <test a new deck>`, `to <draw its front>`, `to <draw it>`
-   * - but for the parameters it introduces, `params`, bold between its pills:  `to <move> (a card) <to> (a pile)`
+   * an action's head:  everything after its first word (`to`, `para`, `after`, `when`), to the end of its last input
+   * or parameter, is what a person typed, ONE pill:  `to <test a new deck>`, `to <play a card>`
+   * - its blanks in it plain, each underlined:  `to <move (a card) to (a pile)>` (epic `language` I109)
    */
   typedAfterLead?: boolean
-  /** its child rules that are the parameters it introduces, `(a card)`, with the brackets round them */
+  /** ... its pill from this group's start, not after the first word:  `después de <poner una carta en una pila>` */
+  typedFrom?: string
+  /** ... and its pill to the head's end, not its last input:  `when <a card is dropped>`, `while <a card is dragged over it>` */
+  typedToEnd?: boolean
+  /** its child rules that are the parameters it introduces, `(a card)`:  each a blank, underlined in its pill */
+  params?: readonly string[]
+  /** its blank:  from its pill's start to the end of this group, `when <a card> is dropped` (`item`) */
+  blankThrough?: string
+  /** its blank:  this group but its first word, `when creating <a card image>`, `al crear <el solitario>` (`signature`) */
+  blankAfterVerb?: string
   /** a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
   namesWhatItDraws?: boolean
-  params?: readonly string[]
   /** its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
   choices?: readonly string[]
   /** its child rules drawn as a step, even in a head (`it "is a face card" if <its rank is jack>`) */
   steps?: readonly string[]
   /** its child rules drawn plain, never bold (`item` in `item column of the list`) */
   plain?: readonly string[]
-  /** its groups drawn bold, names, though they're Spell's words (`moment`:  `dropped` in `when a card is dropped`) */
-  names?: readonly string[]
   /** a CONTROL line:  its steps in a bracket */
   isControl?: boolean
   /**
