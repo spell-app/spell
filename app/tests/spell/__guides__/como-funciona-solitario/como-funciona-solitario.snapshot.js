@@ -68,7 +68,7 @@ export class Carta extends View {
     } else mesa.mensaje = `La columna no toma la ${this.nombre}.`
   }
 
-  /** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
+  /** una carta está en una sola pila a la vez:  moverla a otra la quita de esta */
   get pila() {
     return Pila.ownerOf(this)
   }

@@ -31,7 +31,10 @@ describe("SpellLanguageService.declaredThingAt() (epic `editor` T64)", () => {
 
   test('`the stock`:  the line that draws it, `<stock-pile "stock"/>`', async () => {
     const { text, file } = await opened("Solitaire", "Solitaire.spell")
-    const declared = service.declaredThingAt(file, positionOf(text, "if the card is not in the stock", "stock"))
+    const declared = service.declaredThingAt(
+      file,
+      positionOf(text, "for each card in the cards which are not in the stock", "stock")
+    )
     expect(declared?.file).toBe(file)
     expect(text.split("\n")[declared!.line]).toContain('<stock-pile "stock"/>')
   })
@@ -44,7 +47,9 @@ describe("SpellLanguageService.declaredThingAt() (epic `editor` T64)", () => {
 
   test("a word that names no thing:  a keyword, or an action's name, says nothing", async () => {
     const { text, file } = await opened("Solitaire", "Solitaire.spell")
-    expect(service.declaredThingAt(file, positionOf(text, "if the card is not in the stock", "if"))).toBeUndefined()
+    expect(
+      service.declaredThingAt(file, positionOf(text, "for each card in the cards which are not in the stock", "for"))
+    ).toBeUndefined()
     expect(service.declaredThingAt(file, positionOf(text, 'to "cheat"', "cheat"))).toBeUndefined()
   })
 })

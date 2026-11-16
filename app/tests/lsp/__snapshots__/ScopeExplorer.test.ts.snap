@@ -42,7 +42,7 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "property value",
   "property symbol",
   "property short name",
-  "method put a card on a pile",
+  "method move a card to a pile",
   "property last pile",
   "property pile",
   "method is on top of its pile",

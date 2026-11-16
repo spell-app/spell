@@ -11,7 +11,7 @@ import { wordsOfName } from "./ThingMembers"
  *   and the project's words file (`SP.SpellWordsData`) for their wording.
  * - Knows nothing of Solid or the page:  the Code card draws what it answers.
  * - NEVER imports `spell/parser/core`:  only its types, as the app may (core's AGENTS.md, "Who may value-import it").
- * - What an action takes, and of which type, comes from its words, `put a card on a pile`:
+ * - What an action takes, and of which type, comes from its words, `move a card to a pile`:
  *   the compiler records no parameter types yet.
  *   CONSIDER:  the words file recording each action's parameters (P29's plan), once the parser can take it.
  ****************/
@@ -136,9 +136,9 @@ export class InspectorActions {
 
 /** One of a thing's actions, as the Actions band shows it. */
 export type InspectorAction = {
-  /** Its method's name:  `putOnPile`. */
+  /** Its method's name:  `moveToPile`. */
   name: string
-  /** Its words, the thing itself as `it`:  `put it on a pile`;  `turn over` for one with no words. */
+  /** Its words, the thing itself as `it`:  `move it to a pile`;  `turn over` for one with no words. */
   words: string
   /**
    * Its button's words:  its own, less each field's, which the field's placeholder says (`put it on` [a pile ▾];

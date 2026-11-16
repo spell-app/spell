@@ -523,7 +523,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Every change it made is put back (`recordingChanges()`, `core.ts`), it leaves no undo step
     (`dropUnchangedRecords()`), its after hooks don't run, and it answers no;  done, it answers yes.
   - Described `cancels: true` (`core.describeAction()`, `core.asAction()`):  an action that never cancels costs nothing more.
-- After hooks, `after putting a card on a pile`, from any file:  `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`.
+- After hooks, `after moving a card to a pile`, from any file:  `core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })`.
   - Each runs at the end of its action, inside its undo step, in the order added;  skipped when it's called off.
 - A thing that belongs to one list remembers the one it was in before its latest move:  `Pile.lastOwnerOf(card)`,
   compiled spell's `the card's last pile` -- part of the undo step, put back by undo and by a cancel (`noteKept()`).

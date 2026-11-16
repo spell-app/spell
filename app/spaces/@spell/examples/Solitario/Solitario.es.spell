@@ -99,9 +99,9 @@ solitario es una aplicación
 		de lo contrario
 			poner pila final a la primera pila en cada pila donde puede tomar la carta
 			si no hay una pila final devolver no
-			devolver poner la carta en pila final
+			devolver mover la carta a pila final
 
-	después de poner una carta en una pila
+	después de mover una carta a una pila
 		// El movimiento suma puntos;  la columna que dejó voltea su nueva última carta
 		agregar (los puntos por la carta en la pila) a la puntuación del solitario
 		si la última pila de la carta es una columna y no está vacía

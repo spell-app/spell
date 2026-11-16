@@ -13,7 +13,7 @@ export const words = {
       value: "value",
       symbol: "symbol",
       shortName: "short name",
-      putOnPile: "put a card on a pile",
+      moveToPile: "move a card to a pile",
       isOnTopOfItsPile: "is on top of its pile",
       play: "play a card",
       thePointsForCardOnPile: "the points for (a card) on (a pile)",

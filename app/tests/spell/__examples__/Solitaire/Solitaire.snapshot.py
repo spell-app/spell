@@ -78,15 +78,15 @@ class Card(TwoSidedView):
     def draw_back(self) -> Element:
         return h("test-project-card-image", {"direction": "down", "part": "back"})
 
-    def put_on_pile(self, pile: Pile) -> None:
+    def move_to_pile(self, pile: Pile) -> None:
         """The card, and every card on it, onto the pile, if the piles' rules let it go and take it"""
         # - refused, nothing moves, and there's nothing to undo
-        # - a game adds its own steps after it:  `after putting a card on a pile`
+        # - a game adds its own steps after it:  `after moving a card to a pile`
         assert self.pile is not None
         if (not core.can_give_up(self.pile, self)) or (not core.can_take(pile, self)):
             core.cancel()
         for card in self.pile.starting_with(self):
-            core.move(card, pile)
+            pile.append(card)
 
     @property
     def is_on_top_of_its_pile(self) -> bool:
@@ -101,9 +101,9 @@ class Card(TwoSidedView):
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
                 return False
-            return self.put_on_pile(end_pile)
+            return self.move_to_pile(end_pile)
 
-    def after_put_on_pile(self, pile: Pile) -> None:
+    def after_move_to_pile(self, pile: Pile) -> None:
         """The move scores;  the column it left turns its new last card face up"""
         solitaire.score = solitaire.score + self.the_points_for_card_on_pile(pile)
         it_2 = self.last_pile
@@ -126,7 +126,7 @@ class Card(TwoSidedView):
 
     @property
     def pile(self) -> Pile | None:
-        """a card is in one pile at a time:  putting it on another pile takes it off this one"""
+        """a card is in one pile at a time:  moving it to another pile takes it off this one"""
         return Pile.owner_of(self)
 
     @property
@@ -134,9 +134,8 @@ class Card(TwoSidedView):
         return Pile.last_owner_of(self)
 
 
-core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card", "cancels": True})
-core.describe_action(Card, "play", {"title": "Play Card", "undone_as": "Play Card"})
-core.add_after_hook(Card, "put_on_pile", {"hook": "after_put_on_pile"})
+core.describe_action(Card, "move_to_pile", {"title": "Move Card to Pile", "cancels": True, "undone_as": "Move Card to Pile"})
+core.add_after_hook(Card, "move_to_pile", {"hook": "after_move_to_pile"})
 core.describe_action(Card, "the_points_for_card_on_pile", {"title": "The Points for Card on Pile", "undone_as": "The Points for Card on Pile"})
 # It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
@@ -350,8 +349,7 @@ class Pile(ViewableList):
         return summary
 
     def when_card_dropped_on(self, card: Card) -> None:
-        """put the card on the pile, if it is a legal move"""
-        card.put_on_pile(self)
+        card.move_to_pile(self)
 
     droppable = True
 
@@ -576,8 +574,8 @@ class Solitaire(App):
                     core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
                     h("spacer"),
-                    core.draw_action(self, "undo", {"in-menu": True}),
-                    core.draw_action(self, "redo", {"in-menu": True}),
+                    core.draw_action(self, "undo", {"icon-only": True, "in-menu": True}),
+                    core.draw_action(self, "redo", {"icon-only": True, "in-menu": True}),
                     h("ui-text", {"slot": "right"}, "Score: ", self.score),
                 ),
             ),
@@ -601,14 +599,7 @@ class Solitaire(App):
             ),
             core.draw_context_menu(
                 self,
-                [
-                    "auto_play",
-                    "cheat",
-                    "restart_the_game",
-                    "-",
-                    ["undo", {"icon-only": True}],
-                    ["redo", {"icon-only": True}],
-                ],
+                ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
             ),
         ]
 
@@ -647,10 +638,9 @@ class Solitaire(App):
         self.score = 0
         for card in self.deck:
             core.meanwhile(lambda: card.turn_face_down())
-        for card in self.deck:
-            if card.pile != self.stock:
-                core.meanwhile(lambda: self.stock.append(card))
-                await core.pause_for(10, "msec")
+        for card in core.filter(core.every_thing(Card), lambda card: card.pile != self.stock):
+            core.meanwhile(lambda: self.stock.append(card))
+            await core.pause_for(10, "msec")
         self.stock.randomize()
         # each row's first card lands face down, then turns up where it lies
         for row in range(1, 8):
@@ -666,11 +656,11 @@ class Solitaire(App):
         # - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
         if not self.stock:
             self.reset_the_stock()
-        it = self.stock.last_item
-        it.turn_face_up()
+        next_card = self.stock.last_item
+        next_card.turn_face_up()
         # as long as its flip takes (styles.css), so it turns over before it moves
         await core.pause_for(300, "msec")
-        self.discard_pile.append(it)
+        self.discard_pile.append(next_card)
 
     def reset_the_stock(self) -> None:
         """The discard pile, turned over, back into the stock"""
@@ -825,7 +815,7 @@ def test_the_moves() -> None:
             "yes",
         )
         core.echo_test_action("move the ace to the foundation")
-        core.move(ace, foundation)
+        ace.move_to_pile(foundation)
         core.expect(
             core.can_take(foundation, two),
             "the foundation can take the two",
