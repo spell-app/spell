@@ -554,7 +554,8 @@ function loadCodeMirror(): Promise<CodeMirrorModule> {
  *   (`editor`, the app's Solid parts), which no page with only `<spell-editor>` has.
  *   Its test checks they match.
  * - NOT the page's other keys (New File, Revert ...):  they work the app's own editor, which isn't on this page.
- * - NOR Find All References:  its list is the app's right-click menu (`CodeMirrorMenu`), which isn't either.
+ * - NOR Find All References:  its list is the app's right-click menu (`CodeMirrorMenu`), which isn't either;
+ *   Peek References is, as its box is the code editor's own (`CodeMirrorPeek`).
  */
 export const SPELL_EDITOR_HOTKEYS = {
   saveAll: { shortcut: "mod+S" },
@@ -563,6 +564,8 @@ export const SPELL_EDITOR_HOTKEYS = {
   redo: { shortcut: "shift+mod+Z", codeEditorCommand: "redo" },
   find: { shortcut: "mod+F", codeEditorCommand: "find" },
   goToDefinition: { shortcut: "F12", codeEditorCommand: "goToDefinition" },
+  peekDefinition: { shortcut: "alt+F12", codeEditorCommand: "peekDefinition" },
+  peekReferences: { shortcut: "shift+alt+F12", codeEditorCommand: "peekReferences" },
   rename: { shortcut: "F2", codeEditorCommand: "rename" }
 } as const satisfies Readonly<Record<string, Hotkey>>
 

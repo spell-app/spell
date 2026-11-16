@@ -772,6 +772,12 @@ const APP_TEXTS_ES: AppTextPack = {
   cmNoReferences: "Ningún uso encontrado",
   cmReferences: "Usos",
   cmFindMenu: "Buscar…",
+  // el recuadro de vistazo bajo el código
+  cmPeekDefinition: "Ver la definición",
+  cmPeekReferences: "Ver los usos",
+  cmPeekDefinitionHead: "Definición",
+  cmPeekUses: "{count} usos",
+  cmPeekClose: "Cerrar (Esc)",
   // una dirección web en el código
   codeLinkTipMac: "⌘-clic para abrir",
   codeLinkTip: "Ctrl-clic para abrir"
