@@ -67,6 +67,20 @@ describe("CodeMirrorPeek", () => {
     expect(go).not.toHaveBeenCalled()
   })
 
+  test("no uses:  the box is its head and one row of message, not a tall empty body (epic `codemirror` I5)", async () => {
+    const { states, files, project } = setUp()
+    view = viewOf()
+    states.show(view, files.game, CodeMirrorPeek.extension())
+    CodeMirrorPeek.open({ view, states, project, locations: [], kind: "references", go: () => {} })
+    const box = await boxIn(view)
+
+    expect(box.querySelector(".cm-peek-kind")!.textContent).toBe("0 uses")
+    expect(box.querySelector(".cm-peek-none")!.textContent).toBe("No uses found")
+    expect(box.querySelector(".cm-peek-list")).toBeNull()
+    // the 28px head and a 40px row:  the box with uses is 268px
+    expect(box.getBoundingClientRect().height).toBeLessThan(80)
+  })
+
   test("Esc in the code closes the box too", async () => {
     const { states, files, project } = setUp()
     view = viewOf()
