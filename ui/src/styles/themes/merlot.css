@@ -37,6 +37,7 @@
     --ui-surface-muted: var(--merlot-inset);
     --ui-surface-strong: var(--merlot-code);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#fefcfd, #2b1520);
     --ui-code-background: var(--merlot-inset);
     --ui-highlight: var(--merlot-accent-wash);
     --ui-border-color: var(--merlot-border);

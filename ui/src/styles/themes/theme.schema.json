@@ -259,6 +259,9 @@
         "bar": {
           "$ref": "#/definitions/value"
         },
+        "side-panel": {
+          "$ref": "#/definitions/value"
+        },
         "code": {
           "$ref": "#/definitions/value"
         },

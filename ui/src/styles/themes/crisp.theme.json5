@@ -57,6 +57,8 @@
     "inset": "{own.crisp-inset}",
     "strong": "{own.crisp-page}",
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  white light (nothing is paler than its bar);  the inset's `#141414` dark, a step off the black bar
+    "side-panel": { "light": "#ffffff", "dark": "#141414" },
     "code": "{own.crisp-inset}",
     "highlight": "{own.crisp-accent-wash}"
   },

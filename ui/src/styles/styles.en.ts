@@ -651,6 +651,7 @@ export const themeTree = {
     inset: "--ui-surface-muted",
     strong: "--ui-surface-strong",
     bar: "--ui-bar-background",
+    "side-panel": "--ui-side-panel-background",
     code: "--ui-code-background",
     highlight: "--ui-highlight",
     wallpaper: "--ui-wallpaper"
