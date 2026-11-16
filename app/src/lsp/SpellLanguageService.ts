@@ -1572,15 +1572,15 @@ export class SpellLanguageService {
     const nameMatch = this.nameLeaf(declaration)
     const { scope } = statement
     if (declaration.kind === "variable") {
-      const record = SpellLanguageService.visible(scope.variables).find((it) => it.declaredBy === statement)
+      const record = SpellLanguageService.visible(scope.variables).find((it) => declaredBy(it, statement))
       return record && { kind: "variable", record, nameMatch }
     }
     if (declaration.kind === "type") {
-      const record = SpellLanguageService.visible(scope.types).find((it) => it.declaredBy === statement)
+      const record = SpellLanguageService.visible(scope.types).find((it) => declaredBy(it, statement))
       return record && { kind: "type", record, nameMatch }
     }
     if (declaration.kind === "method" || declaration.kind === "function") {
-      const record = [...generated.values()].find((it) => it.declaredBy === statement)
+      const record = [...generated.values()].find((it) => declaredBy(it, statement))
       return record && { kind: "method", record, nameMatch }
     }
     if (declaration.kind === "property") {
@@ -3383,4 +3383,13 @@ const ACTION_BUTTON_RULE = "action_button"
 function sameWords(a: string, b: string): boolean {
   const plain = (text: string) => withoutAccents(text.trim().replace(/\s+/g, " ")).toLowerCase()
   return plain(a) === plain(b)
+}
+
+/**
+ * Was `record` declared by `statement`, as the latest parse has it?
+ * - A record names the statement first parsed;  an edit inside its body re-parses it as a clone (epic `language` P58),
+ *   which is what's in the file's matches now:  `P.Match.current`.
+ */
+function declaredBy(record: { declaredBy?: P.Match }, statement: P.Match): boolean {
+  return record.declaredBy?.current === statement
 }
