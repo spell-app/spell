@@ -573,7 +573,10 @@ export class BubblyLayout {
   private paintTyped({ statement, row }: Head) {
     const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, statement.end!))
     if (!lead) return
-    const from = statement.start! + lead[0].length
+    const startsAt = row.typedFrom
+      ? (statement.groups as Record<string, P.Match | undefined>)[row.typedFrom]?.start
+      : undefined
+    const from = startsAt ?? statement.start! + lead[0].length
     const typed = [
       ...descendantsNamed(statement, row.inputs).map((input) => input.end!),
       ...descendantsNamed(statement, row.params).map((param) => this.bracketed(param).end)

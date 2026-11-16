@@ -183,6 +183,8 @@ export type BubblyRulePresentation = {
    * - its blanks in it plain, each underlined:  `to <move (a card) to (a pile)>` (epic `language` I109)
    */
   typedAfterLead?: boolean
+  /** ... its pill from this group's start, not after the first word:  `después de <poner una carta en una pila>` */
+  typedFrom?: string
   /** ... and its pill to the head's end, not its last input:  `when <a card is dropped>`, `while <a card is dragged over it>` */
   typedToEnd?: boolean
   /** its child rules that are the parameters it introduces, `(a card)`:  each a blank, underlined in its pill */
