@@ -3,7 +3,7 @@ import { enableExternalSource, flush } from "solid-js"
 import { render } from "@solidjs/web"
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { bridgeSolid } from "spell/util"
+import { bridgeSolid, PrefStore } from "spell/util"
 import { core, Page, Site, Thing, View, h } from "spell/parser/core"
 import type { SiteHost } from "spell/parser/core/core.types"
 import type { Drawing } from "spell/parser/core/drawing"
@@ -99,6 +99,29 @@ class GalaxyGuide extends Site {
   ]
   static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }]
   static sidebars = [{ name: "film sidebar", view: "FilmSidebar" }]
+}
+
+/** A page drawn without the top bar. */
+class LoginPage extends Page {
+  draw(): Drawing {
+    return h("h1", null, "Log in") as unknown as Drawing
+  }
+}
+
+/** The top bar's buttons. */
+class TopBar extends View {
+  draw(): Drawing {
+    return h("button", null, "Share") as unknown as Drawing
+  }
+}
+
+/** A site with a top bar (epic `mockup` T35):  its films in a group, and a page without the bar. */
+class StarCharts extends Site {
+  static pages = [
+    { ...GalaxyGuide.pages[0]!, group: "Archive" },
+    { name: "login page", page: "LoginPage", address: "/login", noTopBar: true }
+  ]
+  static topBar = { name: "top bar", view: "TopBar" }
 }
 
 ////////////////
@@ -340,6 +363,94 @@ describe("a running site", () => {
     Object.defineProperty(click, "button", { value: 0 })
     link.dispatchEvent(click)
     expect(await shown()).toContain("A New Hope")
+  })
+
+  describe("with a top bar (T35)", () => {
+    let charts: StarCharts
+
+    beforeEach(() => {
+      core.things.addClass(TopBar)
+      new LoginPage()
+      PrefStore.setAt("spell-sites:StarCharts.collapsed", undefined)
+      charts = new StarCharts()
+      dispose = render(() => core.drawThing(charts) as never, element)
+    })
+
+    afterEach(() => PrefStore.setAt("spell-sites:StarCharts.collapsed", undefined))
+
+    /** The top bar, and its breadcrumb's steps:  each one's text, its link, and whether it's the page shown. */
+    function topBar() {
+      const bar = element.querySelector("ui-app-menu.spell-site-top-bar")
+      const crumbs = [...element.querySelectorAll("ui-breadcrumb")].map(
+        (crumb) =>
+          `${crumb.textContent}${crumb.getAttribute("link") ? ` -> ${crumb.getAttribute("link")}` : ""}` +
+          `${crumb.hasAttribute("selected") ? " (shown)" : ""}`
+      )
+      return { bar, crumbs }
+    }
+
+    test("draws `<ui-app-menu>` above the page:  the side bar button, where you are, the view's buttons", async () => {
+      await charts.showAddress("/films/a-new-hope")
+      await shown()
+      const { bar, crumbs } = topBar()
+      expect(bar?.parentElement?.classList.contains("spell-site-page")).toBe(true)
+      expect(bar?.querySelector('ui-item[slot="start"]')?.getAttribute("icon")).toBe("columns")
+      expect(crumbs).toEqual(["Archive", "Films -> /films", "film page (shown)"])
+      expect(bar?.querySelector('[slot="end"]')?.textContent).toBe("Share")
+      // the bar's button replaces the narrow width's menu button
+      expect(element.querySelector(".spell-site-menu")).toBeNull()
+    })
+
+    test("follows the page shown, and hides on a page whose line says `, no top bar`", async () => {
+      await charts.showAddress("/films")
+      await shown()
+      expect(topBar().crumbs).toEqual(["Archive", "Films (shown)"])
+      await charts.showAddress("/login")
+      expect(await shown()).toContain("Log in")
+      expect(topBar().bar?.hasAttribute("hidden")).toBe(true)
+      await charts.showAddress("/films")
+      await shown()
+      expect(topBar().bar?.hasAttribute("hidden")).toBe(false)
+    })
+
+    test("wide:  the side bar button shows only the navigation's icons, remembered across visits", async () => {
+      await charts.showAddress("/films")
+      await shown()
+      const nav = () => element.querySelector("ui-site-nav")!
+      expect(nav().hasAttribute("collapsed")).toBe(false)
+      element.querySelector<HTMLElement>(".spell-site-side-bar")!.click()
+      await shown()
+      expect(nav().hasAttribute("collapsed")).toBe(true)
+      expect(new StarCharts().isNavCollapsed).toBe(true)
+      element.querySelector<HTMLElement>(".spell-site-side-bar")!.click()
+      await shown()
+      expect(nav().hasAttribute("collapsed")).toBe(false)
+      expect(new StarCharts().isNavCollapsed).toBe(false)
+    })
+
+    test("narrow:  the side bar button slides the navigation in, all of it, collapsed or not", async () => {
+      charts.isNavCollapsed = true
+      vi.stubGlobal("getComputedStyle", () => ({ position: "absolute" }))
+      await charts.showAddress("/films")
+      await shown()
+      element.querySelector<HTMLElement>(".spell-site-side-bar")!.click()
+      await shown()
+      expect(element.querySelector(".spell-site")!.classList.contains("nav-open")).toBe(true)
+      expect(element.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(false)
+      expect(charts.isNavCollapsed).toBe(true)
+      // the page's other tests have no styles, as before
+      vi.stubGlobal("getComputedStyle", undefined)
+    })
+
+    test("a site without a top bar draws none, and never collapses", async () => {
+      dispose?.()
+      drawSite()
+      await site.showAddress("/films")
+      await shown()
+      expect(topBar().bar).toBeNull()
+      expect(element.querySelector(".spell-site-menu")).toBeTruthy()
+      expect(site.isNavCollapsed).toBe(false)
+    })
   })
 
   test("with no site, `go to the ...` says so", () => {

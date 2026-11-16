@@ -207,8 +207,10 @@ export class Parser extends Derivative {
    * - Its declaration then `claim()`s the stub -- see `P.TypeScope.getOrStub()`.
    * - Through `scope.types.add()`:  journaled, if there's a journal.
    * - Returns the names found, in order:  `P.IncrementalProject` re-parses everything when an edit changes them.
+   * - `reuse`:  stubs this file's text made before, taken back since (epic `language` P59):
+   *   each is added again in place of a new one, if it says the same, so later files' lines that point at it still do.
    */
-  stubDeclaredTypes(scope: P.Scope, texts: string[]): string[] {
+  stubDeclaredTypes(scope: P.Scope, texts: string[], reuse?: readonly P.TypeScope[]): string[] {
     // our language in play:  a name is made singular by its own language's inflector (`pila de descartes`)
     return this.inPlay(() => {
       const names = texts.flatMap((text) => this.declaredTypes(text, scope))
@@ -217,7 +219,10 @@ export class Parser extends Derivative {
       for (const name of names) {
         if (scope.types?.get(name)) continue
         const superType = superTypes.get(name)
-        scope.types?.add({ name, stub: true, lang, ...(superType && { superType }) })
+        const key = scope.types?.getKeyFor({ name } as P.TypeScope)
+        const reused = reuse?.find((type) => scope.types?.getKeyFor(type) === key)
+        if (reused?.stub && reused.lang === lang && reused.superType === superType) scope.types?.add(reused)
+        else scope.types?.add({ name, stub: true, lang, ...(superType && { superType }) })
       }
       return names
     })
@@ -342,6 +347,23 @@ export class Parser extends Derivative {
    * - Default:  never safe.  Languages with bodies override, e.g. `SpellParser`.
    */
   reparseBody(_item: P.Match, _body: P.BlockToken): P.Match | undefined {
+    return undefined
+  }
+
+  /**
+   * Re-parse ONLY the innermost indented body an edit changed INSIDE top-level `item`'s body, now `body`:
+   * e.g. one method's steps in a type's body, keeping the type and its other members.
+   * - Unlike `reparseBody()`, it rewinds and replays the `journal` itself, and moves the tokens it keeps:
+   *   `oldText` and `text` are the file before and after the edit.
+   * - Returns a new match for the whole item, or `undefined` with nothing changed:
+   *   the caller then tries `reparseBody()`.
+   * - Default:  never.  Languages with nested bodies override, e.g. `SpellParser`.
+   */
+  reparseInnerBody(
+    _item: P.Match,
+    _body: P.BlockToken,
+    _texts: { oldText: string; text: string }
+  ): P.Match | undefined {
     return undefined
   }
 
@@ -556,13 +578,18 @@ export class Parser extends Derivative {
    * - Override to do more with each one, e.g. `SpellParser` hands it to its twins in other languages.
    */
   protected addOwnRule(ruleName: string, rule: P.Rule): void {
-    const previous = this.#ownRules[ruleName]
-    this.mergeRule(this.#ownRules, ruleName, rule)
-    const next = this.#ownRules[ruleName]
-    this.updateRule(ruleName)
+    let previous = this.#ownRules[ruleName]
+    // redone, it merges into the rules as they are then (epic `language` P59):  see `P.JournalChange.redo`
+    const redo = () => {
+      previous = this.#ownRules[ruleName]
+      this.mergeRule(this.#ownRules, ruleName, rule)
+      this.updateRule(ruleName)
+    }
+    redo()
     this.journal?.record({
       undo: () => this.setOwnRule(ruleName, previous),
-      redo: () => this.setOwnRule(ruleName, next)
+      redo,
+      change: { kind: "rule", parser: this, ruleName, rule }
     })
   }
 

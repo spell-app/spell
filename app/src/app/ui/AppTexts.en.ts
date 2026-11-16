@@ -155,6 +155,7 @@ export const APP_TEXTS = {
   draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
+  closeTab: "Close",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftHeading: "Throw away your draft?",
@@ -647,9 +648,11 @@ export const APP_TEXTS = {
   "event.keydown": "key down",
   "event.keyup": "key up",
   closeProgram: "Close the Program panel",
-  codeMore: "More for this code",
   codeOutputHeader: "Compiled code",
-  codeOutputMenu: "Show Compiled Code",
+  // the top bar's compiled-code button's tooltip, its language's (`<CompiledCodeButton>`)
+  compiledJavaScript: "Compiled JavaScript",
+  compiledTypeScript: "Compiled TypeScript",
+  compiledPython: "Compiled Python",
   codeOutputClose: "Hide the compiled code",
   referenceTab: "Reference",
   // the Reference tab (`<SpellReference>`):  what you can use

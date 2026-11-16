@@ -35,6 +35,7 @@
     --ui-surface-muted: var(--mockup-inset);
     --ui-surface-strong: var(--mockup-page);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#ffffff, #2a2a2a);
     --ui-code-background: var(--mockup-inset);
     --ui-highlight: var(--mockup-accent-wash);
     --ui-border-width: 2px;

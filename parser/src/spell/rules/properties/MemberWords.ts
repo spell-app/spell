@@ -63,10 +63,11 @@ export class MemberWords extends P.Pattern {
     const { memberStopWords } = SP.Language.active.words
     const isStopWord = (word: string) => memberStopWords.has(word) || ALL_DIGITS.test(word)
     const names: string[] = []
+    const namesOf = (type: P.TypeScope) =>
+      namesWithGrammarWords(type.variables, "member", wordsOfMember, isStopWord, "LOCAL_ONLY")
     for (let types = scope.types; types; types = types.parent) {
-      for (const type of types.get()) {
-        names.push(...namesWithGrammarWords(type.variables, "member", wordsOfMember, isStopWord, "LOCAL_ONLY"))
-      }
+      // only a type with such a member matters (`P.Outline`)
+      for (const type of types.scan((it) => namesOf(it).length > 0)) names.push(...namesOf(type))
     }
     if (!names.length) return 0
     return longestNameIn(wordsAndNumbersIn(tokens), names)

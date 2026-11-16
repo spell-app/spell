@@ -123,12 +123,16 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(drawing, "choice")).toEqual(["ace", "2 ... 10", "jack", "queen", "king"])
   })
 
-  it("draws everything after an action's `to` as what a person typed, its parameters aside", () => {
+  it("draws everything after an action's `to` as ONE pill, each blank in it underlined, its kind word bold (epic `language` I109)", () => {
     const heads = (text: string, parser?: SP.SpellParser) => {
       const laidOut = SP.BubblyLayout.of(text, parser)
       return blocksOf(laidOut.nodes)
-        .slice(1)
-        .map((block) => block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`))
+        .filter((block) => block.partOfSpeech === "action")
+        .map((block) => [
+          ...block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`),
+          ...block.head.underlines.map(({ start, end, kind }) => `underline ${kind}:${text.slice(start, end)}`),
+          ...(block.head.pillNames ?? []).map(({ start, end }) => `name:${text.slice(start, end)}`)
+        ])
     }
     const deck = [
       'a "deck" is a list of cards',
@@ -144,14 +148,11 @@ describe("SP.BubblyLayout", () => {
       ["words:to ", "reference:draw", "words: it"],
       [
         "words:to ",
-        "input:move",
-        "words: (a ",
-        "reference:card",
-        "words:) ",
-        "input:to",
-        "words: (a ",
-        "reference:pile",
-        "words:)"
+        "input:move (a card) to (a pile)",
+        "underline value:a card",
+        "underline value:a pile",
+        "name:card",
+        "name:pile"
       ]
     ])
     // what its head line says about it, after its words:  Spell's words plain, a quoted name a pill of its own
@@ -165,57 +166,92 @@ describe("SP.BubblyLayout", () => {
     expect(heads(pile)).toEqual([
       [
         "words:to ",
-        "input:put a card on",
-        "words: a ",
-        "reference:pile",
+        "input:put a card on a pile",
         "mark:,",
         "words: undoable as ",
-        'input:"Move Card"'
+        'input:"Move Card"',
+        "underline value:a pile",
+        "name:pile"
       ],
       ["words:to ", 'input:"deal the cards"', "words: with title ", 'input:"Deal"', "mark:,", "words: undoable"]
     ])
-    // a quoted name with blanks, drawn as the unquoted one is:  its `"` marks faint at either end (epic `language` I97)
+    // quoted or not, the same pill:  its `"` marks at its ends;  its blanks, bracketed or not, underlined in it
     const quoted = [
       'a "card" is a thing',
       'a "pile" is a list of cards',
+      "\tto put a card on a pile",
+      "\t\tprint 1",
       "solitaire is an app",
+      "\tto play a card",
+      "\t\treturn 1",
       '\tto "count the points for a card on a pile"',
       "\t\treturn 1",
       "\tto count the points for a card on a pile",
       "\t\treturn 1",
       '\tto "move (a card) to (a pile)"',
+      "\t\treturn 1",
+      "\tafter putting a card on a pile",
       "\t\treturn 1"
     ].join("\n")
-    const [, , fromQuoted, unquoted, bracketed] = heads(quoted)
-    expect(unquoted).toEqual([
-      "words:to ",
-      "input:count the points for",
-      "words: a ",
-      "reference:card",
-      "words: ",
-      "input:on",
-      "words: a ",
-      "reference:pile"
-    ])
-    expect(fromQuoted).toEqual(["words:to ", 'mark:"', ...unquoted!.slice(1), 'mark:"'])
-    expect(bracketed).toEqual([
-      "words:to ",
-      'mark:"',
-      "input:move",
-      "words: (a ",
-      "reference:card",
-      "words:) ",
-      "input:to",
-      "words: (a ",
-      "reference:pile",
-      "words:)",
-      'mark:"'
-    ])
-    // the editors draw those marks as a quoted input's own:  curly, either side of its words
+    const [, play, fromQuoted, unquoted, bracketed, after] = heads(quoted)
+    expect(play).toEqual(["words:to ", "input:play a card", "underline value:a card", "name:card"])
+    const blanks = ["underline value:a card", "underline value:a pile", "name:card", "name:pile"]
+    expect(unquoted).toEqual(["words:to ", "input:count the points for a card on a pile", ...blanks])
+    expect(fromQuoted).toEqual(["words:to ", 'input:"count the points for a card on a pile"', ...blanks])
+    expect(bracketed).toEqual(["words:to ", 'input:"move (a card) to (a pile)"', ...blanks])
+    // steps at an action's end draw as its head does (epic `language` P56)
+    expect(after).toEqual(["words:after ", "input:putting a card on a pile", ...blanks])
+    // the editors:  ONE pill between its curly marks, its words plain but its blanks' kind words, not bold as a quoted name is
     const laidOut = SP.BubblyLayout.of(quoted)
-    const head = blocksOf(laidOut.nodes)[3]!
-    const kinds = SP.BubblyStretches.ofLine(quoted, head.head, { band: head.partOfSpeech }).map((each) => each.kind)
-    expect([kinds[1], kinds.at(-1)]).toEqual(["quote-open", "quote-close"])
+    const head = blocksOf(laidOut.nodes).filter((block) => block.partOfSpeech === "action")[2]!
+    const stretches = SP.BubblyStretches.ofLine(quoted, head.head, { band: head.partOfSpeech })
+    expect(
+      stretches.map((each) => `${each.kind}${each.isName ? " (name)" : ""}:${quoted.slice(each.start, each.end)}`)
+    ).toEqual([
+      "words:to ",
+      'quote-open:"',
+      "input:count the points for a card on a pile",
+      'quote-close:"',
+      "reference:card",
+      "reference:pile",
+      "underline:a card",
+      "underline:a pile"
+    ])
+    // Spanish the same
+    const spanish = [
+      'una "carta" es una cosa',
+      'una "pila" es una lista de cartas',
+      "solitario es una app",
+      '\tpara "los puntos por (una carta) en (una pila)"',
+      "\t\tdevolver 1",
+      "\tpara jugar una carta",
+      "\t\tdevolver 1",
+      '\tpara "poner (una carta) en (una pila)"',
+      "\t\tdevolver 1",
+      "\tdespués de poner una carta en una pila",
+      "\t\tdevolver 1"
+    ].join("\n")
+    expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
+      [
+        "words:para ",
+        'input:"los puntos por (una carta) en (una pila)"',
+        "underline value:una carta",
+        "underline value:una pila",
+        "name:carta",
+        "name:pila"
+      ],
+      ["words:para ", "input:jugar una carta", "underline value:una carta", "name:carta"],
+      expect.anything(),
+      // `después de` both outside its pill (Owen, 2026-11-15)
+      [
+        "words:después de ",
+        "input:poner una carta en una pila",
+        "underline value:una carta",
+        "underline value:una pila",
+        "name:carta",
+        "name:pila"
+      ]
+    ])
   })
 
   it("draws a new thing's `a new` bold with its kind, and what a step sets underlined whole (epic `language` I98)", () => {
@@ -302,55 +338,61 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
-  it("draws a drag handler's head with the moment it's for bold, a name:  `when a <card> is <dropped>` (epic `language` I100)", () => {
+  it("draws a drag handler's and a create hook's head as an action's:  ONE pill after its first word, its thing underlined, its kind word bold (epic `language` I109)", () => {
     const heads = (text: string, parser?: SP.SpellParser) =>
       blocksOf(SP.BubblyLayout.of(text, parser).nodes)
         .filter((block) => block.partOfSpeech === "action")
         .map((block) =>
-          block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`).join(" | ")
+          [
+            ...block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`),
+            ...block.head.underlines.map(({ start, end }) => `underline:${text.slice(start, end)}`),
+            ...(block.head.pillNames ?? []).map(({ start, end }) => `name:${text.slice(start, end)}`)
+          ].join(" | ")
         )
     const english = [
       'a "card" is a view',
       'a "pile" is a viewable list of cards',
       "\tit is droppable",
-      "\twhen a card is dropped",
+      "\twhen creating a pile",
+      "\t\tprint 1",
+      "\twhen a card is dropped\t\t-- put the card on the pile",
       "\t\tprint 1",
       "\twhen a card is dragged over",
       "\t\tprint 1",
       "\twhen a card is dragged out of it",
       "\t\tprint 1",
       "\twhile a card is dragged over it",
+      "\t\tprint 1",
+      "solitaire is an app",
+      "\twhen creating solitaire",
       "\t\tprint 1"
     ].join("\n")
     expect(heads(english)).toEqual([
-      "words:when a  | reference:card | words: is  | reference:dropped",
-      "words:when a  | reference:card | words: is  | reference:dragged over",
-      "words:when a  | reference:card | words: is  | reference:dragged out of | words: it",
-      "words:while a  | reference:card | words: is  | reference:dragged over | words: it"
+      "words:when  | input:creating a pile | underline:a pile | name:pile",
+      "words:when  | input:a card is dropped | words:\t\t | comment:-- put the card on the pile | underline:a card | name:card",
+      "words:when  | input:a card is dragged over | underline:a card | name:card",
+      "words:when  | input:a card is dragged out of it | underline:a card | name:card",
+      "words:while  | input:a card is dragged over it | underline:a card | name:card",
+      "words:when  | input:creating solitaire | underline:solitaire | name:solitaire"
     ])
     const spanish = [
       'una "carta" es una vista',
       'una "pila" es una lista visible de cartas',
+      "\tal crear una pila",
+      "\t\timprimir 1",
       "\tcuando una carta se suelta",
       "\t\timprimir 1",
       "\tmientras una carta se arrastra sobre ella",
+      "\t\timprimir 1",
+      "solitario es una app",
+      "\tal crear el solitario",
       "\t\timprimir 1"
     ].join("\n")
     expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
-      "words:cuando una  | reference:carta | words: se  | reference:suelta",
-      "words:mientras una  | reference:carta | words: se  | reference:arrastra sobre | words: ella"
-    ])
-  })
-
-  it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {
-    const deck = ['a "card" is a thing', 'a "deck" is a list of cards', "\twhen creating a deck", "\t\tprint 1"].join(
-      "\n"
-    )
-    const hook = blocksOf(SP.BubblyLayout.of(deck).nodes).find((block) => block.rule === "create_hook")!
-    expect(hook.partOfSpeech).toBe("action")
-    expect(hook.head.pieces.map((piece) => `${piece.kind}:${deck.slice(piece.start, piece.end)}`)).toEqual([
-      "words:when creating a ",
-      "reference:deck"
+      "words:al  | input:crear una pila | underline:una pila | name:pila",
+      "words:cuando  | input:una carta se suelta | underline:una carta | name:carta",
+      "words:mientras  | input:una carta se arrastra sobre ella | underline:una carta | name:carta",
+      "words:al  | input:crear el solitario | underline:el solitario | name:solitario"
     ])
   })
 

@@ -171,3 +171,23 @@ describe("<epic-status>", () => {
     expect(drawn).toEqual(["Codex • Underway", "Codex (Bob) • Underway"])
   })
 })
+
+// I311:  "Put 4px of space between these paragraphs"
+describe("<epic-status> its text's lines", () => {
+  test("a list's lines sit 4px apart:  the page sheet the first card registers", async () => {
+    const host = await ElementFixture.render(
+      `<epic-status slot="status" state="done" at="2026-11-15 16:40" done-at="2026-11-15 16:53">` +
+        `<p>Taken up at once.</p>` +
+        `<p slot="summary">Fixed (0efbfb788):  any Enter takes the spaces before the caret off the line.</p>` +
+        `<ul slot="summary"><li>Only that line's end.</li><li>Checked headless.</li></ul>` +
+        `</epic-status>`
+    )
+    // the runtime registers the page sheet once it has loaded
+    await expect
+      .poll(() => {
+        const [first, second] = [...host.querySelectorAll("li")].map((li) => li.getBoundingClientRect())
+        return Math.round(second.top - first.bottom)
+      })
+      .toBe(4)
+  })
+})

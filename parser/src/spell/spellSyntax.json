@@ -19,7 +19,7 @@
           "ruleNames": ["blank_line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "A blank line, compiling to `P.ASTBlankLine`.",
           "syntaxes": [],
           "aliases": []
@@ -39,7 +39,7 @@
           "ruleNames": ["line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 31,
+          "line": 32,
           "purpose": "Parse a single `LineToken` in a `BlockToken` as.",
           "syntaxes": [],
           "aliases": []
@@ -1663,6 +1663,7 @@
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_top_bar",
             "site_page_state",
             "site_card_color",
             "site_not_found_page",
@@ -1794,6 +1795,9 @@
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
+            },
+            {
+              "syntax": "(top bar|app bar)"
             },
             {
               "syntax": "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
@@ -3548,7 +3552,7 @@
           "ruleNames": ["list_move"],
           "internal": false,
           "file": "src/spell/rules/lists/ListMove.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "`move the card to the tableau` -- moves it, if the pile it belongs to lets it go and the tableau takes it: their guards, e.g. `a tableau can take a card if: ...` (epic page Q25).",
           "syntaxes": [
             {
@@ -3932,7 +3936,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 23,
+          "line": 24,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3958,7 +3962,7 @@
           "ruleNames": ["list_prepend"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPrepend.ts",
-          "line": 7,
+          "line": 8,
           "purpose": "Prepend to list, e.g. `prepend thing to my-list` => `core.prepend(myList, thing)`.",
           "syntaxes": [
             {
@@ -3984,7 +3988,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -4010,7 +4014,7 @@
           "ruleNames": ["list_add_relative"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAddRelative.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Add to list before/after some other item, e.g. `add thing to my-list before other-thing`.",
           "syntaxes": [
             {
@@ -5036,7 +5040,7 @@
           "ruleNames": ["create_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateListType.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "`a deck is a list of cards` or `create a type called Deck as a list of cards` -- declares `type` as a new class extending `List`, with its `instanceType` set to `instanceType`.",
           "syntaxes": [
             {
@@ -6154,7 +6158,7 @@
               }
             },
             {
-              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color}",
+              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color} (, icon {icon:text})?",
               "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", color blue\n\tit has a films page at \"/films\"",
               "outputs": {
                 "js": {
@@ -6165,6 +6169,21 @@
                 },
                 "py": {
                   "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [{\"name\": \"films page\", \"page\": \"FilmsPage\", \"address\": \"/films\", \"group\": \"Films\"}]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} group {group:text}, icon {icon:text}",
+              "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", icon \"film\"\n\tit has a films page at \"/films\"",
+              "outputs": {
+                "js": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\",\n    groupIcon: \"film\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\",\n    groupIcon: \"film\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"group\": \"Films\",\n            \"group_icon\": \"film\",\n        },\n    ]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
                 }
               }
             }
@@ -8845,21 +8864,21 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
               "syntax": "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
-              "example": "a \"film\" is a thing where:\n\t- its \"title\" is text\na \"films page\" is a page\na \"film page\" is a page where:\n\t- it has a film\ngalaxy guide is a site at \"owen@spell/galaxy\":\n\t- it has a films page at \"/films\", named \"Films\"\n\t\t- it has a film page at \"/films/:film\"\n\t- it has a settings dialog\n\t- it has a film sidebar",
+              "example": "a \"film\" is a thing where:\n\t- its \"title\" is text\na \"films page\" is a page\na \"film page\" is a page where:\n\t- it has a film\ngalaxy guide is a site at \"owen@spell/galaxy\":\n\t- it has a films page at \"/films\", named \"Films\", icon \"film\"\n\t\t- it has a film page at \"/films/:film\"\n\t- it has a settings dialog\n\t- it has a film sidebar",
               "outputs": {
                 "js": {
-                  "code": "export class Film extends Thing {\n  static { this.declareProp(\"title\", { type: \"text\" }) }\n  get title() { return this.getProp(\"title\") }\n  set title(value) { this.setProp(\"title\", value) }\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  get film() { return this.getProp(\"film\") }\n  set film(value) { this.setProp(\"film\", value) }\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                  "code": "export class Film extends Thing {\n  static { this.declareProp(\"title\", { type: \"text\" }) }\n  get title() { return this.getProp(\"title\") }\n  set title(value) { this.setProp(\"title\", value) }\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  get film() { return this.getProp(\"film\") }\n  set film(value) { this.setProp(\"film\", value) }\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    icon: \"film\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
                 },
                 "ts": {
-                  "code": "export class Film extends Thing {\n  @prop({ type: \"text\" })\n  accessor title!: string\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  @prop() accessor film!: any\n}\n\nexport class FilmPageElement extends SpellElement<FilmPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-film-page\", \"film page\", [\n    { name: \"film\", kind: \"string\", description: \"Its film.\" }\n  ])\n}\ncore.useElement(FilmPage, FilmPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                  "code": "export class Film extends Thing {\n  @prop({ type: \"text\" })\n  accessor title!: string\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  @prop() accessor film!: any\n}\n\nexport class FilmPageElement extends SpellElement<FilmPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-film-page\", \"film page\", [\n    { name: \"film\", kind: \"string\", description: \"Its film.\" }\n  ])\n}\ncore.useElement(FilmPage, FilmPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    icon: \"film\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
                 },
                 "py": {
-                  "code": "class Film(Thing):\n    title = prop(type=\"text\")\n\nclass FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass FilmPage(Page):\n    element_tag = \"syntax-block-film-page\"\n\n    film = prop()\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"title\": \"Films\",\n            \"pages\": [\n                {\"name\": \"film page\", \"page\": \"FilmPage\", \"address\": \"/films/:film\", \"params\": [\"film\"]},\n            ],\n        },\n    ]\n    dialogs = [{\"name\": \"settings dialog\"}]\n    sidebars = [{\"name\": \"film sidebar\"}]\n    lives_at = \"owen@spell/galaxy\"\n\ngalaxy_guide = GalaxyGuide()"
+                  "code": "class Film(Thing):\n    title = prop(type=\"text\")\n\nclass FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass FilmPage(Page):\n    element_tag = \"syntax-block-film-page\"\n\n    film = prop()\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"title\": \"Films\",\n            \"icon\": \"film\",\n            \"pages\": [\n                {\"name\": \"film page\", \"page\": \"FilmPage\", \"address\": \"/films/:film\", \"params\": [\"film\"]},\n            ],\n        },\n    ]\n    dialogs = [{\"name\": \"settings dialog\"}]\n    sidebars = [{\"name\": \"film sidebar\"}]\n    lives_at = \"owen@spell/galaxy\"\n\ngalaxy_guide = GalaxyGuide()"
                 }
               }
             }
@@ -8871,20 +8890,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 49,
+          "line": 53,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -8894,7 +8913,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 38,
+          "line": 43,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {

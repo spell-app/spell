@@ -150,6 +150,7 @@
     --ui-surface-muted: light-dark(var(--spell-brand-50), var(--spell-violet-850));
     --ui-surface-strong: light-dark(var(--spell-brand-100), var(--spell-violet-800));
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(var(--spell-brand-25), var(--spell-violet-925));
     --ui-code-background: light-dark(var(--spell-brand-100), var(--spell-violet-975));
     --ui-highlight: light-dark(var(--spell-violet-150), var(--spell-violet-800));
     --ui-border-color: light-dark(var(--spell-brand-150), var(--spell-hairline));

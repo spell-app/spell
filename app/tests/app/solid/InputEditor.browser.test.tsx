@@ -248,16 +248,93 @@ describe("<FileTabs>", () => {
     expect(showEditor).toHaveBeenCalledWith("test-project/two.js")
   })
 
-  test("a right click on a tab shows that tab's file, not the next one's, though the bar's ⋯ sits among them", async () => {
+  test("a right click on a tab shows that tab's file, not the next one's", async () => {
     const showEditor = spyOnEditor("showEditor")
     const file = fakeFile("test-project/one.js", "")
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     const tabs = await tabsIn(host)
-    expect(tabs[0]!.parentElement!.querySelector(":scope > .CodeMoreMenu")).not.toBeNull()
+    expect(tabs[0]!.parentElement!.querySelector(":scope > .CodeMoreMenu")).toBeNull()
     tabs[0]!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, clientX: 10, clientY: 10 }))
     expect(showEditor).toHaveBeenLastCalledWith("test-project/one.js")
+  })
+
+  test("every file fits:  no tab has a ✕ (T77)", async () => {
+    const file = fakeFile("test-project/one.js", "")
+    setEditor("project", file.project as unknown as EditorStore["project"])
+    setEditor("file", file)
+    const host = await mount(() => <FileTabs />)
+    const tabs = await tabsIn(host)
+    expect(tabs.map((tab) => getComputedStyle(tab.querySelector(".CloseTab")!).display)).toEqual(["none", "none"])
+  })
+
+  describe("more files than the bar's 8:  a tab's ✕ closes it, the file still in the list (T77)", () => {
+    /**
+     * 12 files, `two.js`, `file3.js` and `one.js` opened from the list, so they're the bar's tabs, `one.js` showing.
+     * - `showEditor()` shows the file it's handed, as the editor does.
+     */
+    async function manyTabs() {
+      const file = fakeFile("test-project/one.js", "", 10)
+      setEditor("project", file.project as unknown as EditorStore["project"])
+      setEditor("file", file)
+      const showEditor = spyOnEditor("showEditor", ((path: string) => {
+        const shows = path === file.path ? file : Object.assign(fakeFile(path, ""), { project: file.project })
+        setEditor("file", shows as unknown as EditorStore["file"])
+      }) as never)
+      localStorage.removeItem("ui-toolbar-open-items")
+      const host = await mount(() => <FileTabs />)
+      const tabs = await tabsIn(host)
+      const row = tabs[0]!.parentElement!
+      await expect.poll(() => row.matches(":state(limited)")).toBe(true)
+      /** The tabs in the bar, by name. */
+      const shown = () => tabs.filter((tab) => !tab.hidden).map((tab) => tab.getAttribute("label"))
+      const tab = (name: string) => tabs.find((each) => each.getAttribute("label") === name)!
+      /** Pick `name` from the list of every file. */
+      const pick = async (name: string) => {
+        row.shadowRoot!.querySelector<HTMLButtonElement>("[part~=all-items]")!.click()
+        await ElementFixture.settle()
+        const rows = [...row.shadowRoot!.querySelectorAll<HTMLElement>("[part~=overflow-menu] .row")]
+        expect(rows).toHaveLength(12)
+        rows.find((each) => each.textContent?.trim() === name)!.click()
+        await vi.waitFor(() => expect(shown()).toContain(name))
+      }
+      for (const name of ["two.js", "file3.js", "one.js"]) await pick(name)
+      expect(shown()).toEqual(["one.js", "two.js", "file3.js"])
+      showEditor.mockClear()
+      return { file, host, tabs, row, shown, tab, pick, showEditor }
+    }
+
+    test("the chosen tab's ✕ shows;  another's only while hovered", async () => {
+      const { tab } = await manyTabs()
+      const close = (name: string) => tab(name).querySelector<HTMLElement>(".CloseTab")!
+      expect(getComputedStyle(close("one.js")).visibility).toBe("visible")
+      expect(getComputedStyle(close("one.js")).display).not.toBe("none")
+      expect(close("one.js").getAttribute("title")).toBe("Close")
+    })
+
+    test("a ✕ closes a tab:  out of the bar, its file not shown;  picked again from the list, it's back", async () => {
+      const { shown, tab, pick, showEditor } = await manyTabs()
+      tab("two.js").querySelector<HTMLElement>(".CloseTab")!.click()
+      await vi.waitFor(() => expect(shown()).toEqual(["one.js", "file3.js"]))
+      expect(showEditor).not.toHaveBeenCalled()
+      expect(tab("one.js").hasAttribute("selected")).toBe(true)
+      await pick("two.js")
+      expect(showEditor).toHaveBeenLastCalledWith("test-project/two.js")
+      expect(shown()).toEqual(["one.js", "two.js", "file3.js"])
+    })
+
+    test("closing the chosen tab shows its neighbour's file;  a middle click closes too", async () => {
+      const { shown, tab, showEditor } = await manyTabs()
+      tab("one.js").querySelector<HTMLElement>(".CloseTab")!.click()
+      expect(showEditor).toHaveBeenLastCalledWith("test-project/two.js")
+      await vi.waitFor(() => expect(shown()).not.toContain("one.js"))
+      await vi.waitFor(() => expect(tab("two.js").hasAttribute("selected")).toBe(true))
+
+      expect(shown()).toEqual(["two.js", "file3.js"])
+      tab("file3.js").dispatchEvent(new MouseEvent("auxclick", { bubbles: true, composed: true, button: 1 }))
+      await vi.waitFor(() => expect(shown()).toEqual(["two.js"]))
+    })
   })
 })
 
@@ -360,8 +437,9 @@ function forgetChoices() {
 /**
  * A fake file of a fake loaded project, as spell cells (`reactiveObject()`), with the other file `two.js`.
  * - Each import's `file` is a cell too:  `one.js` is this one when `path` names it, else a fake of its own.
+ * - `more`:  that many more files after them, `file3.js` ...
  */
-function fakeFile(path: string, contents: string): FakeFile {
+function fakeFile(path: string, contents: string, more = 0): FakeFile {
   const others = {
     one: reactiveObject({ isDirty: false }),
     two: reactiveObject({ isDirty: false })
@@ -372,7 +450,12 @@ function fakeFile(path: string, contents: string): FakeFile {
     spellFiles: [] as SP.SpellFile[],
     imports: [
       { path: "test-project/one.js", location: { file: "one.js" }, file: others.one },
-      { path: "test-project/two.js", location: { file: "two.js" }, file: others.two }
+      { path: "test-project/two.js", location: { file: "two.js" }, file: others.two },
+      ...Array.from({ length: more }, (_, index) => ({
+        path: `test-project/file${index + 3}.js`,
+        location: { file: `file${index + 3}.js` },
+        file: reactiveObject({ isDirty: false })
+      }))
     ],
     updatedContentsFor: vi.fn()
   })

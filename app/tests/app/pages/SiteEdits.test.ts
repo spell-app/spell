@@ -19,6 +19,30 @@ describe("SiteEdits", () => {
     )
   })
 
+  test("a page's icon is read, and kept when its line is written again (T34)", () => {
+    const code = 's is a site:\n\tit has a films page at "/films", named "Films", icon "film", new\n'
+    expect(SiteEdits.partsIn(code)![0]).toMatchObject({ title: "Films", icon: "film", state: "new" })
+    expect(SiteEdits.withPartPlaced(code, "films page", { row: 1, column: 2 })).toContain(
+      '\tit has a films page at "/films", named "Films", icon "film", new, in row 1 column 2\n'
+    )
+    expect(SiteEdits.withPartChanged(code, "films page", { title: "Movies" })).toContain(
+      '\tit has a films page at "/films", named "Movies", icon "film", new\n'
+    )
+  })
+
+  test("a top bar is its own kind of part, and a page's `no top bar` is kept when its line is written again (T35)", () => {
+    const code = 's is a site:\n\tit has a top bar\n\tit has a login page at "/login", icon "key", no top bar\n'
+    const [bar, login] = SiteEdits.partsIn(code)!
+    expect(bar).toMatchObject({ kind: "topBar", name: "top bar" })
+    expect(login).toMatchObject({ kind: "page", icon: "key", noTopBar: true })
+    expect(SiteEdits.withPartPlaced(code, "login page", { row: 1, column: 2 })).toContain(
+      '\tit has a login page at "/login", icon "key", no top bar, in row 1 column 2\n'
+    )
+    expect(SiteEdits.withPartChanged(code, "login page", { title: "Log in" })).toContain(
+      '\tit has a login page at "/login", named "Log in", icon "key", no top bar\n'
+    )
+  })
+
   test("a page's or view's own thumbnail is found in the file declaring it (P16)", () => {
     expect(SiteEdits.thumbnailOf('"a page" is a page\n\tits thumbnail is "x.jpg"\n', "a page")).toBe("x.jpg")
     expect(SiteEdits.thumbnailOf('films page is a page:\n\tits thumbnail is "v.jpg"\n', "films page")).toBe("v.jpg")
@@ -231,6 +255,24 @@ describe("SiteEdits", () => {
         part: SiteEdits.groupKey("Home")
       })
       expect(SiteEdits.partsIn(moved)!.map((part) => [part.title, part.color])[0]).toEqual(["Teams", "purple"])
+    })
+
+    test("a group's icon (I20):  read after its colour or alone, and a rename keeps it", () => {
+      const withIcons = [
+        "galaxy guide is a site:",
+        '\tgroup "Hardware", color yellow, icon "microchip"',
+        '\tit has a "Boards" at "/boards"',
+        '\tgroup "Software", icon "code"',
+        '\tit has a "Apps" at "/apps"',
+        ""
+      ].join("\n")
+      const parts = SiteEdits.partsIn(withIcons)!
+      expect(parts.map((part) => [part.title, part.color, part.icon])).toEqual([
+        ["Hardware", "yellow", "microchip"],
+        ["Software", undefined, "code"]
+      ])
+      const renamed = SiteEdits.withPartRenamed(withIcons, SiteEdits.groupKey("Software"), "Programs")
+      expect(renamed).toContain('\tgroup "Programs", icon "code"\n')
     })
 
     test("a page added lists only its line:  it's made when it's first opened", () => {

@@ -42,12 +42,12 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "property value",
   "property symbol",
   "property short name",
-  "property picture",
-  "property pile",
-  "method is on top",
-  "method play a card",
   "method put a card on a pile",
-  "method count the points for a card on a pile",
+  "property last pile",
+  "property pile",
+  "method is on top of its pile",
+  "method play a card",
+  "method the points for (a card) on (a pile)",
   "property direction",
   "enumeration Directions",
   "property thumbnail",
@@ -124,6 +124,8 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
+      type CardImage (is a View)
+      function test card images
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles
@@ -137,7 +139,8 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
       type DiscardPile (is a Pile)
       type Foundation (is a Pile)
       type Column (is a Pile)
-      function test the moves"
+      function test the moves
+    constant blue"
 `;
 
 exports[`ScopeExplorer of a project importing another, compiled > the imported project shows, with its own files and types, ahead of ours 1`] = `
@@ -207,12 +210,15 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
+      type CardImage (is a View)
+      function test card images
     file Deck.spell
       type Deck (is a ViewableList)
       function test a new deck
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles
+    constant blue
   project app
     file Solitaire.spell
       type Solitaire (is a App)

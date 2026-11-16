@@ -69,7 +69,8 @@ export class ItIsValue extends SpellStatement<
     const language = SP.Language.of(scope)
     const properties = typeScope
       .chain()
-      .flatMap((owner) => owner.variables.get())
+      // only a property with a list matters (`P.Outline`)
+      .flatMap((owner) => owner.variables.scan((it) => !!it.listedValues))
       .filter((variable) => variable.listedValues)
     if (properties.length === 1) return SpellConstant.notOneOfMessage(scope, properties[0]!, word)
     if (!properties.length) return language.parserMessage("no-listed-values", { value: word })

@@ -91,7 +91,7 @@ a "card image" is a view			-- A card's picture:  the one place a card's look liv
 		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 	to draw it
 		<text color={its color}>{its picture}</text>
-	
+
 	to test card images
 		set queen to a new card whose rank is queen, suit is spades and direction is down
 		get a new card image whose card is the queen

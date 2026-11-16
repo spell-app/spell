@@ -423,17 +423,24 @@ function bareAbility(name: string): string {
   return name.replace(/^(?:it|its\s+\w+)\s+(?:is|are)\s+/i, "")
 }
 
-/** A declaration's words as written on its first line, up to its code, less a tag's attributes:  `on click`. */
+/**
+ * A declaration's words as written on its first line, up to its code, less a tag's attributes:  `on click`.
+ * - Less its line's own docstring too:  `when a card is dropped  -- put the card on the pile` => `when a card is dropped`.
+ */
 function wordsAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): string {
   const line = lines[place.line] ?? ""
   return line
     .slice(place.column, codeColumnOf(place, lines))
+    .replace(TRAILING_DOCSTRING, "")
     .trim()
     .replace(/^(?:-\s+|<)/, "")
     .replace(/\s+[\w-]+=[\s\S]*$/, "")
     .replace(/\s*(?::|\/?>)\s*$/, "")
     .trim()
 }
+
+/** A line's own docstring, after its words:  `  -- put the card on the pile`. */
+const TRAILING_DOCSTRING = /\s+--(?:\s[\s\S]*)?$/
 
 /** A declaration's code as written:  after its words on its line, and the lines of its body, dedented. */
 function codeAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): string {

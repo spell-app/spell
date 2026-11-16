@@ -164,7 +164,10 @@ export class BubblyMarks extends TextMarks {
     head: { band?: SP.BubblyPartOfSpeech } = {}
   ): BubblyBlockShape["description"] {
     let description: BubblyBlockShape["description"]
-    for (const stretch of SP.BubblyStretches.ofLine(this.drawing.text, line, head)) {
+    const stretches = SP.BubblyStretches.ofLine(this.drawing.text, line, head)
+    // where an input's spacer is injected:  an underline starting there starts past it, `when <a card> is dropped`
+    const pillStarts = new Set(stretches.filter((each) => each.kind === "input").map((each) => each.start))
+    for (const stretch of stretches) {
       const { start, end, kind } = stretch
       // a drawing's tag:  HTML's marks
       if (this.tags.some((tag) => start >= tag.start && end <= tag.end)) continue
@@ -172,7 +175,12 @@ export class BubblyMarks extends TextMarks {
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-open`, { before: spacer("quote", "before") })
       else if (kind === "quote-close")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
-      else if (kind === "underline") into.push({ kind: "underline", place: this.place(start, end) })
+      else if (kind === "underline")
+        into.push({
+          kind: "underline",
+          place: this.place(start, end),
+          ...(pillStarts.has(start) ? { afterSpacer: true } : {})
+        })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
       else if (kind === "comment" && head.band) description = this.description(start, end)
       else if (kind === "comment") this.comment(start, end, BubblyHtml.classesFor(kind))
@@ -261,6 +269,8 @@ export type BubblyUnderlineShape = {
   kind: "underline"
   /** the mark from its first letter to its last */
   place: number
+  /** it starts where a pill does, `when <a card> is dropped`:  past the spacer injected there (epic `language` I109) */
+  afterSpacer?: boolean
 }
 
 /**

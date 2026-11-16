@@ -496,7 +496,7 @@
     {
       "type": "GalaxyGuide",
       "superType": "Site",
-      "defined": "/StarWarsSite.spell:16158-17155"
+      "defined": "/StarWarsSite.spell:16158-17248"
     },
     {
       "property": "theme",
@@ -563,6 +563,6 @@
     610,
     615,
     637,
-    723
+    730
   ]
 }

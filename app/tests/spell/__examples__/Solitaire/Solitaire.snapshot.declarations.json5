@@ -244,7 +244,7 @@
     {
       "type": "CardImage",
       "superType": "View",
-      "defined": "/Card.spell:2165-4747"
+      "defined": "/Card.spell:2165-4746"
     },
     {
       "property": "card",
@@ -341,7 +341,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card images",
-      "defined": "/Card.spell:4041-4747"
+      "defined": "/Card.spell:4040-4746"
     },
     {
       "type": "Pile",

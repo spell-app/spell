@@ -73,11 +73,13 @@ import "./Inspector.css"
 /****************
  * ### `Inspector`
  * Look inside the running app, and change it (epic `debut` P13):  a part selected in the app, its properties to edit.
- * - Open or closed:  `<InspectorToggle>` in the top bar;  remembered in the browser (`OPEN_PREF`).
+ * - Open or closed, all its cards together:  `<InspectorToggle>` in the top bar, or View › Inspector;
+ *   remembered in the browser (`OPEN_PREF`).
+ *   No card is hidden on its own (epic `editor` T78):  each folds to its header instead.
  * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click selects it:
  *   a drawn thing or a Spell UI control (an input, a button);  Alt-click selects any Spell UI element.
  *   - It starts as the Inspector opens, and stops once something's selected:  the app works as ever again.
- *   - Its crosshairs button starts it again;  Esc stops it.
+ *   - The top bar's Inspect app (its crosshairs) starts it again;  Esc stops it.
  *   - The click goes to the Inspector, never to the app:  selecting a button doesn't press it.
  *   - Shift, Command or Control adds to what's selected, and keeps inspecting;
  *     so does dragging across the app's background, a rubber band (`PartSelector`).
@@ -154,26 +156,25 @@ export class Inspector {
     editorPrefs.set(SHEET_HEIGHT_PREF, height)
   }
 
-  /**
-   * Open the column if closed, else close it;  remember which.  Opening starts inspecting.
-   * - It opens with the cards it last showed (`shownPanels`);  every card when none were.
-   */
+  /** Open the column if closed, else close it;  remember which.  Opening starts inspecting. */
   static toggle(): void {
     if (isOpen()) return Inspector.close()
-    if (!shownPanels().length) setPanels(INSPECTOR_PANELS)
-    setOpen(true)
-    editorPrefs.set(OPEN_PREF, true)
+    Inspector.open()
     Inspector.startInspecting()
   }
 
   /**
-   * View › Inspector:  open the column with every card, or close it;  remember which.
+   * View › Inspector:  open the column, or close it;  remember which.
    * - Opening doesn't start inspecting:  that's Inspect app's (Owen, 2026-11-14, I75).
-   * - Every card, so one hidden by its ✕ comes back:  View lists no cards of its own (I74).
    */
   static showOrHide(): void {
-    if (isOpen()) return Inspector.close()
-    setPanels(INSPECTOR_PANELS)
+    if (isOpen()) Inspector.close()
+    else Inspector.open()
+  }
+
+  /** Open the column, every card in it, if it's closed;  remember that.  Doesn't start inspecting. */
+  static open(): void {
+    if (isOpen()) return
     setOpen(true)
     editorPrefs.set(OPEN_PREF, true)
   }
@@ -186,22 +187,6 @@ export class Inspector {
     Inspector.dismissHelp()
     if (isOpen()) Inspector.startInspecting()
     else Inspector.toggle()
-  }
-
-  /** Is card `panel` showing in the column (reactive)? */
-  static isShown(panel: InspectorPanel): boolean {
-    return shownPanels().includes(panel)
-  }
-
-  /**
-   * Show card `panel`, or hide it;  remember which.
-   * - Showing one opens the column;  hiding the last closes it.
-   */
-  static setShown(panel: InspectorPanel, shown: boolean): void {
-    const next = INSPECTOR_PANELS.filter((each) => (each === panel ? shown : shownPanels().includes(each)))
-    setPanels(next)
-    if (!next.length) Inspector.close()
-    else if (!isOpen()) Inspector.toggle()
   }
 
   /** Is the properties card's section for `group` folded (reactive)?  Advanced starts folded. */
@@ -383,16 +368,12 @@ export class Inspector {
 
   /**
    * Show what's selected in the properties card, with Inspect app off and staying off:  a right click's Inspect.
-   * - SIDE EFFECT:  opens the column and the card if they're closed;  the help counts as seen.
+   * - SIDE EFFECT:  opens the column if it's closed, and unfolds the card;  the help counts as seen.
    */
   static showSelected(): void {
     Inspector.dismissHelp()
-    if (!shownPanels().includes("properties")) setPanels([...shownPanels(), "properties"])
     if (foldedPanels().includes("properties")) Inspector.toggleFolded("properties")
-    if (!isOpen()) {
-      setOpen(true)
-      editorPrefs.set(OPEN_PREF, true)
-    }
+    Inspector.open()
     setSheetUp(true)
   }
 
@@ -475,7 +456,7 @@ export class Inspector {
           .map(({ element, base }) => ({ element, trail: trailTo(base, thing) }))
           .find((row) => row.trail)
     if (!found?.trail) return
-    if (!Inspector.isShown("properties")) Inspector.setShown("properties", true)
+    Inspector.open()
     if (Inspector.isFolded("properties")) Inspector.toggleFolded("properties")
     Inspector.select(found.element, { trail: found.trail })
   }
@@ -560,7 +541,7 @@ export class Inspector {
    * (Owen:  "keep everything EXACTLY THE SAME across page moves").
    * - `rows`:  the app's parts, as the parts tree walks them (`partsIn()`).
    * - While what's selected is still in the app, only its outline is put on what the trail leads to again.
-   * - Found by its place among the parts and its tag (`PartAddress`), for this project:  none there, nothing's selected.
+   * - Found by its path among the parts (`SelectionAddress`), for this project:  none there, nothing's selected.
    */
   static restoreSelection(rows: readonly PartRow[]): void {
     const parts = selectedParts()
@@ -635,15 +616,28 @@ export class Inspector {
     wordsReadyNext = true
   }
 
-  /** The element at `address`:  the same place in the source if it has one, else the same place among the parts. */
+  /**
+   * The element at `address`:  the part at the same path (`partKeysFor()`), else the one with the same tag and `id`
+   * anywhere, a card dealt to another column;  `undefined` while it isn't drawn yet.
+   * - A path is never found by its place in the source or among the parts:
+   *   while the app draws (Solitaire's deal), those name another part (epic `editor` I171).
+   * - An address remembered before paths:  the same place in the source, else the same place among the parts.
+   */
   private static elementAt(address: SelectionAddress, rows: readonly PartRow[]): Element | undefined {
+    if (address.path) {
+      const keys = partKeysFor(rows)
+      const last = address.path.slice(address.path.lastIndexOf("/"))
+      const byId = last.includes("#") ? (key: string) => key.endsWith(last) : () => false
+      const entries = [...keys]
+      return (entries.find(([, key]) => key === address.path) ?? entries.find(([, key]) => byId(key)))?.[0]
+    }
     if (address.place) {
       const same = rows.filter((row) => writtenKeyOf(row.element) === address.place)
       const element = same[address.nth ?? 0]?.element
       if (element?.localName === address.tag) return element
     }
-    const row = rows[address.index]
-    return row?.element.localName === address.tag ? row.element : undefined
+    const row = address.index === undefined ? undefined : rows[address.index]
+    return row && row.element.localName === address.tag ? row.element : undefined
   }
 
   /**
@@ -653,14 +647,10 @@ export class Inspector {
   private static rememberSelection(elements: readonly Element[]): void {
     const area = appArea
     const rows = area ? Inspector.partsIn(area) : []
+    const keys = partKeysFor(rows)
     const addresses = elements.flatMap((element): SelectionAddress[] => {
-      const index = rows.findIndex((row) => row.element === element)
-      if (index < 0) return []
-      const place = writtenKeyOf(element)
-      const nth = place
-        ? rows.filter((row) => writtenKeyOf(row.element) === place).findIndex((row) => row.element === element)
-        : 0
-      return [{ index, tag: element.localName, place, nth }]
+      const path = keys.get(element)
+      return path ? [{ path }] : []
     })
     if (addresses.length) editorPrefs.set(Inspector.selectionPref, addresses)
   }
@@ -677,19 +667,6 @@ export class Inspector {
           ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
           : Inspector.partsIn(child, depth)
     )
-  }
-
-  /** `element`'s key among the app's parts, as a string (`addressKey()`):  `undefined` outside the app. */
-  static keyOf(element: Element): string | undefined {
-    const address = Inspector.addressOf(element)
-    return address && addressKey(address)
-  }
-
-  /** Where `element` sits among the app's parts, to find it again:  `undefined` outside the app. */
-  private static addressOf(element: Element): PartAddress | undefined {
-    const area = appArea
-    const index = area ? Inspector.partsIn(area).findIndex((row) => row.element === element) : -1
-    return index < 0 ? undefined : { index, tag: element.localName }
   }
 
   /** The pref remembering what's selected, the project's own:  `inspector:selected:@spell/examples/tic-tac-toe`. */
@@ -1521,15 +1498,12 @@ const POSITION_SUFFIX = "-position"
 /** One of the app's parts, as the parts tree lists it:  the part, and how deep it sits. */
 export type PartRow = { element: Element; depth: number }
 
-/** Where a part is among the app's parts (`partsIn()`), and its tag. */
-export type PartAddress = { index: number; tag: string }
-
 /**
- * Where a selected part was, to select it again.
- * - By where it's written first (`place`), the `nth` drawn from that place, so a move in the program doesn't lose it.
- * - Its place among the parts, for what's written nowhere:  something a widget made.
+ * Where a selected part was, to select it again:  its `path` among the parts (`partKeysFor()`).
+ * - Remembered before paths (epic `editor` I171), and still read:  where it's written first (`place`), the `nth` drawn
+ *   from that place;  else its place among the parts (`index`) and its `tag`.
  */
-type SelectionAddress = PartAddress & { place?: string; nth?: number }
+type SelectionAddress = { path?: string; index?: number; tag?: string; place?: string; nth?: number }
 
 /** `element`'s own words, its text children's, shortened to `WORDS_LENGTH` characters:  `""` for none. */
 function ownWords(element: Element): string {
@@ -1600,9 +1574,32 @@ function isMadeUpId(id: string, thing: object): boolean {
   return new RegExp(`^${kebabCase(thing.constructor.name) || "thing"}-[0-9a-z]{8}$`).test(id)
 }
 
-/** A part's place as one key:  `4:tic-tac-toe-square`. */
-export function addressKey(address: PartAddress): string {
-  return `${address.index}:${address.tag}`
+/**
+ * Each part's key, from `rows` (`Inspector.partsIn()`):  its PATH, which stays the same while the app draws more.
+ * - Its parent's key, then its tag and its `id`:  `/solitaire-app:0/ui-container:0/solitaire-column#C5`;
+ *   with no `id`, which of its parent's parts of that tag with no `id` it is:  `ui-action:2`.
+ * - Never its place among all the parts:  that moves whenever a part is added above it.
+ *   So the Views tree's rows opened by hand, and the selection, followed the place, not the part:
+ *   a column opened by hand moved to another column each time Solitaire's deal added a card above it,
+ *   so columns opened and closed as the cards came (epic `editor` I171).
+ */
+export function partKeysFor(rows: readonly PartRow[]): Map<Element, string> {
+  const keys = new Map<Element, string>()
+  // the parts round the row walked now, outermost first:  each one's key, and how many of each tag it holds with no `id`
+  const around: { key: string; counts: Map<string, number> }[] = []
+  const topCounts = new Map<string, number>()
+  for (const { element, depth } of rows) {
+    around.length = depth
+    const parent = around.at(-1)
+    const counts = parent?.counts ?? topCounts
+    const tag = element.localName
+    const nth = counts.get(tag) ?? 0
+    if (!element.id) counts.set(tag, nth + 1)
+    const key = `${parent?.key ?? ""}/${tag}${element.id ? `#${element.id}` : `:${nth}`}`
+    keys.set(element, key)
+    around.push({ key, counts: new Map() })
+  }
+  return keys
 }
 
 /** What the Inspector reads of a Spell UI attribute:  its name and kind (`size`, `color` ...). */
@@ -1612,10 +1609,6 @@ export type FieldSpec = { name: string; kind?: string; group?: E.AttributeGroup;
 const OPEN_PREF = "inspector"
 /** The start of the pref remembering the trail, a project's each. */
 const TRAIL_PREF = "inspector:trail"
-/** The pref remembering which cards show. */
-const PANELS_PREF = "inspector:cards"
-/** The pref that remembered them before the Code card (I109):  read once, Code put under what's selected. */
-const OLD_PANELS_PREF = "inspector:panels"
 /** The pref remembering which of the properties card's sections are folded. */
 const FOLDED_GROUPS_PREF = "inspector:foldedGroups"
 /** The pref remembering which cards are folded. */
@@ -1711,22 +1704,6 @@ export type TypePane = (typeof TYPE_PANES)[number]
 /** Any of the Inspector's cards. */
 export type InspectorCardId = InspectorPanel | TypePane
 
-/**
- * The cards showing, in order (remembered:  `PANELS_PREF`).
- * - A card remembered that's gone (Events) is dropped, so an old pref hides nothing.
- * - A pref from before the Code card shows it under what's selected (`withCodeCard()`).
- */
-const [shownPanels, setShownPanels] = createSignal<readonly InspectorPanel[]>(
-  knownPanels(editorPrefs.get(PANELS_PREF)) ??
-    withCodeCard(knownPanels(editorPrefs.get(OLD_PANELS_PREF))) ??
-    INSPECTOR_PANELS
-)
-
-/** `panels` remembered before the Code card:  with it under what's selected, as Code was a band of that card. */
-function withCodeCard(panels: InspectorPanel[] | undefined): InspectorPanel[] | undefined {
-  if (!panels?.includes("properties")) return panels
-  return INSPECTOR_PANELS.filter((panel) => panel === "code" || panels.includes(panel))
-}
 /** The cards folded to their headers (remembered:  `FOLDED_PANELS_PREF`). */
 const [foldedPanels, setFoldedPanels] = createSignal<readonly InspectorCardId[]>(
   knownPanels(editorPrefs.get(FOLDED_PANELS_PREF), [...INSPECTOR_PANELS, ...TYPE_PANES]) ?? []
@@ -1753,11 +1730,6 @@ const [foldedGroups, setFoldedGroups] = createSignal<readonly InspectorBand[]>(
   (editorPrefs.get(FOLDED_GROUPS_PREF) as InspectorBand[] | undefined) ?? ["advanced"]
 )
 
-/** Show `panels`, and remember them. */
-function setPanels(panels: readonly InspectorPanel[]): void {
-  setShownPanels(panels)
-  editorPrefs.set(PANELS_PREF, panels)
-}
 const [isInspecting, setInspecting] = createSignal(false)
 /** What's selected, the last one clicked last (`Inspector.allSelected`). */
 const [selectedParts, setSelectedParts] = createSignal<readonly SelectedPart[]>([])
@@ -2557,7 +2529,8 @@ class PartSelector {
  *   - its code (`<CodeCard>`):  its events, then its actions, while one thing is selected;
  *     while nothing is, its bar alone, folded for good (`<NoCodeCard>`, T69)
  *   - the app's views, things or templates (`<InspectorViews>`)
- * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
+ * - Every card shows while the column does (epic `editor` T78:  no card hidden on its own);
+ *   the top bar's Inspector button opens and closes the column (`<InspectorToggle>`).
  * - Each card folds to its header (`<InspectorCard>`):
  *   a folded card keeps its header's height, the others share the rest.
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
@@ -2577,8 +2550,8 @@ export function InspectorColumn(): JSX.Element {
   void loadBrandTokens()
   const rows = appParts()
   const shown = createMemo((): InspectorCardId[] => {
-    const cards = INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel) && (panel !== "code" || hasCodeCard()))
-    if (!Inspector.typeEdited || !cards.includes("properties")) return cards
+    const cards = INSPECTOR_PANELS.filter((panel) => panel !== "code" || hasCodeCard())
+    if (!Inspector.typeEdited) return cards
     return [cards[0]!, ...TYPE_PANES, ...cards.slice(1)]
   })
   const layout = createMemo(() => cardsLayout(shown(), !Inspector.inspected))
@@ -2637,19 +2610,17 @@ export function InspectorColumn(): JSX.Element {
             (split: HTMLElement) => glide.watch(split)
           ]}
         >
-          <Show when={Inspector.isShown("properties")}>
-            <div class="SplitPane">
-              <PropertiesCard />
-            </div>
-          </Show>
-          <Show when={Inspector.isShown("code") && hasCodeCard()}>
+          <div class="SplitPane">
+            <PropertiesCard />
+          </div>
+          <Show when={hasCodeCard()}>
             <div class="SplitPane">
               <Show when={codeCardPart()} fallback={<NoCodeCard />}>
                 {(part) => <CodeCard element={part().element} thing={part().thing} />}
               </Show>
             </div>
           </Show>
-          <Show when={Inspector.isShown("properties") && Inspector.typeEdited} keyed>
+          <Show when={Inspector.typeEdited} keyed>
             {(thing) => (
               <>
                 <div class="SplitPane">
@@ -2664,11 +2635,9 @@ export function InspectorColumn(): JSX.Element {
               </>
             )}
           </Show>
-          <Show when={Inspector.isShown("views")}>
-            <div class="SplitPane">
-              <InspectorViews rows={rows()} />
-            </div>
-          </Show>
+          <div class="SplitPane">
+            <InspectorViews rows={rows()} />
+          </div>
         </ui-split-panel>
       </aside>
     </Show>
@@ -2943,7 +2912,8 @@ function pinnedAt(height: number): Keyframe {
  * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
  * `<ui-property-editor>` of every property it has, those it sets first
  * (Owen:  "lose that [More]. Show all of the properties").
- * - Inspecting again is the top bar's Inspect app (`<InspectAppButton>`), beside the Inspector's button.
+ * - Inspecting again is the top bar's Inspect app (`<InspectAppButton>`):  the card has no button of its own
+ *   (Owen, 2026-11-15, T78).
  * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
@@ -2996,8 +2966,6 @@ function PropertiesCard(): JSX.Element {
           )}
         </Show>
       }
-      // Inspect app in the card's header, at its right before the eye (Owen, 2026-11-13, I60)
-      actions={<InspectAppButton slot="right" />}
     >
       <Show
         when={inspected()}
@@ -3678,10 +3646,9 @@ const HALF_ROW = "1/2"
 
 /****************
  * ### `<InspectorToggle>`
- * The Inspector's button, in the top bar, right of Inspect app:  its icon, then a dropdown arrow,
- * as Events' "+" (Owen).
- * - The icon opens the column with the cards it last showed, or closes it (`Inspector.toggle()`).
- * - The arrow:  a menu of the cards, each checked when it shows;  choosing one shows or hides it.
+ * The Inspector's button, in the top bar, right of Inspect app:  opens the column, every card in it,
+ * or closes it (`Inspector.toggle()`).
+ * - No menu of cards (epic `editor` T78;  Owen:  "no need to hide the sections of the inspector sidebar separately").
  ****************/
 export function InspectorToggle(): JSX.Element {
   return (
@@ -3694,43 +3661,20 @@ export function InspectorToggle(): JSX.Element {
         title={appTexts.text("inspector")}
         onClick={() => Inspector.toggle()}
       />
-      <ui-dropdown
-        class="InspectorPanelsDropdown"
-        aria-label={appTexts.text("inspectorPanels")}
-        title={appTexts.text("inspectorPanels")}
-        ref={on<{ value: string }>("ui-changed", (event) => {
-          const panel = event.detail.value as InspectorPanel
-          if (!panel) return
-          Inspector.setShown(panel, !Inspector.isShown(panel))
-          // chosen again next time:  a dropdown tells only of a new value
-          const dropdown = event.currentTarget as HTMLElement & { value: string }
-          queueMicrotask(() => (dropdown.value = ""))
-        })}
-      >
-        <span slot="trigger" />
-        <For each={INSPECTOR_PANELS}>
-          {(panel) => (
-            <ui-item value={panel} icon={Inspector.isShown(panel) ? "check" : "blank"}>
-              {appTexts.text(PANEL_TEXTS[panel])}
-            </ui-item>
-          )}
-        </For>
-      </ui-dropdown>
     </span>
   )
 }
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after Edit (and in the Inspector card's header):
+ * Inspect app, in the top bar's Run | Edit group, after Edit:
  * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
- * - `slot`:  the bare icon's place in a toolbar, `right` in a card's header.
  ****************/
-export function InspectAppButton(props: { id?: string; item?: boolean; slot?: string }): JSX.Element {
+export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
   const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
   const inspect = () => {
@@ -3751,7 +3695,6 @@ export function InspectAppButton(props: { id?: string; item?: boolean; slot?: st
   ) : (
     <ui-icon
       id={props.id}
-      slot={props.slot}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}
@@ -3790,16 +3733,6 @@ export function InspectHelp(props: { for: string }): JSX.Element {
       />
     </ui-popup>
   )
-}
-
-/** Each card's name, in the menu of cards. */
-export const PANEL_TEXTS: Record<InspectorCardId, AppTextKey> = {
-  properties: "inspectorProperties",
-  code: "inspectorCode",
-  views: "inspectorParts",
-  events: "inspectorEvents",
-  actions: "inspectorActions",
-  tests: "inspectorTests"
 }
 
 /** The Spell Brand theme's tokens on `.Inspector`, once loaded. */

@@ -264,11 +264,39 @@ export type RuleTypeArgs = { readonly Groups: AnyGroups; readonly MatchData: Any
 
 /** One change to shared parse state which a `ParseJournal` can take back, and put back again. */
 export type JournalChange = {
-  /** Put state back to how it was before the change. */
+  /**
+   * Put state back to how it was before the change.
+   * - Always the newest change done:  the journal undoes newest first.
+   */
   undo: () => void
-  /** Make the change again, e.g. after `undo()`. */
+  /**
+   * Make the change again, e.g. after `undo()`.
+   * - An `op` change is made again onto the state as it is NOW (epic `language` P59):
+   *   a record added to a list goes on the end of the list's items as they are, not back to the list it was added to.
+   *   So a later file's changes can be put back after an earlier file parsed again -- see `P.IncrementalProject`.
+   */
   redo: () => void
+  /**
+   * What it changed, so two parses of a file can be compared (`P.IncrementalProject`, epic `language` P59).
+   * - `undefined`:  not said, so a file making it is never kept after an earlier file changes.
+   */
+  change?: JournalChangeKind
 }
+
+/**
+ * What a `JournalChange` changed -- see `JournalChange.change`.
+ * - `list`:  `items` added to `list` (`ScopeList.add()`), or put in place of its items with their keys (`replace`)
+ * - `assign`:  props set on `target`, each to `next`'s value, each from `previous`'s
+ * - `rule`:  `rule` added to `parser`'s own rules under `ruleName` (`Parser.addRule()`)
+ * - `note`:  `value` noted against `target` in a table of its own, e.g. a name a type's things are given
+ * - `list`, `rule` and `note` changes are redone onto the state as it is now (see `JournalChange.redo`);
+ *   an `assign` sets its values, whatever's there.
+ */
+export type JournalChangeKind =
+  | { kind: "list"; list: P.ScopeList; items: readonly unknown[]; replace?: boolean }
+  | { kind: "assign"; target: object; next: Record<string, unknown>; previous: Record<string, unknown> }
+  | { kind: "rule"; parser: P.Parser; ruleName: string; rule: P.Rule }
+  | { kind: "note"; target: object; value: unknown }
 
 /** Point in a `ParseJournal` to rewind to -- from `journal.mark()`, compared by identity. */
 export type JournalMark = { readonly isMark: true }

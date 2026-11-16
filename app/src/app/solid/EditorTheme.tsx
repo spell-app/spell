@@ -132,13 +132,13 @@ export class EditorTheme {
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async showFullView(): Promise<void> {
-    const [{ EditorMode, ProgramPanelShown }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
+    const [{ EditorMode, ProgramPanelShown }, { Inspector }] = await Promise.all([
       import("./EditorMode"),
       import("./Inspector")
     ])
     EditorMode.show("edit")
     ProgramPanelShown.set(true)
-    for (const panel of INSPECTOR_PANELS) Inspector.setShown(panel, true)
+    Inspector.open()
     if (Inspector.selected) return
     for (let tries = 0; tries < PICK_TRIES; tries++) {
       const area = Inspector.area

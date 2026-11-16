@@ -26,6 +26,11 @@ export class ValueOtherwise extends SpellStatement<"value"> {
     SpellConstant.declareValue(match, match.groups.value)
   }
 
+  /** Only when it declared a value -- see `SpellConstant.valueScopeChanges()`. */
+  getScopeChanges(match?: P.MatchFor<this>): P.ScopeChanges | undefined {
+    return SpellConstant.valueScopeChanges(match)
+  }
+
   getAST(match: P.MatchFor<this>): P.ASTReturnStatement {
     return new P.ASTReturnStatement(match, { value: match.groups.value.AST as P.ASTExpression })
   }

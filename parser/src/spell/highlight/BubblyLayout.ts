@@ -12,6 +12,7 @@ import type {
   BubblyPiece,
   BubblyPieceKind,
   BubblyRulePresentation,
+  BubblyPillName,
   BubblyUnderline
 } from "./highlight.types"
 import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
@@ -74,11 +75,17 @@ export class BubblyLayout {
   /** Every statement's underlines, from the parse:  each line takes those inside it. */
   private readonly underlines: BubblyUnderline[] = []
 
+  /** The names inside the head pill being laid out, bold:  `BubblyLine.pillNames` (`paintTyped()`). */
+  private pillNames: BubblyPillName[] = []
+
   /** Where each tag that declares a member starts:  `BubblyDrawing.declaringTags`. */
   private readonly declaringTags = new Set<number>()
 
   /** Words that point back (`it`, `its`):  drawn plain. */
   private readonly pronouns: Set<string>
+
+  /** Words a blank's kind follows, never part of it:  its language's articles and pronouns (`a`, `el`, `its`). */
+  private readonly smallWords: Set<string>
 
   /** The words that say an ability (`draggable`):  a name, in a head whose row `namesAbility`. */
   private readonly abilityWord: RegExp
@@ -88,7 +95,9 @@ export class BubblyLayout {
     parser: SP.SpellParser,
     parsed?: P.Match
   ) {
-    this.pronouns = (parser.language ?? SP.Language.default).words.pronouns
+    const { words } = parser.language ?? SP.Language.default
+    this.pronouns = words.pronouns
+    this.smallWords = new Set([...words.memberStopWords, ...words.pronouns])
     this.abilityWord = parser.declarations.abilityWord
     this.paint = Array.from({ length: text.length })
     this.spans = SP.SpellHighlighter.spans(text, parser, parsed)
@@ -160,13 +169,6 @@ export class BubblyLayout {
     if (kind?.end !== undefined) this.overlays.push({ start, end: kind.end, kind: "reference", order: 1 })
     for (const plain of descendantsNamed(match, row.plain))
       this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 2 })
-    // `dropped` in `when a card is dropped`:  what the handler is for, a name (epic `language` I100)
-    for (const group of row.names ?? []) {
-      for (const name of [match.groups[group]].flat()) {
-        if (name?.start !== undefined && name.end !== undefined)
-          this.overlays.push({ start: name.start, end: name.end, kind: "reference", order: 1 })
-      }
-    }
   }
 
   ////////////////
@@ -175,13 +177,15 @@ export class BubblyLayout {
 
   /**
    * Underline `statement`'s values and questions, outermost only (`BubblyUnderline`);  a head's only in what it draws
-   * as a step (its row's `steps`), a drawing's markup none.
+   * as a step (its row's `steps`), and an action's blanks;  a drawing's markup none.
    */
   private underlineStatement(statement: P.Match) {
     if (this.text[statement.start!] === "<") return
     const row = BubblyPresentation.for(statement.rule)
     if (!row?.head) return this.underlineIn(statement)
     for (const step of descendantsNamed(statement, row.steps)) this.underlineIn(step)
+    if (row.typedAfterLead)
+      for (const blank of this.blanksOf(statement, row)) this.underline(blank.start, blank.end, "value")
   }
 
   /**
@@ -468,13 +472,24 @@ export class BubblyLayout {
   /** `line`'s pieces:  a head's (`head`), a drawing's markup, or a step's. */
   private lineOf(line: SourceLine, { depth, head }: { depth: number; head?: Head }): BubblyLine {
     const { start, end } = line
+    this.pillNames = []
     this.paintSpans(start, end, head)
     for (const overlay of this.overlays) if (overlay.start >= start && overlay.end <= end) this.paintOverlay(overlay)
     if (head) this.paintHead(head)
     const codes = this.isMarkup(line) ? this.paintMarkup(start, end) : []
     const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
     const pieces = this.piecesOf(start, end, [...underlines, ...codes])
-    return { kind: "line", start, end, depth, pieces, underlines, ...(codes.length ? { codes } : {}) }
+    const { pillNames } = this
+    return {
+      kind: "line",
+      start,
+      end,
+      depth,
+      pieces,
+      underlines,
+      ...(codes.length ? { codes } : {}),
+      ...(pillNames.length ? { pillNames } : {})
+    }
   }
 
   /** Paint each span from `start` to `end` as what it is:  in a head, what was typed is an input. */
@@ -569,40 +584,93 @@ export class BubblyLayout {
   }
 
   /**
-   * An action head's words after its first, to the end of its last input, as ONE pill (`typedAfterLead`):
-   * each stretch between its parameters, its own spaces at either end left out.
+   * An action head's words after its first, to the end of its last input or parameter, as ONE pill
+   * (`typedAfterLead`):  `to <play a card>`, `after <putting a card on a pile>`, `when <a card is dropped>`,
+   * `when <creating solitaire>` (epic `language` I109).
+   * - Its blanks are in it, each its own dotted line (`blanksOf()`), its kind word bold, `a **card**`:
+   *   what the spans painted a name there before the pill (`pillNames`)
+   * - Quoted, `to "play a card"`, its `"` marks are its pill's own, at either end, as any quoted input's.
    */
-  private paintTyped({ statement, row, partOfSpeech }: Head) {
-    const { text } = this
-    const lead = /^\S+\s*/.exec(text.slice(statement.start!, statement.end!))
+  private paintTyped({ statement, row }: Head) {
+    const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, statement.end!))
     if (!lead) return
-    const inputs = descendantsNamed(statement, row.inputs)
-    // a test's words are all its name:  nothing in it is a parameter
-    const params =
-      partOfSpeech === "action" ? descendantsNamed(statement, row.params).map((param) => this.bracketed(param)) : []
-    let end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
-    let from = statement.start! + lead[0].length
-    // a quoted name with parameters, `to "count the points for a card on a pile"`:  drawn as the unquoted one is,
-    // its `"` marks faint at either end;  one with none stays one quoted pill
-    const quoted = params.length ? this.quotedName(statement, from) : undefined
-    if (quoted) {
-      for (let at = quoted.start; at < quoted.end; at++) if (this.paint[at] === "input") this.paint[at] = "words"
-      this.paintRange(quoted.start, quoted.start + 1, "mark")
-      this.paintRange(quoted.end - 1, quoted.end, "mark")
-      from = quoted.start + 1
-      end = quoted.end - 1
+    const startsAt = row.typedFrom
+      ? (statement.groups as Record<string, P.Match | undefined>)[row.typedFrom]?.start
+      : undefined
+    const from = startsAt ?? statement.start! + lead[0].length
+    const typed = [
+      ...descendantsNamed(statement, row.inputs).map((input) => input.end!),
+      ...descendantsNamed(statement, row.params).map((param) => this.bracketed(param).end)
+    ]
+    const end = row.typedToEnd
+      ? this.headEnd(statement)
+      : (this.quotedName(statement, from)?.end ?? Math.max(...typed, 0))
+    if (end <= from) return
+    for (const blank of this.blanksOf(statement, row)) this.pillNames.push(...this.namesIn(blank.start, blank.end))
+    this.paintRange(from, end, "input")
+  }
+
+  /**
+   * A blank's bold words, from `start` to `end`:  the runs painted a name, `card` in `a card`;
+   * none painted one (a create hook's signature, an input already), its words past the small words it starts with
+   * (`smallWords`), `pile` in `a pile`, `solitario` in `el solitario`.
+   */
+  private namesIn(start: number, end: number): BubblyPillName[] {
+    const names = this.namedRuns(start, end)
+    if (names.length) return names
+    let from = start
+    for (const word of this.text.slice(start, end).matchAll(/\S+/g)) {
+      const at = start + word.index
+      if (at !== from || !this.smallWords.has(word[0].toLowerCase())) break
+      from = at + word[0].length
+      while (this.text[from] === " ") from++
     }
-    for (const param of [...params.filter((each) => each.start < end), { start: end, end }].sort(
-      (a, b) => a.start - b.start
-    )) {
-      const words = text.slice(from, param.start)
-      const trimmed = words.trim()
-      if (trimmed) {
-        const at = from + words.indexOf(trimmed)
-        this.paintRange(at, at + trimmed.length, "input")
-      }
-      from = Math.max(from, param.end)
+    return from < end ? [{ start: from, end }] : []
+  }
+
+  /** The runs from `start` to `end` painted a name, a single space between two words of one joined. */
+  private namedRuns(start: number, end: number): BubblyPillName[] {
+    const names: BubblyPillName[] = []
+    for (let at = start; at < end; at++) {
+      if (this.paint[at] !== "reference") continue
+      const last = names.at(-1)
+      // `card image`:  one name
+      if (last && (last.end === at || (last.end === at - 1 && this.text[at - 1] === " "))) last.end = at + 1
+      else names.push({ start: at, end: at + 1 })
     }
+    return names
+  }
+
+  /** Where `statement`'s head ends:  before its body and a comment after it, its spaces and a `:` left out. */
+  private headEnd(statement: P.Match): number {
+    const body = (statement.data as { body?: P.Match }).body
+    let end = body?.start ?? statement.end!
+    const comment = this.spans.find(
+      (span) => span.kind === COMMENT && span.start > statement.start! && span.start < end
+    )
+    if (comment) end = comment.start
+    while (end > statement.start! && /[\s:]/.test(this.text[end - 1]!)) end--
+    return end
+  }
+
+  /**
+   * A head's blanks (`typedAfterLead`), each underlined in its pill:
+   * - an action's parameters, `to play <a card>`, `to move (<a card>) to (<a pile>)` (`params`)
+   * - a drag handler's thing, from after its first word, `when <a card> is dropped` (`blankThrough`)
+   * - what a create hook makes, its signature but its first word, `when creating <a card image>` (`blankAfterVerb`)
+   */
+  private blanksOf(statement: P.Match, row: BubblyRulePresentation): Array<{ start: number; end: number }> {
+    const blanks = descendantsNamed(statement, row.params).map(({ start, end }) => ({ start: start!, end: end! }))
+    const groups = statement.groups as Record<string, P.Match | P.Match[] | undefined>
+    const through = row.blankThrough ? [groups[row.blankThrough]].flat()[0] : undefined
+    const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, statement.end!))?.[0].length ?? 0
+    if (through?.end !== undefined) blanks.push({ start: statement.start! + lead, end: through.end })
+    const made = row.blankAfterVerb ? [groups[row.blankAfterVerb]].flat()[0] : undefined
+    if (made?.start !== undefined && made.end !== undefined) {
+      const verb = /^\S+\s*/.exec(this.text.slice(made.start, made.end))?.[0].length ?? 0
+      if (made.start + verb < made.end) blanks.push({ start: made.start + verb, end: made.end })
+    }
+    return blanks
   }
 
   /** The stretch of `statement`'s quoted name, its `"` marks included, when it starts at `from`;  else `undefined`. */
@@ -728,10 +796,13 @@ export class BubblyLayout {
   /**
    * The painted stretch from `start` to `end`, cut into pieces:
    * - words of one name join, a space between (`two sided view`, `card setup`)
-   * - cut where each of `stretches` starts and ends (its underlines, its code), so it starts and ends with a piece
+   * - cut where each of `stretches` starts and ends (its underlines, its code), so it starts and ends with a piece;
+   *   but for an underline inside a pill, a head's blank (`to play <a card>`):  the pill stays one piece
    */
   private piecesOf(start: number, end: number, stretches: Array<{ start: number; end: number }>): BubblyPiece[] {
-    const cuts = new Set(stretches.flatMap((each) => [each.start, each.end]))
+    // never inside a pill:  a head's blank underlined in it (`to play <a card>`) leaves it ONE piece
+    const isInPill = (at: number) => this.paint[at - 1] === "input" && this.paint[at] === "input"
+    const cuts = new Set(stretches.flatMap((each) => [each.start, each.end]).filter((at) => !isInPill(at)))
     const runs: BubblyPiece[] = []
     for (let at = start; at < end; at++) {
       const paint = this.paint[at] ?? "words"
@@ -810,6 +881,9 @@ const COMMENT_RULE = "comment"
 
 /** The rule of a statement's body:  never walked into for a head's inputs. */
 const BLOCK_RULE = "block"
+
+/** A comment's span. */
+const COMMENT = "comment"
 
 /** A keyword span. */
 const KEYWORD = "keyword"

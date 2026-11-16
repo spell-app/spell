@@ -52,7 +52,13 @@ import type { EditorMemberName, EditorPartName } from "spell/app/app/layout/edit
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
-import { CodeOutputPane, CodeOutputShown, FollowAlong } from "spell/app/app/solid/CodeOutput"
+import {
+  CodeOutputPane,
+  CodeOutputShown,
+  CompiledCodeButton,
+  FollowAlong,
+  LANGUAGE_LOOKS
+} from "spell/app/app/solid/CodeOutput"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
@@ -545,12 +551,10 @@ function appGrows(hidesCode: boolean): string {
 const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
-/** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key. */
+/** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key:  a language's as the compiled code's. */
 const TAB_LOOKS: Record<ProgramTabId, { icon: string; text: AppTextKey }> = {
   output: { icon: "list", text: "outputTab" },
-  javascript: { icon: "js", text: "javascriptTab" },
-  typescript: { icon: "code", text: "typescriptTab" },
-  python: { icon: "python", text: "pythonTab" },
+  ...LANGUAGE_LOOKS,
   tree: { icon: "tree", text: "treeTab" },
   reference: { icon: "book", text: "referenceTab" }
 }
@@ -569,7 +573,8 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
  *   then File · Edit · View · Run · Help (`MenuBar.tsx`)
- * - middle:  Run | Edit, then in Edit, Inspect app and the code's icon, in the same group
+ * - middle:  Run | Edit, then in Edit, the code's icon, the compiled code's (its language's icon) and Inspect app,
+ *   in the same group
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
@@ -584,7 +589,13 @@ export function EditorToolbar(props: { mode: Mode }) {
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
     modeButtons: {
-      draw: () => <ModeButtons current={props.mode} inspect={<InspectAppButton id={INSPECT_APP_ID} item />} />
+      draw: () => (
+        <ModeButtons
+          current={props.mode}
+          compiled={<CompiledCodeButton />}
+          inspect={<InspectAppButton id={INSPECT_APP_ID} item />}
+        />
+      )
     },
     tools: {
       draw: () => (
@@ -609,12 +620,16 @@ export function EditorToolbar(props: { mode: Mode }) {
       {/* no Spell:  every menu still, in a plain row, so a person can go on */}
       <Show when={bar.isBroken()}>
         <AppMenu class="EditorBar">
-          {parts.spellMenu.draw()}
-          {parts.projectMenu.draw()}
-          {parts.appMenus.draw()}
+          <ui-menu slot="start">
+            {parts.spellMenu.draw()}
+            {parts.projectMenu.draw()}
+            {parts.appMenus.draw()}
+          </ui-menu>
           {parts.modeButtons.draw()}
-          {parts.tools.draw()}
-          {parts.you.draw()}
+          <ui-menu slot="end">
+            {parts.tools.draw()}
+            {parts.you.draw()}
+          </ui-menu>
         </AppMenu>
       </Show>
     </div>

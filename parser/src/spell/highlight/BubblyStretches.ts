@@ -14,14 +14,15 @@ import type {
  * underline (`underline`), over the stretches it runs under.
  * - What an editor needs that the drawing leaves to the drawer:
  *   - a quoted input split in three:  its own `"`, its words, its closing `"` (`quote-open`, `input`, `quote-close`)
- *   - a head's lone `"` marks (a quoted action name with parameters, its words pills between them):
- *     `quote-open` and `quote-close` too
  *   - the name a head defines, `isName`:  its first quoted input (`"card"` in `a "card" is a view`),
- *     or a thing's bare one (`solitaire` in `solitaire is an app`)
+ *     or a thing's bare one (`solitaire` in `solitaire is an app`);
+ *     never an action's pill with blanks in it, `to "play a card"`:  plain, but its blanks' kind words (epic `language` I109)
  *   - a heading's `#`s apart from its words (`heading-mark`, then `heading`)
  *   - the part of speech of the band a head's stretches sit on:  `partOfSpeech`
  *   - each underline, ONE stretch from where its value or question starts to where it ends, so an editor draws it
  *     as one line, its dots even, never one per piece
+ * - each name inside an action head's pill (`BubblyLine.pillNames`), a `reference` stretch over its pill's own, `inPill`:
+ *   the pill stays one stretch, so one white shape, its kind words bold over it (`to <play a card>`)
  * - Read by both editors, so they mark the same stretches the same way (epic `language` P50, P51):
  *   - Monaco's `BubblyMarks` (the app), a line at a time (`ofLine()`), as it builds its shapes round them
  *   - the language server's `spell/bubbly` request, for VS Code's decorations, the whole drawing (`of()`)
@@ -62,15 +63,9 @@ export class BubblyStretches {
       if (end > start) stretches.push({ start, end, kind, ...(band ? { partOfSpeech: band } : {}), ...more })
     }
     let isFirstQuoted = !!band
-    let isInQuotes = false
     for (const piece of line.pieces) {
       const { start, end, kind } = piece
-      if (band && kind === "mark" && text.slice(start, end) === '"') {
-        // a quoted name's own `"`, apart from its words:  `to "count the points for a card on a pile"`
-        add(start, end, isInQuotes ? "quote-close" : "quote-open")
-        isInQuotes = !isInQuotes
-        isFirstQuoted = false
-      } else if (kind === "input" || kind === "choice") {
+      if (kind === "input" || kind === "choice") {
         const isQuoted = BubblyStretches.isQuoted(text, piece)
         if (!isQuoted) {
           // a thing's head defines its name bare too:  `solitaire is an app` (epic `language` T131)
@@ -79,8 +74,9 @@ export class BubblyStretches {
           if (isName) isFirstQuoted = false
           continue
         }
+        const hasBlanks = line.underlines.some((each) => each.start > start && each.end < end)
         add(start, start + 1, "quote-open")
-        add(start + 1, end - 1, kind, { isQuoted, ...(isFirstQuoted ? { isName: true } : {}) })
+        add(start + 1, end - 1, kind, { isQuoted, ...(isFirstQuoted && !hasBlanks ? { isName: true } : {}) })
         add(end - 1, end, "quote-close")
         isFirstQuoted = false
       } else if (kind === "heading") {
@@ -92,6 +88,8 @@ export class BubblyStretches {
         add(start, end, kind)
       }
     }
+    // a blank's kind word, bold over its pill's words:  `card` in `to <play a card>` (epic `language` I109)
+    for (const { start, end } of line.pillNames ?? []) add(start, end, "reference", { inPill: true })
     for (const { start, end, kind } of line.underlines) add(start, end, "underline", { underlines: kind })
     return stretches
   }
@@ -120,6 +118,8 @@ export type BubblyStretch = {
   isQuoted?: boolean
   /** the name its head defines:  its first quoted input */
   isName?: boolean
+  /** a name inside a pill, over the pill's own stretch:  a blank's kind word, `card` in `to <play a card>` */
+  inPill?: boolean
   /** an underline's:  what it groups */
   underlines?: BubblyUnderline["kind"]
 }

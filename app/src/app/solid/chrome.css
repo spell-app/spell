@@ -16,8 +16,9 @@ ui-menu.PanelMenu > ui-item[kind="header"]::part(item) {
   padding-left: 1em;
 }
 
-/* `<AppMenu>`:  its items fill the bar's height, with no room of their own above or below */
-ui-menu.AppMenu ui-item::part(item) {
+/* `<AppMenu>`:  its sub-menus' items fill the bar's height too, with no room of their own above or below
+   (`<ui-app-menu>` does it for its own items:  a sub-menu's adopt only the sub-menu's sheets) */
+ui-app-menu.AppMenu ui-item::part(item) {
   padding-block: 0;
 }
 
@@ -30,7 +31,7 @@ ui-menu.short ui-item::part(item) {
 }
 
 /* "tight" menu */
-ui-menu.tight ui-item::part(item) {
+:is(ui-menu, ui-app-menu).tight ui-item::part(item) {
   padding-inline: 8px;
 }
 
@@ -179,7 +180,7 @@ ui-item.ThemeMenu ui-theme-menu {
 :root {
   --ui-panel-pane-bar-background: var(--spell-header-background);
 }
-ui-menu.AppMenu,
+ui-app-menu.AppMenu,
 ui-menu.PanelMenu,
 .NotebookHeader {
   --spell-bar-group-gap: 60px;
@@ -187,21 +188,21 @@ ui-menu.PanelMenu,
   --spell-bar-icon-color: var(--ui-text-muted);
 }
 /* every bar's icons:  the top bar's, a pane header's, a pane toolbar's (the code pane's:  upload, reload, new file, "...") */
-:is(ui-menu.AppMenu, ui-menu.PanelMenu, .NotebookHeader) ui-icon.IconAction {
+:is(ui-app-menu.AppMenu, ui-menu.PanelMenu, .NotebookHeader) ui-icon.IconAction {
   --ui-icon-width: auto;
   --ui-icon-distance: 0;
   --ui-icon-link-opacity: 1;
   margin-inline: calc(var(--spell-bar-icon-gap) / 2);
   color: var(--spell-bar-icon-color);
 }
-ui-menu.AppMenu .YouAvatar {
+ui-app-menu.AppMenu .YouAvatar {
   margin-inline: calc(var(--spell-bar-icon-gap) / 2);
 }
 /*
  * the "..." menu's icon the size of the bar's other icons, and the same grey:  it drew half as wide again, and stood
  * apart;  its glyph centred on the bar (`display: flex`):  in a line of the menu's smaller text, it hung 1px low
  */
-:is(ui-menu.AppMenu, ui-menu.PanelMenu) ui-item.more-menu ui-dropdown > ui-icon[slot="icon"] {
+:is(ui-app-menu.AppMenu, ui-menu.PanelMenu) ui-item.more-menu ui-dropdown > ui-icon[slot="icon"] {
   display: flex;
   --ui-icon-width: auto;
   --ui-icon-distance: 0;
@@ -209,17 +210,17 @@ ui-menu.AppMenu .YouAvatar {
   font-size: 1.15em;
   color: var(--spell-bar-icon-color);
 }
-:is(ui-menu.AppMenu, ui-menu.PanelMenu) ui-item.more-menu ui-dropdown {
+:is(ui-app-menu.AppMenu, ui-menu.PanelMenu) ui-item.more-menu ui-dropdown {
   /* no room before its icon:  a dropdown keeps it for the text it shows, and this one shows none */
   --ui-dropdown-icon-spacing: 0px;
 }
-:is(ui-menu.AppMenu, ui-menu.PanelMenu) ui-item.more-menu::part(item),
-ui-menu.AppMenu ui-item.ThemeMenu::part(item) {
+:is(ui-app-menu.AppMenu, ui-menu.PanelMenu) ui-item.more-menu::part(item),
+ui-app-menu.AppMenu ui-item.ThemeMenu::part(item) {
   padding-inline: calc(var(--spell-bar-icon-gap) / 2);
 }
 
 /* `<ModeButtons>`:  Run | Edit, in the bar's middle:  its own section, so no room of its own either side */
-ui-menu.AppMenu ui-item.ModeButtons::part(item) {
+ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
@@ -233,7 +234,7 @@ ui-menu.ModeTabs ui-item::part(item) {
  * the right group's thin line, between the Inspector's pair and the rest (Owen's "|"):  in the group's 12px rhythm,
  * as tall as a glyph
  */
-ui-menu.AppMenu .BarToolsLine {
+ui-app-menu.AppMenu .BarToolsLine {
   align-self: center;
   width: 1px;
   height: 18px;
@@ -278,10 +279,10 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * - each section its content's width:  too wide still, the bar scrolls sideways (above), never overlaps
  */
 @media (--ui-mobile) {
-  ui-menu.EditorBar ui-item.ModeButtons {
+  ui-app-menu.EditorBar ui-item.ModeButtons {
     display: none;
   }
-  ui-menu.AppMenu .AppName,
+  ui-app-menu.AppMenu .AppName,
   ui-menu.ModeTabs .ModeText {
     position: absolute;
     inline-size: 1px;
@@ -291,7 +292,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     white-space: nowrap;
     font-size: 0.875em;
   }
-  ui-menu.AppMenu > ui-menu.third::part(menu) {
+  ui-app-menu.AppMenu > ui-menu.third::part(menu) {
     flex: 0 0 auto;
   }
   /* the modes' icons alone:  no room kept for words after them */
@@ -299,7 +300,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     gap: 0;
   }
   /* the springs between the sections:  only the room left over, none of their own */
-  ui-menu.AppMenu ui-item.spring::part(item) {
+  ui-app-menu.AppMenu ui-item.spring::part(item) {
     min-width: 0;
     padding-inline: 0;
   }

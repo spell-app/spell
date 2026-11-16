@@ -556,7 +556,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
 - The click goes to the Inspector, never the app;  inspecting stops once something's selected,
-  and the crosshairs start it again.  Esc stops it.
+  and the top bar's crosshairs start it again.  Esc stops it.
 - To select several while inspecting:  Shift takes everything from the last one clicked, Command or Control adds or
   takes away, and dragging across the app's background draws a rubber band over what it touches.
   The Views tree takes the same clicks.
@@ -565,7 +565,9 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - What's selected is found again by where it's written, after a recompile, a reload or a move.
 - Hold the mouse over what you selected to see where it is written:
   `Written in Deck.spell, line 8:  52 of these come from this one place`.
-- The ✕ in the selected part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
+- Esc lets go of what's selected.
+- The Inspector's cards come and go together:  the top bar's Inspector button shows or hides the whole column,
+  and each card folds to its title, but none is hidden on its own.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
 **Not yet:**  an event's code typed there isn't written back into the code.
@@ -659,7 +661,9 @@ Click a line of the code, a line of compiled code, a row of the Views tree or a 
   Most lines don't, and leave what's selected as it was.
 - It never takes the keyboard's focus, scrolls only what's out of view, and leaves the code alone while you're typing in it.
   It marks the line in the margin, and a thing in another file shows that file.
-- The compiled code is off until you ask:  the code pane's ⋯ shows JavaScript, TypeScript or Python beside the code, and remembers.
+- The compiled code is off until you ask:  the top bar's compiled-code button, between `</>` and the crosshairs, shows it
+  beside the code, and remembers;  its icon is the language it shows, JavaScript, TypeScript or Python,
+  chosen in the compiled code's own tabs.
   - The code's column takes room from the app's while it shows.
   - Under 440px, the code keeps the column.
 
@@ -709,7 +713,8 @@ The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
 - File · Edit · View · Run · Help, each item showing its key
   - File:  New Spell File (⌥⌘N:  ⌘N is the browser's New Window), New CSS File, ─, Save, AutoSave, ─,
     Duplicate File, Revert Changes to the file
-- Run | Edit, in the middle
+- Run | Edit, in the middle, then in Edit the code's `</>`, the compiled code's button (its language's icon)
+  and Inspect app's crosshairs
 - at the right, one group of icons:  in Edit, Inspect app and the Inspector's menu, a thin line;
   then Restart, the theme menu, a palette, and you, as an avatar
 
@@ -720,6 +725,7 @@ a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/m
 The code column:
 - every file of the project as a tab, none closing, a dot on one not saved;
   too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
+  - more than eight, the ones opened lately, and a file icon and ▾ beside them that list every file
   - drag a tab along the row to move its file:  the new order is saved in the project file
 - Save, Revert Changes and New Spell File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
   - Save saves every file with changes not saved, not just the one showing.

@@ -296,3 +296,238 @@ describe("<ui-tree sticky-path>", () => {
     expect(await path(host)).toEqual([])
   })
 })
+
+describe('<ui-tree appearance="columns">', () => {
+  /** A column view:  Acme (Menu (menu.pdf, photos (loaf.jpg)), Site), Books (Catalogue);  nothing open. */
+  async function columns(attributes = "", extraRows = "") {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" ${attributes} label="Work" style="height: 200px; width: 900px">
+        <ui-tree-item label="Acme">
+          <ui-tree-item label="Menu">
+            <ui-tree-item label="menu.pdf"></ui-tree-item>
+            <ui-tree-item label="photos">
+              <ui-tree-item label="loaf.jpg"></ui-tree-item>
+            </ui-tree-item>
+          </ui-tree-item>
+          <ui-tree-item label="Site"></ui-tree-item>
+        </ui-tree-item>
+        <ui-tree-item label="Books">
+          <ui-tree-item label="Catalogue"></ui-tree-item>
+        </ui-tree-item>
+        ${extraRows}
+      </ui-tree>`
+    )) as HTMLElement
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** The open rows, outermost first:  each column's pick. */
+  function chain(host: Element): string[] {
+    return [...host.querySelectorAll("ui-tree-item[open]")].map((item) => item.getAttribute("label")!)
+  }
+
+  /** Where `label`'s row starts, from the tree's own left edge. */
+  function leftOf(host: Element, label: string): number {
+    const line = row(host, label).shadowRoot!.querySelector('[part~="row"]')!
+    return Math.round(line.getBoundingClientRect().left - host.getBoundingClientRect().left)
+  }
+
+  /** Every column title on screen, from left to right. */
+  function titleBoxes(host: Element): HTMLElement[] {
+    const first = [...host.shadowRoot!.querySelectorAll<HTMLElement>(".column-title")]
+    const deeper = [...host.querySelectorAll("ui-tree-item")].flatMap((item) => [
+      ...item.shadowRoot!.querySelectorAll<HTMLElement>(".rows > .column-title")
+    ])
+    return [...first, ...deeper]
+      .filter((title) => title.checkVisibility())
+      .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+  }
+
+  /** The titles over the columns on screen, in order. */
+  function titles(host: Element): string[] {
+    return titleBoxes(host).map((title) => title.textContent!)
+  }
+
+  /** The line after column `index`, which sizes it. */
+  function edge(host: Element, index: number): HTMLElement {
+    return host.shadowRoot!.querySelectorAll<HTMLElement>(".column-edge")[index]!
+  }
+
+  /** Column `index`'s box:  the top rows', else the rows of the pick before it. */
+  function columnBox(host: Element, index: number): HTMLElement {
+    if (index === 0) return host.shadowRoot!.querySelector<HTMLElement>(".column")!
+    const pick = [...host.querySelectorAll("ui-tree-item[open]")][index - 1]!
+    return pick.shadowRoot!.querySelector<HTMLElement>(".rows")!
+  }
+
+  it("picking a row selects it and shows its rows in the next column, beside the first", async () => {
+    const host = await columns()
+    expect(onScreen(host)).toEqual(["Acme", "Books"])
+    click(host, "Acme")
+    await ElementFixture.settle()
+    expect(selected(host)).toEqual(["Acme"])
+    expect(onScreen(host)).toEqual(["Acme", "Menu", "Site", "Books"])
+    expect(leftOf(host, "Books")).toBe(leftOf(host, "Acme"))
+    expect(leftOf(host, "Menu") - leftOf(host, "Acme")).toBeGreaterThan(100)
+    // the next column starts at the top, beside the first, not under Acme
+    expect(row(host, "Menu").getBoundingClientRect().top).toBe(row(host, "Acme").getBoundingClientRect().top)
+  })
+
+  it("picking deeper keeps the chain;  picking earlier closes the columns after it", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    click(host, "Menu")
+    await ElementFixture.settle()
+    click(host, "photos")
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Acme", "Menu", "photos"])
+    expect(selected(host)).toEqual(["photos"])
+    expect(leftOf(host, "loaf.jpg")).toBeGreaterThan(leftOf(host, "menu.pdf"))
+    click(host, "Books")
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Books"])
+    expect(onScreen(host)).toEqual(["Acme", "Books", "Catalogue"])
+  })
+
+  it("a picked row with nothing inside is marked a pick, and opens no column", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    click(host, "Site")
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Acme", "Site"])
+    expect(selected(host)).toEqual(["Site"])
+    expect(row(host, "Site").shadowRoot!.querySelector(".rows")).toBeNull()
+    expect(host.shadowRoot!.querySelectorAll(".column-edge").length).toBe(2)
+  })
+
+  it("a cancelled `ui-selecting` neither selects nor opens", async () => {
+    const host = await columns()
+    host.addEventListener("ui-selecting", (event) => event.preventDefault())
+    click(host, "Acme")
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual([])
+    expect(selected(host)).toEqual([])
+  })
+
+  it("keys select as they move, as the Finder's do:  up and down in a column, right and left between them", async () => {
+    const host = await columns()
+    row(host, "Acme").focus()
+    await press("ArrowDown")
+    expect(document.activeElement).toBe(row(host, "Books"))
+    expect(selected(host)).toEqual(["Books"])
+    expect(chain(host)).toEqual(["Books"])
+    await press("ArrowUp")
+    expect(selected(host)).toEqual(["Acme"])
+    expect(chain(host)).toEqual(["Acme"])
+    await press("ArrowRight")
+    expect(document.activeElement).toBe(row(host, "Menu"))
+    expect(selected(host)).toEqual(["Menu"])
+    expect(chain(host)).toEqual(["Acme", "Menu"])
+    // down stays in Menu's column:  never into Books, the next row of the first
+    await press("ArrowDown")
+    expect(document.activeElement).toBe(row(host, "Site"))
+    await press("ArrowDown")
+    expect(document.activeElement).toBe(row(host, "Site"))
+    await press("Home")
+    expect(document.activeElement).toBe(row(host, "Menu"))
+    await press("ArrowRight")
+    expect(selected(host)).toEqual(["menu.pdf"])
+    await press("ArrowDown")
+    expect(chain(host)).toEqual(["Acme", "Menu", "photos"])
+    // back out:  Menu selected again, the columns after it kept, photos still its column's pick
+    await press("ArrowLeft")
+    expect(document.activeElement).toBe(row(host, "Menu"))
+    expect(selected(host)).toEqual(["Menu"])
+    expect(chain(host)).toEqual(["Acme", "Menu", "photos"])
+    // and in again, onto the row picked there before
+    await press("ArrowRight")
+    expect(document.activeElement).toBe(row(host, "photos"))
+    expect(host.querySelectorAll('ui-tree-item[tabindex="0"]').length).toBe(1)
+  })
+
+  it("titles each column by level, the last title repeating for deeper ones", async () => {
+    const host = await columns('column-titles="Clients, Projects"')
+    expect(titles(host)).toEqual(["Clients"])
+    click(host, "Acme")
+    await ElementFixture.settle()
+    click(host, "Menu")
+    await ElementFixture.settle()
+    click(host, "photos")
+    await ElementFixture.settle()
+    expect(titles(host)).toEqual(["Clients", "Projects", "Projects", "Projects"])
+    // one row of headers:  every title at the same height
+    expect(new Set(titleBoxes(host).map((title) => title.getBoundingClientRect().top)).size).toBe(1)
+  })
+
+  it("draws no titles without `column-titles`", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    expect(titles(host)).toEqual([])
+  })
+
+  it("keeps each column's title at its top while the column scrolls", async () => {
+    const many = Array.from({ length: 40 }, (_, at) => `<ui-tree-item label="row ${at}"></ui-tree-item>`).join("")
+    const host = await columns('column-titles="Clients"', many)
+    const column = columnBox(host, 0)
+    const [title] = titleBoxes(host)
+    const top = title!.getBoundingClientRect().top
+    column.scrollTop = 300
+    await ElementFixture.settle()
+    expect(column.scrollTop).toBe(300)
+    expect(title!.getBoundingClientRect().top).toBe(top)
+    // opaque:  the rows slide under it, unseen
+    expect(getComputedStyle(title!).backgroundColor).not.toMatch(/rgba\(.*, 0\)|transparent/)
+  })
+
+  it("the line after a column resizes it:  a drag, the arrow keys, a double-click to put it back", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    const start = columnBox(host, 0).getBoundingClientRect().width
+    const line = edge(host, 0)
+    const box = line.getBoundingClientRect()
+    const at = { clientX: box.left + 3, clientY: box.top + 20, pointerId: 1, button: 0, bubbles: true, composed: true }
+    line.dispatchEvent(new PointerEvent("pointerdown", at))
+    window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: at.clientX + 60 }))
+    window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: at.clientX + 60 }))
+    await ElementFixture.settle()
+    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(Math.round(start + 60))
+    // the next column moved with it
+    expect(leftOf(host, "Menu") - leftOf(host, "Acme")).toBe(Math.round(start + 60))
+    line.focus()
+    line.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(Math.round(start + 44))
+    line.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(Math.round(start))
+  })
+
+  it("remembers the widths under its `id`, by level;  a tree without one doesn't keep them", async () => {
+    localStorage.removeItem("ui-tree-column-widths:work")
+    const host = await columns('id="work"')
+    edge(host, 0).dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(JSON.parse(localStorage.getItem("ui-tree-column-widths:work")!)).toEqual([expect.any(Number)])
+    const width = columnBox(host, 0).getBoundingClientRect().width
+    const again = await columns('id="work"')
+    expect(columnBox(again, 0).getBoundingClientRect().width).toBe(width)
+    localStorage.removeItem("ui-tree-column-widths:work")
+
+    const keys = Object.keys(localStorage).length
+    const plain = await columns()
+    edge(plain, 0).dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(Object.keys(localStorage).length).toBe(keys)
+  })
+
+  it("is accessible", async () => {
+    const host = await columns('column-titles="Clients, Projects, Files"')
+    click(host, "Acme")
+    await ElementFixture.settle()
+    await expectAccessible(host)
+  })
+})

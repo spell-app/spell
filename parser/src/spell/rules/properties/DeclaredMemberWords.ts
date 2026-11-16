@@ -21,10 +21,10 @@ export class DeclaredMemberWords extends MemberWords {
 
   /** Does a type in `scope` have a property called `words`, e.g. `short name`? */
   static isDeclared(scope: P.Scope, words: string): boolean {
+    const has = (type: P.TypeScope) => type instanceof P.TypeScope && type.hasProperty(words)
     for (let types = scope.types; types; types = types.parent) {
-      for (const type of types.get()) {
-        if (type instanceof P.TypeScope && type.hasProperty(words)) return true
-      }
+      // only a type with the property matters (`P.Outline`)
+      if (types.some(has)) return true
     }
     return false
   }

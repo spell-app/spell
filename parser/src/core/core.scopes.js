@@ -71,6 +71,8 @@
       description: "Would it let go of a thing moving elsewhere, e.g. `if the stock can give up the card`?\n- Yes, unless its type says otherwise:  `a stock-pile can give up a card if: the card is its last card`,\n  or `a foundation can never let go of a card`.\n- `release`, `remove` and `let go of` mean the same.\n- Only `move` asks.  `remove` and `empty` never do.",
       rules: [
         { name: "can_give_up", syntax: "{operator:can_or_cannot} (release|remove|give up|let go of) {expression:operand}" },
+        { name: "can_give_up", syntax: "{operator:can_or_cannot} give {expression:operand} up" },
+        { name: "can_give_up", syntax: "{operator:can_or_cannot} let {expression:operand} go" },
         { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
         { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
         { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },

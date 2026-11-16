@@ -10,12 +10,11 @@ import {
   ACTION_ICON,
   Inspector,
   ThingChip,
-  addressKey,
   isThing,
   itemsOf,
+  partKeysFor,
   type InspectorBand,
   type InspectorCardId,
-  type InspectorPanel,
   type PartRow,
   type SlicePlace
 } from "./Inspector"
@@ -30,9 +29,10 @@ import { on } from "./on"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), its `actions`, and the eye.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`.
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
- * - The eye hides the card (`Inspector.setShown()`);  the Inspector's button, held, shows it again.
+ * - No ✕:  a card isn't hidden on its own;  the top bar's Inspector button shows and hides the whole column
+ *   (Owen, 2026-11-15, epic `editor` T78:  "no need to hide the sections of the inspector sidebar separately").
  * - The body scrolls by itself, and is drawn only while the card is unfolded.
  * - `locked`:  folded for good, with no chevron, its bar alone (`<NoCodeCard>`).
  ****************/
@@ -45,7 +45,7 @@ export function InspectorCard(props: {
   label: string
   /** What the bar says:  `<ui-item>`s, or `slot="title"`. */
   bar?: JSX.Element
-  /** Its own buttons, before the eye:  `slot="right"`. */
+  /** Its own buttons, at its bar's right:  `slot="right"`. */
   actions?: JSX.Element
   /** The body's class. */
   class?: string
@@ -78,23 +78,6 @@ export function InspectorCard(props: {
       <ui-toolbar slot="actions" appearance="segmented link header" tabs="" shrinkable="" label={props.label}>
         {props.bar}
         {props.actions}
-        {/* a ✕ at the right:  the top card's closes the whole Inspector, another card's hides that card (Owen, 2026-11-14,
-            I74);  it never lets go of what's selected:  Esc does (Owen, 2026-11-14:  the pill's own ✕ dropped, I79);  a type's cards go with the switch */}
-        <Show when={isPanel(props.panel)}>
-          <ui-icon
-            slot="right"
-            name="close"
-            link=""
-            class="InspectorCardClose"
-            label={appTexts.text(props.panel === "properties" ? "inspectorClose" : "inspectorHide")}
-            title={appTexts.text(props.panel === "properties" ? "inspectorClose" : "inspectorHide")}
-            onClick={() =>
-              props.panel === "properties"
-                ? Inspector.close()
-                : Inspector.setShown(props.panel as InspectorPanel, false)
-            }
-          />
-        </Show>
       </ui-toolbar>
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
@@ -397,14 +380,18 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
  */
 type PartNode = { element: Element; key: string; children: PartNode[]; startsOpen: boolean }
 
-/** `rows` nested, as the tree shows them. */
+/**
+ * `rows` nested, as the tree shows them.
+ * - Each row's key is its part's path (`partKeysFor()`):  a row opened by hand stays open while the app draws more.
+ */
 function nodesFor(rows: readonly PartRow[]): PartNode[] {
   const top: PartNode[] = []
   const around: PartNode[] = []
-  rows.forEach((row, index) => {
+  const keys = partKeysFor(rows)
+  rows.forEach((row) => {
     const node = {
       element: row.element,
-      key: addressKey({ index, tag: row.element.localName }),
+      key: keys.get(row.element)!,
       children: [],
       startsOpen: row.depth === 0 || !SpellElement.thingOf(row.element)
     }
@@ -586,7 +573,7 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  * - The card's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *   handler in its place (`Inspector.addEvent()`), which then takes the cursor.
  * - Each event's ✕, at its row's right (`<RemoveEventButton>`):  removes it, after asking unless ⌥ is held;  one undo.
- * - Resized, folded and closed as the other cards are;  shown by the column while one part is selected.
+ * - Resized and folded as the other cards are;  shown by the column while one part is selected.
  ****************/
 export function CodeCard(props: {
   /** The part selected, in the app:  its events. */
@@ -666,7 +653,7 @@ export function CodeCard(props: {
  * ### `<NoCodeCard>`
  * The Code card while nothing's selected:  its bar alone, folded, with no chevron to unfold it (epic `editor` T69).
  * - So the card stays in the column, and selecting something only changes its size, which glides (`CardGlide`).
- * - No "+":  there's nothing to add an event to.  Its ✕ still hides the card.
+ * - No "+":  there's nothing to add an event to.
  ****************/
 export function NoCodeCard(): JSX.Element {
   return (
@@ -832,11 +819,6 @@ export function WrittenCode(props: { place: SlicePlace | undefined; code: string
 /** `text`'s letters and digits alone, lower case:  `testCardSetup` and `test card setup` are the same. */
 function letters(text: string): string {
   return text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
-}
-
-/** Is `card` one of the column's own cards, which the menu shows and hides (not a type's)? */
-function isPanel(card: InspectorCardId): card is InspectorPanel {
-  return card === "properties" || card === "code" || card === "views"
 }
 
 /****************

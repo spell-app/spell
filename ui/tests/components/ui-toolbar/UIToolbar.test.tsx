@@ -218,6 +218,23 @@ describe("<ui-toolbar> bar slots", () => {
       await expect.poll(() => shown(host)).toEqual(["F1", "F3"])
     })
 
+    it("`all-items-icon`:  its icon before the button's caret", async () => {
+      const { host } = await toolbar(900, items(5), `${LOOK} max-visible="3" all-items-icon="file outline"`)
+      await expect.poll(() => listButton(host)?.querySelectorAll("svg").length).toBe(2)
+    })
+
+    it("`all-items-at-end`:  the button at the bar's far end, however few items show", async () => {
+      const { host } = await toolbar(600, items(5), `${LOOK} max-visible="2" all-items-at-end`)
+      await expect.poll(() => listButton(host)).not.toBeNull()
+      const bar = host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+      expect(Math.round(listButton(host)!.getBoundingClientRect().right)).toBe(Math.round(bar.right))
+      // without it:  right after the last item
+      const plain = await toolbar(600, items(5), `${LOOK} max-visible="2"`)
+      await expect.poll(() => listButton(plain.host)).not.toBeNull()
+      const plainBar = plain.host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+      expect(listButton(plain.host)!.getBoundingClientRect().right).toBeLessThan(plainBar.right - 100)
+    })
+
     it("bare, it means 8", async () => {
       const { host } = await toolbar(900, items(8), `${LOOK} max-visible`)
       await ElementFixture.settle()
@@ -236,6 +253,76 @@ describe("<ui-toolbar> bar slots", () => {
       await expect.poll(() => shown(first.host)).toEqual(["F0", "F3"])
       const second = await toolbar(900, items(5), `${LOOK} max-visible="2" remember="test-row"`)
       await expect.poll(() => shown(second.host)).toEqual(["F0", "F3"])
+    })
+
+    describe("closeItem()", () => {
+      /** A row of 5, at most 3:  F0 chosen, then F2 and F4 picked from the list, so the row shows F0, F2, F4. */
+      async function rowOfThree(attributes = "") {
+        const made = await toolbar(900, items(5), `${LOOK} max-visible="3" ${attributes}`)
+        const { host } = made
+        await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+        for (const index of [2, 4, 0]) {
+          listButton(host)!.click()
+          await ElementFixture.settle()
+          rows(host)[index]!.click()
+          await ElementFixture.settle()
+        }
+        await expect.poll(() => shown(host)).toEqual(["F0", "F2", "F4"])
+        return { ...made, item: (title: string) => [...host.querySelectorAll("ui-item")].find((each) => each.textContent === title)! }
+      }
+
+      /** Click `item`'s box, as a person does:  the row chooses it. */
+      const press = (item: Element) => item.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+
+      it("an item not chosen leaves the row, but stays in the list;  picked there, it's back", async () => {
+        const { host, item } = await rowOfThree()
+        expect(host.component.closeItem(item("F2"))).toBeUndefined()
+        await expect.poll(() => shown(host)).toEqual(["F0", "F4"])
+        listButton(host)!.click()
+        await ElementFixture.settle()
+        expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual(["F0", "F1", "F2", "F3", "F4"])
+        rows(host)[2]!.click()
+        await expect.poll(() => shown(host)).toEqual(["F0", "F2", "F4"])
+      })
+
+      it("the chosen one:  answers its neighbour to choose, after it, else before;  it stays out once that's chosen", async () => {
+        const { host, item } = await rowOfThree()
+        const next = host.component.closeItem(item("F0"))
+        expect(next).toBe(item("F2"))
+        press(next!)
+        await expect.poll(() => next!.hasAttribute("selected")).toBe(true)
+        await expect.poll(() => shown(host)).toEqual(["F2", "F4"])
+        // the last one's neighbour is before it
+        press(item("F4"))
+        await expect.poll(() => item("F4").hasAttribute("selected")).toBe(true)
+        expect(shown(host)).toEqual(["F2", "F4"])
+        expect(host.component.closeItem(item("F4"))).toBe(item("F2"))
+      })
+
+      it("never the row's last item, nor while every item shows", async () => {
+        const { host, item } = await rowOfThree()
+        host.component.closeItem(item("F2"))
+        host.component.closeItem(item("F4"))
+        await expect.poll(() => shown(host)).toEqual(["F0"])
+        expect(host.component.closeItem(item("F0"))).toBeUndefined()
+        await ElementFixture.settle()
+        expect(shown(host)).toEqual(["F0"])
+
+        const all = await toolbar(900, items(3), `${LOOK} max-visible="3"`)
+        await ElementFixture.settle()
+        all.host.component.closeItem(all.host.querySelectorAll("ui-item")[1]!)
+        await ElementFixture.settle()
+        expect(shown(all.host)).toEqual(["F0", "F1", "F2"])
+      })
+
+      it("`remember`:  a closed item stays closed after a reload", async () => {
+        localStorage.removeItem("ui-toolbar-open-items")
+        const { host, item } = await rowOfThree('remember="closing-row"')
+        host.component.closeItem(item("F2"))
+        await expect.poll(() => shown(host)).toEqual(["F0", "F4"])
+        const again = await toolbar(900, items(5), `${LOOK} max-visible="3" remember="closing-row"`)
+        await expect.poll(() => shown(again.host)).toEqual(["F0", "F4"])
+      })
     })
 
     it("no `max-visible`:  every item, however many", async () => {

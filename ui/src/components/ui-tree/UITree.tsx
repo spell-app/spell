@@ -1,11 +1,14 @@
 import { isServer } from "@solidjs/web"
 import { For, Show } from "solid-js"
 
+import { Dragging } from "spell/util/Dragging"
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 import { treeVocabulary } from "./UITree.en"
 import { UITreeItem } from "./UITreeItem"
 
 import treeCSS from "./UITree.css?inline"
+import columnsCSS from "./UITreeColumns.css?inline"
 
 /****************
  * ### `UITree`
@@ -22,6 +25,15 @@ import treeCSS from "./UITree.css?inline"
  * - `filter`:  only the rows whose words hold it, with the rows they're inside kept open.
  *   It changes no row's `open`.  Rows drawn only once their parent opens can't be found while that's closed.
  * - Plain walks over its light DOM, so 500 rows filter in a few milliseconds.
+ * - `appearance="columns"`:  a column per level, side by side, as a Mac's Finder shows folders.
+ *   - The same rows, nested the same way:  each open row draws the rows inside it as the next column
+ *     (`UITreeColumns.css`).
+ *   - Selecting a row opens it, and closes every other open row but the ones it's inside:
+ *     the open rows are the chain of picks, one a column (a picked row with no rows is open too, drawing none).
+ *   - The keys select as they move:  up and down within a column;  right and left to the next and previous column.
+ *   - `column-titles`:  a title over each column, by level.
+ *   - The line after each column resizes it:  dragged, or its arrow keys;  a double-click puts it back.
+ *     A tree with an `id` remembers the widths in this browser, under it;  one without, until the page reloads.
  * - `sticky-path`:  while it scrolls, one line pinned at its top names the open rows the first row in view is inside.
  *   - Read again on every scroll of whatever scrolls it, before the next paint:  rows know nothing of it.
  *   - Hidden from screen readers:  each row already says how deep it is (`aria-level`), and the keys walk the rows.
@@ -29,7 +41,7 @@ import treeCSS from "./UITree.css?inline"
 export class UITree extends E.UIComponent<typeof treeVocabulary> {
   @E.proto static vocabulary = treeVocabulary
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    styleSheets: { tree: treeCSS },
+    styleSheets: { tree: treeCSS, columns: columnsCSS },
     delegatesFocus: false,
     aria: { role: "tree" }
   }
@@ -61,7 +73,36 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return this.label
   }
 
+  /** `appearance="columns"`:  a column per level, side by side. */
+  @E.cssState("columns")
+  get isColumns(): boolean {
+    return this.appearance === COLUMNS
+  }
+
+  /** `column-titles`, one a level:  none without it. */
+  get columnTitleList(): string[] {
+    return (this.columnTitles ?? "")
+      .split(",")
+      .map((title) => title.trim())
+      .filter(Boolean)
+  }
+
+  /** The title over column `index`, 0 for the top rows':  the last title goes on for every deeper column. */
+  titleForColumn(index: number): string | undefined {
+    const titles = this.columnTitleList
+    return titles[Math.min(index, titles.length - 1)]
+  }
+
   render() {
+    return (
+      <Show when={!this.isColumns} fallback={this.renderColumns()}>
+        {this.renderRows()}
+      </Show>
+    )
+  }
+
+  /** The rows, nested:  every appearance but `columns`. */
+  private renderRows() {
     return (
       <>
         <Show when={this.pathRows.length}>
@@ -92,6 +133,34 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           </div>
         </Show>
       </>
+    )
+  }
+
+  /**
+   * `appearance="columns"`:  the top rows as the first column, in a box that scrolls sideways.
+   * - Each open row draws the rows inside it as the next column, placed against this box (`UITreeColumns.css`).
+   */
+  private renderColumns() {
+    return (
+      <div class="columns">
+        <div class="column" style={{ width: this.columnWidthCSS(0) }}>
+          <Show when={this.titleForColumn(0)}>
+            {(title) => (
+              <div class="column-title" aria-hidden="true">
+                {title()}
+              </div>
+            )}
+          </Show>
+          <slot />
+          <Show when={this.hasNoMatches}>
+            <div class="empty" part={this.partForName("empty")}>
+              <slot name="empty">{this.translationForKey("noMatches")}</slot>
+            </div>
+          </Show>
+        </div>
+        <For each={this.columnIndexes}>{(column) => this.columnEdge(column)}</For>
+        <div class="column-probe" aria-hidden="true" />
+      </div>
     )
   }
 
@@ -147,14 +216,19 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.activate(row, event)
   }
 
-  /** `row` was clicked, or Enter or Space pressed on it. */
-  private activate(row: UITreeItem, event: MouseEvent | KeyboardEvent) {
+  /**
+   * `row` was clicked, or Enter or Space pressed on it;  in a column view, a key moved onto it too.
+   * - `keepsInside`:  a column view keeps the columns after it open, as when a key goes back to it.
+   */
+  private activate(row: UITreeItem, event: MouseEvent | KeyboardEvent, { keepsInside = false } = {}) {
     if (row.group) {
-      row.disclosure.toggle(event)
+      if (this.isColumns) this.openColumnOf(row, event, keepsInside)
+      else row.disclosure.toggle(event)
       return
     }
     const value = row.valueOrLabel
     if (!this.send("ui-selecting", { item: row.domElement, value, originalEvent: event })) return
+    if (this.isColumns) this.openColumnOf(row, event, keepsInside)
     const rows = this.rowsOnScreen.filter((each) => !each.group)
     const selected = this.allRows.filter((each) => each.selected)
     const next = new Set(
@@ -165,6 +239,85 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
     const values = this.allRows.filter((each) => next.has(each)).map((each) => each.valueOrLabel)
     this.send("ui-changed", { value, values, originalEvent: event })
+  }
+
+  ////////////////
+  // ## Columns
+  ////////////////
+
+  /**
+   * `appearance="columns"`:  `row` is picked, so the rows inside it become the next column.
+   * - It opens, though it has no rows:  `open` marks each column's pick, the earlier ones drawn grey.
+   * - Every other open row closes, but the ones it's inside, and with `keepsInside`, the ones inside it.
+   * - Then the box scrolls to its end, so the newest column is in view.
+   */
+  private openColumnOf(row: UITreeItem, event?: Event, keepsInside = false) {
+    const chain = new Set(this.rowsAround(row))
+    chain.add(row)
+    for (const each of this.allRows) {
+      const isKept = chain.has(each) || (keepsInside && row.domElement.contains(each.domElement))
+      if (each.isOpen && !isKept) each.disclosure.close(event)
+    }
+    row.disclosure.open(event)
+    if (!keepsInside) this.showNewestColumn()
+  }
+
+  /** The open rows, outermost first, one a level:  each column's pick, the last one the newest. */
+  private get openChain(): UITreeItem[] {
+    void this.rowsVersion
+    const chain: UITreeItem[] = []
+    for (let level: Element = this.domElement; ;) {
+      const open = this.rowsIn(level).find((row) => row.isOpen)
+      if (!open) return chain
+      chain.push(open)
+      level = open.domElement
+    }
+  }
+
+  /** The columns on screen, by level:  the top rows', then one for each pick with rows inside it. */
+  get columnIndexes(): number[] {
+    if (!this.isColumns) return []
+    const count = 1 + this.openChain.filter((row) => row.canOpen).length
+    return Array.from({ length: count }, (_, index) => index)
+  }
+
+  /** Bumped as rows come, go or connect:  the chain is read again. */
+  @E.state private accessor rowsVersion = 0
+
+  /** A row connected, maybe after the tree drew:  what's read from the rows is read again (`UITreeItem.onConnect()`). */
+  rowConnected() {
+    this.rowsVersion++
+  }
+
+  /** The rows `row` is inside, outermost first. */
+  private rowsAround(row: UITreeItem): UITreeItem[] {
+    const around: UITreeItem[] = []
+    for (let at = row.domElement.parentElement; at && at !== this.domElement; at = at.parentElement) {
+      const { component } = at as E.DOMElement
+      if (component instanceof UITreeItem) around.unshift(component)
+    }
+    return around
+  }
+
+  /** The rows in the same column as `row`, on screen:  its parent's, or the top rows. */
+  private rowsBeside(row: UITreeItem): UITreeItem[] {
+    const parent = row.domElement.parentElement
+    return parent ? this.rowsIn(parent).filter((each) => !each.isFilteredOut) : [row]
+  }
+
+  /** Scroll the columns' box to its end, once the newest column is drawn. */
+  private showNewestColumn() {
+    if (isServer) return
+    E.beforeNextPaint(() => {
+      const box = this.domElement.renderRoot.querySelector<HTMLElement>(".columns")
+      if (!box) return
+      const isRightToLeft = getComputedStyle(box).direction === "rtl"
+      const isStill = matchMedia("(prefers-reduced-motion: reduce)").matches
+      box.scrollTo({
+        left: isRightToLeft ? -box.scrollWidth : box.scrollWidth,
+        behavior: isStill ? "instant" : "smooth"
+      })
+    })
   }
 
   ////////////////
@@ -209,6 +362,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** What each key does on `row`;  `false`:  it did nothing, so leave the key alone. */
   private keyActions(row: UITreeItem): Record<string, (event: KeyboardEvent) => unknown> {
     const select = (event: KeyboardEvent) => this.activate(row, event)
+    if (this.isColumns) return { Enter: select, " ": select, ...this.columnKeyActions(row) }
     return {
       Enter: select,
       " ": select,
@@ -228,10 +382,178 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
   }
 
+  /**
+   * `appearance="columns"`:  the keys select as they move, before `UI.focus.roving()` sees them, as a Mac's Finder's do.
+   * - Up, down, Home and End:  within `row`'s column, selecting the row they land on, which opens its column.
+   * - The key toward the next column:  into it, onto the row picked there before, else its first.
+   * - The other:  back to the row it's inside, the columns after it kept.
+   * - Right to left, the columns go leftward, and so do those two keys.
+   */
+  private columnKeyActions(row: UITreeItem): Record<string, (event: KeyboardEvent) => unknown> {
+    const column = this.rowsBeside(row)
+    const at = column.indexOf(row)
+    const pick = (next: UITreeItem | undefined, event: KeyboardEvent, keepsInside = false) => {
+      if (!next) return false
+      this.focusRow(next)
+      this.activate(next, event, { keepsInside })
+      return true
+    }
+    const moveTo = (index: number, event: KeyboardEvent) => {
+      const next = column[Math.max(0, Math.min(column.length - 1, index))]
+      return next === row ? true : pick(next, event)
+    }
+    const goIn = (event: KeyboardEvent) => {
+      if (!row.showsRows) return false
+      const inside = this.rowsIn(row.domElement).filter((each) => !each.isFilteredOut)
+      return pick(inside.find((each) => each.isOpen) ?? inside[0], event, true)
+    }
+    const goOut = (event: KeyboardEvent) => pick(this.rowsAround(row).at(-1), event, true)
+    const isRightToLeft = getComputedStyle(this.domElement).direction === "rtl"
+    return {
+      ArrowDown: (event) => moveTo(at + 1, event),
+      ArrowUp: (event) => moveTo(at - 1, event),
+      Home: (event) => moveTo(0, event),
+      End: (event) => moveTo(column.length - 1, event),
+      ArrowRight: isRightToLeft ? goOut : goIn,
+      ArrowLeft: isRightToLeft ? goIn : goOut
+    }
+  }
+
   /** Move the focus to `row`. */
   private focusRow(row: UITreeItem | undefined) {
     if (row) this.roving?.focus(this.roving.items.indexOf(row.domElement))
   }
+
+  ////////////////
+  // ## Column widths
+  ////////////////
+
+  /**
+   * Each column's width by level, in px, as a person sized it:  `undefined` for one left at `--ui-tree-column-width`.
+   * - Kept under the tree's `id`, when it has one (`columnWidthStore`).
+   */
+  @E.state({ equals: E.isSameList }) accessor columnWidths: readonly (number | undefined)[] = []
+
+  /** Column `index`'s width, as CSS:  its own, else the token's. */
+  columnWidthCSS(index: number): string {
+    const width = this.columnWidths[index]
+    return width === undefined ? DEFAULT_WIDTH : `${width}px`
+  }
+
+  /** Where column `index` starts, as CSS:  the widths of the columns before it, added up. */
+  columnStartCSS(index: number): string {
+    const widths = Array.from({ length: index }, (_, before) => this.columnWidthCSS(before))
+    return `calc(0px + ${widths.join(" + ") || "0px"})`
+  }
+
+  /** The line after column `index`:  a few px of it to drag, or to move with the keys, sizing that column. */
+  private columnEdge(index: number) {
+    return (
+      <div
+        class="column-edge"
+        role="separator"
+        tabindex="0"
+        aria-orientation="vertical"
+        aria-label={this.translationForKey("resizeColumn")}
+        aria-valuenow={Math.round(this.columnWidths[index] ?? this.defaultWidthPx)}
+        aria-valuemin={MIN_COLUMN_PX}
+        style={{ "inset-inline-start": this.columnStartCSS(index + 1) }}
+        onPointerDown={(event) => this.startResizing(event, index)}
+        onKeyDown={(event) => this.resizeByKey(event, index)}
+        onDblClick={() => this.setColumnWidth(index, undefined)}
+      />
+    )
+  }
+
+  /** What an unsized column's width comes to, in px:  measured as the columns draw. */
+  @E.state accessor defaultWidthPx = 0
+
+  /** Column `index`'s width on screen now, in px. */
+  private widthOf(index: number): number {
+    const width = this.columnWidths[index]
+    if (width !== undefined) return width
+    return this.measureDefaultWidth()
+  }
+
+  /** Measure what an unsized column's width comes to, in px, and keep it (`defaultWidthPx`). */
+  private measureDefaultWidth(): number {
+    const probe = this.domElement.renderRoot.querySelector<HTMLElement>(".column-probe")
+    const width = Math.round(probe?.getBoundingClientRect().width ?? 0)
+    if (width) this.defaultWidthPx = width
+    return width
+  }
+
+  /** Drag column `index`'s line:  it follows the pointer;  Escape puts it back. */
+  private startResizing(event: PointerEvent & { currentTarget: HTMLElement }, index: number) {
+    if (event.button !== 0) return
+    const startWidth = this.widthOf(index)
+    const before = this.columnWidths[index]
+    const direction = this.isRightToLeft ? -1 : 1
+    new Dragging(event.currentTarget, event, {
+      carried: [event.currentTarget],
+      follows: false,
+      // the line's own cursor, over the whole page while it's dragged
+      cursor: "col-resize",
+      placing: (x) => this.setColumnWidth(index, startWidth + (x - event.clientX) * direction, { keeps: false }),
+      onDrop: () => this.setColumnWidth(index, this.columnWidths[index]),
+      onCancel: () => this.setColumnWidth(index, before, { keeps: false })
+    })
+  }
+
+  /** Left and right on column `index`'s line:  narrower and wider, ten times as far with Shift. */
+  private resizeByKey(event: KeyboardEvent, index: number) {
+    const step = RESIZE_KEYS[event.key]
+    if (!step) return
+    event.preventDefault()
+    event.stopPropagation()
+    const direction = this.isRightToLeft ? -1 : 1
+    const distance = KEY_STEP_PX * (event.shiftKey ? SHIFT_STEPS : 1)
+    this.setColumnWidth(index, this.widthOf(index) + step * direction * distance)
+  }
+
+  /**
+   * Column `index` is `width` px wide now, at least `MIN_COLUMN_PX`;  `undefined`:  back to the token's.
+   * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
+   */
+  private setColumnWidth(index: number, width: number | undefined, { keeps = true } = {}) {
+    const widths = [...this.columnWidths]
+    widths[index] = width === undefined ? undefined : Math.round(Math.max(MIN_COLUMN_PX, width))
+    while (widths.length && widths.at(-1) === undefined) widths.pop()
+    this.columnWidths = widths
+    const id = this.domElement.id
+    if (keeps && id) {
+      if (widths.length)
+        UITree.columnWidthStore.set(
+          id,
+          widths.map((each) => each ?? null)
+        )
+      else UITree.columnWidthStore.forget(id)
+    }
+  }
+
+  /** The widths kept under its `id`, as it connects;  what an unsized one comes to;  its newest column, in view. */
+  @E.onChange("isConnected", "isColumns")
+  protected onConnectedInColumns(isConnected: boolean, isColumns: boolean) {
+    if (!isConnected || !isColumns || isServer) return
+    E.beforeNextPaint(() => this.measureDefaultWidth())
+    // the picks it was drawn with, in view
+    this.showNewestColumn()
+    const id = this.domElement.id
+    if (!id) return
+    const kept = UITree.columnWidthStore.get<(number | null)[]>(id)
+    if (Array.isArray(kept)) this.columnWidths = kept.map((each) => (typeof each === "number" ? each : undefined))
+  }
+
+  /** Is it laid out right to left? */
+  private get isRightToLeft(): boolean {
+    return getComputedStyle(this.domElement).direction === "rtl"
+  }
+
+  /** Where every column tree's widths are kept, by its `id`:  made on first use, so a server render never touches storage. */
+  private static get columnWidthStore(): PrefStore {
+    return (UITree.madeColumnWidthStore ??= new PrefStore(COLUMN_WIDTHS_STORE))
+  }
+  private static madeColumnWidthStore?: PrefStore
 
   ////////////////
   // ## The sticky path
@@ -308,6 +630,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Rows came or went, or their words changed. */
   @E.watches({ childList: true, subtree: true, attributes: true, attributeFilter: ["label", "which"] })
   protected onRowsChanged() {
+    this.rowsVersion++
     if (this.filter) this.applyFilter()
     this.roving?.refresh()
   }
@@ -339,3 +662,24 @@ function rowBoxOf(row: UITreeItem): DOMRect {
 
 /** `choose` of a tree whose rows are selected many at a time. */
 const MANY = "many"
+
+/** The tree's `appearance` that shows a column per level. */
+const COLUMNS = "columns"
+
+/** A column's width while nobody has sized it. */
+const DEFAULT_WIDTH = "var(--_ui-tree-column-width)"
+
+/** What the column widths are kept under, in this browser. */
+const COLUMN_WIDTHS_STORE = "ui-tree-column-widths"
+
+/** The narrowest a column can be made, in px. */
+const MIN_COLUMN_PX = 80
+
+/** How far an arrow key moves a column's line, in px. */
+const KEY_STEP_PX = 16
+
+/** How many steps Shift makes it. */
+const SHIFT_STEPS = 10
+
+/** The keys that move a column's line, and which way:  narrower, wider (right to left, turned round). */
+const RESIZE_KEYS: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1 }

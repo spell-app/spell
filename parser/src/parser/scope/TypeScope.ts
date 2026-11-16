@@ -292,12 +292,24 @@ export class TypeScope extends BlockScope {
     return this.chain().find((type) => type.saved)?.saved
   }
 
-  /** SIDE EFFECT:  property `words` is declared somewhere in our files -- see `propertiesAhead`.  Journaled. */
+  /**
+   * SIDE EFFECT:  property `words` is declared somewhere in our files -- see `propertiesAhead`.  Journaled.
+   * - Redone, it's added to our names ahead as they are then (epic `language` P59):  another file's stubs may have
+   *   changed them since.
+   */
   declarePropertyAhead(words: string): void {
     const key = snakeCase(words)
     if (this.propertiesAhead?.includes(key)) return
-    P.ParseJournal.assign(this.parser?.journal, this as TypeScope, {
-      propertiesAhead: [...(this.propertiesAhead ?? []), key]
+    let previous = this.propertiesAhead
+    const redo = () => {
+      previous = this.propertiesAhead
+      if (!previous?.includes(key)) this.propertiesAhead = [...(previous ?? []), key]
+    }
+    redo()
+    this.parser?.journal?.record({
+      undo: () => (this.propertiesAhead = previous),
+      redo,
+      change: { kind: "note", target: this, value: `${AHEAD}${key}` }
     })
   }
 
@@ -324,8 +336,13 @@ export class TypeScope extends BlockScope {
   propertiesListing(word: string): Array<{ property: P.ScopeVariable; value: string }> {
     const singular = P.singularize(word)
     const found = new Map<string, { property: P.ScopeVariable; value: string }>()
+    const lists = (property: P.ScopeVariable) =>
+      !!property.listedValues?.some(
+        (listed) => typeof listed === "string" && P.singularize(P.spellValueOf(listed)) === singular
+      )
     for (const owner of this.chain()) {
-      for (const property of owner.variables.get()) {
+      // only a property listing the word matters (`P.Outline`)
+      for (const property of owner.variables.scan(lists)) {
         if (!property.listedValues || found.has(property.name)) continue
         for (const listed of property.listedValues) {
           if (typeof listed !== "string") continue
@@ -343,7 +360,24 @@ export class TypeScope extends BlockScope {
   /** Is `words` a property a scan found on us, or on a type we're built on?  See `propertiesAhead`. */
   knowsPropertyAhead(words: string): boolean {
     const key = snakeCase(words)
-    return this.chain().some((type) => type.propertiesAhead?.includes(key))
+    return this.chain().some((type) => {
+      P.ScopeList.outline?.lookedUp(type, `${AHEAD}${key}`)
+      return type.propertiesAhead?.includes(key)
+    })
+  }
+
+  /**
+   * For a caller reading our `propertiesAhead` itself, by the words it was said with:
+   * note each name ahead those words start with, in the outline of the file parsing (`P.Outline`).
+   * - e.g. `short name changes` notes `short`, `short_name` and `short_name_changes`.
+   */
+  notePropertiesAheadSaid(said: string): void {
+    const { outline } = P.ScopeList
+    if (!outline) return
+    const words = said.split(" ").filter(Boolean)
+    for (let count = 1; count <= words.length; count++) {
+      outline.lookedUp(this, `${AHEAD}${snakeCase(words.slice(0, count).join(" "))}`)
+    }
   }
 
   /** Do we have a property called `words`, inherited or declared further down?  NOT a method. */
@@ -382,16 +416,7 @@ export class TypeScope extends BlockScope {
    * - `superType` MUST be right:  a project's declarations read it -- see `SP.SpellDeclarations`.
    */
   claim(declaredBy: P.Match, superType?: string, { itemType, valueKind, aka, gender }: ClaimListOptions = {}): void {
-    const previous = {
-      stub: this.stub,
-      declaredBy: this.declaredBy,
-      superType: this.superType,
-      itemType: this.itemType,
-      valueKind: this.valueKind,
-      aka: this.aka,
-      gender: this.gender
-    }
-    const next = {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, {
       stub: false,
       declaredBy,
       superType: superType && P.classCase(superType),
@@ -399,14 +424,9 @@ export class TypeScope extends BlockScope {
       valueKind,
       aka: aka && P.classCase(aka),
       gender
-    }
-    Object.assign(this, next)
+    })
     // now IT declares us -- see `ScopeList.noteDeclared()`
     P.ScopeList.noteDeclared(this)
-    declaredBy.scope.parser?.journal?.record({
-      undo: () => Object.assign(this, previous),
-      redo: () => Object.assign(this, next)
-    })
   }
 
   /**
@@ -439,21 +459,8 @@ export class TypeScope extends BlockScope {
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
     if (existing?.isSavedTime && !isSavedTime && existing.declaredBy !== declaredBy) {
-      const { datatype: datatypeWas, declaredBy: previous } = existing
-      const takeOver = () => {
-        existing.declaredBy = declaredBy
-        existing.datatype = datatype
-        existing.isSavedTime = undefined
-      }
-      takeOver()
-      declaredBy.scope.parser?.journal?.record({
-        undo: () => {
-          existing.declaredBy = previous
-          existing.datatype = datatypeWas
-          existing.isSavedTime = true
-        },
-        redo: takeOver
-      })
+      const takeOver = { declaredBy, datatype, isSavedTime: undefined }
+      P.ParseJournal.assign(declaredBy.scope.parser?.journal, existing, takeOver)
     } else if (!existing) {
       // only what's there:  a declaration writes out what a record holds -- see spell's `SpellDeclarations`
       const props: P.ScopeVariableProps = { name, datatype, declaredBy }
@@ -469,12 +476,7 @@ export class TypeScope extends BlockScope {
     }
     // an earlier parse of THIS statement left it:  it's ours again -- see `sameStatement()`
     else if (existing.declaredBy !== declaredBy && TypeScope.sameStatement(existing.declaredBy, declaredBy)) {
-      const previous = existing.declaredBy
-      existing.declaredBy = declaredBy
-      declaredBy.scope.parser?.journal?.record({
-        undo: () => (existing.declaredBy = previous),
-        redo: () => (existing.declaredBy = declaredBy)
-      })
+      P.ParseJournal.assign(declaredBy.scope.parser?.journal, existing, { declaredBy })
       P.ScopeList.noteDeclared(existing)
     }
   }
@@ -491,20 +493,14 @@ export class TypeScope extends BlockScope {
   addPropertyRules(name: string, rules: readonly PropRule[], declaredBy: P.Match): boolean {
     const variable = this.variables.get(name, "LOCAL_ONLY")
     if (!variable) return false
-    const previous = { sources: variable.ruleSources, rules: variable.rules }
     const sources = [
       ...(variable.ruleSources ?? []).filter(
         (it) => it.declaredBy !== declaredBy && !TypeScope.sameStatement(it.declaredBy, declaredBy)
       ),
       { declaredBy, rules }
     ]
-    const next = { sources, rules: sources.flatMap((it) => it.rules) }
-    const apply = (state: typeof next | typeof previous) => {
-      variable.ruleSources = state.sources
-      variable.rules = state.rules
-    }
-    apply(next)
-    declaredBy.scope.parser?.journal?.record({ undo: () => apply(previous), redo: () => apply(next) })
+    const next = { ruleSources: sources, rules: sources.flatMap((it) => it.rules) }
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, variable, next)
     return true
   }
   /**
@@ -525,12 +521,7 @@ export class TypeScope extends BlockScope {
     const existing = itemType.variables.get(name, "LOCAL_ONLY")
     if (existing && existing.declaredBy === declaredBy) return
     if (existing?.exclusive && TypeScope.sameStatement(existing.declaredBy, declaredBy)) {
-      const previous = existing.declaredBy
-      existing.declaredBy = declaredBy
-      declaredBy.scope.parser?.journal?.record({
-        undo: () => (existing.declaredBy = previous),
-        redo: () => (existing.declaredBy = declaredBy)
-      })
+      P.ParseJournal.assign(declaredBy.scope.parser?.journal, existing, { declaredBy })
       P.ScopeList.noteDeclared(existing)
       return
     }
@@ -565,8 +556,8 @@ export class TypeScope extends BlockScope {
 
   /**
    * Is `old` an earlier parse of the same statement as `match`:  same rule, same line of the same file?
-   * - Why:  incremental parsing can REPLAY a record an old match added (`P.ParseJournal` swaps in whole item
-   *   lists), so a re-parsed statement finds "its" record already there -- declared by a match that's gone.
+   * - Why:  incremental parsing can REPLAY a record an old match added (e.g. an item's last good entries,
+   *   `keepLastGood`), so a re-parsed statement finds "its" record already there -- declared by a match that's gone.
    *   It should take it back, as a full parse would have it declare it.
    * - Its TEXT may differ, e.g. `a card is a t` while typing `a card is a thing`:  what the line says now wins.
    * - A genuine second declaration, e.g. the same line twice, is on another line:  the first still wins.
@@ -784,3 +775,6 @@ export type TypeScopeProps = {
   /** See `TypeScope.declaredAt`. */
   declaredAt?: P.DeclaredAt
 }
+
+/** What an outline notes `knowsPropertyAhead()` asked of a type, before the property's key:  see `P.Outline`. */
+const AHEAD = "ahead:"

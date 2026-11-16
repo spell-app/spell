@@ -10,6 +10,7 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-action": "action",
   "ui-actions": "action",
   "ui-ad": "property",
+  "ui-app-menu": "structure",
   "ui-audio": "property",
   "ui-author": "property",
   "ui-avatar": "property",
