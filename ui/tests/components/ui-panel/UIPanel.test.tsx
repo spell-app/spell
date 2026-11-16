@@ -111,6 +111,11 @@ describe('<ui-panel appearance="pane">', () => {
     const bar = part(host, "title").getBoundingClientRect()
     expect(bar.height).toBe(40)
     expect(bar.top).toBe(host.getBoundingClientRect().top)
+    // its line a 1px shadow inside its bottom edge, no border taking room (epic `editor` I216)
+    const title = getComputedStyle(part(host, "title"))
+    expect(title.borderBottomWidth).toBe("0px")
+    expect(title.boxShadow).toMatch(/inset$|^inset| inset/)
+    expect(title.boxShadow).toContain("-1px")
     const content = part(host, "content").getBoundingClientRect()
     expect(Math.round(content.top)).toBe(Math.round(bar.bottom))
     expect(Math.round(content.bottom)).toBe(Math.round(host.getBoundingClientRect().bottom))
@@ -127,7 +132,8 @@ describe('<ui-panel appearance="pane">', () => {
       const box = element.getBoundingClientRect()
       return box.top + box.height / 2
     }
-    const centre = bar.top + (bar.height - 1) / 2
+    // the bar's line is a shadow, taking no room:  its middle is the bar's own (epic `editor` I216)
+    const centre = bar.top + bar.height / 2
     expect(Math.abs(middle(part(host, "fold-icon")) - centre)).toBeLessThan(1)
     expect(Math.abs(middle(toolbar.shadowRoot!.querySelector("[part~=menu]")!) - centre)).toBeLessThan(1)
     expect(Math.abs(middle(toolbar.shadowRoot!.querySelector("[part~=right]")!) - centre)).toBeLessThan(1)
@@ -143,7 +149,7 @@ describe('<ui-panel appearance="pane">', () => {
     await ElementFixture.tick()
     expect(host.matches(":state(collapsed)")).toBe(true)
     expect(part(host, "content").getAttribute("hidden")).toBe("until-found")
-    expect(getComputedStyle(part(host, "title")).borderBottomWidth).toBe("0px")
+    expect(getComputedStyle(part(host, "title")).boxShadow).toBe("none")
     expect(host.querySelector("ui-toolbar")!.getBoundingClientRect().width).toBeGreaterThan(0)
   })
 
