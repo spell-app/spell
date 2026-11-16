@@ -63,12 +63,21 @@ describe.skipIf(!SERVING)("live edit everywhere", { timeout: 240_000 }, () => {
   beforeAll(async () => {
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
-    // saves never reach the disk;  the library's compiled code, once changed, is answered from here
+    // saves never reach the disk;  the library's compiled code, once changed, is answered from here;
+    // a saved file read again (AutoSave's keep, then the editor's look at its open file) is what was saved
+    const saved = new Map<string, string>()
     await context.route(/\/api\/projects\/file\/|\.(spell|spell\.js)(\?.*)?$/, (route) => {
       const request = route.request()
       if (request.isNavigationRequest()) return route.continue()
-      if (request.method() !== "GET") return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
       const url = new URL(request.url())
+      const tail = decodeURI(url.pathname).split("/").slice(-3).join("/")
+      if (request.method() !== "GET") {
+        saved.set(tail, request.postData() ?? "")
+        return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
+      }
+      if (tail.endsWith(".spell") && saved.has(tail)) {
+        return route.fulfill({ contentType: "text/plain", body: saved.get(tail)! })
+      }
       if (libraryEdit && url.pathname.endsWith("/counter/counter.spell.js")) {
         return route
           .fetch()

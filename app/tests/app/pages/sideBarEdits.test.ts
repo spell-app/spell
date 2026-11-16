@@ -59,7 +59,7 @@ async function open(page: Page, project: string, { codeEditor }: { codeEditor: b
 async function select(page: Page, tag: string, { alt = false } = {}): Promise<void> {
   const drawn = await page.waitForFunction(
     (name) => {
-      const find = (root: Document | ShadowRoot): Element | undefined => {
+      const find = (root: ParentNode): Element | undefined => {
         for (const element of root.querySelectorAll("*")) {
           if (element.localName === name) return element
           const inside = element.shadowRoot && find(element.shadowRoot)
@@ -67,7 +67,8 @@ async function select(page: Page, tag: string, { alt = false } = {}): Promise<vo
         }
         return undefined
       }
-      const box = find(document)?.getBoundingClientRect()
+      // in the app:  the editor's own bar has Spell UI elements too
+      const box = find(document.querySelector(".AppPaneBody") ?? document)?.getBoundingClientRect()
       return box && { x: box.x + box.width / 2, y: box.y + box.height / 2 }
     },
     tag,
@@ -319,15 +320,16 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await open(page, "Counter", { codeEditor: true })
       const { text: before } = await fileState(page, "Counter.spell")
       await select(page, "ui-button")
+      // Counter's button says its colour already (`color="primary"`):  the change is to that attribute
       await change(page, "color", "red")
-      const added = before.replace("<button onClick", `<button color="red" onClick`)
+      const added = before.replace(`color="primary"`, `color="red"`)
       expect((await fileState(page, "Counter.spell")).text).toBe(added)
       await change(page, "color", "blue")
       expect((await fileState(page, "Counter.spell")).text).toBe(added.replace("red", "blue"))
 
       // its text is code:  it says so, with a way to it
       await change(page, "textContent", "Press me")
-      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/comes from code/)
+      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/works this out/)
       expect((await fileState(page, "Counter.spell")).text).toBe(added.replace("red", "blue"))
 
       // one step:  the two changes to one field fold
@@ -478,7 +480,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.waitForTimeout(300)
       await change(page, "count", 5)
       const { text } = await fileState(page, "Counter.spell")
-      expect(text).toBe(before.replace(">0</property>", ">5</property>"))
+      expect(text).toBe(before.replace("a number starting at 0", "a number starting at 5"))
       const counts = () =>
         page.evaluate(() => {
           const { made, moved } = window as unknown as Record<"made" | "moved", { count: number }>
