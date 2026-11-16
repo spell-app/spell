@@ -25,6 +25,8 @@ import { PartEdits } from "./PartEdits"
 import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
 
+import "./CodeCard.css"
+
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
@@ -658,6 +660,9 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  * - A Spell UI element's:  what it handles (`Inspector.eventsOf()`), `on click`, with the code it was written with.
  * - Then a thing's actions (`InspectorActions.of()`), each its signature (`<ActionSignature>`) and its code.
  * - Each one's code is the code editor on its lines of the file (`<CodeSlice>`):  typing there is typing in the file.
+ * - Each drawn as the code pane draws the same block (`CodeCard.css`, epic `editor` T98):  its head a band in its part of
+ *   speech's colour, what was typed a white pill on it, its code on the paper under it, a rail down its left;
+ *   its chevron the code pane's fold arrow's size
  *   Code it can't find in the file shows as written, to read.
  * - Each folds on its own, by its words, remembered for the project
  *   (`rowFold()`, Owen:  "event handlers / actions should be collapsible").
@@ -850,7 +855,7 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
   const hasCode = () => !!(place || props.row.code)
   return (
     <ui-section
-      class={["InspectorEvent", props.row.kind]}
+      class={["InspectorEvent", "bubbly", props.row.kind]}
       level="3"
       fold-icon="start"
       collapsible={hasCode() ? "" : undefined}
@@ -859,7 +864,7 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
     >
       <span slot="label" class="InspectorEventWords">
         <ui-icon name={isEvent ? EVENT_ICON : ABILITY_ICON} />
-        {props.row.words}
+        <BandWords words={props.row.words} />
       </span>
       <Show when={isEvent && place}>
         <RemoveEventButton element={props.element} row={props.row} />
@@ -868,6 +873,24 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
         <WrittenCode place={place} code={props.row.code} focus={isAdded} />
       </Show>
     </ui-section>
+  )
+}
+
+/**
+ * An event's or ability's words on its band, as the code pane draws its head (epic `editor` T98):
+ * the first word Spell's own (`when`, `on`), the rest what was typed, a white pill (`creating solitaire`).
+ * - One word alone (`draggable`):  the pill alone.
+ */
+function BandWords(props: { words: string }): JSX.Element {
+  const split = () => /^(\S+)\s+(.+)$/s.exec(props.words.trim())
+  return (
+    <Show when={split()} fallback={<span class="bubbly-input">{props.words}</span>}>
+      {(found) => (
+        <>
+          <span>{found()[1]}</span> <span class="bubbly-input">{found()[2]}</span>
+        </>
+      )}
+    </Show>
   )
 }
 
@@ -907,7 +930,7 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
   if (isAdded) queueMicrotask(() => Inspector.tookCursor())
   return (
     <ui-section
-      class="InspectorEvent action"
+      class="InspectorEvent bubbly action"
       level="3"
       fold-icon="start"
       collapsible={place ? "" : undefined}
@@ -1131,23 +1154,45 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
   const isRenamable = () => props.action.parameters.length === 0 && pieces().every((piece) => !piece.isType)
   return (
     <span class="InspectorActionSignature">
-      <span>{toWordOf(editor.project?.wordsLanguages?.[0])}</span>
+      <span>{toWordOf(editor.project?.wordsLanguages?.[0])}</span>{" "}
       <Show
         when={isRenamable()}
         fallback={
-          // by position:  a new signature's pieces are new objects, the same words
-          <For each={pieces()} keyed={false}>
-            {(piece) => (
-              <Show when={piece().isType} fallback={<span>{piece().text}</span>}>
-                <ui-label size="mini" appearance="basic" class="InspectorActionType">
-                  {piece().text}
-                </ui-label>
-              </Show>
-            )}
-          </For>
+          // what was typed, one white pill as the code pane draws it (T98):  each blank underlined, its kind bold
+          <span class="bubbly-input">
+            {/* by position:  a new signature's pieces are new objects, the same words */}
+            <For each={pieces()} keyed={false}>
+              {(piece) => (
+                <>
+                  <Show when={piece().isType} fallback={<span>{piece().text}</span>}>
+                    <TypeBlank text={piece().text} />
+                  </Show>{" "}
+                </>
+              )}
+            </For>
+          </span>
         }
       >
         <ActionName thing={props.thing} action={props.action} />
+      </Show>
+    </span>
+  )
+}
+
+/**
+ * One of a signature's blanks, `a card`:  underlined, its kind bold, as the code pane draws a blank (`.bubbly-underline`,
+ * `.bubbly-reference`;  epic `editor` T98).
+ */
+function TypeBlank(props: { text: string }): JSX.Element {
+  const split = () => /^(an?|the)\s+(.+)$/i.exec(props.text)
+  return (
+    <span class="InspectorActionType bubbly-underline">
+      <Show when={split()} fallback={<span class="bubbly-reference">{props.text}</span>}>
+        {(found) => (
+          <>
+            {found()[1]} <span class="bubbly-reference">{found()[2]}</span>
+          </>
+        )}
       </Show>
     </span>
   )
@@ -1219,7 +1264,8 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
       fallback={
         <>
           <span
-            class="InspectorActionName"
+            // what was typed, a white pill on its band, as the code pane draws a name (T98)
+            class="InspectorActionName bubbly-input bubbly-name"
             title={title()}
             onClick={(event: MouseEvent) => {
               event.stopPropagation()

@@ -1,0 +1,113 @@
+/*
+ * The Code card's rows (`<EventCode>`, `<ActionCode>`), drawn as the code pane draws the same block (epic `editor` T98):
+ * - the row is a `.bubbly` box, so the bubbly look's tokens reach it (`bubbly.css`, the look's ONE sheet):
+ *   its head a band in its part of speech's colour (`--bubbly-pill`), what was typed a white pill on it (`.bubbly-input`),
+ *   its body (`<CodeSlice>`) on the code's paper, a rail down its left from the band's corner, a foot under it
+ * - the fold chevron and the row's buttons (✕, ▶) beside the band, as the code pane's fold arrows sit beside its bands
+ * - the chevron as big as the code pane's fold arrows:  its stroke's ends 8.5px apart, 5px tall (`CodeMirrorSetup`)
+ * - a row with no code (an ability with no condition):  its band alone, every corner round
+ */
+ui-section.InspectorEvent.bubbly {
+  /* the box `.bubbly` draws round a page's drawing:  none here, the card's own glass round the rows */
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  max-width: none;
+  overflow: visible;
+  /* nor its page layout's zoom to the editor's size:  the row's words stay 13px, its code the slice's own 14px */
+  zoom: 1;
+  letter-spacing: normal;
+  font-size: 13px;
+  line-height: normal;
+  color: inherit;
+
+  /* each kind's band in its part of speech's colour:  events and actions are actions, an ability its thing's */
+  &.event,
+  &.action {
+    --bubbly-hue: var(--bubbly-action);
+  }
+  &.ability {
+    --bubbly-hue: var(--bubbly-thing);
+  }
+
+  /*
+   * the chevron the code pane's fold arrow's size, in its grey (`--cmb-fold-ink`):  10px draws it 8.75px by 5px,
+   * its arms 1.25px thick;  the fold arrow's stroke is 8.5px by 5px, 1.5px thick (was 12px:  10.5px by 6px, 1.5px)
+   */
+  --ui-section-fold-icon-size: 10px;
+  --ui-section-title-gap: 4px;
+  --ui-section-content-padding: 0;
+
+  &::part(fold-icon) {
+    color: var(--cmb-fold-ink, currentColor);
+  }
+
+  /* the body under the band, lined up with it:  past the chevron */
+  &::part(content) {
+    margin-left: calc(var(--ui-section-fold-icon-size) + var(--ui-section-title-gap));
+  }
+}
+
+/*
+ * open, with a body:  a rail down the body's left from the band's square corner, turning into a foot under the code;
+ * the band's colour behind the paper's round top-left corner, so the paper curves out of the band
+ * - folded, or with no code (an ability with no condition):  the band alone
+ */
+ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"])::part(content) {
+  border-left: var(--bubbly-gutter) solid var(--bubbly-pill);
+  border-bottom-left-radius: var(--bubbly-gutter-corner);
+  padding-bottom: var(--bubbly-foot-height);
+  background:
+    linear-gradient(var(--bubbly-pill) 0 0) left bottom / var(--bubbly-foot-width) var(--bubbly-foot-height) no-repeat,
+    linear-gradient(var(--bubbly-pill) 0 0) left top / var(--bubbly-inner-top) var(--bubbly-inner-top) no-repeat;
+}
+
+/* the band:  the row's icon and words, as tall as a band in the code, its words a little in from its round end */
+ui-section.InspectorEvent.bubbly > .InspectorEventWords {
+  min-height: var(--bubbly-pill-height);
+  box-sizing: border-box;
+  padding: 0 var(--bubbly-pill-pad-right) 0 8px;
+  gap: 4px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-weight: var(--ui-font-weight-normal, 400);
+  color: var(--bubbly-ink);
+  background: var(--bubbly-pill);
+  border-radius: var(--bubbly-pill-radius);
+
+  /* what was typed, the event's words or the action's name:  a white pill, as in the code */
+  & .bubbly-input {
+    line-height: calc(var(--bubbly-input-height) - var(--bubbly-input-pad-top));
+  }
+  & > ui-icon {
+    color: color-mix(in srgb, var(--bubbly-ink) 60%, var(--bubbly-pill));
+  }
+}
+/* open, with a body under it:  its bottom-left square, the rail dropping straight from it */
+ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"]) > .InspectorEventWords {
+  border-bottom-left-radius: 0;
+}
+
+/* the body's code:  on the code's paper, no field's border, its top-left curving out of the band */
+ui-section.InspectorEvent.bubbly > :is(.CodeSlice, pre.InspectorCode) {
+  /* from the rail, not over it:  only its right takes back some of the card's room (`Inspector.css`, I164) */
+  margin-inline: 0 -6px;
+  border: 0;
+  border-radius: var(--bubbly-inner-top) 4px 4px var(--bubbly-block-inner-corner);
+  background: var(--spell-code-paper, var(--bubbly-paper));
+}
+ui-section.InspectorEvent.bubbly > pre.InspectorCode {
+  padding: 4px 8px;
+}
+
+/* `to` as far from its pill as `when` is from its own (`.InspectorEventWords`) */
+ui-section.InspectorEvent.bubbly .InspectorActionSignature {
+  gap: 4px;
+}
+
+/* an action's name, which a click renames:  round as a pill, whichever sheet loads last */
+ui-section.InspectorEvent.bubbly .InspectorActionSignature > .InspectorActionName {
+  border-radius: var(--bubbly-input-radius);
+}

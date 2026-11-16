@@ -131,12 +131,12 @@
     height: 100%;
     translate: var(--cmb-fold-shift, calc(var(--cmb-fold-overlap) / 2)) 0;
     cursor: pointer;
-    color: light-dark(#6b6a76, #a3a1ae);
+    color: var(--cmb-fold-ink);
     opacity: 0;
     transition: opacity 0.12s;
   }
   .cmb-fold:hover {
-    color: light-dark(#26252e, #e6e5ee);
+    color: var(--cmb-fold-hover-ink);
   }
   .cm-gutters:hover .cmb-fold,
   .cmb-fold-folded {
@@ -154,6 +154,15 @@
   .cmb-fold-more:hover {
     opacity: 1;
   }
+}
+
+/*
+ * a fold arrow's grey, and its hover's:  page-wide, so the Inspector's Code card draws its rows' chevrons in it too
+ * (`CodeCard.css`, epic `editor` T98)
+ */
+:root {
+  --cmb-fold-ink: light-dark(#6b6a76, #a3a1ae);
+  --cmb-fold-hover-ink: light-dark(#26252e, #e6e5ee);
 }
 
 /* the bubbly look's room round the code, 12px (epic `editor` I187):  the gutter section's comment above */

@@ -81,6 +81,22 @@ describe("CodeMirrorBubbly", () => {
     expect(textWith(marked, "cmb-band-opens-group")).not.toContain('group "What It Keeps"')
   })
 
+  test("a group's notes, at the top level or in a type, drawn where its members' words are;  no other line (I134)", () => {
+    const text = `group "The piles"
+// Each kind of pile
+-- and how it lies
+
+a "pile" is a list
+\t// what a pile is
+\tgroup "Rank & Suit" -- low to high
+\t// ace is low
+\tits "rank" is a number
+\tto turn it
+\t\t// a step's comment
+`
+    expect(groupLinesOf(text)).toEqual(["// Each kind of pile", "-- and how it lies", "\t// ace is low"])
+  })
+
   /** A Spell block, a drawing in it, and a tag block in the drawing:  each head folds (`CodeMirrorLanguage.folding()`). */
   const DRAWN = `a "card" is a view
 \tits "rank" is a number
@@ -269,6 +285,17 @@ function columnsOf(text: string, slice: { from: number; to: number; hiddenIndent
     }
   )
   return { bands, rails: [...new Set(rails)], feet }
+}
+
+/** The lines drawn as a group's own, its notes (`cmb-group-line`), in order. */
+function groupLinesOf(text: string): string[] {
+  const state = EditorState.create({ doc: text })
+  const lines: string[] = []
+  CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, to, decoration) => {
+    const classes = (decoration.spec as { class?: string }).class?.split(" ") ?? []
+    if (from === to && classes.includes("cmb-group-line")) lines.push(state.doc.lineAt(from).text)
+  })
+  return lines
 }
 
 /** How many rails each railed line draws, by its text;  `slice`:  the lines shown. */
