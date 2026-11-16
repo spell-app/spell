@@ -135,4 +135,58 @@ describe("a body's rail under the caret", () => {
       )
     }
   })
+
+  /** A drawing's start tag laid out as Enter lays a long one out, Prettier's way (epic `language` I133). */
+  const LAID_OUT = `a "game" is a view
+\tto draw it
+\t\t<segment inverted>
+\t\t\t<toolbar
+\t\t\t\tclass="GameBar"
+\t\t\t\tinverted
+\t\t\t>
+\t\t\t\t<action "cheat" />
+\t\t\t</>
+\t\t</segment>
+`
+
+  test("a start tag over several lines:  each attribute line's pill round its words alone, hanging on the tag's rail;  its `>` at its band's edge", async () => {
+    const view = await bubblyEditorOf(LAID_OUT)
+    const [head, attribute, bare, close, child] = linesStarting(view, [
+      "<toolbar",
+      "class=",
+      "inverted",
+      ">",
+      "<action"
+    ])
+    const elementOf = (number: number) => {
+      const node = view.domAtPos(view.state.doc.line(number).to).node
+      return (node instanceof HTMLElement ? node : node.parentElement)!.closest<HTMLElement>(".cm-line")!
+    }
+    const band = elementOf(head!).querySelector(".cmb-band-open")!.getBoundingClientRect()
+    // no band reaching left over the line's indent and the rails round it
+    for (const number of [attribute!, bare!, close!]) {
+      const row = elementOf(number).querySelector(".cmb-tag-row")!
+      expect(row.textContent!.replace(/[“”]/g, '"'), String(number)).toBe(view.state.doc.line(number).text.trim())
+      expect(row.getBoundingClientRect().left).toBeGreaterThanOrEqual(band.left - 0.1)
+    }
+    // the attribute lines on the tag's rail, as its children are
+    const rail = railMiddle(view, child!)!
+    expect(Math.abs(railMiddle(view, attribute!)! - rail)).toBeLessThan(0.1)
+    expect(
+      Math.abs(elementOf(attribute!).querySelector(".cmb-tag-row")!.getBoundingClientRect().left - rail)
+    ).toBeLessThan(0.1)
+    // its `>` the end of the tag's band, from the band's left edge
+    expect(
+      Math.abs(elementOf(close!).querySelector(".cmb-tag-row")!.getBoundingClientRect().left - band.left)
+    ).toBeLessThan(0.1)
+  })
+
+  test("an attribute's opening quote mark a space's room after its `=`, as after a space", async () => {
+    const view = await bubblyEditorOf(LAID_OUT)
+    const equalsMark = view.dom.querySelector(".bubbly-equals")!
+    const equals = equalsMark.getBoundingClientRect()
+    const glyph = equalsMark.parentElement!.querySelector(".cmb-quote-open .cmb-quote-glyph")!.getBoundingClientRect()
+    // the `=`'s character box is wider than its ink:  its mark now starts past the box's middle
+    expect(glyph.left).toBeGreaterThan(equals.left + equals.width / 2)
+  })
 })
