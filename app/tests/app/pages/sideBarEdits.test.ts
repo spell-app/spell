@@ -271,15 +271,37 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.waitForTimeout(800)
       expect(await page.locator(".InspectorScope").count()).toBe(0)
       expect(await page.locator(".InspectorTrail").innerText()).toContain("Solitaire")
-      // its type's cards, as All Cards has:  its type is it
+      // its code is ONE Code card, as a column's is, with Add Event and Add Action (I186):  no tests, no Tests card
       const cards = await page
         .locator(".InspectorCard")
         .evaluateAll((all) => all.map((one) => (one as HTMLElement).dataset.panel))
-      expect(cards).toEqual(["properties", "events", "actions", "tests", "views"])
+      expect(cards).toEqual(["properties", "code", "views"])
+      const code = page.locator(".InspectorCard[data-panel=code]")
+      expect(await code.innerText()).toMatch(/when creating/i)
+      expect(await code.locator(".InspectorAddEvent").count()).toBe(1)
+      expect(await code.locator(".InspectorAddAction").count()).toBe(1)
       expect(await page.locator(".InspectorColumn").innerText()).not.toMatch(/All Solitaires/i)
       // a change it can't keep still says why, in words that name no "all"
       await change(page, "score", 7)
       expect(await page.locator(".InspectorNotSaved").textContent()).not.toMatch(/\ball\b/i)
+      await page.close()
+    }
+  )
+
+  test(
+    "the Inspector card's Close hides the column;  the top bar's Inspect app brings it back (I186)",
+    { timeout: 90_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Counter", { codeEditor: false })
+      const close = page.locator(".InspectorCard[data-panel=properties] ui-icon.InspectorClose")
+      expect(await close.count()).toBe(1)
+      await close.click()
+      await page.waitForTimeout(500)
+      expect(await page.locator(".InspectorColumn").count()).toBe(0)
+      await page.locator(".InspectAppButton").first().click({ force: true })
+      await page.waitForTimeout(500)
+      expect(await page.locator(".InspectorColumn").count()).toBe(1)
       await page.close()
     }
   )
