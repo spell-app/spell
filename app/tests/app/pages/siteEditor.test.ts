@@ -166,7 +166,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   })
 
   test("a page's stories:  one added, then ticked off, each one step written into the page;  its card counts them", async () => {
-    await cardWith("/films · ").click()
+    await cardOf("films page").click()
     const stories = page.locator(".SitePageStories")
     await stories.locator("li").first().waitFor({ timeout: 10_000 })
     expect(await stories.locator("li").count()).toBe(3)
