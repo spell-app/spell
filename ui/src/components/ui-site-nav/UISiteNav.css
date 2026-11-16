@@ -3,7 +3,7 @@
  * - Tokens:
  *   | `--ui-site-nav-padding` | the room around the tree |
  * - The rows' look is the tree's own (`--ui-tree-*`).
- * - A group's pages are a step in from its label:  their icons under its label's start (epic `mockup` I20).
+ * - A group's pages are a small step in from its label;  collapsed, a slight one (epic `mockup` I20).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
  *   a page with no icon its first letter, a group with no icon a thin line.
  */
@@ -60,9 +60,9 @@
     line-height: 1;
   }
 
-  /* a group's pages, a step in from its label:  their icons under the start of its label (an icon and the row's gap) */
+  /* a group's pages, a small step in from its label (Owen:  "less indent", I20) */
   :host(:not(:state(collapsed))) ui-tree-item[band="group"] ui-tree-item::part(row) {
-    padding-inline-start: calc(0.75em + 1.75em + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent));
+    padding-inline-start: calc(0.75em + 1em + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent));
   }
 
   /* ## `collapsed`:  the icons alone, each centred in its row, the titles their tooltips */
@@ -82,6 +82,10 @@
   :host(:state(collapsed)) ui-tree-item::part(row) {
     justify-content: center;
     padding-inline: 0.5em;
+  }
+  /* a group's pages, a slight step in from the group's icon, so they still read as its pages (Owen, I20) */
+  :host(:state(collapsed)) ui-tree-item[band="group"] ui-tree-item::part(row) {
+    padding-inline: 0.875em 0.125em;
   }
   /* a group with no icon, a thin line across:  still a row to click, its line drawn through its middle */
   :host(:state(collapsed)) ui-tree-item[band="group"]:not([icon])::part(row) {

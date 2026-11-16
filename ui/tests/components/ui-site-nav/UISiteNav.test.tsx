@@ -304,17 +304,17 @@ describe("<ui-site-nav> pages' extras", () => {
     const rowOf = (title: string) => row(host, title).shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!
     const startOf = (title: string) => parseFloat(getComputedStyle(rowOf(title)).paddingInlineStart)
     expect(row(host, "Design").getAttribute("icon")).toBe("palette")
-    // a step in:  an icon and the row's gap more than a page outside any group would have
-    expect(startOf("Explore") - startOf("Design")).toBeGreaterThan(20)
+    // a small step in (Owen, I20:  "less indent"):  1em more than its group's label
+    expect(startOf("Explore") - startOf("Design")).toBeGreaterThan(8)
+    expect(startOf("Explore") - startOf("Design")).toBeLessThan(20)
     // Run, with no icon, keeps an icon's room beside Design's
     expect(row(host, "Run").querySelector(':scope > [slot="icon"]')).not.toBeNull()
     host.setAttribute("collapsed", "")
     await ElementFixture.settle()
-    const centre = (title: string) => {
-      const box = row(host, title).shadowRoot!.querySelector('[part~="row"]')!.getBoundingClientRect()
-      return box.left + box.width / 2
-    }
-    expect(Math.abs(centre("Design") - centre("Explore"))).toBeLessThan(1)
+    // collapsed:  a group's page a slight step in from the group's icon (Owen, I20)
+    const step = startOf("Explore") - startOf("Design")
+    expect(step).toBeGreaterThan(2)
+    expect(step).toBeLessThan(10)
     const runRow = row(host, "Run").shadowRoot!.querySelector('[part~="row"]')!
     expect(getComputedStyle(runRow).backgroundImage).toContain("gradient")
     expect(getComputedStyle(row(host, "Design").shadowRoot!.querySelector('[part~="row"]')!).backgroundImage).toBe(
