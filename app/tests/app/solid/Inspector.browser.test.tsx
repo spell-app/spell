@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
+import { PropertyLayouts } from "spell/ui/property"
 import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell/app/app/solid"
 
 /**
@@ -126,6 +127,8 @@ describe("inspecting", () => {
     Inspector.stopInspecting()
     const inputs = [...area.querySelectorAll("ui-input")]
     Inspector.selectAll(inputs)
+    // the card waits for the tag's layout file, the first time (T97)
+    await PropertyLayouts.load("ui-input")
     flush()
     await ElementFixture.settle(host)
     expect(Inspector.allSelected.length).toBe(2)
@@ -202,6 +205,8 @@ describe("the properties card", () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     Inspector.select(area.querySelector("ui-button")!)
+    // the card waits for the tag's layout file, the first time (T97)
+    await PropertyLayouts.load("ui-button")
     flush()
     await ElementFixture.settle(host)
     const sections = [...host.querySelectorAll(".InspectorMain ui-property-group")]
@@ -307,11 +312,71 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     ])
     expect([...card.querySelectorAll(".InspectorEventWords")].map((words) => words.textContent)).toEqual(["on click"])
     expect(card.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
-    // its header:  Add Event, an icon and its words (T79);  Add Action only for a thing, and a Spell UI element isn't one
+    // its header:  Add Event, an icon and its words (T79);  Add Action goes to the view drawing it (I197), and none does
     const addEvent = card.querySelector('ui-dropdown.InspectorAddEvent[slot="right"]')!
     expect(addEvent.querySelector(".InspectorAddWords")!.textContent).toBe("Add Event")
     expect(addEvent.querySelector('[slot="trigger"] ui-icon')!.getAttribute("name")).toBe("bolt")
     expect(card.querySelector(".InspectorAddAction")).toBeNull()
+  })
+
+  test("a Spell UI element in a view's drawing:  Add Action beside Add Event, for that view (I197);  the empty card names both", async () => {
+    /** A stand-in for a drawn spell view. */
+    class Board {}
+    const board = new Board()
+    const area = await inArea(`<test-board></test-board>`)
+    cleanups.push(Inspector.watch(area))
+    const view = area.querySelector("test-board")!
+    Object.assign(view, { component: { currentThing: board } })
+    // its drawing, in its shadow root, as a view's is
+    view.attachShadow({ mode: "open" }).innerHTML = `<ui-segment></ui-segment>`
+    const segment = view.shadowRoot!.querySelector("ui-segment")!
+    expect(Inspector.actionHomeOf(segment)).toBe(board)
+    expect(Inspector.actionHomeOf(view)).toBe(board)
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    Inspector.select(segment)
+    flush()
+    await ElementFixture.settle(host)
+    const card = host.querySelector(".InspectorCard[data-panel=code]")!
+    const addAction = card.querySelector('ui-button.InspectorAddAction[slot="right"]')!
+    expect(addAction.getAttribute("icon")).toBe("fa7-free:circle-play")
+    expect(addAction.querySelector(".InspectorAddWords")!.textContent).toBe("Add Action")
+    expect(card.querySelector(".InspectorTip")!.textContent).toBe("No code yet.\nAdd Event or Add Action to start.")
+  })
+
+  test("the header (T95):  what's selected a file bar's tab, chosen, with its icon;  Spell UI docs before Inspect app, one tab for all;  the ✕ a panel's", async () => {
+    class Board {}
+    const area = await inArea(`<test-board></test-board><ui-segment></ui-segment>`)
+    cleanups.push(Inspector.watch(area))
+    const view = area.querySelector("test-board")!
+    Object.assign(view, { component: { currentThing: new Board() } })
+    const segment = area.querySelector("ui-segment")!
+    expect(Inspector.spellUITagOf(segment)).toBe("ui-segment")
+    expect(Inspector.spellUITagOf(view)).toBeUndefined()
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    Inspector.select(segment)
+    flush()
+    await ElementFixture.settle(host)
+    const tab = host.querySelector(
+      'ui-menu.InspectorTrail[appearance="segmented link header"] > ui-item.InspectorPartTag'
+    )!
+    expect(tab.hasAttribute("selected")).toBe(true)
+    expect(tab.getAttribute("icon")).toBeTruthy()
+    const buttons = [...host.querySelectorAll(".InspectorCard ui-menu.InspectAppMenu > ui-item")]
+    expect(buttons.map((button) => button.classList[0])).toEqual(["SpellUIDocsButton", "InspectAppButton"])
+    expect(buttons[0]!.getAttribute("appearance")).toBe("circular")
+    expect(buttons[0]!.getAttribute("title")).toBe("Spell UI docs for <ui-segment>")
+    const open = vi.spyOn(window, "open").mockReturnValue(null)
+    cleanups.push(() => open.mockRestore())
+    ;(buttons[0] as HTMLElement).click()
+    expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/components\/ui\/ui-segment\.html$/), "spell-ui-docs")
+    expect(host.querySelector(".InspectorCard ui-icon.PanelClose.InspectorClose")).not.toBeNull()
+    // a program's own view:  no docs
+    Inspector.select(view)
+    flush()
+    await ElementFixture.settle(host)
+    expect(host.querySelector(".SpellUIDocsButton")).toBeNull()
   })
 
   test("a drawn thing's events by its own words;  an ability with no condition, a hand and its words alone", async () => {
@@ -363,12 +428,13 @@ describe("the cards", () => {
     Inspector.toggleFolded("views")
     flush()
     expect(titles()).toEqual([false, true, true])
-    // no card is hidden on its own:  the one ✕ is the top card's Close, right of Inspect app, which hides the column (I186)
+    // no card is hidden on its own:  the one ✕ is the top card's Close, right of Inspect app, which hides the column (I186);
+    // beside its bar, a panel's ✕ as the file bar's is (T95)
     const closes = host.querySelectorAll<HTMLElement>(".InspectorCard ui-icon[name=close]")
     expect(closes).toHaveLength(1)
-    expect(closes[0]!.matches('[data-panel="properties"] [slot="actions"] .InspectAppMenu ~ .InspectorClose')).toBe(
-      true
-    )
+    expect(
+      closes[0]!.matches('[data-panel="properties"] > ui-toolbar[slot="actions"] ~ ui-icon.PanelClose[slot="actions"]')
+    ).toBe(true)
     // closed by it, then opened again:  every card, the folded one still folded
     closes[0]!.click()
     flush()

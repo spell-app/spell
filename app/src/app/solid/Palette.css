@@ -143,9 +143,11 @@
     gap: 8px;
   }
 
+  /* each name's icon close to its word, Spell UI's own distance (its icon margin, no gap on top);
+     the names 16px apart, so an icon reads as its own name's (epic `editor` I203, Owen:  "Same with these") */
   & ui-item.PaletteGroupName::part(item) {
-    gap: 5px;
-    padding-inline: 6px;
+    gap: 0;
+    padding-inline: 8px;
     color: var(--ui-text-muted);
     font-size: 13px;
     font-weight: var(--ui-font-weight-normal, 400);
@@ -193,14 +195,48 @@
   position: fixed;
   box-sizing: border-box;
   padding: 4px;
-  overflow: auto;
-  overscroll-behavior: contain;
   /* as a menu of the top bar looks (`MenuBar.css`, `.BarMenuPopup`) */
   border: var(--ui-border-width, 1px) solid var(--ui-border-color-strong);
   border-radius: var(--ui-radius);
   background: color-mix(in oklab, var(--ui-surface) 25%, var(--ui-background));
   box-shadow: var(--ui-shadow-floating);
   backdrop-filter: blur(24px) saturate(1.4);
+  /* its header stays put, its rows scroll under it */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  & .PaletteMatchRows {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* its topic's icon and name, a menu section's header (T99):  as the popup's topic band (`.PaletteGroup h4`), not a row */
+.PaletteMatchHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  /* its name lines up with the rows' labels, its icon with their icons (the icon's box is a little wider than its glyph) */
+  gap: 1px;
+  margin: 0 0 2px;
+  padding: 3px 8px;
+  border-radius: var(--ui-radius-sm, 6px);
+  background: color-mix(in oklab, var(--ui-text-color) 7%, transparent);
+  color: var(--ui-text-muted);
+  font-size: 12px;
+  font-weight: var(--ui-font-weight-bold, 700);
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+
+  & span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* a topic's menu:  its rows, as many as fit the window, then it scrolls */

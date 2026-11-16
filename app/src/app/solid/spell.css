@@ -39,7 +39,8 @@
   );
   /*
    * the top bar's fill as it's seen, for a bar inside a panel to match it (epic `mockup` I18, `editor` T83):
-   * the Inspector's card headers, the code's file tabs, the site editor's board bar
+   * the site editor's board bar (the code's file tabs and the Inspector's card bars see the page itself instead,
+   *   through the top bar's fill and blur:  `--spell-pane-bar-height`, below;  epic `editor` I194)
    * - the top bar's own fill (`--spell-menu-bar-fill`), over the page under it:  a theme's bar is often see-through,
    *   on the page, where these sit on a panel
    * - so the page is painted again under it:  a theme's wallpaper, as Spell UI's bars over a panel paint it
@@ -57,18 +58,34 @@
     linear-gradient(var(--spell-menu-bar-fill), var(--spell-menu-bar-fill)),
     var(--ui-bar-wallpaper, linear-gradient(transparent, transparent)),
     var(--ui-bar-wallpaper-color, var(--ui-background));
-  /* the top bar's blur, for what sits on the page beside it (the palette kept open, `Palette.css`) */
+  /* the top bar's blur, for what sits on the page beside it (the palette kept open, `Palette.css`),
+     and a panel's bar, which sees the page through it as the top bar does (`--spell-pane-bar-height`, below) */
   --spell-menu-bar-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
+  /*
+   * a panel's bar, the code's file tabs and each Inspector card's:  Spell UI's pane bar height (`UIPanel.css`)
+   * - in the editor's themes the panel's glass starts under it (`EditorTheme.css`),
+   *   so the bar is the top bar's own fill and blur over the page itself:  the same colour, light and dark
+   *   (epic `editor` I194:  "Make panel headers the same as the menubar")
+   */
+  --spell-pane-bar-height: var(--ui-panel-pane-bar-height, max(40px, calc(var(--ui-control-height, 0px) + 12px)));
+  /*
+   * what a panel's body lays over its glass:  the code's paper at half strength, 50% white, or 50% near-black in dark
+   * (epic `editor` I194:  "add 50% white inside the panel backgrounds")
+   */
+  --spell-panel-wash: color-mix(in srgb, var(--spell-code-paper) 50%, transparent);
 }
 
 /*
  * the editor's forms, `<ui-property-editor compact>`:  ONE look, the Inspector's, wherever one is
  * (the Inspector's cards, the site editor's page form;  epic `mockup` I14)
  * - fields less round than a theme's pills (Owen)
- * - a select with nothing chosen reads "none", in italics (Owen)
+ * - a select with nothing chosen reads "none", muted but upright, as its menu's choices (Owen, epic `editor` I198)
+ * - its groups' headers in capitals, a little smaller and spaced so they don't shout (Owen, epic `editor` I199)
  */
 ui-property-editor[compact] {
   --ui-input-radius: 6px;
   --ui-select-radius: 6px;
-  --ui-select-placeholder-style: italic;
+  --ui-property-editor-band-transform: uppercase;
+  --ui-property-editor-band-size: 11px;
+  --ui-property-editor-band-spacing: 0.06em;
 }

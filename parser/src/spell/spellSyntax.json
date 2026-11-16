@@ -8875,11 +8875,11 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 27,
+          "line": 30,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? (with {defaults:object_literal_properties})? {with_nested_statements}?",
               "example": "a \"film\" is a thing where:\n\t- its \"title\" is text\na \"films page\" is a page\na \"film page\" is a page where:\n\t- it has a film\ngalaxy guide is a site at \"owen@spell/galaxy\":\n\t- it has a films page at \"/films\", named \"Films\", icon \"film\"\n\t\t- it has a film page at \"/films/:film\"\n\t- it has a settings dialog\n\t- it has a film sidebar",
               "outputs": {
                 "js": {

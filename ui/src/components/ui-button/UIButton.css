@@ -135,7 +135,9 @@
     /* ## Motion and the icon */
     --_ui-button-duration: var(--ui-button-duration, var(--ui-duration-fast));
     --_ui-button-icon-opacity: var(--ui-button-icon-opacity, 0.8);
-    --_ui-button-icon-spacing: var(--ui-button-icon-spacing, var(--ui-space-xs));
+    /* space between the icon and its words:  a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own
+       button's;  at 0.5em it stood as far from them as from what came before the button (epic `editor` I203) */
+    --_ui-button-icon-spacing: var(--ui-button-icon-spacing, 0.35714em);
     /* ## Variations */
     --_ui-button-basic-border-width: var(--ui-button-basic-border-width, var(--ui-border-width));
     --_ui-button-basic-background-hover: var(--ui-button-basic-background-hover, var(--ui-surface));

@@ -2127,6 +2127,8 @@ sidebars any of them opens.
 - `galaxy guide is a site:` (`create_site`) is `create_one_of_a_kind`'s line for a SITE, spell's built-in template
   ([Site.spell](../core/templates/Site.spell), an app):  a type and its one instance.
   - Where it lives, if its line says:  `at "owen@spell/galaxy"`, or `in the cloud`.
+  - Its own values for a site's properties, after that, as a type's line has them (`create_type`'s `defaults`,
+    epic `mockup` I30):  `galaxy guide is a site with theme "mockup"`;  Spanish `con tema "mockup"`.
 - The lines under it compile to nothing by themselves;  `create_site` gathers them, walking its body (`CreateSite.partsOf()`):
   - `- it has a film page at "/films/:film", named "Film"` (`site_page`):  a page, at its address;  the lines under it, its pages
   - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
@@ -2174,7 +2176,8 @@ sidebars any of them opens.
 - Running:  the template's class extends the core's hand-written `SiteBase` (`HAND_WRITTEN_BASES`, in
   `builtInTemplateFiles.ts`), which shows the page an address names;  a program with a site starts its site, not its first
   page (`SpellProject.startedByItself()`).
-- Its theme (epic `mockup` P8):  a property of its own, `its "theme" is "mockup"`, no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
+- Its theme (epic `mockup` P8, I30):  the template's `theme` property, on its line, `galaxy guide is a site with theme "mockup"`,
+  or in its body, `its "theme" is "mockup"`;  no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
   alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
 - A page's stories (epic `mockup` P6) are the page's own, `<stories>` in its outline:  "Markdown" below.
 

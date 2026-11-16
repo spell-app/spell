@@ -1299,7 +1299,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "appearance",
-      "placeholder",
       "padding",
       "clearing",
       "align",

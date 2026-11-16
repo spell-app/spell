@@ -2530,7 +2530,8 @@
             },
             {
               "name": "--ui-button-icon-spacing",
-              "default": "var(--ui-space-xs)"
+              "default": "0.35714em",
+              "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)"
             },
             {
               "name": "--ui-button-basic-border-width",
@@ -23812,6 +23813,10 @@
             {
               "name": "--ui-page-layout-gap",
               "default": "var(--ui-font-size, 16px)"
+            },
+            {
+              "name": "--ui-page-layout-shadow",
+              "default": "0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent), 0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)"
             }
           ]
         }
@@ -30127,6 +30132,10 @@
               "description": "Half a row on its editor's grid:  its kind's width (a number, a select), or its `width`."
             },
             {
+              "name": "in-row",
+              "description": "One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share."
+            },
+            {
               "name": "inline-check",
               "description": "A yes or no in a compact editor:  the box, then its label, on one line."
             },
@@ -31135,6 +31144,10 @@
             {
               "name": "--ui-property-editor-band-transform",
               "default": "none"
+            },
+            {
+              "name": "--ui-property-editor-band-spacing",
+              "default": "0"
             },
             {
               "name": "--ui-property-editor-band-weight",
@@ -35093,19 +35106,11 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.",
+              "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint), `placeholder` (a tinted, centred block reserving room for content).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`, `placeholder`.",
               "type": {
                 "text": "string"
               },
               "fieldName": "appearance"
-            },
-            {
-              "name": "placeholder",
-              "description": "A tinted, centred block reserving room for content.",
-              "type": {
-                "text": "boolean"
-              },
-              "fieldName": "placeholder"
             },
             {
               "name": "padding",
@@ -38320,6 +38325,14 @@
             {
               "name": "--ui-site-nav-padding",
               "default": "0.5em 0"
+            },
+            {
+              "name": "--ui-site-nav-group-background",
+              "default": "light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.18))"
+            },
+            {
+              "name": "--ui-site-nav-group-radius",
+              "default": "var(--ui-radius-l)"
             }
           ]
         }
@@ -39711,7 +39724,7 @@
             },
             {
               "name": "min-size",
-              "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.",
+              "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for any pane.  Default:  `5%` and `0px`.  A pane's own `min-width` / `max-width` (`min-height` / `max-height` in rows) bound it too;  one whose least and most are the same isn't resized:  a bar beside it sizes the panes across it.",
               "type": {
                 "text": "string"
               },

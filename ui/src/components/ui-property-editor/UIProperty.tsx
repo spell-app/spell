@@ -4,7 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E, UI } from "spell/ui/core"
 // the family barrel, not the leaf:  the lib build then imports `ui-form.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines the form family:  a property is a field, in a form)
-import { DOMFieldElement, FormFields, UIField } from "spell/ui/components/ui-form"
+import { DOMFieldElement, FormBinding, FormFields, UIField } from "spell/ui/components/ui-form"
 import type { fieldVocabulary } from "spell/ui/components/ui-form/UIField.en"
 import { PropertySchemas } from "spell/ui/property"
 import type { AttributeSpec, PropertySchema, ValueType } from "spell/ui/vocabulary"
@@ -463,13 +463,16 @@ export class UIProperty extends UIField {
       // a row of buttons has no read-only of its own:  it looks the same, and takes no press
       if (control.attributes?.appearance === SEGMENTED) element.inert = true
     }
+    // unset, the thing shows a value of its own (an action's title and icon):  that, faded
+    const unset = this.unsetValue
+    if (unset) element.setAttribute("placeholder", unset)
     if (control.choices === "items") {
       const choices = this.choices ?? []
       const isSegmented = control.attributes?.appearance === SEGMENTED
       // no value and no default:  it reads "none", never blank (a segmented row always shows its choices)
       // (drawn again while its things disagree, it keeps saying "Mixed")
       if (spec?.default === undefined && !isSegmented && !this.domElement.hasAttribute("mixed"))
-        element.setAttribute("placeholder", this.translationForKey("none"))
+        if (!unset) element.setAttribute("placeholder", this.translationForKey("none"))
       // every segment an icon:  icons alone, each one's name its tooltip
       const iconsOnly = isSegmented && choices.length > 0 && choices.every(UIProperty.hasIcon)
       if (iconsOnly) element.setAttribute("icon", "")
@@ -532,11 +535,42 @@ export class UIProperty extends UIField {
    */
   @E.cssState("half")
   get isHalf(): boolean {
-    if (this.flagRun) return false
+    if (this.flagRun || this.isInRow) return false
     const width = this.attributes.width
     const columns = width ? E.ValueSets.columns(width) : undefined
     if (columns !== undefined) return columns <= HALF_OF_GRID
     return this.control?.width === HALF
+  }
+
+  /**
+   * What the thing it edits shows for its attribute while it isn't set, if it says:  its control's placeholder.
+   * - A Spell UI element says through its component's `unsetValueOf(name)`:  `<ui-action>`'s title and icon are its
+   *   action's (epic `editor` I208).
+   * - Only while it edits one thing.
+   */
+  protected get unsetValue(): string | undefined {
+    const scope = FormBinding.scopeAround(this.domElement)
+    const component = (scope as { component?: { unsetValueOf?(name: string): unknown } } | undefined)?.component
+    const value = component?.unsetValueOf?.(this.propertyName)
+    return typeof value === "string" && value ? value : undefined
+  }
+
+  /** SIDE EFFECT:  its made control's placeholder follows `unsetValue`, as the thing it edits arrives or changes. */
+  @E.onChange("unsetValue", { defer: true })
+  protected onUnsetValueChanged(unset: string | undefined) {
+    if (!unset) return
+    for (const child of this.domElement.children) {
+      if (child.hasAttribute(MADE_ATTRIBUTE) && !FormFields.isCheckable(child)) child.setAttribute("placeholder", unset)
+    }
+  }
+
+  /**
+   * `:state(in-row)`:  one of a row's properties, side by side in a `<ui-fields>` (a layout's row, `PropertyLayouts`):
+   * each the same share of the row, whatever its kind.
+   */
+  @E.cssState("in-row")
+  get isInRow(): boolean {
+    return this.isConnected && this.domElement.parentElement?.localName === ROW_TAG
   }
 
   /** In a compact editor, a yes or no draws on one line:  the field's `inline`, the box before its label. */
@@ -802,6 +836,7 @@ type DOMEditorLike = HTMLElement & {
  * its first property heads it (`flagRun`), the rest hide (`isFlagMember`).
  * - A run:  three or more side by side, by themselves;  a group's `flags` says otherwise
  *   (`pills`:  any run;  `checkboxes`:  none).
+ * - Never in a layout's row (`<ui-fields>`):  its properties are laid out as the row says.
  * - Each property still has its checkbox, which its form binds:  the pills only turn them on and off.
  * - Arranged a moment after any property in the group makes its control, so every one of them has.
  ****************/
@@ -819,7 +854,9 @@ class FlagRun {
   /** Find `container`'s runs and tell each property its part in them. */
   static arrange(container: Element) {
     const mode = container.getAttribute("flags")
-    const least = mode === PILLS ? 1 : mode === CHECKBOXES ? Infinity : LEAST_FLAGS
+    // a layout's row lays its properties out itself:  never pills
+    const least =
+      container.localName === ROW_TAG ? Infinity : mode === PILLS ? 1 : mode === CHECKBOXES ? Infinity : LEAST_FLAGS
     const runs: UIProperty[][] = []
     let run: UIProperty[] = []
     for (const child of container.children) {
@@ -878,6 +915,9 @@ const FLAGS = "flags"
 
 /** The pills' select. */
 const DROPDOWN_TAG = "ui-dropdown"
+
+/** A layout's row of properties, side by side:  a form's row of fields. */
+const ROW_TAG = "ui-fields"
 
 /** The value type of a choice, and the kind a row of icons draws as. */
 const CHOICE: ValueType = "choice"

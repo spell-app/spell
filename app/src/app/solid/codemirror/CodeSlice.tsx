@@ -32,11 +32,12 @@ export function CodeSlice(props: CodeSliceProps) {
   /** The view, once made. */
   let view: EditorView | undefined
 
-  // Show new lines, or another file's, in the same view.
+  // Show new lines, or another file's, in the same view:  what the compute read, never the props read again in the apply
+  // (a prop may be a `<Show>`'s value, which an apply can't follow:  Solid's `STRICT_READ_UNTRACKED`, epic `editor` I193)
   createEffect(
-    () => [props.file, props.from, props.to, props.column, props.endColumn] as const,
-    () => {
-      show()
+    () => ({ file: props.file, lines: linesOf(props) }),
+    ({ file, lines }) => {
+      if (view) SpellCodeMirror.states.showSlice(view, file, lines)
     }
   )
 
@@ -46,7 +47,7 @@ export function CodeSlice(props: CodeSliceProps) {
         onMount={(made) => {
           view = made
           untrack(() => {
-            show()
+            SpellCodeMirror.states.showSlice(made, props.file, linesOf(props))
             if (props.focus) caretToEnd(made)
             else takeCaretBack(made, props.file)
           })
@@ -64,18 +65,16 @@ export function CodeSlice(props: CodeSliceProps) {
       />
     </div>
   )
+}
 
-  /** Show the props' lines of their file in the view. */
-  function show() {
-    if (!view) return
-    const lines: SliceLines = {
-      first: props.from,
-      last: props.to,
-      column: props.column,
-      endColumn: props.endColumn,
-      dedent: !props.column
-    }
-    SpellCodeMirror.states.showSlice(view, props.file, lines)
+/** The lines `props` show of their file:  read where it's called, so an effect's compute follows them. */
+function linesOf(props: CodeSliceProps): SliceLines {
+  return {
+    first: props.from,
+    last: props.to,
+    column: props.column,
+    endColumn: props.endColumn,
+    dedent: !props.column
   }
 }
 

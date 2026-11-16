@@ -38,7 +38,7 @@ export const APP_TEXTS = {
   menuDuplicate: "Duplicate",
   menuDelete: "Delete",
   addPart: "Add to the app",
-  paletteSearch: "Search",
+  paletteSearch: "Search Views",
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
   paletteMoreTip: "Show everything filed under {topic}",
@@ -154,10 +154,9 @@ export const APP_TEXTS = {
   revertChanges: "Discard Changes",
   discardDraft: "Discard",
   publishDraft: "Publish",
-  editingDraft: "Editing a Draft",
-  /** "Editing a Draft" while the top bar is compact (epic `editor` T89). */
-  draftShort: "Draft",
-  draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
+  draft: "Draft",
+  draftTip:
+    "Your changes are a draft:  only you see them.\nPublish makes them everyone's, and keeps a version.\nDiscard throws them away.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
   closeTab: "Close",
@@ -295,7 +294,6 @@ export const APP_TEXTS = {
   inspectorNotSavedTypeSets: "Every one of the {types} starts with this.\nTo change it, pick All {types} first.",
   inspectorUnsavedAuto: "Spell makes this for you, so a change here can't be kept.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
-  inspectorScopeThis: "This",
   inspectorScopeThese: "These {count} {Types}",
   inspectorUnsavedSomeAuto: "Spell makes some of these for you, so those can't be changed.",
   inspectorSelectedMany: "{count} {kind}",
@@ -569,7 +567,7 @@ export const APP_TEXTS = {
   inspectorNone: "none",
   // the Inspector's Code card:  a part's events, abilities and actions, each with its code (`<CodeCard>`)
   inspectorCode: "Code",
-  inspectorCodeNone: "No code yet.  + adds an event.",
+  inspectorCodeNone: "No code yet.\nAdd Event or Add Action to start.",
   // a type's cards, while All Cards edits it (`TYPE_PANES`):  its events and abilities, its actions, its tests
   inspectorEvents: "Events",
   inspectorActions: "Actions",
@@ -624,6 +622,7 @@ export const APP_TEXTS = {
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
   // the Inspector card's Close, right of Inspect app:  hides the column (I186)
+  inspectorSpellUIDocs: "Spell UI docs for <{tag}>",
   inspectorClose: "Close the Inspector",
   inspectorAddEvent: "Add Event",
   inspectorAddAction: "Add Action",
@@ -634,7 +633,8 @@ export const APP_TEXTS = {
   inspectorParts: "Views",
   inspectorDivider: "Divider",
   inspectorFilter: "Filter",
-  inspectorNotDrawn: "Not drawn",
+  // a row of what the app holds but doesn't draw:  its tooltip (T96)
+  inspectorHidden: "Not drawn:  hidden, or drawn by no tag",
   inspectorNoParts: "Run the app to see its parts.",
   // the Views card's sort (`<InspectorViews>`)
   inspectorSort: "Sort",

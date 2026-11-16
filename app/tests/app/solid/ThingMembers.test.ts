@@ -111,6 +111,8 @@ describe("ThingMembers.bandsOf()", () => {
       ["two sided view", ["direction"]],
       ["", ["id"]]
     ])
+    // the card's own band goes untitled in the Inspector, its header already names it;  the view's keeps its (I200)
+    expect(bands.map((band) => !!band.isOwnType)).toEqual([true, false, false])
   })
 
   test("no running program:  only what its schema stores", () => {

@@ -6,7 +6,7 @@
  *
  *     <button class="ui [size] [fluid read-only disabled] icon picker" part="field"
  *             style="anchor-name: --ui-icon-picker-7">
- *       <span class="glyph" part="glyph"><svg></span>                     (while an icon is chosen)
+ *       <span class="glyph [placeholder]" part="glyph"><svg></span>       (an icon chosen;  none, the placeholder's, faded)
  *       <span class="text [placeholder]" part="text">star</span>
  *     </button>
  *     <div class="panel" popover part="panel" style="position-anchor: --ui-icon-picker-7">
@@ -225,6 +225,10 @@
     inline-size: 100%;
     block-size: 100%;
     fill: currentColor;
+  }
+  /* no icon chosen, the placeholder's (an action's own icon):  faded, as the placeholder's words are */
+  .ui.picker > .glyph.placeholder {
+    opacity: 0.45;
   }
   .ui.picker > .text {
     overflow: hidden;

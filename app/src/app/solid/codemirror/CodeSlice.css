@@ -10,6 +10,9 @@
      I164:  "Less round on the input") */
   border-radius: 4px;
   overflow: hidden;
+  /* on the code's paper, as the code pane's code is:  white, near-black in dark (`--spell-code-paper`;
+     Owen, epic `editor` I195:  "Code in panels should be white background") */
+  background: var(--spell-code-paper);
 
   /* as tall as its lines:  the editor's own box grows with them, and never scrolls up and down */
   > .CodeMirrorEditor,

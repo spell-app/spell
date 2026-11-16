@@ -8,11 +8,12 @@ import { DOMFormElement, FormBinding, UIForm } from "spell/ui/components/ui-form
 import "spell/ui/components/ui-section"
 import type { formVocabulary } from "spell/ui/components/ui-form/UIForm.en"
 import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
-import { PropertyEditorPages, PropertySchemas } from "spell/ui/property"
+import { PropertyEditorPages, PropertyLayouts, PropertySchemas, type PropertyLayout } from "spell/ui/property"
 import type { ComponentVocabulary, PropertySchema } from "spell/ui/vocabulary"
 import { propertyEditorVocabulary } from "./UIPropertyEditor.en"
 import {
   GROUP_SELECTOR,
+  GROUP_TAG,
   MADE_ATTRIBUTE,
   MADE_FROM,
   PROPERTY_SELECTOR,
@@ -160,13 +161,64 @@ export class UIPropertyEditor extends UIForm {
   @E.onChange("currentSchema", "isConnected")
   protected onSchemaChanged(schema: PropertySchema | undefined, isConnected: boolean) {
     if (!isConnected || this.holdsOwnProperties || this.attributes.source) return
-    this.removeMadeProperties(MADE_FROM.schema)
-    for (const spec of schema?.attributes ?? []) {
-      const property = document.createElement(PROPERTY_TAG)
-      property.setAttribute("name", spec.name)
-      property.setAttribute(MADE_ATTRIBUTE, MADE_FROM.schema)
-      this.domElement.append(property)
+    // a Spell UI tag with a layout file:  its sections and rows, once the file is in (epic `editor` T97)
+    if (schema && PropertyLayouts.tags.includes(schema.name)) {
+      let isCurrent = true
+      void PropertyLayouts.load(schema.name).then((layout) => {
+        // the author may have laid out properties of their own meanwhile (a Solid page draws its children after)
+        if (isCurrent && !this.holdsOwnProperties) this.makeProperties(schema, layout)
+      })
+      return () => {
+        isCurrent = false
+      }
     }
+    this.makeProperties(schema, undefined)
+  }
+
+  /**
+   * Make a `<ui-property>` per attribute of `schema`:  in `layout`'s sections and rows, else one after another.
+   * - A section is a `<ui-property-group>`, titled as the layout says;  a row of several, a `<ui-fields>`.
+   * - SIDE EFFECT:  writes its light DOM, each element it adds marked as made from the schema.
+   */
+  @E.untracked
+  private makeProperties(schema: PropertySchema | undefined, layout: PropertyLayout | undefined) {
+    this.removeMadeProperties(MADE_FROM.schema)
+    const attributes = schema?.attributes ?? []
+    const made = (tag: string, name?: string) => {
+      const element = document.createElement(tag)
+      if (name) element.setAttribute("name", name)
+      element.setAttribute(MADE_ATTRIBUTE, MADE_FROM.schema)
+      return element
+    }
+    if (!layout) {
+      for (const spec of attributes) this.domElement.append(made(PROPERTY_TAG, spec.name))
+      return
+    }
+    for (const section of PropertyLayouts.place(layout, attributes)) {
+      const group = made(GROUP_TAG)
+      group.setAttribute("label", section.label ?? PropertyLayouts.labelOf(section.group))
+      for (const row of section.rows) {
+        const holder = row.length > 1 ? made(ROW_TAG) : group
+        for (const name of row) holder.append(made(PROPERTY_TAG, name))
+        if (holder !== group) group.append(holder)
+      }
+      this.domElement.append(group)
+    }
+  }
+
+  /**
+   * `holdsOwnProperties`, watched:  the author's own may come after it made its own from the schema
+   * (a Solid page that draws them once a layout file is in, as the spell editor's Inspector does).
+   */
+  @E.watches({ childList: true })
+  get hasOwnProperties(): boolean {
+    return this.holdsOwnProperties
+  }
+
+  /** SIDE EFFECT:  the author's own properties came:  the ones it made from the schema go. */
+  @E.onChange("hasOwnProperties", { defer: true })
+  protected onOwnPropertiesChanged(hasOwn: boolean) {
+    if (hasOwn) this.removeMadeProperties(MADE_FROM.schema)
   }
 
   /** The author laid out properties (or groups) of their own:  any element child it didn't make. */
@@ -561,6 +613,9 @@ export const COLUMNS_PROPERTY = "--_property-editor-columns"
 /** The section it draws, and its buttons. */
 const SECTION_TAG = "ui-section"
 const BUTTON_TAG = "ui-button"
+
+/** A layout's row of properties side by side (`PropertyLayouts`):  a form's row of fields. */
+const ROW_TAG = "ui-fields"
 
 /** The section's slot the output goes in:  its title bar's end. */
 const ACTIONS_SLOT = "actions"

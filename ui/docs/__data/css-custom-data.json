@@ -313,7 +313,7 @@
       "name": "--ui-button-icon-spacing",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-button>`'s token.  Default:  `var(--ui-space-xs)`"
+        "value": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)\n\n`<ui-button>`'s token.  Default:  `0.35714em`"
       }
     },
     {
@@ -6834,6 +6834,13 @@
       }
     },
     {
+      "name": "--ui-page-layout-shadow",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-page-layout>`'s token.  Default:  `0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent), 0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)`"
+      }
+    },
+    {
       "name": "--ui-panel-background",
       "description": {
         "kind": "markdown",
@@ -7454,6 +7461,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-property-editor>`'s token.  Default:  `none`"
+      }
+    },
+    {
+      "name": "--ui-property-editor-band-spacing",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-property-editor>`'s token.  Default:  `0`"
       }
     },
     {
@@ -8882,6 +8896,20 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-site-nav>`'s token.  Default:  `0.5em 0`"
+      }
+    },
+    {
+      "name": "--ui-site-nav-group-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-site-nav>`'s token.  Default:  `light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.18))`"
+      }
+    },
+    {
+      "name": "--ui-site-nav-group-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-site-nav>`'s token.  Default:  `var(--ui-radius-l)`"
       }
     },
     {
@@ -12651,7 +12679,7 @@
       "name": ":state(in-row)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-term>`:  Set while its `<ui-terms>` is `direction=\"horizontal\"`."
+        "value": "Custom state of:\n\n- `<ui-property>`:  One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share.\n- `<ui-term>`:  Set while its `<ui-terms>` is `direction=\"horizontal\"`."
       }
     },
     {

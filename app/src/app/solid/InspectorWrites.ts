@@ -422,7 +422,7 @@ export function originOfDefault(element: Element, name: string): PropertyOrigin 
 }
 
 /** The file whose `<ui-defaults>` gives `element` attribute `name`, as the running program says;  `undefined` for none. */
-export function defaultsFileOf(element: Element, name: string): string | undefined {
+function defaultsFileOf(element: Element, name: string): string | undefined {
   const component = (element as Element & { component?: { vocabulary?: { tag?: string } } }).component
   const tag = component?.vocabulary?.tag ?? element.localName
   return runtimeCore()?.uiDefaults()?.sources[tag]?.[name]

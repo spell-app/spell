@@ -444,3 +444,27 @@ describe("SpellTyping.indentToSnap() before a group (epic `language` I121)", () 
     expect(SpellTyping.indentToAdd(cardWith(7, "g"), 7, 0)).toBe("\t")
   })
 })
+
+describe("`|>` closes a tag (epic `codemirror` T16)", () => {
+  /** Does the `>` at the end of `line` close a tag with a bar? */
+  const closes = (line: string, before: string[] = []) =>
+    SpellTyping.closesWithBar([...before, line], before.length, line.length - 1)
+
+  test("a `|>` between a tag's attributes, or right after its name", () => {
+    expect(closes(`\t<divider |>`)).toBe(true)
+    expect(closes(`<divider|>`)).toBe(true)
+    expect(closes(`<card-image card={it} |>`)).toBe(true)
+    expect(closes(`<icon name="star"|>`)).toBe(true)
+    expect(closes(`\t\tspacing="xs" |>`, [`\t<container columns="7"`])).toBe(true)
+  })
+
+  test("left alone:  in a value, in text, in Spell code, no `|` before it", () => {
+    expect(closes(`<text value="a |>`)).toBe(false)
+    expect(closes(`<x a={b |>`)).toBe(false)
+    expect(closes(`<x a=b|>`)).toBe(false)
+    expect(closes(`<text>a |>`)).toBe(false)
+    expect(closes(`its "x" is 1 |>`)).toBe(false)
+    expect(closes(`<divider >`)).toBe(false)
+    expect(closes(`</text|>`)).toBe(false)
+  })
+})

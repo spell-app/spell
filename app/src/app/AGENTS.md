@@ -157,6 +157,10 @@ and in the app's build folder, `app/` at the app folder's root.
     - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
       the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
+    - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
+      as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
+    - Four clicks select a block (epic `codemirror` T15):  the one the clicked line's fold arrow folds, or the
+      innermost one it's in;  each click after, the block around it (`CLICKS_SELECT_BLOCKS`).
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
     the scope explorer's packs use it too.
   - What a hover says and which code actions show are decided once, editor-free, in
@@ -172,6 +176,8 @@ and in the app's build folder, `app/` at the app folder's root.
       [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from [MarkupMarks](ui/MarkupMarks.ts), the page's own
       reading of it (`BubblyMarkup`);  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no
       editor in them;  pointed ends.
+      - A tag's `⟨` and `⟩` and the bar of its `|⟩` are a step darker than its other marks, all one colour
+        (`--bubbly-angle-ink`, the editor's `--bubbly-angle-mark`;  epic `codemirror` T17).
     - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
       ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
     - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
@@ -193,7 +199,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - Pinned lines (Settings… › Pinned lines, epic `codemirror` T8):
     the lines opening the blocks the top of the code is inside stay at the top while it scrolls
     ([CodeMirrorPinned](ui/codemirror/CodeMirrorPinned.ts)).
-  - Nine helps as Spell is typed, in every Spell editor, the look on or off
+  - Ten helps as Spell is typed, in every Spell editor, the look on or off
     ([CodeMirrorTyping](ui/codemirror/CodeMirrorTyping.ts)):  what each decides from the lines is the language
     service's `LSP.SpellTyping`;  each one undo
     - each writes with its key, so only the editor typed in helps:  a file's editor and a slice of it both have them
@@ -209,6 +215,9 @@ and in the app's build folder, `app/` at the app folder's root.
       any other, its closing tag written out, `<segment ` => `<segment |></segment>`;  one undo leaves `<action `
       - the shape choosing it from the suggestion list writes, from the same table (`LSP.CompletionShapes.spaceAfterTag()`)
       - only with nothing more of the tag written after the caret
+    - `|>` typed in a tag writes `/>`, which the bubbly look draws as a bar and a point, `|⟩` (epic `codemirror` T16):
+      only between a tag's attributes, never in a value, text or Spell code;  one undo leaves the `|>` typed
+      - an HTML file's editor has this help alone (`CodeMirrorTyping.markupExtension()`)
     - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
       Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
@@ -512,9 +521,12 @@ and in the app's build folder, `app/` at the app folder's root.
     groups at least 60px apart (`--spell-bar-group-gap`), icons in a group 12px apart (`--spell-bar-icon-gap`),
     measured between what's drawn.
     A new item takes its place in a group;  never a margin of its own.
-  - A bar inside a panel (the file tabs, the Inspector's cards, the site editor's board) and the palette kept open
-    wear the top bar's colour as it's seen, in one token, `--spell-menu-bar-background` (`solid/spell.css`;
-    epic `editor` T83):  the bar's fill over the theme's wallpaper, so it's drawn with `background-attachment: fixed`.
+  - A panel's bar (the file tabs, the Inspector's cards) and the palette kept open are the top bar's look (`solid/spell.css`;  epic `editor` T83, I194):
+    the top bar's fill and blur (`--spell-menu-bar-fill`, `-filter`) on a layer under it, over the page itself,
+    as the panel's glass starts under the bar (`--spell-pane-bar-height`, `solid/EditorTheme.css`).
+    - A panel's body is its glass under the code's paper at half strength (`--spell-panel-wash`).
+    - The site editor's board bar wears the top bar's colour repainted, `--spell-menu-bar-background`:
+      the bar's fill over the theme's wallpaper, so it's drawn with `background-attachment: fixed`.
 - Prod builds keep class names (`output.keepNames`, here):
   SEE [parser's AGENTS.md](../../../parser/src/parser/AGENTS.md), `keepNames`.
 

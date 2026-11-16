@@ -1,7 +1,7 @@
 import { For, Loading, Show, createEffect, createMemo, createSignal, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { scrollIntoSight } from "spell/util"
+import { flatParentFor, scrollIntoSight, scrollingBoxFor } from "spell/util"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -9,7 +9,6 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import {
   ACTION_ICON,
   Inspector,
-  ThingChip,
   isThing,
   itemsOf,
   partKeysFor,
@@ -29,7 +28,7 @@ import { on } from "./on"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its `close`.
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - No ✕:  a card isn't hidden on its own;  the top bar's Inspector button shows and hides the whole column
  *   (Owen, 2026-11-15, epic `editor` T78:  "no need to hide the sections of the inspector sidebar separately").
@@ -47,6 +46,11 @@ export function InspectorCard(props: {
   bar?: JSX.Element
   /** Its own buttons, at its bar's right:  `slot="right"`. */
   actions?: JSX.Element
+  /**
+   * Its ✕, after the bar, as the file bar's is:  a panel's action beside the bar, not in it (`PanelClose`, T95),
+   * so its size and the room before it are the file bar's own.
+   */
+  close?: JSX.Element
   /** The body's class. */
   class?: string
   /** The body. */
@@ -79,6 +83,7 @@ export function InspectorCard(props: {
         {props.bar}
         {props.actions}
       </ui-toolbar>
+      {props.close}
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
       </Show>
@@ -142,7 +147,10 @@ export function appParts(): () => PartRow[] {
  *   Esc or the glass again closes it, and the tree is as it was (`filter`).
  * - The header's double chevron closes every row, or opens them all.
  * - The header's sort puts each row's parts in document order, by name or by type, remembered (`ViewsOrder`).
- * - What the app made but doesn't draw, the deck say, is its own group:  a click shows it in the Inspector.
+ * - A new selection unfolds it, and its row comes into view (`<PartsTree>`;  Owen, 2026-11-16, epic `editor` I206:
+ *   "Selecting a card should expand the views panel and scroll so the card is visible").
+ * - What the app holds but doesn't draw, the deck say, is a row where it's held, its icon an eye with a slash:
+ *   a click shows it in the Inspector (`<HiddenItem>`).
  ****************/
 export function InspectorViews(props: {
   /** The app's parts (`appParts()`). */
@@ -211,36 +219,48 @@ export function InspectorViews(props: {
 
 /****************
  * ### `<PartsTree>`
- * The running app as a tree (`<ui-tree>`):  its parts, nested as they are in the app, then what it made but doesn't draw.
+ * The running app as a tree (`<ui-tree>`):  its parts, nested as they are in the app, and what it holds but doesn't draw.
  * - A part is a drawn thing or a Spell UI element (`Inspector.isPart()`);  the elements between them are skipped.
  * - A row says what a person would (`Inspector.rowWordsFor()`), how it's written in its tooltip.
  * - Clicking a row selects that part, and Shift, Command or Control several, as in the app.
  * - A part with parts inside closes;  what's closed is remembered with the project.
- * - What's not drawn:  a group of its own, closed to start.  A click inspects the thing (`Inspector.inspectThing()`).
+ * - What's not drawn (`<deck "deck" hidden />`, or a thing no tag draws):  a row inside the row of what holds it,
+ *   before what that draws, muted, an eye with a slash its icon (Owen, 2026-11-16, epic `editor` T96:  "Instead of
+ *   Not Drawn at the end of views, put hidden items in document order with the \"hidden\" icon").
+ *   - A click inspects the thing (`Inspector.inspectThing()`).
+ *   - What nothing drawn holds (a top-level thing):  a row at the tree's top, after the app.
  ****************/
 function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]; filter?: string }): JSX.Element {
   const shown = () => shownIn(props.nodes)
   // what's selected, however it came to be:  the rows around it open, so its row can be seen
   // the part whose row should come into view:  a new one for each new selection, so only that scrolls the tree;
-  // a thing reached along a trail (the deck, picked under Not drawn) isn't its base's row:  that row isn't revealed
+  // a thing reached along a trail (the deck, a hidden row) isn't its base's row:  that row isn't revealed;
+  // a part with no row of its own (a card's picture, drawn inside the card):  the row of the part it's in (I206)
   const revealing = createMemo(
-    (): Revealing => ({
-      element: (Inspector.inspected?.crumbs.length ?? 1) > 1 ? undefined : Inspector.selected?.element
-    }),
+    (): Revealing => {
+      const selected = Inspector.selected?.element
+      const isTrail = (Inspector.inspected?.crumbs.length ?? 1) > 1
+      return { element: selected && !isTrail ? rowPartFor(props.nodes, selected) : undefined }
+    },
     { equals: (a, b) => a.element === b.element }
   )
   createEffect(revealing, ({ element }) => {
     // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
     if (element) queueMicrotask(() => openRowsAround(props.nodes, element))
   })
-  const notDrawn = createMemo(() => {
+  // what's not drawn, by what holds it:  `undefined` for what nothing drawn holds
+  const hidden = createMemo(() => {
     const core = runtimeCore()
-    if (!core) return []
+    if (!core) return new Map<object | undefined, object[]>()
     const drawn = props.rows.map((row) => SpellElement.thingOf(row.element)).filter((thing) => !!thing)
-    const held = heldThings([...core.things.topLevel().map(({ thing }) => thing), ...drawn], core)
-    const things = core.things.all().filter((thing) => held.has(thing) && !drawn.includes(thing))
-    return sortedThings(things, viewsOrder())
+    return hiddenThings(
+      core.things.topLevel().map(({ thing }) => thing),
+      drawn,
+      core,
+      viewsOrder()
+    )
   })
+  const hiddenIn = (holder: object | undefined) => hidden().get(holder) ?? []
   return (
     <Show when={props.rows.length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}>
       <ui-tree
@@ -253,58 +273,92 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
         ref={treeChoosesRows}
       >
         <For each={props.nodes} keyed={(node) => node.element}>
-          {(node) => <PartItem node={node()} shown={shown} revealing={revealing} />}
+          {(node) => <PartItem node={node()} shown={shown} revealing={revealing} hiddenIn={hiddenIn} />}
         </For>
-        <Show when={notDrawn().length}>
-          <ui-tree-item
-            group=""
-            icon="eye slash outline"
-            label={appTexts.text("inspectorNotDrawn")}
-            which={String(notDrawn().length)}
-            open={isRowOpen(NOT_DRAWN) ? "" : undefined}
-            ref={whenRowToggled(() => toggleRow(NOT_DRAWN))}
-          >
-            <For each={notDrawn()}>
-              {(thing) => (
-                <ui-tree-item
-                  icon="cube"
-                  label={Inspector.thingLabel(thing, "", null)}
-                  selected={Inspector.inspected?.value === thing}
-                  ref={chooseRow(() => Inspector.inspectThing(thing))}
-                >
-                  <ThingChip label={Inspector.thingLabel(thing, "", null)} inRow />
-                </ui-tree-item>
-              )}
-            </For>
-          </ui-tree-item>
-        </Show>
+        <For each={hiddenIn(undefined)}>{(thing) => <HiddenItem thing={thing} hiddenIn={hiddenIn} />}</For>
       </ui-tree>
     </Show>
   )
 }
 
 /**
- * Every thing the app holds, from `roots` (its top-level things and what it draws):
- * each one's stored properties' things, and a list's items, all the way down.
- * - So Not drawn lists only what the app keeps, the deck say:  never a thing made and let go of,
+ * What the app holds but doesn't draw, by its holder:  the thing whose stored property (or list) holds it,
+ * `undefined` for a top-level thing nothing holds.
+ * - Found from `roots` (its top-level things) and what it draws:  each one's stored properties' things,
+ *   and a list's items, all the way down;  the nearest holder wins.
+ * - So it's only what the app keeps, the deck say:  never a thing made and let go of,
  *   e.g. the card a foundation makes to draw its placeholder's picture
  *   (`the picture of a new card whose rank is ace ...`).
+ * - Each holder's in `order`, as the tree's rows are.
  * - Reads stored values only:  no program code runs.
  */
-function heldThings(roots: readonly object[], core: NonNullable<ReturnType<typeof runtimeCore>>): Set<object> {
-  const held = new Set<object>()
-  const visit = (thing: object) => {
-    if (held.has(thing)) return
-    held.add(thing)
+function hiddenThings(
+  roots: readonly object[],
+  drawn: readonly object[],
+  core: NonNullable<ReturnType<typeof runtimeCore>>,
+  order: ViewsOrder
+): Map<object | undefined, object[]> {
+  const holders = new Map<object, object | undefined>()
+  // breadth first, so a thing's holder is the nearest
+  const queue: [object, object | undefined][] = [...drawn, ...roots].map((thing) => [thing, undefined])
+  for (let next = queue.shift(); next; next = queue.shift()) {
+    const [thing, holder] = next
+    if (holders.has(thing)) continue
+    holders.set(thing, holder)
     for (const property of core.things.propertiesOf(thing as never)) {
       if (property.computed) continue
       const value = (thing as Record<string, unknown>)[property.name]
-      if (isThing(value)) visit(value)
+      if (isThing(value)) queue.push([value, thing])
     }
-    for (const item of itemsOf(thing) ?? []) if (isThing(item)) visit(item)
+    for (const item of itemsOf(thing) ?? []) if (isThing(item)) queue.push([item, thing])
   }
-  roots.forEach(visit)
-  return held
+  const byHolder = new Map<object | undefined, object[]>()
+  const things = core.things.all().filter((thing) => holders.has(thing) && !drawn.includes(thing))
+  for (const thing of sortedThings(things, order)) {
+    const holder = holders.get(thing)
+    byHolder.set(holder, [...(byHolder.get(holder) ?? []), thing])
+  }
+  return byHolder
+}
+
+/****************
+ * ### `<HiddenItem>`
+ * A row for a thing the app holds but doesn't draw:  muted, an eye with a slash its icon (epic `editor` T96).
+ * - A click inspects it (`Inspector.inspectThing()`).
+ * - What it holds that isn't drawn either, inside it.
+ ****************/
+function HiddenItem(props: { thing: object; hiddenIn: (holder: object) => object[] }): JSX.Element {
+  const label = () => Inspector.thingLabel(props.thing, "", null)
+  return (
+    <ui-tree-item
+      class="InspectorHiddenRow"
+      icon="eye slash outline"
+      label={label()}
+      title={appTexts.text("inspectorHidden")}
+      selected={Inspector.inspected?.value === props.thing}
+      ref={chooseRow(() => Inspector.inspectThing(props.thing))}
+    >
+      <span slot="label">{label()}</span>
+      <For each={props.hiddenIn(props.thing)}>{(thing) => <HiddenItem thing={thing} hiddenIn={props.hiddenIn} />}</For>
+    </ui-tree-item>
+  )
+}
+
+/**
+ * The part among `nodes` whose row shows `element`:  itself, else the nearest part it's drawn inside,
+ * across shadow roots (a card's `<card-image>`, drawn in the card's own drawing, has no row:  the card's is it).
+ * - `undefined`:  none of them holds it.
+ */
+function rowPartFor(nodes: readonly PartNode[], element: Element): Element | undefined {
+  const rowParts = new Set<Element>()
+  const gather = (list: readonly PartNode[]) =>
+    list.forEach((node) => {
+      rowParts.add(node.element)
+      gather(node.children)
+    })
+  gather(nodes)
+  for (let at: Element | undefined = element; at; at = flatParentFor(at)) if (rowParts.has(at)) return at
+  return undefined
 }
 
 /** Open the rows around `element`'s, among `nodes`, in one change:  its row then scrolls into view. */
@@ -324,8 +378,18 @@ function rowsAround(nodes: readonly PartNode[], element: Element): PartNode[] | 
 }
 
 /** One part's row, with the parts inside it. */
-function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: () => Revealing }): JSX.Element {
+function PartItem(props: {
+  node: PartNode
+  shown: () => Element[]
+  revealing: () => Revealing
+  /** What's held but not drawn, by its holder:  this part's thing's go first among its rows. */
+  hiddenIn: (holder: object | undefined) => object[]
+}): JSX.Element {
   const words = () => Inspector.rowWordsFor(props.node.element)
+  const hidden = () => {
+    const thing = SpellElement.thingOf(props.node.element)
+    return thing ? props.hiddenIn(thing) : []
+  }
   // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
   const isThingRow = () => !!SpellElement.thingOf(props.node.element)
   // the row, set by its ref:  a ref callback has no owner, so the effect below lives here, not in it
@@ -348,7 +412,8 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
       label={words().label}
       which={words().which}
       title={words().tag}
-      selected={Inspector.isSelected(props.node.element)}
+      // selected, or what's selected is drawn inside it with no row of its own (a card's picture:  I206)
+      selected={Inspector.isSelected(props.node.element) || props.revealing().element === props.node.element}
       open={isRowOpen(props.node) ? "" : undefined}
       ref={(element: Element) => {
         row = element
@@ -361,13 +426,15 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
       }}
     >
       <Show when={isThingRow()}>
-        <ThingChip
-          label={Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object, "", props.node.element)}
-          inRow
-        />
+        <span slot="label">
+          {Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object, "", props.node.element)}
+        </span>
       </Show>
+      <For each={hidden()}>{(thing) => <HiddenItem thing={thing} hiddenIn={props.hiddenIn} />}</For>
       <For each={props.node.children} keyed={(child) => child.element}>
-        {(child) => <PartItem node={child()} shown={props.shown} revealing={props.revealing} />}
+        {(child) => (
+          <PartItem node={child()} shown={props.shown} revealing={props.revealing} hiddenIn={props.hiddenIn} />
+        )}
       </For>
     </ui-tree-item>
   )
@@ -520,7 +587,7 @@ function setRowsOpen(rows: readonly TreeRow[], open: boolean): void {
   setRowsChanged((count) => count + 1)
 }
 
-/** A row `isRowOpen()` can say of:  a part's (`PartNode`), or Not drawn's. */
+/** A row `isRowOpen()` can say of:  a part's (`PartNode`). */
 type TreeRow = Pick<PartNode, "key" | "startsOpen">
 
 /** Counts the changes to `rowOpenings()`, so the tree reads them again. */
@@ -538,15 +605,38 @@ type Revealing = {
  */
 const [revealed, setRevealed] = createSignal<Revealing | undefined>()
 
-/** Scroll `row` into the tree's view, once it's drawn, for `wanted`. */
-function revealRow(row: Element, wanted: Revealing): void {
-  if (!row.getClientRects().length) return
+/**
+ * Scroll `row` into the tree's view, once it's drawn, for `wanted`:  only if it isn't in view already, and no jump
+ * while it's partly there (`scrollIntoSight()`).
+ * - The rows around it open a frame or two after their `open` is written (epic `editor` I206:  a card in a column
+ *   stayed out of view, its column just opened):  so it looks again each frame, for a few, till the row has a box.
+ * - The cards glide to their new heights as the selection changes (`CardGlide`):  the tree's body, taller for a
+ *   moment, pulls the scroll back, so while the glide lasts each new height brings the row into view again.
+ *   Only its size does:  a person scrolling the tree meanwhile isn't fought.
+ * - A newer selection on the way stops it.
+ */
+function revealRow(row: Element, wanted: Revealing, framesLeft = REVEAL_FRAMES): void {
+  if (revealed() === wanted) return
+  if (!row.getClientRects().length || !row.getBoundingClientRect().height) {
+    if (framesLeft > 0) requestAnimationFrame(() => revealRow(row, wanted, framesLeft - 1))
+    return
+  }
   scrollIntoSight(row)
   setRevealed(wanted)
+  const body = scrollingBoxFor(row)
+  if (!body) return
+  const resized = new ResizeObserver(() => {
+    if (revealed() === wanted) scrollIntoSight(row)
+  })
+  resized.observe(body)
+  setTimeout(() => resized.disconnect(), GLIDE_WATCH_MS)
 }
 
-/** The "Not drawn" group, among the parts (their keys are `<place>|<tag>`):  closed until opened. */
-const NOT_DRAWN: TreeRow = { key: "not-drawn", startsOpen: false }
+/** How long `revealRow()` keeps a row in view while the cards glide, ms:  their glide, and the wait before it. */
+const GLIDE_WATCH_MS = 1500
+
+/** How many frames `revealRow()` waits for a row's box, at most. */
+const REVEAL_FRAMES = 10
 
 /**
  * The start of the pref remembering the rows someone opened or closed, a project's each.
@@ -574,8 +664,12 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  * - Its header's Add Event and Add Action, icon and words (Owen, 2026-11-15, epic `editor` T79;  a bare "+" before):
  *   - Add Event:  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *     handler in its place (`Inspector.addEvent()`), which then takes the cursor
- *   - Add Action, for a thing:  an empty action in its type, `to "new action"` (`Inspector.addAction()`),
- *     which then takes the cursor;  its name is changed as any action's is, in its signature
+ *   - Add Action, beside it for every part (Owen, 2026-11-16, I197:  "Bring back (>) Add Action"):
+ *     an empty action, `to "new action"` (`Inspector.addAction()`), which then takes the cursor;
+ *     its name is changed as any action's is, in its signature
+ *     - a thing's:  in its own type
+ *     - a Spell UI element's:  in the type of the view drawing it (`Inspector.actionHomeOf()`),
+ *       which is selected then, so its card shows the new action;  the element's handlers can call it (J160)
  *   - In a narrow column, their icons alone (`Inspector.css`):  the header never wraps.
  * - Each event's ✕, at its row's right (`<RemoveEventButton>`):  removes it, after asking unless ⌥ is held;  one undo.
  * - Resized and folded as the other cards are;  shown by the column while one part is selected.
@@ -599,11 +693,15 @@ export function CodeCard(props: {
     })
   })
   const actions = createMemo(() => {
+    // read again as each run ends:  a live edit keeps the thing, and an action added (Add Action) is its type's then
+    void editor.programRuns
     const core = runtimeCore()
     return core && props.thing && isThing(props.thing)
       ? InspectorActions.of(props.thing, core, editor.programWords)
       : []
   })
+  // a thing's own type;  a Spell UI element's, the view drawing it (I197)
+  const actionHome = () => (props.thing && isThing(props.thing) ? props.thing : Inspector.actionHomeOf(props.element))
   const addable = () =>
     DEFAULT_EVENTS.filter((event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event))))
   return (
@@ -632,8 +730,8 @@ export function CodeCard(props: {
               <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
             </ui-dropdown>
           </Show>
-          <Show when={props.thing && isThing(props.thing) ? props.thing : undefined}>
-            {(thing) => (
+          <Show when={actionHome()}>
+            {(home) => (
               <ui-button
                 slot="right"
                 size="mini"
@@ -644,7 +742,7 @@ export function CodeCard(props: {
                 title={appTexts.text("inspectorAddAction")}
                 onClick={(event: MouseEvent) => {
                   event.stopPropagation()
-                  Inspector.addAction(thing(), actions())
+                  Inspector.addAction(home(), home() === props.thing ? undefined : props.element)
                 }}
               >
                 <span class="InspectorAddWords">{appTexts.text("inspectorAddAction")}</span>
@@ -908,6 +1006,8 @@ function TypeEventCode(props: { thing: object; row: EventRow }): JSX.Element {
  ****************/
 export function TypeActionsCard(props: { thing: object }): JSX.Element {
   const actions = createMemo(() => {
+    // read again as each run ends, as the Code card's are
+    void editor.programRuns
     const core = runtimeCore()
     return core ? InspectorActions.of(props.thing, core, editor.programWords) : []
   })

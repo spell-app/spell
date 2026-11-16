@@ -394,7 +394,7 @@ const ADD_BUTTON_ID = "AddPartButton"
 
 /**
  * The palette kept open:  the top bar's second row, edge to edge, of its topics' names (epic `editor` T80).
- * - Its pin at its far left, pinned:  a click unpins it, closing the bar (epic `editor` T92;  a ✕ by the search before).
+ * - Its pin right before "Add View", pinned:  a click unpins it, closing the bar (epic `editor` T92, I212;  a ✕ by the search before).
  * - Add View, in bold, then each topic's icon and name (epic `editor` T86).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
  * - This app (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
@@ -484,10 +484,10 @@ export function PaletteStrip(): JSX.Element {
 
   return (
     <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
-      <div class="PaletteStripStart">
-        <PinIcon />
-      </div>
+      {/* the bar's start, kept empty so its groups stay centred;  the pin sits right before "Add View" (epic `editor` I212) */}
+      <div class="PaletteStripStart" />
       <div class="PaletteStripAdd">
+        <PinIcon />
         <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>
         <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
           <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
@@ -548,13 +548,18 @@ export function PaletteStrip(): JSX.Element {
         }}
       >
         <Show when={thisMatches()}>
-          <PaletteMatchPanel for={THIS_GROUP_MENU_ID} name={thisGroup()} resizes={resizes}>
+          <PaletteMatchPanel for={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON} resizes={resizes}>
             <ThisGroupRows words={words} />
           </PaletteMatchPanel>
         </Show>
         <For each={groupMatches()}>
           {(group) => (
-            <PaletteMatchPanel for={groupMenuId(group)} name={upperFirst(groupName(group))} resizes={resizes}>
+            <PaletteMatchPanel
+              for={groupMenuId(group)}
+              name={upperFirst(groupName(group))}
+              icon={group.icon ?? GROUP_ICON}
+              resizes={resizes}
+            >
               <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
             </PaletteMatchPanel>
           )}
@@ -579,10 +584,15 @@ function groupMenuId(group: PaletteGroup): string {
  * ### `<PaletteMatchPanel>`
  * One topic's search results in the pinned bar:  a menu of only its matches, under its name (`layOutMatches()`).
  * - `for`:  its name's id in the bar.
+ * - Headed by the topic's icon and name, as a menu's section is (epic `editor` T99):
+ *   with several open side by side, each says which topic it is, though its name in the bar may be off to one side.
+ *   - Only a label:  no click, no focus, so ↓ from the field still lands on the first match.
+ *   - It stays put while the rows under it scroll.
  */
 function PaletteMatchPanel(props: {
   for: string
   name: string
+  icon: string
   resizes: ResizeObserver
   children: JSX.Element
 }): JSX.Element {
@@ -593,9 +603,15 @@ function PaletteMatchPanel(props: {
   })
   return (
     <div class={MATCH_PANEL} data-for={props.for} ref={(element: HTMLElement) => (panel = element)}>
-      <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
-        {props.children}
-      </ui-tree>
+      <div class="PaletteMatchHeader" aria-hidden="true">
+        <ui-icon name={props.icon} />
+        <span>{props.name}</span>
+      </div>
+      <div class="PaletteMatchRows">
+        <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
+          {props.children}
+        </ui-tree>
+      </div>
     </div>
   )
 }

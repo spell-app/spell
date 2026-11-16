@@ -42,7 +42,7 @@ describe("<ui-segment> classes", () => {
     ['appearance="stacked"', "ui stacked segment"],
     ['appearance="tall-stacked"', "ui tall stacked segment"],
     ['appearance="piled"', "ui piled segment"],
-    ['appearance="vertical" placeholder', "ui placeholder vertical segment"],
+    ['appearance="vertical placeholder"', "ui vertical placeholder segment"],
     // the old names (epic ui-gaps P4), and the new
     ['appearance="circular basic" padding="compact" clearing', "ui compact clearing circular basic segment"],
     ['padding="lg"', "ui very padded segment"],

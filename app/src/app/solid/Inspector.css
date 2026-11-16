@@ -84,23 +84,24 @@ ui-panel.InspectorCard > .InspectorSection {
   min-height: 0;
 }
 .InspectorCard {
-  /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu") */
-  --ui-panel-pane-bar-background: var(--spell-menu-bar-background);
+  /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu"):
+     drawn under the bar, the top bar's fill and blur over the page (`EditorTheme.css`, epic `editor` I194) */
+  --ui-panel-pane-bar-background: transparent;
+  /* its body's scroll shades (`.InspectorSection::before`, I201):  a dark tint, deeper on a dark page */
+  --spell-scroll-shade: light-dark(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.6));
+  --spell-scroll-shade-size: 16px;
+  /* the room between its header and its body's first row, in every card (Owen, 2026-11-16, epic `editor` I210:
+     "Too much space above Solitare and the rest of the panel views") */
+  --spell-card-body-top: 8px;
   /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
      (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
   &.locked {
     --ui-panel-pane-bar-padding: 20px 16px;
   }
-  /* what's selected, as its title:  a blue pill (Owen) */
-  & .InspectorPartTag {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 2px 10px;
-    border-radius: 999px;
-    background: color-mix(in oklab, var(--ui-blue) 14%, transparent);
-    color: color-mix(in oklab, var(--ui-blue) 80%, var(--ui-text-color));
-    font-size: 0.9em;
+  /* ... and its title muted while nothing's selected (Owen, 2026-11-16, epic `editor` I204:
+     "Code header should be grey when nothing selected") */
+  &.locked [slot="title"] {
+    color: var(--ui-text-muted);
   }
 }
 
@@ -250,6 +251,20 @@ ui-panel.InspectorCard > .InspectorSection {
     min-height: 0;
   }
 }
+/*
+ * No card is smaller than its header, and a folded card is its header alone, never resized
+ * (Owen, 2026-11-16, epic `editor` I207:  "shouldn't be able to resize it smaller than its header"):
+ * - `<ui-split-panel>` keeps a drag within a pane's own min and max height
+ * - a pane whose min and max are the same is skipped:  the bars above and below a folded card resize
+ *   the open cards across it
+ * - `CardGlide`'s frames set their own min and max, so a card still glides as it folds
+ */
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane {
+  min-height: var(--spell-pane-bar-height, 40px);
+}
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane:has(> .InspectorCard.folded) {
+  max-height: var(--spell-pane-bar-height, 40px);
+}
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
@@ -267,24 +282,96 @@ ui-panel.InspectorCard > .InspectorSection {
   max-height: none;
 }
 
-/* a card's body:  scrolling by itself, its content 14px in */
+/* a card's body:  scrolling by itself, its content 14px in, 8px under the card's header (I210) */
 .InspectorSection {
   display: flex;
   flex-direction: column;
-  padding: 12px 14px;
+  padding: var(--spell-card-body-top) 14px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* a row the card's foot cuts fades out over its bottom padding, so it reads as "more below", not sliced off
-     (epic `editor` I11);  scrolled to the end, only the empty padding is under the fade */
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent);
+  /* its scroll, which its edges' shades follow (below) */
+  scroll-timeline: --inspector-scroll block;
+}
+/*
+ * A card body's SCROLL SHADES:  a soft dark shadow at each edge with more beyond it, so a row cut off there reads
+ * as "more this way", not sliced off (Owen, 2026-11-16, epic `editor` I201:  "white shading is not visible enough
+ * ... Make it darken instead, but hide when scrolled to bottom or top";  a white fade since I11).
+ * - None at the very top, none at the very bottom, and none at all on a body that doesn't scroll.
+ * - Each a strip stuck to its edge, the body's whole width, taking no room, never in a click's way.
+ * - It shows by the scroll itself, no script:  a scroll-driven animation fades it over its first (or last) 16px
+ *   of scroll;  a body with nothing to scroll has no timeline, so its shades keep their resting `opacity: 0`.
+ */
+.InspectorSection::before,
+.InspectorSection::after {
+  content: "";
+  position: sticky;
+  z-index: 3;
+  flex: none;
+  height: var(--spell-scroll-shade-size);
+  margin-inline: -14px;
+  pointer-events: none;
+  opacity: 0;
+  animation: auto linear both;
+  animation-timeline: --inspector-scroll;
+}
+.InspectorSection::before {
+  top: calc(-1 * var(--spell-card-body-top));
+  margin-block: calc(-1 * var(--spell-card-body-top)) calc(var(--spell-card-body-top) - var(--spell-scroll-shade-size));
+  background: linear-gradient(to bottom, var(--spell-scroll-shade), transparent);
+  animation-name: InspectorShadeShows;
+  animation-range: 0 16px;
+}
+.InspectorSection::after {
+  bottom: -12px;
+  margin-block: calc(12px - var(--spell-scroll-shade-size)) -12px;
+  background: linear-gradient(to top, var(--spell-scroll-shade), transparent);
+  animation-name: InspectorShadeHides;
+  animation-range: calc(100% - 16px) 100%;
+}
+/* Views:  its path line sticks at the top while it's scrolled, so the top shade starts under it, as its rows do */
+.InspectorSection.InspectorViews::before {
+  top: var(--ui-tree-row-height, 22px);
+  margin-block: 0 calc(-1 * var(--spell-scroll-shade-size));
+}
+@keyframes InspectorShadeShows {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes InspectorShadeHides {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 /* Views:  the tree's path line sticks right under the card's header, not under the section's padding,
    so the room above the first row is the first row's own (Owen, 2026-11-13, I56) */
 .InspectorSection.InspectorViews {
   padding-block-start: 0;
   & > :first-child {
-    margin-block-start: 12px;
+    margin-block-start: var(--spell-card-body-top);
   }
+}
+/* the thing's own type's band, its title left out (`<ThingBands>`, I200):  the card's header names the type */
+ui-property-group.InspectorUntitled::part(title) {
+  display: none;
+}
+/* ... and its first field the card's 8px under the header, as every card's first row is (I210) */
+ui-property-group.InspectorUntitled:first-child::part(content) {
+  padding-block-start: 0;
+}
+/* a Views row brought into view (`revealRow()`, I206) stops clear of the body's edges and their shades */
+.InspectorTree ui-tree-item {
+  scroll-margin-block: 24px;
+}
+/* a Views row for what the app holds but doesn't draw (`<HiddenItem>`, T96):  muted, as its eye-with-a-slash says */
+ui-tree-item.InspectorHiddenRow::part(row) {
+  color: var(--ui-text-muted);
 }
 /* each event, ability and action of the Code card (`<ui-section>`, folding on its own;  epic `editor` I109):
    its chevron, icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
@@ -421,6 +508,12 @@ ui-button.InspectorActionButton::part(button) {
 ui-button.InspectorActionButton::part(icon) {
   margin: 0;
 }
+/* an event's ✕ (`<RemoveEventButton>`):  small and grey, never the bar's ink (Owen, epic `editor` I195:
+   "`x` is too big -- lighter and grey") */
+ui-button.InspectorRemoveEvent::part(button) {
+  font-size: 12px;
+  color: var(--ui-text-muted);
+}
 ui-button.InspectorActionButton:not([disabled]):hover::part(button) {
   color: var(--ui-primary);
 }
@@ -439,13 +532,6 @@ ui-button.InspectorActionButton::part(button):focus-visible {
   display: block;
   margin: -4px -14px 0;
   font-size: 13px;
-}
-/* a drawn thing's pill, as its row's title (`<ThingChip inRow>`):  its words as close to the icon as a plain row's
-   (Owen, epic `editor` I130:  "too much space between icon and title"),
-   the pill's rim tucked in by the room the row leaves after its icon */
-ui-button.InspectorRowChip {
-  margin-inline-start: -2px;
-  --ui-button-padding-inline: 6px;
 }
 .InspectorFilter {
   flex: 1 1 auto;
@@ -525,35 +611,22 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   color: var(--ui-text-muted);
 }
 
-/* the trail in the properties card's header:  a pill a step, `›` between;  an earlier step goes back to it */
-.InspectorTrail {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+/* the properties card's header for the app or a Spell UI element:  what's selected, a tab of the file bar's, its icon
+   and its words, chosen (T95:  "Make these tabs look like the ones in the file menu";  I200:  no trail) */
+ui-menu.InspectorTrail {
   min-width: 0;
   overflow: hidden;
 
-  & > .InspectorTrailStep {
-    color: var(--ui-text-muted);
-  }
-  & > .InspectorPartTag {
+  & > ui-item.InspectorPartTag {
     flex: 0 1 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    min-width: 0;
     white-space: nowrap;
   }
   & .InspectorPartTagText {
+    display: block;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  & > .InspectorPartTag.back {
-    cursor: var(--ui-control-cursor);
-    opacity: 0.75;
-  }
-  & > .InspectorPartTag.back:hover {
-    opacity: 1;
   }
 }
 
@@ -762,11 +835,16 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
  * the seams between them, so each reads as its own pane (Owen, epic `editor` I190:  "Code doesn't look like a
  * separate pane.  Put that background *inside* the panels, rather than in the background of the sidebar")
  * - the card's corners its pane's;  its bar the top bar's colour (`.InspectorCard`, above)
+ * - its body the panels' (`--spell-pane-body-background`):  the glass under 50% of the code's paper (I194)
  * - before:  a panel's own solid fill, `--spell-panel-background` (epic `mockup` I18), then the glass behind the
  *   whole column (T83, undone by I190)
  */
 :root[data-spell-theme] .InspectorColumn .InspectorSplit > .SplitPane::before {
-  background: var(--spell-pane-background);
+  /* under the bar:  the bar sees the page itself, as the top bar does (`EditorTheme.css`, epic `editor` I194) */
+  top: var(--spell-pane-bar-height);
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  background: var(--spell-pane-body-background);
   -webkit-backdrop-filter: var(--spell-pane-filter);
   backdrop-filter: var(--spell-pane-filter);
 }

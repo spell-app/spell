@@ -53,6 +53,12 @@
   --bubbly-bold-ink: light-dark(#1f1f26, #f6f5fb);
   /* marks (`<`, `:`, `,`) and comments:  faint on the paper;  on a band, faint on its colour */
   --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
+  /*
+   * a tag's `⟨` and `⟩`, and the bar of its `|⟩` and `⟨|`:  a step darker than the other marks, all one colour
+   * (Owen, 2026-11-16, epic `codemirror` T17:  "Make `<` and `>` and `|>` slightly darker", "`|>` color should match
+   * the bubbly `>`")
+   */
+  --bubbly-angle-ink: color-mix(in srgb, var(--bubbly-ink) 18%, var(--bubbly-faint));
   /* a `//` note:  lighter than code, but clear on the paper, and under the editor's selection (Owen) */
   --bubbly-comment-ink: color-mix(in srgb, var(--bubbly-ink) 66%, var(--bubbly-paper));
   /* a note at the end of a head, on its band */
@@ -276,6 +282,7 @@
   .bubbly-tag-pill,
   .bubbly-foot-pill {
     --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
+    --bubbly-angle-ink: color-mix(in srgb, var(--bubbly-ink) 18%, var(--bubbly-faint));
   }
 
   /****** text ******/
@@ -725,6 +732,7 @@
     font-family: var(--bubbly-font-family);
     font-size: var(--bubbly-font-size);
     font-weight: 800;
+    color: var(--bubbly-angle-ink);
     /* line up > point with the pill corner. */
     top: -0.25px;
   }
@@ -741,6 +749,7 @@
   .bubbly-slash {
     display: inline-block;
     transform: scaleY(0.85);
+    color: var(--bubbly-angle-ink);
   }
   /* its bracket close beside it */
   .bubbly-angle-open:has(+ .bubbly-slash)::before {
@@ -1353,7 +1362,7 @@
       top: 0;
       left: 0;
       margin: 0;
-      color: var(--bubbly-band-mark);
+      color: var(--bubbly-angle-mark);
       font-size: calc(var(--bubbly-font-size) * var(--bubbly-editor-scale));
       line-height: normal;
     }
@@ -1379,14 +1388,14 @@
       top: 0;
       font-weight: 300;
       letter-spacing: normal;
-      color: var(--bubbly-band-mark);
+      color: var(--bubbly-angle-mark);
     }
     .cm-line .bubbly-mark.bubbly-slash.bubbly-end-bare {
       letter-spacing: -0.2em;
     }
     .cm-line .bubbly-end-slash::before {
       left: -0.08em;
-      color: var(--bubbly-end-mark);
+      color: var(--bubbly-end-angle-mark);
     }
     .cm-line .bubbly-end-slash.bubbly-foot-tiny::before {
       color: var(--bubbly-foot-tiny-ink);
@@ -1435,12 +1444,21 @@
     --bubbly-band-mark: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
     /* ... an end tag's a little fainter (Owen:  at 22%, and its name faded on top, it didn't read) */
     --bubbly-end-mark: color-mix(in srgb, var(--bubbly-ink) 28%, var(--bubbly-paper));
+    /*
+     * a tag's `⟨` and `⟩`, and the bar of its `|⟩`:  a step darker than its other marks, ONE colour, so a `|⟩` reads as
+     * the same mark as a `⟩` (Owen, 2026-11-16, epic `codemirror` T17);  an end tag's `⟨|` and `⟩` as much darker
+     * than its marks
+     */
+    --bubbly-angle-mark: color-mix(in srgb, var(--bubbly-ink) 18%, var(--bubbly-band-mark));
+    --bubbly-end-angle-mark: color-mix(in srgb, var(--bubbly-ink) 18%, var(--bubbly-end-mark));
     .cm-line .bubbly-mark {
       color: var(--bubbly-band-mark);
     }
-    .cm-line .bubbly-mark.bubbly-tag-end,
-    .cm-line .bubbly-angle.bubbly-tag-end::before {
+    .cm-line .bubbly-mark.bubbly-tag-end {
       color: var(--bubbly-end-mark);
+    }
+    .cm-line .bubbly-angle.bubbly-tag-end::before {
+      color: var(--bubbly-end-angle-mark);
     }
     /* an attribute's `=` 10% darker, as on the page (I145) */
     .cm-line .bubbly-mark.bubbly-equals {
@@ -2254,10 +2272,15 @@
      * own text, in place of the `"`, so nothing see-through is left to come back when it's selected (I115)
      * - Times' bold curly quotes at the editor's size, leaning with the band;  their colour 10% darker than the
      *   other marks, as an `=`'s (`.bubbly-quote-mark::after`, the drawn-bubbly page's)
+     * - Its box tall enough to reach the middle of the letters, up from their baseline:  CodeMirror finds the place
+     *   under the pointer from its pieces' boxes, and took one of no height for a piece above or below the pointer,
+     *   so a press or a drag left of a quote landed after its value (epic `codemirror` I10);  no taller, or it lifted
+     *   the white 1px
      */
     .cm-line .cmb-quote {
       display: inline-block;
       width: 0;
+      height: 0.7em;
     }
     .cm-line .cmb-quote-glyph {
       position: absolute;
@@ -2296,13 +2319,13 @@
     }
     /*
      * a tag's quoted value's marks:  each mark's box as wide as the `"` it shows (0.4625em, the editor's `"`),
-     * its top at the text's, its curly mark over its middle, leaning more
+     * as tall as the letters, its top at theirs (I10, above), its curly mark over its middle, leaning more
      */
     .cm-line .cmb-tag-quote {
       --bubbly-quote-rotation: 30deg;
       position: relative;
       width: 0.4625em;
-      height: 0;
+      height: 1em;
       vertical-align: text-top;
     }
     /*

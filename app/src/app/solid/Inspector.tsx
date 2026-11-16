@@ -14,7 +14,7 @@ import { RenameError } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import type { TextChange } from "spell/app/app/EditorHistory"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { PropertySchemas } from "spell/ui/property"
+import { GROUP_ORDER, PropertyLayouts, PropertySchemas, type PropertyLayout } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 // By file:  a click's rule is all this needs
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
@@ -61,9 +61,10 @@ import {
   type WrittenEvent
 } from "./InspectorSource"
 import { InspectorData } from "./InspectorData"
-import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
+import { NotebookDocs } from "./notebook/NotebookDocs"
 import { PageLoading } from "./PageLoading"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -244,11 +245,18 @@ export class Inspector {
   /**
    * Select `element` (`undefined`:  nothing), outlined while it stays selected.
    * - A new selection starts the trail afresh (`inspected`);  `trail`, inspecting it again after a redraw, follows that one.
+   * - It unfolds the Views card, folded, so its row can come into view there (Owen, 2026-11-16, epic `editor` I206:
+   *   "Selecting a card should expand the views panel and scroll so the card is visible");  not `unfoldsViews: false`,
+   *   what was selected found again after a reload or a redraw, so a card folded by hand stays folded.
    * - NOTE:  the new selection and trail are passed along, never read back:
    *   a signal reads its old value until the next flush.
    */
-  static select(element: Element | undefined, { trail: steps = [] as readonly string[] } = {}): void {
+  static select(
+    element: Element | undefined,
+    { trail: steps = [] as readonly string[], unfoldsViews = true } = {}
+  ): void {
     const part = element && Inspector.partFor(element)
+    if (part && unfoldsViews && Inspector.isFolded("views")) Inspector.toggleFolded("views")
     setSelectedParts(part ? [part] : [])
     setTrail(steps)
     clicks.pivot = element
@@ -261,12 +269,14 @@ export class Inspector {
 
   /**
    * Select all of `elements` at once:  what isn't a part is left out;  one is as `select()`, none lets go.
+   * - It unfolds the Views card as `select()` does, but with `unfoldsViews: false`.
    * - The last is the one the properties card says most about (`selected`).
    * - Several have no trail:  a trail starts from one thing.
    */
-  static selectAll(elements: readonly Element[]): void {
-    if (elements.length < 2) return Inspector.select(elements[0])
+  static selectAll(elements: readonly Element[], { unfoldsViews = true } = {}): void {
+    if (elements.length < 2) return Inspector.select(elements[0], { unfoldsViews })
     const parts = elements.flatMap((element) => Inspector.partFor(element) ?? [])
+    if (parts.length && unfoldsViews && Inspector.isFolded("views")) Inspector.toggleFolded("views")
     setSelectedParts(parts)
     setTrail([])
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), [])
@@ -462,11 +472,6 @@ export class Inspector {
     Inspector.select(found.element, { trail: found.trail })
   }
 
-  /** Go back along the trail to step `depth` (0:  what's selected). */
-  static backTo(depth: number): void {
-    Inspector.followTrail(trail().slice(0, depth))
-  }
-
   /** Follow `steps` from what's selected;  remember them, and outline what they lead to when it's drawn. */
   private static followTrail(steps: readonly string[]): void {
     setTrail(steps)
@@ -569,14 +574,15 @@ export class Inspector {
     const found = [remembered ?? []].flat().flatMap((address) => Inspector.elementAt(address, rows) ?? [])
     // the trail from it too, as it was left
     const steps = (editorPrefs.get(Inspector.projectPref(TRAIL_PREF)) as string[] | undefined) ?? []
-    if (found.length > 1) return Inspector.selectAll(found)
-    if (found.length) return Inspector.select(found[0], { trail: steps })
+    // found again, not chosen anew:  the Views card stays as it was left
+    if (found.length > 1) return Inspector.selectAll(found, { unfoldsViews: false })
+    if (found.length) return Inspector.select(found[0], { trail: steps, unfoldsViews: false })
     // a part no row holds (a button in a drawn thing's own drawing):  the element drawn again from the same place
     const redrawn = parts.flatMap((part) =>
       part.element.isConnected ? part.element : (Inspector.redrawnElement(part.element) ?? [])
     )
-    if (redrawn.length > 1) Inspector.selectAll(redrawn)
-    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps })
+    if (redrawn.length > 1) Inspector.selectAll(redrawn, { unfoldsViews: false })
+    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps, unfoldsViews: false })
     else if (parts.length) Inspector.select(undefined)
   }
 
@@ -807,6 +813,30 @@ export class Inspector {
     const drawn = (element as E.DOMElement).component as { actionToDraw?: object } | undefined
     if (drawn?.actionToDraw) return ACTION_ICON
     return Inspector.vocabularyOf(element)?.icon ?? CONTROL_ICON
+  }
+
+  /**
+   * `element`'s Spell UI tag, `ui-segment`, when it's a Spell UI element:  for its docs (`<SpellUIDocsButton>`, T95).
+   * - Its vocabulary's own tag, so a translated element (`<es-segmento>`) finds the English page.
+   * - `undefined`:  a drawn thing (a program's own view, the app), or not Spell UI's.
+   */
+  static spellUITagOf(element: Element): string | undefined {
+    if (SpellElement.thingOf(element)) return undefined
+    const tag = Inspector.vocabularyOf(element)?.tag
+    return tag?.startsWith("ui-") ? tag : undefined
+  }
+
+  /**
+   * Open `tag`'s page of Spell UI's docs, on the page server (`SPELL_UI_DOCS`), in ONE browser tab every time
+   * (`window.open()`'s name, `spell-ui-docs`;  Owen, T95:  "Re-use the same tab for all components").
+   * - Its page as the docs' data says (`SiteData.tag()`):  a tag with no page of its own, its family's, at its section
+   *   (`ui-column` => `ui-grid.html#ui-column`);  until the data's in, `<tag>.html`.
+   * - SIDE EFFECT:  starts loading the data, for the next one.
+   */
+  static openSpellUIDocs(tag: string): void {
+    const page = docsPages?.[tag] ?? `${tag}.html`
+    window.open(new URL(`${SPELL_UI_DOCS}${page}`, location.href).href, DOCS_TAB)
+    loadDocsPages()
   }
 
   /** A Spell UI element's vocabulary, once its family has loaded. */
@@ -1208,9 +1238,7 @@ export class Inspector {
    * - A thing's value kept in a data place, or worked out from one, says so over what the code says (epic `editor` P26).
    */
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
-    const names = part.layout
-      ? [...part.layout.set, ...part.layout.more].map((field) => field.name)
-      : Inspector.storedNamesOf(part.value)
+    const names = part.layout ? part.layout.fields.map((field) => field.name) : Inspector.storedNamesOf(part.value)
     const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
     if (part.layout) return origins
     for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
@@ -1294,15 +1322,34 @@ export class Inspector {
   }
 
   /**
+   * The thing whose type Add Action writes into, for `element` selected (epic `editor` I197, J160):
+   * - a drawn thing (`<solitaire-card>`):  its own thing
+   * - a Spell UI element (a `<button>` in a drawing):  the nearest view drawing it, the element whose drawing holds it,
+   *   through its shadow root:  its event handlers can call that view's actions
+   * - `undefined`:  no view draws it
+   */
+  static actionHomeOf(element: Element): object | undefined {
+    for (let at: Element | undefined = element; at; at = at.parentElement ?? shadowHostOf(at)) {
+      const thing = SpellElement.thingOf(at)
+      if (thing) return thing
+    }
+    return undefined
+  }
+
+  /**
    * Add an empty action to `thing`'s type, `to "new action"`, as a step of `editor.history` (epic `editor` T79):
    * the Code card's Add Action.
    * - Written as an event is (`newEventIn()`):  after its type's last line, its empty body a level in.
-   * - Named `new action`, else `new action 2` ... one none of `actions` has.
+   * - Named `new action`, else `new action 2` ... one none of its actions has.
    * - Its row then shows with the cursor in its code (`Inspector.justAdded`);  it's renamed in its signature.
+   * - `from`:  the Spell UI element it was added from, when `thing` is the view drawing it (`actionHomeOf()`, I197):
+   *   that view is selected, so its Code card shows the new action, the cursor in it.
    * - Nothing happens where its type can't be found in the program.
    * - TODO:  a Spanish program's own words (`para "nueva acción"`):  English is written for now, as `addEvent()` does.
    */
-  static addAction(thing: object, actions: readonly { words: string }[]): void {
+  static addAction(thing: object, from?: Element): void {
+    const core = runtimeCore()
+    const actions = core ? InspectorActions.of(thing, core, editor.programWords) : []
     const words = newActionWords(actions.map((action) => action.words))
     const written = newEventIn(InspectorActions.typeWordsOf(thing), sourceFiles(), `to "${words}"`)
     if (!written) return
@@ -1313,6 +1360,7 @@ export class Inspector {
       { file, at: written.at, before: "", after: written.code },
       { title: appTexts.text("inspectorAddAction") }
     )
+    if (from) Inspector.inspectThing(thing)
   }
 
   /**
@@ -1382,7 +1430,7 @@ export class Inspector {
       }
     }
     if (isUIElement(element) || isWrittenTag(element)) {
-      // its attributes as its vocabulary lists them:  those it sets first, the rest under "More"
+      // its attributes as its vocabulary lists them
       const component = (element as Element & { component?: { vocabulary?: { attributes?: FieldSpec[] } } }).component
       const fields = component?.vocabulary?.attributes ?? []
       return {
@@ -1393,11 +1441,8 @@ export class Inspector {
         layout: {
           // its text, when it holds only text:  a button's words aren't an attribute
           hasText: element.childElementCount === 0 && !!element.textContent?.trim(),
-          // a value the program's `<ui-defaults>` gives it shows among those it sets (epic `language` P29)
-          ...withPositionsBesideTheirs(
-            fields.filter((field) => element.hasAttribute(field.name) || !!defaultsFileOf(element, field.name)),
-            fields.filter((field) => !element.hasAttribute(field.name) && !defaultsFileOf(element, field.name))
-          )
+          // every field in its vocabulary's place, set or not:  a value never moves its field (epic `editor` I199)
+          fields
         }
       }
     }
@@ -1457,11 +1502,11 @@ function sharedSchema(parts: readonly SelectedPart[]): SelectedPart["schema"] {
   return { name: first.label, attributes }
 }
 
-/** Several Spell UI elements' fields:  one tag's, with nothing set first, and no text field;  else none. */
+/** Several Spell UI elements' fields:  one tag's, and no text field;  else none. */
 function sharedLayout(parts: readonly SelectedPart[]): SelectedPart["layout"] {
   const [first] = parts as readonly [SelectedPart, ...SelectedPart[]]
   if (!first.layout || !parts.every((part) => isSameKind(part, first))) return undefined
-  return { hasText: false, set: [], more: [...first.layout.set, ...first.layout.more] }
+  return { hasText: false, fields: first.layout.fields }
 }
 
 /**
@@ -1528,30 +1573,15 @@ export type SelectedPart = {
   /** Its title:  `Card "queen of spades"`, `<ui-input>`. */
   label: string
   /**
-   * A Spell UI element's fields, in the editor's order:  what it sets first, the rest folded under "More";
+   * A Spell UI element's fields, in its vocabulary's order, whether it sets them or not;
    * `undefined`, the schema's own order (a thing's properties are all set).
    */
   layout?: {
     /** It holds only text, its words:  a field for them first, its `textContent`. */
     hasText: boolean
-    /** The attributes it sets, in its vocabulary's order. */
-    set: FieldSpec[]
-    /** The rest. */
-    more: FieldSpec[]
+    /** Its attributes, in its vocabulary's order:  each keeps its place, set or not (epic `editor` I199). */
+    fields: FieldSpec[]
   }
-}
-
-/**
- * An attribute that places another (`icon-position`) goes beside it, so the two share a row.
- * - set:  `icon` set and its position not, the position comes up from "More" to sit after it
- */
-function withPositionsBesideTheirs(set: FieldSpec[], more: FieldSpec[]): { set: FieldSpec[]; more: FieldSpec[] } {
-  const moved = more.filter((field) => set.some((other) => field.name === `${other.name}${POSITION_SUFFIX}`))
-  const ordered = set.flatMap((field) => [
-    field,
-    ...moved.filter((other) => other.name === `${field.name}${POSITION_SUFFIX}`)
-  ])
-  return { set: ordered, more: more.filter((field) => !moved.includes(field)) }
 }
 
 /** The name ending of an attribute that places another:  `icon-position` places `icon`. */
@@ -2117,11 +2147,16 @@ function turnedBox(element: Element): { width: number; height: number; matrix: D
   return { width, height, matrix: new DOMMatrix([linear.a, linear.b, linear.c, linear.d, left, top]) }
 }
 
+/** The element whose shadow root holds `node`, if one does. */
+function shadowHostOf(node: Element): Element | undefined {
+  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+}
+
 /** `node`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
 function flatParentOf(node: Element): Element | undefined {
   if (node.assignedSlot) return node.assignedSlot
   if (node.parentElement) return node.parentElement
-  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+  return shadowHostOf(node)
 }
 
 /**
@@ -2214,6 +2249,29 @@ const INSPECTING_MARK = "data-inspecting"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
+/** Where Spell UI's docs pages are:  the page server's, which the editor's dev server passes `/components/` on to. */
+const SPELL_UI_DOCS = "/components/ui/"
+/** The browser tab every Spell UI docs page opens in (`Inspector.openSpellUIDocs()`). */
+const DOCS_TAB = "spell-ui-docs"
+
+/** Each Spell UI tag's docs page (`ui-grid.html#ui-column`), once the docs' data is in (`loadDocsPages()`). */
+let docsPages: Record<string, string> | undefined
+
+/**
+ * Load each tag's docs page from Spell UI's docs data, once (`NotebookDocs.dataUrl`, through `SiteData`).
+ * - NEVER throws:  without it, a tag's page is guessed (`<tag>.html`).
+ */
+function loadDocsPages(): void {
+  if (docsPages) return
+  docsPages = {}
+  void import("spell/ui/docs-components/SiteData")
+    .then(async ({ SiteData }) => {
+      SiteData.url ??= NotebookDocs.dataUrl
+      const data = await SiteData.load()
+      for (const entry of data.components) if (entry.href) docsPages![entry.tag] = entry.href
+    })
+    .catch((error: unknown) => console.error("loadDocsPages():  couldn't load Spell UI's docs data", error))
+}
 const CONTROL_ICON = "square outline"
 /** An action's icon, wherever the Inspector shows one:  Font Awesome's circled play (epic `editor` I116, I131). */
 export const ACTION_ICON = "fa7-free:circle-play"
@@ -2990,8 +3048,8 @@ function pinnedAt(height: number): Keyframe {
 
 /****************
  * ### `<PropertiesCard>`
- * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
- * `<ui-property-editor>` of every property it has, those it sets first
+ * What's selected:  in the card's header, what a change applies to, then a
+ * `<ui-property-editor>` of every property it has, each in its vocabulary's place, set or not (I199)
  * (Owen:  "lose that [More]. Show all of the properties").
  * - Inspecting again:  Inspect app, in the card's header as in the top bar (`<InspectAppButton>`;
  *   Owen, 2026-11-15:  "Put the inspector crosshair back in this header", T78).
@@ -3001,9 +3059,12 @@ function pinnedAt(height: number): Keyframe {
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
  * - Its code is the Code card's, under it (`<CodeCard>`, epic `editor` I109).
- * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
- *   Following one, the title is the TRAIL from what was selected (`Solitaire › Discard Pile "discards"`),
- *   each step a pill that goes back to it (`Inspector.inspected`).
+ * - The header (Owen, 2026-11-16, epic `editor` I200:  "Don't need header like this, just \"Stock pile\" and
+ *   \"All Stock Piles\""):
+ *   - a thing:  only the choice of what a change applies to, `Stock pile | All Stock Piles` (`<ScopeSwitch>`)
+ *   - the app, a one of a kind, or a Spell UI element:  only what it is, a file bar's tab, its icon (T95)
+ *   - no trail of how it was reached (`Solitaire › Deck`):  another part is selected in the Views card,
+ *     where every thing the app holds is a row (T96), or in the app
  ****************/
 function PropertiesCard(): JSX.Element {
   // the same part, reached again:  its card isn't drawn again, so a field being typed in keeps the cursor
@@ -3018,56 +3079,49 @@ function PropertiesCard(): JSX.Element {
         <Show when={inspected()} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
             <Show
-              when={!hasScopeSwitch(part()) || part().crumbs.length > 1}
-              // a thing alone, with no trail:  ONE segmented control, [Card "King of Diamonds" | All Cards] (Owen)
+              when={!hasScopeSwitch(part())}
+              // a thing:  ONE segmented control, [Stock pile | All Stock Piles], and nothing more (I200)
               fallback={<ScopeSwitch part={part()} />}
             >
-              <span slot="title" class="InspectorTrail">
-                <For each={part().crumbs}>
-                  {(crumb) => (
-                    <>
-                      <Show when={crumb.depth}>
-                        <span class="InspectorTrailStep">›</span>
-                      </Show>
-                      <span
-                        class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
-                        title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
-                        onClick={(event: MouseEvent) => {
-                          if (crumb.depth === part().crumbs.length - 1) return
-                          event.stopPropagation()
-                          Inspector.backTo(crumb.depth)
-                        }}
-                      >
-                        <span class="InspectorPartTagText">{crumb.label}</span>
-                      </span>
-                    </>
-                  )}
-                </For>
-              </span>
-              <ScopeSwitch part={part()} />
+              {/* the app, or a Spell UI element:  what it is, a file bar's tab (T95) */}
+              <ui-menu
+                slot="title"
+                appearance="segmented link header"
+                class="InspectorTrail"
+                ref={on("ui-choosing", (event) => event.preventDefault())}
+              >
+                <ui-item
+                  class="InspectorPartTag"
+                  icon={part().crumbs.length === 1 && part().element ? Inspector.iconFor(part().element!) : THING_ICON}
+                  selected
+                  title={
+                    part().crumbs.length === 1 ? Inspector.writtenPlaceTitle(part().element) || undefined : undefined
+                  }
+                >
+                  <span class="InspectorPartTagText">{part().label}</span>
+                </ui-item>
+              </ui-menu>
             </Show>
           )}
         </Show>
       }
       // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78),
-      // then Close, which hides the column (I186)
-      actions={
-        <>
-          <InspectAppMenu slot="right" />
-          <ui-icon
-            slot="right"
-            name="close"
-            link=""
-            class={["IconAction", "InspectorClose"]}
-            label={appTexts.text("inspectorClose")}
-            title={appTexts.text("inspectorClose")}
-            onClick={(event: MouseEvent) => {
-              // in the card's header:  a click closes the column, never folds the card
-              event.stopPropagation()
-              Inspector.close()
-            }}
-          />
-        </>
+      // then Close, which hides the column (I186):  a panel's ✕, as the file bar's is (`PanelClose`, T95)
+      actions={<InspectAppMenu slot="right" />}
+      close={
+        <ui-icon
+          slot="actions"
+          name="close"
+          link=""
+          class={["PanelClose", "InspectorClose"]}
+          label={appTexts.text("inspectorClose")}
+          title={appTexts.text("inspectorClose")}
+          onClick={(event: MouseEvent) => {
+            // in the card's header:  a click closes the column, never folds the card
+            event.stopPropagation()
+            Inspector.close()
+          }}
+        />
       }
     >
       <Show
@@ -3122,7 +3176,7 @@ function PropertiesCard(): JSX.Element {
               </Show>
               <Show when={part.layout}>
                 {(layout) => (
-                  <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
+                  <For each={sectionsFor(layout().fields, layout().hasText, layoutFileOf(part.element))}>
                     {(section) => (
                       <ui-property-group
                         label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
@@ -3137,7 +3191,16 @@ function PropertiesCard(): JSX.Element {
                         <Show when={section.hasText}>
                           <ui-property name="textContent" label={appTexts.text("inspectorText")} />
                         </Show>
-                        <For each={section.fields}>{(field) => <Field field={field} fields={section.fields} />}</For>
+                        <For each={section.rows}>
+                          {(row) => (
+                            <Show when={row.length > 1} fallback={<Field field={row[0]!} fields={section.fields} />}>
+                              {/* a layout's row:  its fields side by side, each the same share (Spell UI's `:state(in-row)`) */}
+                              <ui-fields>
+                                <For each={row}>{(field) => <Field field={field} fields={row} />}</For>
+                              </ui-fields>
+                            </Show>
+                          )}
+                        </For>
                       </ui-property-group>
                     )}
                   </For>
@@ -3178,8 +3241,8 @@ const SCOPE_PREF = "scope"
 
 /****************
  * ### `<ScopeSwitch>`
- * `This | All Cards`, short, in the row that names what's inspected, beside its chip, which already names the thing
- * (Q32):  so it costs no height.
+ * `Card | All Cards`:  the whole of the properties card's header for a thing (Q32;  epic `editor` I200),
+ * so it costs no height.
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
  * - Never for a one of a kind, the app among them (`Inspector.isOneOfAKind()`):  its changes go to its type.
@@ -3190,14 +3253,12 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
   const typeWords = () => wordsOfType(props.part.value)
   const scope = () => Inspector.scopeOf(props.part)
   const count = () => props.part.together?.length ?? 1
-  // with no trail, the first segment IS what's selected, as its chip said it (`Card "King of Diamonds"`), its ✕ after
-  const isWhole = () => props.part.crumbs.length === 1
+  // this one, by its type, as Owen wrote it:  `Stock pile`;  several, `These 3 Cards`
   const these = () =>
     count() > 1
       ? appTexts.text("inspectorScopeThese", { count: count(), Types: titleCase(P.pluralize(typeWords())) })
-      : isWhole()
-        ? headlineCase(props.part.crumbs[0]!.label)
-        : appTexts.text("inspectorScopeThis")
+      : typeWords().charAt(0).toUpperCase() + typeWords().slice(1)
+  const isWhole = () => props.part.crumbs.length === 1
   return (
     <Show when={hasScopeSwitch(props.part)}>
       <ui-item
@@ -3396,29 +3457,80 @@ function OwnEditor(props: { markup: string }): JSX.Element {
 const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
 
 /**
- * A Spell UI element's fields in the Inspector's sections, one per group, in the groups' order
- * (`E.ATTRIBUTE_GROUPS`:  Name, Content, Appearance, Layout ...).
- * - A field keeps its place in `fields` within its section:  those it sets first.
- * - A field with no group goes in Appearance;  the element's own text (`hasText`) heads Content.
+ * A Spell UI element's fields in the Inspector's sections, as its tag's layout file lays them out
+ * (`ui-action.editor.html`, `PropertyLayouts`;  epic `editor` T97):  its sections in order, each its rows.
+ * - A field the file doesn't place still shows:  after its group's rows, or in a section of its own
+ *   (`PropertyLayouts.place()`);  no file, the vocabulary's own order, a section per group.
+ * - A field with no group goes in Appearance;  the element's own text (`hasText`) heads Content,
+ *   a section of its own when the layout has none.
  * - A section with nothing in it isn't drawn.
+ * - `layout` `null`:  its file is still loading (`layoutFileOf()`), so no section yet.
  */
-function sectionsFor(fields: FieldSpec[], hasText: boolean): InspectorSection[] {
-  return E.ATTRIBUTE_GROUPS.map((group) => ({
-    group,
-    hasText: hasText && group === "content",
-    fields: fields.filter((field) => (field.group ?? "appearance") === group)
-  })).filter((section) => section.fields.length || section.hasText)
+function sectionsFor(
+  fields: FieldSpec[],
+  hasText: boolean,
+  layout: PropertyLayout | null | undefined
+): InspectorSection[] {
+  // its layout file still loading:  nothing yet, so no field moves once it's in
+  if (layout === null) return []
+  const byName = new Map(fields.map((field) => [field.name, field]))
+  const sections: InspectorSection[] = PropertyLayouts.place(layout, fields).map((placed) => {
+    const rows = placed.rows.map((row) => row.map((name) => byName.get(name)!))
+    return { group: placed.group ?? DEFAULT_GROUP, hasText: false, rows, fields: rows.flat() }
+  })
+  if (hasText) {
+    const content = sections.find((section) => section.group === CONTENT_GROUP)
+    if (content) content.hasText = true
+    else {
+      const at = sections.findIndex(
+        (section) => GROUP_ORDER.indexOf(section.group) > GROUP_ORDER.indexOf(CONTENT_GROUP)
+      )
+      sections.splice(at < 0 ? sections.length : at, 0, { group: CONTENT_GROUP, hasText: true, rows: [], fields: [] })
+    }
+  }
+  return sections
 }
 
-/** One of the Inspector's sections:  a group, its fields, and whether the element's text heads it. */
-type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: FieldSpec[] }
+/** One of the Inspector's sections:  a group, its rows of fields (`fields`, every one), and whether the element's text heads it. */
+type InspectorSection = { group: E.AttributeGroup; hasText: boolean; rows: FieldSpec[][]; fields: FieldSpec[] }
+
+/** A field with no group is in this one;  the element's text heads that one. */
+const DEFAULT_GROUP: E.AttributeGroup = "appearance"
+const CONTENT_GROUP: E.AttributeGroup = "content"
+
+/** Bumped as a tag's layout file comes in:  `layoutFileOf()` reads it, so the card lays out again. */
+const [layoutFilesIn, setLayoutFilesIn] = createSignal(0)
+
+/**
+ * The layout file of `element`'s tag (its vocabulary's, so a translated element finds the English one), once it's in;
+ * `undefined` for none;  `null` while it loads, the first time (then the card lays out again).
+ * - SIDE EFFECT:  starts loading it, the first time.
+ */
+function layoutFileOf(element: Element | undefined): PropertyLayout | null | undefined {
+  if (!element) return undefined
+  void layoutFilesIn()
+  const tag = (element as E.DOMElement).component?.vocabulary?.tag ?? element.localName
+  const loaded = PropertyLayouts.loaded(tag)
+  if (loaded !== undefined) return loaded ?? undefined
+  if (!PropertyLayouts.tags.includes(tag)) return undefined
+  void PropertyLayouts.load(tag)
+    .then(() => setLayoutFilesIn((count) => count + 1))
+    .catch((error) => console.error(error))
+  return null
+}
 
 /****************
  * ### `<ThingBands>`
  * A thing's properties as the properties card lists them (epic `debut` P26):
  * in folding bands named by its file's groups and headings (`rank`, `suit`, `drawing`), in the file's order
- * (`ThingMembers.bandsOf()`);  then, for a list, its items, a link each.
- * - A stored property:  a field to change it, or a link to the thing it holds (`<ThingLink>`).
+ * (`ThingMembers.bandsOf()`);  then, for a list, how many items it has.
+ * - Its own type's members under no group first, in a band with no title:  the card's header already names the type
+ *   (Owen, 2026-11-16, epic `editor` I200:  "Solitaire blue header is not necessary").
+ *   An inherited type's band (`pile`) keeps its title:  it says where those come from.
+ * - A stored property:  a field to change it.
+ * - NOT a stored property that holds another thing, nor a list's items:  they're its children, each a row of
+ *   the Views card under it, drawn or not, to select it there (Owen, 2026-11-16, epic `editor` I205:
+ *   "Ditch children in this panel -- we have the bottom pane to select them").
  * - A computed one (Value, Color, Picture, is a face card):
  *   its value, read only, live as the program changes it (`<ComputedField>`).
  * - Each by its words in the program (`is a face card`), when the words file has them.
@@ -3442,13 +3554,15 @@ function ThingBands(props: {
       const things = runtimeCore()?.things
       const properties = things && isThing(props.value) ? things.propertiesOf(props.value as never) : []
       const stored = props.schema.attributes.map((attribute) => attribute.name)
+      // a stored property holding a thing is a child:  the Views card's (I205)
+      const isChild = (member: ThingMember) => member.kind === "stored" && isThing(holds(member.name))
       const all = ThingMembers.bandsOf(props.value, { stored, properties, words: editor.programWords })
-      if (!props.isTogether) return all
       return all
         .map((band) => ({
           ...band,
           members: band.members.filter(
-            (member) => member.kind === "stored" && stored.includes(member.name) && !isThing(holds(member.name))
+            (member) =>
+              !isChild(member) && (!props.isTogether || (member.kind === "stored" && stored.includes(member.name)))
           )
         }))
         .filter((band) => band.members.length)
@@ -3465,10 +3579,12 @@ function ThingBands(props: {
           const setFolded = (folded: boolean) => Inspector.setGroupFolded(fold, folded !== !!band.isBuiltIn)
           return (
             <ui-property-group
-              label={band.isBuiltIn ? appTexts.text("inspectorBuiltIn") : band.title}
-              description={band.description}
-              collapsible=""
-              open={isFolded() ? "false" : undefined}
+              // its own type's members:  no title, as the header names the type (I200)
+              class={{ InspectorUntitled: !!band.isOwnType }}
+              label={band.isBuiltIn ? appTexts.text("inspectorBuiltIn") : band.isOwnType ? undefined : band.title}
+              description={band.isOwnType ? undefined : band.description}
+              collapsible={band.isOwnType ? undefined : ""}
+              open={isFolded() && !band.isOwnType ? "false" : undefined}
               ref={(group) => {
                 on("ui-closing", () => setFolded(true))(group)
                 on("ui-opening", () => setFolded(false))(group)
@@ -3484,16 +3600,7 @@ function ThingBands(props: {
                       when={member.kind === "stored"}
                       fallback={<ComputedField thing={props.value} member={member} />}
                     >
-                      <Show
-                        when={isThing(holds(member.name))}
-                        fallback={<ui-property name={member.name} label={memberLabel(member)} />}
-                      >
-                        <ThingLink
-                          label={memberLabel(member)}
-                          thing={holds(member.name) as object}
-                          step={member.name}
-                        />
-                      </Show>
+                      <ui-property name={member.name} label={memberLabel(member)} />
                     </Show>
                   </Show>
                 )}
@@ -3502,13 +3609,10 @@ function ThingBands(props: {
           )
         }}
       </For>
+      {/* its items are its children, in the Views tree under it, drawn or not (I205):  only how many here */}
       <Show when={items().length}>
         <div class="InspectorItems">
           <span class="InspectorItemsLabel">{appTexts.text("inspectorItems", { count: items().length })}</span>
-          {/* items the app draws are in the Views tree, under it:  not listed twice (Owen:  "don't need them twice") */}
-          <Show when={!items().every((item) => Inspector.elementDrawing(item))}>
-            <For each={items()}>{(item, index) => <ThingLink thing={item} step={`${ITEM_STEP}${index()}`} />}</For>
-          </Show>
         </div>
       </Show>
     </>
@@ -3696,22 +3800,18 @@ function ThingLink(props: {
 
 /****************
  * ### `<ThingChip>`
- * A thing made as the program runs, as a pill:  `Card "king of diamonds" ›`.
- * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree
- *   (Owen:  "Full pill for items that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
- * - `inRow`:  drawn inside a tree row, as its label:  `inert`, so a click, the keys and focus stay the row's,
- *   and no `›`, since a click there selects rather than follows.
+ * A thing made as the program runs, as a pill:  `Card "king of diamonds" ›`, the Inspector's link to it (`<ThingLink>`).
+ * - Not in the Views tree:  its rows say a thing's name as plain words (Owen, 2026-11-16, epic `editor` I209:
+ *   "Lose pill border around these items";  a pill there since "Full pill for items that are allocated objects").
  ****************/
-export function ThingChip(props: { label: string; onClick?: () => void; inRow?: boolean }): JSX.Element {
+function ThingChip(props: { label: string; onClick?: () => void }): JSX.Element {
   return (
     <ui-button
       appearance="basic"
       size="small"
-      icon={props.inRow ? undefined : "angle right"}
-      icon-position={props.inRow ? undefined : "right"}
-      class={["InspectorThingButton", { InspectorRowChip: props.inRow }]}
-      slot={props.inRow ? "label" : undefined}
-      inert={props.inRow ? "" : undefined}
+      icon="angle right"
+      icon-position="right"
+      class="InspectorThingButton"
       onClick={props.onClick}
     >
       {props.label}
@@ -3789,8 +3889,12 @@ export function InspectAppButton(props: { id?: string }): JSX.Element {
 
 /****************
  * ### `<InspectAppMenu>`
- * Inspect app in the Inspector card's header:  its button in a menu of its own, the top bar's group's look
- * (a header's segmented menu), so it's drawn as the top bar's is.
+ * The Inspector card's header buttons, at its right:  the file bar's look, a header's segmented menu, each an icon
+ * in a soft round (`appearance="circular"`), as the top bar's are (epic `editor` T95:
+ * "Make these tabs look like the ones in the file menu").
+ * - Spell UI docs, while a Spell UI element is selected (`<SpellUIDocsButton>`)
+ * - Inspect app (`<InspectAppButton>`)
+ * - The card's Close is after it, outside:  a panel's ✕, as the file bar's (`PanelClose`)
  * - Pressed, never chosen:  the menu's choosing is turned away.
  * - `slot`:  its place in the card's bar, `right`.
  ****************/
@@ -3802,8 +3906,40 @@ function InspectAppMenu(props: { slot: string }): JSX.Element {
       class="InspectAppMenu"
       ref={on("ui-choosing", (event) => event.preventDefault())}
     >
+      <SpellUIDocsButton />
       <InspectAppButton />
     </ui-menu>
+  )
+}
+
+/****************
+ * ### `<SpellUIDocsButton>`
+ * Spell UI's docs for what's selected, left of Inspect app, while it's a Spell UI element (epic `editor` T95):
+ * a `<ui-segment>`, or a program's `<segment>` drawn as one.
+ * - A click opens its page of Spell UI's docs (`Inspector.openSpellUIDocs()`), every one in the same browser tab.
+ * - Not for a program's own view, nor the app:  they have no page.
+ ****************/
+function SpellUIDocsButton(): JSX.Element {
+  const tag = () => {
+    const element = Inspector.inspected?.element
+    return element ? Inspector.spellUITagOf(element) : undefined
+  }
+  return (
+    <Show when={tag()}>
+      {(shown) => (
+        <ui-item
+          icon="book"
+          appearance="circular"
+          class="SpellUIDocsButton"
+          label={appTexts.text("inspectorSpellUIDocs", { tag: shown() })}
+          title={appTexts.text("inspectorSpellUIDocs", { tag: shown() })}
+          onClick={(event: MouseEvent) => {
+            event.stopPropagation()
+            Inspector.openSpellUIDocs(shown())
+          }}
+        />
+      )}
+    </Show>
   )
 }
 

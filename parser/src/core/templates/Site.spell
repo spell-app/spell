@@ -6,3 +6,5 @@
 a "site" is an app
 	its "current address" is a text starting at "/"
 		// the address of the page it's showing:  "/" when it starts
+	its "theme" is a text
+		// the theme its pages wear, e.g. "mockup":  `harbor is a site with theme "mockup"`

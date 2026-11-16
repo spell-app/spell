@@ -454,7 +454,10 @@ export class FileStates {
           )
         ]
       : isMarkupFile(file)
-        ? [CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))]
+        ? [
+            CodeMirrorTyping.markupExtension(),
+            CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))
+          ]
         : []
     return [
       EditorView.updateListener.of((update) => {
