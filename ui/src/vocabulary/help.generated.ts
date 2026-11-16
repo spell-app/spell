@@ -1770,7 +1770,7 @@ export const HELP_TABLE: Readonly<
       appearance:
         '`nav`: the docs site\'s look, its pages a tree with `appearance="nav"`: taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.',
       collapsed:
-        "Only the icons: each row's title its tooltip, a page with no icon its title's first letter, and a group's label a thin line.",
+        "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.",
       remember: "Keep which pages are open for each person, under this name, across reloads and visits."
     }
   },
@@ -2252,6 +2252,8 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the tree.",
       appearance:
         "`nav`: a site's side navigation, as the docs site's is: taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.",
+      "column-titles":
+        '`appearance="columns"`: a title over each column, by level, separated by commas (`Clients, Projects, Files`); the last one names every column deeper than the list goes.',
       "sticky-path":
         "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit."
     }

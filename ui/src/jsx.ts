@@ -40737,12 +40737,12 @@ export interface UISiteNavEventMap {
 /** `<ui-site-nav>`'s own attributes, from its vocabulary. */
 export interface UISiteNavAttributes {
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first page), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first page;  its `icon` before its label, its pages a step in), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   pages?: unknown
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first page), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first page;  its `icon` before its label, its pages a step in), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `pages` -- `prop:` stays only for compiled spell
    */
@@ -40778,7 +40778,7 @@ export interface UISiteNavAttributes {
    */
   "prop:appearance"?: "nav"
   /**
-   * Only the icons:  each row's title its tooltip, a page with no icon its title's first letter, and a group's label a thin line.  None:  the titles beside the icons.
+   * Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -51621,15 +51621,25 @@ export interface UITreeAttributes {
    */
   "prop:label"?: string
   /**
-   * `nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.
-   * - takes:  `nav`
+   * `nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.  `columns`:  a column per level, side by side, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column, and closes the columns after that.
+   * - takes:  `nav` · `columns`
    */
-  appearance?: "nav"
+  appearance?: "nav" | "columns"
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:appearance"?: "nav"
+  "prop:appearance"?: "nav" | "columns"
+  /**
+   * `appearance="columns"`:  a title over each column, by level, separated by commas (`Clients, Projects, Files`);  the last one names every column deeper than the list goes.  None:  no titles.
+   * - takes:  text
+   */
+  "column-titles"?: string
+  /**
+   * `column-titles`, as the DOM element's property.
+   * @deprecated write `column-titles` -- `prop:` stays only for compiled spell
+   */
+  "prop:columnTitles"?: string
   /**
    * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
    * - takes:  flag (present / absent)

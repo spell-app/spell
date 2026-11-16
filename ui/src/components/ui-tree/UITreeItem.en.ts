@@ -98,7 +98,11 @@ export const treeItemVocabulary = {
     { name: "selected", description: "It's selected." },
     { name: "has-items", description: "It has rows inside it, or could:  it draws its triangle." },
     { name: "filtered-out", description: "The tree's `filter` hides it." },
-    { name: "nav", description: "Its tree's `appearance` is `nav`:  it takes the side navigation's look." }
+    { name: "nav", description: "Its tree's `appearance` is `nav`:  it takes the side navigation's look." },
+    {
+      name: "in-columns",
+      description: "Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
+    }
   ],
   texts: [
     { key: "open", text: "Open", description: "The triangle's name, closed." },

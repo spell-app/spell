@@ -79,6 +79,35 @@
                   </ui-tree>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-columns" label="Columns" sticky="stack" collapsible dividing>
+                <ui-example description="With `appearance=&quot;columns&quot;`, each level is a column, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column.  `column-titles` names the columns, by level;  the last title names every deeper one.  Drag the line after a column to resize it, or double-click it to put it back:  with an `id`, the tree remembers the widths.">
+                  <ui-tree id="docs-tree-columns" appearance="columns" column-titles="Clients, Projects, Files" label="Work" style="height: 15em">
+                    <ui-tree-item label="Acme Bakery" icon="building outline" open>
+                      <ui-tree-item label="Spring menu" icon="folder" open>
+                        <ui-tree-item label="menu.pdf" icon="file pdf outline" selected></ui-tree-item>
+                        <ui-tree-item label="photos" icon="folder">
+                          <ui-tree-item label="croissant.jpg" icon="file image outline"></ui-tree-item>
+                          <ui-tree-item label="loaf.jpg" icon="file image outline"></ui-tree-item>
+                        </ui-tree-item>
+                        <ui-tree-item label="prices.csv" icon="file alternate outline"></ui-tree-item>
+                      </ui-tree-item>
+                      <ui-tree-item label="Website" icon="folder">
+                        <ui-tree-item label="home.html" icon="file code outline"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="Harbor Books" icon="building outline">
+                      <ui-tree-item label="Catalogue" icon="folder">
+                        <ui-tree-item label="autumn.pdf" icon="file pdf outline"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="Pine Studio" icon="building outline">
+                      <ui-tree-item label="Logo" icon="folder">
+                        <ui-tree-item label="logo.svg" icon="file image outline"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
             </ui-section>
             <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section id="examples-content-which-one" label="Which one" sticky="stack" collapsible dividing>
@@ -174,6 +203,11 @@
                   - Up and down move between the rows on screen;  Home and End go to the ends.
                   - Right opens a row, then goes into it;  left closes it, then goes out to its parent.
                   - Enter and Space select, with Shift, Command or Control as a click takes them.
+
+                  With `appearance="columns"`, the keys select as they move, as a Mac's Finder's do, and a selected row's rows show in the next column.
+                  - Up and down move within a column;  Home and End go to its ends.
+                  - Right goes into the next column, onto the row picked there before, else its first;  left goes back to the previous column's pick.  Right to left, they swap.
+                  - On the line after a column, left and right make it narrower and wider, ten times as far with Shift.
                 </script>
               </ui-markdown>
             </ui-section>
