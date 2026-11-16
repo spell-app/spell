@@ -4,7 +4,8 @@ import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
-import { AppBarMenus, BarMenu, ProjectBarMenu, uiReady } from "spell/app/app/solid"
+import { editorPrefs } from "spell/app/app/editorPrefs"
+import { AppBarMenus, BarMenu, CodeSettings, ProjectBarMenu, uiReady } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 
 /**
@@ -102,6 +103,53 @@ describe("<AppBarMenus>", () => {
     await waitForCondition(() => saveAll.mock.calls.length > 0)
     expect(saveAll).toHaveBeenCalledTimes(1)
     expect(popup.visible).toBe(false)
+  })
+
+  test("View:  Run, Edit, Site ─ Code, Compiled Code, Inspector, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
+    const wrappedBefore = CodeSettings.choices.wrapLines
+    cleanups.push(() => CodeSettings.choose("wrapLines", wrappedBefore))
+    CodeSettings.choose("wrapLines", false)
+    const host = await mount(() => <AppBarMenus mode="edit" />)
+    const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=ViewBarMenu]")!
+    popup.visible = true
+    flush()
+    const menu = () => popup.querySelector("ui-menu.BarMenuItems")
+    await waitForCondition(() => !!menu()?.children.length)
+    await rowsReady(menu()!)
+    const rows = [...menu()!.children].map((row) => (row.getAttribute("kind") === "divider" ? "─" : rowText(row)))
+    // Owen, epic `editor` T100:  Inspector after Compiled Code, in one group with Program Panel;  Soft Wrap under Line Numbers
+    expect(rows).toEqual([
+      "Run",
+      "Edit",
+      "Site",
+      "─",
+      "Code",
+      "Compiled Code",
+      "Inspector",
+      "Program Panel",
+      "─",
+      "Line Numbers",
+      "Soft Wrap"
+    ])
+
+    // its row's button, pressed (ticked) while wrapping's on
+    const softWrap = () => menu()!.lastElementChild!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!
+    const ticked = () => softWrap().getAttribute("aria-pressed") === "true"
+    expect(ticked()).toBe(false)
+    // chosen:  wrapping on, the same choice Code Editor Settings… shows, and remembered
+    softWrap().click()
+    flush()
+    await waitForCondition(() => CodeSettings.choices.wrapLines)
+    expect(editorPrefs.get("codeWrapLines")).toBe(true)
+    await waitForCondition(ticked)
+    // chosen again:  off
+    popup.visible = true
+    flush()
+    softWrap().click()
+    flush()
+    await waitForCondition(() => !CodeSettings.choices.wrapLines)
+    expect(editorPrefs.get("codeWrapLines")).toBe(false)
+    await waitForCondition(() => !ticked())
   })
 })
 

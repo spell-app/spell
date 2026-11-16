@@ -41,6 +41,8 @@ spell editor is an app
 		// The Inspector shows
 	its "line numbers showing" is yes or no
 		// The code shows its line numbers
+	its "soft wrapping" is yes or no
+		// The code wraps its long lines onto the next, rather than scrolling sideways
 	its "inspecting" is yes or no
 		// A click in the app picks what it clicks
 	its "site ready" is yes or no
@@ -128,6 +130,8 @@ spell editor is an app
 		selected when its inspector open is yes
 	to "show line numbers" with title "Line Numbers", icon "list ol"
 		selected when its line numbers showing is yes
+	to "soft wrap" with title "Soft Wrap", icon "level down alternate"
+		selected when its soft wrapping is yes
 
 	group "Running"
 	to "compile and run" with icon "play"
@@ -525,11 +529,11 @@ a "view menu" is a bar menu
 			<divider/>
 			<action "show code"/>
 			<action "show compiled code"/>
+			<action "show inspector"/>
 			<action "show program panel"/>
 			<divider/>
-			<action "show inspector"/>
-			<divider/>
 			<action "show line numbers"/>
+			<action "soft wrap"/>
 		</menu>
 
 a "run menu" is a bar menu

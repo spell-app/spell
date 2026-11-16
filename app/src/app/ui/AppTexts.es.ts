@@ -98,6 +98,7 @@ const APP_TEXTS_ES: AppTextPack = {
   partNoDrawing: "Este programa no tiene un dibujo al que añadir:\nañádele primero un <draw>.",
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
+  softWrap: "Ajuste de línea",
   // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "Acerca de Spell…",

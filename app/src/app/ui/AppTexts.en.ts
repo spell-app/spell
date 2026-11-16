@@ -93,6 +93,7 @@ export const APP_TEXTS = {
   partNoDrawing: "This program has no drawing to add to:\nadd a <draw> to it first.",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
+  softWrap: "Soft Wrap",
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "About Spell…",
