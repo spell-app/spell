@@ -525,6 +525,34 @@ describe("a body's rail under the caret", () => {
     expect(Math.abs(slash.left - inkRightOf(quote) - 4)).toBeLessThan(0.1)
   })
 
+  test("a quote left open breaks its own line only:  every tag, band and `⟩` after it drawn as before (I145)", async () => {
+    // Owen:  "Quotes don't span lines, so a quoted expression should only break its line"
+    const drawn = async (text: string) => {
+      const view = await bubblyEditorOf(text)
+      await frames()
+      const content = view.contentDOM
+      const shape = {
+        tags: content.querySelectorAll(".bubbly-tag-name").length,
+        bands: content.querySelectorAll(".cmb-band, .cmb-band-open").length,
+        rows: content.querySelectorAll(".cmb-tag-block").length,
+        points: content.querySelectorAll(".cmb-tag-point").length
+      }
+      view.dom.parentElement?.remove()
+      view.destroy()
+      return shape
+    }
+    const closed = await drawn(CLOSE_ALONE)
+    expect(closed.points).toBe(1)
+    expect(await drawn(CLOSE_ALONE.replace('size="small"', 'size="small'))).toEqual(closed)
+    // a plain Spell line's:  the lines after it keep their bands
+    const view = await bubblyEditorOf(
+      'a "card" is a view\n\tits "name is text\n\tits "rank" is a number\n\tits "suit" is text\n'
+    )
+    await frames()
+    for (const number of [1, 3, 4])
+      expect(lineElement(view, number).querySelector(".cmb-band"), `line ${number}`).toBeTruthy()
+  })
+
   test("an attribute's opening quote mark a space's room after its `=`, as after a space", async () => {
     const view = await bubblyEditorOf(LAID_OUT)
     const equalsMark = view.dom.querySelector(".bubbly-equals")!
