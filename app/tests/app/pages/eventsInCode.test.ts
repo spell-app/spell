@@ -169,6 +169,13 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       await page.waitForTimeout(150)
     }
     expect(await mainFile()).toBe(before)
+    // each row keeps its own head, at once:  not read again while the program's compile is behind the text (I220:
+    // `on click`'s row read `if it is face up ...`, its code `play the card`, till the next compile ran)
+    const onClick = page.locator(".InspectorEvent").nth(1)
+    expect((await onClick.locator(".InspectorEventWords").innerText()).replace(/\s+/g, " ").trim()).toBe("on click")
+    expect((await onClick.locator(".CodeSlice .cm-line").first().innerText()).trim()).toBe(
+      "if it is face up or its pile is solitaire's stock"
+    )
   })
 
   // Solitaire's card has no one-line row any more (`- clickable when ...` is its `on click`'s `if` now, I62):
