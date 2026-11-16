@@ -474,7 +474,8 @@ export class CodeMirrorDecorations {
    * their lines drawn as ONE row, a foot for each (Owen, 2026-11-16;  epic `language` I132)
    * - each end tag the file's own text, drawn small in a pill pointed at both ends, at the end of its block's foot:
    *   its rail turning out at a tag's slant, then a short bar (`.cmb-feet-row`, `bubbly.css`)
-   * - the feet nested as Spell's (I125):  each one round the one before it, below it and a rail further left
+   * - side by side on one level (Owen:  "put multiple ending tags on one line"):  the innermost end tag first, each one
+   *   round it further along, its bar running on behind the end tags before it (`--cmb-foot-level`, its place in the run)
    * - the line breaks between them hidden, so the caret, a click and Delete reach each end tag as before
    * - its blocks' rails end in it:  each foot draws its own, down to its turn
    * - right above a band:  room under it, so the two blocks stand apart, as under a Spell foot (T141)
@@ -820,7 +821,9 @@ class FeetJoinWidget extends WidgetType {
   }
 
   toDOM(): HTMLElement {
-    return document.createElement("span")
+    const join = document.createElement("span")
+    join.className = "cmb-feet-join"
+    return join
   }
 
   /** `pos` 0, before it:  after the end tag above;  else before the end tag below. */
