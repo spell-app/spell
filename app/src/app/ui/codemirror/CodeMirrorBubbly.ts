@@ -1,5 +1,5 @@
-import type { EditorState, Extension } from "@codemirror/state"
-import { Decoration, type DecorationSet, EditorView, WidgetType } from "@codemirror/view"
+import { type EditorState, type Extension, StateEffect, StateField } from "@codemirror/state"
+import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
@@ -13,7 +13,8 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  * (epic `editor` P30, the CodeMirror test;  epic `codemirror` P3).
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
  *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
- *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen)
+ *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen);
+ *     one that doesn't fit there gets rows of its own under the head, wrapped (`DescriptionRoom`;  epic `language` I120)
  *   - its body's rail:  a line decoration on every line under it, a stripe per enclosing block (`--cmb-rails`)
  *   - its foot:  a block widget after its last line
  *   - folded:  its head alone, a pill, the fold's `…` in its right end (`CodeMirrorSetup`;  epic `language` I116)
@@ -48,7 +49,8 @@ export class CodeMirrorBubbly {
         CodeMirrorBubbly.RELAYOUT_MSEC
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
-      CodeMirrorMarkup.tabStops
+      CodeMirrorMarkup.tabStops,
+      DescriptionRoom.extension
     ]
   }
 
@@ -328,6 +330,139 @@ function lastLineEnd(block: SP.BubblyBlock): number {
   const last = block.body.findLast((node) => node.kind !== "gap")
   if (!last) return block.head.end
   return last.kind === "block" ? lastLineEnd(last) : (last as SP.BubblyLine).end
+}
+
+/****************
+ * ### `DescriptionRoom`
+ * Rows of their own under a head for its description, when it doesn't fit at its band's right end (epic `language` I120).
+ * - The description floats at the band's right end;  too wide for the room beside the head's words,
+ *   the browser drops it under them, where it was drawn over the next lines (`a "card"`'s over its first comments,
+ *   a group's behind its first member's band).
+ * - So it's measured as drawn:  a head line whose description reaches below its row gets as many rows under it as
+ *   the description takes, wrapped, its words starting under the head's (`cmb-head-description-below`, `bubbly.css`).
+ *   - CodeMirror measures lines as they're drawn, so the caret, the gutter and the lines below follow.
+ *   - Measured again as the editor changes:  a wider one puts it back at the band's end (`fitsOnBand()`).
+ * - Only lines on screen are measured;  the rest keep the rows they had, moved with the text.
+ * - Its position in the import graph:  CodeMirror alone.
+ ****************/
+class DescriptionRoom {
+  /** The rows under each head line, by where it starts, set as they're measured. */
+  private static readonly measured = StateEffect.define<Map<number, number>>()
+
+  /** The rows under each head line, by where it starts:  only lines that have any. */
+  private static readonly rows = StateField.define<Map<number, number>>({
+    create: () => new Map(),
+    update(rows, transaction) {
+      for (const effect of transaction.effects) if (effect.is(DescriptionRoom.measured)) return effect.value
+      if (!transaction.docChanged || !rows.size) return rows
+      const moved = new Map<number, number>()
+      for (const [from, count] of rows) moved.set(transaction.changes.mapPos(from), count)
+      return moved
+    },
+    provide: (it) =>
+      EditorView.decorations.compute([it], (state) =>
+        Decoration.set(
+          [...state.field(it)]
+            .filter(([from]) => from <= state.doc.length)
+            .map(([from, count]) =>
+              Decoration.line({
+                class: DescriptionRoom.BELOW,
+                attributes: { style: `--cmb-description-rows: ${count}` }
+              }).range(state.doc.lineAt(from).from)
+            ),
+          true
+        )
+      )
+  })
+
+  /** A head line's class while its description is in rows under it. */
+  static readonly BELOW = "cmb-head-description-below"
+
+  /** Measures the descriptions on screen after each update, and sets the rows when they've changed. */
+  private static readonly measure = ViewPlugin.fromClass(
+    class {
+      constructor(readonly view: EditorView) {
+        this.request()
+      }
+
+      update() {
+        this.request()
+      }
+
+      private request() {
+        this.view.requestMeasure({
+          key: this,
+          read: (view) => ({ state: view.state, rows: DescriptionRoom.rowsOnScreen(view) }),
+          write: ({ state, rows }, view) => {
+            if (view.state !== state) return
+            const known = state.field(DescriptionRoom.rows)
+            const next = new Map(known)
+            for (const [from, count] of rows) {
+              if (count) next.set(from, count)
+              else next.delete(from)
+            }
+            if (sameRows(known, next)) return
+            // not inside CodeMirror's own update:  once it's done
+            queueMicrotask(() => {
+              if (view.state === state) view.dispatch({ effects: DescriptionRoom.measured.of(next) })
+            })
+          }
+        })
+      }
+    }
+  )
+
+  /** Measuring and drawing the rows under heads, for a bubbly editor. */
+  static readonly extension: Extension = [DescriptionRoom.rows, DescriptionRoom.measure]
+
+  /**
+   * Each line on screen's rows for its description:  0 for one with none, or whose description fits on its band.
+   * - Rows of the line's own height, as many as the description reaches below its row.
+   */
+  private static rowsOnScreen(view: EditorView): Map<number, number> {
+    const rows = new Map<number, number>()
+    const scale = view.scaleY || 1
+    for (const line of view.contentDOM.querySelectorAll<HTMLElement>(".cm-line")) {
+      const description = line.querySelector<HTMLElement>(".cmb-description")
+      const from = view.posAtDOM(line, 0)
+      if (!description) {
+        rows.set(from, 0)
+        continue
+      }
+      const rowHeight = Number.parseFloat(getComputedStyle(line).lineHeight)
+      if (!(rowHeight > 0)) continue
+      if (line.classList.contains(DescriptionRoom.BELOW) && DescriptionRoom.fitsOnBand(description)) {
+        rows.set(from, 0)
+        continue
+      }
+      const below = (description.getBoundingClientRect().bottom - line.getBoundingClientRect().top) / scale - rowHeight
+      // a pixel's slack:  a description on its band never reaches below it by more
+      rows.set(from, below > 1 ? Math.ceil((below - 1) / rowHeight) : 0)
+    }
+    return rows
+  }
+
+  /**
+   * Would `description`, drawn under its head, fit at its band's right end again, after the head's words?
+   * - Drawn under it, it's as wide as its words, up to the band's:  narrower than the band's room after the words,
+   *   it fits there, as the browser decides for it at the band's end.
+   */
+  private static fitsOnBand(description: HTMLElement): boolean {
+    const band = description.closest<HTMLElement>(".cmb-band")
+    if (!band?.firstChild) return false
+    const words = document.createRange()
+    words.setStartBefore(band.firstChild)
+    words.setEndBefore(description)
+    const end = band.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(band).paddingRight)
+    return words.getBoundingClientRect().right + description.getBoundingClientRect().width <= end + 0.5
+  }
+}
+
+/** Do `a` and `b` give the same lines the same rows? */
+function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
+  if (a.size !== b.size) return false
+  for (const [from, count] of a) if (b.get(from) !== count) return false
+  return true
 }
 
 /****************

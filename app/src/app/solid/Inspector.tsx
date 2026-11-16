@@ -73,7 +73,7 @@ import "./Inspector.css"
 /****************
  * ### `Inspector`
  * Look inside the running app, and change it (epic `debut` P13):  a part selected in the app, its properties to edit.
- * - Open or closed, all its cards together:  `<InspectorToggle>` in the top bar, or View › Inspector;
+ * - Open or closed, all its cards together:  View › Inspector, or the Inspector card's ✕;
  *   closed by the Close in its top card's header too (I186);  the top bar's Inspect app opens it again;
  *   remembered in the browser (`OPEN_PREF`).
  *   No card is hidden on its own (epic `editor` T78):  each folds to its header instead.
@@ -1675,8 +1675,6 @@ const TRAIL_PREF = "inspector:trail"
 const FOLDED_GROUPS_PREF = "inspector:foldedGroups"
 /** The pref remembering which cards are folded. */
 const FOLDED_PANELS_PREF = "inspector:foldedPanels"
-/** The Inspector's icon:  its toggle's, and its header's. */
-const INSPECTOR_ICON = "sliders horizontal"
 /** The start of the pref remembering what's selected, a project's each (`Inspector.selectionPref`). */
 const SELECTION_PREF = "inspector:selected"
 /** The pref remembering that Inspect app's help was seen:  closed, or a part selected (`Inspector.isHelpShown`). */
@@ -2605,7 +2603,7 @@ class PartSelector {
  *     a one of a kind's (the app) are its Code card, its Tests card only while it has tests (I186)
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Every card shows while the column does (epic `editor` T78:  no card hidden on its own);
- *   the top bar's Inspector button opens and closes the column (`<InspectorToggle>`).
+ *   View › Inspector opens and closes the column, and the Inspector card's ✕ closes it (epic `editor` T83, I186).
  * - Each card folds to its header (`<InspectorCard>`):
  *   a folded card keeps its header's height, the others share the rest.
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
@@ -3055,7 +3053,7 @@ function PropertiesCard(): JSX.Element {
       // then Close, which hides the column (I186)
       actions={
         <>
-          <InspectAppButton slot="right" />
+          <InspectAppMenu slot="right" />
           <ui-icon
             slot="right"
             name="close"
@@ -3758,37 +3756,16 @@ function isPositionPair(field: FieldSpec, fields: FieldSpec[]): boolean {
 const HALF_ROW = "1/2"
 
 /****************
- * ### `<InspectorToggle>`
- * The Inspector's button, in the top bar, right of Inspect app:  opens the column, every card in it,
- * or closes it (`Inspector.toggle()`).
- * - No menu of cards (epic `editor` T78;  Owen:  "no need to hide the sections of the inspector sidebar separately").
- ****************/
-export function InspectorToggle(): JSX.Element {
-  return (
-    <span class="InspectorToggle">
-      <ui-icon
-        name={INSPECTOR_ICON}
-        link=""
-        class={["IconAction", { active: Inspector.isOpen }]}
-        label={appTexts.text("inspector")}
-        title={appTexts.text("inspector")}
-        onClick={() => Inspector.toggle()}
-      />
-    </span>
-  )
-}
-
-/****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after Edit (and in the Inspector card's header):
- * select a part of the app.
+ * Inspect app, in the top bar's Run | Edit group, after the compiled code's button (and in the Inspector card's
+ * header, `<InspectAppMenu>`):  select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
+ * - A menu item of its icon alone, in a circle (Spell UI's `appearance="circular"`), pressed while inspecting:
+ *   ONE look in both places (epic `editor` T90, T91:  "Make this look like the inset for inspector in the top bar").
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
- * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
- * - `slot`:  the bare icon's place in a toolbar, `right` in a card's header.
  ****************/
-export function InspectAppButton(props: { id?: string; item?: boolean; slot?: string }): JSX.Element {
+export function InspectAppButton(props: { id?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
   const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
   const inspect = () => {
@@ -3796,28 +3773,37 @@ export function InspectAppButton(props: { id?: string; item?: boolean; slot?: st
     else if (Inspector.isInspecting) Inspector.stopInspecting()
     else Inspector.startInspecting()
   }
-  return props.item ? (
+  return (
     <ui-item
       id={props.id}
       icon="crosshairs"
+      appearance="circular"
       class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
       aria-pressed={pressed()}
       title={title()}
       onClick={inspect}
     />
-  ) : (
-    <ui-icon
-      id={props.id}
+  )
+}
+
+/****************
+ * ### `<InspectAppMenu>`
+ * Inspect app in the Inspector card's header:  its button in a menu of its own, the top bar's group's look
+ * (a header's segmented menu), so it's drawn as the top bar's is.
+ * - Pressed, never chosen:  the menu's choosing is turned away.
+ * - `slot`:  its place in the card's bar, `right`.
+ ****************/
+function InspectAppMenu(props: { slot: string }): JSX.Element {
+  return (
+    <ui-menu
       slot={props.slot}
-      name="crosshairs"
-      link=""
-      class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}
-      label={appTexts.text("inspectorInspect")}
-      aria-pressed={pressed()}
-      title={title()}
-      onClick={inspect}
-    />
+      appearance="segmented link header"
+      class="InspectAppMenu"
+      ref={on("ui-choosing", (event) => event.preventDefault())}
+    >
+      <InspectAppButton />
+    </ui-menu>
   )
 }
 

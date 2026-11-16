@@ -168,6 +168,7 @@ export function ModeButtons(props: {
         <Show when={props.current === "edit"}>
           <ui-item
             icon="code"
+            appearance="circular"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
             title={appTexts.text("menuCode")}

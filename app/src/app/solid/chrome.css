@@ -30,8 +30,8 @@ ui-menu.short ui-item::part(item) {
   padding-block: 0;
 }
 
-/* "tight" menu */
-:is(ui-menu, ui-app-menu).tight ui-item::part(item) {
+/* "tight" menu:  its items' room, but a circular one's (Spell UI's `appearance="circular"`, its size its own) */
+:is(ui-menu, ui-app-menu).tight ui-item:not([appearance~="circular"])::part(item) {
   padding-inline: 8px;
 }
 
@@ -217,22 +217,13 @@ ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
-ui-menu.ModeTabs ui-item::part(item) {
+ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   gap: 0.4em;
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
-/* ... its icons alone (the code, the compiled code, Inspect app, Add) in circles, not pills:  as wide as they're tall,
-   the glyph centred (Owen, epic `editor` T90:  "Make the surrounds on these buttons circular rather than pills");
-   so their glyphs stand about the bar's 12px apart */
-ui-menu.ModeTabs ui-item:not(:has(.ModeText))::part(item) {
-  box-sizing: border-box;
-  inline-size: calc(1lh + 2 * var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em));
-  padding-inline: 0;
-  justify-content: center;
-  gap: 0;
-  border-radius: 50%;
-}
+/* ... its icons alone (the code, the compiled code, Inspect app, Add) are Spell UI's circular items
+   (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {

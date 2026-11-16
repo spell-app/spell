@@ -185,7 +185,9 @@ export type BubblyDrawing = {
  * rule (`SP.BubblyLayout`;  the roles-to-look table is in `bubbly.css`).
  * - `declaration`:  what a person typed in a declaration's head, a white pill:  `a «"pile"» is ...`, `to «play a card»`
  * - `blank`:  a blank an action's head introduces, underlined in its pill, its kind word bold:  `to play «a card»`
- * - `name`:  a name, bold:  `droppable` in `it is droppable when`, `a new foundation`, `'s`
+ * - `name`:  a name, bold:  `droppable` in `it is droppable when`, `a new foundation`, `'s`;
+ *   a type's kind, its abilities and words too, its commas plain:  `a "pile" is a **viewable**, **droppable list of cards**`
+ * - `choice`:  each value a list declares, a bold pill of its own:  `its "rank" is one of «ace», «2 ... 10», «jack»`
  * - `value`:  one value read, one dotted underline:  `as lower case` (more of the value before it), `each card in the deck`
  * - `question`:  a yes or no asked of a thing, underlined with that thing:  `the card is on top of its pile`
  * - `action call`:  a call of an action the project declares, underlined whole:  `turn over the next card`
@@ -197,6 +199,7 @@ export type BubblyRole =
   | "declaration"
   | "blank"
   | "name"
+  | "choice"
   | "value"
   | "question"
   | "action call"
@@ -240,7 +243,7 @@ export type BubblyRuleRoles = {
  * - Rule names, never class names:  a rule's `name` is what its syntax strings call it (`{define_property_has}`),
  *   the same in every language;  a rule built while parsing (a phrase, `is_a_$suit`) goes by its `importableAs`.
  * - Its CHECKS, each a look no role says yet (epic `language` P60, Q69):
- *   `namesKind`, `namesWhatItDraws`, `choices`, `blankAfterVerb`.
+ *   `namesWhatItDraws`, `blankAfterVerb`.
  */
 export type BubblyRulePresentation = {
   /** a group:  its body holds the declarations after it, up to the next group */
@@ -260,17 +263,8 @@ export type BubblyRulePresentation = {
   // ## Checks:  a look no role says yet
   ////////////////
 
-  /**
-   * CHECK:  its group whose end ends the KIND its head says it is, the kind bold whole, ONE name (epic `language` I111):
-   * `superType` in `a "card" is a draggable **two sided view**`, `instanceType` in `a "pile" is a **viewable list of cards**`
-   * - the kind starts after the article that follows the name, past any ability (`draggable`), the commas between
-   *   them included;  Spanish's starts with words of its syntax, `una **lista visible, soltable de cartas**`
-   */
-  namesKind?: string
   /** CHECK:  a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
   namesWhatItDraws?: boolean
-  /** CHECK:  its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
-  choices?: readonly string[]
   /**
    * CHECK:  its blank, this group but its first word, `when creating <a card image>`, `al crear <el solitario>`
    * (`signature`), its kind its words past the small words it starts with, whatever the parse read

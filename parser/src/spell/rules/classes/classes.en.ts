@@ -177,7 +177,7 @@ classes.addRule(WithNestedStatements, {
 })
 
 classes.addRule(CreateType, {
-  roles: { band: "thing", type: "declaration", ability: "name" },
+  roles: { band: "thing", type: "declaration", ability: "name", superType: "name" },
   syntax: `(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) ${ABILITIES} {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
@@ -448,7 +448,7 @@ classes.addRule(DimensionUnit, {
 const PAGE_LAYOUT = "(, in the {layout:type_words}|, (no_layout:no layout))?"
 
 classes.addRule(CreateOneOfAKind, {
-  roles: { band: "thing", type: "declaration", ability: "name" },
+  roles: { band: "thing", type: "declaration", ability: "name", superType: "name" },
   syntax: `{type:type_words} is (a|an) ${ABILITIES} {superType:type} (, aka {aka:quoted_type})? ${PAGE_LAYOUT} {with_nested_statements}?`,
   tests: [
     {
@@ -486,8 +486,15 @@ classes.addRule(CreateOneOfAKind, {
   ]
 })
 
+// its kind bold, a name, its commas plain:  `a viewable, droppable list of cards`, `una lista visible de cartas`
 classes.addRule(CreateListType, {
-  roles: { band: "thing", type: "declaration", ability: "name" },
+  roles: {
+    band: "thing",
+    type: "declaration",
+    ability: "name",
+    instanceType: "name",
+    literal: { viewable: "name", list: "name", of: "name", lista: "name", visible: "name", de: "name", del: "name" }
+  },
   syntax: "create a type (named|called) {type} as (a|an) list of {instanceType:type}",
   tests: [
     {
@@ -561,8 +568,15 @@ classes.addRule(ReopenType, {
   syntax: "(a|an) {type} {with_nested_statements}?"
 })
 
+// its kind bold, a name, its commas plain:  `a viewable, droppable list of cards`, `una lista visible de cartas`
 classes.addRule(CreateViewableListType, {
-  roles: { band: "thing", type: "declaration", ability: "name" },
+  roles: {
+    band: "thing",
+    type: "declaration",
+    ability: "name",
+    instanceType: "name",
+    literal: { viewable: "name", list: "name", of: "name", lista: "name", visible: "name", de: "name", del: "name" }
+  },
   syntax: `(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) ${ABILITIES} viewable ${MORE_ABILITIES} list of {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
@@ -1522,6 +1536,7 @@ classes.addRule(CreateThing, {
 })
 
 classes.addRule(TypeSpecifierEnum, {
+  roles: { enumeration: "choice" },
   syntax: "as (either|one of) {enumeration:identifier_list}",
   tests: [
     {
@@ -1978,6 +1993,7 @@ classes.addRule(DefinePropertyHas, {
 })
 
 classes.addRule(OutlineSpecifierEnum, {
+  roles: { enumeration: "choice" },
   syntax:
     "(either|one of) {enumeration:identifier_list} ((,)? with default ({start:text}|{start:number}|{word:identifier}))?",
   tests: [

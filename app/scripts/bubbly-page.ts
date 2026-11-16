@@ -71,6 +71,7 @@ const ROLES = [
     line: "to move a card to a pile"
   },
   { role: "name", on: "a group, a word", draws: "bold", line: "it is droppable when" },
+  { role: "choice", on: "a group", draws: "a bold pill for each value", line: 'its "rank" is one of' },
   {
     role: "value",
     on: "the rule, its groups",

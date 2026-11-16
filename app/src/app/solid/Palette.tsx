@@ -364,6 +364,7 @@ export function AddPartButton(): JSX.Element {
       <ui-item
         id={ADD_BUTTON_ID}
         icon="plus"
+        appearance="circular"
         class="AddPartButton"
         label={appTexts.text("addPart")}
         title={appTexts.text("addPart")}

@@ -647,8 +647,8 @@ export interface UIActionAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.
-   * - takes:  space-separated:  `link`
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  Its old name was the bare `link` switch.
+   * - takes:  space-separated:  `link` · `circular`
    */
   appearance?: string
   /**
@@ -21173,8 +21173,8 @@ export interface UIItemAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.
-   * - takes:  space-separated:  `link`
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  Its old name was the bare `link` switch.
+   * - takes:  space-separated:  `link` · `circular`
    */
   appearance?: string
   /**
@@ -41786,8 +41786,8 @@ export interface UISiteNavButtonAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.
-   * - takes:  space-separated:  `link`
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  Its old name was the bare `link` switch.
+   * - takes:  space-separated:  `link` · `circular`
    */
   appearance?: string
   /**

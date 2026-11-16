@@ -195,6 +195,16 @@
                     </ui-menu>
                   </ui-menu>
                 </ui-example>
+                <ui-example
+                  description="An icon alone in a circle:  `appearance=&quot;circular&quot;` on the item, as wide as it's tall, its hover and its pressed look round too (`aria-pressed`, a toggle that's never the chosen one)."
+                >
+                  <ui-menu appearance="segmented link header" aria-label="Modes and tools">
+                    <ui-item selected icon="pencil alternate">Edit</ui-item>
+                    <ui-item icon="code" appearance="circular" aria-label="Code" aria-pressed="true"></ui-item>
+                    <ui-item icon="crosshairs" appearance="circular" aria-label="Inspect" aria-pressed="false"></ui-item>
+                    <ui-item icon="plus" appearance="circular" aria-label="Add"></ui-item>
+                  </ui-menu>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-ticks" label="Ticks" sticky="stack" collapsible dividing>

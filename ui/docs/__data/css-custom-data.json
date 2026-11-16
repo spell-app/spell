@@ -6302,6 +6302,13 @@
       }
     },
     {
+      "name": "--ui-menu-circular-item-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `2em`"
+      }
+    },
+    {
       "name": "--ui-message-margin",
       "description": {
         "kind": "markdown",

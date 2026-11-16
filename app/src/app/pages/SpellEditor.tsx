@@ -592,7 +592,7 @@ export function EditorToolbar(props: { mode: Mode }) {
         <ModeButtons
           current={props.mode}
           compiled={<CompiledCodeButton />}
-          inspect={<InspectAppButton id={INSPECT_APP_ID} item />}
+          inspect={<InspectAppButton id={INSPECT_APP_ID} />}
           add={<AddPartButton />}
         />
       )
