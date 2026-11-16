@@ -10,7 +10,6 @@ import { SpellPage, on, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
-import { RunSite } from "./RunSite"
 
 import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
@@ -170,7 +169,7 @@ export function SiteEditorPage() {
                     storiesLineOf={SiteEditorPage.storiesLineOf}
                     iconOf={(part) => part.icon}
                     thumbnailOf={SiteEditorPage.thumbnailOf}
-                    newTabOf={SiteEditorPage.newTabOf}
+                    editLabelOf={SiteEditorPage.editLabelOf}
                     onPick={setPicked}
                     onOpen={SiteEditorPage.openInEdit}
                   />
@@ -262,20 +261,9 @@ SiteEditorPage.thumbnailOf = (part: SitePart): string | undefined => {
   return thumbnail && SP.SpellUrls.fileUrl(`${editor.project?.path}/${thumbnail}`)
 }
 
-/**
- * What a card's corner link opens in a new tab:
- * - its real page on the live site, when its line names one (`live`)
- * - else, once a page has been made for it, that page of the site in Run, at its address (epic `mockup` I12)
- * - none for a dialog, a sidebar, a group, a page with nothing made for it yet,
- *   or an address that needs a value filled in (`/films/:film`)
- */
-SiteEditorPage.newTabOf = (part: SitePart): { url: string; label: string } | undefined => {
-  if (part.live && SiteEdits.isLiveLink(part.live)) return { url: part.live, label: appTexts.text("siteOpenInNewTab") }
-  const project = editor.project
-  if (part.kind !== "page" || !part.address || part.address.includes(":") || !project) return undefined
-  if (!SiteWrites.declaringFile(part.name) && !project.hasPageOrView(part.name)) return undefined
-  return { url: RunSite.runUrlFor(project.path, part.address), label: appTexts.text("siteRunInNewTab") }
-}
+/** What the pencil in a card's corner says:  `Edit Films`, `Edit Settings` (epic `mockup` I24). */
+SiteEditorPage.editLabelOf = (part: SitePart): string =>
+  appTexts.text("siteEditPart", { name: SiteEditorPage.cardTitleOf(part) })
 
 /** An address no page has yet, for a new page:  `/new-page`, then `/new-page-2` ... */
 SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {

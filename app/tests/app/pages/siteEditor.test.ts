@@ -117,8 +117,8 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     const films = page.locator('.SiteCard[data-part="films page"]')
     await expect.poll(() => films.locator(".heading ui-icon").getAttribute("name")).toBe("film")
     expect(await films.locator(".heading .title").textContent()).toBe("Films")
-    expect(await films.locator(".line").textContent()).toMatch(/^\/films\b/)
-    expect(await films.locator("a.new-tab").count()).toBe(1)
+    expect(await films.locator(".line:not(.stories)").textContent()).toMatch(/^\/films\b/)
+    expect(await films.locator("button.edit").getAttribute("aria-label")).toBe("Edit Films")
     // a dialog has no icon, and says what it is
     const settings = page.locator('.SiteCard[data-part="settings dialog"]')
     expect(await settings.locator(".heading ui-icon").count()).toBe(0)
@@ -384,6 +384,16 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     const back = page.locator(".BackToSite ui-button")
     await back.waitFor({ timeout: 30_000 })
     await back.click()
+    await page.waitForURL(/\/site\//, { timeout: 30_000 })
+    await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
+  })
+
+  test("the pencil in a card's corner opens it in Edit, in the same tab (I24)", async () => {
+    const pages = page.context().pages().length
+    await page.locator(".SiteCard", { hasText: "/people/:person" }).locator("button.edit").click()
+    await page.waitForURL(/\/edit\//, { timeout: 30_000 })
+    expect(page.context().pages().length).toBe(pages)
+    await page.locator(".BackToSite ui-button").click()
     await page.waitForURL(/\/site\//, { timeout: 30_000 })
     await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
   })

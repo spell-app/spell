@@ -201,8 +201,8 @@
     opacity: 0.45;
   }
 
-  /* the page's link to itself in a new tab:  8px inside the card's corner, readable over a thumbnail */
-  .new-tab {
+  /* the pencil opening the card in Edit:  8px inside the card's corner, readable over a thumbnail */
+  .edit {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -216,7 +216,9 @@
     color: var(--ui-text-color);
     background: var(--spell-pane-background);
     box-shadow: 0 0 0 1px var(--spell-pane-border-color);
-    text-decoration: none;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
 
     &:hover {
       color: var(--ui-primary-color, var(--ui-focus-color));

@@ -52,7 +52,7 @@ export type SiteScreenshotsWays = {
  * ### `SiteScreenshots`
  * Pictures of a site's old pages, taken by a person walking the site (epic `mockup` P12):  what `spell site screenshots` saves.
  * - Each is a file of the project, `snapshots/<name>.jpg`, and the site's page is pointed at it, its line's `thumbnail`;
- *   the address it was taken at becomes its line's `live`, what its card's new-tab icon opens (epic `mockup` P17).
+ *   the address it was taken at becomes its line's `live`, its form's live link (epic `mockup` P17).
  * - A page the site doesn't have yet is added, at the address the browser is on.
  * - Plain files in and out:  the window is `siteScreenshots()`'s.
  ****************/
