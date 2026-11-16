@@ -174,9 +174,9 @@ describe("inspecting", () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
     flush()
     expect(Inspector.selected).toBeUndefined()
-    // nothing selected:  the tip, and the inspect button in the card's header (I60)
+    // nothing selected:  the tip;  no inspect button in the card's header, the top bar's does it (T78)
     expect(host.querySelector(".InspectorTip")).not.toBeNull()
-    expect(host.querySelector('.InspectorCard [slot="actions"] .InspectAppButton')).not.toBeNull()
+    expect(host.querySelector(".InspectorCard .InspectAppButton")).toBeNull()
 
     Inspector.select(area.querySelector("ui-input")!)
     flush()
@@ -342,7 +342,7 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
 })
 
 describe("the cards", () => {
-  test("a card hides and folds;  the column opens again with the cards it last showed", async () => {
+  test("a card folds, and has no ✕ of its own (T78);  the column opens again with every card", async () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     flush()
@@ -354,17 +354,23 @@ describe("the cards", () => {
     Inspector.toggleFolded("views")
     flush()
     expect(titles()).toEqual([false, true, true])
-    Inspector.setShown("views", false)
-    flush()
-    expect(titles()).toEqual([false, true])
-    // closed, then opened again, a click each
+    // no card is hidden on its own:  no ✕ in any card's header
+    expect(host.querySelector(".InspectorCard ui-icon[name=close]")).toBeNull()
+    // closed, then opened again, a click each:  every card, the folded one still folded
     Inspector.toggle()
     flush()
+    expect(host.querySelector(".InspectorCard")).toBeNull()
     Inspector.toggle()
     flush()
-    expect(titles()).toEqual([false, true])
+    expect(titles()).toEqual([false, true, true])
+    // View › Inspector too
+    Inspector.showOrHide()
+    flush()
+    expect(Inspector.isOpen).toBe(false)
+    Inspector.showOrHide()
+    flush()
+    expect(titles()).toEqual([false, true, true])
     // as it was, for the other tests
-    Inspector.setShown("views", true)
     Inspector.toggleFolded("views")
     flush()
   })

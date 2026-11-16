@@ -457,19 +457,10 @@ ui-button.InspectorRowChip {
   min-width: 0;
 }
 
-/* the Inspector's button (`<InspectorToggle>`):  its icon, then its arrow, close by, the header's grey */
+/* the Inspector's button (`<InspectorToggle>`):  its icon alone */
 .InspectorToggle {
   display: inline-flex;
   align-items: center;
-
-  & > ui-icon.IconAction {
-    margin-inline-end: 2px;
-  }
-  & > ui-dropdown.InspectorPanelsDropdown {
-    margin-inline-end: calc(var(--spell-bar-icon-gap) / 2);
-    color: var(--spell-bar-icon-color);
-    --ui-dropdown-icon-spacing: 0px;
-  }
 }
 
 /* Events' "+":  its glyph's own width, level with the header's other icons */
