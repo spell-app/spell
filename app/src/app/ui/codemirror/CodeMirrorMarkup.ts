@@ -946,7 +946,10 @@ type TagRow = {
   right: number
   /** where its words start, were they not moved in (`--cmb-reach-in`):  every row's but the first's */
   words?: number
-  /** the first row's:  from its left edge to its `⟨`;  and where its first attribute starts, after its name */
+  /**
+   * the first row's:  from its left edge to its `⟨`, and the slide (I140);
+   * and where its first attribute starts, after its name
+   */
   gap?: number
   attribute?: number
   /** the last row's:  the room its `>` needs before it, so its `⟩` is `POINT_ROOM` past the words' ink */
@@ -990,7 +993,8 @@ function measureTagBlocks(view: EditorView): TagRow[] {
       for (let next = besideOf(element, "after"); next?.matches(".bubbly-spacer"); next = besideOf(next, "after"))
         row.right = Math.max(row.right, next.getBoundingClientRect().right - after)
     const angle = element.classList.contains("cmb-tag-block-first") && element.querySelector(".bubbly-angle-open")
-    if (angle) row.gap = angle.getBoundingClientRect().left - row.left
+    // as far in as its `⟨` was before every band slid right (`--cmb-slide`;  I140), then slid too
+    if (angle) row.gap = angle.getBoundingClientRect().left - row.left + 2 * reach("--cmb-slide")
     const join = element.querySelector(".cmb-tag-join")
     if (join) row.attribute = join.getBoundingClientRect().right
     return row

@@ -210,6 +210,23 @@ describe("a body's rail under the caret", () => {
     expect(caret.left).toBeLessThan(outerBox.left + outerBox.width / 2)
   })
 
+  test("the caret at a body line's first column in the middle of its rail:  every band and rail slid 2px right (I140)", async () => {
+    const view = await bubblyEditorOf(NESTED)
+    // Owen:  "slide *all* of the bubble band backgrounds + gutters to the right 2 pixels"
+    expect(getComputedStyle(view.dom).getPropertyValue("--cmb-slide").trim()).toBe("2px")
+    const [member] = linesStarting(view, ['its "rank"'])
+    view.dispatch({ selection: { anchor: view.state.doc.line(member!).from } })
+    await frames()
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    expect(Math.abs(caret.left + caret.width / 2 - railMiddle(view, member!)!)).toBeLessThan(1)
+    // a band's words where they were:  a tab in from its line's indent, its room before them taking the slide
+    const band = getComputedStyle(view.dom.querySelector(".cmb-band-open:not(.cmb-tag-band, .cmb-band-hung)")!)
+    const tab = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-indent"))
+    expect(Math.abs(Number.parseFloat(band.marginLeft) + Number.parseFloat(band.paddingLeft) - tab)).toBeLessThan(0.01)
+    // ... and the words after it:  its end slid out, its room after them
+    expect(Number.parseFloat(band.marginRight)).toBe(-2)
+  })
+
   /**
    * A drawing's start tag laid out as Enter lays a long one out (epic `language` I133):
    * each attribute on its own line, its `>` at the end of the last (I135).
