@@ -560,7 +560,7 @@ export class Inspector {
    * (Owen:  "keep everything EXACTLY THE SAME across page moves").
    * - `rows`:  the app's parts, as the parts tree walks them (`partsIn()`).
    * - While what's selected is still in the app, only its outline is put on what the trail leads to again.
-   * - Found by its place among the parts and its tag (`PartAddress`), for this project:  none there, nothing's selected.
+   * - Found by its path among the parts (`SelectionAddress`), for this project:  none there, nothing's selected.
    */
   static restoreSelection(rows: readonly PartRow[]): void {
     const parts = selectedParts()
@@ -635,15 +635,28 @@ export class Inspector {
     wordsReadyNext = true
   }
 
-  /** The element at `address`:  the same place in the source if it has one, else the same place among the parts. */
+  /**
+   * The element at `address`:  the part at the same path (`partKeysFor()`), else the one with the same tag and `id`
+   * anywhere, a card dealt to another column;  `undefined` while it isn't drawn yet.
+   * - A path is never found by its place in the source or among the parts:
+   *   while the app draws (Solitaire's deal), those name another part (epic `editor` I171).
+   * - An address remembered before paths:  the same place in the source, else the same place among the parts.
+   */
   private static elementAt(address: SelectionAddress, rows: readonly PartRow[]): Element | undefined {
+    if (address.path) {
+      const keys = partKeysFor(rows)
+      const last = address.path.slice(address.path.lastIndexOf("/"))
+      const byId = last.includes("#") ? (key: string) => key.endsWith(last) : () => false
+      const entries = [...keys]
+      return (entries.find(([, key]) => key === address.path) ?? entries.find(([, key]) => byId(key)))?.[0]
+    }
     if (address.place) {
       const same = rows.filter((row) => writtenKeyOf(row.element) === address.place)
       const element = same[address.nth ?? 0]?.element
       if (element?.localName === address.tag) return element
     }
-    const row = rows[address.index]
-    return row?.element.localName === address.tag ? row.element : undefined
+    const row = address.index === undefined ? undefined : rows[address.index]
+    return row && row.element.localName === address.tag ? row.element : undefined
   }
 
   /**
@@ -653,14 +666,10 @@ export class Inspector {
   private static rememberSelection(elements: readonly Element[]): void {
     const area = appArea
     const rows = area ? Inspector.partsIn(area) : []
+    const keys = partKeysFor(rows)
     const addresses = elements.flatMap((element): SelectionAddress[] => {
-      const index = rows.findIndex((row) => row.element === element)
-      if (index < 0) return []
-      const place = writtenKeyOf(element)
-      const nth = place
-        ? rows.filter((row) => writtenKeyOf(row.element) === place).findIndex((row) => row.element === element)
-        : 0
-      return [{ index, tag: element.localName, place, nth }]
+      const path = keys.get(element)
+      return path ? [{ path }] : []
     })
     if (addresses.length) editorPrefs.set(Inspector.selectionPref, addresses)
   }
@@ -677,19 +686,6 @@ export class Inspector {
           ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
           : Inspector.partsIn(child, depth)
     )
-  }
-
-  /** `element`'s key among the app's parts, as a string (`addressKey()`):  `undefined` outside the app. */
-  static keyOf(element: Element): string | undefined {
-    const address = Inspector.addressOf(element)
-    return address && addressKey(address)
-  }
-
-  /** Where `element` sits among the app's parts, to find it again:  `undefined` outside the app. */
-  private static addressOf(element: Element): PartAddress | undefined {
-    const area = appArea
-    const index = area ? Inspector.partsIn(area).findIndex((row) => row.element === element) : -1
-    return index < 0 ? undefined : { index, tag: element.localName }
   }
 
   /** The pref remembering what's selected, the project's own:  `inspector:selected:@spell/examples/tic-tac-toe`. */
@@ -1521,15 +1517,12 @@ const POSITION_SUFFIX = "-position"
 /** One of the app's parts, as the parts tree lists it:  the part, and how deep it sits. */
 export type PartRow = { element: Element; depth: number }
 
-/** Where a part is among the app's parts (`partsIn()`), and its tag. */
-export type PartAddress = { index: number; tag: string }
-
 /**
- * Where a selected part was, to select it again.
- * - By where it's written first (`place`), the `nth` drawn from that place, so a move in the program doesn't lose it.
- * - Its place among the parts, for what's written nowhere:  something a widget made.
+ * Where a selected part was, to select it again:  its `path` among the parts (`partKeysFor()`).
+ * - Remembered before paths (epic `editor` I171), and still read:  where it's written first (`place`), the `nth` drawn
+ *   from that place;  else its place among the parts (`index`) and its `tag`.
  */
-type SelectionAddress = PartAddress & { place?: string; nth?: number }
+type SelectionAddress = { path?: string; index?: number; tag?: string; place?: string; nth?: number }
 
 /** `element`'s own words, its text children's, shortened to `WORDS_LENGTH` characters:  `""` for none. */
 function ownWords(element: Element): string {
@@ -1600,9 +1593,32 @@ function isMadeUpId(id: string, thing: object): boolean {
   return new RegExp(`^${kebabCase(thing.constructor.name) || "thing"}-[0-9a-z]{8}$`).test(id)
 }
 
-/** A part's place as one key:  `4:tic-tac-toe-square`. */
-export function addressKey(address: PartAddress): string {
-  return `${address.index}:${address.tag}`
+/**
+ * Each part's key, from `rows` (`Inspector.partsIn()`):  its PATH, which stays the same while the app draws more.
+ * - Its parent's key, then its tag and its `id`:  `/solitaire-app:0/ui-container:0/solitaire-column#C5`;
+ *   with no `id`, which of its parent's parts of that tag with no `id` it is:  `ui-action:2`.
+ * - Never its place among all the parts:  that moves whenever a part is added above it.
+ *   So the Views tree's rows opened by hand, and the selection, followed the place, not the part:
+ *   a column opened by hand moved to another column each time Solitaire's deal added a card above it,
+ *   so columns opened and closed as the cards came (epic `editor` I171).
+ */
+export function partKeysFor(rows: readonly PartRow[]): Map<Element, string> {
+  const keys = new Map<Element, string>()
+  // the parts round the row walked now, outermost first:  each one's key, and how many of each tag it holds with no `id`
+  const around: { key: string; counts: Map<string, number> }[] = []
+  const topCounts = new Map<string, number>()
+  for (const { element, depth } of rows) {
+    around.length = depth
+    const parent = around.at(-1)
+    const counts = parent?.counts ?? topCounts
+    const tag = element.localName
+    const nth = counts.get(tag) ?? 0
+    if (!element.id) counts.set(tag, nth + 1)
+    const key = `${parent?.key ?? ""}/${tag}${element.id ? `#${element.id}` : `:${nth}`}`
+    keys.set(element, key)
+    around.push({ key, counts: new Map() })
+  }
+  return keys
 }
 
 /** What the Inspector reads of a Spell UI attribute:  its name and kind (`size`, `color` ...). */

@@ -248,14 +248,14 @@ describe("<FileTabs>", () => {
     expect(showEditor).toHaveBeenCalledWith("test-project/two.js")
   })
 
-  test("a right click on a tab shows that tab's file, not the next one's, though the bar's ⋯ sits among them", async () => {
+  test("a right click on a tab shows that tab's file, not the next one's", async () => {
     const showEditor = spyOnEditor("showEditor")
     const file = fakeFile("test-project/one.js", "")
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     const tabs = await tabsIn(host)
-    expect(tabs[0]!.parentElement!.querySelector(":scope > .CodeMoreMenu")).not.toBeNull()
+    expect(tabs[0]!.parentElement!.querySelector(":scope > .CodeMoreMenu")).toBeNull()
     tabs[0]!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, clientX: 10, clientY: 10 }))
     expect(showEditor).toHaveBeenLastCalledWith("test-project/one.js")
   })

@@ -10,9 +10,9 @@ import {
   ACTION_ICON,
   Inspector,
   ThingChip,
-  addressKey,
   isThing,
   itemsOf,
+  partKeysFor,
   type InspectorBand,
   type InspectorCardId,
   type InspectorPanel,
@@ -397,14 +397,18 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
  */
 type PartNode = { element: Element; key: string; children: PartNode[]; startsOpen: boolean }
 
-/** `rows` nested, as the tree shows them. */
+/**
+ * `rows` nested, as the tree shows them.
+ * - Each row's key is its part's path (`partKeysFor()`):  a row opened by hand stays open while the app draws more.
+ */
 function nodesFor(rows: readonly PartRow[]): PartNode[] {
   const top: PartNode[] = []
   const around: PartNode[] = []
-  rows.forEach((row, index) => {
+  const keys = partKeysFor(rows)
+  rows.forEach((row) => {
     const node = {
       element: row.element,
-      key: addressKey({ index, tag: row.element.localName }),
+      key: keys.get(row.element)!,
       children: [],
       startsOpen: row.depth === 0 || !SpellElement.thingOf(row.element)
     }

@@ -218,6 +218,11 @@ describe("<ui-toolbar> bar slots", () => {
       await expect.poll(() => shown(host)).toEqual(["F1", "F3"])
     })
 
+    it("`all-items-icon`:  its icon before the button's caret", async () => {
+      const { host } = await toolbar(900, items(5), `${LOOK} max-visible="3" all-items-icon="file outline"`)
+      await expect.poll(() => listButton(host)?.querySelectorAll("svg").length).toBe(2)
+    })
+
     it("bare, it means 8", async () => {
       const { host } = await toolbar(900, items(8), `${LOOK} max-visible`)
       await ElementFixture.settle()
