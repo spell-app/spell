@@ -118,7 +118,8 @@
     --ui-progress-background: var(--glass-track);
     --ui-progress-bar-background: var(--ui-primary);
     --ui-progress-text-color: var(--ui-primary-on);
-    --ui-checkbox-radius: var(--ui-radius-circle);
+    --ui-checkbox-radius: 4px;
+    --ui-checkbox-handle-background: white;
     --ui-input-radius: var(--ui-radius-m);
     --ui-input-background: light-dark(#ffffffb3, #ffffff0f);
     --ui-input-border-color: var(--glass-field-edge);

@@ -36,7 +36,7 @@
 //   (Owen, 2026-10-04:  the brand's P052 `.otf` fallback was ~540 KB, and AGPL).
 //   Body:  the system sans;  code:  the system mono.
 // - Shape:  pill buttons, labels and progress bars, 12px inputs and menus, 16px cards / segments / messages /
-//   toasts, 22px modals, 8px popups;  round checkboxes (the brand's to-do circle).
+//   toasts, 22px modals, 8px popups;  checkboxes with soft 4px corners (round read as radios:  epic `editor` I177).
 //   Soft layered, violet-tinted shadows (`tokens/theme.css` `--shadow-xs` ... `-lg`), each ONE list whose layers are
 //   `light-dark()` colours, so the dark glows switch with the scheme like every other token.
 // - NOT taken from the brand (no `ui` token, or a component change):  the modal scrim's 4px blur;  the
@@ -511,8 +511,11 @@
       "text-color": "{brand.primary.on}"
     },
     "checkbox": {
-      "radius": "{radii.circle}",
-      // the brand's done to-do, a FILLED purple circle with a white check (issue I1)
+      // a box with soft corners, never a circle:  a round one reads as a radio (epic `editor` I177)
+      "radius": "4px",
+      // a toggle's knob is white in dark too:  the surface would sink into the dark lane
+      "handle-background": "white",
+      // the brand's done to-do, FILLED purple with a white check (issue I1)
       "checked-background": "{brand.primary.color}",
       "checked-border-color": "{brand.primary.color}",
       "checked-mark-color": "{brand.primary.on}"

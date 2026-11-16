@@ -335,7 +335,8 @@
     --ui-progress-background: light-dark(var(--spell-brand-100), #c8cee71a);
     --ui-progress-bar-background: var(--ui-primary);
     --ui-progress-text-color: var(--ui-primary-on);
-    --ui-checkbox-radius: var(--ui-radius-circle);
+    --ui-checkbox-radius: 4px;
+    --ui-checkbox-handle-background: white;
     --ui-checkbox-checked-background: var(--ui-primary);
     --ui-checkbox-checked-border-color: var(--ui-primary);
     --ui-checkbox-checked-mark-color: var(--ui-primary-on);
