@@ -105,21 +105,39 @@ export class SpellWarnings {
   }
 
   /**
-   * Note what a writer's whole-project pass has to tell the author (`P.WriterOptions.noteForAuthor`):
-   * here `P.ReadGathering` reads a saved type whole, and says why.
+   * What a writer's whole-project pass has to tell the author, for ONE compile of the project `project`
+   * (`P.WriterOptions.noteForAuthor`):  here `P.ReadGathering` reads a saved type whole, and says why.
    * - The route a writer has onto these warnings:  it words nothing, knowing no language, and this does.
    * - Noted on the line it's about, while compiling:  `note()`'s once-only keeps a recompile from saying it twice.
+   * - SIDE EFFECT:  takes back what the project's last compile noted this way first.
+   *   Why:  an incremental parse keeps a line's match across edits, and what's read whole is the whole project's
+   *   to say:  an edit elsewhere can settle it (epic `language` P58).
    * - Nothing for a type read whole for a reason nobody can change, one that undo puts back.
    */
-  static noteRead = ({ match, kind, typeName }: P.ReadNote): void => {
-    const key = READ_WHOLE_MESSAGES[kind]
-    if (!key) return
-    const { scope } = match
-    const type = typeName ? scope.getType(typeName) : undefined
-    const what = type
-      ? SpellWarnings.exampleNoun(scope, type, "definite")
-      : SP.Language.of(scope).parserMessage("read-whole-everything")
-    SpellWarnings.note(match as P.Match, SP.Language.of(scope).parserMessage(key, { what }))
+  static readNoterFor(project: object | undefined): (note: P.ReadNote) => void {
+    const noted: Array<[P.Match, string]> = []
+    if (project) {
+      for (const [match, message] of READ_NOTED.get(project) ?? []) SpellWarnings.forget(match, message)
+      READ_NOTED.set(project, noted)
+    }
+    return ({ match, kind, typeName }) => {
+      const key = READ_WHOLE_MESSAGES[kind]
+      if (!key) return
+      const { scope } = match
+      const type = typeName ? scope.getType(typeName) : undefined
+      const what = type
+        ? SpellWarnings.exampleNoun(scope, type, "definite")
+        : SP.Language.of(scope).parserMessage("read-whole-everything")
+      const message = SP.Language.of(scope).parserMessage(key, { what })
+      SpellWarnings.note(match as P.Match, message)
+      noted.push([match as P.Match, message])
+    }
+  }
+
+  /** Take back the warning `message` noted on `match` about itself. */
+  private static forget(match: P.Match, message: string): void {
+    const data = match.data as WarningsData
+    data.warnings = data.warnings?.filter((noted) => !(noted.at === match && noted.message === message))
   }
 
   /**
@@ -319,6 +337,9 @@ type WarningsData = {
 }
 
 /** A warning as noted on a match:  `in()` reports it while `stillHolds()`, if given -- see `SpellWarnings.noteIf()`. */
+/** What each project's last compile noted through `SpellWarnings.readNoterFor()`, by its scope. */
+const READ_NOTED = new WeakMap<object, Array<[P.Match, string]>>()
+
 type NotedWarning = SP.SpellWarning & {
   /** Is it still so?  Asked when they're gathered. */
   stillHolds?: () => boolean

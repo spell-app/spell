@@ -188,10 +188,10 @@ function getterWaits(member: P.ScopeVariable, seen: Set<object>): boolean {
   if (!declaredBy || seen.has(member)) return false
   seen.add(member)
   let waits = false
-  P.forEachNode([declaredBy.AST as P.ASTNode], (node) => {
+  P.forEachNode([declaredBy.current.AST as P.ASTNode], (node) => {
     waits ||= node instanceof P.ASTPropertyDefinition && !!node.get?.waitsItself
   })
-  return waits || readsAWaitingProperty(declaredBy, seen)
+  return waits || readsAWaitingProperty(declaredBy.current, seen)
 }
 
 ////////////////

@@ -2462,6 +2462,24 @@ sidebars any of them opens.
         - the body's nested scope isn't the header's
         - its statement's `mutateScopeFromBody()` records the same as before, in `data.fromBody`
           - e.g. the method still returns a `number`:  later lines may read it
+      - First, deeper (epic `language` P58):  the innermost body that changed INSIDE it, when only one did
+        (`SpellParser.reparseInnerBody()` => `BlockLine.reparseInnerBody()`).
+        - e.g. one action's steps, in a type's outline:  the type, its other members, later items and files are kept.
+          Before, a type's body declares its members, so an edit to any step in it re-parsed every file after it.
+        - It goes down one body at a time, while only one body under it changed and the text around it is the same.
+        - A body it goes through:  read as a plain block, recording nothing once parsed (`mutateScopeFromBody()`),
+          no line reading what's under it (`readsBelow`) or joined (`JoinedLines`):  a type's outline, an event's steps.
+        - The body it re-parses:  the deepest one `reparseBody()` will take, under its same rules.
+          The steps of an `if` share their action's scope, so the action's.
+        - Rewinds to that body's `bodyMark`, and replays from its `bodyEndMark`:  the mark `commitStatement()` takes
+          after the body and its `mutateScopeFromBody()`.
+        - Each body around it is built again from its kept lines (`Block.assembleBlock()`), its statement a clone
+          that keeps the old one's nested scope.
+      - A re-bodied statement is a clone (`Match.clone()`):  the old one's `replacedBy` is the clone.
+        - Scope records still name the statement first parsed (`declaredBy`):
+          what reads its BODY reads `declaredBy.current`, e.g. whether a method waits (`waits: true` in its declaration),
+          an action's title, a getter's reads.
+        - That was the incremental parse losing an action's `waits: true` after an edit inside it.
     - anything else:  rewind to the item holding the first change, and re-parse from there.
       - Or to the one BEFORE it, if the change starts with an indented block that item may now take.
       - Once back in step with the unchanged items at the end, `canKeepFrom()`:
@@ -2490,10 +2508,16 @@ sidebars any of them opens.
     - `assignment` is `"internal"` (a variable), unless it auto-declared a property.
       Then it's `"global"` (`data.autoDeclared`).
     - So a plain `set x to 1` stays cheap.
+    - A line that may declare a bare word as a value (`its rank should be queen`, `red if ...`, `return black
+      otherwise`) is `"global"` only when it did:  the word was new (`SpellConstant.valueScopeChanges()`).
+      A word the project knew already, e.g. one of a card's ranks, changes nothing.
+    - `if` is `"global"` only when its condition's subject took an `it` name (`data.subjectIt`).
 - If an `update()` throws (a rule crashed committing a line), `IncrementalProject.isBroken`:
   the next update re-parses every file from scratch.
 - Cost, Solitaire, against a full parse of ~110ms (a smaller grammar, a quieter machine:  a warm parse today, "Rules and matching"):
   - body edit:  ~10ms
+    - a step in a type's outline, its first file's (Card.spell, epic `language` P58):  ~5-11ms, was ~165-230ms,
+      every file after it parsed again
   - comment, blank line or top-level statement, anywhere:  ~1-2ms
   - declaration edit near the END:  ~1ms
   - declaration edit near the START of the first file:  ~110ms (~= a full parse)
@@ -2502,6 +2526,12 @@ sidebars any of them opens.
   - Over projects written inline:  spell-parser's own [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts).
   - every line, with `INCREMENTAL_FULL=1`
   - After each edit, and after undoing it, it checks output, errors and token positions against a full parse.
+- spell-app's [IncrementalEdits.test.ts](../../../app/tests/spell/parserTests/IncrementalEdits.test.ts) does every example
+  and library project, against its imports (epic `language` P58).
+  - In each file:  a step changed and one added deep in a body, a member renamed, added and removed, a new kind,
+    a new phrase, each then undone.
+  - It checks each file's output, errors and warnings, and the whole project's code for every target.
+  - Each project's first file;  every file with `INCREMENTAL_FULL=1`.
 - spell-app's [ParseJournal.test.ts](../../../app/tests/spell/parserTests/ParseJournal.test.ts) checks a whole project's rewind / replay.
 
 ## Compile
