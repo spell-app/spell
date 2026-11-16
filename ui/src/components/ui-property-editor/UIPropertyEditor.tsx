@@ -165,7 +165,8 @@ export class UIPropertyEditor extends UIForm {
     if (schema && PropertyLayouts.tags.includes(schema.name)) {
       let isCurrent = true
       void PropertyLayouts.load(schema.name).then((layout) => {
-        if (isCurrent) this.makeProperties(schema, layout)
+        // the author may have laid out properties of their own meanwhile (a Solid page draws its children after)
+        if (isCurrent && !this.holdsOwnProperties) this.makeProperties(schema, layout)
       })
       return () => {
         isCurrent = false
@@ -203,6 +204,21 @@ export class UIPropertyEditor extends UIForm {
       }
       this.domElement.append(group)
     }
+  }
+
+  /**
+   * `holdsOwnProperties`, watched:  the author's own may come after it made its own from the schema
+   * (a Solid page that draws them once a layout file is in, as the spell editor's Inspector does).
+   */
+  @E.watches({ childList: true })
+  get hasOwnProperties(): boolean {
+    return this.holdsOwnProperties
+  }
+
+  /** SIDE EFFECT:  the author's own properties came:  the ones it made from the schema go. */
+  @E.onChange("hasOwnProperties", { defer: true })
+  protected onOwnPropertiesChanged(hasOwn: boolean) {
+    if (hasOwn) this.removeMadeProperties(MADE_FROM.schema)
   }
 
   /** The author laid out properties (or groups) of their own:  any element child it didn't make. */

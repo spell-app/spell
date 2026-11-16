@@ -14,7 +14,7 @@ import { RenameError } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import type { TextChange } from "spell/app/app/EditorHistory"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { PropertySchemas } from "spell/ui/property"
+import { GROUP_ORDER, PropertyLayouts, PropertySchemas, type PropertyLayout } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 // By file:  a click's rule is all this needs
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
@@ -3176,7 +3176,7 @@ function PropertiesCard(): JSX.Element {
               </Show>
               <Show when={part.layout}>
                 {(layout) => (
-                  <For each={sectionsFor(layout().fields, layout().hasText)}>
+                  <For each={sectionsFor(layout().fields, layout().hasText, layoutFileOf(part.element))}>
                     {(section) => (
                       <ui-property-group
                         label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
@@ -3191,7 +3191,16 @@ function PropertiesCard(): JSX.Element {
                         <Show when={section.hasText}>
                           <ui-property name="textContent" label={appTexts.text("inspectorText")} />
                         </Show>
-                        <For each={section.fields}>{(field) => <Field field={field} fields={section.fields} />}</For>
+                        <For each={section.rows}>
+                          {(row) => (
+                            <Show when={row.length > 1} fallback={<Field field={row[0]!} fields={section.fields} />}>
+                              {/* a layout's row:  its fields side by side, each the same share (Spell UI's `:state(in-row)`) */}
+                              <ui-fields>
+                                <For each={row}>{(field) => <Field field={field} fields={row} />}</For>
+                              </ui-fields>
+                            </Show>
+                          )}
+                        </For>
                       </ui-property-group>
                     )}
                   </For>
@@ -3448,22 +3457,67 @@ function OwnEditor(props: { markup: string }): JSX.Element {
 const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
 
 /**
- * A Spell UI element's fields in the Inspector's sections, one per group, in the groups' order
- * (`E.ATTRIBUTE_GROUPS`:  Name, Content, Appearance, Layout ...).
- * - A field keeps its place in `fields` within its section:  its vocabulary's order, set or not.
- * - A field with no group goes in Appearance;  the element's own text (`hasText`) heads Content.
+ * A Spell UI element's fields in the Inspector's sections, as its tag's layout file lays them out
+ * (`ui-action.editor.html`, `PropertyLayouts`;  epic `editor` T97):  its sections in order, each its rows.
+ * - A field the file doesn't place still shows:  after its group's rows, or in a section of its own
+ *   (`PropertyLayouts.place()`);  no file, the vocabulary's own order, a section per group.
+ * - A field with no group goes in Appearance;  the element's own text (`hasText`) heads Content,
+ *   a section of its own when the layout has none.
  * - A section with nothing in it isn't drawn.
+ * - `layout` `null`:  its file is still loading (`layoutFileOf()`), so no section yet.
  */
-function sectionsFor(fields: FieldSpec[], hasText: boolean): InspectorSection[] {
-  return E.ATTRIBUTE_GROUPS.map((group) => ({
-    group,
-    hasText: hasText && group === "content",
-    fields: fields.filter((field) => (field.group ?? "appearance") === group)
-  })).filter((section) => section.fields.length || section.hasText)
+function sectionsFor(
+  fields: FieldSpec[],
+  hasText: boolean,
+  layout: PropertyLayout | null | undefined
+): InspectorSection[] {
+  // its layout file still loading:  nothing yet, so no field moves once it's in
+  if (layout === null) return []
+  const byName = new Map(fields.map((field) => [field.name, field]))
+  const sections: InspectorSection[] = PropertyLayouts.place(layout, fields).map((placed) => {
+    const rows = placed.rows.map((row) => row.map((name) => byName.get(name)!))
+    return { group: placed.group ?? DEFAULT_GROUP, hasText: false, rows, fields: rows.flat() }
+  })
+  if (hasText) {
+    const content = sections.find((section) => section.group === CONTENT_GROUP)
+    if (content) content.hasText = true
+    else {
+      const at = sections.findIndex(
+        (section) => GROUP_ORDER.indexOf(section.group) > GROUP_ORDER.indexOf(CONTENT_GROUP)
+      )
+      sections.splice(at < 0 ? sections.length : at, 0, { group: CONTENT_GROUP, hasText: true, rows: [], fields: [] })
+    }
+  }
+  return sections
 }
 
-/** One of the Inspector's sections:  a group, its fields, and whether the element's text heads it. */
-type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: FieldSpec[] }
+/** One of the Inspector's sections:  a group, its rows of fields (`fields`, every one), and whether the element's text heads it. */
+type InspectorSection = { group: E.AttributeGroup; hasText: boolean; rows: FieldSpec[][]; fields: FieldSpec[] }
+
+/** A field with no group is in this one;  the element's text heads that one. */
+const DEFAULT_GROUP: E.AttributeGroup = "appearance"
+const CONTENT_GROUP: E.AttributeGroup = "content"
+
+/** Bumped as a tag's layout file comes in:  `layoutFileOf()` reads it, so the card lays out again. */
+const [layoutFilesIn, setLayoutFilesIn] = createSignal(0)
+
+/**
+ * The layout file of `element`'s tag (its vocabulary's, so a translated element finds the English one), once it's in;
+ * `undefined` for none;  `null` while it loads, the first time (then the card lays out again).
+ * - SIDE EFFECT:  starts loading it, the first time.
+ */
+function layoutFileOf(element: Element | undefined): PropertyLayout | null | undefined {
+  if (!element) return undefined
+  void layoutFilesIn()
+  const tag = (element as E.DOMElement).component?.vocabulary?.tag ?? element.localName
+  const loaded = PropertyLayouts.loaded(tag)
+  if (loaded !== undefined) return loaded ?? undefined
+  if (!PropertyLayouts.tags.includes(tag)) return undefined
+  void PropertyLayouts.load(tag)
+    .then(() => setLayoutFilesIn((count) => count + 1))
+    .catch((error) => console.error(error))
+  return null
+}
 
 /****************
  * ### `<ThingBands>`
