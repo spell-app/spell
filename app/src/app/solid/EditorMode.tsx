@@ -6,6 +6,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
+import { barTooltip } from "./chrome"
 import { on } from "./on"
 import { tracked } from "./tracked"
 
@@ -171,7 +172,7 @@ export function ModeButtons(props: {
             appearance="circular"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
-            title={appTexts.text("menuCode")}
+            {...barTooltip(appTexts.text("menuCode"))}
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
           />
@@ -192,7 +193,7 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
     <ui-item
       icon={look().icon}
       selected={props.current === props.mode}
-      title={appTexts.text(look().text)}
+      {...barTooltip(appTexts.text(look().text))}
       onClick={() => EditorMode.show(props.mode)}
     >
       <span class="ModeText">{appTexts.text(look().text)}</span>
@@ -222,17 +223,24 @@ function PublishDraft(): JSX.Element {
   return (
     <Show when={hasDrafts()}>
       <span class="PublishDraft">
-        <span class="DraftState" title={appTexts.text("draftTip")}>
+        <span class="DraftState" {...barTooltip(appTexts.text("draftTip"))}>
           <ui-icon name={DRAFT_ICON} />
           {appTexts.text("draft")}
         </span>
-        <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
+        <ui-button
+          class="Publish"
+          color="primary"
+          icon={PUBLISH_ICON}
+          {...barTooltip(appTexts.text("draftTip"))}
+          onClick={() => void editor.publish()}
+        >
           {appTexts.text("publishDraft")}
         </ui-button>
         <ui-button
           class="DiscardDraft"
           appearance="tertiary"
           icon={DISCARD_ICON}
+          {...barTooltip(appTexts.text("draftTip"))}
           onClick={() => void editor.deleteDraft()}
         >
           {appTexts.text("discardDraft")}

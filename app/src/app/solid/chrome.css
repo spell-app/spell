@@ -113,11 +113,17 @@ ui-icon.IconAction {
   --ui-section-tip-background: var(--spell-tooltip-background);
   --ui-section-tip-color: white;
 }
-/* the palette's tip, a popup:  the same colours, and the same two seconds' wait (a popup's own is 800ms) */
+/*
+ * The top bar's and the Add View bar's tooltips (`barTooltip()`, epic `editor` I217), the palette's tip, a popup, among
+ * them:  the same colours, after the page's hover pause (`--ui-hover-delay`, 800ms;  the palette's waited 2s until I217)
+ */
 ui-item.ThemeMenu ui-theme-menu {
-  --ui-hover-delay: 2s;
   --ui-popup-inverted-background: var(--spell-tooltip-background);
   --ui-popup-inverted-color: white;
+}
+#app-root [data-tooltip][data-inverted] {
+  --ui-tooltip-background: var(--spell-tooltip-background);
+  --ui-tooltip-color: white;
 }
 
 /* Scrollbars:  a grey thumb on no track of its own, so a pane's fill runs to its edge

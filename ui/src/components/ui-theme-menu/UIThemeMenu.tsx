@@ -40,7 +40,7 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *       - under a divider, "Theme bench" (`<a part="bench">`):  the theme bench, in a new window, in the theme
  *         chosen (`bench`;  Owen:  "Add \"theme bench\" link to theme dropdown, opens in new window")
  *       - the `end` slot's rows, the page's own (the Spell editor's palette:  "Edit theme...")
- *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
+ *     - its tooltip, `<ui-popup part="tip" inverted size="small">` (hidden while the overlay is open)
  *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
  *       button stood beside it, and the overlay had a "Match system" switch.
  *   - `scheme`:  the sun / moon button alone, `<button part="scheme">`, with its tooltip:
@@ -302,7 +302,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
             )}
           </For>
         </button>
-        <ui-popup part={this.partForName("tip")} inverted="" size={MINI} position={TIP_POSITION}>
+        <ui-popup part={this.partForName("tip")} inverted="" size={TIP_SIZE} position={TIP_POSITION}>
           {next()}
         </ui-popup>
       </>
@@ -344,7 +344,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
           part={this.partForName("tip")}
           for={IDS.palette}
           inverted=""
-          size={MINI}
+          size={TIP_SIZE}
           position={TIP_POSITION}
           class={this.isOpen ? MUTED_CLASS : undefined}
         >
@@ -761,7 +761,7 @@ const FOCUSED_ITEM = "ui-item:focus-within"
 const TIP_POSITION = "bottom center"
 
 /** `size` of the tooltips. */
-const MINI = "mini"
+const TIP_SIZE = "small"
 
 /** Class word of the round buttons. */
 const BUTTON_CLASS = "button"

@@ -80,3 +80,49 @@
     }
   }
 }
+
+/*
+ * A centred popup slid along its side to stay in the window, or across to the other side (`SHIFTED_FALLBACKS`,
+ * `UIPopup.tsx`):  the gap faces the target, and the arrow points at it, near the end the popup lines up with.
+ * - Its fallbacks are named (`bottom span-left` ...), never `flip-block`, so the rules above don't apply to it.
+ */
+@layer ui.components.popup.variations {
+  @container anchored(fallback: bottom center) or anchored(fallback: bottom span-left) or anchored(fallback: bottom span-right) {
+    .ui:is(.top, .bottom).center.popup {
+      --_popup-arrow-shadow: -1px -1px 0 0 var(--_popup-arrow-edge);
+      --_popup-arrow-clip: polygon(-2px -2px, calc(100% + 5px) -2px, -2px calc(100% + 5px));
+      margin: var(--_ui-popup-distance) 0 0;
+    }
+    .ui:is(.top, .bottom).center.popup::before {
+      top: var(--_ui-popup-arrow-offset);
+      bottom: auto;
+    }
+  }
+  @container anchored(fallback: top center) or anchored(fallback: top span-left) or anchored(fallback: top span-right) {
+    .ui:is(.top, .bottom).center.popup {
+      --_popup-arrow-shadow: 1px 1px 0 0 var(--_popup-arrow-edge);
+      --_popup-arrow-clip: polygon(calc(100% + 2px) -5px, calc(100% + 2px) calc(100% + 2px), -5px calc(100% + 2px));
+      margin: 0 0 var(--_ui-popup-distance);
+    }
+    .ui:is(.top, .bottom).center.popup::before {
+      top: auto;
+      bottom: var(--_ui-popup-arrow-offset);
+    }
+  }
+  /* Ends at the target's right edge:  the arrow near its own right end */
+  @container anchored(fallback: top span-left) or anchored(fallback: bottom span-left) {
+    .ui:is(.top, .bottom).center.popup::before {
+      right: var(--_ui-popup-arrow-edge-distance);
+      left: auto;
+      margin-left: 0;
+    }
+  }
+  /* Starts at the target's left edge:  the arrow near its own left end */
+  @container anchored(fallback: top span-right) or anchored(fallback: bottom span-right) {
+    .ui:is(.top, .bottom).center.popup::before {
+      right: auto;
+      left: var(--_ui-popup-arrow-edge-distance);
+      margin-left: 0;
+    }
+  }
+}

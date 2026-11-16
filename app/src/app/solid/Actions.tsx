@@ -6,7 +6,7 @@ import { SPACES } from "spell/app/spaces"
 import { editor, runtimeConsole } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import type * as Modals from "spell/app/app/solid/modals"
-import { tracked } from "spell/app/app/solid"
+import { barTooltip, tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   EDITOR_HOTKEYS,
@@ -27,6 +27,7 @@ import {
  * - `iconOnly`:  just its icon, a plain `<ui-icon link>`, with `title` as its tooltip, below it, after a pause
  *   (the browser's own `title`, which no parent frame can cut off).
  *   - A `<ui-icon>`, not an item:  an item's box is `display: contents`, which draws no tooltip.
+ *   - `inBar`:  in the editor's top bar, its tooltip Spell UI's instead (`barTooltip()`, epic `editor` I217).
  * - `active` highlights it:  the item's `selected`, the button's `selected`, the icon's `color`.
  * - Everything else goes to the element as is:  `onClick`, `color`, `disabled`, `value`, `class` ...
  * - Inside a `<MoreMenu>` (a `<ui-dropdown>`) the item is DATA:
@@ -36,7 +37,7 @@ import {
  * - SEE:  its App UI components page, `app/docs/Actions.html` (`/components/app/Actions.html`).
  ****************/
 export function Action(props: ActionProps) {
-  const rest = omit(props, "title", "button", "iconOnly", "icon", "active", "menu", "shortcut", "tip")
+  const rest = omit(props, "title", "button", "iconOnly", "inBar", "icon", "active", "menu", "shortcut", "tip")
   return (
     <Switch
       fallback={
@@ -61,7 +62,8 @@ export function Action(props: ActionProps) {
           link=""
           name={props.icon}
           label={tipFor(props.title)}
-          title={tipFor(props.title)}
+          title={props.inBar ? undefined : tipFor(props.title)}
+          {...(props.inBar ? barTooltip(tipFor(props.title)) : {})}
           {...omit(rest, "class", "color")}
           class={["IconAction", props.class, { active: !!props.active }]}
           color={props.active ? props.color : undefined}
@@ -102,6 +104,8 @@ export type ActionProps = {
   button?: boolean
   /** Just its icon, `title` its tooltip:  a `<ui-icon link>` instead of a menu `<ui-item>`. */
   iconOnly?: boolean
+  /** An `iconOnly` action in the editor's top bar:  its tooltip Spell UI's (`barTooltip()`), not the browser's. */
+  inBar?: boolean
   /** An item of the top bar's menus:  a `<ui-action>`, its icon, title and `shortcut`, in the menu's icon column. */
   menu?: boolean
   /** Why it's greyed, as a tooltip:  a `menu` item's. */
@@ -173,7 +177,7 @@ export const Actions = {
       type="button"
       class="YouAvatar"
       aria-label={appTexts.text("you")}
-      title={appTexts.text("you")}
+      {...barTooltip(appTexts.text("you"))}
       onClick={() => editor.showYou()}
     >
       <span class="YouLetter" aria-hidden="true">

@@ -9,6 +9,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { CodeMirrorFollowed, SpellCodeMirror } from "spell/app/app/solid/codemirror"
 import { ErrorBoundary, tracked } from "spell/app/app/solid"
+import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 import { LazyCodeMirror } from "./LazyCodeMirror"
@@ -104,7 +105,7 @@ export function CompiledCodeButton(): JSX.Element {
       appearance="circular"
       class="CompiledCodeToggle"
       label={appTexts.text(look().tip)}
-      title={appTexts.text(look().tip)}
+      {...barTooltip(appTexts.text(look().tip))}
       aria-pressed={CodeOutputShown.target ? "true" : "false"}
       onClick={() => CodeOutputShown.toggle()}
     />
