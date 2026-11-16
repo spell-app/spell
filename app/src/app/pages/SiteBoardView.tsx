@@ -14,7 +14,8 @@ import "./SiteBoardView.css"
  * - A card takes its section's colour (`<ui-card background>`);  a page's is rounded, a dialog's square,
  *   a section's bold and bigger;  its thumbnail on top, when it has one.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
- * - A page's card has a link in its corner, opening it in a new tab:  `newTabOf`.
+ * - A page's card has a link in its corner, opening it in a tab of its own:  `newTabOf`.
+ *   - The tab is named for its address (`tabNameFor()`), so a second click goes back to the same tab (`mockup` I19).
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
  *   - a section's card:  up or down, the whole section before or after another, a line showing where;
  *     or onto a spot of another section, which it joins, its pages with it
@@ -79,7 +80,7 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
           <a
             class="new-tab"
             href={link().url}
-            target="_blank"
+            target={tabNameFor(link().url)}
             title={link().label}
             aria-label={link().label}
             onClick={(event: MouseEvent) => event.stopPropagation()}
@@ -92,6 +93,17 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
       </Show>
     </ui-card>
   )
+}
+
+/** What starts a page's tab name:  a name starting `_` would be one of the browser's own (`_blank`). */
+const TAB_NAME_PREFIX = "spell-page "
+
+/**
+ * The name of the tab `url` opens in, from a card's corner:  one per address, so the same page's link reuses its tab.
+ * - The run's address names the project and the page, so two projects' `/` pages get two tabs.
+ */
+function tabNameFor(url: string): string {
+  return `${TAB_NAME_PREFIX}${url}`
 }
 
 /** Props for `<SiteBoardView>`. */
