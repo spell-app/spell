@@ -84,8 +84,9 @@ ui-panel.InspectorCard > .InspectorSection {
   min-height: 0;
 }
 .InspectorCard {
-  /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu") */
-  --ui-panel-pane-bar-background: var(--spell-menu-bar-background);
+  /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu"):
+     drawn under the bar, the top bar's fill and blur over the page (`EditorTheme.css`, epic `editor` I194) */
+  --ui-panel-pane-bar-background: transparent;
   /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
      (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
   &.locked {
@@ -420,6 +421,12 @@ ui-button.InspectorActionButton::part(button) {
 }
 ui-button.InspectorActionButton::part(icon) {
   margin: 0;
+}
+/* an event's ✕ (`<RemoveEventButton>`):  small and grey, never the bar's ink (Owen, epic `editor` I195:
+   "`x` is too big -- lighter and grey") */
+ui-button.InspectorRemoveEvent::part(button) {
+  font-size: 12px;
+  color: var(--ui-text-muted);
 }
 ui-button.InspectorActionButton:not([disabled]):hover::part(button) {
   color: var(--ui-primary);
@@ -762,11 +769,16 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
  * the seams between them, so each reads as its own pane (Owen, epic `editor` I190:  "Code doesn't look like a
  * separate pane.  Put that background *inside* the panels, rather than in the background of the sidebar")
  * - the card's corners its pane's;  its bar the top bar's colour (`.InspectorCard`, above)
+ * - its body the panels' (`--spell-pane-body-background`):  the glass under 50% of the code's paper (I194)
  * - before:  a panel's own solid fill, `--spell-panel-background` (epic `mockup` I18), then the glass behind the
  *   whole column (T83, undone by I190)
  */
 :root[data-spell-theme] .InspectorColumn .InspectorSplit > .SplitPane::before {
-  background: var(--spell-pane-background);
+  /* under the bar:  the bar sees the page itself, as the top bar does (`EditorTheme.css`, epic `editor` I194) */
+  top: var(--spell-pane-bar-height);
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  background: var(--spell-pane-body-background);
   -webkit-backdrop-filter: var(--spell-pane-filter);
   backdrop-filter: var(--spell-pane-filter);
 }

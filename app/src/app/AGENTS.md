@@ -507,9 +507,12 @@ and in the app's build folder, `app/` at the app folder's root.
     groups at least 60px apart (`--spell-bar-group-gap`), icons in a group 12px apart (`--spell-bar-icon-gap`),
     measured between what's drawn.
     A new item takes its place in a group;  never a margin of its own.
-  - A bar inside a panel (the file tabs, the Inspector's cards, the site editor's board) and the palette kept open
-    wear the top bar's colour as it's seen, in one token, `--spell-menu-bar-background` (`solid/spell.css`;
-    epic `editor` T83):  the bar's fill over the theme's wallpaper, so it's drawn with `background-attachment: fixed`.
+  - A panel's bar (the file tabs, the Inspector's cards) and the palette kept open are the top bar's look (`solid/spell.css`;  epic `editor` T83, I194):
+    the top bar's fill and blur (`--spell-menu-bar-fill`, `-filter`) on a layer under it, over the page itself,
+    as the panel's glass starts under the bar (`--spell-pane-bar-height`, `solid/EditorTheme.css`).
+    - A panel's body is its glass under the code's paper at half strength (`--spell-panel-wash`).
+    - The site editor's board bar wears the top bar's colour repainted, `--spell-menu-bar-background`:
+      the bar's fill over the theme's wallpaper, so it's drawn with `background-attachment: fixed`.
 - Prod builds keep class names (`output.keepNames`, here):
   SEE [parser's AGENTS.md](../../../parser/src/parser/AGENTS.md), `keepNames`.
 
