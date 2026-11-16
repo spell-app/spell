@@ -113,6 +113,18 @@ describe("LiveEdit", () => {
     expect(edit.text).toContain("color: blue")
   })
 
+  test("what's kept on a class, its after hooks and events, is run again:  the new class has them (epic `language` I107)", () => {
+    const described = PROGRAM.replace(
+      "export class Special",
+      'core.addAfterHook(Counter, "countUp", { hook: "afterCountUp" })\n' +
+        'core.describeEvent(Counter, "counted", {})\nexport class Special'
+    )
+    const edit = editOf(described, described.replace("this.count + 1", "this.count + 2"))
+    expect(edit.kind).toBe("live")
+    expect(edit.text).toContain('core.addAfterHook(Counter, "countUp", { hook: "afterCountUp" })')
+    expect(edit.text).toContain('core.describeEvent(Counter, "counted", {})')
+  })
+
   test("a new property:  live", () => {
     const edit = editOf(
       PROGRAM,
