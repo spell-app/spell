@@ -392,7 +392,10 @@ export type SitePart = {
   state?: string
   /** A thumbnail of a page, a file of the project:  `snapshots/films.png`. */
   thumbnail?: string
-  /** The real page it stands for, on the live site:  what its card's new-tab icon opens. */
+  /**
+   * The real page it stands for, on the live site:  a field of its form.
+   * - Its card's corner opens the page in Edit, not this (epic `mockup` I24).
+   */
   live?: string
   /** A page drawn without the site's top bar, when its line says `, no top bar` (epic `mockup` T35). */
   noTopBar?: boolean

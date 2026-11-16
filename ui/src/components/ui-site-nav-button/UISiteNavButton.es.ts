@@ -13,5 +13,5 @@ export const siteNavButtonEs = {
   name: "boton-de-navegacion",
   aka: ["botón de barra lateral", "botón del cajón", "hamburguesa", "alternar navegación"],
   attributes: { flag: "bandera" },
-  texts: { label: "Mostrar u ocultar la barra lateral" }
+  texts: { label: "Mostrar u ocultar la barra lateral", menuLabel: "Mostrar u ocultar el menú" }
 } as const satisfies E.TagDictionary

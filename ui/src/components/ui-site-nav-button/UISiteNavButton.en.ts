@@ -29,6 +29,12 @@ export const siteNavButtonVocabulary = {
       key: "label",
       text: "Show or hide the side bar",
       description: "What it's called, its tooltip and its name for a screen reader, without `aria-label`."
+    },
+    {
+      key: "menuLabel",
+      text: "Show or hide the menu",
+      description:
+        "What it's called at a narrow width, where the drawer is hidden until it slides in:  its icon the menu's (`bars`)."
     }
   ]
 } as const satisfies E.ComponentVocabulary

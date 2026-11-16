@@ -88,7 +88,7 @@
             </ui-section>
             <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
               <ui-section id="examples-variations-compact-drawer" label="Compact drawer" sticky="stack" collapsible dividing>
-                <ui-example description="`drawer=&quot;compact&quot;`:  the drawer shows only its icons.  Rest the pointer on it and it opens over the page, all of it, without pushing the page;  move away and it closes.">
+                <ui-example description="`drawer=&quot;compact&quot;`:  the drawer shows only its icons.  Rest the pointer on it and it grows out over the page, all of it, without pushing the page;  move away and it shrinks back.  Its button widens it to all of it, and narrows it again.  Reduced motion, or `animation=&quot;none&quot;` round it, and it moves at once.">
                   <ui-page-layout drawer="compact" style="min-height: 12em">
                   <ui-site-nav
                     slot="drawer"
@@ -137,7 +137,7 @@
                   - `left`, `right`:  side bars either side of the page;  `footer`:  across the bottom.
                   - A region with nothing in it takes no room at all.
                   - `drawer="compact"` shows only the drawer's icons:  the layout sets `collapsed` on each `<ui-site-nav>` in it.
-                  - `toggleDrawer()`, what a `<ui-site-nav-button>` calls:  narrow, slides the drawer in or out;  wide, switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`.  The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
+                  - `toggleDrawer()`, what a `<ui-site-nav-button>` calls:  narrow, slides the drawer in or out;  wide, switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`;  to `full` a frame later, so the column widens from where it was.  The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
                 </script>
               </ui-markdown>
               <ui-code language="js">

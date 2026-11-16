@@ -51,8 +51,19 @@ describe("<ui-page-layout>", () => {
     expect(drawer.width).toBeGreaterThanOrEqual(160)
     expect(drawer.width).toBeLessThanOrEqual(257)
     expect(box(layout, "menu")!.getBoundingClientRect().left).toBeCloseTo(drawer.right, 0)
-    const row = box(layout, "page")!.parentElement!
-    expect(parseFloat(getComputedStyle(row).paddingInlineStart)).toBeGreaterThan(0)
+    const underMenu = box(layout, "page")!.parentElement!.parentElement!
+    expect(parseFloat(getComputedStyle(underMenu).paddingInlineStart)).toBeGreaterThan(0)
+  })
+
+  test("the menu and the drawer read as one surface:  the menu on the drawer's fill, the drawer's line starting under it", async () => {
+    const layout = await pageLayout(`<div slot="menu">Menu</div>${NAV}<p>The page</p>`)
+    const drawer = box(layout, "drawer")!
+    const menu = box(layout, "menu")!
+    const underMenu = box(layout, "page")!.parentElement!.parentElement!
+    expect(getComputedStyle(drawer).borderInlineEndWidth).toBe("0px")
+    expect(getComputedStyle(underMenu).borderInlineStartWidth).toBe("1px")
+    expect(underMenu.getBoundingClientRect().top).toBeCloseTo(menu.getBoundingClientRect().bottom, 0)
+    expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-background").trim()).not.toBe("")
   })
 
   test('`drawer="compact"` sets `collapsed` on the navigation in it, and takes it off again', async () => {
@@ -74,31 +85,42 @@ describe("<ui-page-layout>", () => {
     expect(layout.getAttribute("drawer")).toBe("compact")
     expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
     expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({ newState: "compact", oldState: "full" })
+    // From its icons to all of it, the switch waits a frame:  the column holds its width first, to widen from
     layout.toggleDrawer()
+    expect(layout.getAttribute("drawer")).toBe("compact")
+    await new Promise(requestAnimationFrame)
     await ShadowTree.settle(layout)
     expect(layout.hasAttribute("drawer")).toBe(false)
     expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({ newState: "full", oldState: "compact" })
   })
 
-  test("compact, the pointer resting on the drawer opens it over the page after the hover delay, the page staying put", async () => {
+  // epic `mockup` I26 (Owen:  "Delay in hover animation on sidebar slide out takes too long, feels like an error")
+  test("compact, the pointer resting on the drawer a moment opens it over the page, not the page's hover delay;  the page staying put", async () => {
     const layout = await pageLayout(`${NAV}<p>The page</p>`, { drawer: "compact" })
-    layout.style.setProperty("--ui-hover-delay", "50ms")
+    layout.style.setProperty("--ui-hover-delay", "5s")
     const page = box(layout, "page")!
     const before = page.getBoundingClientRect().left
     const drawer = box(layout, "drawer")!
     drawer.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
     await ElementFixture.tick()
     expect(layout.matches(":state(open)")).toBe(false)
-    await expect.poll(() => layout.matches(":state(open)")).toBe(true)
+    await expect.poll(() => layout.matches(":state(open)"), { timeout: 400 }).toBe(true)
     await ShadowTree.settle(layout)
     expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(false)
     expect(page.getBoundingClientRect().left).toBeCloseTo(before, 0)
     expect(box(layout, "drawer-box")!.getBoundingClientRect().width).toBeGreaterThan(
       drawer.getBoundingClientRect().width
     )
+    // a slip off its edge and back keeps it open;  off it, it closes a moment later
+    drawer.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }))
+    drawer.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
+    await new Promise((done) => setTimeout(done, 250))
+    expect(layout.matches(":state(open)")).toBe(true)
     drawer.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }))
     await ShadowTree.settle(layout)
-    expect(layout.matches(":state(open)")).toBe(false)
+    expect(layout.matches(":state(open)")).toBe(true)
+    await expect.poll(() => layout.matches(":state(open)")).toBe(false)
+    await ShadowTree.settle(layout)
     expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
   })
 

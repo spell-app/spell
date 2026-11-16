@@ -51,6 +51,8 @@ const MOTION_TESTS = [
   "components/ui-loader/UILoader.test.tsx",
   // the segmented thumb slides
   "components/ui-menu/UIMenu.test.tsx",
+  // the drawer grows out over the page, and its column widens and narrows
+  "components/ui-page-layout/UIPageLayoutMotion.test.tsx",
   // waits for the transition before ui-opened / ui-closed
   "components/ui-modal/UIModal.test.tsx",
   // its axe check:  the inverted nag's muted title fails contrast once its background has settled

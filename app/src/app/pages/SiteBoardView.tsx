@@ -18,8 +18,8 @@ import "./SiteBoardView.css"
  *   - Its title, after its page's icon when it has one, and under it its address (`iconOf`, `lineOf`;  epic `mockup`
  *     T34):  its own words in the card, not the card's `heading` shorthand, which can hold no icon.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
- * - A page's card has a link in its corner, opening it in a tab of its own:  `newTabOf`.
- *   - The tab is named for its address (`tabNameFor()`), so a second click goes back to the same tab (`mockup` I19).
+ * - Every card has a pencil in its corner, opening it in Edit in this window, as a double click does
+ *   (`onOpen`, its words `editLabelOf`;  epic `mockup` I24):  a page's own file, or the site file at its line.
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
  *   - a section's card, or a group's line:  up or down, the whole section before or after another, a line showing where;
  *     or onto a spot of another section, which it joins, its pages with it
@@ -114,35 +114,22 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
         <div class="line">{props.lineOf(part())}</div>
         <Show when={props.storiesLineOf(part())}>{(stories) => <div class="line stories">{stories()}</div>}</Show>
       </div>
-      <Show when={props.newTabOf(part())}>
-        {(link) => (
-          <a
-            class="new-tab"
-            href={link().url}
-            target={tabNameFor(link().url)}
-            title={link().label}
-            aria-label={link().label}
-            onClick={(event: MouseEvent) => event.stopPropagation()}
-            onDblClick={(event: MouseEvent) => event.stopPropagation()}
-            onPointerDown={(event: PointerEvent) => event.stopPropagation()}
-          >
-            <ui-icon name="up right from square" />
-          </a>
-        )}
-      </Show>
+      <button
+        type="button"
+        class="edit"
+        title={props.editLabelOf(part())}
+        aria-label={props.editLabelOf(part())}
+        onClick={(event: MouseEvent) => {
+          event.stopPropagation()
+          props.onOpen(part().name)
+        }}
+        onDblClick={(event: MouseEvent) => event.stopPropagation()}
+        onPointerDown={(event: PointerEvent) => event.stopPropagation()}
+      >
+        <ui-icon name="pencil" />
+      </button>
     </ui-card>
   )
-}
-
-/** What starts a page's tab name:  a name starting `_` would be one of the browser's own (`_blank`). */
-const TAB_NAME_PREFIX = "spell-page "
-
-/**
- * The name of the tab `url` opens in, from a card's corner:  one per address, so the same page's link reuses its tab.
- * - The run's address names the project and the page, so two projects' `/` pages get two tabs.
- */
-function tabNameFor(url: string): string {
-  return `${TAB_NAME_PREFIX}${url}`
 }
 
 /** Props for `<SiteBoardView>`. */
@@ -161,11 +148,11 @@ export type SiteBoardViewProps = {
   iconOf: (part: SitePart) => string | undefined
   /** The address of its thumbnail, if it has one. */
   thumbnailOf: (part: SitePart) => string | undefined
-  /** The link in a part's corner, opening it in a new tab, and what it says:  none for what has no page to open. */
-  newTabOf: (part: SitePart) => { url: string; label: string } | undefined
+  /** What the pencil in a part's corner says:  `Edit Films`. */
+  editLabelOf: (part: SitePart) => string
   /** A click on part `name`'s card. */
   onPick: (name: string) => void
-  /** A double click on it. */
+  /** A double click on it, or a click on the pencil in its corner:  open it in Edit. */
   onOpen: (name: string) => void
 }
 

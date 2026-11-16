@@ -242,8 +242,7 @@ export const APP_TEXTS = {
   siteChangePart: "Change {name}",
   siteMovePart: "Move {name}",
   siteOpenPage: "Open in Edit",
-  siteOpenInNewTab: "Open the live page in a new tab",
-  siteRunInNewTab: "Open this page of the site in a new tab",
+  siteEditPart: "Edit {name}",
   siteBackToSite: "Back to the site",
   siteGroupTitle: "Sites",
   siteGroupLine: "Every site in this group:  open one to change its pages.",
@@ -753,6 +752,18 @@ export const APP_TEXTS = {
   // `$`:  the number CodeMirror fills in
   cmReplacedMatchOnLine: "replaced match on line $",
   cmReplacedMatches: "replaced $ matches",
+  // the find bar's (`CodeMirrorFind`):  `$` its key;  `$1 of $2`, the match and how many
+  cmFindMatchCase: "Match Case ($)",
+  cmFindWholeWord: "Match Whole Word ($)",
+  cmFindRegexp: "Use Regular Expression ($)",
+  cmFindPrevious: "Previous Match ($)",
+  cmFindNext: "Next Match ($)",
+  cmFindClose: "Close ($)",
+  cmFindToggleReplace: "Toggle Replace",
+  cmFindReplace: "Replace ($)",
+  cmFindReplaceAll: "Replace All ($)",
+  cmFindNoResults: "No results",
+  cmFindCount: "$1 of $2",
   cmGoToLine: "Go to line",
   cmGo: "go",
   // folds

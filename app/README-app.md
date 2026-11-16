@@ -863,7 +863,8 @@ For a project that is a site, View › Site opens its own page, `/site/<project>
 - **Pages:**  a tree of the site's pages, dialogs and sidebars (drag a row to move it), a board of cards
   (double-click opens the page's own file in Edit, making it first if there's none, with Back to the site there),
   and the picked page's form:  its name, title, address, live link, parameters and stories.
-- A card's new-tab icon opens the real page it stands for, and only shows when its line has a `live=` link.
+- The pencil in a card's corner does what a double-click does, in the same window;
+  a page's `live=` link, the real page it stands for, is in its form.
 - A site can be its routing alone, `Galaxy.site.spell`:  titles and addresses, `<group>` lines heading the board's
   sections, and each page a file of its own.
 - **Data:**  each place the site reads as a NERD, only its linking fields, on `<ui-diagram>`;

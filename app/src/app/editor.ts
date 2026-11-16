@@ -2100,7 +2100,7 @@ const HAS_EXTENSION = /\.[^./]+$/
 editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: true })
 
 /** How long typing pauses before AutoSave keeps an edit (`keepEdit()`), in milliseconds. */
-const KEEP_DELAY_MS = 800
+const KEEP_DELAY_MS = 2000
 
 /** Each file's edit waiting for typing to pause, before AutoSave keeps it. */
 const waitingKeeps = new Map<SP.AnySpellFile, ReturnType<typeof setTimeout>>()
