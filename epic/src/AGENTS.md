@@ -1299,7 +1299,9 @@ In `tools/`:
         - too wide even then (phone width), it scrolls sideways inside its own box, never the page.
           `spell-doc.css`, "A TWO-COLUMN table".
       - remembered per table, in this browser (`spell-table-wide:<path>`):
-        by the table's id, else the nearest id above it and which table it is under that (`p14#table-1`)
+        by the table's id, else the nearest id above it and its header's words (`p-look-roles#today-becomes-...`),
+        else which table it is under that (`p14#table-1`);  ⌥-click the button:  every table the same way, and back
+        into the column forgets them all, the reset (epic `epic-engine` I315)
       - the runtime's `wireTableWidths()` measures how far in a table starts,
         so one inside a list item or an epic item's details goes out to the gutter too
       - no button at phone width:  the column is the page already
