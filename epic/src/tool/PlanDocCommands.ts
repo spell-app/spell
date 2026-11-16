@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join, relative, resolve } from "node:path"
 
 import { SRV } from "spell/server"
-import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
@@ -21,6 +21,7 @@ import {
   type PlanSummary
 } from "./planDoc.types"
 
+import { BedtimeAll } from "./BedtimeAll"
 import { CommitRemap } from "./CommitRemap"
 import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDocs"
 import { EpicOwners, type PathOwners } from "./EpicOwners"
@@ -154,6 +155,9 @@ export class PlanDocCommands {
     const { positional, flags } = parseVerbArgs(argv)
     const [command, name, ...rest] = positional
     if (command === "list") return this.printEpics(this.files.listEpics(), Boolean(flags.json))
+    // `bedtime all ...` and `bedtime status`:  every epic at once, not one page (`BedtimeAll`, epic `epic-engine` T85)
+    if (command === "bedtime" && (name === "all" || name === "status"))
+      return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
     // `saga page`:  a saga's page (`SagaPage`);  every other `saga` verb is the list's (`SagaCommands`)
@@ -1237,6 +1241,71 @@ export class PlanDocCommands {
   ////////////////
 
   /** `list`:  every epic, grouped in progress / future / done, its worktree when it has one (or JSON). */
+  /**
+   * `bedtime all plan | questions <epic> --file <f> | spec [--wait <d>] [--out <f>]` and `bedtime status`:  a
+   * `/bedtime all` night's steps (`BedtimeAll`;  bedtime's SKILL.md, "All epics").
+   * - `plan`:  tonight's epics (the running ones, and `--include`'s), kept in tonight's folder;  `--json` as JSON
+   * - `questions`:  an epic's session's up-front questions, kept beside the plan
+   * - `spec`:  the one details page's spec, after waiting (`--wait`, default none) for the sessions still to send theirs;
+   *   prints its path
+   * - `status`:  every epic in bedtime mode and how far it is
+   * - throws a `PlanDocError` for a missing argument, a bad file, or no plan yet
+   */
+  private async bedtimeAll([verb, ...args]: string[], flags: Flags): Promise<number | void> {
+    const listings = this.files.listEpics()
+    const summaryOf = (file: string) => this.read(file).summary()
+    const folder = BedtimeAll.folderFor()
+    const json = Boolean(flags.json)
+    try {
+      switch (verb) {
+        case "plan": {
+          const include = (stringFlag(flags.include) ?? "")
+            .split(",")
+            .map((one) => one.trim())
+            .filter(Boolean)
+          const plan = BedtimeAll.candidates({ listings, summaryOf, include })
+          const file = BedtimeAll.writePlan(plan, folder)
+          if (json) return this.print(JSON.stringify(plan, null, 2))
+          const lines = plan.epics.map((epic) => BedtimeAll.planLine(epic))
+          if (!lines.length) lines.push("no epic has a phase to do tonight")
+          if (plan.idle.length) lines.push(`not running, left out (--include takes one):  ${plan.idle.join(", ")}`)
+          if (plan.skipped.length) lines.push(`left out (pages that won't read):  ${plan.skipped.join(", ")}`)
+          return this.print([...lines, `kept in ${file}`].join("\n"))
+        }
+        case "questions": {
+          const epic = need(args[0], "the epic whose questions these are")
+          const file = need(stringFlag(flags.file), "--file <questions.json>")
+          const count = BedtimeAll.keepQuestions(folder, epic, readFileSync(resolve(file), "utf8"))
+          return this.print(`bedtime all:  ${epic}'s ${count} question(s) kept for tonight's page`)
+        }
+        case "spec": {
+          const plan = BedtimeAll.readPlan(folder)
+          const wait = stringFlag(flags.wait)
+          const until = Date.now() + (wait ? duration(wait) : 0)
+          while (BedtimeAll.waitingFor(folder, plan).length && Date.now() < until)
+            await new Promise((done) => setTimeout(done, SPEC_POLL_MS))
+          const late = BedtimeAll.waitingFor(folder, plan)
+          const out = resolve(stringFlag(flags.out) ?? join(folder, "spec.json"))
+          writeFileSync(out, JSON.stringify(BedtimeAll.spec(folder, plan), null, 2) + "\n")
+          if (late.length) this.warn(`bedtime all:  no questions from ${late.join(", ")}:  their open Q items stand in`)
+          return this.print(out)
+        }
+        case "status": {
+          const running = BedtimeAll.status({ listings, summaryOf })
+          if (json) return this.print(JSON.stringify(running, null, 2))
+          return this.print(
+            running.length ? running.map((epic) => BedtimeAll.statusLine(epic)).join("\n") : "no epic in bedtime mode"
+          )
+        }
+        default:
+          throw new PlanDocError(`bedtime all what?  plan | questions <epic> --file <f> | spec (not '${verb ?? ""}')`)
+      }
+    } catch (error) {
+      if (error instanceof PlanDocError) throw error
+      throw new PlanDocError((error as Error).message)
+    }
+  }
+
   private printEpics(epics: EpicListing[], json: boolean): void {
     if (json) return this.print(JSON.stringify(epics, null, 2))
     const lines: string[] = []
@@ -1699,6 +1768,9 @@ const LOG_LABEL = "Log"
 const LOG_LAST = 20
 
 const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }
+
+/** How often `bedtime all spec --wait` looks for the questions still to come. */
+const SPEC_POLL_MS = 5000
 
 /**
  * `bedtime <name> start|done ...`:  a `/bedtime` run's mode (`PlanDoc.startBedtime()`), logged.

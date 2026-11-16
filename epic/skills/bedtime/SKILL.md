@@ -1,6 +1,6 @@
 ---
 name: bedtime
-description: Work through an epic's remaining phases unattended overnight -- pick phases and answer questions up-front, then build each in order with a commit per phase, record judgement calls in the epic page, merge each finished phase and agent into main when it merges cleanly, never push.  User-invoked as `/bedtime`;  in the morning, `/epic review <name>` goes through the night.
+description: Work through an epic's remaining phases unattended overnight -- pick phases and answer questions up-front, then build each in order with a commit per phase, record judgement calls in the epic page, merge each finished phase and agent into main when it merges cleanly, never push.  User-invoked as `/bedtime`, or `/bedtime all` for every running epic at once;  in the morning, `/epic review <name>` goes through the night.
 disable-model-invocation: true
 ---
 
@@ -19,6 +19,8 @@ The EPIC PAGE is the record, as on any day:
 - So no morning report (D5 of `review-review`):  in the morning, `/epic review <name>` goes through what's red.
 
 - `<name>`:  the epic id.
+- `/bedtime all`:  EVERY running epic at once, from any session:  "All epics", below, then each epic's session runs
+  steps 4-6 by itself.
 - Bedtime mode:  `epic bedtime <name> start "P<a>-P<b>"` turns it on, `... done "<summary>"` off.
   Both go in the log.
   - While it's on, every item a command touches is marked the night's:  green until reviewed (D2).
@@ -28,6 +30,42 @@ The EPIC PAGE is the record, as on any day:
     - `null` when off
 - Style:  as in `/epic`:
   the epic page written for the person coming back cold ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
+
+## All epics (`/bedtime all`)
+
+Every running epic goes to bed in one sitting (epic `epic-engine` T85;  the person, 2026-11-16:  "`/bedtime all` to put
+everything in bedtime mode").
+This session (any) is the HOME:  it gathers, asks once, hands each epic its answers.
+Each epic's own session then runs steps 4-6 for itself, as if `/bedtime` had been typed there.
+
+1. Tonight's epics:  `epic bedtime all plan`.
+   - The running epics:  a Claude Code session in the epic's worktree, a phase still to do, not in bedtime already.
+     A standing epic counts only when it has a phase to do.
+   - It lists the idle ones (phases to do, no session) and leaves them out;  `--include <epic,...>` takes them too:
+     a session is started for each in step 4.
+   - `--json` prints the plan:  each epic's `session` (its address, `SendMessage`'s `to`), phases, open questions.
+2. Ask each running session for its up-front questions, by `SendMessage` to its address:
+   "/bedtime all:  read your chosen phases' plans and the code they touch, as /bedtime's step 3 says, and write your
+   real up-front questions as `{ "questions": [{ "id", "title", "text", "multiple", "options": [{ "title", "summary",
+   "recommended" }] }] }` (the details page's question shape), then run
+   `epic bedtime all questions <epic> --file <that file>`.  No questions:  `{ "questions": [] }`.  No reply needed."
+3. The ONE page:  `epic bedtime all spec --wait 5m` waits for them, then writes the page's spec and prints its path.
+   - A session that sent nothing in time:  its epic's open Q items stand in, answered in their boxes.
+   - Then `epic ask create bedtime-all-<YYYY-MM-DD> --from <that path>`, `epic ask show <slug> --wait` in the
+     BACKGROUND, and end the turn with the page's link pair (`epic pages link <page>`).
+   - The page:  a section per epic, its phases to pick (All ticked and recommended), then its questions.
+     Each question's id is `<epic>--<id>`:  the answer splits by epic on the `--`.
+4. Woken by the person's Send, for EACH epic in the plan:
+   - its answers (its `<epic>--...` lines) and the phases picked, sent to its session by `SendMessage`:
+     "/bedtime all:  <the answers>.  Record them (step 3's 'Record the answers'), then `epic bedtime <epic> start
+     "<phases>"` and run them unattended, steps 4-6, merging each phase into main as it lands cleanly, and
+     `epic bedtime <epic> done "..."` at the end.  Don't reply."
+   - an epic with no running session (`--include`):  `epic window launch <epic> --prompt "/bedtime ..."`, the same
+     answers written into the prompt.
+   - An epic whose phases came back unticked:  left awake;  say so.
+5. One line per epic in the reply:  sent, or started, or left awake.  `epic bedtime status` shows every epic in bedtime
+   mode and how far it is, any time;  the person's question about the night is answered from it.
+6. In the morning:  each epic's "0. While you were out" holds its night;  `/epic review <epic>` per epic, as usual.
 
 ## 1. Find the phases
 
@@ -212,4 +250,8 @@ add <name>#J|#I|#T ...                  every call, problem, loose end:  an item
 commit <name>#P<N> <sha> "..."          the phase's commit, under its Commits
 log <name> "P<n> done|WIP|skipped ..."  what happened, timestamped
 bedtime <name> done "summary"           bedtime mode off;  logs "Bedtime done"
+bedtime all plan [--include a,b]        /bedtime all:  tonight's running epics (--json for their sessions)
+bedtime all questions <e> --file <f>    an epic's session drops its up-front questions
+bedtime all spec --wait 5m              the one page's spec, once they're in;  prints its path
+bedtime status                          every epic in bedtime mode, and how far
 ```

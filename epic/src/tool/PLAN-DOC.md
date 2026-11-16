@@ -71,6 +71,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - Since 2026-10-08 it colours nothing:  a decided item stays green however old.
     - Kept until it's dropped (`PlanReader.recentSince`).
   - `bedtime="P3-P6"`:  a `/bedtime` run is on (`bedtime <name> start | done`).
+    `/bedtime all` puts every running epic to bed in one sitting:  `bedtime all plan | questions | spec`, and
+    `bedtime status` lists every page with it on (`BedtimeAll`, epic `epic-engine` T85).
   - `repo`:  the GitHub page every `<epic-commit sha>` links through.
     Written by `commit`, and by `commits --backfill`.
 - Its `<epic-commit>`s land by themselves (epic `epic-engine` I135), under their phases and items AND in the Log
