@@ -300,7 +300,7 @@ a "file tab bar" is a view
 	</css>
 	to draw it
 		<panel appearance="pane" label="Files">
-			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible all-items-icon="file outline" remember={its remember as} label="Files">
+			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
 				{draw each file in its files}
 			</toolbar>
 		</panel>

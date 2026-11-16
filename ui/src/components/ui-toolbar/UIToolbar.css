@@ -109,6 +109,17 @@
   }
 
   /*
+   * `all-items-at-end`:  at the bar's far end, however few items show (the editor's file tabs);
+   * a right slot after it then sits right beside it
+   */
+  .ui.toolbar > .all-items.at-end {
+    margin-inline-start: auto;
+  }
+  .ui.toolbar > .all-items.at-end ~ .right {
+    margin-inline-start: 0;
+  }
+
+  /*
    * the menu's own box scrolls (the scrolling row's sheet):  it takes the room left, its items never shrunk
    * - none of a menu's margin beside its siblings:  the keys and slots before it aren't other blocks,
    *   and its 1em above and below made a 40px bar 68px tall (epic `data` I87)

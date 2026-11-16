@@ -57922,6 +57922,13 @@
           }
         },
         {
+          "name": "all-items-at-end",
+          "description": {
+            "kind": "markdown",
+            "value": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

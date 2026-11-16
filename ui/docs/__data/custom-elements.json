@@ -45427,6 +45427,14 @@
               "fieldName": "allItemsIcon"
             },
             {
+              "name": "all-items-at-end",
+              "description": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "allItemsAtEnd"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {

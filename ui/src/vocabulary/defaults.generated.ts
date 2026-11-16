@@ -1799,7 +1799,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "scroll-first", kind: "boolean", group: "layout" },
     { name: "max-visible", kind: "string", group: "layout" },
     { name: "remember", kind: "string", group: "layout" },
-    { name: "all-items-icon", kind: "icon", group: "content" }
+    { name: "all-items-icon", kind: "icon", group: "content" },
+    { name: "all-items-at-end", kind: "boolean", group: "layout" }
   ],
   "ui-transition": [
     { name: "duration", kind: "string", group: "behaviour" },

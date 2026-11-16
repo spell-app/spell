@@ -46488,6 +46488,11 @@
           "description": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone."
         },
         {
+          "name": "all-items-at-end",
+          "kind": "boolean",
+          "description": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,

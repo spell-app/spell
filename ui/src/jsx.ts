@@ -50230,6 +50230,16 @@ export interface UIToolbarAttributes {
    */
   "prop:allItemsIcon"?: string
   /**
+   * With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.
+   * - takes:  flag (present / absent)
+   */
+  "all-items-at-end"?: boolean | ""
+  /**
+   * `all-items-at-end`, as the DOM element's property.
+   * @deprecated write `all-items-at-end` -- `prop:` stays only for compiled spell
+   */
+  "prop:allItemsAtEnd"?: boolean | ""
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */

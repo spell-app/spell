@@ -61,6 +61,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - `remember` keeps the row across reloads.
  *   - `all-items-icon` draws an icon before the button's caret, saying what the list is of
  *     (the editor's file tabs:  `file outline`;  epic `editor` T76).
+ *   - `all-items-at-end` puts the button at the bar's far end, however few items show:
+ *     without it, it sits right after the last one (the editor's file tabs;  epic `editor` I173).
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -314,7 +316,7 @@ export class UIToolbar extends UIMenu {
         <button
           ref={(element: HTMLButtonElement) => (this.allItemsButton = element)}
           type="button"
-          class={ALL_ITEMS}
+          class={[ALL_ITEMS, { [AT_END]: !!this.allItemsAtEnd }]}
           part={this.toolbarPart(ALL_ITEMS)}
           style={this.overflowMenu.anchorStyle}
           aria-haspopup="menu"
@@ -404,6 +406,9 @@ const RIGHT = "right"
 
 /** Class word and part of the button listing every item. */
 const ALL_ITEMS = "all-items"
+
+/** Its class word with `all-items-at-end`:  at the bar's far end. */
+const AT_END = "at-end"
 
 /** Its icon. */
 const ALL_ITEMS_ICON = "caret down"
