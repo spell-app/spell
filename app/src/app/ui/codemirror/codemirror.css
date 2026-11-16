@@ -237,6 +237,10 @@
     font-size: 13px;
     overflow: hidden;
   }
+  .cm-tooltip.cm-tooltip-autocomplete > ul {
+    font-family: var(--bubbly-font-family);
+    font-size: 14px;
+  }
   .cm-tooltip-autocomplete > ul > li {
     padding: 3px 10px !important;
   }
