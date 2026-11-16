@@ -11,6 +11,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 // by file:  the language service itself loads with the code editor
 import { RenameError } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
+import type { TextChange } from "spell/app/app/EditorHistory"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
@@ -46,6 +47,8 @@ import {
   startingValues,
   oneOfWritten,
   declaredActionPlace,
+  declaredEventSpan,
+  handlerSpanInSource,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
   propertyCodePlace,
@@ -1263,6 +1266,51 @@ export class Inspector {
       { file, at: written.at, before: "", after: written.code },
       { title: appTexts.text("inspectorAddEvent") }
     )
+  }
+
+  /**
+   * Remove `element`'s event `row` from the program (epic `editor` T73):  its head and its code, as a step of
+   * `editor.history`, so one undo puts it back.
+   * - `when`:  `"after asking"` (a click on its ✕) asks first, naming it;  `"at once"` (an ⌥-click) doesn't.
+   * - A drawn thing's:  its lines in its type (`declaredEventSpan()`).
+   * - A Spell UI element's:  its ` onClick={...}` (`handlerSpanInSource()`).
+   * - Nothing happens where it can't be found.
+   * - NEVER throws.
+   */
+  static async removeEvent(
+    element: Element,
+    row: WrittenEvent & { key?: string },
+    when: "after asking" | "at once"
+  ): Promise<void> {
+    const title = appTexts.text("inspectorRemoveEvent", { event: row.words })
+    if (when === "after asking") {
+      if (!Inspector.removalOf(element, row)) return
+      const message = appTexts.text("inspectorRemoveEventConfirm", { event: row.words })
+      const ok = appTexts.text("inspectorRemoveEventOk")
+      if (!(await editor.confirm({ message, ok, danger: true }).catch(() => false))) return
+    }
+    // found again after asking:  the file may have changed meanwhile
+    const removal = Inspector.removalOf(element, row)
+    if (removal) editor.history.change(removal, { title })
+  }
+
+  /**
+   * The change that removes `element`'s event `row` (`removeEvent()`):  `undefined` when it isn't found,
+   * or what's there isn't it, e.g. the code typed since its last compile moved it.
+   */
+  private static removalOf(element: Element, row: WrittenEvent & { key?: string }): TextChange | undefined {
+    const thing = SpellElement.thingOf(element)
+    const sources = new Map(sourceFiles().map((file) => [file.path, file.text]))
+    const handling = [element, ...(element.shadowRoot?.querySelectorAll("*") ?? [])]
+    const span = thing
+      ? declaredEventSpan(row, classNamesOf(thing), declarationPlaces(), sourceFiles())
+      : handling.map((at) => (row.key ? handlerSpanInSource(at, sources, row.key) : undefined)).find(Boolean)
+    const file = span && sliceOf({ path: span.path, from: 1, to: 1 })?.file
+    if (!span || !file) return undefined
+    const before = (file.contents ?? "").slice(span.start, span.end)
+    const named = thing ? row.words : `on${upperFirst(row.key ?? "")}`
+    if (!before.replace(/\s+/g, " ").toLowerCase().includes(named.replace(/\s+/g, " ").toLowerCase())) return undefined
+    return { file, at: span.start, before, after: "" }
   }
 
   /** The words or DOM event of the row added last (`addEvent()`), for it to take the cursor;  `""` once it has. */
