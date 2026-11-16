@@ -31,6 +31,7 @@ import appMenuCSS from "./UIAppMenu.css?inline"
  *   - each is at least its content's width:  too narrow for all three, the bar scrolls sideways, never overlaps
  *   - the end's content is pushed to the bar's end
  * - Its own items fill the bar's height:  no room of their own above or below.
+ *   - And, unlike a plain menu's, no hairline between them (epic `mockup` I22).
  *   - Not a sub-menu's:  they adopt the sub-menu's sheets (`UIItem.styleSheetNames`), so the page sets theirs.
  ****************/
 export class UIAppMenu extends UIMenu {

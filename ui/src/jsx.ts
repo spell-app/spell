@@ -50900,6 +50900,16 @@ export interface UIToolbarAttributes {
    */
   "prop:allItemsAtEnd"?: boolean | ""
   /**
+   * The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away.
+   * - takes:  flag (present / absent)
+   */
+  "all-items-always"?: boolean | ""
+  /**
+   * `all-items-always`, as the DOM element's property.
+   * @deprecated write `all-items-always` -- `prop:` stays only for compiled spell
+   */
+  "prop:allItemsAlways"?: boolean | ""
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
@@ -54452,10 +54462,10 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-author": UIAuthorJSXAttributes
       /**
-       * `<ui-avatar>`:  A small picture of a person:  a comment's or a card's.
+       * `<ui-avatar>`:  A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.
        * - also known as:  profile picture, user image, userpic
        * - slots:
-       *   - default:  An `<img>`, instead of `src`.
+       *   - default:  An `<img>`, instead of `src`;  or, on its own, the person's initial.
        */
       "ui-avatar": UIAvatarJSXAttributes
       /**

@@ -158,7 +158,7 @@ an "editor bar" is a view
 	its "mode buttons" is an editor part
 		// Run and Edit, then Inspect app and the code's icon in Edit
 	its "tools" is an editor part
-		// Add and the Inspector's menu in Edit, then Restart and the theme
+		// Add and the Inspector's button in Edit, then Restart and the theme
 	its "you" is an editor part
 		// The person's own menu
 
@@ -239,7 +239,7 @@ a "file" is a thing
 
 a "file list" is a viewable list of files
 	// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
-	// Its ✕ closes its tab, only while some files are put away in the list (T77)
+	// Its ✕, in its file icon's place while hovered, closes its tab, only while some files are put away in the list (T77, T82)
 	to draw each item
 		<item icon={the icon of the file} label={the name of the file} value={the path of the file} selected={the file is chosen} onClick={show the file}>
 			<context-menu>
@@ -247,6 +247,10 @@ a "file list" is a viewable list of files
 				<action "rename file"/>
 				<action "delete file"/>
 			</>
+			<span class="TabIcon" slot="icon">
+				<icon name={the icon of the file} />
+				<icon class="CloseTab" name="close" title={the close words of the file} onClick={close the file} />
+			</span>
 			{the name of the file}
 			<if the file is changed><span class="NotSaved"/></if>
 			<if the file is drafted>
@@ -258,14 +262,14 @@ a "file list" is a viewable list of files
 					</popup>
 				</span>
 			</if>
-			<icon class="CloseTab" name="close" title={the close words of the file} onClick={close the file} />
 		</item>
 
 a "file tab bar" is a view
 	// Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
 	// Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 	// With more files than fit the bar's limit, only the ones opened lately are tabs;  a file and a ▾ beside them list every file.
-	// Then each tab has a ✕, on the chosen one and on one hovered, as VS Code's do:  it closes the tab, the file still in the list, and picking it there opens it again (T77).
+	// The file and the ▾ show at the bar's right end always, however few files there are (T82).
+	// Then a tab hovered shows a ✕ in its file icon's place:  it closes the tab, the file still in the list, and picking it there opens it again (T77).  The ✕ takes no room of its own, so no tab grows or moves (T82).
 	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
@@ -300,19 +304,26 @@ a "file tab bar" is a view
 		ui-item[drop="after"]::part(item) {
 			box-shadow: inset -2px 0 0 var(--ui-primary);
 		}
-		/* a tab's ✕:  only while some files are put away in the list (the toolbar's limited);  seen on the chosen tab and a hovered one, its room kept on the others so tabs don't move */
+		/* a tab's file icon, and its ✕ in the same spot:  the ✕ only while some files are put away in the list (the toolbar's limited), on a tab hovered;  the file icon then hidden, its room kept, so no tab grows or moves */
+		.TabIcon {
+			display: inline-grid;
+			place-items: center;
+		}
+		/* a `<ui-icon>` draws no box of its own:  its glyph's box is the one placed, both in the one cell */
+		.TabIcon > ui-icon::part(icon) {
+			grid-area: 1 / 1;
+			margin: 0;
+		}
 		.CloseTab {
-			display: none;
-			margin-inline-start: 6px;
-			font-size: 0.7em;
+			visibility: hidden;
+			font-size: 0.8em;
 			opacity: 0.6;
 			cursor: pointer;
 		}
-		ui-toolbar:state(limited) > ui-item .CloseTab {
-			display: inline-block;
+		ui-toolbar:state(limited) > ui-item:hover .TabIcon > ui-icon {
 			visibility: hidden;
 		}
-		ui-toolbar:state(limited) > ui-item:is([selected], :hover) .CloseTab {
+		ui-toolbar:state(limited) > ui-item:hover .TabIcon > .CloseTab {
 			visibility: visible;
 		}
 		.CloseTab:hover {
@@ -325,7 +336,7 @@ a "file tab bar" is a view
 	</css>
 	to draw it
 		<panel appearance="pane" label="Files">
-			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
+			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible all-items-icon="file outline" all-items-at-end all-items-always remember={its remember as} label="Files">
 				{draw each file in its files}
 			</toolbar>
 		</panel>

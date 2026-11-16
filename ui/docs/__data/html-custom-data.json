@@ -3125,7 +3125,7 @@
       "name": "ui-avatar",
       "description": {
         "kind": "markdown",
-        "value": "A small picture of a person:  a comment's or a card's.\n\nAlso known as:  profile picture, user image, userpic.\n\n**Slots:**  default"
+        "value": "A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.\n\nAlso known as:  profile picture, user image, userpic.\n\n**Slots:**  default"
       },
       "attributes": [
         {
@@ -58694,6 +58694,13 @@
           "description": {
             "kind": "markdown",
             "value": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "all-items-always",
+          "description": {
+            "kind": "markdown",
+            "value": "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away.\n\nTakes:  flag (present / absent)"
           }
         },
         {

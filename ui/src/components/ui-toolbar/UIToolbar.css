@@ -65,7 +65,7 @@
     display: none;
   }
 
-  /* `max-visible`:  the button listing every item, a quiet key beside the row, which never scrolls away */
+  /* `max-visible` (or `all-items-always`):  the button listing every item, a quiet key beside the row, which never scrolls away */
   .ui.toolbar > .all-items {
     display: inline-grid;
     flex: none;

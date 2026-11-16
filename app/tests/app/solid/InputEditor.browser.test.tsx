@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 import { render } from "@solidjs/web"
+import { userEvent } from "vite-plus/test/browser"
 
 import { reactiveObject } from "spell/util"
 import type { SP } from "spell/parser/spell"
@@ -260,13 +261,20 @@ describe("<FileTabs>", () => {
     expect(showEditor).toHaveBeenLastCalledWith("test-project/one.js")
   })
 
-  test("every file fits:  no tab has a ✕ (T77)", async () => {
+  test("every file fits:  the list of every file still shows at the bar's end, and no tab's ✕, even hovered (T77, T82)", async () => {
     const file = fakeFile("test-project/one.js", "")
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     const tabs = await tabsIn(host)
-    expect(tabs.map((tab) => getComputedStyle(tab.querySelector(".CloseTab")!).display)).toEqual(["none", "none"])
+    const row = tabs[0]!.parentElement!
+    await vi.waitFor(() => expect(row.shadowRoot!.querySelector("[part~=all-items]")).not.toBeNull())
+    // force:  an earlier test's right-click menu may still lie over the bar
+    await userEvent.hover(tabs[1]!, { force: true })
+    expect(tabs.map((tab) => getComputedStyle(tab.querySelector(".CloseTab")!).visibility)).toEqual([
+      "hidden",
+      "hidden"
+    ])
   })
 
   describe("more files than the bar's 8:  a tab's ✕ closes it, the file still in the list (T77)", () => {
@@ -305,12 +313,21 @@ describe("<FileTabs>", () => {
       return { file, host, tabs, row, shown, tab, pick, showEditor }
     }
 
-    test("the chosen tab's ✕ shows;  another's only while hovered", async () => {
+    test("a tab's ✕ shows in its file icon's place only while hovered, and the tab keeps its width (T82)", async () => {
       const { tab } = await manyTabs()
       const close = (name: string) => tab(name).querySelector<HTMLElement>(".CloseTab")!
-      expect(getComputedStyle(close("one.js")).visibility).toBe("visible")
-      expect(getComputedStyle(close("one.js")).display).not.toBe("none")
+      const fileIcon = (name: string) => tab(name).querySelector<HTMLElement>(".TabIcon > ui-icon:not(.CloseTab)")!
+      const width = (name: string) => tab(name).getBoundingClientRect().width
+      expect(getComputedStyle(close("one.js")).visibility).toBe("hidden")
       expect(close("one.js").getAttribute("title")).toBe("Close")
+      const before = width("two.js")
+      await userEvent.hover(tab("two.js"))
+      await vi.waitFor(() => expect(getComputedStyle(close("two.js")).visibility).toBe("visible"))
+      expect(getComputedStyle(fileIcon("two.js")).visibility).toBe("hidden")
+      expect(width("two.js")).toBe(before)
+      // in the same spot:  their centres one
+      const centre = (element: Element) => ((box) => box.left + box.width / 2)(element.getBoundingClientRect())
+      expect(Math.abs(centre(close("two.js")) - centre(fileIcon("two.js")))).toBeLessThan(1)
     })
 
     test("a ✕ closes a tab:  out of the bar, its file not shown;  picked again from the list, it's back", async () => {

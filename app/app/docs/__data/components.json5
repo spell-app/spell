@@ -2601,7 +2601,7 @@
         "notices"
       ],
       "aka": [],
-      "description": "Says the program's last edit takes effect on restart, with a Restart button:  the app keeps running as it was.",
+      "description": "Says the program's last edit takes effect on restart:  the app keeps running as it was.",
       "noun": "RestartNeeded",
       "attributes": [],
       "slots": [],
