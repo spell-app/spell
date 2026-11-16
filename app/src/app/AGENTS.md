@@ -238,8 +238,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - Backspace at an attribute line's start joins it to the line above, a space between, its `>` with it;
         a `>` alone on the line under comes up too (`LSP.SpellTyping.tagLineJoined()`)
       - Format Document keeps such a tag as it is
-      - the bubbly look draws it as ONE block of the tag's colour, its `>` at the block's right edge, past the widest
-        attribute (`CodeMirrorMarkup.tagBlocks`)
+      - the bubbly look draws it as ONE block of the tag's colour (`CodeMirrorMarkup.tagBlocks`):  its first attribute
+        on its name's line, the others lined up under it, its `>` 4px past the last one's ink (I139);
+        only drawn so, the file keeps its lines
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
