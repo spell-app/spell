@@ -44,20 +44,40 @@
   }
 }
 
-/* kept open:  one 40px bar across the top of the panes */
+/* kept open:  the top bar's second row, edge to edge, a hairline between them;  its topics' names, quiet, as the
+   bar's menus are, the ✕ at its end */
 .PaletteStrip {
   flex: none;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding-inline: var(--spell-gap, 8px);
+  height: 32px;
+  /* its first name under the top bar's hat, its ✕ under the bar's last icon */
+  padding-inline: 15px 8px;
   min-width: 0;
+  border-block-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
 
-  & .PaletteStripItems {
+  & .PaletteStripGroups {
     flex: 1;
     min-width: 0;
   }
+
+  & ui-item.PaletteGroupName::part(item) {
+    padding-inline: 9px;
+    color: var(--ui-text-muted);
+    font-size: 13px;
+    font-weight: var(--ui-font-weight-normal, 400);
+  }
+  & ui-item.PaletteGroupName:hover::part(item) {
+    color: var(--ui-text-color);
+  }
+}
+
+/* a topic's menu:  its rows, as many as fit the window, then it scrolls */
+ui-popup.PaletteGroupPopup::part(popup) {
+  min-width: 180px;
+  max-height: min(calc(100dvh - 120px), 560px);
+  overflow: auto;
 }
 
 /* an empty app, in Edit:  what to do */
