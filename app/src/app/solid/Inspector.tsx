@@ -3734,7 +3734,8 @@ function TypeChoicesField(props: { thing: object; member: ThingMember; values: s
  * - A yes or no is a read-only toggle, dimmed (Spell UI's disabled look), so it doesn't look like one to press
  *   (Owen, 2026-11-16, epic `editor` I224:  "These should be read-only since they are getters");
  *   a thing, a link to it (`<ThingLink>`);  a list, its count.
- * - A yes or no takes half a row, two to a row, on its label's line, as a stored one is (`as="toggle"`;  I224).
+ * - Short ones (a yes or no, a number, a few words) take half a row, two to a row:  a yes or no on its label's line,
+ *   as a stored one is (`as="toggle"`);  a longer value, a whole row (I224, I225:  "These should go 2 per line").
  * - No "won't be saved" icon:  nothing here can be changed (Spell UI leaves it off a read-only property).
  * - One that throws shows its error, dimmed:  reading it ran the program's code.
  ****************/
@@ -3788,12 +3789,16 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
   )
 }
 
-/** A computed value short enough for half a row:  a yes or no. */
+/** A computed value short enough for half a row:  a yes or no, a number, or text of a few words (`7 of spades`). */
 function isShortComputed(read: { value?: unknown; error?: unknown }): boolean {
   if ("error" in read) return false
   const { value } = read
-  return typeof value === "boolean"
+  if (typeof value === "boolean" || typeof value === "number") return true
+  return typeof value === "string" && value.length <= SHORT_COMPUTED_LENGTH
 }
+
+/** The most letters a computed text value has to sit in half a row (`isShortComputed()`). */
+const SHORT_COMPUTED_LENGTH = 12
 
 /** What a computed property's field shows:  its value as text, a list's count, or its error's message. */
 function computedText(read: { value?: unknown; error?: unknown }): string {

@@ -116,4 +116,19 @@ describe.skipIf(!SERVING)("a thing's computed properties", { timeout: 180_000 },
     const after = (await computedFields()).find((field) => /face card/i.test(field.label))!
     expect(after.selected).toBe(before.selected)
   })
+
+  test("short computed values sit two to a row;  none shows an unsaved icon", async () => {
+    const fields = await computedFields()
+    expect(fields.filter((field) => field.hasUnsavedIcon).map((field) => field.label)).toEqual([])
+    const value = fields.find((field) => field.label === "Value")
+    const symbol = fields.find((field) => field.label === "Symbol")
+    expect(value?.isHalf, "Value:  half a row").toBe(true)
+    expect(symbol?.isHalf, "Symbol:  half a row").toBe(true)
+    // some pair shares a row
+    const halves = fields.filter((field) => field.isHalf)
+    const shareARow = halves.some((one) =>
+      halves.some((other) => other !== one && Math.abs(other.top - one.top) < 4 && other.left !== one.left)
+    )
+    expect(shareARow).toBe(true)
+  })
 })
