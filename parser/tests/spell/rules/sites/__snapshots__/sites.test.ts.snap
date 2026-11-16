@@ -3,10 +3,10 @@
 exports[`testing spell module sites > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
   "create_site": "type|superType|address?|cloud?|with_nested_statements?|body?",
-  "define_group": "type|group|color",
+  "define_group": "type|group|color?|icon?",
   "show_site_part": "part|thing?|close?",
   "site_address_of": "part|thing?",
   "site_overlay": "type|part|row?|column?|color?",
-  "site_page": "type|part|address|title?|tab?|tags?|state?|thumbnail?|live?|row?|column?|color?|with_nested_statements?|body?",
+  "site_page": "type|part|address|title?|icon?|tab?|tags?|state?|thumbnail?|live?|no_top_bar?|row?|column?|color?|with_nested_statements?|body?",
 }
 `;

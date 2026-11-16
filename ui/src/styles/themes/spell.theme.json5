@@ -221,6 +221,8 @@
     // a bar over scrolling content (a page's top bar, its sticky strips, an epic page's toolbar):  Spell's own page,
     // its cool grey-blue, and its ink;  without them a page fell back to an ivory band (`--ui-brown-background`)
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  the bar's family at its palest:  `brand-25` light, `violet-925` dark (a step lighter than the bar's `violet-950`)
+    "side-panel": { "light": "{own.spell-brand-25}", "dark": "{own.spell-violet-925}" },
     // Code wells:  the brand's `--surface-code` (also the docs pages' inline code and `pre`)
     // light:  `brand-100`, a step under the page (I45), so code on the page itself keeps its fill
     "code": { "light": "{own.spell-brand-100}", "dark": "{own.spell-violet-975}" },

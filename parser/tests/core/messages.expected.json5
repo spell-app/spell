@@ -86,6 +86,8 @@
     "site-page-failed": "Sorry, this page couldn't be shown.",
     "site-page-failed-why": "{page} failed:  {why}",
     "site-menu": "Pages",
+    "site-side-bar": "Show or hide the side bar",
+    "site-where": "Where you are",
     "table-edit": "Edit Table"
   }
 }

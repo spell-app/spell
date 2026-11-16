@@ -841,6 +841,7 @@ export class GalaxyGuide extends Site {
     page: "FilmsPage",
     address: "/films",
     title: "Films",
+    icon: "film",
     pages: [{
       name: "film page",
       page: "FilmPage",
@@ -853,6 +854,7 @@ export class GalaxyGuide extends Site {
     page: "PeoplePage",
     address: "/people",
     title: "People",
+    icon: "users",
     pages: [{
       name: "person page",
       page: "PersonPage",
@@ -865,6 +867,7 @@ export class GalaxyGuide extends Site {
     page: "PlanetsPage",
     address: "/planets",
     title: "Planets",
+    icon: "globe",
     pages: [{
       name: "planet page",
       page: "PlanetPage",
@@ -877,6 +880,7 @@ export class GalaxyGuide extends Site {
     page: "SpeciesListPage",
     address: "/species",
     title: "Species",
+    icon: "dna",
     pages: [{
       name: "species page",
       page: "SpeciesPage",
@@ -889,6 +893,7 @@ export class GalaxyGuide extends Site {
     page: "VehiclesPage",
     address: "/vehicles",
     title: "Vehicles",
+    icon: "car",
     pages: [{
       name: "vehicle page",
       page: "VehiclePage",
@@ -901,6 +906,7 @@ export class GalaxyGuide extends Site {
     page: "StarshipsPage",
     address: "/starships",
     title: "Starships",
+    icon: "rocket",
     pages: [{
       name: "starship page",
       page: "StarshipPage",
@@ -912,7 +918,8 @@ export class GalaxyGuide extends Site {
     name: "reviews page",
     page: "ReviewsPage",
     address: "/reviews",
-    title: "Reviews"
+    title: "Reviews",
+    icon: "star"
   }]
   static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }, { name: "review dialog", view: "ReviewDialog" }]
   static sidebars = [{ name: "person sidebar", view: "PersonSidebar" }]

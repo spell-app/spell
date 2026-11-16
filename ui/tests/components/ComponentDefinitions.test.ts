@@ -82,16 +82,21 @@ describe("ComponentDefinitions.palette()", () => {
 })
 
 describe("ComponentDefinitions.paletteGroups()", () => {
-  it("files every family once, what it offers ready-made first and the rest as its N more", () => {
+  it("files every family once, what it offers ready-made first, then the rest", () => {
     const groups = ComponentDefinitions.paletteGroups()
-    const tags = groups.flatMap(({ parts, more }) => [...parts, ...more].map((definition) => definition.tag))
+    const tags = groups.flatMap(({ parts }) => parts.map((definition) => definition.tag))
     expect(new Set(tags).size).toBe(tags.length)
     expect(tags).toEqual(expect.arrayContaining(ComponentDefinitions.palette().map((definition) => definition.tag)))
     expect(tags).toEqual(expect.arrayContaining(["ui-tab", "ui-table", "ui-modal"]))
     // a part only inside another, and what a page holds once, are never offered
     expect(tags).not.toContain("ui-tree-item")
     expect(tags).not.toContain("ui-root")
-    expect(groups.every(({ parts, more }) => parts.length + more.length > 0)).toBe(true)
+    expect(groups.every(({ parts }) => parts.length > 0)).toBe(true)
+    // in each topic, the ready-made ones (a snippet of their own) before the rest
+    for (const { parts } of groups) {
+      const readyMade = parts.map((definition) => !!definition.snippet?.startsWith(`<${definition.tag}`))
+      expect(readyMade, parts[0]!.tag).toEqual([...readyMade].sort((a, b) => Number(b) - Number(a)))
+    }
   })
 })
 

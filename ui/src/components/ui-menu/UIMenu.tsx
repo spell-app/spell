@@ -1043,7 +1043,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             aria-label={this.landmarkLabel}
           >
             {this.overflowButtonBox()}
-            <slot />
+            {this.boxContent()}
           </div>
         </Match>
         <Match when={true}>
@@ -1058,11 +1058,19 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             aria-label={this.landmarkLabel}
           >
             {this.overflowButtonBox()}
-            <slot />
+            {this.boxContent()}
           </nav>
         </Match>
       </Switch>
     )
+  }
+
+  /**
+   * What a top-level menu's box holds after its overflow button:  its items, through one `<slot>`.
+   * - `<ui-app-menu>`'s is its three sections instead (`UIAppMenu`), each a box of its own around a slot.
+   */
+  protected boxContent(): JSX.Element {
+    return <slot />
   }
 
   ////////////////

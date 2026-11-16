@@ -39,6 +39,19 @@ export class IncrementalParse {
   lastUpdate: IncrementalUpdate | undefined
   /** Should a line edited into a broken state keep its last working declarations?  See `parseItem()`. */
   declare keepLastGood: boolean
+  /**
+   * What our parses looked up in shared state, since we last parsed from scratch -- see `P.Outline`.
+   * - `P.IncrementalProject` keeps us when an earlier file parses again, if nothing we looked up changed.
+   */
+  readonly outline = new P.Outline()
+  /**
+   * When our last `update()` or `parseAll()` rewound, what it took back:  our own entries from then (`own`),
+   * and every later file's after them (`later`) -- `undefined` if it didn't.
+   * - `from`:  the mark our entries now start from, where our own re-parse went back to.
+   * - So `P.IncrementalProject` can compare our parse then and now, and put back later files it can keep
+   *   (epic `language` P59).
+   */
+  rewound: { own: P.JournalEntry[]; later: P.JournalEntry[]; from: P.JournalMark } | undefined
 
   /**
    * Parse `text` in `scope` from scratch.
@@ -66,19 +79,31 @@ export class IncrementalParse {
    * - Also how `P.IncrementalProject` re-parses a later file after an earlier one rewound.
    */
   parseAll(text: string) {
-    if (this.startMark && this.journal.has(this.startMark)) this.journal.rewindTo(this.startMark)
+    this.rewound = undefined
+    if (this.startMark && this.journal.has(this.startMark))
+      this.noteRewound(this.journal.rewindTo(this.startMark), this.startMark)
     else this.startMark = this.journal.mark()
     this.text = text
-    const root = this.parser.tokenizeRoot(text)
-    if (!root) {
-      // Can't go item by item:  parse it whole.
-      this.items = []
-      this.match = this.scope.parse(text, this.parser.defaultRule)
-    } else {
-      this.items = this.parseItems(root.tokens, 0)
-      this.match = this.assemble(root, root.tokens)
-    }
+    this.outline.clear()
+    this.outline.noting(() => {
+      const root = this.parser.tokenizeRoot(text)
+      if (!root) {
+        // Can't go item by item:  parse it whole.
+        this.items = []
+        this.match = this.scope.parse(text, this.parser.defaultRule)
+      } else {
+        this.items = this.parseItems(root.tokens, 0)
+        this.match = this.assemble(root, root.tokens)
+      }
+    })
     this.endMark = this.journal.mark()
+  }
+
+  /** Note what rewinding to `from` took back, `undone`:  see `rewound`. */
+  private noteRewound(undone: P.JournalEntry[], from: P.JournalMark) {
+    // rewound to our end:  all of it is later files'
+    const end = from === this.endMark ? 0 : undone.indexOf(this.endMark) + 1 || undone.length
+    this.rewound = { own: undone.slice(0, end), later: undone.slice(end), from }
   }
 
   /**
@@ -91,7 +116,8 @@ export class IncrementalParse {
    * - SIDE EFFECT: kept tokens after the edit are moved to their new offsets / lines.
    */
   update(text: string): IncrementalUpdate {
-    return (this.lastUpdate = this.reparse(text))
+    this.rewound = undefined
+    return (this.lastUpdate = this.outline.noting(() => this.reparse(text)))
   }
 
   /** Does `update()`'s work. */
@@ -129,7 +155,8 @@ export class IncrementalParse {
     let from = holding === -1 ? this.items.length : holding
     if (from > 0 && this.items[from]?.index === before && newItems[before] instanceof P.BlockToken) from--
     const firstToken = this.items[from]?.index ?? oldItems.length
-    const undone = this.journal.rewindTo(this.items[from]?.mark ?? this.endMark)
+    const rewoundTo = this.items[from]?.mark ?? this.endMark
+    const undone = this.journal.rewindTo(rewoundTo)
     const kept = this.items.slice(0, from)
     const region: IncrementalItem[] = []
     this.text = text
@@ -173,6 +200,7 @@ export class IncrementalParse {
     }
 
     const tokens = [...oldItems.slice(0, firstToken), ...newItems.slice(firstToken)]
+    this.noteRewound(undone, rewoundTo)
     this.items = [...kept, ...region]
     this.match = this.assemble(newRoot, tokens)
     this.endMark = this.journal.mark()

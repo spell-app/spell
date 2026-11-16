@@ -11,8 +11,15 @@ import { P } from "spell/parser/parser"
  * - Before any file parses, every type and method the files declare is stubbed,
  *   so a line can name a type, or call a method, declared further down:
  *   `parser.stubDeclaredTypes()`, `stubDeclaredVariables()`, `stubDeclaredMethods()`, `stubDeclaredProperties()`.
- * - An edit which changes WHICH types or methods a file declares, or what a type is, re-parses everything:
- *   rare, and the only way a line above it learns of the change.  See `parser.changesMethods()`.
+ * - An edit which changes WHICH types or properties a file declares, or what a type is, stubs that file again
+ *   and parses it again whole:  the only way a line above it learns of the change (`reparseDeclaring()`).
+ *   - WHICH methods:  everything parses again, so every call registered ahead of a definition reads again
+ *     (`parser.changesMethods()`, epic `editor` I170).
+ * - Whenever a file parses again from part way, the files after it are KEPT if what they looked up finds the same
+ *   (epic `language` P59):  each file's `P.Outline`, held up against the `P.ParseDiff` of what parsed again.
+ *   - A kept file's journal entries are put back onto the new records (`P.JournalChange.redo`),
+ *     and its lines pointed at the new records in place of the old ones (`P.ParseDiff.keepPlan()`).
+ *   - The rest parse again, in order, and what they change counts for the files after them.
  * - A file ALONE, one a language says holds one thing and nothing else (spell's page alone in its file,
  *   `P.FileHead`, epic `notebook` P10) stays out of all that:
  *   - the project knows only its head, its name and what it has, by a scan, with no parse
@@ -37,6 +44,15 @@ export class IncrementalProject {
   declare keepLastGood: boolean
   /** Journal mark before the types we stub -- rewinding to it takes back the whole project. */
   declare startMark: P.JournalMark
+  /**
+   * Where each file's stubs start in the journal, one run per kind of stub and file:
+   * every file's types, then every file's variables, methods and properties -- see `stub()`.
+   * - `kind`:  which of `STUBS`;  `file`:  its index in `files`.
+   * - So an edit that changes what a file declares stubs just that file again (`reparseDeclaring()`).
+   */
+  declare stubMarks: StubMark[]
+  /** Journal mark after every stub, before the first file's parse. */
+  declare stubsEndMark: P.JournalMark
   /** Reads a file's head after an edit:  see `IncrementalProjectProps.headOf`. */
   declare headOf: IncrementalProjectProps["headOf"]
   /**
@@ -59,7 +75,7 @@ export class IncrementalProject {
     this.headOf = headOf
     this.startMark = journal.mark()
     for (const { head } of files) head?.declareIn(scope)
-    this.stub(files.flatMap(({ text, head }, index) => (head ? [] : [{ text, parser: parsers[index]! }])))
+    this.stub(files.flatMap(({ text, head }, index) => (head ? [] : [{ text, parser: parsers[index]!, index }])))
     this.files = files.map(({ path, name = path, text, head }, index) => {
       const fileParser = parsers[index]!
       if (head) return { path, name, text, types: "", parser: fileParser, head }
@@ -132,30 +148,139 @@ export class IncrementalProject {
       // changed which types, methods or properties it declares:  every line above may read differently
       const { parser } = entry
       const types = parser.declaredTypes(text).join()
-      if (this.isBroken || types !== entry.types) return this.parseAll(path, text)
+      if (this.isBroken) return this.parseAll(path, text)
       // a declaration's line being typed in keeps what it declared till the next full parse;  an edit of many lines
       // (a rename, its head and every call) is a change like any other (epic `editor` I170)
       const keepEdited = this.keepLastGood && changesOneLine(file.text, text)
+      // which methods there are:  every call registered ahead of its definition reads again (epic `editor` I170)
       if (parser.changesMethods(this.scope, file.text, text, keepEdited)) return this.parseAll(path, text)
-      if (parser.changesProperties(file.text, text, keepEdited)) return this.parseAll(path, text)
-      if (parser.changesTypeKinds(file.text, text, keepEdited)) return this.parseAll(path, text)
+      if (
+        types !== entry.types ||
+        parser.changesProperties(file.text, text, keepEdited) ||
+        parser.changesTypeKinds(file.text, text, keepEdited)
+      ) {
+        return this.reparseDeclaring(index, text)
+      }
       const kindsBefore = this.typeKinds()
+      const oldMatch = file.match
       const result = file.update(text)
       if (result === "same") return []
       if (result === "body" || result === "region") return [file]
-      // Rewinding took back every later file:  re-parse them, in order.
+      // Rewinding took back every later file:  keep those whose lookups find the same, re-parse the rest, in order.
       // Alone files are never in the journal we rewound.
-      const later = this.files.slice(index + 1).flatMap((it) => (it.head ? [] : [it.parse!]))
-      later.forEach((it) => it.parseAll(it.text))
+      const { own, later, from } = file.rewound!
+      const diff = new P.ParseDiff()
+      diff.compare(own, this.journal.entriesFrom(from), oldMatch, file.match)
+      const parsed = this.keepOrParse(this.files.slice(index + 1), later, diff)
       // A type line the scan still sees, but the parse no longer reads as one (swallowed by a tag left open above
       // it, `<text>🂠</text`):  what it is changed after all, so every line above may read differently.
       if (this.typeKinds() !== kindsBefore) return this.parseAll(path, text)
-      return [file, ...later]
+      return [file, ...parsed]
     } catch (error) {
       // e.g. a rule's `getAST()` crashed while committing a line -- a full parse would crash too.
       this.isBroken = true
       throw error
     }
+  }
+
+  /** Journal shared by every file. */
+  private get journal(): P.ParseJournal {
+    return this.scope.parser!.journal!
+  }
+
+  /**
+   * File `index` now has `text`, which changes what it declares:  stub it again, then keep every other file whose
+   * lookups find the same, and parse it and the rest again (epic `language` P59).
+   * - Takes back everything, as `parseAll()` does, then puts back what it can:
+   *   - every other file's stubs, as they were;  this file's, from `text`, its types the same records where they can be
+   *   - each file in order:  this one parsed again;  each other one kept, if its lookups find the same
+   *     (`P.ParseDiff.keepPlan()`), else parsed again too
+   * - Before, every file parsed again:  ~150-230ms for a member renamed in Solitaire's first file.
+   * - Falls back on `parseAll()` when this file's types are another's too:  only the first file's stub stands.
+   */
+  private reparseDeclaring(index: number, text: string): P.IncrementalParse[] {
+    const { journal, scope } = this
+    const edited = this.files[index]!
+    const path = edited.path
+    const types = edited.parser.declaredTypes(text)
+    const others = new Set(this.files.flatMap((file, at) => (at === index ? [] : file.types.split(","))))
+    const shared = [...types, ...edited.types.split(",")].some((name) => name && others.has(name))
+    if (shared || !journal.has(this.startMark) || !this.stubsEndMark) return this.parseAll(path, text)
+
+    const undone = journal.rewindTo(this.startMark)
+    const at = (mark: P.JournalMark) => undone.indexOf(mark)
+    const diff = new P.ParseDiff()
+
+    // alone files' heads, then the stubs:  every other file's as they were, this one's again
+    journal.replay(undone.slice(0, at(this.stubMarks[0]?.mark ?? this.stubsEndMark)))
+    const ends = [...this.stubMarks.slice(1).map(({ mark }) => mark), this.stubsEndMark]
+    this.stubMarks = this.stubMarks.map((stub, segment) => {
+      const old = undone.slice(at(stub.mark), at(ends[segment]!))
+      if (stub.file !== index) {
+        journal.replay(old)
+        return stub
+      }
+      const mark = journal.mark()
+      STUBS[stub.kind]!(edited.parser, scope, [text], stubbedTypesIn(old))
+      diff.compare(old, journal.entriesFrom(mark))
+      return { ...stub, mark }
+    })
+    this.stubsEndMark = journal.mark()
+
+    // then each file, in order:  this one parsed again, each other one kept if it can be
+    edited.types = types.join()
+    const parsed = this.keepOrParse(this.files, undone, diff, { index, text })
+    const aloneParsed = this.files.flatMap((file) => {
+      if (!file.head || !file.parse) return []
+      file.parse = undefined
+      return [this.parseAloneFile(file)]
+    })
+    this.isBroken = false
+    return [...parsed, ...aloneParsed]
+  }
+
+  /**
+   * After an earlier file parsed again, with what changed in `diff`:  each of `files` in order, kept or parsed again.
+   * - `undone`:  what was taken back, holding each file's journal entries from its last parse.
+   * - A file is kept if its lookups find the same (`P.ParseDiff.keepPlan()`):
+   *   its entries put back, made again onto the records as they are now, and its lines pointed at the new records.
+   * - Else it parses again, and what it changed goes in `diff` too, for the files after it.
+   * - `edited`:  file `index` has new `text`, and always parses again.
+   * - Returns the files that parsed again.  Alone files are never in the journal:  left alone.
+   */
+  private keepOrParse(
+    files: IncrementalFile[],
+    undone: P.JournalEntry[],
+    diff: P.ParseDiff,
+    edited?: { index: number; text: string }
+  ): P.IncrementalParse[] {
+    const { journal } = this
+    const parsed: P.IncrementalParse[] = []
+    const last = files.reduce((found, file, at) => (!file.head && file.parse ? at : found), -1)
+    for (const [at, file] of files.entries()) {
+      const { parse } = file
+      if (file.head || !parse) continue
+      const start = undone.indexOf(parse.startMark)
+      const end = undone.indexOf(parse.endMark)
+      const old = start === -1 || end === -1 ? [] : undone.slice(start, end + 1)
+      const isEdited = edited && this.files[edited.index] === file
+      if (!isEdited && old.length) {
+        const roots: unknown[] = [parse.match, ...parse.items.map((item) => item.match)]
+        const plan = diff.keepPlan(old, parse.outline, roots, parse.text)
+        if (plan) {
+          // pointed at the new records first:  a field its entries set again is set to the new one
+          for (const [holder, key, value] of plan) (holder as Record<string, unknown>)[key] = value
+          journal.replay(old)
+          continue
+        }
+      }
+      const oldMatch = parse.match
+      parse.parseAll(isEdited ? edited.text : parse.text)
+      // what it changed only counts for a file after it
+      if (at < last) diff.compare(old, journal.entriesFrom(parse.startMark), oldMatch, parse.match)
+      parsed.push(parse)
+    }
+    return parsed
   }
 
   /**
@@ -196,7 +321,7 @@ export class IncrementalProject {
     const texts = this.files.map((file) => (file.path === path ? text : (file.parse?.text ?? file.text)))
     for (const file of this.files) file.head?.declareIn(this.scope)
     const rest = this.files.flatMap((file, index) => (file.head ? [] : [{ file, text: texts[index]! }]))
-    this.stub(rest.map(({ file, text: its }) => ({ text: its, parser: file.parser })))
+    this.stub(rest.map(({ file, text: its }) => ({ text: its, parser: file.parser, index: this.files.indexOf(file) })))
     for (const { file, text: its } of rest) {
       file.types = file.parser.declaredTypes(its).join()
       file.parse!.parseAll(its)
@@ -215,12 +340,39 @@ export class IncrementalProject {
    * Stub what `files` declare, before any file parses:  every one's types, then its variables, methods and properties.
    * - Each file by its own parser:  another language's declares in its own words.
    */
-  private stub(files: Array<{ text: string; parser: P.Parser }>): void {
-    for (const { text, parser } of files) parser.stubDeclaredTypes(this.scope, [text])
-    for (const { text, parser } of files) parser.stubDeclaredVariables(this.scope, [text])
-    for (const { text, parser } of files) parser.stubDeclaredMethods(this.scope, [text])
-    for (const { text, parser } of files) parser.stubDeclaredProperties(this.scope, [text])
+  private stub(files: Array<{ text: string; parser: P.Parser; index: number }>): void {
+    const journal = this.scope.parser!.journal!
+    this.stubMarks = []
+    STUBS.forEach((stub, kind) => {
+      for (const { text, parser, index } of files) {
+        this.stubMarks.push({ kind, file: index, mark: journal.mark() })
+        stub(parser, this.scope, [text])
+      }
+    })
+    this.stubsEndMark = journal.mark()
   }
+}
+
+/** Where one file's stubs of one kind start in the journal:  see `IncrementalProject.stubMarks`. */
+type StubMark = { kind: number; file: number; mark: P.JournalMark }
+
+/**
+ * Each kind of stub, in the order every file's are made:  types first, so the rest can name them.
+ * - `reuse`:  type stubs made before, for the types to be the same records again -- see `P.Parser.stubDeclaredTypes()`.
+ */
+const STUBS: Array<(parser: P.Parser, scope: P.Scope, texts: string[], reuse?: P.TypeScope[]) => void> = [
+  (parser, scope, texts, reuse) => void parser.stubDeclaredTypes(scope, texts, reuse),
+  (parser, scope, texts) => parser.stubDeclaredVariables(scope, texts),
+  (parser, scope, texts) => parser.stubDeclaredMethods(scope, texts),
+  (parser, scope, texts) => parser.stubDeclaredProperties(scope, texts)
+]
+
+/** The type stubs journal `entries` added:  what `STUBS` can add again for a file's types. */
+function stubbedTypesIn(entries: P.JournalEntry[]): P.TypeScope[] {
+  return entries.flatMap((entry) => {
+    const change = "undo" in entry ? entry.change : undefined
+    return change?.kind === "list" ? change.items.filter((item) => item instanceof P.TypeScope) : []
+  })
 }
 
 /** One of `IncrementalProject`'s files:  see `IncrementalProject.files`. */

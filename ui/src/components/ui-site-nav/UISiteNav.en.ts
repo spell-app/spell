@@ -28,7 +28,9 @@ export const siteNavVocabulary = {
         "The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each " +
         '`{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  ' +
         "A page with no `href` only holds pages:  a click opens or closes it.  " +
-        "Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, " +
+        "Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a " +
+        "group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first " +
+        "page;  its `icon` before its label, its pages a step in), `count`, " +
         "`badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` " +
         "(open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element " +
         "whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  " +
@@ -55,6 +57,14 @@ export const siteNavVocabulary = {
       description:
         '`nav`:  the docs site\'s look, its pages a tree with `appearance="nav"`:  taller rows, the page shown a ' +
         "rounded box in the primary colour, and `band` pages as heading bands."
+    },
+    {
+      name: "collapsed",
+      group: "appearance",
+      kind: "keyOnly",
+      description:
+        "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, " +
+        "and a group with no icon a thin line.  None:  the titles beside the icons."
     },
     {
       name: "remember",
@@ -99,7 +109,7 @@ export const siteNavVocabulary = {
     { name: "nav", description: "The navigation landmark around the tree." },
     { name: "tree", description: "The `<ui-tree>` of pages." }
   ],
-  states: [],
+  states: [{ name: "collapsed", description: "`collapsed`:  only the icons." }],
   texts: [
     { key: "label", text: "Site", description: "What a screen reader calls the navigation, without `label`." },
     { key: "star", text: "Add {title} to favourites", description: "A page's star, not starred." },

@@ -1,6 +1,11 @@
 import { Show, omit } from "solid-js"
 
-import type { UIDropdownJSXAttributes, UIItemJSXAttributes, UIMenuJSXAttributes } from "spell/ui/jsx"
+import type {
+  UIAppMenuJSXAttributes,
+  UIDropdownJSXAttributes,
+  UIItemJSXAttributes,
+  UIMenuJSXAttributes
+} from "spell/ui/jsx"
 import { AppMark, on } from "spell/app/app/solid"
 
 import "./chrome.css"
@@ -15,19 +20,23 @@ import "./chrome.css"
 
 /****************
  * ### `<AppMenu>`
- * Top-level app menu, joined to the top of the window:  a `<ui-menu appearance="header">`, which draws the bar.
- * - Its left section starts with Spell's hat (`<Submenu left mark>`).
+ * Top-level app menu, joined to the top of the window:  Spell UI's app bar, `<ui-app-menu>`, which draws the bar.
+ * - Its sections:  a sub-menu each, `slot="start"`, the middle (no slot) and `slot="end"`.
+ * - Its start section starts with Spell's hat (`<Submenu left mark>`).
  * - Goes straight in its page, outside any padding:  the bar runs the window's whole width.
  *   - The violet bar it was under any other theme went in epic `debut` P17:  every theme of the set dresses it.
  * - SEE:  its App UI components page, `app/docs/chrome.html` (`/components/app/chrome.html`).
  ****************/
-export function AppMenu(props: MenuProps) {
+export function AppMenu(props: AppMenuProps) {
   return (
-    <ui-menu appearance="header" {...omit(props, "class", "children")} class={["AppMenu", "tight", props.class]}>
+    <ui-app-menu {...omit(props, "class", "children")} class={["AppMenu", "tight", props.class]}>
       {props.children}
-    </ui-menu>
+    </ui-app-menu>
   )
 }
+
+/** Props for `<AppMenu>`:  any `<ui-app-menu>` attribute, its sections as children. */
+export type AppMenuProps = UIAppMenuJSXAttributes
 
 /****************
  * ### `<PanelMenu>`
@@ -42,7 +51,7 @@ export function PanelMenu(props: MenuProps) {
   )
 }
 
-/** Props for `<AppMenu>` / `<PanelMenu>`:  any `<ui-menu>` attribute (`size`, `color` ...), its items as children. */
+/** Props for `<PanelMenu>`:  any `<ui-menu>` attribute (`size`, `color` ...), its items as children. */
 export type MenuProps = UIMenuJSXAttributes
 
 /****************

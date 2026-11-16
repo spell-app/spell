@@ -56,8 +56,12 @@ export class Palette {
     return opens
   }
 
-  /** Keep it open, or stop;  remembered. */
+  /**
+   * Keep it open, or stop;  remembered.
+   * - Its menus close either way (epic `editor` I175):  pinned, the bar shows in the popup's place.
+   */
   static togglePinned(): void {
+    Palette.closeMenus()
     const pinned = !isPinned()
     setPinned(pinned)
     editorPrefs.set(PINNED_PREF, pinned)
@@ -71,6 +75,17 @@ export class Palette {
 
   /** Shows the menu:  `<AddPartButton>`'s, while it's drawn. */
   static showMenu: (() => void) | undefined
+
+  /**
+   * Close its menus, the popup and the pinned bar's:  what's added, or dragged, lands on a page you can see
+   * (epic `editor` I176).
+   */
+  static closeMenus(): void {
+    for (const menu of menus) {
+      if (menu.isConnected) menu.visible = false
+      else menus.delete(menu)
+    }
+  }
 
   /** Load what it offers, the first time. */
   static load(): void {
@@ -93,6 +108,7 @@ export class Palette {
 
   /** Add `view`, one of the app's own, beside what's selected, else at the end of the drawing. */
   static addOwn(view: OwnView): void {
+    Palette.closeMenus()
     const place = PartEdits.placeForNew()
     Inspector.readyWordsNext()
     const snippet = withStartingValues(view.snippet, Inspector.startingValuesOf(view.classNames))
@@ -114,6 +130,7 @@ export class Palette {
     const file = editor.file
     const opening = file && NotebookPageCells.drawnPageIn(file.contents ?? "", file.path)
     if (!file || opening === undefined) return
+    Palette.closeMenus()
     const title = appTexts.text("partStepAdd", { part: appTexts.text("paletteNewView") })
     const whole = { start: opening, end: opening }
     PartEdits.add([NEW_VIEWS[languageOf(file)] ?? NEW_VIEWS.en!], title, { file, opening, where: "before", whole })
@@ -124,6 +141,7 @@ export class Palette {
    * - Never one example inside another:  an example selected, a new one goes after it (epic `notebook` P5).
    */
   static add(definition: ComponentDefinition): void {
+    Palette.closeMenus()
     const place = PartEdits.placeForNew()
     Inspector.readyWordsNext()
     const snippet = snippetFor(definition, place?.file)
@@ -142,6 +160,15 @@ let loading: Promise<void> | undefined
 
 /** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
+
+/** Its menus, the popup and the pinned bar's:  `Palette.closeMenus()` closes them, forgetting those gone. */
+const menus = new Set<HTMLElement & { visible?: boolean }>()
+
+/** A `ref` for one of its popups:  closed by `Palette.closeMenus()`, and by a drag starting from it. */
+function closesWithPalette(popup: HTMLElement & { visible?: boolean }): void {
+  menus.add(popup)
+  PartEdits.onPaletteDrag = () => Palette.closeMenus()
+}
 
 /**
  * What `definition` adds to `file`, in its language.
@@ -289,9 +316,6 @@ function stepTitle(definition: ComponentDefinition): string {
 export function AddPartButton(): JSX.Element {
   let popup: (HTMLElement & { visible?: boolean }) | undefined
   onSettled(() => {
-    PartEdits.onPaletteDrag = () => {
-      if (popup) popup.visible = false
-    }
     Palette.showMenu = () => {
       if (popup) popup.visible = true
     }
@@ -317,6 +341,7 @@ export function AddPartButton(): JSX.Element {
         aria-label={appTexts.text("addPart")}
         ref={(element: HTMLElement) => {
           popup = element
+          closesWithPalette(element)
         }}
       >
         <PaletteMenu />
@@ -402,38 +427,29 @@ function PinIcon(): JSX.Element {
 /**
  * The palette as a menu, in columns:
  * what to do and its search, then This app, the app's own views, then every part, by topic.
- * - Each topic shows its few ready-made parts;  its "N more" opens every other component filed under it.
+ * - Every topic shows everything filed under it, its ready-made parts first (epic `editor` I174).
  * - A search looks through all of them, by name, other names and description.
  */
 function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
-  const [opened, setOpened] = createSignal<ReadonlySet<string>>(new Set())
-  const open = (topic: string) => setOpened((topics) => new Set([...topics, topic]))
+  const words = () => filter().trim().toLowerCase()
   const shown = (): PaletteGroup[] => {
-    const words = filter().trim().toLowerCase()
-    if (!words)
-      return offered().map((group) =>
-        opened().has(group.topic) ? { ...group, parts: [...group.parts, ...group.more], more: [] } : group
-      )
+    if (!words()) return [...offered()]
     const matches = (part: ComponentDefinition) =>
-      `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words)
+      `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words())
     return offered()
-      .map(({ topic, parts, more }) => ({ topic, parts: [...parts, ...more].filter(matches), more: [] }))
+      .map(({ topic, parts }) => ({ topic, parts: parts.filter(matches) }))
       .filter(({ parts }) => parts.length)
   }
-  const own = () => {
-    const words = filter().trim().toLowerCase()
-    return ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words))
-  }
+  const own = () => ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words()))
   /**
    * On a page, its examples and sections (`PAGE_PART_TAGS`) that match the search, to show under This page
    * - they still show under their own topics too (epic `notebook` P9)
    */
   const pageParts = () => {
-    const words = filter().trim().toLowerCase()
-    const parts = offered().flatMap((group) => [...group.parts, ...group.more])
+    const parts = offered().flatMap((group) => group.parts)
     return PAGE_PART_TAGS.flatMap((tag) => parts.filter((part) => part.tag === tag)).filter((part) =>
-      `${part.name} ${part.aka.join(" ")}`.toLowerCase().includes(words)
+      `${part.name} ${part.aka.join(" ")}`.toLowerCase().includes(words())
     )
   }
   /** Its first group's name:  This page on a page that draws its body, else This app. */
@@ -452,60 +468,46 @@ function PaletteMenu(): JSX.Element {
         <PinIcon />
       </div>
       <div class="PaletteGroups">
-        <Show when={own().length || Palette.isPageShown}>
-          <section class="PaletteGroup ThisApp">
-            <h4>{appTexts.text(thisGroup())}</h4>
-            <ui-tree class="PaletteTree" label={appTexts.text(thisGroup())} ref={treeChoosesRows}>
-              <Show when={Palette.isPageShown}>
-                <ui-tree-item
-                  icon={NEW_VIEW_ICON}
-                  label={appTexts.text("paletteNewView")}
-                  title={appTexts.text("paletteNewViewTip")}
-                  ref={(row: Element) => chooseRow(() => Palette.addNewView())(row)}
-                />
-                <For each={pageParts()}>{(definition) => <PaletteRow definition={definition} />}</For>
-              </Show>
-              <For each={own()}>
-                {(view) => (
+        <div class="PaletteColumns">
+          <Show when={own().length || Palette.isPageShown}>
+            <section class="PaletteGroup ThisApp">
+              <h4>{appTexts.text(thisGroup())}</h4>
+              <ui-tree class="PaletteTree" label={appTexts.text(thisGroup())} ref={treeChoosesRows}>
+                <Show when={Palette.isPageShown}>
                   <ui-tree-item
-                    icon={OWN_VIEW_ICON}
-                    label={view.name}
-                    ref={(row: Element) => {
-                      chooseRow(() => Palette.addOwn(view))(row)
-                      startsOwnDrag(row, view)
-                    }}
+                    icon={NEW_VIEW_ICON}
+                    label={appTexts.text("paletteNewView")}
+                    title={appTexts.text("paletteNewViewTip")}
+                    ref={(row: Element) => chooseRow(() => Palette.addNewView())(row)}
                   />
-                )}
-              </For>
-            </ui-tree>
-          </section>
-        </Show>
-        <For each={shown()}>
-          {(group) => (
-            <section class="PaletteGroup">
-              <div class="PaletteGroupHead">
-                <h4>{upperFirst(topicName(group.topic))}</h4>
-                <Show when={group.more.length}>
-                  <ui-button
-                    appearance="tertiary"
-                    size="tiny"
-                    padding="none"
-                    class="PaletteMore"
-                    title={appTexts.text("paletteMoreTip", { topic: topicName(group.topic) })}
-                    onClick={() => open(group.topic)}
-                  >
-                    {appTexts.text("paletteMore", { count: group.more.length })}
-                  </ui-button>
+                  <For each={pageParts()}>{(definition) => <PaletteRow definition={definition} />}</For>
                 </Show>
-              </div>
-              <Show when={group.parts.length}>
+                <For each={own()}>
+                  {(view) => (
+                    <ui-tree-item
+                      icon={OWN_VIEW_ICON}
+                      label={view.name}
+                      ref={(row: Element) => {
+                        chooseRow(() => Palette.addOwn(view))(row)
+                        startsOwnDrag(row, view)
+                      }}
+                    />
+                  )}
+                </For>
+              </ui-tree>
+            </section>
+          </Show>
+          <For each={shown()}>
+            {(group) => (
+              <section class="PaletteGroup">
+                <h4>{upperFirst(topicName(group.topic))}</h4>
                 <ui-tree class="PaletteTree" label={topicName(group.topic)} ref={treeChoosesRows}>
                   <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
                 </ui-tree>
-              </Show>
-            </section>
-          )}
-        </For>
+              </section>
+            )}
+          </For>
+        </div>
       </div>
     </div>
   )

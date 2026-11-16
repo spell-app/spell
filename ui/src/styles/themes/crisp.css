@@ -37,6 +37,7 @@
     --ui-surface-muted: var(--crisp-inset);
     --ui-surface-strong: var(--crisp-page);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#ffffff, #141414);
     --ui-code-background: var(--crisp-inset);
     --ui-highlight: var(--crisp-accent-wash);
     --ui-border-width: 2px;

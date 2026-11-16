@@ -41,6 +41,7 @@
     --ui-surface-muted: var(--pop-inset);
     --ui-surface-strong: var(--pop-panel);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#fffaf4, #24122f);
     --ui-code-background: var(--pop-inset);
     --ui-highlight: var(--pop-accent-wash);
     --ui-border-width: 2px;

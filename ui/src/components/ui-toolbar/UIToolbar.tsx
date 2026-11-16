@@ -59,6 +59,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - The row keeps the page's order.  The item chosen longest ago leaves it first;  the chosen one never does.
  *   - An item left out is `hidden`, so the menu's own rules skip it, and its overflow menu is the list.
  *   - `remember` keeps the row across reloads.
+ *   - `closeItem()` closes one of the row's items:  it leaves the row, but stays in the list
+ *     (the editor's file tabs' ✕;  epic `editor` T77).
  *   - `all-items-icon` draws an icon before the button's caret, saying what the list is of
  *     (the editor's file tabs:  `file outline`;  epic `editor` T76).
  *   - `all-items-at-end` puts the button at the bar's far end, however few items show:
@@ -212,6 +214,9 @@ export class UIToolbar extends UIMenu {
   /** The chosen item when the row last followed it. */
   @E.state accessor followedValue: string | undefined = undefined
 
+  /** The chosen item, just closed (`closeItem()`):  out of the row, until the page chooses another. */
+  private closedChoice: string | undefined
+
   /** The items this toolbar hid:  an item the page hid stays the page's. */
   private readonly putAway = new WeakSet<Element>()
 
@@ -272,9 +277,11 @@ export class UIToolbar extends UIMenu {
     }
     const chosen = items.find((each) => this.itemOf(each)?.isSelected)
     const chosenValue = chosen && UIToolbar.valueOf(chosen)
+    if (chosenValue !== this.closedChoice) this.closedChoice = undefined
+    const keepsChosen = chosenValue !== undefined && chosenValue !== this.closedChoice
     // an item not drawn yet keeps its place:  a reload's items arrive a few at a time
     const others = this.openValues.filter((each) => each !== chosenValue)
-    let open = [...(chosenValue === undefined ? [] : [chosenValue]), ...others].slice(0, limit)
+    let open = [...(keepsChosen ? [chosenValue] : []), ...others].slice(0, limit)
     if (!open.length) open = items.slice(0, limit).map((each) => UIToolbar.valueOf(each))
     for (const item of items) this.showInRow(item, open.includes(UIToolbar.valueOf(item)))
     this.isLimited = true
@@ -284,6 +291,28 @@ export class UIToolbar extends UIMenu {
       const box = this.itemOf(chosen)?.focusTarget
       if (box) E.beforeNextPaint(() => this.scrolling.bringIntoView(box, { smoothly: true }))
     }
+  }
+
+  /**
+   * Close `item`:  it leaves the row, but stays in the list, where choosing it brings it back (epic `editor` T77).
+   * - Only while some items are put away (`isLimited`), and never the row's last one:  else it does nothing.
+   * - The chosen item:  answers the item to choose in its place, its neighbour in the row (after it, else before);
+   *   choosing it is the page's, as every choice in the row is.
+   *   Until the page chooses another, the closed one stays out of the row.
+   * - SIDE EFFECT:  kept under `remember`, as every change to the row is.
+   */
+  @E.untracked
+  closeItem(item: Element): Element | undefined {
+    const row = this.rowElements().filter((each) => this.itemOf(each) && !(each as HTMLElement).hidden)
+    if (!this.isLimited || row.length < 2 || !row.includes(item)) return undefined
+    const value = UIToolbar.valueOf(item)
+    this.keepOpenValues(this.openValues.filter((each) => each !== value))
+    const isChosen = !!this.itemOf(item)?.isSelected
+    if (isChosen) this.closedChoice = value
+    this.limitRefresh.ask()
+    if (!isChosen) return undefined
+    const at = row.indexOf(item)
+    return row[at + 1] ?? row[at - 1]
   }
 
   /** Show `item` in the row, or put it away:  only ever hides what it can show again. */

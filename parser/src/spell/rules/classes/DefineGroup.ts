@@ -17,7 +17,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - Or at a file's top level, with no template (epic `language` P55, Q54):  `group "The piles"` is the same as
  *   the heading `## The piles` -- see `isFileHeading()`, which `Block` asks.
  */
-export class DefineGroup extends SpellStatement<"type?|group|color?"> {
+export class DefineGroup extends SpellStatement<"type?|group|color?|icon?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 

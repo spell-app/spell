@@ -327,6 +327,8 @@ export const CORE_MESSAGES = {
   "site-page-failed": "Sorry, this page couldn't be shown.",
   "site-page-failed-why": "{page} failed:  {why}",
   "site-menu": "Pages",
+  "site-side-bar": "Show or hide the side bar",
+  "site-where": "Where you are",
   "table-edit": "Edit Table"
 }
 
@@ -386,6 +388,8 @@ export type SitePageEntry = {
   address: string
   /** what the site calls it, in its navigation, if the line names it:  `Film` */
   title?: string
+  /** the icon before its title in its navigation, one of Spell UI's, if the line names it:  `film` */
+  icon?: string
   /** what its tab says in `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
   tab?: string
   /** what the line files it under, to group and search a site's pages by:  `["Forms", "Inputs"]` */
@@ -394,14 +398,18 @@ export type SitePageEntry = {
   params?: string[]
   /** the real page it stands for, on the live site, if the line says */
   live?: string
+  /** drawn without the site's top bar, when its line says `, no top bar` (epic `mockup` T35) */
+  noTopBar?: boolean
   /** the `<group>` it's under, at the site's top level:  its navigation's heading */
   group?: string
+  /** the icon its `<group>`'s line names, before the group's name in its navigation (epic `mockup` I20):  `microchip` */
+  groupIcon?: string
   /** the pages under it, as the lines under its line list them */
   pages?: SitePageEntry[]
 }
 
 /**
- * One dialog, sidebar, not found page or error page of a site:  named once, with no address of its own.
+ * One dialog, sidebar, not found page, error page or top bar of a site:  named once, with no address of its own.
  * - e.g. `- it has a settings dialog` => `{ name: "settings dialog", view: "SettingsDialog" }`
  */
 export type SiteOverlayEntry = {

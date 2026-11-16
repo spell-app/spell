@@ -46,6 +46,7 @@
     --ui-surface-muted: var(--matrix-inset);
     --ui-surface-strong: var(--matrix-raised);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#fafcfb, #0d1518);
     --ui-code-background: var(--matrix-inset);
     --ui-highlight: var(--matrix-accent-wash);
     --ui-border-color: var(--matrix-border);

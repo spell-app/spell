@@ -110,15 +110,20 @@ export function namesWithGrammarWords<Item>(
   localOnly?: "LOCAL_ONLY"
 ): string[] {
   const names: string[] = []
+  const nameOf = (item: Item) => {
+    const words = wordsOf(item).map((word) => word.toLowerCase())
+    return words.length > 1 && words.slice(1).some(isGrammarWord) ? words.join(" ") : undefined
+  }
   for (let current = list; current; current = localOnly ? undefined : current.parent) {
-    const items = current.get()
+    // only an item with a grammar word in its name matters to us (`P.Outline`)
+    const items = current.scan((item) => nameOf(item) !== undefined)
     const cache = (GRAMMAR_WORD_NAMES[kind] ??= new WeakMap())
     let found = cache.get(items)
     if (!found) {
       found = []
       for (const item of items) {
-        const words = wordsOf(item).map((word) => word.toLowerCase())
-        if (words.length > 1 && words.slice(1).some(isGrammarWord)) found.push(words.join(" "))
+        const name = nameOf(item)
+        if (name !== undefined) found.push(name)
       }
       cache.set(items, found)
     }

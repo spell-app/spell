@@ -1,0 +1,42 @@
+/*
+ * `<ui-app-menu>`:  an app's top bar, in three sections.
+ * - Adopted after `UIMenu.css`, which draws the bar (its window bar, "Bar") and the items as for `<ui-menu>`.
+ *   This sheet only lays out the three sections, and fits the items to the bar's height.
+ * - Items adopt the top menu's sheets too:  every rule here starts at the menu's box, or an item IN an app menu.
+ * - Tokens:  the menu's window bar's, `--ui-menu-header-bar-height`, `-font-size`, `-background`, `-filter`, `-border`.
+ */
+
+@layer ui.components.app-menu.types;
+
+@layer ui.components.app-menu.types {
+  /*
+   * The sections:
+   * - start and end share the room the middle leaves, so the middle sits on the bar's centre
+   * - each at least its content's width:  too narrow, the bar scrolls sideways (below), never overlaps or wraps
+   */
+  .ui.header.menu > :is(.start, .middle, .end) {
+    display: flex;
+    align-items: stretch;
+    min-width: max-content;
+  }
+  .ui.header.menu > :is(.start, .end) {
+    flex: 1 1 0;
+  }
+  .ui.header.menu > .middle {
+    flex: 0 0 auto;
+  }
+  .ui.header.menu > .end {
+    justify-content: flex-end;
+  }
+  .ui.header.menu {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  /* an item of an app menu:  it fills the bar's height, with no room of its own above or below
+     - its own items only:  a sub-menu's items adopt the sub-menu's sheets, not these */
+  :host(:state(in-menu)) > .item {
+    padding-block: 0;
+  }
+}

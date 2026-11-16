@@ -163,8 +163,8 @@ an "editor bar" is a view
 		// The person's own menu
 
 	to draw it
-		<menu appearance="header" class="AppMenu tight EditorBar">
-			<menu position="left" class="third side">
+		<app-menu class="AppMenu tight EditorBar">
+			<menu slot="start" position="left" class="third side">
 				{draw its spell menu}
 				{draw its project menu}
 				{draw its app menus}
@@ -175,14 +175,14 @@ an "editor bar" is a view
 				{draw its mode buttons}
 				<item class="spring no-border"/>
 			</menu>
-			<menu position="right" class="third side BarTools">
+			<menu slot="end" position="right" class="third side BarTools">
 				<item class="spring no-border"/>
 				<menu appearance="capsule">
 					{draw its tools}
 				</menu>
 				{draw its you}
 			</menu>
-		</menu>
+		</app-menu>
 
 an "editor layout" is a view
 	// The editor's panes:  the code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).
@@ -229,14 +229,19 @@ a "file" is a thing
 		// What its pen's tip says, "Updated in your draft.", in the page's language:  the editor's own
 	its "discard words" is text
 		// The tip's link, "Discard changes", in the page's language:  the editor's own
+	its "close words" is text
+		// Its ✕'s tooltip, "Close", in the page's language:  the editor's own
 	to show it
 	to discard it
 		// Your draft of it goes, back to what's published:  the editor's own
+	to close it
+		// Its tab leaves the bar, the file still in the list of every file:  the editor's own (T77)
 
 a "file list" is a viewable list of files
 	// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
+	// Its ✕ closes its tab, only while some files are put away in the list (T77)
 	to draw each item
-		<item icon={the icon of the file} label={the name of the file} selected={the file is chosen} onClick={show the file}>
+		<item icon={the icon of the file} label={the name of the file} value={the path of the file} selected={the file is chosen} onClick={show the file}>
 			<context-menu>
 				<action "duplicate file"/>
 				<action "rename file"/>
@@ -253,12 +258,14 @@ a "file list" is a viewable list of files
 					</popup>
 				</span>
 			</if>
+			<icon class="CloseTab" name="close" title={the close words of the file} onClick={close the file} />
 		</item>
 
 a "file tab bar" is a view
 	// Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
 	// Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 	// With more files than fit the bar's limit, only the ones opened lately are tabs;  a file and a ▾ beside them list every file.
+	// Then each tab has a ✕, on the chosen one and on one hovered, as VS Code's do:  it closes the tab, the file still in the list, and picking it there opens it again (T77).
 	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
@@ -292,6 +299,24 @@ a "file tab bar" is a view
 		}
 		ui-item[drop="after"]::part(item) {
 			box-shadow: inset -2px 0 0 var(--ui-primary);
+		}
+		/* a tab's ✕:  only while some files are put away in the list (the toolbar's limited);  seen on the chosen tab and a hovered one, its room kept on the others so tabs don't move */
+		.CloseTab {
+			display: none;
+			margin-inline-start: 6px;
+			font-size: 0.7em;
+			opacity: 0.6;
+			cursor: pointer;
+		}
+		ui-toolbar:state(limited) > ui-item .CloseTab {
+			display: inline-block;
+			visibility: hidden;
+		}
+		ui-toolbar:state(limited) > ui-item:is([selected], :hover) .CloseTab {
+			visibility: visible;
+		}
+		.CloseTab:hover {
+			opacity: 1;
 		}
 		.NotSaved[hidden],
 		.Drafted[hidden] {

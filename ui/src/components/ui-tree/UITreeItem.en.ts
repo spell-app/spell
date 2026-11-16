@@ -46,10 +46,11 @@ export const treeItemVocabulary = {
       name: "band",
       group: "appearance",
       kind: "valueOnly",
-      values: ["heading", "subheading"],
+      values: ["heading", "subheading", "group"],
       description:
         "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a " +
-        "tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it."
+        "tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it;  " +
+        "`group`, a group's quiet label, with no arrow."
     },
     {
       name: "count",
@@ -97,7 +98,11 @@ export const treeItemVocabulary = {
     { name: "selected", description: "It's selected." },
     { name: "has-items", description: "It has rows inside it, or could:  it draws its triangle." },
     { name: "filtered-out", description: "The tree's `filter` hides it." },
-    { name: "nav", description: "Its tree's `appearance` is `nav`:  it takes the side navigation's look." }
+    { name: "nav", description: "Its tree's `appearance` is `nav`:  it takes the side navigation's look." },
+    {
+      name: "in-columns",
+      description: "Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
+    }
   ],
   texts: [
     { key: "open", text: "Open", description: "The triangle's name, closed." },
