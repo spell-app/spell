@@ -3,7 +3,7 @@ import type { MarkdownPlace } from "./UIMarkdown.types"
 /****************
  * ### `MarkdownFormats`
  * The formats `<ui-markdown editable>`'s box puts on its text (epic `epic-engine` P61), as markdown marks:
- * bold `**`, italic `*`, strikethrough `~~`, a link `[text](address)`;  and a piece's SHAPE, which its line starts
+ * bold `**`, italic `*`, strikethrough `~~`, inline code `` ` ``, a link `[text](address)`;  and a piece's SHAPE, which its line starts
  * with:  a paragraph, a heading (`## `), a bulleted or numbered item (`- `, `1. `).
  * - Each format works on the box's text and its selection (`Edit`), and answers the new text and selection.
  * - `runsOf()`:  the text cut into runs, each mark or styled word, for the box's faded-marks view.
@@ -31,6 +31,18 @@ export class MarkdownFormats {
       }
     }
     const length = mark.length
+    // inline code:  the code span the cursor or selection is in comes off whole
+    if (mark === "`") {
+      const span = MarkdownFormats.codeAt(text, edit.start, edit.end)
+      if (span) {
+        const inner = text.slice(span.start + 1, span.end - 1)
+        return {
+          text: text.slice(0, span.start) + inner + text.slice(span.end),
+          start: Math.max(span.start, edit.start - 1),
+          end: Math.min(span.start + inner.length, edit.end - 1)
+        }
+      }
+    }
     const isWrapped = (from: number, to: number) =>
       text.slice(from - length, from) === mark &&
       text.slice(to, to + length) === mark &&
@@ -93,13 +105,28 @@ export class MarkdownFormats {
     return undefined
   }
 
-  /** The selection (or, with none, all the text) without its marks:  bold, italic, strikethrough, links. */
+  /** The code span (backticks included) around `start` to `end`, by offsets into `text`;  `undefined` for none. */
+  static codeAt(text: string, start: number, end: number): { start: number; end: number } | undefined {
+    for (const match of text.matchAll(CODE)) {
+      const from = match.index
+      const to = from + match[0].length
+      if (start > from && end < to) return { start: from, end: to }
+    }
+    return undefined
+  }
+
+  /** The selection (or, with none, all the text) without its marks:  bold, italic, strikethrough, code, links. */
   static clear(edit: Edit): Edit {
     const whole = edit.start === edit.end
     const start = whole ? 0 : edit.start
     const end = whole ? edit.text.length : edit.end
     let part = edit.text.slice(start, end)
-    part = part.replace(LINK, "$1").replace(STRONG, "$1").replace(STRUCK, "$1").replace(EMPHASIS, "$1")
+    part = part
+      .replace(LINK, "$1")
+      .replace(CODE, "$1")
+      .replace(STRONG, "$1")
+      .replace(STRUCK, "$1")
+      .replace(EMPHASIS, "$1")
     // the marks just outside the selection, when it's exactly a marked run's words
     const text = edit.text.slice(0, start) + part + edit.text.slice(end)
     let cleared: Edit = { text, start, end: start + part.length }
@@ -122,6 +149,7 @@ export class MarkdownFormats {
     inside(STRONG, "bold")
     inside(EMPHASIS, "italic")
     inside(STRUCK, "strikethrough")
+    inside(CODE, "code")
     inside(LINK, "link")
     return formats
   }
@@ -245,7 +273,12 @@ export class MarkdownFormats {
     }
     if (match.index) runs.push({ text: text.slice(0, match.index), formats: within, isMark: false })
     const inner = [...within, format]
-    if (format === "link") {
+    if (format === "code") {
+      // a code span's insides are code, never other marks
+      runs.push({ text: mark, formats: inner, isMark: true })
+      if (match[1]) runs.push({ text: match[1], formats: inner, isMark: false })
+      runs.push({ text: mark, formats: inner, isMark: true })
+    } else if (format === "link") {
       runs.push({ text: "[", formats: inner, isMark: true })
       MarkdownFormats.cut(match[1]!, inner, runs)
       runs.push({ text: `](${match[2]})`, formats: inner, isMark: true })
@@ -269,10 +302,10 @@ export type Edit = {
 }
 
 /** A mark put around words. */
-export type WrapMark = "**" | "*" | "~~"
+export type WrapMark = "**" | "*" | "~~" | "`"
 
 /** A format the box's buttons put on, and show pressed. */
-export type Format = "bold" | "italic" | "strikethrough" | "link"
+export type Format = "bold" | "italic" | "strikethrough" | "code" | "link"
 
 /** A piece's shape:  what its line starts with. */
 export type Shape = "paragraph" | "h2" | "h3" | "h4" | "h5" | "h6" | "h1" | "bullet" | "numbered"
@@ -291,7 +324,7 @@ export type Run = {
 export type FoundLink = { start: number; end: number; words: string; address: string }
 
 /** Each wrapping mark, longest first. */
-const WRAP_MARKS: WrapMark[] = ["**", "~~", "*"]
+const WRAP_MARKS: WrapMark[] = ["**", "~~", "`", "*"]
 
 /** What each shape's line starts with. */
 const SHAPE_LEADS: Record<Shape, string> = {
@@ -312,6 +345,9 @@ const LINK = /\[([^\]\n]*)\]\(([^)\s]*)\)/g
 /** Bold:  its words. */
 const STRONG = /\*\*(?=\S)([^\n]*?\S)\*\*/g
 
+/** Inline code:  its text, between single backticks. */
+const CODE = /`([^`\n]+)`/g
+
 /** Strikethrough:  its words. */
 const STRUCK = /~~(?=\S)([^\n]*?\S)~~/g
 
@@ -320,6 +356,7 @@ const EMPHASIS = /(?<!\*)\*(?=[^\s*])([^\n*]*?[^\s*])\*/g
 
 /** Each run's pattern, its format and its mark, for `runsOf()`. */
 const RUN_PATTERNS: [RegExp, Format, string][] = [
+  [new RegExp(CODE.source, "g"), "code", "`"],
   [new RegExp(LINK.source, "g"), "link", ""],
   [new RegExp(STRONG.source, "g"), "bold", "**"],
   [new RegExp(STRUCK.source, "g"), "strikethrough", "~~"],
