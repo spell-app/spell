@@ -2114,27 +2114,69 @@
     }
     /*
      * a start tag over several lines, its attributes on lines of their own, as Enter lays a long one out (epic
-     * `language` I133):  its band on its first line, no `⟩` end there;  each line under it a pill of its colour round
-     * that line's words, hanging on its rail as its body's tags do, the last one's right end its `⟩`'s point
+     * `language` I133):  ONE block of its colour round them all (I135;  Owen:  "show in a block pill"), a row on each
+     * line (`.cmb-tag-block`, `CodeMirrorMarkup.tagOn()`)
+     * - each row from the block's left edge, its band's, to its right edge, its widest row's:  how far it reaches past
+     *   its words, `--cmb-reach-before` and `--cmb-reach-after`, measured once it's drawn (`CodeMirrorMarkup.tagBlocks`)
+     * - the rows fill their lines, so the block is whole from its first line's band to its last's
+     * - its corners cut as a tag's ends are:  top left and right, bottom right, where its `>` is;  bottom left too, or
+     *   square with its rail dropping from it when it has a body
      */
-    .cmb-tag-continued {
-      border-top-right-radius: var(--bubbly-pill-radius);
-      border-bottom-right-radius: var(--bubbly-pill-radius);
-      corner-shape: round;
+    .cmb-tag-block {
+      height: calc(var(--bubbly-pill-height) + var(--cmb-band-margin));
+      padding-right: var(--cmb-reach-after);
+      border-radius: 0;
+      corner-shape: bevel;
+    }
+    .cmb-tag-block-first {
+      padding-bottom: calc(2 * var(--cmb-words-lift) + var(--cmb-band-margin));
+      border-top-left-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
+      border-top-right-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
+    }
+    .cmb-tag-block.cmb-band-open::after {
+      content: none;
     }
     .cmb-tag-row {
-      padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
-      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) 0;
-      corner-shape: round;
+      margin-top: 0;
+      margin-left: calc(-1 * var(--cmb-reach-before));
+      padding-top: var(--cmb-band-margin);
+      padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale) + var(--cmb-reach-before));
     }
-    /* ... a `>` alone on its line, back at the tag's level:  the end of the tag's band, from the band's left edge */
+    .cmb-tag-row:not(.cmb-tag-block-last) {
+      height: var(--cmb-line-height);
+      padding-bottom: calc(2 * var(--cmb-words-lift) + var(--cmb-band-margin));
+    }
+    /* ... a `>` alone on its line, back at the tag's level (as I133 laid it out):  from the band's left edge */
     .cmb-tag-row.cmb-tag-row-close {
-      margin-left: var(--cmb-band-left);
+      margin-left: calc(var(--cmb-band-left) - var(--cmb-reach-before));
     }
-    .cmb-tag-row.cmb-tag-row-last {
-      border-radius: 0 var(--bubbly-tag-point) var(--bubbly-tag-point) 0 / 0 calc(var(--bubbly-pill-height) / 2)
-        calc(var(--bubbly-pill-height) / 2) 0;
-      corner-shape: bevel;
+    /*
+     * ... its last row:  its `>` at the block's right edge (`TagPointWidget`), a value's room in a band clear of the
+     * widest row's words, and as far in from the edge as its `⟨` is (`--cmb-reach-end`;  Owen, I135)
+     */
+    .cmb-tag-block-last {
+      position: relative;
+      padding-right: var(--cmb-reach-end);
+      border-bottom-left-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
+      border-bottom-right-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
+    }
+    .cmb-tag-point {
+      margin-left: calc(var(--cmb-tag-room) + var(--cmb-reach-after));
+    }
+    /* ... a block with a body:  square bottom-left, its rail dropping from it, as a block's band (below) */
+    .cmb-tag-block-opens {
+      border-bottom-left-radius: 0;
+    }
+    .cmb-tag-block-opens::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 100%;
+      z-index: -1;
+      width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
+      height: var(--cmb-tag-inner-down);
+      background: var(--bubbly-pill);
+      clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
     /* a tag that declares the member it draws:  round (epic `editor` I84) */
     .cmb-tag-round {
