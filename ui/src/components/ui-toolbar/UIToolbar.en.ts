@@ -72,7 +72,7 @@ export const toolbarVocabulary = {
       kind: "string",
       description:
         "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, " +
-        "and a button that's always there lists every item.  An item picked there joins the row, and the one " +
+        "and a button lists every item while some aren't in view.  An item picked there joins the row, and the one " +
         "chosen longest ago leaves it."
     },
     {
@@ -96,14 +96,6 @@ export const toolbarVocabulary = {
       description:
         "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  " +
         "Without it, it sits right after the last one."
-    },
-    {
-      name: "all-items-always",
-      group: "layout",
-      kind: "boolean",
-      description:
-        "The button listing every item shows even while every item is in the row, so it's always in the same " +
-        "spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away."
     }
   ],
   slots: [
@@ -128,7 +120,7 @@ export const toolbarVocabulary = {
     {
       name: "all-items",
       description:
-        "`max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
+        "`max-visible`:  the button listing every item, while some are put away or scrolled out of the row."
     }
   ],
   states: [

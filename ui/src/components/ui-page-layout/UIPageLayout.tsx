@@ -54,6 +54,8 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  * - `drawer="compact"`:  the drawer shows only its icons, as the layout sets `collapsed` on each `<ui-site-nav>` in it.
  *   - The pointer resting on it (`--ui-hover-delay`), or the keyboard's focus coming into it, opens it over the page,
  *     all of it, without pushing the page:  its column keeps its width.  Leaving it closes it.
+ *   - It grows out from the column's edge and shrinks back into it;  switched to all of it and back, the column
+ *     widens and narrows (`UIPageLayout.css`, "Motion").
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the start
  *   (`:state(open)`), from a `<ui-site-nav-button>` inside it, or its own menu button when it has none.
  *   - Escape closes it;  so does going to a page from it (`ui-navigating` from inside the drawer).
@@ -134,6 +136,8 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   /**
    * Show or hide the drawer:  narrow, slide it in or out (`:state(open)`);  wide, switch `drawer` between its icons
    * only and all of it, and send `ui-toggle`.  Script API, on the DOM element too.
+   * - From its icons to all of it, the switch waits a frame:
+   *   the column first holds the width it has, so it has a width to widen from (`isWidening`).
    */
   toggleDrawer() {
     if (this.isNarrow) {
@@ -143,9 +147,28 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     const oldState: DrawerState = this.isCompact ? COMPACT : FULL
     const newState: DrawerState = oldState === COMPACT ? FULL : COMPACT
     this.peekTimer?.cancel()
+    this.cancelWidening?.()
     this.isOpen = false
+    if (newState === FULL) {
+      this.compactWidth = this.drawerColumn?.getBoundingClientRect().width
+      this.isWidening = true
+      this.cancelWidening = E.beforeNextPaint(() => this.switchDrawer(newState, oldState))
+    } else {
+      this.switchDrawer(newState, oldState)
+    }
+  }
+
+  /** Switch `drawer` to `newState`, and say so (`ui-toggle`). */
+  private switchDrawer(newState: DrawerState, oldState: DrawerState) {
+    // The column at its held width at once (holding it starts a move of its own), so it's what it widens from
+    if (this.isWidening && this.drawerColumn) {
+      for (const move of this.drawerColumn.getAnimations()) move.finish()
+      void getComputedStyle(this.drawerColumn).inlineSize
+    }
     this.drawer = newState === COMPACT ? COMPACT : undefined
     this.send("ui-toggle", { newState, oldState })
+    // ... held till it's no longer compact everywhere (`:state(compact)` follows a moment later)
+    if (this.isWidening) this.cancelWidening = E.beforeNextPaint(() => (this.isWidening = false))
   }
 
   /** Escape closes the drawer open over the page. */
@@ -169,6 +192,12 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
 
   /** The compact drawer's column width, kept while it's open over the page:  so the page doesn't move. */
   @E.state accessor compactWidth: number | undefined = undefined
+
+  /** Switching from its icons to all of it, for a frame:  the compact column holds its width, to widen from. */
+  @E.state accessor isWidening = false
+
+  /** Stop waiting the frame `toggleDrawer()` waits before widening, while one runs. */
+  private cancelWidening: (() => void) | undefined
 
   /** The pointer came onto the compact drawer:  open it after the page's hover delay (`--ui-hover-delay`). */
   private onDrawerEnter(event: PointerEvent) {
@@ -199,9 +228,10 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     this.isOpen = true
   }
 
-  /** Its inline style:  the compact column's kept width, while it's open over the page. */
+  /** Its inline style:  the compact column's kept width, while it's open over the page or about to widen. */
   get layoutStyle(): Record<string, string | undefined> {
-    const width = this.isCompact && this.isOpen && !this.isNarrow ? this.compactWidth : undefined
+    const isHeld = (this.isCompact && !this.isNarrow && this.isOpen) || this.isWidening
+    const width = isHeld ? this.compactWidth : undefined
     return { [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px` }
   }
 

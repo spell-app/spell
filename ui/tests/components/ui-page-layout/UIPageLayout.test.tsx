@@ -74,7 +74,10 @@ describe("<ui-page-layout>", () => {
     expect(layout.getAttribute("drawer")).toBe("compact")
     expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
     expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({ newState: "compact", oldState: "full" })
+    // From its icons to all of it, the switch waits a frame:  the column holds its width first, to widen from
     layout.toggleDrawer()
+    expect(layout.getAttribute("drawer")).toBe("compact")
+    await new Promise(requestAnimationFrame)
     await ShadowTree.settle(layout)
     expect(layout.hasAttribute("drawer")).toBe(false)
     expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({ newState: "full", oldState: "compact" })

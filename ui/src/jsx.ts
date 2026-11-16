@@ -51844,7 +51844,7 @@ export interface UIToolbarAttributes {
    */
   "prop:scrollFirst"?: boolean | ""
   /**
-   * More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.  An item picked there joins the row, and the one chosen longest ago leaves it.
+   * More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.  An item picked there joins the row, and the one chosen longest ago leaves it.
    * - takes:  text
    */
   "max-visible"?: string
@@ -51883,16 +51883,6 @@ export interface UIToolbarAttributes {
    * @deprecated write `all-items-at-end` -- `prop:` stays only for compiled spell
    */
   "prop:allItemsAtEnd"?: boolean | ""
-  /**
-   * The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away.
-   * - takes:  flag (present / absent)
-   */
-  "all-items-always"?: boolean | ""
-  /**
-   * `all-items-always`, as the DOM element's property.
-   * @deprecated write `all-items-always` -- `prop:` stays only for compiled spell
-   */
-  "prop:allItemsAlways"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)

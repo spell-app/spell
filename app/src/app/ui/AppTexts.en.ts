@@ -157,6 +157,8 @@ export const APP_TEXTS = {
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
   closeTab: "Close",
+  /** The file bar's ✕ at its far right, which hides the code (epic `editor` T83). */
+  hideCode: "Hide the code",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftHeading: "Throw away your draft?",
@@ -236,8 +238,7 @@ export const APP_TEXTS = {
   siteChangePart: "Change {name}",
   siteMovePart: "Move {name}",
   siteOpenPage: "Open in Edit",
-  siteOpenInNewTab: "Open the live page in a new tab",
-  siteRunInNewTab: "Open this page of the site in a new tab",
+  siteEditPart: "Edit {name}",
   siteBackToSite: "Back to the site",
   siteGroupTitle: "Sites",
   siteGroupLine: "Every site in this group:  open one to change its pages.",
@@ -618,6 +619,8 @@ export const APP_TEXTS = {
   // the phone's sheet (`<InspectorSheetBar>`)
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
+  // the Inspector card's Close, right of Inspect app:  hides the column (I186)
+  inspectorClose: "Close the Inspector",
   inspectorAddEvent: "Add Event",
   inspectorAddAction: "Add Action",
   // a Code card row's ✕ (`<RemoveEventButton>`, epic `editor` T73):  its tooltip and undo step, then what it asks
