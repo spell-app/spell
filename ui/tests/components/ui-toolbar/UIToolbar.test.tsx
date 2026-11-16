@@ -235,6 +235,22 @@ describe("<ui-toolbar> bar slots", () => {
       expect(listButton(plain.host)!.getBoundingClientRect().right).toBeLessThan(plainBar.right - 100)
     })
 
+    it("`all-items-always`:  the button, and its list of every item, while every item is in the row", async () => {
+      const { host } = await toolbar(
+        600,
+        items(1),
+        `${LOOK} max-visible all-items-icon="file outline" all-items-at-end all-items-always`
+      )
+      await expect.poll(() => listButton(host)?.querySelectorAll("svg").length).toBe(2)
+      expect(host.matches(":state(limited)")).toBe(false)
+      expect(shown(host)).toEqual(["F0"])
+      const bar = host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+      expect(Math.round(listButton(host)!.getBoundingClientRect().right)).toBe(Math.round(bar.right))
+      listButton(host)!.click()
+      await ElementFixture.settle()
+      expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual(["F0"])
+    })
+
     it("bare, it means 8", async () => {
       const { host } = await toolbar(900, items(8), `${LOOK} max-visible`)
       await ElementFixture.settle()
@@ -268,7 +284,10 @@ describe("<ui-toolbar> bar slots", () => {
           await ElementFixture.settle()
         }
         await expect.poll(() => shown(host)).toEqual(["F0", "F2", "F4"])
-        return { ...made, item: (title: string) => [...host.querySelectorAll("ui-item")].find((each) => each.textContent === title)! }
+        return {
+          ...made,
+          item: (title: string) => [...host.querySelectorAll("ui-item")].find((each) => each.textContent === title)!
+        }
       }
 
       /** Click `item`'s box, as a person does:  the row chooses it. */
@@ -280,7 +299,13 @@ describe("<ui-toolbar> bar slots", () => {
         await expect.poll(() => shown(host)).toEqual(["F0", "F4"])
         listButton(host)!.click()
         await ElementFixture.settle()
-        expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual(["F0", "F1", "F2", "F3", "F4"])
+        expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual([
+          "F0",
+          "F1",
+          "F2",
+          "F3",
+          "F4"
+        ])
         rows(host)[2]!.click()
         await expect.poll(() => shown(host)).toEqual(["F0", "F2", "F4"])
       })

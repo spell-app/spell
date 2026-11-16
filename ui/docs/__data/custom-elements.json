@@ -45956,6 +45956,14 @@
               "fieldName": "allItemsAtEnd"
             },
             {
+              "name": "all-items-always",
+              "description": "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "allItemsAlways"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -46169,7 +46177,7 @@
             },
             {
               "name": "all-items",
-              "description": "`max-visible`:  the button listing every item, while some are put away."
+              "description": "`max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
             }
           ],
           "cssStates": [

@@ -2230,7 +2230,9 @@ export const HELP_TABLE: Readonly<
       "all-items-icon":
         "With `max-visible`: an icon before the caret of the button listing every item, saying what they are (a project's files: `file outline`).",
       "all-items-at-end":
-        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show."
+        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show.",
+      "all-items-always":
+        "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few)."
     }
   },
   "ui-transition": {
