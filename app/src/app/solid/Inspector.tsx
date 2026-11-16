@@ -1126,9 +1126,27 @@ export class Inspector {
    */
   static scopeOf(part: { value: object }): InspectorScope {
     if (!isThing(part.value)) return "this"
+    // the only one of its type:  its type IS it, so changes go there, never asked (epic `editor` I183)
+    if (Inspector.isOneOfAKind(part.value)) return "all"
     void scopeChoices()
     const chosen = Inspector.scopesChosen[part.value.constructor.name]
     return chosen ?? InspectorWrites.startingScope(part.value, Inspector.storedNamesOf(part.value))
+  }
+
+  /**
+   * Is `thing` the only one its program can have of its type, so "this one" and "all of them" are the same?
+   * (epic `editor` I183)
+   * - A one of a kind:  a type and its one thing declared together, `solitaire is an app`,
+   *   `leaderboard is a page`, a site, a place (`family cookbook is a web server at ...`).
+   *   The parse says so:  its thing is a variable of kind `only` in the project's scope.
+   * - The program's app (`core.RUNTIME.app`), however it's declared:  a program has one app.
+   *   So it holds before the editor's first parse, while the program runs from a kept compile.
+   */
+  static isOneOfAKind(thing: object): boolean {
+    if (runtimeCore()?.RUNTIME?.app === thing) return true
+    const className = thing.constructor.name
+    const variables = editor.project?.scope?.variables?.get() ?? []
+    return variables.some((variable) => variable.kind === "only" && variable.datatype === className)
   }
 
   /**
@@ -3113,6 +3131,7 @@ const SCOPE_PREF = "scope"
  * (Q32):  so it costs no height.
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
+ * - Never for a one of a kind, the app among them (`Inspector.isOneOfAKind()`):  its changes go to its type.
  * - Several things:  one switch for them all, the choice remembered for their type;  of several types, none.
  * - A plain pair of the row's own items, so it collapses with the row when the card is narrow.
  ****************/
@@ -3149,11 +3168,14 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
   )
 }
 
-/** Does `part` get the This | All switch?  A thing, or several of one type:  a Spell UI element has no type to change. */
+/**
+ * Does `part` get the This | All switch?  A thing, or several of one type:  a Spell UI element has no type to change.
+ * - Never a one of a kind (`solitaire is an app`):  there's no "All Solitaires", only it (epic `editor` I183).
+ */
 function hasScopeSwitch(part: Inspected): boolean {
   const main = part.together?.[0]
   const isOneType = !main || part.together!.every((each) => each.value.constructor === main.value.constructor)
-  return isThing(part.value) && isOneType
+  return isThing(part.value) && isOneType && !Inspector.isOneOfAKind(part.value)
 }
 
 /**
@@ -3243,9 +3265,13 @@ function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
   const why = (): NotWritten | undefined => {
     // a thing made in a loop says so on each field, its crossed-out save icon (`Inspector.unsavedTipOf()`)
-    // All Cards edits the type's own fields (Q29):  no note that its values come from the code
-    if (Inspector.typeEdited) return undefined
-    if (isThing(props.part.value) && Inspector.scopeOf(props.part) === "all" && Inspector.isAllFromCode(props.part)) {
+    // All Cards edits the type's own fields (Q29):  no note that its values come from the code;
+    // a one of a kind's type IS it, so a change it can't keep still says why (I183)
+    const isOneOfAKind = Inspector.isOneOfAKind(props.part.value)
+    if (Inspector.typeEdited && !isOneOfAKind) return undefined
+    // a one of a kind has no "each" to speak of
+    const isAll = Inspector.scopeOf(props.part) === "all" && !isOneOfAKind
+    if (isThing(props.part.value) && isAll && Inspector.isAllFromCode(props.part)) {
       return { reason: "allFromCode" }
     }
     const why = notSaved()?.part === props.part ? notSaved()?.why : undefined

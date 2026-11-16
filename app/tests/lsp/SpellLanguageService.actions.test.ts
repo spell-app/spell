@@ -43,7 +43,7 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
     expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "turn over the next card"]))
     // in its order:  the game's own, then the app's, then the other types'
     // - Solitaire's other types have none a button may run:  a card's `play` answers yes or no since its
-    //   `put a card on a pile` may cancel (epic `language` P56)
+    //   `move a card to a pile` may cancel (epic `language` P56)
     const sorted = [...items].sort((a, b) => a.sortText!.localeCompare(b.sortText!)).map(({ label }) => label)
     expect(sorted.indexOf("auto play")).toBeLessThan(sorted.indexOf("undo"))
     expect(sorted.slice(-2)).toEqual(["undo", "redo"])

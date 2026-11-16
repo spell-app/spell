@@ -17,7 +17,11 @@
  *   - another cell kept by the 5-second save, the box still open where it was, the scroll unmoved;  Escape puts it
  *     back, in the file too
  *   - the formatting bar (P61):  above the box;  ⌘A, ⌘B and Enter bold a cell in the file, the page unmoved;  again,
- *     the bold off
+ *     the bold off;  its inline code button (T67) there
+ *   - a paragraph of the page's own HTML (T66):  ⌥-click, End, typing and Enter change that paragraph alone in the
+ *     file, the page unmoved and not reloaded
+ *   - a code block of the page's own (T66):  ⌥-click, End, a new line typed, ⌘Enter:  that block's text alone changed,
+ *     escaped
  *   - no page errors
  * - a screenshot of the table:  `edit-in-place.png` in outDir (default a temporary folder)
  * - exits 1 on any miss
@@ -165,6 +169,13 @@ try {
     !!barFacts.bar && barFacts.bar.height > 0 && barFacts.bar.bottom <= barFacts.box.top + 1,
     `the formatting bar sits just above the box (${barFacts.bar?.bottom} vs ${barFacts.box?.top})`
   )
+  check(
+    await page.evaluate(
+      () =>
+        !!document.querySelector("#loe ui-markdown").shadowRoot.querySelector('[part~=edit-bar] ui-button[icon="code"]')
+    ),
+    "the bar has the inline code button (T67)"
+  )
   await page.keyboard.press("Meta+a")
   const scrolled = await page.evaluate(() => scrollY)
   const bolded = savedOnce(page)
@@ -180,6 +191,112 @@ try {
   await page.keyboard.press("Enter")
   await unbolded
   check(readFileSync(file, "utf8").includes(`| ${bold} |`), "⌘B again took the bold off")
+  ////////////////
+  // ## The page's own HTML (T66)
+  ////////////////
+
+  const paragraph = await page.evaluate(() => {
+    const blocks = "p, ul, ol, li, div, table, pre, blockquote, section, ui-section"
+    const found = [...document.querySelectorAll("main ui-section[id] p")].find(
+      (each) =>
+        !each.closest("ui-markdown, [data-spell-added], [source], epic-page") &&
+        !each.querySelector(blocks) &&
+        (each.textContent ?? "").trim().length > 30
+    )
+    if (!found) return undefined
+    for (let section = found.closest("ui-section"); section; section = section.parentElement?.closest("ui-section"))
+      section.setAttribute("open", "")
+    found.setAttribute("data-check-edit", "")
+    return found.textContent.trim()
+  })
+  check(!!paragraph, "the guide has a paragraph of its own HTML")
+  if (paragraph) {
+    await page.waitForTimeout(600)
+    await page.evaluate(() => document.querySelector("[data-check-edit]").scrollIntoView({ block: "center" }))
+    await page.waitForTimeout(400)
+    const spot = await page.evaluate(() => {
+      const box = document.querySelector("[data-check-edit]").getBoundingClientRect()
+      return { x: box.left + 8, y: box.top + 8, top: box.top, scroll: scrollY }
+    })
+    const fileBefore = readFileSync(file, "utf8")
+    await altClick(page, spot)
+    check(
+      await page.evaluate(() => document.querySelector("[data-check-edit]").isContentEditable),
+      "⌥-click made the paragraph editable"
+    )
+    await page.keyboard.press("End")
+    const typingAt = await page.evaluate(() => scrollY)
+    await page.keyboard.type(" Checked in place.")
+    await page.keyboard.press("Enter")
+    let fileAfter = fileBefore
+    for (let wait = 0; wait < 25 && fileAfter === fileBefore; wait++) {
+      await page.waitForTimeout(200)
+      fileAfter = readFileSync(file, "utf8")
+    }
+    const lines = changedLines(fileBefore, fileAfter)
+    writeFileSync(join(outDir, "paragraph-before.html"), fileBefore)
+    writeFileSync(join(outDir, "paragraph-after.html"), fileAfter)
+    check(
+      fileAfter.includes(" Checked in place.") && fileAfter.replace(" Checked in place.", "") === fileBefore,
+      `the paragraph alone changed in the file (${lines.length} line${lines.length === 1 ? "" : "s"})`
+    )
+    const moved = await page.evaluate(() => ({
+      top: document.querySelector("[data-check-edit]").getBoundingClientRect().top,
+      scroll: scrollY,
+      editable: document.querySelector("[data-check-edit]").isContentEditable
+    }))
+    check(!moved.editable, "Enter kept it, the paragraph no longer editable")
+    check(moved.scroll === typingAt, `keeping it didn't scroll the page (${typingAt} -> ${moved.scroll})`)
+    check(await page.evaluate(() => window.__notReloaded === true), "the page didn't reload")
+  }
+
+  ////////////////
+  // ## A code block of the page's own (T66)
+  ////////////////
+
+  const hasCode = await page.evaluate(() => {
+    const found = [...document.querySelectorAll("main ui-section[id] pre > code")].find(
+      (each) => !each.closest("ui-markdown, [data-spell-added], [source]")
+    )
+    if (!found) return false
+    for (let section = found.closest("ui-section"); section; section = section.parentElement?.closest("ui-section"))
+      section.setAttribute("open", "")
+    // a code block is folded in its accordion (spell-code)
+    found.closest("ui-accordion")?.setAttribute("open", "0")
+    found.setAttribute("data-check-code", "")
+    return true
+  })
+  check(hasCode, "the guide has a code block of its own")
+  if (hasCode) {
+    // a tall window:  the folded page may be too short to scroll the block to the middle
+    await page.setViewportSize({ width: 1100, height: 1600 })
+    await page.waitForTimeout(600)
+    await page.evaluate(() => document.querySelector("[data-check-code]").scrollIntoView({ block: "center" }))
+    await page.waitForTimeout(400)
+    const spot = await page.evaluate(() => {
+      // its middle:  its copy button sits at its first line's left
+      const box = document.querySelector("[data-check-code]").getBoundingClientRect()
+      return { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+    })
+    const codeBefore = readFileSync(file, "utf8")
+    await altClick(page, spot)
+    await page.keyboard.press("End")
+    await page.keyboard.press("Enter")
+    await page.keyboard.type("// a < b, checked")
+    await page.keyboard.press("Meta+Enter")
+    let codeAfter = codeBefore
+    for (let wait = 0; wait < 25 && codeAfter === codeBefore; wait++) {
+      await page.waitForTimeout(200)
+      codeAfter = readFileSync(file, "utf8")
+    }
+    writeFileSync(join(outDir, "code-before.html"), codeBefore)
+    writeFileSync(join(outDir, "code-after.html"), codeAfter)
+    const added = codeAfter.includes("// a &lt; b, checked")
+    const at = codeAfter.indexOf("// a &lt; b, checked")
+    const rest = codeAfter.slice(0, at - 1) + codeAfter.slice(at + "// a &lt; b, checked".length)
+    check(added && rest === codeBefore, "the code block's text alone changed in the file, escaped")
+  }
+
   await page.locator("#loe").screenshot({ path: join(outDir, "edit-in-place.png") })
   check(!errors.length, `no page errors${errors.length ? `:  ${errors.join(" / ")}` : ""}`)
 } finally {

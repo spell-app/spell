@@ -152,7 +152,7 @@ test("inbox:  an issue's or a call's Do this says what the agent does;  update .
   expect(plan.itemState(plan.findItem("j1")!)).toBe("replied")
 })
 
-test("apply:  a todo's plane queues it into the first phase still to do, with a Noted card;  its x cancels it", async () => {
+test("apply:  a todo's plane STARTS it now, never into an unrelated phase to do (I314), with a Noted card;  its x cancels it", async () => {
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   plan.addPhase("Bring It In")
   plan.addPhase("Fold Into Elements")
@@ -171,11 +171,12 @@ test("apply:  a todo's plane queues it into the first phase still to do, with a 
   const t1 = after.findItem("t1")!
   expect([t1.getAttribute("queued"), t1.getAttribute("work"), t1.getAttribute("review-as")]).toEqual([
     after.today,
-    "P2 · Fold Into Elements",
+    "now",
     "next"
   ])
   const card = t1.querySelector(':scope > epic-status[slot="status"]')!
-  expect([card.getAttribute("state"), card.textContent]).toEqual(["noted", "Queued for P2 · Fold Into Elements"])
+  expect(card.getAttribute("state")).toBe("noted")
+  expect(card.textContent).toMatch(/^Start now:\s+an agent takes it next$/)
   // Owen's note kept, as his reply
   expect(t1.querySelector('epic-reply[from="Owen"]')?.textContent).toBe("after the merge")
   const t2 = after.findItem("t2")!
@@ -185,27 +186,27 @@ test("apply:  a todo's plane queues it into the first phase still to do, with a 
     "drop"
   ])
   const out = printed.join("\n")
-  expect(out).toContain("T1  queued for P2 · Fold Into Elements")
+  expect(out).toContain("T1  start now:  start an agent on it")
+  expect(out).not.toContain("Fold Into Elements")
   expect(out).toContain("T2  canceled:  dropped by Owen in review")
   expect(after.toString()).toMatch(/T2 canceled:\s+dropped by Owen in review/)
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
-test("apply:  a todo's plane with no phase still to do:  queued for the next phase, and it says so", async () => {
+test("apply:  a todo's plane with a note asking for a phase:  left for the session, to make a NEW phase (I314)", async () => {
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Unrelated")
   plan.addItem("todo", "later")
   writeFileSync(file, plan.toString())
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("t1", { action: "next" }, M1)
+    inbox.setMark("t1", { action: "next", note: "give these a new phase" }, M1)
     inbox.markSent(M2)
   })
   await commands().inbox.run("x", file, ["apply"], {})
   const t1 = PlanDoc.parse(readFileSync(file, "utf8")).findItem("t1")!
-  expect(t1.getAttribute("work")).toBe("the next phase")
-  expect(t1.querySelector("epic-status")!.textContent).toMatch(
-    /^Queued for the next phase:\s+there's no phase to do yet$/
-  )
-  expect(printed.join("\n")).toContain("T1  queued for the next phase (no phase to do yet)")
+  expect(t1.getAttribute("work")).toBeNull()
+  expect(printed.join("\n")).toContain("a new phase for it")
+  expect(printed.join("\n")).not.toContain("Unrelated")
 })
 
 test("apply:  the note box's x (`skip`):  reviewed, nothing else, a note kept;  a todo dropped;  a phase noted", async () => {

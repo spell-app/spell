@@ -1031,12 +1031,16 @@ a line of the built-in types table, a built-in template, or a project's own `one
   - A declaration names them without quotes:  `Rule.declaredText()`.
     - `SubjectRule` also overrides it:  `card`, not `it`.
 - An ABILITY may be a word before the template, on the type's own line (epic `language` P48):
-  `a "card" is a draggable two sided view`, `a "pile" is a droppable viewable list of cards`.
+  `a "card" is a draggable two sided view`, `a "pile" is a viewable, droppable list of cards`.
   - The same flag as `it is draggable` in its body:  `static draggable = true`, first among its body's statements
     (`TypeDeclaration.abilitiesOf()`, which `Block.getAST()` asks for).
-  - `{ability:draggable_or_droppable}*`, so several:  `a clickable selectable thing`.
+  - `[ability:{draggable_or_droppable} ,?]`, so several, a comma between them optional:
+    `a clickable selectable thing`, `a draggable, clickable two sided view` (epic `language` I112).
+    - An optional delimiter may be left out, and is never taken last:  `P.Repeat`.
+  - A viewable list's go before `viewable` or after it:  `a viewable, droppable list of cards`,
+    `a droppable viewable list of cards`.
   - Spanish's come after the template, as its adjectives do:  `una "carta" es una vista reversible arrastrable`,
-    `una "pila" es una lista visible soltable de cartas`.
+    `una "pila" es una lista visible, soltable de cartas`, a comma before each optional.
 - A type's line may say its short name last (P48, Q6):  `a "playing card" is a thing, aka "card"`
   (Spanish `, alias "carta"`);  a property's start and default too:  `its score is a number, starting at -1`,
   `its direction is one of up or down, with default down` (Spanish `, empezando en`, `, por defecto`).

@@ -838,7 +838,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 - `yarn pack:check` ~== `spell-pack check` ~== `spell pack check epics` -- exits 1 while either is stale
 - `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
   - rerun after changing an element or a page's sections, and commit `docs/__data/`
-- `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium)
+- `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium):  fast, no turn needed
+- `yarn test:integration` -- the slow tests that run real git and processes, one file at a time (`INTEGRATION_TESTS`
+  in [vitest.config.ts](../vitest.config.ts);  epic `epic-engine` I313):  in the turn, `epic turns run test -- yarn
+  test:integration`;  `yarn review` and CI run both
   - the root's `yarn test` runs them as `epics:node` / `epics:browser`
 - `yarn ts`, `yarn lint`, `yarn format`, `yarn review`
 - the docs tools' own (see "Scripts"):
@@ -1296,7 +1299,9 @@ In `tools/`:
         - too wide even then (phone width), it scrolls sideways inside its own box, never the page.
           `spell-doc.css`, "A TWO-COLUMN table".
       - remembered per table, in this browser (`spell-table-wide:<path>`):
-        by the table's id, else the nearest id above it and which table it is under that (`p14#table-1`)
+        by the table's id, else the nearest id above it and its header's words (`p-look-roles#today-becomes-...`),
+        else which table it is under that (`p14#table-1`);  ⌥-click the button:  every table the same way, and back
+        into the column forgets them all, the reset (epic `epic-engine` I315)
       - the runtime's `wireTableWidths()` measures how far in a table starts,
         so one inside a list item or an epic item's details goes out to the gutter too
       - no button at phone width:  the column is the page already
@@ -1631,8 +1636,19 @@ In `tools/`:
       with an id read fresh (`SPELL_SERVER.readElement()`), the block found by its text, only its text swapped, indented as
       it was, its one-line tags kept (r52), then written back (`editPage()`, `shown`), so the page never reloads or moves
     - the open box has a formatting bar above it (epic `epic-engine` P61, Q67):  bold, italic, strikethrough, a link,
-      Paragraph / H2-H4, lists, clear formatting;  ⌘B ⌘I ⌘K ⌘⇧X, never ⌘E (Claude Code's);  and a switch between the
-      markdown with its marks faint and formatted only, remembered per browser (Spell UI's `MarkdownBox`)
+      Paragraph / H2-H4, lists, clear formatting, inline code (a button only, T67);  ⌘B ⌘I ⌘K ⌘⇧X, never ⌘E (Claude
+      Code's);  and a switch between the markdown with its marks faint and formatted only, remembered per browser (Spell
+      UI's `MarkdownBox`)
+    - the page's OWN HTML too (epic `epic-engine` T66, [spell-doc-edit.js](tools/_assets/spell-doc-edit.js)):  ⌥-click a
+      paragraph, list item, heading, table cell or definition written in the page (not in a `<ui-markdown>`), or a code
+      block (as plain text);  the block itself becomes editable;  Enter (⌘Enter in code) or a click away keeps it,
+      Escape puts it back, Home / End go to its ends
+      - saved by `HtmlBlocks` ([HtmlBlocks.js](tools/HtmlBlocks.js)):  the nearest element with an id the file has is
+        read, the block found there by its tag and place among the same tags, its words checked against the page's,
+        and only its inside swapped (the file's spacing at its ends kept);  a mismatch refuses, saying to reload
+      - not:  an epic page, a body loaded from another file (`source`), what the runtime added, a block holding other
+        blocks (an item with a list), a block with no element with an id around it in the file
+      - adding or removing a table's rows and columns, and a pencil to turn plain-click editing on:  not built (a todo)
     - the toolbar bullhorn's tooltip says "⌥-click text to edit it";  `editable="tabs"` (Write / Preview) is left alone
     - [check-edit-in-place.mjs](demo/check-edit-in-place.mjs) checks it, on a copy of a guide in `pages/`
 - Copy buttons (epic `epic-engine` I182;  2026-10-29:  "this should have a copy icon on the left"):

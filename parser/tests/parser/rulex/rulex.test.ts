@@ -127,7 +127,8 @@ describe("testing language rulex", () => {
       pair: "x{2}",
       alert: "\\[!(note|tip)/i\\]",
       list: "[{word},]",
-      spacedList: "[{word} ,]"
+      spacedList: "[{word} ,]",
+      optionalCommas: "[{word} ,?]"
     })) {
       const rule = P.Rule.compileSyntax(syntax)
       rule.name = name
@@ -190,6 +191,14 @@ describe("testing language rulex", () => {
       expect(matched("list", "x, y")).toBe(3)
       expect(matched("list", "x , y")).toBe(1)
       expect(matched("spacedList", "x , y")).toBe(3)
+    })
+
+    it("an optional delimiter may be left out, and is never taken last (epic `language` I112)", () => {
+      expect(matched("optionalCommas", "x, y")).toBe(3)
+      expect(matched("optionalCommas", "x y")).toBe(2)
+      expect(matched("optionalCommas", "x, y hello")).toBe(4)
+      // the comma after the last is for whatever follows, `, aka "x"`
+      expect(matched("optionalCommas", "x y,")).toBe(2)
     })
   })
 })

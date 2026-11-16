@@ -5,7 +5,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
   template Card  is a TwoSidedView
     A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
     Properties  rank, suit, color, name, value, symbol, short name, last pile, pile
-    Actions     is a face card, is a number card, is the (rank) of (suit), put a card on a pile,
+    Actions     is a face card, is a number card, is the (rank) of (suit), move a card to a pile,
                 is on top of its pile, play a card, the points for (a card) on (a pile)
     Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
                 Colors (red, black)
@@ -47,7 +47,7 @@ Card.spell:1
 A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 
 Properties  rank, suit, color, name, value, symbol, short name, last pile, pile
-Actions     is a face card, is a number card, is the (rank) of (suit), put a card on a pile,
+Actions     is a face card, is a number card, is the (rank) of (suit), move a card to a pile,
             is on top of its pile, play a card, the points for (a card) on (a pile)
 Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
             Colors (red, black)

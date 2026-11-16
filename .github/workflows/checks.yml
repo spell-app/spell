@@ -47,6 +47,9 @@ jobs:
       - run: yarn ts
       - run: yarn lint
       - run: yarn test
+      # epic's slow, process-spawning tests, which its `yarn test` leaves out (epic `epic-engine` I313)
+      - run: yarn test:integration
+        working-directory: epic
 
   # The epic tools on Windows (epic `epic-friend` P15):  the process, link and clipboard helpers (`Processes`,
   # `Links`, the extension's `ClipboardImage`), then epic's node tests and the window script's.
@@ -68,6 +71,8 @@ jobs:
       - run: git config --global user.name CI && git config --global user.email ci@spell.invalid
       - run: yarn vp test run --project server tests/server/Processes.test.ts
       - run: yarn test:node
+        working-directory: epic
+      - run: yarn test:integration
         working-directory: epic
       - run: yarn test:scripts
         working-directory: epic

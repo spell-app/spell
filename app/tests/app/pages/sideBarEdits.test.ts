@@ -257,6 +257,34 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
+    "the app is one of a kind:  no This | All switch, its changes go to its type, and no All Solitaires anywhere (I183)",
+    { timeout: 90_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", { codeEditor: true })
+      await page.evaluate(async () => {
+        const { editor, Inspector } = window as unknown as DebugGlobals
+        const { core } = await editor.loadRuntime()
+        Inspector.inspectThing(core.things.all().find((thing) => thing.constructor.name === "Solitaire")!)
+      })
+      await page.waitForSelector("ui-property-editor", { timeout: 8000 })
+      await page.waitForTimeout(800)
+      expect(await page.locator(".InspectorScope").count()).toBe(0)
+      expect(await page.locator(".InspectorTrail").innerText()).toContain("Solitaire")
+      // its type's cards, as All Cards has:  its type is it
+      const cards = await page
+        .locator(".InspectorCard")
+        .evaluateAll((all) => all.map((one) => (one as HTMLElement).dataset.panel))
+      expect(cards).toEqual(["properties", "events", "actions", "tests", "views"])
+      expect(await page.locator(".InspectorColumn").innerText()).not.toMatch(/All Solitaires/i)
+      // a change it can't keep still says why, in words that name no "all"
+      await change(page, "score", 7)
+      expect(await page.locator(".InspectorNotSaved").textContent()).not.toMatch(/\ball\b/i)
+      await page.close()
+    }
+  )
+
+  test(
     "a drawn tag:  an attribute's added, then changed, and the menu says what it'll undo",
     { timeout: 90_000 },
     async () => {

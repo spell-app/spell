@@ -13,7 +13,7 @@ export const words = {
       valor: "valor",
       símbolo: "símbolo",
       nombreCorto: "nombre corto",
-      ponerEnPila: "poner una carta en una pila",
+      moverAPila: "mover una carta a una pila",
       jugar: "jugar una carta",
       losPuntosPorEnPila: "los puntos por (una carta) en (una pila)",
       pila: "pila"

@@ -20,3 +20,36 @@
     text-overflow: ellipsis;
   }
 }
+
+/*
+ * Look of `<RestartNeeded>` (`Notice.tsx`):  one compact row, sized to what it holds
+ *   (epic `editor` I181):  a restart icon, the message, a primary Restart button, a close button.
+ * - Raised off the page as a popup is:  the theme's surface, border and floating shadow.
+ * - Never wraps:  the message cuts short with "…" in a window too narrow for it.
+ */
+.RestartNeededBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--ui-popup-border-color, var(--ui-border-color));
+  border-radius: var(--ui-popup-radius, var(--ui-radius-m));
+  background: var(--ui-popup-background, var(--ui-surface));
+  box-shadow: var(--ui-shadow-floating);
+  color: var(--ui-text-color);
+  white-space: nowrap;
+
+  & ui-icon {
+    flex: none;
+    color: var(--ui-primary);
+  }
+  & .RestartNeededText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+  & ui-button {
+    flex: none;
+  }
+}

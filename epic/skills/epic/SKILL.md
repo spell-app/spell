@@ -536,6 +536,14 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
   - run a FULL test run in its turn, one at a time on the machine:
     `epic turns run test -- yarn test` (and `yarn review`, `yarn kit:review`);  a single test file needs no turn
     - why:  three full runs at once drove the load to about 50, and failed tests on their 5-second timeouts
+    - the FOLDERS it touched, run from each (`cd epic && epic turns run test -- yarn test`), never the kit's root
+      `yarn review` over every folder unless it changed the kit's `src/`:  that held the turn 30+ minutes while every
+      other agent waited (epic `epic-engine` I313)
+    - epic's own:  its `yarn test` is fast and needs no turn;  its slow tests that run real git and processes are
+      `yarn test:integration`, one file at a time, in the turn (`epic turns run test -- yarn test:integration`);
+      `yarn review` and CI run both
+    - waiters go first come, first served, and wait while the line moves;  `epic turns list` shows the holder, how
+      long, and the line
   - record its choices as items (`epic add <epic>#J ... --calm`), and come back with any question for the person,
     rather than ask it:  an agent has no question modal
     - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
@@ -896,8 +904,11 @@ The person reviews ON THE PAGE:  the epic page in the side bar's Review tab, whe
 - An issue's or a judgement call's first button is Do this:  worked in the item itself, no todo
   (`epic guide review`, "Do this").
 - A todo that's WORK (no `limit`) has these instead:
-  the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
+  the plane, "start it now" (`next`);  Revisit;  the x, "drop it" (`drop`).
   `inbox apply` applies both.
+  - The plane STARTS the todo (epic `epic-engine` I314):  its line says `start now`, and the session starts an agent on
+    each at once ("The session answers;  agents build"), never queueing it into a phase still to do.
+    His note asking for a phase:  `epic phase` a NEW one for it, next.
 - Every other note box:  Revisit Later;  the x, "skip this" (`skip`:  nothing to do).
   `inbox apply` applies it as reviewed:  the note kept, the status left as it was.
 - Choose, on option cards.
@@ -1033,7 +1044,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
      - In Codex:  run it in the foreground, and take the work it returns;  end the turn only when it times out.
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
-   a todo's plane queues it for the next phase, its x drops it;
+   a todo's plane starts it now, its x drops it;
    a phase's or an issue's plane (Do this) says go ahead and build it;
    an open issue's x closes it (not needed);  a fixed one's check accepts the fix;
    a note box's x skips it (nothing to do);

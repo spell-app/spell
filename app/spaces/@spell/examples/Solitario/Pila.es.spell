@@ -3,7 +3,7 @@
 // Cada pila es su propio elemento alrededor de los elementos de sus cartas, `<solitario-columna>` alrededor de `<solitario-carta>`s.
 // Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias reglas (`soltable`).
 
-una "pila" es una lista visible soltable de cartas
+una "pila" es una lista visible, soltable de cartas
 	su "disposición" es uno de apilada o vertical
 		// Cómo están sus cartas:  una sobre otra, o hacia abajo en una columna -- styles.css
 	su "color" es
@@ -21,17 +21,17 @@ una "pila" es una lista visible soltable de cartas
 			poner resumen a resumen + " " + el nombre corto de la carta
 		devolver resumen
 
-	cuando una carta se suelta sobre ella		-- poner la carta en la pila, si es un movimiento válido
-		poner la carta en la pila
+	cuando una carta se suelta sobre ella		-- mover la carta a la pila, si es un movimiento válido
+		mover la carta a la pila
 
-	para poner una carta en una pila, deshacible como "Mover carta"
+	para mover una carta a una pila
 		// La carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y la toman
 		// - rechazado, nada se mueve, y no hay nada que deshacer
-		// - un juego agrega sus propios pasos después:  `después de poner una carta en una pila`
+		// - un juego agrega sus propios pasos después:  `después de mover una carta a una pila`
 		cancelar si la pila de la carta no puede soltar la carta
 			o la pila no puede tomar la carta
 		para carta en (las cartas en la pila de la carta empezando con la carta)
-			mover eso a la pila
+			agregar eso a la pila
 
 	para probar las pilas
 		poner la reserva a una nueva pila con id "reserva"
@@ -52,4 +52,4 @@ una "pila" es una lista visible soltable de cartas
 		el nombre corto de los descartes debería ser "descartes: 7♥↓"
 
 una carta pertenece a una pila
-	// una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta
+	// una carta está en una sola pila a la vez:  moverla a otra pila la quita de esta

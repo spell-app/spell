@@ -1,25 +1,29 @@
-import type { monaco } from "./monaco"
-
 /****************
  * ### `TextMarks`
- * The marks a bubbly drawing puts on a text in Monaco, by offsets into it:  the base of `BubblyMarks` (Spell) and
- * `MarkupMarks` (HTML).
- * - Each mark is a Monaco decoration in the classes of the look's one sheet, `bubbly.css`.
- * - A shape names its place by an index into `marks`:  Monaco moves that mark as the text is edited.
- * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
+ * The marks a bubbly drawing puts on a text, by offsets into it:  the base of Monaco's `BubblyMarks` (Spell) and of
+ * `MarkupMarks` (HTML), which every editor reads.
+ * - Which stretch of the text gets which classes of the look's one sheet, `bubbly.css`, and which spacers:
+ *   worked out here, the same for every editor.
+ * - Only the last step is the editor's:  its `MarkMaker` turns each stretch into the editor's own mark
+ *   (Monaco's decoration, `MonacoMarks.make`;  CodeMirror's, `CodeMirrorMarkup`'s).
+ * - A shape names its place by an index into `marks`:  the editor moves that mark as the text is edited.
+ * - Pure data:  no editor in it, so it's tested without one.
+ *   NEVER imports Monaco or CodeMirror (epic `codemirror` P3).
  ****************/
-export class TextMarks {
+export class TextMarks<Mark> {
   /** Where each line starts in `text`. */
   private readonly lineStarts: number[] = []
 
   /**
    * `text`:  what the marks are on
-   * `marks`:  the decorations to set, in order, a shape naming its place by an index into them;
+   * `make`:  the editor's step, from a stretch to its own mark
+   * `marks`:  the marks made, in order, a shape naming its place by an index into them;
    *   another drawing's, to add to its own (a Spell drawing's tags, `MarkupMarks.within()`)
    */
   protected constructor(
     protected readonly text: string,
-    readonly marks: monaco.editor.IModelDeltaDecoration[] = []
+    protected readonly make: MarkMaker<Mark>,
+    readonly marks: Mark[] = []
   ) {
     let at = 0
     for (const line of text.split("\n")) {
@@ -34,28 +38,17 @@ export class TextMarks {
    */
   protected mark(start: number, end: number, classes: string, spacers: Spacers = {}): number {
     if (end <= start) return -1
-    const options: monaco.editor.IModelDecorationOptions = {
-      inlineClassName: classes ? `${PIECE} ${classes}` : PIECE,
-      ...(spacers.before ? { before: spacers.before } : {}),
-      ...(spacers.after ? { after: spacers.after } : {})
-    }
-    return this.marks.push({ range: this.range(start, end), options }) - 1
+    const stretch: MarkedStretch = { start, end, classes: classes ? `${PIECE} ${classes}` : PIECE, ...spacers }
+    return this.marks.push(this.make(stretch, this)) - 1
   }
 
   /** A mark holding a shape's place from `start` to `end`, and nothing else;  returns its index. */
   protected place(start: number, end: number): number {
-    return this.marks.push({ range: this.range(start, end), options: {} }) - 1
-  }
-
-  /** Monaco's range from offset `start` to `end`. */
-  protected range(start: number, end: number): monaco.IRange {
-    const from = this.positionAt(start)
-    const to = this.positionAt(end)
-    return { startLineNumber: from.line, startColumn: from.column, endLineNumber: to.line, endColumn: to.column }
+    return this.marks.push(this.make({ start, end }, this)) - 1
   }
 
   /** Offset `offset`'s line and column, 1-based. */
-  protected positionAt(offset: number): { line: number; column: number } {
+  positionAt(offset: number): { line: number; column: number } {
     let low = 0
     let high = this.lineStarts.length - 1
     while (low < high) {
@@ -71,8 +64,32 @@ export class TextMarks {
 // ## Types and helpers
 ////////////////
 
+/**
+ * An editor's step from a stretch of marked text to its own mark (`TextMarks`).
+ * - `stretch.classes` undefined:  a place, holding nothing but where a shape goes
+ * - `marks`:  the marks being made, for `positionAt()`
+ */
+export type MarkMaker<Mark> = (stretch: MarkedStretch, marks: { positionAt: TextMarks<Mark>["positionAt"] }) => Mark
+
+/** A stretch of the text, its classes and the spacers either side:  what an editor makes a mark of. */
+export type MarkedStretch = {
+  /** where it starts, an offset into the text */
+  start: number
+  /** where it ends */
+  end: number
+  /** its classes, `bubbly-piece` first;  undefined for a place */
+  classes?: string
+} & Spacers
+
 /** Spacers injected before or after a mark. */
-export type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: monaco.editor.InjectedTextOptions }
+export type Spacers = { before?: Spacer; after?: Spacer }
+
+/**
+ * Room injected beside a mark:  `content`, in `inlineClassName`, its width the sheet's.
+ * - `cursorStops`:  which side of it the caret stops on, as Monaco's `InjectedTextCursorStops`:
+ *   `1` (right) for a spacer before the text, `2` (left) for one after it;  none:  either side
+ */
+export type Spacer = { content: string; inlineClassName: string; cursorStops?: 1 | 2 }
 
 /**
  * What a spacer makes room for, `bubbly-<kind>-spacer`:
@@ -110,11 +127,10 @@ const PIECE = "bubbly-piece"
 /**
  * A spacer:  a no-break space, `bubbly-spacer bubbly-<kind>-spacer bubbly-spacer-<side>`, its width the sheet's.
  * - The caret stops only on the text's side of it:  beside the letter, never out past the spacer.
- *   Monaco's `InjectedTextCursorStops`:  `Right` (1) for a spacer before the text, `Left` (2) for a spacer after it.
  */
-export function spacer(kind: SpacerKind, side: "before" | "after"): monaco.editor.InjectedTextOptions {
+export function spacer(kind: SpacerKind, side: "before" | "after"): Spacer {
   return {
-    content: " ",
+    content: " ",
     inlineClassName: `bubbly-spacer bubbly-${kind}-spacer bubbly-spacer-${side}`,
     cursorStops: side === "before" ? 1 : 2
   }

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 
 import { SP } from "spell/parser/spell"
 import { BubblyMarks, type BubblyShape } from "spell/app/app/ui/monaco/BubblyMarks"
-import type { MarkupShape } from "spell/app/app/ui/monaco/MarkupMarks"
+import type { MarkupShape } from "spell/app/app/ui/MarkupMarks"
 
 /** A card, as Solitaire's starts. */
 const CARD = `a "card" is a draggable two sided view

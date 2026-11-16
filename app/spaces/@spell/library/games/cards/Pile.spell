@@ -3,7 +3,7 @@
 // Each pile is its own element around its cards' elements, `<games-pile>` around `<games-card>`s.
 // A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
-a "pile" is a droppable viewable list of cards
+a "pile" is a viewable, droppable list of cards
 	its "layout" is one of stacked, vertical, horizontal or fanned
 		// How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
 	its "color" is
@@ -40,4 +40,4 @@ a "pile" is a droppable viewable list of cards
 		the discards' short name should be "discards: 7♥↓"
 
 a card belongs to one pile
-	// a card is in one pile at a time:  putting it on another pile takes it off this one
+	// a card is in one pile at a time:  moving it to another pile takes it off this one

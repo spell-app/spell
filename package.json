@@ -772,6 +772,11 @@
       "types": "./ui/dist-types/src/docs-components/ui-docs-nav/index.d.ts",
       "default": "./ui/src/docs-components/ui-docs-nav/index.ts"
     },
+    "./ui/docs-components/ui-docs-palette": {
+      "spell-source": "./ui/src/docs-components/ui-docs-palette/index.ts",
+      "types": "./ui/dist-types/src/docs-components/ui-docs-palette/index.d.ts",
+      "default": "./ui/src/docs-components/ui-docs-palette/index.ts"
+    },
     "./ui/docs-components/ui-docs-search": {
       "spell-source": "./ui/src/docs-components/ui-docs-search/index.ts",
       "types": "./ui/dist-types/src/docs-components/ui-docs-search/index.d.ts",

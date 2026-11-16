@@ -17,8 +17,9 @@ const UI_CONFIG = "spell/ui/vite.config.ts"
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
- * vitest config for `spell-epic`, a component pack (`spell-pack`):  three projects, over `tests/`.
- * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell-pack check`:
+ * vitest config for `spell-epic`, a component pack (`spell-pack`):  four projects, over `tests/`.
+ * - `integration` -- the slow node tests that run real processes, one file at a time (`INTEGRATION_TESTS`)
+ * - `node` -- everything but the elements and those:  the epic code's tests, `pack.test.ts` among them (`spell-pack check`:
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
  *   chromium, animations off), as Spell UI's are;  `motion`:  the few that test motion itself, animations on.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
@@ -49,6 +50,35 @@ const MOTION_TESTS = [
   "components/epic-section/ItemFold.test.ts"
 ]
 
+/**
+ * INTEGRATION tests:  the slow, timing-sensitive ones, which run real git and node processes (worktrees, merges, whole
+ * `epic` commands, the docs tools' link check);  the `integration` project's, ONE FILE AT A TIME (epic `epic-engine`
+ * I313;  Owen, 2026-11-16:  "separate out tests that are timing sensitive into integration tests").
+ * - `yarn test` (`node`, `browser`, `motion`) leaves them out:  fast, files side by side, no turn needed for it
+ * - `yarn test:integration` runs them, in the `test` turn (`epic turns run test -- yarn test:integration`);
+ *   `yarn review` and CI run both
+ * - measured 2026-11-16, alone in the turn:  these 16 files took ~135s of the node project's ~224s, file by file
+ * - a new test that spawns git, `node` or `epic` and takes seconds goes here, not in `node`
+ */
+const INTEGRATION_TESTS = [
+  "command/WorktreeHook.test.ts",
+  "command/RepoInit.test.ts",
+  "command/MultiRepo.test.ts",
+  "cli/EpicProgram.test.ts",
+  "command/ProtectedBase.test.ts",
+  "command/MainMerge.test.ts",
+  "command/OneRepo.test.ts",
+  "tools/doc-links.test.js",
+  "command/TurnEnd.test.ts",
+  "command/MergeCommits.test.ts",
+  "command/Turns.test.ts",
+  "command/CheckoutServers.test.ts",
+  "command/SharedSync.test.ts",
+  "command/LeftoverFolders.test.ts",
+  "command/SharedMigration.test.ts",
+  "command/PullRequest.test.ts"
+]
+
 export function epicsProjects({
   prefix = "",
   root
@@ -64,9 +94,23 @@ export function epicsProjects({
         dir: TESTS,
         environment: "node",
         include: ["**/*.test.{js,ts}"],
-        exclude: ["**/node_modules/**", "components/**", "vscode/**"],
+        exclude: ["**/node_modules/**", "components/**", "vscode/**", ...INTEGRATION_TESTS],
         // a scratch epic home, its person "Owen":  what the tools write never names whoever runs the tests
         setupFiles: [EPIC_HOME_SETUP]
+      }
+    },
+    {
+      ...(root && { root }),
+      plugins: [standardDecorators()],
+      test: {
+        name: `${prefix}integration`,
+        dir: TESTS,
+        environment: "node",
+        include: INTEGRATION_TESTS,
+        setupFiles: [EPIC_HOME_SETUP],
+        // one file at a time:  they spawn real processes, and side by side they slowed each other past their limits
+        fileParallelism: false,
+        testTimeout: 30_000
       }
     },
     browserProject({ name: `${prefix}browser`, root, animations: "off" }),

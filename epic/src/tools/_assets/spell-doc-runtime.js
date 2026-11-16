@@ -84,6 +84,7 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { slug } from "spell/util/string"
 import { PagePatch } from "spell/server/site"
 import { commentsOnPage, wireComments } from "./spell-doc-comments.js"
+import { editHtmlInPlace } from "./spell-doc-edit.js"
 import {
   FIELDS,
   addBlockAction,
@@ -319,6 +320,7 @@ async function start() {
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
   editMarkdownInPlace([main])
+  editHtmlInPlace(main, noteToast)
   highlight()
   addCodeCopies(main)
   wireImageZoom()
@@ -480,6 +482,8 @@ function drawReadingTime(main) {
  *   column, the button hides.
  * - Inside a `<ui-table>`, the host is what moves.
  * - Remembered in this browser, per page, by the table's key (`tableKey()`):  `spell-table-wide:<path>`.
+ * - ⌥-click (Alt-click):  every table on the page goes the same way;  back into the column, every saved width for the
+ *   page is forgotten too:  the reset (epic `epic-engine` I315, r72)
  * - Tables a part's body or a live update adds later get theirs too (`eachTable()`).
  */
 function wireTableWidths(main) {
@@ -503,7 +507,9 @@ function wireTableWidths(main) {
     toggle.hidden = roomWidth(box, main) <= (narrow.get(box) ?? 0) + MIN_WIDE_GAIN
     const wide = isWide(box) && !toggle.hidden
     toggle.toggleAttribute("selected", wide)
-    toggle.title = wide ? "Back into the column" : "Expand to the page's width"
+    toggle.title = wide
+      ? "Back into the column  (⌥-click:  every table, and forget their widths)"
+      : "Expand to the page's width  (⌥-click:  every table)"
     toggle.setAttribute("aria-label", toggle.title)
     toggle.setAttribute("icon", wide ? "arrows left right to line" : "arrows left right")
     titleInside(toggle)
@@ -515,10 +521,11 @@ function wireTableWidths(main) {
     }
     if (!parent.getClientRects().length) return
     const room = roomFor(box, main)
-    const style = getComputedStyle(parent)
-    const contentLeft =
-      parent.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft)
-    const start = `${room.left - contentLeft}px`
+    // where the table starts in its column, read off the table itself with its own offset taken off:  its light-DOM
+    // parent is NOT where it's laid out when it's slotted (an `<epic-field>`'s table sits in the field's padded
+    // `.text` box), so measuring the parent put it 51px off, cut off at the phase's clipping edge (I315, r72)
+    box.style.removeProperty("margin-inline-start")
+    const start = `${room.left - box.getBoundingClientRect().left}px`
     box.style.maxWidth = "none"
     box.style.width = `${room.right - room.left}px`
     box.style.marginInlineStart = start
@@ -534,12 +541,21 @@ function wireTableWidths(main) {
     writeJSON(storeKey, saved)
     place(box)
   }
+  // ⌥-click:  EVERY table on the page as this one goes, as an ⌥-click on a fold reaches everything in it;  back into
+  // the column, it forgets every saved width for the page, the reset (I315, r72:  "reset table zoom")
+  const flipAll = (box) => {
+    const wide = !isWide(box)
+    const saved = {}
+    if (wide) for (const each of toggles.keys()) saved[tableKey(each, main)] = true
+    writeJSON(storeKey, saved)
+    toggles.forEach((_toggle, each) => place(each))
+  }
   const toggleFor = (box) => {
     const toggle = document.createElement("ui-button")
     toggle.className = "spell-table-toggle"
     toggle.setAttribute("appearance", "basic")
     toggle.setAttribute("size", "mini")
-    toggle.addEventListener("click", () => flip(box))
+    toggle.addEventListener("click", (event) => (event.altKey ? flipAll(box) : flip(box)))
     return toggle
   }
   const redrawSoon = eachTable(main, {
@@ -892,14 +908,24 @@ function wireStuckTrail(main) {
 const STUCK_SETTLE_MS = 120
 
 /**
- * A table's key, for remembering its width:  its id, else the nearest id above it and which table it is under that
- * (`p14#table-1`, `memory#table-2`);  `page#table-<n>` with no id above it.
+ * A table's key, for remembering its width:  its id, else the nearest id above it and the table's HEADER words
+ * (`p-look-roles#today-becomes-what-it-says`), else which table it is under that (`p14#table-1`);  `page#...` with no
+ * id above it.
+ * - by its header, not its place (I315, r72):  a table added above it, or its rows edited, keeps its key;
+ *   a key saved by place before is simply no longer read, so an old saved width never sticks to the wrong table
+ * - two tables under one id with the same header:  the second gets `-2`
  */
 function tableKey(box, main) {
   if (box.id) return box.id
   const holder = box.parentElement.closest("[id]")
   const root = holder && main.contains(holder) ? holder : main
-  return `${root === main ? "page" : root.id}#table-${tableBoxes(root).indexOf(box) + 1}`
+  const name = root === main ? "page" : root.id
+  const words = (each) => slug(tableOf(each)?.rows[0]?.textContent ?? "").slice(0, 48)
+  const own = words(box)
+  if (!own) return `${name}#table-${tableBoxes(root).indexOf(box) + 1}`
+  const same = tableBoxes(root).filter((each) => words(each) === own)
+  const nth = same.indexOf(box) + 1
+  return `${name}#${own}${nth > 1 ? `-${nth}` : ""}`
 }
 
 /**

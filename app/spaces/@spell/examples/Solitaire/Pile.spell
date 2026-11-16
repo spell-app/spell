@@ -1,9 +1,6 @@
-# A pile of cards
-// A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
-// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
-
-a "pile" is a droppable viewable list of cards
+a "pile" is a viewable, droppable list of cards
+	-- A pile of cards, e.g. in a game like solitaire
+	-- A card can only be in one pile at a time
 	its "layout" is one of stacked or vertical
 		// How its cards lie:  on top of each other, or down a column -- styles.css
 	its "color" is
@@ -11,7 +8,7 @@ a "pile" is a droppable viewable list of cards
 		the color of its last card otherwise
 	its "value" is
 		0 if it is empty
-		the value of its last card otherwise
+		otherwise the value of its last card
 	its "short name" is
 		// Its id, then its cards' short names:  stock: Q♠↑ 7♥↓
 		set summary to its id + ":"
@@ -19,37 +16,37 @@ a "pile" is a droppable viewable list of cards
 			set summary to summary + " " + the short name of the card
 		return summary
 
-	when a card is dropped		-- put the card on the pile, if it is a legal move
-		put the card on the pile
+	when a card is dropped
+		move the card to the pile
 
-	to put a card on a pile, undoable as "Move Card"
+	to move a card to a pile
 		// The card, and every card on it, onto the pile, if the piles' rules let it go and take it
 		// - refused, nothing moves, and there's nothing to undo
-		// - a game adds its own steps after it:  `after putting a card on a pile`
+		// - a game adds its own steps after it:  `after moving a card to a pile`
 		cancel if the card's pile cannot give it up
 			or the pile cannot take it
 		for card in cards in the card's pile starting with the card
-			move it to the pile
-
-	to test piles
-		set the stock to a new pile with id "stock"
-		stock's color should be "none"
-		stock's value should be 0
-		add (a new card whose rank is queen, suit is spades and direction is up) to the stock
-		add (a new card whose rank is 7, suit is hearts and direction is down) to the stock
-		stock's color should be red
-		stock's value should be 7
-		stock's short name should be "stock: Q♠↑ 7♥↓"
-
-		// a card is in one pile at a time
-		set the discards to a new pile with id "discards"
-		get the top card of the stock
-		add it to the discards
-		its pile is the discards should be yes
-		the number of cards in the stock should be 1
-		the discards' short name should be "discards: 7♥↓"
+			add it to the pile
 
 a card
-	// a card is in one pile at a time:  putting it on another pile takes it off this one
+	// a card is in one pile at a time:  moving it to another pile takes it off this one
 	belongs to one pile
 	it "is on top of its pile" if it is the top card of its pile		-- the card the next one goes on
+
+to test piles
+	set the stock to a new pile with id "stock"
+	stock's color should be "none"
+	stock's value should be 0
+	add a new card with rank queen, suit  spades and direction up to the stock
+	add a new card with rank 7, suit  hearts and direction down to the stock
+	stock's color should be red
+	stock's value should be 7
+	stock's short name should be "stock: Q♠↑ 7♥↓"
+
+	// a card is in one pile at a time
+	set the discards to a new pile with id "discards"
+	get the top card of the stock
+	add it to the discards
+	its pile is the discards should be yes
+	the number of cards in the stock should be 1
+	the discards' short name should be "discards: 7♥↓"

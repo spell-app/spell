@@ -1,178 +1,35 @@
 /*
- * Spell's CodeMirror editor, drawn bubbly (epic `editor` P30, the CodeMirror test):  what's the editor's own.
- * - The look itself is `bubbly.css`'s, the look's one sheet:  the editor's box is a `.bubbly` (`CodeMirrorBubbly`),
- *   so its settings and its page rules reach the marks in the text, which are real elements, as on the page.
- * - Here:  the box, the lines' size, a tab stop's width, the bands, rails and feet, a drawing's tags, the selection,
- *   and the find panel, suggestions and hover in the page's colours.
+ * Spell's CodeMirror editor (epic `editor` P30;  epic `codemirror`):  what's the editor's own.
+ * - The look itself is `bubbly.css`'s, the look's one sheet, its CodeMirror section:  the editor's box is a `.bubbly`
+ *   (`CodeMirrorBubbly`, `CodeMirrorMarkup`), so its settings and its page rules reach the marks in the text, which are
+ *   real elements, as on the page.  NOTHING of the look here (epic `codemirror` P3).
+ * - Here:  the find panel, suggestions, hover and problems in the page's colours, the gutter, the compiled code's
+ *   view and the merge view's own pieces.
  * - Light and dark from one set, `light-dark()`, as `bubbly.css`:  the page's `color-scheme` picks.
  */
 
-.bubbly.cmb-editor {
-  /* a tab stop:  how far a body's lines sit in from its band */
-  --cmb-indent: 24px;
-  /* room before a line's words:  a top-level band's round end, half a tab further left, still shows */
-  --cmb-line-pad: 22px;
-  /* a band starts this far left of its words, and its rail there */
-  --cmb-band-inset: 10px;
-  /* a rail's width, a foot's height */
-  --cmb-rail: 3px;
-  /* a line's height:  room for a band, with a little between two */
-  --cmb-line-height: 26px;
-
-  /* each part of speech's band over the paper, for the rails a line draws (the bands themselves are `--bubbly-pill`) */
-  --cmb-band-thing: light-dark(
-    color-mix(in srgb, var(--bubbly-thing) 20%, white),
-    color-mix(in srgb, var(--bubbly-thing) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-action: light-dark(
-    color-mix(in srgb, var(--bubbly-action) 20%, white),
-    color-mix(in srgb, var(--bubbly-action) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-property: light-dark(
-    color-mix(in srgb, var(--bubbly-property) 20%, white),
-    color-mix(in srgb, var(--bubbly-property) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-plain: light-dark(
-    color-mix(in srgb, var(--bubbly-plain) 20%, white),
-    color-mix(in srgb, var(--bubbly-plain) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-control: light-dark(
-    color-mix(in srgb, var(--bubbly-control) 20%, white),
-    color-mix(in srgb, var(--bubbly-control) 34%, var(--bubbly-paper-dark))
-  );
-
-  /* the drawing's box is the editor's:  its paper, no border, padding or margin of its own */
+/* with the look off (`CodeMirrorLook`):  Spell in the page's font, coloured by its tokens, as Monaco shows it */
+.cm-editor.cmb:not(.bubbly, .cmb-code) {
+  /* what the popups below read of the look's sheet, which a box that isn't a `.bubbly` doesn't have */
+  --bubbly-font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bubbly-ink: var(--ui-code-color, light-dark(#3a3a44, #dedde6));
+  --bubbly-bold-ink: var(--ui-code-color, light-dark(#26252e, #f1f0f6));
+  --bubbly-comment-ink: var(--ui-code-comment, light-dark(#8a8996, #8e8c9a));
+  --bubbly-paper: var(--ui-code-background, light-dark(white, #1c1b22));
   height: 100%;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  max-width: none;
-  overflow: hidden;
   font-size: 15px;
-  line-height: var(--cmb-line-height);
 
   .cm-scroller {
     font-family: var(--bubbly-font-family);
-    line-height: var(--cmb-line-height);
+    line-height: 23px;
   }
   .cm-content {
-    tab-size: var(--cmb-indent);
-    padding: 8px 0;
-    caret-color: var(--bubbly-bold-ink);
+    tab-size: 4;
   }
-  .cm-line {
-    padding: 0 16px 0 var(--cmb-line-pad);
-    /* the rails of the blocks it's inside:  one stripe each (`CodeMirrorBubbly`) */
-    background-image: var(--cmb-rails, none);
-  }
-  .cm-gutters {
-    background: transparent;
-    border: 0;
-  }
-  .cm-cursor {
-    border-left-color: var(--bubbly-bold-ink);
-  }
+}
 
-  /*
-   * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
-   * - Monaco's sheet does the same for its shapes (`--bubbly-selection-strength`)
-   */
-  .cm-selectionLayer {
-    z-index: 1 !important;
-    pointer-events: none;
-  }
-  .cm-selectionBackground,
-  &.cm-focused .cm-selectionBackground {
-    background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
-  }
-
-  /****** a declaration's head:  its band ******/
-  .cmb-hue {
-    --bubbly-pill: light-dark(
-      color-mix(in srgb, var(--bubbly-hue) 20%, white),
-      color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark))
-    );
-    --bubbly-input: light-dark(
-      color-mix(in srgb, white var(--bubbly-input-opacity), transparent),
-      color-mix(
-        in srgb,
-        color-mix(in srgb, var(--bubbly-hue) 14%, var(--bubbly-input-dark)) var(--bubbly-input-opacity),
-        transparent
-      )
-    );
-    --bubbly-expression-pill: light-dark(
-      color-mix(in srgb, var(--bubbly-hue) 62%, #1f1f26),
-      color-mix(in srgb, var(--bubbly-hue) 45%, white)
-    );
-    --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
-  }
-  .bubbly-group.cmb-hue {
-    --bubbly-pill: light-dark(
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
-    );
-  }
-  .cmb-band {
-    position: relative;
-    display: inline-block;
-    height: var(--bubbly-pill-height);
-    line-height: var(--bubbly-pill-height);
-    vertical-align: middle;
-    /* its words stay on their tab stop:  the band reaches left of them */
-    margin-left: calc(-1 * var(--cmb-band-inset));
-    padding: 0 var(--bubbly-pill-pad-right) 0 var(--cmb-band-inset);
-    border-radius: var(--bubbly-pill-radius);
-    background: var(--bubbly-pill);
-    white-space: pre;
-  }
-  /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line */
-  .cmb-band-open {
-    border-bottom-left-radius: 0;
-  }
-  .cmb-band-open::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 100%;
-    width: var(--cmb-rail);
-    height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
-    background: var(--bubbly-pill);
-  }
-
-  /* a block's foot:  a short bar off its rail, on a thin line of its own */
-  .cmb-foot-row {
-    position: relative;
-    height: calc(var(--cmb-rail) + 4px);
-    background-image: var(--cmb-rails, none);
-  }
-  .cmb-foot {
-    position: absolute;
-    top: 0;
-    left: calc(var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) - var(--cmb-band-inset));
-    width: calc(var(--cmb-rail) * 6);
-    height: var(--cmb-rail);
-    border-radius: 0 var(--cmb-rail) var(--cmb-rail) var(--cmb-rail);
-    background: var(--bubbly-pill);
-  }
-
-  /****** a drawing's tag:  a band of the structure's blue, as the drawn-bubbly page draws HTML ******/
-  .cmb-tag {
-    display: inline-block;
-    line-height: var(--bubbly-pill-height);
-    padding: 0 3px;
-    border-radius: 6px;
-    background: var(--bubbly-pill);
-  }
-  .cmb-tag .bubbly-tag {
-    font-weight: var(--bubbly-bold);
-    color: var(--bubbly-bold-ink);
-  }
-  .cmb-tag-close {
-    font-size: 0.85em;
-    opacity: 0.8;
-  }
-
+/* every CodeMirror editor's popups, the look on or off */
+.cm-editor.cmb {
   /****** popups:  the find panel, suggestions, hover, problems, in the page's colours ******/
   .cm-panels {
     background: light-dark(#f6f5fa, #26252e);
@@ -274,6 +131,55 @@
     background-image: none;
     text-decoration: underline wavy #e2a336;
     text-underline-offset: 3px;
+  }
+}
+
+/*
+ * Every CodeMirror editor's gutter (`CodeMirrorSetup`), as Monaco's is drawn (`MonacoEditor.css`, epic `editor` I154):
+ * - no line numbers until asked;  then they come first
+ * - the fold arrows' column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code:
+ *   its chevron ends well before a line's first word
+ * - an arrow shows while the mouse is on the edge, a folded block's always
+ * - no change bar (epic `codemirror` Q1)
+ */
+.cm-editor.cmb {
+  --cmb-fold-width: 16px;
+  --cmb-fold-overlap: 8px;
+
+  .cm-gutters {
+    background: transparent;
+    border: 0;
+  }
+  .cm-foldGutter {
+    width: var(--cmb-fold-width);
+    margin-inline-end: calc(-1 * var(--cmb-fold-overlap));
+  }
+  .cm-foldGutter .cm-gutterElement {
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+  .cmb-fold {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--cmb-fold-width);
+    height: 100%;
+    translate: calc(var(--cmb-fold-overlap) / 2) 0;
+    cursor: pointer;
+    color: light-dark(#6b6a76, #a3a1ae);
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+  .cmb-fold:hover {
+    color: light-dark(#26252e, #e6e5ee);
+  }
+  .cm-gutters:hover .cmb-fold,
+  .cmb-fold-folded {
+    opacity: 1;
+  }
+  .cmb-fold-folded svg {
+    rotate: -90deg;
   }
 }
 

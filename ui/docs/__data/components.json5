@@ -22375,6 +22375,11 @@
           "description": "`editable`:  the bar's strikethrough button."
         },
         {
+          "key": "code",
+          "text": "Inline code",
+          "description": "`editable`:  the bar's inline code button (no key:  ⌘E is Claude Code's)."
+        },
+        {
           "key": "link",
           "text": "Link (⌘K)",
           "description": "`editable`:  the bar's link button."
@@ -48029,6 +48034,11 @@
           "description": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one."
         },
         {
+          "name": "all-items-always",
+          "kind": "boolean",
+          "description": "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -48282,7 +48292,7 @@
         },
         {
           "name": "all-items",
-          "description": "`max-visible`:  the button listing every item, while some are put away."
+          "description": "`max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
         }
       ],
       "states": [
@@ -52784,6 +52794,312 @@
       "page": false
     },
     {
+      "tag": "ui-docs-palette",
+      "name": "Docs palette",
+      "folder": "ui-docs-palette",
+      "topics": [
+        "documentation",
+        "forms",
+        "lists"
+      ],
+      "aka": [
+        "palette groups",
+        "palette editor",
+        "component groups",
+        "palette table"
+      ],
+      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
+      "noun": "palette",
+      "attributes": [
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "bar",
+          "description": "Its bar:  what to do, Add group, Save and how the save went."
+        },
+        {
+          "name": "groups",
+          "description": "The groups, a column each, and Not in the palette last."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "hint",
+          "text": "Drag a component to another group or place, or a group by its handle.  Not in the palette keeps what it leaves out.",
+          "description": "What to do, in the bar."
+        },
+        {
+          "key": "addGroup",
+          "text": "Add group",
+          "description": "The button that adds an empty group at the end."
+        },
+        {
+          "key": "save",
+          "text": "Save",
+          "description": "The button that writes the table."
+        },
+        {
+          "key": "saved",
+          "text": "Saved:  the editor's palette shows it on its next load.",
+          "description": "After a save."
+        },
+        {
+          "key": "unsaved",
+          "text": "Changed, not saved",
+          "description": "While there are changes to save."
+        },
+        {
+          "key": "loading",
+          "text": "Loading the palette's groups…",
+          "description": "While the table loads."
+        },
+        {
+          "key": "noServer",
+          "text": "Can't reach the page server's palette groups:  open this page from the page server.",
+          "description": "When the table can't be loaded."
+        },
+        {
+          "key": "saveFailed",
+          "text": "Couldn't save:  {error}",
+          "description": "When a save fails;  `{error}` says why."
+        },
+        {
+          "key": "newGroup",
+          "text": "New group",
+          "description": "A new group's name."
+        },
+        {
+          "key": "groupName",
+          "text": "Group name",
+          "description": "The label of a group's name field."
+        },
+        {
+          "key": "removeGroup",
+          "text": "Remove {group}:  its components go to Not in the palette",
+          "description": "A group's remove button."
+        },
+        {
+          "key": "moveGroup",
+          "text": "Drag to move {group}",
+          "description": "A group's drag handle."
+        },
+        {
+          "key": "notOffered",
+          "text": "Not in the palette",
+          "description": "The last column:  what the palette leaves out."
+        }
+      ],
+      "mainTag": "ui-docs-palette",
+      "main": true,
+      "page": false
+    },
+    {
       "tag": "ui-docs-search",
       "name": "Docs search",
       "folder": "ui-docs-search",
@@ -55607,6 +55923,18 @@
           "type": "color"
         }
       ]
+    },
+    "ui-docs-palette": {
+      "folder": "ui-docs-palette",
+      "mainTag": "ui-docs-palette",
+      "title": "Docs palette",
+      "summary": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
+      "status": "done",
+      "docs": true,
+      "tags": [
+        "ui-docs-palette"
+      ],
+      "tokens": []
     },
     "ui-docs-search": {
       "folder": "ui-docs-search",

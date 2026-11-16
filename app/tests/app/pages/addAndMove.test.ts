@@ -865,12 +865,72 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(600)
     expect(await menusOpen()).toBe(0)
 
+    // its search opens every topic with a match at once, each with only its matches, side by side (J140, revisited)
+    const matches = () =>
+      page.evaluate(() => {
+        const layer = document.querySelector(".PaletteMatches")!
+        if (!layer.matches(":popover-open")) return []
+        return [...layer.querySelectorAll<HTMLElement>(".PaletteMatchPanel")].map((panel) => {
+          const box = panel.getBoundingClientRect()
+          const labels = [...panel.querySelectorAll("ui-tree-item")].map((row) => row.getAttribute("label") ?? "")
+          return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, labels }
+        })
+      })
+    const search = page.locator(".PaletteStrip .PaletteStripSearch input")
+    await search.click()
+    await page.keyboard.type("butt", { delay: 30 })
+    await page.waitForTimeout(800)
+    const shown = await matches()
+    expect(shown.length).toBeGreaterThan(1)
+    expect(shown.flatMap(({ labels }) => labels)).toContain("Button")
+    // no topic with nothing to show;  none over another, none off the window
+    expect(shown.every(({ labels }) => labels.length > 0)).toBe(true)
+    const width = await page.evaluate(() => document.documentElement.clientWidth)
+    for (const [at, one] of shown.entries()) {
+      expect(one.left).toBeGreaterThanOrEqual(0)
+      expect(one.right).toBeLessThanOrEqual(width)
+      for (const other of shown.slice(at + 1)) {
+        const apart =
+          one.right <= other.left || other.right <= one.left || one.bottom <= other.top || other.bottom <= one.top
+        expect(apart).toBe(true)
+      }
+    }
+    // ↓ goes into the first;  Escape there comes back to the field, and closes them
+    await page.keyboard.press("ArrowDown")
+    await page.waitForTimeout(200)
+    expect(await page.evaluate(() => document.activeElement?.localName)).toBe("ui-tree-item")
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+    expect(await matches()).toEqual([])
+    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
+    // typing opens them again;  Escape in the field closes them;  so does clearing it
+    await page.keyboard.type("o")
+    await page.waitForTimeout(600)
+    expect((await matches()).length).toBeGreaterThan(0)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+    expect(await matches()).toEqual([])
+    await search.fill("grid")
+    await page.waitForTimeout(600)
+    expect((await matches()).length).toBeGreaterThan(0)
+    await search.fill("")
+    await page.waitForTimeout(600)
+    expect(await matches()).toEqual([])
+    // choosing a match closes them all (I176)
+    const grids = ((await text()).match(/<(ui-)?grid\b/g) ?? []).length
+    await search.fill("grid")
+    await page.waitForTimeout(600)
+    await page.locator('.PaletteMatchPanel ui-tree-item[label="Grid"]').first().click()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await matches()).toEqual([])
+    expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids + 1)
+
     await page.locator(".PaletteStrip .PaletteClose").click()
     await page.waitForTimeout(600)
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
   })
 
-  test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180)", async () => {
+  test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
     await page.locator("#AddPartButton").click()
@@ -878,7 +938,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     // no "N more":  what was behind it shows, under its topic
     expect(await page.locator(".PalettePopup .PaletteMore").count()).toBe(0)
     expect(await page.locator('.PalettePopup ui-tree-item[label="Grid"]').count()).toBe(1)
-    // a group of buttons, ready-made;  everything fits, in 5 columns, with no scrolling (I180)
+    // a group of buttons, ready-made;  everything fits, with no scrolling (I180):
+    // 6 columns at 1440px wide, rows 20px, so the palette table's longer topics fit an 800px window (I185)
     expect(await page.locator('.PalettePopup ui-tree-item[label="Buttons"]').count()).toBe(1)
     const fits = await page.evaluate(() => {
       const groups = document.querySelector(".PalettePopup .PaletteGroups")!
@@ -887,7 +948,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       )
       return { scrolls: groups.scrollHeight > groups.clientHeight + 1, columns: columns.size }
     })
-    expect(fits).toEqual({ scrolls: false, columns: 5 })
+    expect(fits).toEqual({ scrolls: false, columns: 6 })
     await page.locator(".PalettePopup .PaletteSearch input").fill("grid")
     await page.waitForTimeout(600)
     expect(await page.locator(".PalettePopup .PaletteGroup:not(.ThisApp) ui-tree-item").count()).toBeGreaterThan(0)

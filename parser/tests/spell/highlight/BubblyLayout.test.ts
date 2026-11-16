@@ -406,6 +406,10 @@ describe("SP.BubblyLayout", () => {
       "\tprint 1",
       'a "pile" is a droppable viewable list of cards',
       "\tprint 1",
+      'a "stack" is a viewable, droppable list of cards',
+      "\tprint 1",
+      'a "tile" is a draggable, clickable two sided view',
+      "\tprint 1",
       'a "deck" is a list of cards',
       "\tprint 1",
       'a "foundation" is a pile',
@@ -416,6 +420,8 @@ describe("SP.BubblyLayout", () => {
     expect(heads(english)).toEqual([
       'words:a  | input:"card" | words: is a  | reference:draggable two sided view',
       'words:a  | input:"pile" | words: is a  | reference:droppable viewable list of cards',
+      'words:a  | input:"stack" | words: is a  | reference:viewable, droppable list of cards',
+      'words:a  | input:"tile" | words: is a  | reference:draggable, clickable two sided view',
       'words:a  | input:"deck" | words: is a  | reference:list of cards',
       'words:a  | input:"foundation" | words: is a  | reference:pile',
       "input:solitaire | words: is an  | reference:app"
@@ -425,6 +431,8 @@ describe("SP.BubblyLayout", () => {
       "\timprimir 1",
       'una "pila" es una lista visible soltable de cartas',
       "\timprimir 1",
+      'un "montón" es una lista visible, soltable de cartas',
+      "\timprimir 1",
       'un "mazo" es una lista de cartas',
       "\timprimir 1",
       'una "fundación" es una pila',
@@ -433,6 +441,7 @@ describe("SP.BubblyLayout", () => {
     expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
       'words:una  | input:"carta" | words: es una  | reference:vista reversible arrastrable',
       'words:una  | input:"pila" | words: es una  | reference:lista visible soltable de cartas',
+      'words:un  | input:"montón" | words: es una  | reference:lista visible, soltable de cartas',
       'words:un  | input:"mazo" | words: es una  | reference:lista de cartas',
       'words:una  | input:"fundación" | words: es una  | reference:pila'
     ])

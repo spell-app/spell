@@ -71,6 +71,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - Since 2026-10-08 it colours nothing:  a decided item stays green however old.
     - Kept until it's dropped (`PlanReader.recentSince`).
   - `bedtime="P3-P6"`:  a `/bedtime` run is on (`bedtime <name> start | done`).
+    `/bedtime all` puts every running epic to bed in one sitting:  `bedtime all plan | questions | spec`, and
+    `bedtime status` lists every page with it on (`BedtimeAll`, epic `epic-engine` T85).
   - `repo`:  the GitHub page every `<epic-commit sha>` links through.
     Written by `commit`, and by `commits --backfill`.
 - Its `<epic-commit>`s land by themselves (epic `epic-engine` I135), under their phases and items AND in the Log
@@ -438,7 +440,7 @@ As `plan-doc.md`, "Ids":
     - `review-as`:  how the person's mark was handled
       - `approve`, `todo`, `revisit`
       - `now`:  a request for now (Add Details, a revisit now) done, written by `inbox done`
-      - `next`, `drop`:  a todo (work) queued into the next phase, or dropped
+      - `next`, `drop`:  a todo (work) started now (I314), or dropped
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
@@ -517,11 +519,14 @@ As `plan-doc.md`, "Ids":
     - `notnow`:  `deferred`:  last in their order
 - A WORK todo's review buttons (no `limit`;  2026-10-09):  the plane, Revisit, the x,
   in one group.  No Approve or Make Todo.
-  - The plane (`next`, green):  "Do it in the next phase".
-    - `inbox apply` queues it into the first phase whose status is `todo`:
-      `queued`, and `work` `P10 · <name>`.
-    - No such phase:  `the next phase`, and its line says so.
-    - A Noted status card, `Queued for P10 · <name>`;  reviewed.
+  - The plane (`next`, green):  "Start it now" (epic `epic-engine` I314;  Owen, 2026-11-16, after four todos he sent
+    landed in an unrelated phase:  "they should either go in a new phase or start now").
+    - `inbox apply` STARTS it:  `queued`, `work` `now`, a Noted status card `Start now:  an agent takes it next`;
+      reviewed;  its line `start now:  start an agent on it`, and the session does (an agent each, T77), its Underway
+      card when taken.
+    - His note asks for a phase ("a new phase", "its own phase"):  left for the session, which makes a NEW phase for it,
+      placed next;  never an unrelated phase still to do.
+    - Before I314 it went into the first phase still to do (`work` `P10 · <name>`), related or not.
     - Its chip is DOTTED blue while queued (`scheduled`):  agreed, not started.
   - Revisit (blue):  "Revisit:  I'm adding a note for you";  answered as any revisit.
   - The x (`drop`, grey):  "Drop it".
@@ -785,7 +790,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
   - `inbox apply`:  a card born NOTED for each of these (none for an approval):
     - each todo it files (Q19):  `Made todo T23 to follow this up.`
       - a pick has none since I153:  its set's `chosen-on` and `chosen-note`, drawn in its Choices
-    - each todo it queues:  `Queued for P10 · <name>`
+    - each todo it starts:  `Start now:  an agent takes it next`
     - each new item it makes:  `Made from the page:  the person's new todo, ...`
   - `inbox done | clear` of a mark carrying a pick:  the pick kept on its set, `chosen-note` `recorded after the
     talk;  ...`.  Unless a `decide --option` already chose in that set.
@@ -804,7 +809,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
-| green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
+| green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
@@ -850,7 +855,7 @@ In the person's words (2026-10-10):
 | an open question answered (Approve:  its recommended option;  or a pick) | green | as above | as above                  | green `decided` |
 | Make Todo                            | green  | pressed           | sent                                         | green:  settled;  the new todo is its own item (yellow until queued) |
 | Do this (an issue, a judgement call) | green  | pressed           | sent                                         | BLUE outlined (`handed`), in the item, until Claude's fix turns it orange;  Approve closes it |
-| a todo's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  dotted blue until the todo is closed | green, once done |
+| a todo's plane:  "start it now" | green | pressed      | sent;  then QUEUED (`queued`):  dotted blue until the todo is closed | green, once done |
 | a review's "do it" (`queue <id> "work"`) | green | --              | queued:  dotted blue until started and done  | green, once done                |
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
 | the note box's x:  "skip this" (no line button wears it:  the chip alone does) | grey | pressed | sent              | its status as it was (`skip` settles nothing) |
