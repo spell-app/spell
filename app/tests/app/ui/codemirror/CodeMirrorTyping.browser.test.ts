@@ -149,33 +149,59 @@ describe("typing Spell in a real CodeMirror editor", () => {
     })
   })
 
-  describe("Enter and Tab between a tag's attributes (I142)", () => {
-    test("Enter lines the rest up under the first attribute, tabs then spaces, as one undo", () => {
-      // `columns` is 13 columns in, a tab 2 (I113):  6 tabs, then a space
-      const code = editorOf([`\t<container columns="7" spacing="xs">`, `\t</container>`], 1, 25)
+  describe("Enter, Backspace and Tab between a tag's attributes (I142, I133)", () => {
+    const TOOLBAR = [`\t<toolbar class="GameBar" appearance="pills" inverted>`, `\t</toolbar>`]
+
+    test("Enter lays the tag out as Prettier does:  each attribute a level in, its `>` back at the tag's level;  one undo", () => {
+      const code = editorOf(TOOLBAR, 1, 27)
       press("Enter")
-      expect(text(code)).toBe([`\t<container columns="7"`, `\t\t\t\t\t\t spacing="xs">`, `\t</container>`].join("\n"))
-      expect(position()).toMatchObject({ lineNumber: 2, column: 8 })
-      const { doc } = code.state
-      const caretLeft = code.coordsAtPos(code.state.selection.main.head)!.left
-      const columnsLeft = code.coordsAtPos(doc.line(1).from + doc.line(1).text.indexOf("c", 3))!.left
-      expect(Math.abs(caretLeft - columnsLeft)).toBeLessThan(2)
+      expect(text(code).split("\n")).toEqual([
+        `\t<toolbar`,
+        `\t\tclass="GameBar"`,
+        `\t\tappearance="pills"`,
+        `\t\tinverted`,
+        `\t>`,
+        `\t</toolbar>`
+      ])
+      expect(position()).toMatchObject({ lineNumber: 3, column: 3 })
       undo(code)
-      expect(text(code)).toBe([`\t<container columns="7" spacing="xs">`, `\t</container>`].join("\n"))
+      expect(text(code).split("\n")).toEqual(TOOLBAR)
     })
 
-    test("Enter before the first attribute is Spell's Enter rules', the line's own indent", () => {
-      const code = editorOf([`\t<container columns="7">`], 1, 13)
+    test("Enter right after the tag's name lays it out too, the caret before its first attribute", () => {
+      const code = editorOf([`\t<container columns="7">`], 1, 12)
       press("Enter")
-      expect(text(code)).toBe(`\t<container\n\tcolumns="7">`)
+      expect(text(code)).toBe(`\t<container\n\t\tcolumns="7"\n\t>`)
+      expect(position()).toMatchObject({ lineNumber: 2, column: 3 })
+    })
+
+    test("Backspace at an attribute line's start joins it to the line above, a space between;  the last brings its `>` up", () => {
+      const code = editorOf([`\t<toolbar class="GameBar"`, `\t\tappearance="pills"`, `\t>`, `\t</toolbar>`], 2, 3)
+      press("Backspace")
+      expect(text(code).split("\n")).toEqual([`\t<toolbar class="GameBar" appearance="pills">`, `\t</toolbar>`])
+      expect(position()).toMatchObject({ lineNumber: 1, column: 27 })
+      undo(code)
+      expect(text(code).split("\n")).toEqual([
+        `\t<toolbar class="GameBar"`,
+        `\t\tappearance="pills"`,
+        `\t>`,
+        `\t</toolbar>`
+      ])
     })
 
     test("Tab at the start of an attribute line moves that line alone;  Shift+Tab takes it back", () => {
-      const lines = [`\t<container columns="7"`, `\t\t\t\t\t\t spacing="xs">`, `\t\t<text "hi" />`, `\t</container>`]
-      const code = editorOf(lines, 2, 8)
+      const lines = [
+        `\t<container`,
+        `\t\tcolumns="7"`,
+        `\t\tspacing="xs"`,
+        `\t>`,
+        `\t\t<text "hi" />`,
+        `\t</container>`
+      ]
+      const code = editorOf(lines, 3, 3)
       press("Tab")
-      expect(text(code).split("\n")).toEqual([lines[0], `\t\t\t\t\t\t\t spacing="xs">`, ...lines.slice(2)])
-      expect(position()).toMatchObject({ lineNumber: 2, column: 9 })
+      expect(text(code).split("\n")).toEqual([...lines.slice(0, 2), `\t\t\tspacing="xs"`, ...lines.slice(3)])
+      expect(position()).toMatchObject({ lineNumber: 3, column: 4 })
 
       press("Tab", { shift: true })
       expect(text(code).split("\n")).toEqual(lines)

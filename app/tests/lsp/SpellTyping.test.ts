@@ -247,10 +247,10 @@ describe("SpellTyping.tagOpenAt() (I142)", () => {
   const TAG = [`\t\t<container columns="7" padding="small"`, `\t\t\t\t\t spacing="xs">`, `\t\t\t<text "hi" />`]
 
   test("between a tag's attributes:  the line it starts on, its first attribute's column", () => {
-    expect(SpellTyping.tagOpenAt(TAG, 0, 25)).toEqual({ line: 0, firstAttribute: 13 })
+    expect(SpellTyping.tagOpenAt(TAG, 0, 25)).toEqual({ line: 0, start: 2, nameEnd: 12, firstAttribute: 13 })
     // a line of its attributes under its first
-    expect(SpellTyping.tagOpenAt(TAG, 1, 0)).toEqual({ line: 0, firstAttribute: 13 })
-    expect(SpellTyping.tagOpenAt(TAG, 1, 6)).toEqual({ line: 0, firstAttribute: 13 })
+    expect(SpellTyping.tagOpenAt(TAG, 1, 0)).toMatchObject({ line: 0, firstAttribute: 13 })
+    expect(SpellTyping.tagOpenAt(TAG, 1, 6)).toMatchObject({ line: 0, firstAttribute: 13 })
   })
 
   test("not inside quotes, nor after the tag's `>`, nor on a line after it", () => {
@@ -262,7 +262,7 @@ describe("SpellTyping.tagOpenAt() (I142)", () => {
   })
 
   test("a tag whose name ends its line has no first attribute there", () => {
-    expect(SpellTyping.tagOpenAt([`<container`, `\tcolumns="7">`], 1, 0)).toEqual({
+    expect(SpellTyping.tagOpenAt([`<container`, `\tcolumns="7">`], 1, 0)).toMatchObject({
       line: 0,
       firstAttribute: undefined
     })
@@ -271,6 +271,107 @@ describe("SpellTyping.tagOpenAt() (I142)", () => {
   test("a closing tag, or no tag, is none", () => {
     expect(SpellTyping.tagOpenAt([`\t</container>`], 0, 5)).toBeUndefined()
     expect(SpellTyping.tagOpenAt([`its rank is 3`], 0, 5)).toBeUndefined()
+  })
+})
+
+describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, as Prettier lays out a long tag (I133)", () => {
+  const TABS = { insertSpaces: false, tabSize: 2 }
+  /** Solitaire's toolbar, a drawing's tag three levels in, then its first child. */
+  const TOOLBAR = [
+    `\t\t\t<toolbar class="GameBar" appearance="pills" inverted size="small" shrinkable>`,
+    `\t\t\t\t<text slot="title">Spell Solitaire</>`
+  ]
+  const LAID_OUT = [
+    `\t\t\t<toolbar`,
+    `\t\t\t\tclass="GameBar"`,
+    `\t\t\t\tappearance="pills"`,
+    `\t\t\t\tinverted`,
+    `\t\t\t\tsize="small"`,
+    `\t\t\t\tshrinkable`,
+    `\t\t\t>`
+  ]
+
+  test("each attribute on its own line a level in from the tag, its `>` back at the tag's level;  the caret before the next", () => {
+    const column = TOOLBAR[0]!.indexOf("appearance") - 1
+    expect(SpellTyping.tagLaidOut(TOOLBAR, 0, column, TABS)).toEqual({
+      from: 0,
+      to: 0,
+      lines: LAID_OUT,
+      caret: { line: 2, column: 4 }
+    })
+  })
+
+  test("a tag laid out already, or partly (Owen's draft:  the rest lined up 11 tabs in), is laid out the same", () => {
+    const partly = [
+      `\t\t\t<toolbar class="GameBar"`,
+      `\t\t\t\t\t\t\t\t\t\t\tappearance="pills" inverted size="small" shrinkable>`
+    ]
+    const layout = SpellTyping.tagLaidOut(partly, 1, 33, TABS)!
+    expect(layout).toMatchObject({ from: 0, to: 1, lines: LAID_OUT })
+    // in `inverted`, where it was:  `inv|erted`
+    expect(layout.caret).toEqual({ line: 3, column: 7 })
+    expect(SpellTyping.tagLaidOut(LAID_OUT, 3, 4, TABS)).toMatchObject({ from: 0, to: 6, lines: LAID_OUT })
+  })
+
+  test("a `/>`, a `{…}` and a quoted value with spaces kept whole;  what follows the tag stays after its `>`", () => {
+    expect(
+      SpellTyping.tagLaidOut([`\t<card-image rank=ace suit={its suit} title="a b" />`], 0, 13, TABS)!.lines
+    ).toEqual([`\t<card-image`, `\t\trank=ace`, `\t\tsuit={its suit}`, `\t\ttitle="a b"`, `\t/>`])
+    expect(SpellTyping.tagLaidOut([`<text slot="title" heavy>Spell</>`], 0, 19, TABS)!.lines).toEqual([
+      `<text`,
+      `\tslot="title"`,
+      `\theavy`,
+      `>Spell</>`
+    ])
+  })
+
+  test("after the last attribute:  a line of its own for the next, the caret on it", () => {
+    expect(SpellTyping.tagLaidOut([`<action "cheat" />`], 0, 16, TABS)).toEqual({
+      from: 0,
+      to: 0,
+      lines: [`<action`, `\t"cheat"`, `\t`, `/>`],
+      caret: { line: 2, column: 1 }
+    })
+  })
+
+  test("in a file indented with spaces, a level of spaces;  in Spanish's tags too", () => {
+    expect(
+      SpellTyping.tagLaidOut([`  <barra clase="x" pequeña>`], 0, 18, { insertSpaces: true, tabSize: 2 })!.lines
+    ).toEqual([`  <barra`, `    clase="x"`, `    pequeña`, `  >`])
+  })
+
+  test("not between a tag's attributes, or a tag with none:  none", () => {
+    expect(SpellTyping.tagLaidOut([`its rank is 3`], 0, 5, TABS)).toBeUndefined()
+    expect(SpellTyping.tagLaidOut([`<divider />`], 0, 8, TABS)).toBeUndefined()
+    expect(SpellTyping.tagLaidOut(TOOLBAR, 0, TOOLBAR[0]!.length, TABS)).toBeUndefined()
+  })
+})
+
+describe("SpellTyping.tagLineJoined():  Backspace at an attribute line's start (I133)", () => {
+  test("the line joins the one above, a space between", () => {
+    const lines = [`\t\t\t<toolbar class="GameBar"`, `\t\t\t\tappearance="pills" inverted>`, `\t\t\t\t<text />`]
+    expect(SpellTyping.tagLineJoined(lines, 1, 4)).toEqual({
+      from: 0,
+      to: 1,
+      lines: [`\t\t\t<toolbar class="GameBar" appearance="pills" inverted>`],
+      caret: { line: 0, column: 28 }
+    })
+  })
+
+  test("its attributes all back on the tag's line, a `>` alone under it comes up too, no space before it", () => {
+    const lines = [`<toolbar class="GameBar"`, `\tshrinkable`, `>`]
+    expect(SpellTyping.tagLineJoined(lines, 1, 1)).toMatchObject({
+      from: 0,
+      to: 2,
+      lines: [`<toolbar class="GameBar" shrinkable>`]
+    })
+    expect(SpellTyping.tagLineJoined([`<action "x"`, `/>`], 1, 0)).toMatchObject({ lines: [`<action "x" />`] })
+  })
+
+  test("only at the start of an attribute line, after its indent", () => {
+    const lines = [`<toolbar class="GameBar"`, `\tshrinkable>`]
+    expect(SpellTyping.tagLineJoined(lines, 1, 2)).toBeUndefined()
+    expect(SpellTyping.tagLineJoined([`<toolbar>`, `\t<text />`], 1, 1)).toBeUndefined()
   })
 })
 

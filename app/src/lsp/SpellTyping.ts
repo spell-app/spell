@@ -170,9 +170,88 @@ export class SpellTyping {
       if (at !== index) since.push((lines[index] ?? "").slice(0, column))
       if (!isStillOpen(since.join("\n"))) return undefined
       const word = /\S/.exec(line.slice(nameEnd))
-      return { line: at, firstAttribute: word ? nameEnd + word.index : undefined }
+      return { line: at, start: start.index, nameEnd, firstAttribute: word ? nameEnd + word.index : undefined }
     }
     return undefined
+  }
+
+  /**
+   * Enter between a tag's attributes, `column` (0-based) of `lines[index]`:  the tag laid out as Prettier lays out a
+   * long one (epic `language` I133;  Owen:  "indent all of the attributes the same as prettier would format them").
+   * - Its `<` and name stay where they are;  each attribute on a line of its own, a level in from the tag's line;
+   *   its `>` or `/>` on a line of its own, back at the tag's line's indent, with whatever followed it.
+   * - A tag already laid out so, or partly:  laid out again the same way.
+   * - The caret:  where it was in the attribute it was in, or at the start of the next;
+   *   after the last, on a new line of its own, where the next attribute would go.
+   * - A tag with no `>` yet:  only its lines up to the caret's.
+   * - `undefined`:  not between a tag's attributes, or the tag has none.
+   */
+  static tagLaidOut(
+    lines: readonly string[],
+    index: number,
+    column: number,
+    settings: IndentSettings
+  ): TagLayout | undefined {
+    const tag = SpellTyping.tagOpenAt(lines, index, column)
+    if (!tag) return undefined
+    const first = lines[tag.line]!
+    // what follows its name, its lines joined;  the caret's place in it
+    const after = [first.slice(tag.nameEnd), ...lines.slice(tag.line + 1, tag.line + 1 + TAG_LINES_BACK)]
+    const starts = after.reduce<number[]>(
+      (all, line, at) => [...all, at ? all[at - 1]! + after[at - 1]!.length + 1 : 0],
+      []
+    )
+    const caret = starts[index - tag.line]! + (index === tag.line ? column - tag.nameEnd : column)
+    let { words, close } = tagWords(after.join("\n"))
+    // no `>` yet:  only up to the caret's line, the lines under it left alone
+    if (!close) ({ words } = tagWords(after.slice(0, index - tag.line + 1).join("\n")))
+    if (!words.length) return undefined
+    const lastLine = close ? starts.findLastIndex((start) => start <= close!.at) : index - tag.line
+    const indent = SpellTyping.indentOf(first)
+    const inside = indent + (settings.insertSpaces ? " ".repeat(settings.tabSize) : "\t")
+    const laidOut = [first.slice(0, tag.nameEnd).trimEnd(), ...words.map((word) => inside + word.text)]
+    // the caret:  in the word it's in, or before the next;  after the last, on a line of its own
+    let at = words.findIndex((word) => word.at + word.text.length > caret)
+    const offset = at < 0 ? 0 : Math.max(0, caret - words[at]!.at)
+    if (at < 0) {
+      at = words.length
+      laidOut.push(inside)
+    }
+    if (close) {
+      const rest = after[lastLine]!.slice(close.at + close.text.length - starts[lastLine]!)
+      laidOut.push(indent + close.text + rest)
+    }
+    return {
+      from: tag.line,
+      to: tag.line + lastLine,
+      lines: laidOut,
+      caret: { line: tag.line + 1 + at, column: inside.length + offset }
+    }
+  }
+
+  /**
+   * Backspace at the start of a tag's attribute line, right after its indent (epic `language` I133;  Owen:
+   * "backspace with cursor here should move `appearance` back to the line above, with a space between"):
+   * the line joins the one above, its indent gone, a space between;  none before a `>`, as `shrinkable>` is written.
+   * - Its attributes all back on the tag's own line, a `>` or `/>` alone on the line under comes up too:
+   *   the tag one line again.
+   * - `undefined`:  not at the start of a tag's attribute line.
+   */
+  static tagLineJoined(lines: readonly string[], index: number, column: number): TagLayout | undefined {
+    const line = lines[index] ?? ""
+    if (!index || column !== SpellTyping.indentOf(line).length || !line.trim()) return undefined
+    const tag = SpellTyping.tagOpenAt(lines, index, 0)
+    if (!tag) return undefined
+    const above = lines[index - 1]!.trimEnd()
+    const joined = joinedTagLine(above, line)
+    const next = lines[index + 1] ?? ""
+    const closesAlone = tag.line === index - 1 && /^\s*\/?>/.test(next)
+    return {
+      from: index - 1,
+      to: closesAlone ? index + 1 : index,
+      lines: [closesAlone ? joinedTagLine(joined, next) : joined],
+      caret: { line: index - 1, column: joined.length - line.trim().length }
+    }
   }
 
   /**
@@ -371,8 +450,24 @@ export type IndentSettings = {
 export type OpenTag = {
   /** index of the line the tag starts on */
   line: number
+  /** column (0-based) of its `<` on that line */
+  start: number
+  /** column just after its name on that line */
+  nameEnd: number
   /** column (0-based) of the first word after its name on that line;  `undefined` when the name ends the line */
   firstAttribute: number | undefined
+}
+
+/** Lines `from` ... `to` (indexes) written as `lines`, and where the caret goes:  `SpellTyping.tagLaidOut()`'s ... */
+export type TagLayout = {
+  /** index of the first line it replaces */
+  from: number
+  /** index of the last */
+  to: number
+  /** what's written in their place */
+  lines: string[]
+  /** where the caret goes, in the file as written:  a line's index and a column (0-based) */
+  caret: { line: number; column: number }
 }
 
 /** An attribute value `SpellTyping.quotedValueAt()` found:  the columns (0-based) of its text, inside its quotes. */
@@ -408,6 +503,42 @@ function isStillOpen(text: string): boolean {
     else if (char === ">") return false
   }
   return !quote
+}
+
+/**
+ * The words of a tag after its name, `text`:  each attribute (`size="small"`, `inverted`, `{x}`, `"stock"`),
+ * where it starts in `text`, and the `>` or `/>` that ends the tag, if there's one yet.
+ * - A word ends at a space or a line's end outside quotes and braces, or at the tag's end:  `shrinkable>`.
+ */
+function tagWords(text: string): { words: Array<{ text: string; at: number }>; close?: { text: string; at: number } } {
+  const words: Array<{ text: string; at: number }> = []
+  let at = 0
+  const isEnd = (from: number) => text[from] === ">" || text.startsWith("/>", from)
+  while (at < text.length) {
+    while (/\s/.test(text[at] ?? "")) at++
+    if (at >= text.length) break
+    if (isEnd(at)) return { words, close: { text: text[at] === ">" ? ">" : "/>", at } }
+    const start = at
+    let quote = ""
+    let braces = 0
+    for (; at < text.length; at++) {
+      const char = text[at]!
+      if (quote) {
+        if (char === quote) quote = ""
+      } else if (char === '"' || char === "'") quote = char
+      else if (char === "{") braces++
+      else if (char === "}") braces = Math.max(0, braces - 1)
+      else if (!braces && (/\s/.test(char) || isEnd(at))) break
+    }
+    words.push({ text: text.slice(start, at), at: start })
+  }
+  return { words }
+}
+
+/** `line` after `above`, a tag's lines joined:  its indent gone, a space between, none before a `>`. */
+function joinedTagLine(above: string, line: string): string {
+  const words = line.trim()
+  return above.trimEnd() + (words.startsWith(">") ? "" : " ") + words
 }
 
 /**
