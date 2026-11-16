@@ -1,11 +1,12 @@
 /* `<PublishClash>`:  each file's diff tall enough to read */
 .PublishClash .DiffView {
   height: 40vh;
+  overflow: auto;
   border: 1px solid var(--ui-border-color, #8884);
   border-radius: 0 0 6px 6px;
 }
 
-/* the two sides' headers, each over its half of the diff (Monaco splits it in half) */
+/* the two sides' headers, each over its half of the diff (the merge view splits it in half) */
 .PublishClash .PublishClashSides {
   display: grid;
   grid-template-columns: 1fr 1fr;

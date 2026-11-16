@@ -14,7 +14,7 @@ import { LSP_TEXTS_ES } from "./LspTexts.es"
  * - Read one with `text(key, params)`:  `LspTexts.of(scope).text("declaredIn", { where })`.
  *   - The keys and their English:  `LSP_TEXTS` (`LspTexts.en.ts`);  Spanish:  `LspTexts.es.ts`.
  *   - A language with no texts here reads English.
- * - Plain data, browser-safe:  the app's Monaco editor runs the same service in-process.
+ * - Plain data, browser-safe:  the app's code editor runs the same service in-process.
  * - NOT `UI.i18n` (Spell UI's), which the app's own texts read:  the server runs in node too, with no Spell UI.
  * - Its Spanish is a static import, not a lazy chunk:  hover and completion answer at once,
  *   and the Spanish language pack (`SP.spanish`) it labels is in the same bundle already.

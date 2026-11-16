@@ -12,10 +12,19 @@
   overflow: hidden;
 }
 
-/* the line being followed:  a mark in the margin, in the theme's accent, and no band across the code */
-.FollowedLine {
-  margin-inline-start: 3px;
-  width: 3px !important;
-  border-radius: 2px;
-  background: var(--ui-primary);
+/*
+ * the line being followed:  a mark in the gutter, in the theme's accent, and no band across the code
+ * (`CodeMirrorFollowed`:  every gutter's element of the line is a `.FollowedLine`;  the fold gutter's draws it)
+ */
+.cm-foldGutter .cm-gutterElement.FollowedLine {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 2px auto 2px 3px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--ui-primary);
+  }
 }

@@ -33,7 +33,7 @@ import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
  *   - its indent:  what's under what, so a line that doesn't parse still sits where it should
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
- * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so will Monaco (epic `language` P50) and VS Code (P51).
+ * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so do the app's code editor (epic `codemirror` P3) and VS Code (P51).
  * - NEVER throws:  a parse that fails lays out every line as a step, coloured by its tokens.
  ****************/
 export class BubblyLayout {
@@ -252,9 +252,9 @@ export class BubblyLayout {
    * An expression of operands and operators, `the pile's suit is the card's suit and the card is on top of its pile`:
    * each operand its own value, but a question (`is on top of its pile`) one with the thing it asks of;
    * the operators that combine them (`is`, `and`, `- 1`) plain between.
-   * - The thing a question asks of:  what's before it back to the last `and` or `or` (`isJoin`), as the compiler
-   *   binds it (`CompoundExpression`'s precedence):  every question binds tighter than those, and no tighter than
-   *   arithmetic.
+   * - The thing a question asks of:  what's before it back to the last `and` or `or` (`isJoin`),
+   *   as the compiler binds it (`CompoundExpression`'s precedence):
+   *   every question binds tighter than those, and no tighter than arithmetic.
    */
   private underlineCombination(match: P.Match) {
     const { lhs, rhsChain } = match.groups as { lhs?: P.Match; rhsChain?: P.Match }
@@ -647,9 +647,9 @@ export class BubblyLayout {
   }
 
   /**
-   * An action head's pill:  what a person typed, ONE pill, from its first `declaration` or `blank` to its last
-   * `declaration` (`pillOf()`):  `to <play a card>`, `after <putting a card on a pile>`, `when <a card is dropped>`,
-   * `when <creating solitaire>` (epic `language` I109).
+   * An action head's pill:  what a person typed, ONE pill,
+   * from its first `declaration` or `blank` to its last `declaration` (`pillOf()`, epic `language` I109):
+   * `to <play a card>`, `after <putting a card on a pile>`, `when <a card is dropped>`, `when <creating solitaire>`.
    * - Its blanks are in it, each its own dotted line (`blanksOf()`), its kind word bold, `a **card**`:
    *   what the spans painted a name there before the pill (`pillNames`)
    * - Quoted, `to "play a card"`, its `"` marks are its pill's own, at either end, as any quoted input's.
@@ -710,10 +710,10 @@ export class BubblyLayout {
   /**
    * An action head's blanks, each underlined in its pill:
    * - its own parts that are a `blank`, each with the article before it:  `when <a card> is dropped`
-   * - in its declarations, the parts their rules say are a `blank`:  an action's parameters,
-   *   `to play <a card>`, `to move (<a card>) to (<a pile>)` (`method_signature`'s)
-   * - EXCEPT a create hook's (`blankAfterVerb`, a check of its own):  its signature but its first word,
-   *   `when creating <a card image>`, `when creating <it>`
+   * - in its declarations, the parts their rules say are a `blank`:
+   *   an action's parameters, `to play <a card>`, `to move (<a card>) to (<a pile>)` (`method_signature`'s)
+   * - EXCEPT a create hook's (`blankAfterVerb`, a check of its own):
+   *   its signature but its first word, `when creating <a card image>`, `when creating <it>`
    */
   private blanksOf(statement: P.Match, roles: BubblyRuleRoles, row: BubblyRulePresentation | undefined): Stretch[] {
     if (row?.blankAfterVerb) {

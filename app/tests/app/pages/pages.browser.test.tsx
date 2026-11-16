@@ -219,7 +219,10 @@ function keydown(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
   return event
 }
 
-/** Spy on every `editor` method `EDITOR_HOTKEYS` runs (Esc stops inspecting;  Undo, Redo and Find are Monaco's). */
+/**
+ * Spy on every `editor` method `EDITOR_HOTKEYS` runs
+ * (Esc stops inspecting;  Undo, Redo, Find, Go to Definition, Find All References and Rename are the code editor's).
+ */
 function spyOnHotkeys() {
   expect(Object.keys(EDITOR_HOTKEYS)).toEqual([
     "saveAll",
@@ -231,6 +234,9 @@ function spyOnHotkeys() {
     "undo",
     "redo",
     "find",
+    "goToDefinition",
+    "findReferences",
+    "rename",
     "cutParts",
     "copyParts",
     "pasteParts",

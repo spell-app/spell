@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 import { createTestProject, type TestProject } from "./testProject"
 
 /**
@@ -28,15 +28,6 @@ const CARD = [
   ``
 ].join("\n")
 
-/** What's used of the page's debug globals:  the code editor showing. */
-type CodeGlobals = {
-  editor: {
-    shownCodeEditor: {
-      getPosition(): { lineNumber: number; column: number }
-    }
-  }
-}
-
 describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 }, () => {
   let browser: Browser
   let page: Page
@@ -50,7 +41,7 @@ describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 
   }
   /** Put the caret on line `line` (1-based), by the arrow keys:  at its start, or past its indent if it snaps. */
   const caretToLine = async (line: number) => {
-    await page.locator(".InputEditor .monaco-editor .view-lines").first().click()
+    await page.locator(".InputEditor .cm-content").first().click()
     await page.keyboard.press("Meta+ArrowUp")
     await page.keyboard.press("Control+Home")
     for (let at = 1; at < line; at++) await page.keyboard.press("ArrowDown")
@@ -58,12 +49,10 @@ describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 
   /** Line `line` (1-based) of the file. */
   const lineOf = async (line: number) => (await contents()).split("\n")[line - 1]
   /** Where the caret is. */
-  const caret = () =>
-    page.evaluate(() => {
-      const code = (window as unknown as CodeGlobals).editor.shownCodeEditor
-      const { lineNumber, column } = code.getPosition()
-      return { line: lineNumber, column }
-    })
+  const caret = async () => {
+    const { lineNumber, column } = await new CodeEditor(page).caret()
+    return { line: lineNumber, column }
+  }
   const undo = () => page.keyboard.press(process.platform === "darwin" ? "Meta+z" : "Control+z")
 
   beforeAll(async () => {
@@ -71,7 +60,7 @@ describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 
     page = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage()
     project = await createTestProject(EDITOR!, { name: "typing", filePath: FILE, contents: CARD })
     await page.goto(`${EDITOR}edit/${project.projectId}`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(1500)
   }, 120_000)
 

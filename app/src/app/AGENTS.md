@@ -41,7 +41,7 @@ and in the app's build folder, `app/` at the app folder's root.
     `mockup` P4), which changes the site's file through `SiteWrites`;  a page's stories, `PageStories` (P6);
     its board of sections and cards, `SiteBoard` and `<SiteBoardView>` (T31);  a site of its routing alone, `X.site.spell`,
     each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`)
-  - `ui/`:  `UI`, shared UI types, Monaco's plumbing,
+  - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
@@ -133,28 +133,66 @@ and in the app's build folder, `app/` at the app folder's root.
     - Pinned by `element.build.test.ts`.
   - `spell app vscode` is NOT here:  it's the app folder's (its `src/cli/`).
   - `yarn lsp:start` and `yarn lsp:scopes` are [lsp](../lsp/)'s.
-- [The app's Monaco plumbing](ui/monaco/) (no UI).
-  - Its language features call the SAME `LSP.SpellLanguageService`, in-process.
+- [The app's CodeMirror plumbing](ui/codemirror/) (no UI):  every place the app shows code is CodeMirror 6
+  (epic `codemirror`, 2026-11-16):  the code pane and its fallback editor, the Inspector's Code card, the compiled
+  pane, Publish's diff, notebook cells and `<spell-editor>`.
+  - Its language features call the SAME `LSP.SpellLanguageService`, in-process
+    ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts)).
     So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
-  - It draws Spell in the bubbly look as it's typed (epic `language` P50):  [SpellBubbly](ui/monaco/SpellBubbly.ts),
-    from the parser's `SP.BubblyLayout`, marked by [BubblyMarks](ui/monaco/BubblyMarks.ts), styled by
-    [bubbly.css](components/spell-code/bubbly.css)'s marked Monaco section, the look's one sheet.
-    - The text stays ordinary text:  its pieces are decorations in the sheet's classes, room round a pill is injected
-      text, the shapes a layer behind the editor, the room under a declaration a view zone.
-    - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, `codePopups.ts`).
+    - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
+    - Suggestions, hover, folding, signature help (⇧⌘Space, or as a space is typed while Settings… says),
+      highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
+      Find All References, code actions, accent fixes as you type;  hovers and signature help drawn by `<ui-markdown>`.
+    - A Spell UI tag's help on Go to Definition;  Format Document, expand / shrink selection, Go to Symbol.
+  - Spell in CodeMirror is [SpellCodeMirror](ui/codemirror/SpellCodeMirror.ts):  `edit()` makes an editor of a view,
+    `codeExtensions()` shows another language's code (the compiled JavaScript, TypeScript and Python, read-only),
+    `merge()` the two sides of a diff.
+  - One state per file, [FileStates](ui/codemirror/FileStates.ts):  each file keeps its text, undo, folds and selection
+    while another is shown;  the files' states follow `file.contents` both ways.
+    - Edits from outside the code go in through `applyEdits()`, one undo step each, marked with their `EditWay`
+      (`FileStates.EDIT_WAY`, the one "not typed" mark).
+  - Every editor starts from one base setup, [CodeMirrorSetup](ui/codemirror/CodeMirrorSetup.ts):
+    keys, undo, find, the gutter (no line numbers, fold arrows over the code's padding),
+    and CodeMirror's words, which are `AppTexts` keys (`cm...`), following `appTexts.lang`.
+  - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
+    the scope explorer's packs use it too.
+  - What a hover says and which code actions show are decided once, editor-free, in
+    [CodeEditorFeatures](ui/CodeEditorFeatures.ts):  so are what Rename Symbol says, the hover's ⌥ rule, the web
+    addresses and heading comments in a line.
+  - The whole bubbly look (epic `language` P50), drawn on the text itself, no layer behind it:
+    the look's one sheet, [bubbly.css](components/spell-code/bubbly.css), has the editor's CodeMirror section,
+    and nothing of the look is in `codemirror.css`.
+    - Spell:  [CodeMirrorBubbly](ui/codemirror/CodeMirrorBubbly.ts), from the parser's `SP.BubblyLayout`;
+      a head's description at its band's right end;  a drawing's tags as HTML's.
+    - HTML, an HTML file's (a property editor page, `Card.editor.html`) and a drawing's tags:
+      [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from [MarkupMarks](ui/MarkupMarks.ts), the page's own
+      reading of it (`BubblyMarkup`);  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no
+      editor in them;  pointed ends.
+    - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
+      ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
+    - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
+      [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
+      tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
     - Not in a page file.
-    - Both sides of a diff too (Publish's `<DiffView>`, epic `editor` T75):  Monaco lines them up round its view zones.
-    - A `<CodeSlice>` (the Inspector's Code card) is drawn too (`SpellBubbly.showSlice()`, epic `editor` T72):
-      only what's wholly in its lines, so the action whose body it shows draws no band or rail cut off at its edges.
-    - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:
-      [MarkupMarks](ui/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
-      `.bubbly-html` too;  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no editor in
-      them, and made Monaco's decorations by [MonacoMarks](ui/monaco/MonacoMarks.ts) (epic `codemirror` P3)
-  - Nine helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
-    what each decides from the lines is the language service's `LSP.SpellTyping`, which the CodeMirror test page
-    reads too (epic `codemirror` P1);  Monaco's file holds only its wiring
+    - ONE colour table, [CodeRules](ui/CodeRules.ts):  a role's `--ui-code-<role>` colour and CodeMirror's highlight
+      tags;  the compiled pane is coloured by it.
+    - A slice of a file, the Inspector's Code card (`<CodeSlice>`, epic `editor` T72):
+      `FileStates.showSlice()`, the file's own text in another view, its edits the file's;
+      only what's wholly in its lines is drawn bubbly, so the action whose body it shows draws no band or rail
+      cut off at its edges.
+    - Both sides of a diff too (Publish's `<DiffView>`, on CodeMirror's merge view, epic `editor` T75).
+  - The lines being followed (the place in focus, `editor.followed`) are a bar in the gutter
+    ([CodeMirrorFollowed](ui/codemirror/CodeMirrorFollowed.ts)).
+  - Pinned lines (Settings… › Pinned lines, epic `codemirror` T8):
+    the lines opening the blocks the top of the code is inside stay at the top while it scrolls
+    ([CodeMirrorPinned](ui/codemirror/CodeMirrorPinned.ts)).
+  - Nine helps as Spell is typed, in every Spell editor, the look on or off
+    ([CodeMirrorTyping](ui/codemirror/CodeMirrorTyping.ts)):  what each decides from the lines is the language
+    service's `LSP.SpellTyping`;  each one undo
+    - each writes with its key, so only the editor typed in helps:  a file's editor and a slice of it both have them
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
+      - the snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
     - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
@@ -168,38 +206,47 @@ and in the app's build folder, `app/` at the app folder's root.
       and closing tag, a body;  one undo
       - a line of a tag's attributes, under its first line, moves alone (I142);  so does a comment line (I161)
     - Enter between a tag's attributes puts the rest on a new line, lined up under its first attribute (epic `editor` I142):
-      measured as it's drawn, tabs then spaces;  one undo
+      measured as CodeMirror draws it, tabs then spaces;  one undo
+      - a tab is 2 spaces wide (Monaco's, epic `language` I113), but the bubbly look's bands and pills take room of
+        their own, so the text it writes can differ from one look to the other, lined up all the same
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
-  - A drawing's attribute value switches between text and code as it's typed ([CodeOrTextTyping](ui/monaco/CodeOrTextTyping.ts),
-    epic `editor` T74):  a `{` typed in `color="blue"` makes it `color={blue}`;  a `"` typed right after a code value's
-    `{` makes it text again;  one undo leaves the character typed
+  - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;
+    between `<x>` and `</x>`, the caret a level in and the closing tag on its own line (epic `editor` I65):
+    Spell's Enter rules, ONE table, `LSP.SpellTyping.ENTER_RULES`, which `CodeMirrorTyping` follows,
+    with VS Code's `language-configuration.json` kept the same by a test (`SpellKeywords.test.ts`)
+  - A drawing's attribute value switches between text and code as it's typed
+    ([CodeMirrorCodeOrText](ui/codemirror/CodeMirrorCodeOrText.ts), epic `editor` T74):
+    a `{` typed in `color="blue"` makes it `color={blue}`;
+    a `"` typed right after a code value's `{` makes it text again;  one undo leaves the character typed
     - the right-click menu's Refactor… and the light bulb do it too, "Make it code" / "Make it text"
       (`LSP.CodeOrText`, which both ask, so VS Code has them as well)
   - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥
-    ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97)
-  - Rename Symbol (F2) renames an action as the Inspector's Code card does, its calls and buttons too, one undo,
-    refused in the same words (`renameRefusal()`, epic `editor` I147);  the right-click menu shows it only where
-    something can be renamed (`SpellLanguageFeatures.followRenameRow()`), and F2 elsewhere says what can
+    ([CodeMirrorHovers](ui/codemirror/CodeMirrorHovers.ts), epic `editor` I97);
+    the rule is `CodeEditorFeatures.showsHoverInfo()`
+  - Rename Symbol (F2) renames an action as the Inspector's Code card does, its calls and buttons too, refused in the
+    same words (`CodeEditorFeatures.rename()`, over the service's `renameSaying()`, epic `editor` I147):
+    [CodeMirrorRename](ui/codemirror/CodeMirrorRename.ts), a field over the name;
+    each file's edits through `FileStates.applyEdits()`, one undo each
+    - the right-click menu shows it only where something can be renamed (`canRename`, in
+      [CodeMirrorMenu](ui/codemirror/CodeMirrorMenu.tsx)), and F2 elsewhere says what can
   - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code,
-    whatever key the hover takes
-    ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101)
-  - Drawn bubbly, the code starts 8px from the pane's edge, the fold arrows half over it (`MonacoEditor.css`);
-    a press on one folds through [FoldArrows](ui/monaco/FoldArrows.ts), as Monaco would take it as one on the code
-    (epic `editor` I154)
+    whatever key the hover takes ([CodeMirrorLinks](ui/codemirror/CodeMirrorLinks.ts), epic `editor` I101);
+    the addresses in a line are `CodeEditorFeatures`'
+  - Heading comments bold ([CodeMirrorHeadings](ui/codemirror/CodeMirrorHeadings.ts));
+    which lines are, `CodeEditorFeatures.headingIn()`
   - A colour or an icon attribute's value is picked from its words list's first row, "Pick a color…":
-    the palette or the icon picker at the caret ([ValuePicker](ui/monaco/ValuePicker.ts), epic `editor` T61)
-  - An attribute's words show quietly under its value once the caret rests in it for a second, the value ticked
-    ([ValueChoices](ui/monaco/ValueChoices.ts), epic `editor` T70):  typing or moving hides them, the keys stay with
-    the code;  ⌥↓ steps in, a click chooses, Ctrl+Space is the suggestion list
-  - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
-    the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
-    ONE table, `LSP.SpellTyping.ENTER_RULES`, which `SpellMonaco.CONFIGURATION` is built from,
-    with VS Code's `language-configuration.json` kept the same by a test
+    the palette or the icon picker at the caret (epic `editor` T61);  an attribute's words show quietly under its value
+    once the caret rests in it for a second, the value ticked (epic `editor` T70):  typing or moving hides them, the
+    keys stay with the code;  ⌥↓ steps in, a click chooses, Ctrl+Space is the suggestion list
+    - both:  [CodeMirrorValues](ui/codemirror/CodeMirrorValues.ts),
+      drawn by [ValuePopups](ui/ValuePopups.ts), editor-neutral;  where the value is, `LSP.SpellTyping.quotedValueAt()`
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
+    - Settings… drives the editors live:
+      `codeMirrorOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following `codeChoices`, which `CodeSettings` sets.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them
       through the component pack (`SP.ComponentPacks.help()`), from Spell UI's help table, `help.generated.ts`.
       On every line of a tag split over several, too (I64).
@@ -207,49 +254,23 @@ and in the app's build folder, `app/` at the app folder's root.
       `<action "|" />`, `<divider />`, `<content>` a line in then `</>`, `color="|"` with its words listed at once;
       a tag that closes itself always with a space before its `/>` (I70 C4).
       The shapes are ONE table, the language service's `LSP.CompletionShapes`, so VS Code writes the same.
-  - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`, with no Monaco in it:
-    the scope explorer's packs and the CodeMirror test page use it too (epic `codemirror` P1)
-  - What a hover says and which code actions show are decided once for both editors, Monaco-free:
-    [CodeEditorFeatures](ui/CodeEditorFeatures.ts)
-  - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
+  - Its keys are the page's, passed in (`hotkeys`:  the app's `EDITOR_HOTKEYS`;  `SpellCodeMirror.keymapFor()`).
+  - Its right-click menu ([CodeMirrorMenu](ui/codemirror/CodeMirrorMenu.tsx)) is the part menu's popup,
+    `<MenuPopup>`, Cut / Copy / Paste through `cutCopyOrPaste()`;  Find All References lists the uses in the same popup.
+    - NOT in the barrel:  import `CodeMirrorMenu` by its file, where the app is.
+  - While it has the focus it's the page's code editor (`codeEditors.focused`, in `ui.types.ts`):
+    ⌘Z off the code reaches its history in I167's order (`undoInEdit()`).
+  - NEVER imports the editor page (`editorHotkeys.ts`, `editor`, `spell/app/app/solid`), types aside:
+    `<spell-editor>`'s lazy chunk is this barrel, on pages with no app (`element.build.test.ts` pins it).
+  - The editors on it are Solid, in [their folder](solid/codemirror/):
+    `CodeMirrorEditor`, `FileEditor`, `CodeSlice` and `DiffView`.
     Its barrel re-exports the plumbing.
-  - Loaded LAZILY:
-    - in the app, through `spell/app/app/solid`'s `LazyMonaco`
-    - in `<spell-editor>`, through its `loadMonaco()`
-    - NEVER import `spell/app/app/ui/monaco` or `spell/app/app/solid/monaco` statically outside those folders, types aside.
-    - Or Monaco (~4.4 MB) lands in the main bundle again.
-- [The CodeMirror plumbing](ui/codemirror/), the editor Monaco is moving to (epic `codemirror`):
-  only the test page, `/demo/codemirror.html`, shows it until the swap (P6, Q4).
-  - One state per file, `FileStates` (P2):  each file keeps its text, undo, folds and selection while another is shown;
-    edits from outside the code go in through `applyEdits()`, one undo step each, marked with their `EditWay`.
-    - Its own copy of `SpellModels`' editor-free half (J4):  a change to one is copied to the other by hand till P6.
-  - Every CodeMirror editor starts from one base setup, `CodeMirrorSetup`:  keys, undo, find, the gutter
-    (no line numbers, fold arrows over the code's padding), and CodeMirror's words, which are `AppTexts` keys (`cm...`),
-    following `appTexts.lang`.
-  - The language service's answers reach it through one converter, `LspToCodeMirror`, the twin of `LspToMonaco`.
-  - Its Solid editors are `CodeMirrorEditor`, `FileEditor` and `CodeSlice`, in [their folder](solid/codemirror/),
-    as Monaco's are.
-  - The whole bubbly look (P3), drawn on the text itself, no layer behind it:  the look's one sheet, `bubbly.css`, has
-    a CodeMirror section, and nothing of the look is in `codemirror.css`
-    - Spell:  [CodeMirrorBubbly](ui/codemirror/CodeMirrorBubbly.ts), from the same `SP.BubblyLayout` as Monaco's;
-      a head's description at its band's right end;  a drawing's tags as HTML's
-    - HTML, an HTML file's and a drawing's tags:  [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from the
-      editors' shared `MarkupMarks`, only the step from its stretches to CodeMirror's marks its own;  pointed ends
-    - the look off (`codeLook`, through `CodeMirrorLook`'s compartment):  Spell coloured by the parser's own tokens,
-      `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own
-    - ONE colour table for both editors, [CodeRules](ui/CodeRules.ts):  a role's `--ui-code-<role>` colour, Monaco's
-      rules and CodeMirror's highlight tags;  the compiled JavaScript, TypeScript and Python pane is coloured by it
-    - a slice of a file, `CodeSlice`:  `FileStates.showSlice()`, the file's own text in another view, its edits the
-      file's;  only what's wholly in its lines bubbly;  both sides of a diff bubbly
-  - All nine typing helps, Monaco's, on the same rules (`LSP.SpellTyping`), one undo each (P4):
-    [CodeMirrorTyping](ui/codemirror/CodeMirrorTyping.ts);  and the code-or-text switch, `{` and `"` in an attribute's
-    value, [CodeMirrorCodeOrText](ui/codemirror/CodeMirrorCodeOrText.ts) (`LSP.CodeOrText`)
-    - each writes with its key, so only the editor typed in helps:  a file's editor and a slice of it both have them
-    - the caret's snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
-    - Enter between a tag's attributes measures tabs and spaces as CodeMirror draws them:  the bubbly look's tab stop
-      isn't 4 of the font's spaces, so its text can differ from Monaco's, lined up all the same
-  - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
-    and the test page, types aside:  it's to load lazily, as Monaco does.
+  - Loaded LAZILY, after the program has compiled and run:
+    - in the app, through `spell/app/app/solid`'s `LazyCodeMirror`
+    - in `<spell-editor>`, through its `loadCodeMirror()`:  the chunk `spell-editor-codemirror.js`
+    - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
+      and the demo page, types aside:  one static import puts it in the main bundle.
+  - Its demo page, `/demo/codemirror.html` ([CodeMirrorTest](ui/codemirror/CodeMirrorTest.tsx)), on the dev server.
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).
   - The router ships its Solid JSX as SOURCE (`.jsx` files, in its dist folder).
     - [`NOT_SOLID_SOURCE`](../../app/vite.shared.ts) lets the Solid plugin compile it out of `node_modules`.
@@ -260,6 +281,8 @@ and in the app's build folder, `app/` at the app folder's root.
     - Route components call `followRoute()`, which hands the URL's params to `editor.selectPath()`.
   - The editor page's shortcuts are ONE list, `EDITOR_HOTKEYS` ([editorHotkeys.ts](pages/editorHotkeys.ts)):
     the page's keys (on Spell UI's keyboard), the code editor's commands and the top bar's menus all read it.
+    - The code editor's own are by neutral names (`codeEditorCommand`:  `undo`, `find`, `rename` ...;  epic `codemirror`
+      P5), which CodeMirror runs by its commands (`UIT.CodeEditorHandle`).
 - `index.html` wraps the app in `<ui-root icons="fomantic">`.
   - So the app's icon names are Fomantic's ([loadUI.ts](solid/loadUI.ts)).
   - It still links `semantic.min.css`:  running programs draw with Semantic UI's class words.
@@ -389,7 +412,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - Its `define()` imports each family's ES module beside it, one per folder of `components/`.
       - One that won't load is a warning, and the rest still define:
         `spell-code.js` on a docs page whose Spell UI shares no code family, where `<spell-viewer>` still runs.
-    - They need lazy chunks (Monaco, the parser), and `spell-runtime.js` per app.
+    - They need lazy chunks (CodeMirror, the parser), and `spell-runtime.js` per app.
   - On a docs page (with Spell UI of its own), both take Solid and Spell UI's core from the page.
     - That's `SpellUI.packModules`, through `spell-solid-shared.js`.
     - Never a second copy (T3).
@@ -458,18 +481,20 @@ and in the app's build folder, `app/` at the app folder's root.
     1. its entry in `pages.json5`, then `yarn site:data`
     2. a copy of a page like it:  `Notice.html` for a picture, `spell-viewer.html` for a live one
     3. linked from `index.html`
-- `spellEditor/` is `<spell-editor>`'s pane:  the app's Monaco editor, as a web component.
+- `spellEditor/` is `<spell-editor>`'s pane:  the app's CodeMirror editor, as a web component.
   - `yarn build:element` => `spell-editor.js`
   - its demo:  `/demo/spell-editor.html`
   - It edits a server project, and feeds `<spell-viewer>`s what it compiles.
     - That's `SPELL_COMPILED_EVENT`, and `SpellCompiled` in [runner.types.ts](runner/runner.types.ts).
-  - Its OWN build, `vite.editor.config.ts`, so Monaco's CSS stays out of `spell-app.css`.
-    - Monaco is a lazy chunk:  the parser compiles, and apps run, before it loads.
+  - Its OWN build, `vite.editor.config.ts`, so the editor's CSS (the bubbly look's) stays out of `spell-app.css`.
+    - CodeMirror is a lazy chunk, `spell-editor-codemirror.js`:  the parser compiles, and apps run, before it loads.
     - Pinned by `element.build.test.ts`.
   - Several on a page edit several projects.
-    - Each `SpellModels.use()`s its own.
-    - Each listens with `SpellMonaco.onEdit()` / `onOpen()`, NOT through the app's editor.
-    - NEVER import `UI` or `LazyMonaco` there.
+    - Each `SpellCodeMirror.states.use()`s its own.
+    - Each listens with `SpellCodeMirror.onEdit()`, and its `<FileEditor>`'s `onOpen`, NOT through the app's editor.
+    - Its keys are its own copy of the editor page's (`SPELL_EDITOR_HOTKEYS`):  `EDITOR_HOTKEYS` brings the app.
+    - No right-click menu of the app's, no Find All References list:  `CodeMirrorMenu` is the app's.
+    - NEVER import `UI`, `LazyCodeMirror` or the editor page there.
 - Styles:  WWOD §18 › "Plain `.css` beside its component" (no Less).
   - app-wide sheets:  `spell.css`, `syntax.css`
   - The top bar's SPACING is one rule, in `solid/chrome.css` (Owen, 2026-10-24):

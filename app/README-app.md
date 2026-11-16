@@ -16,7 +16,8 @@ inside the element's own shadow root, with a toolbar holding Restart and Debug.
   the element, Solid and Spell UI's core, and the app's own copy of Spell's runtime.
   After that it loads only the Spell UI widgets the calculator draws, each the first time one appears.
 - It never loads the editor.
-  Monaco, the code editor inside VS Code, is a 4.2 MB file of its own, and only a `<spell-editor>` asks for it.
+  CodeMirror, the code editor with Spell's language service in it, is a 681 KB file of its own,
+  and only a `<spell-editor>` asks for it.
 - The JavaScript comes from the page server, which compiles
   [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell) when it starts, or the first time it's asked.
 
@@ -25,7 +26,7 @@ and in VS Code's Run Project panel.
 It all lives in [src/app/](src/app/), Spell's editor:
 the web app where you write Spell on one side and watch it run on the other.
 It's [Solid](https://docs.solidjs.com/) 2 on [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s components,
-with [Monaco](https://microsoft.github.io/monaco-editor/) for the text.
+with [CodeMirror](https://codemirror.net/) 6 for the text.
 
 Its server isn't in this folder:
 it's [spaces'](README-spaces.md#the-servers--an-api-that-nothing-starts), a route module on the page server.
@@ -38,7 +39,7 @@ flowchart TB
   subgraph web["the editor app"]
     routes["the routes:  /edit, /run, the chooser"] --> screens["the screens:  panes, menus, dialogs"]
     screens --> store["editor:  the one store"]
-    screens --> monaco["Monaco, asking the language service in the page"]
+    screens --> codemirror["CodeMirror, asking the language service in the page"]
   end
   store --> runner["the runner:  runCompiled()"]
   panel["VS Code's Run Project panel"] --> runner
@@ -63,7 +64,7 @@ Inside a framework's page is another matter:  Spell UI's `<ui-dropdown>` has bee
 | Tag | What it does | What you set |
 | --- | --- | --- |
 | `<spell-viewer>` | runs a project, with an optional toolbar and a debug pane below it:  the Type Explorer, the Thing Explorer and the console;  a root of its own, so the page needs nothing around it | `project` or `src`:  what to run;  `editor`:  a `<spell-editor>` to take programs from;  `toolbar`;  `debug`:  the pane's first tab |
-| `<spell-editor>` | Monaco with tabs, editing a project on the page server;  it compiles as it opens, two seconds after typing stops and on Cmd+Enter, and hands what it compiled to its apps | `project`;  `file`:  the one to show first;  `app`:  a selector for the apps it feeds |
+| `<spell-editor>` | CodeMirror with tabs, editing a project on the page server;  it compiles as it opens, two seconds after typing stops and on Cmd+Enter, and hands what it compiled to its apps | `project`;  `file`:  the one to show first;  `app`:  a selector for the apps it feeds |
 | `<spell-code>` | Spell UI's `<ui-code>`, drawing Spell in the bubbly look from Spell's own parser:  each declaration on a band, what was typed in pills;  once it loads, every `<ui-code language="spell">` on the page is drawn so too | `language`:  `spell` unless it says otherwise;  `line-numbers` or `wrap`:  coloured lines instead |
 | `<spell-markdown>` | Spell UI's `<ui-markdown>`, drawn by spell-parser's own markdown engine, its Spell blocks coloured | `editable`:  Write and Preview tabs |
 
@@ -106,7 +107,7 @@ Where it stops:
   through the page server's API:  saved as this machine's person, whoever's signed in.
   A page with a `<spell-editor>` is for your own machine, not the open web.
 - The pack defines all four tags as it registers, so it fetches `spell-editor.js`, 2.0 MB, even where no editor is.
-  Monaco still waits for an editor to open.
+  CodeMirror still waits for an editor to open.
   A page of apps alone is lighter loading `spell-viewer.js` by itself.
 - Only a checkout's page server serves the elements today:  the `spell` package on npm ships the app's code,
   but not its element bundles, `dist-element/`, which are never committed either;
@@ -148,7 +149,7 @@ Where it stops:
 | `compiled` | the property holding what it last compiled with no parse errors |
 | `spell-compiled` | the event it sends after each such compile, bubbling out of its shadow root:  `detail` is what it made, its project, JavaScript, scope pack and declarations |
 
-- An editor compiles without Monaco, so its apps run before Monaco has arrived.
+- An editor compiles without CodeMirror, so its apps run before CodeMirror has arrived.
 - Several editors on one page edit several projects;  two editors of one project share its files,
   so typing in one shows in the other.
 - Leaving the page releases an element a moment later;  a move in one go keeps it.
@@ -649,8 +650,8 @@ Each one dresses the whole editor:
   - The Spell extension carries the same colours as VS Code themes:  "Spell Matrix Dark" and the rest.
 - A theme made with Spell UI's theme editor and kept in the browser is worn over its base,
   while that base is the theme chosen.
-- All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx), [the code themes](src/app/ui/monaco/themes/) and
-  the one table of which colour each kind of code takes, in either editor, [CodeRules.ts](src/app/ui/CodeRules.ts).
+- All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx) and
+  the one table of which colour each kind of code takes, [CodeRules.ts](src/app/ui/CodeRules.ts).
 - **Not yet:**  a menu entry for that kept theme, and a design pass on Merlot and Spell,
   which were built to their first drawings with no round of polish.
 
@@ -774,10 +775,10 @@ The editor's keys, with Command on a Mac or Control elsewhere (either works on b
 | `Esc` | stop inspecting |
 
 - ONE list of them, `EDITOR_HOTKEYS` ([editorHotkeys.ts](src/app/pages/editorHotkeys.ts)):
-  the menus show each item's key from it, Monaco's commands are made from it, and the page's keys go through
+  the menus show each item's key from it, the code editor's keys are made from it, and the page's keys go through
   Spell UI's keyboard.
 - `Mod+Z` and `Mod+Shift+Z` belong to whatever has the focus:
-  - in the code, Monaco's undo and redo
+  - in the code, CodeMirror's undo and redo, each file its own history
   - in the running app, the program's:  what it did, one action at a time
     ([spell-parser's core](https://github.com/spell-app/spell/blob/main/parser/README-core.md));
     a text field in it keeps its own
@@ -804,25 +805,26 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   - A Spanish page loads Spell UI's own Spanish too, so its dialogs' buttons match.
 - The language server's labels follow the language of the FILE they're about instead, by its name ([README-lsp.md](README-lsp.md)):
   a Spanish program's hover says "declarado en" in any editor.
-- Still English:  the spaces' prompts (a new project's name), Monaco's own menus, the dev-only dialog demos.
+- Still English:  the spaces' prompts (a new project's name), the dev-only dialog demos.
 
 </details>
 
 <details>
-<summary>Monaco, and the language service in the page</summary>
+<summary>CodeMirror, and the language service in the page</summary>
 
-- [src/app/ui/monaco/](src/app/ui/monaco/) wires Monaco to Spell:  the colours, and the errors, hover, completion
-  and the rest, from [the language service](README-lsp.md#what-it-answers-request-by-request),
+- [The app's CodeMirror folder](src/app/ui/codemirror/) wires CodeMirror 6 to Spell:
+  the colours, and the errors, hover, completion and the rest, from [the language service](README-lsp.md#what-it-answers-request-by-request),
   called in the page itself.
   - That's why the language service must stay safe to run in a browser.
 - An error shows its message on a plain hover over its squiggle;  the rest of the hover waits for ⌥, as the
-  code pane's Settings… choose ([ErrorHover](src/app/ui/monaco/ErrorHover.ts)).
-- A web address in the code opens in a new tab ([LinkClick](src/app/ui/monaco/LinkClick.ts)):
+  code pane's Settings… choose ([CodeMirrorHovers](src/app/ui/codemirror/CodeMirrorHovers.ts)).
+- A web address in the code opens in a new tab ([CodeMirrorLinks](src/app/ui/codemirror/CodeMirrorLinks.ts)):
   - a plain click on the small open icon drawn after it (Font Awesome's `up-right-from-square`), which isn't text:
     the caret never lands in it, and copying leaves it out
   - or ⌘-click (Ctrl-click off a Mac) on the address, as in VS Code, in every hover setting:
     ⌘ held over it underlines it, and a plain hover says so
-- A colour or an icon attribute's value can be picked, not typed ([ValuePicker](src/app/ui/monaco/ValuePicker.ts)):
+- A colour or an icon attribute's value can be picked, not typed
+  ([CodeMirrorValues](src/app/ui/codemirror/CodeMirrorValues.ts)):
   - in its quotes, its words list starts with "Pick a color…" (`color="|"`) or "Pick an icon…" (`icon="|"`)
   - that opens the colour palette, or Spell UI's icon picker, at the caret;  a pick writes the value as one undo step
   - which attribute takes which picker is Spell UI's to say, through the help the language service reads:
@@ -830,12 +832,17 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   - VS Code has no picker, so its list has no Pick row
 - Long lines don't wrap:  they scroll sideways, in the code pane and the Inspector's code alike, unless Settings…
   › Wrap long lines is on (`CodeSettings`, epic `editor` I110).  A notebook's cells always wrap.
-- Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`,
-  a view of its file:  the project's files stay the source of truth, and each edit re-parses as little as it can.
+- Each file is a CodeMirror state at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`
+  ([FileStates](src/app/ui/codemirror/FileStates.ts)), a view of its file, keeping its own undo, folds and caret
+  while another is shown:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.
-- The editors on it are Solid components, `MonacoEditor` and `FileEditor`.
-- Monaco loads lazily, the first time an editor opens:
-  through `LazyMonaco` in the app, and `loadMonaco()` in `<spell-editor>`.
+- The editors on it are Solid components, `CodeMirrorEditor`, `FileEditor`, `CodeSlice` (the Inspector's code) and
+  `DiffView` (Publish's diff), in [their folder](src/app/solid/codemirror/).
+- CodeMirror loads lazily, after the program has compiled and run:
+  through `LazyCodeMirror` in the app, and `loadCodeMirror()` in `<spell-editor>`.
+- **Not yet:**  `<spell-editor>` has no right-click menu or Find All References list (both are the app's),
+  and no editor has a peek view:  Go to Definition jumps to the declaration,
+  and nothing shows another file's lines inline under the code.
 
 </details>
 
@@ -969,7 +976,7 @@ Then the page loads the viewer and names a project:
 ```
 
 - It builds `<spell-viewer>` (`yarn build:element`) and copies it into `element/`:
-  about 2,400 files, 17 MB, without the editor, Monaco or source maps, which a viewer never loads.
+  about 2,400 files, 17 MB, without the editor, CodeMirror or source maps, which a viewer never loads.
 - Each project, compiled where it's out of date, goes into `spaces/<project>/`, with the projects it imports:
   the paths the page server answers, so the viewer reads them as plain files.
 - It replaces those two folders, and leaves the rest of the site alone.
@@ -982,7 +989,7 @@ To let visitors change the code too, add `--editor`, and put a `<spell-editor st
 <spell-viewer id="game" project="@spell/examples/Solitaire"></spell-viewer>
 ```
 
-- `--editor` copies `<spell-editor>` and Monaco too (13 files, 6.9 MB, 1.7 MB gzipped),
+- `--editor` copies `<spell-editor>` and CodeMirror too (7 files, 3.9 MB, 1 MB gzipped),
   and writes each project's index into `api/projects/index/`, which the editor opens it from.
 - `static` reads the project from those plain files, through the preview's `StaticFiles`,
   and keeps every edit in the page's memory:  nothing is saved, and a reload starts over.
@@ -1005,9 +1012,10 @@ Five builds, each run from spell-app's folder, each into a folder of [app/](app/
 Two copies of Solid on one page break silently, so however many of these bundles a page loads,
 it gets ONE Solid.
 What each bundle costs is the other half of the design:
-- Monaco loads only when an editor opens:  4.2 MB as `<spell-editor>` builds it, 5.5 MB in the app's own build.
-- `<spell-editor>` has a build of its own, so Monaco's styles stay out of `<spell-viewer>`'s:
-  `spell-app.css` is 8 KB, `spell-editor.css` 188 KB.
+- The code editor loads only when an editor opens:  CodeMirror is 681 KB as `<spell-editor>` builds it;
+  687 KB in the app's own build.
+- `<spell-editor>` has a build of its own, so the editor's styles stay out of `<spell-viewer>`'s:
+  `spell-app.css` is 7 KB, `spell-editor.css` 48 KB.
 - `spell-language.js` is 611 bytes:  it registers Spell's colours with the page's `<ui-code>`, no element,
   and fetches Spell's parser to colour with the first time a Spell block appears.
   spell-app's part of the page server's settings ([README-page-server.md](README-page-server.md)) adds it to the docs
@@ -1015,7 +1023,7 @@ What each bundle costs is the other half of the design:
 - `spell-page.js` is the page's `@spell/core` for a Python Spell app:
   it exports what `spell-runtime.js` does, and a test fails on one it leaves out.
 - The build tests pin all of it:  no React in any chunk, the runtime's included;  one Solid;
-  `core` in `spell-runtime.js` alone;  Monaco in chunks of its own, loaded lazily.
+  `core` in `spell-runtime.js` alone;  CodeMirror in chunks of its own, loaded lazily.
 
 You pay for that split at build time:  `yarn build:element` is four Vite builds in a row, `spell-solid.js` first.
 
@@ -1078,7 +1086,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
   ```
 
 - Two rules that bite:
-  - Never import Monaco statically outside its two folders, types aside:  one static import puts it in the main bundle.
+  - Never import CodeMirror, or the app's two CodeMirror folders, statically outside those folders, types aside:  one static import puts it in the main bundle.
   - Only `spellRuntime.ts` imports `spell/parser/core` as a value:
     anywhere else, it lands in a chunk every app on the page shares, and the build tests fail.
 - The rest of the folder's rules:  [app's AGENTS.md](src/app/AGENTS.md).
@@ -1089,5 +1097,5 @@ It's 31 pages in seven groups, from the four web components through the panes an
 - [The Spell app](README.md):  this folder's front page, with the live loop drawn for people who don't program
 - [Spaces](README-spaces.md):  where the projects come from, and the server the editor saves through
 - [The element framework](https://github.com/spell-app/spell/blob/main/README/element.md):  what all four elements are written on, and how a pack loads
-- [The language server](README-lsp.md):  the service Monaco asks in the page, and VS Code asks over stdio
+- [The language server](README-lsp.md):  the service CodeMirror asks in the page, and VS Code asks over stdio
 - [Spell in VS Code](https://github.com/spell-app/spell/blob/main/README-vscode.md):  Run Project, the third place the runner runs

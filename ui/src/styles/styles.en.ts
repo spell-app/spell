@@ -1,9 +1,10 @@
 /**
  * Global style vocabulary:  every name and value of the global scales, as typed DATA.
- * - Single source of truth for `tokens.css`, `colors.css` and `sizes.css` -- `StyleGenerator` reads this file
- *   (`yarn gen:styles`), so NEVER edit those sheets by hand.  Change a value here and regenerate.
- * - Keys are the CANONICAL names that reach CSS (`.ui.red`, `--ui-space-m`).  A translation
- *   (`styles.vocabulary.es.ts`) maps translated names onto these keys and never repeats the values.
+ * - Single source of truth for `tokens.css`, `colors.css` and `sizes.css`:
+ *   `StyleGenerator` reads this file (`yarn gen:styles`), so NEVER edit those sheets by hand.
+ *   Change a value here and regenerate.
+ * - Keys are the CANONICAL names that reach CSS (`.ui.red`, `--ui-space-m`).
+ *   A translation (`styles.vocabulary.es.ts`) maps translated names onto these keys and never repeats the values.
  * - Key `default` means "the unsuffixed token", e.g. `fonts.default` => `--ui-font-family`.
  * - Lengths are `em` of the local font size or px -- NEVER rem (the page can redefine it).
  * - PURE DATA, near the bottom of the folder's import graph:  it imports `styles.types` as types only, so node reads
@@ -33,11 +34,11 @@ import type {
  * The palette:  Fomantic's 13 hue names, re-drawn in OKLCH.
  * - Same hue angles as Fomantic's hex values (so `red` still reads as Fomantic red), with lightness evened
  *   out and chroma nudged so no hue is much louder than its neighbours.
- * - `onDark` is lighter and a touch less saturated -- Fomantic's `light<Hue>` role, used by the dark scheme
- *   and `inverted` variations.
- * - `black` lightens instead of darkening for its states, as Fomantic's `@blackHover` does.  Its `inverted`
- *   (text / outline on dark surfaces) is near-white, as Fomantic's inverted black button is:  `onDark` (L 0.42)
- *   read 2.2:1 as text on the inverted surface.
+ * - `onDark` is lighter and a touch less saturated --
+ *   Fomantic's `light<Hue>` role, used by the dark scheme and `inverted` variations.
+ * - `black` lightens instead of darkening for its states, as Fomantic's `@blackHover` does.
+ *   - Its `inverted` (text / outline on dark surfaces) is near-white, as Fomantic's inverted black button is:
+ *     `onDark` (L 0.42) read 2.2:1 as text on the inverted surface.
  * - `onLight` of red / green / blue / pink is darker than the "even" lightness, so WHITE text passes WCAG AA
  *   (4.5:1) on the solid colour and its states -- was L 0.6 / 0.66 / 0.58 / 0.63, white 4.4 / 2.9 / 4.3 / 3.9:1.
  *   Yellow / olive / orange / teal stay light and take dark text instead (`onColors`, `--ui-<hue>-on`).
@@ -202,8 +203,9 @@ export const onColors = {
  * Text alpha roles:  Fomantic's "Neutral Text" (`@mutedTextColor: rgb(0 0 0 / 0.6)`) and their
  * `inverted` counterparts (`@invertedMutedTextColor: rgb(255 255 255 / 0.8)`), as alphas of `ink`.
  * - `default` ~== `--ui-text-color` (Fomantic's `@textColor`).
- * - `light` / `unselected` are 0.58 on light surfaces, not Fomantic's 0.4 (2.7:1 on white):  the lowest alpha of
- *   `ink` that still reaches WCAG AA 4.5:1 on white.  `disabled` stays faint (inactive controls are exempt).
+ * - `light` / `unselected` are 0.58 on light surfaces, not Fomantic's 0.4 (2.7:1 on white):
+ *   the lowest alpha of `ink` that still reaches WCAG AA 4.5:1 on white.
+ * - `disabled` stays faint (inactive controls are exempt).
  */
 export const textAlphas = {
   default: { onLight: 0.87, onDark: 0.9 },
@@ -394,8 +396,8 @@ export const focusRing = {
 export const disabledOpacity = 0.45
 
 /**
- * How long, in ms, the pointer rests on a target before its hover popup shows (`--ui-hover-delay`):  the page's
- * preference for every `<ui-popup open-on="hover">` that names no `show-delay` of its own.
+ * How long, in ms, the pointer rests on a target before its hover popup shows (`--ui-hover-delay`):
+ * the page's preference for every `<ui-popup open-on="hover">` that names no `show-delay` of its own.
  * - Owen, 2026-10-25:  "have a theme preference somewhere for tooltip delay, they're all too quick" (Fomantic's 50ms)
  * - a theme or page sets the token:  `:root { --ui-hover-delay: 2s }`
  * - NOT the browser's own `title` tooltips:  their delay is the operating system's
@@ -487,8 +489,8 @@ export const easings = {
 
 /**
  * Box-shadow roles as layers of `--ui-shadow-ink`.
- * - `subtle` / `bottom` / `floating` / `floating-hover` are Fomantic's accents;  `raised` (segments, cards)
- *   and `overlay` (modals, popups) are softer modern additions.
+ * - `subtle` / `bottom` / `floating` / `floating-hover` are Fomantic's accents.
+ * - `raised` (segments, cards) and `overlay` (modals, popups) are softer modern additions.
  */
 export const shadows = {
   subtle: [[0, 1, 2, 0, 0.15]],
@@ -516,18 +518,18 @@ export const shadows = {
 ////////////////
 
 /**
- * The code's colours, by what they colour (epic `debut` P22):  every theme's, light and dark, as `--ui-code-<role>`
- * (`text` is `--ui-code-color`).
- * - The editor's code (Monaco, `CodeThemes`), every `<ui-code>` block and the Spell VS Code themes read the same ones.
+ * The code's colours, by what they colour (epic `debut` P22):
+ * every theme's, light and dark, as `--ui-code-<role>` (`text` is `--ui-code-color`).
+ * - The editor's code (`CodeRules`), every `<ui-code>` block and the Spell VS Code themes read the same ones.
  * - Each role's RECIPE:  where a theme with no code colours of its own takes it from, `[source, lightness]`:
  *   - `source`:  a colour the theme already has, its hue and chroma kept (`oklch(from <source> ...)`)
  *   - lightness:  `strong` reads on the code's background in both schemes (OKLCH 0.48 light, 0.80 dark);
  *     `soft`, comments and punctuation, a step quieter and greyer (0.50, 0.74)
  *   - `StyleGenerator` writes them into `colors.css` (`ui.tokens`);  a theme file's `code` group sets any of them
  *     by hand, and wins (`ui.theme`).
- * - `colors.contrast.test.ts` holds every one to 4.5:1 on the theme's panel, comments too:  a Spell file's comments are
- *   its prose.
- * - The roles are the editor's (`ShadesOfPurple.rules()`'s), plus `attr`, `meta`, `addition` and `deletion`, which
+ * - `colors.contrast.test.ts` holds every one to 4.5:1 on the theme's panel, comments too:
+ *   a Spell file's comments are its prose.
+ * - The roles are the editor's (`CodeRules.ROLES`), plus `attr`, `meta`, `addition` and `deletion`, which
  *   `<ui-code>`'s highlight.js colours read;  its `number` and `title` take `constant` and `action`.
  */
 export const codeRoles = {

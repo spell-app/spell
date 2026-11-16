@@ -1,4 +1,4 @@
-import { For, Show, createComponent, createSignal, onSettled, untrack } from "solid-js"
+import { For, Show, createSignal, onSettled, untrack } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
 import type { MergeView } from "@codemirror/merge"
 
@@ -6,17 +6,19 @@ import { setDebugGlobal } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { codeLook, showBubbly } from "spell/app/app/ui/codePopups"
+import { codeLook, showBubbly, showCodeChoices } from "spell/app/app/ui/codePopups"
+import { EDITOR_HOTKEYS, editorHotkeys } from "spell/app/app/pages/editorHotkeys"
+import { CodeSettings, CodeSettingsPanel } from "spell/app/app/solid"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import {
   CodeMirrorEditor,
-  CodeMirrorMenu,
   CodeMirrorSetup,
   CodeSlice,
   FileEditor,
   SpellCodeMirror,
   type CompiledLanguage
 } from "spell/app/app/solid/codemirror"
+import { CodeMirrorMenu } from "./CodeMirrorMenu"
 
 // Every Solid computation follows spell cells (the project's files)
 import "spell/app/app/solid/cellsBridge"
@@ -26,28 +28,39 @@ import "./CodeMirrorTest.css"
 
 /****************
  * ### `<CodeMirrorTest>`
- * The CodeMirror test page (epic `editor` P30), `/demo/codemirror.html` on the editor's dev server:
- * Solitaire's Spell in Monaco and in CodeMirror 6, side by side, so Owen can judge a move.
+ * The CodeMirror demo page (epic `editor` P30), `/demo/codemirror.html` on the editor's dev server:
+ * Solitaire's Spell in the app's code editor, CodeMirror 6, alone, for trying it and for headless checks
+ * (epic `codemirror` J3).
  * - Three views, by the bar's buttons:
- *   - Edit:  the same file in both editors, Solitaire.spell, Card.spell or Card.editor.html (a property editor page,
- *     made here, never saved);  typing in one shows in the other.
- *     Switching files keeps each one's undo, folds and selection, in both (CodeMirror's `FileStates`).
- *     Under a Spell file, a slice of it in both (`<CodeSlice>`):  the end of one block, cut, and the whole of the next.
- *   - Diff:  Publish's clash dialog's two sides, CodeMirror's merge view beside Monaco's diff editor
- *   - Compiled:  the file's compiled JavaScript, TypeScript or Python in both
+ *   - Edit:  Solitaire.spell, Card.spell or Card.editor.html (a property editor page, made here, never saved).
+ *     Switching files keeps each one's undo, folds and selection (`FileStates`).
+ *     Under a Spell file, a slice of it (`<CodeSlice>`):  the end of one block, cut, and the whole of the next;
+ *     typing in one shows in the other.
+ *   - Diff:  Publish's clash dialog's two sides, in the merge view
+ *   - Compiled:  the file's compiled JavaScript, TypeScript or Python
  * - The look, bubbly or not, as the code pane's "Settings…" says (`codeLook`), by the bar too, or `?look=off`.
  * - The page's language (English, Español) and look (light, dark), by the bar too, or `?lang=es&scheme=dark`:
  *   CodeMirror's words follow the app's (`appTexts.lang`).
- * - Line numbers, off or on, as the app's View › Line Numbers:  CodeMirror's alone (`?lines=on`).
- * - `?only=cm` or `?only=monaco`:  one editor alone, for measuring it (`?view=diff`, `?file=Card` likewise).
+ * - Line numbers, off or on, as the app's View › Line Numbers (`?lines=on`).
+ * - Settings…, the code pane's card (`<CodeSettingsPanel>`):  each choice changes the editors live
+ *   (`CodeSettings`, `codeChoices`;  epic `codemirror` P5).
+ * - The editor page's keys (`editorHotkeys()`), so ⌘Z with the focus off the code reaches the code's undo (I167),
+ *   and the right-click menu's Cut, Copy and Paste are the Edit menu's;  Save (⌘S) saves the file now.
+ * - `?project=@spell/examples/CajaDeRecetas`:  another project, its first file shown, e.g. a Spanish one for its
+ *   accent fixes as you type.
+ * - `?highlights=on`:  marks the uses of the word at the caret, which the app has off.
+ * - `?view=diff`, `?file=Card`, `?target=python`:  a view, a file or a language at once.
  * - Each edit is saved 2 seconds after it, as the app's AutoSave saves (after 800 msec);
  *   but NOTHING is written:  every write the page would send to the server is answered here (`answerWrites()`).
  * - What it measures, for a probe to read:  the debug global `codemirrorTest` (`timings`, `latencies`).
- * - Its position in the import graph:  a demo page's entry;  Monaco loads lazily, as in the app.
+ * - Its position in the import graph:  a demo page's entry, importing CodeMirror's folders statically, as only it may.
  ****************/
 function CodeMirrorTest(props: { project: SP.SpellProject }) {
   const query = new URLSearchParams(location.search)
-  const [fileName, setFileName] = createSignal(FILE_QUERIES[query.get("file") ?? ""] ?? "Solitaire.spell")
+  const [fileName, setFileName] = createSignal(
+    FILE_QUERIES[query.get("file") ?? ""] ??
+      (query.get("project") ? nameOf(props.project.spellFiles[0]!.path) : "Solitaire.spell")
+  )
   const [look, setLook] = createSignal(codeLook.isBubbly ? "on" : "off")
   const [target, setTarget] = createSignal<CompiledLanguage>(
     (query.get("target") as CompiledLanguage | null) ?? "javascript"
@@ -56,7 +69,6 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
   const [lang, setLang] = createSignal(query.get("lang") === "es" ? "es" : "en")
   const [scheme, setScheme] = createSignal(query.get("scheme") === "dark" ? "dark" : "light")
   const [lines, setLines] = createSignal(query.get("lines") === "on" ? "on" : "off")
-  const only = query.get("only")
   const fileOf = (name: string): SP.AnySpellFile =>
     name === EDITOR_PAGE
       ? editorPage(props.project)
@@ -80,6 +92,8 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
   }
   /** The CodeMirror editor, once it shows a file. */
   let codeMirror: SpellCodeMirror | undefined
+  // the editor page's keys, never in Run here
+  editorHotkeys(() => false)
   return (
     <div class="CodeMirrorTest">
       <header>
@@ -154,11 +168,17 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
           ]}
           onPick={changeLines}
         />
+        <ui-button size="small" icon="cog" onClick={() => CodeSettings.toggleShowing()}>
+          {appTexts.text("codeSettings")}
+        </ui-button>
       </header>
+      <Show when={CodeSettings.isShowing}>
+        <div class="CodeMirrorTestSettings">
+          <CodeSettingsPanel />
+        </div>
+      </Show>
       <Show when={view() === "edit"}>
         <Sides
-          only={only}
-          monaco={<MonacoSide file={fileOf(fileName())} />}
           codemirror={
             <CodeMirrorSide
               file={fileOf(fileName())}
@@ -173,36 +193,19 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
         <Show when={fileName() !== EDITOR_PAGE ? fileName() : undefined} keyed>
           {(name) => {
             const lines = sliceOf(spellFileOf(name))
-            return (
-              <Sides
-                only={only}
-                class="Slices"
-                monaco={<MonacoSlice file={fileOf(name)} {...lines} />}
-                codemirror={<CodeSlice file={fileOf(name)} {...lines} />}
-              />
-            )
+            return <Sides class="Slices" codemirror={<CodeSlice file={fileOf(name)} {...lines} />} />
           }}
         </Show>
       </Show>
       <Show when={view() === "diff"}>
-        <Sides
-          only={only}
-          monaco={<MonacoDiff clash={clashOf(spellFileOf("Card.spell"))} />}
-          codemirror={<CodeMirrorDiff clash={clashOf(spellFileOf("Card.spell"))} />}
-        />
+        <Sides codemirror={<CodeMirrorDiff clash={clashOf(spellFileOf("Card.spell"))} />} />
       </Show>
       <Show when={view() === "compiled"}>
         <Show when={`${fileName() === EDITOR_PAGE ? "Card.spell" : fileName()}:${target()}`} keyed>
           {(shown) => {
             const [name, language] = shown.split(":") as [string, CompiledLanguage]
             const text = compiledOf(spellFileOf(name), language)
-            return (
-              <Sides
-                only={only}
-                monaco={<MonacoCompiled text={text} language={language} />}
-                codemirror={<CodeMirrorCompiled text={text} language={language} />}
-              />
-            )
+            return <Sides codemirror={<CodeMirrorCompiled text={text} language={language} />} />
           }}
         </Show>
       </Show>
@@ -213,22 +216,14 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
 /** What the page shows. */
 type TestView = "edit" | "diff" | "compiled"
 
-/** The two editors side by side, each with its caption;  `only` one of them, when asked. */
-function Sides(props: { only: string | null; monaco: JSX.Element; codemirror: JSX.Element; class?: string }) {
+/** The CodeMirror editor, with its caption. */
+function Sides(props: { codemirror: JSX.Element; class?: string }) {
   return (
     <div class={["CodeMirrorTestSides", props.class]}>
-      <Show when={props.only !== "cm"}>
-        <section class="Monaco">
-          <h2>Monaco (today's editor)</h2>
-          <div class="Pane">{props.monaco}</div>
-        </section>
-      </Show>
-      <Show when={props.only !== "monaco"}>
-        <section class="CodeMirror">
-          <h2>CodeMirror 6</h2>
-          <div class="Pane">{props.codemirror}</div>
-        </section>
-      </Show>
+      <section class="CodeMirror">
+        <h2>CodeMirror 6</h2>
+        <div class="Pane">{props.codemirror}</div>
+      </section>
     </div>
   )
 }
@@ -271,6 +266,9 @@ function CodeMirrorSide(props: CodeMirrorSideProps) {
           return true
         }}
         onContextMenu={(editor, at) => void CodeMirrorMenu.open(editor, at)}
+        onReferences={(editor, at, locations) => CodeMirrorMenu.openReferences(editor, at, locations)}
+        hotkeys={TEST_HOTKEYS}
+        highlights={new URLSearchParams(location.search).get("highlights") === "on"}
         onMount={(editor) => {
           timings.codemirror ??= { madeMsec: nowMsec() - started }
           afterPaint(() => (timings.codemirror!.firstDrawAtMsec ??= nowMsec()))
@@ -310,109 +308,6 @@ function CodeMirrorCompiled(props: { text: string; language: CompiledLanguage })
     <div class="Editor">
       <CodeMirrorEditor value={props.text} extensions={SpellCodeMirror.codeExtensions(props.language)} />
     </div>
-  )
-}
-
-////////////////
-// ## Monaco's side
-////////////////
-
-/** `spell/app/app/solid/monaco`, loaded once, lazily, as the app loads it. */
-let monacoModule: Promise<MonacoModule> | undefined
-type MonacoModule = typeof import("spell/app/app/solid/monaco")
-
-/** Load Monaco and its Spell, once;  the time it took goes in `timings`. */
-function loadMonaco(): Promise<MonacoModule> {
-  monacoModule ??= (async () => {
-    const started = nowMsec()
-    const module = await import("spell/app/app/solid/monaco")
-    timings.monaco = { loadMsec: nowMsec() - started }
-    return module
-  })()
-  return monacoModule
-}
-
-/** Draw `make(module)` once Monaco has loaded. */
-function WithMonaco(props: { make: (module: MonacoModule) => JSX.Element }) {
-  const [module, setModule] = createSignal<MonacoModule>()
-  onSettled(() => {
-    void loadMonaco().then((loaded) => setModule(() => loaded))
-  })
-  return (
-    <Show when={module()} keyed fallback={<p class="Loading">Loading Monaco…</p>}>
-      {(loaded) => props.make(loaded)}
-    </Show>
-  )
-}
-
-/** `file` in today's Monaco editor, its model the app's (`SpellMonaco.models`). */
-function MonacoSide(props: { file: SP.AnySpellFile }) {
-  return (
-    <WithMonaco
-      make={(module) => {
-        // its models stay while the page shows the project:  read once, as it mounts
-        module.SpellMonaco.models.use(untrack(() => props.file.project))
-        return createComponent(module.MonacoEditor, {
-          get model() {
-            return module.SpellMonaco.models.modelFor(props.file)
-          },
-          onMount: (editor) => {
-            const madeAt = nowMsec()
-            timings.monaco = { ...timings.monaco, madeAtMsec: madeAt }
-            afterPaint(() => (timings.monaco!.firstDrawAtMsec ??= nowMsec()))
-            setDebugGlobal({ monaco: editor })
-          }
-        })
-      }}
-    />
-  )
-}
-
-/** Publish's two sides in Monaco's diff editor, as `<PublishClash>` shows them. */
-function MonacoDiff(props: { clash: Clash }) {
-  return (
-    <WithMonaco
-      make={(module) =>
-        createComponent(module.DiffView, { theirs: props.clash.theirs, mine: props.clash.mine, onChange: () => {} })
-      }
-    />
-  )
-}
-
-/** Lines `from` to `to` of `file` in Monaco's `<CodeSlice>`, as the Inspector's Code card shows them. */
-function MonacoSlice(props: { file: SP.AnySpellFile; from: number; to: number }) {
-  return (
-    <WithMonaco
-      make={(module) => {
-        module.SpellMonaco.models.use(untrack(() => props.file.project))
-        return createComponent(module.CodeSlice, {
-          get file() {
-            return props.file
-          },
-          get from() {
-            return props.from
-          },
-          get to() {
-            return props.to
-          }
-        })
-      }}
-    />
-  )
-}
-
-/** Compiled code in Monaco, read only. */
-function MonacoCompiled(props: { text: string; language: CompiledLanguage }) {
-  return (
-    <WithMonaco
-      make={(module) =>
-        createComponent(module.MonacoEditor, {
-          value: props.text,
-          language: props.language,
-          options: { readOnly: true, lineNumbers: "on", fontFamily: "ui-monospace, Menlo, monospace", fontSize: 13 }
-        })
-      }
-    />
   )
 }
 
@@ -495,15 +390,14 @@ function nameOf(path: string): string {
 
 /** When each editor was made and first drawn, in msec from the page's start:  for a probe to read. */
 const timings: {
-  /** Solitaire loaded and parsed, both editors' starting point */
+  /** Solitaire loaded and parsed, the editor's starting point */
   projectReadyAtMsec?: number
   codemirror?: { madeMsec: number; firstDrawAtMsec?: number }
-  monaco?: { loadMsec?: number; madeAtMsec?: number; firstDrawAtMsec?: number }
 } = {}
 
 /**
  * How long each key typed took to show, in msec:  from its `keydown` to the frame after it's drawn.
- * - Read by a probe that types into one editor alone (`?only=cm`, `?only=monaco`).
+ * - Read by a probe that types into the editor.
  */
 const latencies: number[] = []
 
@@ -534,8 +428,9 @@ function afterPaint(done: () => void) {
 ////////////////
 
 /**
- * Answer every write the page would send to the server here, so nothing is saved:  a compile's build files,
- * preferences, a file saved.  Reads go through.
+ * Answer every write the page would send to the server here, so nothing is saved:
+ * a compile's build files, preferences, a file saved.
+ * - Reads go through.
  */
 function answerWrites() {
   const fetchBefore = window.fetch.bind(window)
@@ -546,7 +441,7 @@ function answerWrites() {
   }
 }
 
-/** The page light or dark:  Spell UI's class on `<html>`, which Monaco's colours follow too, and the scheme. */
+/** The page light or dark:  Spell UI's class on `<html>`, and the scheme. */
 function showScheme(scheme: string) {
   const root = document.documentElement
   root.classList.toggle("ui-dark", scheme === "dark")
@@ -577,6 +472,24 @@ function saveSoon(file: SP.AnySpellFile) {
   saveWaits.set(file.path, wait)
 }
 
+/**
+ * The editor page's keys, as the page's CodeMirror editor takes them:  Save saves the file shown now, as nothing here
+ * has the app's project for `editor.saveAll()`.
+ */
+const TEST_HOTKEYS = {
+  ...EDITOR_HOTKEYS,
+  saveAll: { ...EDITOR_HOTKEYS.saveAll, run: () => saveAllNow() }
+}
+
+/** Save every file waiting to be, now. */
+function saveAllNow() {
+  for (const [path, wait] of saveWaits) {
+    wait.cancel()
+    saveWaits.delete(path)
+    saves.push(path)
+  }
+}
+
 /** How long after its last edit a file is saved, in msec. */
 const SAVE_AFTER_MSEC = 2000
 
@@ -589,14 +502,16 @@ const saves: string[] = []
 /** Load Solitaire, parse it, and draw the page. */
 async function start() {
   answerWrites()
-  SpellCodeMirror.states.onEdit = saveSoon
+  SpellCodeMirror.onEdit(saveSoon)
   measureTyping()
   const query = new URLSearchParams(location.search)
   showScheme(query.get("scheme") === "dark" ? "dark" : "light")
+  // what Settings… has chosen, as the app starts on
+  showCodeChoices(CodeSettings.choices)
   if (query.get("look") === "off") showBubbly(false)
   await uiReady
   if (query.get("lang") === "es") await showLanguage("es")
-  const project = new SP.SpellProject(SP.SpellProject.projectIdForImport(PROJECT))
+  const project = new SP.SpellProject(SP.SpellProject.projectIdForImport(query.get("project") ?? PROJECT))
   await project.load()
   await project.parse()
   timings.projectReadyAtMsec = nowMsec()
@@ -604,7 +519,7 @@ async function start() {
   render(() => <CodeMirrorTest project={project} />, document.getElementById("codemirror-test")!)
 }
 
-/** The project the page shows. */
+/** The project the page shows, unless `?project=` names another (`@spell/examples/CajaDeRecetas`, for Spanish). */
 const PROJECT = "@spell/examples/Solitaire"
 
 void start().catch((error: unknown) => console.error("CodeMirror test:  couldn't start", error))

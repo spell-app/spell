@@ -69,8 +69,8 @@ export class Palette {
   }
 
   /**
-   * Close its menus, the popup and the pinned bar's:  what's added, or dragged, lands on a page you can see
-   * (epic `editor` I176).
+   * Close its menus, the popup and the pinned bar's:
+   * what's added, or dragged, lands on a page you can see (epic `editor` I176).
    */
   static closeMenus(): void {
     for (const menu of menus) {
@@ -116,8 +116,8 @@ export class Palette {
   }
 
   /**
-   * Add a new view of the open page's own, in plain Spell just above its head:  `a "new view" is a view:`,
-   * drawn later by its name (epic `language` P47).
+   * Add a new view of the open page's own, in plain Spell just above its head:
+   * `a "new view" is a view:`, drawn later by its name (epic `language` P47).
    */
   static addNewView(): void {
     const file = editor.file
@@ -895,10 +895,8 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
  * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
  *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a dashed line, then ours (epic `editor` I76, Owen's pick).
- * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
+ * - Drawn as every right click's menu is, `<MenuPopup>`:  at once, inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
- * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not the part.
- *   - A right click on it is ours too:  the browser's own menu never shows over it (Owen, 2026-11-12).
  * - `PartEdits.openMenu()` opens it:  what was clicked is selected once the menu is on the screen.
  */
 export function PartMenu(): JSX.Element {
@@ -922,88 +920,135 @@ export function PartMenu(): JSX.Element {
       </>
     )
   }
-  const isAnItem = (event: Event) =>
-    event.composedPath().some((target) => {
-      return (
-        target instanceof Element &&
-        target.localName === "ui-action" &&
-        !target.hasAttribute("disabled") &&
-        !target.hasAttribute("kind")
-      )
-    })
-  // Decided as the click starts, before the row runs:  a row may grey itself once it has run (Delete, Cut)
-  let isClosing = false
   return (
     <Show when={at()}>
       {(where) => (
-        <ui-popup
+        <MenuPopup
           at={where()}
-          open-on="manual"
-          visible=""
-          class={["BarMenuPopup", PART_MENU]}
-          aria-label={appTexts.text("menuEdit")}
-          ref={on("ui-closing", () => setAt(undefined))}
-          onContextMenu={(event: MouseEvent) => event.preventDefault()}
+          class={PART_MENU}
+          label={appTexts.text("menuEdit")}
+          onClose={() => setAt(undefined)}
+          // the part right-clicked, if it's not selected yet:  the item acts on it
+          onChoosing={() => PartEdits.selectMenuPart() && flush()}
         >
-          <div
-            class="BarMenuPanel"
-            ref={(panel) =>
-              panel.addEventListener(
-                "click",
-                (event) => {
-                  // the part right-clicked, if it's not selected yet:  the item acts on it
-                  if (PartEdits.selectMenuPart()) flush()
-                  isClosing = isAnItem(event)
-                },
-                { capture: true }
-              )
-            }
-            onClick={() => isClosing && setAt(undefined)}
-          >
-            <ui-menu
-              direction="vertical"
-              size="small"
-              interactive=""
-              icon-column=""
-              class="BarMenuItems"
-              aria-label={appTexts.text("menuEdit")}
-            >
-              {programItems()}
-              <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
-              <ui-action kind="divider" />
-              <Action
-                menu
-                icon="code"
-                title={appTexts.text("menuShowInCode")}
-                disabled={!!whyNoCodeAt(where())}
-                tip={whyNoCodeAt(where())}
-                onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
-              />
-              <Action
-                menu
-                icon="crosshairs"
-                title={appTexts.text("menuInspect")}
-                onClick={() => Inspector.showSelected()}
-              />
-              <Show when={ChangeThis.isAvailable}>
-                <ui-action kind="divider" />
-                <Action
-                  menu
-                  icon="magic"
-                  title={appTexts.text("menuChangeThis")}
-                  shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
-                  disabled={!!whyNoCodeAt(where())}
-                  tip={whyNoCodeAt(where())}
-                  onClick={() => ChangeThis.open(where())}
-                />
-              </Show>
-            </ui-menu>
-          </div>
-        </ui-popup>
+          {programItems()}
+          <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
+          <ui-action kind="divider" />
+          <Action
+            menu
+            icon="code"
+            title={appTexts.text("menuShowInCode")}
+            disabled={!!whyNoCodeAt(where())}
+            tip={whyNoCodeAt(where())}
+            onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
+          />
+          <Action
+            menu
+            icon="crosshairs"
+            title={appTexts.text("menuInspect")}
+            onClick={() => Inspector.showSelected()}
+          />
+          <Show when={ChangeThis.isAvailable}>
+            <ui-action kind="divider" />
+            <Action
+              menu
+              icon="magic"
+              title={appTexts.text("menuChangeThis")}
+              shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
+              disabled={!!whyNoCodeAt(where())}
+              tip={whyNoCodeAt(where())}
+              onClick={() => ChangeThis.open(where())}
+            />
+          </Show>
+        </MenuPopup>
       )}
     </Show>
   )
 }
+
+/****************
+ * ### `<MenuPopup>`
+ * A right click's menu at `at`:  the app's ONE look for one, the part menu's (`<PartMenu>`), and the code editor's
+ * (CodeMirror's `CodeMirrorMenu`;  epic `codemirror` P5).
+ * - A `<ui-popup>` at the click, holding a `<ui-menu>` of `children`:
+ *   it stays inside the window, with arrow keys, Enter and Esc.
+ * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not what's under it.
+ *   - A right click on it is ours too:  the browser's own menu never shows over it (Owen, 2026-11-12).
+ * - A row chosen closes it, decided as the click starts, before the row runs:
+ *   a row may grey itself once it has run (Delete, Cut).
+ ****************/
+export function MenuPopup(props: MenuPopupProps): JSX.Element {
+  // Decided as the click starts, before the row runs:  a row may grey itself once it has run (Delete, Cut)
+  let isClosing = false
+  return (
+    <ui-popup
+      at={props.at}
+      open-on="manual"
+      visible=""
+      class={["BarMenuPopup", MENU_POPUP, props.class]}
+      aria-label={props.label}
+      ref={on("ui-closing", () => props.onClose())}
+      onContextMenu={(event: MouseEvent) => event.preventDefault()}
+    >
+      <div
+        class="BarMenuPanel"
+        ref={(panel) =>
+          panel.addEventListener(
+            "click",
+            (event) => {
+              props.onChoosing?.()
+              isClosing = isAnItem(event)
+            },
+            { capture: true }
+          )
+        }
+        onClick={() => isClosing && props.onClose()}
+      >
+        <ui-menu
+          direction="vertical"
+          size="small"
+          interactive=""
+          icon-column=""
+          class="BarMenuItems"
+          aria-label={props.label}
+        >
+          {props.children}
+        </ui-menu>
+      </div>
+    </ui-popup>
+  )
+}
+
+/** Props for `<MenuPopup>`. */
+export type MenuPopupProps = {
+  /** where, on the page:  the click */
+  at: { x: number; y: number }
+  /** what it's called, for a screen reader */
+  label: string
+  /** its own class, beside the menu's */
+  class?: string
+  /** it's going:  Esc, a click away, or a row chosen */
+  onClose: () => void
+  /** a click on it is starting, before the row it's on runs */
+  onChoosing?: () => void
+  /** its rows:  `<Action menu>`s, `<ui-action kind="divider">`s */
+  children: JSX.Element
+}
+
+/** Is `event` on a row that does something:  not a divider, nor a greyed row? */
+function isAnItem(event: Event): boolean {
+  return event.composedPath().some((target) => {
+    return (
+      target instanceof Element &&
+      target.localName === "ui-action" &&
+      !target.hasAttribute("disabled") &&
+      !target.hasAttribute("kind")
+    )
+  })
+}
+
+/** The class of every right click's menu:  shown at once (`Palette.css`). */
+const MENU_POPUP = "MenuPopup"
 
 /** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"

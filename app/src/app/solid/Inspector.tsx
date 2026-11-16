@@ -27,7 +27,7 @@ import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
-import { LazyMonaco } from "./LazyMonaco"
+import { LazyCodeMirror } from "./LazyCodeMirror"
 import {
   CodeCard,
   InspectorCard,
@@ -878,8 +878,8 @@ export class Inspector {
     const at = head.toLowerCase().indexOf(action.words.toLowerCase())
     if (!file || at < 0) throw new UIError(appTexts.text("renameActionNotAction", { action: action.words }))
     try {
-      const { SpellMonaco } = await LazyMonaco.load()
-      const { service, addresses } = SpellMonaco.register()
+      const { service } = (await LazyCodeMirror.load()).SpellCodeMirror
+      const { addresses } = service
       const { changes = {} } = service.renameActionAt(file, { line: place!.line, character: at + 1 }, newWords)
       const wanted = newWords.trim().replace(/\s+/g, " ")
       const title = appTexts.text("renameAction", { action: action.words, newName: wanted })
@@ -1700,8 +1700,9 @@ const ADDED_TAGS = new Set([
 /**
  * Does a click on `element` mean it, by its tag?
  * - A Spell UI control (`CONTROL_TAGS`), anywhere
- * - What the palette adds (`ADDED_TAGS`), or any other tag the drawing writes (`isWrittenTag()`:  a `<spacer />`),
- *   when it isn't in a drawn thing's shadow root:  there it's how the thing looks, and a click means the thing.
+ * - What the palette adds (`ADDED_TAGS`), or any other tag the drawing writes, a `<spacer />` say (`isWrittenTag()`),
+ *   when it isn't in a drawn thing's shadow root:
+ *   there it's how the thing looks, and a click means the thing.
  */
 function isClickableTag(element: Element): boolean {
   if (CONTROL_TAGS.has(element.localName)) return true
@@ -1725,8 +1726,8 @@ const [helpSeen, setHelpSeen] = createSignal(!!editorPrefs.get(HELP_SEEN_PREF))
 /**
  * The Inspector's cards, top to bottom:  what's selected, its code, then the app's views.
  * - The Events card is gone (epic `debut` P28):  its events are the Code card's.
- * - Code is a card of its own again, under what's selected (Owen, 2026-11-14, I109;  a band of the properties card
- *   since P21).
+ * - Code is a card of its own again, under what's selected
+ *   (Owen, 2026-11-14, I109;  a band of the properties card since P21).
  */
 export const INSPECTOR_PANELS = ["properties", "code", "views"] as const
 /** One of the Inspector's cards. */
@@ -2466,8 +2467,8 @@ class PartSelector {
 
   /**
    * The part under the event's pointer:  the innermost on its path, inside `area`, that's
-   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button,
-   *   an action's button ...)
+   * - a drawn thing (its type's element, a card),
+   *   or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button, an action's button ...)
    * - or a Spell UI element with a handler of its own:  a menu item that acts as a button
    *   (Owen:  "I can't e.g. inspect buttons in the solitaire app header (e.g. cheat button)")
    * - with Alt held, any Spell UI element:  the text or label inside a card too

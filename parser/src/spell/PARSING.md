@@ -2448,8 +2448,8 @@ sidebars any of them opens.
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
 - The editor's code editor calls `project.takeText(file, text)` on every keystroke, and parses once the typing pauses
-  (`project.parseWaitingText()`, 200 msec after the last key:  `SpellModels`, in
-  [the app's Monaco folder](../../../app/src/app/ui/monaco/)).
+  (`project.parseWaitingText()`, 200 msec after the last key:
+  `FileStates`, in [the app's CodeMirror folder](../../../app/src/app/ui/codemirror/)).
   - So no keystroke waits on a parse:  a parse of Solitaire's game took 50 msec a key (2026-11-12).
   - What needs the new parse sooner asks for it:  the language features, a click or focus elsewhere, `compile()`, `parse()`.
   - Everything else calls `project.updateText(file, text)`, which takes the text and parses it at once
@@ -2796,13 +2796,13 @@ sidebars any of them opens.
   - All `SpellLanguageService` adds is `LSP.FileAddresses`:  the editor's URI for each file.
 - It's used twice:
   - by VS Code, over stdio
-  - IN-PROCESS, by the app's Monaco editor ([the app's Monaco folder](../../../app/src/app/ui/monaco/))
-    - its `SpellModels` keep one Monaco model per file in step with `file.contents`.
+  - IN-PROCESS, by the app's CodeMirror editor ([the app's CodeMirror folder](../../../app/src/app/ui/codemirror/))
+    - its `FileStates` keep one CodeMirror state per file in step with `file.contents`.
       Edits go through `takeText()`, parsed once the typing pauses (`parseWaitingText()`).
-    - its `SpellLanguageFeatures` call the service, and convert its answers with `LspToMonaco`
+    - its `CodeMirrorLanguage` calls the service, and converts its answers with `LspToCodeMirror`
   - The app shows one project at a time.
-    `<spell-editor>`s on a page show one each, all in one Monaco:
-    each `SpellModels.use()`s its project, so another's models don't replace them.
+    `<spell-editor>`s on a page show one each:
+    each `use()`s its project's states (`SpellCodeMirror.states`), so another's don't replace them.
 - `SpellDiskWorkspace` is the stdio server's:
   - it loads from disk, via `LoadableFile.fetch` (above)
   - it maps a `.spell` file to its project (the nearest `project.json`)
@@ -2841,7 +2841,7 @@ sidebars any of them opens.
       so the CSS is never read as spell.
   - spell's own colouring skips the block
   - editors colour it as CSS themselves:
-    VS Code through the grammar's embedded CSS, the app's Monaco through its own (`SpellTokensProvider`)
+    VS Code through the grammar's embedded CSS;  the app's CodeMirror editor not yet
 - A `<json>` element's text is JSON, not spell:  read as raw text too (`rawTextTags`), so its `{` and `[` stay as written.
 - A `<markdown>` block is markdown, not spell:  read as raw text too (`rawTextTags`), its common indent taken off.
   - in a drawing:  [`markdown_block`](rules/JSX/MarkdownBlock.ts)
@@ -2862,7 +2862,7 @@ sidebars any of them opens.
     - it splits holes as `markdown_block` does
   - no diagnostics inside
   - editors colour it as markdown themselves:
-    VS Code through the grammar's embedded markdown, the app's Monaco through its own (`SpellTokensProvider`)
+    VS Code through the grammar's embedded markdown;  the app's CodeMirror editor not yet
 - Formatting is `P.TokenFormatter` ([the tokenizer folder](../parser/tokenizer/)):
   whitespace only, from the tokens, indenting with TABS always.
   - No pretty-printer:  the AST is a javascript tree.

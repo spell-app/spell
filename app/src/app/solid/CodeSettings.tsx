@@ -5,18 +5,11 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import {
   CODE_POPUP_DEFAULTS,
   HOVER_MODES,
-  SUGGEST_DETAILS_HIDDEN,
   SUGGEST_MODES,
   SUGGEST_MODES_RENAMED,
-  OWN_WRAP,
-  codeHover,
-  hoverDetailFor,
-  monacoOptionsFor,
-  showBubbly,
-  suggestsByItself,
+  showCodeChoices,
   type CodePopupChoices
 } from "spell/app/app/ui/codePopups"
-import type { monaco } from "spell/app/app/solid/monaco"
 import { on } from "./on"
 
 import "./CodeSettings.css"
@@ -27,9 +20,10 @@ import "./CodeSettings.css"
  * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50),
  * and whether long lines wrap (epic `editor` I110:  the code pane and the Inspector's code alike).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
- * - Each change applies at once to every Monaco editor on the page, and the browser remembers it
- *   (`spellEditor:codeHover` ...).
- * - Defaults, and what each choice means to Monaco:  `codePopups.ts`.
+ * - Each change applies at once to every code editor on the page, and the browser remembers it
+ *   (`spellEditor:codeHover` ...):  the editors follow `codeChoices`, which it sets (`showCodeChoices()`),
+ *   from the page's start.
+ * - Defaults, and what each choice means to the code editor:  `codePopups.ts`.
  * - Static, like `LineNumbers`:  ONE set of choices per page.
  ****************/
 export class CodeSettings {
@@ -54,43 +48,7 @@ export class CodeSettings {
     chosen = { ...chosen, [key]: value }
     setChoices(chosen)
     editorPrefs.set(PREFS[key], value)
-    for (const each of monacoApi?.editor.getEditors() ?? []) CodeSettings.applyTo(each)
-    showBubbly(chosen.bubbly)
-  }
-
-  /**
-   * Apply the choices to every Monaco editor on the page, now and as each is made.
-   * - Called once, as Monaco loads (`LazyMonaco`).  Takes Monaco then:  it's a lazy chunk.
-   */
-  static follow(api: typeof monaco): void {
-    if (monacoApi) return
-    monacoApi = api
-    showBubbly(chosen.bubbly)
-    for (const each of api.editor.getEditors()) CodeSettings.setUp(each)
-    api.editor.onDidCreateEditor((each) => CodeSettings.setUp(each))
-  }
-
-  /**
-   * A new editor:  apply the choices, show its hover when ⌥ is pressed over a word,
-   * and its suggestions by themselves where they help.
-   */
-  private static setUp(codeEditor: monaco.editor.ICodeEditor): void {
-    // in a box that wraps its own (a notebook's cell):  it keeps it
-    if (codeEditor.getContainerDomNode().closest(`[${OWN_WRAP}]`)) wrapsItsOwn.add(codeEditor)
-    CodeSettings.applyTo(codeEditor)
-    showHoverOnAlt(codeEditor)
-    suggestWhereItHelps(codeEditor)
-  }
-
-  /**
-   * Apply what's chosen to `codeEditor`.
-   * - Wrap long lines:  the code pane's and the Inspector's slices, never an editor made with its own (`wrapsItsOwn`).
-   */
-  static applyTo(codeEditor: monaco.editor.ICodeEditor): void {
-    const { wordWrap, ...options } = monacoOptionsFor(chosen)
-    codeEditor.updateOptions(wrapsItsOwn.has(codeEditor) ? options : { ...options, wordWrap })
-    codeHover.detail = hoverDetailFor(chosen)
-    codeEditor.getContainerDomNode().classList.toggle(SUGGEST_DETAILS_HIDDEN, !chosen.suggestDetails)
+    showCodeChoices(chosen)
   }
 }
 
@@ -134,58 +92,8 @@ let chosen: CodePopupChoices = {
 const [choices, setChoices] = createSignal(chosen)
 const [isShowing, setShowing] = createSignal(false)
 
-/** Monaco, once it's loaded:  see `CodeSettings.follow()`. */
-let monacoApi: typeof monaco | undefined
-
-/** The editors made with a wrap of their own (a notebook's cells):  Wrap long lines leaves them be. */
-const wrapsItsOwn = new WeakSet<monaco.editor.ICodeEditor>()
-
-/**
- * HACK:  ⌥ pressed while the mouse rests on a word shows its hover, the first time too.
- * - Monaco shows it on ⌥ only once the editor has shown a hover (it makes its hover widget on first use).
- *   Till then it waits for the mouse to move.
- * - So ⌥ pressed in the editor replays the last mouse move, ⌥ held.  Only while hover is "Only with ⌥ held".
- */
-function showHoverOnAlt(codeEditor: monaco.editor.ICodeEditor): void {
-  let lastMove: MouseEvent | undefined
-  codeEditor.onMouseMove((event) => (lastMove = event.event.browserEvent))
-  codeEditor.onMouseLeave(() => (lastMove = undefined))
-  codeEditor.onKeyDown((event) => {
-    if (event.browserEvent.key !== "Alt" || event.browserEvent.repeat) return
-    if (!lastMove || chosen.hover !== "withAlt") return
-    const { clientX, clientY } = lastMove
-    const root = codeEditor.getContainerDomNode().getRootNode() as Document | ShadowRoot
-    const move = new MouseEvent("mousemove", { bubbles: true, composed: true, clientX, clientY, altKey: true })
-    root.elementFromPoint(clientX, clientY)?.dispatchEvent(move)
-  })
-}
-
-/**
- * While "Where it helps" is chosen:  a letter or sign typed that leaves the caret at one of those places
- * (`suggestsByItself()`) shows the suggestions, as Ctrl+Space would.
- * - Only Spell's code, one character typed, never an undo:  a paste or a help's own edit asks for nothing.
- * - After the keystroke's own edit is in, so the caret is past it.
- */
-function suggestWhereItHelps(codeEditor: monaco.editor.ICodeEditor): void {
-  codeEditor.onDidChangeModelContent((event) => {
-    if (chosen.suggest !== "whereItHelps" || event.isUndoing || event.isRedoing || event.changes.length !== 1) return
-    const [change] = event.changes
-    if (change!.rangeLength !== 0 || !ONE_CHARACTER.test(change!.text)) return
-    queueMicrotask(() => {
-      const model = codeEditor.getModel()
-      const caret = codeEditor.getPosition()
-      if (!model || !caret || !model.getLanguageId().startsWith(SPELL_LANGUAGE)) return
-      const before = model.getLineContent(caret.lineNumber).slice(0, caret.column - 1)
-      if (suggestsByItself(before)) codeEditor.trigger("keyboard", "editor.action.triggerSuggest", { auto: true })
-    })
-  })
-}
-
-/** One character, typed:  an emoji's surrogate pair counts as one. */
-const ONE_CHARACTER = /^.$/su
-
-/** Monaco's language ids for Spell's code all start with it:  `spell`, `spell-page`. */
-const SPELL_LANGUAGE = "spell"
+// the page's code editors start on what's chosen
+showCodeChoices(chosen)
 
 /****************
  * ### `<CodeSettingsPanel>`

@@ -23,7 +23,7 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorTyping`
- * The nine helps as a person types Spell in a CodeMirror editor, as Monaco's `SpellTyping` gives them
+ * The nine helps as a person types Spell in a CodeMirror editor
  * (epic `codemirror` P4), so what they see is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicked or arrowed onto, a blank line inside a body gets that body's indent, the caret after it.
@@ -47,13 +47,13 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  * - Enter before a comment after code puts the comment on its own line, at the level of the body under it.
  * - Enter keeps the line's indent and follows Spell's Enter rules (`LSP.SpellTyping.ENTER_RULES`),
  *   and leaves no tabs or spaces at the end of the line it splits.
- * - Two editors on one file (the code and a slice of it, `FileStates.showSlice()`):  each has these helps,
- *   but only the one typed in hears the keys, so only it helps.
+ * - Two editors on one file (the code and a slice of it, `FileStates.showSlice()`):
+ *   each has these helps, but only the one typed in hears the keys, so only it helps.
  * - Its own edits, and an edit from outside the code (`FileStates.EDIT_WAY`), are never taken for typing.
  * - Every help writes only on the lines it's working on:  an edit anywhere else is dropped, with an error saying so,
  *   so a help gone wrong never breaks a file silently (`write()`).
- * - What each help decides, from the lines, is the language service's (`LSP.SpellTyping`), as Monaco's is,
- *   so both editors decide alike;  this class is only the CodeMirror wiring.
+ * - What each help decides, from the lines, is the language service's (`LSP.SpellTyping`),
+ *   so the editor and its tests decide alike;  this class is only the CodeMirror wiring.
  ****************/
 export class CodeMirrorTyping {
   /** The helps, for a file in `lang`;  `fileOf()`:  the project file, whose parse says which tags are its views. */
@@ -422,8 +422,8 @@ function indentWidthsOf(view: EditorView): { space: number; tab: number } {
 /**
  * Write `spec` as a help, each change inside the lines it's working on, `from` to `to` (1-based);
  * returns whether it did (epic `editor` I150).
- * - A change outside them is a help gone wrong:  nothing is written, and it logs which, so a file is never broken
- *   silently.
+ * - A change outside them is a help gone wrong:
+ *   nothing is written, and it logs which, so a file is never broken silently.
  */
 function write(view: EditorView, { from, to }: { from: number; to: number }, spec: TransactionSpec): boolean {
   const { doc } = view.state

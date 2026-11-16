@@ -18,7 +18,7 @@ import {
   type PartRow,
   type SlicePlace
 } from "./Inspector"
-import { LazyMonaco } from "./LazyMonaco"
+import { LazyCodeMirror } from "./LazyCodeMirror"
 import type { TestResult } from "spell/parser/core"
 import { InspectorActions, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
@@ -284,10 +284,11 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
 }
 
 /**
- * Every thing the app holds, from `roots` (its top-level things and what it draws):  each one's stored properties'
- * things, and a list's items, all the way down.
- * - So Not drawn lists only what the app keeps, the deck say:  never a thing made and let go of, e.g. the card a
- *   foundation makes to draw its placeholder's picture (`the picture of a new card whose rank is ace ...`).
+ * Every thing the app holds, from `roots` (its top-level things and what it draws):
+ * each one's stored properties' things, and a list's items, all the way down.
+ * - So Not drawn lists only what the app keeps, the deck say:  never a thing made and let go of,
+ *   e.g. the card a foundation makes to draw its placeholder's picture
+ *   (`the picture of a new card whose rank is ace ...`).
  * - Reads stored values only:  no program code runs.
  */
 function heldThings(roots: readonly object[], core: NonNullable<ReturnType<typeof runtimeCore>>): Set<object> {
@@ -549,8 +550,8 @@ const NOT_DRAWN: TreeRow = { key: "not-drawn", startsOpen: false }
 
 /**
  * The start of the pref remembering the rows someone opened or closed, a project's each.
- * - Not `inspector:folded`, the set of rows closed when every row started open:  left behind, it would open them all
- *   (epic `editor` I119)
+ * - Not `inspector:folded`, the set of rows closed when every row started open:
+ *   left behind, it would open them all (epic `editor` I119)
  */
 const ROWS_OPEN_PREF = "inspector:rowsOpen"
 
@@ -568,8 +569,8 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  * - Then a thing's actions (`InspectorActions.of()`), each its signature (`<ActionSignature>`) and its code.
  * - Each one's code is the code editor on its lines of the file (`<CodeSlice>`):  typing there is typing in the file.
  *   Code it can't find in the file shows as written, to read.
- * - Each folds on its own, by its words, remembered for the project (`rowFold()`, Owen:  "event handlers / actions
- *   should be collapsible").
+ * - Each folds on its own, by its words, remembered for the project
+ *   (`rowFold()`, Owen:  "event handlers / actions should be collapsible").
  * - Its header's Add Event and Add Action, icon and words (Owen, 2026-11-15, epic `editor` T79;  a bare "+" before):
  *   - Add Event:  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *     handler in its place (`Inspector.addEvent()`), which then takes the cursor
@@ -827,7 +828,7 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
 }
 
 /**
- * Code as written in the program:  the code editor on its lines of the file (`<CodeSlice>`, loaded with Monaco),
+ * Code as written in the program:  the code editor on its lines of the file (`<CodeSlice>`, loaded with CodeMirror),
  * else -- its lines not found -- the text, to read.
  */
 export function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus?: boolean }): JSX.Element {
@@ -835,7 +836,7 @@ export function WrittenCode(props: { place: SlicePlace | undefined; code: string
     <Show when={props.place} fallback={<pre class="InspectorCode">{props.code}</pre>}>
       {(place) => (
         <Loading fallback={<pre class="InspectorCode">{props.code}</pre>}>
-          <LazyMonaco.CodeSlice
+          <LazyCodeMirror.CodeSlice
             file={place().file}
             from={place().from}
             to={place().to}
@@ -931,8 +932,8 @@ export function TypeActionsCard(props: { thing: object }): JSX.Element {
  * A type's tests (`<test "card setup">`), while All Cards edits it (Owen:  "tests should show up in the sidebar for
  * all cards"):  each its words and its code, the file's own lines (`Inspector.testsOf()`).
  * - The card's ▶ runs the program's tests, as `spell test` does, on a copy of the runtime of their own
- *   (`editor.runTests()`):  the running app keeps its game.  Each test then shows how it went, its checks' messages
- *   its tooltip.
+ *   (`editor.runTests()`):  the running app keeps its game.
+ * - Each test then shows how it went, its checks' messages its tooltip.
  ****************/
 export function TypeTestsCard(props: { thing: object }): JSX.Element {
   const tests = createMemo(() => Inspector.testsOf(props.thing))
@@ -1018,8 +1019,8 @@ const ABILITY_ICON = "hand paper outline"
  * of its type (Owen:  "where `a card` is in a badge to show it is a type").
  * - One that takes nothing else (`to play (a card)`) has a run button, for the thing selected:
  *   at its row's far right (`<ActionRunButton>`, in its section's `actions`;  epic `editor` I116), not here.
- * - One that needs another thing gets no button and no field:  it can't be run from here (Owen:  "shouldn't be a select
- *   here because you can't actually execute it").
+ * - One that needs another thing gets no button and no field:  it can't be run from here
+ *   (Owen:  "shouldn't be a select here because you can't actually execute it").
  * - One whose words are its name alone (`to cheat`):  a click on its name renames it (`<ActionName>`, I111).
  * - Its words are the program's, in its language:  `to` is `para` in a Spanish one.
  */

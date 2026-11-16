@@ -4,8 +4,7 @@ import { EditorState } from "@codemirror/state"
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
 
 /**
- * `CodeMirrorBubbly`, Spell drawn bubbly in CodeMirror (epic `codemirror` P3):  the twin of Monaco's `BubblyMarks`
- * tests for what P3 adds -- a drawing's tags from the page's reading of markup, a head's description at its band's
+ * `CodeMirrorBubbly`, Spell drawn bubbly in CodeMirror (epic `codemirror` P3):  what P3 adds -- a drawing's tags from the page's reading of markup, a head's description at its band's
  * right end, and a slice drawing only what's wholly in its lines.
  * - Runs in node:  the decorations are worked out from an editor state, no view needed.
  */

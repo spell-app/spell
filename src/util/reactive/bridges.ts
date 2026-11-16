@@ -2,7 +2,7 @@
  * Readers OUTSIDE spell state:  how Solid, and plain code, follow cells -- see `cells.ts`.
  * - `bridgeSolid()` -- every Solid computation reads cells, installed ONCE per Solid by the HOST (the app, a
  *   runner, `<spell-viewer>`):  `util` and `core` never import Solid, so `spell-runtime.js` holds none.
- * - `observe()` -- a plain function re-run synchronously as what it read changes, e.g. `SpellModels`.
+ * - `observe()` -- a plain function re-run synchronously as what it read changes, e.g. `FileStates`.
  * - (React's was `view()`, gone with React:  epic `output-targets` P11.)
  */
 
@@ -61,7 +61,7 @@ export type SolidForBridge = {
  * - Only a derived value it read changed:  re-run on a microtask, if its value really
  *   changed (`flushCells()` settles it).
  * - NEVER re-runs for a change `fn` makes itself while running -- see `Reaction`.
- * - For code outside Solid, e.g. following a file's `contents` into a Monaco model.
+ * - For code outside Solid, e.g. following a file's `contents` into a code editor's state.
  */
 export function observe(fn: () => void): () => void {
   const reaction = new Reaction(rerun)

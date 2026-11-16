@@ -10,7 +10,7 @@ import { tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   EDITOR_HOTKEYS,
-  runCodeEditorAction,
+  runCodeEditorCommand,
   undoOrRedo,
   undoWay,
   type HotkeyName
@@ -358,7 +358,7 @@ export const Actions = {
   },
 
   ////////////////
-  // ## The code editor's own -- run in it, with its own keys (`EDITOR_HOTKEYS`'s `codeEditorAction`)
+  // ## The code editor's own -- run in it, with its own keys (`EDITOR_HOTKEYS`'s `codeEditorCommand`)
   ////////////////
 
   undo: (props: ActionProps) => <UndoAction action="undo" {...props} />,
@@ -584,7 +584,7 @@ function CodeEditorAction(props: ActionProps & { hotkey: Extract<HotkeyName, "fi
   return (
     <Action
       shortcut={hotkey().shortcut}
-      onClick={() => runCodeEditorAction(hotkey().codeEditorAction)}
+      onClick={() => runCodeEditorCommand(hotkey().codeEditorCommand)}
       {...omit(props, "hotkey")}
     />
   )

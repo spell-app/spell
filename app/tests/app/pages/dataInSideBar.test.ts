@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A value kept in a data place, in the side bar (epic `editor`, Data In Side Bar):  Recipe Box, whose recipes are kept
@@ -134,20 +134,7 @@ describe.skipIf(!SERVING)("data in the side bar", { timeout: 240_000 }, () => {
     expect(source).toContain("Real data, kept in family cookbook")
     // its mark is the link:  the line that declares the field, selected in the code
     await page.locator('ui-property-editor ui-property[name="title"] button.origin.mark').first().click()
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const code = (
-            window as unknown as {
-              editor: {
-                getInputEditor(): { getModel(): { getValueInRange(range: unknown): string }; getSelection(): unknown }
-              }
-            }
-          ).editor.getInputEditor()
-          return code?.getModel().getValueInRange(code.getSelection())
-        })
-      )
-      .toContain('its "title" is text')
+    await expect.poll(() => new CodeEditor(page).selectedText()).toContain('its "title" is text')
   })
 
   test("a worked-out value is read only, and names the places it read", async () => {

@@ -11,7 +11,7 @@
  *     until epic `notebook` P3 had the running program draw the notebook's page
  *   - so the server could work the same list out later, for multiplayer Spell, with no change to the page
  * - Each runtime hands it its rules (`PatchRules`), laid over ONE shared set (`PagePatch.SHARED`):
- *   - what's never replaced:  an open editor (Monaco in a cell), the field being typed in
+ *   - what's never replaced:  an open editor (a code editor in a cell), the field being typed in
  *   - what reader state is kept:  folds, open panels, typed text, the scroll, the selection
  *   - spell-epic's docs runtime adds the epic pages' (`spell-doc-runtime.js`), Spell UI's site its own (`SitePatch`)
  * - A runtime shows a patch with `redraw()`:  one short cross-fade when it changes what's on screen, never a half-drawn
@@ -344,14 +344,14 @@ export class PagePatch {
    * - kept:  `open`, the folds and open panels the reader set (a folded section is `open="false"`)
    * - replaced whole when they change:  what draws its children itself, or holds text that isn't plain
    *   (code, a highlighted `<pre>`, an include, a script)
-   * - never touched:  an open editor (Monaco's, or anything marked `data-spell-editor`)
+   * - never touched:  an open editor (CodeMirror's, or anything marked `data-spell-editor`)
    * - a copy brought in keeps the reader's typed text (fields with an `id`) and open accordion panels
    *   (`keepReaderState()`)
    */
   static readonly SHARED: PatchRules = {
     keptAttributes: ["open"],
     replacedWhole: "pre, ui-code, ui-markdown, ui-include, script, style, template, svg",
-    fixed: ".monaco-editor, [data-spell-editor]",
+    fixed: ".cm-editor, [data-spell-editor]",
     prepare: (copy, live) => {
       if (live) keepReaderState(live, copy)
     }

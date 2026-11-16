@@ -6,7 +6,7 @@ import { MarkupMarks } from "spell/app/app/ui/MarkupMarks"
 import { CodeMirrorMarkup } from "spell/app/app/ui/codemirror/CodeMirrorMarkup"
 
 /**
- * `CodeMirrorMarkup`, HTML drawn bubbly in CodeMirror (epic `codemirror` P3):  the twin of Monaco's `MarkupMarks`
+ * `CodeMirrorMarkup`, HTML drawn bubbly in CodeMirror (epic `codemirror` P3):  the shared `MarkupMarks`
  * tests, from the same shared reading, its shapes drawn on the text itself.
  * - Runs in node:  the decorations are worked out from an editor state, no view needed.
  */
@@ -44,7 +44,7 @@ describe("CodeMirrorMarkup", () => {
     ])
   })
 
-  test("its pieces are the shared reading's, as Monaco marks them:  brackets, names, a value's white pill", () => {
+  test("its pieces are the shared reading's, as the editor marks them:  brackets, names, a value's white pill", () => {
     const marked = marksOf(PAGE)
     expect(textWith(marked, "bubbly-tag-name").slice(0, 3)).toEqual(["html", "head", "meta"])
     expect(textWith(marked, "bubbly-attribute-name")).toEqual(["lang", "charset", "id"])

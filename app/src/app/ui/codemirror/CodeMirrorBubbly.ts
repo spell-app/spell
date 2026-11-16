@@ -3,13 +3,14 @@ import { Decoration, type DecorationSet, EditorView, WidgetType } from "@codemir
 
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
-import { CodeMirrorDecorations, CodeMirrorMarkup, railsOf, type Rail } from "./CodeMirrorMarkup"
+import { CodeMirrorDecorations, CodeMirrorMarkup, railsStyle, type Indent, type Rail } from "./CodeMirrorMarkup"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 
 /****************
  * ### `CodeMirrorBubbly`
- * Spell drawn in the bubbly look in a CodeMirror editor (epic `editor` P30, the CodeMirror test;  epic `codemirror`
- * P3), from the parser's `SP.BubblyLayout`, the same data Monaco's `SpellBubbly` and the page's `BubblyHtml` draw from.
+ * Spell drawn in the bubbly look in a CodeMirror editor,
+ * from the parser's `SP.BubblyLayout`, the same data the page's `BubblyHtml` draws from
+ * (epic `editor` P30, the CodeMirror test;  epic `codemirror` P3).
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
  *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
  *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen)
@@ -18,16 +19,16 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  *   - what a person typed in white pills, a quoted one's curly marks, bold names, italic values, faint marks,
  *     one dotted line under each value and question:  marks in the classes of the look's one sheet, `bubbly.css`
  *   - a drawing's tags as HTML is drawn, its ends pointed, from the page's own reading of markup
- *     (`CodeMirrorMarkup`, `BubblyMarkup`):  the same as Monaco's, a `{…}` an inverted pill
+ *     (`CodeMirrorMarkup`, `BubblyMarkup`):  a `{…}` an inverted pill
  * - `slice`:  a range of the file shown alone (`<CodeSlice>`):  only what's wholly in its lines is drawn, so a block it
- *   cuts draws no band or rail cut off at its edges, as Monaco's `SpellBubbly.showSlice()`.
+ *   cuts draws no band or rail cut off at its edges.
  * - No layer behind the text, no injected text for room round Spell's pills:  padding round a pill is the pill's own,
  *   and the caret still lands on its letters, as CodeMirror measures the lines as they're drawn.
  * - Typing never waits for the layout:  CodeMirror moves the marks with the text,
  *   and the layout is worked out again once the typing pauses (`RELAYOUT_MSEC`, `CodeMirrorRelayout`).
  * - The editor's box is a `.bubbly` too (`EDITOR_CLASSES`), so the sheet's settings and rules reach it:
  *   its CodeMirror section draws the bands, rails, feet and tags.
- * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks;  never Monaco.
+ * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks.
  * - NEVER throws:  a layout that fails leaves the code plain, and logs why.
  ****************/
 export class CodeMirrorBubbly {
@@ -50,7 +51,7 @@ export class CodeMirrorBubbly {
     ]
   }
 
-  /** How long the typing must pause before the code's laid out again, in msec:  Monaco's `SpellBubbly` waits 300. */
+  /** How long the typing must pause before the code's laid out again, in msec. */
   static RELAYOUT_MSEC = 150
 
   /**
@@ -84,6 +85,8 @@ class BubblyDecorations {
   private readonly text: string
   /** A drawing's tags:  drawn as HTML is (`CodeMirrorMarkup`), so Spell's marks leave them alone. */
   private readonly tags: Array<{ start: number; end: number }> = []
+  /** The feet under each line end, by where it is, innermost first:  as they stack. */
+  private readonly feet = new Map<number, FootWidget[]>()
 
   constructor(
     private readonly state: EditorState,
@@ -156,12 +159,16 @@ class BubblyDecorations {
     const isShown = this.isWhollyShown(block)
     const hasBody = block.body.some((node) => node.kind !== "gap")
     this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
-    const indent = this.decorations.indentAt(head.start)
+    // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it,
+    // as Monaco drew them (I113)
+    const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
+    const indent = hung(this.decorations.indentAt(head.start), isHung)
     const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? ["bubbly-group"] : [])]
     const hasDescription = this.line(head, partOfSpeech)
     if (isShown) {
       const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
       if (hasDescription) band.push("cmb-band-described")
+      if (isHung) band.push("cmb-band-hung")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
     }
     if (!hasBody) return
@@ -171,13 +178,21 @@ class BubblyDecorations {
     if (!isShown) return
     // the foot, under its last line
     const last = lastLineEnd(block)
+    const at = this.state.doc.lineAt(last).to
+    const foot = new FootWidget(indent.tabs, partOfSpeech, rails)
+    // its rail stops short in the row above its foot, where the foot's round corner turns:  its last line, or the foot of
+    // a block in it that ends there too
+    const above = this.feet.get(at)?.at(-1)
+    if (above) above.stopped.add(rails.length)
+    else this.decorations.stopRail(last, rails.length)
+    this.feet.set(at, [...(this.feet.get(at) ?? []), foot])
     this.decorations.add(
       Decoration.widget({
-        widget: new FootWidget(indent.tabs, partOfSpeech, rails),
+        widget: foot,
         block: true,
         // an inner block's foot before its parent's, when they end on the same line
         side: 1000 - block.level
-      }).range(this.state.doc.lineAt(last).to)
+      }).range(at)
     )
   }
 
@@ -271,7 +286,13 @@ function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
   return !!type && SP.SpellJSX.isDrawnType(type)
 }
 
+/** `indent`, a tab further out when `isHung`:  where a group's band and rail start. */
+function hung(indent: Indent, isHung: boolean): Indent {
+  return isHung ? { ...indent, tabs: indent.tabs - 1 } : indent
+}
+
 /** Where `block`'s last line that isn't a gap ends. */
+
 function lastLineEnd(block: SP.BubblyBlock): number {
   const last = block.body.findLast((node) => node.kind !== "gap")
   if (!last) return block.head.end
@@ -280,8 +301,10 @@ function lastLineEnd(block: SP.BubblyBlock): number {
 
 /****************
  * ### `FootWidget`
- * A block's foot:  a short bar off the bottom of its rail, on a line of its own under its last line.
- * - The rails of the blocks around it run on beside it.
+ * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner, as Monaco's did (I113),
+ * on a line of its own under its last line.
+ * - The rails of the blocks around it run on beside it;
+ *   one whose own foot is in the row under it stops short there, for that foot's corner (`stopped`).
  ****************/
 class FootWidget extends WidgetType {
   constructor(
@@ -292,18 +315,22 @@ class FootWidget extends WidgetType {
     super()
   }
 
+  /** The rails beside it, by their place in `rails`, whose feet are in the row under it:  set while it's laid out. */
+  readonly stopped = new Set<number>()
+
   eq(other: FootWidget): boolean {
     return (
       other.column === this.column &&
       other.partOfSpeech === this.partOfSpeech &&
-      railsOf(other.rails) === railsOf(this.rails)
+      railsStyle(other.rails, other.stopped) === railsStyle(this.rails, this.stopped)
     )
   }
 
   toDOM(): HTMLElement {
     const row = document.createElement("div")
     row.className = "cmb-foot-row"
-    if (this.rails.length) row.style.setProperty("--cmb-rails", railsOf(this.rails))
+    if (this.rails.length) row.style.cssText = railsStyle(this.rails, this.stopped)
+
     const foot = document.createElement("div")
     foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}`
     foot.style.setProperty("--cmb-column", String(this.column))

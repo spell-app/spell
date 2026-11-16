@@ -7,8 +7,8 @@ import { SP } from "spell/parser/spell"
  * - A page's body is a drawing, written as a page reads:
  *   - a line of prose, `A button that counts its clicks.`, drawn as markdown, a `##` heading starting a section
  *   - markup, as written:  `<section>`, `<example "one counter">`
- *   - the tags it draws with, each ONE `SP.PageTagToken`:  `<if ...>`, `<otherwise>`, `<for ...>`, an `<html>` block,
- *     a `<spell>` block
+ *   - the tags it draws with, each ONE `SP.PageTagToken`:
+ *     `<if ...>`, `<otherwise>`, `<for ...>`, an `<html>` block, a `<spell>` block
  * - Everything outside a page is plain Spell, read as any plain file is:  a page's own views are written above it.
  * - At the START of a line (after its indent):
  *   - a page's head, at the file's left edge:  a `SP.PageTagToken`, its tag a `page`
@@ -80,7 +80,7 @@ export class PageTokenizer extends P.Tokenizer {
 
   /**
    * Tokenize ONE line of a file, `line`, read with the tags `open` before it:  for colouring a file line by line,
-   * as the editor app's Monaco does.
+   * as the editor app's code editor does.
    * - Returns its tokens, and the tags open after it:  the next line's `open`.
    * - `open` is never changed.
    * - No line is checked against the file's end:  a tag still open isn't an error here.

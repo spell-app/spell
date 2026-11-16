@@ -538,8 +538,8 @@ Their long before / afters are in `agents/wwod/writing.md`.
 - **The final `else` of an exhaustive ladder documents its condition:**
   - `else /* if (placement === "after") */`.
 - **`oxlint-disable` carries a `-- reason`:**
-  - `` // oxlint-disable-next-line import/default -- `?worker` is Vite's, typed by `vite/client`, which oxlint
-    can't see `` (`packages/app/src/ui/monaco/monaco.ts`).
+  - `` // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook ``
+    (the app folder's `src/app/editor.ts`).
 - **A front page per repo, `README.md`, and a `README-<folder>.md` beside it per major folder**, REQUIRED;
   NO README inside a folder, but the kit's one `README/` (below).  Structure:
   - the kit, with too many pages for its root, keeps its topic pages in `README/` (`README/cli.md`), beside

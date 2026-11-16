@@ -573,7 +573,6 @@ export const APP_TEXTS = {
   inspectorTestPassed: "Passed",
   inspectorTestFailed: "Failed",
   inspectorTestsNone: "No tests yet.",
-  // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
   // the project menu's Theme ›, at its foot:  each opens in a new window
@@ -584,6 +583,7 @@ export const APP_TEXTS = {
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",
+  // an event's heading over its code (Owen:  "make label `on click`")
   inspectorEventHeading: "on {event}",
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words
   inspectorActionOnlyWhen: "Only when {condition}",
@@ -768,7 +768,17 @@ export const APP_TEXTS = {
   cmSelectionDeleted: "Selection deleted",
   // its right-click menu's rows
   cmGoToDefinition: "Go to Definition",
-  cmFindMenu: "Find…"
+  cmGoToTypeDefinition: "Go to Type Definition",
+  cmFindReferences: "Find All References",
+  cmRenameSymbol: "Rename Symbol",
+  // its list of a thing's uses:  `{file}`, a file's name;  `{line}`, a line's number
+  cmReferenceAt: "{file}:{line}",
+  cmNoReferences: "No uses found",
+  cmReferences: "Uses",
+  cmFindMenu: "Find…",
+  // a web address in the code, its tip on a plain hover (`CodeEditorFeatures.linkTip()`)
+  codeLinkTipMac: "⌘-click to open",
+  codeLinkTip: "Ctrl-click to open"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

@@ -1,0 +1,33 @@
+/*
+ * `<CodeSlice>`:  a few lines of a file, as tall as they are, in a box that looks like a field to type in.
+ */
+.CodeSlice {
+  min-height: 1.5em;
+  /* room round the lines, so a block's band, rail and foot at the first and last lines show whole (epic `editor` I164) */
+  padding: 4px 8px;
+  border: 1px solid var(--ui-border-color);
+  /* 4px, whatever the theme's radii (Owen, T72:  "4px round on these so they look like type-in-text fields";
+     I164:  "Less round on the input") */
+  border-radius: 4px;
+  overflow: hidden;
+
+  /* as tall as its lines:  the editor's own box grows with them, and never scrolls up and down */
+  > .CodeMirrorEditor,
+  > .CodeMirrorEditor > .cm-editor {
+    height: auto;
+  }
+  .cm-scroller {
+    overflow-y: hidden;
+  }
+  /* a long line scrolls sideways, a thin bar under it, unless Wrap long lines is on */
+  .cm-scroller::-webkit-scrollbar {
+    height: 6px;
+  }
+  /* no fold arrows or line numbers:  a slice is part of its row */
+  .cm-gutters {
+    display: none;
+  }
+  .cm-editor {
+    font-size: 14px;
+  }
+}

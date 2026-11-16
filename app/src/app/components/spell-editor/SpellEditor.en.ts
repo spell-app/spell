@@ -8,16 +8,16 @@ import type { E } from "spell/element"
 
 /****************
  * ### `<spell-editor>`
- * Edits a spell project in any page, in Monaco, and feeds `<spell-viewer>`s on the page what it compiles.
+ * Edits a spell project in any page, in CodeMirror, and feeds `<spell-viewer>`s on the page what it compiles.
  ****************/
 export const spellEditorVocabulary = {
   tag: "spell-editor",
   topics: ["inputs", "text"],
-  aka: ["code editor", "source editor", "ide", "monaco"],
+  aka: ["code editor", "source editor", "ide", "codemirror"],
   noun: "editor",
   ui: false,
   description:
-    "Edits a spell project in any page, in Monaco, saving back to the spell server;  compiles as it opens, after " +
+    "Edits a spell project in any page, in CodeMirror, saving back to the spell server;  compiles as it opens, after " +
     "typing stops and on Cmd+Enter, and feeds `<spell-viewer>`s what it compiled.",
   attributes: [
     {

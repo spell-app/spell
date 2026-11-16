@@ -18,7 +18,7 @@ describe("AppAddresses (epic `codemirror` P1)", () => {
     }
   })
 
-  test("reads Monaco's spelling of an address too, and leaves a line after it out", () => {
+  test("reads an encoded spelling of an address too, and leaves a line after it out", () => {
     expect(AppAddresses.pathOf("spell:/%40spell/examples/Solitaire/Card.spell")).toBe(
       "@spell/examples/Solitaire/Card.spell"
     )

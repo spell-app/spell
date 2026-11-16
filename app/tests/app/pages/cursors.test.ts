@@ -1,7 +1,7 @@
 import { chromium } from "playwright"
 import { describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The cursor over every part of the running editor (epic `editor` P1):  nothing left to the browser's guess.
@@ -16,7 +16,7 @@ import { EDITOR, SERVING } from "./runningEditor"
 /** What a place may show, by what's around it;  the first match decides. */
 const RULES: [where: RegExp, allowed: RegExp][] = [
   // the code draws its own:  text, and its gutter's fold markers
-  [/monaco/, /^(default|text|pointer|col-resize|row-resize|ns-resize|ew-resize)$/],
+  [/cm-editor/, /^(default|text|pointer|col-resize|row-resize|ns-resize|ew-resize)$/],
   [/^(input|textarea)\b|ui-input|ui-textarea/, /^(text|default)$/],
   [/ui-selectable/, /^(auto|default|text)$/],
   // the app's own, to be dragged
@@ -38,7 +38,7 @@ describe.skipIf(!SERVING)("the cursor over the running editor", () => {
       )
       const page = await context.newPage()
       await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`)
-      await page.waitForSelector(".monaco-editor .view-line", { timeout: 90_000 })
+      await new CodeEditor(page).shown(90_000)
       await page.waitForTimeout(4000)
       await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
       await page.waitForTimeout(2000)

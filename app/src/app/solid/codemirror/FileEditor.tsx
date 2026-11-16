@@ -9,11 +9,12 @@ import { CodeMirrorEditor } from "./CodeMirrorEditor"
 /****************
  * ### `<FileEditor>`
  * `<CodeMirrorEditor>` showing `file`'s state, from the page's `FileStates`, which keeps it and the file in step:
- * the twin of Monaco's `<FileEditor>`.
+ * the app's code pane, and `<spell-editor>`'s.
  * - A new `file` is shown in the SAME view:  the last one's state is kept, its undo, folds, selection and scroll,
  *   so switching back finds it as it was left.  No remount per file.
  * - No `file` yet:  a placeholder saying the editor's loading.
  * - `onMount` hands out the editor, `SpellCodeMirror`, once it shows a file.
+ * - SEE:  its App UI components page, `app/docs/FileEditor.html` (`/components/app/FileEditor.html`).
  ****************/
 export function FileEditor(props: FileEditorProps) {
   /** The view, once made. */
@@ -65,14 +66,22 @@ export function FileEditor(props: FileEditorProps) {
       file,
       // read now:  always the latest
       onOpen: (location) => props.onOpen?.(location) ?? false,
-      onContextMenu: (shown, at) => props.onContextMenu?.(shown, at)
+      onContextMenu: (shown, at) => props.onContextMenu?.(shown, at),
+      onReferences: (shown, at, locations) => props.onReferences?.(shown, at, locations),
+      onUpdate: (update) => props.onUpdate?.(update),
+      // read once, as it's made
+      hotkeys: untrack(() => props.hotkeys),
+      highlights: untrack(() => props.highlights)
     })
     props.onMount?.(editor)
   }
 }
 
 /** Props for `<FileEditor>`. */
-export type FileEditorProps = Pick<SpellCodeMirrorOptions, "onOpen" | "onContextMenu"> & {
+export type FileEditorProps = Pick<
+  SpellCodeMirrorOptions,
+  "onOpen" | "onContextMenu" | "onReferences" | "onUpdate" | "hotkeys" | "highlights"
+> & {
   /** File to edit, if we have one yet. */
   file: SP.AnySpellFile | undefined
   /** Called with the editor once it first shows a file. */

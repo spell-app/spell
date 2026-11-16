@@ -13,8 +13,9 @@ import type { ContextMenuElement, Core, MenuItem } from "spell/parser/core"
  *   thing or up its chain (`core.menuOf()`), drawn three ways:
  *   - as a toolbar or menu in a drawing, `<ui-toolbar menu="GameMenu" />`:  `fill()` puts its actions in
  *   - as a right click's menu, `context-menu="GameMenu"` on any element of a drawing:  `showContextMenu()`
- * - A right click's menu written IN a drawing, `<context-menu>` inside an element (epic `language`):  the core draws it
- *   as a hidden `<spell-context-menu>` holding its items (`core.drawContextMenu()`), which `showContextMenu()` finds.
+ * - A right click's menu written IN a drawing, `<context-menu>` inside an element (epic `language`):
+ *   the core draws it as a hidden `<spell-context-menu>` holding its items (`core.drawContextMenu()`),
+ *   which `showContextMenu()` finds.
  * - In the editor's Edit, a right click's menu shows first in the editor's own part menu (`contextMenuItemsOf()`,
  *   epic `editor` I76), drawn the same way (`itemsFor()`).
  *   - as the app's menu bar, `- its menu bar is "GameMenu"`:  `SpellElement` draws it with `itemsFor()`
@@ -220,7 +221,7 @@ export class ActionMenus {
 
   /**
    * Is `target` somewhere people type:  a text field, a text area, a select, editable text?  Its keys are its own.
-   * - An element with an `EditContext` too:  the editor's code pane (Monaco) types through one,
+   * - An element with an `EditContext` too:  a code editor may type through one,
    *   on a plain `<div>` that is neither an input nor contenteditable.
    *   Missed, Solitaire's `A` (auto play) took every `a` typed into the code (epic `debut` I79).
    */

@@ -2,7 +2,7 @@
  *
  *  Common syntax coloring methods
  *
- *  Light and dark (`light-dark()`):  the dark ones are Shades of Purple's, as the code's colours (`monaco/themes`).
+ *  Light and dark (`light-dark()`):  the dark ones are Shades of Purple's, as the code's colours (`CodeRules`).
  *
  *  VS Code's Semantic Tokens:  https://github.com/microsoft/vscode-extension-samples/tree/master/semantic-tokens-sample
  *

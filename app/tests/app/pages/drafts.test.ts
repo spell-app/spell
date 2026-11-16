@@ -4,7 +4,7 @@ import path from "node:path"
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 import { createTestProject, type TestProject } from "./testProject"
 
 /**
@@ -50,7 +50,7 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     page = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage()
     project = await createTestProject(EDITOR!, { name: "drafts", filePath: FILE, contents: FIRST })
     await page.goto(`${EDITOR}edit/${project.projectId}`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(1500)
     // the editor's first load, and its code editor's:  well over a hook's 10 seconds on a cold server
   }, 120_000)
@@ -99,7 +99,7 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     const theirs = published().replace('"text"', '"theirs"')
     writeFileSync(path.join(project.folder, FILE), theirs) // as if someone else published
     const publishing = page.evaluate(() => (window as any).editor.publish())
-    await page.waitForSelector("ui-modal.PublishClash .DiffView .monaco-diff-editor", { timeout: 20_000 })
+    await page.waitForSelector("ui-modal.PublishClash .DiffView .cm-mergeView", { timeout: 20_000 })
     await page.locator("ui-modal.PublishClash ui-button", { hasText: "Start Again" }).click()
     await publishing
     expect(drafts()).toEqual([])
@@ -114,7 +114,7 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     writeFileSync(path.join(project.folder, FILE), theirs) // as if someone else published
     const publishing = page.evaluate(() => (window as any).editor.publish())
     const clash = "ui-modal.PublishClash"
-    await page.waitForSelector(`${clash} .DiffView .monaco-diff-editor .revertButton`, {
+    await page.waitForSelector(`${clash} .DiffView .cm-merge-revert button`, {
       state: "attached",
       timeout: 20_000
     })
@@ -122,17 +122,17 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
       "Current Published Version",
       "Your Changes"
     ])
-    // two changes, an arrow each;  the lower one, `"mine"`, taken from theirs (an arrow shows only on hover)
-    const arrows = page.locator(`${clash} .revertButton`)
+    // two changes, an arrow each;  the lower one, `"mine"`, taken from theirs (CodeMirror takes it on mousedown)
+    const arrows = page.locator(`${clash} .cm-merge-revert button`)
     expect(await arrows.count()).toBe(2)
     await arrows.evaluateAll((all) =>
       all
         .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[1]
-        .dispatchEvent(new MouseEvent("click", { bubbles: true }))
+        .dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }))
     )
     // the right side's text, drawn bubbly or not:  `mine` gone, `theirs` in its place
     await page.waitForFunction((clash) => {
-      const text = document.querySelector(`${clash} .modified-in-monaco-diff-editor .view-lines`)?.textContent ?? ""
+      const text = document.querySelector(`${clash} .cm-merge-b .cm-content`)?.textContent ?? ""
       return !text.includes("mine") && text.includes("theirs")
     }, clash)
     await page.locator(`${clash} ui-button[color=primary]`).click()

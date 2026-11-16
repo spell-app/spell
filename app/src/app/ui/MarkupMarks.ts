@@ -15,11 +15,11 @@ import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
  * What an editor draws of an HTML file in the bubbly look (epic `language`), as the drawn-bubbly page draws it
  * (`BubblyMarkup`):  the MARKS on the text, and the SHAPES drawn under it.
  * - Every editor's (epic `codemirror` P3):  the editor hands in its own step from a stretch to its mark
- *   (`MarkMaker`), Monaco's `MonacoMarks.make` or CodeMirror's in `CodeMirrorMarkup`.
+ *   (`MarkMaker`):  CodeMirror's, in `CodeMirrorMarkup`.
  * - From the same reading as the page's, `BubblyMarkup.treeOf()`, so both see the same elements:
  *   - an element with what's inside it on lines of its own:  a block, its start tag the band, an end tag that starts
  *     its line, named or `</>`, a TINY pill at the rail's turn, its letters tiny, its line only the pill's row tall
- *     (Owen, Q61;  `SpellBubbly` shortens its line)
+ *     (Owen, Q61)
  *   - an element alone on its line with no end tag (`<meta …>`), and a doctype:  a band by itself
  *   - an element with nothing between its tags:  ONE pill over both, drawn as if self-closed, `/⟩`, its end tag's
  *     `<` and name hidden (Owen, Q62)
@@ -27,14 +27,14 @@ import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
  *     line linking its two pills too, between them (`MarkupLinkShape`)
  *   - a start tag on lines of its own:  its shape's place spans them, drawn as ONE tall band
  * - Marks:
- *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
- *     attributes' names, as the page draws them
+ *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;
+ *     its `/`, name and attributes' names, as the page draws them
  *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it;
  *     a `{…}` one's (Spell, worked out as it runs) an inverted pill, its braces part of it, as a quoted one's marks
  *     are of its white (Owen, epic `editor` I144 C1);  a Spell drawing's `{…}` between its tags too
  *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
  *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
- * - Shapes are drawn by the editor:  Monaco's `SpellBubbly` places them from where it draws each line and letter;
+ * - Shapes are drawn by the editor:  placed from where it draws each line and letter;
  *   CodeMirror's `CodeMirrorMarkup` puts them on the text itself.
  * - Pure data:  no editor in it, so it's tested without one.
  ****************/
@@ -50,8 +50,8 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
    * - `isView`:  is a tag one of the project's own views, `<tableau "T1"/>`?  Then it draws a thing:  purple.
    * - `declaringTags`:  where each tag that declares a member starts (`SP.BubblyDrawing.declaringTags`):
    *   drawn round, `bubbly-tag-declares` (epic `editor` I84)
-   * - `codes`:  the lines' code, each `{…}` (`SP.BubblyLine.codes`):  one between tags an inverted pill, as a
-   *   `{…}` value's is
+   * - `codes`:  the lines' code, each `{…}` (`SP.BubblyLine.codes`):
+   *   one between tags an inverted pill, as a `{…}` value's is
    */
   static within<Mark>(
     text: string,
@@ -71,8 +71,8 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
   readonly tags: Array<{ start: number; end: number }> = []
 
   /**
-   * The room injected after each tag or code pill in a line, by where it ends:  a tag (or code) right after it starts
-   * past it too.
+   * The room injected after each tag or code pill in a line, by where it ends:
+   * a tag (or code) right after it starts past it too.
    */
   private readonly roomAfter = new Map<number, TagRoom>()
 
@@ -354,8 +354,9 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
   }
 
   /**
-   * An end tag's pieces;  `"block"`:  a block's, its name faint as its marks are, as the page draws it, every piece
-   * tiny (`bubbly-foot-tiny`, Q61).
+   * An end tag's pieces.
+   * - `"block"`:  a block's, its name faint as its marks are, as the page draws it,
+   *   every piece tiny (`bubbly-foot-tiny`, Q61).
    */
   private endTag(tag: MarkupEndTag, place: "block" | "inline") {
     const { start, end } = tag
@@ -471,7 +472,7 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
 // ## Types and helpers
 ////////////////
 
-/** A shape an editor draws under an HTML file's text:  Monaco's `SpellBubbly`, CodeMirror's `CodeMirrorMarkup`. */
+/** A shape an editor draws under an HTML file's text:  `CodeMirrorMarkup`. */
 export type MarkupShape = MarkupBlockShape | MarkupTagShape | MarkupLinkShape | BubblyInputShape
 
 /** An element with what's inside it on lines of its own:  its band, gutter, body, and its end tag's band. */
@@ -519,7 +520,7 @@ export type MarkupTagShape = {
   /**
    * the room injected where it starts, each spacer's kind:  the tag's it follows right on (`<p><b>`), then its own;
    * none at its line's start, less where its point touches its element's other tag
-   * - Monaco places a column before the room injected there:  the pill starts past it
+   * - a column before the room beside it:  the pill starts past it
    */
   room?: TagRoom[]
 }

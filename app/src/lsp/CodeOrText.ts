@@ -4,7 +4,7 @@
  * (epic `editor` T74):  the same words, their two quotes turned into braces or back.
  * - Two ways in, which agree because both ask this class:
  *   - typing:  a `{` typed inside a quoted value makes it code;  a `"` typed right after a code value's `{` makes it
- *     text (the app's typing helps:  Monaco's `CodeOrTextTyping`, CodeMirror's `CodeMirrorCodeOrText`)
+ *     text (the app's typing helps:  `CodeMirrorCodeOrText`)
  *   - the right-click menu and the light bulb:  "Make it code" / "Make it text" on the value the caret is in
  *     (`SpellLanguageService.codeActions()`), so VS Code has them too
  * - Only an attribute's value, after its `=`:  not a tag's quoted word (`<action "redo" />`), and not the words
@@ -57,8 +57,8 @@ export class CodeOrText {
   }
 
   /**
-   * What a `typed` character does at `offset` of `text` (the text BEFORE it was typed):  the value it switches,
-   * and that value switched;  `undefined` when it's typed as any other character is.
+   * What a `typed` character does at `offset` of `text` (the text BEFORE it was typed):
+   * the value it switches, and that value switched;  `undefined` when it's typed as any other character is.
    * - `{` anywhere inside a quoted value:  it becomes code.
    * - `"` right after a code value's `{`, where its opening quote would go:  it becomes text.
    *   Not further in:  a `"` there starts a string in the code, `{say "hi"}`.
