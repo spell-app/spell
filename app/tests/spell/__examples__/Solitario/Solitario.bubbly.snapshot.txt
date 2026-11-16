@@ -187,7 +187,7 @@
 ⟦// Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias reglas (`soltable`).⟧
 
 [thing create_viewable_list_type L0]
-| una «"pila"» es una **lista visible, soltable de cartas**
+| una «"pila"» es una **lista visible**, **soltable de cartas**
 |   [property define_property_has L1]
 |   | su «"disposición"» es uno de ‹apilada› o ‹vertical›
 |   |   ⟦// Cómo están sus cartas:  una sobre otra, o hacia abajo en una columna -- styles.css⟧

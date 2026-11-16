@@ -61,7 +61,7 @@ export class CodeMirrorTyping {
     return [
       HAS_TYPING_HELPS.of(true),
       snapped,
-      EditorState.transactionFilter.of((transaction) => CodeMirrorTyping.moved(transaction)),
+      EditorState.transactionFilter.of((transaction) => CodeMirrorTyping.moved(transaction, lang)),
       // before the base setup's keys:  its Tab, ⌘[ and ⌘] would indent the line alone
       Prec.high(
         keymap.of([
@@ -280,7 +280,7 @@ export class CodeMirrorTyping {
    * the line it snapped on before gets back what it had, if it's still blank.
    * - Written with the move, out of undo, marked as not typed (`FileStates.EDIT_WAY`).
    */
-  private static moved(transaction: Transaction): TransactionSpec | readonly TransactionSpec[] {
+  private static moved(transaction: Transaction, lang: string): TransactionSpec | readonly TransactionSpec[] {
     const { startState } = transaction
     if (transaction.docChanged || !transaction.selection || !transaction.isUserEvent("select")) return transaction
     if (startState.readOnly || !startState.facet(HAS_TYPING_HELPS)) return transaction
@@ -296,7 +296,7 @@ export class CodeMirrorTyping {
         changes.push({ from: left.from, to: left.to, insert: was.before })
     }
     const isCaret = caret.ranges.length === 1 && caret.main.empty
-    const indent = isCaret ? LSP.SpellTyping.indentToSnap(doc.toJSON(), line.number - 1) : ""
+    const indent = isCaret ? LSP.SpellTyping.indentToSnap(doc.toJSON(), line.number - 1, lang) : ""
     if (indent) changes.push({ from: line.to, insert: indent })
     const now = indent ? { from: line.from, before: line.text } : undefined
     if (!changes.length) return was ? [transaction, { effects: snap.of(now) }] : transaction

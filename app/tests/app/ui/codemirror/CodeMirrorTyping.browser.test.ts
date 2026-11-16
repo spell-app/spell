@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { userEvent } from "vite-plus/test/browser"
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete"
 import { undo } from "@codemirror/commands"
 import { EditorSelection, EditorState, type Extension } from "@codemirror/state"
@@ -365,6 +366,56 @@ describe("typing Spell in a real CodeMirror editor", () => {
       const code = editorOf(LINES, 2, 1)
       code.dispatch({ selection: EditorSelection.cursor(code.state.doc.line(3).from) })
       expect(text(code).split("\n")).toEqual(LINES)
+    })
+
+    describe("not on the blank line before a group:  it's drawn outside the group above (epic `language` I121)", () => {
+      /** Solitaire's card, shortened:  line 5 is the blank line under the group "Aliases", before "Names". */
+      const GROUPS = [
+        `a "card" is a view`,
+        `\tgroup "Aliases"`,
+        `\tit "is a face card" if its rank is jack, queen or king`,
+        `\tit "is the (rank) of (suit)"`,
+        ``,
+        `\tgroup "Names"`,
+        `\tits "name" is its rank && "of" && its suit`
+      ]
+
+      /** An editor of `GROUPS`, scrolled into view:  the arrows move by where lines are drawn. */
+      const shownOf = (line: number, column: number) => {
+        const code = editorOf(GROUPS, line, column)
+        code.dom.scrollIntoView()
+        return code
+      }
+
+      test("arrowed onto:  nothing written, the caret at the margin", () => {
+        const code = shownOf(4, 1)
+        press("ArrowDown")
+        expect(position()).toEqual({ lineNumber: 5, column: 1 })
+        expect(text(code).split("\n")).toEqual(GROUPS)
+        press("ArrowUp")
+        press("ArrowDown")
+        expect(text(code).split("\n")).toEqual(GROUPS)
+      })
+
+      test("clicked onto, by the mouse:  nothing written, the caret at the margin", async () => {
+        const code = shownOf(2, 1)
+        await userEvent.click(code.dom.querySelectorAll(".cm-line")[4]!)
+        expect(position()).toEqual({ lineNumber: 5, column: 1 })
+        expect(text(code).split("\n")).toEqual(GROUPS)
+      })
+
+      test("typed on:  a letter still takes the group's indent, so `group` lands at its level", () => {
+        const code = shownOf(4, 1)
+        press("ArrowDown")
+        type("g")
+        expect(text(code).split("\n")[4]).toBe(`\tg`)
+      })
+
+      test("Enter at the end of the group's last line still goes on in its body", () => {
+        const code = shownOf(4, GROUPS[3]!.length + 1)
+        press("Enter")
+        expect(withCaret().split("\n")[4]).toBe(`\t|`)
+      })
     })
   })
 
