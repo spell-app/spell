@@ -83,6 +83,44 @@
   }
 }
 
+/* its search, before the ✕:  compact, wider while it's typed in (epic `editor` J140) */
+.PaletteStrip .PaletteStripSearch {
+  flex: none;
+  width: 130px;
+  transition: width 0.15s ease;
+
+  &:focus-within {
+    width: 220px;
+  }
+}
+
+/* its search's results:  a layer over the page, holding each topic's matches as a menu under its name;
+   where each goes is `layOutMatches()`'s */
+.PaletteMatches {
+  position: fixed;
+  inset: 0 auto auto 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+}
+.PaletteMatchPanel {
+  position: fixed;
+  box-sizing: border-box;
+  padding: 4px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  /* as a menu of the top bar looks (`MenuBar.css`, `.BarMenuPopup`) */
+  border: var(--ui-border-width, 1px) solid var(--ui-border-color-strong);
+  border-radius: var(--ui-radius);
+  background: color-mix(in oklab, var(--ui-surface) 25%, var(--ui-background));
+  box-shadow: var(--ui-shadow-floating);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+
 /* a topic's menu:  its rows, as many as fit the window, then it scrolls */
 ui-popup.PaletteGroupPopup::part(popup) {
   min-width: 180px;
