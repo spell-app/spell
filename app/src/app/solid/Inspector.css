@@ -734,3 +734,8 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+/* a card's code box takes back some of the card's 14px each side, so its lines have room (Owen, I164:
+   "Reduce margin around the input") */
+.InspectorSection .CodeSlice {
+  margin-inline: -6px;
+}
