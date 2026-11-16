@@ -110,19 +110,19 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       )
       // its words are its row's header:  the field holds only its code (Solitaire as it is now, I62)
       .toEqual(["if it is face up or its pile is solitaire's stock", "play the card"])
-    // an action:  its signature, its types in badges, then its code
+    // an action:  its signature in its band, its name a pill, each type a blank in it (T98), then its code
     const action = page
       .locator(".InspectorEvent.action")
       .filter({ has: page.locator(".InspectorActionSignature", { hasText: /to\s*play/ }) })
       .first()
     const signature = action.locator(".InspectorActionSignature")
     expect((await signature.innerText()).replace(/\s+/g, " ").trim()).toBe("to play a card")
-    expect(await signature.locator("ui-label").allInnerTexts()).toEqual(["a card"])
+    expect(await signature.locator(".InspectorActionType").allInnerTexts()).toEqual(["a card"])
     // it takes nothing else:  a run button for the card selected, at its row's right (I116)
     expect(await action.locator(":scope > ui-button.InspectorActionButton[slot=actions]").count()).toBe(1)
-    // one that needs a pile:  its type a badge, and no select or button, as it can't run from here
-    const putOn = page.locator(".InspectorActionSignature").filter({ hasText: /put/ }).first()
-    expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
+    // one that needs a pile (`to move a card to a pile`, was `put ... on`):  each type a blank in its pill, and no select or button, as it can't run from here
+    const putOn = page.locator(".InspectorActionSignature").filter({ hasText: /move/ }).first()
+    expect(await putOn.locator(".InspectorActionType").allInnerTexts()).toEqual(["a card", "a pile"])
     expect(await putOn.locator("ui-button, ui-select, ui-input").count()).toBe(0)
     expect((await action.locator(".CodeSlice .cm-content").innerText()).replace(/\s+/g, " ")).toContain(
       "if the card is in the stock"

@@ -184,6 +184,8 @@ and in the app's build folder, `app/` at the app folder's root.
       `FileStates.showSlice()`, the file's own text in another view, its edits the file's;
       only what's wholly in its lines is drawn bubbly, so the action whose body it shows draws no band or rail
       cut off at its edges.
+      The card draws that band and rail itself, round the slice, from the same sheet
+      (`CodeCard.css`, epic `editor` T98).
     - Both sides of a diff too (Publish's `<DiffView>`, on CodeMirror's merge view, epic `editor` T75).
   - The lines being followed (the place in focus, `editor.followed`) are a bar in the gutter
     ([CodeMirrorFollowed](ui/codemirror/CodeMirrorFollowed.ts)).
