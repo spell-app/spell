@@ -105,7 +105,7 @@ describe("the Spell UI site", () => {
     const folders = readdirSync(FOLDER, { withFileTypes: true }).filter(
       (entry) => entry.isDirectory() && entry.name !== "snapshots"
     )
-    expect(folders.length).toBe(100)
+    expect(folders.length).toBe(103)
     for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spell"))).toBe(false)
   })
 
