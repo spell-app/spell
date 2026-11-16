@@ -1042,6 +1042,8 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
  * refactor its callers) by clicking on the name"):  a field holding it, which renames it everywhere it's named
  * (`Inspector.renameAction()`) when it's left -- Enter, Tab or a click away.
  * - Esc leaves it as it was.
+ * - Renamed:  the new name shows at once, a spinner right after it, until the program's compiled again and the row
+ *   drawn from it (I168);  never the old name in between.
  * - A name refused (empty, another member's, not words) keeps the field open, saying why under it:
  *   nothing is renamed.
  *   - Under that, `Restore "cheat"`:  its link puts the old name back and closes the field, as Esc does (I139).
@@ -1051,6 +1053,8 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
 function ActionName(props: { thing: object; action: InspectorAction }): JSX.Element {
   const [isEditing, setEditing] = createSignal(false)
   const [refusal, setRefusal] = createSignal<string>()
+  // the new name, shown while the rename's compile is on its way:  the row is drawn again from the program after it
+  const [renamedTo, setRenamedTo] = createSignal<string>()
   // the words the field starts with:  set once per edit, so nothing redraws over what's typed
   let wordsAtStart = ""
   // a rename on its way, or a cancel:  the field's going, and its `focusout` must do nothing more
@@ -1079,9 +1083,13 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
     if (words.trim().replace(/\s+/g, " ") === wordsAtStart) return cancel()
     isLeaving = true
     try {
-      await Inspector.renameAction(props.thing, props.action, words)
+      const renamed = await Inspector.renameAction(props.thing, props.action, words)
       setRefusal(undefined)
+      if (renamed) setRenamedTo(words.trim().replace(/\s+/g, " "))
       setEditing(false)
+      // once compiled, the row is the renamed action's own:  this one's gone, unless the program didn't take it
+      await renamed?.compiled
+      setRenamedTo(undefined)
     } catch (error) {
       // refused:  the field stays, saying why
       isLeaving = false
@@ -1093,16 +1101,21 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
     <Show
       when={isEditing()}
       fallback={
-        <span
-          class="InspectorActionName"
-          title={title()}
-          onClick={(event: MouseEvent) => {
-            event.stopPropagation()
-            start()
-          }}
-        >
-          {props.action.words}
-        </span>
+        <>
+          <span
+            class="InspectorActionName"
+            title={title()}
+            onClick={(event: MouseEvent) => {
+              event.stopPropagation()
+              if (!renamedTo()) start()
+            }}
+          >
+            {renamedTo() ?? props.action.words}
+          </span>
+          <Show when={renamedTo()}>
+            <ui-loader visible="" inline="" size="mini" class="InspectorActionNameSpinner" />
+          </Show>
+        </>
       }
     >
       <span class="InspectorActionNameEdit" onClick={(event: MouseEvent) => event.stopPropagation()}>

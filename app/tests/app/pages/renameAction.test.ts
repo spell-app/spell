@@ -179,6 +179,51 @@ describe.skipIf(!SERVING)("Renaming an action in the Inspector", { timeout: 180_
     expect(await allFiles()).toBe(before)
   })
 
+  test("renamed, the row shows the new name at once with a spinner, and its code keeps its lines (I168)", async () => {
+    const before = await allFiles()
+    await openField("restart the game")
+    await page.keyboard.type("start over")
+    // the row's name and its code's first line, at every frame and change, from the Enter on
+    await page.evaluate(() => {
+      const seen: string[] = []
+      ;(window as unknown as { renameFrames: string[] }).renameFrames = seen
+      const started = performance.now()
+      const note = () => {
+        for (const row of document.querySelectorAll(".InspectorCodeCard ui-section.InspectorEvent.action")) {
+          const name = row.querySelector(".InspectorActionName")?.textContent ?? ""
+          if (!/restart the game|start over/.test(name)) continue
+          const lines = [...row.querySelectorAll(".view-line")] as HTMLElement[]
+          const first = lines.sort((one, other) => parseFloat(one.style.top) - parseFloat(other.style.top))[0]
+          const spinner = row.querySelector(".InspectorActionNameSpinner") ? " +spinner" : ""
+          seen.push(`${name}${spinner} | ${first?.textContent?.replace(/\s+/g, " ").trim() ?? ""}`)
+        }
+      }
+      const frame = () => {
+        note()
+        if (performance.now() - started < 5000) requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+      new MutationObserver(note).observe(document.querySelector(".InspectorCodeCard")!, {
+        subtree: true,
+        childList: true,
+        characterData: true
+      })
+    })
+    await page.keyboard.press("Enter")
+    await expect.poll(allFiles, { timeout: 10_000 }).toContain('to "start over" with shortcut "R"')
+    await page.waitForTimeout(5000)
+    const frames = await page.evaluate(() => (window as unknown as { renameFrames: string[] }).renameFrames)
+    // never the old name, never a line of its code out of place
+    expect(frames.filter((frame) => frame.startsWith("restart the game"))).toEqual([])
+    expect(frames.filter((frame) => !/\| (clear the score)?$/.test(frame))).toEqual([])
+    // the spinner first, gone at the end
+    expect(frames.some((frame) => frame.startsWith("start over +spinner"))).toBe(true)
+    expect(frames.at(-1)).toBe("start over | clear the score")
+    await page.keyboard.press("ControlOrMeta+z")
+    await expect.poll(allFiles, { timeout: 10_000 }).toBe(before)
+    await page.waitForTimeout(SETTLE_MS)
+  })
+
   test("leaving the field renames it everywhere it's named, as one undo", async () => {
     const before = await allFiles()
     const buttons = count(before, '<action "cheat"/>')

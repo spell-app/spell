@@ -1,5 +1,6 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
+import type { TextEdit } from "vscode-languageserver"
 
 import { UIError, kebabCase, setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
@@ -881,7 +882,11 @@ export class Inspector {
    * Call `thing`'s action `action` `newWords`, wherever it's named (epic `editor` I111):  its head, each call and each
    * `<action "...">`, in every file of the project, as the language service finds them (`renameActionAt()`).
    * - ONE step of the editor's history, however many files it changes;  then a compile.
-   * - Answers whether it renamed it.
+   * - Each place it's named is a change of its own, the last first (I168):
+   *   one change from its first place to its last replaced every line between,
+   *   and each code slice on those lines showed other lines until the Code card was drawn again.
+   * - Answers once the files are changed, with the compile that follows (`compiled`, which NEVER rejects:
+   *   a failure shows in the error banner);  `undefined` when it wasn't renamed.
    * - throws a `UIError` when the name is refused (empty, taken, not words ...):  its message says why, in words,
    *   for the field it was typed in;  any other failure shows in the error banner
    */
@@ -889,7 +894,7 @@ export class Inspector {
     thing: object,
     action: { words: string; name: string },
     newWords: string
-  ): Promise<boolean> {
+  ): Promise<{ compiled: Promise<void> } | undefined> {
     const place = declaredActionPlace(action, classNamesOf(thing), declarationPlaces())
     const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
     const head = file?.contents?.split("\n")[place!.line] ?? ""
@@ -904,21 +909,23 @@ export class Inspector {
       editor.history.transaction(title, () => {
         for (const [uri, edits] of Object.entries(changes)) {
           const at = editor.project?.spellFiles.find((each) => addresses.uriFor(each) === uri)
-          const before = at?.contents ?? ""
-          if (!at || !edits.length) continue
-          const { span, newText } = SourceEdits.editBetween(before, SourceEdits.applied(before, edits))
-          editor.history.change(
-            { file: at, at: span.start, before: before.slice(span.start, span.end), after: newText },
-            { title }
-          )
+          if (!at) continue
+          // the last first:  so the places before it are still where the service said
+          for (const edit of [...edits].sort(laterFirst)) {
+            const before = at.contents ?? ""
+            const { span, newText } = SourceEdits.editBetween(before, SourceEdits.applied(before, [edit]))
+            editor.history.change(
+              { file: at, at: span.start, before: before.slice(span.start, span.end), after: newText },
+              { title }
+            )
+          }
         }
       })
-      void editor.compileApp().catch((error: unknown) => editor.showError(error as Error))
-      return true
+      return { compiled: editor.compileApp().catch((error: unknown) => editor.showError(error as Error)) }
     } catch (error) {
       if (!(error instanceof RenameError)) {
         editor.showError(error as Error)
-        return false
+        return undefined
       }
       throw new UIError(renameRefusal(error, newWords, action.words))
     }
@@ -3819,3 +3826,8 @@ async function loadBrandTokens(): Promise<void> {
 const BRAND_THEME = "spell"
 /** A load of the brand's tokens has started. */
 let loadingBrandTokens = false
+
+/** Sorts text edits from the last in the file to the first:  made in that order, each one's place still holds. */
+function laterFirst(one: TextEdit, other: TextEdit): number {
+  return other.range.start.line - one.range.start.line || other.range.start.character - one.range.start.character
+}
