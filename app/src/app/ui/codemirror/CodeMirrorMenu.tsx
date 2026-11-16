@@ -5,6 +5,7 @@ import type { CodeAction } from "vscode-languageserver"
 
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
+import { CodeMirrorTyping } from "./CodeMirrorTyping"
 import type { SpellCodeMirror } from "./SpellCodeMirror"
 
 // the editor's menu look:  the top bar's and the part menu's
@@ -68,6 +69,8 @@ function MenuPopup(props: MenuPopupProps) {
   }
   const paste = async () => {
     const text = await navigator.clipboard.readText()
+    // re-indented where it lands, as ⌘V's is, in a Spell file
+    if (CodeMirrorTyping.paste(view(), text)) return
     view().dispatch(view().state.replaceSelection(text), { userEvent: "input.paste" })
   }
   return (

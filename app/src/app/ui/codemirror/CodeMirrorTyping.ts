@@ -1,42 +1,203 @@
-import { snippet, startCompletion } from "@codemirror/autocomplete"
-import type { Extension } from "@codemirror/state"
+import { completionStatus, insertBracket, snippet, startCompletion } from "@codemirror/autocomplete"
+import { isolateHistory } from "@codemirror/commands"
+import { indentUnit } from "@codemirror/language"
+import {
+  ChangeSet,
+  EditorState,
+  type Extension,
+  Facet,
+  Prec,
+  StateEffect,
+  StateField,
+  Transaction,
+  type TransactionSpec
+} from "@codemirror/state"
 import { EditorView, keymap } from "@codemirror/view"
 
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { CodeMirrorSetup } from "./CodeMirrorSetup"
+import { FileStates } from "./FileStates"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorTyping`
- * The Spell typing helps that matter most, in a CodeMirror editor (epic `editor` P30, the CodeMirror test):
- * four of the nine Monaco's `SpellTyping` gives, enough to judge.
- * - Enter keeps the line's indent and follows Spell's Enter rules (`LSP.SpellTyping.ENTER_RULES`):
- *   a level in after a `:`, an opening tag, a line ending in `and` / `or`, or before a comment after code;
- *   between `<x>` and `</x>`, the caret a level in and the closing tag on its own line.
- *   It leaves no tabs or spaces at the end of the line it splits.
+ * The nine helps as a person types Spell in a CodeMirror editor, as Monaco's `SpellTyping` gives them
+ * (epic `codemirror` P4), so what they see is what they type.
+ * - The caret snaps into the body a blank line is drawn in:
+ *   clicked or arrowed onto, a blank line inside a body gets that body's indent, the caret after it.
+ *   - Backspace there takes one indent off, the caret out a level:  it doesn't snap back in till the caret leaves.
+ *   - Left without typing, the line gets back what it had.
+ *   - No undo step of its own:  kept out of undo, as an edit from outside the code is.
+ * - A letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in;
+ *   the same undo step as the letter.
+ * - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;
+ *   one undo leaves `group ` again, and a `"` typed after the name steps over the closing one.
  * - A space after a tag's name writes the rest of the tag, the caret where its next words go:
- *   `<action ` => `<action "|" />`, the program's actions listed at once (`LSP.CompletionShapes.spaceAfterTag()`).
- * - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between.
- * - A letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in.
- * - What each reads of the lines is the language service's (`LSP.SpellTyping`), as Monaco's is, so both editors
- *   decide alike.
+ *   `<action ` => `<action "|" />`, the program's actions listed at once (`LSP.CompletionShapes.spaceAfterTag()`);
+ *   one undo leaves `<action `.
+ * - A paste takes the indent where it lands, ⌘V and the right-click menu's Paste alike (`paste()`);
+ *   one undo takes it all back.  A whole line copied (nothing selected) pastes as copied.
+ * - Shift+Tab, ⌘[, or Backspace at the end of a line's indent moves the lines under it out a level with it;
+ *   Tab there, or ⌘], moves them in.  One undo.
+ *   - A line of a tag's attributes under its first line moves alone, its indent tabs then spaces;
+ *     so does a comment line.
+ * - Enter between a tag's attributes lines the rest up under its first attribute, measured as it's drawn.
+ * - Enter before a comment after code puts the comment on its own line, at the level of the body under it.
+ * - Enter keeps the line's indent and follows Spell's Enter rules (`LSP.SpellTyping.ENTER_RULES`),
+ *   and leaves no tabs or spaces at the end of the line it splits.
+ * - Two editors on one file (the code and a slice of it, `FileStates.showSlice()`):  each has these helps,
+ *   but only the one typed in hears the keys, so only it helps.
+ * - Its own edits, and an edit from outside the code (`FileStates.EDIT_WAY`), are never taken for typing.
+ * - Every help writes only on the lines it's working on:  an edit anywhere else is dropped, with an error saying so,
+ *   so a help gone wrong never breaks a file silently (`write()`).
+ * - What each help decides, from the lines, is the language service's (`LSP.SpellTyping`), as Monaco's is,
+ *   so both editors decide alike;  this class is only the CodeMirror wiring.
  ****************/
 export class CodeMirrorTyping {
   /** The helps, for a file in `lang`;  `fileOf()`:  the project file, whose parse says which tags are its views. */
   static extension(fileOf: () => SP.SpellFile | undefined, lang = "en"): Extension {
     return [
-      keymap.of([{ key: "Enter", run: (view) => CodeMirrorTyping.enter(view) }]),
+      HAS_TYPING_HELPS.of(true),
+      snapped,
+      EditorState.transactionFilter.of((transaction) => CodeMirrorTyping.moved(transaction)),
+      // before the base setup's keys:  its Tab, ⌘[ and ⌘] would indent the line alone
+      Prec.high(
+        keymap.of([
+          { key: "Enter", run: (view) => CodeMirrorTyping.enter(view) },
+          { key: "Tab", run: (view) => CodeMirrorTyping.moveLines(view, "in", "tab") },
+          { key: "Shift-Tab", run: (view) => CodeMirrorTyping.moveLines(view, "out", "tab") },
+          { key: "Backspace", run: (view) => CodeMirrorTyping.moveLines(view, "out", "backspace") },
+          { key: "Mod-[", run: (view) => CodeMirrorTyping.moveLines(view, "out", "mod") },
+          { key: "Mod-]", run: (view) => CodeMirrorTyping.moveLines(view, "in", "mod") }
+        ])
+      ),
       EditorView.inputHandler.of((view, from, to, text) =>
         CodeMirrorTyping.typed(view, { from, to, text, lang, fileOf })
-      )
+      ),
+      EditorView.domEventHandlers({ paste: (event, view) => CodeMirrorTyping.pasting(event, view) }),
+      EditorView.clipboardOutputFilter.of((text, state) => {
+        copiedWholeLine = state.selection.ranges.every((range) => range.empty) ? text : undefined
+        return text
+      })
     ]
   }
 
-  /** Enter, Spell's way.  `false` with more than one caret, for CodeMirror's own. */
+  ////////////////
+  // ## A paste takes its indent
+  ////////////////
+
+  /**
+   * Write `text` re-indented to where it lands, as one edit, so one undo takes it back:
+   * every paste, ⌘V's and the right-click menu's.
+   * - Returns whether it did:  `false` leaves the paste to CodeMirror, as it was.
+   * - Left to CodeMirror:  a view without these helps, several carets, a whole line copied (it pastes above),
+   *   a one-line paste, or no change needed.
+   */
+  static paste(view: EditorView, text: string): boolean {
+    const { state } = view
+    if (!state.facet(HAS_TYPING_HELPS) || state.readOnly || state.selection.ranges.length !== 1) return false
+    if (!text || text === copiedWholeLine) return false
+    const { from, to } = state.selection.main
+    const pasted = text.replace(/\r\n?/g, "\n").split("\n")
+    const line = state.doc.lineAt(from)
+    const lines = LSP.SpellTyping.pastedLines(pasted, state.sliceDoc(line.from, from), indentSettingsOf(state))
+    if (lines.join("\n") === pasted.join("\n")) return false
+    const insert = lines.join(state.lineBreak)
+    return write(view, linesOf(state, from, to), {
+      changes: { from, to, insert },
+      selection: { anchor: from + insert.length },
+      scrollIntoView: true,
+      userEvent: "input.paste"
+    })
+  }
+
+  /** ⌘V:  the browser's paste, re-indented by `paste()` unless it's left to CodeMirror. */
+  private static pasting(event: ClipboardEvent, view: EditorView): boolean {
+    const text = event.clipboardData?.getData("text/plain")
+    if (!text || !CodeMirrorTyping.paste(view, text)) return false
+    event.preventDefault()
+    return true
+  }
+
+  ////////////////
+  // ## A line moved out takes what's under it
+  ////////////////
+
+  /**
+   * Move the caret's line `way`, the lines under it along, as one edit:  `key` says which key asked.
+   * - `"tab"`:  Shift+Tab anywhere on the line;  Tab only with the caret at the end of its indent,
+   *   nothing selected and no suggestions showing, so Tab elsewhere is CodeMirror's
+   * - `"backspace"`:  only at the end of its indent;  never on a tag's attribute line, where it's a space at a time
+   * - `"mod"`:  ⌘[ and ⌘]
+   * - A line with nothing under it is left to CodeMirror;  a tag's attribute line and a comment line move alone.
+   * - Returns whether it did.
+   */
+  static moveLines(view: EditorView, way: "in" | "out", key: "tab" | "backspace" | "mod"): boolean {
+    const { state } = view
+    if (state.readOnly || state.selection.ranges.length !== 1) return false
+    const selection = state.selection.main
+    const line = state.doc.lineAt(selection.from)
+    if (state.doc.lineAt(selection.to).number !== line.number) return false
+    const { text } = line
+    const indent = LSP.SpellTyping.indentOf(text)
+    if ((way === "out" && !indent) || !text.trim()) return false
+    const isAtIndent = selection.empty && selection.head === line.from + indent.length
+    const isTab = key === "tab" && way === "in"
+    if ((key === "backspace" || isTab) && !isAtIndent) return false
+    // Tab takes a suggestion while the list shows:  CodeMirror's, not ours
+    if (isTab && completionStatus(state) === "active") return false
+    const lines = state.doc.toJSON()
+    const index = line.number - 1
+    // a line of a tag's attributes, under its first line, moves alone:  its indent tabs then spaces again (I142)
+    const isAttributeLine = !!LSP.SpellTyping.tagOpenAt(lines, index, 0)
+    if (isAttributeLine && key === "backspace") return false
+    // a comment line moves alone:  what's under it is the body of the line above it (I161)
+    const isComment = LSP.SpellTyping.isComment(text)
+    const under = isAttributeLine || isComment ? 0 : LSP.SpellTyping.linesUnder(lines, index)
+    if (!under && !isAttributeLine) return false
+    const settings = indentSettingsOf(state)
+    // how far the lines move:  out to the level before, or in a level
+    // (a tag's attribute line:  a whole level, so its spaces stay lined up)
+    const outBy = isAttributeLine
+      ? settings.tabSize
+      : LSP.SpellTyping.widthOf(indent, settings.tabSize) - LSP.SpellTyping.outdentWidth(indent, settings.tabSize)
+    const by = way === "in" ? settings.tabSize : -outBy
+    const changes = lines.slice(index, index + under + 1).flatMap((each, at) => {
+      if (!each.trim()) return []
+      const its = LSP.SpellTyping.indentOf(each)
+      const from = state.doc.line(line.number + at).from
+      const width = Math.max(0, LSP.SpellTyping.widthOf(its, settings.tabSize) + by)
+      return [{ from, to: from + its.length, insert: LSP.SpellTyping.indentOfWidth(width, settings) }]
+    })
+    const changeSet = ChangeSet.of(changes, state.doc.length)
+    const first = changes[0]!
+    return write(
+      view,
+      { from: line.number, to: line.number + under },
+      {
+        changes: changeSet,
+        // at its indent, the caret stays where typing goes:  the end of the line's new indent
+        selection: isAtIndent ? { anchor: changeSet.mapPos(first.to, 1) } : undefined,
+        scrollIntoView: true,
+        userEvent: way === "in" ? "input.indent" : "input.dedent"
+      }
+    )
+  }
+
+  ////////////////
+  // ## Enter
+  ////////////////
+
+  /**
+   * Enter, Spell's way:  before a comment after code, between a tag's attributes, else by Spell's Enter rules.
+   * - `false` with more than one caret, for CodeMirror's own.
+   */
   static enter(view: EditorView): boolean {
     const { state } = view
-    if (state.selection.ranges.length > 1) return false
+    if (state.readOnly || state.selection.ranges.length > 1) return false
+    if (state.selection.main.empty && (enterBeforeComment(view) || enterInTag(view))) return true
     const { from, to } = state.selection.main
     const line = state.doc.lineAt(from)
     const text = state.sliceDoc(line.from, from)
@@ -56,43 +217,255 @@ export class CodeMirrorTyping {
     return true
   }
 
+  ////////////////
+  // ## What was typed
+  ////////////////
+
   /**
    * A key typed:  a help to give with it, if any.
    * - `true` when the help wrote the key itself, with what it adds.
    */
   private static typed(view: EditorView, typing: Typing): boolean {
     const { from, to, text, lang, fileOf } = typing
-    if (from !== to || !/^.$/su.test(text) || view.state.selection.ranges.length > 1) return false
-    const line = view.state.doc.lineAt(from)
+    const { state } = view
+    if (from !== to || !/^.$/su.test(text) || state.selection.ranges.length > 1) return false
+    const line = state.doc.lineAt(from)
     const column = from - line.from
-    const lineText = line.text.slice(0, column) + text + line.text.slice(column)
-    const lines = view.state.doc.toString().split("\n")
-    lines[line.number - 1] = lineText
+    const lines = state.doc.toJSON()
     const index = line.number - 1
+    lines[index] = line.text.slice(0, column) + text + line.text.slice(column)
+    const onLine = { from: line.number, to: line.number }
     const indent = LSP.SpellTyping.indentToAdd(lines, index, column)
-    if (indent) {
-      view.dispatch({
-        changes: { from: line.from, insert: indent + line.text.slice(0, column) + text, to: from },
-        selection: { anchor: from + indent.length + 1 },
+    // the letter and its indent, one undo step
+    if (indent)
+      return write(view, onLine, {
+        changes: { from, insert: indent + text },
+        selection: { anchor: from + indent.length + text.length },
         userEvent: "input.type"
       })
-      return true
-    }
     if (text !== " ") return false
     const tag = LSP.SpellTyping.tagBeforeSpace(lines, index, column)
     if (tag) {
       const rest = LSP.CompletionShapes.spaceAfterTag(scopeOf(fileOf(), lang), tag)
       view.dispatch({ changes: { from, insert: " " }, selection: { anchor: from + 1 }, userEvent: "input.type" })
-      if (rest.insertText) snippet(LspToCodeMirror.snippet(rest.insertText))(view, { label: tag }, from + 1, from + 1)
+      // the rest an undo step of its own:  a snippet's edit never joins the typing before it
+      if (rest.insertText) {
+        snippet(LspToCodeMirror.snippet(rest.insertText))(view, { label: tag }, from + 1, from + 1)
+        // what's typed in it next is a step of its own
+        view.dispatch({ annotations: isolateHistory.of("after") })
+      }
       if (rest.command) queueMicrotask(() => startCompletion(view))
       return true
     }
-    if (LSP.SpellTyping.opensQuotes(lines, index, lang)) {
-      view.dispatch({ changes: { from, insert: ' ""' }, selection: { anchor: from + 2 }, userEvent: "input.type" })
-      return true
+    if (!LSP.SpellTyping.opensQuotes(lines, index, lang)) return false
+    view.dispatch({ changes: { from, insert: " " }, selection: { anchor: from + 1 }, userEvent: "input.type" })
+    // typed as a `"` would be, so a `"` typed after the name steps over the closing one;  an undo step of its own
+    const quotes = insertBracket(view.state, '"')
+    if (!quotes) return true
+    return write(view, onLine, {
+      changes: quotes.changes,
+      selection: quotes.selection,
+      effects: quotes.effects,
+      userEvent: "input"
+    })
+  }
+
+  ////////////////
+  // ## The caret snaps into its body
+  ////////////////
+
+  /**
+   * The caret moved onto another line, by a click or a key (`transaction`, a `select` event):
+   * a blank line inside a body gets that body's indent, the caret after it;
+   * the line it snapped on before gets back what it had, if it's still blank.
+   * - Written with the move, out of undo, marked as not typed (`FileStates.EDIT_WAY`).
+   */
+  private static moved(transaction: Transaction): TransactionSpec | readonly TransactionSpec[] {
+    const { startState } = transaction
+    if (transaction.docChanged || !transaction.selection || !transaction.isUserEvent("select")) return transaction
+    if (startState.readOnly || !startState.facet(HAS_TYPING_HELPS)) return transaction
+    const { doc } = startState
+    const caret = transaction.newSelection
+    const line = doc.lineAt(caret.main.head)
+    if (line.number === doc.lineAt(startState.selection.main.head).number) return transaction
+    const changes: { from: number; to?: number; insert: string }[] = []
+    const was = startState.field(snapped)
+    if (was) {
+      const left = doc.lineAt(was.from)
+      if (left.text !== was.before && !left.text.trim())
+        changes.push({ from: left.from, to: left.to, insert: was.before })
     }
+    const isCaret = caret.ranges.length === 1 && caret.main.empty
+    const indent = isCaret ? LSP.SpellTyping.indentToSnap(doc.toJSON(), line.number - 1) : ""
+    if (indent) changes.push({ from: line.to, insert: indent })
+    const now = indent ? { from: line.from, before: line.text } : undefined
+    if (!changes.length) return was ? [transaction, { effects: snap.of(now) }] : transaction
+    const changeSet = ChangeSet.of(changes, doc.length)
+    // after the move, in the same transaction:  its changes in the text as the move leaves it, which it doesn't change
+    return [
+      transaction,
+      {
+        changes: changeSet,
+        selection: indent ? { anchor: changeSet.mapPos(line.to, 1) } : caret.map(changeSet),
+        effects: snap.of(now && { ...now, from: changeSet.mapPos(now.from, -1) }),
+        annotations: [Transaction.addToHistory.of(false), FileStates.EDIT_WAY.of("typing")],
+        sequential: true
+      }
+    ]
+  }
+}
+
+////////////////
+// ## Enter's own helps
+////////////////
+
+/**
+ * Enter before a comment after code (`its "face" is\t\t-- the card it draws`):  the comment goes on its own line,
+ * at the level of the body under that line, so the body still reads as its body (I155, I161).
+ * - The tabs and spaces round the caret go:  none left at the end of the code's line, none before the comment.
+ * - Returns whether it did:  `false` leaves the key to Spell's Enter rules.
+ */
+function enterBeforeComment(view: EditorView): boolean {
+  const { state } = view
+  const caret = state.selection.main.head
+  const line = state.doc.lineAt(caret)
+  const before = state.sliceDoc(line.from, caret)
+  const after = state.sliceDoc(caret, line.to)
+  if (!LSP.SpellKeywords.CODE_BEFORE.test(before) || !LSP.SpellKeywords.COMMENT_AFTER.test(after)) return false
+  const indent = LSP.SpellTyping.commentIndent(state.doc.toJSON(), line.number - 1, indentSettingsOf(state))
+  const from = line.from + before.trimEnd().length
+  return write(
+    view,
+    { from: line.number, to: line.number },
+    {
+      changes: { from, to: line.to - after.trimStart().length, insert: state.lineBreak + indent },
+      selection: { anchor: from + 1 + indent.length },
+      scrollIntoView: true,
+      userEvent: "input"
+    }
+  )
+}
+
+/**
+ * Enter between a tag's attributes (`<container columns="7" |spacing="xs">`):  the rest goes to a new line
+ * lined up under the tag's first attribute, `columns` (I142).
+ * - Lined up as the editor draws it, not by counting letters:  its font needn't be monospace, and the bubbly look
+ *   leaves room round some words.  So it measures where the first attribute is, then writes tabs, then spaces
+ *   for what's left (`LSP.SpellTyping.indentOfWidth()`).
+ * - The spaces before the caret go:  no trailing space left on the tag's line.
+ * - Returns whether it did:  `false` leaves the key to Spell's Enter rules (not between a tag's attributes,
+ *   or before its first).
+ */
+function enterInTag(view: EditorView): boolean {
+  const { state } = view
+  const caret = state.selection.main.head
+  const line = state.doc.lineAt(caret)
+  const column = caret - line.from
+  const tag = LSP.SpellTyping.tagOpenAt(state.doc.toJSON(), line.number - 1, column)
+  const firstAttribute = tag?.firstAttribute
+  if (!tag || firstAttribute === undefined) return false
+  if (tag.line === line.number - 1 && column <= firstAttribute) return false
+  const before = line.text.slice(0, column).replace(/[ \t]+$/, "")
+  const after = line.text.slice(column).replace(/^[ \t]+/, "")
+  const indent = attributeIndent(view, tag.line, firstAttribute)
+  const from = line.from + before.length
+  return write(
+    view,
+    { from: line.number, to: line.number },
+    {
+      changes: { from, to: line.to - after.length, insert: state.lineBreak + indent },
+      selection: { anchor: from + 1 + indent.length },
+      scrollIntoView: true,
+      userEvent: "input"
+    }
+  )
+}
+
+/**
+ * The indent that puts a new line's words where a tag's first attribute is drawn:  `column` (0-based) of line `index`
+ * (0-based);  tabs, then spaces for what's left.
+ * - Measured on the page:  a tab is as wide as the editor draws it (the bubbly look's tab stop isn't 4 of the font's
+ *   spaces), a space the font's.
+ * - Counted where the line isn't drawn:  a tab `tabSize` columns.
+ * - In a file indented with spaces:  spaces only.
+ */
+function attributeIndent(view: EditorView, index: number, column: number): string {
+  const { state } = view
+  const settings = indentSettingsOf(state)
+  const line = state.doc.line(index + 1)
+  const start = view.coordsAtPos(line.from, 1)
+  // the end of the space before it:  where its pill starts, the bubbly look's room round its words after that
+  const at = view.coordsAtPos(line.from + column, -1)
+  const { space, tab } = indentWidthsOf(view)
+  if (!start || !at || !space || !tab) {
+    const width = LSP.SpellTyping.widthOf(line.text.slice(0, column).replace(/\S/g, " "), state.tabSize)
+    return LSP.SpellTyping.indentOfWidth(width, settings)
+  }
+  const width = Math.max(0, at.left - start.left)
+  if (settings.insertSpaces) return " ".repeat(Math.round(width / space))
+  const tabs = Math.floor(width / tab)
+  return "\t".repeat(tabs) + " ".repeat(Math.round((width - tabs * tab) / space))
+}
+
+/** How wide a space and a tab are drawn in `view`, in pixels (`CodeMirrorSetup.widthIn()`). */
+function indentWidthsOf(view: EditorView): { space: number; tab: number } {
+  return {
+    space: CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
+    tab: CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
+  }
+}
+
+////////////////
+// ## Writing a help
+////////////////
+
+/**
+ * Write `spec` as a help, each change inside the lines it's working on, `from` to `to` (1-based);
+ * returns whether it did (epic `editor` I150).
+ * - A change outside them is a help gone wrong:  nothing is written, and it logs which, so a file is never broken
+ *   silently.
+ */
+function write(view: EditorView, { from, to }: { from: number; to: number }, spec: TransactionSpec): boolean {
+  const { doc } = view.state
+  const changes = spec.changes instanceof ChangeSet ? spec.changes : view.state.changes(spec.changes ?? [])
+  let outside: number | undefined
+  changes.iterChangedRanges((start, end) => {
+    const first = doc.lineAt(start).number
+    const last = doc.lineAt(end).number
+    if (first < from || last > to) outside ??= first
+  })
+  if (outside !== undefined) {
+    console.error(
+      `CodeMirrorTyping:  a help's edit at line ${outside} is outside lines ${from}-${to}, the ones it's working on;  not written`,
+      spec
+    )
     return false
   }
+  // its own undo step, before and after:  typing on joins it no more than it joins the typing before
+  // (a letter's indent is part of the letter's step:  `input.type`)
+  const isolated = spec.userEvent === "input.type" ? [] : [isolateHistory.of("full")]
+  view.dispatch({ ...spec, changes, annotations: [...asList(spec.annotations), ...isolated] })
+  return true
+}
+
+/** `value` as a list:  none, one or several. */
+function asList<T>(value: T | readonly T[] | undefined): readonly T[] {
+  return value === undefined ? [] : Array.isArray(value) ? value : [value as T]
+}
+
+/** The lines `from` ... `to` (offsets) are on, 1-based. */
+function linesOf(state: EditorState, from: number, to: number): { from: number; to: number } {
+  return { from: state.doc.lineAt(from).number, to: state.doc.lineAt(to).number }
+}
+
+/** `state`'s indent settings:  a level a tab, or spaces, as its indent unit says;  a tab its tab size wide. */
+function indentSettingsOf(state: EditorState): LSP.IndentSettings {
+  return { insertSpaces: !state.facet(indentUnit).includes("\t"), tabSize: state.tabSize }
+}
+
+/** The scope a tag typed in `file` is read in:  its last parse's, else its language's. */
+function scopeOf(file: SP.SpellFile | undefined, lang: string): P.Scope {
+  return file?.scope ?? file?.project.scope ?? SP.Language.for(lang).rootScope
 }
 
 /** A key being typed, and what the helps need to know. */
@@ -107,7 +480,38 @@ type Typing = {
   fileOf: () => SP.SpellFile | undefined
 }
 
-/** The scope a tag typed in `file` is read in:  its last parse's, else its language's. */
-function scopeOf(file: SP.SpellFile | undefined, lang: string): P.Scope {
-  return file?.scope ?? file?.project.scope ?? SP.Language.for(lang).rootScope
-}
+/** Does a state have these helps?  The right-click menu's Paste asks, through `paste()`. */
+const HAS_TYPING_HELPS = Facet.define<boolean, boolean>({ combine: (values) => values.some(Boolean) })
+
+/**
+ * The text of the last copy made with nothing selected, a whole line:  CodeMirror pastes that above the caret's line,
+ * so it's left to it.
+ * - Page-wide, as CodeMirror's own note of it is.
+ */
+let copiedWholeLine: string | undefined
+
+/** A blank line the caret snapped on:  where it starts, and what it had before. */
+type Snapped = { from: number; before: string }
+
+/** The caret snapped on a line, or left it (`undefined`). */
+const snap = StateEffect.define<Snapped | undefined>()
+
+/**
+ * The line the caret last snapped on, till the caret leaves it or something's typed on it.
+ * - Backspace there leaves it snapped:  it's still blank, so leaving gives it back what it had.
+ * - Moves with edits above it.
+ */
+const snapped = StateField.define<Snapped | undefined>({
+  create: () => undefined,
+  update(value, transaction) {
+    for (const effect of transaction.effects) if (effect.is(snap)) return effect.value
+    if (!value || !transaction.docChanged) return value
+    const from = transaction.changes.mapPos(value.from, -1)
+    const line = transaction.state.doc.lineAt(from)
+    // typed on, or left by an edit (Enter):  it's the person's now
+    const isTyped = !transaction.annotation(FileStates.EDIT_WAY) && transaction.isUserEvent("input")
+    const caretLine = transaction.state.doc.lineAt(transaction.state.selection.main.head).number
+    if (line.text.trim() || (isTyped && caretLine !== line.number)) return undefined
+    return { ...value, from: line.from }
+  }
+})

@@ -4,6 +4,7 @@ import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } fr
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
+import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
 /****************
  * ### `CodeMirrorMarkup`
@@ -40,7 +41,10 @@ export class CodeMirrorMarkup {
   static tabStops = ViewPlugin.define((view) => {
     const measure = () =>
       view.requestMeasure({
-        read: () => [widthIn(view.scrollDOM, " ".repeat(100)) / 100, widthIn(view.scrollDOM, "\t", view.state.tabSize)],
+        read: () => [
+          CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
+          CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
+        ],
         write: ([space, tab]) => {
           if (!space || !tab) return
           view.dom.style.setProperty("--cmb-space", `${space}px`)
@@ -101,21 +105,6 @@ export class CodeMirrorMarkup {
     }
     new MarkupShapes(marks.marks, decorations).draw(marks.shapes, rails)
   }
-}
-
-/**
- * `text`'s width in `element`'s font, as the browser lays it out, in px;  a tab `tabSize` spaces, as CodeMirror's is.
- * - A hidden probe in the scroller, beside the text, never in it:  CodeMirror reads any change to its content as an edit.
- * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (16.875px, 4 spaces of 4.234px).
- */
-function widthIn(element: HTMLElement, text: string, tabSize = 4): number {
-  const probe = document.createElement("span")
-  probe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; tab-size: ${tabSize}`
-  probe.textContent = text
-  element.append(probe)
-  const width = probe.getBoundingClientRect().width
-  probe.remove()
-  return width
 }
 
 /** An HTML file's editor's classes:  a `.bubbly` and a `.bubbly-html`, so `bubbly.css` reaches it, and ours. */

@@ -21,6 +21,7 @@ import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
+import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
 import { CodeMirrorLanguage } from "./CodeMirrorLanguage"
 import { CodeMirrorLook } from "./CodeMirrorLook"
 import { CodeMirrorMarkup } from "./CodeMirrorMarkup"
@@ -318,6 +319,15 @@ export class FileStates {
               this.fromSlice(entry, update.view, transaction)
         }),
         host,
+        // typed in, a slice helps as its file's editor does:  only the editor typed in hears the key
+        entry.language
+          ? [
+              closeBrackets(),
+              keymap.of(closeBracketsKeymap),
+              CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang),
+              CodeMirrorCodeOrText.extension()
+            ]
+          : [],
         CodeMirrorLook.extension((isBubbly) =>
           isBubbly
             ? CodeMirrorBubbly.extension(fileOf, (state) => state.field(sliceShown))
@@ -422,6 +432,7 @@ export class FileStates {
           keymap.of(closeBracketsKeymap),
           autocompletion({ override: [language.completions], icons: false }),
           CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
+          CodeMirrorCodeOrText.extension(),
           language.extensions(),
           CodeMirrorLook.extension((isBubbly) =>
             isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
