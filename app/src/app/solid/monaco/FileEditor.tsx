@@ -30,12 +30,15 @@ export function FileEditor(props: FileEditorProps) {
 
 /**
  * The code pane's options, over `SpellMonaco.OPTIONS`.
- * - 12px of room above the first line:  its band sat right under the file tabs' hairline (Owen, epic `editor` I179:
+ * - 5px of room above the first line:  its band sat right under the file tabs' hairline (Owen, epic `editor` I179:
  *   "Need more padding above the first line of the file").
+ *   - The band starts ~2.7px into its line, so its top is 7.7px under the tabs:
+ *     2px more than the room left of it, 5.2px from the pane's edge (Owen:  "make it 2px taller than the gutter").
+ *   - Whole pixels:  Monaco rounds `padding.top` down (4.5 => 4).
  *   The bubbly shapes follow, since Monaco counts it in every line's top (`getTopForLineNumber()`).
  * - Here, not in `SpellMonaco.OPTIONS`:  the Inspector's code boxes (`CodeSlice`) and the diff keep their own room.
  */
-const FILE_OPTIONS: MonacoEditorProps["options"] = { padding: { top: 12 } }
+const FILE_OPTIONS: MonacoEditorProps["options"] = { padding: { top: 5 } }
 
 /** Props for `<FileEditor>`. */
 export type FileEditorProps = Pick<MonacoEditorProps, "onMount" | "onUnmount"> & {

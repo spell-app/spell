@@ -1642,3 +1642,19 @@ main > ui-sticky.spell-h1 + * {
 img[data-ui-zoom] {
   cursor: zoom-in;
 }
+
+/* editing a page's own blocks in place (epic `epic-engine` T66, `spell-doc-edit.js`):  ⌥ held, what a click would edit
+   is outlined;  the block being edited, a solid ring;  while it saves, faded */
+html[data-spell-alt] main[data-spell-edit-html] :is(p, li, h1, h2, h3, h4, h5, h6, td, th, dt, dd, pre > code):hover {
+  outline: 1px dashed var(--ui-blue);
+  outline-offset: 2px;
+  cursor: text;
+}
+main [data-spell-editing] {
+  outline: 2px solid var(--ui-blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+main [data-spell-saving] {
+  opacity: 0.6;
+}

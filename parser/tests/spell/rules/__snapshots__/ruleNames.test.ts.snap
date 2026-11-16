@@ -237,6 +237,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "create_list_type",
       "create_list_type",
       "create_viewable_list_type",
+      "create_viewable_list_type",
       "css_block",
       "markdown_description",
       "belongs_to_one",

@@ -1,7 +1,8 @@
-import { For, Show, createSignal, flush, onSettled } from "solid-js"
+import { For, Show, createEffect, createSignal, flush, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
+import { beforeNextPaint } from "spell/util/timing"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
@@ -76,6 +77,7 @@ export class Palette {
       if (menu.isConnected) menu.visible = false
       else menus.delete(menu)
     }
+    for (const close of matchClosers) close()
   }
 
   /** Load what it offers, the first time. */
@@ -154,6 +156,9 @@ let opensOnArrival = false
 
 /** Its menus, the popup and the pinned bar's:  `Palette.closeMenus()` closes them, forgetting those gone. */
 const menus = new Set<HTMLElement & { visible?: boolean }>()
+
+/** What closes the pinned bar's search results, while the bar is drawn (`<PaletteStrip>`). */
+const matchClosers = new Set<() => void>()
 
 /** A `ref` for one of its popups:  closed by `Palette.closeMenus()`, and by a drag starting from it. */
 function closesWithPalette(popup: HTMLElement & { visible?: boolean }): void {
@@ -302,6 +307,47 @@ function stepTitle(definition: ComponentDefinition): string {
   return appTexts.text("partStepAdd", { part: definition.name })
 }
 
+////////////////
+// ## Search:  the popup's, and the pinned bar's
+////////////////
+
+/** Does `part` hold `words` (lowercase) in its name, its other names or its description?  Every part, for none. */
+function partMatches(part: ComponentDefinition, words: string): boolean {
+  return `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words)
+}
+
+/** Every topic with a part matching `words`, cut to those parts, in the palette's order. */
+function groupsMatching(words: string): PaletteGroup[] {
+  if (!words) return [...offered()]
+  return offered()
+    .map((group) => ({ ...group, parts: group.parts.filter((part) => partMatches(part, words)) }))
+    .filter(({ parts }) => parts.length)
+}
+
+/** The app's own views matching `words`. */
+function ownViewsMatching(words: string): readonly OwnView[] {
+  return ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words))
+}
+
+/** A page's examples and sections (`PAGE_PART_TAGS`) matching `words`, by name and other names:  This page's. */
+function pagePartsMatching(words: string): ComponentDefinition[] {
+  const parts = offered().flatMap((group) => group.parts)
+  return PAGE_PART_TAGS.flatMap((tag) => parts.filter((part) => part.tag === tag)).filter((part) =>
+    `${part.name} ${part.aka.join(" ")}`.toLowerCase().includes(words)
+  )
+}
+
+/** Does This page's "new view" row match `words`? */
+function newViewMatches(words: string): boolean {
+  return appTexts.text("paletteNewView").toLowerCase().includes(words)
+}
+
+/** Has This app (This page) a row matching `words`?  Shown at all, for none. */
+function thisGroupMatches(words: string): boolean {
+  const onPage = Palette.isPageShown && (newViewMatches(words) || pagePartsMatching(words).length > 0)
+  return onPage || ownViewsMatching(words).length > 0
+}
+
 /** The top bar's `+`:  opens the palette, a menu with its search;  kept open too, beside the pinned bar. */
 export function AddPartButton(): JSX.Element {
   let popup: (HTMLElement & { visible?: boolean }) | undefined
@@ -344,31 +390,114 @@ const ADD_BUTTON_ID = "AddPartButton"
  * The palette kept open:  the top bar's second row, edge to edge, of its topics' names (epic `editor` T80).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
  * - This app (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › when they don't fit.
+ * - Its search, before the ✕, looks as the popup's does (epic `editor` J140, revisited):
+ *   every topic with a match opens its menu at once, each listing only its matches, side by side under its name.
+ *   - Escape, clearing the field, a click elsewhere, or choosing or dragging a row closes them;  typing opens them again.
+ *   - ↓ goes into the first one;  Escape there comes back to the field.
  * - The ✕ at its end stops keeping it open.
- * - No search of its own:  the top bar's `+` opens the popup, which has one.
  */
 export function PaletteStrip(): JSX.Element {
-  onSettled(() => Palette.load())
+  const [filter, setFilter] = createSignal("")
+  const [isDismissed, setDismissed] = createSignal(false)
+  const words = () => filter().trim().toLowerCase()
   const thisGroup = () => appTexts.text(Palette.isPageShown ? "thisPage" : "thisApp")
+  const thisMatches = () => !!words() && thisGroupMatches(words())
+  const groupMatches = () => (words() ? groupsMatching(words()) : [])
+  const isShowingMatches = () => !isDismissed() && (thisMatches() || groupMatches().length > 0)
+  let strip: HTMLElement | undefined
+  let search: HTMLElement | undefined
+  let matches: HTMLElement | undefined
+  const layOut = () => matches && strip && layOutMatches(matches, strip)
+  // each menu's height changes as its rows draw:  laid out again
+  const resizes = new ResizeObserver(() => layOut())
+  /** Back to the field, the menus closed:  focus first, as focusing the field opens them. */
+  const backToSearch = () => {
+    search?.focus()
+    setDismissed(true)
+  }
+
+  onSettled(() => {
+    Palette.load()
+    const closeMatches = () => setDismissed(true)
+    matchClosers.add(closeMatches)
+    const closeOnPressElsewhere = (event: PointerEvent) => {
+      const path = event.composedPath()
+      if (matches && search && !path.includes(matches) && !path.includes(search)) setDismissed(true)
+    }
+    document.addEventListener("pointerdown", closeOnPressElsewhere, { capture: true })
+    window.addEventListener("resize", layOut)
+    return () => {
+      matchClosers.delete(closeMatches)
+      document.removeEventListener("pointerdown", closeOnPressElsewhere, { capture: true })
+      window.removeEventListener("resize", layOut)
+      resizes.disconnect()
+    }
+  })
+
+  // shown or hidden, and laid out again, as what matches changes
+  createEffect(
+    () => (isShowingMatches() ? [thisMatches(), ...groupMatches().map(groupMenuId)].join(" ") : ""),
+    (shown) => {
+      if (!matches) return
+      const isOpen = matches.matches(":popover-open")
+      if (!shown) {
+        if (isOpen) matches.hidePopover()
+        return
+      }
+      if (!isOpen) matches.showPopover()
+      beforeNextPaint(() => layOut())
+    }
+  )
+
+  const onSearchKey = (event: KeyboardEvent) => {
+    if (!isShowingMatches()) return
+    if (event.key === "Escape") setDismissed(true)
+    else if (event.key === "ArrowDown") matches?.querySelector<HTMLElement>("ui-tree-item")?.focus()
+    else return
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  const onMatchesKey = (event: KeyboardEvent) => {
+    const rows = [...(event.currentTarget as HTMLElement).querySelectorAll("ui-tree-item")]
+    const isFirstRow = event.composedPath()[0] === rows[0] || event.target === rows[0]
+    if (event.key === "Escape" || (event.key === "ArrowUp" && isFirstRow)) {
+      event.preventDefault()
+      event.stopPropagation()
+      backToSearch()
+    }
+  }
+
   return (
-    <div class="PaletteStrip">
+    <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
       <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
         <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
-          <PaletteGroupMenu id={`${GROUP_MENU_ID}this`} name={thisGroup()}>
+          <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()}>
             <ThisGroupRows words={() => ""} />
           </PaletteGroupMenu>
         </Show>
         <For each={offered()}>
           {(group) => (
-            <PaletteGroupMenu
-              id={`${GROUP_MENU_ID}${kebabCase(group.title ?? group.topic ?? "")}`}
-              name={upperFirst(groupName(group))}
-            >
+            <PaletteGroupMenu id={groupMenuId(group)} name={upperFirst(groupName(group))}>
               <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
             </PaletteGroupMenu>
           )}
         </For>
       </ui-toolbar>
+      <ui-input
+        class="PaletteStripSearch"
+        size="small"
+        aria-label={appTexts.text("paletteSearch")}
+        placeholder={appTexts.text("paletteSearch")}
+        onFocusIn={() => setDismissed(false)}
+        ref={(element: HTMLElement) => {
+          search = element
+          element.addEventListener("keydown", onSearchKey, { capture: true })
+          on<{ value: string }>("ui-typed", (event) => {
+            setFilter(event.detail.value)
+            setDismissed(false)
+          })(element)
+        }}
+      />
       <ui-icon
         name="close"
         link=""
@@ -377,12 +506,151 @@ export function PaletteStrip(): JSX.Element {
         title={appTexts.text("paletteUnpin")}
         onClick={() => Palette.togglePinned()}
       />
+      <div
+        popover="manual"
+        class="PaletteMatches"
+        ref={(element: HTMLElement) => {
+          matches = element
+          element.addEventListener("keydown", onMatchesKey, { capture: true })
+        }}
+      >
+        <Show when={thisMatches()}>
+          <PaletteMatchPanel for={THIS_GROUP_MENU_ID} name={thisGroup()} resizes={resizes}>
+            <ThisGroupRows words={words} />
+          </PaletteMatchPanel>
+        </Show>
+        <For each={groupMatches()}>
+          {(group) => (
+            <PaletteMatchPanel for={groupMenuId(group)} name={upperFirst(groupName(group))} resizes={resizes}>
+              <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
+            </PaletteMatchPanel>
+          )}
+        </For>
+      </div>
     </div>
   )
 }
 
 /** The start of each pinned bar topic's id, which its menu points at. */
 const GROUP_MENU_ID = "PaletteGroup-"
+
+/** This app's (This page's) id in the pinned bar. */
+const THIS_GROUP_MENU_ID = `${GROUP_MENU_ID}this`
+
+/** `group`'s id in the pinned bar:  its name's button, which its menu and its search results point at. */
+function groupMenuId(group: PaletteGroup): string {
+  return `${GROUP_MENU_ID}${kebabCase(group.title ?? group.topic ?? "")}`
+}
+
+/**
+ * ### `<PaletteMatchPanel>`
+ * One topic's search results in the pinned bar:  a menu of only its matches, under its name (`layOutMatches()`).
+ * - `for`:  its name's id in the bar.
+ */
+function PaletteMatchPanel(props: {
+  for: string
+  name: string
+  resizes: ResizeObserver
+  children: JSX.Element
+}): JSX.Element {
+  let panel: HTMLElement | undefined
+  onSettled(() => {
+    if (panel) props.resizes.observe(panel)
+    return () => panel && props.resizes.unobserve(panel)
+  })
+  return (
+    <div class={MATCH_PANEL} data-for={props.for} ref={(element: HTMLElement) => (panel = element)}>
+      <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
+        {props.children}
+      </ui-tree>
+    </div>
+  )
+}
+
+/** The class of one topic's search results in the pinned bar. */
+const MATCH_PANEL = "PaletteMatchPanel"
+
+/** How wide each topic's search results are, in px. */
+const MATCH_WIDTH = 200
+
+/** The space between them, and between rows of them, in px. */
+const MATCH_GAP = 6
+
+/** The least space between them and the window's edges, in px. */
+const MATCH_MARGIN = 8
+
+/** The least height of each, in px, however many rows of them. */
+const MATCH_MIN_HEIGHT = 120
+
+/**
+ * Put each topic's search results in `layer` under its name in `strip`, as its own menu would open:
+ * side by side, never over each other or off the window.
+ * - One that would overlap the one before moves right;  the last ones move left to stay in the window.
+ * - More than fit across the window start a row under the tallest of the row before,
+ *   each row's height shared out so they all stay in the window.
+ */
+function layOutMatches(layer: HTMLElement, strip: HTMLElement): void {
+  if (!layer.matches(":popover-open")) return
+  const panels = [...layer.querySelectorAll<HTMLElement>(`.${MATCH_PANEL}`)]
+  const width = document.documentElement.clientWidth
+  const top = strip.getBoundingClientRect().bottom + 2
+  const perRow = Math.max(1, Math.floor((width - 2 * MATCH_MARGIN + MATCH_GAP) / (MATCH_WIDTH + MATCH_GAP)))
+  const rows = Math.ceil(panels.length / perRow)
+  const room = (window.innerHeight - top - MATCH_MARGIN - (rows - 1) * MATCH_GAP) / rows
+  for (const panel of panels) {
+    panel.style.width = `${MATCH_WIDTH}px`
+    panel.style.maxHeight = `${Math.max(MATCH_MIN_HEIGHT, Math.min(room, MATCH_MAX_HEIGHT))}px`
+  }
+  // a name's element draws none of its own (`display: contents`):  the box is its item's
+  const nameBox = (panel: HTMLElement) => {
+    const name = document.getElementById(panel.dataset.for ?? "")
+    return name?.shadowRoot?.querySelector("[part~=item]") ?? name
+  }
+  const wanted = panels.map((panel) => nameBox(panel)?.getBoundingClientRect().left ?? MATCH_MARGIN)
+  const places = matchPlaces(
+    wanted,
+    panels.map((panel) => panel.offsetHeight),
+    { width, perRow }
+  )
+  panels.forEach((panel, at) => {
+    panel.style.left = `${places[at]!.left}px`
+    panel.style.top = `${top + places[at]!.top}px`
+  })
+}
+
+/** The tallest each topic's search results get, in px, as its own menu (`Palette.css`). */
+const MATCH_MAX_HEIGHT = 560
+
+/**
+ * Where each of the search results goes, from the left each would start at (`wanted`) and how tall each is:
+ * left to right, `perRow` a row, inside a window `width` wide;  `top` from the first row's top.
+ */
+function matchPlaces(
+  wanted: readonly number[],
+  heights: readonly number[],
+  { width, perRow }: { width: number; perRow: number }
+): { left: number; top: number }[] {
+  const places: { left: number; top: number }[] = []
+  let top = 0
+  for (let start = 0; start < wanted.length; start += perRow) {
+    const lefts: number[] = []
+    // right, past the one before
+    let edge = MATCH_MARGIN - MATCH_GAP
+    for (const left of wanted.slice(start, start + perRow)) {
+      lefts.push(Math.max(left, edge + MATCH_GAP))
+      edge = lefts.at(-1)! + MATCH_WIDTH
+    }
+    // left, to stay in the window, pushing the ones before along
+    let limit = width - MATCH_MARGIN
+    for (let at = lefts.length - 1; at >= 0; at--) {
+      lefts[at] = Math.min(lefts[at]!, limit - MATCH_WIDTH)
+      limit = lefts[at]! - MATCH_GAP
+    }
+    for (const left of lefts) places.push({ left, top })
+    top += Math.max(...heights.slice(start, start + perRow)) + MATCH_GAP
+  }
+  return places
+}
 
 /**
  * ### `<PaletteGroupMenu>`
@@ -434,15 +702,6 @@ function PinIcon(): JSX.Element {
 function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
   const words = () => filter().trim().toLowerCase()
-  const shown = (): PaletteGroup[] => {
-    if (!words()) return [...offered()]
-    const matches = (part: ComponentDefinition) =>
-      `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words())
-    return offered()
-      .map((group) => ({ ...group, parts: group.parts.filter(matches) }))
-      .filter(({ parts }) => parts.length)
-  }
-  const own = () => ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words()))
   /** Its first group's name:  This page on a page that draws its body, else This app. */
   const thisGroup = () => (Palette.isPageShown ? "thisPage" : "thisApp")
   return (
@@ -460,7 +719,7 @@ function PaletteMenu(): JSX.Element {
       </div>
       <div class="PaletteGroups">
         <div class="PaletteColumns">
-          <Show when={own().length || Palette.isPageShown}>
+          <Show when={thisGroupMatches(words())}>
             <section class="PaletteGroup ThisApp">
               <h4>{appTexts.text(thisGroup())}</h4>
               <ui-tree class="PaletteTree" label={appTexts.text(thisGroup())} ref={treeChoosesRows}>
@@ -468,7 +727,7 @@ function PaletteMenu(): JSX.Element {
               </ui-tree>
             </section>
           </Show>
-          <For each={shown()}>
+          <For each={groupsMatching(words())}>
             {(group) => (
               <section class="PaletteGroup">
                 <h4>{upperFirst(groupName(group))}</h4>
@@ -491,25 +750,20 @@ function PaletteMenu(): JSX.Element {
  * - Then the app's own views.
  */
 function ThisGroupRows(props: { words: () => string }): JSX.Element {
-  const own = () => ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(props.words()))
-  const pageParts = () => {
-    const parts = offered().flatMap((group) => group.parts)
-    return PAGE_PART_TAGS.flatMap((tag) => parts.filter((part) => part.tag === tag)).filter((part) =>
-      `${part.name} ${part.aka.join(" ")}`.toLowerCase().includes(props.words())
-    )
-  }
   return (
     <>
-      <Show when={Palette.isPageShown}>
+      <Show when={Palette.isPageShown && newViewMatches(props.words())}>
         <ui-tree-item
           icon={NEW_VIEW_ICON}
           label={appTexts.text("paletteNewView")}
           title={appTexts.text("paletteNewViewTip")}
           ref={(row: Element) => chooseRow(() => Palette.addNewView())(row)}
         />
-        <For each={pageParts()}>{(definition) => <PaletteRow definition={definition} />}</For>
       </Show>
-      <For each={own()}>
+      <Show when={Palette.isPageShown}>
+        <For each={pagePartsMatching(props.words())}>{(definition) => <PaletteRow definition={definition} />}</For>
+      </Show>
+      <For each={ownViewsMatching(props.words())}>
         {(view) => (
           <ui-tree-item
             icon={OWN_VIEW_ICON}

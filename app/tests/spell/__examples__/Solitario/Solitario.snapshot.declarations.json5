@@ -177,7 +177,7 @@
         }
       ],
       "returns": "choice",
-      "defined": "/Pila.es.spell:1171-1650"
+      "defined": "/Pila.es.spell:1172-1651"
     },
     {
       "syntax": "jugar {thisArg:expression}",
@@ -234,7 +234,7 @@
       "group": "Una pila de cartas",
       "datatype": "Pila",
       "exclusive": true,
-      "defined": "/Pila.es.spell:2469-2499"
+      "defined": "/Pila.es.spell:2470-2500"
     },
     {
       "type": "ImagenDeCarta",
@@ -360,7 +360,7 @@
       "superType": "ViewableList",
       "gender": "feminine",
       "itemType": "Carta",
-      "defined": "/Pila.es.spell:377-2467"
+      "defined": "/Pila.es.spell:377-2468"
     },
     {
       "property": "disposición",
@@ -370,25 +370,25 @@
         "apilada",
         "vertical"
       ],
-      "defined": "/Pila.es.spell:429-562"
+      "defined": "/Pila.es.spell:430-563"
     },
     {
       "property": "color",
       "of": "Pila",
-      "defined": "/Pila.es.spell:564-710"
+      "defined": "/Pila.es.spell:565-711"
     },
     {
       "property": "valor",
       "of": "Pila",
       "datatype": "number",
-      "defined": "/Pila.es.spell:712-816"
+      "defined": "/Pila.es.spell:713-817"
     },
     {
       "property": "nombre_corto",
       "asWritten": "nombre corto",
       "of": "Pila",
       "datatype": "text",
-      "defined": "/Pila.es.spell:818-1044"
+      "defined": "/Pila.es.spell:819-1045"
     },
     {
       "syntax": "probar las pilas",
@@ -397,7 +397,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "las pilas",
-      "defined": "/Pila.es.spell:1653-2467"
+      "defined": "/Pila.es.spell:1654-2468"
     },
     {
       "type": "PilaDeReserva",

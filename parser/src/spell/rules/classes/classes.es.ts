@@ -105,6 +105,9 @@ const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {wh
 const CAN_NEVER_MOVE =
   "(never:nunca puede|nunca pueden|no puede nunca|no pueden nunca) {verb:take_or_give_up} (un|una) {item:type}"
 
+/** A type head's abilities, after its kind, a comma before each optional:  `una lista visible, soltable de cartas`. */
+const ABILITIES = "(,? [ability:{draggable_or_droppable} ,?])?"
+
 /** `a`:  either gender. */
 const A = "(un|una)"
 
@@ -240,7 +243,7 @@ classesEs.addRule(WithNestedStatements, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} ${ABILITIES} (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -303,10 +306,80 @@ classesEs.addRule(CreateType, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `${A} {type:quoted_type} es ${A} {superType:type} ${ABILITIES} (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     { compileAs: "statement", tests: [['una "card" es una cosa', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] },
+    {
+      // several abilities, a comma before each optional (epic `language` I112)
+      compileAs: "block",
+      tests: [
+        [
+          'una "carta" es una vista reversible arrastrable, pulsable donde:',
+          [
+            "export class Carta extends TwoSidedView {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static draggable = true",
+            "",
+            "  static clickable = true",
+            "}"
+          ],
+          [
+            "export class Carta extends TwoSidedView {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static draggable = true",
+            "",
+            "  static clickable = true",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-carta>`:  a carta, drawn in its own element, e.g. by `draw the carta`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its carta's properties;  its methods call its carta's.",
+            " * - What every view's element does, e.g. drawing its carta, is `SpellElement`'s.",
+            " */",
+            "export class CartaElement extends SpellElement<Carta> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-carta", "carta", [])',
+            "}",
+            "core.useElement(Carta, CartaElement)"
+          ]
+        ],
+        [
+          'una "carta" es una vista reversible, arrastrable pulsable, alias "card" donde:',
+          [
+            "export class Carta extends TwoSidedView {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static draggable = true",
+            "",
+            "  static clickable = true",
+            "}"
+          ],
+          [
+            "export class Carta extends TwoSidedView {",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static draggable = true",
+            "",
+            "  static clickable = true",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-carta>`:  a carta, drawn in its own element, e.g. by `draw the carta`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its carta's properties;  its methods call its carta's.",
+            " * - What every view's element does, e.g. drawing its carta, is `SpellElement`'s.",
+            " */",
+            "export class CartaElement extends SpellElement<Carta> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-carta", "carta", [])',
+            "}",
+            "core.useElement(Carta, CartaElement)"
+          ]
+        ]
+      ]
+    },
     {
       compileAs: "block",
       tests: [
@@ -377,7 +450,7 @@ classesEs.addRule(DimensionUnit, {
 })
 
 classesEs.addRule(CreateOneOfAKind, {
-  syntax: `{type:type_words} es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {superType:type} ${ABILITIES} (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -431,7 +504,7 @@ classesEs.addRule(CreateListType, {
 })
 
 classesEs.addRule(CreateListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista ${ABILITIES} ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -457,7 +530,7 @@ classesEs.addRule(CreateListType, {
 })
 
 classesEs.addRule(CreateListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:quoted_type} es ${A} lista ${ABILITIES} ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -487,7 +560,7 @@ classesEs.addRule(ReopenType, {
 })
 
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible ${ABILITIES} ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -520,7 +593,109 @@ classesEs.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `una "pila" es una lista visible de cartas donde:`
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista visible {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`
+  syntax: `${A} {type:quoted_type} es ${A} lista visible ${ABILITIES} ${OF} {instanceType:type} {with_nested_statements}?`,
+  tests: [
+    {
+      // its abilities after `visible`, a comma before each optional (epic `language` I112)
+      compileAs: "block",
+      tests: [
+        [
+          'una "pila" es una lista visible, soltable de cartas donde:',
+          [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Carta",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static droppable = true",
+            "}"
+          ],
+          [
+            "export class Pila extends ViewableList<Carta> {",
+            "  static instanceType = Carta",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static droppable = true",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "}",
+            "core.useElement(Pila, PilaElement)"
+          ]
+        ],
+        [
+          'una "pila" es una lista visible soltable de cartas donde:',
+          [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Carta",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static droppable = true",
+            "}"
+          ],
+          [
+            "export class Pila extends ViewableList<Carta> {",
+            "  static instanceType = Carta",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static droppable = true",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "}",
+            "core.useElement(Pila, PilaElement)"
+          ]
+        ],
+        [
+          'una "pila" es una lista visible, soltable, seleccionable de cartas donde:',
+          [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Carta",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static droppable = true",
+            "",
+            "  static selectable = true",
+            "}"
+          ],
+          [
+            "export class Pila extends ViewableList<Carta> {",
+            "  static instanceType = Carta",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  static droppable = true",
+            "",
+            "  static selectable = true",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "}",
+            "core.useElement(Pila, PilaElement)"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 
 classesEs.addRule(CSSBlock, {
