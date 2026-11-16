@@ -5,6 +5,7 @@ import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, Widg
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import { type MarkMaker, type MarkedStretch, type Spacer, spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
+import { CodeMirrorSelection } from "./CodeMirrorSelection"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
 /****************
@@ -29,7 +30,8 @@ export class CodeMirrorMarkup {
     return [
       CodeMirrorRelayout.extension((state) => CodeMirrorMarkup.decorationsOf(state), CodeMirrorMarkup.RELAYOUT_MSEC),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
-      CodeMirrorMarkup.tabStops
+      CodeMirrorMarkup.tabStops,
+      CodeMirrorSelection.extension
     ]
   }
 
