@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { Wording } from "spell/parser/spell/rules/expressions"
+import { refuseIfNotAnItem } from "./lists.shared"
 
 // TODO: Add to middle of list, pushing existing items out of the way.
 //       "add {thing:expression} to position {position:expression} of {list:expression}",
@@ -17,6 +18,12 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  */
 export class ListAddRelative extends SpellStatement<"thing|list|operator|item"> {
   @proto static alias = "statement"
+
+  /** SIDE EFFECT:  it won't compile if `thing` can't be what `list` holds (`refuseIfNotAnItem()`). */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    return match && refuseIfNotAnItem(match, match.groups.thing, match.groups.list)
+  }
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { thing, list, operator, item } = match.groups

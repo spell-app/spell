@@ -409,6 +409,14 @@ export const PARSER_MESSAGES = {
   "one-each-a-statement": 'One "each ... in" a statement:  loop over the other with "for each ... in", around it',
   "create-hook-names-another-type": 'Name the type this is in:  "when {verb} {aType}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
+  /**
+   * `add it to the discard pile`, where `it` is something the list can't hold (epic `language` I106):
+   * `{what}` is what `it` is (`solitaire`, `a pile`), `{list}` the list as written, `{items}` what it holds.
+   */
+  "not-an-item-it":
+    'it is {what} here, which isn\'t {aItem}, and {list} holds {items}:  say which {item}, or "get" it first',
+  /** `add the stock to the discard pile`:  a thing the list can't hold, `{thing}` as written. */
+  "not-an-item": '"{thing}" is {what}, which isn\'t {aItem}:  {list} holds {items}',
   /** A built-in type published:  `a thing is published as "..."` (epic `atmosphere` P10). */
   "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",
   /** `- it is published as "x"`, a name that isn't an NSID (epic `atmosphere` P10). */
