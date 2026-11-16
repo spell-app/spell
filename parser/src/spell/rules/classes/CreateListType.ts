@@ -13,6 +13,7 @@ import { TypeDeclaration } from "./TypeDeclaration"
  *   `a draw pile aka pile is a list of cards`
  * - Compiles to a class declaration extending `List` with a static `instanceType`,
  *   e.g. `a deck is a list of cards` => `export class Deck extends List {` + `static instanceType = Card` + `}`.
+ *   - Not for a plain value, `a pile is a list of numbers`:  there's no class to name.
  * - A card in at most ONE pile at a time:  `a card belongs to one pile`, below.
  */
 export class CreateListType extends TypeDeclaration<
@@ -49,17 +50,22 @@ export class CreateListType extends TypeDeclaration<
     const { type, instanceType } = match.groups
     const typeAST = P.matchAST<P.ASTTypeExpression>(type)
     const value = P.matchAST<P.ASTTypeExpression>(instanceType)
+    const members: P.ASTClassMember[] = []
+    // a plain value, `a pile is a list of numbers`, has no class to name
+    const holdsAClass = !P.isValueType(SP.typeName(`${instanceType.value}`))
     // declared below us:  read when used -- see `parse()`
-    const members: P.ASTClassMember[] = match.data.itemTypeBelow
-      ? [
-          new P.ASTStaticMethod(match, {
-            type: typeAST,
-            name: "instanceType",
-            getter: true,
-            method: new P.ASTMethodDefinition(match, { body: value })
-          })
-        ]
-      : [new P.ASTStaticDefinition(match, { type: typeAST, name: "instanceType", value })]
+    if (holdsAClass && match.data.itemTypeBelow) {
+      members.push(
+        new P.ASTStaticMethod(match, {
+          type: typeAST,
+          name: "instanceType",
+          getter: true,
+          method: new P.ASTMethodDefinition(match, { body: value })
+        })
+      )
+    } else if (holdsAClass) {
+      members.push(new P.ASTStaticDefinition(match, { type: typeAST, name: "instanceType", value }))
+    }
     const superType = new P.ASTTypeExpression(match, { raw: this.listType, name: P.classCase(this.listType) })
     const element = this.elementMember(match, typeAST, match.data.elementProject)
     if (element) members.push(element)

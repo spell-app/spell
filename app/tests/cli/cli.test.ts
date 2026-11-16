@@ -672,7 +672,7 @@ describe("spell test", () => {
   // in the project's own order of its files (editor I62):  Card, Pile, Deck, Solitaire
   test("reports each test -- its cards', piles' and deck's, then its game's", () => {
     const { status, stdout } = spell(["test", "@spell/examples/Solitaire"])
-    const tests = ["card setup", "piles", "a new deck", "the moves"]
+    const tests = ["card setup", "card images", "piles", "a new deck", "the moves"]
     expect(stdout).toBe(
       `${tests.map((name) => `✓ test ${name}  (${stdout.match(new RegExp(`test ${name}  \\((\\d+) checks`))?.[1]} checks)\n`).join("")}\n${tests.length} passed\n`
     )
