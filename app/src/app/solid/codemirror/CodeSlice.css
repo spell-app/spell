@@ -44,7 +44,7 @@
     padding: 0;
   }
   .cm-editor.cmb.cmb-editor {
-    --cmb-line-pad: calc(8px - var(--cmb-band-left));
+    --cmb-line-pad: calc(8px + var(--cmb-band-inset));
     .cm-content {
       padding-block: calc(8px - var(--cmb-band-margin));
     }

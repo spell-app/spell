@@ -596,15 +596,15 @@ export type Indent = { tabs: number; spaces: number }
 export type Rail = Indent & { partOfSpeech: string }
 
 /**
- * `rails` as a CSS background:  one stripe per enclosing block, at its band's left edge, in its band's colour.
- * - its middle where its body's lines start, so the caret at a body line's start stands on it (epic `language` I131)
- * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`), a rail (`--cmb-rail`) and where a band
- *   starts from its line's indent (`--cmb-band-left`):  only the columns are written here.
+ * `rails` as a CSS background:  one stripe per enclosing block, in its band's colour, dropping from under its band.
+ * - `--cmb-rail-gap` before its body's lines start, so nothing on them touches it (epic `language` I136)
+ * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`), a rail (`--cmb-rail`) and where a rail
+ *   starts from its band's line's indent (`--cmb-rail-left`):  only the columns are written here.
  */
 function railsOf(rails: Rail[]): string {
   return rails
     .map(({ tabs, spaces, partOfSpeech }) => {
-      const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) + var(--cmb-band-left))`
+      const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) + var(--cmb-rail-left))`
       const colour = `var(--cmb-band-${partOfSpeech})`
       return `linear-gradient(to right, transparent ${x}, ${colour} ${x}, ${colour} calc(${x} + var(--cmb-rail)), transparent calc(${x} + var(--cmb-rail)))`
     })
