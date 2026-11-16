@@ -17,14 +17,23 @@
  */
 @layer ui.components {
   :host {
-    /* a row's height, in the nav's own text:  the tree's, at its smaller text (2.25em of 0.875em, `appearance="nav"`) */
-    --_site-nav-row-height: calc(2.25em * 0.875);
-    /* beside a bar, the room above its first row that puts the row's middle on the bar's;  else half its text */
+    /* a row's height, in the nav's own text:  the tree's, at its smaller text (2.25em of 0.875em, `appearance="nav"`),
+       on the 4px grid as the tree's is (epic `mockup` I36) */
+    --_site-nav-row-height: round(2.25em * 0.875, var(--ui-grid, 4px));
+    /* beside a bar, the room above its first row that puts the row's middle on the bar's;  else half its text
+       - on the 4px grid (I36):  exact where the bar and the row differ by a multiple of 8 (a 40px bar, 32px rows:
+         4px), else 2px off the bar's middle (28px rows, from text near 14px) */
     --_site-nav-padding-top: max(
       0px,
-      (var(--ui-site-nav-bar-height, calc(var(--_site-nav-row-height) + 1em)) - var(--_site-nav-row-height)) / 2
+      round(
+        (var(--ui-site-nav-bar-height, calc(var(--_site-nav-row-height) + 1em)) - var(--_site-nav-row-height)) / 2,
+        var(--ui-grid, 4px)
+      )
     );
-    --_ui-site-nav-padding: var(--ui-site-nav-padding, var(--_site-nav-padding-top) 0 0.5em);
+    --_ui-site-nav-padding: var(
+      --ui-site-nav-padding,
+      var(--_site-nav-padding-top) 0 round(0.5em, var(--ui-grid, 4px))
+    );
     --_ui-site-nav-group-background: var(
       --ui-site-nav-group-background,
       light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.18))
@@ -93,8 +102,8 @@
    */
   ui-tree-item[band="group"]:state(open) {
     display: block;
-    margin: 0.25em;
-    padding-block-start: 0.125em;
+    margin: var(--ui-grid, 4px);
+    padding-block-start: 0;
     border-radius: var(--_ui-site-nav-group-radius);
     outline: 1px solid light-dark(oklch(0 0 0 / 0.06), oklch(1 0 0 / 0.06));
     outline-offset: -1px;

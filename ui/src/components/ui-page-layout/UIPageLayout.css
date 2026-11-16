@@ -15,6 +15,11 @@
  *   and the menu by a soft shadow, both its top corners rounded (epic `mockup` I32, epic `editor` I219):
  *   - a shadow in every theme, Mockup's too:  never the theme's ink line (Owen:  "Make the black border a shadow")
  *   - made from the theme's shadow colour (`--ui-shadow-ink`), as a theme's own raised shadow may be none or a line
+ * - The top bar's edge is the same soft shadow (epic `mockup` I36, Owen:  "Top bar should have a shadow matching the
+ *   side border"), and no line takes room:
+ *   - beside the drawer, the page side's own, drawn over the bar, round its top as down its side
+ *   - with no drawer, or narrow, the menu's, cast down over what's under it
+ * - On the 4px grid (`--ui-grid`, I36):  the menu 40px tall, the room round the page a font size rounded to the grid.
  * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
  *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
@@ -36,7 +41,9 @@
  */
 @layer ui.components {
   :host {
-    --_ui-page-layout-gap: var(--ui-page-layout-gap, var(--ui-font-size, 16px));
+    --_ui-page-layout-gap: var(--ui-page-layout-gap, var(--_page-layout-room));
+    /* a font size, on the 4px grid:  the room between the menu, the page and the footer, and the page's inset */
+    --_page-layout-room: round(var(--ui-font-size, 16px), var(--ui-grid, 4px));
     --_ui-page-layout-duration: var(--ui-duration-normal, 200ms);
     --_page-layout-close-duration: 0.2s;
     --_page-layout-flyout-radius: var(--ui-panel-radius, var(--ui-radius-l, 14px));
@@ -46,7 +53,7 @@
       0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)
     );
     /* the muted strip down the page's end side, beside its top-right corner (I219) */
-    --_ui-page-layout-end-room: var(--ui-page-layout-end-room, 0.5em);
+    --_ui-page-layout-end-room: var(--ui-page-layout-end-room, round(0.5em, var(--ui-grid, 4px)));
     /* all of the drawer:  its column, its open box, and what it holds while it moves */
     --_page-layout-drawer-width: 16em;
     /* its own width decides narrow:  a site drawn in a narrow box is narrow */
@@ -93,7 +100,16 @@
   }
   /* the menu's room below it is inside what's under it:  so the drawer's line runs on from the menu's */
   .menu + .under-menu {
-    padding-block-start: 1em;
+    padding-block-start: var(--_page-layout-room);
+  }
+  /* the menu over what's under it, its shadow below it alone (I36):  with no drawer beside it, or narrow;
+     beside one, the page side's own shadow is its edge (below) */
+  .menu {
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--_ui-page-layout-shadow);
+    clip-path: inset(0 0 -2em 0);
+    --ui-menu-header-bar-shadow: none;
   }
   .under-menu {
     flex: 1 0 auto;
@@ -101,10 +117,10 @@
     flex-direction: column;
   }
   .page-menu {
-    margin-block-end: 1em;
+    margin-block-end: var(--_page-layout-room);
   }
   .footer {
-    margin-block-start: 1em;
+    margin-block-start: var(--_page-layout-room);
   }
   .row {
     flex: 1 0 auto;
@@ -131,7 +147,7 @@
   .layout:has(> .drawer) > .body > .under-menu {
     position: relative;
     margin-inline-end: var(--_ui-page-layout-end-room);
-    padding-inline-start: var(--ui-font-size, 16px);
+    padding-inline-start: var(--_page-layout-room);
     border-start-start-radius: var(--_page-layout-flyout-radius);
     border-start-end-radius: var(--_page-layout-flyout-radius);
     background: var(--ui-background, Canvas);
@@ -143,7 +159,11 @@
   .layout:has(> .drawer) > .body > .menu {
     --ui-menu-header-bar-background: transparent;
     --ui-menu-header-bar-filter: none;
-    --ui-menu-header-bar-border: none;
+    /* the page side drawn over it, its shadow round its top as down its side:  one edge, the bar's (I36) */
+    position: static;
+    z-index: auto;
+    box-shadow: none;
+    clip-path: none;
   }
   /* its own menu button:  only at a narrow width */
   .menu-button {
@@ -209,10 +229,11 @@
     :host(:state(compact)) .drawer {
       position: absolute;
       inset-inline-start: 0;
-      inset-block-start: 2.75em;
+      /* under the menu:  its measured height (`--ui-site-nav-bar-height`, set on the layout) */
+      inset-block-start: var(--ui-site-nav-bar-height, 40px);
       z-index: var(--ui-z-popup, 1000);
       inline-size: min(16em, 85%);
-      max-block-size: calc(100% - 2.75em);
+      max-block-size: calc(100% - var(--ui-site-nav-bar-height, 40px));
       overflow: auto;
       background: linear-gradient(var(--ui-background, Canvas), var(--ui-background, Canvas)) Canvas;
       border-inline-end: none;
@@ -245,12 +266,20 @@
     }
     .layout:has(> .drawer) > .body > .menu {
       --ui-menu-header-bar-background: initial;
-      --ui-menu-header-bar-border: initial;
+      --ui-menu-header-bar-filter: initial;
+      /* the page side no box:  the menu casts its shadow down again (I36) */
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--_ui-page-layout-shadow);
+      clip-path: inset(0 0 -2em 0);
     }
+    /* its own menu button 32px tall, 8px above what's under it:  the page starts 40px down, as under a menu (I36) */
     .menu-button {
+      --ui-button-padding-block: 8px;
+      --ui-button-line-height: 16px;
       display: inline-flex;
       align-self: start;
-      margin-block-end: 0.5em;
+      margin-block-end: 8px;
     }
   }
 

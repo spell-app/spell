@@ -59494,7 +59494,7 @@
         },
         {
           "name": "--ui-menu-header-bar-height",
-          "default": "38px",
+          "default": "40px",
           "type": "length"
         },
         {
@@ -59508,8 +59508,8 @@
           "type": "color"
         },
         {
-          "name": "--ui-menu-header-bar-border",
-          "default": "1px solid var(--ui-border-color)",
+          "name": "--ui-menu-header-bar-shadow",
+          "default": "0 1px 0 var(--ui-border-color)",
           "type": "other"
         },
         {
@@ -59979,7 +59979,7 @@
       "tokens": [
         {
           "name": "--ui-page-layout-gap",
-          "default": "var(--ui-font-size, 16px)",
+          "default": "var(--_page-layout-room)",
           "type": "length"
         },
         {
@@ -59989,7 +59989,7 @@
         },
         {
           "name": "--ui-page-layout-end-room",
-          "default": "0.5em",
+          "default": "round(0.5em, var(--ui-grid, 4px))",
           "description": "the muted strip down the page's end side, beside its top-right corner (I219)",
           "type": "length"
         }
@@ -62045,7 +62045,7 @@
       "tokens": [
         {
           "name": "--ui-site-nav-padding",
-          "default": "var(--_site-nav-padding-top) 0 0.5em",
+          "default": "var(--_site-nav-padding-top) 0 round(0.5em, var(--ui-grid, 4px))",
           "type": "length"
         },
         {
