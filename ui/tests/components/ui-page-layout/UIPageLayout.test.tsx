@@ -55,13 +55,19 @@ describe("<ui-page-layout>", () => {
     expect(parseFloat(getComputedStyle(underMenu).paddingInlineStart)).toBeGreaterThan(0)
   })
 
-  test("the menu and the drawer read as one surface:  the menu on the drawer's fill, the drawer's line starting under it", async () => {
+  test("the menu and the drawer read as one surface:  the menu on the drawer's fill;  the page's side a box under it, a soft shadow round it, no line (I32)", async () => {
     const layout = await pageLayout(`<div slot="menu">Menu</div>${NAV}<p>The page</p>`)
     const drawer = box(layout, "drawer")!
     const menu = box(layout, "menu")!
     const underMenu = box(layout, "page")!.parentElement!.parentElement!
     expect(getComputedStyle(drawer).borderInlineEndWidth).toBe("0px")
-    expect(getComputedStyle(underMenu).borderInlineStartWidth).toBe("1px")
+    expect(getComputedStyle(underMenu).borderInlineStartWidth).toBe("0px")
+    expect(getComputedStyle(underMenu).boxShadow).not.toBe("none")
+    expect(parseFloat(getComputedStyle(underMenu).borderTopLeftRadius)).toBeGreaterThan(0)
+    expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-border").trim()).toBe("none")
+    // a shadow in a theme whose own shadows are none and whose lines are ink, as Mockup's (Owen:  "even in mockup")
+    layout.style.cssText += ";  --ui-shadow-raised: none;  --ui-shadow-floating: none;  --ui-border-color: black"
+    expect(getComputedStyle(underMenu).boxShadow).not.toBe("none")
     expect(underMenu.getBoundingClientRect().top).toBeCloseTo(menu.getBoundingClientRect().bottom, 0)
     expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-background").trim()).not.toBe("")
   })
@@ -80,10 +86,13 @@ describe("<ui-page-layout>", () => {
     const layout = await pageLayout(NAV)
     const toggled = vi.fn()
     layout.addEventListener("ui-toggle", toggled)
+    // to its icons a frame later:  the width they take is measured first
     layout.toggleDrawer()
+    await new Promise(requestAnimationFrame)
     await ShadowTree.settle(layout)
     expect(layout.getAttribute("drawer")).toBe("compact")
-    expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
+    // all of it while the column narrows, clipped;  its icons only once it's narrow (I32)
+    await expect.poll(() => layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
     expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({ newState: "compact", oldState: "full" })
     // From its icons to all of it, the switch waits a frame:  the column holds its width first, to widen from
     layout.toggleDrawer()

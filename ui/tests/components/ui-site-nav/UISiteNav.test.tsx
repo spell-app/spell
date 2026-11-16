@@ -293,10 +293,16 @@ describe("<ui-site-nav> pages' extras", () => {
     const textSize = parseFloat(getComputedStyle(host).fontSize)
     expect(startOf("Explore") - startOf("Design")).toBeCloseTo(textSize / 2, 1)
     // the open group a slight inset well round its label and its pages (Owen's A, I31);  a shut one, none
+    // - its label on the bar's own fill, the well's fill only under it, round its pages (I32)
     const design = getComputedStyle(row(host, "Design"))
-    expect(design.backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    expect(design.backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(design.outlineStyle).toBe("solid")
     expect(parseFloat(design.borderTopLeftRadius)).toBeGreaterThan(0)
-    expect(getComputedStyle(row(host, "Run")).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(getComputedStyle(rowOf("Design")).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    const pages = row(host, "Design").shadowRoot!.querySelector<HTMLElement>('[part~="group"]')!
+    expect(getComputedStyle(pages).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    expect(pages.getBoundingClientRect().top).toBeCloseTo(rowOf("Design").getBoundingClientRect().bottom, 0)
+    expect(getComputedStyle(row(host, "Run")).outlineStyle).toBe("none")
     // Run, with no icon, keeps an icon's room beside Design's
     expect(row(host, "Run").querySelector(':scope > [slot="icon"]')).not.toBeNull()
     host.setAttribute("collapsed", "")

@@ -5,7 +5,8 @@
  *   | `--ui-site-nav-group-background` | the fill of an open group's well |
  *   | `--ui-site-nav-group-radius` | the corners of an open group's well |
  * - The rows' look is the tree's own (`--ui-tree-*`).
- * - An open group sits in a slight inset well, its label and its pages inside it (epic `mockup` I31, Owen's A).
+ * - An open group sits in a slight inset well, its label and its pages inside it (epic `mockup` I31, Owen's A):
+ *   its label on the bar's own fill, as a header;  the well's darker fill only under it, round its pages (I32).
  * - A group's pages are 8px in from its label (I20, I31);
  *   collapsed, none:  every icon centred in its row, the same room on both sides (I31).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
@@ -71,6 +72,9 @@
 
   /*
    * an open group, a slight inset well round its label and its pages (Owen's A, I31)
+   * - its label the well's header, on the bar's own fill;  the darker fill, shaded at its top, only under it, round
+   *   its pages (I32, Owen:  "don't darken under the header bit")
+   * - one faint line round both, so they read as one box:  an outline, drawn over the pages' fill
    * - its rows a little in from the well's sides, so the current page's pill sits inside it
    * - the well 4px in from the column, its rows 4px in from the well:  the rows stay where they were, 8px from the
    *   column's edges, as it opens and shuts
@@ -78,12 +82,17 @@
   ui-tree-item[band="group"]:state(open) {
     display: block;
     margin: 0.25em;
-    padding-block: 0.125em 0.25em;
+    padding-block-start: 0.125em;
     border-radius: var(--_ui-site-nav-group-radius);
+    outline: 1px solid light-dark(oklch(0 0 0 / 0.06), oklch(1 0 0 / 0.06));
+    outline-offset: -1px;
+  }
+  ui-tree-item[band="group"]:state(open)::part(group) {
+    border-end-start-radius: var(--_ui-site-nav-group-radius);
+    border-end-end-radius: var(--_ui-site-nav-group-radius);
+    padding-block-end: 0.25em;
     background: var(--_ui-site-nav-group-background);
-    box-shadow:
-      inset 0 1px 2px light-dark(oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.3)),
-      inset 0 0 0 1px light-dark(oklch(0 0 0 / 0.03), oklch(1 0 0 / 0.04));
+    box-shadow: inset 0 1px 2px light-dark(oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.3));
   }
   /* 4px of the tree's text, from inside each row's smaller text (a label's 0.8125em, a page's 0.875em) */
   ui-tree-item[band="group"]:state(open)::part(row) {

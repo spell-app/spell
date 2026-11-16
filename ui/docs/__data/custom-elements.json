@@ -23812,6 +23812,10 @@
             {
               "name": "--ui-page-layout-gap",
               "default": "var(--ui-font-size, 16px)"
+            },
+            {
+              "name": "--ui-page-layout-shadow",
+              "default": "0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent), 0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)"
             }
           ]
         }
@@ -38320,6 +38324,14 @@
             {
               "name": "--ui-site-nav-padding",
               "default": "0.5em 0"
+            },
+            {
+              "name": "--ui-site-nav-group-background",
+              "default": "light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.18))"
+            },
+            {
+              "name": "--ui-site-nav-group-radius",
+              "default": "var(--ui-radius-l)"
             }
           ]
         }
