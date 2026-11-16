@@ -1,5 +1,4 @@
 "input api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Input
 		<header>An input is a field used to elicit a response from a user.</>

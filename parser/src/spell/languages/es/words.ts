@@ -423,6 +423,14 @@ export const spanishTypeWords: P.TypeWords = {
   "vista-reversible": "two sided view",
   // pages people move between by address (epic `mockup` P1)
   sitio: "site",
+  // lo que queda en pantalla alrededor de las páginas de un sitio (épica `mockup` T39):  `diseño principal es un diseño`;
+  // `diseño de página` se declara, pero no se nombra así después:  su `de` es una palabra de la gramática
+  diseño: "page layout",
+  diseno: "page layout",
+  "diseño de página": "page layout",
+  "diseño-de-página": "page layout",
+  "diseno de pagina": "page layout",
+  "diseno-de-pagina": "page layout",
   // un tipo de medida:  `la longitud es una dimensión:` (épica `language` P23)
   dimensión: "dimension",
   dimension: "dimension",

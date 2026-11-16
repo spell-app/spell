@@ -10,7 +10,7 @@
  * - It IS a program's `@spell/core`:
  *   compiled spell's `import ... from "@spell/core"` is pointed at this module's URL -- see `runApp()`.
  *   It exports what compiled spell imports:
- *   - `core`, `Thing`, `List`, `App`, `View`, `ViewableList`, `Page`, `TwoSidedView`, `Site` (and its base)
+ *   - `core`, `Thing`, `List`, `App`, `View`, `ViewableList`, `Page`, `TwoSidedView`, `Site` (and its base), `PageLayout`
  *   - Solid's `h()`, which it draws with
  *   - the helpers it calls by name:  `on()`, `trigger()`, `positionOf()` ...
  *   - the `css` tag a view template's style sheet is written with
@@ -33,6 +33,7 @@ import {
   TwoSidedView,
   SiteBase,
   Site,
+  PageLayout,
   h,
   css,
   on,
@@ -63,7 +64,8 @@ installSpellElements(core)
 const E = { proto: UIElements.proto, protoMerged: UIElements.protoMerged }
 
 // What compiled spell imports, e.g. `import { core, Thing, List, App, h } from "@spell/core"`.
-// - `View`, `ViewableList`, `Page`, `TwoSidedView`:  what a view template extends (epic `drawable-thing`).
+// - `View`, `ViewableList`, `Page`, `TwoSidedView`, `PageLayout`:  what a view template extends (epic `drawable-thing`,
+//   `mockup` T39).
 // - The helpers it calls by name, e.g. `trigger("card-click", ...)`, `positionOf(...)` (epic `output-targets`, P19).
 // - `h`:  what compiled spell draws with (P20), Solid's own.
 //   The PAGE's one copy, taken through `spell-solid-shared.js` as core's drawing takes it,
@@ -83,6 +85,7 @@ export {
   TwoSidedView,
   SiteBase,
   Site,
+  PageLayout,
   h,
   css,
   on,

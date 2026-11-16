@@ -37,6 +37,7 @@ import {
   TwoSidedView,
   SiteBase,
   Site,
+  PageLayout,
   View,
   ViewableList,
   trigger
@@ -113,6 +114,7 @@ const CORE_EXPORTS: Record<string, { value: unknown; module: string }> = {
   TwoSidedView: { value: TwoSidedView, module: "classes/TwoSidedView" },
   SiteBase: { value: SiteBase, module: "classes/SiteBase" },
   Site: { value: Site, module: "classes/Site" },
+  PageLayout: { value: PageLayout, module: "classes/PageLayout" },
   ViewableList: { value: ViewableList, module: "classes/ViewableList" },
   h: { value: h, module: "drawing" },
   css: { value: css, module: "elements" },

@@ -213,5 +213,58 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
       ],
       codeLines: [10, 14]
     }
+  },
+  "page layout": {
+    en: {
+      spellVersion: "0.8.0",
+      provides: ["PageLayout"],
+      statements: [
+        {
+          type: "PageLayout",
+          superType: "View",
+          defined: "/PageLayout.spell:813-1082"
+        },
+        {
+          of: "PageLayout",
+          slots: ["app_menu", "page_menu", "drawer", "left_sidebar", "right_sidebar", "footer"],
+          defined: "/PageLayout.spell:840-932"
+        }
+      ],
+      codeLines: [14, 17]
+    },
+    es: {
+      spellVersion: "0.8.0",
+      languages: ["es"],
+      provides: ["PageLayout"],
+      statements: [
+        {
+          type: "PageLayout",
+          superType: "View",
+          gender: "masculine",
+          defined: "/PageLayout.es.spell:947-1277"
+        },
+        {
+          of: "PageLayout",
+          slots: [
+            "menú_de_la_aplicación",
+            "menú_de_página",
+            "cajón",
+            "barra_lateral_izquierda",
+            "barra_lateral_derecha",
+            "pie_de_página"
+          ],
+          defined: "/PageLayout.es.spell:983-1121",
+          slotOutputs: {
+            menú_de_la_aplicación: "app_menu",
+            menú_de_página: "page_menu",
+            cajón: "drawer",
+            barra_lateral_izquierda: "left_sidebar",
+            barra_lateral_derecha: "right_sidebar",
+            pie_de_página: "footer"
+          }
+        }
+      ],
+      codeLines: [16, 19]
+    }
   }
 }

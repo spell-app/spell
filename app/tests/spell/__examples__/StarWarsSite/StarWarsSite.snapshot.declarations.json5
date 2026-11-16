@@ -20,6 +20,7 @@
     "StarshipPage",
     "ReviewsPage",
     "GalaxyGuide",
+    "MainLayout",
     "GalaxyReview",
     "PersonPage"
   ],
@@ -503,6 +504,11 @@
       "of": "GalaxyGuide",
       "datatype": "text",
       "defined": "/StarWarsSite.spell:16182-16205"
+    },
+    {
+      "type": "MainLayout",
+      "superType": "PageLayout",
+      "defined": "/main.page-layout.spell:223-373"
     }
   ],
   "codeLines": [
@@ -563,6 +569,7 @@
     610,
     615,
     637,
-    730
+    731,
+    741
   ]
 }

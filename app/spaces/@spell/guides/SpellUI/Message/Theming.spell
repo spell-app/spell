@@ -1,5 +1,4 @@
 "message theming" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Message
 		<header>A message displays information that explains nearby content.</>

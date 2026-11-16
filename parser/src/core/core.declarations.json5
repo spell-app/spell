@@ -9,6 +9,7 @@
     "TwoSidedView",
     "SiteBase",
     "Site",
+    "PageLayout",
     "ViewableList",
     "h",
     "css",
@@ -3768,6 +3769,12 @@
       "superType": "SiteBase",
       "module": "classes/Site",
       "description": "`Site`:  spell's built-in template `site`, compiled from `templates/Site.spell`."
+    },
+    {
+      "type": "PageLayout",
+      "superType": "View",
+      "module": "classes/PageLayout",
+      "description": "`PageLayout`:  spell's built-in template `page layout`, compiled from `templates/PageLayout.spell`."
     },
     {
       "type": "ViewableList",

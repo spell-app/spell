@@ -2138,13 +2138,28 @@ sidebars any of them opens.
   - A parameter, `:film`, is one of the page's own properties (`- it has a film`):  its type is the page's, never written twice.
   - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
     address another page has (`P.TypeScope.declareSitePage()`, journaled).
-- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
+- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, `static mainLayout`,
+  on its class.
 - Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
   (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.
-- Its top bar (epic `mockup` T35):  `- it has a top bar` (`site_overlay`, by the wording `site_top_bar`;  Spanish
-  `- tiene una barra superior`):  `static topBar`, its buttons the view of its name, as a dialog's are.
-  - A page drawn without it says so on its line, `, no top bar` (Spanish `, sin barra superior`):  its entry's `noTopBar`.
-  - Not a part to go to:  `go to` and `show` never name it, and the site doesn't list it among its parts.
+- Its PAGE LAYOUTS (epic `mockup` T39):  what stays on screen around its pages, so going between them redraws only the
+  page.
+  - A layout is one of a kind, made from spell's built-in template `page layout`
+    ([PageLayout.spell](../core/templates/PageLayout.spell), a view;  Spanish `diseño`, as `diseño de página`'s `de`
+    is a grammar word):  `main layout is a page layout`, `create_one_of_a_kind` (`isOneOfAKindType()`).
+    - Its slots, each its own drawing:  `to draw its app menu` (the top bar), `page menu` (a row under it, the
+      shown page's family as tabs by default), `drawer` (the site's navigation unless it draws it), `left sidebar`,
+      `right sidebar`, `footer`.
+    - A layout builds on another as any one of a kind does:  `wide layout is a main layout`.
+  - A PAGE picks its layout on its own line (`create_one_of_a_kind`'s `layout` / `no_layout`):
+    `systems is a page, in the bare layout` => `static layout = "BareLayout"`;  `, no layout` => `static layout = false`.
+    - Refused on anything but a page;  a layout the project doesn't declare is refused once it has parsed.
+  - Every other page is in the site's MAIN layout, the page layout whose words read as `site_main_layout`
+    (`main layout`, Spanish `diseño principal`):  `static mainLayout`, by `mainLayoutOf()`.
+    - None:  the site draws its built-in frame, the navigation and the page.
+  - A page may draw a slot itself, `to draw its right sidebar` (`draw_it`'s slot drawing):  its own wins while it's shown.
+  - `- it has a top bar` and `, no top bar` (T35) are RETIRED:  they compile to nothing, with a warning saying where
+    each goes now (`site-top-bar-retired`, `site-no-top-bar-retired`).
 - Going between its pages (P2), naming the PAGE, never its address:
   - `go to the film page for this film`, `show the settings dialog` (`show_site_part`, a statement and an expression, for a
     handler):  `core.showSitePart("film page", film)`

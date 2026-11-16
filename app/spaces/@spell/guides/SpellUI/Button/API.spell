@@ -1,5 +1,4 @@
 "button api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>

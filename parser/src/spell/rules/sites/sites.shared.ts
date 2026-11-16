@@ -28,8 +28,6 @@ export type SitePageEntry = {
   thumbnail?: string
   /** the real page it stands for, on the live site, if the line says:  `https://example.com/films` */
   live?: string
-  /** drawn without the site's top bar, when its line says `, no top bar` (epic `mockup` T35) */
-  noTopBar?: boolean
   /** the `<group>` it's under, at the site's top level:  `Hardware` */
   group?: string
   /** the icon its `<group>`'s line names, before the group's name in the site's navigation:  `microchip` */
@@ -184,9 +182,30 @@ export function specialPageOf(scope: P.Scope, name: string): "notFound" | "error
   return undefined
 }
 
-/** Is `name` a site's top bar, in the scope's language:  `top bar`, Spanish's `barra superior` (epic `mockup` T35)? */
+/**
+ * Is `name` a site's top bar, in the scope's language:  `top bar`, Spanish's `barra superior` (epic `mockup` T35)?
+ * - Retired by page layouts (T39):  read only to say so.
+ */
 export function topBarOf(scope: P.Scope, name: string): "topBar" | undefined {
   return Wording.reads(scope, "site_top_bar", name) ? "topBar" : undefined
+}
+
+/**
+ * The class of the program's MAIN layout, the one every page is in unless its line says otherwise (epic `mockup` T39):
+ * the page layout whose words read as the language's `site_main_layout`, `main layout` (Spanish `diseño principal`).
+ * - `undefined` when the program has none:  its pages are drawn in the site's built-in frame.
+ * - Read once the whole project has parsed:  the layout's file may come after the site's.
+ */
+export function mainLayoutOf(scope: P.Scope): string | undefined {
+  const layouts = (scope.types?.get() ?? []).filter(
+    (type) => !type.stub && type.isA("PageLayout") && type.name !== "PageLayout"
+  )
+  return layouts.find((type) => Wording.reads(scope, "site_main_layout", wordsOf(type.name)))?.name
+}
+
+/** The words a class's name says:  `MainLayout` => `main layout`, `DiseñoPrincipal` => `diseño principal`. */
+function wordsOf(className: string): string {
+  return className.replace(/(\p{Ll})(\p{Lu})/gu, "$1 $2").toLowerCase()
 }
 
 /**

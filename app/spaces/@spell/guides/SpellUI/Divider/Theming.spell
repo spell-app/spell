@@ -1,5 +1,4 @@
 "divider theming" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>

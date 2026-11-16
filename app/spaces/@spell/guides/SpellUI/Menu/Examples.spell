@@ -1,5 +1,4 @@
 "menu examples" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Menu
 		<header>A menu displays grouped navigation actions.</>

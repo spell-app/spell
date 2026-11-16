@@ -1,5 +1,4 @@
 "breadcrumb api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
