@@ -60,12 +60,17 @@ describe("<PublishClash>", () => {
     const modal = await clashDialog()
     await expect.poll(() => arrows(modal).length).toBe(2)
     expect(arrows(modal)[0]!.querySelector("ui-icon")!.getAttribute("name")).toBe("arrow left")
+    // centred on its change's first line (Owen, T101)
+    await expect.poll(() => Math.abs(middle(arrows(modal)[0]!) - middle(lineOf(modal, "first mine")))).toBeLessThan(1.5)
 
     press(arrows(modal)[0]!)
     await expect.poll(() => shownFile(modal)).toContain("first theirs")
     await expect.poll(() => undoIcons(modal).length).toBe(1)
     expect(arrows(modal)).toHaveLength(1)
     expect(undoIcons(modal)[0]!.querySelector("ui-icon")!.getAttribute("name")).toBe("undo")
+    await expect
+      .poll(() => Math.abs(middle(undoIcons(modal)[0]!) - middle(lineOf(modal, "first theirs"))))
+      .toBeLessThan(1.5)
 
     press(undoIcons(modal)[0]!)
     await expect.poll(() => shownFile(modal)).toContain("first mine")
@@ -172,6 +177,19 @@ function arrows(modal: Modal): HTMLElement[] {
 /** The undo icons in the file showing's centre column. */
 function undoIcons(modal: Modal): HTMLElement[] {
   return [...shownSection(modal).querySelectorAll<HTMLElement>(".cm-merge-taken button")]
+}
+
+/** Your side's line holding `text`, in the file showing. */
+function lineOf(modal: Modal, text: string): HTMLElement {
+  return [...shownSection(modal).querySelectorAll<HTMLElement>(".cm-merge-a .cm-line")].find((line) =>
+    line.textContent!.includes(text)
+  )!
+}
+
+/** The middle of `element`'s box, top to bottom, on the page. */
+function middle(element: HTMLElement): number {
+  const box = element.getBoundingClientRect()
+  return box.top + box.height / 2
 }
 
 /** The lowest of `buttons` on the page. */
