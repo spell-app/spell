@@ -110,7 +110,8 @@ Until the run ends (step 6), these OVERRIDE the root rules and memory:
   Stage the phase's files by name, never `git add -A`.
 - Don't stop between phases for review.
 - NEVER any of these:
-  - merge into `main`, or push
+  - merge into `main`, or push:  NOT even an agent's finished work, which by day goes into `main` at once (the epic
+    skill's "The session answers;  agents build")
   - `/isolate done`, or `ExitWorktree`
   - delete anything outside the worktree
   - Something needing those:  `add <name>#T` (a todo:  work still to do), and go on.
