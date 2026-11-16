@@ -186,10 +186,7 @@ export class TypeDeclaration<
    */
   abilitiesOf(match: P.Match): P.ASTPatchedMember[] {
     const { ability, type } = match.groups as { ability?: P.Match | P.Match[]; type: P.Match }
-    // one word, or several (`a clickable selectable view`):  a repeat's match, each word one of its own
-    const words = (ability === undefined ? [] : Array.isArray(ability) ? ability : [ability]).flatMap((each) =>
-      each.rule instanceof P.Repeat ? each.matched.filter((word): word is P.Match => word instanceof P.Match) : [each]
-    )
+    const words = abilityWords(ability)
     return words.map((word) => {
       const flag = new P.ASTStaticDefinition(match, {
         type: P.matchAST<P.ASTTypeExpression>(type),
@@ -234,6 +231,15 @@ export class TypeDeclaration<
   private static named(match: object) {
     return match as unknown as P.Match<{ type: P.Match; aka?: P.Match }>
   }
+}
+
+/**
+ * The words of a head's `ability` groups, each `draggable_or_droppable`'s own match:
+ * one word, or several (`a clickable selectable view`, `a viewable, droppable list of cards`).
+ * - Each group a repeat's match:  its `items`, never the commas between them.
+ */
+function abilityWords(ability: P.Match | P.Match[] | undefined): P.Match[] {
+  return [ability ?? []].flat().flatMap((each) => (each.rule instanceof P.Repeat ? each.items : [each]))
 }
 
 /** A type's name in words, e.g. `bank account` for `BankAccount`. */

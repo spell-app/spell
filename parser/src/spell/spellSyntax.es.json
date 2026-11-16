@@ -4984,7 +4984,7 @@
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?",
               "example": "una card es una cosa",
               "outputs": {
                 "js": {
@@ -4999,7 +4999,7 @@
               }
             },
             {
-              "syntax": "(un|una) {type:quoted_type} es (un|una) {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "(un|una) {type:quoted_type} es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?",
               "example": "una \"card\" es una cosa",
               "outputs": {
                 "js": {
@@ -5025,7 +5025,7 @@
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} es (un|una) {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "{type:type_words} es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (, alias {aka:quoted_type})? {with_nested_statements}?",
               "example": "solitaire es una aplicación",
               "outputs": {
                 "js": {
@@ -5066,7 +5066,7 @@
               }
             },
             {
-              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista {ability:draggable_or_droppable}* (de|del) {instanceType:type} {with_nested_statements}?",
+              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista (,? [ability:{draggable_or_droppable} ,?])? (de|del) {instanceType:type} {with_nested_statements}?",
               "example": "un deck es una lista de cartas",
               "outputs": {
                 "js": {
@@ -5081,7 +5081,7 @@
               }
             },
             {
-              "syntax": "(un|una) {type:quoted_type} es (un|una) lista {ability:draggable_or_droppable}* (de|del) {instanceType:type} {with_nested_statements}?",
+              "syntax": "(un|una) {type:quoted_type} es (un|una) lista (,? [ability:{draggable_or_droppable} ,?])? (de|del) {instanceType:type} {with_nested_statements}?",
               "example": "un \"deck\" es una lista de cartas",
               "outputs": {
                 "js": {
@@ -5107,7 +5107,7 @@
           "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista visible {ability:draggable_or_droppable}* (de|del) {instanceType:type} {with_nested_statements}?",
+              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista visible (,? [ability:{draggable_or_droppable} ,?])? (de|del) {instanceType:type} {with_nested_statements}?",
               "example": "una pile es una lista visible de cartas",
               "outputs": {
                 "js": {
@@ -5122,7 +5122,19 @@
               }
             },
             {
-              "syntax": "(un|una) {type:quoted_type} es (un|una) lista visible {ability:draggable_or_droppable}* (de|del) {instanceType:type} {with_nested_statements}?"
+              "syntax": "(un|una) {type:quoted_type} es (un|una) lista visible (,? [ability:{draggable_or_droppable} ,?])? (de|del) {instanceType:type} {with_nested_statements}?",
+              "example": "una \"pila\" es una lista visible, soltable de cartas donde:",
+              "outputs": {
+                "js": {
+                  "code": "export class Pila extends ViewableList {\n  static instanceType = Carta\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static droppable = true\n}"
+                },
+                "ts": {
+                  "code": "export class Pila extends ViewableList<Carta> {\n  static instanceType = Carta\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static droppable = true\n}\n\nexport class PilaElement extends SpellElement<Pila> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-pila\", \"pila\", [])\n}\ncore.useElement(Pila, PilaElement)"
+                },
+                "py": {
+                  "code": "class Pila(ViewableList):\n    item_type = Carta\n    element_tag = \"syntax-block-pila\"\n\n    droppable = True"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

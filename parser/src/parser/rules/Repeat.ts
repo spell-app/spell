@@ -10,6 +10,9 @@ import { Rule } from "./Rule"
  * - `repeat.delimiter` (optional) if provided, we'll look for one of these
  *    between each instance of `rule`.
  *    - The delimiter at the end is optional.
+ *    - An optional delimiter (`[{ability} ,?]`) may be left out between two instances too:
+ *      `draggable, clickable` and `draggable clickable` both match.
+ *      It's never taken at the end:  what follows may start with it.
  *    - Note that the delimiters are NOT added to the `matched` array.
  * - `repeat.minCount` (optional) is the fewest copies of `rule` that match (delimiters don't count).
  * - `repeat.maxCount` (optional) is the most copies we take:  we stop there, like regex's `{n,m}`, and leave the
@@ -86,10 +89,15 @@ export class Repeat<
         if (!P.spacingAllows(tokens[length - 1], this.delimiter.spacing)) break
         // get delimiter, exiting if not found
         const delimiter = this.delimiter.parse(scope, remainingTokens)
-        if (!delimiter) break
-        matched.push(delimiter)
-        length += delimiter.length
-        remainingTokens = remainingTokens.slice(delimiter.length)
+        if (!delimiter && !this.delimiter.optional) break
+        // an optional one only between two copies:  a comma after the last is for whatever follows (`, alias "x"`)
+        if (delimiter && this.delimiter.optional && !this.rule.parse(scope, remainingTokens.slice(delimiter.length)))
+          break
+        if (delimiter) {
+          matched.push(delimiter)
+          length += delimiter.length
+          remainingTokens = remainingTokens.slice(delimiter.length)
+        }
         next = this.rule
       }
     }
