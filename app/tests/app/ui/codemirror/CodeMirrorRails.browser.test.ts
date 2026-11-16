@@ -279,6 +279,31 @@ describe("a body's rail under the caret", () => {
     expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
   })
 
+  test("Left, Left, Right at a pill's first letter, after a space or an `=`:  drawn in ONE place, at the word (I141)", async () => {
+    // Owen:  "Seeing the same thing in pills before unqoured white pill"
+    const view = await bubblyEditorOf(
+      "solitaire is an app\n\twhen creating solitaire\n\t\tpause for 10 msec\n\tto draw it\n\t\t<card-image direction=down />\n"
+    )
+    for (const word of ["creating", "down"]) {
+      const start = view.state.doc.toString().indexOf(word)
+      view.dispatch({ selection: { anchor: start + 1 } })
+      cursorCharLeft(view)
+      const left = await caretX(view)
+      expect(view.state.selection.main.head).toBe(start)
+      cursorCharLeft(view)
+      cursorCharRight(view)
+      expect(view.state.selection.main.head).toBe(start)
+      const right = await caretX(view)
+      expect(Math.abs(right - left), word).toBeLessThan(0.01)
+      // at the word's first letter, inside its pill
+      const letter = document.createRange()
+      const node = view.domAtPos(start + 1).node
+      letter.setStart(node, 0)
+      letter.setEnd(node, 1)
+      expect(Math.abs(left - letter.getBoundingClientRect().left), word).toBeLessThan(1)
+    }
+  })
+
   test("a plain body line's first word where a band's words on its level are, at every level;  its column 0 on its rail (I142)", async () => {
     for (const [text, plain, banded] of [
       [CHARACTER, "it lives", 'its "name"'],

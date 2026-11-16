@@ -31,6 +31,9 @@ export class CodeMirrorSelection {
    *   stepping Right (or down from the line above), at the indent's end, a band's room further left, outside its
    *   band (Owen, epic `language` I141:  "Inconsistent").
    * - So that one place is drawn one way, at the word:  Left and Right step indent end <=> the line's column 0.
+   * - The same for a word after a space inside a line, a pill's first (Owen, I141:  "Seeing the same thing in pills
+   *   before unquoted white pill"):  `when |creating solitaire` at `creating`, not back at `when`'s end;
+   *   never before a `"`, whose curly mark places its caret itself (`QuoteWidget`)
    */
   static wordsSide: Extension = EditorState.transactionFilter.of((transaction) => {
     const { selection } = transaction
@@ -118,12 +121,16 @@ class LineBands {
   }
 }
 
-/** Is `range` a caret right before its line's first word, stuck to the indent before it:  drawn short of the word. */
+/** Is `range` a caret right before a word (its line's first, or one after a space), stuck to what's before it? */
 function isBeforeWords(doc: Text, range: SelectionRange): boolean {
   if (!range.empty || range.assoc >= 0) return false
   const line = doc.lineAt(range.head)
   const words = line.text.search(/\S/)
-  return words >= 0 && range.head === line.from + words
+  if (words < 0) return false
+  if (range.head === line.from + words) return true
+  // ... or a word after a space in the line:  a pill's first, `when |creating solitaire` (I141)
+  const at = range.head - line.from
+  return at > words && /[ \t]/.test(line.text[at - 1]!) && /[^\s"]/.test(line.text[at] ?? "")
 }
 
 /** A CSS length `length` (`var(--x)`, `calc(...)`) in px, as `element`'s styles make it. */
