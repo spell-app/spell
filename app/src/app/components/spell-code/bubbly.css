@@ -1728,17 +1728,34 @@
 
     /*
      * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
-     * - how strong it is:  `--bubbly-selection-strength`
-     * - while the editor has the focus too:  CodeMirror's own rule for that, more specific than a plain
+     * - a see-through black, no hue of its own, so the pills' colours read through it as they are (Owen:  "make the
+     *   selection black so it doesn't clash with the pills", I124);  on dark paper, where black can't show, white
+     * - fainter while the editor hasn't the focus, as CodeMirror's own
+     * - with the focus:  CodeMirror's own rule for that, more specific than a plain
      *   `.cm-focused .cm-selectionBackground`, painted it solid lavender over the text, which vanished (I115)
+     * - on the bands, in the middle of each line (`CodeMirrorSelection`, drawn in place of CodeMirror's own layer,
+     *   hidden here;  I124)
      */
     .cm-selectionLayer {
+      display: none;
+    }
+    .cmb-selection-layer {
       z-index: 1 !important;
       pointer-events: none;
     }
-    .cm-selectionBackground,
-    &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
-      background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
+    .cm-selectionBackground {
+      background: light-dark(rgb(0 0 0 / 10%), rgb(255 255 255 / 10%));
+    }
+    &.cm-focused > .cm-scroller > .cmb-selection-layer .cm-selectionBackground {
+      background: light-dark(rgb(0 0 0 / 18%), rgb(255 255 255 / 16%));
+    }
+    /*
+     * ... every letter in its own colour under it:  the page's own `::selection` (Semantic UI's sheet) made them all its
+     * near-black, lost on the code pills and on dark paper (I124)
+     */
+    .cm-line::selection,
+    .cm-line ::selection {
+      color: currentColor;
     }
     /*
      * ... and a character with a mark drawn over it stays see-through in it:  a tag's `<`, `>` and `/`, a description's

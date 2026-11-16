@@ -5,6 +5,7 @@ import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { CodeMirrorDecorations, CodeMirrorMarkup, railsStyle, type Indent, type Rail } from "./CodeMirrorMarkup"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
+import { CodeMirrorSelection } from "./CodeMirrorSelection"
 
 /****************
  * ### `CodeMirrorBubbly`
@@ -50,6 +51,7 @@ export class CodeMirrorBubbly {
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
       CodeMirrorMarkup.tabStops,
+      CodeMirrorSelection.extension,
       DescriptionRoom.extension
     ]
   }
