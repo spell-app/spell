@@ -38,6 +38,11 @@ import {
   PlanDocError,
   QUESTION_ID,
   REVIEW_AS,
+  NEW_PHASE,
+  START_IN_PHASE,
+  START_NOW_CARD,
+  START_NOW_DID,
+  START_NOW_WORK,
   UNDERWAY_CARD,
   isItemKind,
   isPhaseStatus,
@@ -1410,8 +1415,9 @@ export class PlanDoc extends PlanReader {
    *   - a question answered with it (its title the answer), any other item APPROVED with it (as approve)
    *   - reviewed;  the set says when, and what happens next (`chosen-on`, `chosen-note`), in its Choices (I153)
    * - `todo`:  a new todo, "Follow up:  <title>", linking back;  the item reviewed;  a Noted card `Made todo T23 ...`
-   * - `next`, a todo's plane (Owen, 2026-10-09):  queued into the NEXT phase, the first still to do
-   *   (`queue()`, its work `P10 · <name>`;  none:  "the next phase"), a Noted card `Queued for P10 · <name>`
+   * - `next`, a todo's plane:  STARTED now (epic `epic-engine` I314, `START_NOW_*`):  queued with work `now`, a Noted
+   *   card `Start now:  ...`;  the session starts an agent on it.  His note asking for a phase:  left, for a NEW phase.
+   *   - before I314 (Owen, 2026-10-09):  queued into the first phase still to do, related or not
    * - every card `apply` writes is NOTED, never Done (Owen, 2026-10-10):
    *   it records Owen's choice;  nothing is built yet
    * - `drop`, a todo's x:  canceled (struck through, grey), "dropped by Owen in review" in the log;  reviewed
@@ -1565,13 +1571,12 @@ export class PlanDoc extends PlanReader {
         return { applied: true, did: filedDid(todo) }
       }
       case "next": {
-        const phase = this.phases.find((each) => each.status === "todo")
-        const where = phase ? `P${phase.number} · ${phase.name}` : "the next phase"
-        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "next phase", at, shot })
-        this.queue(item.id, where)
-        const card = phase ? `Queued for ${where}` : `Queued for the next phase:  there's no phase to do yet`
-        this.noteStatus(item.id, PlanMarkup.text(card))
-        return { applied: true, did: `queued for ${where}${phase ? "" : " (no phase to do yet)"}` }
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "start now", at, shot })
+        // his note asks for a phase:  the session makes a NEW one for it (never an unrelated phase to do;  I314)
+        if (note && NEW_PHASE.test(note)) return { applied: false, left: START_IN_PHASE }
+        this.queue(item.id, START_NOW_WORK)
+        this.noteStatus(item.id, PlanMarkup.text(START_NOW_CARD))
+        return { applied: true, did: START_NOW_DID }
       }
       case "drop": {
         if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "drop", at, shot })

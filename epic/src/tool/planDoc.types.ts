@@ -184,6 +184,22 @@ export const QUESTION_ID = /^q\d+$/
  */
 export const CALM_ID = /^[ij]\d+$/
 
+/**
+ * A todo's plane (`next`) STARTS it now (epic `epic-engine` I314;  Owen, 2026-11-16, after four todos he sent landed in
+ * an unrelated phase:  "they should either go in a new phase or start now"):  never queued into a phase still to do.
+ * - queued with this work, a Noted card saying so, and `inbox apply` tells the session to start an agent on it (T77)
+ * - his note asking for a phase ("new phase", "in a phase"):  left for the session, which makes a NEW phase for it
+ */
+export const START_NOW_WORK = "now"
+/** The Noted card a todo's plane writes. */
+export const START_NOW_CARD = "Start now:  an agent takes it next"
+/** What `inbox apply` says for it:  the session starts an agent on it, and gives it an Underway card. */
+export const START_NOW_DID = "start now:  start an agent on it (its Underway card when taken)"
+/** A note on a todo's plane asking for a phase of its own. */
+export const NEW_PHASE = /\b(new|own|its own|a) phase\b|\bin a phase\b/i
+/** What's left for the session when the note asks for a phase. */
+export const START_IN_PHASE = "a new phase for it, as his note asks:  `epic phase` it in, next, never an unrelated phase"
+
 /** A judgement call's id:  grey once it's `calm`, where a calm issue stays yellow (epic `epic-engine` P63). */
 export const JUDGEMENT_ID = /^j\d+$/
 
