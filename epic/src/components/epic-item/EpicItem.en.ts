@@ -340,6 +340,12 @@ export const epicItemVocabulary = {
         "has it, while the item is still to finish (I307)."
     },
     {
+      name: "done-in",
+      description:
+        "With `taken-in` on a finished item (done, canceled, decided):  a grey `done in P20` at its line's end, where " +
+        "its plane was, linking the phase it was done in (epic `epic-engine` J231)."
+    },
+    {
       name: "git",
       description:
         "With commits (`commits`, or `<epic-commit>` children):  a git icon at the line's end that shows or hides " +
@@ -427,6 +433,16 @@ export const epicItemVocabulary = {
       description: "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
     },
     { key: "handledIn", text: "in {phase}", description: "Its line's link to the phase that handled it:  `in P4`." },
+    {
+      key: "doneIn",
+      text: "done in {phase}",
+      description: "A finished item's link to the phase it was done in, where its plane was:  `done in P20` (J231)."
+    },
+    {
+      key: "donePillTip",
+      text: "Click:  go to {phase}.",
+      description: "The `done in P20` pill's tooltip's second line (epic `epic-engine` J231)."
+    },
     {
       key: "handledTip",
       text: "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",

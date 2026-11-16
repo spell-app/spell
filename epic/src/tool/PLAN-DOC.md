@@ -665,7 +665,9 @@ As `plan-doc.md`, "Ids":
 - Do this on an issue or a judgement call (epic `epic-engine` I232;  2026-11-08):  its first button, the phase's
   word and plane (a thumbs up until I299);  the same stored `todo` mark.
   - an OPEN issue's last button is the x (I299):  a `drop` mark, closed as canceled;  a FIXED one's (orange) is Accept the
-    fix (the check), its first Send back (the same plane, the same `todo` mark)  NO todo is made.
+    fix (the check), with Revisit before it and no plane (J231:  a fix goes back with Revisit's note);  NO todo is made.
+  - a FINISHED issue or call (done, canceled, decided;  J231):  Revisit and Saw it, no plane;  a phase that took it
+    (`taken-in`) draws `done in P20` where the plane was
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.

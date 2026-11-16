@@ -436,7 +436,9 @@ On an item's line, ONE group, in this order:
 2. Revisit (history), blue
 3. Approve (check), green
    - on an OPEN issue, nothing fixed yet:  the x, grey, "Close it:  not needed" (canceled, as a todo's x;  I299)
-   - on a FIXED issue or call (orange):  Accept the fix (check), and its first button is Send back (paper plane)
+   - on a FIXED issue or call (orange):  Accept the fix (check);  no plane, Revisit sends it back with a note (J231)
+   - on a FINISHED one (done, canceled, decided):  Saw it (check);  no plane:  `done in P20` stands in its place when a
+     phase took it (J231)
 
 One icon per meaning (epic `epic-engine` I299;  2026-11-15:  "Thumbs up and checkmark in the same row are
 ambiguous"):  the plane sends something to be worked, the x drops or closes it, the check accepts it or says you saw

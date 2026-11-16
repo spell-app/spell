@@ -396,9 +396,9 @@ describe("<epic-item>", () => {
       host.setAttribute("status", "canceled")
       await Promise.resolve()
       expect(buttonsOf()).toBe("issue-open")
-      // let go at his Send:  its own buttons again
+      // let go at his Send:  its own buttons again, a finished issue's (J231)
       held.mockReturnValue(false)
-      expect(buttonsOf()).toBe("issue")
+      expect(buttonsOf()).toBe("issue-done")
     } finally {
       held.mockRestore()
     }
@@ -446,11 +446,10 @@ describe("<epic-item>", () => {
       ["revisit", "history"],
       ["drop", "xmark"]
     ])
-    // fixed, waiting for Owen:  Send back (the plane), Revisit, Accept the fix (the check)
+    // fixed, waiting for Owen:  Revisit (sends it back, with a note), Accept the fix (the check);  no plane (J231)
     expect(buttonsForItem("i1", { status: "open", fixed: true })).toBe("issue-fixed")
     expect(buttonsForItem("j1", { status: "open", fixed: true })).toBe("issue-fixed")
     expect(BUTTONS_OF["issue-fixed"].map((spec) => [spec.action, spec.icon, spec.label])).toEqual([
-      ["todo", "paper plane", "sendBack"],
       ["revisit", "history", "revisit"],
       ["approve", "check", "acceptFix"]
     ])
@@ -470,10 +469,20 @@ describe("<epic-item>", () => {
     expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
-    expect(buttonsForItem("i1", { status: "done" })).toBe("issue")
     expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
       ["revisit", "revisitNote"],
       ["approve", "sawIt"]
+    ])
+  })
+
+  test("buttonsForItem():  a finished issue or call draws Revisit and Saw it, no plane (J231)", () => {
+    for (const status of ["done", "canceled", "decided"]) {
+      expect(buttonsForItem("i1", { status })).toBe("issue-done")
+      expect(buttonsForItem("j1", { status, fixed: true })).toBe("issue-done")
+    }
+    expect(BUTTONS_OF["issue-done"].map((spec) => [spec.action, spec.icon])).toEqual([
+      ["revisit", "history"],
+      ["approve", "check"]
     ])
   })
 
@@ -495,7 +504,7 @@ describe("<epic-item>", () => {
     }
   })
 
-  test("a FINISHED item's `taken-in` draws no pill (I307):  its id chip names the phase;  `handled` keeps its pill", async () => {
+  test("a FINISHED item's `taken-in` draws `done in P2` where the plane was (J231), not `in P2` (I307);  `handled` keeps its pill", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
@@ -505,12 +514,19 @@ describe("<epic-item>", () => {
           `<epic-item id="j100" title="Import's pictures" status="${status}" taken-in="p-fix"></epic-item>`
         )
         expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
+        const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
+        expect([done.textContent, done.getAttribute("link")]).toEqual(["done in P2", "#p-fix"])
+        expect(done.title).toBe("Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.")
         expect(chip.title).toContain("Taken up in P2 · Fix Open Issues:  fixed or done there")
       }
+      // still to finish:  its `in P2`, no `done in`
+      const open = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
+      expect(open.host.shadowRoot!.querySelector("[part~='done-in']")).toBeNull()
       const handled = await item(
         `<epic-item id="q4" title="How many?" status="decided" state="handled" handled="p-one" taken-in="p-fix"></epic-item>`
       )
       expect(handled.host.shadowRoot!.querySelector("[part~='handled']")!.textContent).toBe("in P1")
+      expect(handled.host.shadowRoot!.querySelector("[part~='done-in']")).toBeNull()
     } finally {
       phases.remove()
     }
