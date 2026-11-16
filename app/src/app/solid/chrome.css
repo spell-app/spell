@@ -216,6 +216,18 @@ ui-app-menu.AppMenu ui-item.ThemeMenu::part(item) {
 ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
+/*
+ * ... its round icons stand `--spell-bar-icon-gap` after the tabs, pill edge to circle edge (epic `editor` I202,
+ * Owen:  "Add space between Edit and code button"):  the tabs' track keeps its options 1px apart,
+ * which left the chosen tab's pill touching the code's pressed circle
+ * - the tabs and the icons are two halves of one group:  the icons keep their own 1px apart,
+ *   their glyphs ~14px apart, the rule's 12px and a little
+ * - on the first icon's drawn button:  the `<ui-item>` itself draws no box
+ */
+ui-menu.ModeTabs ui-item:not([appearance~="circular"]) + ui-item[appearance~="circular"]::part(item) {
+  /* less the 1px the header tabs' track already keeps between its options (Spell UI's `UIMenu.css`) */
+  margin-inline-start: calc(var(--spell-bar-icon-gap) - 1px);
+}
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   gap: 0.4em;
