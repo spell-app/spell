@@ -101,6 +101,7 @@ export function CompiledCodeButton(): JSX.Element {
   return (
     <ui-item
       icon={look().icon}
+      appearance="circular"
       class="CompiledCodeToggle"
       label={appTexts.text(look().tip)}
       title={appTexts.text(look().tip)}

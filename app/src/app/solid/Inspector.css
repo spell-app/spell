@@ -452,12 +452,6 @@ ui-button.InspectorRowChip {
   min-width: 0;
 }
 
-/* the Inspector's button (`<InspectorToggle>`):  its icon alone */
-.InspectorToggle {
-  display: inline-flex;
-  align-items: center;
-}
-
 /*
  * The Code card's Add Event and Add Action (T79):  an icon and its words each, in the header's grey and size,
  * the theme's primary colour under the pointer;  Add Event's caret after its words.
@@ -514,20 +508,8 @@ ui-button.InspectorAddAction::part(icon) {
   }
 }
 
-/*
- * Inspect app (`<InspectAppButton>`), pressed while inspecting:  held down, in the theme's primary colour, a sunken dip
- * behind the glyph, its size not counted
- */
-ui-icon.InspectAppButton.inspecting {
-  border-radius: 6px;
-  color: var(--ui-primary);
-  background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
-  box-shadow:
-    0 0 0 5px color-mix(in oklab, var(--ui-primary) 22%, transparent),
-    inset 0 1px 2px rgb(0 0 0 / 0.25);
-}
-
-/* (as the bar's item, in Run | Edit's group, its `aria-pressed` gives it Spell UI's pressed toggle:  `UIMenu.css`) */
+/* Inspect app (`<InspectAppButton>`), in the card's header as in the top bar:  Spell UI's circular item, pressed
+   while inspecting (`appearance="circular"`, `aria-pressed`;  epic `editor` T91) */
 
 /* Inspect app's help (`<InspectHelp>`):  a small popup under its button, its words then a close */
 ui-popup.InspectHelp::part(popup) {
