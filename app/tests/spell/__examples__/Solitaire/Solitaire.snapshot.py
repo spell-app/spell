@@ -358,11 +358,11 @@ def test_piles() -> None:
         core.expect(stock.color, "stock's color", "none", "\"none\"")
         core.expect(stock.value, "stock's value", 0, "0")
         core.echo_test_action(
-            "add a new card with rank queen, suit  spades and direction up to the stock",
+            "add a new card with rank queen, suit spades and direction up to the stock",
         )
         stock.append(Card(rank="queen", suit="spades", direction="up"))
         core.echo_test_action(
-            "add a new card with rank 7, suit  hearts and direction down to the stock",
+            "add a new card with rank 7, suit hearts and direction down to the stock",
         )
         stock.append(Card(rank=7, suit="hearts", direction="down"))
         core.expect(stock.color, "stock's color", "red", "red")
