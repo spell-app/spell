@@ -61,7 +61,7 @@ import {
   type WrittenEvent
 } from "./InspectorSource"
 import { InspectorData } from "./InspectorData"
-import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 import { NotebookDocs } from "./notebook/NotebookDocs"
@@ -1233,9 +1233,7 @@ export class Inspector {
    * - A thing's value kept in a data place, or worked out from one, says so over what the code says (epic `editor` P26).
    */
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
-    const names = part.layout
-      ? [...part.layout.set, ...part.layout.more].map((field) => field.name)
-      : Inspector.storedNamesOf(part.value)
+    const names = part.layout ? part.layout.fields.map((field) => field.name) : Inspector.storedNamesOf(part.value)
     const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
     if (part.layout) return origins
     for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
@@ -1427,7 +1425,7 @@ export class Inspector {
       }
     }
     if (isUIElement(element) || isWrittenTag(element)) {
-      // its attributes as its vocabulary lists them:  those it sets first, the rest under "More"
+      // its attributes as its vocabulary lists them
       const component = (element as Element & { component?: { vocabulary?: { attributes?: FieldSpec[] } } }).component
       const fields = component?.vocabulary?.attributes ?? []
       return {
@@ -1438,11 +1436,8 @@ export class Inspector {
         layout: {
           // its text, when it holds only text:  a button's words aren't an attribute
           hasText: element.childElementCount === 0 && !!element.textContent?.trim(),
-          // a value the program's `<ui-defaults>` gives it shows among those it sets (epic `language` P29)
-          ...withPositionsBesideTheirs(
-            fields.filter((field) => element.hasAttribute(field.name) || !!defaultsFileOf(element, field.name)),
-            fields.filter((field) => !element.hasAttribute(field.name) && !defaultsFileOf(element, field.name))
-          )
+          // every field in its vocabulary's place, set or not:  a value never moves its field (epic `editor` I199)
+          fields
         }
       }
     }
@@ -1502,11 +1497,11 @@ function sharedSchema(parts: readonly SelectedPart[]): SelectedPart["schema"] {
   return { name: first.label, attributes }
 }
 
-/** Several Spell UI elements' fields:  one tag's, with nothing set first, and no text field;  else none. */
+/** Several Spell UI elements' fields:  one tag's, and no text field;  else none. */
 function sharedLayout(parts: readonly SelectedPart[]): SelectedPart["layout"] {
   const [first] = parts as readonly [SelectedPart, ...SelectedPart[]]
   if (!first.layout || !parts.every((part) => isSameKind(part, first))) return undefined
-  return { hasText: false, set: [], more: [...first.layout.set, ...first.layout.more] }
+  return { hasText: false, fields: first.layout.fields }
 }
 
 /**
@@ -1573,30 +1568,15 @@ export type SelectedPart = {
   /** Its title:  `Card "queen of spades"`, `<ui-input>`. */
   label: string
   /**
-   * A Spell UI element's fields, in the editor's order:  what it sets first, the rest folded under "More";
+   * A Spell UI element's fields, in its vocabulary's order, whether it sets them or not;
    * `undefined`, the schema's own order (a thing's properties are all set).
    */
   layout?: {
     /** It holds only text, its words:  a field for them first, its `textContent`. */
     hasText: boolean
-    /** The attributes it sets, in its vocabulary's order. */
-    set: FieldSpec[]
-    /** The rest. */
-    more: FieldSpec[]
+    /** Its attributes, in its vocabulary's order:  each keeps its place, set or not (epic `editor` I199). */
+    fields: FieldSpec[]
   }
-}
-
-/**
- * An attribute that places another (`icon-position`) goes beside it, so the two share a row.
- * - set:  `icon` set and its position not, the position comes up from "More" to sit after it
- */
-function withPositionsBesideTheirs(set: FieldSpec[], more: FieldSpec[]): { set: FieldSpec[]; more: FieldSpec[] } {
-  const moved = more.filter((field) => set.some((other) => field.name === `${other.name}${POSITION_SUFFIX}`))
-  const ordered = set.flatMap((field) => [
-    field,
-    ...moved.filter((other) => other.name === `${field.name}${POSITION_SUFFIX}`)
-  ])
-  return { set: ordered, more: more.filter((field) => !moved.includes(field)) }
 }
 
 /** The name ending of an attribute that places another:  `icon-position` places `icon`. */
@@ -3064,7 +3044,7 @@ function pinnedAt(height: number): Keyframe {
 /****************
  * ### `<PropertiesCard>`
  * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
- * `<ui-property-editor>` of every property it has, those it sets first
+ * `<ui-property-editor>` of every property it has, each in its vocabulary's place, set or not (I199)
  * (Owen:  "lose that [More]. Show all of the properties").
  * - Inspecting again:  Inspect app, in the card's header as in the top bar (`<InspectAppButton>`;
  *   Owen, 2026-11-15:  "Put the inspector crosshair back in this header", T78).
@@ -3200,7 +3180,7 @@ function PropertiesCard(): JSX.Element {
               </Show>
               <Show when={part.layout}>
                 {(layout) => (
-                  <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
+                  <For each={sectionsFor(layout().fields, layout().hasText)}>
                     {(section) => (
                       <ui-property-group
                         label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
@@ -3476,7 +3456,7 @@ const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
 /**
  * A Spell UI element's fields in the Inspector's sections, one per group, in the groups' order
  * (`E.ATTRIBUTE_GROUPS`:  Name, Content, Appearance, Layout ...).
- * - A field keeps its place in `fields` within its section:  those it sets first.
+ * - A field keeps its place in `fields` within its section:  its vocabulary's order, set or not.
  * - A field with no group goes in Appearance;  the element's own text (`hasText`) heads Content.
  * - A section with nothing in it isn't drawn.
  */
