@@ -48,6 +48,9 @@
   --spell-pane-background: var(--ui-panel-pane-background, var(--ui-surface));
   --spell-pane-border-color: var(--ui-panel-pane-border-color, var(--ui-border-color));
   --spell-pane-filter: var(--ui-panel-pane-filter, none);
+  /* a panel's body:  its glass, under the code's paper at half strength (`--spell-panel-wash`, epic `editor` I194) */
+  --spell-pane-body-background:
+    linear-gradient(var(--spell-panel-wash), var(--spell-panel-wash)), var(--spell-pane-background);
   --spell-header-background: var(--ui-panel-pane-header-background, transparent);
   /* the views show the panel through them */
   --spell-view-background: transparent;
@@ -184,10 +187,22 @@
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: var(--spell-pane-background);
+    background: var(--spell-pane-body-background);
     -webkit-backdrop-filter: var(--spell-pane-filter);
     backdrop-filter: var(--spell-pane-filter);
     pointer-events: none;
+  }
+  /* ... under a bar that's the top bar's (the code's file tabs;  an Inspector card's, `Inspector.css`), the glass starts
+     below it:  the bar sees the page itself through the top bar's blur, as the top bar does (epic `editor` I194) */
+  /* ... a panel holding panels (the code column, the code over its compiled output) has none of its own:
+     each panel in it has its glass, and its bar sees the page, not a second glass (I194, as the Inspector's I190) */
+  & .SplitPane:has(> ui-split-panel > .SplitPane)::before {
+    content: none;
+  }
+  & .SplitPane:has(> .InputRoot > .FileTabs)::before {
+    top: var(--spell-pane-bar-height);
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
   }
   /* ... in Safari, no blur:  the theme's surface instead, near the same look (`EditorTheme.markSafari()`);  Safari 26 left
      the blurred glass stale, a bright violet wash over the code, after a resize, a hover or the app's fonts arriving
@@ -214,10 +229,21 @@
   }
 }
 
-/* The Inspector's cards' bars the top bar's colour (`--spell-menu-bar-background`, set in `Inspector.css`;
-   epic `editor` T83):  its wallpaper fixed, as the page's is */
+/* The Inspector's cards' bars the top bar's look (epic `editor` T83, I194):  its fill and its blur
+   over the page itself, as the code's file tabs' (`FileTabs.css`);  the card's glass starts under the bar (`Inspector.css`) */
 ui-panel.InspectorCard::part(title) {
-  background-attachment: fixed;
+  position: relative;
+  isolation: isolate;
+}
+ui-panel.InspectorCard::part(title)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--spell-menu-bar-fill);
+  -webkit-backdrop-filter: var(--spell-menu-bar-filter);
+  backdrop-filter: var(--spell-menu-bar-filter);
+  pointer-events: none;
 }
 
 /*
