@@ -596,8 +596,8 @@ export type Indent = { tabs: number; spaces: number }
 export type Rail = Indent & { partOfSpeech: string }
 
 /**
- * `rails` as a CSS background:  one stripe per enclosing block, in its band's colour, dropping from under its band.
- * - `--cmb-rail-gap` before its body's lines start, so nothing on them touches it (epic `language` I136)
+ * `rails` as a CSS background:  one stripe per enclosing block, at its band's left edge, in its band's colour
+ *   (epic `language` I137, as before I131).
  * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`), a rail (`--cmb-rail`) and where a rail
  *   starts from its band's line's indent (`--cmb-rail-left`):  only the columns are written here.
  */

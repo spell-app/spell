@@ -1631,20 +1631,11 @@
     /* where a band starts from its line's indent:  its room before its words further out */
     --cmb-band-left: calc(-1 * var(--cmb-band-inset));
     /*
-     * room between a rail and its body's lines:  from its right edge to where each line starts, a plain line's first
-     * letter, a tag's pointed end (Owen, epic `language` I136:  "Gap wins")
+     * where a block's rail starts from its band's line's indent:  at its band's left edge, the band's bottom-left
+     * square into it (Owen, epic `language` I137:  "put the rails back where they were", as before I131)
+     * - its feet, its rows of end tags and its inside corners start from it too
      */
-    --cmb-rail-gap: 3px;
-    /*
-     * where a block's rail starts from its band's line's indent:  `--cmb-rail-gap` and a rail before its body's lines
-     * start, so nothing on them touches it;  the caret at a body line's start stands just right of it
-     * - its words and its bands stay where they were before I131 (Owen, I136:  "Fix the gutters so all text and tags
-     *   are inset as they were before"):  the rail drops from under its band, a little in from its round end
-     * - its feet and inside corners start from it too
-     */
-    --cmb-rail-left: calc(var(--cmb-indent) - var(--cmb-rail-gap) - var(--cmb-rail));
-    /* ... from its band's left edge */
-    --cmb-rail-in: calc(var(--cmb-rail-left) - var(--cmb-band-left));
+    --cmb-rail-left: var(--cmb-band-left);
 
     /*
      * the room on a band before its words, less a tab:  the page's, at the editor's size (2.81px)
@@ -1860,20 +1851,19 @@
       margin-left: calc(var(--cmb-band-left) - var(--cmb-indent));
       padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
     }
-    /*
-     * a band with a body:  its rail dropping from under it to the next line, a little in from its round end, clear of
-     * its body's lines (I136), round its inside corner
-     * - from 3px up in the band:  the round end's curve is still that little above its bottom there (1.5px)
-     */
+    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line, round its inside corner */
+    .cmb-band-open {
+      border-bottom-left-radius: 0;
+    }
     .cmb-band-open::after {
       content: "";
       position: absolute;
-      left: var(--cmb-rail-in);
-      top: calc(100% - 3px);
+      left: 0;
+      top: 100%;
       width: var(--cmb-rail);
       /* ... through the rows a description takes under it (`.cmb-head-description-below`) */
       height: calc(
-        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 4px + var(--cmb-description-rows, 0) *
+        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px + var(--cmb-description-rows, 0) *
           var(--cmb-line-height)
       );
       background: var(--bubbly-pill);
@@ -1888,7 +1878,7 @@
     .cmb-band-open:not(.cmb-tag-band)::before {
       content: "";
       position: absolute;
-      left: calc(var(--cmb-rail-in) + var(--cmb-rail));
+      left: var(--cmb-rail);
       top: 100%;
       z-index: -1;
       width: var(--cmb-inner-top);
@@ -2102,8 +2092,8 @@
      * - each row from the block's left edge, its band's, to its right edge, its widest row's:  how far it reaches past
      *   its words, `--cmb-reach-before` and `--cmb-reach-after`, measured once it's drawn (`CodeMirrorMarkup.tagBlocks`)
      * - the rows fill their lines, so the block is whole from its first line's band to its last's
-     * - its corners cut as a tag's ends are:  top left and right, bottom right, where its `>` is, and bottom left;
-     *   with a body, its rail dropping from under it (I136)
+     * - its corners cut as a tag's ends are:  top left and right, bottom right, where its `>` is;  bottom left too, or
+     *   square with its rail dropping from it when it has a body
      */
     .cmb-tag-block {
       height: calc(var(--bubbly-pill-height) + var(--cmb-band-margin));
@@ -2146,16 +2136,18 @@
     .cmb-tag-point {
       margin-left: calc(var(--cmb-tag-room) + var(--cmb-reach-after));
     }
-    /* ... a block with a body:  its rail dropping from under it, as a block's band (below) */
+    /* ... a block with a body:  square bottom-left, its rail dropping from it, as a block's band (below) */
+    .cmb-tag-block-opens {
+      border-bottom-left-radius: 0;
+    }
     .cmb-tag-block-opens::after {
       content: "";
       position: absolute;
-      left: var(--cmb-rail-in);
-      /* from 3px up in the band:  its pointed end's cut is still that little above its bottom there (2.3px) */
-      top: calc(100% - 3px);
+      left: 0;
+      top: 100%;
       z-index: -1;
       width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
-      height: calc(var(--cmb-tag-inner-down) + 3px);
+      height: var(--cmb-tag-inner-down);
       background: var(--bubbly-pill);
       clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
@@ -2165,27 +2157,27 @@
       corner-shape: round;
     }
     /*
-     * a block's start tag:  its band where a Spell band starts, its `⟨` clear of its cut corner, as the page's;
+     * a block's start tag:  its band from its rail's left edge, its `⟨` clear of its cut corner, as the page's;
      * its `⟩` in its point, as every tag's (it had a bracket's room more there, the point past it;  I114)
      */
     .cmb-tag-band.cmb-band-open {
       position: relative;
       margin-left: var(--cmb-band-left);
       padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
+      border-bottom-left-radius: 0;
     }
     /*
-     * ... its rail dropping from under it, clear of its body's lines (I136), its corner with its body cut, as
-     * Monaco's:  under the text, into the line below (`z-index`), the rows' own rails carrying on from it
+     * ... its rail dropping from it, its corner with its body cut, as Monaco's:  under the text, into the line below
+     * (`z-index`), the rows' own rails carrying on from it
      */
     .cmb-tag-band.cmb-band-open::after {
       content: "";
       position: absolute;
-      left: var(--cmb-rail-in);
-      /* from 3px up in the band:  its pointed end's cut is still that little above its bottom there (2.3px) */
-      top: calc(100% - 3px);
+      left: 0;
+      top: 100%;
       z-index: -1;
       width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
-      height: calc(var(--cmb-tag-inner-down) + 3px);
+      height: var(--cmb-tag-inner-down);
       background: var(--bubbly-pill);
       clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
