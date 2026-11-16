@@ -39,9 +39,20 @@ ui-section.InspectorEvent.bubbly {
   --ui-section-fold-icon-size: 10px;
   --ui-section-title-gap: 4px;
   --ui-section-content-padding: 0;
+  /*
+   * room above the band only:  the body starts right under it, so the rail drops straight from its square corner
+   * (epic `editor` I215:  2px of the card's glass showed between them);  rows 8px apart, foot to band
+   */
+  --ui-section-title-padding: 4px 0 0;
 
   &::part(fold-icon) {
     color: var(--cmb-fold-ink, currentColor);
+  }
+
+  /* the band the row's whole width, past the chevron to the card's right edge (I215) */
+  &::part(header) {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   /* the body under the band, lined up with it:  past the chevron */
@@ -51,21 +62,44 @@ ui-section.InspectorEvent.bubbly {
 }
 
 /*
- * open, with a body:  a rail down the body's left from the band's square corner, turning into a foot under the code;
- * the band's colour behind the paper's round top-left corner, so the paper curves out of the band
+ * the row's buttons (✕, ▶) on the band's right end, the band's colour behind them (I215:  "the bar should go all the
+ * way to the right, including the `x`"):  the band's last piece, its round end, out to the paper's right edge
+ */
+ui-section.InspectorEvent.bubbly:has(> [slot="actions"])::part(actions) {
+  align-self: stretch;
+  align-items: center;
+  margin-inline: calc(-1 * var(--ui-section-title-gap)) -4px;
+  padding-inline: 4px 8px;
+  background: var(--bubbly-pill);
+  border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) 0;
+}
+
+/*
+ * open, with a body:  a rail down the body's left from the band's square corner, turning into a foot under the code,
+ * as the code pane draws a block's (I215)
+ * - the rail, the foot and the corner between them are the band's colour behind the paper, the row's own corner round:
+ *   the paper's round corners carve their insides, so the rail runs the body's whole height into the foot,
+ *   and the foot's swoop is one even curve (a left border, thinning round its round corner, stopped short of the foot)
+ * - the band's colour behind the paper's round top-left corner too, so the paper curves out of the band
  * - folded, or with no code (an ability with no condition):  the band alone
  */
 ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"])::part(content) {
-  border-left: var(--bubbly-gutter) solid var(--bubbly-pill);
-  border-bottom-left-radius: var(--bubbly-gutter-corner);
+  padding-left: var(--bubbly-gutter);
   padding-bottom: var(--bubbly-foot-height);
+  border-bottom-left-radius: var(--bubbly-gutter-corner);
   background:
+    linear-gradient(var(--bubbly-pill) 0 0) left top / var(--bubbly-gutter) 100% no-repeat,
     linear-gradient(var(--bubbly-pill) 0 0) left bottom / var(--bubbly-foot-width) var(--bubbly-foot-height) no-repeat,
-    linear-gradient(var(--bubbly-pill) 0 0) left top / var(--bubbly-inner-top) var(--bubbly-inner-top) no-repeat;
+    linear-gradient(var(--bubbly-pill) 0 0) left bottom / var(--bubbly-gutter-corner) var(--bubbly-gutter-corner)
+      no-repeat,
+    linear-gradient(var(--bubbly-pill) 0 0) left top / calc(var(--bubbly-gutter) + var(--bubbly-inner-top))
+      var(--bubbly-inner-top) no-repeat;
 }
 
 /* the band:  the row's icon and words, as tall as a band in the code, its words a little in from its round end */
 ui-section.InspectorEvent.bubbly > .InspectorEventWords {
+  display: flex;
+  width: 100%;
   min-height: var(--bubbly-pill-height);
   box-sizing: border-box;
   padding: 0 var(--bubbly-pill-pad-right) 0 8px;
@@ -88,6 +122,11 @@ ui-section.InspectorEvent.bubbly > .InspectorEventWords {
 /* open, with a body under it:  its bottom-left square, the rail dropping straight from it */
 ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"]) > .InspectorEventWords {
   border-bottom-left-radius: 0;
+}
+/* with buttons after it:  its right end theirs (above) */
+ui-section.InspectorEvent.bubbly:has(> [slot="actions"]) > .InspectorEventWords {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 /* the body's code:  on the code's paper, no field's border, its top-left curving out of the band */

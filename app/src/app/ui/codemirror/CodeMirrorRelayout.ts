@@ -18,7 +18,8 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  * Decorations worked out from the whole text, which follow the text as it's typed,
  * and are worked out again once the typing pauses.
  * - Typing never waits:  CodeMirror moves the marks with each change at once (`decorations.map()`).
- * - Worked out again after an edit, or a new parse (`CodeMirrorSetup.PARSED`), once nothing has changed for `msec`.
+ * - Worked out again after an edit, or a new parse (`CodeMirrorSetup.PARSED`), once nothing has changed for `msec`;
+ *   and as a view takes the state, which a parse may have reached while it was shown nowhere.
  * - And at once, in the same update, when a block folds or unfolds:  a folded block is drawn as its head alone
  *   (epic `language` I116), and waiting showed its body's rails and feet under it for a moment.
  * - In the editor's state, not a view plugin's, so its decorations may be block widgets.
@@ -53,11 +54,19 @@ export class CodeMirrorRelayout {
       class {
         private timer: CancelablePromise<void> | undefined
 
-        constructor(readonly view: EditorView) {}
+        constructor(readonly view: EditorView) {
+          // once more as a view takes the state:  a parse that came while it was shown nowhere told no plugin
+          // (epic `editor` I215:  the code pane drew the `if`s it opened on as plain lines)
+          this.relayoutSoon()
+        }
 
         update(update: ViewUpdate) {
           const isParsed = update.transactions.some((it) => it.effects.some((e) => e.is(CodeMirrorSetup.PARSED)))
           if (!update.docChanged && !isParsed) return
+          this.relayoutSoon()
+        }
+        /** Lay the text out again `msec` from now, unless something else changes first. */
+        relayoutSoon() {
           this.timer?.cancel()
           this.timer = after(msec / 1000, () => {
             this.view.dispatch({ effects: laidOut.of(decorationsOf(this.view.state)) })

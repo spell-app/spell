@@ -553,7 +553,8 @@ export class FileStates {
   }
 
   /**
-   * `file`'s parse changed:  its diagnostics become its state's problems, and `CodeMirrorSetup.PARSED` tells the rest.
+   * `file`'s parse changed:  its diagnostics become its state's problems, and `CodeMirrorSetup.PARSED` tells the rest,
+   * its slices' views too.
    * - Only a parse of the text the state holds:  an older one would put its problems in the wrong places.
    */
   private parseChanged(entry: FileEntry, file: SP.SpellFile): void {
@@ -565,6 +566,9 @@ export class FileStates {
       .map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
     const { effects } = setDiagnostics(state, problems)
     this.dispatch(entry, { effects: [...asList(effects), CodeMirrorSetup.PARSED.of(null)] })
+    // its slices too, so their bubbly look takes the parse:  a slice made before it drew its `if`s as plain lines
+    // (epic `editor` I215)
+    for (const slice of entry.slices) slice.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
   }
 }
 

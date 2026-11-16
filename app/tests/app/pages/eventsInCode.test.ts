@@ -237,4 +237,48 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     await page.waitForTimeout(800)
     expect(await allFiles()).toBe(beforeFiles)
   })
+
+  test("each row drawn as its block in the code:  band, rail and foot joined, the band to the right edge (I215)", async () => {
+    await page.evaluate(() =>
+      (window as unknown as { Inspector: { select(element: Element): void } }).Inspector.select(
+        document.querySelector("solitaire-app")!
+      )
+    )
+    await page.waitForTimeout(SETTLE_MS)
+    const scoreRow = row("the score changes")
+    await expect.poll(() => scoreRow.locator(".CodeSlice .cmb-band-open").count()).toBe(1)
+    const drawn = await scoreRow.evaluate((section) => {
+      const band = section.querySelector(".InspectorEventWords")!.getBoundingClientRect()
+      const content = section.shadowRoot!.querySelector("[part~=content]")!
+      const actions = section.shadowRoot!.querySelector("[part~=actions]")!.getBoundingClientRect()
+      const slice = section.querySelector(".CodeSlice")!
+      const scroller = slice.querySelector(".cm-scroller")!
+      return {
+        bandToBody: content.getBoundingClientRect().top - band.bottom,
+        bandToButtons: actions.left - band.right,
+        buttonsToPaperEnd: slice.getBoundingClientRect().right - actions.right,
+        buttonsBehind: getComputedStyle(section.shadowRoot!.querySelector("[part~=actions]")!).backgroundColor,
+        bandBehind: getComputedStyle(section.querySelector(".InspectorEventWords")!).backgroundColor,
+        overflow: scroller.scrollWidth - scroller.clientWidth,
+        railAndFoot: getComputedStyle(content).backgroundImage.split("linear-gradient").length - 1,
+        // its `if`:  its body under its band, railed, ending in a foot
+        ifRailed: [...slice.querySelectorAll(".cm-line")].filter((line) =>
+          line.getAttribute("style")?.includes("--cmb-rails")
+        ).length,
+        ifFeet: slice.querySelectorAll(".cmb-foot").length
+      }
+    })
+    // the rail drops straight from the band's square corner:  no glass between them
+    expect(drawn.bandToBody).toBeCloseTo(0, 1)
+    // the band runs on behind the ✕, out to the paper's right edge
+    expect(drawn.bandToButtons).toBeCloseTo(0, 1)
+    expect(drawn.buttonsToPaperEnd).toBeCloseTo(0, 1)
+    expect(drawn.buttonsBehind).toBe(drawn.bandBehind)
+    // lines that fit don't scroll sideways
+    expect(drawn.overflow).toBe(0)
+    // the rail, the foot, the swoop's corner and the paper's top corner:  all the band's colour behind the paper
+    expect(drawn.railAndFoot).toBe(4)
+    expect(drawn.ifRailed).toBe(2)
+    expect(drawn.ifFeet).toBe(1)
+  })
 })
