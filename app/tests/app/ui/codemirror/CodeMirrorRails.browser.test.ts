@@ -9,11 +9,12 @@ import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 import "spell/app/app/components/spell-code/bubbly.css"
 
 /**
- * A body's rail in the bubbly look, on a real CodeMirror editor in the browser (epic `language` I131):
- * the caret at the start of a body line stands in the middle of the rail the line hangs on
- * (Owen:  "slide the expanded pills over so the cursor is right in the center of the gutter line").
+ * A body's rail in the bubbly look, on a real CodeMirror editor in the browser (epic `language` I131, I136):
+ * 3px of room between the rail and what starts each line it hangs on, a plain line's first letter, a tag's
+ * pointed end (Owen, I136:  "Gap wins"), so nothing on the line touches it.
  * - Spell's bodies and a drawing's tags' alike, at every level.
- * - The rail stays under its band's round end:  the band's left edge is the rail's.
+ * - The words stay where they were, a body's under its head's (Owen, I136:  "Fix the gutters so all text and tags are
+ *   inset as they were before"):  the rail drops from under its band, a little in from its round end.
  */
 describe("a body's rail under the caret", () => {
   let view: EditorView | undefined
@@ -68,7 +69,7 @@ describe("a body's rail under the caret", () => {
   function railMiddle(view: EditorView, number: number): number | undefined {
     const line = view.domAtPos(view.state.doc.line(number).from).node
     const element = (line instanceof HTMLElement ? line : line.parentElement)!.closest<HTMLElement>(".cm-line")!
-    const columns = [...element.style.getPropertyValue("--cmb-rails").matchAll(/transparent (calc\(.*?band-left\)\))/g)]
+    const columns = [...element.style.getPropertyValue("--cmb-rails").matchAll(/transparent (calc\(.*?rail-left\)\))/g)]
     if (!columns.length) return undefined
     const probe = element.appendChild(document.createElement("span"))
     probe.style.cssText = `position: absolute; display: inline-block; height: 0; width: ${columns.at(-1)![1]}`
@@ -92,7 +93,7 @@ describe("a body's rail under the caret", () => {
     return starts.map((start) => lines.findIndex((line) => line.trimStart().startsWith(start)) + 1)
   }
 
-  test("at a body line's start, Spell's or a drawing's tags', at every level:  the caret in the middle of its rail", async () => {
+  test("at a body line's start, Spell's or a drawing's tags', at every level:  3px clear of its rail", async () => {
     const view = await bubblyEditorOf(NESTED)
     const bodyLines = linesStarting(view, [
       "// face down",
@@ -105,22 +106,27 @@ describe("a body's rail under the caret", () => {
       "</container>"
     ])
     // `</>` and `</container>` are their own blocks' feet:  on the rail of the block round them
-    const atRails: Array<{ line: number; caret: number; rail: number }> = []
+    const railWidth = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
+    const atRails: Array<{ line: number; start: number; rail: number }> = []
     for (const line of bodyLines.slice(0, 6)) {
-      atRails.push({ line, caret: await caretMiddle(view, line), rail: railMiddle(view, line)! })
+      // where the line starts:  a tag's pointed end, else its first letter, where the caret is
+      const tag = lineElement(view, line).querySelector<HTMLElement>(".cmb-tag-pill, .cmb-tag-band")
+      const start = tag ? tag.getBoundingClientRect().left : await caretMiddle(view, line)
+      atRails.push({ line, start, rail: railMiddle(view, line)! })
     }
-    for (const { line, caret, rail } of atRails)
-      expect(Math.abs(caret - rail), view.state.doc.line(line).text).toBeLessThan(0.1)
+    for (const { line, start, rail } of atRails)
+      expect(Math.abs(start - (rail + railWidth / 2) - 3), view.state.doc.line(line).text).toBeLessThan(0.1)
     // four levels of rail, each a tab stop further in
     const rails = [...new Set(atRails.map(({ rail }) => rail.toFixed(1)))]
     expect(rails.length).toBe(4)
   })
 
-  test("each rail under its band's round end:  the band's left edge is its rail's", async () => {
+  test("each rail dropping from under its band, a little in from its round end;  a body's words under its head's", async () => {
     const view = await bubblyEditorOf(NESTED)
     const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
     for (const [head, body] of [
       ["to turn it over", "if it is face up"],
+      ["to turn it over", 'say "done"'],
       ["if it is face up", "turn it face down"],
       ["<container", "<stock-pile"],
       ["<segment", "<action"]
@@ -131,9 +137,16 @@ describe("a body's rail under the caret", () => {
         .node.parentElement!.closest(".cm-line")!
         .querySelector<HTMLElement>(".cmb-band-open")!
       expect(band, head).toBeTruthy()
-      expect(Math.abs(band.getBoundingClientRect().left + rail / 2 - railMiddle(view, bodyLine!)!), head).toBeLessThan(
-        0.1
-      )
+      const { left, right } = band.getBoundingClientRect()
+      const middle = railMiddle(view, bodyLine!)!
+      // under the band, in from its round (or pointed) end:  5.25px
+      expect(middle - rail / 2 - left, head).toBeGreaterThan(5)
+      expect(middle + rail / 2, head).toBeLessThan(right)
+      // a Spell body's words start where its head's do, as before I131 (a head in it:  a tab further in, on its band)
+      if (!head.startsWith("<") && !lineElement(view, bodyLine!).querySelector(".cmb-band")) {
+        const words = left + Number.parseFloat(getComputedStyle(band).paddingLeft)
+        expect(Math.abs((await caretMiddle(view, bodyLine!)) - words), head).toBeLessThan(0.1)
+      }
     }
   })
 
@@ -229,9 +242,12 @@ describe("a body's rail under the caret", () => {
     const angle = lineElement(view, head!).querySelector(".bubbly-angle-open")!.getBoundingClientRect()
     expect(Math.abs(band.right - point.right - (angle.left - band.left))).toBeLessThan(0.1)
     expect(point.left - quotes[quotes.length - 1]!.getBoundingClientRect().right).toBeGreaterThan(2)
-    // the tag's rail, its children's, the block's left edge
+    // the tag's rail, its children's, dropping from under the block, a little in from its left edge, 3px clear of
+    // its child's pointed end (I136)
     const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
-    expect(Math.abs(band.left + rail / 2 - railMiddle(view, child!)!)).toBeLessThan(0.1)
+    expect(railMiddle(view, child!)! - rail / 2 - band.left).toBeGreaterThan(5)
+    const childTag = lineElement(view, child!).querySelector(".cmb-tag-pill, .cmb-tag-band")!.getBoundingClientRect()
+    expect(Math.abs(childTag.left - (railMiddle(view, child!)! + rail / 2) - 3)).toBeLessThan(0.1)
   })
 
   test("...the caret before its `>` at the last attribute's end, after it past the point;  wider as it's typed", async () => {
