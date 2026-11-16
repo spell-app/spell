@@ -8,7 +8,8 @@
  *       <script type="module" src="/element/spell-editor.js"></script>
  *       <spell-editor project="@spell/examples/Solitaire" app="#game"></spell-editor>
  *
- * - Holds the parser, to compile in the page.  Monaco is a chunk of its own, loaded once there's a project to show.
+ * - Holds the parser, to compile in the page.  CodeMirror is a chunk of its own, `spell-editor-codemirror.js`,
+ *   loaded once there's a project to show.
  * - NEVER imports `spell/parser/core`, even indirectly:  apps run on their own copy (`spellRuntime.ts`).
  */
 

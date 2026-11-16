@@ -281,7 +281,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
   - `spell`:  the ONE package, the kit's `src/` and every folder's, built into `dist/<folder>/`
     (`spell/ui/core` is `dist/ui/core.js`).
     - Lean by default (epic `epic-engine` P66):  npm installs only what the `spell` and `epic` commands need.
-      The rest (Monaco, Solid, Vite+ ...) publishes as optional peers, the kit's `"spellPublish": { "optionalPeers" }`.
+      The rest (CodeMirror, Solid, Vite+ ...) publishes as optional peers, the kit's `"spellPublish": { "optionalPeers" }`.
     - A command that needs one prints the `npm install spell@next ...` line to paste.
   - `spell-ui`:  Spell UI on its own, its Vite library build, with the element code inside.
   - `spell-epic`:  the epic plugin for Claude Code, its parts at its root, its code `spell`'s.

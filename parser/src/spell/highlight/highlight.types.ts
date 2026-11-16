@@ -1,10 +1,10 @@
 /**
- * The types of `highlight/`:  the BUBBLY LAYOUT, Spell drawn so what a person typed stands apart from Spell's own
- * words, as data.
+ * The types of `highlight/`:  the BUBBLY LAYOUT, as data:
+ * Spell drawn so what a person typed stands apart from Spell's own words.
  * - `SP.BubblyLayout` makes a `BubblyDrawing` from source;  `SP.BubblyPresentation` says how each rule presents.
  * - Read by everything that draws the look, so they draw the same blocks, bands and pills:
  *   - the app's `BubblyHtml` (`<spell-code>`, `<ui-code language="spell">`, the drawn-bubbly page)
- *   - Monaco's decorations (epic `language` P50) and VS Code's (P51)
+ *   - the app's code editor's decorations (epic `codemirror` P3) and VS Code's (P51)
  * - Types only:  nothing here runs.
  */
 
@@ -215,8 +215,8 @@ export type BubblyRole =
  * - `match`:  the role of everything it matched (`is a {type}`:  `question`)
  * - each of its groups, by name:  that part's role (`signature: "declaration"`, `item: "blank"`)
  * - `literal`:  a word of its syntax that's a name, `{ droppable: "name" }`;  any other word is Spell's own, plain
- * - A rule with no roles draws by the defaults:  names that read or set something bold, Spell's own words plain,
- *   written values italic.
+ * - A rule with no roles draws by the defaults:
+ *   names that read or set something bold, Spell's own words plain, written values italic.
  */
 export type BubblyRuleRoles = {
   /** a declaration's head, on a band of this colour */
@@ -239,8 +239,8 @@ export type BubblyRuleRoles = {
  * - Every field is optional:  a rule with no row draws by its roles alone.
  * - Rule names, never class names:  a rule's `name` is what its syntax strings call it (`{define_property_has}`),
  *   the same in every language;  a rule built while parsing (a phrase, `is_a_$suit`) goes by its `importableAs`.
- * - Its CHECKS, each a look no role says yet (epic `language` P60, Q69):  `namesKind`, `namesWhatItDraws`, `choices`,
- *   `blankAfterVerb`.
+ * - Its CHECKS, each a look no role says yet (epic `language` P60, Q69):
+ *   `namesKind`, `namesWhatItDraws`, `choices`, `blankAfterVerb`.
  */
 export type BubblyRulePresentation = {
   /** a group:  its body holds the declarations after it, up to the next group */

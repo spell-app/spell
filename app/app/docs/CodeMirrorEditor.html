@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>CodeMirrorEditor</title>
+    <meta name="description" content="A CodeMirror editor, filling its parent:  what every code editor in the app is." />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="CodeMirrorEditor">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="../../src/app/solid/codemirror/CodeMirrorEditor.tsx"
+              icon="code"
+              aria-label="Its code, CodeMirrorEditor.tsx"
+              title="Its code, CodeMirrorEditor.tsx"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            CodeMirrorEditor
+            <ui-header>A CodeMirror editor, filling its parent: what every code editor in the app is.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            CodeMirror 6, as a Solid component that fills the box it's in. Every code editor in the app is one: the
+            code pane, the Inspector's Code card, the Program panel's JavaScript, TypeScript and Python tabs, Publish's
+            diff, a notebook's cells, and the editor in a
+            <a href="spell-editor.html" target="src-packages-app-docs-spell-editor-html"
+              ><code>&lt;spell-editor&gt;</code></a
+            >.
+          </p>
+          <ui-list class="spell-meta">
+            <ui-item icon="user">Written for: anyone changing a code editor in the app, or reading its code</ui-item>
+            <ui-item icon="image">A picture, not live: it needs the editor's page around it</ui-item>
+          </ui-list>
+
+          <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="image"></ui-icon>
+            <p>
+              The one in the editor's "Javascript Output" pane, now the Program panel's JavaScript tab: Solitaire's
+              Card.spell, compiled.
+            </p>
+            <ui-image
+              src="_images/CodeMirrorEditor.png"
+              alt="A code editor showing compiled javascript, with line numbers"
+              appearance="bordered rounded"
+            >
+            </ui-image>
+            <p class="meta">
+              A picture, taken by <code>yarn site:pictures</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              The Program panel's code tabs (<code>OutputEditor</code>) draw one on some text, read only. It loads it
+              lazily, so it goes inside a
+              <code>&lt;Loading&gt;</code> that shows "Loading editor…" till it's in:
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>OutputEditor.tsx · the compiled code · 6 lines</ui-title>
+              <ui-content>
+                <ui-code language="typescript"
+                  ><script type="text/plain">
+                    <Loading fallback={<LazyCodeMirror.Loading />}>
+                      <LazyCodeMirror.CodeMirrorEditor
+                        value={code()}
+                        language={target ? TARGET_LOOKS[target].language : "javascript"}
+                      />
+                    </Loading>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Only the editor's pages need CodeMirror, so it's never imported directly: the app loads it after the
+                program has compiled and run, through <code>LazyCodeMirror</code>, and a
+                <code>&lt;spell-editor&gt;</code> through its own loader.
+              </li>
+              <li>
+                What it shows:
+                <ul>
+                  <li>
+                    <code>state</code>, someone else's, which wins: a file's, from the app's <code>FileStates</code>;
+                    the <a href="FileEditor.html" target="src-packages-app-docs-fileeditor-html">FileEditor</a> shows
+                    each file's state in one view
+                  </li>
+                  <li>
+                    else <code>value</code>, in a state of its own: with <code>extensions</code>, or as
+                    <code>language</code> says (compiled code, read only, its lines numbered; or a snippet of Spell)
+                  </li>
+                </ul>
+              </li>
+              <li>
+                It's made once, when it's settled into the page: remount it for a fresh editor. A file's editor
+                doesn't: it shows each file's state in the same view.
+              </li>
+              <li>
+                A new <code>value</code> goes in only if it differs, as a new starting point: undo can't go back past
+                it, and <code>onChange</code> isn't called. That's only for the person's own edits.
+              </li>
+              <li>
+                <code>onMount</code> and <code>onUnmount</code> hand out the view itself, to show a file in it or
+                follow the caret.
+              </li>
+              <li>
+                It works inside a shadow root too, as in a <code>&lt;spell-editor&gt;</code>: the view's root is the
+                element's.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-props" label="3. Props, and where it's drawn" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-docs-api family="CodeMirrorEditor"></ui-docs-api>
+            <p class="meta">
+              From its code, by <code>yarn site:data</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="4-its-code" label="4. Its code" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="folder open"></ui-icon>
+            <ul>
+              <li>
+                <a
+                  href="../../src/app/solid/codemirror/CodeMirrorEditor.tsx"
+                  target="src-app-src-app-solid-codemirror-codemirroreditor-tsx"
+                  ><code title="src/app/solid/codemirror/CodeMirrorEditor.tsx">CodeMirrorEditor.tsx</code></a
+                >: the component, and its props
+              </li>
+              <li>
+                <a
+                  href="../../src/app/solid/codemirror/CodeMirrorEditor.css"
+                  target="src-app-src-app-solid-codemirror-codemirroreditor-css"
+                  ><code title="src/app/solid/codemirror/CodeMirrorEditor.css">CodeMirrorEditor.css</code></a
+                >: its look
+              </li>
+              <li>
+                <a href="../../src/app/solid/LazyCodeMirror.tsx" target="src-app-src-app-solid-lazycodemirror-tsx"
+                  ><code title="src/app/solid/LazyCodeMirror.tsx">LazyCodeMirror.tsx</code></a
+                >: how the app loads it, once the program has run
+              </li>
+              <li>
+                <a
+                  href="../../src/app/spellEditor/SpellEditorPane.tsx"
+                  target="src-packages-app-src-spelleditor-spelleditorpane-tsx"
+                  ><code title="src/app/spellEditor/SpellEditorPane.tsx">SpellEditorPane.tsx</code></a
+                >: the one in a <code>&lt;spell-editor&gt;</code>
+              </li>
+              <li>
+                Its tests, with the code pane's:
+                <a
+                  href="../../tests/app/solid/InputEditor.browser.test.tsx"
+                  target="src-tests-app-src-solid-inputeditor-browser-test-tsx"
+                  ><code title="tests/app/solid/InputEditor.browser.test.tsx">InputEditor.browser.test.tsx</code></a
+                >
+              </li>
+              <li>
+                CodeMirror's plumbing under it, Spell's language in it:
+                <a href="../../src/app/ui/codemirror/" target="src-app-src-app-ui-codemirror"
+                  ><code title="src/app/ui/codemirror/">SpellCodeMirror</code></a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-11-16 against branch <code>codemirror</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

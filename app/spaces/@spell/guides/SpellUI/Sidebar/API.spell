@@ -1,5 +1,4 @@
 "sidebar api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>

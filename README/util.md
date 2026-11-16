@@ -373,7 +373,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
   so ten writes in a row redraw it ONCE, when Solid next runs, or at `flushCells()` (below).
 - **Plain code, through `observe(fn)`:**  `fn` runs again synchronously, so ten writes run it ten times.
   Only a change to a derived value it read waits for a microtask.
-  The editor follows a file's `contents` into its Monaco model this way.
+  The editor follows a file's `contents` into its CodeMirror state this way (`FileStates`).
 
 <details>
 <summary>Wiring cells to Solid:  the host's job</summary>

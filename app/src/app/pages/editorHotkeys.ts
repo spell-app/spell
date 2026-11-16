@@ -3,27 +3,26 @@ import { createSignal, onSettled } from "solid-js"
 import { UI } from "spell/ui/core"
 import { editor } from "spell/app/app/editor"
 import { ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
-import type { monaco } from "spell/app/app/solid/monaco"
-
-/** The code editor's find, opened with its replace row showing:  what ⌘F runs (epic `editor` I105). */
-export const FIND_AND_REPLACE = "editor.action.startFindReplaceAction"
+import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spell/app/app/ui/ui.types"
 
 /**
  * The editor page's keyboard shortcuts:  ONE list (`EDITOR_HOTKEYS`), which the page's keys, the code editor's
  * commands and the top bar's menus all read (epic `debut` P32).
- * - Each key, in Spell UI's words (`mod+S`:  ⌘S on a Mac, Ctrl+S elsewhere), is what a menu item shows
- *   (`<ui-action shortcut>`).
+ * - Each key, in Spell UI's words (`mod+S`:  ⌘S on a Mac, Ctrl+S elsewhere),
+ *   is what a menu item shows (`<ui-action shortcut>`).
  * - The page's keys go through Spell UI's one keyboard (`UI.keyboard`), registered while the page is up
  *   (`editorHotkeys()`).
- * - Inside the code editor (Monaco) its own commands run them (`addCodeEditorKeys()`):  the page leaves a key typed
- *   there, or into any field, alone, so one press never runs twice.
- * - Find is the code editor's own key:  listed so the menus show it, bound by Monaco itself.
+ * - Inside the code editor its own keymap runs them (`SpellCodeMirror.keymapFor()`);
+ *   the page leaves a key typed there, or into any field, alone, so one press never runs twice.
+ * - The code editor's own keys (Find, Go to Definition, Rename Symbol ...) are its commands,
+ *   by neutral names (`codeEditorCommand`, epic `codemirror` P5):
+ *   listed so the menus show them;  the code editor's keymap is made from this list.
  * - Cut, Copy, Paste, Duplicate and Delete are on what's selected in the app:  never a key in the code or a field,
  *   where the page leaves them alone.
  * - Undo and Redo go by focus (`undoWay()`):
  *   - in the code:  the code editor's own undo
- *   - in the running app, or on nothing (the page's body), in Run or Edit:  the program's own first,
- *     a move in the game;  with none to undo, the key comes on to ours (epic `editor` I167)
+ *   - in the running app, or on nothing (the page's body), in Run or Edit:
+ *     the program's own first, a move in the game;  with none to undo, the key comes on to ours (epic `editor` I167)
  *     - the program's keys are registered after ours, so they're asked first (core's `listenForUndoKeys()`)
  *   - anywhere else in Edit, the Inspector's fields too:  the editor's history (`editor.history`);
  *     with nothing there, what was typed in the code, so a click on the app doesn't strand it (epic
@@ -37,10 +36,13 @@ export const EDITOR_HOTKEYS = {
   createFile: { shortcut: "alt+mod+N", run: () => editor.createFile() },
   stopInspecting: { shortcut: "Escape", run: stopInspecting, outsideCode: true },
   changeThis: { shortcut: "mod+K", run: () => ChangeThis.open(), outsideCode: true },
-  undo: { shortcut: "mod+Z", codeEditorAction: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
-  redo: { shortcut: "shift+mod+Z", codeEditorAction: "redo", run: () => undoOutsideCode("redo"), inProperties: true },
+  undo: { shortcut: "mod+Z", codeEditorCommand: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
+  redo: { shortcut: "shift+mod+Z", codeEditorCommand: "redo", run: () => undoOutsideCode("redo"), inProperties: true },
   // find AND replace, as VS Code's ⌥⌘F:  its own ⌘R reloads the page here (Owen, epic `editor` I105)
-  find: { shortcut: "mod+F", codeEditorAction: FIND_AND_REPLACE },
+  find: { shortcut: "mod+F", codeEditorCommand: "find" },
+  goToDefinition: { shortcut: "F12", codeEditorCommand: "goToDefinition" },
+  findReferences: { shortcut: "shift+F12", codeEditorCommand: "findReferences" },
+  rename: { shortcut: "F2", codeEditorCommand: "rename" },
   cutParts: { shortcut: "mod+X", run: () => partsAction("cut"), outsideCode: true },
   copyParts: { shortcut: "mod+C", run: () => partsAction("copy"), outsideCode: true },
   pasteParts: { shortcut: "mod+V", run: () => partsAction("paste"), outsideCode: true },
@@ -58,8 +60,8 @@ export type Hotkey = {
   shortcut: string
   /** What it does;  none:  the code editor's own key, only shown. */
   run?: () => unknown
-  /** The code editor's own action it is, which a menu item runs (`runCodeEditorAction()`). */
-  codeEditorAction?: string
+  /** The code editor's own command it is, which a menu item runs (`runCodeEditorCommand()`), by its neutral name. */
+  codeEditorCommand?: CodeEditorCommand
   /** A key the code editor never takes (Esc):  the page's alone, never a code editor command. */
   outsideCode?: boolean
   /** A key that's still the page's in a property editor's field:  Undo, where the field's change is a step. */
@@ -69,7 +71,8 @@ export type Hotkey = {
 /**
  * Turn the editor page's shortcuts on while the page is up:  each of `EDITOR_HOTKEYS` that runs something,
  * on Spell UI's keyboard.
- * - Call in `<SpellEditor>`'s body.  `isRunning`:  is it showing Run?  Undo is then the program's.
+ * - Call in `<SpellEditor>`'s body.
+ * - `isRunning`:  is it showing Run?  Undo is then the program's.
  * - A running program's ⌘Z, in the app or on nothing, is asked before ours:  its keys are registered later.
  * - A Mod key works with Command or Control, on every system.
  * - A key typed into a field, or into the code editor, is left alone:  the code editor runs its own.
@@ -114,24 +117,6 @@ export function editorHotkeys(isRunning: () => boolean): void {
 }
 
 /**
- * Give the code editor (Monaco) the page's shortcuts as its own commands:  Save, Revert, Compile and Run, New File.
- * - Why:  a key typed in it is the code editor's, which the page's keys leave alone (`isEditable()`).
- * - Its own keys (Undo, Redo, Find) it binds itself;  Esc stays the page's.
- */
-export function addCodeEditorKeys(codeEditor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco): void {
-  const { KeyMod, KeyCode } = api
-  for (const hotkey of Object.values(EDITOR_HOTKEYS) as Hotkey[]) {
-    const run = hotkey.run
-    // Monaco binds its own undo
-    if (!run || hotkey.outsideCode || hotkey.codeEditorAction) continue
-    const chord = UI.keyboard.chord(hotkey.shortcut)
-    const key = chord.key === "enter" ? KeyCode.Enter : KeyCode[`Key${chord.key.toUpperCase()}` as "KeyS"]
-    const modifiers = KeyMod.CtrlCmd | (chord.shift ? KeyMod.Shift : 0) | (chord.alt ? KeyMod.Alt : 0)
-    codeEditor.addCommand(modifiers | key, () => void run())
-  }
-}
-
-/**
  * What the Edit menu's Undo and Redo reach now:  the code editor's own, or the editor's history;
  * `false` in Run:  the program's.
  * - A menu takes focus when it opens, so a focus in a menu doesn't count:  they go by where it was last.
@@ -154,17 +139,25 @@ function undoOutsideCode(action: "undo" | "redo"): unknown {
 }
 
 /**
- * Undo or redo in Edit with the focus off the code:  the side bar's change, else what was typed in the code.
+ * Undo or redo in Edit with the focus off the code:  the side bar's change, else what was typed in the code
+ * (epic `editor` I167's order;  epic `codemirror` Q2):  the code editor's own history.
  * - true if it did either.
  * - Leaves the focus where it is:  on the thing selected in the app, say.
  */
 function undoInEdit(action: "undo" | "redo"): boolean {
   if (editor.history[action]()) return true
-  const codeEditor = editor.getInputEditor()
-  const model = codeEditor?.getModel()
-  if (!codeEditor || !model || !(action === "undo" ? model.canUndo() : model.canRedo())) return false
-  codeEditor.trigger("keyboard", action, undefined)
+  const codeEditor = codeEditorNow()
+  if (!codeEditor?.canUndo(action)) return false
+  codeEditor.undo(action)
   return true
+}
+
+/**
+ * The code editor the page's keys and menus reach now:  the one that has (or last had) the focus,
+ * else the code pane's (`editor.getInputEditor()`).
+ */
+export function codeEditorNow(): CodeEditorHandle | undefined {
+  return codeEditors.focused ?? editor.getInputEditor()
 }
 
 /**
@@ -178,37 +171,27 @@ function partsAction(action: PartAction): unknown {
 
 /** Cut, Copy or Paste from a menu:  the code editor's own in the code, else on what's selected in the app. */
 export function cutCopyOrPaste(action: "cut" | "copy" | "paste"): void {
-  if (undoWay() === "code") return runCodeEditorAction(CLIPBOARD_ACTIONS[action])
+  if (undoWay() === "code") return runCodeEditorCommand(action)
   PartEdits.run(action)
 }
-
-/** The code editor's action for each of Cut, Copy and Paste. */
-const CLIPBOARD_ACTIONS = {
-  cut: "editor.action.clipboardCutAction",
-  copy: "editor.action.clipboardCopyAction",
-  paste: "editor.action.clipboardPasteAction"
-} as const
 
 /** Undo or redo from a menu, by `undoWay()`. */
 export function undoOrRedo(action: "undo" | "redo"): void {
   const way = undoWay()
-  if (way === "code") runCodeEditorAction(action)
+  if (way === "code") runCodeEditorCommand(action)
   else if (way === "history") undoInEdit(action)
 }
 
-/** Run the code editor's own action `name` (`undo`, `FIND_AND_REPLACE`), focusing it first.  Nothing without one. */
-export function runCodeEditorAction(name: string): void {
-  const codeEditor = editor.getInputEditor()
-  if (!codeEditor) return
-  codeEditor.focus()
-  codeEditor.trigger("menu", name, undefined)
+/** Run the code editor's own `command` (`undo`, `find` ...), focusing it first.  Nothing without one. */
+export function runCodeEditorCommand(command: CodeEditorCommand): void {
+  codeEditorNow()?.run(command)
 }
 
-/** Was `event` typed into something editable:  a field, a `contenteditable`, or the code editor (Monaco)? */
+/** Was `event` typed into something editable:  a field, a `contenteditable`, or the code editor? */
 export function isEditable(event: KeyboardEvent): boolean {
   const target = event.composedPath()[0]
   if (!(target instanceof HTMLElement)) return false
-  return target.isContentEditable || target.matches("input, textarea, select") || !!target.closest(".monaco-editor")
+  return target.isContentEditable || target.matches("input, textarea, select") || !!target.closest(CODE_SELECTOR)
 }
 
 /** Is `event` in a property editor:  the Inspector's fields? */
@@ -238,8 +221,8 @@ const [focusInCode, setFocusInCode] = createSignal(false)
 /** Is the page showing Run?  What `editorHotkeys()` was handed. */
 let isRunningNow: () => boolean = () => false
 
-/** What holds the code editor, and what a menu is:  see `undoWay()`. */
-const CODE_SELECTOR = ".monaco-editor"
+/** What holds a code editor, and what a menu is:  see `undoWay()`. */
+const CODE_SELECTOR = ".cm-editor"
 const MENU_SELECTOR = "ui-menu, ui-dropdown, ui-action"
 const PROPERTY_EDITOR = "ui-property-editor"
 

@@ -131,19 +131,19 @@
       "group": "editors",
       "file": "src/app/solid/OutputEditor.tsx"
     },
-    "MonacoEditor": {
-      "title": "MonacoEditor",
-      "summary": "A Monaco editor, filling its parent:  what every code editor in the app is.",
+    "CodeMirrorEditor": {
+      "title": "CodeMirrorEditor",
+      "summary": "A CodeMirror editor, filling its parent:  what every code editor in the app is.",
       "status": "done",
       "group": "editors",
-      "file": "src/app/solid/monaco/MonacoEditor.tsx"
+      "file": "src/app/solid/codemirror/CodeMirrorEditor.tsx"
     },
     "FileEditor": {
       "title": "FileEditor",
-      "summary": "A Monaco editor on one spell file, kept in step with it.",
+      "summary": "A CodeMirror editor on the project's files, one at a time, each kept in step with its file.",
       "status": "done",
       "group": "editors",
-      "file": "src/app/solid/monaco/FileEditor.tsx"
+      "file": "src/app/solid/codemirror/FileEditor.tsx"
     },
     "FileDropdown": {
       "title": "FileDropdown",

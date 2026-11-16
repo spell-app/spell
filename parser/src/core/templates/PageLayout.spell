@@ -1,0 +1,13 @@
+## A page layout:  what stays on screen around a site's pages, while people move between them
+// Built into spell (epic `mockup` T39):  compiled once, into the core's `PageLayout`.
+// A layout made from it says what each of its slots shows, `to draw its app menu:` ...:  the site draws it ONCE,
+// and puts the page shown in its middle, so going between pages that share it redraws only the page.
+// - A page picks its layout on its own line, `Systems is a page, in the bare layout`, or `, no layout`;
+//   every other page is in the site's `main layout`, when the program has one.
+// - A page may draw one of its slots itself, `to draw its right sidebar:`:  the page's wins while it's shown.
+// - A slot nobody draws is empty, and takes no room;  the drawer holds the site's navigation unless a layout draws it.
+a "page layout" is a view
+	it has slots "app menu", "page menu", "drawer", "left sidebar", "right sidebar" and "footer"
+	// the shown page's family as tabs, a row of their own under the app menu:  none for a page with no family
+	to draw its page menu
+		<ui-site-tabs />

@@ -1,174 +1,35 @@
 /*
- * Spell's CodeMirror editor, drawn bubbly (epic `editor` P30, the CodeMirror test):  what's the editor's own.
- * - The look itself is `bubbly.css`'s, the look's one sheet:  the editor's box is a `.bubbly` (`CodeMirrorBubbly`),
- *   so its settings and its page rules reach the marks in the text, which are real elements, as on the page.
- * - Here:  the box, the lines' size, a tab stop's width, the bands, rails and feet, a drawing's tags, the selection,
- *   and the find panel, suggestions and hover in the page's colours.
+ * Spell's CodeMirror editor (epic `editor` P30;  epic `codemirror`):  what's the editor's own.
+ * - The look itself is `bubbly.css`'s, the look's one sheet, its CodeMirror section:  the editor's box is a `.bubbly`
+ *   (`CodeMirrorBubbly`, `CodeMirrorMarkup`), so its settings and its page rules reach the marks in the text, which are
+ *   real elements, as on the page.  NOTHING of the look here (epic `codemirror` P3).
+ * - Here:  the find panel, suggestions, hover and problems in the page's colours, the gutter, the compiled code's
+ *   view and the merge view's own pieces.
  * - Light and dark from one set, `light-dark()`, as `bubbly.css`:  the page's `color-scheme` picks.
  */
 
-.bubbly.cmb-editor {
-  /* a tab stop:  how far a body's lines sit in from its band */
-  --cmb-indent: 24px;
-  /* room before a line's words:  a top-level band's round end, half a tab further left, still shows */
-  --cmb-line-pad: 22px;
-  /* a band starts this far left of its words, and its rail there */
-  --cmb-band-inset: 10px;
-  /* a rail's width, a foot's height */
-  --cmb-rail: 3px;
-  /* a line's height:  room for a band, with a little between two */
-  --cmb-line-height: 26px;
-
-  /* each part of speech's band over the paper, for the rails a line draws (the bands themselves are `--bubbly-pill`) */
-  --cmb-band-thing: light-dark(
-    color-mix(in srgb, var(--bubbly-thing) 20%, white),
-    color-mix(in srgb, var(--bubbly-thing) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-action: light-dark(
-    color-mix(in srgb, var(--bubbly-action) 20%, white),
-    color-mix(in srgb, var(--bubbly-action) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-property: light-dark(
-    color-mix(in srgb, var(--bubbly-property) 20%, white),
-    color-mix(in srgb, var(--bubbly-property) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-plain: light-dark(
-    color-mix(in srgb, var(--bubbly-plain) 20%, white),
-    color-mix(in srgb, var(--bubbly-plain) 34%, var(--bubbly-paper-dark))
-  );
-  --cmb-band-control: light-dark(
-    color-mix(in srgb, var(--bubbly-control) 20%, white),
-    color-mix(in srgb, var(--bubbly-control) 34%, var(--bubbly-paper-dark))
-  );
-
-  /* the drawing's box is the editor's:  its paper, no border, padding or margin of its own */
+/* with the look off (`CodeMirrorLook`):  Spell in the page's font, coloured by its tokens */
+.cm-editor.cmb:not(.bubbly, .cmb-code) {
+  /* what the popups below read of the look's sheet, which a box that isn't a `.bubbly` doesn't have */
+  --bubbly-font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bubbly-ink: var(--ui-code-color, light-dark(#3a3a44, #dedde6));
+  --bubbly-bold-ink: var(--ui-code-color, light-dark(#26252e, #f1f0f6));
+  --bubbly-comment-ink: var(--ui-code-comment, light-dark(#8a8996, #8e8c9a));
+  --bubbly-paper: var(--ui-code-background, light-dark(white, #1c1b22));
   height: 100%;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  max-width: none;
-  overflow: hidden;
   font-size: 15px;
-  line-height: var(--cmb-line-height);
 
   .cm-scroller {
     font-family: var(--bubbly-font-family);
-    line-height: var(--cmb-line-height);
+    line-height: 23px;
   }
   .cm-content {
-    tab-size: var(--cmb-indent);
-    padding: 8px 0;
-    caret-color: var(--bubbly-bold-ink);
+    tab-size: 4;
   }
-  .cm-line {
-    padding: 0 16px 0 var(--cmb-line-pad);
-    /* the rails of the blocks it's inside:  one stripe each (`CodeMirrorBubbly`) */
-    background-image: var(--cmb-rails, none);
-  }
-  .cm-cursor {
-    border-left-color: var(--bubbly-bold-ink);
-  }
+}
 
-  /*
-   * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
-   * - Monaco's sheet does the same for its shapes (`--bubbly-selection-strength`)
-   */
-  .cm-selectionLayer {
-    z-index: 1 !important;
-    pointer-events: none;
-  }
-  .cm-selectionBackground,
-  &.cm-focused .cm-selectionBackground {
-    background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
-  }
-
-  /****** a declaration's head:  its band ******/
-  .cmb-hue {
-    --bubbly-pill: light-dark(
-      color-mix(in srgb, var(--bubbly-hue) 20%, white),
-      color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark))
-    );
-    --bubbly-input: light-dark(
-      color-mix(in srgb, white var(--bubbly-input-opacity), transparent),
-      color-mix(
-        in srgb,
-        color-mix(in srgb, var(--bubbly-hue) 14%, var(--bubbly-input-dark)) var(--bubbly-input-opacity),
-        transparent
-      )
-    );
-    --bubbly-expression-pill: light-dark(
-      color-mix(in srgb, var(--bubbly-hue) 62%, #1f1f26),
-      color-mix(in srgb, var(--bubbly-hue) 45%, white)
-    );
-    --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
-  }
-  .bubbly-group.cmb-hue {
-    --bubbly-pill: light-dark(
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
-    );
-  }
-  .cmb-band {
-    position: relative;
-    display: inline-block;
-    height: var(--bubbly-pill-height);
-    line-height: var(--bubbly-pill-height);
-    vertical-align: middle;
-    /* its words stay on their tab stop:  the band reaches left of them */
-    margin-left: calc(-1 * var(--cmb-band-inset));
-    padding: 0 var(--bubbly-pill-pad-right) 0 var(--cmb-band-inset);
-    border-radius: var(--bubbly-pill-radius);
-    background: var(--bubbly-pill);
-    white-space: pre;
-  }
-  /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line */
-  .cmb-band-open {
-    border-bottom-left-radius: 0;
-  }
-  .cmb-band-open::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 100%;
-    width: var(--cmb-rail);
-    height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
-    background: var(--bubbly-pill);
-  }
-
-  /* a block's foot:  a short bar off its rail, on a thin line of its own */
-  .cmb-foot-row {
-    position: relative;
-    height: calc(var(--cmb-rail) + 4px);
-    background-image: var(--cmb-rails, none);
-  }
-  .cmb-foot {
-    position: absolute;
-    top: 0;
-    left: calc(var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) - var(--cmb-band-inset));
-    width: calc(var(--cmb-rail) * 6);
-    height: var(--cmb-rail);
-    border-radius: 0 var(--cmb-rail) var(--cmb-rail) var(--cmb-rail);
-    background: var(--bubbly-pill);
-  }
-
-  /****** a drawing's tag:  a band of the structure's blue, as the drawn-bubbly page draws HTML ******/
-  .cmb-tag {
-    display: inline-block;
-    line-height: var(--bubbly-pill-height);
-    padding: 0 3px;
-    border-radius: 6px;
-    background: var(--bubbly-pill);
-  }
-  .cmb-tag .bubbly-tag {
-    font-weight: var(--bubbly-bold);
-    color: var(--bubbly-bold-ink);
-  }
-  .cmb-tag-close {
-    font-size: 0.85em;
-    opacity: 0.8;
-  }
-
+/* every CodeMirror editor's popups, the look on or off */
+.cm-editor.cmb {
   /****** popups:  the find panel, suggestions, hover, problems, in the page's colours ******/
   .cm-panels {
     background: light-dark(#f6f5fa, #26252e);
@@ -274,7 +135,7 @@
 }
 
 /*
- * Every CodeMirror editor's gutter (`CodeMirrorSetup`), as Monaco's is drawn (`MonacoEditor.css`, epic `editor` I154):
+ * Every CodeMirror editor's gutter (`CodeMirrorSetup`;  epic `editor` I154):
  * - no line numbers until asked;  then they come first
  * - the fold arrows' column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code:
  *   its chevron ends well before a line's first word
@@ -322,34 +183,57 @@
   }
 }
 
-/* a hover's words:  its text, its code blocks */
-.cmb-hover {
+/* a hover's words and signature help's, drawn by Spell UI's `<ui-markdown>` (`CodeMirrorLanguage`) */
+.cmb-hover,
+.cmb-signature {
   max-width: 480px;
   padding: 8px 12px;
   line-height: 1.45;
 
-  p {
-    margin: 0 0 6px;
+  ui-markdown {
+    --ui-font-size: 13px;
+    font-size: 13px;
   }
-  p:last-child {
-    margin-bottom: 0;
+}
+
+/* the uses of the word at the caret, when asked (`?highlights=on`):  a read, and a write */
+.cmb-highlight {
+  border-radius: 3px;
+  background: light-dark(rgb(120 100 220 / 14%), rgb(170 150 255 / 18%));
+}
+.cmb-highlight-write {
+  background: light-dark(rgb(220 140 60 / 18%), rgb(255 180 100 / 20%));
+}
+
+/* Rename Symbol's field over the name (`CodeMirrorRename`), and what it says where it can't */
+.cmb-rename {
+  /* the tooltip's border, this padding, the field's border and padding:  1 + 4 + 1 + 6 */
+  --cmb-rename-inset: 12px;
+  padding: 4px;
+  /* the field's text starts where the name's does:  the tooltip pulled left by what's before the text */
+  margin-left: calc(-1 * var(--cmb-rename-inset));
+
+  input {
+    box-sizing: border-box;
+    width: 220px;
+    padding: 3px 6px;
+    border: 1px solid var(--ui-primary, #6e56cf);
+    border-radius: 4px;
+    background: var(--bubbly-paper);
+    color: var(--bubbly-ink);
+    font: inherit;
+    outline: none;
   }
-  hr {
-    margin: 6px 0;
-    border: 0;
-    border-top: 1px solid light-dark(#e6e4ee, #34323f);
-  }
-  pre {
-    margin: 0 0 6px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    background: light-dark(#f4f2f9, #2a2932);
-    font:
-      12px / 1.4 ui-monospace,
-      Menlo,
-      monospace;
-    white-space: pre-wrap;
-  }
+}
+.cmb-rename-message {
+  max-width: 420px;
+  padding: 6px 10px;
+  white-space: pre-line;
+}
+
+/* the suggestions' details hidden, as Settings… says (`CodeMirrorPopups`) */
+.cm-editor.suggest-details-hidden .cm-completionInfo {
+  display: none;
 }
 
 /****** another language's code (the compiled javascript):  coloured by the page's code colours ******/
@@ -387,5 +271,91 @@
   .cm-changedText,
   .cm-deletedText {
     background: color-mix(in srgb, #f2994a 40%, transparent) !important;
+  }
+}
+
+/*
+ * Web addresses, errors on a plain hover, heading comments (epic `codemirror` P5):
+ * `CodeMirrorLinks`, `CodeMirrorHovers`, `CodeMirrorHeadings`.
+ */
+.cm-editor.cmb {
+  /* a web address with ⌘ held over it:  underlined, a hand to click it with */
+  .cmb-link-ready {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  /* its tip on a plain hover, "⌘-click to open":  the hover's look */
+  .cmb-link-tip {
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+
+  /*
+   * the icon after each web address:  Font Awesome's up-right-from-square, small and muted
+   * (Font Awesome Free 7.3.1 by @fontawesome, https://fontawesome.com, icons CC BY 4.0);
+   * a plain click on it opens the address, so it shows a hand, and the link's colour when hovered
+   */
+  .cmb-link-icon {
+    display: inline-block;
+    width: 0.75em;
+    height: 0.75em;
+    margin-inline-start: 0.25em;
+    /* its bottom on the text's baseline (`overflow` makes it so), a little below, as the letters' feet */
+    overflow: hidden;
+    vertical-align: -0.1em;
+    background-color: currentColor;
+    opacity: 0.45;
+    mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290.4 19.8C295.4 7.8 307.1 0 320 0L480 0c17.7 0 32 14.3 32 32l0 160c0 12.9-7.8 24.6-19.8 29.6s-25.7 2.2-34.9-6.9L400 157.3 246.6 310.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L354.7 112 297.4 54.6c-9.2-9.2-11.9-22.9-6.9-34.9zM0 176c0-44.2 35.8-80 80-80l80 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-80 0c-8.8 0-16 7.2-16 16l0 256c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-80c0-17.7 14.3-32 32-32s32 14.3 32 32l0 80c0 44.2-35.8 80-80 80L80 512c-44.2 0-80-35.8-80-80L0 176z"/></svg>')
+      center / contain no-repeat;
+    cursor: pointer;
+    &:hover {
+      background-color: var(--ui-link, light-dark(#006ab1, #3794ff));
+      opacity: 1;
+    }
+  }
+
+  /* an error's message on a hover over its squiggle:  a row per error;  a message in short lines keeps them */
+  .cmb-errors {
+    max-width: min(480px, 90vw);
+  }
+  .cmb-error-row {
+    padding: 6px 10px;
+    white-space: pre-line;
+  }
+  /* and between the hover's sections, its info and its errors */
+  .cmb-error-row + .cmb-error-row,
+  .cm-tooltip-section:not(.cm-tooltip-lint) ~ .cm-tooltip-section:not(.cm-tooltip-lint) {
+    border-top: 1px solid light-dark(#e6e4ee, #34323f);
+  }
+  /* CodeMirror's own problems popup, left empty (`CodeMirrorHovers`):  hidden, and the hover with nothing else in it */
+  .cm-tooltip-lint.cm-tooltip-section:empty,
+  .cm-tooltip-hover:not(:has(> .cm-tooltip-section:not(.cm-tooltip-lint:empty))) {
+    display: none;
+  }
+
+  /* a heading comment, `#` ... to its line's end, with the look off:  bold;  the bubbly look draws its own */
+  &:not(.bubbly) .spell-heading {
+    font-weight: bold;
+  }
+}
+
+/*
+ * Pinned lines (`CodeMirrorPinned`, Settings… › Pinned lines):  the lines opening the blocks the top of the code is in,
+ * over the code's top, on the editor's paper, a hairline under them;  a pointer, as a click goes to each
+ */
+.cm-editor .cmb-pinned {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
+  padding: 0;
+  background: var(--bubbly-paper, var(--ui-code-background, light-dark(white, #1c1b22)));
+  border-bottom: 1px solid light-dark(#e6e4ee, #34323f);
+  box-shadow: 0 2px 4px light-dark(#0000000d, #0000004d);
+  white-space: pre;
+  overflow: hidden;
+
+  > .cm-line {
+    cursor: pointer;
   }
 }

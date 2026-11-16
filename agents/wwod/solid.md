@@ -177,27 +177,23 @@ function update(changed: TypeExplorerState) {
   - `ui` elements bring their own native fallback:  `packages/ui/AGENTS.md` "Solid authoring"
 
 - **Remount with `<Show when={key()} keyed>`:**
-  - a subtree that must start afresh when something changes (a new file's editor, a new node's details) sits under
-    `<Show when={key()} keyed>`;  `key` is a memo whose docstring says EXACTLY what remakes it
+  - a subtree that must start afresh when something changes (a new node's details, a new compile target's pane)
+    sits under `<Show when={key()} keyed>`;  `key` is a memo whose docstring says EXACTLY what remakes it
   - give the memo `equals` to remount on the change that matters only:  `shown` (`TypeExplorer.tsx`) is a new object
     only when the selected PATH changes
   - unkeyed `<Show>` keeps its children mounted while `when` stays truthy, and a child callback gets an ACCESSOR;
     `keyed` REMAKES them whenever `when` changes value (`!==`), and the callback gets the VALUE
 
 ```tsx
-function FileInputEditor() {
-  const file = tracked(() => editor.file)
-  /** Remakes the editor when it changes:  the file's path, or `"loading"` before there's a file. */
-  const key = createMemo(() => file()?.path || "loading")
-  followInitialSelection()
-  return (
-    <Loading fallback={<LazyMonaco.Loading />}>
-      <Show when={key()} keyed>
-        {(_key) => <LazyMonaco.FileEditor file={file()} onMount={didMount} onUnmount={editor.onInputWillUnmount} />}
-      </Show>
-    </Loading>
-  )
-}
+// `TypeExplorer.tsx`, shortened
+/** `{ path }` of the selected node:  a new object only when the PATH changes, so the details remount just then. */
+const shown = createMemo(() => ({ path: selected()?.path }), { equals: (a, b) => a.path === b.path })
+
+return (
+  <Show when={shown()} keyed>
+    {(current) => <ScopeDetailsPane node={trailTo(tree(), current.path)?.at(-1) ?? selected()} trail={trail().slice(1)} />}
+  </Show>
+)
 ```
 
 - **Lists keyed by a stable id:**

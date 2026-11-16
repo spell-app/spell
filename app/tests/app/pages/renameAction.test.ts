@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Renaming an action by its name in the Inspector's Code card, on Solitaire (epic `editor` I111):
@@ -79,7 +79,7 @@ describe.skipIf(!SERVING)("Renaming an action in the Inspector", { timeout: 180_
     })
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(3000)
     if (!(await page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting")))) {
       await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
@@ -192,8 +192,8 @@ describe.skipIf(!SERVING)("Renaming an action in the Inspector", { timeout: 180_
         for (const row of document.querySelectorAll(".InspectorCodeCard ui-section.InspectorEvent.action")) {
           const name = row.querySelector(".InspectorActionName")?.textContent ?? ""
           if (!/restart the game|start over/.test(name)) continue
-          const lines = [...row.querySelectorAll(".view-line")] as HTMLElement[]
-          const first = lines.sort((one, other) => parseFloat(one.style.top) - parseFloat(other.style.top))[0]
+          // CodeMirror draws its lines in order:  the first drawn is the first
+          const first = row.querySelector(".cm-line")
           const spinner = row.querySelector(".InspectorActionNameSpinner") ? " +spinner" : ""
           seen.push(`${name}${spinner} | ${first?.textContent?.replace(/\s+/g, " ").trim() ?? ""}`)
         }

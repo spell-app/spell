@@ -2138,13 +2138,28 @@ sidebars any of them opens.
   - A parameter, `:film`, is one of the page's own properties (`- it has a film`):  its type is the page's, never written twice.
   - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
     address another page has (`P.TypeScope.declareSitePage()`, journaled).
-- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
+- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, `static mainLayout`,
+  on its class.
 - Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
   (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.
-- Its top bar (epic `mockup` T35):  `- it has a top bar` (`site_overlay`, by the wording `site_top_bar`;  Spanish
-  `- tiene una barra superior`):  `static topBar`, its buttons the view of its name, as a dialog's are.
-  - A page drawn without it says so on its line, `, no top bar` (Spanish `, sin barra superior`):  its entry's `noTopBar`.
-  - Not a part to go to:  `go to` and `show` never name it, and the site doesn't list it among its parts.
+- Its PAGE LAYOUTS (epic `mockup` T39):  what stays on screen around its pages, so going between them redraws only the
+  page.
+  - A layout is one of a kind, made from spell's built-in template `page layout`
+    ([PageLayout.spell](../core/templates/PageLayout.spell), a view;  Spanish `diseño`, as `diseño de página`'s `de`
+    is a grammar word):  `main layout is a page layout`, `create_one_of_a_kind` (`isOneOfAKindType()`).
+    - Its slots, each its own drawing:  `to draw its app menu` (the top bar), `page menu` (a row under it, the
+      shown page's family as tabs by default), `drawer` (the site's navigation unless it draws it), `left sidebar`,
+      `right sidebar`, `footer`.
+    - A layout builds on another as any one of a kind does:  `wide layout is a main layout`.
+  - A PAGE picks its layout on its own line (`create_one_of_a_kind`'s `layout` / `no_layout`):
+    `systems is a page, in the bare layout` => `static layout = "BareLayout"`;  `, no layout` => `static layout = false`.
+    - Refused on anything but a page;  a layout the project doesn't declare is refused once it has parsed.
+  - Every other page is in the site's MAIN layout, the page layout whose words read as `site_main_layout`
+    (`main layout`, Spanish `diseño principal`):  `static mainLayout`, by `mainLayoutOf()`.
+    - None:  the site draws its built-in frame, the navigation and the page.
+  - A page may draw a slot itself, `to draw its right sidebar` (`draw_it`'s slot drawing):  its own wins while it's shown.
+  - `- it has a top bar` and `, no top bar` (T35) are RETIRED:  they compile to nothing, with a warning saying where
+    each goes now (`site-top-bar-retired`, `site-no-top-bar-retired`).
 - Going between its pages (P2), naming the PAGE, never its address:
   - `go to the film page for this film`, `show the settings dialog` (`show_site_part`, a statement and an expression, for a
     handler):  `core.showSitePart("film page", film)`
@@ -2433,8 +2448,8 @@ sidebars any of them opens.
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
 - The editor's code editor calls `project.takeText(file, text)` on every keystroke, and parses once the typing pauses
-  (`project.parseWaitingText()`, 200 msec after the last key:  `SpellModels`, in
-  [the app's Monaco folder](../../../app/src/app/ui/monaco/)).
+  (`project.parseWaitingText()`, 200 msec after the last key:
+  `FileStates`, in [the app's CodeMirror folder](../../../app/src/app/ui/codemirror/)).
   - So no keystroke waits on a parse:  a parse of Solitaire's game took 50 msec a key (2026-11-12).
   - What needs the new parse sooner asks for it:  the language features, a click or focus elsewhere, `compile()`, `parse()`.
   - Everything else calls `project.updateText(file, text)`, which takes the text and parses it at once
@@ -2781,13 +2796,13 @@ sidebars any of them opens.
   - All `SpellLanguageService` adds is `LSP.FileAddresses`:  the editor's URI for each file.
 - It's used twice:
   - by VS Code, over stdio
-  - IN-PROCESS, by the app's Monaco editor ([the app's Monaco folder](../../../app/src/app/ui/monaco/))
-    - its `SpellModels` keep one Monaco model per file in step with `file.contents`.
+  - IN-PROCESS, by the app's CodeMirror editor ([the app's CodeMirror folder](../../../app/src/app/ui/codemirror/))
+    - its `FileStates` keep one CodeMirror state per file in step with `file.contents`.
       Edits go through `takeText()`, parsed once the typing pauses (`parseWaitingText()`).
-    - its `SpellLanguageFeatures` call the service, and convert its answers with `LspToMonaco`
+    - its `CodeMirrorLanguage` calls the service, and converts its answers with `LspToCodeMirror`
   - The app shows one project at a time.
-    `<spell-editor>`s on a page show one each, all in one Monaco:
-    each `SpellModels.use()`s its project, so another's models don't replace them.
+    `<spell-editor>`s on a page show one each:
+    each `use()`s its project's states (`SpellCodeMirror.states`), so another's don't replace them.
 - `SpellDiskWorkspace` is the stdio server's:
   - it loads from disk, via `LoadableFile.fetch` (above)
   - it maps a `.spell` file to its project (the nearest `project.json`)
@@ -2826,7 +2841,7 @@ sidebars any of them opens.
       so the CSS is never read as spell.
   - spell's own colouring skips the block
   - editors colour it as CSS themselves:
-    VS Code through the grammar's embedded CSS, the app's Monaco through its own (`SpellTokensProvider`)
+    VS Code through the grammar's embedded CSS;  the app's CodeMirror editor not yet
 - A `<json>` element's text is JSON, not spell:  read as raw text too (`rawTextTags`), so its `{` and `[` stay as written.
 - A `<markdown>` block is markdown, not spell:  read as raw text too (`rawTextTags`), its common indent taken off.
   - in a drawing:  [`markdown_block`](rules/JSX/MarkdownBlock.ts)
@@ -2847,7 +2862,7 @@ sidebars any of them opens.
     - it splits holes as `markdown_block` does
   - no diagnostics inside
   - editors colour it as markdown themselves:
-    VS Code through the grammar's embedded markdown, the app's Monaco through its own (`SpellTokensProvider`)
+    VS Code through the grammar's embedded markdown;  the app's CodeMirror editor not yet
 - Formatting is `P.TokenFormatter` ([the tokenizer folder](../parser/tokenizer/)):
   whitespace only, from the tokens, indenting with TABS always.
   - No pretty-printer:  the AST is a javascript tree.

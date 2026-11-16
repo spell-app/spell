@@ -1,5 +1,4 @@
 "extra examples" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Extra
 		<header>Extra content is set apart from the main content, such as a card's footer.</>

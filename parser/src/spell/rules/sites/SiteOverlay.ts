@@ -29,10 +29,8 @@ import {
  *   - pages with no address, shown in place of one
  *   - the program's own when it declares a page of that name, else a plain built-in one
  *   - every new site lists them;  one deleted still shows the built-in one
- * - Its TOP BAR too (epic `mockup` T35):  `- it has a top bar` (`site_top_bar`).
- *   - drawn above every page but one whose line says `, no top bar`:  a side bar button, where you are, its buttons
- *   - the buttons are the view of its name, when the program declares one (`a "top bar" is a view`), as a dialog's are
- *   - a site without the line has no top bar
+ * - `- it has a top bar` (`site_top_bar`, epic `mockup` T35) is RETIRED by page layouts (T39):
+ *   it compiles to nothing, with a warning saying where the top bar goes now, its main layout's app menu.
  * - Under a page, one line in from it, it belongs to that page's section of the site editor's board;
  *   it's opened from any page all the same.
  * - Its line may end with where its card sits in its section, and its colour (epic `mockup` T31):
@@ -66,12 +64,13 @@ export class SiteOverlay extends SpellStatement<
     if (!card) return SpellStatement.refuse(match, cardPlaceMessage(SP.Language.of(scope), match.groups))
     match.data.kind = kind
     match.data.entry = { name, ...(view && { view: view.name }), ...card }
+    if (kind === "topBar") SP.SpellWarnings.note(match, SP.Language.of(scope).parserMessage("site-top-bar-retired"))
     return match
   }
 
   /**
    * SIDE EFFECT:  our site lists us, for `go to the ...` to be checked against -- see `P.TypeScope.siteOverlays`.
-   * - Not its top bar:  it's always there, never gone to.
+   * - Not a retired top bar:  it's nothing now.
    */
   mutateScope(match: P.MatchFor<this>) {
     const { entry, kind } = match.data
@@ -84,5 +83,5 @@ export class SiteOverlay extends SpellStatement<
   }
 }
 
-/** Which of a site's parts with no address a `site_overlay` line names. */
+/** Which of a site's parts with no address a `site_overlay` line names:  `topBar` is retired (T39), and lists nothing. */
 export type SiteOverlayKind = "dialog" | "sidebar" | "notFound" | "error" | "topBar"

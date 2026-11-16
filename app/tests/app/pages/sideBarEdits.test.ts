@@ -1,7 +1,7 @@
 import { chromium, type BrowserContext, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
+import { builtInProjectsNow, CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A change in the side bar goes into the program's text, in the running editor (epic `editor`, Sidebar Writes Source).
@@ -14,7 +14,7 @@ import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
  */
 
 /** The code editor's chunk, in dev:  never answered, to work without it. */
-const CODE_EDITOR = /\/src\/app\/solid\/monaco\//
+const CODE_EDITOR = /\/src\/app\/solid\/codemirror\//
 
 /** Saves answered here, and what a reload then reads:  by address. */
 const saved = new Map<string, string>()
@@ -39,7 +39,7 @@ async function contextWithNoSaving(context: BrowserContext): Promise<void> {
 /** Open `project`, with the Inspector open. */
 async function open(page: Page, project: string, { codeEditor }: { codeEditor: boolean }): Promise<void> {
   await page.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
-  if (codeEditor) await page.waitForSelector(".monaco-editor .view-line", { timeout: 60_000 })
+  if (codeEditor) await new CodeEditor(page).shown()
   // with no code editor to wait for, the page's loading hero gives up after 8 seconds
   else await page.waitForTimeout(9000)
   await page.waitForTimeout(4000)
@@ -192,7 +192,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // typing elsewhere, at the top of the file
       await page.locator("ui-item", { hasText: "Solitaire.spell" }).first().click()
       await page.waitForTimeout(800)
-      await page.locator(".monaco-editor .view-line").nth(1).click()
+      await new CodeEditor(page).lineLocator().nth(1).click()
       await page.keyboard.press("ControlOrMeta+ArrowUp")
       await page.keyboard.type("// typed\n")
       await page.waitForTimeout(400)
@@ -257,6 +257,34 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
+    "the app is one of a kind:  no This | All switch, its changes go to its type, and no All Solitaires anywhere (I183)",
+    { timeout: 90_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", { codeEditor: true })
+      await page.evaluate(async () => {
+        const { editor, Inspector } = window as unknown as DebugGlobals
+        const { core } = await editor.loadRuntime()
+        Inspector.inspectThing(core.things.all().find((thing) => thing.constructor.name === "Solitaire")!)
+      })
+      await page.waitForSelector("ui-property-editor", { timeout: 8000 })
+      await page.waitForTimeout(800)
+      expect(await page.locator(".InspectorScope").count()).toBe(0)
+      expect(await page.locator(".InspectorTrail").innerText()).toContain("Solitaire")
+      // its type's cards, as All Cards has:  its type is it
+      const cards = await page
+        .locator(".InspectorCard")
+        .evaluateAll((all) => all.map((one) => (one as HTMLElement).dataset.panel))
+      expect(cards).toEqual(["properties", "events", "actions", "tests", "views"])
+      expect(await page.locator(".InspectorColumn").innerText()).not.toMatch(/All Solitaires/i)
+      // a change it can't keep still says why, in words that name no "all"
+      await change(page, "score", 7)
+      expect(await page.locator(".InspectorNotSaved").textContent()).not.toMatch(/\ball\b/i)
+      await page.close()
+    }
+  )
+
+  test(
     "a drawn tag:  an attribute's added, then changed, and the menu says what it'll undo",
     { timeout: 90_000 },
     async () => {
@@ -290,10 +318,10 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   test("what's typed in the code undoes after a click on the app (J116)", { timeout: 90_000 }, async () => {
     const page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.spell`, { timeout: 60_000 })
-    await page.waitForSelector(".monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(5000)
     const { text: before } = await fileState(page, "Card.spell")
-    await page.locator(".monaco-editor .view-line").nth(1).click()
+    await new CodeEditor(page).lineLocator().nth(1).click()
     await page.keyboard.press("Home")
     await page.keyboard.type("Q")
     await page.waitForTimeout(500)
@@ -308,7 +336,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
 
     // a click on a card moves the focus out of the code:  the key still reaches what was typed
     await select(page, "solitaire-card").catch(() => undefined)
-    expect(await page.evaluate(() => document.activeElement?.closest(".monaco-editor"))).toBeNull()
+    expect(await page.evaluate(() => document.activeElement?.closest(".cm-editor"))).toBeNull()
     // a click that played the card undoes first, the game's own step (I167)
     const gameCanUndo = () =>
       page.evaluate(
@@ -327,10 +355,10 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     saved.clear()
     const page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.spell`, { timeout: 60_000 })
-    await page.waitForSelector(".monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(5000)
     const { text: before } = await fileState(page, "Card.spell")
-    await page.locator(".monaco-editor .view-line").nth(1).click()
+    await new CodeEditor(page).lineLocator().nth(1).click()
     await page.keyboard.press("Home")
     await page.keyboard.type("Q")
     await page.waitForTimeout(3000)
@@ -349,7 +377,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     await page.waitForTimeout(1000)
     const played = await game()
     expect(played).toEqual({ canUndo: true, discards: dealt.discards! + 1 })
-    expect(await page.evaluate(() => document.activeElement?.closest(".monaco-editor"))).toBeNull()
+    expect(await page.evaluate(() => document.activeElement?.closest(".cm-editor"))).toBeNull()
 
     // the focus in the app (or on nothing):  the game's move first, the code as typed
     await press(page, "ControlOrMeta+z")
@@ -360,7 +388,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     expect((await fileState(page, "Card.spell")).text).toBe(before)
 
     // in the code:  the code editor's own
-    await page.locator(".monaco-editor .view-line").nth(1).click()
+    await new CodeEditor(page).lineLocator().nth(1).click()
     await press(page, "Shift+ControlOrMeta+z")
     expect((await fileState(page, "Card.spell")).text).toBe(typed)
     await page.close()
@@ -747,7 +775,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     const state = await gameState(page)
     await page.locator("ui-item", { hasText: "Solitaire.spell" }).first().click()
     await page.waitForTimeout(800)
-    await page.locator(".monaco-editor .view-line").nth(1).click()
+    await new CodeEditor(page).lineLocator().nth(1).click()
     await page.keyboard.press("ControlOrMeta+ArrowDown")
     await page.keyboard.type("\n// a comment\n")
     await page.waitForTimeout(6000)

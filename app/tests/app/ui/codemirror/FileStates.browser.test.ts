@@ -7,7 +7,6 @@ import { declareProp, Observable } from "spell/util"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { FileStates, type EditWay } from "spell/app/app/ui/codemirror/FileStates"
-import { SpellModels } from "spell/app/app/ui/monaco/SpellModels"
 
 /**
  * `FileStates`, one CodeMirror state per file, on a real view in the browser (epic `codemirror` P2):
@@ -117,8 +116,43 @@ describe("FileStates", () => {
     expect(view.state.doc.toString()).toBe(GAME + "\n\tdeal again")
   })
 
-  test("its waits are Monaco's `SpellModels`', kept equal by hand until the swap (epic `codemirror` J4)", () => {
-    expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([SpellModels.PARSE_WAIT, SpellModels.SAVE_WAIT])
+  test("a slice of a file in another view holds its text, never a copy;  an edit in either is the other's at once (P3)", () => {
+    const { states, files } = setUp()
+    view = viewOf()
+    const slice = viewOf()
+    try {
+      states.show(view, files.game)
+      states.showSlice(slice, files.game, { first: 2, last: 3 })
+      // the same text, not a copy
+      expect(slice.state.doc).toBe(view.state.doc)
+      // the file's edit, in the slice
+      type(view, 0, "// ")
+      expect(slice.state.doc.toString()).toBe("// " + GAME)
+      // the slice's edit, in the file and its editor:  one change, once
+      type(slice, slice.state.doc.toString().indexOf("deal"), "now ")
+      expect(files.game.contents).toBe("// to play it:\n\tnow deal cards\n\tshuffle")
+      expect(view.state.doc.toString()).toBe(files.game.contents)
+      // the slice's undo is its own edit's
+      undo(slice)
+      expect(view.state.doc.toString()).toBe("// " + GAME)
+    } finally {
+      states.releaseSlice(slice)
+      slice.destroy()
+    }
+  })
+
+  test("a slice shows only its lines:  the others hidden, out of the caret's way, moved with an edit above them", () => {
+    const { states, files } = setUp()
+    view = viewOf()
+    states.showSlice(view, files.game, { first: 2, last: 2 })
+    expect(view.dom.querySelector(".cm-content")?.textContent).toBe("\tdeal cards")
+    states.applyEdits(files.game, [replacing(0, 0, "// first\n")])
+    expect(view.dom.querySelector(".cm-content")?.textContent).toBe("\tdeal cards")
+    states.releaseSlice(view)
+  })
+
+  test("its waits:  a parse once the typing pauses 200 msec, a rename's save within 2 s (epic `codemirror` J4)", () => {
+    expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([200, 2000])
   })
 })
 

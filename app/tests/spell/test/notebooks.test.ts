@@ -17,6 +17,9 @@ import "spell/app/spaces"
 const SITE = SPACES.SPELL_UI_SITE_PROJECT
 const FOLDER = fixtureFolder(SITE)
 const SITE_FILE = "/SpellUI.spell"
+
+/** Its page layout's file:  the frame round every page (epic `mockup` T39). */
+const LAYOUT_FILE = "/main.page-layout.spell"
 /** How long the whole-project compile below may take. */
 const COMPILE_MS = 300_000
 
@@ -58,8 +61,8 @@ function codeOf(compiled: string): string {
 // ## The site itself
 ////////////////
 
-/** Each page of the project:  its file, its page's name and its contents. */
-const PAGES = FILES.filter(({ path }) => path !== SITE_FILE).map(({ path, contents }) => ({
+/** Each page of the project:  its file, its page's name and its contents;  not the site's file, nor its layout's. */
+const PAGES = FILES.filter(({ path }) => path !== SITE_FILE && path !== LAYOUT_FILE).map(({ path, contents }) => ({
   path,
   contents,
   // its plain head (epic `language` P45):  `"button usage" is a notebook page`, its own views above it (P47)

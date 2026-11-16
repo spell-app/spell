@@ -1,0 +1,15 @@
+## Un diseño de página:  lo que queda en pantalla alrededor de las páginas de un sitio, mientras la gente va de una a otra
+// Integrado en spell (épica `mockup` T39):  compilado una vez, en el `PageLayout` del núcleo.
+// Un diseño hecho de él dice qué muestra cada una de sus ranuras, `para dibujar su menú de la aplicación:` ...:
+// el sitio lo dibuja UNA vez, y pone en medio la página que muestra, así que ir entre páginas que lo comparten
+// solo vuelve a dibujar la página.
+// - Una página elige su diseño en su propia línea, `Sistemas es una página, en el diseño sencillo`, o `, sin diseño`;
+//   las demás están en el `diseño principal` del sitio, cuando el programa tiene uno.
+// - Una página puede dibujar una de sus ranuras, `para dibujar su barra lateral derecha:`:  la suya gana mientras se ve.
+// - Una ranura que nadie dibuja está vacía, y no ocupa sitio;  el cajón tiene la navegación del sitio, salvo que un
+//   diseño lo dibuje.
+un "diseño de página" es una vista
+	tiene las ranuras "menú de la aplicación", "menú de página", "cajón", "barra lateral izquierda", "barra lateral derecha" y "pie de página"
+	// la familia de la página que se ve, como pestañas, en una fila propia bajo el menú de la aplicación
+	para "dibujar su menú de página"
+		<ui-site-tabs />

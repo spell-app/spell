@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A drafted file's tab, its pen's tip (epic `editor` I92), in the running editor:
@@ -32,7 +32,7 @@ describe.skipIf(!SERVING)("a drafted tab's pen's tip", { timeout: 180_000 }, () 
     await answerHere(context, discarded)
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(4000)
     await page.evaluate(`(() => {
       const { editor } = window

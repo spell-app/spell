@@ -216,7 +216,7 @@ describe("<epic-item> review controls", () => {
     expect([button(host, "approve").dataset.fill, button(host, "approve").dataset.color]).toEqual(["dashed", "green"])
   })
 
-  test("a todo:  the plane (next phase), Revisit, the x (drop), one group;  no Approve or Make Todo", async () => {
+  test("a todo:  the plane (start now), Revisit, the x (drop), one group;  no Approve or Make Todo", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="t4" title="A todo" status="open"><p>Text</p></epic-item>`)
     expect(actions(host)).toEqual(["next", "revisit", "drop"])
@@ -233,7 +233,7 @@ describe("<epic-item> review controls", () => {
       [
         "paper plane",
         "green",
-        "Do it in the next phase:  Queued into the next phase still to do, once Claude applies it"
+        "Start it now:  an agent takes it at once (a note asking for a phase gets it a new one)"
       ],
       ["history", "blue", "Revisit:  I'm adding a note for you:  Write a note for Claude in the box at its end"],
       ["xmark", "grey", "Drop it:  Canceled, struck through, once Claude applies it"]

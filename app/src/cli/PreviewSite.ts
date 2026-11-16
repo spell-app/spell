@@ -67,8 +67,8 @@ export class PreviewSite {
    * with no editor and no server:  `<spell-viewer project="@spell/examples/Solitaire">`.
    * 1. the element, built (`yarn build:element`), then copied to `<folder>/element/`,
    *    where its page loads it from:  `<script type="module" src="/element/spell-viewer.js">`
-   *    - but not what it never loads (`VIEWER_LEAVES_OUT`):  source maps, the editor and Monaco
-   *    - `withEditor`:  `<spell-editor>` and Monaco too (`EDITOR_LEAVES_OUT`), for `<spell-editor static>`,
+   *    - but not what it never loads (`VIEWER_LEAVES_OUT`):  source maps, the editor and CodeMirror
+   *    - `withEditor`:  `<spell-editor>` and CodeMirror too (`EDITOR_LEAVES_OUT`), for `<spell-editor static>`,
    *      loaded from `/element/spell-editor.js`
    * 2. each project, compiled where it's out of date:  its files and build at `<folder>/spaces/<project>/`,
    *    where the viewer reads them, as `build()` writes them;  and the projects it imports
@@ -262,7 +262,7 @@ const EDITOR_LEAVES_OUT = [
 ]
 
 /**
- * What `buildViewer()` leaves out with no editor:  `EDITOR_LEAVES_OUT`, and `<spell-editor>`, Monaco among it --
+ * What `buildViewer()` leaves out with no editor:  `EDITOR_LEAVES_OUT`, and `<spell-editor>`, CodeMirror among it --
  * `<spell-viewer>` loads it only for one inside it.
  */
 const VIEWER_LEAVES_OUT = [...EDITOR_LEAVES_OUT, /^\/spell-editor[-.]/]

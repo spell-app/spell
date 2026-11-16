@@ -1443,7 +1443,14 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  log and upkeep
   log: { "--last <n>": "with no text:  how many of the newest review lines to print (default 20)" },
   prompt: { "--file <file>": "the prompt, from a file" },
-  bedtime: {},
+  bedtime: {
+    "--json": "`all plan` and `status`:  print it as JSON",
+    "--include <epics>":
+      "`all plan`:  epics no session runs, to take too (comma-separated):  a session starts for each",
+    "--file <file>": "`all questions <epic>`:  the epic's up-front questions, a JSON file",
+    "--wait <duration>": "`all spec`:  wait this long for the sessions still to send their questions (5m)",
+    "--out <file>": "`all spec`:  where to write the details page's spec (default:  tonight's folder)"
+  },
   backfill: { "--all": "every epic", "--apply": "mark them:  a dry run without it" },
   split: { "--dry-run": "only say what it would do", "--done": "every finished epic" },
   join: {},

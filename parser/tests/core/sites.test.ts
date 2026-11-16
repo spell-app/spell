@@ -4,7 +4,7 @@ import { render } from "@solidjs/web"
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { bridgeSolid, PrefStore } from "spell/util"
-import { core, Page, Site, Thing, View, h } from "spell/parser/core"
+import { core, Page, PageLayout, Site, Thing, View, h } from "spell/parser/core"
 import type { SiteHost } from "spell/parser/core/core.types"
 import type { Drawing } from "spell/parser/core/drawing"
 
@@ -113,27 +113,58 @@ class TabbedGuide extends Site {
   static pages = [{ name: "tabbed page", page: "TabbedPage", address: "/tabbed" }]
 }
 
-/** A page drawn without the top bar. */
+/** A page drawn alone, its line saying `, no layout` (T39). */
 class LoginPage extends Page {
+  static layout = false
   draw(): Drawing {
     return h("h1", null, "Log in") as unknown as Drawing
   }
 }
 
-/** The top bar's buttons. */
-class TopBar extends View {
+/** A page in the bare layout, its line saying `, in the bare layout`. */
+class PrintPage extends Page {
+  static layout = "BareLayout"
   draw(): Drawing {
-    return h("button", null, "Share") as unknown as Drawing
+    return h("h1", null, "Print") as unknown as Drawing
   }
 }
 
-/** A site with a top bar (epic `mockup` T35):  its films in a group, and a page without the bar. */
+/** A page that draws the layout's right side bar itself:  its own wins while it's shown. */
+class CastPage extends Page {
+  draw(): Drawing {
+    return h("h1", null, "Cast") as unknown as Drawing
+  }
+  drawRightSidebar(): Drawing {
+    return h("p", null, "Who's in it") as unknown as Drawing
+  }
+}
+
+/** The main layout:  an app menu with a button, and a right side bar;  its page menu the template's, the tabs. */
+class MainLayout extends PageLayout {
+  drawAppMenu(): Drawing {
+    return h("ui-app-menu", null, h("button", null, "Share")) as unknown as Drawing
+  }
+  drawRightSidebar(): Drawing {
+    return h("p", null, "Related") as unknown as Drawing
+  }
+}
+
+/** Another layout:  only a footer, its drawer the site's navigation. */
+class BareLayout extends PageLayout {
+  drawFooter(): Drawing {
+    return h("p", null, "Made with Spell") as unknown as Drawing
+  }
+}
+
+/** A site with page layouts (T39):  its films in a group, a page drawn alone, one in the bare layout. */
 class StarCharts extends Site {
   static pages = [
     { ...GalaxyGuide.pages[0]!, group: "Archive" },
-    { name: "login page", page: "LoginPage", address: "/login", noTopBar: true }
+    { name: "login page", page: "LoginPage", address: "/login" },
+    { name: "print page", page: "PrintPage", address: "/print" },
+    { name: "cast page", page: "CastPage", address: "/cast" }
   ]
-  static topBar = { name: "top bar", view: "TopBar" }
+  static mainLayout = "MainLayout"
 }
 
 ////////////////
@@ -179,11 +210,11 @@ describe("a running site", () => {
     vi.restoreAllMocks()
   })
 
-  /** What the site draws now, as text:  its columns, not the narrow width's style sheet and menu button. */
+  /** What the site draws now, as text:  the layout shown, not the ones kept hidden, nor the style sheet. */
   async function shown(): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve))
     core.flush()
-    return element.querySelector(".spell-site")?.textContent ?? ""
+    return element.querySelector(SHOWN)?.textContent ?? ""
   }
 
   /** Draw the site into the fake page. */
@@ -231,7 +262,7 @@ describe("a running site", () => {
     expect(nav).toBeTruthy()
     expect(nav.getAttribute("current")).toBe("/films")
     expect(nav.getAttribute("remember")).toBe("GalaxyGuide")
-    expect(element.querySelector(".spell-site-page")!.textContent).toBe("A New Hope")
+    expect(element.querySelector(SHOWN)!.textContent).toBe("A New Hope")
   })
 
   test("shows the page its address names, its parameter filled from the program's things", async () => {
@@ -349,22 +380,6 @@ describe("a running site", () => {
     expect(pages[0]).toMatchObject({ title: "Films", href: "/films" })
   })
 
-  test("narrow:  the menu button opens the navigation over the page;  Escape closes it", async () => {
-    drawSite()
-    await site.showAddress("/films")
-    await shown()
-    const menu = element.querySelector<HTMLElement>(".spell-site-menu")!
-    const columns = () => element.querySelector(".spell-site")!
-    expect(menu.getAttribute("aria-expanded")).toBe("false")
-    menu.click()
-    await shown()
-    expect(columns().classList.contains("nav-open")).toBe(true)
-    expect(menu.getAttribute("aria-expanded")).toBe("true")
-    columns().dispatchEvent(Object.assign(new Event("keydown", { bubbles: true }), { key: "Escape" }))
-    await shown()
-    expect(columns().classList.contains("nav-open")).toBe(false)
-  })
-
   test("draws no tabs of its own:  a page that wants them draws `<site-tabs/>`, inside the box beside its navigation (T38)", async () => {
     drawSite()
     await site.showAddress("/films")
@@ -396,91 +411,119 @@ describe("a running site", () => {
     expect(await shown()).toContain("A New Hope")
   })
 
-  describe("with a top bar (T35)", () => {
+  describe("with page layouts (T39)", () => {
     let charts: StarCharts
 
     beforeEach(() => {
-      core.things.addClass(TopBar)
       new LoginPage()
-      PrefStore.setAt("spell-sites:StarCharts.collapsed", undefined)
+      new PrintPage()
+      new CastPage()
+      new MainLayout()
+      new BareLayout()
+      PrefStore.setAt("spell-sites:StarCharts.MainLayout.compact", undefined)
       charts = new StarCharts()
       dispose = render(() => core.drawThing(charts) as never, element)
     })
 
-    afterEach(() => PrefStore.setAt("spell-sites:StarCharts.collapsed", undefined))
+    afterEach(() => PrefStore.setAt("spell-sites:StarCharts.MainLayout.compact", undefined))
 
-    /** The top bar, and its breadcrumb's steps:  each one's text, its link, and whether it's the page shown. */
-    function topBar() {
-      const bar = element.querySelector("ui-app-menu.spell-site-top-bar")
-      const crumbs = [...element.querySelectorAll("ui-breadcrumb")].map(
-        (crumb) =>
-          `${crumb.textContent}${crumb.getAttribute("link") ? ` -> ${crumb.getAttribute("link")}` : ""}` +
-          `${crumb.hasAttribute("selected") ? " (shown)" : ""}`
-      )
-      return { bar, crumbs }
-    }
+    /** The layout element of class `name`, shown or not. */
+    const layout = (name: string) => element.querySelector(`ui-page-layout[data-layout="${name}"]`)
+    /** Region `slot` of the layout of class `name`:  the wrapper its drawing is slotted in by. */
+    const region = (name: string, slot: string) => layout(name)?.querySelector(`:scope > [slot="${slot}"]`)
 
-    test("draws `<ui-app-menu>` above the page:  the side bar button, where you are, the view's buttons", async () => {
+    test("draws a page in the site's main layout:  its slots, the site's navigation in the drawer, the page", async () => {
+      await charts.showAddress("/films")
+      expect(await shown()).toContain("Films")
+      expect(region("MainLayout", "menu")?.textContent).toBe("Share")
+      expect(region("MainLayout", "page-menu")?.querySelector("ui-site-tabs")).toBeTruthy()
+      expect(region("MainLayout", "right")?.textContent).toBe("Related")
+      expect(region("MainLayout", "footer")).toBeNull()
+      expect(layout("MainLayout")?.querySelector(':scope > ui-site-nav[slot="drawer"]')).toBeTruthy()
+    })
+
+    test("no flash:  a page in the same layout redraws only the page, its menu and navigation the same elements", async () => {
+      await charts.showAddress("/films")
+      await shown()
+      const before = { layout: layout("MainLayout"), menu: region("MainLayout", "menu")?.firstElementChild }
+      const nav = element.querySelector("ui-site-nav")
       await charts.showAddress("/films/a-new-hope")
-      await shown()
-      const { bar, crumbs } = topBar()
-      expect(bar?.parentElement?.classList.contains("spell-site-page")).toBe(true)
-      expect(bar?.querySelector('ui-item[slot="start"]')?.getAttribute("icon")).toBe("columns")
-      expect(crumbs).toEqual(["Archive", "Films -> /films", "film page (shown)"])
-      expect(bar?.querySelector('[slot="end"]')?.textContent).toBe("Share")
-      // the bar's button replaces the narrow width's menu button
-      expect(element.querySelector(".spell-site-menu")).toBeNull()
+      expect(await shown()).toContain("A New Hope")
+      expect(layout("MainLayout")).toBe(before.layout)
+      expect(region("MainLayout", "menu")?.firstElementChild).toBe(before.menu)
+      expect(element.querySelector("ui-site-nav")).toBe(nav)
     })
 
-    test("follows the page shown, and hides on a page whose line says `, no top bar`", async () => {
+    test("a page that draws a slot itself:  its own wins while it's shown, the rest of the layout stays", async () => {
       await charts.showAddress("/films")
       await shown()
-      expect(topBar().crumbs).toEqual(["Archive", "Films (shown)"])
+      const menu = region("MainLayout", "menu")?.firstElementChild
+      await charts.showAddress("/cast")
+      await shown()
+      expect(region("MainLayout", "right")?.textContent).toBe("Who's in it")
+      await charts.showAddress("/films")
+      await shown()
+      expect(region("MainLayout", "right")?.textContent).toBe("Related")
+      expect(region("MainLayout", "menu")?.firstElementChild).toBe(menu)
+    })
+
+    test("a page in another layout shows that one;  the first is kept, hidden, and comes back as it was", async () => {
+      await charts.showAddress("/films")
+      await shown()
+      const main = layout("MainLayout")
+      await charts.showAddress("/print")
+      expect(await shown()).toContain("Made with Spell")
+      expect(main?.hasAttribute("hidden")).toBe(true)
+      expect(layout("BareLayout")?.hasAttribute("hidden")).toBe(false)
+      await charts.showAddress("/films")
+      await shown()
+      expect(layout("MainLayout")).toBe(main)
+      expect(main?.hasAttribute("hidden")).toBe(false)
+      expect(layout("BareLayout")?.hasAttribute("hidden")).toBe(true)
+    })
+
+    test("`, no layout`:  the page alone", async () => {
       await charts.showAddress("/login")
-      expect(await shown()).toContain("Log in")
-      expect(topBar().bar?.hasAttribute("hidden")).toBe(true)
-      await charts.showAddress("/films")
-      await shown()
-      expect(topBar().bar?.hasAttribute("hidden")).toBe(false)
+      expect(await shown()).toBe("Log in")
+      expect(element.querySelector("ui-page-layout:not([hidden])")).toBeNull()
     })
 
-    test("wide:  the side bar button shows only the navigation's icons, remembered across visits", async () => {
-      await charts.showAddress("/films")
-      await shown()
-      const nav = () => element.querySelector("ui-site-nav")!
-      expect(nav().hasAttribute("collapsed")).toBe(false)
-      element.querySelector<HTMLElement>(".spell-site-side-bar")!.click()
-      await shown()
-      expect(nav().hasAttribute("collapsed")).toBe(true)
-      expect(new StarCharts().isNavCollapsed).toBe(true)
-      element.querySelector<HTMLElement>(".spell-site-side-bar")!.click()
-      await shown()
-      expect(nav().hasAttribute("collapsed")).toBe(false)
-      expect(new StarCharts().isNavCollapsed).toBe(false)
+    test("the not found page is in the main layout:  its navigation is there, to get out", async () => {
+      await charts.showAddress("/nowhere")
+      expect(await shown()).toContain("No such page")
+      expect(layout("MainLayout")?.hasAttribute("hidden")).toBe(false)
     })
 
-    test("narrow:  the side bar button slides the navigation in, all of it, collapsed or not", async () => {
-      charts.isNavCollapsed = true
-      vi.stubGlobal("getComputedStyle", () => ({ position: "absolute" }))
+    test('its drawer\'s icons only (`drawer="compact"`):  remembered for each person, site and layout', async () => {
       await charts.showAddress("/films")
       await shown()
-      element.querySelector<HTMLElement>(".spell-site-side-bar")!.click()
+      expect(layout("MainLayout")?.hasAttribute("drawer")).toBe(false)
+      layout("MainLayout")!.dispatchEvent(
+        new CustomEvent("ui-toggle", { detail: { newState: "compact", oldState: "full" } })
+      )
       await shown()
-      expect(element.querySelector(".spell-site")!.classList.contains("nav-open")).toBe(true)
-      expect(element.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(false)
-      expect(charts.isNavCollapsed).toBe(true)
-      // the page's other tests have no styles, as before
-      vi.stubGlobal("getComputedStyle", undefined)
+      expect(layout("MainLayout")?.getAttribute("drawer")).toBe("compact")
+      expect(new StarCharts().isCompact("MainLayout")).toBe(true)
+      expect(new StarCharts().isCompact("BareLayout")).toBe(false)
+      layout("MainLayout")!.dispatchEvent(
+        new CustomEvent("ui-toggle", { detail: { newState: "full", oldState: "compact" } })
+      )
+      await shown()
+      expect(layout("MainLayout")?.hasAttribute("drawer")).toBe(false)
+      expect(new StarCharts().isCompact("MainLayout")).toBe(false)
     })
 
-    test("a site without a top bar draws none, and never collapses", async () => {
+    test("a site with no main layout draws its built-in frame:  the navigation and the page, nothing else", async () => {
       dispose?.()
       drawSite()
       await site.showAddress("/films")
-      await shown()
-      expect(topBar().bar).toBeNull()
-      expect(element.querySelector(".spell-site-menu")).toBeTruthy()
-      expect(site.isNavCollapsed).toBe(false)
+      expect(await shown()).toContain("Films")
+      const frame = element.querySelector("ui-page-layout")!
+      expect(frame.hasAttribute("data-layout")).toBe(false)
+      expect([...frame.children].map((child) => child.getAttribute("slot") ?? child.localName)).toEqual([
+        "drawer",
+        "h1"
+      ])
     })
   })
 
@@ -489,3 +532,6 @@ describe("a running site", () => {
     expect(() => core.showSitePart("films page")).toThrow(/has no site/)
   })
 })
+
+/** The layout shown, or the page drawn alone:  not the layouts kept hidden. */
+const SHOWN = ".spell-site:not([hidden]), .spell-site-alone:not([hidden])"

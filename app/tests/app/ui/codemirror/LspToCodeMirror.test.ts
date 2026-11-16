@@ -11,7 +11,7 @@ import { LspToCodeMirror } from "spell/app/app/ui/codemirror/LspToCodeMirror"
 import environment from "spell/app/spaces/server/node/environment"
 
 /**
- * LSP => CodeMirror conversions, alone and on real `SpellLanguageService` answers:  `LspToMonaco`'s tests, for
+ * LSP => CodeMirror conversions, alone and on real `SpellLanguageService` answers:  the conversions' tests, for
  * CodeMirror's shapes.
  * - Runs in node:  `LspToCodeMirror` reads CodeMirror's texts, never a view.
  */

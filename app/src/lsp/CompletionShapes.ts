@@ -4,7 +4,7 @@ import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
-/** What the editor runs to show the suggestion list again, the moment a completion is written:  VS Code's and Monaco's. */
+/** What the editor runs to show the suggestion list again, the moment a completion is written:  VS Code's. */
 const SHOW_SUGGESTIONS: Command = { title: "", command: "editor.action.triggerSuggest" }
 
 /**
@@ -23,7 +23,7 @@ const SPELL_TAG_SHAPES: Record<string, TagShape | undefined> = {
 /****************
  * ### `CompletionShapes`
  * How a tag or an attribute chosen from the suggestion list is written WHOLE, the caret where you type next
- * (epic `editor` I70):  the ONE table of shapes, as snippets, so Monaco and VS Code write the same.
+ * (epic `editor` I70):  the ONE table of shapes, as snippets, so the app and VS Code write the same.
  * - `<act` => `<action "|" />`, the program's actions listed at once;  `<divider />|`;  `<content>`, a line in, `</>`.
  * - `<segment col` => `color="|"`, its words listed at once;  `fluid` alone, as it takes no value.
  * - What's already written after the caret is never doubled:  then only the name is (`isWrittenAfter()`).
@@ -59,7 +59,7 @@ export class CompletionShapes {
    * The completion fields that write attribute `help.name` whole:  `color="|"`, its words listed at once if it has
    * any;  one that takes no value (`bare`) by its name alone.
    * - Only the name when an `=` already follows it.
-   * - `picksValues`:  the editor can pick its value (a colour, an icon;  epic `editor` T61),
+   * - `picksValues`:  the editor can pick its value, a colour or an icon (epic `editor` T61):
    *   so a picked one with no words lists too, for its Pick row.
    */
   static attribute(help: SP.ComponentAttributeHelp, after: string, picksValues = false): Partial<CompletionItem> {
@@ -110,8 +110,8 @@ export class CompletionShapes {
   }
 
   /**
-   * The shape tag `tag` is written in, as `scope`'s language reads it:  spell's own tag's (`SPELL_TAG_SHAPES`),
-   * else its component's, else `holds`.
+   * The shape tag `tag` is written in, as `scope`'s language reads it:
+   * spell's own tag's (`SPELL_TAG_SHAPES`), else its component's, else `holds`.
    */
   private static shapeOf(scope: P.Scope, tag: string): TagShape {
     const meaning = SP.spellTagsIn(scope).find((each) => each.tag === tag)?.meaning

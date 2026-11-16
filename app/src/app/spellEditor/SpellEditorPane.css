@@ -1,4 +1,4 @@
-/* The element itself:  a block with a default height, as Monaco fills whatever it's given. */
+/* The element itself:  a block with a default height, as the editor fills whatever it's given. */
 :host {
   display: block;
   box-sizing: border-box;

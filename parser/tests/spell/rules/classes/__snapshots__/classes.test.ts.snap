@@ -7,7 +7,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "can_belong_to_many": "type|list",
   "class_member": "type|member",
   "create_list_type": "type|instanceType|aka?|ability?|with_nested_statements?|body?",
-  "create_one_of_a_kind": "type|ability?|superType|aka?|with_nested_statements?|body?",
+  "create_one_of_a_kind": "type|ability?|superType|aka?|layout?|no_layout?|with_nested_statements?|body?",
   "create_thing": "type|props?",
   "create_type": "type|aka[]?|ability?|superType|defaults?|with_nested_statements?|body?",
   "create_viewable_list_type": "type|aka?|ability[]?|instanceType|with_nested_statements?|body?",

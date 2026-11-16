@@ -2,7 +2,8 @@ import { execSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { setTimeout as wait } from "node:timers/promises"
-import { chromium, type BrowserContext, type Page } from "playwright"
+import type { EditorView } from "@codemirror/view"
+import { chromium, type BrowserContext, type Locator, type Page } from "playwright"
 import { afterAll, afterEach } from "vite-plus/test"
 
 /**
@@ -60,6 +61,178 @@ export function builtInProjectsNow(): string {
     cwd: path.join(KIT, "app"),
     maxBuffer: 64 * 1024 * 1024
   }).toString()
+}
+
+////////////////
+// ## The code editor
+////////////////
+
+/** What a test reads of the page's debug globals:  the code editor showing, CodeMirror's view of it. */
+type CodeGlobals = { editor: { shownCodeEditor?: { view: EditorView } } }
+
+/** A place in the code:  its line and column, each from 1. */
+export type CodePlace = { lineNumber: number; column: number }
+
+/**
+ * The editor page's code editor, as a test reads and drives it:  every page test's ONE way in.
+ * - Reads CodeMirror's own state (`window.editor.shownCodeEditor.view`), never what it draws,
+ *   so long files read whole, and bubbly or plain looks alike.
+ * - Lines and columns count from 1.
+ * - Clicks are a real mouse's, keys a real keyboard's.
+ */
+export class CodeEditor {
+  /** A drawn line of the code pane. */
+  static readonly LINE = ".InputEditor .cm-editor .cm-line"
+
+  constructor(readonly page: Page) {}
+
+  /** Wait for the code pane to show a line. */
+  async shown(timeout = 60_000): Promise<void> {
+    await this.page.waitForSelector(CodeEditor.LINE, { timeout })
+  }
+
+  /** Its whole text. */
+  text(): Promise<string> {
+    return this.page.evaluate(() =>
+      (window as unknown as CodeGlobals).editor.shownCodeEditor!.view.state.doc.toString()
+    )
+  }
+
+  /** Its lines' text, each. */
+  async lines(): Promise<string[]> {
+    return (await this.text()).split("\n")
+  }
+
+  /** Line `lineNumber`'s text. */
+  line(lineNumber: number): Promise<string> {
+    return this.page.evaluate(
+      (at) => (window as unknown as CodeGlobals).editor.shownCodeEditor!.view.state.doc.line(at).text,
+      lineNumber
+    )
+  }
+
+  /** `count` lines' text, from `lineNumber` on. */
+  async linesFrom(lineNumber: number, count: number): Promise<string[]> {
+    return (await this.lines()).slice(lineNumber - 1, lineNumber - 1 + count)
+  }
+
+  /** How many lines it has. */
+  lineCount(): Promise<number> {
+    return this.page.evaluate(() => (window as unknown as CodeGlobals).editor.shownCodeEditor!.view.state.doc.lines)
+  }
+
+  /** The number of the first line holding `words`;  `0`:  none does. */
+  async lineOf(words: string): Promise<number> {
+    return (await this.lines()).findIndex((line) => line.includes(words)) + 1
+  }
+
+  /** Where the caret is. */
+  caret(): Promise<CodePlace> {
+    return this.page.evaluate(() => {
+      const { state } = (window as unknown as CodeGlobals).editor.shownCodeEditor!.view
+      const { head } = state.selection.main
+      const line = state.doc.lineAt(head)
+      return { lineNumber: line.number, column: head - line.from + 1 }
+    })
+  }
+
+  /**
+   * Put the caret on line `lineNumber`, at `column`, scrolled into view.
+   * - `"end"`:  after the line's last character
+   * - Doesn't focus the editor:  `focus()` does
+   */
+  async setCaret(lineNumber: number, column: number | "end" = 1): Promise<void> {
+    await this.page.evaluate(
+      ([at, place]) => {
+        const { view } = (window as unknown as CodeGlobals).editor.shownCodeEditor!
+        const line = view.state.doc.line(at)
+        const anchor = place === "end" ? line.to : line.from + place - 1
+        view.dispatch({ selection: { anchor }, scrollIntoView: true })
+      },
+      [lineNumber, column] as const
+    )
+  }
+
+  /** Give it the keyboard. */
+  async focus(): Promise<void> {
+    await this.page.evaluate(() => (window as unknown as CodeGlobals).editor.shownCodeEditor!.view.focus())
+  }
+
+  /** Has it the keyboard?  `false`:  no code editor showing either. */
+  hasFocus(): Promise<boolean> {
+    return this.page.evaluate(() => (window as unknown as CodeGlobals).editor.shownCodeEditor?.view.hasFocus ?? false)
+  }
+
+  /** The text selected;  `""`:  none. */
+  selectedText(): Promise<string> {
+    return this.page.evaluate(() => {
+      const { state } = (window as unknown as CodeGlobals).editor.shownCodeEditor!.view
+      return state.sliceDoc(state.selection.main.from, state.selection.main.to)
+    })
+  }
+
+  /** How far down it's scrolled, in pixels. */
+  scrollTop(): Promise<number> {
+    return this.page.evaluate(() => (window as unknown as CodeGlobals).editor.shownCodeEditor!.view.scrollDOM.scrollTop)
+  }
+
+  /**
+   * Click line `lineNumber` with a real mouse:  scrolled to the middle first.
+   * - At `column`;  default:  one character into its first word
+   */
+  async clickLine(lineNumber: number, column?: number): Promise<void> {
+    const at = await this.page.evaluate(
+      async ([number, place]) => {
+        const { view } = (window as unknown as CodeGlobals).editor.shownCodeEditor!
+        const line = view.state.doc.line(number)
+        const pos = line.from + (place ? place - 1 : Math.max(0, line.text.search(/\S/)) + 1)
+        const scrollTo = (view.constructor as typeof EditorView).scrollIntoView
+        view.dispatch({ effects: scrollTo(Math.min(pos, line.to), { y: "center" }) })
+        // CodeMirror scrolls when it next measures, in a frame
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const box = view.coordsAtPos(Math.min(pos, line.to))!
+        return { x: box.left + 2, y: (box.top + box.bottom) / 2 }
+      },
+      [lineNumber, column] as const
+    )
+    await this.page.waitForTimeout(200)
+    await this.page.mouse.click(at.x, at.y)
+  }
+
+  /** Type `text` where the caret is, a key at a time:  focused first. */
+  async type(text: string, delay = 0): Promise<void> {
+    await this.focus()
+    await this.page.keyboard.type(text, { delay })
+  }
+
+  /** Press `key` (`"Meta+z"`, `"Enter"` ...):  focused first. */
+  async press(key: string): Promise<void> {
+    await this.focus()
+    await this.page.keyboard.press(key)
+  }
+
+  /** Paste `text` at the caret, as ⌘V's paste event would bring it. */
+  async paste(text: string): Promise<void> {
+    await this.page.evaluate((pasted) => {
+      const data = new DataTransfer()
+      data.setData("text/plain", pasted)
+      const { contentDOM } = (window as unknown as CodeGlobals).editor.shownCodeEditor!.view
+      contentDOM.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
+    }, text)
+  }
+
+  /** The drawn lines of the code pane, those holding `words` only, if given. */
+  lineLocator(words?: string): Locator {
+    return this.page.locator(CodeEditor.LINE, words === undefined ? {} : { hasText: words })
+  }
+
+  /**
+   * The drawn lines' text of any CodeMirror view inside `within` (an Inspector card's slice, the compiled code ...).
+   * - Only those drawn:  CodeMirror leaves out lines far off screen.
+   */
+  static async drawnLines(within: Locator): Promise<string[]> {
+    return within.locator(".cm-line").allInnerTexts()
+  }
 }
 
 ////////////////

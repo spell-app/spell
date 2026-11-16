@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Site breadcrumbs | Spell UI</title>
+    <meta
+      name="description"
+      content="Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Site breadcrumbs">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-site-breadcrumbs%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Site breadcrumbs
+            <ui-header>Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-where-you-are" label="Where you are" sticky="stack" collapsible dividing>
+                <ui-example description="`pages` is the side navigation&#x27;s own list.  Site breadcrumbs find the page shown and draw the way down to it:  the group&#x27;s name, each page above it a link, then the page itself.">
+                  <ui-site-breadcrumbs
+                    current="#systems"
+                    pages='[{ "title": "Hardware", "id": "group:Hardware", "band": "group", "pages": [{ "title": "Machines", "href": "#machines", "pages": [{ "title": "Systems", "href": "#systems" }] }] }]'
+                  ></ui-site-breadcrumbs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-a-page-with-a-parameter" label="A page with a parameter" sticky="stack" collapsible dividing>
+                <ui-example description="A page above the one shown whose address has a parameter (`/films/:film`) can&#x27;t be gone to without one:  its crumb is only its name.">
+                  <ui-site-breadcrumbs
+                    current="#cast"
+                    pages='[{ "title": "Films", "href": "#films", "pages": [{ "title": "Film", "href": "/films/:film", "pages": [{ "title": "Cast", "href": "#cast" }] }] }]'
+                  ></ui-site-breadcrumbs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-not-found" label="Not found" sticky="stack" collapsible dividing>
+                <ui-example description="The page shown isn&#x27;t among the pages (a not found page):  nothing is drawn and it takes no room, `:state(empty)`.">
+                  <ui-site-breadcrumbs current="#missing" pages='[{ "title": "Home", "href": "#home" }]'></ui-site-breadcrumbs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Put it at the start of an app's top bar.  Inside a site with a `<ui-site-nav>`, that's all:  with no `pages` of its own, it follows the navigation around it, its pages and the page it marks shown, as `<ui-site-tabs>` does.  A page of a Spell site writes a bare `<site-breadcrumbs/>`.
+                  - Elsewhere, hand it the same `pages` you hand `<ui-site-nav>`, and `current`.
+                  - A group (`band: "group"`) or a page with no `href` is only a name;  a page above the one shown is a link, unless its address has a parameter.
+                  - Each crumb is a real link:  a site that shows its pages itself takes the click as it takes any link to one of its pages.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const crumbs = document.querySelector("ui-site-breadcrumbs")
+                  crumbs.pages = site.pages
+                  crumbs.current = location.pathname
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Each link is a stop for Tab;  Enter follows it.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The trail is a `nav` landmark named `label`, else "Where you are";  the page shown is `aria-current="page"`.  Not found, nothing is drawn, so nothing is announced.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-breadcrumbs" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-breadcrumbs" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-breadcrumbs" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-breadcrumbs" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-breadcrumbs" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-site-breadcrumbs" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-site-breadcrumbs
+                  current="#systems"
+                  pages='[{ "title": "Hardware", "id": "group:Hardware", "band": "group", "pages": [{ "title": "Machines", "href": "#machines", "pages": [{ "title": "Systems", "href": "#systems" }] }] }]'
+                ></ui-site-breadcrumbs>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -27,6 +27,14 @@ body {
       font-size: 17px;
     }
   }
+
+  /* Settings…, the code pane's card, over the editors' top right corner */
+  .CodeMirrorTestSettings {
+    position: absolute;
+    top: 64px;
+    right: 16px;
+    z-index: 10;
+  }
 }
 
 .CodeMirrorTestSides {
@@ -60,7 +68,6 @@ body {
   }
 
   .Editor,
-  .MonacoEditor,
   .DiffView {
     height: 100%;
   }
@@ -69,4 +76,10 @@ body {
     padding: 16px;
     color: light-dark(#8a8996, #8e8c9a);
   }
+}
+
+/* a slice of the file under each editor, as the Inspector's Code card shows one */
+.CodeMirrorTestSides.Slices {
+  flex: 0 0 230px;
+  padding-top: 0;
 }

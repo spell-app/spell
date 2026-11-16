@@ -601,7 +601,7 @@ export const REVIEW_NAME_TEXTS = [
     description: "Review button:  its name (Make Caveat, epic `epic-engine` P32 to P44)."
   },
   { key: "revisit", text: "Revisit", description: "Review button:  its name." },
-  { key: "next", text: "Do it in the next phase", description: "A todo's review button (the plane):  its name." },
+  { key: "next", text: "Start it now", description: "A todo's review button (the plane):  its name." },
   {
     key: "revisitNote",
     text: "Revisit:  I'm adding a note for you",
@@ -708,7 +708,7 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "nextTip",
-    text: "Queued into the next phase still to do, once Claude applies it",
+    text: "an agent takes it at once (a note asking for a phase gets it a new one)",
     description: "A todo's review button:  what the plane does."
   },
   {

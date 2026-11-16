@@ -1,0 +1,135 @@
+import { describe, expect, test } from "vite-plus/test"
+import { EditorState } from "@codemirror/state"
+import type { DecorationSet } from "@codemirror/view"
+
+import { MarkupMarks } from "spell/app/app/ui/MarkupMarks"
+import { CodeMirrorMarkup } from "spell/app/app/ui/codemirror/CodeMirrorMarkup"
+
+/**
+ * `CodeMirrorMarkup`, HTML drawn bubbly in CodeMirror (epic `codemirror` P3):  the shared `MarkupMarks`
+ * tests, from the same shared reading, its shapes drawn on the text itself.
+ * - Runs in node:  the decorations are worked out from an editor state, no view needed.
+ */
+describe("CodeMirrorMarkup", () => {
+  /** A page, as the drawn-bubbly page's examples are:  `MarkupMarks`' own test's. */
+  const PAGE = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>A demo</title>
+  </head>
+  <body>
+    <h2>Two <code>x</code></h2>
+    <spell-viewer id="a"></spell-viewer>
+  </body>
+</html>
+`
+
+  test("each tag in a line a pill, each tag alone a band, each block's start tag an open band, its end tag a tiny foot", () => {
+    const marked = marksOf(PAGE)
+    expect(textWith(marked, "cmb-tag-pill")).toEqual([
+      "<title>",
+      "</title>",
+      "<h2>",
+      "<code>",
+      "</code>",
+      "</h2>",
+      '<spell-viewer id="a"></spell-viewer>'
+    ])
+    expect(textWith(marked, "cmb-band-open")).toEqual(['<html lang="en">', "<head>", "<body>"])
+    expect(textWith(marked, "cmb-tag-foot")).toEqual(["</head>", "</body>", "</html>"])
+    expect(textWith(marked, "cmb-tag-band").filter((tag) => !/<(html|head|body)/.test(tag))).toEqual([
+      "<!doctype html>",
+      '<meta charset="UTF-8" />'
+    ])
+  })
+
+  test("its pieces are the shared reading's, as the editor marks them:  brackets, names, a value's white pill", () => {
+    const marked = marksOf(PAGE)
+    expect(textWith(marked, "bubbly-tag-name").slice(0, 3)).toEqual(["html", "head", "meta"])
+    expect(textWith(marked, "bubbly-attribute-name")).toEqual(["lang", "charset", "id"])
+    expect(textWith(marked, "bubbly-input")).toEqual(["en", "UTF-8", "a"])
+    // every mark of the shared reading is drawn:  as many stretches with classes as it worked out
+    const shared = MarkupMarks.of(PAGE, CodeMirrorMarkup.make).marks.filter((stretch) => stretch.classes)
+    for (const stretch of shared) expect(marked.has(`${stretch.start}:${stretch.end}`)).toBe(true)
+  })
+
+  test("a block's body:  a rail on each line under its start tag, to its end tag's turn, nested ones inside", () => {
+    const rails = railsOf(PAGE)
+    // `<head>`'s lines:  inside `<html>` and `<head>`
+    expect(rails.get("    <title>A demo</title>")).toBe(2)
+    expect(rails.get("  </head>")).toBe(2)
+    expect(rails.get("  <body>")).toBe(1)
+    expect(rails.get("</html>")).toBe(1)
+    expect(rails.get("<!doctype html>")).toBeUndefined()
+  })
+
+  test("a one-line element with something between its tags:  a link between its pills", () => {
+    expect(textWith(marksOf(PAGE), "cmb-tag-link")).toEqual(["A demo", "Two <code>x</code>", "x"])
+  })
+
+  test("spacers where the shared reading has room:  before a block's tags, either side of a tag in a line", () => {
+    const kinds = spacersOf(PAGE)
+    expect(kinds).toContain("bubbly-tag-head-spacer")
+    expect(kinds).toContain("bubbly-tag-foot-spacer")
+    expect(kinds).toContain("bubbly-tag-spacer")
+  })
+
+  test("a reading that fails leaves the text plain:  NEVER throws", () => {
+    expect(() => CodeMirrorMarkup.decorationsOf(EditorState.create({ doc: "<<<</ />" }))).not.toThrow()
+  })
+})
+
+/** Each mark's classes, by its stretch (`start:end`), and the text it's on. */
+function marksOf(text: string): Map<string, { text: string; classes: string[] }> {
+  const marked = new Map<string, { text: string; classes: string[] }>()
+  eachDecoration(CodeMirrorMarkup.decorationsOf(EditorState.create({ doc: text })), (from, to, spec) => {
+    if (typeof spec.class === "string" && to > from && !spec.block) {
+      marked.set(`${from}:${to}`, { text: text.slice(from, to), classes: spec.class.split(" ") })
+    }
+  })
+  return marked
+}
+
+/** The text of each mark with class `name`, in order. */
+function textWith(marked: Map<string, { text: string; classes: string[] }>, name: string): string[] {
+  return [...marked.entries()]
+    .filter(([, mark]) => mark.classes.includes(name))
+    .sort(([a], [b]) => Number(a.split(":")[0]) - Number(b.split(":")[0]))
+    .map(([, mark]) => mark.text)
+}
+
+/** How many rails each railed line of `text` draws, by its text. */
+function railsOf(text: string): Map<string, number> {
+  const state = EditorState.create({ doc: text })
+  const rails = new Map<string, number>()
+  eachDecoration(CodeMirrorMarkup.decorationsOf(state), (from, to, spec) => {
+    const style = (spec.attributes as Record<string, string> | undefined)?.style
+    if (from === to && style?.startsWith("--cmb-rails")) {
+      rails.set(state.doc.lineAt(from).text, style.split("linear-gradient").length - 1)
+    }
+  })
+  return rails
+}
+
+/** The classes of each spacer widget. */
+function spacersOf(text: string): string[] {
+  const kinds: string[] = []
+  eachDecoration(CodeMirrorMarkup.decorationsOf(EditorState.create({ doc: text })), (_from, _to, spec) => {
+    const widget = spec.widget as { classes?: string } | undefined
+    if (widget?.classes) kinds.push(...widget.classes.split(" ").filter((name) => name.endsWith("-spacer")))
+  })
+  return kinds
+}
+
+/** Call `each` with every decoration's range and spec. */
+function eachDecoration(
+  decorations: DecorationSet,
+  each: (from: number, to: number, spec: Record<string, unknown>) => void
+): void {
+  const cursor = decorations.iter()
+  while (cursor.value) {
+    each(cursor.from, cursor.to, cursor.value.spec as Record<string, unknown>)
+    cursor.next()
+  }
+}

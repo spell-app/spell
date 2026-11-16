@@ -449,8 +449,12 @@ classesEs.addRule(DimensionUnit, {
     "(un|una) {unit:unit_names} , es {top:number} (/ {bottom:number})? {of:unit_words} (, empezando en {start:number})?"
 })
 
+// el diseño de una página, en su línea (épica `mockup` T39):  `sistemas es una página, en el diseño sencillo`,
+// `entrar es una página, sin diseño`
+const PAGE_LAYOUT = "(, en el {layout:type_words}|, (no_layout:sin diseño))?"
+
 classesEs.addRule(CreateOneOfAKind, {
-  syntax: `{type:type_words} es ${A} {superType:type} ${ABILITIES} (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {superType:type} ${ABILITIES} (, alias {aka:quoted_type})? ${PAGE_LAYOUT} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",

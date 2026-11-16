@@ -1,4 +1,5 @@
 import h from "@solidjs/h"
+import { For, createMemo } from "solid-js"
 
 import { PrefStore, schemaOf } from "spell/util"
 import { waitUntil } from "spell/util/timing"
@@ -10,6 +11,7 @@ import { isElementThunk, type Drawing } from "spell/parser/core/drawing"
 // Import directly to avoid circular import
 import { App } from "./App"
 import { Page } from "./Page"
+import { PageLayout } from "./PageLayout"
 import { Thing } from "./Thing"
 
 /**
@@ -49,10 +51,11 @@ export class SiteBase extends App {
   static livesAt?: string
 
   /**
-   * Its top bar, when it lists one:  `- it has a top bar` (epic `mockup` T35).
-   * - Its buttons are the view of its name, when the program declares one (`view`).
+   * The class of its MAIN layout, every page's unless its own line picks another, when the program has one:
+   * `main layout is a page layout` => `"MainLayout"` (epic `mockup` T39).
+   * - None:  its pages are drawn in its built-in frame, the navigation and the page.
    */
-  static topBar?: SiteOverlayEntry
+  static mainLayout?: string
 
   /**
    * SIDE EFFECT:  the running program's first site is its site, `core.RUNTIME.site`:
@@ -201,7 +204,7 @@ export class SiteBase extends App {
     // `/` with no page of its own is the site's first page:  where Run starts
     const found = this.pageFor(address) ?? (address === "/" ? this.firstPage() : undefined)
     if (!found) {
-      this.setState("showing", { kind: "missing", address } satisfies Showing)
+      this.showNow({ kind: "missing", address })
       return
     }
     // a page not compiled yet (`SiteHost.pageNeeded()`):  the host brings it in;  false:  this isn't the place to show it
@@ -210,7 +213,7 @@ export class SiteBase extends App {
     if (this.currentAddressHere !== address) return
     const page = this.pageInstance(found.entry)
     if (!page) {
-      this.setState("showing", { kind: "waiting", entry: found.entry } satisfies Showing)
+      this.showNow({ kind: "waiting", entry: found.entry })
       return
     }
     try {
@@ -221,7 +224,7 @@ export class SiteBase extends App {
         if (this.currentAddressHere !== address) return
         ;(page as unknown as Record<string, unknown>)[property] = value
       }
-      this.setState("showing", { kind: "page", page, entry: found.entry } satisfies Showing)
+      this.showNow({ kind: "page", page, entry: found.entry })
     } catch (error) {
       if (this.currentAddressHere === address) this.showFailure(found.entry.name, error)
     }
@@ -232,7 +235,7 @@ export class SiteBase extends App {
    * (`core.drawingFailed()` asks `pageFailed()` first).
    */
   showFailure(name: string, error: unknown): void {
-    this.setState("showing", { kind: "failed", name, error } satisfies Showing)
+    this.showNow({ kind: "failed", name, error })
   }
 
   /**
@@ -321,16 +324,18 @@ export class SiteBase extends App {
   }
 
   /**
-   * Its side navigation, the page it shows beside it, and an open dialog or sidebar over it (epic `mockup` P3).
-   * - The navigation is Spell UI's `<ui-site-nav>`, its pages the site's, nested as its lines nest them
-   *   (`navPages()`);  picking one goes there without leaving the page.
-   * - Two columns of its own, not `<ui-page>`:
-   *   that's a whole window's frame and root, and Run draws the site inside the editor's page.
+   * The page it shows, in its page layout, and an open dialog or sidebar over it (epic `mockup` P3, T39).
+   * - Its page layout:  Spell UI's `<ui-page-layout>`, its slots drawn by the layout the page is in
+   *   (`layoutNameFor()`):  its app menu, page menu, drawer, side bars and footer;  the page in its middle.
+   *   - Its drawer holds the site's navigation, `<ui-site-nav>`, its pages the site's, nested as its lines nest them
+   *     (`navPages()`), unless the layout draws its drawer itself.
+   *   - A slot the page shown draws itself (`to draw its right sidebar`) is the page's while it's shown.
+   * - Drawn ONCE per layout, and kept:  going to a page in the same layout redraws only the page, so nothing around
+   *   it flashes;  a page in another layout shows that one, and the first is kept, hidden, as it was left.
+   * - A site with no main layout draws every page in its built-in frame:  the navigation and the page.
+   *   A page whose line says `, no layout` is drawn alone.
+   * - Not `<ui-page>`:  that's a whole window's frame and root, and Run draws the site inside the editor's page.
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
-   * - A site with a top bar (`topBar`) draws it above the page, and the bar's side bar button replaces the narrow
-   *   width's menu button (`drawTopBar()`).
-   * - No tabs of its own:  a page that wants its family as tabs writes `<site-tabs/>`, which follows the navigation
-   *   around it, and its tabs are links this follows (epic `mockup` T38).
    */
   draw(): Drawing {
     return h(
@@ -343,178 +348,163 @@ export class SiteBase extends App {
           return tokens ? `${tokens};  ${THEMED_FRAME}` : ""
         },
         "data-theme": () => this.themeName,
-        onKeyDown: (event: KeyboardEvent) => this.closeNavOnEscape(event)
-      },
-      h("style", {}, NARROW_SITE_CSS),
-      this.siteClass.topBar
-        ? null
-        : h("ui-button", {
-            class: "spell-site-menu",
-            icon: "bars",
-            appearance: "basic",
-            size: "small",
-            "aria-label": core.message("site-menu"),
-            title: core.message("site-menu"),
-            "aria-expanded": () => (this.isNavOpen ? "true" : "false"),
-            onClick: () => (this.isNavOpen = !this.isNavOpen)
-          }),
-      this.drawSite()
-    ) as unknown as Drawing
-  }
-
-  /**
-   * Its navigation is open over the page:  only below a width, where it slides in from the button (T10, epic
-   * `mockup` P5).  Above it the navigation is always beside the page, and this changes nothing.
-   */
-  get isNavOpen(): boolean {
-    return !!this.getState<boolean>("navOpen")
-  }
-
-  set isNavOpen(open: boolean) {
-    this.setState("navOpen", open)
-  }
-
-  /**
-   * Its navigation shows only its icons (`<ui-site-nav collapsed>`):  the top bar's side bar button, on a wide site
-   * (epic `mockup` T35).
-   * - Remembered for each person, for each site, across pages and visits (`PrefStore`, `spell-sites:<Site>.collapsed`).
-   * - Only a site with a top bar collapses:  without one, nothing would open it again.
-   */
-  get isNavCollapsed(): boolean {
-    if (!this.siteClass.topBar) return false
-    const set = this.getState<boolean>("navCollapsed")
-    return set ?? PrefStore.getAt(this.collapsedKey) === true
-  }
-
-  set isNavCollapsed(collapsed: boolean) {
-    this.setState("navCollapsed", collapsed)
-    PrefStore.setAt(this.collapsedKey, collapsed || undefined)
-  }
-
-  /** Where it remembers `isNavCollapsed`:  `spell-sites:<Site>.collapsed`. */
-  private get collapsedKey(): string {
-    return `${SITES_PREFS}:${this.constructor.name}.collapsed`
-  }
-
-  /**
-   * The top bar's side bar button:  on a wide site, its navigation shows only its icons, or all of it again;
-   * narrow, where the navigation slides over the page, it slides it in or out.
-   */
-  toggleNav(event: Event): void {
-    const nav = (event.currentTarget as Element | null)?.closest(".spell-site")?.querySelector(".spell-site-nav")
-    if (nav && isSlidOver(nav)) this.isNavOpen = !this.isNavOpen
-    else this.isNavCollapsed = !this.isNavCollapsed
-  }
-
-  /** Escape closes the navigation open over the page. */
-  private closeNavOnEscape(event: KeyboardEvent) {
-    if (event.key === "Escape" && this.isNavOpen) this.isNavOpen = false
-  }
-
-  /** The two columns:  the navigation, the page shown, and an open dialog or sidebar over it. */
-  private drawSite(): Drawing {
-    return h(
-      "div",
-      {
-        class: () => (this.isNavOpen ? "spell-site nav-open" : "spell-site"),
-        style: SITE_LAYOUT,
         onClick: (event: MouseEvent) => this.followLink(event)
       },
-      h("ui-site-nav", {
-        class: "spell-site-nav",
-        appearance: "nav",
-        remember: this.constructor.name,
-        // functions:  `h()` reads a function on a dashed tag as a live value
-        // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
-        pages: () => JSON.stringify(this.navPages()),
-        current: () => this.navCurrent(),
-        // only its icons:  never while it's slid over a narrow page
-        collapsed: () => (this.isNavCollapsed && !this.isNavOpen ? "" : undefined),
-        "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
-          event.preventDefault()
-          this.isNavOpen = false
-          this.navigate(event.detail.href)
-        }
-      }),
-      h("div", { class: "spell-site-page", style: PAGE_LAYOUT }, this.drawTopBar(), () => made(this.drawShowing())),
+      h("style", {}, SITE_CSS),
+      h(For, { each: () => this.layoutsDrawn, children: (name: string) => this.drawLayout(name) }),
       () => made(this.drawOverlay())
     ) as unknown as Drawing
   }
 
+  ////////////////
+  // ## Its page layouts
+  ////////////////
+
   /**
-   * Its top bar, above the page, when it has one (`- it has a top bar`, epic `mockup` T35):  Spell UI's `<ui-app-menu>`.
-   * - At its start:  the side bar button (`toggleNav()`), then where you are, as a breadcrumb (`crumbs()`).
-   * - At its end:  the buttons its view draws, when the program declares one (`a "top bar" is a view`).
-   * - Drawn once, and hidden on a page whose line says `, no top bar`:  so its view's element is never made again.
+   * The name of the layout the page shown is in:  its page layout's class (`MainLayout`), else `BUILT_IN_FRAME` or
+   * `JUST_THE_PAGE`.
+   * - A page's own line picks one (`static layout`):  a layout's class, or `false` for `, no layout`;
+   *   saying nothing, it's in the site's main layout (`static mainLayout`).
+   * - The not found and error pages are in the main layout:  so its navigation is there, to get out.
+   * - A layout the program doesn't make (yet):  the built-in frame.
    */
-  private drawTopBar(): Drawing | null {
-    if (!this.siteClass.topBar) return null
-    const view = this.topBarView()
+  layoutNameFor(showing: Showing | undefined): string {
+    const picked =
+      showing?.kind === "page" ? (showing.page.constructor as { layout?: string | false }).layout : undefined
+    if (picked === false) return JUST_THE_PAGE
+    const name = picked ?? this.siteClass.mainLayout
+    return name && this.layoutNamed(name) ? name : BUILT_IN_FRAME
+  }
+
+  /**
+   * The layout the page shown is in:  see `layoutNameFor()`.
+   * - Worked out as the page is shown (`showNow()`), never as it's drawn:  finding a layout reads every thing of the
+   *   program, and a drawing that read them would draw again each time the page made one.
+   */
+  get shownLayoutName(): string {
+    return this.getState<string>("shownLayout") ?? BUILT_IN_FRAME
+  }
+
+  /** Every layout drawn so far, in the order first shown:  each one's drawing is kept, the one shown visible. */
+  get layoutsDrawn(): string[] {
+    return this.getState<string[]>("layoutsDrawn") ?? []
+  }
+
+  /** The program's page layout of class `name`:  the one its file made (`export const mainLayout = new MainLayout()`). */
+  private layoutNamed(name: string): PageLayout | undefined {
+    return core.things.all().find((thing) => thing instanceof PageLayout && thing.constructor.name === name) as
+      | PageLayout
+      | undefined
+  }
+
+  /**
+   * Show `showing`:  its page, the not found page or the error page.
+   * - SIDE EFFECT:  the layout it's in is shown (`shownLayoutName`), and drawn from now on if it isn't already
+   *   (`layoutsDrawn`).
+   */
+  private showNow(showing: Showing): void {
+    const name = this.layoutNameFor(showing)
+    if (!this.layoutsDrawn.includes(name)) this.setState("layoutsDrawn", [...this.layoutsDrawn, name])
+    this.setState("shownLayout", name)
+    this.setState("showing", showing)
+  }
+
+  /**
+   * Layout `name`, drawn once:  `<ui-page-layout>`, each of its slots drawn by the layout, or the page shown when it
+   * draws that slot itself, and the page in its middle while it's the layout shown.
+   * - Hidden while another layout is shown, as it was left.
+   * - Its drawer's choice of only its icons (`drawer="compact"`) is remembered for each person, for each site and
+   *   layout (`isCompact()`).
+   */
+  private drawLayout(name: string): unknown {
+    const isShown = () => this.shownLayoutName === name
+    const page = () => (isShown() ? made(this.drawShowing()) : null)
+    if (name === JUST_THE_PAGE)
+      return h("div", { class: "spell-site-alone", hidden: () => (isShown() ? undefined : "") }, page)
+    const layout = name === BUILT_IN_FRAME ? undefined : this.layoutNamed(name)
     return h(
-      "ui-app-menu",
+      "ui-page-layout",
       {
-        class: "spell-site-top-bar",
-        hidden: () => (this.isTopBarHidden ? "" : undefined)
-      },
-      h("ui-item", {
-        slot: "start",
-        class: "spell-site-side-bar",
-        icon: "columns",
-        "aria-label": core.message("site-side-bar"),
-        title: core.message("site-side-bar"),
-        onClick: (event: MouseEvent) => this.toggleNav(event)
-      }),
-      h(
-        "ui-item",
-        { slot: "start", class: "spell-site-where" },
-        h("ui-breadcrumbs", { "aria-label": core.message("site-where") }, () =>
-          this.crumbs().map((crumb) =>
-            made(
-              h(
-                "ui-breadcrumb",
-                { ...(crumb.link && { link: crumb.link }), ...(crumb.isShown && { selected: "" }) },
-                crumb.title
-              )
-            )
+        class: "spell-site",
+        "data-layout": name || undefined,
+        hidden: () => (isShown() ? undefined : ""),
+        drawer: () => (this.isCompact(name) ? COMPACT : undefined),
+        // a listener, not an `on-ui-toggle` attribute:  Solid warns about a function on an attribute
+        ref: (element: Element) =>
+          element.addEventListener(TOGGLE, (event) =>
+            this.rememberCompact(name, (event as CustomEvent<{ newState: string }>).detail.newState === COMPACT)
           )
-        )
-      ),
-      view ? h("div", { slot: "end", class: "spell-site-top-bar-end" }, core.drawThing(view)) : null
-    ) as unknown as Drawing
-  }
-
-  /** The page shown says `, no top bar`. */
-  get isTopBarHidden(): boolean {
-    const showing = this.getState<Showing>("showing")
-    return showing?.kind === "page" && !!showing.entry.noTopBar
-  }
-
-  /** The view its top bar draws its buttons with, made the first time:  `undefined` when the program has none. */
-  private topBarView(): object | undefined {
-    const name = this.siteClass.topBar?.view
-    const View = name ? core.things.classNamed(name) : undefined
-    if (View) this.topBarViewMade ??= new (View as new () => object)()
-    return this.topBarViewMade
+      },
+      layout?.drawDrawer === PageLayout.prototype.drawDrawer || !layout
+        ? this.drawNav()
+        : this.drawSlot(layout, "drawDrawer", "drawer"),
+      layout && this.drawSlot(layout, "drawAppMenu", "menu"),
+      layout && this.drawSlot(layout, "drawPageMenu", "page-menu"),
+      layout && this.drawSlot(layout, "drawLeftSidebar", "left"),
+      layout && this.drawSlot(layout, "drawRightSidebar", "right"),
+      layout && this.drawSlot(layout, "drawFooter", "footer"),
+      page
+    )
   }
 
   /**
-   * Where you are, as the top bar's breadcrumb says it:  the group of the page shown, the pages above it, then it.
-   * - e.g. `Hardware › Systems`;  a film's page:  `Films › Film`
-   * - The group is only a name;  each page above is a link to it, unless it needs a parameter;  the page shown is
-   *   `isShown`.
-   * - None for the not found and error pages.
+   * Slot `slot` of the layout's region `region`:  the page shown's own drawing of it while it has one, else the
+   * layout's;  nothing when neither draws anything, so the region takes no room.
+   * - Drawn again only when WHO draws it changes (a memo of that), never on every page change:
+   *   so a layout's menu is the same element from page to page.
    */
-  crumbs(): SiteCrumb[] {
-    const path = this.shownPath()
-    const crumbs: SiteCrumb[] = []
-    const group = path[0]?.group
-    if (group) crumbs.push({ title: group })
-    path.forEach((entry, at) => {
-      const title = entry.title ?? entry.name
-      if (at === path.length - 1) crumbs.push({ title, isShown: true })
-      else crumbs.push({ title, ...(!entry.params?.length && { link: entry.address }) })
+  private drawSlot(layout: PageLayout, slot: LayoutSlot, region: string): unknown {
+    const drawer = createMemo(() => {
+      const showing = this.getState<Showing>("showing")
+      const page =
+        showing?.kind === "page" && this.shownLayoutName === layout.constructor.name ? showing.page : undefined
+      return page && typeof (page as unknown as Record<string, unknown>)[slot] === "function" ? page : layout
     })
-    return crumbs
+    return () => {
+      const drawing = made((drawer() as unknown as Record<LayoutSlot, () => unknown>)[slot]())
+      return drawing == null ? null : h("div", { slot: region, class: "spell-site-slot" }, drawing)
+    }
+  }
+
+  /** The site's navigation, in a layout's drawer:  its pages, the one shown marked;  picking one goes there. */
+  private drawNav(): unknown {
+    return h("ui-site-nav", {
+      slot: "drawer",
+      class: "spell-site-nav",
+      appearance: "nav",
+      remember: this.constructor.name,
+      // functions:  `h()` reads a function on a dashed tag as a live value
+      // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
+      pages: () => JSON.stringify(this.navPages()),
+      current: () => this.navCurrent(),
+      // a listener, not an `on-ui-navigating` attribute:  Solid warns about a function on an attribute
+      ref: (element: Element) =>
+        element.addEventListener(NAVIGATING, (event) => {
+          event.preventDefault()
+          this.navigate((event as CustomEvent<{ href: string }>).detail.href)
+        })
+    })
+  }
+
+  /**
+   * Does layout `name`'s drawer show only its icons (`drawer="compact"`)?  Its `<ui-site-nav-button>` switches it.
+   * - Remembered for each person, for each site and layout, across pages and visits
+   *   (`PrefStore`, `spell-sites:<Site>.<Layout>.compact`).
+   */
+  isCompact(name: string): boolean {
+    const set = this.getState<boolean>(`compact:${name}`)
+    return set ?? PrefStore.getAt(this.compactKey(name)) === true
+  }
+
+  /** Remember that layout `name`'s drawer shows only its icons, or all of it:  what its `ui-toggle` says. */
+  private rememberCompact(name: string, compact: boolean): void {
+    this.setState(`compact:${name}`, compact)
+    PrefStore.setAt(this.compactKey(name), compact || undefined)
+  }
+
+  /** Where it remembers layout `name`'s `isCompact()`:  `spell-sites:<Site>.<Layout>.compact`. */
+  private compactKey(name: string): string {
+    return `${SITES_PREFS}:${this.constructor.name}.${name || BUILT_IN_KEY}.compact`
   }
 
   /**
@@ -744,9 +734,6 @@ export class SiteBase extends App {
 
   /** The views of its dialogs and sidebars, made the first time each opens, by name. */
   private overlayViews = new Map<string, object>()
-
-  /** The view its top bar draws, once made:  see `topBarView()`. */
-  private topBarViewMade?: object
 }
 
 ////////////////
@@ -765,86 +752,41 @@ type SiteNavPage = {
   pages?: SiteNavPage[]
 }
 
-/** One step of the top bar's breadcrumb:  see `SiteBase.crumbs()`. */
-type SiteCrumb = {
-  /** what it says:  a group's name, a page's title */
-  title: string
-  /** where it goes:  a page above the page shown */
-  link?: string
-  /** it's the page shown */
-  isShown?: boolean
-}
-
-/** The store a site keeps what each person chose in:  `spell-sites:<Site>.collapsed`. */
+/** The store a site keeps what each person chose in:  `spell-sites:<Site>.<Layout>.compact`. */
 const SITES_PREFS = "spell-sites"
 
-/**
- * Is `nav` slid over a narrow page, rather than beside it (`NARROW_SITE_CSS`)?
- * - Asks its style, where the width is decided:  a container query, so the page's style sheet stays the one truth.
- * - No styles (a page with no layout, under node):  beside it.
- */
-function isSlidOver(nav: Element): boolean {
-  return typeof getComputedStyle === "function" && getComputedStyle(nav).position === "absolute"
-}
+/** The built-in frame's key in it:  a site with no main layout. */
+const BUILT_IN_KEY = "frame"
+
+/** The layout name of the site's built-in frame, for a site with no main layout:  the navigation and the page. */
+const BUILT_IN_FRAME = ""
+
+/** The layout name of a page drawn alone, whose line says `, no layout`. */
+const JUST_THE_PAGE = "-"
+
+/** `<ui-page-layout drawer>`'s word for a drawer that shows only its icons, and `ui-toggle`'s. */
+const COMPACT = "compact"
+
+/** What `<ui-page-layout>` sends when its drawer switches between its icons only and all of it. */
+const TOGGLE = "ui-toggle"
+
+/** What `<ui-site-nav>` sends when a page is picked:  cancelled, the site shows it itself. */
+const NAVIGATING = "ui-navigating"
+
+/** A page layout's slot drawings, each a method of the layout, or of a page that draws that slot itself. */
+type LayoutSlot = "drawDrawer" | "drawAppMenu" | "drawPageMenu" | "drawLeftSidebar" | "drawRightSidebar" | "drawFooter"
 
 /**
- * A site's two columns:  its navigation, then the page.
- * - Each as tall as the taller, and the site at least as tall as the box it's drawn in (`NARROW_SITE_CSS`):
- *   the navigation runs from top to bottom (epic `mockup` T34).
- * - No gap between them:  the page keeps its own distance from the navigation, so its top bar meets the
- *   navigation, the navigation's line their only edge (`NARROW_SITE_CSS`, epic `mockup` I22).
+ * How a site fills the box Run gives it:  its page layout the whole height of that box, the layouts not shown hidden.
+ * - The regions themselves are `<ui-page-layout>`'s:  a slot's wrapper is only a way into it.
  */
-const SITE_LAYOUT = "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); align-items: stretch"
-
-/** The page's column:  as wide as it's given. */
-const PAGE_LAYOUT = "min-width: 0"
-
-/**
- * Below 40em of the box Run gives it (a container query, not the window's width):  one column, and the navigation
- * slides over the page from the menu button, inside the site's own box.
- * - Not `<ui-flyout>`:  that's fixed to the window, and Run draws the site inside the editor's page.
- */
-const NARROW_SITE_CSS = `
-.spell-site-frame { container: spell-site / inline-size; position: relative }
-.spell-site-menu { display: none }
+const SITE_CSS = `
 /* the whole height of the box its element is drawn in (Run's):  that element, whatever its tag, a column */
 :has(> .spell-site-frame) { display: flex; flex-direction: column; min-height: 100% }
 .spell-site-frame { flex: 1 0 auto; display: flex; flex-direction: column }
-.spell-site { flex: 1 0 auto }
-/* the whole height, on a fill of its own and a line at its right;  its list its own scroller, stuck at the top,
-   so showing the page's row never scrolls the page */
-.spell-site-nav {
-  background: var(--ui-surface-muted, Canvas); border-inline-end: 1px solid var(--ui-border-color, GrayText)
-}
-.spell-site-nav::part(nav) { position: sticky; inset-block-start: 0; max-height: 100dvh; overflow: auto }
-/* its top bar (\`- it has a top bar\`):  above the page, its buttons at its end;  hidden on a page with none
-   (its element is \`display: contents\`:  its box is its menu part) */
-.spell-site-top-bar::part(menu) { margin-block-end: 1em }
-/* the page a font size from the navigation, but its top bar up against it:  the navigation's line their only edge
-   (in pixels, \`--ui-font-size\`:  the bar's own em is its smaller text's) */
-.spell-site-page { padding-inline-start: var(--ui-font-size, 16px) }
-.spell-site-top-bar::part(menu) {
-  margin-inline-start: calc(-1 * var(--ui-font-size, 16px)); width: calc(100% + var(--ui-font-size, 16px))
-}
-.spell-site-top-bar[hidden] { display: none }
-/* ... its last one as far in from the bar's end as the side bar button's icon from its start (a menu item's padding) */
-.spell-site-top-bar-end { display: flex; align-items: center; gap: 0.5em; padding-inline-end: 1.14286em }
-/* only its icons (\`collapsed\`):  as narrow as they are */
-.spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: auto minmax(0, 1fr) !important }
-@container spell-site (width < 40em) {
-  .spell-site-menu { display: inline-flex; margin-block-end: 0.5em }
-  .spell-site-page { padding-inline-start: 0 }
-  .spell-site-top-bar::part(menu) { margin-inline-start: 0; width: 100% }
-  .spell-site, .spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: minmax(0, 1fr) !important }
-  .spell-site-nav {
-    position: absolute; inset-inline-start: 0; inset-block-start: 2.75em; z-index: var(--ui-z-popup, 1000); width: min(16em, 85%);
-    max-height: calc(100% - 2.75em); overflow: auto; background: var(--ui-background, Canvas);
-    box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2)); border-radius: var(--ui-radius, 6px);
-    translate: calc(-100% - 1em); visibility: hidden; transition: translate 0.2s, visibility 0.2s
-  }
-  .spell-site.nav-open .spell-site-nav { translate: 0; visibility: visible }
-}
-@media (prefers-reduced-motion: reduce) { .spell-site-nav { transition: none } }
+.spell-site, .spell-site-alone { flex: 1 0 auto }
+.spell-site[hidden], .spell-site-alone[hidden] { display: none }
+.spell-site-slot { display: contents }
 `
 
 /** What a site shows:  a page, the not found page for an address, or the error page for a page that failed. */

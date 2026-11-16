@@ -1,5 +1,4 @@
 "theme-menu usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Theme Menu
 		<header>A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.</>

@@ -1,0 +1,17 @@
+<!-- `<ui-page-layout>`:  a site's frame -- its top bar, its drawer of side navigation, the page's tabs, the page, a footer -->
+<ui-page-layout style="min-height: 18em">
+  <ui-app-menu slot="menu">
+    <ui-site-nav-button slot="start"></ui-site-nav-button>
+    <ui-site-breadcrumbs slot="start"></ui-site-breadcrumbs>
+    <ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices"></ui-button>
+  </ui-app-menu>
+  <ui-site-tabs slot="page-menu"></ui-site-tabs>
+  <ui-site-nav
+    slot="drawer"
+    appearance="nav"
+    current="#api"
+    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
+  ></ui-site-nav>
+  <p>The page goes here. Going to another page redraws only this part.</p>
+  <ui-text slot="footer" color="grey">Made with Spell</ui-text>
+</ui-page-layout>

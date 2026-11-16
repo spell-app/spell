@@ -1,5 +1,4 @@
 "value api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Value
 		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>

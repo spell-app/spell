@@ -55,7 +55,7 @@ const PICTURES: Picture[] = [
   { name: "chrome", page: PROJECT, selector: ".AppMenu" },
   { name: "InputEditor", page: PROJECT, selector: ".InputRoot" },
   { name: "OutputEditor", page: PROJECT, selector: ".OutputRoot" },
-  { name: "MonacoEditor", page: PROJECT, selector: ".OutputEditor .MonacoEditor" },
+  { name: "CodeMirrorEditor", page: PROJECT, selector: ".OutputEditor .CodeMirrorEditor" },
   { name: "ConsoleViewer", page: PROJECT, selector: ".ConsoleRoot" },
   {
     name: "Actions",
@@ -67,7 +67,7 @@ const PICTURES: Picture[] = [
     name: "TreeViewer",
     page: PROJECT,
     prepare: async (page) => {
-      await page.locator(".InputEditor .view-line").nth(1).click()
+      await page.locator(".InputEditor .cm-line").nth(1).click()
       await page.waitForTimeout(1500)
     },
     selector: ".TreeRoot"

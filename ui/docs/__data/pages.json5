@@ -304,6 +304,11 @@
       "summary": "A page frames a whole window:  a header, navigation, the main content, a side column and a footer.",
       "status": "done"
     },
+    "ui-page-layout": {
+      "title": "Page layout",
+      "summary": "A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.",
+      "status": "done"
+    },
     "ui-panel": {
       "title": "Panel",
       "summary": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.",
@@ -510,9 +515,19 @@
       "summary": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
       "status": "done"
     },
+    "ui-site-breadcrumbs": {
+      "title": "Site breadcrumbs",
+      "summary": "Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.",
+      "status": "done"
+    },
     "ui-site-nav": {
       "title": "Site nav",
       "summary": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.",
+      "status": "done"
+    },
+    "ui-site-nav-button": {
+      "title": "Site nav button",
+      "summary": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.",
       "status": "done"
     },
     "ui-site-tabs": {

@@ -1,4 +1,4 @@
-/* `<CodeMirrorEditor>`:  the editor fills its parent, as `<MonacoEditor>` does */
+/* `<CodeMirrorEditor>`:  the editor fills its parent */
 .CodeMirrorEditor {
   height: 100%;
   min-height: 0;

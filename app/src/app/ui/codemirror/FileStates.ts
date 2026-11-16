@@ -3,24 +3,36 @@ import { isolateHistory } from "@codemirror/commands"
 import { setDiagnostics } from "@codemirror/lint"
 import {
   Annotation,
+  type ChangeSet,
   Compartment,
   EditorState,
   type Extension,
+  RangeSet,
   type StateEffect,
+  StateField,
   Transaction,
   type TransactionSpec
 } from "@codemirror/state"
-import { EditorView, keymap } from "@codemirror/view"
+import { Decoration, type DecorationSet, EditorView, keymap } from "@codemirror/view"
 import type { TextEdit } from "vscode-languageserver"
 
 import { observe } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
-import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
+import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
+import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
+import { CodeMirrorHeadings } from "./CodeMirrorHeadings"
+import { CodeMirrorHovers } from "./CodeMirrorHovers"
 import { CodeMirrorLanguage } from "./CodeMirrorLanguage"
+import { CodeMirrorLinks } from "./CodeMirrorLinks"
+import { CodeMirrorLook } from "./CodeMirrorLook"
+import { CodeMirrorMarkup } from "./CodeMirrorMarkup"
+import { CodeMirrorPopups } from "./CodeMirrorPopups"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
+import { CodeMirrorTokens } from "./CodeMirrorTokens"
 import { CodeMirrorTyping } from "./CodeMirrorTyping"
+import { CodeMirrorValues } from "./CodeMirrorValues"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
@@ -42,19 +54,19 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   `applyEdits()`:  one undo step each, carrying their `EditWay` (`FileStates.EDIT_WAY`), the one "not typed" mark
  *   the typing helps read to leave them alone.
  * - Shown by a view through `show()`:  ONE view per state at a time;  a state shown nowhere still takes edits.
+ *   - A SLICE of it, some of its lines (the Inspector's Code card, `<CodeSlice>`), in as many other views as like,
+ *     through `showSlice()` (epic `codemirror` P3):  each slice's state holds the same text, never a copy
+ *     (CodeMirror's text is shared, as it's never changed in place), and every edit, the file's or a slice's,
+ *     reaches the others at once, as CodeMirror's split view does.
  * - Covers a project at a time:  a state for every spell file it parses (a rename's edits need them), plus any other
  *   file once shown.  Showing a file of another project lets go of the last one's states, UNLESS something `use()`s
  *   it, e.g. a `<spell-editor>`.
- * - Its own copy of the half of Monaco's `SpellModels` that has nothing to do with Monaco (epic `codemirror` J4):
- *   its waits, `use()`, `saveAfterEdit()`, `applyEdits()` and `EditWay`.
- *   - No shared base class:  until the swap (P6) the two are kept in step BY HAND, and P6 checks them before
- *     `SpellModels` goes.
- *   - Left out, as nothing here reads them:  `SpellModels.onDidParse` (Monaco's semantic colouring asks it), and a
- *     language per form of file (`setModelLanguage()`:  CodeMirror reads the form from the parse).
+ * - What it does that has nothing to do with CodeMirror (its waits, `use()`, `saveAfterEdit()`, `applyEdits()` and
+ *   `EditWay`) is what the app's code editor did before CodeMirror, copied in (epic `codemirror` J4).
  * - Follows files with `observe()` (`spell/util`, on spell cells):  a plain function, re-run synchronously as the cells
  *   it read change, so it's fine wherever `stateFor()` is called from.
- * - Its position in the import graph:  CodeMirror, the parser, the language service, the CodeMirror folder's other
- *   files;  never Monaco.
+ * - Its position in the import graph:
+ *   CodeMirror, the parser, the language service, the CodeMirror folder's other files.
  ****************/
 export class FileStates {
   constructor({ service, onEdit = () => {} }: FileStatesProps) {
@@ -113,8 +125,7 @@ export class FileStates {
   }
 
   /**
-   * How long the typing must pause before what's typed is parsed, in msec:  Monaco's `SpellModels.PARSE_WAIT`.
-   * - Kept equal to it by hand until the swap (a test checks):  this folder never imports Monaco's.
+   * How long the typing must pause before what's typed is parsed, in msec.
    */
   static PARSE_WAIT = 200
 
@@ -173,8 +184,7 @@ export class FileStates {
   }
 
   /**
-   * How long `saveAfterEdit()` waits for an edit, in msec:  Monaco's `SpellModels.SAVE_WAIT`.
-   * - Kept equal to it by hand until the swap, as `PARSE_WAIT` is.
+   * How long `saveAfterEdit()` waits for an edit, in msec.
    */
   static SAVE_WAIT = 2000
 
@@ -278,6 +288,103 @@ export class FileStates {
   }
 
   /**
+   * Show `lines` of `file`'s state in `view`, alone:  a slice of it, drawn as the file is, only what's wholly in its
+   * lines bubbly (epic `codemirror` P3).
+   * - `lines`:  the first and last, 1-based;  they move with edits above them, and grow with lines typed in them
+   *   - `column`:  where its code starts on its first line, 1-based, when words come before it there
+   *     (`- clickable when it is face up`):  those are hidden, and the caret never goes into them
+   *   - `endColumn`:  where its code ends on its last line, when a tag's end follows it there (`its rank</>`):
+   *     the rest of that line is hidden the same way
+   *   - `dedent`:  its lines shown without their common indent, which the caret never goes into either
+   *     (Owen:  "shouldn't show indent here, should be implicit")
+   * - `host`:  what the view adds for itself
+   * - Its edits are the file's at once, and the file's its;  its own undo is its own edits'.
+   * - `releaseSlice()` before the view's destroyed.
+   */
+  showSlice(view: EditorView, file: SP.AnySpellFile, lines: SliceLines, host: Extension = []): void {
+    this.releaseSlice(view)
+    const entry = this.entryFor(file)
+    const { doc } = entry.state
+    const first = doc.line(Math.max(1, Math.min(lines.first, doc.lines)))
+    const last = doc.line(Math.max(first.number, Math.min(lines.last, doc.lines)))
+    const from = lines.column ? Math.min(first.from + lines.column - 1, first.to) : first.from
+    const to = lines.endColumn ? Math.max(from, Math.min(last.from + lines.endColumn - 1, last.to)) : last.to
+    const shown = sliceShown.init(() => ({ from, to, dedent: !!lines.dedent }))
+    const fileOf = () => (entry.file instanceof SP.SpellFile ? entry.file : undefined)
+    const state = EditorState.create({
+      doc,
+      extensions: [
+        shown,
+        EditorView.updateListener.of((update) => {
+          for (const transaction of update.transactions)
+            if (transaction.docChanged && !transaction.annotation(FileStates.SLICED))
+              this.fromSlice(entry, update.view, transaction)
+        }),
+        host,
+        // typed in, a slice helps as its file's editor does:  only the editor typed in hears the key
+        entry.language
+          ? [
+              closeBrackets(),
+              keymap.of(closeBracketsKeymap),
+              CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang),
+              CodeMirrorCodeOrText.extension(),
+              CodeMirrorHovers.extension(),
+              CodeMirrorHeadings.extension()
+            ]
+          : [],
+        CodeMirrorLinks.extension(),
+        CodeMirrorPopups.extension(),
+        CodeMirrorLook.extension((isBubbly) =>
+          isBubbly
+            ? CodeMirrorBubbly.extension(fileOf, (state) => state.field(sliceShown))
+            : CodeMirrorTokens.extension(fileOf)
+        ),
+        CodeMirrorSetup.extensions()
+      ]
+    })
+    view.setState(state)
+    entry.slices.add(view)
+  }
+
+  /** What `state`, a slice's (`showSlice()`), shows of its file, from and to:  `undefined` for a file's own. */
+  static sliceIn(state: EditorState): Slice | undefined {
+    const slice = state.field(sliceShown, false)
+    return slice && { from: slice.from, to: slice.to }
+  }
+
+  /** `view` shows a slice no more, e.g. before it's destroyed. */
+  releaseSlice(view: EditorView): void {
+    for (const entry of this.entries.values()) entry.slices.delete(view)
+  }
+
+  /** The mark on an edit passed on to a slice, or from one:  each takes it once, and keeps it out of its undo. */
+  private static readonly SLICED = Annotation.define<boolean>()
+
+  /** A slice's edit `transaction`:  into its file's state, and every other slice of it. */
+  private fromSlice(entry: FileEntry, slice: EditorView, transaction: Transaction): void {
+    this.slicing = slice
+    try {
+      this.dispatch(entry, {
+        changes: transaction.changes,
+        annotations: [FileStates.SLICED.of(true), Transaction.userEvent.of("input.slice")]
+      })
+    } finally {
+      this.slicing = undefined
+    }
+  }
+
+  /** `changes` made to `entry`'s state:  passed on to each slice of it, but the one they came from. */
+  private toSlices(entry: FileEntry, changes: ChangeSet): void {
+    for (const slice of entry.slices) {
+      if (slice === this.slicing) continue
+      slice.dispatch({ changes, annotations: [FileStates.SLICED.of(true), Transaction.addToHistory.of(false)] })
+    }
+  }
+
+  /** The slice whose edit is going into its file's state now. */
+  private slicing: EditorView | undefined
+
+  /**
    * Each state's place for what the view showing it adds (`show()`'s `host`).
    * - STATIC:  every file state has one, empty while it's shown nowhere.
    */
@@ -310,6 +417,7 @@ export class FileStates {
     const entry: FileEntry = {
       file,
       language,
+      slices: new Set(),
       state: EditorState.create({ doc: file.contents ?? "", extensions: this.extensionsFor(file, language) }),
       dispose: () => {
         stopContents()
@@ -324,8 +432,10 @@ export class FileStates {
 
   /**
    * What `file`'s state is made of:  how it follows its view, room for the view's own, Spell's features for a spell
-   * file, and the setup every editor takes.
+   * file, its look, and the setup every editor takes.
    * - Spell's before the setup's, so its keys (Enter) get the first go.
+   * - Its look as the page's setting says (`CodeMirrorLook`):  a Spell file bubbly, else coloured by its tokens;
+   *   an HTML file (a property editor page) bubbly, else plain (epic `codemirror` P3).
    */
   private extensionsFor(file: SP.AnySpellFile, language: CodeMirrorLanguage | undefined): Extension {
     const spell = language
@@ -334,18 +444,30 @@ export class FileStates {
           keymap.of(closeBracketsKeymap),
           autocompletion({ override: [language.completions], icons: false }),
           CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
+          CodeMirrorCodeOrText.extension(),
+          CodeMirrorValues.extension(language.attributeValuesAt),
+          CodeMirrorHovers.extension(),
+          CodeMirrorHeadings.extension(),
           language.extensions(),
-          CodeMirrorBubbly.extension(() => language.file)
+          CodeMirrorLook.extension((isBubbly) =>
+            isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
+          )
         ]
-      : []
+      : isMarkupFile(file)
+        ? [CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))]
+        : []
     return [
       EditorView.updateListener.of((update) => {
         const entry = this.entries.get(file.path)
         // only the view showing it:  another may still hold an old copy of the state
-        if (entry && update.view === entry.view) this.took(entry, update.state, update.docChanged)
+        if (entry && update.view === entry.view)
+          this.took(entry, update.state, update.docChanged ? update.changes : undefined)
       }),
       FileStates.host.of([]),
       spell,
+      CodeMirrorLinks.extension(),
+      // Settings…' choices, changed live
+      CodeMirrorPopups.extension(),
       CodeMirrorSetup.extensions()
     ]
   }
@@ -357,13 +479,15 @@ export class FileStates {
       return
     }
     const transaction = entry.state.update(spec)
-    this.took(entry, transaction.state, transaction.docChanged)
+    this.took(entry, transaction.state, transaction.docChanged ? transaction.changes : undefined)
   }
 
-  /** `entry`'s state is now `state`:  kept, and an edit goes into its file (`stateEdited()`). */
-  private took(entry: FileEntry, state: EditorState, isEdited: boolean): void {
+  /** `entry`'s state is now `state`:  kept;  its `changes` go into its file (`stateEdited()`) and its slices. */
+  private took(entry: FileEntry, state: EditorState, changes: ChangeSet | undefined): void {
     entry.state = state
-    if (isEdited) this.stateEdited(entry)
+    if (!changes) return
+    this.toSlices(entry, changes)
+    this.stateEdited(entry)
   }
 
   /**
@@ -450,10 +574,24 @@ export type FileStatesProps = {
 }
 
 /**
- * How an edit from outside the code joins its file's undo:  a step of its own, or part of a run of typing
- * -- see `FileStates.applyEdits()`.  The same words as Monaco's `SpellModels`' `EditWay`.
+ * How an edit from outside the code joins its file's undo:
+ * a step of its own, or part of a run of typing -- see `FileStates.applyEdits()`.
  */
 export type EditWay = "step" | "typing"
+
+/** The lines `FileStates.showSlice()` shows:  see there. */
+export type SliceLines = {
+  /** its first line, 1-based */
+  first: number
+  /** its last line, 1-based */
+  last: number
+  /** where its code starts on its first line, 1-based:  the words before it are hidden */
+  column?: number
+  /** where its code ends on its last line, 1-based:  the words from there on are hidden */
+  endColumn?: number
+  /** show its lines without their common indent */
+  dedent?: boolean
+}
 
 /** One file's state, and what goes with it. */
 type FileEntry = {
@@ -465,10 +603,80 @@ type FileEntry = {
   language: CodeMirrorLanguage | undefined
   /** the view showing it, if any */
   view?: EditorView
+  /** the views showing a slice of it (`showSlice()`) */
+  slices: Set<EditorView>
   /** where it was scrolled to when last shown */
   scroll?: StateEffect<unknown>
   /** stops following its file */
   dispose: () => void
+}
+
+/** Is `file` HTML, e.g. a property editor page, `Card.editor.html`:  drawn as the drawn-bubbly page draws HTML? */
+function isMarkupFile(file: SP.AnySpellFile): boolean {
+  return /\.html?$/i.test(file.path)
+}
+
+/**
+ * The lines a slice shows, moved with each edit;  the text above and below them hidden, and out of the caret's way,
+ * with the words before its code on its first line and after it on its last, and its lines' common indent if asked.
+ * - Set by `showSlice()`:  `init()`, as each slice shows its own.
+ */
+const sliceShown = StateField.define<Slice & { dedent: boolean }>({
+  create: () => ({ from: 0, to: 0, dedent: false }),
+  update: (slice, transaction) =>
+    transaction.docChanged
+      ? {
+          ...slice,
+          from: transaction.changes.mapPos(slice.from, -1),
+          to: transaction.changes.mapPos(slice.to, 1)
+        }
+      : slice,
+  provide: (field) => {
+    const hidden = (state: EditorState): DecorationSet => {
+      const { from, to, dedent } = state.field(field)
+      const { doc } = state
+      const first = doc.lineAt(from)
+      const last = doc.lineAt(to)
+      const ranges = []
+      if (first.from > 0) ranges.push(HIDDEN.range(0, first.from - 1))
+      if (from > first.from) ranges.push(HIDDEN_WORDS.range(first.from, from))
+      if (dedent) ranges.push(...indentHidden(doc, first.number, last.number, from))
+      if (to < last.to) ranges.push(HIDDEN_WORDS.range(to, last.to))
+      if (last.to < doc.length) ranges.push(HIDDEN.range(last.to + 1, doc.length))
+      return Decoration.set(ranges, true)
+    }
+    return [
+      EditorView.decorations.compute([field, "doc"], hidden),
+      EditorView.atomicRanges.of((view) => hidden(view.state) as RangeSet<Decoration>)
+    ]
+  }
+})
+
+/** Lines out of a slice:  hidden, a block of nothing. */
+const HIDDEN = Decoration.replace({ block: true })
+
+/** Words on a slice's first or last line that aren't its code, and its lines' common indent:  hidden. */
+const HIDDEN_WORDS = Decoration.replace({})
+
+/**
+ * The common indent of lines `first` to `last` of `doc`, hidden on each:  the slice's lines shown as if dedented.
+ * - Blank lines don't count toward it, and lose only what they have of it.
+ * - A first line whose code starts at `from`, past its indent, keeps what's before it to `HIDDEN_WORDS`.
+ */
+function indentHidden(doc: EditorState["doc"], first: number, last: number, from: number) {
+  let common = Infinity
+  for (let number = first; number <= last; number++) {
+    const { text } = doc.line(number)
+    if (text.trim()) common = Math.min(common, text.length - text.trimStart().length)
+  }
+  if (!common || common === Infinity) return []
+  const ranges = []
+  for (let number = first; number <= last; number++) {
+    const line = doc.line(number)
+    const indent = Math.min(common, line.text.length - line.text.trimStart().length)
+    if (indent && line.from >= from) ranges.push(HIDDEN_WORDS.range(line.from, line.from + indent))
+  }
+  return ranges
 }
 
 /** `effects`, one or many or none, as a list. */

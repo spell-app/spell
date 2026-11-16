@@ -1172,6 +1172,14 @@ export const HELP_TABLE: Readonly<
       pure: "Leaves the browser's `setAttribute()` alone."
     }
   },
+  "ui-page-layout": {
+    description:
+      "A page layout puts what stays on screen around a page: a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.",
+    attributes: {
+      drawer:
+        "`compact`: the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it."
+    }
+  },
   "ui-panel": {
     description:
       "A panel is an inspector: a tinted box of fields under a header band, with sub-head bands that open and close.",
@@ -1761,6 +1769,17 @@ export const HELP_TABLE: Readonly<
       required: "Form validation: every side shown must have a length."
     }
   },
+  "ui-site-breadcrumbs": {
+    description:
+      "Site breadcrumbs say where you are in a site: the group, the pages above the page shown, then the page (Hardware › Systems), each page above a link.",
+    empty: true,
+    attributes: {
+      pages:
+        "The site's pages, nested as the side navigation nests them: the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, band?, pages?",
+      current: "Which page is shown: its `href` or its `id`.",
+      label: "What a screen reader calls the trail."
+    }
+  },
   "ui-site-nav": {
     description: "A site nav lists a site's pages as a tree, the page shown marked; a click goes to a page.",
     empty: true,
@@ -1773,6 +1792,27 @@ export const HELP_TABLE: Readonly<
       collapsed:
         "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.",
       remember: "Keep which pages are open for each person, under this name, across reloads and visits."
+    }
+  },
+  "ui-site-nav-button": {
+    description:
+      "A site nav button shows or hides the side navigation of the page layout around it: its icons only and back on a wide page, slid in and out on a narrow one.",
+    attributes: {
+      color: "Menu: hue of the item while selected (`red active item`).",
+      position: "Menu: `right` pushes the item (and what follows) to the far end.",
+      value: "Value; defaults to `label`.",
+      label: "Dropdown: its words; defaults to the text content.",
+      description: "Dropdown: secondary text, shown at the end.",
+      icon: "Icon name, shown before the text.",
+      image: "Image URL, shown before the text: an avatar in a list, the item's picture in the Items view.",
+      flag: "Dropdown: country code, shown as a flag before the text.",
+      link: "List / menu: where it goes: renders a link (`<a>`).",
+      target: "Link target, with `link`.",
+      appearance: "The look: `link` -- list / menu: interactive without a `link`, a `<button>` with the link hover.",
+      disabled: "Can't be chosen or followed.",
+      selected: "Chosen: the dropdown's value, the list's / menu's current item (`aria-current`).",
+      padding: "Menu: `none`, no padding; `none-x` / `none-y` drop only the left and right, or top and bottom.",
+      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row)."
     }
   },
   "ui-site-tabs": {

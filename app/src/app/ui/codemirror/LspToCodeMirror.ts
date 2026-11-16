@@ -20,17 +20,16 @@ import { LSP } from "spell/app/lsp"
 
 /****************
  * ### `LspToCodeMirror`
- * Converts what `LSP.SpellLanguageService` answers, in Language Server Protocol shapes, to CodeMirror's:
- * the twin of Monaco's `LspToMonaco`.
+ * Converts what `LSP.SpellLanguageService` answers, in Language Server Protocol shapes, to CodeMirror's.
  * - Positions:  LSP counts lines and characters from 0;  CodeMirror counts OFFSETS into its text, `doc`.
  *   - So every position or range needs the text it's in.
  *   - Both count UTF-16 units, so a character is an offset's step.
  *   - A position past a line's end, or past the last line, lands at that end:  never outside `doc`.
  * - Suggestions become CodeMirror's completions;  hovers a range and its words;  problems its lint diagnostics;
  *   edits its changes;  locations a file's path and range.
- * - STATIC and instance-free on purpose, as `LspToMonaco` is:  nothing to keep between calls.
- * - Its position in the import graph:  CodeMirror's types, the language service;  no DOM, no view,
- *   so it unit-tests in node.
+ * - STATIC and instance-free on purpose:  nothing to keep between calls.
+ * - Its position in the import graph:  CodeMirror's types, the language service;
+ *   no DOM, no view, so it unit-tests in node.
  ****************/
 export class LspToCodeMirror {
   ////////////////
@@ -89,8 +88,8 @@ export class LspToCodeMirror {
    * CodeMirror suggestion for LSP `item`, written as the service says.
    * - Its own range, when it names one (`textEdit`), stretched to whatever's typed since;  else the word being typed.
    * - A snippet stays a snippet:  `move ${1:card} to ${2:pile}`, each field a stop for Tab.
-   * - So does its command, run once it's written:  `editor.action.triggerSuggest` lists what goes in its quotes
-   *   (epic `editor` I70).
+   * - So does its command, run once it's written:
+   *   `editor.action.triggerSuggest` lists what goes in its quotes (epic `editor` I70).
    */
   static completion(doc: Text, item: CompletionItem): Completion {
     const edit = item.textEdit && "range" in item.textEdit ? item.textEdit : undefined

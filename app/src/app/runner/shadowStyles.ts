@@ -78,7 +78,7 @@ export function absoluteUrls(css: string, base: string): string {
 
 /**
  * Add `fonts`, and Lato's stylesheet at `lato`, to the page's `<head>` -- each once.
- * - Each element's files bring their own, e.g. `<spell-editor>`'s Monaco icons:  a font already there is skipped.
+ * - Each element's files may bring their own:  a font already there is skipped.
  */
 function addFonts(fonts: string[], lato: string) {
   const added = new Set(Array.from(document.querySelectorAll("style[data-spell-app-fonts]"), (it) => it.textContent))

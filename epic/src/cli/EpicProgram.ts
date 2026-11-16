@@ -459,9 +459,12 @@ export class EpicProgram {
     ).usage('<epic> "text" | --file <file>')
     this.page(
       epic.command("bedtime"),
-      "a /bedtime run:  start turns bedtime mode on (changes stay green until reviewed), done off",
+      "a /bedtime run:  start turns bedtime mode on (changes stay green until reviewed), done off;  " +
+        "`all`:  every epic in one night (plan, questions, spec), `status`:  every epic in bedtime mode",
       'epic bedtime seo start "P3-P6,P9"'
-    ).usage('<epic> start "P3-P6,P9" | done "summary"')
+    ).usage(
+      '<epic> start "P3-P6,P9" | done "summary"  |  all plan | all questions <epic> --file <f> | all spec  |  status'
+    )
     this.page(
       epic.command("backfill"),
       "items you already went through in past sessions:  a dry run unless --apply",

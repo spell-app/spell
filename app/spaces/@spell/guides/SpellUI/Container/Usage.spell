@@ -1,5 +1,4 @@
 "container usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Container
 		<header>A container limits content to a maximum width.</>

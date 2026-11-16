@@ -1,5 +1,4 @@
 "section usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Section
 		<header>A section is a titled block of content that can close and keep its title in view.</>

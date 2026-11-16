@@ -444,9 +444,12 @@ classes.addRule(DimensionUnit, {
   syntax: "one {unit:unit_names} , is {top:number} (/ {bottom:number})? {of:unit_words} (, starting at {start:number})?"
 })
 
+// a page's layout, on its line (epic `mockup` T39):  `systems is a page, in the bare layout`, `login is a page, no layout`
+const PAGE_LAYOUT = "(, in the {layout:type_words}|, (no_layout:no layout))?"
+
 classes.addRule(CreateOneOfAKind, {
   roles: { band: "thing", type: "declaration", ability: "name" },
-  syntax: `{type:type_words} is (a|an) ${ABILITIES} {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `{type:type_words} is (a|an) ${ABILITIES} {superType:type} (, aka {aka:quoted_type})? ${PAGE_LAYOUT} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",

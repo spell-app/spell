@@ -1,5 +1,4 @@
 "label examples" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Label
 		<header>A label displays content classification.</>

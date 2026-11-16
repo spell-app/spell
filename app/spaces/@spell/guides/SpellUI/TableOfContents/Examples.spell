@@ -1,5 +1,4 @@
 "table-of-contents examples" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Table of contents
 		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>

@@ -1,5 +1,4 @@
 "author usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Author
 		<header>An author names who wrote a comment or did a feed event.</>
