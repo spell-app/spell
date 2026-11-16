@@ -1,6 +1,6 @@
 ---
 name: bedtime
-description: Work through an epic's remaining phases unattended overnight -- pick phases and answer questions up-front, then build each in order with a commit per phase, record judgement calls in the epic page, never merge.  User-invoked as `/bedtime`;  in the morning, `/epic review <name>` goes through the night.
+description: Work through an epic's remaining phases unattended overnight -- pick phases and answer questions up-front, then build each in order with a commit per phase, record judgement calls in the epic page, merge each finished phase and agent into main when it merges cleanly, never push.  User-invoked as `/bedtime`;  in the morning, `/epic review <name>` goes through the night.
 disable-model-invocation: true
 ---
 
@@ -108,10 +108,12 @@ Until the run ends (step 6), these OVERRIDE the root rules and memory:
   Decide, record, go on.
 - Commit after each phase without asking:  the `/bedtime` run is the ask.
   Stage the phase's files by name, never `git add -A`.
+- Merge each finished phase, and each agent's finished work, into `main` at once when it merges cleanly, as by day
+  (the epic skill's "The session answers;  agents build";  the person, 2026-11-15:  "`/bedtime` should merge").
+  - Not cleanly:  `add <name>#I "P<n> not merged:  <why>"`, red, and go on.
 - Don't stop between phases for review.
 - NEVER any of these:
-  - merge into `main`, or push:  NOT even an agent's finished work, which by day goes into `main` at once (the epic
-    skill's "The session answers;  agents build")
+  - push
   - `/isolate done`, or `ExitWorktree`
   - delete anything outside the worktree
   - Something needing those:  `add <name>#T` (a todo:  work still to do), and go on.
@@ -199,7 +201,7 @@ Everything else stands:
   - "Review it now (Recommended)":  runs `/epic review <name>`, judgement calls first.
     That's [the epic skill](../epic/SKILL.md), "7. Review".
   - "Later":  `/epic review <name>` any time.
-- Do NOT merge.
+- Everything that merged cleanly is on `main` already;  the reply names what didn't, and why.
 
 ## Cheat sheet (`epic ... <name>`)
 

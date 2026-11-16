@@ -553,7 +553,7 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       into the branch first, generated strays ditched
     - it can't:  it says why in its report AND on its item (`epic update <epic>#<id> noted "Not merged:  <why>"`), and
       the session tells the person in bold, on a line of its own
-    - NOT under `/bedtime` (it never merges), nor in a phase whose plan says to hold its work
+    - `/bedtime` too (2026-11-15);  NOT in a phase whose plan says to hold its work
     - In Codex:  the same steps, by the session itself, after each item.
 - `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
   each saying who has it while it waits.
@@ -777,7 +777,7 @@ cut-off agents, "it should have restarted automatically").
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/epic done`:  the worktree, the window and the session stay, for the next request.
-     - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
+     - In bedtime mode too:  each finished phase merges when it merges cleanly, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).
 6. A short note (done, issues, todos, next), the "complete.  Next is" line (see the top), then GO STRAIGHT ON to
