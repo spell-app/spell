@@ -69,7 +69,8 @@ export class CodeMirrorMarkup {
 
   /**
    * Each tag laid out over lines drawn as ONE block (epic `language` I135):  every row from the block's left edge to
-   * its right edge, the widest row's;  measured once they're drawn, and after every change (`measureTagBlocks()`).
+   * its right edge, past the widest row;  the rows under the first lined up under its first attribute, its `>` 4px
+   * past the last one (I139);  measured once they're drawn, and after every change (`measureTagBlocks()`).
    */
   static tagBlocks = ViewPlugin.define((view) => {
     /** the reaches written so far, by their names:  the ones no row reads any more are taken off */
@@ -238,10 +239,14 @@ class MarkupShapes {
    *   `shrinkable>`, as Enter lays it out;  epic `language` I133, I135):  ONE block of its colour round them all
    *   (Owen:  "show in a block pill"), drawn as a row on each line (`cmb-tag-block`):
    *   - its first line its band, `classes`;  on each line under it, a row round that line's words, never its indent
-   *   - every row from the block's left edge, its band's, to its right edge, its widest row's:
-   *     how far each reaches past its words is measured once it's drawn (`TagBlocks`)
-   *   - its `>` or `/>` at the block's right edge, the end of the last row, wherever it is in the text
-   *     (`TagPointWidget`):  the caret before it still at the words' end
+   *   - its first attribute drawn on its name's line, `⟨ toolbar class="GameBar"` (I139;  Owen:  "`class` should be
+   *     on the same line as `toolbar`"):  the line break and indent between them hidden (`TagJoinWidget`),
+   *     the file unchanged
+   *   - every other attribute's words lined up under that first one's (`--cmb-reach-in`;  Owen:  "other attributes
+   *     should be indented as much as `class`")
+   *   - every row from the block's left edge, its band's, to its right edge, past its widest row:
+   *     how far each reaches past its words is measured once it's drawn (`tagBlocks`)
+   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139)
    */
   private tagOn(place: number, classes: string[], partOfSpeech: string) {
     const stretch = this.marks[place]
@@ -262,20 +267,32 @@ class MarkupShapes {
           style:
             `--cmb-reach-before: var(--cmb-tag-row-${row}-before, 0px); ` +
             `--cmb-reach-after: var(--cmb-tag-row-${row}-after, 0px); ` +
-            `--cmb-reach-end: var(--cmb-tag-row-${row}-end, var(--bubbly-bracket-pad))`
+            `--cmb-reach-in: var(--cmb-tag-row-${row}-in, 0px); ` +
+            `--cmb-reach-point: var(--cmb-tag-row-${row}-point, 4px)`
         }
       }
     }
     const first = rowOf(["cmb-tag-block-first"])
+    // its first attribute on its name's line (I139):  only when that line holds its name alone
+    const name = doc.sliceString(stretch.start, firstLine.to)
+    const joined = /^<[^\s"'=>]+\s*$/.test(name) ? doc.line(firstLine.number + 1) : undefined
+    const joinedFrom = joined ? joined.from + /^\s*/.exec(joined.text)![0].length : 0
+    const isJoined = joined !== undefined && joinedFrom < Math.min(joined.to, stretch.end)
+    const firstEnd = isJoined ? Math.min(joined.to, stretch.end) : firstLine.to
+    if (isJoined) {
+      this.decorations.add(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
+      if (firstEnd === stretch.end) first.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
+    }
     // the tag's own mark (`bubbly-piece`) on its first row alone:  over all its lines, it cut the last row in two
     const own = this.decorations.unmark(stretch.start, stretch.end)
     this.decorations.mark(
       stretch.start,
-      firstLine.to,
+      firstEnd,
       [...own, ...classes, "cmb-tag-continued", ...first.classes],
       first.attributes
     )
-    for (let number = firstLine.number + 1; number <= lastLine.number; number++) {
+    const after = isJoined ? joined.number + 1 : firstLine.number + 1
+    for (let number = after; number <= lastLine.number; number++) {
       const line = doc.line(number)
       const from = line.from + /^\s*/.exec(line.text)![0].length
       const to = Math.min(line.to, stretch.end)
@@ -291,7 +308,7 @@ class MarkupShapes {
         Decoration.mark({ class: row.classes.join(" "), attributes: row.attributes, inclusive: true }).range(from, to)
       )
     }
-    // its `>` or `/>` at the block's right edge
+    // its `>` or `/>` past its last attribute
     const close = /\/?>$/.exec(doc.sliceString(lastLine.from, stretch.end))
     if (close) this.decorations.point(stretch.end - close[0].length, stretch.end)
   }
@@ -319,7 +336,7 @@ function hueOf(partOfSpeech: string): string[] {
 export class CodeMirrorDecorations {
   /** The decorations that are neither marks nor lines:  feet, spacers. */
   private readonly ranges: Array<Range<Decoration>> = []
-  /** Where a tag laid out over lines has its `>` or `/>`, drawn at its block's right edge (`TagPointWidget`). */
+  /** Where a tag laid out over lines has its `>` or `/>`, drawn past its last attribute (`TagPointWidget`). */
   private readonly points: Array<{ start: number; end: number }> = []
   /** How many tags laid out over lines, and their rows, so far:  each one's number (`CodeMirrorMarkup.tagBlocks`). */
   private blocks = 0
@@ -436,7 +453,7 @@ export class CodeMirrorDecorations {
   }
 
   /**
-   * `start`-`end`, a tag's `>` or `/>`, drawn at its block's right edge (`TagPointWidget`):
+   * `start`-`end`, a tag's `>` or `/>`, drawn past its last attribute (`TagPointWidget`):
    * the marks of its pieces drawn inside it.
    */
   point(start: number, end: number): void {
@@ -541,14 +558,14 @@ export class CodeMirrorDecorations {
     const quotes = marks.filter((mark) => mark.classes.has(QUOTE_MARK))
     const quoteStarts = new Set(quotes.map((quote) => quote.start))
     const quoteEnds = new Set(quotes.map((quote) => quote.end))
-    // a tag's `>` drawn at its block's edge:  its pieces' marks inside it
+    // a laid-out tag's `>` drawn past its last attribute:  its pieces' marks inside it
     const isInPoint = (start: number, end: number) =>
       this.points.find((point) => point.start <= start && end <= point.end)
     for (const point of this.points) {
       const pieces = marks
         .filter((mark) => point.start <= mark.start && mark.end <= point.end)
         .sort((one, other) => one.start - other.start)
-        // its `⟩` shown, at the block's edge:  not hidden as at a pill's pointed end
+        // its `⟩` shown:  not hidden as at a pill's pointed end
         .map((mark) => ({
           classes: [...mark.classes].filter((each) => each !== "bubbly-angle-at-end").join(" "),
           text: this.text.slice(mark.start, mark.end)
@@ -564,7 +581,8 @@ export class CodeMirrorDecorations {
       // a mark starting or ending with a quote holds it:  CodeMirror draws a widget at a mark's edge outside it,
       // unless the mark's inclusive there;  every one at that edge, so they still nest as they did
       const inclusiveStart = quoteStarts.has(start)
-      const inclusiveEnd = quoteEnds.has(end)
+      // ... and a laid-out tag's `>` drawn at its end (`TagPointWidget`), its first row its last (I139)
+      const inclusiveEnd = quoteEnds.has(end) || this.points.some((point) => point.end === end)
       const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd })
       ranges.push(mark.range(start, end))
     }
@@ -838,11 +856,47 @@ class FeetJoinWidget extends WidgetType {
 }
 
 /****************
+ * ### `TagJoinWidget`
+ * The line break, and the next line's indent, between a laid-out tag's name and its first attribute, drawn as the
+ * space between them (epic `language` I139;  Owen:  "`class` should be on the same line as `toolbar`"):
+ * `⟨ toolbar class="GameBar"`, the file still `<toolbar`, then `class="GameBar"` on a line of its own.
+ * - One step for the caret, as the feet's join (`FeetJoinWidget`):  before it, after the name;  after it, before
+ *   the attribute
+ ****************/
+class TagJoinWidget extends WidgetType {
+  /** The hiding decoration:  `atomic`, so `CodeMirrorRelayout` makes it one step for the caret. */
+  static readonly decoration = Decoration.replace({ widget: new TagJoinWidget(), atomic: true })
+
+  eq(): boolean {
+    return true
+  }
+
+  toDOM(): HTMLElement {
+    const join = document.createElement("span")
+    join.className = "cmb-tag-join"
+    join.textContent = " "
+    return join
+  }
+
+  /** `pos` 0, before it:  after the tag's name;  else before its first attribute. */
+  coordsAt(join: HTMLElement, pos: number): Rect | null {
+    const letter = letterBeside(join, pos === 0 ? "before" : "after")
+    const box = join.getBoundingClientRect()
+    return letter ? caretAt(pos === 0 ? box.left : box.right, letter) : null
+  }
+
+  ignoreEvent(): boolean {
+    return false
+  }
+}
+
+/****************
  * ### `TagPointWidget`
- * A tag laid out over lines' `>` or `/>`, drawn at its block's right edge (epic `language` I135;  Owen:  "The `>`
- * should be on the same line as the last tag, but outdented past the farthest right attribute value").
- * - Shown IN PLACE of the file's `>`, which stays right after the last attribute:  the row's room before it,
- *   `--cmb-reach-after`, puts it at the edge (`CodeMirrorMarkup.tagBlocks`).
+ * A tag laid out over lines' `>` or `/>`, drawn on its last attribute's line, its `⟩` 4px past that attribute's ink
+ * (epic `language` I139;  Owen:  "put the `>` on the same line as the last attribute, 4px to the right of the end
+ * of the last attribute";  at the block's right edge under I135).
+ * - Shown IN PLACE of the file's `>`, which stays right after the last attribute:  the room before it,
+ *   `--cmb-reach-point`, is measured from the letters' ink (`CodeMirrorMarkup.tagBlocks`).
  * - Its pieces the marks the `>` had (`bubbly-angle-close` ...), so the sheet draws it as it draws every tag's.
  * - The caret before it stands at the words' end, where a letter typed goes;  after it, past its point.
  ****************/
@@ -872,7 +926,8 @@ class TagPointWidget extends WidgetType {
     const box = point.getBoundingClientRect()
     if (pos > 0) return { left: box.right, right: box.right, top: box.top, bottom: box.bottom }
     const words = letterBeside(point, "before")
-    if (!words || words.right > box.left) return { left: box.left, right: box.left, top: box.top, bottom: box.bottom }
+    // the `>`'s box starts before the words' end:  its `⟩` 4px past their ink
+    if (!words) return { left: box.left, right: box.left, top: box.top, bottom: box.bottom }
     return caretAt(words.right, words)
   }
 
@@ -881,23 +936,28 @@ class TagPointWidget extends WidgetType {
   }
 }
 
-/** A row of a tag laid out over lines, as `TagBlocks` measures it:  its block, its number, its words' edges. */
 /** A row of a tag laid out over lines, as `measureTagBlocks()` finds it, its reach taken off. */
 type TagRow = {
   /** its block's number, and its own (`CodeMirrorMarkup.tagOn()`) */
   block: string
   row: string
-  /** where its words start and end:  the last row's, before its room and its `>` */
+  /** where it starts and its words end, its reach and its room before its words taken off */
   left: number
   right: number
-  /** the first row's:  from its left edge to its `⟨` */
+  /** where its words start, were they not moved in (`--cmb-reach-in`):  every row's but the first's */
+  words?: number
+  /** the first row's:  from its left edge to its `⟨`;  and where its first attribute starts, after its name */
   gap?: number
-  /** the last row's:  its `>`'s width, and the room before it */
-  point?: { width: number; room: number }
+  attribute?: number
+  /** the last row's:  the room its `>` needs before it, so its `⟩` is `POINT_ROOM` past the words' ink */
+  point?: number
 }
 
+/** How far a laid-out tag's `⟩` is past its last attribute's ink, in px (Owen, I139:  "4px to the right"). */
+const POINT_ROOM = 4
+
 /**
- * Each tag laid out over lines' rows, measured where they're drawn (epic `language` I135), for
+ * Each tag laid out over lines' rows, measured where they're drawn (epic `language` I135, I139), for
  * `CodeMirrorMarkup.tagBlocks`:  where each one's words start and end, its reach past them taken off.
  * - A row's words end past the room after its last value's closing quote, drawn just outside it.
  */
@@ -913,49 +973,107 @@ function measureTagBlocks(view: EditorView): TagRow[] {
       left: box.left + reach("--cmb-reach-before"),
       right: box.right - after
     }
+    if (element.matches(".cmb-tag-row:not(.cmb-tag-row-close)"))
+      row.words = box.left + parseFloat(style.paddingLeft) - reach("--cmb-reach-in")
     const point = element.querySelector<HTMLElement>(".cmb-tag-point")
     if (point) {
-      const at = point.getBoundingClientRect()
-      const room = parseFloat(getComputedStyle(point).marginLeft) - after
-      row.right = at.left - room - after
-      row.point = { width: at.width, room }
+      // its first ink:  a `/>`'s bar, drawn at its slash's left edge, else its `⟩`
+      const slash = point.querySelector<HTMLElement>(".bubbly-slash")
+      const angle = point.querySelector<HTMLElement>(".bubbly-angle-close")
+      const ink = inkBefore(point)
+      if (ink !== undefined && (slash || angle)) {
+        const box = point.getBoundingClientRect()
+        const inkIn = (slash ? slash.getBoundingClientRect().left : angleInkLeft(angle!)) - box.left
+        row.point = ink + POINT_ROOM - inkIn - (box.left - (parseFloat(getComputedStyle(point).marginLeft) || 0))
+      }
     } else
       for (let next = besideOf(element, "after"); next?.matches(".bubbly-spacer"); next = besideOf(next, "after"))
         row.right = Math.max(row.right, next.getBoundingClientRect().right - after)
     const angle = element.classList.contains("cmb-tag-block-first") && element.querySelector(".bubbly-angle-open")
     if (angle) row.gap = angle.getBoundingClientRect().left - row.left
+    const join = element.querySelector(".cmb-tag-join")
+    if (join) row.attribute = join.getBoundingClientRect().right
     return row
   })
 }
 
 /**
- * How far each row of `rows` reaches past its words, `--cmb-tag-row-<n>-before`, `-after` and `-end`:
+ * How far each row of `rows` reaches past its words, `--cmb-tag-row-<n>-before`, `-after`, `-in` and `-point`:
  * every row from its block's left edge to its right edge.
- * - The right edge:  past the widest row's words, the room a value has in a band, then the `>`, then as much as the
- *   block has before its `⟨` (Owen:  "the `>` has as much space to its right as `<toolbar` has")
- * - The last row's `>` at that edge, less that much (`-end`), past its own reach (`-after`)
+ * - The right edge:  past the widest row, a `⟩` or a value's room, as much as the block has before its `⟨`
+ *   (Owen, I135:  "the `>` has as much space to its right as `<toolbar` has")
+ * - Each row under the first, its words in under the first attribute, on the name's line (`-in`;  I139)
+ * - The last row's `>` its room past the words' ink (`-point`;  I139)
  */
 function tagRowReaches(rows: TagRow[]): Map<string, string> {
-  const blocks = new Map<string, { left: number; right: number; gap: number; point: { width: number; room: number } }>()
-  for (const { block, left, right, gap, point } of rows) {
-    const edges = blocks.get(block) ?? { left, right, gap: 0, point: { width: 0, room: 0 } }
+  const blocks = new Map<string, { left: number; right: number; gap: number; attribute?: number }>()
+  for (const { block, left, right, gap, attribute } of rows) {
+    const edges = blocks.get(block) ?? { left, right, gap: 0 }
     blocks.set(block, {
       left: Math.min(edges.left, left),
       right: Math.max(edges.right, right),
       gap: gap ?? edges.gap,
-      point: point ?? edges.point
+      attribute: attribute ?? edges.attribute
     })
   }
   const reaches = new Map<string, string>()
   const px = (value: number) => `${Math.max(0, value).toFixed(2)}px`
-  for (const { block, row, left, right, point } of rows) {
+  for (const { block, row, left, right, words, point } of rows) {
     const edges = blocks.get(block)!
-    const edge = edges.right + edges.point.room + edges.point.width + edges.gap
     reaches.set(`--cmb-tag-row-${row}-before`, px(left - edges.left))
-    if (point) {
-      reaches.set(`--cmb-tag-row-${row}-after`, px(edge - edges.gap - point.width - point.room - right))
-      reaches.set(`--cmb-tag-row-${row}-end`, px(edges.gap))
-    } else reaches.set(`--cmb-tag-row-${row}-after`, px(edge - right))
+    reaches.set(`--cmb-tag-row-${row}-after`, px(edges.right + edges.gap - right))
+    if (words !== undefined && edges.attribute !== undefined)
+      reaches.set(`--cmb-tag-row-${row}-in`, px(edges.attribute - words))
+    // its room may be less than none:  the `>`'s box is wider than its `⟩`
+    if (point !== undefined) reaches.set(`--cmb-tag-row-${row}-point`, `${point.toFixed(2)}px`)
   }
   return reaches
+}
+
+/**
+ * Where the ink of the last letter before `element` on its line ends:  a word's, or a closing quote mark's.
+ * - Each letter's box is its advance, wider than its ink:  the letter's own bounds taken off (`inkOf()`)
+ */
+function inkBefore(element: HTMLElement): number | undefined {
+  const line = element.closest(".cm-line")
+  if (!line) return undefined
+  const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => (node.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP)
+  })
+  let last: Text | undefined
+  while (walker.nextNode()) {
+    const text = walker.currentNode as Text
+    if (element.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING) break
+    last = text
+  }
+  if (!last) return undefined
+  const at = last.textContent!.trimEnd().length - 1
+  const range = document.createRange()
+  range.setStart(last, at)
+  range.setEnd(last, at + 1)
+  const ink = inkOf(last.textContent![at]!, getComputedStyle(last.parentElement!))
+  return range.getBoundingClientRect().left + ink.right
+}
+
+/**
+ * Where a `>`'s `⟩`'s ink starts:  drawn by its `::before`, at its box's right edge, `ANGLE_INK_IN` in from it.
+ * - Not measured as a letter's is (`inkOf()`):  the page draws it in a fallback font, made bold, which a canvas
+ *   measures half a pixel narrower
+ */
+function angleInkLeft(angle: HTMLElement): number {
+  return angle.getBoundingClientRect().right - ANGLE_INK_IN * parseFloat(getComputedStyle(angle, "::before").fontSize)
+}
+
+/** How far in from its box's right edge a `⟩`'s ink starts, in its font's size:  5.22px at 15px, by a pixel scan. */
+const ANGLE_INK_IN = 0.348
+
+/** Measures a letter's ink with. */
+const INK_CANVAS = typeof document === "undefined" ? undefined : document.createElement("canvas").getContext("2d")
+
+/** `letter`'s ink, in `style`'s font, from where it's drawn:  how far its ink starts and ends, and its advance. */
+function inkOf(letter: string, style: CSSStyleDeclaration): { left: number; right: number; advance: number } {
+  if (!INK_CANVAS) return { left: 0, right: 0, advance: 0 }
+  INK_CANVAS.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+  const metrics = INK_CANVAS.measureText(letter)
+  return { left: -metrics.actualBoundingBoxLeft, right: metrics.actualBoundingBoxRight, advance: metrics.width }
 }
