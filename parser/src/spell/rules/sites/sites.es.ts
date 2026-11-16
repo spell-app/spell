@@ -416,11 +416,110 @@ sitesEs.addRule(SitePartWords, {
 
 // un sitio, y dónde vive:  `spell ui es un sitio en "owen@spell/spell-ui":`, `guía galáctica es un sitio en la nube`
 sitesEs.addRule(CreateSite, {
-  syntax: `{type:type_words} es ${A} {superType:type} (en {address:text}|(cloud:en la nube))? {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {superType:type} (en {address:text}|(cloud:en la nube))? (con {defaults:object_literal_properties})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "block",
       tests: [
+        {
+          title: "sus propios valores en su línea, como los de un tipo:  el tema de sus páginas (I30)",
+          input: [
+            'una "portada" es una página',
+            'guía galáctica es un sitio con tema "mockup"',
+            '\t- tiene una portada en "/"'
+          ],
+          js: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  get theme() {",
+            '    return "mockup"',
+            "  }",
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/"',
+            "  }]",
+            "}",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ],
+          ts: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-portada>`:  a portada, drawn in its own element, e.g. by `draw the portada`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its portada's properties;  its methods call its portada's.",
+            " * - What every view's element does, e.g. drawing its portada, is `SpellElement`'s.",
+            " */",
+            "export class PortadaElement extends SpellElement<Portada> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-portada", "portada", [])',
+            "}",
+            "core.useElement(Portada, PortadaElement)",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  get theme(): string {",
+            '    return "mockup"',
+            "  }",
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/"',
+            "  }]",
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-guia-galactica>`:  a guía galáctica, drawn in its own element, e.g. by `draw the guía galáctica`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its guía galáctica's properties;  its methods call its guía galáctica's.",
+            " * - What every view's element does, e.g. drawing its guía galáctica, is `SpellElement`'s.",
+            " */",
+            "export class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-guia-galactica", "guía galáctica", [])',
+            "}",
+            "core.useElement(GuíaGaláctica, GuíaGalácticaElement)",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ]
+        },
+        {
+          title: "su tema en su cuerpo, como antes (P8)",
+          input: ["guía galáctica es un sitio", '\tsu "tema" es "mockup"'],
+          js: [
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "",
+            "  get theme() {",
+            '    return "mockup"',
+            "  }",
+            "}",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ],
+          ts: [
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "",
+            "  get theme(): string {",
+            '    return "mockup"',
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-guia-galactica>`:  a guía galáctica, drawn in its own element, e.g. by `draw the guía galáctica`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its guía galáctica's properties;  its methods call its guía galáctica's.",
+            " * - What every view's element does, e.g. drawing its guía galáctica, is `SpellElement`'s.",
+            " */",
+            "export class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-guia-galactica", "guía galáctica", [])',
+            "}",
+            "core.useElement(GuíaGaláctica, GuíaGalácticaElement)",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ]
+        },
         {
           title: "una página elige su diseño en su línea;  el diseño principal del sitio es el de las demás (T39)",
           input: [

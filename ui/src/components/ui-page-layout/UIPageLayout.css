@@ -1,18 +1,25 @@
 /*
  * `<ui-page-layout>` (`UIPageLayout.tsx`):  what stays on screen around a site's pages, in its own box.
  * - Shadow markup:  `.layout` (a grid) holding `.drawer` (around `.drawer-box`) and `.body`:  the menu button, the
- *   menu, the page menu, `.row` (left, page, right) and the footer.  An empty region isn't drawn, so takes no room.
+ *   menu, then `.under-menu`:  the page menu, `.row` (left, page, right) and the footer.
+ *   An empty region isn't drawn, so takes no room.
  * - Tokens:
  *   | `--ui-page-layout-gap` | the room between the page and its side bars |
- * - The drawer:  a column the whole height, on a muted fill with a line at its end;  its box a scroller stuck at
- *   the top, so a long navigation scrolls by itself, never the page.
- * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's),
- *   but the menu flush against it, the drawer's line their only edge.
+ * - The drawer:  a column the whole height, on a muted fill;  its box a scroller stuck at the top,
+ *   so a long navigation scrolls by itself, never the page.
+ * - The menu beside the drawer's top, flush against it and on the same fill:  one surface, no line between them
+ *   (epic `mockup` I25).
+ *   - The drawer's line starts under the menu (`.under-menu`'s start), the menu's own bottom line turning into it.
+ * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
  *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
+ * - The open box wears the column's own fill, not one of its own (epic `mockup` I31):
+ *   a theme's see-through fill blurs what's under it, so over the page it looks as the column does;
+ *   its end side rounded, as the panel round the page is (`--ui-panel-radius`).
  * - Motion (epic `mockup` I25), the theme's `--ui-duration-normal`:
  *   - the open box grows out from the column's edge and shrinks back into it, its shadow fading in and out;
  *     closing, it keeps its fill and its place over the page until it's back (the delayed `transition`s)
+ *   - closing always takes 0.2s, whatever the theme's duration (Owen, I31)
  *   - switching between compact and all of it, the column narrows or widens, the page following
  *     (`interpolate-size`:  where a browser has none, it jumps)
  *   - reduced motion, or `animation="none"` round it (`--ui-motion: none`):  none of it
@@ -23,6 +30,8 @@
   :host {
     --_ui-page-layout-gap: var(--ui-page-layout-gap, var(--ui-font-size, 16px));
     --_ui-page-layout-duration: var(--ui-duration-normal, 200ms);
+    --_page-layout-close-duration: 0.2s;
+    --_page-layout-flyout-radius: var(--ui-panel-radius, var(--ui-radius-l, 14px));
     /* its own width decides narrow:  a site drawn in a narrow box is narrow */
     container-type: inline-size;
     display: flex;
@@ -49,7 +58,6 @@
     min-inline-size: 0;
     transition: inline-size var(--_ui-page-layout-duration) var(--ui-ease, ease);
     background: var(--ui-surface-muted, Canvas);
-    border-inline-end: 1px solid var(--ui-border-color, GrayText);
   }
   .drawer-box {
     /* its own width moves only between lengths:  a keyword (auto) would follow the column as it moves */
@@ -66,7 +74,15 @@
     flex-direction: column;
     min-inline-size: 0;
   }
-  .menu,
+  /* the menu's room below it is inside what's under it:  so the drawer's line runs on from the menu's */
+  .menu + .under-menu {
+    padding-block-start: 1em;
+  }
+  .under-menu {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
   .page-menu {
     margin-block-end: 1em;
   }
@@ -86,9 +102,13 @@
   .right {
     flex: 0 0 auto;
   }
-  /* a font size in from the drawer;  the menu flush against it */
-  .layout:has(> .drawer) > .body > :is(.page-menu, .row, .footer) {
+  /* a font size in from the drawer, after its line;  the menu flush against it, on its fill */
+  .layout:has(> .drawer) > .body > .under-menu {
     padding-inline-start: var(--ui-font-size, 16px);
+    border-inline-start: 1px solid var(--ui-border-color, GrayText);
+  }
+  .layout:has(> .drawer) > .body > .menu {
+    --ui-menu-header-bar-background: var(--ui-surface-muted, Canvas);
   }
   /* its own menu button:  only at a narrow width */
   .menu-button {
@@ -106,22 +126,27 @@
   /* closed:  the box as wide as its column;  closing, its fill and place over the page wait until it's back */
   :host(:state(compact):not(:state(narrow))) .drawer-box {
     inline-size: 100%;
+    border-start-end-radius: var(--_page-layout-flyout-radius);
+    border-end-end-radius: var(--_page-layout-flyout-radius);
     box-shadow: 0 0 0 transparent;
     transition:
-      inline-size var(--_ui-page-layout-duration) var(--ui-ease-in, ease-in),
-      box-shadow var(--_ui-page-layout-duration) var(--ui-ease-in, ease-in),
-      z-index 0s var(--_ui-page-layout-duration) allow-discrete,
-      min-block-size 0s var(--_ui-page-layout-duration),
-      background 0s var(--_ui-page-layout-duration) allow-discrete,
-      border-inline-end 0s var(--_ui-page-layout-duration) allow-discrete;
+      inline-size var(--_page-layout-close-duration) var(--ui-ease-in, ease-in),
+      box-shadow var(--_page-layout-close-duration) var(--ui-ease-in, ease-in),
+      z-index 0s var(--_page-layout-close-duration) allow-discrete,
+      min-block-size 0s var(--_page-layout-close-duration),
+      background 0s var(--_page-layout-close-duration) allow-discrete,
+      backdrop-filter 0s var(--_page-layout-close-duration) allow-discrete,
+      border-inline-end 0s var(--_page-layout-close-duration) allow-discrete;
   }
   /* open:  all of it, grown out from the column's edge over the page */
   :host(:state(compact):state(open):not(:state(narrow))) .drawer-box {
     z-index: var(--ui-z-popup, 1000);
     inline-size: 16em;
     min-block-size: min(100%, 100dvh);
-    /* over the page:  on Canvas too, as a theme's fill may let what's under it through */
-    background: linear-gradient(var(--ui-surface-muted, Canvas), var(--ui-surface-muted, Canvas)) Canvas;
+    /* the column's own fill (Owen, I31:  "keep the same background color");  a see-through one blurs the page under
+       it, so it reads as the column does over the page's backdrop, not the page's text */
+    background: var(--ui-surface-muted, Canvas);
+    backdrop-filter: blur(1.5em);
     border-inline-end: 1px solid var(--ui-border-color, GrayText);
     box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2));
     transition:
@@ -162,8 +187,12 @@
       max-block-size: none;
       overflow: visible;
     }
-    .layout:has(> .drawer) > .body > :is(.page-menu, .row, .footer) {
+    .layout:has(> .drawer) > .body > .under-menu {
       padding-inline-start: 0;
+      border-inline-start: none;
+    }
+    .layout:has(> .drawer) > .body > .menu {
+      --ui-menu-header-bar-background: initial;
     }
     .menu-button {
       display: inline-flex;

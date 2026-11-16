@@ -10,7 +10,7 @@ import type { BubblyRulePresentation } from "./highlight.types"
  *   - a line's SHAPE:  a control line's bracket, a group, what a head draws as a step, what joins two questions,
  *     what holds expressions, what a step sets
  *   - the CHECKS no role says yet, each kept by name (epic `language` P60, Q69:  a red judgement call each):
- *     `namesKind`, `namesWhatItDraws`, `choices`, `blankAfterVerb`
+ *     `namesWhatItDraws`, `blankAfterVerb`
  * - Read by `SP.BubblyLayout` (so by the app's `<spell-code>`, the docs pages and the drawn-bubbly page),
  *   and by the code editor's and VS Code's drawings (epic `language` P50, P51).
  * - Keyed by a rule's NAME, what its syntax strings call it (`{define_property_has}`), the same in every language;
@@ -25,17 +25,7 @@ export class BubblyPresentation {
     // ## Declarations
     ////////////////
 
-    // the kind a type's head says it is, bold whole, ONE name (epic `language` I111, I112):
-    // `two sided view`, `viewable list of cards`;
-    // Spanish's `lista visible, soltable de cartas` starts with words of its syntax
-    create_type: { namesKind: "superType" },
-    create_list_type: { namesKind: "instanceType" },
-    create_viewable_list_type: { namesKind: "instanceType" },
-    create_one_of_a_kind: { namesKind: "superType" },
-
-    // properties:  `its "rank" is one of ace, 2 ... 10`, each value a pill of its own;  `it "is a face card" if ...`
-    define_property_has: { choices: ["identifier_list"] },
-    property_value_getter: { choices: ["identifier_list"] },
+    // a property's:  `it "is a face card" if ...`, what it asks, a step's
     quoted_type_expression: { steps: ["expression"] },
     // `it is droppable when ...`:  what it asks, a step's
     list_guard: { steps: ["expression"] },

@@ -48,6 +48,14 @@
       ui-table.ui.collapsing.table {
         width: revert-layer;
       }
+      /* Spell's wordmark, "Spell" beside the hat:  ONE look, the loading screen's and the top bar's (`EditorTheme.css`,
+         `.AppMarkLabel`;  epic `editor` T93:  "Make Spell bolder (same as loading screen)") */
+      :root {
+        --spell-wordmark-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
+        /* the heaviest:  Owen, I191:  "Spell logo more bolder" (800 in T93) */
+        --spell-wordmark-weight: 900;
+        --spell-wordmark-tracking: -0.035em;
+      }
       /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
          Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet.
          Above everything, the selection's ants and the hover box included (their 2147483000). */
@@ -95,7 +103,7 @@
         background: light-dark(#ffffffcc, #16151dcc);
         backdrop-filter: blur(2px);
         color: light-dark(#1d1a2e, #f4f2ff);
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
+        font-family: var(--spell-wordmark-font);
         text-align: center;
         /* the word's size and the line's:  the hat is measured from both */
         --hero-size: clamp(64px, 15vmin, 148px);
@@ -113,8 +121,8 @@
         margin: 0;
         font-family: inherit;
         font-size: var(--hero-size);
-        font-weight: 800;
-        letter-spacing: -0.035em;
+        font-weight: var(--spell-wordmark-weight);
+        letter-spacing: var(--spell-wordmark-tracking);
         line-height: 1;
       }
       /* the hat alone, in the line's colour:  a mask of the hat, written in (`static/favicon/hat.svg`), so it never waits

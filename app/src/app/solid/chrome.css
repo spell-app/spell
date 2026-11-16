@@ -30,8 +30,8 @@ ui-menu.short ui-item::part(item) {
   padding-block: 0;
 }
 
-/* "tight" menu */
-:is(ui-menu, ui-app-menu).tight ui-item::part(item) {
+/* "tight" menu:  its items' room, but a circular one's (Spell UI's `appearance="circular"`, its size its own) */
+:is(ui-menu, ui-app-menu).tight ui-item:not([appearance~="circular"])::part(item) {
   padding-inline: 8px;
 }
 
@@ -187,6 +187,10 @@ ui-menu.PanelMenu,
 ui-app-menu.AppMenu .YouAvatar {
   margin-inline: calc(var(--spell-bar-icon-gap) / 2);
 }
+/* its end is a menu of items, each with its own room:  none of the app menu's own after them (epic `mockup` I27) */
+ui-app-menu.AppMenu::part(end)::after {
+  display: none;
+}
 /*
  * the "..." menu's icon the size of the bar's other icons, and the same grey:  it drew half as wide again, and stood
  * apart;  its glyph centred on the bar (`display: flex`):  in a line of the menu's smaller text, it hung 1px low
@@ -213,11 +217,13 @@ ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
-ui-menu.ModeTabs ui-item::part(item) {
+ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   gap: 0.4em;
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
+/* ... its icons alone (the code, the compiled code, Inspect app, Add) are Spell UI's circular items
+   (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {
@@ -286,9 +292,11 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
- * - "Editing a Draft" plain words in deep amber;  "Publish Draft" the primary button, a round thumb 2px inside its end
- * - "Discard Draft" between them, the same round thumb in a neutral grey, 4px from Publish
- *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft")
+ * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside its end
+ * - "Discard" between them, a link in the theme's primary colour (Glass's purple), as text, 4px from Publish
+ *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft";
+ *   2026-11-16, T85:  "make `Discard` look like a link";  I192:  "Text + icon should be purple")
+ * - all three on one centre line (I192)
  */
 .ModeButtons > .PublishDraft {
   --spell-draft-height: 28px;
@@ -323,18 +331,20 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     --ui-button-padding-inline: 10px;
     margin: 0;
   }
+  /* no padding above or below:  a tertiary button's own (Discard's) pushed its words 2.4px under the label's */
   & > ui-button::part(button) {
     block-size: calc(var(--spell-draft-height) - 2 * var(--spell-draft-inset));
     margin: 0;
+    padding-block: 0;
   }
+  /* Discard, a link (T85):  the theme's primary colour in its text shade, words and icon (I192), no fill and no room of its own,
+     underlined on hover (a tertiary button's own line) */
   & > ui-button.DiscardDraft {
-    --ui-button-background: light-dark(oklch(0.9 0 0), oklch(0.4 0 0));
-    --ui-button-background-hover: light-dark(oklch(0.86 0 0), oklch(0.45 0 0));
-    --ui-button-background-down: light-dark(oklch(0.82 0 0), oklch(0.5 0 0));
-    --ui-button-color: var(--ui-text-color);
+    --ui-color-text: var(--ui-primary-text);
+    --ui-button-tertiary-padding: 0px;
   }
   & > ui-button.DiscardDraft + ui-button {
-    margin-inline-start: -4px;
+    margin-inline-start: 4px;
   }
 }
 

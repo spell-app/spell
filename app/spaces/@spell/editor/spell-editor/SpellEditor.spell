@@ -279,7 +279,7 @@ a "file tab bar" is a view
 		// What this project's open tabs are kept under, the editor's own
 	its "hide words" is text
 		// The ✕'s tooltip, "Hide the code", in the page's language:  the editor's own
-	to hide it
+	to hide the code
 		// The ✕:  the code's column hides, as the top bar's code icon hides it:  the editor's own (T83)
 	<css>
 		/* the dot on a tab whose file isn't saved:  the theme's warning hue */
@@ -342,7 +342,7 @@ a "file tab bar" is a view
 		/* the ✕ that hides the code, at the bar's far right:  the bar's icons' size and grey */
 		.HideCode {
 			flex: none;
-			margin-inline: 4px 2px;
+			margin-inline: 4px 0;
 			color: var(--ui-text-muted);
 			cursor: pointer;
 		}
@@ -359,7 +359,7 @@ a "file tab bar" is a view
 			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
 				{draw each file in its files}
 			</toolbar>
-			<icon slot="actions" class="HideCode" name="close" title={its hide words} label={its hide words} onClick={hide it} />
+			<icon slot="actions" class="HideCode" name="close" title={its hide words} label={its hide words} onClick={hide the code} />
 		</panel>
 
 a "home row" is a view

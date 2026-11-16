@@ -75,6 +75,9 @@ export class BubblyLayout {
   /** Stretches every line takes from the parse, whatever it is:  yes and no, `'s`, `item`;  `order` low first. */
   private readonly overlays: Overlay[] = []
 
+  /** Each value a list declares (`choice`), from the parse:  a pill of its own, painted over the rest of its line. */
+  private readonly choices: Stretch[] = []
+
   /** Every statement's underlines, from the parse:  each line takes those inside it. */
   private readonly underlines: BubblyUnderline[] = []
 
@@ -169,6 +172,12 @@ export class BubblyLayout {
     for (const name of this.partsWith(match, roles, "name"))
       this.overlays.push({ ...name, kind: "reference", order: 1 })
     for (const plain of this.partsWith(match, roles, "plain")) this.overlays.push({ ...plain, kind: "words", order: 2 })
+    // `is one of ace, 2 ... 10, jack`:  each value its list's item
+    for (const group of BubblyRoles.groupsWith(roles, "choice"))
+      for (const list of groupNamed(match, group))
+        for (const item of childrenOf(list))
+          if (item.start !== undefined && item.end !== undefined)
+            this.choices.push({ start: item.start, end: item.end })
   }
 
   /**
@@ -184,17 +193,22 @@ export class BubblyLayout {
     return parts.sort((a, b) => a.start - b.start)
   }
 
-  /** The words of `match` outside every group's match:  the words of its syntax, `when`, `it`, `droppable`. */
+  /**
+   * The words of `match` outside every group's match:  the words of its syntax, `when`, `it`, `droppable`.
+   * - never a comment's:  `of` in `-- a deck of playing cards`
+   */
   private literalsOf(match: P.Match): Array<Stretch & { word: string }> {
-    const groups = Object.values(match.groups ?? {})
+    const groups: Stretch[] = Object.values(match.groups ?? {})
       .flat()
       .filter((each): each is P.Match => each instanceof P.Match && each.start !== undefined)
+      .map((each) => ({ start: each.start!, end: each.end! }))
+    for (const span of this.spans)
+      if (span.kind === "comment" && span.end > match.start! && span.start < match.end!) groups.push(span)
     const words: Array<Stretch & { word: string }> = []
     for (const found of this.text.slice(match.start, match.end).matchAll(WORD)) {
       const start = match.start! + found.index
       const end = start + found[0].length
-      if (!groups.some((group) => start >= group.start! && end <= group.end!))
-        words.push({ start, end, word: found[0] })
+      if (!groups.some((group) => start >= group.start && end <= group.end)) words.push({ start, end, word: found[0] })
     }
     return words
   }
@@ -514,6 +528,8 @@ export class BubblyLayout {
     this.paintSpans(start, end, head)
     for (const overlay of this.overlays) if (overlay.start >= start && overlay.end <= end) this.paintOverlay(overlay)
     if (head) this.paintHead(head)
+    for (const choice of this.choices)
+      if (choice.start >= start && choice.end <= end) this.paintChoice(choice.start, choice.end)
     const codes = this.isMarkup(line) ? this.paintMarkup(start, end) : []
     const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
     const pieces = this.piecesOf(start, end, [...underlines, ...codes])
@@ -570,48 +586,16 @@ export class BubblyLayout {
   }
 
   /**
-   * A head's declarations and choices, over what its spans said:
+   * A head's declarations, over what its spans said:
    * - an action's, ONE pill (`paintTyped()`);  any other's, each part that's a `declaration` a pill
    */
   private paintHead(head: Head) {
-    const { statement, row, roles } = head
-    this.paintKind(head)
+    const { statement, roles } = head
     // a drawing's head, `to draw its placeholder`:  what it draws a name, no pill (epic `language` I99)
     if (this.paintDrawing(head)) return
     if (head.partOfSpeech === "action") this.paintTyped(head)
     else
       for (const part of this.partsWith(statement, roles, "declaration")) this.paintRange(part.start, part.end, "input")
-    for (const list of descendantsNamed(statement, row.choices))
-      for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
-  }
-
-  /**
-   * The kind a type's head says it is (`namesKind`), bold whole, ONE name (epic `language` I111):
-   * `a "deck" is a **list of cards**`, `una "pila" es una **lista visible de cartas**`.
-   * - It ends where its row's group ends (`instanceType`, `superType`), from the parse.
-   * - It starts after the first article past the name (`is a`, `es una`), past any more small words.
-   * - Its abilities are in it, wherever they are, and the commas between them (epic `language` I112):
-   *   `a "card" is a **draggable, clickable two sided view**`, `a "pile" is a **viewable, droppable list of cards**`.
-   */
-  private paintKind({ statement, row }: Head) {
-    if (!row.namesKind) return
-    const groups = statement.groups as Record<string, P.Match | P.Match[] | undefined>
-    const [kind] = [groups[row.namesKind]].flat()
-    if (kind?.start === undefined || kind.end === undefined) return
-    const names = [groups.type, groups.aka].flat().filter((each) => each?.end !== undefined && each.end <= kind.start!)
-    const nameEnd = Math.max(...names.map((each) => each!.end!), statement.start!)
-    let from: number | undefined
-    let pastArticle = false
-    for (const word of this.text.slice(nameEnd, kind.start).matchAll(/\S+/g)) {
-      const at = nameEnd + word.index
-      const isSmall = this.smallWords.has(word[0].toLowerCase())
-      if (!pastArticle) pastArticle = isSmall
-      else if (!isSmall) {
-        from = at
-        break
-      }
-    }
-    this.paintRange(from ?? kind.start, kind.end, "reference")
   }
 
   /**
@@ -831,9 +815,21 @@ export class BubblyLayout {
     return -1
   }
 
-  /** Paint an overlay:  only over Spell's own words, when it says so (`overWordsOnly`). */
+  /**
+   * Paint an overlay:  only over Spell's own words, when it says so (`overWordsOnly`).
+   * - A name never takes a mark, nor the space after one:  its commas stay plain,
+   *   `**draggable**, **clickable two sided view**` (epic `language` J214)
+   */
   private paintOverlay({ start, end, kind, overWordsOnly }: Overlay) {
-    for (let at = start; at < end; at++) if (!overWordsOnly || this.paint[at] === "words") this.paint[at] = kind
+    let afterMark = false
+    for (let at = start; at < end; at++) {
+      const paint = this.paint[at]
+      const isMark: boolean = paint === "mark" || (afterMark && /\s/.test(this.text[at]!))
+      afterMark = isMark
+      if (overWordsOnly && paint !== "words") continue
+      if (kind === "reference" && isMark) continue
+      this.paint[at] = kind
+    }
   }
 
   /** Paint `start` to `end` as `paint`. */

@@ -1,8 +1,9 @@
+import { foldedRanges } from "@codemirror/language"
 import { type EditorState, type Extension, type Range } from "@codemirror/state"
-import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
+import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
-import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
+import { type MarkMaker, type MarkedStretch, type Spacer, spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
@@ -138,9 +139,30 @@ class MarkupShapes {
           this.block(shape, rails)
           break
         case "input":
+          if (shape.isBare) this.bareQuotes(shape.place)
           break
       }
     }
+  }
+
+  /**
+   * A value written without quotes (`direction=down`) drawn as `direction="down"` is (epic `language` I123):
+   * its curly marks and the room outside them, as widgets beside its words, nothing added to the file.
+   * - Placed outside its pill's room, which is at its words' ends too (sides -1, 1)
+   */
+  private bareQuotes(place: number) {
+    const value = this.marks[place]
+    if (!value) return
+    const room = (kind: "quote" | "tag-quote", side: "before" | "after") => spacer(kind, side).inlineClassName
+    const { start, end } = value
+    this.decorations.add(
+      Decoration.widget({ widget: new SpacerWidget(room("quote", "before")), side: -3 }).range(start)
+    )
+    this.decorations.add(QuoteWidget.bare("open").range(start))
+    this.decorations.add(QuoteWidget.bare("close").range(end))
+    this.decorations.add(
+      Decoration.widget({ widget: new SpacerWidget(room("tag-quote", "after")), side: 3 }).range(end)
+    )
   }
 
   /** An element with what's inside it on lines of its own:  its band, its body's rail, its end tag's tiny pill. */
@@ -149,6 +171,11 @@ class MarkupShapes {
     const whole = this.marks[block.place]
     if (!head || !whole) return
     const hue = hueOf(block.partOfSpeech)
+    // folded:  its start tag alone, a band pointed at both ends, the fold's `…` in its end (I116)
+    if (this.decorations.isFoldedAt(head.start)) {
+      this.on(block.head, ["cmb-tag-band", "cmb-band-folded", "cmb-tag-start", ...hue])
+      return
+    }
     this.on(block.head, ["cmb-tag-band", "cmb-band-open", "cmb-tag-start", ...hue])
     const inside = [...rails, { ...this.decorations.indentAt(head.start), partOfSpeech: block.partOfSpeech }]
     // the rail:  every line under its start tag, to its end tag's
@@ -209,6 +236,21 @@ export class CodeMirrorDecorations {
 
   /** The text being drawn. */
   readonly text: string
+
+  /**
+   * Is the block whose head is on the line `at` is on folded?
+   * - Its fold starts at its head line's end (`CodeMirrorLanguage.folding()`), so it's drawn as its head alone:
+   *   a pill, no rail, no foot, nothing of its hidden body (epic `language` I116)
+   */
+  isFoldedAt(at: number): boolean {
+    const { to } = this.state.doc.lineAt(at)
+    let isFolded = false
+    foldedRanges(this.state).between(to, to, (from) => {
+      if (from === to) isFolded = true
+      return isFolded ? false : undefined
+    })
+    return isFolded
+  }
 
   /** Mark `start`-`end` with `classes`, and `attributes`, along with any the same stretch has. */
   mark(start: number, end: number, classes: string[], attributes: Record<string, string> = {}): void {
@@ -278,9 +320,25 @@ export class CodeMirrorDecorations {
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     const ranges = [...this.ranges]
-    for (const [range, { classes, attributes }] of this.marks) {
+    const marks = [...this.marks].map(([range, mark]) => {
       const [start, end] = range.split(":").map(Number) as [number, number]
-      ranges.push(Decoration.mark({ class: [...classes].join(" "), attributes }).range(start, end))
+      return { start, end, ...mark }
+    })
+    // a quote mark's `"` shown as its curly mark;  where they start and end
+    const quotes = marks.filter((mark) => mark.classes.has(QUOTE_MARK))
+    const quoteStarts = new Set(quotes.map((quote) => quote.start))
+    const quoteEnds = new Set(quotes.map((quote) => quote.end))
+    for (const { start, end, classes, attributes } of marks) {
+      if (classes.has(QUOTE_MARK)) {
+        ranges.push(QuoteWidget.over(classes).range(start, end))
+        continue
+      }
+      // a mark starting or ending with a quote holds it:  CodeMirror draws a widget at a mark's edge outside it,
+      // unless the mark's inclusive there;  every one at that edge, so they still nest as they did
+      const inclusiveStart = quoteStarts.has(start)
+      const inclusiveEnd = quoteEnds.has(end)
+      const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd })
+      ranges.push(mark.range(start, end))
     }
     for (const [from, { classes, rails, stopped, ended }] of this.lines) {
       const innermost = rails.at(-1)
@@ -335,8 +393,142 @@ export function railsStyle(
 /** A rail's size in a row it stops short in:  the row's width, its height less the corner's reach into it. */
 const STOPPED_RAIL = "100% max(0px, 100% - var(--cmb-foot-lift))"
 
-/** Room beside a mark, an empty inline box, its width the sheet's. */
+/** The class the shared marks give a quoted value's own `"` (`MarkupMarks`, `CodeMirrorBubbly`). */
+const QUOTE_MARK = "bubbly-quote-mark"
 
+/** The quote classes renamed for the editor's own:  `bubbly-quote-open` => `cmb-quote-open` ... */
+const QUOTE_CLASS = /^bubbly-(?=quote-|tag-quote|tag-word-quote)/
+
+/****************
+ * ### `QuoteWidget`
+ * A quoted value's `"` drawn as its curly mark:  `“` before it, `”` after it, the mark the look's (`cmb-quote`).
+ * - Shown IN PLACE of the file's `"`, which stays in the file:  the caret and a selection step over it as one
+ *   letter, and a copy copies the `"`.
+ * - Nothing see-through left under it:  the file's own `"`, kept transparent with its curly mark drawn over it,
+ *   came back as a straight quote beside the curly one whenever it was selected (epic `language` I115)
+ * - Its classes:  the mark's, `bubbly-quote-*` and `bubbly-tag-*quote` as `cmb-*`, so none of the drawn-bubbly
+ *   page's rules for its own `"` reach it
+ ****************/
+class QuoteWidget extends WidgetType {
+  constructor(
+    readonly classes: string,
+    readonly mark: string,
+    readonly isBare = false
+  ) {
+    super()
+  }
+
+  /** The decoration showing a `"` marked `classes` as its curly mark. */
+  static over(classes: ReadonlySet<string>): Decoration {
+    const isOpen = classes.has("bubbly-quote-open")
+    const own = [...classes].filter((each) => each !== QUOTE_MARK).map((each) => each.replace(QUOTE_CLASS, "cmb-"))
+    return Decoration.replace({ widget: new QuoteWidget(["cmb-quote", ...own].join(" "), isOpen ? "“" : "”") })
+  }
+
+  /**
+   * A curly mark for a value written without quotes (`direction=down`), with nothing of the file under it:
+   * outside the room either side of its words (sides -2, 2), inside the room outside the marks (-3, 3).
+   */
+  static bare(end: "open" | "close"): Decoration {
+    const classes = new Set([QUOTE_MARK, "bubbly-tag-quote", `bubbly-quote-${end}`])
+    const { classes: own, mark } = (QuoteWidget.over(classes).spec as { widget: QuoteWidget }).widget
+    return Decoration.widget({ widget: new QuoteWidget(own, mark, true), side: end === "open" ? -2 : 2 })
+  }
+
+  eq(other: QuoteWidget): boolean {
+    return other.classes === this.classes && other.mark === this.mark && other.isBare === this.isBare
+  }
+
+  /** `<span class="cmb-quote ..."><span class="cmb-quote-glyph">“</span></span>`:  the glyph placed in its box. */
+  toDOM(): HTMLElement {
+    const box = document.createElement("span")
+    box.className = this.classes
+    const glyph = box.appendChild(document.createElement("span"))
+    glyph.className = "cmb-quote-glyph"
+    glyph.textContent = this.mark
+    return box
+  }
+
+  /**
+   * Where the caret stands beside the mark:  outside it, or at the quoted words' edge, as tall as they are.
+   * - CodeMirror's own measure was the box's:  no height, since its glyph is placed on its own (epic `language` I122:
+   *   no caret after a closing quote, or before an opening one)
+   * - `pos` 0 is before the `"`, 1 after it
+   * - A bare value's mark has no `"` to step over:  the caret beside it is at its words' edge, where a letter typed
+   *   goes into the value
+   */
+  coordsAt(box: HTMLElement, pos: number): Rect | null {
+    const isOpen = this.mark === "“"
+    const words = letterBeside(box, isOpen ? "after" : "before")
+    if (!words) return null
+    const isOutside = !this.isBare && (pos === 0 ? isOpen : !isOpen)
+    return caretAt(isOutside ? outsideOf(box, isOpen ? "before" : "after") : isOpen ? words.left : words.right, words)
+  }
+
+  ignoreEvent(): boolean {
+    return false
+  }
+}
+
+/**
+ * The first letter after `element` on its line (`"after"`), or the last one before it;  else any letter on its line.
+ * - What a caret beside a widget takes its height from:  a widget's own box may have none
+ */
+function letterBeside(element: HTMLElement, side: "before" | "after"): DOMRect | undefined {
+  const line = element.closest(".cm-line")
+  if (!line) return undefined
+  const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) =>
+      node.textContent?.trim() && !node.parentElement?.closest(".cmb-quote")
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_SKIP
+  })
+  const letters: Text[] = []
+  while (walker.nextNode()) letters.push(walker.currentNode as Text)
+  const isAfter = (text: Text) => Boolean(element.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING)
+  const beside = side === "after" ? letters.find(isAfter) : letters.findLast((text) => !isAfter(text))
+  const text = beside ?? letters[0]
+  if (!text) return undefined
+  // its first letter, or its last:  past any spaces at that end
+  const content = text.textContent!
+  const at = side === "after" || !beside ? content.search(/\S/) : content.trimEnd().length - 1
+  const range = document.createRange()
+  range.setStart(text, at)
+  range.setEnd(text, at + 1)
+  return range.getBoundingClientRect()
+}
+
+/** The element next to `element` on `side`, past CodeMirror's buffers beside a widget. */
+function besideOf(element: Element, side: "before" | "after"): Element | undefined {
+  let next = side === "after" ? element.nextElementSibling : element.previousElementSibling
+  while (next?.matches(".cm-widgetBuffer"))
+    next = side === "after" ? next.nextElementSibling : next.previousElementSibling
+  return next ?? undefined
+}
+
+/**
+ * Where a caret stands outside a quote's curly mark, `side` of it.
+ * - A tag's mark:  past the room outside it, where the text beside it starts, so the caret's at one place whichever
+ *   way it came;  without that room, its box's edge, as wide as the `"`, the mark over its middle
+ * - A Spell value's has no box, its mark outside the white:  the mark's own edge
+ */
+function outsideOf(quote: HTMLElement, side: "before" | "after"): number {
+  const room = besideOf(quote, side)
+  const box = quote.getBoundingClientRect()
+  const edges = room?.matches(".bubbly-spacer")
+    ? room.getBoundingClientRect()
+    : box.width >= 1
+      ? box
+      : (quote.firstElementChild ?? quote).getBoundingClientRect()
+  return side === "before" ? edges.left : edges.right
+}
+
+/** A caret at `x`, as tall as `letter`. */
+function caretAt(x: number, letter: DOMRect): Rect {
+  return { left: x, right: x, top: letter.top, bottom: letter.bottom }
+}
+
+/** Room beside a mark, an empty inline box, its width the sheet's. */
 class SpacerWidget extends WidgetType {
   constructor(readonly classes: string) {
     super()
@@ -350,6 +542,24 @@ class SpacerWidget extends WidgetType {
     const room = document.createElement("span")
     room.className = this.classes
     return room
+  }
+
+  /**
+   * Where the caret stands beside the room:  at its edge by the text, as tall as the letters there;
+   * beside a quote's curly mark, outside the mark;  inside a pill, at its words' edge.
+   * - CodeMirror's own measure was the box's:  no height (epic `language` I122)
+   */
+  coordsAt(room: HTMLElement): Rect | null {
+    const isBefore = room.classList.contains("bubbly-spacer-before")
+    const letter = letterBeside(room, isBefore ? "after" : "before")
+    if (!letter) return null
+    const quote = besideOf(room, isBefore ? "after" : "before")
+    const edge = room.getBoundingClientRect()
+    if (quote?.matches(".cmb-quote"))
+      return caretAt(outsideOf(quote as HTMLElement, isBefore ? "before" : "after"), letter)
+    // a pill's room inside it:  at its words' edge, where a letter typed goes
+    if (room.matches(".bubbly-input-spacer")) return caretAt(isBefore ? letter.left : letter.right, letter)
+    return caretAt(isBefore ? edge.right : edge.left, letter)
   }
 
   ignoreEvent(): boolean {

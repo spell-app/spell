@@ -19,6 +19,7 @@ import { CodeMirrorPopups } from "spell/app/app/ui/codemirror"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { uiReady } from "spell/app/app/solid"
 import { CodeSettings } from "spell/app/app/solid/CodeSettings"
+import { CodeShown } from "spell/app/app/solid/EditorMode"
 import { FileDropdown } from "spell/app/app/solid/FileDropdown"
 import { FileTabs } from "spell/app/app/solid/FileTabs"
 import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
@@ -262,20 +263,38 @@ describe("<FileTabs>", () => {
     expect(showEditor).toHaveBeenLastCalledWith("test-project/one.js")
   })
 
-  test("every file fits:  the list of every file still shows at the bar's end, and no tab's ✕, even hovered (T77, T82)", async () => {
+  test("every file fits:  no list of every file, and no tab's ✕, even hovered (T77, T83)", async () => {
     const file = fakeFile("test-project/one.js", "")
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     const tabs = await tabsIn(host)
     const row = tabs[0]!.parentElement!
-    await vi.waitFor(() => expect(row.shadowRoot!.querySelector("[part~=all-items]")).not.toBeNull())
+    await ElementFixture.settle()
+    expect(row.matches(":state(overflowing)")).toBe(false)
+    expect(row.shadowRoot!.querySelector("[part~=all-items]")).toBeNull()
     // force:  an earlier test's right-click menu may still lie over the bar
     await userEvent.hover(tabs[1]!, { force: true })
     expect(tabs.map((tab) => getComputedStyle(tab.querySelector(".CloseTab")!).visibility)).toEqual([
       "hidden",
       "hidden"
     ])
+  })
+
+  test("the ✕ at the bar's far right hides the code, as the top bar's code icon does (T83)", async () => {
+    const file = fakeFile("test-project/one.js", "")
+    setEditor("project", file.project as unknown as EditorStore["project"])
+    setEditor("file", file)
+    const host = await mount(() => <FileTabs />)
+    await tabsIn(host)
+    const hide = host.querySelector(".FileTabs > :not(ui-menu)")!.shadowRoot!.querySelector<HTMLElement>(".HideCode")!
+    expect(hide.getAttribute("title")).toBe("Hide the code")
+    expect(CodeShown.isClosed(file.project.path)).toBe(false)
+    hide.click()
+    flush()
+    expect(CodeShown.isClosed(file.project.path)).toBe(true)
+    CodeShown.set(file.project.path, true)
+    flush()
   })
 
   describe("more files than the bar's 8:  a tab's ✕ closes it, the file still in the list (T77)", () => {

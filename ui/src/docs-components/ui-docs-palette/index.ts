@@ -11,6 +11,7 @@ import { UIDocsPalette } from "./UIDocsPalette"
 
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-icon-picker"
 import "spell/ui/components/ui-input"
 
 UIDocsPalette.define()

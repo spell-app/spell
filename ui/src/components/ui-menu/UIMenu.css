@@ -1570,6 +1570,26 @@
     background: var(--_ui-menu-segmented-active-hover-background, var(--_ui-menu-active-hover-background));
   }
 
+  /*
+   * Circular:  an item of its icon alone, in a circle (`<ui-item appearance="circular">`;  epic `editor` T90, T91:
+   * the editor's top bar's code, compiled code, Inspect app and Add, and the Inspector card's Inspect app)
+   * - as wide as it's tall, `--ui-menu-circular-item-size` (2em), its glyph centred
+   * - every surround round:  its hover, and pressed (above), as `<ui-button appearance="circular">` is
+   * - NOT for an option a segmented menu chooses:  its sliding thumb keeps the options' corners
+   */
+  :host(:state(in-menu)) > .circular.item {
+    box-sizing: border-box;
+    inline-size: var(--ui-menu-circular-item-size, 2em);
+    block-size: var(--ui-menu-circular-item-size, 2em);
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+  }
+  :host(:state(in-menu)) > .circular.item,
+  :host([aria-pressed="true"]:state(in-menu)) > .circular.item:not(.active) {
+    border-radius: 50%;
+  }
+
   /* Active:  the current item;  a coloured menu (or item) paints it in `--ui-color`. */
   :host(:state(in-menu)) > .active.item,
   .ui.menu .active.item {
@@ -1799,12 +1819,22 @@
     box-shadow: var(--ui-shadow-raised);
   }
   /* too many rows for the window's height:  columns, top to bottom, then across (`fitColumns()`), each as wide as its
-     longest row;  the chosen one still ticked */
+     longest row, the rows a little tighter;  the chosen one still ticked
+     - hanging from its button towards the end, else towards the start, else under it across the window:
+       never cut by the window's edge (`max-width` would hold it in the first, and it'd scroll sideways) */
   .overflow-menu[popover]:popover-open[data-columns] {
     display: grid;
     grid-auto-flow: column;
-    grid-template-rows: repeat(var(--_ui-menu-overflow-rows), auto);
+    grid-template-rows: repeat(var(--_ui-menu-overflow-rows, 1), auto);
+    position-try-fallbacks:
+      block-end span-inline-start,
+      block-end span-all;
+    position-try-order: normal;
+    max-width: calc(100vw - 1em);
     overflow: auto;
+  }
+  .overflow-menu[data-columns] > .row {
+    padding-block: 0.4em;
   }
   .overflow-menu > .row {
     display: flex;

@@ -278,7 +278,7 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(getComputedStyle(label).display).toBe("none")
   })
 
-  it("a group's icon shows before its label, its pages a step in;  `collapsed`, one column, an iconless group a line (I20)", async () => {
+  it("a group's icon shows before its label, its pages a step in;  `collapsed`, one column, centred, an iconless group a line (I20, I31)", async () => {
     const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
     const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
     await ShadowTree.settle(host)
@@ -292,10 +292,18 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(row(host, "Run").querySelector(':scope > [slot="icon"]')).not.toBeNull()
     host.setAttribute("collapsed", "")
     await ElementFixture.settle()
-    // collapsed:  a group's page a slight step in from the group's icon (Owen, I20)
-    const step = startOf("Explore") - startOf("Design")
-    expect(step).toBeGreaterThan(2)
-    expect(step).toBeLessThan(10)
+    // collapsed:  no step in, the same room on both sides, each icon centred in its row (Owen, I31)
+    for (const title of ["Design", "Explore"]) {
+      const style = getComputedStyle(rowOf(title))
+      expect(style.paddingInlineStart).toBe(style.paddingInlineEnd)
+      const box = rowOf(title).getBoundingClientRect()
+      // the icon as drawn:  `<ui-icon>`'s own box takes no room
+      const iconHost =
+        row(host, title).shadowRoot!.querySelector(".icon") ?? row(host, title).querySelector('[slot="icon"]')!
+      const icon = (iconHost.shadowRoot?.querySelector(".icon") ?? iconHost).getBoundingClientRect()
+      expect(icon.width).toBeGreaterThan(0)
+      expect(Math.abs(icon.left - box.left - (box.right - icon.right))).toBeLessThan(1)
+    }
     const runRow = row(host, "Run").shadowRoot!.querySelector('[part~="row"]')!
     expect(getComputedStyle(runRow).backgroundImage).toContain("gradient")
     expect(getComputedStyle(row(host, "Design").shadowRoot!.querySelector('[part~="row"]')!).backgroundImage).toBe(

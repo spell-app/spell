@@ -38,9 +38,11 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *       <div class="body">
  *         <ui-button part="menu-button">                              (narrow, with no `<ui-site-nav-button>`)
  *         <div part="menu"> <slot name="menu"> </div>                   (flush against the drawer)
- *         <div part="page-menu"> <slot name="page-menu"> </div>
- *         <div class="row">  left | page (the default slot) | right  </div>
- *         <div part="footer"> <slot name="footer"> </div>
+ *         <div class="under-menu">                                      (the drawer's line at its start)
+ *           <div part="page-menu"> <slot name="page-menu"> </div>
+ *           <div class="row">  left | page (the default slot) | right  </div>
+ *           <div part="footer"> <slot name="footer"> </div>
+ *         </div>
  *       </div>
  *     </div>
  *
@@ -49,11 +51,12 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *     what's slotted brings its own (the navigation's `<nav>`).
  *   - At least as tall as the box it's in (`min-height: 100%`), the drawer running from top to bottom.
  * - A slot with nothing in it isn't drawn:  no column, no row, no gap.
- * - The page is a font size in from the drawer;  the menu's row is flush against it, the drawer's line their only
- *   edge.
+ * - The page is a font size in from the drawer;  the menu's row is flush against it, on the drawer's fill:
+ *   - so the drawer and the menu read as one surface, the bar beside the drawer's top with no line between them
+ *   - the drawer's line starts under the menu, the menu's own line turning into it (epic `mockup` I25)
  * - `drawer="compact"`:  the drawer shows only its icons, as the layout sets `collapsed` on each `<ui-site-nav>` in it.
- *   - The pointer resting on it (`--ui-hover-delay`), or the keyboard's focus coming into it, opens it over the page,
- *     all of it, without pushing the page:  its column keeps its width.  Leaving it closes it.
+ *   - The pointer resting on it a moment (0.1s), or the keyboard's focus coming into it, opens it over the page,
+ *     all of it, without pushing the page:  its column keeps its width.  Leaving it closes it, a moment later.
  *   - It grows out from the column's edge and shrinks back into it;  switched to all of it and back, the column
  *     widens and narrows (`UIPageLayout.css`, "Motion").
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the start
@@ -187,7 +190,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   // ## Opening the compact drawer
   ////////////////
 
-  /** The wait before the pointer resting on the compact drawer opens it, while one runs. */
+  /** The wait before the pointer on the compact drawer opens it, or off it closes it, while one runs. */
   private peekTimer: ReturnType<typeof E.after> | undefined
 
   /** The compact drawer's column width, kept while it's open over the page:  so the page doesn't move. */
@@ -199,21 +202,31 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   /** Stop waiting the frame `toggleDrawer()` waits before widening, while one runs. */
   private cancelWidening: (() => void) | undefined
 
-  /** The pointer came onto the compact drawer:  open it after the page's hover delay (`--ui-hover-delay`). */
+  /**
+   * The pointer came onto the compact drawer:  open it after a moment (`OPEN_DELAY`), or stay open.
+   * - Not the page's hover delay (`--ui-hover-delay`, 800ms) for pop-ups:  the drawer is where the pointer goes on
+   *   purpose, and waiting that long for it read as broken (epic `mockup` I26).
+   */
   private onDrawerEnter(event: PointerEvent) {
-    if (!this.isCompact || this.isNarrow || this.isOpen || event.pointerType === "touch") return
+    if (!this.isCompact || this.isNarrow || event.pointerType === "touch") return
     this.peekTimer?.cancel()
-    this.peekTimer = E.after(UIPageLayout.hoverDelayOf(this.domElement), () => this.peek())
+    if (!this.isOpen) this.peekTimer = E.after(OPEN_DELAY, () => this.peek())
   }
 
-  /** The pointer left the drawer:  close it, or stop waiting to open it. */
+  /** The pointer left the drawer:  stop waiting to open it, or close it after a moment (`CLOSE_DELAY`). */
   private onDrawerLeave() {
     this.peekTimer?.cancel()
+    if (this.isCompact && !this.isNarrow && this.isOpen) this.peekTimer = E.after(CLOSE_DELAY, () => this.unpeek())
+  }
+
+  /** Close the compact drawer opened over the page. */
+  private unpeek() {
     if (this.isCompact && !this.isNarrow) this.isOpen = false
   }
 
   /** The keyboard's focus came into the compact drawer:  open it at once. */
   private onDrawerFocusIn() {
+    this.peekTimer?.cancel()
     if (this.isCompact && !this.isNarrow && !this.isOpen) this.peek()
   }
 
@@ -344,15 +357,17 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
             />
           </Show>
           {this.region("menu")}
-          {this.region("page-menu")}
-          <div class={ROW}>
-            {this.region("left")}
-            <div class={PAGE} part={this.partForName("page")}>
-              <slot />
+          <div class={UNDER_MENU}>
+            {this.region("page-menu")}
+            <div class={ROW}>
+              {this.region("left")}
+              <div class={PAGE} part={this.partForName("page")}>
+                <slot />
+              </div>
+              {this.region("right")}
             </div>
-            {this.region("right")}
+            {this.region("footer")}
           </div>
-          {this.region("footer")}
         </div>
       </div>
     )
@@ -367,23 +382,6 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
         </div>
       </Show>
     )
-  }
-
-  ////////////////
-  // ## Helpers
-  ////////////////
-
-  /**
-   * How long, in seconds, the pointer rests on the drawer before it opens:  the page's `--ui-hover-delay` (`800ms`,
-   * `2s`), as every hover pop-up waits.
-   * - REFACTOR:  the third reader of the token (`UIPopup.hoverDelay`, `DataTooltips`' `delayOf()`):
-   *   one `hoverDelayOf(element)` in `spell/ui/util` for all three.
-   */
-  private static hoverDelayOf(element: Element): number {
-    const value = getComputedStyle(element).getPropertyValue(HOVER_DELAY_TOKEN).trim()
-    const seconds = parseFloat(value)
-    if (Number.isNaN(seconds)) return 0
-    return value.endsWith("ms") ? seconds / 1000 : seconds
   }
 }
 
@@ -412,8 +410,14 @@ const NAV_BUTTON = "ui-site-nav-button"
 /** The private custom property holding the compact column's kept width (`UIPageLayout.css`). */
 const COMPACT_WIDTH = "--_page-layout-compact-width"
 
-/** The page's hover delay (`styles.en.ts`'s `hoverDelay`). */
-const HOVER_DELAY_TOKEN = "--ui-hover-delay"
+/**
+ * How long, in seconds, the pointer rests on the compact drawer before it opens:  long enough that passing over it
+ * on the way somewhere else doesn't open it, short enough to feel at once.
+ */
+const OPEN_DELAY = 0.1
+
+/** How long, in seconds, the pointer is off the open compact drawer before it closes:  a slip off its edge doesn't. */
+const CLOSE_DELAY = 0.15
 
 /** The drawer's column's `position` while it's slid over a narrow page. */
 const ABSOLUTE = "absolute"
@@ -423,6 +427,7 @@ const LAYOUT = "layout"
 const DRAWER = "drawer"
 const DRAWER_BOX = "drawer-box"
 const BODY = "body"
+const UNDER_MENU = "under-menu"
 const ROW = "row"
 const PAGE = "page"
 const MENU_BUTTON = "menu-button"

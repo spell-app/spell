@@ -26,8 +26,16 @@
   .ui.header.menu > .middle {
     flex: 0 0 auto;
   }
+  /* its end as far in from the bar's end as its start's first item's icon is from its start:  an item's room
+     (`--ui-menu-item-padding`'s inline half), for what isn't an item there (a button, an avatar;  epic `mockup` I27);
+     an item there takes it back (below) */
   .ui.header.menu > .end {
     justify-content: flex-end;
+  }
+  /* (a box, not padding:  padding would widen the end past the start, and the middle off the bar's centre) */
+  .ui.header.menu > .end::after {
+    content: "";
+    flex: 0 0 1.14286em;
   }
   /* no hairlines between its items:  the sections and their own spacing set them apart (epic `mockup` I22) */
   .ui.header.menu {
@@ -45,5 +53,10 @@
      - its own items only:  a sub-menu's items adopt the sub-menu's sheets, not these */
   :host(:state(in-menu)) > .item {
     padding-block: 0;
+  }
+  /* ... its end's last item has room of its own:  it takes back the end's (above), flush with the bar's end as the
+     start's first item is with its start */
+  :host(:state(in-menu)[slot="end"]:last-child) > .item {
+    margin-inline-end: -1.14286em;
   }
 }

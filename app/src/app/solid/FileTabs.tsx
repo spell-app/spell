@@ -81,7 +81,7 @@ export function FileTabs() {
       if (!it || !loaded) return
       it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
       it.hideWords = words.hide
-      it.hide = () => CodeShown.set(editor.project?.path, false)
+      it.hideTheCode = () => CodeShown.set(editor.project?.path, false)
       const File = loaded.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
       it.files.items = files.map((each) => {
@@ -271,8 +271,8 @@ type FileTabBar = EditorThing<
     rememberAs: string
     /** The ✕'s tooltip:  "Hide the code", in the page's language. */
     hideWords: string
-    /** Spell's `hide it`, the ✕ at the bar's far right:  the code's column hides (`CodeShown`). */
-    hide: () => void
+    /** Spell's `hide the code`, the ✕ at the bar's far right:  the code's column hides (`CodeShown`). */
+    hideTheCode: () => void
   }
 >
 

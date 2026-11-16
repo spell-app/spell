@@ -28,6 +28,7 @@
  *   | declaration   | a group, a word     | a white pill:  what a person typed             | `.bubbly-input`     | `a "pile" is ...` |
  *   | blank         | a group             | dotted underline in its pill, its kind bold    | `.bubbly-underline` | `to play a card`  |
  *   | name          | a group, a word     | bold                                           | `.bubbly-reference` | `it is droppable` |
+ *   | choice        | a group             | a bold pill for each value                     | `.bubbly-choice`    | `one of ace, 2`   |
  *   | value         | the rule, its groups| one dotted underline, outermost only           | `.bubbly-underline` | `each card in it` |
  *   | question      | the rule            | one dotted underline, with what it asks of     | `.bubbly-underline` | `it is face up`   |
  *   | action call   | the rule            | one dotted underline, whole                    | `.bubbly-underline` | `reset the stock` |
@@ -260,12 +261,12 @@
     --bubbly-code-brace-ink: color-mix(in srgb, var(--bubbly-expression-ink) 62%, var(--bubbly-expression-pill));
   }
 
-  /* a group:  its parent's hue, 10% darker (Owen) */
+  /* a group:  its parent's hue, half as strong in light, fainter in dark, so it stands apart from its parent's band (Owen, I119) */
   .bubbly-group {
     --bubbly-hue: inherit;
     --bubbly-pill: light-dark(
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+      color-mix(in srgb, var(--bubbly-hue) 13%, white),
+      color-mix(in srgb, var(--bubbly-hue) 20%, var(--bubbly-paper-dark))
     );
   }
 
@@ -1455,6 +1456,13 @@
     .cm-line .bubbly-mark.bubbly-brace {
       color: var(--bubbly-brace-ink);
     }
+    /*
+     * ... but a code pill's own, part of it:  its light words' ink, faded toward the pill, as on the page;
+     * the paper's dark brace ink was lost on the pill (I127)
+     */
+    .cm-line .bubbly-mark.bubbly-code-brace {
+      color: var(--bubbly-code-brace-ink);
+    }
     /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
     .cm-line .bubbly-expression {
       --bubbly-ink: var(--bubbly-expression-ink);
@@ -1732,6 +1740,14 @@
     &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
       background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
     }
+    /*
+     * ... and a character with a mark drawn over it stays see-through in it:  a tag's `<`, `>` and `/`, a description's
+     * `--`;  the browser's own selection drew them again in its colour, beside their marks (I115)
+     */
+    .cm-line :is(.bubbly-angle, .bubbly-closing-slash, .bubbly-end-slash, .bubbly-dash)::selection {
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
 
     /****** a declaration's head:  its band ******/
     .cmb-hue {
@@ -1755,8 +1771,8 @@
     }
     .bubbly-group.cmb-hue {
       --bubbly-pill: light-dark(
-        color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
-        color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+        color-mix(in srgb, var(--bubbly-hue) 13%, white),
+        color-mix(in srgb, var(--bubbly-hue) 20%, var(--bubbly-paper-dark))
       );
     }
     .cmb-band {
@@ -1785,7 +1801,7 @@
       margin-left: calc(-1 * (var(--cmb-band-inset) + var(--cmb-indent)));
       padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
     }
-    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line */
+    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line, round its inside corner */
 
     .cmb-band-open {
       border-bottom-left-radius: 0;
@@ -1796,8 +1812,37 @@
       left: 0;
       top: 100%;
       width: var(--cmb-rail);
-      height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
+      /* ... through the rows a description takes under it (`.cmb-head-description-below`) */
+      height: calc(
+        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px + var(--cmb-description-rows, 0) *
+          var(--cmb-line-height)
+      );
       background: var(--bubbly-pill);
+    }
+    /*
+     * ... and its inside corner, where the band's bottom meets its rail, curving from one into the other:  the page's
+     * body's top corner (`--bubbly-inner-top`) at the editor's size (11.25px), as Monaco drew it (I117);
+     * under the text and the bands below, which it reaches into
+     * - a tag's band has its own, cut at a tag's slant (`.cmb-tag-band.cmb-band-open::after`)
+     */
+    --cmb-inner-top: calc(var(--bubbly-inner-top) * var(--bubbly-editor-scale));
+    .cmb-band-open:not(.cmb-tag-band)::before {
+      content: "";
+      position: absolute;
+      left: var(--cmb-rail);
+      top: 100%;
+      z-index: -1;
+      width: var(--cmb-inner-top);
+      height: var(--cmb-inner-top);
+      background: radial-gradient(
+        circle at 100% 100%,
+        transparent calc(var(--cmb-inner-top) - 0.5px),
+        var(--bubbly-pill) var(--cmb-inner-top)
+      );
+    }
+    /* ... but none over a group right under it:  its band, hung on this rail, would show the curve as a stray bubble (I119) */
+    .cmb-band-opens-group::before {
+      content: none;
     }
 
     /*
@@ -1817,17 +1862,43 @@
       /*
        * so the band on the next line is the page's line gap below the foot;  on whole pixels, so every line under it
        * starts on one and its words sit as on the lines above (they're placed on whole pixels;  it was 5.03px, I114)
+       * - the last of a stack of feet under one line:  the rows above it in the stack (`--cmb-foot-drops-above`, in
+       *   tabs) and it, together, on whole pixels (I125)
        */
-      height: round(
-        calc(
-          var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) * var(--bubbly-editor-scale) -
-            var(--cmb-band-margin)
-        ),
-        1px
+      --cmb-foot-above: calc(var(--cmb-foot-drops-above, 0) * var(--cmb-indent));
+      height: calc(
+        round(
+            calc(
+              var(--cmb-foot-above) + var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) *
+                var(--bubbly-editor-scale) - var(--cmb-band-margin)
+            ),
+            1px
+          ) -
+          var(--cmb-foot-above)
       );
       background-image: var(--cmb-rails, none);
       background-size: var(--cmb-rail-sizes, auto);
       background-repeat: no-repeat;
+    }
+    /*
+     * ... one with a foot under it, a block round it ending on the same line:  as tall as their rails are apart across
+     * (`--cmb-foot-drop-tabs`), so that one's foot is as far below this one as its rail is left of it (Owen, 2026-11-11;
+     * Monaco's and the drawn-bubbly page's stack, I125)
+     */
+    .cmb-foot-row.cmb-foot-over {
+      height: calc(var(--cmb-foot-drop-tabs) * var(--cmb-indent));
+    }
+    /*
+     * ... the last one, right above a band:  room under its foot, so the two blocks stand apart, the rails round them
+     * running on through it (Owen:  "add some space between the pill blocks";  T141)
+     * - `--cmb-block-gap`:  a blank line's height on the page at the editor's size, on whole pixels (8px), so the
+     *   lines under it start on one
+     */
+    --cmb-block-gap: round(calc(var(--bubbly-gap-height) * var(--bubbly-editor-scale)), 1px);
+    .cmb-foot-row.cmb-foot-above-band {
+      /* on top of its height (the page's sizing counts padding in it) */
+      box-sizing: content-box;
+      padding-bottom: var(--cmb-block-gap);
     }
     .cmb-foot {
       position: absolute;
@@ -1875,6 +1946,66 @@
     }
     .cmb-description {
       float: right;
+      /* too wide for the room beside the head's words:  wrapped, under them */
+      white-space: pre-wrap;
+    }
+    /*
+     * ... one that doesn't fit there:  in rows of its own under the head, its words under the head's, wrapped,
+     * each row a line's height, so nothing below is drawn over (`DescriptionRoom`, which measures them;  I120)
+     * - `--cmb-description-rows`:  how many it takes
+     * - as wide as its words, so `DescriptionRoom` can tell when a wider editor has room for it at the band's end again
+     */
+    .cm-line.cmb-head-description-below {
+      padding-bottom: calc(var(--cmb-description-rows) * var(--cmb-line-height));
+      --cmb-description-left: calc(var(--cmb-band-inset) + var(--cmb-indent));
+      .cmb-band-hung {
+        --cmb-description-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
+      }
+      .cmb-description {
+        position: absolute;
+        /* the top of the row under the head */
+        top: calc(var(--cmb-line-height) - var(--cmb-band-margin));
+        left: var(--cmb-description-left);
+        float: none;
+        width: max-content;
+        max-width: calc(100% - var(--cmb-description-left) - 14px);
+        line-height: var(--cmb-line-height);
+      }
+    }
+
+    /****** a folded block (I116):  its head alone, a pill, the fold's `…` in its right end, a click there unfolds it ******/
+
+    /* room for the `…` at the band's end, as wide as it is (`--cmb-fold-more`), half the band's own end after it */
+    --cmb-fold-more: 1.1em;
+    --cmb-fold-end: calc(var(--bubbly-pill-pad-right) / 2);
+    .cmb-band-folded {
+      padding-right: calc(var(--cmb-fold-end) + var(--cmb-fold-more));
+    }
+    .cmb-band-described.cmb-band-folded {
+      padding-right: calc(14px + var(--cmb-fold-more));
+    }
+    /* ... the `…` drawn in that room, on the band's line, over it */
+    .cmb-band-folded ~ .cmb-fold-more {
+      position: relative;
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: top;
+      width: var(--cmb-fold-more);
+      height: var(--bubbly-pill-height);
+      margin-top: var(--cmb-band-margin);
+      margin-left: calc(-1 * (var(--cmb-fold-more) + var(--cmb-fold-end)));
+      padding: 0 0 calc(2 * var(--cmb-words-lift));
+      line-height: calc(var(--bubbly-pill-height) - 2 * var(--cmb-words-lift));
+      text-align: center;
+    }
+    .cmb-band-described.cmb-band-folded ~ .cmb-fold-more {
+      margin-left: calc(-1 * (var(--cmb-fold-more) + 14px));
+    }
+    /* a tag's band keeps its `⟩` in its point:  the `…` just after it, on its line */
+    .cmb-tag-band.cmb-band-folded ~ .cmb-fold-more {
+      width: auto;
+      margin-left: 0;
+      padding-inline: 4px;
     }
 
     /****** HTML's tags (`CodeMirrorMarkup`):  pills and bands, their ends pointed, as the page draws them ******/
@@ -1905,7 +2036,12 @@
       margin-top: var(--cmb-band-margin);
       padding-inline: var(--bubbly-bracket-pad);
       background: var(--bubbly-pill);
-      border-radius: var(--bubbly-tag-corner);
+      /*
+       * each end a point at a tag's slant, its tip half way down:  each corner `--bubbly-tag-point` across and half the
+       * pill down (I118);  `--bubbly-tag-corner` itself is a corner's two radii, so as the shorthand's two values it made
+       * the top-right and bottom-left corners 10.78px each way and the others 6.68px:  45° ends, the tip 2px low
+       */
+      border-radius: var(--bubbly-tag-point) / calc(var(--bubbly-pill-height) / 2);
       corner-shape: bevel;
       white-space: pre;
     }
@@ -1990,17 +2126,26 @@
     .cmb-tag-link > :is(.cmb-tag-pill, .cmb-tag-band) {
       margin-top: 0;
     }
+    /*
+     * ... but code alone between its tags, `<text>{its picture}</text>`:  the line and the code are one stretch, so
+     * one mark, and the code keeps its inverted pill;  without it its light words were on the paper (I126)
+     */
+    .cmb-tag-link.bubbly-expression {
+      padding-inline: var(--bubbly-code-pad);
+      border-radius: var(--bubbly-input-radius);
+      corner-shape: round;
+      background: var(--bubbly-expression-pill);
+    }
+    /*
+     * ... reaching out of its box to each tag's point:  past the room beside that tag, then under its point
+     * - a tag at its end too (`<number "score" />` before `</>`):  that tag's room after it is outside the box as well,
+     *   so the lines reach one room further, to the end tag's point (they stopped 2.34px short of it, a notch;  I118)
+     */
+    --cmb-tag-room: calc((var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale));
     .cmb-tag-link::before {
       content: "";
       position: absolute;
-      inset: 0
-        calc(
-          -1 *
-            (
-              (var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale) +
-                var(--bubbly-tag-point)
-            )
-        );
+      inset: 0 calc(-1 * (var(--cmb-tag-room) + var(--bubbly-tag-point)));
       z-index: -1;
       background:
         linear-gradient(var(--bubbly-pill) 0 0) top / 100%
@@ -2008,69 +2153,94 @@
         linear-gradient(var(--bubbly-pill) 0 0) bottom / 100%
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat;
     }
+    .cmb-tag-link:has(> .cmb-tag-pill:last-child)::before {
+      right: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
+    }
+    .cmb-tag-link:has(> .cmb-tag-pill:first-child)::before {
+      left: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
+    }
     /* spacers, injected beside HTML's tags (`CodeMirrorMarkup`):  their widths the shared rules' */
     .bubbly-spacer {
       display: inline-block;
     }
     /*
+     * a quoted value's `"`, shown as its curly mark (`QuoteWidget`, in `CodeMirrorMarkup`):  the mark is the editor's
+     * own text, in place of the `"`, so nothing see-through is left to come back when it's selected (I115)
+     * - Times' bold curly quotes at the editor's size, leaning with the band;  their colour 10% darker than the
+     *   other marks, as an `=`'s (`.bubbly-quote-mark::after`, the drawn-bubbly page's)
+     */
+    .cm-line .cmb-quote {
+      display: inline-block;
+      width: 0;
+    }
+    .cm-line .cmb-quote-glyph {
+      position: absolute;
+      color: color-mix(in oklab, color-mix(in srgb, var(--bubbly-ink) 33%, var(--bubbly-input)), black 10%);
+      font-family: var(--bubbly-quote-font);
+      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
+      font-weight: 700;
+      transform: rotate(var(--bubbly-quote-rotation));
+      pointer-events: none;
+    }
+    /*
      * a quoted input's curly marks on a Spell band, as Monaco drew them (I114:  "Curlies lost their curl", "comma too
-     * faint"):  at the editor's size, outside its white, where Monaco's `"` was, a gap and half a `"` from it;
+     * faint"):  outside its white, where Monaco's `"` was, a gap and half a `"` from it;
      * the opening one high and centred there, the closing one low and tucked in, clear of a comma after it
-     * - placed from the white, their `"` no wider than nothing inside it;  they were a size bigger, the closing one
+     * - placed from the white (each mark's box takes no room in it);  they were a size bigger, the closing one
      *   right over the comma
      */
     --cmb-quote-reach: calc(var(--bubbly-input-gap) * var(--bubbly-editor-scale) + 0.23em);
-    .cm-line .bubbly-quoted > .bubbly-quote-mark::after {
-      right: auto;
-      bottom: auto;
+    /* ... CodeMirror's 1em marks beside each, no height:  on the baseline they lifted the white 1px */
+    .cm-line .bubbly-quoted > .cm-widgetBuffer {
+      height: 0;
+    }
+    .cm-line .bubbly-quoted > .cmb-quote > .cmb-quote-glyph {
       /* from the top of the white, on a line as tall as the editor's, as Monaco's were on theirs */
       top: calc(-0.1em - 0.18px);
       line-height: var(--cmb-line-height);
-      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
     }
-    .cm-line .bubbly-quoted > .bubbly-quote-open::after {
+    .cm-line .bubbly-quoted > .cmb-quote-open > .cmb-quote-glyph {
       left: calc(-1 * var(--cmb-quote-reach));
       translate: -50% 0;
     }
-    .cm-line .bubbly-quoted > .bubbly-quote-close::after {
+    .cm-line .bubbly-quoted > .cmb-quote-close > .cmb-quote-glyph {
       left: calc(100% + var(--cmb-quote-reach));
       top: calc(0.25em - 0.18px);
       translate: -85% 0;
     }
     /*
-     * a tag's quoted value's marks:  the file's `"` keeps its width,
-     * its curly mark drawn over it;  a Spell pill's own quoted marks are the page's
+     * a tag's quoted value's marks:  each mark's box as wide as the `"` it shows (0.4625em, the editor's `"`),
+     * its top at the text's, its curly mark over its middle, leaning more
      */
-    .cm-line .bubbly-tag-quote {
+    .cm-line .cmb-tag-quote {
+      --bubbly-quote-rotation: 30deg;
       position: relative;
-      display: inline;
+      width: 0.4625em;
+      height: 0;
+      vertical-align: text-top;
     }
     /*
      * a value in a tag close after its opening quote mark, as Monaco's (I114):  at the white's usual 2px gap, the mark
      * stood 1.5px further from it than Monaco's
      */
-    .cm-line .bubbly-quote-open + .bubbly-input-spacer + .bubbly-input,
-    .cm-line .bubbly-quote-open + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input {
+    .cm-line .cmb-quote-open + .bubbly-input-spacer + .bubbly-input,
+    .cm-line .cmb-quote-open + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input,
+    .cm-line .cmb-quote-open + .cm-widgetBuffer + .bubbly-input-spacer + .bubbly-input,
+    .cm-line .cmb-quote-open + .cm-widgetBuffer + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input {
       margin-left: 0.5px;
     }
-    .cm-line .bubbly-tag-quote::after {
+    .cm-line .cmb-tag-quote > .cmb-quote-glyph {
       left: 50%;
-      right: auto;
-      bottom: auto;
       top: 0;
       line-height: inherit;
       translate: -50% 0;
-      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
     }
-    .cm-line .bubbly-tag-quote.bubbly-quote-open::after {
+    .cm-line .cmb-tag-quote.cmb-quote-open > .cmb-quote-glyph {
       translate: -75% -0.3em;
     }
-    .cm-line .bubbly-tag-quote.bubbly-quote-close::after {
+    .cm-line .cmb-tag-quote.cmb-quote-close > .cmb-quote-glyph {
       top: 0.25em;
       translate: -85% 0;
-    }
-    .bubbly-tag-quote {
-      --bubbly-quote-rotation: 30deg;
     }
     /*
      * ... but either side of an input, a tag's value, and before a block's tags:  the pill's or band's own padding is

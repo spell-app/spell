@@ -845,6 +845,9 @@ galaxy guide is a site at "owen@spell/galaxy"
 - `:film` is the film page's own property (`it has a film`):  the address fills it with that film.
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
+- A site wears a theme, named on its line:  `galaxy guide is a site with theme "mockup"`.
+  - Its line takes its own values the way a type's does, several joined by commas.
+  - `its "theme" is "mockup"`, under the site, says the same.
 - A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
 
 ```spell

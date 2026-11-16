@@ -177,6 +177,10 @@ describe("inspecting", () => {
     // nothing selected:  the tip, and the inspect button in the card's header (I60;  kept, T78)
     expect(host.querySelector(".InspectorTip")).not.toBeNull()
     expect(host.querySelector('.InspectorCard [slot="actions"] .InspectAppButton')).not.toBeNull()
+    // the top bar's look:  Spell UI's circular item, in a header's segmented menu of its own (T91)
+    expect(
+      host.querySelector('.InspectorCard ui-menu.InspectAppMenu > ui-item.InspectAppButton[appearance="circular"]')
+    ).not.toBeNull()
 
     Inspector.select(area.querySelector("ui-input")!)
     flush()
@@ -362,7 +366,7 @@ describe("the cards", () => {
     // no card is hidden on its own:  the one ✕ is the top card's Close, right of Inspect app, which hides the column (I186)
     const closes = host.querySelectorAll<HTMLElement>(".InspectorCard ui-icon[name=close]")
     expect(closes).toHaveLength(1)
-    expect(closes[0]!.matches('[data-panel="properties"] [slot="actions"] .InspectAppButton ~ .InspectorClose')).toBe(
+    expect(closes[0]!.matches('[data-panel="properties"] [slot="actions"] .InspectAppMenu ~ .InspectorClose')).toBe(
       true
     )
     // closed by it, then opened again:  every card, the folded one still folded

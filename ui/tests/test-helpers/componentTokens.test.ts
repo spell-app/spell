@@ -58,6 +58,10 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-header-margin-bottom": "its heading shares the head row with the toggle:  the nested header's own margins go",
     "--ui-menu-margin": "its menus of links stack flush, a section's entries under its title"
   },
+  "ui-page-layout/UIPageLayout.css": {
+    "--ui-menu-header-bar-background":
+      "the menu beside the drawer's top takes the drawer's fill:  the two read as one surface (epic `mockup` I25)"
+  },
   "ui-zoom/UIZoom.css": {
     "--ui-modal-dimmer-background":
       "a zoom's backdrop is dark whatever the page's theme (its own `--ui-zoom-backdrop`):  it sets its modal's dimmer"

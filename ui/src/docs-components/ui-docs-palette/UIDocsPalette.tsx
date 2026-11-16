@@ -17,7 +17,7 @@ import paletteCSS from "./UIDocsPalette.css?inline"
  *   shows it as the palette does:  `ComponentDefinitions.paletteGroups()`, so a component the table doesn't name
  *   shows where the palette would put it.
  * - Drag a component to another group or place;  drag a group by its handle;  rename a group in its field;
- *   add one, or remove one (its components go to Not in the palette).
+ *   pick its icon (the editor's pinned Add bar shows it, epic `editor` T86);  add one, or remove one (its components go to Not in the palette).
  * - The last column, Not in the palette, holds every other component:  drag one into a group to offer it.
  * - Save writes the table back (`PUT`, with the page server's token):  the editor's palette shows it on its next load.
  * - Reads `ComponentDefinitions` itself, a lazy chunk on this page alone:  the palette's own rule, never a copy of it.
@@ -35,8 +35,9 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
   ////////////////
 
   /** The palette's rules, once loaded:  `ComponentDefinitions`. */
-  @E.state accessor definitions: typeof import("spell/ui/components/ComponentDefinitions").ComponentDefinitions | undefined =
-    undefined
+  @E.state accessor definitions:
+    | typeof import("spell/ui/components/ComponentDefinitions").ComponentDefinitions
+    | undefined = undefined
 
   /** The groups as edited, in order. */
   @E.state accessor groups: readonly EditedGroup[] = []
@@ -66,9 +67,10 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
       ])
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
       const table = (await response.json()) as PaletteTable
-      const groups = ComponentDefinitions.paletteGroups(table).map(({ topic, title, parts }) => ({
+      const groups = ComponentDefinitions.paletteGroups(table).map(({ topic, title, icon, parts }) => ({
         topic,
         title,
+        icon,
         tags: parts.map((definition) => definition.tag)
       }))
       const placed = new Set(groups.flatMap((group) => group.tags))
@@ -95,9 +97,10 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
       definitions.paletteGroupsByTopic().flatMap(({ parts }) => parts.map((definition) => definition.tag))
     )
     const table: PaletteTable = {
-      groups: this.groups.map(({ topic, title, tags }) => ({
+      groups: this.groups.map(({ topic, title, icon, tags }) => ({
         ...(topic && { topic }),
         ...(title && { title }),
+        ...(icon && { icon }),
         tags: [...tags]
       })),
       hidden: this.notOffered.filter((tag) => offeredByRule.has(tag))
@@ -145,6 +148,15 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
     const title = words && words.toLowerCase() !== topicWord?.toLowerCase() ? words : undefined
     if (title === group.title || (!title && !group.topic)) return
     this.groups = this.groups.map((each, index) => (index === at ? { ...each, title } : each))
+    this.changed()
+  }
+
+  /** Group `at`'s icon is now `icon`:  none when empty. */
+  @E.untracked
+  private setIcon(at: number, icon: string): void {
+    const group = this.groups[at]
+    if (!group || (group.icon ?? "") === icon) return
+    this.groups = this.groups.map((each, index) => (index === at ? { ...each, icon: icon || undefined } : each))
     this.changed()
   }
 
@@ -359,6 +371,14 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
           >
             <ui-icon name="grip vertical" aria-hidden="true"></ui-icon>
           </span>
+          <ui-icon-picker
+            class="icon"
+            size="small"
+            value={group().icon ?? ""}
+            aria-label={this.text("groupIcon", { group: name() })}
+            title={this.text("groupIcon", { group: name() })}
+            on-ui-changed={(event: CustomEvent<{ value: string }>) => this.setIcon(at, event.detail.value)}
+          ></ui-icon-picker>
           <ui-input
             class="name"
             size="small"
@@ -411,7 +431,12 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
 export interface UIDocsPalette extends E.AttributeValues<DocsPaletteVocabulary> {}
 
 /** One group as it's edited:  its topic or title, and its tags in order. */
-type EditedGroup = { readonly topic?: PaletteTable["groups"][number]["topic"]; title?: string; tags: string[] }
+type EditedGroup = {
+  readonly topic?: PaletteTable["groups"][number]["topic"]
+  title?: string
+  icon?: string
+  tags: string[]
+}
 
 /** How the table's load or save went. */
 type Status = "loading" | "noServer" | "ready" | "changed" | "saving" | "saved" | "failed"

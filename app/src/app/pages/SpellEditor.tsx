@@ -1,4 +1,4 @@
-import type { RouteSectionProps } from "@solidjs/router"
+import { useBeforeLeave, type BeforeLeaveEventArgs, type RouteSectionProps } from "@solidjs/router"
 import { Match, Show, Switch, createEffect, createSignal, onCleanup, onSettled, untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
@@ -110,14 +110,7 @@ export function SpellEditor(props: { mode: Mode }) {
   const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
   // the Inspector's pane:  never in Run, which is the app alone (Owen, 2026-11-07);  still open for Edit, and a phone's sheet
   const showsInspector = () => Inspector.isOpen && props.mode !== "run"
-  // ... and nothing stays selected in Run:  its ants would sit over the app alone (Owen, 2026-11-07)
-  createEffect(
-    () => props.mode === "run",
-    (isRun) => {
-      // what's selected read as Run starts, not followed:  only the switch to Run lets go
-      if (isRun && untrack(() => Inspector.allSelected.length)) Inspector.letGo()
-    }
-  )
+  // ... and nothing stays selected in Run:  `<ProjectPageRoute>` lets go as the address leaves for it (`letGoForRun()`)
   const columns = rememberedSizes(() => columnsFor(hidesCode(), showsInspector(), !!CodeOutputShown.target))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
@@ -592,7 +585,7 @@ export function EditorToolbar(props: { mode: Mode }) {
         <ModeButtons
           current={props.mode}
           compiled={<CompiledCodeButton />}
-          inspect={<InspectAppButton id={INSPECT_APP_ID} item />}
+          inspect={<InspectAppButton id={INSPECT_APP_ID} />}
           add={<AddPartButton />}
         />
       )
@@ -642,11 +635,32 @@ const INSPECT_APP_ID = "InspectApp"
  * in Run for `/run/`, else in Edit.
  * - ONE route for both:  it stays mounted while only the URL's params change, the page (`edit`, `run`) too,
  *   so switching between Run and Edit, or between files, doesn't redraw the page.
+ * - Nothing stays selected in Run:  its ants would sit over the app alone (Owen, 2026-11-07).
+ *   - So the switch to Run lets go of what's selected, as the address leaves for `/run/` (`letGoForRun()`).
  ****************/
 export function ProjectPageRoute(props: RouteSectionProps) {
   const page = (): EditorPage => (props.params.page === RUN_PAGE ? "runner" : "editor")
   followRoute(() => props.params, page)
+  useBeforeLeave(letGoForRun)
   return <SpellEditor mode={page() === "runner" ? "run" : "edit"} />
+}
+
+/**
+ * Let go of what's selected when the address is leaving for Run (`/run/...`), from any other page.
+ * - In the navigation itself, before the address changes:  the letting go and the new page land together.
+ *   NOT an effect on the mode, which wrote the selection a flush after the address changed,
+ *   so whatever read both ran twice (Solid's `EFFECT_RELAY_TEAR`, epic `editor` I193).
+ * - Back and forward hand over a step count, not an address:  the window's address is already the new one then.
+ */
+function letGoForRun(leave: BeforeLeaveEventArgs): void {
+  const to = typeof leave.to === "string" ? leave.to : location.pathname
+  const leavesForRun = pageIn(to) === RUN_PAGE && pageIn(leave.from.pathname) !== RUN_PAGE
+  if (leavesForRun && untrack(() => Inspector.allSelected.length)) Inspector.letGo()
+}
+
+/** The page word an address starts with:  `run` for `/run/<project>/...`. */
+function pageIn(address: string): string | undefined {
+  return new URL(address, location.href).pathname.split("/")[1]
 }
 
 /**

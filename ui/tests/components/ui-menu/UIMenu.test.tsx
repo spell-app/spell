@@ -1031,3 +1031,27 @@ describe("<ui-menu> in a native form (epic debut J166)", () => {
     expect([...new FormData(form).keys()]).toEqual([])
   })
 })
+
+describe('<ui-item appearance="circular">', () => {
+  it("an icon alone in a circle, as wide as it's tall, its glyph centred;  pressed, the surround round too (epic `editor` T90)", async () => {
+    const box = await ElementFixture.render(
+      `<ui-menu appearance="segmented link header" style="font-size: 13px">
+        <ui-item selected>Run</ui-item>
+        <ui-item icon="crosshairs" appearance="circular" label="Inspect" aria-pressed="true"></ui-item>
+        <ui-item icon="code" label="Code" aria-pressed="false"></ui-item>
+      </ui-menu>`
+    )
+    await ElementFixture.settle()
+    const [, round, plain] = [...box.querySelectorAll<DOMElement>("ui-item")].map((item) =>
+      item.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!
+    )
+    const roundBox = round!.getBoundingClientRect()
+    expect(roundBox.width).toBeCloseTo(roundBox.height, 0)
+    expect(roundBox.width).toBeCloseTo(26, 0)
+    expect(getComputedStyle(round!).borderRadius).toBe("50%")
+    const glyph = round!.querySelector("[part~=icon]")!.getBoundingClientRect()
+    expect(glyph.left + glyph.width / 2).toBeCloseTo(roundBox.left + roundBox.width / 2, 0)
+    // an item without it keeps the menu's corners
+    expect(getComputedStyle(plain!).borderRadius).not.toBe("50%")
+  })
+})

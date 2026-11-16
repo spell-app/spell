@@ -10,6 +10,8 @@ import type { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
 import type { DOMPageLayoutElement, UIPageLayout } from "spell/ui/components/ui-page-layout/UIPageLayout"
 import { siteNavButtonVocabulary } from "./UISiteNavButton.en"
 
+import siteNavButtonCSS from "./UISiteNavButton.css?inline"
+
 /****************
  * ### `<ui-site-nav-button>`
  * The component behind `<ui-site-nav-button>`:  the drawer's button (epic `mockup` T39).
@@ -21,6 +23,7 @@ import { siteNavButtonVocabulary } from "./UISiteNavButton.en"
  * - It IS a `<ui-item>` (it extends `UIItem`):  an app menu draws it as one of its items, as today's top bar's side
  *   bar button.
  *   - Its icon is `columns`, and its name and tooltip its words (`label`), unless the page writes its own.
+ *   - Narrow, the drawer hidden until it slides in:  `bars`, a menu's, and its words for that (`menuLabel`).
  *   - Outside a menu, where an item draws nothing of its own, it's a small basic `<ui-button>` with the same icon.
  * - A click:  the nearest `<ui-page-layout>` around it, across shadow roots, `toggleDrawer()`s.
  *   - So narrow, the drawer slides in and out;  wide, it shows only its icons, or all of it again.
@@ -33,7 +36,7 @@ export class UISiteNavButton extends UIItem {
   @E.proto static vocabulary = siteNavButtonVocabulary as unknown as typeof itemVocabulary
   @E.protoMerged static elementSetup = {
     // the item's own, restated:  its setup is typed as its literal
-    styleSheets: { item: UIItem.elementSetup.styleSheets.item },
+    styleSheets: { item: UIItem.elementSetup.styleSheets.item, "site-nav-button": siteNavButtonCSS },
     isAPart: true,
     disabled: "its own"
   } satisfies Partial<E.ElementSetup>
@@ -67,9 +70,22 @@ export class UISiteNavButton extends UIItem {
   // ## Its look and its name
   ////////////////
 
-  /** Its icon:  its own `icon` attribute, else `columns`.  (A member with an attribute's name wins over it.) */
+  /**
+   * Its icon:  its own `icon` attribute, else `columns` beside a drawer it shows, `bars` while the drawer is hidden at a
+   * narrow width (epic `mockup` I26).  (A member with an attribute's name wins over it.)
+   */
   get icon(): string | undefined {
-    return this.attributes.icon ?? COLUMNS
+    return this.attributes.icon ?? (this.isForHiddenDrawer ? BARS : COLUMNS)
+  }
+
+  /** Is the layout narrow, its drawer slid out of sight until this button slides it in? */
+  private get isForHiddenDrawer(): boolean {
+    return this.layoutComponent?.isNarrow ?? false
+  }
+
+  /** Its words:  for the menu while the drawer is hidden at a narrow width, else for the side bar. */
+  private get words(): string | undefined {
+    return this.translationForKey(this.isForHiddenDrawer ? MENU_LABEL : LABEL)
   }
 
   /** Always a button:  something to press, in any owner. */
@@ -79,13 +95,13 @@ export class UISiteNavButton extends UIItem {
 
   /** What it's called:  the page's `aria-label`, else its words. */
   protected get boxLabel(): string | undefined {
-    return super.boxLabel ?? this.translationForKey(LABEL)
+    return super.boxLabel ?? this.words
   }
 
   /** Its tooltip:  the page's `title`, else its words. */
   protected get boxTooltip(): string | undefined {
     const own = this.attributes.title
-    return own === null ? this.translationForKey(LABEL) : own || undefined
+    return own === null ? this.words : own || undefined
   }
 
   /** Does the layout's drawer show all of it:  its `aria-expanded`. */
@@ -127,12 +143,14 @@ export class UISiteNavButton extends UIItem {
 
 /** Its words' key in its vocabulary's `texts`:  TypeScript knows only the item's, which has none. */
 const LABEL = "label" as never
+const MENU_LABEL = "menuLabel" as never
 
 /** The layout's tag. */
 const PAGE_LAYOUT = "ui-page-layout"
 
-/** Its icon, today's top bar's side bar button's. */
+/** Its icons:  today's top bar's side bar button's;  the menu's, while the drawer is hidden. */
 const COLUMNS = "columns"
+const BARS = "bars"
 
 /** Its look outside a menu:  a small basic button, as the layout's own menu button. */
 const BASIC = "basic"

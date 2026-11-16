@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vite-plus/test"
+import { codeFolding, foldEffect } from "@codemirror/language"
 import { EditorState } from "@codemirror/state"
 
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
@@ -51,7 +52,170 @@ describe("CodeMirrorBubbly", () => {
     const rails = railsOf(CARD, { from, to })
     expect(rails.get('\t\t<card-image rank={its rank} direction="down" />')).toBe(1)
   })
+
+  test("a body opening with a group:  no inside corner under its band, the group's band hung right there (I119)", () => {
+    const text = `calculator is an app
+\tgroup "What It Keeps"
+\tits "input" is text
+\tits "left" is text
+`
+    const marked = marksOf(text)
+    expect(textWith(marked, "cmb-band-opens-group")).toEqual(["calculator is an app"])
+    // a band whose body opens with a line keeps its corner
+    expect(textWith(marked, "cmb-band-opens-group")).not.toContain('group "What It Keeps"')
+  })
+
+  /** A Spell block, a drawing in it, and a tag block in the drawing:  each head folds (`CodeMirrorLanguage.folding()`). */
+  const DRAWN = `a "card" is a view
+\tits "rank" is a number
+\tto draw it
+\t\t<segment inverted>
+\t\t\t<text>Hi</>
+\t\t</>
+`
+
+  test("a folded block:  its head alone, a pill;  its hidden body draws no rail, no foot, nothing (I116)", () => {
+    const state = folded(DRAWN, 1)
+    const shapes = shapesOf(state)
+    expect(shapes.bands).toEqual([{ text: 'a "card" is a view', classes: expect.arrayContaining(["cmb-band-folded"]) }])
+    expect(shapes.bands[0]!.classes).toContain("cmb-band-pill")
+    expect(shapes.bands[0]!.classes).not.toContain("cmb-band-open")
+    expect(shapes.feet).toBe(0)
+    expect(shapes.railedLines).toEqual([])
+  })
+
+  test("a folded tag block:  its start tag a band pointed at both ends;  its parent's rail and foot as for a one-line child (I116)", () => {
+    const shapes = shapesOf(folded(DRAWN, 4))
+    const segment = shapes.tagBands.find((band) => band.text.startsWith("<segment"))!
+    expect(segment.classes).toContain("cmb-band-folded")
+    expect(segment.classes).not.toContain("cmb-band-open")
+    // nothing of its body:  no `<text>` pill, no tiny foot;  the blocks round it keep their feet, the card's and the action's
+    expect(shapes.tagBands.map((band) => band.text)).toEqual(["<segment inverted>"])
+    expect(shapes.tagFeet).toBe(0)
+    expect(shapes.feet).toBe(2)
+    // the line under the action's head is in its rail and the card's, as before
+    expect(shapes.railedLines).toContain("\t\t<segment inverted>")
+  })
+
+  test("bodies ending on one line:  each foot under the one inside it, as far down as their rails are apart across (I125)", () => {
+    const text = `to deal
+\tfor row from 1 to 7
+\t\tif row is 1
+\t\t\tsay row
+\tsay "done"
+`
+    // the `if`'s, then the `for`'s a tab lower;  the action's under its own last line
+    expect(feetOf(text)).toEqual([
+      { line: "\t\t\tsay row", column: 2, partOfSpeech: "control", drop: 1, dropsAbove: 0, ended: [] },
+      { line: "\t\t\tsay row", column: 1, partOfSpeech: "control", drop: 0, dropsAbove: 1, ended: [] },
+      { line: '\tsay "done"', column: 0, partOfSpeech: "action", drop: 0, dropsAbove: 0, ended: [] }
+    ])
+  })
+
+  test("a group ending its type's body:  ONE foot, the group's, its type's rail ending beside it (I125)", () => {
+    const text = `a "card" is a view
+\tgroup "Drawing"
+\tto draw it
+\t\tsay "hi"
+`
+    // the action's foot, then the group's a tab lower, where the card's would be, in the card's rail's hue:
+    // the card's rail (0) ends there
+    expect(feetOf(text)).toEqual([
+      { line: '\t\tsay "hi"', column: 1, partOfSpeech: "action", drop: 1, dropsAbove: 0, ended: [] },
+      { line: '\t\tsay "hi"', column: 0, partOfSpeech: "thing", drop: 0, dropsAbove: 1, ended: [0] }
+    ])
+  })
 })
+
+describe("CodeMirrorBubbly's room between blocks (T141)", () => {
+  test("a foot right above a band has room under it;  not above a plain line, a blank line, or under a band's own body", () => {
+    const text = `a "card" is a view
+\tits "color" is
+\t\tblue if it is face down
+\tits "picture" is
+\t\tsay "hi"
+\tto turn it over
+\t\tif it is face up
+\t\t\tsay "down"
+\t\tsay "flipped"
+
+\tits "rank" is a number
+`
+    expect(feetOf(text).map(({ line, isAboveBand = false }) => ({ line, isAboveBand }))).toEqual([
+      // `its "picture" is` right under it
+      { line: "\t\tblue if it is face down", isAboveBand: true },
+      // `to turn it over` right under it
+      { line: '\t\tsay "hi"', isAboveBand: true },
+      // a plain line under it, then a blank line
+      { line: '\t\t\tsay "down"', isAboveBand: false },
+      { line: '\t\tsay "flipped"', isAboveBand: false },
+      // the end of the file
+      { line: '\tits "rank" is a number', isAboveBand: false }
+    ])
+  })
+})
+
+/**
+ * Each foot `text` draws, in order:  the line it's under, its rail's column, and how its stack is laid out;
+ * `isAboveBand` only when it is.
+ */
+function feetOf(text: string) {
+  const state = EditorState.create({ doc: text })
+  const feet: Array<Record<string, unknown>> = []
+  CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, _to, decoration) => {
+    const spec = decoration.spec as { block?: boolean; widget?: Foot }
+    if (!spec.block || !spec.widget) return
+    const { column, partOfSpeech, drop, dropsAbove, ended, isAboveBand } = spec.widget
+    const foot = { line: state.doc.lineAt(from).text, column, partOfSpeech, drop, dropsAbove, ended: [...ended] }
+    feet.push(isAboveBand ? { ...foot, isAboveBand } : foot)
+  })
+  return feet
+}
+
+/** What a foot's widget says of itself. */
+type Foot = {
+  column: number
+  partOfSpeech: string
+  drop: number
+  dropsAbove: number
+  ended: Set<number>
+  isAboveBand: boolean
+}
+
+/** `text`'s state, the block whose head is on line `line` folded, as a click on its arrow folds it. */
+function folded(text: string, line: number): EditorState {
+  const state = EditorState.create({ doc: text, extensions: codeFolding() })
+  const head = state.doc.line(line)
+  const lines = text.split("\n")
+  // its last line:  the last one further in than its head
+  const indent = (each: string) => each.length - each.trimStart().length
+  let last = line
+  while (last < lines.length && lines[last]!.trim() && indent(lines[last]!) > indent(lines[line - 1]!)) last++
+  // a tag block's end tag too, as the language service folds it
+  if (lines[last]?.trimStart().startsWith("</")) last++
+  return state.update({ effects: foldEffect.of({ from: head.to, to: state.doc.line(last).to }) }).state
+}
+
+/** What `state` draws:  its bands, its tags' bands, its feet, and the lines a rail runs down. */
+function shapesOf(state: EditorState) {
+  const text = state.doc.toString()
+  const bands: Array<{ text: string; classes: string[] }> = []
+  const tagBands: Array<{ text: string; classes: string[] }> = []
+  const railedLines: string[] = []
+  let feet = 0
+  let tagFeet = 0
+  CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, to, decoration) => {
+    const spec = decoration.spec as { class?: string; block?: boolean; attributes?: Record<string, string> }
+    const classes = spec.class?.split(" ") ?? []
+    if (spec.block) feet++
+    else if (from === to && spec.attributes?.style?.startsWith("--cmb-rails"))
+      railedLines.push(state.doc.lineAt(from).text)
+    else if (classes.includes("cmb-band")) bands.push({ text: text.slice(from, to), classes })
+    else if (classes.includes("cmb-tag-band")) tagBands.push({ text: text.slice(from, to), classes })
+    else if (classes.includes("cmb-tag-foot")) tagFeet++
+  })
+  return { bands, tagBands, feet, tagFeet, railedLines }
+}
 
 /** Each mark's classes, by its stretch, and the text it's on;  `slice`:  the lines shown. */
 function marksOf(text: string, slice?: { from: number; to: number }): Array<{ text: string; classes: string[] }> {

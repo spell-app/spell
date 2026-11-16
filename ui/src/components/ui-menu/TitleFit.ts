@@ -112,7 +112,16 @@ export class TitleFit {
     const { rows, others } = this.setup.children()
     this.watch([...rows.flatMap(({ box, title }) => [box, title]), ...others.flatMap(TitleFit.boxesOf)])
     if (!rows.length) return WHOLE
-    const sizes = this.measure(rows, others)
+    const measured = this.measure(rows, others)
+    // HYSTERESIS (epic `editor` I189):  from a smaller stage, the whole look must fit with the room that stage freed
+    // (a toolbar's list button, hidden while it's the dropdown) given back;  else each look's room chose the other,
+    // every frame
+    // asked every time, so the menu can measure what it holds back while it shows
+    const holdBack = Math.max(0, this.setup.holdBack?.() ?? 0)
+    const heldBack = this.answer === WHOLE ? 0 : holdBack
+    const sizes = heldBack
+      ? { ...measured, room: measured.room - heldBack, fitsWhole: measured.needed <= measured.room - heldBack + HAIR }
+      : measured
     if (sizes.fitsWhole) return WHOLE
     const titlesRoom = sizes.room - sizes.fixed.reduce((sum, width) => sum + width, 0)
     if (this.setup.isSegmented()) {
@@ -133,6 +142,7 @@ export class TitleFit {
    * - `fitsWhole`:  every title whole, nothing cut and nothing past the row's end:  the rest needn't be read
    * - `room`:  the row's width for its items, less its padding, its gaps and everything else in it
    *   (with their margins:  once the row is full, an `auto` margin has nothing left to take)
+   * - `needed`:  the items' width, titles whole
    * - `titles`:  each title's natural width;  `fixed`:  the rest of each item (padding, icon, badge), titles whole
    * - `icons`:  each item's width with its icon only
    * - `titleMin`, `itemMin`:  the two minimums, read from the menu's tokens
@@ -164,7 +174,8 @@ export class TitleFit {
       icons = rows.map(({ box: itemBox }) => TitleFit.outerWidthOf(itemBox))
     }
     this.present(this.answer)
-    return { fitsWhole, room, titles, fixed, icons, titleMin, itemMin, scrollMin }
+    const needed = titles.reduce((sum, width, index) => sum + width + fixed[index]!, 0)
+    return { fitsWhole, room, needed, titles, fixed, icons, titleMin, itemMin, scrollMin }
   }
 
   /** Write `answer`'s look:  `--_menu-fit` and `--_menu-title-max` on the box, the stage's `:state()`. */
@@ -349,6 +360,11 @@ export type TitleFitSetup = {
   isSegmented: () => boolean
   /** a segmented menu scrolls while it has `--ui-toolbar-scroll-min`, rather than become a dropdown (`scroll-first`) */
   scrollsFirst?: () => boolean
+  /**
+   * room a smaller stage frees, which the whole look takes back:  a toolbar's list button, hidden while it's the
+   * dropdown;  coming back to whole needs this much more, so the two looks never take turns (epic `editor` I189)
+   */
+  holdBack?: () => number
   /** the stage changed */
   onAnswer: (answer: FitAnswer) => void
 }
@@ -367,6 +383,8 @@ export type IconRow = {
 type FitSizes = {
   fitsWhole: boolean
   room: number
+  /** the items' width, every title whole */
+  needed: number
   titles: number[]
   fixed: number[]
   icons: number[]

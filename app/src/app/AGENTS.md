@@ -168,7 +168,8 @@ and in the app's build folder, `app/` at the app folder's root.
     the look's one sheet, [bubbly.css](components/spell-code/bubbly.css), has the editor's CodeMirror section,
     and nothing of the look is in `codemirror.css`.
     - Spell:  [CodeMirrorBubbly](ui/codemirror/CodeMirrorBubbly.ts), from the parser's `SP.BubblyLayout`;
-      a head's description at its band's right end;  a drawing's tags as HTML's.
+      a head's description at its band's right end, or in rows of its own under the head when it doesn't fit there
+      (`DescriptionRoom`, epic `language` I120);  a drawing's tags as HTML's.
     - HTML, an HTML file's (a property editor page, `Card.editor.html`) and a drawing's tags:
       [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from [MarkupMarks](ui/MarkupMarks.ts), the page's own
       reading of it (`BubblyMarkup`);  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no
@@ -198,6 +199,8 @@ and in the app's build folder, `app/` at the app folder's root.
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
       - the snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
+      - not the blank lines before a group's line:  they're drawn outside the group above, so the caret stays at the
+        margin (epic `language` I121)
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
     - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
@@ -506,6 +509,12 @@ and in the app's build folder, `app/` at the app folder's root.
     groups at least 60px apart (`--spell-bar-group-gap`), icons in a group 12px apart (`--spell-bar-icon-gap`),
     measured between what's drawn.
     A new item takes its place in a group;  never a margin of its own.
+  - A panel's bar (the file tabs, the Inspector's cards) and the palette kept open are the top bar's look (`solid/spell.css`;  epic `editor` T83, I194):
+    the top bar's fill and blur (`--spell-menu-bar-fill`, `-filter`) on a layer under it, over the page itself,
+    as the panel's glass starts under the bar (`--spell-pane-bar-height`, `solid/EditorTheme.css`).
+    - A panel's body is its glass under the code's paper at half strength (`--spell-panel-wash`).
+    - The site editor's board bar wears the top bar's colour repainted, `--spell-menu-bar-background`:
+      the bar's fill over the theme's wallpaper, so it's drawn with `background-attachment: fixed`.
 - Prod builds keep class names (`output.keepNames`, here):
   SEE [parser's AGENTS.md](../../../parser/src/parser/AGENTS.md), `keepNames`.
 

@@ -645,9 +645,10 @@
           "name": "appearance",
           "kind": "multiple",
           "values": [
-            "link"
+            "link",
+            "circular"
           ],
-          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch."
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -18950,9 +18951,10 @@
           "name": "appearance",
           "kind": "multiple",
           "values": [
-            "link"
+            "link",
+            "circular"
           ],
-          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch."
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -37911,9 +37913,10 @@
           "name": "appearance",
           "kind": "multiple",
           "values": [
-            "link"
+            "link",
+            "circular"
           ],
-          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch."
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -38177,6 +38180,11 @@
           "key": "label",
           "text": "Show or hide the side bar",
           "description": "What it's called, its tooltip and its name for a screen reader, without `aria-label`."
+        },
+        {
+          "key": "menuLabel",
+          "text": "Show or hide the menu",
+          "description": "What it's called at a narrow width, where the drawer is hidden until it slides in:  its icon the menu's (`bars`)."
         }
       ],
       "mainTag": "ui-site-nav-button",
@@ -52803,7 +52811,7 @@
         "component groups",
         "palette table"
       ],
-      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
+      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save.",
       "noun": "palette",
       "attributes": [
         {
@@ -53073,6 +53081,11 @@
           "key": "groupName",
           "text": "Group name",
           "description": "The label of a group's name field."
+        },
+        {
+          "key": "groupIcon",
+          "text": "{group}'s icon, in the editor's Add bar",
+          "description": "A group's icon picker;  `{group}` is its name."
         },
         {
           "key": "removeGroup",
@@ -59516,6 +59529,11 @@
           "name": "--ui-menu-capsule-background",
           "default": "oklch(from var(--ui-ink) l c h / 0.06)",
           "type": "color"
+        },
+        {
+          "name": "--ui-menu-circular-item-size",
+          "default": "2em",
+          "type": "length"
         }
       ]
     },

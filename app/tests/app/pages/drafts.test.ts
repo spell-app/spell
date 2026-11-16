@@ -81,11 +81,13 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
 
   test("Publish makes it public, keeps a version, and the draft goes", async () => {
     await edit('"words"', '"text"')
-    // while there's a draft:  Editing a Draft | Discard Draft | Publish Draft beside the modes, and a pen on its tab
-    // (I44, I90, I93, T67)
+    // while there's a draft:  Draft | Discard | Publish beside the modes, and a pen on its tab
+    // (I44, I90, I93, T67, I192);  the label says what a draft is, on hover
     await page.waitForSelector(".PublishDraft", { timeout: 5000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(1)
     expect(await page.locator(".PublishDraft ui-button.DiscardDraft").count()).toBe(1)
+    expect((await page.locator(".PublishDraft .DraftState").textContent())?.trim()).toBe("Draft")
+    expect(await page.locator(".PublishDraft .DraftState").getAttribute("title")).toMatch(/only you see them/)
     await page.locator(".PublishDraft ui-button.Publish").click()
     await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)

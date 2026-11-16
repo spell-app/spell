@@ -165,6 +165,27 @@ describe("<ui-toolbar> bar slots", () => {
       expect(host.matches(":state(overflowing)")).toBe(false)
     })
 
+    it("with `max-visible`, at every width round the scroll room:  one look, never taking turns (epic `editor` I189)", async () => {
+      // the list's button shows while the row scrolls, and hides in the dropdown:  each look's room chose the other
+      for (const width of [190, 200, 210, 220, 230, 240, 250, 260]) {
+        const { host } = await toolbar(width, FILES, `${LOOK} scroll-first max-visible all-items-icon="file outline"`)
+        await ElementFixture.settle()
+        await new Promise((done) => setTimeout(done, 300))
+        const looks: string[] = []
+        await new Promise<void>((done) => {
+          const end = performance.now() + 600
+          const frame = () => {
+            const look = host.matches(":state(dropdown)") ? "dropdown" : "row"
+            if (looks.at(-1) !== look) looks.push(look)
+            if (performance.now() < end) requestAnimationFrame(frame)
+            else done()
+          }
+          requestAnimationFrame(frame)
+        })
+        expect({ width, looks }).toEqual({ width, looks: [looks[0]] })
+      }
+    })
+
     it("without it, a shrinkable segmented row goes straight to the dropdown", async () => {
       const { host } = await toolbar(300, FILES, LOOK)
       await expect.poll(() => host.matches(":state(dropdown)")).toBe(true)
@@ -249,6 +270,39 @@ describe("<ui-toolbar> bar slots", () => {
       listButton(narrow.host)!.click()
       await ElementFixture.settle()
       expect(rows(narrow.host)).toHaveLength(6)
+    })
+
+    it("many put away:  the few tabs left stay a row, never the dropdown (epic `editor` I188)", async () => {
+      // a site's files, as the editor's file tabs have them:  an icon and a longer name each
+      const files = Array.from(
+        { length: 60 },
+        (_, index) => `<ui-item icon="file outline" ${index ? "" : "selected"}>page-number-${index}.spell</ui-item>`
+      ).join("")
+      const { host } = await toolbar(600, files, `${LOOK} tabs shrinkable scroll-first max-visible="2"`)
+      await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+      await ElementFixture.settle()
+      expect(host.matches(":state(dropdown)")).toBe(false)
+      expect(listButton(host)).not.toBeNull()
+    })
+
+    it("a list too long for the window:  its rows in columns, top to bottom, the chosen one ticked (epic `editor` T84)", async () => {
+      const { host } = await toolbar(600, items(120), `${LOOK} max-visible="3"`)
+      await expect.poll(() => listButton(host)).not.toBeNull()
+      listButton(host)!.click()
+      await ElementFixture.settle()
+      const menu = host.shadowRoot!.querySelector<HTMLElement>("[part~=overflow-menu]")!
+      await expect.poll(() => Number(menu.dataset.columns)).toBeGreaterThan(1)
+      const all = rows(host)
+      expect(all).toHaveLength(120)
+      // the second row under the first, the next column's first beside it
+      const perColumn = Number(getComputedStyle(menu).getPropertyValue("--_ui-menu-overflow-rows"))
+      const [first, second, nextColumn] = [all[0]!, all[1]!, all[perColumn]!].map((row) => row.getBoundingClientRect())
+      expect(second!.left).toBe(first!.left)
+      expect(second!.top).toBeGreaterThan(first!.top)
+      expect(nextColumn!.left).toBeGreaterThan(first!.left)
+      expect(Math.round(nextColumn!.top)).toBe(Math.round(first!.top))
+      expect(menu.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+      expect(all.filter((row) => row.classList.contains("selected"))).toHaveLength(1)
     })
 
     it("bare, it means 8", async () => {

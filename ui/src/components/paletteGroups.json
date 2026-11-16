@@ -2,6 +2,7 @@
   "groups": [
     {
       "topic": "text",
+      "icon": "font",
       "tags": [
         "ui-text",
         "ui-link",
@@ -27,6 +28,7 @@
     {
       "topic": "buttons",
       "title": "Actions",
+      "icon": "hand pointer",
       "tags": [
         "ui-button",
         "ui-buttons",
@@ -42,6 +44,7 @@
     },
     {
       "topic": "layout",
+      "icon": "table columns",
       "tags": [
         "ui-container",
         "ui-divider",
@@ -65,6 +68,7 @@
     },
     {
       "topic": "navigation",
+      "icon": "compass",
       "tags": [
         "ui-breadcrumbs",
         "ui-breadcrumb",
@@ -82,6 +86,7 @@
     },
     {
       "topic": "forms",
+      "icon": "pen to square",
       "tags": [
         "ui-form",
         "ui-fields",
@@ -107,6 +112,7 @@
     },
     {
       "topic": "media",
+      "icon": "image",
       "tags": [
         "ui-icon",
         "ui-icons",
@@ -123,10 +129,12 @@
     },
     {
       "topic": "data display",
+      "icon": "chart simple",
       "tags": ["ui-card", "ui-cards", "ui-json", "ui-statistic", "ui-statistics", "ui-value", "ui-example"]
     },
     {
       "topic": "lists",
+      "icon": "list",
       "tags": [
         "ui-list",
         "ui-item",
@@ -144,10 +152,12 @@
     },
     {
       "topic": "overlays",
+      "icon": "layer group",
       "tags": ["ui-popup", "ui-modal", "ui-dimmer", "ui-flyout", "ui-nag", "ui-toast", "ui-message"]
     },
     {
       "topic": "animation",
+      "icon": "wand magic sparkles",
       "tags": [
         "ui-loader",
         "ui-placeholder",
@@ -165,6 +175,7 @@
     },
     {
       "title": "Social",
+      "icon": "users",
       "tags": ["ui-avatar", "ui-comment", "ui-comments", "ui-feed", "ui-summary", "ui-event", "ui-author"]
     }
   ],

@@ -12,7 +12,7 @@ import { paletteRoutesFor, paletteTableOrDie } from "spell/ui/tools/paletteRoute
 /** A table as the palette groups page saves it. */
 const TABLE = {
   groups: [
-    { topic: "buttons", tags: ["ui-buttons", "ui-button"] },
+    { topic: "buttons", icon: "hand pointer", tags: ["ui-buttons", "ui-button"] },
     { title: "Mine", tags: ["ui-card"] }
   ],
   hidden: ["ui-ad"]
@@ -75,6 +75,15 @@ describe("paletteTableOrDie()", () => {
       groups: [{ title: "A", tags: [] }],
       hidden: []
     })
+  })
+
+  test("keeps a group's icon, which must be text (epic `editor` T86)", () => {
+    expect(paletteTableOrDie({ groups: [{ title: "A", icon: "star", tags: [] }] }).groups).toEqual([
+      { title: "A", icon: "star", tags: [] }
+    ])
+    expect(() => paletteTableOrDie({ groups: [{ title: "A", icon: 3, tags: [] }] })).toThrow(
+      /group 1.s `icon` isn.t text/
+    )
   })
 
   test("a group needs a topic or a title", () => {

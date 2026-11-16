@@ -6,3 +6,5 @@
 un "sitio" es una aplicación
 	su "dirección actual" es un texto empezando en "/"
 		// la dirección de la página que muestra:  "/" al empezar
+	su "tema" es un texto
+		// el tema que llevan sus páginas, p. ej. "mockup":  `harbor es un sitio con tema "mockup"`
