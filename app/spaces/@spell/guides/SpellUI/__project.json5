@@ -856,6 +856,22 @@
       "active": true
     },
     {
+      "path": "/PageLayout/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/PageLayout/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/PageLayout/API.spell",
+      "active": true
+    },
+    {
+      "path": "/PageLayout/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/Panel/Usage.spell",
       "active": true
     },
@@ -1136,6 +1152,22 @@
       "active": true
     },
     {
+      "path": "/SiteBreadcrumbs/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteBreadcrumbs/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteBreadcrumbs/API.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteBreadcrumbs/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/SiteNav/Usage.spell",
       "active": true
     },
@@ -1149,6 +1181,18 @@
     },
     {
       "path": "/SiteNav/Theming.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteNavButton/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteNavButton/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteNavButton/API.spell",
       "active": true
     },
     {

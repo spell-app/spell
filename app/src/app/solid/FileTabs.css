@@ -23,9 +23,12 @@
      left and right, make it equal to the padding at the top of card.spell"), on the 4px grid:  8px (I213;  was 7.5px)
      - on the left, 6px and the bar's own 2px before its actions;  on the right, to the ✕'s glyph, its box its own
        (`.HideCode`, `SpellEditor.spell`)
-     - above and below, 7.5px:  the 24px tabs in the 39px over the bar's hairline (J:  a 41px bar, or 23px tabs)
+     - above and below, 8px:  the 24px tabs in the 40px bar, its line a shadow taking no room (I216;  was 7.5px,
+       the tabs in the 39px over a 1px border)
      - inline only, start and end, as `<ui-panel>` reads it */
   --ui-panel-pane-bar-padding: 6px 8px;
+  /* each tab 24px tall, on the grid:  its words' padding made it 23.91px, 8.05px from the bar's top and bottom (I216) */
+  --ui-menu-item-min-height: 24px;
 
   &::before {
     content: "";

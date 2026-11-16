@@ -169,3 +169,34 @@ describe("SpellProjectRoot:  File > Export, then Import", () => {
     expect(server.files.get(`${GROUP}/texts-only/${SP.PROJECT_FILE}`)).toContain("Texts Only!")
   })
 })
+
+describe("SpellProjectRoot:  a new project from a starter", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test("a site (epic `mockup` T40):  its site file, then its main page layout and its home page", async () => {
+    const server = new PretendServer()
+    vi.spyOn(LoadableFile, "fetch").mockImplementation(server.fetch)
+    const project = await SPACES.SpellProjectRoot.projects.createFrom("site")
+    expect(project.projectId).toBe(`${GROUP}/my-site`)
+    expect(project.files.map((file) => file.filePath)).toEqual([
+      "/MySite.site.spell",
+      "/main.page-layout.spell",
+      "/home.spell"
+    ])
+    expect(server.files.get(`${GROUP}/my-site/main.page-layout.spell`)).toBe(
+      SPACES.STARTER_PROGRAMS.site.alongside[0].contents
+    )
+    expect(server.files.get(`${GROUP}/my-site/MySite.site.spell`)).toMatch(/^# My Site$/m)
+  })
+
+  test("a plain app makes its one file", async () => {
+    const server = new PretendServer()
+    vi.spyOn(LoadableFile, "fetch").mockImplementation(server.fetch)
+    const project = await SPACES.SpellProjectRoot.projects.createApp(`${GROUP}/plain`)
+    expect(project.projectId).toBe(`${GROUP}/plain`)
+    expect([...server.files.keys()]).toEqual([`${GROUP}/plain/${SPACES.STARTER_PROGRAMS.blank.fileName}`])
+    expect(server.asked.filter((each) => each.includes("/create/file"))).toEqual([])
+  })
+})

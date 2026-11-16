@@ -1113,6 +1113,7 @@ owen@spell       Projects       ...
 | Option | What it does |
 | --- | --- |
 | `spell app create <name> --in <folder>` | makes it in that folder instead of your own space |
+| `spell app create <name> --site` | makes a site instead:  `<name>.site.spell`, its main page layout `main.page-layout.spell`, and a `home.spell` page, as the editor's Site card does |
 | `spell app serve <project>` | opens the editor on that project, e.g. `@spell/examples/Solitaire`;  default:  the project here, else the chooser |
 | `spell app serve --port <n>` | the editor's port, for a page server this starts;  default 3000, else any free one |
 | `spell app serve --headless` | doesn't open a browser:  just prints the address |
@@ -1270,7 +1271,7 @@ After an unknown command it adds `(spell help lists the commands)`.
   loading it would write one there (`projectUtils.getIndex()`).
 - Loading any project may still rewrite its project file, if its imports are out of step with its files:
   `getIndex()` does that, the same as in the app.
-- `app create` writes its two files itself, never through `getIndex()`, which would add an `Untitled.spell`.
+- `app create` writes its files itself (two, or a site's four), never through `getIndex()`, which would add an `Untitled.spell`.
 - `ssr` and the `pack` verbs write what their tables above say, never over a page or a file that's there.
   - `pack create` also adds the new repo's yarn scripts to the commands page's data;  the kit itself needs no wiring.
   - So on `main` the commands check names the new scripts as missing until the branch merges.

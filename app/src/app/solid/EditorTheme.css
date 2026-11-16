@@ -238,7 +238,8 @@ ui-panel.InspectorCard::part(title) {
 ui-panel.InspectorCard::part(title)::before {
   content: "";
   position: absolute;
-  inset: 0;
+  /* clear of the bar's line, a shadow inside its bottom edge (`<ui-panel>`'s pane bar, I216):  over it, this layer hid it */
+  inset: 0 0 1px;
   z-index: -1;
   background: var(--spell-menu-bar-fill);
   -webkit-backdrop-filter: var(--spell-menu-bar-filter);

@@ -5,7 +5,13 @@ import { SP } from "spell/parser/spell"
 import { LOCAL_PERSON } from "./projectGroups"
 import { ProjectFiles } from "./ProjectFiles"
 import { projectFileOf, projectFilesUrl, type ProjectArchive, type ProjectArchiveFile } from "./projectArchive"
-import { STARTER_PROGRAMS, freeProjectId, type StarterProgram } from "./starterProjects"
+import {
+  STARTER_PROGRAMS,
+  freeProjectId,
+  type Starter,
+  type StarterProgram,
+  type StartingFile
+} from "./starterProjects"
 
 /**
  * A project GROUP's list of projects, e.g. `@spell/examples`.
@@ -213,10 +219,13 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   protected titlesTyped = new Map<string, string | null>()
 
   /**
-   * Create a new project at `projectId`, starting as `first` (default:  a blank app, with a drawing to add things to).
-   * Returns new project, or throws on error.
+   * Create a new project at `projectId`, starting as `first`, and return it;  throws on error.
+   * - `first`:  one file to make it with, or a starter program (`STARTER_PROGRAMS`), by its key
+   *   - default:  `"blank"`, an app with a drawing to add things to
+   *   - a starter's first file is made with the project, its other files after it, in their order:
+   *     a site's (`"site"`) its main page layout and home page (epic `mockup` T40)
    */
-  async createApp(projectId: string, first?: { filePath: string; contents: string }): Promise<SP.SpellProject> {
+  async createApp(projectId: string, first: StartingFile | StarterProgram = "blank"): Promise<SP.SpellProject> {
     const die = getDier(this, `creating ${this.type}`, { projectId })
 
     const location = new SP.SpellLocation(projectId, die)
@@ -224,6 +233,10 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
 
     await this.loadOrDie(die)
     if (this.getProject(projectId)) die(`${this.Type} already exists.`)
+    const starter: Starter | undefined = typeof first === "string" ? STARTER_PROGRAMS[first] : undefined
+    const start: StartingFile = starter
+      ? { filePath: starter.fileName, contents: starter.contents(titleFor(location)) }
+      : (first as StartingFile)
 
     // Tell the server to create the project, which returns new projects list
     try {
@@ -232,8 +245,8 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
         contents: {
           projectId,
           title: this.titlesTyped.get(projectId),
-          filePath: first?.filePath ?? STARTER_PROGRAMS.blank.fileName,
-          contents: first?.contents ?? STARTER_PROGRAMS.blank.contents(titleFor(location))
+          filePath: start.filePath,
+          contents: start.contents
         },
         requestFormat: SpellProjectRoot.REQUEST_FORMAT_JSON,
         format: "json"
@@ -242,8 +255,12 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     } catch (e) {
       die(`Server error creating ${this.type}`, e)
     }
-    // Return the new project
-    return this.getProject(projectId) || die(`Server didn't create the new ${this.type}.`)
+    const project = this.getProject(projectId) || die(`Server didn't create the new ${this.type}.`)
+    if (starter?.alongside) {
+      const files = new ProjectFiles(project)
+      for (const { fileName, contents } of starter.alongside) await files.writeFile(fileName, contents)
+    }
+    return project
   }
 
   /**
@@ -252,10 +269,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
    */
   async createFrom(starter: StarterProgram): Promise<SP.SpellProject> {
     await this.load(undefined)
-    const { name, fileName, contents } = STARTER_PROGRAMS[starter]
-    const projectId = freeProjectId(this.path, name, this.projectPaths)
-    const title = titleFor(new SP.SpellLocation(projectId))
-    return (await this.createApp(projectId, { filePath: fileName, contents: contents(title) }))!
+    return this.createApp(freeProjectId(this.path, STARTER_PROGRAMS[starter].name, this.projectPaths), starter)
   }
 
   /**

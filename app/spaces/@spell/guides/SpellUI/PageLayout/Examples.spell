@@ -1,0 +1,59 @@
+"page-layout examples" is a notebook page
+	<header level="1">
+		Page layout
+		<header>A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="A site's frame" sticky="stack" collapsible dividing>
+			<example "A site's frame" description="A site's top bar in `menu`, its side navigation in `drawer`, the page's tabs in `page-menu`, a footer, and the page itself.  The drawer runs the whole height;  the top bar meets it with no gap, the page sits a little in from it.  The button in the top bar is a `<ui-site-nav-button>`:  press it to show only the drawer's icons.">
+				<ui-page-layout style="min-height: 18em">
+					<app-menu slot="menu">
+						<site-nav-button slot="start" />
+						<site-breadcrumbs slot="start" />
+						<button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices" />
+					</>
+					<site-tabs slot="page-menu" />
+					<site-nav slot="drawer" appearance="nav" current="#api" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Parts\", \"id\": \"group:Parts\", \"band\": \"group\", \"icon\": \"cubes\", \"pages\": \[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"pages\": \[{ \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }] }] }]" />
+					<text paragraph>The page goes here.  Going to another page redraws only this part.</>
+					<text slot="footer" color="grey">Made with Spell</>
+				</>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Compact drawer" sticky="stack" collapsible dividing>
+			<example "Compact drawer" description="`drawer=\"compact\"`:  the drawer shows only its icons.  Rest the pointer on it and it grows out over the page, all of it, without pushing the page;  move away and it shrinks back.  Its button widens it to all of it, and narrows it again.  Reduced motion, or `animation=\"none\"` round it, and it moves at once.">
+				<ui-page-layout drawer="compact" style="min-height: 12em">
+					<site-nav slot="drawer" appearance="nav" current="#api" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Parts\", \"id\": \"group:Parts\", \"band\": \"group\", \"icon\": \"cubes\", \"pages\": \[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"icon\": \"hand pointer outline\", \"pages\": \[{ \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }] }] }]" />
+					<text paragraph>The page keeps its place while the drawer opens over it.</>
+				</>
+			</example>
+		</>
+
+		<section label="Side bars" sticky="stack" collapsible dividing>
+			<example "Side bars" description="`left` and `right` are side bars either side of the page, under the menus.  A region with nothing in it takes no room:  here there's no drawer and no menu.">
+				<ui-page-layout>
+					<segment slot="left">On the left</>
+					<text paragraph>The page, between its side bars.</>
+					<segment slot="right">On the right</>
+				</>
+			</example>
+		</>
+
+		<section label="Narrow" sticky="stack" collapsible dividing>
+			<example "Narrow" description="Below 40em of its own box, not the window's, it's one column:  the drawer slides over the page from the start.  With no `<ui-site-nav-button>` inside, the layout draws its own menu button;  Escape, or going to a page, closes the drawer.">
+				<ui-page-layout style="max-width: 30em; min-height: 14em">
+					<site-nav slot="drawer" appearance="nav" current="#api" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Parts\", \"id\": \"group:Parts\", \"band\": \"group\", \"icon\": \"cubes\", \"pages\": \[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"icon\": \"hand pointer outline\", \"pages\": \[{ \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }] }] }]" />
+					<text paragraph>Press the menu button to slide the drawer in.</>
+				</>
+			</example>
+		</>
+	</>

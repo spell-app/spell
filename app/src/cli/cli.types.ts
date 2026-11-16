@@ -137,7 +137,10 @@ export type ServeOptions = GlobalOptions & {
  * - `in`:  make the project in this folder -- default `owen@spell`'s, your space's (`<spell-spaces>/@spell/owen@/`)
  */
 export type NewOptions = GlobalOptions & {
+  /** the folder to make it in */
   in?: string
+  /** a site, with its main page layout and home page, instead of a plain project */
+  site?: boolean
 }
 
 ////////////////

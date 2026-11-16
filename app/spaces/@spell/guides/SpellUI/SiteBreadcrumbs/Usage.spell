@@ -1,0 +1,45 @@
+"site-breadcrumbs usage" is a notebook page
+	<header level="1">
+		Site breadcrumbs
+		<header>Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put it at the start of an app's top bar.
+			Inside a site with a `<ui-site-nav>`, that's all:  with no `pages` of its own, it follows the navigation around it,
+			its pages and the page it marks shown, as `<ui-site-tabs>` does.
+			A Spell site's page layout writes a bare `<site-breadcrumbs slot="start" />` in its app menu.
+
+			- Elsewhere, hand it the same `pages` you hand `<ui-site-nav>`, and `current`.
+			- A group (`band: "group"`) or a page with no `href` is only a name;
+			  a page above the one shown is a link, unless its address has a parameter.
+			- Each crumb is a real link:  a site that shows its pages itself takes the click as it takes any link to one of its pages.
+		</>
+		<markdown>
+			```js
+			const crumbs = document.querySelector("ui-site-breadcrumbs")
+			crumbs.pages = site.pages
+			crumbs.current = location.pathname
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>Each link is a stop for Tab;  Enter follows it.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The trail is a `nav` landmark named `label`, else "Where you are";  the page shown is `aria-current="page"`.
+			Not found, nothing is drawn, so nothing is announced.
+		</>
+	</>

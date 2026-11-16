@@ -1,0 +1,52 @@
+"page-layout api" is a notebook page
+	<header level="1">
+		Page layout
+		<header>A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#events">Events</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+			<item link="#texts">Texts</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-page-layout" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api tag="ui-page-layout" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api tag="ui-page-layout" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-page-layout" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-page-layout" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api tag="ui-page-layout" only="texts"></>
+		</>
+	</>

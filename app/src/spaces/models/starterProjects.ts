@@ -1,6 +1,38 @@
 import { SP } from "spell/parser/spell"
 
 /**
+ * A file a starter program makes beside its first one:  a site's page layout and home page.
+ */
+export type StarterFile = {
+  /** its name in the project, `main.page-layout.spell` */
+  fileName: string
+  /** what it starts as */
+  contents: string
+}
+
+/** One file a project is made with:  an imported project's first, say. */
+export type StartingFile = {
+  /** its path in the project, `/MyApp.spell` */
+  filePath: string
+  /** what it holds */
+  contents: string
+}
+
+/**
+ * What a project can start as:  its name, its first file, and the files it makes beside it.
+ */
+export type Starter = {
+  /** the project's name when nobody types one, `my-app` */
+  name: string
+  /** its first file, the one the project is made with */
+  fileName: string
+  /** what its first file starts as, its heading `title` */
+  contents: (title: string) => string
+  /** the files made beside it, in their order in the project, after the first */
+  alongside?: readonly StarterFile[]
+}
+
+/**
  * What a new project starts as:  a program with a drawing, so the palette has somewhere to add things.
  * - The name in the code is always "my app":  a person names their project anything, a word spell may read otherwise,
  *   and renaming it changes nothing here.
@@ -62,8 +94,43 @@ my app is an app:
 \t\t\t<text>You rolled {its roll}, in {its rolls} rolls</text>
 \t\t</container>
 `
+  },
+  /**
+   * A site (epic `mockup` T40):  its routing alone in its site file, each page a file of its own,
+   * and the main page layout every page is drawn in, as Star Wars' and harbor-new's.
+   * - The layout's file is what makes it a site's main layout (T39, J149):  nothing in the site file names it.
+   */
+  site: {
+    name: "my-site",
+    fileName: "MySite.site.spell",
+    contents: (title: string) => `# ${title}
+// The site:  its pages, and the address of each.  Each page is a file of its own.
+
+my site is a site
+\tit has a Home at "/", icon "house"
+`,
+    alongside: [
+      {
+        fileName: "main.page-layout.spell",
+        contents: `// Every page's frame:  the site's navigation in the drawer;  above each page its app menu,
+// the drawer's button and where you are;  under that, the page's family as tabs.
+main layout is a page layout
+\tto draw its app menu
+\t\t<app-menu>
+\t\t\t<site-nav-button slot="start" />
+\t\t\t<site-breadcrumbs slot="start" />
+\t\t</app-menu>
+`
+      },
+      {
+        fileName: "home.spell",
+        contents: `"Home" is a page
+\t<header size="large">Home</header>
+`
+      }
+    ]
   }
-} as const
+} as const satisfies Record<string, Starter>
 
 /** A program a project can start as:  a key of `STARTER_PROGRAMS`. */
 export type StarterProgram = keyof typeof STARTER_PROGRAMS

@@ -145,6 +145,8 @@ const APP_TEXTS_ES: AppTextPack = {
   startTaskListLine: "Añade tareas, márcalas y hazla tuya.",
   startDice: "Saca un seis",
   startDiceLine: "Un jueguito de pocas líneas.",
+  startSite: "Sitio",
+  startSiteLine: "Páginas con su propia dirección, en un mismo marco.",
   startSolitaire: "Solitario",
   startSolitaireLine: "Un juego entero.  Cambia algo y mira.",
   startSolitaireInvite: "Haz clic en una carta y cambia su palo a la derecha.",
