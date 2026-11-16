@@ -685,10 +685,16 @@ export function CodeCard(props: {
   /** The thing selected (or the trail leads to):  its actions. */
   thing?: object
 }): JSX.Element {
+  // the element itself, told only when it's another:  what's inspected is worked out again as each key is typed, a new
+  // object around the same element, and the rows read again then took a place from the last compile against the text
+  // as it is now (epic `editor` I220:  after an edit and ⌘Z, `on click`'s row read as its `if` line)
+  const shownElement = createMemo(() => props.element)
   const rows = createMemo((): EventRow[] => {
-    const element = props.element
-    // read again as a handler's added (`justAdded`), not on every key typed in one:  each row's editor follows its lines
+    const element = shownElement()
+    // read again as a handler's added (`justAdded`) and as each run ends, when where the compiler says each is matches
+    // the text;  not on every key typed in one:  each row's editor follows its lines
     void Inspector.justAdded
+    void editor.programRuns
     return untrack(() => {
       if (!Inspector.isDrawnThing(element)) {
         const handlers = Inspector.writtenHandlersOf(element)
