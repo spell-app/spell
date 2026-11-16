@@ -6,12 +6,13 @@
  * - Tokens:
  *   | `--ui-page-layout-gap` | the room between the page and its side bars |
  *   | `--ui-page-layout-shadow` | the soft shadow round the page's side, beside the drawer |
+ *   | `--ui-page-layout-end-room` | the strip of the drawer's fill down the page's end side, beside a drawer |
  * - The drawer:  a column the whole height, on a muted fill;  its box a scroller stuck at the top,
  *   so a long navigation scrolls by itself, never the page.
  * - The menu beside the drawer's top, flush against it and on the same fill:  one surface, no line between them
  *   (epic `mockup` I25).
  * - Under the menu, the page's side (`.under-menu`) is a box on the page's own background, set apart from the drawer
- *   and the menu by a soft shadow, its corner by the drawer rounded (epic `mockup` I32):
+ *   and the menu by a soft shadow, both its top corners rounded (epic `mockup` I32, epic `editor` I219):
  *   - a shadow in every theme, Mockup's too:  never the theme's ink line (Owen:  "Make the black border a shadow")
  *   - made from the theme's shadow colour (`--ui-shadow-ink`), as a theme's own raised shadow may be none or a line
  * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
@@ -44,6 +45,8 @@
       0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent),
       0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)
     );
+    /* the muted strip down the page's end side, beside its top-right corner (I219) */
+    --_ui-page-layout-end-room: var(--ui-page-layout-end-room, 0.5em);
     /* all of the drawer:  its column, its open box, and what it holds while it moves */
     --_page-layout-drawer-width: 16em;
     /* its own width decides narrow:  a site drawn in a narrow box is narrow */
@@ -121,14 +124,25 @@
   .layout:has(> .drawer) > .body {
     background: var(--ui-surface-muted, Canvas);
   }
+  /* ... both its top corners rounded, the muted surface a strip down its end side too, so each corner is an inside
+     corner of the drawer's and the menu's surface (epic `editor` I219:  "Add a corner to the top-right as well");
+     drawn over the menu (`position`), as the menu's own items are positioned:  under them, its shadow showed beside
+     the drawer but stopped dead at the menu, a hard edge above the corner instead of a shade round its curve */
   .layout:has(> .drawer) > .body > .under-menu {
+    position: relative;
+    margin-inline-end: var(--_ui-page-layout-end-room);
     padding-inline-start: var(--ui-font-size, 16px);
     border-start-start-radius: var(--_page-layout-flyout-radius);
+    border-start-end-radius: var(--_page-layout-flyout-radius);
     background: var(--ui-background, Canvas);
     box-shadow: var(--_ui-page-layout-shadow);
   }
+  /* ... the menu on the body's fill, the drawer's, with none of its own:  a theme's muted surface is see-through
+     (Glass's 45% white), so the bar's own fill and blur over it read lighter than the drawer, a seam down the
+     drawer's edge into the corner (I219) */
   .layout:has(> .drawer) > .body > .menu {
-    --ui-menu-header-bar-background: var(--ui-surface-muted, Canvas);
+    --ui-menu-header-bar-background: transparent;
+    --ui-menu-header-bar-filter: none;
     --ui-menu-header-bar-border: none;
   }
   /* its own menu button:  only at a narrow width */
@@ -223,6 +237,7 @@
       background: none;
     }
     .layout:has(> .drawer) > .body > .under-menu {
+      margin-inline-end: 0;
       padding-inline-start: 0;
       border-radius: 0;
       background: none;
