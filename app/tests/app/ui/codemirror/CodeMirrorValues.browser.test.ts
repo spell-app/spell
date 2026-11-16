@@ -9,8 +9,8 @@ import { CodeMirrorValues, type ValuesAt } from "spell/app/app/ui/codemirror/Cod
 
 /**
  * An attribute's words, shown quietly under its value once the caret rests in it (epic `editor` T70), and the picker
- * at the caret (T61), on a real CodeMirror editor (epic `codemirror` P5):  the twin of Monaco's
- * `ValueChoices.browser.test.ts`, a plain state, its words handed in as the language service would.
+ * at the caret (T61), on a real CodeMirror editor (epic `codemirror` P5):
+ * a plain state, its words handed in as the language service would.
  */
 describe("CodeMirrorValues", () => {
   let view: EditorView | undefined

@@ -12,7 +12,7 @@ import type { BubblyRulePresentation } from "./highlight.types"
  *   - the CHECKS no role says yet, each kept by name (epic `language` P60, Q69:  a red judgement call each):
  *     `namesKind`, `namesWhatItDraws`, `choices`, `blankAfterVerb`
  * - Read by `SP.BubblyLayout` (so by the app's `<spell-code>`, the docs pages and the drawn-bubbly page),
- *   and by Monaco's and VS Code's drawings (epic `language` P50, P51).
+ *   and by the code editor's and VS Code's drawings (epic `language` P50, P51).
  * - Keyed by a rule's NAME, what its syntax strings call it (`{define_property_has}`), the same in every language;
  *   a rule built while parsing (a phrase, `is_a_$suit`) by its `importableAs` (`quoted_property`).
  *   Never by its class (WWOD §3 › "Names aren't identifiers").

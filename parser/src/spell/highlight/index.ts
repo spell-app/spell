@@ -2,7 +2,7 @@
  * Barrel for `highlight/` -- drawing spell source outside an editor:
  * - `SpellHighlighter`:  its coloured spans, for `<ui-code language="spell">`
  * - `BubblyLayout`, `BubblyRoles`, `BubblyPresentation`:  the bubbly look, as data (its types in `highlight.types.ts`)
- * - `BubblyStretches`:  a drawing's lines as an editor marks them, for Monaco and VS Code
+ * - `BubblyStretches`:  a drawing's lines as an editor marks them, for the app's code editor and VS Code
  * - Flattened into `spell/parser/spell`:  `SP.SpellHighlighter`, `SP.BubblyLayout`.
  * - The page's side is the app's:  its `<spell-code>` family registers it with `UI.code` (`SpellLanguage`),
  *   and draws the bubbly look (`BubblyHtml`).

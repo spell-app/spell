@@ -8,7 +8,7 @@ import { CodeMirrorCodeOrText } from "spell/app/app/ui/codemirror/CodeMirrorCode
 import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 
 /**
- * `CodeMirrorCodeOrText` on a real CodeMirror editor, in the browser (epic `codemirror` P4), the twin of Monaco's
+ * `CodeMirrorCodeOrText` on a real CodeMirror editor, in the browser (epic `codemirror` P4),
  * `CodeOrTextTyping.browser.test.ts`, each case the same text before and after:
  * a `{` typed in a quoted value makes it code, a `"` typed right after a code value's `{` makes it text;
  * one undo leaves what was typed.

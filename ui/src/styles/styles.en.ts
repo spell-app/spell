@@ -518,7 +518,7 @@ export const shadows = {
 /**
  * The code's colours, by what they colour (epic `debut` P22):  every theme's, light and dark, as `--ui-code-<role>`
  * (`text` is `--ui-code-color`).
- * - The editor's code (Monaco, `CodeThemes`), every `<ui-code>` block and the Spell VS Code themes read the same ones.
+ * - The editor's code (`CodeRules`), every `<ui-code>` block and the Spell VS Code themes read the same ones.
  * - Each role's RECIPE:  where a theme with no code colours of its own takes it from, `[source, lightness]`:
  *   - `source`:  a colour the theme already has, its hue and chroma kept (`oklch(from <source> ...)`)
  *   - lightness:  `strong` reads on the code's background in both schemes (OKLCH 0.48 light, 0.80 dark);

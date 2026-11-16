@@ -13,11 +13,11 @@ import { FileStates } from "spell/app/app/ui/codemirror/FileStates"
 
 /**
  * `CodeMirrorTyping` on a real CodeMirror editor, in the browser (epic `codemirror` P4):
- * the twin of Monaco's `SpellTyping.browser.test.ts`, each case the same text before and after.
+ * each case the same text before and after.
  * - A plain editor of Spell, no project:  only what's typed and pasted is checked.
  * - Keys go through the editor's own key handling (`runScopeHandlers()`), what's typed through its input handlers,
  *   as the keyboard's would.
- * - Monaco's "a help whose caret has moved on by the time it writes" has no twin:  CodeMirror's helps write with the
+ * - "a help whose caret has moved on by the time it writes" has no case here:  CodeMirror's helps write with the
  *   key, never after it.
  */
 describe("typing Spell in a real CodeMirror editor", () => {
@@ -45,7 +45,7 @@ describe("typing Spell in a real CodeMirror editor", () => {
     return state.sliceDoc(0, caret) + "|" + state.sliceDoc(caret)
   }
 
-  /** The caret's line and column, 1-based, as Monaco's `getPosition()`. */
+  /** The caret's line and column, 1-based. */
   const position = () => {
     const { state } = view!
     const caret = state.selection.main.head

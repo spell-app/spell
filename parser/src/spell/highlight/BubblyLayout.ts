@@ -33,7 +33,7 @@ import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
  *   - its indent:  what's under what, so a line that doesn't parse still sits where it should
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
- * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so will Monaco (epic `language` P50) and VS Code (P51).
+ * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so do the app's code editor (epic `codemirror` P3) and VS Code (P51).
  * - NEVER throws:  a parse that fails lays out every line as a step, coloured by its tokens.
  ****************/
 export class BubblyLayout {

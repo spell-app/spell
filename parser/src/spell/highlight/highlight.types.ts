@@ -4,7 +4,7 @@
  * - `SP.BubblyLayout` makes a `BubblyDrawing` from source;  `SP.BubblyPresentation` says how each rule presents.
  * - Read by everything that draws the look, so they draw the same blocks, bands and pills:
  *   - the app's `BubblyHtml` (`<spell-code>`, `<ui-code language="spell">`, the drawn-bubbly page)
- *   - Monaco's decorations (epic `language` P50) and VS Code's (P51)
+ *   - the app's code editor's decorations (epic `codemirror` P3) and VS Code's (P51)
  * - Types only:  nothing here runs.
  */
 

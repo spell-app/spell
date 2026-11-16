@@ -24,7 +24,7 @@ import type {
  * - each name inside an action head's pill (`BubblyLine.pillNames`), a `reference` stretch over its pill's own, `inPill`:
  *   the pill stays one stretch, so one white shape, its kind words bold over it (`to <play a card>`)
  * - Read by both editors, so they mark the same stretches the same way (epic `language` P50, P51):
- *   - Monaco's `BubblyMarks` (the app), a line at a time (`ofLine()`), as it builds its shapes round them
+ *   - the app's code editor (`CodeMirrorBubbly`), a line at a time (`ofLine()`), as it builds its shapes round them
  *   - the language server's `spell/bubbly` request, for VS Code's decorations, the whole drawing (`of()`)
  * - The page draws its own HTML from the drawing (`BubblyHtml`):  a page has no caret to keep on its letters.
  * - STATIC and instance-free:  pure data, no editor.

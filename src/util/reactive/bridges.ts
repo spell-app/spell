@@ -61,7 +61,7 @@ export type SolidForBridge = {
  * - Only a derived value it read changed:  re-run on a microtask, if its value really
  *   changed (`flushCells()` settles it).
  * - NEVER re-runs for a change `fn` makes itself while running -- see `Reaction`.
- * - For code outside Solid, e.g. following a file's `contents` into a Monaco model.
+ * - For code outside Solid, e.g. following a file's `contents` into a code editor's state.
  */
 export function observe(fn: () => void): () => void {
   const reaction = new Reaction(rerun)

@@ -80,7 +80,7 @@ export class PageTokenizer extends P.Tokenizer {
 
   /**
    * Tokenize ONE line of a file, `line`, read with the tags `open` before it:  for colouring a file line by line,
-   * as the editor app's Monaco does.
+   * as the editor app's code editor does.
    * - Returns its tokens, and the tags open after it:  the next line's `open`.
    * - `open` is never changed.
    * - No line is checked against the file's end:  a tag still open isn't an error here.

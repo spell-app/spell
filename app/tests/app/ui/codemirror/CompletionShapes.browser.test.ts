@@ -17,7 +17,7 @@ import { LspToCodeMirror } from "spell/app/app/ui/codemirror/LspToCodeMirror"
 
 /**
  * A tag or an attribute chosen from the suggestion list, on a real CodeMirror editor (epic `editor` I70;
- * epic `codemirror` P5):  the twin of Monaco's `CompletionShapes.browser.test.ts`.
+ * epic `codemirror` P5).
  * - Written whole by its snippet, the caret where you type next, and the list asked for again where it should be.
  * - The language service's own shapes (`LSP.CompletionShapes`), handed to CodeMirror as the editor hands them
  *   (`LspToCodeMirror.completion()`);  a plain state, no project.
