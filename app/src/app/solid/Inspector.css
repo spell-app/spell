@@ -251,6 +251,20 @@ ui-panel.InspectorCard > .InspectorSection {
     min-height: 0;
   }
 }
+/*
+ * No card is smaller than its header, and a folded card is its header alone, never resized
+ * (Owen, 2026-11-16, epic `editor` I207:  "shouldn't be able to resize it smaller than its header"):
+ * - `<ui-split-panel>` keeps a drag within a pane's own min and max height
+ * - a pane whose min and max are the same is skipped:  the bars above and below a folded card resize
+ *   the open cards across it
+ * - `CardGlide`'s frames set their own min and max, so a card still glides as it folds
+ */
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane {
+  min-height: var(--spell-pane-bar-height, 40px);
+}
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane:has(> .InspectorCard.folded) {
+  max-height: var(--spell-pane-bar-height, 40px);
+}
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
