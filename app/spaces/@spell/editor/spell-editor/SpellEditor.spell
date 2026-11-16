@@ -163,8 +163,8 @@ an "editor bar" is a view
 		// The person's own menu
 
 	to draw it
-		<menu appearance="header" class="AppMenu tight EditorBar">
-			<menu position="left" class="third side">
+		<app-menu class="AppMenu tight EditorBar">
+			<menu slot="start" position="left" class="third side">
 				{draw its spell menu}
 				{draw its project menu}
 				{draw its app menus}
@@ -175,14 +175,14 @@ an "editor bar" is a view
 				{draw its mode buttons}
 				<item class="spring no-border"/>
 			</menu>
-			<menu position="right" class="third side BarTools">
+			<menu slot="end" position="right" class="third side BarTools">
 				<item class="spring no-border"/>
 				<menu appearance="capsule">
 					{draw its tools}
 				</menu>
 				{draw its you}
 			</menu>
-		</menu>
+		</app-menu>
 
 an "editor layout" is a view
 	// The editor's panes:  the code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).

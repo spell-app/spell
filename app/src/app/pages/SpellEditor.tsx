@@ -609,12 +609,16 @@ export function EditorToolbar(props: { mode: Mode }) {
       {/* no Spell:  every menu still, in a plain row, so a person can go on */}
       <Show when={bar.isBroken()}>
         <AppMenu class="EditorBar">
-          {parts.spellMenu.draw()}
-          {parts.projectMenu.draw()}
-          {parts.appMenus.draw()}
+          <ui-menu slot="start">
+            {parts.spellMenu.draw()}
+            {parts.projectMenu.draw()}
+            {parts.appMenus.draw()}
+          </ui-menu>
           {parts.modeButtons.draw()}
-          {parts.tools.draw()}
-          {parts.you.draw()}
+          <ui-menu slot="end">
+            {parts.tools.draw()}
+            {parts.you.draw()}
+          </ui-menu>
         </AppMenu>
       </Show>
     </div>

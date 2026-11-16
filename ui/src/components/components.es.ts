@@ -153,6 +153,7 @@ import { tocEs } from "spell/ui/components/ui-toc/UIToc.es"
 import { exampleEs } from "spell/ui/components/ui-example/UIExample.es"
 import { toastEs } from "spell/ui/components/ui-toast/UIToast.es"
 import { toolbarEs } from "spell/ui/components/ui-toolbar/UIToolbar.es"
+import { appMenuEs } from "spell/ui/components/ui-app-menu/UIAppMenu.es"
 import { transitionEs } from "spell/ui/components/ui-transition/UITransition.es"
 import { treeNodeEs } from "spell/ui/components/ui-tree-diagram/UITreeNode.es"
 import { treeDiagramEs } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.es"
@@ -817,6 +818,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   exampleEs,
   toastEs,
   toolbarEs,
+  appMenuEs,
   transitionEs,
   treeDiagramEs,
   diagramEs,

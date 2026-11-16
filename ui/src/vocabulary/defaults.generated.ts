@@ -75,6 +75,41 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "align", kind: "valueOnly", group: "layout", values: ["center"] },
     { name: "test", kind: "string", group: "appearance" }
   ],
+  "ui-app-menu": [
+    { name: "size", kind: "size", group: "appearance" },
+    { name: "color", kind: "color", group: "appearance" },
+    {
+      name: "appearance",
+      kind: "multiple",
+      group: "appearance",
+      values: ["tabular", "pointing", "secondary", "text", "segmented", "link", "borderless", "header", "capsule"]
+    },
+    { name: "name", kind: "string", group: "form" },
+    { name: "value", kind: "string", group: "form" },
+    { name: "choose", kind: "valueOnly", group: "behaviour", values: ["one", "many"] },
+    { name: "position", kind: "valueOnly", group: "layout", values: ["left", "right", "center"] },
+    { name: "direction", kind: "valueOnly", group: "layout", values: ["horizontal", "vertical"] },
+    { name: "pagination", kind: "keyOnly", group: "appearance" },
+    { name: "icon", kind: "keyOnly", group: "content" },
+    { name: "labeled", kind: "keyOnly", group: "appearance" },
+    { name: "fluid", kind: "keyOnly", group: "layout" },
+    { name: "stackable", kind: "keyOnly", group: "layout" },
+    { name: "centered", kind: "keyOnly", group: "layout" },
+    { name: "wrapping", kind: "keyOnly", group: "layout" },
+    { name: "wrap", kind: "keyOnly", group: "appearance" },
+    { name: "inverted", kind: "keyOnly", group: "appearance" },
+    { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y", "compact"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "fixed", kind: "keyOrValueAndKey", group: "layout", values: ["top", "bottom", "left", "right"] },
+    { name: "align", kind: "valueAndKey", group: "layout", values: ["fluid", "left", "center", "right"] },
+    { name: "equal", kind: "keyOnly", group: "layout" },
+    { name: "items", kind: "width", group: "content" },
+    { name: "shrinkable", kind: "boolean", group: "layout" },
+    { name: "ticks", kind: "boolean", group: "behaviour" },
+    { name: "icon-column", kind: "boolean", group: "appearance" },
+    { name: "tabs", kind: "boolean", group: "behaviour" },
+    { name: "interactive", kind: "boolean", group: "behaviour" }
+  ],
   "ui-audio": [
     { name: "src", kind: "string", group: "link" },
     { name: "autoplay", kind: "boolean", group: "behaviour" },
@@ -1450,6 +1485,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "current", kind: "string", group: "content" },
     { name: "label", kind: "string", group: "content" },
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
+    { name: "collapsed", kind: "keyOnly", group: "appearance" },
     { name: "remember", kind: "string", group: "behaviour" }
   ],
   "ui-site-tabs": [
@@ -1833,7 +1869,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "keyOnly", group: "behaviour" },
     { name: "expandable", kind: "keyOnly", group: "behaviour" },
     { name: "group", kind: "keyOnly", group: "behaviour" },
-    { name: "band", kind: "valueOnly", group: "appearance", values: ["heading", "subheading"] },
+    { name: "band", kind: "valueOnly", group: "appearance", values: ["heading", "subheading", "group"] },
     { name: "count", kind: "string", group: "content" },
     { name: "badge", kind: "string", group: "content" }
   ],

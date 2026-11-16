@@ -1554,6 +1554,656 @@ export interface UIAdAttributes {
 export interface UIAdJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIAdAttributes>, UIAdAttributes {}
 
+/** `<ui-app-menu>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIAppMenuEventMap {
+  /**
+   * `ui-choosing`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+  /**
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ value?: string, values?: string[] }`
+   */
+  "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
+  /**
+   * `ui-form-value`:  A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.
+   * - `event.detail`:  `{}`
+   */
+  "ui-form-value": CustomEvent<{}>
+}
+
+/** `<ui-app-menu>`'s own attributes, from its vocabulary. */
+export interface UIAppMenuAttributes {
+  /**
+   * Size, `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  color?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` (a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless` · `header` · `capsule`
+   */
+  appearance?: string
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
+  /**
+   * A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
+  /**
+   * A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).
+   * - takes:  `one` · `many`
+   */
+  choose?: "one" | "many"
+  /**
+   * `choose`, as the DOM element's property.
+   * @deprecated write `choose` -- `prop:` stays only for compiled spell
+   */
+  "prop:choose"?: "one" | "many"
+  /**
+   * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
+   * - takes:  `left` · `right` · `center`
+   */
+  position?: "left" | "right" | "center"
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
+  "prop:position"?: "left" | "right" | "center"
+  /**
+   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name was the bare `vertical` switch.
+   * - takes:  `horizontal` · `vertical`
+   */
+  direction?: "horizontal" | "vertical"
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: "horizontal" | "vertical"
+  /**
+   * Page links:  compact, centred items.
+   * - takes:  flag (present / absent)
+   */
+  pagination?: boolean | ""
+  /**
+   * `pagination`, as the DOM element's property.
+   * @deprecated write `pagination` -- `prop:` stays only for compiled spell
+   */
+  "prop:pagination"?: boolean | ""
+  /**
+   * Icon-only items.
+   * - takes:  flag (present / absent)
+   */
+  icon?: boolean | ""
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
+  "prop:icon"?: boolean | ""
+  /**
+   * Labeled icon items:  a large icon above each item's text.
+   * - takes:  flag (present / absent)
+   */
+  labeled?: boolean | ""
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
+  "prop:labeled"?: boolean | ""
+  /**
+   * Takes the full width of its container.
+   * - takes:  flag (present / absent)
+   */
+  fluid?: boolean | ""
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
+  "prop:fluid"?: boolean | ""
+  /**
+   * Stacks its items on mobile.
+   * - takes:  flag (present / absent)
+   */
+  stackable?: boolean | ""
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
+  "prop:stackable"?: boolean | ""
+  /**
+   * Centred in its container, items centred.
+   * - takes:  flag (present / absent)
+   */
+  centered?: boolean | ""
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
+  "prop:centered"?: boolean | ""
+  /**
+   * Items wrap onto more lines when they don't fit.
+   * - takes:  flag (present / absent)
+   */
+  wrapping?: boolean | ""
+  /**
+   * `wrapping`, as the DOM element's property.
+   * @deprecated write `wrapping` -- `prop:` stays only for compiled spell
+   */
+  "prop:wrapping"?: boolean | ""
+  /**
+   * With `wrapping`:  square corners where the lines meet.  Its old name was `wrapped`.
+   * - takes:  flag (present / absent)
+   */
+  wrap?: boolean | ""
+  /**
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
+   */
+  "prop:wrap"?: boolean | ""
+  /**
+   * The dark scheme;  with `color`, filled with the colour.
+   * - takes:  flag (present / absent)
+   */
+  inverted?: boolean | ""
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
+  "prop:inverted"?: boolean | ""
+  /**
+   * `none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`.
+   * - takes:  `none` · `none-x` · `none-y` · `compact`
+   */
+  padding?: "none" | "none-x" | "none-y" | "compact"
+  /**
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
+   */
+  "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
+  /**
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.
+   * - takes:  `both` · `top` · `bottom`
+   */
+  "attach-to"?: "both" | "top" | "bottom"
+  /**
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
+   */
+  "prop:attachTo"?: "both" | "top" | "bottom"
+  /**
+   * Fixed to an edge of the viewport.
+   * - takes:  flag, or `top` · `bottom` · `left` · `right`
+   */
+  fixed?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
+  "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /**
+   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name was `alignment`.
+   * - takes:  `fluid` · `left` · `center` · `right`
+   */
+  align?: "fluid" | "left" | "center" | "right"
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "fluid" | "left" | "center" | "right"
+  /**
+   * Every item the same width, from the items themselves (no count):  with `align="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
+   * - takes:  flag (present / absent)
+   */
+  equal?: boolean | ""
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
+  "prop:equal"?: boolean | ""
+  /**
+   * Older, count-based alias of `equal`:  divides the width evenly between N items (`items="3"` => `three item`);  `items="equal"` => `equal width` (Fomantic's, ~== `equal alignment="fluid"`).
+   * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
+   */
+  items?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /**
+   * `items`, as the DOM element's property.
+   * @deprecated write `items` -- `prop:` stays only for compiled spell
+   */
+  "prop:items"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /**
+   * Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  shrinkable?: boolean | ""
+  /**
+   * `shrinkable`, as the DOM element's property.
+   * @deprecated write `shrinkable` -- `prop:` stays only for compiled spell
+   */
+  "prop:shrinkable"?: boolean | ""
+  /**
+   * A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  ticks?: boolean | ""
+  /**
+   * `ticks`, as the DOM element's property.
+   * @deprecated write `ticks` -- `prop:` stays only for compiled spell
+   */
+  "prop:ticks"?: boolean | ""
+  /**
+   * Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  "icon-column"?: boolean | ""
+  /**
+   * `icon-column`, as the DOM element's property.
+   * @deprecated write `icon-column` -- `prop:` stays only for compiled spell
+   */
+  "prop:iconColumn"?: boolean | ""
+  /**
+   * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  tabs?: boolean | ""
+  /**
+   * `tabs`, as the DOM element's property.
+   * @deprecated write `tabs` -- `prop:` stays only for compiled spell
+   */
+  "prop:tabs"?: boolean | ""
+  /**
+   * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
+   * - takes:  flag (present / absent)
+   */
+  interactive?: boolean | ""
+  /**
+   * `interactive`, as the DOM element's property.
+   * @deprecated write `interactive` -- `prop:` stays only for compiled spell
+   */
+  "prop:interactive"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * `ui-choosing`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-choosing"?: (event: UIAppMenuEventMap["ui-choosing"]) => void
+  /**
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ value?: string, values?: string[] }`
+   */
+  "on-ui-changed"?: (event: UIAppMenuEventMap["ui-changed"]) => void
+  /**
+   * `ui-form-value`:  A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-form-value"?: (event: UIAppMenuEventMap["ui-form-value"]) => void
+}
+
+/** `<ui-app-menu>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIAppMenuJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIAppMenuEventMap>>, keyof UIAppMenuAttributes>,
+    UIAppMenuAttributes {}
+
 /** `<ui-audio>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIAudioEventMap {
   /**
@@ -40087,12 +40737,12 @@ export interface UISiteNavEventMap {
 /** `<ui-site-nav>`'s own attributes, from its vocabulary. */
 export interface UISiteNavAttributes {
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first page), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   pages?: unknown
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first page), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `pages` -- `prop:` stays only for compiled spell
    */
@@ -40127,6 +40777,16 @@ export interface UISiteNavAttributes {
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: "nav"
+  /**
+   * Only the icons:  each row's title its tooltip, a page with no icon its title's first letter, and a group's label a thin line.  None:  the titles beside the icons.
+   * - takes:  flag (present / absent)
+   */
+  collapsed?: boolean | ""
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
+  "prop:collapsed"?: boolean | ""
   /**
    * Keep which pages are open for each person, under this name, across reloads and visits.  None:  only for as long as the page is open.
    * - takes:  text
@@ -51679,15 +52339,15 @@ export interface UITreeItemAttributes {
    */
   "prop:group"?: boolean | ""
   /**
-   * The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it.
-   * - takes:  `heading` · `subheading`
+   * The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it;  `group`, a group's quiet label, with no arrow.
+   * - takes:  `heading` · `subheading` · `group`
    */
-  band?: "heading" | "subheading"
+  band?: "heading" | "subheading" | "group"
   /**
    * `band`, as the DOM element's property.
    * @deprecated write `band` -- `prop:` stays only for compiled spell
    */
-  "prop:band"?: "heading" | "subheading"
+  "prop:band"?: "heading" | "subheading" | "group"
   /**
    * A number in a small round label after its words:  how many rows are inside it, say.
    * - takes:  text
@@ -53738,6 +54398,17 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-ad": UIAdJSXAttributes
       /**
+       * `<ui-app-menu>`:  An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or sidebar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.  It takes every `<ui-menu>` attribute.
+       * - also known as:  app bar, top bar, title bar, header bar, navbar, masthead, window bar
+       * - slots:
+       *   - default:  The middle section, centred on the bar:  `<ui-item>`s, a sub-menu, e.g. a page's modes or its tabs.
+       *   - `start`:  The start section, at the bar's start:  a menu or sidebar button first, then a title or breadcrumb.
+       *   - `end`:  The end section, at the bar's end:  buttons, e.g. settings and the person's menu.
+       *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
+       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
+       */
+      "ui-app-menu": UIAppMenuJSXAttributes
+      /**
        * `<ui-audio>`:  An audio plays a sound file:  in the browser's own player, or unseen, when the page says.
        * - also known as:  audio, sound, music, sound effect, audio player
        * - events:  `ui-play`, `ui-pause`, `ui-ended`
@@ -54765,13 +55436,15 @@ export interface UIEventMap {
   "ui-loading": CustomEvent<unknown>
   "ui-loaded": CustomEvent<unknown>
   "ui-error": CustomEvent<unknown>
+  "ui-choosing": CustomEvent<unknown>
+  "ui-changed": CustomEvent<unknown>
+  "ui-form-value": CustomEvent<unknown>
   "ui-play": CustomEvent<unknown>
   "ui-pause": CustomEvent<unknown>
   "ui-ended": CustomEvent<unknown>
   "ui-selected": CustomEvent<unknown>
   "ui-deselected": CustomEvent<unknown>
   "ui-changing": CustomEvent<unknown>
-  "ui-changed": CustomEvent<unknown>
   "ui-saving": CustomEvent<unknown>
   "ui-saved": CustomEvent<unknown>
   "ui-coloured": CustomEvent<unknown>
@@ -54798,8 +55471,6 @@ export interface UIEventMap {
   "ui-removing": CustomEvent<unknown>
   "ui-chosen": CustomEvent<unknown>
   "ui-drawn": CustomEvent<unknown>
-  "ui-choosing": CustomEvent<unknown>
-  "ui-form-value": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
   "ui-completed": CustomEvent<unknown>
   "ui-show-code": CustomEvent<unknown>
@@ -54832,6 +55503,7 @@ declare global {
     "ui-action": HTMLElement
     "ui-actions": HTMLElement
     "ui-ad": HTMLElement
+    "ui-app-menu": UIHTMLElement<UIAppMenuEventMap>
     "ui-audio": UIHTMLElement<UIAudioEventMap>
     "ui-author": HTMLElement
     "ui-avatar": HTMLElement
