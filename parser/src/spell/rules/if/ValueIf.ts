@@ -37,6 +37,11 @@ export class ValueIf extends SpellStatement<"value|condition|otherValue?"> {
     for (const value of [match.groups.value, match.groups.otherValue]) SpellConstant.declareValue(match, value)
   }
 
+  /** Only when it declared a value -- see `SpellConstant.valueScopeChanges()`. */
+  getScopeChanges(match?: P.MatchFor<this>): P.ScopeChanges | undefined {
+    return SpellConstant.valueScopeChanges(match)
+  }
+
   getAST(match: P.MatchFor<this>): P.ASTIfStatement | P.ASTStatementGroup {
     const { value, condition, otherValue } = match.groups
     const ifAST = new P.ASTIfStatement(match, {

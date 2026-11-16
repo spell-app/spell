@@ -345,6 +345,23 @@ export class Parser extends Derivative {
   }
 
   /**
+   * Re-parse ONLY the innermost indented body an edit changed INSIDE top-level `item`'s body, now `body`:
+   * e.g. one method's steps in a type's body, keeping the type and its other members.
+   * - Unlike `reparseBody()`, it rewinds and replays the `journal` itself, and moves the tokens it keeps:
+   *   `oldText` and `text` are the file before and after the edit.
+   * - Returns a new match for the whole item, or `undefined` with nothing changed:
+   *   the caller then tries `reparseBody()`.
+   * - Default:  never.  Languages with nested bodies override, e.g. `SpellParser`.
+   */
+  reparseInnerBody(
+    _item: P.Match,
+    _body: P.BlockToken,
+    _texts: { oldText: string; text: string }
+  ): P.Match | undefined {
+    return undefined
+  }
+
+  /**
    * File match for `root` from the matches of its top-level `items`, as a full parse would build it.
    * - Default:  `undefined`, i.e. can't.  Languages which support `reparseBody()` override.
    */

@@ -922,6 +922,13 @@ export class SpellParser extends P.Parser {
     return item.is(SP.BlockLine) ? item.rule.reparseBody(item, body) : undefined
   }
 
+  /** Re-parse the innermost body an edit changed inside a top-level `line`'s body -- see `BlockLine.reparseInnerBody()`. */
+  reparseInnerBody(item: P.Match, body: P.BlockToken, texts: { oldText: string; text: string }): P.Match | undefined {
+    const { journal } = this
+    if (!journal || !item.is(SP.BlockLine)) return undefined
+    return item.rule.reparseInnerBody(item, body, { ...texts, journal })
+  }
+
   /** File match from its top-level item matches, as `Block.parse()` builds it -- see `Block.assembleBlock()`. */
   assembleFile(scope: P.Scope, root: P.BlockToken, items: P.Match[]): P.Match | undefined {
     const rule = this.getRuleOrDie("block")
