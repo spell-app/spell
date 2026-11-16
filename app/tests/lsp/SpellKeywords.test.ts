@@ -189,17 +189,17 @@ describe("SpellKeywords", () => {
       expect(CLOSES_TAG.test(`<x>`)).toBe(false)
     })
 
-    test("VS Code's Enter rules are Monaco's", () => {
-      const rules = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).onEnterRules as {
-        beforeText: string | { pattern: string; flags: string }
-        afterText?: { pattern: string; flags: string }
-        action: { indent: string }
-      }[]
-      const asRegExp = (it: { source: string; flags: string }) => ({ pattern: it.source, flags: it.flags })
-      expect(rules.slice(0, 2)).toEqual([
-        { beforeText: asRegExp(OPENS_TAG), afterText: asRegExp(CLOSES_TAG), action: { indent: "indentOutdent" } },
-        { beforeText: asRegExp(OPENS_TAG), action: { indent: "indent" } }
-      ])
+    test("VS Code's Enter rules are the shared table, every rule in its order (epic `codemirror` P1)", () => {
+      const rules = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).onEnterRules as unknown[]
+      // VS Code writes a regex with no flags as its bare pattern
+      const asJson = (it: RegExp) => (it.flags ? { pattern: it.source, flags: it.flags } : it.source)
+      expect(rules).toEqual(
+        LSP.SpellTyping.ENTER_RULES.map(({ beforeText, afterText, indent }) => ({
+          beforeText: asJson(beforeText),
+          ...(afterText ? { afterText: asJson(afterText) } : {}),
+          action: { indent }
+        }))
+      )
     })
   })
 })

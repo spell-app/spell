@@ -672,6 +672,11 @@
       "types": "./ui/dist-types/src/components/ui-action/index.d.ts",
       "default": "./ui/src/components/ui-action/index.ts"
     },
+    "./ui/components/ui-app-menu": {
+      "spell-source": "./ui/src/components/ui-app-menu/index.ts",
+      "types": "./ui/dist-types/src/components/ui-app-menu/index.d.ts",
+      "default": "./ui/src/components/ui-app-menu/index.ts"
+    },
     "./ui/components/ui-toolbar": {
       "spell-source": "./ui/src/components/ui-toolbar/index.ts",
       "types": "./ui/dist-types/src/components/ui-toolbar/index.d.ts",
@@ -751,6 +756,11 @@
       "spell-source": "./ui/src/docs-components/ui-docs-nav/index.ts",
       "types": "./ui/dist-types/src/docs-components/ui-docs-nav/index.d.ts",
       "default": "./ui/src/docs-components/ui-docs-nav/index.ts"
+    },
+    "./ui/docs-components/ui-docs-palette": {
+      "spell-source": "./ui/src/docs-components/ui-docs-palette/index.ts",
+      "types": "./ui/dist-types/src/docs-components/ui-docs-palette/index.d.ts",
+      "default": "./ui/src/docs-components/ui-docs-palette/index.ts"
     },
     "./ui/docs-components/ui-docs-search": {
       "spell-source": "./ui/src/docs-components/ui-docs-search/index.ts",

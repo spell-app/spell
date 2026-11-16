@@ -40,7 +40,7 @@
 }
 
 @layer ui.components.property.states {
-  /* ## A compact editor's yes or no:  "[x] Label (i)" */
+  /* ## A compact editor's yes or no:  "(o  ) Label (i)", its toggle before its label */
   :host(:state(inline-check)) .inline.field:has(> .row) {
     flex-wrap: nowrap;
     column-gap: 0.5em;
@@ -50,6 +50,9 @@
     flex: 0 0 auto;
     /* the box keeps no room for text of its own:  its label is the field's, beside it */
     --ui-checkbox-label-distance: 0;
+    /* a toggle a size smaller, for the form's density (epic `editor` I177) */
+    --ui-checkbox-toggle-width: 2.5em;
+    --ui-checkbox-toggle-handle: 1.25em;
   }
   :host(:state(inline-check)) .inline.field > .row > .label {
     cursor: var(--ui-control-cursor);

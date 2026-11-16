@@ -106,6 +106,8 @@
     "strong": { "light": "#ffffffe6", "dark": "#3a3846cc" },
     // a bar over scrolling content, for pages that draw one (the docs site's top bar, its sticky titles)
     "bar": "{own.glass-bar}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  the bar's lavender page at its palest:  halfway to white light, the bar's own plum, solid, dark
+    "side-panel": { "light": "#f9f7fd", "dark": "#1e1c26" },
     "code": { "light": "#ffffff80", "dark": "#00000040" },
     "highlight": "{own.glass-accent-wash}"
   },
@@ -195,8 +197,10 @@
       "text-color": "{brand.primary.on}"
     },
     "checkbox": {
-      // round checks:  the to-do circle of Reminders
-      "radius": "{radii.circle}"
+      // a box with soft corners, never a circle:  a round one reads as a radio (epic `editor` I177)
+      "radius": "4px",
+      // a toggle's knob is white in dark too:  the surface would sink into the dark lane
+      "handle-background": "white"
     },
     "input": {
       "radius": "{radii.m}",

@@ -3,10 +3,9 @@ import type { Position } from "vscode-languageserver"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { appTexts, renameRefusal } from "spell/app/app/ui/AppTexts"
-import { codeHover } from "spell/app/app/ui/codePopups"
+import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { monaco } from "./monaco"
-import { AppAddresses } from "./AppAddresses"
 import { LspToMonaco } from "./LspToMonaco"
 import type { SpellModels } from "./SpellModels"
 
@@ -25,7 +24,7 @@ import type { SpellModels } from "./SpellModels"
  */
 export class SpellLanguageFeatures {
   declare service: LSP.SpellLanguageService
-  declare addresses: AppAddresses
+  declare addresses: LSP.AppAddresses
   declare models: SpellModels
   /** Show the file at `path`, selecting `selection` -- asked by editor `source`, if we know it.  `true` if shown. */
   declare open: (path: string, selection?: UIT.EditorSelection, source?: monaco.editor.ICodeEditor) => boolean
@@ -145,10 +144,10 @@ export class SpellLanguageFeatures {
     return LspToMonaco.semanticTokens(tokens)
   }
 
-  /** Hover at `position`, e.g. what a word is and its docstring, saying as much as `codeHover` asks. */
+  /** Hover at `position`, e.g. what a word is and its docstring, saying as much as Settings… asks (`CodeEditorFeatures.hover()`). */
   private hover(model: monaco.editor.ITextModel, position: monaco.Position): monaco.languages.Hover | null {
     const file = this.fileOf(model)
-    const hover = file && this.service.hover(file, LspToMonaco.lspPosition(position), codeHover.detail)
+    const hover = file && CodeEditorFeatures.hover(this.service, file, LspToMonaco.lspPosition(position))
     return hover ? LspToMonaco.hover(hover) : null
   }
 
@@ -180,7 +179,7 @@ export class SpellLanguageFeatures {
   /** Quick fixes and rewrites for `range`:  "Define `to <phrase>`" on a line that didn't parse, "Make it code" on a value. */
   private codeActions(model: monaco.editor.ITextModel, range: monaco.Range): monaco.languages.CodeActionList {
     const file = this.fileOf(model)
-    const actions = file ? this.service.codeActions(file, LspToMonaco.lspRange(range)) : []
+    const actions = file ? CodeEditorFeatures.codeActions(this.service, file, LspToMonaco.lspRange(range)) : []
     return { actions: actions.map((action) => LspToMonaco.codeAction(action)), dispose() {} }
   }
 
@@ -396,7 +395,7 @@ export class SpellLanguageFeatures {
       source?.trigger("spell", "editor.action.showHover", { focus: false })
       return !!source
     }
-    const path = AppAddresses.pathOf(resource)
+    const path = LSP.AppAddresses.pathOf(resource)
     if (path === undefined) return false
     if (!selectionOrPosition) return this.open(path, undefined, source)
     else {
@@ -440,7 +439,7 @@ export type SpellLanguageFeaturesProps = {
   /** Answers every question. */
   service: LSP.SpellLanguageService
   /** How our models' URIs map to files. */
-  addresses: AppAddresses
+  addresses: LSP.AppAddresses
   /** Our models, e.g. to save after a rename. */
   models: SpellModels
   /** Show the file at `path`, selecting `selection` -- asked by editor `source`, if we know it.  `true` if shown. */

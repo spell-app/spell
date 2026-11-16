@@ -477,12 +477,12 @@ function firstPhrase(description: string | undefined): string | undefined {
 export function ChooserToolbar(props: { isHome?: boolean }) {
   return (
     <AppMenu>
-      <Submenu left spring>
+      <Submenu slot="start" left spring>
         <ui-menu appearance="capsule">
           <AppMark />
         </ui-menu>
       </Submenu>
-      <Submenu right spring>
+      <Submenu slot="end" right spring>
         <ui-menu appearance="capsule">
           <Actions.showProjectChooser iconOnly active={props.isHome ?? true} />
           <ThemeMenu />

@@ -16,6 +16,11 @@
       "summary": "An ad displays third-party promotional content.",
       "status": "done"
     },
+    "ui-app-menu": {
+      "title": "App menu",
+      "summary": "An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.",
+      "status": "done"
+    },
     "ui-breadcrumbs": {
       "title": "Breadcrumb",
       "summary": "A breadcrumb is used to show hierarchy between content.",
@@ -123,6 +128,11 @@
     "ui-docs-nav": {
       "title": "Docs nav",
       "summary": "A docs nav lists the site's pages and every component, A-Z or by topic, with search and favourites;  the current page is highlighted and scrolled into view.",
+      "status": "done"
+    },
+    "ui-docs-palette": {
+      "title": "Docs palette",
+      "summary": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
       "status": "done"
     },
     "ui-docs-search": {

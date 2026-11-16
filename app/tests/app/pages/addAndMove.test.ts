@@ -115,9 +115,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         if (isProgram) saved = request.postData() ?? ""
         return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
       }
-      return isProgram
-        ? route.fulfill({ contentType: "text/plain", body: saved ?? BLANK })
-        : route.continue()
+      return isProgram ? route.fulfill({ contentType: "text/plain", body: saved ?? BLANK }) : route.continue()
     })
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/TaskList`, { timeout: 60_000 })
@@ -837,17 +835,65 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .monaco-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload", async () => {
+  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80)", async () => {
+    const popupShows = () =>
+      page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
     await page.locator("#AddPartButton").click()
     await page.waitForTimeout(600)
+    expect(await popupShows()).toBe(true)
     await page.locator(".PalettePopup .PalettePin").click()
     await page.waitForTimeout(600)
     expect(await page.locator(".PaletteStrip").count()).toBe(1)
+    expect(await popupShows()).toBe(false)
     await page.reload()
-    await page.waitForSelector(".PaletteStrip", { timeout: 60_000 })
-    await page.locator(".PaletteStrip .PalettePin").click()
+    await page.waitForSelector(".PaletteStrip .PaletteGroupName", { timeout: 60_000 })
+    await page.waitForTimeout(1000)
+
+    // the pinned bar:  a topic's name opens its menu, every part filed there;  choosing one closes it (I176)
+    const menusOpen = () =>
+      page.evaluate(
+        () =>
+          [...document.querySelectorAll(".PaletteGroupPopup")].filter(
+            (menu) => (menu as HTMLElement & { visible?: boolean }).visible
+          ).length
+      )
+    await page.locator(".PaletteStrip .PaletteGroupName", { hasText: "Layout" }).click()
+    await page.waitForTimeout(600)
+    expect(await menusOpen()).toBe(1)
+    expect(await page.locator('.PaletteGroupPopup ui-tree-item[label="Grid"]').count()).toBe(1)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(600)
+    expect(await menusOpen()).toBe(0)
+
+    await page.locator(".PaletteStrip .PaletteClose").click()
     await page.waitForTimeout(600)
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
+  })
+
+  test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180)", async () => {
+    const popupShows = () =>
+      page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
+    await page.locator("#AddPartButton").click()
+    await page.waitForTimeout(600)
+    // no "N more":  what was behind it shows, under its topic
+    expect(await page.locator(".PalettePopup .PaletteMore").count()).toBe(0)
+    expect(await page.locator('.PalettePopup ui-tree-item[label="Grid"]').count()).toBe(1)
+    // a group of buttons, ready-made;  everything fits, in 5 columns, with no scrolling (I180)
+    expect(await page.locator('.PalettePopup ui-tree-item[label="Buttons"]').count()).toBe(1)
+    const fits = await page.evaluate(() => {
+      const groups = document.querySelector(".PalettePopup .PaletteGroups")!
+      const columns = new Set(
+        [...document.querySelectorAll(".PalettePopup .PaletteGroup")].map((group) => group.getBoundingClientRect().x)
+      )
+      return { scrolls: groups.scrollHeight > groups.clientHeight + 1, columns: columns.size }
+    })
+    expect(fits).toEqual({ scrolls: false, columns: 5 })
+    await page.locator(".PalettePopup .PaletteSearch input").fill("grid")
+    await page.waitForTimeout(600)
+    expect(await page.locator(".PalettePopup .PaletteGroup:not(.ThisApp) ui-tree-item").count()).toBeGreaterThan(0)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(600)
+    expect(await popupShows()).toBe(false)
   })
 
   test("a page that draws, its whole drawing in its shadow root, says nothing of dragging (T77)", async () => {

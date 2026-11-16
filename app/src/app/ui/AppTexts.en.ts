@@ -155,6 +155,7 @@ export const APP_TEXTS = {
   draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
+  closeTab: "Close",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftHeading: "Throw away your draft?",
@@ -611,16 +612,13 @@ export const APP_TEXTS = {
   // F2's new name refused, for a property, a type or a name
   renameRefused:
     "{oldName} can't be renamed {newName}:\nuse letters, numbers and dashes,\nand a name nothing else has.",
-  inspectorProperties: "Properties",
-  inspectorClose: "Close the Inspector",
-  inspectorHide: "Hide this card",
   inspectorExpandAll: "Expand all",
   inspectorCollapseAll: "Collapse all",
-  inspectorPanels: "Show or hide panels",
   // the phone's sheet (`<InspectorSheetBar>`)
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
-  inspectorAddEvent: "Add event",
+  inspectorAddEvent: "Add Event",
+  inspectorAddAction: "Add Action",
   // a Code card row's ✕ (`<RemoveEventButton>`, epic `editor` T73):  its tooltip and undo step, then what it asks
   inspectorRemoveEvent: "Remove {event}",
   inspectorRemoveEventConfirm: 'Remove "{event}"?\nIts code goes with it.\n⌥-click the ✕ to remove without asking.',

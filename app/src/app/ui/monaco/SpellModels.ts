@@ -1,9 +1,8 @@
 import { observe } from "spell/util"
 import { SP } from "spell/parser/spell"
-import type { LSP } from "spell/app/lsp"
+import { LSP } from "spell/app/lsp"
 import type { TextEdit } from "vscode-languageserver"
 import { monaco } from "./monaco"
-import { AppAddresses } from "./AppAddresses"
 import { LspToMonaco } from "./LspToMonaco"
 import { SpellMonaco } from "./SpellMonaco"
 
@@ -192,7 +191,7 @@ export class SpellModels {
     const existing = this.#models.get(file.path)
     if (existing) return existing.model
 
-    const uri = monaco.Uri.parse(AppAddresses.uriOf(file.path))
+    const uri = monaco.Uri.parse(LSP.AppAddresses.uriOf(file.path))
     const model =
       monaco.editor.getModel(uri) ??
       monaco.editor.createModel(file.contents ?? "", SpellMonaco.languageForPath(file.path, file.contents), uri)

@@ -5,22 +5,22 @@ import { EditorView, keymap } from "@codemirror/view"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
-// The pure helps' reading of lines, shared with Monaco's:  its file imports Monaco's TYPES only, so no Monaco comes with it
-import { SpellTyping } from "spell/app/app/ui/monaco/SpellTyping"
 import { snippetOf } from "./CodeMirrorLanguage"
 
 /****************
  * ### `CodeMirrorTyping`
  * The Spell typing helps that matter most, in a CodeMirror editor (epic `editor` P30, the CodeMirror test):
  * four of the nine Monaco's `SpellTyping` gives, enough to judge.
- * - Enter keeps the line's indent, goes in a level after a `:` or an opening tag, and between `<x>` and `</x>` puts
- *   the caret a level in and the closing tag on its own line;  it leaves no tabs or spaces at the end of the line
- *   it splits.
+ * - Enter keeps the line's indent and follows Spell's Enter rules (`LSP.SpellTyping.ENTER_RULES`):
+ *   a level in after a `:`, an opening tag, a line ending in `and` / `or`, or before a comment after code;
+ *   between `<x>` and `</x>`, the caret a level in and the closing tag on its own line.
+ *   It leaves no tabs or spaces at the end of the line it splits.
  * - A space after a tag's name writes the rest of the tag, the caret where its next words go:
  *   `<action ` => `<action "|" />`, the program's actions listed at once (`LSP.CompletionShapes.spaceAfterTag()`).
  * - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between.
  * - A letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in.
- * - What each reads of the lines is Monaco's own (`SpellTyping`'s static helpers), so both editors decide alike.
+ * - What each reads of the lines is the language service's (`LSP.SpellTyping`), as Monaco's is, so both editors
+ *   decide alike.
  ****************/
 export class CodeMirrorTyping {
   /** The helps, for a file in `lang`;  `fileOf()`:  the project file, whose parse says which tags are its views. */
@@ -39,25 +39,17 @@ export class CodeMirrorTyping {
     if (state.selection.ranges.length > 1) return false
     const { from, to } = state.selection.main
     const line = state.doc.lineAt(from)
-    const before = state.sliceDoc(line.from, from).replace(/[ \t]+$/, "")
+    const text = state.sliceDoc(line.from, from)
     const after = state.sliceDoc(to, line.to)
-    const indent = /^[ \t]*/.exec(line.text)![0]
-    const opens = /:$/.test(before) || OPENING_TAG_AT_END.test(before)
-    const inner = opens ? indent + "\t" : indent
-    // between `<x>` and `</x>`:  the caret a level in, the closing tag on its own line
-    if (opens && /^\s*<\//.test(after)) {
-      const insert = `\n${inner}\n${indent}`
-      view.dispatch({
-        changes: { from: line.from + before.length, to, insert },
-        selection: { anchor: line.from + before.length + 1 + inner.length },
-        userEvent: "input"
-      })
-      return true
-    }
-    const insert = `\n${inner}`
+    // no tabs or spaces left at the end of the line Enter splits (I160)
+    const before = text.slice(0, text.length - LSP.SpellTyping.spaceAtEnd(text))
+    const indent = LSP.SpellTyping.indentOf(line.text)
+    const rule = LSP.SpellTyping.enterRuleFor(before, after)
+    const inner = rule ? indent + "\t" : indent
+    const insert = rule?.indent === "indentOutdent" ? `\n${inner}\n${indent}` : `\n${inner}`
     view.dispatch({
       changes: { from: line.from + before.length, to, insert },
-      selection: { anchor: line.from + before.length + insert.length },
+      selection: { anchor: line.from + before.length + 1 + inner.length },
       scrollIntoView: true,
       userEvent: "input"
     })
@@ -77,7 +69,7 @@ export class CodeMirrorTyping {
     const lines = view.state.doc.toString().split("\n")
     lines[line.number - 1] = lineText
     const index = line.number - 1
-    const indent = SpellTyping.indentToAdd(lines, index, column)
+    const indent = LSP.SpellTyping.indentToAdd(lines, index, column)
     if (indent) {
       view.dispatch({
         changes: { from: line.from, insert: indent + line.text.slice(0, column) + text, to: from },
@@ -87,7 +79,7 @@ export class CodeMirrorTyping {
       return true
     }
     if (text !== " ") return false
-    const tag = SpellTyping.tagBeforeSpace(lines, index, column)
+    const tag = LSP.SpellTyping.tagBeforeSpace(lines, index, column)
     if (tag) {
       const rest = LSP.CompletionShapes.spaceAfterTag(scopeOf(fileOf(), lang), tag)
       view.dispatch({ changes: { from, insert: " " }, selection: { anchor: from + 1 }, userEvent: "input.type" })
@@ -95,7 +87,7 @@ export class CodeMirrorTyping {
       if (rest.command) queueMicrotask(() => startCompletion(view))
       return true
     }
-    if (SpellTyping.opensQuotes(lines, index, lang)) {
+    if (LSP.SpellTyping.opensQuotes(lines, index, lang)) {
       view.dispatch({ changes: { from, insert: ' ""' }, selection: { anchor: from + 2 }, userEvent: "input.type" })
       return true
     }
@@ -114,9 +106,6 @@ type Typing = {
   /** the project file shown */
   fileOf: () => SP.SpellFile | undefined
 }
-
-/** A line ending in a tag that opens, `<content>` or `<toolbar class="x">`:  not `<divider />`, not `</x>`. */
-const OPENING_TAG_AT_END = /<[\p{L}][^<>/]*(?:"[^"]*"[^<>/]*)*>$/u
 
 /** The scope a tag typed in `file` is read in:  its last parse's, else its language's. */
 function scopeOf(file: SP.SpellFile | undefined, lang: string): P.Scope {

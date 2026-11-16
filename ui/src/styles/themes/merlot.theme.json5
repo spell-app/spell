@@ -65,6 +65,8 @@
     // as in the other three themes;  a tab bar on them keeps the panels' colour behind it, so the tabs still stand out
     // (Owen's pick, epic `debut` P17, Q2:  the stuck header stood apart in the panels' white / lighter plum)
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  the bar's rose at its palest:  `merlot-panel` light, `merlot-inset` dark (a step off the bar)
+    "side-panel": { "light": "#fefcfd", "dark": "#2b1520" },
     "code": "{own.merlot-inset}",
     "highlight": "{own.merlot-accent-wash}"
   },

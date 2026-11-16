@@ -4,7 +4,6 @@ import type * as UIT from "spell/app/app/ui/ui.types"
 import { CODE_POPUP_DEFAULTS, monacoOptionsFor } from "spell/app/app/ui/codePopups"
 import { CodeThemes } from "spell/app/app/ui/monaco/themes/CodeThemes"
 import { monaco } from "./monaco"
-import { AppAddresses } from "./AppAddresses"
 import { SpellHeadings } from "./SpellHeadings"
 import { SpellBubbly } from "./SpellBubbly"
 import { SpellTyping } from "./SpellTyping"
@@ -17,6 +16,12 @@ import { LinkClick } from "./LinkClick"
 import { SpellTokensProvider } from "./SpellTokensProvider"
 import { SpellModels } from "./SpellModels"
 import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
+
+/** Monaco's indent action for each of the Enter rules' `indent`s (`LSP.SpellTyping.ENTER_RULES`). */
+const ENTER_INDENT = {
+  indent: monaco.languages.IndentAction.Indent,
+  indentOutdent: monaco.languages.IndentAction.IndentOutdent
+} as const satisfies Record<LSP.EnterRule["indent"], monaco.languages.IndentAction>
 
 /**
  * Spell in Monaco:  the `spell` and `spell-page` languages and their features, and the options every `<MonacoEditor>`
@@ -87,6 +92,7 @@ export class SpellMonaco {
   /**
    * How spell edits:  comments, brackets, back out for `else` (`SpellKeywords`);
    *   in a level after a trailing `:` or an opening tag, and between `<x>` and `</x>` (epic `editor` I65).
+   * - Its Enter rules are the language service's table (`LSP.SpellTyping.ENTER_RULES`).
    * - NOTE: keep in step with the VS Code extension's `vscode/language-configuration.json`:
    *   a test checks they match.
    */
@@ -116,23 +122,12 @@ export class SpellMonaco {
       increaseIndentPattern: /:\s*$/,
       decreaseIndentPattern: LSP.SpellKeywords.DECREASE_INDENT
     },
-    onEnterRules: [
-      {
-        beforeText: LSP.SpellKeywords.OPENS_TAG,
-        afterText: LSP.SpellKeywords.CLOSES_TAG,
-        action: { indentAction: monaco.languages.IndentAction.IndentOutdent }
-      },
-      { beforeText: LSP.SpellKeywords.OPENS_TAG, action: { indentAction: monaco.languages.IndentAction.Indent } },
-      // a comment after code goes on its own line, a level in (epic `editor` I155)
-      {
-        beforeText: LSP.SpellKeywords.CODE_BEFORE,
-        afterText: LSP.SpellKeywords.COMMENT_AFTER,
-        action: { indentAction: monaco.languages.IndentAction.Indent }
-      },
-      { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } },
-      // a condition going on onto the next line (epic `language` P55, Q53)
-      { beforeText: LSP.SpellKeywords.CONTINUES_LINE, action: { indentAction: monaco.languages.IndentAction.Indent } }
-    ]
+    // Spell's Enter rules, one table for every editor (`LSP.SpellTyping.ENTER_RULES`)
+    onEnterRules: LSP.SpellTyping.ENTER_RULES.map(({ beforeText, afterText, indent }) => ({
+      beforeText,
+      ...(afterText ? { afterText } : {}),
+      action: { indentAction: ENTER_INDENT[indent] }
+    }))
   }
 
   /** Who hears each edit -- see `onEdit()`. */
@@ -224,7 +219,7 @@ export class SpellMonaco {
       .then(colourEach)
       .catch((error) => console.warn("SpellMonaco.register():  CSS, markdown or html colouring didn't load", error))
 
-    const addresses = new AppAddresses()
+    const addresses = new LSP.AppAddresses()
     const service = new LSP.SpellLanguageService(addresses)
     // its value's words list a Pick row first, which opens the picker at the caret (epic `editor` T61)
     service.picksValues = true
@@ -275,7 +270,7 @@ export type SpellMonacoOpener = (
 
 /** Everything `SpellMonaco.register()` makes. */
 export type SpellMonacoParts = {
-  addresses: AppAddresses
+  addresses: LSP.AppAddresses
   service: LSP.SpellLanguageService
   models: SpellModels
   features: SpellLanguageFeatures

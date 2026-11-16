@@ -1,9 +1,11 @@
 import { Show } from "solid-js"
 
 import { E } from "spell/ui/core"
+import type { UITree } from "./UITree"
 import { treeItemVocabulary } from "./UITreeItem.en"
 
 import treeCSS from "./UITree.css?inline"
+import columnsCSS from "./UITreeColumns.css?inline"
 
 /****************
  * ### `UITreeItem`
@@ -21,8 +23,13 @@ import treeCSS from "./UITree.css?inline"
  * - A click on the row isn't handled here:  it reaches `<ui-tree>`, which knows the other rows.
  * - The row is what takes the focus' ring, though the DOM element takes the focus:  the tree's keys move it.
  * - How deep it is comes from its place, read as it connects:  it pads its row, so a selected row fills the width.
+ * - Its tree's `appearance="columns"`:  `:state(in-columns)`, followed as the tree's `appearance` changes.
+ *   - While it's open, the rows inside it are the tree's next column, beside the one it's in, with that column's title
+ *     (`UITreeColumns.css`).
+ *   - The tree does the picking:  a click on its triangle is a click on the row.
  * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
  *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
+ *   - `band="group"`:  a quiet label over its rows, with no arrow:  whatever holds the tree opens it.
  *   - Its rows stay drawn while it's closed (shut, and out of the keys' and a screen reader's reach), so they ease open
  *     and shut, as the docs site's folds do (`--ui-tree-nav-open-duration` ...).  Every other tree draws them only
  *     while it's open.
@@ -30,7 +37,7 @@ import treeCSS from "./UITree.css?inline"
 export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   @E.proto static vocabulary = treeItemVocabulary
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    styleSheets: { tree: treeCSS },
+    styleSheets: { tree: treeCSS, columns: columnsCSS },
     delegatesFocus: false,
     aria: { role: "treeitem" },
     cssStates: ["selected"]
@@ -47,6 +54,35 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
 
   /** How many rows it's inside that aren't `band`s:  how far in it's drawn, as a heading band adds no step. */
   @E.state accessor indent = 0
+
+  /** The `<ui-tree>` it's in, found as it connects. */
+  @E.state accessor treeElement: E.DOMElement | undefined = undefined
+
+  /** Its tree's component, once it has one. */
+  private get tree(): UITree | undefined {
+    return this.treeElement?.component as UITree | undefined
+  }
+
+  /** Its tree shows a column per level (`appearance="columns"`):  `:state(in-columns)`. */
+  @E.cssState("in-columns")
+  get isInColumns(): boolean {
+    return !!this.tree?.isColumns
+  }
+
+  /** `appearance="columns"`:  the title over the column of rows inside it, from the tree's `column-titles`. */
+  get columnTitle(): string | undefined {
+    return this.isInColumns ? this.tree?.titleForColumn(this.depth + 1) : undefined
+  }
+
+  /** `appearance="columns"`:  where the column of rows inside it goes, and how wide it is, as its tree says. */
+  get columnPlace(): Record<string, string> | undefined {
+    const { tree } = this
+    if (!this.isInColumns || !tree) return undefined
+    return {
+      "--_ui-tree-column-start": tree.columnStartCSS(this.depth + 1),
+      "--_ui-tree-column-own-width": tree.columnWidthCSS(this.depth + 1)
+    }
+  }
 
   /** Its tree is a side navigation (`appearance="nav"`):  `:state(nav)`. */
   @E.cssState("nav") @E.state accessor isInNav = false
@@ -77,7 +113,8 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
 
   /** The rows inside it are on screen. */
   get showsRows(): boolean {
-    return this.canOpen && (this.isOpen || this.isKeptOpen)
+    // a column view shows only the chain of picks:  a filter's match opens no column
+    return this.canOpen && (this.isOpen || (this.isKeptOpen && !this.isInColumns))
   }
 
   /** The box of rows inside it is drawn:  while they show, and always in a side navigation, so they ease. */
@@ -117,7 +154,11 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   render() {
     return (
       <>
-        <div class={["row", this.band]} part={this.partForName("row")} style={{ "--_ui-tree-depth": this.indent }}>
+        <div
+          class={["row", this.band]}
+          part={this.partForName("row")}
+          style={{ "--_ui-tree-depth": this.isInColumns ? 0 : this.indent }}
+        >
           <span
             class="toggle"
             part={this.partForName("toggle")}
@@ -158,7 +199,16 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
             role="group"
             part={this.partForName("group")}
             inert={this.showsRows ? undefined : ""}
+            aria-label={this.columnTitle}
+            style={this.columnPlace}
           >
+            <Show when={this.columnTitle}>
+              {(title) => (
+                <div class="column-title" aria-hidden="true">
+                  {title()}
+                </div>
+              )}
+            </Show>
             <div class="folded">
               <slot />
             </div>
@@ -168,9 +218,9 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
     )
   }
 
-  /** The triangle was clicked:  open or close, and select nothing. */
+  /** The triangle was clicked:  open or close, and select nothing;  in a column view, it's a click on the row. */
   @E.untracked private readonly onToggleClicked = (event: MouseEvent) => {
-    if (!this.canOpen) return
+    if (!this.canOpen || this.isInColumns) return
     event.stopPropagation()
     this.disclosure.toggle(event)
   }
@@ -188,6 +238,9 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
     this.depth = depth
     this.indent = indent
     this.isInNav = at?.getAttribute("appearance") === NAV
+    this.treeElement = at ? (at as E.DOMElement) : undefined
+    // after this connect's render:  a write here could land inside the tree's own
+    E.afterSolidUpdate(() => this.tree?.rowConnected())
   }
 
   /** It was selected, by whatever:  it shows, in the middle of the tree if it was out of sight. */

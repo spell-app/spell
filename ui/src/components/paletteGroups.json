@@ -1,0 +1,141 @@
+{
+  "groups": [
+    {
+      "topic": "layout",
+      "tags": [
+        "ui-container",
+        "ui-divider",
+        "ui-section",
+        "ui-grid",
+        "ui-page",
+        "ui-panel",
+        "ui-rail",
+        "ui-sections",
+        "ui-space",
+        "ui-split-panel",
+        "ui-stack",
+        "ui-sticky"
+      ]
+    },
+    {
+      "topic": "containers",
+      "tags": ["ui-segment", "ui-accordion", "ui-include", "ui-segments"]
+    },
+    {
+      "topic": "navigation",
+      "tags": ["ui-breadcrumbs", "ui-sidebar", "ui-site-nav", "ui-site-tabs", "ui-steps", "ui-tabs", "ui-toc"]
+    },
+    {
+      "topic": "menus",
+      "tags": ["ui-menu", "ui-action", "ui-toolbar"]
+    },
+    {
+      "topic": "forms",
+      "tags": [
+        "ui-checkbox",
+        "ui-input",
+        "ui-dropdown",
+        "ui-form",
+        "ui-icon-picker",
+        "ui-property-editor",
+        "ui-radio",
+        "ui-select",
+        "ui-textarea",
+        "ui-theme-editor"
+      ]
+    },
+    {
+      "topic": "inputs",
+      "tags": ["ui-slider", "ui-rating", "ui-search", "ui-sides"]
+    },
+    {
+      "topic": "controls",
+      "tags": ["ui-theme-menu"]
+    },
+    {
+      "topic": "buttons",
+      "tags": ["ui-button", "ui-buttons"]
+    },
+    {
+      "topic": "date & time",
+      "tags": ["ui-calendar"]
+    },
+    {
+      "topic": "text",
+      "tags": ["ui-text", "ui-code", "ui-dimension", "ui-keys", "ui-markdown", "ui-quote", "ui-terms"]
+    },
+    {
+      "topic": "media",
+      "tags": ["ui-ad", "ui-audio", "ui-embed", "ui-video"]
+    },
+    {
+      "topic": "images",
+      "tags": ["ui-image", "ui-images", "ui-zoom"]
+    },
+    {
+      "topic": "icons",
+      "tags": ["ui-emoji", "ui-flag", "ui-icon", "ui-icons"]
+    },
+    {
+      "topic": "data display",
+      "tags": ["ui-diagram", "ui-json", "ui-statistic", "ui-statistics", "ui-tree-diagram"]
+    },
+    {
+      "topic": "lists",
+      "tags": ["ui-list", "ui-item", "ui-items", "ui-tree"]
+    },
+    {
+      "topic": "tables",
+      "tags": ["ui-table"]
+    },
+    {
+      "topic": "cards",
+      "tags": ["ui-card", "ui-cards"]
+    },
+    {
+      "topic": "messages",
+      "tags": ["ui-message"]
+    },
+    {
+      "topic": "notifications",
+      "tags": ["ui-nag", "ui-toast"]
+    },
+    {
+      "topic": "overlays",
+      "tags": ["ui-dimmer", "ui-flyout"]
+    },
+    {
+      "topic": "dialogs",
+      "tags": ["ui-modal"]
+    },
+    {
+      "topic": "popups",
+      "tags": ["ui-popup"]
+    },
+    {
+      "topic": "loading",
+      "tags": ["ui-loader", "ui-placeholder"]
+    },
+    {
+      "topic": "progress",
+      "tags": ["ui-progress"]
+    },
+    {
+      "topic": "status",
+      "tags": ["ui-label", "ui-labels"]
+    },
+    {
+      "topic": "animation",
+      "tags": ["ui-reveal", "ui-shape", "ui-transition", "ui-visibility"]
+    },
+    {
+      "topic": "social",
+      "tags": ["ui-comment", "ui-comments", "ui-feed"]
+    },
+    {
+      "topic": "documentation",
+      "tags": ["ui-example"]
+    }
+  ],
+  "hidden": []
+}

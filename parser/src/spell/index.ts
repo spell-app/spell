@@ -60,6 +60,7 @@ export {
   spellTagsIn,
   type SpellTag,
   ActionButton,
+  SpellJSX,
   isBareComponentName,
   type JSXMatchData,
   MarkdownDescription,

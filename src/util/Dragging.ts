@@ -28,6 +28,7 @@ import { beforeNextPaint, soon } from "./timing"
  *   as it does for a drag the browser takes away, or the window losing focus mid-drag (epic `language` T29).
  *   - What moved is drawn again in its new list, and glides there from where it was dropped (`Glides`).
  * - A mouse drag covers the whole page with the closed hand, whatever is under it (`DRAG_COVER`).
+ *   - Or the cursor its owner says (`DragOptions.cursor`):  a line that resizes keeps `col-resize` while it's dragged.
  *   - A rule can't do that:  nothing in a page's sheets reaches into every shadow root,
  *     and the code editor sets its own cursor.
  * - A drag can leave finding its place to its owner (`DragOptions.placing`), e.g. the editor's, moving a part:
@@ -39,7 +40,7 @@ export class Dragging {
   /** The drag in progress, if any:  a list under the pointer asks it what's coming. */
   static current: Dragging | undefined
 
-  /** What covers the page during a mouse drag, showing the closed hand:  made once, on the first use. */
+  /** What covers the page during a mouse drag, showing its cursor:  made once, on the first use. */
   private static get cover(): HTMLElement {
     if (!Dragging.madeCover) {
       Dragging.madeCover = document.createElement("div")
@@ -153,7 +154,10 @@ export class Dragging {
     // no text selected as the pointer sweeps the page, as the browser's own drag selects none
     getSelection()?.removeAllRanges()
     document.documentElement.style.userSelect = "none"
-    if (!this.isTouch) document.body.append(Dragging.cover)
+    if (!this.isTouch) {
+      Dragging.cover.style.cursor = this.options.cursor ?? DRAG_CURSOR
+      document.body.append(Dragging.cover)
+    }
     Dragging.current = this
     this.element.dispatchEvent(new DragEvent("dragstart", { bubbles: true, composed: true }))
   }
@@ -351,6 +355,8 @@ export type DragOptions = {
   follows?: boolean
   /** Its owner finds the place itself:  told where the pointer is as it moves, and no list hears of the drag. */
   placing?(x: number, y: number): void
+  /** The cursor over the whole page while it's dragged with a mouse, as CSS says it:  default the closed hand. */
+  cursor?: string
 }
 
 /** How far the pointer moves before a press is a drag, in pixels:  less is a click. */
@@ -359,8 +365,11 @@ export const DRAG_START_PX = 6
 /** Above the board while dragged. */
 const DRAGGING_Z_INDEX = "1000"
 
-/** How the page's cover looks during a mouse drag (`Dragging.cover`):  clear, over everything, the closed hand. */
-const DRAG_COVER = "position: fixed; inset: 0; z-index: 2147483647; cursor: grabbing"
+/** How the page's cover looks during a mouse drag (`Dragging.cover`):  clear, over everything;  its cursor, the drag's. */
+const DRAG_COVER = "position: fixed; inset: 0; z-index: 2147483647"
+
+/** The cursor while dragging, unless the drag says another (`DragOptions.cursor`):  the closed hand. */
+const DRAG_CURSOR = "grabbing"
 
 /** How long a drop nobody took slides back, in milliseconds. */
 const SLIDE_BACK_MS = 200

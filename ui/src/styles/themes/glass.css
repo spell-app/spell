@@ -63,6 +63,7 @@
     --ui-surface-muted: var(--glass-surface);
     --ui-surface-strong: light-dark(#ffffffe6, #3a3846cc);
     --ui-bar-background: var(--glass-bar);
+    --ui-side-panel-background: light-dark(#f9f7fd, #1e1c26);
     --ui-code-background: light-dark(#ffffff80, #00000040);
     --ui-highlight: var(--glass-accent-wash);
     --ui-border-color: var(--glass-hairline);
@@ -118,7 +119,8 @@
     --ui-progress-background: var(--glass-track);
     --ui-progress-bar-background: var(--ui-primary);
     --ui-progress-text-color: var(--ui-primary-on);
-    --ui-checkbox-radius: var(--ui-radius-circle);
+    --ui-checkbox-radius: 4px;
+    --ui-checkbox-handle-background: white;
     --ui-input-radius: var(--ui-radius-m);
     --ui-input-background: light-dark(#ffffffb3, #ffffff0f);
     --ui-input-border-color: var(--glass-field-edge);

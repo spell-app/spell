@@ -1,6 +1,8 @@
 import { ValueSets, type ComponentTopic, type ComponentVocabulary, type Dictionary } from "spell/ui/vocabulary"
 import { es } from "spell/ui/components/components.es"
 
+import paletteTable from "./paletteGroups.json"
+
 /** One tag, as the docs' component browser (and later `<ui-root>`'s loader) needs it. */
 export type ComponentDefinition = {
   /** Canonical tag, e.g. `ui-buttons`. */
@@ -24,6 +26,33 @@ export type ComponentDefinition = {
   readonly snippet?: string
 }
 
+/**
+ * The palette's groups, as Owen arranged them:  `paletteGroups.json`, saved by the palette groups page
+ * (`ComponentDefinitions.paletteGroups()`).
+ */
+export type PaletteTable = {
+  /** The groups, in the palette's order. */
+  groups: PaletteTableGroup[]
+  /** Tags never offered, though today's rule would (`paletteGroupsByTopic()`). */
+  hidden?: string[]
+}
+
+/** One group of the palette's table. */
+export type PaletteTableGroup = {
+  /** Its topic:  names it in each language (`topicIn()`), and takes in a new component filed under it. */
+  topic?: ComponentTopic
+  /** Its own name, as written, in every language:  in place of its topic's word. */
+  title?: string
+  /** Its components' tags, in order. */
+  tags: string[]
+}
+
+/** One group of the editor's palette:  its topic or title, and its components, in order. */
+export type PaletteGroup = Omit<PaletteTableGroup, "tags"> & { parts: ComponentDefinition[] }
+
+/** The palette's table as it ships:  read once. */
+const PALETTE_TABLE = paletteTable as PaletteTable
+
 /** Every English vocabulary module, by path.  Above the class:  `ComponentDefinitions.all` reads it at definition. */
 const VOCABULARY_MODULES = import.meta.glob<Record<string, unknown>>("./*/*.en.ts", { eager: true })
 
@@ -40,6 +69,31 @@ const DICTIONARIES: Readonly<Record<string, Dictionary>> = { es }
 
 /** Tags a page holds once, around everything else:  never something to add to an app. */
 const NEVER_ADDED = new Set(["ui-root", "ui-components"])
+
+/**
+ * Tags the palette offers though they aren't their folder's main tag (`ui-<folder>`):  each stands alone
+ * (epic `editor` I180).
+ * - groups of their folder's main tag (`<ui-cards>` ...), and the tags a folder holds beside it (`<ui-textarea>`)
+ * - NOT the parts that only go inside another (`<ui-cell>`, `<ui-field>`, `<ui-tree-item>`, the content parts)
+ */
+const STANDS_ALONE = new Set([
+  "ui-audio",
+  "ui-cards",
+  "ui-comments",
+  "ui-icons",
+  "ui-images",
+  "ui-labels",
+  "ui-radio",
+  "ui-sections",
+  "ui-segments",
+  "ui-statistics",
+  "ui-steps",
+  "ui-tabs",
+  "ui-textarea"
+])
+
+/** Folders' main tags the palette never offers:  each only goes inside another of its folder's (`<ui-tab>` in `<ui-tabs>`). */
+const ONLY_INSIDE = new Set(["ui-step", "ui-tab"])
 
 /**
  * A vocabulary module's folder:
@@ -118,35 +172,81 @@ export class ComponentDefinitions {
   }
 
   /**
-   * The editor's palette, by topic, in `ValueSets.topics` order:  the topics with anything in them.
-   * - `parts`:  what it offers ready-made (`paletteByTopic()`).
-   * - `more`:  every other component filed there (`paletteMoreByTopic()`), shown when its "N more" is clicked.
+   * The editor's palette, in groups, as the palette's table says (`paletteGroups.json`, epic `editor` T81):
+   * its groups in order, each its components in order.
+   * - Owen tweaks the table on Spell UI's palette groups page (`<ui-docs-palette>`), which saves it.
+   * - A component the table doesn't name, nor hides, still shows:  where today's rule files it
+   *   (`paletteGroupsByTopic()`), at the end of the table's group for that topic, else in a group of its own at the end.
+   *   So a new component shows up with nothing to do.
+   * - A tag the table names that isn't a component (any more), or names twice, is skipped.
+   * - `table`:  the one the palette ships with, unless handed another (the page, as it's edited;  tests).
    */
-  static paletteGroups(): { topic: ComponentTopic; parts: ComponentDefinition[]; more: ComponentDefinition[] }[] {
-    const parts = ComponentDefinitions.paletteByTopic()
-    const more = ComponentDefinitions.paletteMoreByTopic()
-    return ValueSets.topics
-      .filter((topic) => parts.has(topic) || more.has(topic))
-      .map((topic) => ({ topic, parts: parts.get(topic) ?? [], more: more.get(topic) ?? [] }))
+  static paletteGroups(table: PaletteTable = PALETTE_TABLE): PaletteGroup[] {
+    const hidden = new Set(table.hidden ?? [])
+    const placed = new Set<string>()
+    const groups: PaletteGroup[] = table.groups.map(({ topic, title, tags }) => ({
+      topic,
+      title,
+      parts: tags.flatMap((tag) => {
+        const definition = ComponentDefinitions.byTag(tag)
+        if (!definition || placed.has(tag) || NEVER_ADDED.has(tag)) return []
+        placed.add(tag)
+        return [definition]
+      })
+    }))
+    for (const { topic, parts } of ComponentDefinitions.paletteGroupsByTopic()) {
+      const unlisted = parts.filter((definition) => !placed.has(definition.tag) && !hidden.has(definition.tag))
+      if (!unlisted.length) continue
+      const group = groups.find((each) => each.topic === topic)
+      if (group) group.parts.push(...unlisted)
+      else groups.push({ topic, parts: unlisted })
+    }
+    return groups.filter(({ parts }) => parts.length)
   }
 
   /**
-   * Every other component the palette could add, by topic, as `paletteByTopic()` files them:  its "N more".
-   * - A folder's main tag only (`ui-tabs`, never `ui-tab`):  a part that only makes sense inside another isn't offered.
+   * Today's rule, for what the palette's table doesn't name:  by topic, in `ValueSets.topics` order, the topics with
+   * anything in them.
+   * - `parts`:  every component filed there, all shown (epic `editor` I174):
+   *   what it offers ready-made first (`paletteByTopic()`), then the rest (`paletteOthersByTopic()`).
+   */
+  static paletteGroupsByTopic(): { topic: ComponentTopic; parts: ComponentDefinition[] }[] {
+    const readyMade = ComponentDefinitions.paletteByTopic()
+    const others = ComponentDefinitions.paletteOthersByTopic()
+    return ValueSets.topics
+      .filter((topic) => readyMade.has(topic) || others.has(topic))
+      .map((topic) => ({ topic, parts: [...(readyMade.get(topic) ?? []), ...(others.get(topic) ?? [])] }))
+  }
+
+  /** Every component the palette could offer, sorted by name:  all but what a page holds once (`<ui-root>` ...). */
+  static paletteCandidates(): ComponentDefinition[] {
+    return ComponentDefinitions.all.filter((definition) => !NEVER_ADDED.has(definition.tag))
+  }
+
+  /** `group`'s name in `language`:  its own title, as written, else its topic's word (`topicIn()`). */
+  static groupNameIn(group: Pick<PaletteGroup, "topic" | "title">, language: string): string {
+    return group.title ?? (group.topic ? ComponentDefinitions.topicIn(group.topic, language) : "")
+  }
+
+  /**
+   * Every other component the palette could add, by topic, as `paletteByTopic()` files them:
+   * after its ready-made ones.
+   * - A folder's main tag (`ui-<folder>`), and the others that stand alone (`STANDS_ALONE`, `<ui-tabs>` ...):
+   *   a part that only makes sense inside another isn't offered (`<ui-tab>`, `<ui-cell>`;  `ONLY_INSIDE`).
    * - Each under its first topic, sorted by name;  none has a snippet, so adding one writes its bare tag.
    */
-  static paletteMoreByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
+  static paletteOthersByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
     const offered = new Set(ComponentDefinitions.palette())
-    const more = ComponentDefinitions.all.filter(
+    const others = ComponentDefinitions.all.filter(
       (definition) =>
-        definition.tag === definition.folder &&
+        (definition.tag === definition.folder ? !ONLY_INSIDE.has(definition.tag) : STANDS_ALONE.has(definition.tag)) &&
         !offered.has(definition) &&
         !NEVER_ADDED.has(definition.tag) &&
         definition.topics.length
     )
     const topics = new Map<ComponentTopic, ComponentDefinition[]>()
     for (const topic of ValueSets.topics) {
-      const list = more.filter((definition) => definition.topics[0] === topic)
+      const list = others.filter((definition) => definition.topics[0] === topic)
       if (list.length) topics.set(topic, list)
     }
     return topics

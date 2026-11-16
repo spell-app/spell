@@ -98,6 +98,33 @@ describe("mergeEpic()", () => {
   })
 })
 
+describe("mergeTakingMain() (T83)", () => {
+  test("main moved past the branch:  taken into it in its worktree first, then merged", () => {
+    // left by the test above:  main has c.txt, the branch d.txt, and a stale snapshot sits in the main checkout
+    expect(Requests.takeMainIn("tooling", REPO)).not.toBeNull()
+    const { commits } = Requests.mergeTakingMain("tooling", REPO)[0]!
+    expect(commits.some((line) => line.endsWith("P2"))).toBe(true)
+    expect(readFileSync(join(REPO, "d.txt"), "utf8")).toBe("four")
+    expect(readFileSync(join(WORKTREE, "c.txt"), "utf8")).toBe("three")
+  })
+
+  test("nothing to take in:  null, and the merge goes on as before", () => {
+    commit("g.txt", "seven", "P5", WORKTREE)
+    expect(Requests.takeMainIn("tooling", REPO)).toBeNull()
+    const { commits } = Requests.mergeTakingMain("tooling", REPO)[0]!
+    expect(commits.map((line) => line.replace(/^\w+ /, ""))).toEqual(["P5"])
+  })
+
+  test("a conflict it can't settle:  stops, naming the files, and merges nothing", () => {
+    commit("x.txt", "main's", "x on main")
+    commit("x.txt", "the branch's", "x on the branch", WORKTREE)
+    const before = git("rev-parse", "main")
+    expect(() => Requests.mergeTakingMain("tooling", REPO)).toThrow(/conflicts in x\.txt.*merge-main --continue/s)
+    expect(git("rev-parse", "main")).toBe(before)
+    git("-C", WORKTREE, "merge", "--abort")
+  })
+})
+
 /** Write `file`, from the repo's root, holding `text`. */
 function put(file: string, text: string): void {
   mkdirSync(dirname(join(REPO, file)), { recursive: true })

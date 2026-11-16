@@ -8,6 +8,7 @@ a "gone in a second" is a view:
 		<button onClick={show the toasts}>Show, then close it after a second</button>
 
 "toast examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>

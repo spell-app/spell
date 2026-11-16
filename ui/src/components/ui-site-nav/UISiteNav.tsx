@@ -58,13 +58,24 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  *   and can open though it has none yet (a "Loading..." under a band).
  * - A page with `copyOf` is a second copy of another (a favourite):  marked as shown whenever that page is;
  *   `revealCurrent()` still goes to the original.
+ * - A page with `band="group"` is a quiet label over its pages, with no arrow (epic `mockup` T34):  a Spell site's
+ *   groups.
+ *   - It opens by itself while the page shown is under it, and stays open:  more than one can be open at once.
+ *   - A click (or Enter) on it opens it and goes to its first page;  on one that's open, and doesn't hold the page shown,
+ *     it closes it.
+ * - A page with no `icon`, beside pages with one, keeps an icon's room, so its title lines up with theirs.
+ * - A group's `icon` shows before its label, and its pages are a step in from it (epic `mockup` I20).
+ * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`), all in one column, no step in;
+ *   a page with no icon shows its title's first letter, as `<ui-menu>`'s icons-only look does,
+ *   and a group with no icon is a thin line.
  ****************/
 export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   @E.proto static vocabulary = siteNavVocabulary
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { "site-nav": siteNavCSS },
     DOMElement: DOMSiteNavElement,
-    delegatesFocus: false
+    delegatesFocus: false,
+    cssStates: ["collapsed"]
   }
 
   ////////////////
@@ -113,10 +124,14 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   /** Pages the person opened (`true`) or closed (`false`), by key:  over `currentPath`'s. */
   @E.state accessor openedByPerson: ReadonlyMap<string, boolean> = new Map()
 
-  /** Is `page` open:  as its `open` says, else as the person left it, else open when the shown page is under it. */
+  /**
+   * Is `page` open:  as its `open` says, else as the person left it, else open when the shown page is under it.
+   * - A group (`band="group"`) is always open while the shown page is under it:  it opens by itself.
+   */
   isOpen(page: SiteNavPage): boolean {
     if (page.open !== undefined) return page.open
     const key = UISiteNav.keyOf(page)
+    if (page.band === GROUP && this.currentPath.has(key)) return true
     return this.openedByPerson.get(key) ?? this.currentPath.has(key)
   }
 
@@ -146,7 +161,14 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     const key = (event.target as HTMLElement).getAttribute(DATA_KEY)
     const page = this.pageForKey(key)
     if (key === null || !page) return
-    const detail = { page, open: isOpening, originalEvent: event.detail.originalEvent }
+    const { originalEvent } = event.detail
+    // a group holding the page shown stays open:  a click on it goes to its first page instead
+    if (page.band === GROUP && !isOpening && this.currentPath.has(key)) {
+      event.preventDefault()
+      if (UISiteNav.isPick(originalEvent)) this.goToFirstPage(page, originalEvent)
+      return
+    }
+    const detail = { page, open: isOpening, originalEvent }
     if (!this.send(isOpening ? "ui-opening" : "ui-closing", detail)) {
       event.preventDefault()
       return
@@ -155,6 +177,15 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     this.openedByPerson = next
     const preferenceKey = this.preferenceKey
     if (preferenceKey) PrefStore.setAt(preferenceKey, Object.fromEntries(next))
+    if (page.band === GROUP && isOpening && UISiteNav.isPick(originalEvent)) this.goToFirstPage(page, originalEvent)
+  }
+
+  /**
+   * Was `originalEvent` a pick:  a click, Enter or Space, not the tree's arrow keys walking it?
+   * - A group opened by the arrow keys only opens:  the keys walk the tree without leaving the page.
+   */
+  private static isPick(originalEvent: Event | undefined): boolean {
+    return !(originalEvent instanceof KeyboardEvent && originalEvent.key.startsWith("Arrow"))
   }
 
   ////////////////
@@ -173,9 +204,20 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     // a middle or modified click on its link:  the browser opens it, as with any link
     if (SitePages.isOpenElsewhere(originalEvent)) return
     originalEvent?.preventDefault()
-    const href = page.href
+    this.goTo(page as SiteNavPage & { href: string }, originalEvent)
+  }
+
+  /** Go to `page`:  `ui-navigating`, then the browser's address, unless it's cancelled. */
+  private goTo(page: SiteNavPage & { href: string }, originalEvent: Event | undefined) {
+    const { href } = page
     if (!this.send("ui-navigating", { href, page, originalEvent })) return
     location.assign(href)
+  }
+
+  /** Go to the first page under `group` that has an `href`, at any depth;  none, nothing. */
+  private goToFirstPage(group: SiteNavPage, originalEvent: Event | undefined) {
+    const first = SitePages.allOf(group.pages ?? []).find((page): page is SiteNavPage & { href: string } => !!page.href)
+    if (first) this.goTo(first, originalEvent)
   }
 
   /** A page's star was clicked:  `ui-starred`, saying what the person asked for;  nothing is selected. */
@@ -232,16 +274,28 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
           on-ui-closing={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, false)}
         >
           <For each={this.sitePages} keyed={UISiteNav.keyOf}>
-            {(page) => this.row(page)}
+            {(page) => this.row(page, () => this.sitePages)}
           </For>
         </ui-tree>
       </nav>
     )
   }
 
-  /** One page's row, and its pages' rows inside it. */
-  private row(page: () => SiteNavPage): JSX.Element {
+  /** One page's row, and its pages' rows inside it;  `siblings`, the pages beside it, itself among them. */
+  private row(page: () => SiteNavPage, siblings: () => readonly SiteNavPage[]): JSX.Element {
     const isMarked = () => this.isMarked(page())
+    /**
+     * It has no icon, but a page beside it has:  an icon's room, or (`collapsed`) its first letter, stands in.
+     * - A group with no icon keeps the room beside groups with one, so the labels line up;
+     *   `collapsed`, it's a thin line instead (epic `mockup` I20).
+     */
+    const showsLetter = () => {
+      const { icon, band } = page()
+      if (icon) return false
+      const besideIcons = siblings().some((each) => !!each.icon)
+      if (band === GROUP) return !this.collapsed && besideIcons
+      return !band && (this.collapsed || besideIcons)
+    }
     return (
       <ui-tree-item
         data-page={UISiteNav.keyOf(page())}
@@ -257,7 +311,13 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
         selected={isMarked() ? "" : undefined}
         open={(page().pages?.length || page().slot) && this.isOpen(page()) ? "" : undefined}
         aria-current={isMarked() ? "page" : undefined}
+        title={this.collapsed ? page().title : undefined}
       >
+        <Show when={showsLetter()}>
+          <span slot="icon" class="letter" aria-hidden="true">
+            {LETTER_OR_DIGIT.exec(page().title)?.[0].toLocaleUpperCase()}
+          </span>
+        </Show>
         <Show when={page().href}>
           {(href) => (
             <a slot="label" class="link" href={href()} tabindex="-1">
@@ -268,7 +328,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
         <Show when={page().starred !== undefined}>{this.star(page)}</Show>
         <Show when={page().pages?.length}>
           <For each={page().pages} keyed={UISiteNav.keyOf}>
-            {(below) => this.row(below)}
+            {(below) => this.row(below, () => page().pages ?? [])}
           </For>
         </Show>
         <Show when={page().slot}>{(name) => <slot name={name()} />}</Show>
@@ -321,8 +381,13 @@ export type SiteNavPage = {
   icon?: string
   /** the pages under it */
   pages?: readonly SiteNavPage[]
-  /** a heading band over its pages (`heading`), or a lighter one inside one (`subheading`):  with `appearance="nav"` */
-  band?: "heading" | "subheading"
+  /**
+   * a band over its pages, with `appearance="nav"`:
+   * - `heading`:  a tinted heading band, with an arrow
+   * - `subheading`:  a lighter one inside one
+   * - `group`:  a group's quiet label, no arrow, open while the page shown is under it;  a click goes to its first page
+   */
+  band?: "heading" | "subheading" | "group"
   /** a number in a small round label after its title:  how many pages it holds */
   count?: number | string
   /** a word in a small label after its title:  `Planned` */
@@ -345,6 +410,12 @@ const DATA_KEY = "data-page"
 
 /** The attribute on the page shown's row. */
 const DATA_CURRENT = "data-current"
+
+/** The `band` of a group's quiet label over its pages:  a Spell site's `group`. */
+const GROUP = "group"
+
+/** What stands for a page with no icon, while `collapsed`:  its title's first letter or digit (`<ui-item>`'s too). */
+const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u
 
 /** A star's icons:  starred, and not. */
 const STAR = "star"

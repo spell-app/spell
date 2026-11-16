@@ -142,6 +142,20 @@ describe("<ui-property-editor compact>", () => {
     expect(label.left).toBeGreaterThan(box.left)
   })
 
+  it("draws a yes or no as a toggle, a pill with no room for text of its own (epic `editor` I177)", async () => {
+    const host = await editor("compact")
+    const toggle = property(host, "visible").querySelector("ui-checkbox")!
+    expect(toggle.getAttribute("appearance")).toBe("toggle")
+    expect(toggle.getAttribute("padding")).toBe("none")
+    const lane = getComputedStyle(toggle.shadowRoot!.querySelector("label")!, "::before")
+    expect(lane.borderTopLeftRadius).toBe("9999px")
+    expect(parseFloat(lane.width)).toBeGreaterThan(parseFloat(lane.height) * 1.5)
+    // its label close beside it:  no empty room the toggle kept for text
+    const box = toggle.getBoundingClientRect()
+    const label = field(host, "visible").querySelector(".label")!.getBoundingClientRect()
+    expect(label.left - (box.left + parseFloat(lane.width))).toBeLessThan(16)
+  })
+
   it("shows the hint at the end of the label row", async () => {
     const host = await editor("compact")
     const hint = field(host, "name").querySelector(".row > .hint")!
@@ -180,6 +194,7 @@ describe("<ui-property-editor> without `compact`", () => {
     const steps = field(host, "steps").getBoundingClientRect()
     expect(steps.top).toBeGreaterThan(kind.bottom - 1)
     expect(has(host, "visible", "inline-check")).toBe(false)
+    expect(property(host, "visible").querySelector("ui-checkbox")!.hasAttribute("appearance")).toBe(false)
   })
 
   it("lays fields on `columns` all the same", async () => {

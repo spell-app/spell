@@ -1,4 +1,5 @@
 "dimension examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Dimension
 		<header>A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.</>

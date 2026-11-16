@@ -1,4 +1,5 @@
 "zoom examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Zoom
 		<header>A zoom shows something small in the page, and full size over it on a click.</>

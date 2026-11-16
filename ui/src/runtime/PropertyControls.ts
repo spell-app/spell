@@ -156,6 +156,8 @@ const FLUID: Readonly<Record<string, string>> = { fluid: "" }
  * - `color` is the browser's own picker for now:  Spell UI's colour pickers come later (epic `property-editor` T4).
  * - `icon` draws `<ui-icon-picker>`:  every `icon` attribute (a button's, a rating's) is picked from a grid of glyphs,
  *   not typed (epic `debut` P14).
+ * - `toggle` is a switch with no room for text of its own (`padding="none"`):  its label is its field's.
+ *   A compact editor draws every yes or no with it (epic `editor` I177).
  */
 const BUILT_IN_KINDS: Record<string, PropertyControl> = {
   input: { tag: "ui-input", attributes: FLUID, types: ["text", "data"] },
@@ -168,7 +170,7 @@ const BUILT_IN_KINDS: Record<string, PropertyControl> = {
   radios: { tag: "ui-radio", choices: "radios" },
   range: { tag: "ui-slider" },
   checkbox: { tag: "ui-checkbox", types: ["boolean"], inline: true },
-  toggle: { tag: "ui-checkbox", attributes: { type: "toggle" }, inline: true },
+  toggle: { tag: "ui-checkbox", attributes: { appearance: "toggle", padding: "none" }, inline: true },
   color: { tag: "ui-input", attributes: { ...FLUID, type: "color" }, width: "half" },
   sides: { tag: "ui-sides", types: ["sides"], width: "half" },
   editor: { tag: "ui-property-editor", types: ["thing"] }

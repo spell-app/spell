@@ -2,7 +2,7 @@
  * Look of the editor's chrome in every theme of the set (`EditorTheme.tsx`):  Spell, Glass, Fruity, Merlot, Paper,
  * Midnight, Crisp and Pop.
  * - The shape every theme shares (below, "Every theme"):  a top bar joined to the window (`<AppMenu>`, Spell UI's
- *   `<ui-menu appearance="header">`), panels with gaps and rounded corners under it,
+ *   `<ui-app-menu>`), panels with gaps and rounded corners under it,
  *   each panel's menu a plain header over a hairline.
  * - Its colours, corners, shadows and blur are the THEME's own bar and panel tokens (epic `debut` P17, J89),
  *   the ones the epic pages' bars and Spell UI's panels read:
@@ -135,23 +135,18 @@
 
   /* the top bar's ends:  the hat and the avatar line up with the panels' edges under them, the end items' own room
      (8px and 6px) making up the rest */
-  & ui-menu.AppMenu::part(menu) {
+  & ui-app-menu.AppMenu::part(menu) {
     padding-inline: max(0px, calc(var(--spell-gap) - 8px)) max(0px, calc(var(--spell-gap) - 6px));
   }
   /* its sections take the room their items need, never less, so no group ever runs over the next (I30):
-     the middle one moves aside for a long left side, rather than sitting on the bar's centre over its menus */
-  & ui-menu.AppMenu > ui-menu.third::part(menu) {
+     the middle one moves aside for a long left side, rather than sitting on the bar's centre over its menus
+     - too narrow for every item, the bar scrolls sideways:  `<ui-app-menu>`'s own (its sections, `UIAppMenu.css`)
+     - TODO: `‹` / `›` arrows to scroll it, as the editor's tabs have (epic `debut` T33) */
+  & ui-app-menu.AppMenu > ui-menu.third::part(menu) {
     min-width: max-content;
     flex-shrink: 0;
   }
-  /* too narrow for every item:  the bar scrolls sideways, never overlaps or wraps */
-  /* TODO: `‹` / `›` arrows to scroll it, as the editor's tabs have (epic `debut` T33) */
-  & ui-menu.AppMenu::part(menu) {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-  }
-  & ui-menu.AppMenu ui-item::part(item)::before {
+  & ui-app-menu.AppMenu ui-item::part(item)::before {
     width: 0;
   }
 
@@ -240,7 +235,7 @@
 *******************************/
 
 /* `<AppMark>`:  the hat and Spell's name, a link home;  the editor's Spell menu (`<SpellBarMenu>`) the same */
-ui-menu.AppMenu :is(ui-item.AppMark, ui-item.SpellBarMenu)::part(item) {
+ui-app-menu.AppMenu :is(ui-item.AppMark, ui-item.SpellBarMenu)::part(item) {
   padding-inline: 6px 12px;
 }
 .AppMark a {

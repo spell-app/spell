@@ -12,9 +12,12 @@ import { ShowSitePart } from "./ShowSitePart"
 import { SiteAddressOf } from "./SiteAddressOf"
 import { SitePartWords } from "./SitePartWords"
 
-/** What a page's line may say after its address:  what the navigation calls it, its tab, its tags, how far along it is, its picture. */
+/**
+ * What a page's line may say after its address:  what the navigation calls it, its icon there, its tab, its tags,
+ * how far along it is, its picture, the real page it stands for, and that it's drawn without the site's top bar.
+ */
 const PAGE_DETAILS =
-  "(, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})?"
+  "(, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))?"
 
 /** What any part's line may end with:  its place in its section of the site editor's board, and its colour there. */
 const CARD_DETAILS = "(, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
@@ -28,6 +31,9 @@ sites.addRule(Synonyms.specialize({ ruleName: "site_dialog" }), { syntax: "(dial
 
 // the last word of a site's sidebar, for `site_overlay`:  `- it has a syntax sidebar`
 sites.addRule(Synonyms.specialize({ ruleName: "site_sidebar" }), { syntax: "(sidebar|flyout)" })
+
+// a site's top bar, for `site_overlay`:  `- it has a top bar`, `- it has an app bar` (epic `mockup` T35)
+sites.addRule(Wording.specialize({ ruleName: "site_top_bar", meanings: [] }), { syntax: "(top bar|app bar)" })
 
 // what state a site's page is in, last on its line:  `- it has a films page at "/films", old` (epic `mockup` P13, T14)
 sites.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["old", "new", "mocked", "built"] }), {
@@ -50,9 +56,10 @@ sites.addRule(
 // `group "Hardware", color yellow`, `group "Hardware" with color yellow`, or as a part's line says it, `, colored yellow`
 // - `with` as an action's head line says what it is (`with title "Deal"`, `action_modifiers`);  a comma as a part's line does
 // - Compiles to nothing, as any group does (`classes`'s `group "x"`):  its colour is the site editor's, read from the text
+// - `, icon "microchip"` after it:  the icon before the group's name in the site's navigation (epic `mockup` I20)
 sites.addRule(DefineGroup, {
   syntax:
-    "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color}",
+    "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color} (, icon {icon:text})?",
   tests: [
     {
       compileAs: "block",
@@ -245,6 +252,148 @@ sites.addRule(DefineGroup, {
             "core.useElement(GalaxyGuide, GalaxyGuideElement)",
             "export const galaxyGuide = new GalaxyGuide()"
           ]
+        },
+        {
+          title: "an icon after its colour:  its pages carry it, for the group's line in the navigation",
+          input: [
+            'a "films page" is a page',
+            "galaxy guide is a site in the cloud:",
+            '\tgroup "Films", color blue, icon "film"',
+            '\tit has a films page at "/films"'
+          ],
+          js: [
+            "export class FilmsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "films page",',
+            '    page: "FilmsPage",',
+            '    address: "/films",',
+            '    group: "Films",',
+            '    groupIcon: "film"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ],
+          ts: [
+            "export class FilmsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-films-page>`:  a films page, drawn in its own element, e.g. by `draw the films page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its films page's properties;  its methods call its films page's.",
+            " * - What every view's element does, e.g. drawing its films page, is `SpellElement`'s.",
+            " */",
+            "export class FilmsPageElement extends SpellElement<FilmsPage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-films-page", "films page", [])',
+            "}",
+            "core.useElement(FilmsPage, FilmsPageElement)",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "films page",',
+            '    page: "FilmsPage",',
+            '    address: "/films",',
+            '    group: "Films",',
+            '    groupIcon: "film"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// a site's group with an icon and no colour:  `group "Hardware", icon "microchip"` (epic `mockup` I20)
+sites.addRule(DefineGroup, {
+  syntax: "{type:subject_implied} group {group:text}, icon {icon:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "an icon alone:  its pages carry it, for the group's line in the navigation",
+          input: [
+            'a "films page" is a page',
+            "galaxy guide is a site in the cloud:",
+            '\tgroup "Films", icon "film"',
+            '\tit has a films page at "/films"'
+          ],
+          js: [
+            "export class FilmsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "films page",',
+            '    page: "FilmsPage",',
+            '    address: "/films",',
+            '    group: "Films",',
+            '    groupIcon: "film"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ],
+          ts: [
+            "export class FilmsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-films-page>`:  a films page, drawn in its own element, e.g. by `draw the films page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its films page's properties;  its methods call its films page's.",
+            " * - What every view's element does, e.g. drawing its films page, is `SpellElement`'s.",
+            " */",
+            "export class FilmsPageElement extends SpellElement<FilmsPage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-films-page", "films page", [])',
+            "}",
+            "core.useElement(FilmsPage, FilmsPageElement)",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "films page",',
+            '    page: "FilmsPage",',
+            '    address: "/films",',
+            '    group: "Films",',
+            '    groupIcon: "film"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ]
         }
       ]
     }
@@ -285,7 +434,7 @@ sites.addRule(CreateSite, {
             'a "film page" is a page where:',
             "\t- it has a film",
             'galaxy guide is a site at "owen@spell/galaxy":',
-            '\t- it has a films page at "/films", named "Films"',
+            '\t- it has a films page at "/films", named "Films", icon "film"',
             '\t\t- it has a film page at "/films/:film"',
             "\t- it has a settings dialog",
             "\t- it has a film sidebar"
@@ -314,6 +463,7 @@ sites.addRule(CreateSite, {
             '    page: "FilmsPage",',
             '    address: "/films",',
             '    title: "Films",',
+            '    icon: "film",',
             "    pages: [{",
             '      name: "film page",',
             '      page: "FilmPage",',
@@ -373,6 +523,7 @@ sites.addRule(CreateSite, {
             '    page: "FilmsPage",',
             '    address: "/films",',
             '    title: "Films",',
+            '    icon: "film",',
             "    pages: [{",
             '      name: "film page",',
             '      page: "FilmPage",',
@@ -439,6 +590,114 @@ sites.addRule(CreateSite, {
             '    address: "/"',
             "  }]",
             '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ]
+        },
+        {
+          title: "a top bar, its buttons a view of its name, over every page but one that says no top bar (T35)",
+          input: [
+            'a "home page" is a page',
+            'a "login page" is a page',
+            'a "top bar" is a view',
+            "galaxy guide is a site:",
+            "\t- it has a top bar",
+            '\t- it has a home page at "/"',
+            '\t- it has a login page at "/login", no top bar'
+          ],
+          js: [
+            "export class HomePage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class LoginPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class TopBar extends View {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "home page",',
+            '    page: "HomePage",',
+            '    address: "/"',
+            "  }, {",
+            '    name: "login page",',
+            '    page: "LoginPage",',
+            '    address: "/login",',
+            "    noTopBar: true",
+            "  }]",
+            '  static topBar = { name: "top bar", view: "TopBar" }',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ],
+          ts: [
+            "export class HomePage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-home-page>`:  a home page, drawn in its own element, e.g. by `draw the home page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its home page's properties;  its methods call its home page's.",
+            " * - What every view's element does, e.g. drawing its home page, is `SpellElement`'s.",
+            " */",
+            "export class HomePageElement extends SpellElement<HomePage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-home-page", "home page", [])',
+            "}",
+            "core.useElement(HomePage, HomePageElement)",
+            "export class LoginPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-login-page>`:  a login page, drawn in its own element, e.g. by `draw the login page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its login page's properties;  its methods call its login page's.",
+            " * - What every view's element does, e.g. drawing its login page, is `SpellElement`'s.",
+            " */",
+            "export class LoginPageElement extends SpellElement<LoginPage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-login-page", "login page", [])',
+            "}",
+            "core.useElement(LoginPage, LoginPageElement)",
+            "export class TopBar extends View {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-top-bar>`:  a top bar, drawn in its own element, e.g. by `draw the top bar`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its top bar's properties;  its methods call its top bar's.",
+            " * - What every view's element does, e.g. drawing its top bar, is `SpellElement`'s.",
+            " */",
+            "export class TopBarElement extends SpellElement<TopBar> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-top-bar", "top bar", [])',
+            "}",
+            "core.useElement(TopBar, TopBarElement)",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "home page",',
+            '    page: "HomePage",',
+            '    address: "/"',
+            "  }, {",
+            '    name: "login page",',
+            '    page: "LoginPage",',
+            '    address: "/login",',
+            "    noTopBar: true",
+            "  }]",
+            '  static topBar = { name: "top bar", view: "TopBar" }',
             "}",
             "",
             "/**",

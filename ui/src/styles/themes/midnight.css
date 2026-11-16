@@ -40,6 +40,7 @@
     --ui-surface-muted: var(--midnight-inset);
     --ui-surface-strong: var(--midnight-panel);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#fbfcfd, #121a24);
     --ui-code-background: var(--midnight-inset);
     --ui-highlight: var(--midnight-accent-wash);
     --ui-border-color: var(--midnight-border);

@@ -856,6 +856,9 @@ galaxy guide is a site
 
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
 - `live=` is the real page it stands for:  its card in the site editor opens it.
+- `it has a top bar` draws a bar above every page:  a button that shows only the side bar's icons, where you are as a
+  breadcrumb, and the buttons a view named `top bar` draws.
+  A page whose line ends `, no top bar` is drawn without it.
 
 Every move names the page, never its address:
 

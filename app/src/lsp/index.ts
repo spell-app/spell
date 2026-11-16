@@ -9,6 +9,8 @@
  * - `SpellCSS`:  the `<css>` blocks in a file, edited as CSS.
  * - `HostNameCheck`:  the names a host fills by name in a project, an error when the code drops one.
  * - `SpellKeywords`:  a language pack's keywords, for accent fixes and colouring.
+ * - `SpellTyping`:  the rules behind the typing helps, Enter's among them, for every editor.
+ * - `AppAddresses`:  how the app's editors address files, `spell:/<file.path>`.
  * - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it).
  * - `SpellLanguageServer` wires both to an LSP connection.
  * - Browser-safe:  NO node imports, so the app's editor uses the service in-process.
@@ -22,6 +24,8 @@ export * from "./lsp.types"
 
 export * from "./LspTexts"
 export * from "./SpellKeywords"
+export * from "./SpellTyping"
+export * from "./AppAddresses"
 export * from "./SpellLanguageService"
 export * from "./SpellCSS"
 export * from "./HostNames"

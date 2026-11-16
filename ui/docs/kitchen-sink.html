@@ -1377,6 +1377,390 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="views-diagram" label="Diagram" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.
+                  <a href="ui-diagram.html">Diagram page</a>
+                </p>
+                <ui-diagram remember="example-recipe-box">
+                  <script type="application/json">
+                    {
+                      "columns": [
+                        {
+                          "groups": [
+                            {
+                              "label": "Recipe Box",
+                              "color": "#047857",
+                              "lanes": [
+                                [
+                                  {
+                                    "name": "Recipe",
+                                    "note": "One dish, written down",
+                                    "gap_before": 50,
+                                    "fields": [
+                                      "cuisine",
+                                      "tags[]",
+                                      "method",
+                                      "photos[]",
+                                      "notes[]",
+                                      "adapted_from",
+                                      "replaces",
+                                      "related_recipes[]"
+                                    ]
+                                  }
+                                ],
+                                [
+                                  {
+                                    "name": "Cuisine",
+                                    "note": "e.g. Thai, Basque"
+                                  },
+                                  {
+                                    "name": "Tag",
+                                    "note": "Quick, vegetarian, spicy"
+                                  },
+                                  {
+                                    "name": "Method",
+                                    "note": "Varies by cuisine",
+                                    "fields": ["technique", "timer"]
+                                  },
+                                  {
+                                    "name": "Photo",
+                                    "note": "Kept by a photo host",
+                                    "fields": ["host / photo_id"]
+                                  },
+                                  {
+                                    "name": "Note",
+                                    "note": "A cook's remark"
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "groups": [
+                            {
+                              "legend": true
+                            },
+                            {
+                              "label": "Elsewhere",
+                              "color": "#6b7280",
+                              "gap_before": 60,
+                              "nodes": [
+                                {
+                                  "name": "Technique",
+                                  "note": "Kitchen guide",
+                                  "color": "#7c3aed"
+                                },
+                                {
+                                  "name": "Timer",
+                                  "note": "Kitchen guide",
+                                  "color": "#7c3aed"
+                                },
+                                {
+                                  "name": "Photo hosts",
+                                  "note": "Outside services"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "edges": [
+                        {
+                          "from": "Recipe.cuisine",
+                          "to": "Cuisine"
+                        },
+                        {
+                          "from": "Recipe.tags[]",
+                          "to": "Tag"
+                        },
+                        {
+                          "from": "Recipe.method",
+                          "to": "Method",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Recipe.photos[]",
+                          "to": "Photo",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Recipe.notes[]",
+                          "to": "Note",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Recipe.adapted_from",
+                          "to": "Recipe"
+                        },
+                        {
+                          "from": "Recipe.replaces",
+                          "to": "Recipe"
+                        },
+                        {
+                          "from": "Recipe.related_recipes[]",
+                          "to": "Recipe"
+                        },
+                        {
+                          "from": "Method.technique",
+                          "to": "Technique"
+                        },
+                        {
+                          "from": "Method.timer",
+                          "to": "Timer"
+                        },
+                        {
+                          "from": "Photo.host / photo_id",
+                          "to": "Photo hosts"
+                        }
+                      ]
+                    }
+                  </script>
+                </ui-diagram>
+              </ui-example>
+              <ui-example description="Several concepts, in three columns">
+                <ui-diagram>
+                  <script type="application/json">
+                    {
+                      "columns": [
+                        {
+                          "groups": [
+                            {
+                              "legend": true
+                            },
+                            {
+                              "label": "Library",
+                              "color": "#0f766e",
+                              "nodes": [
+                                {
+                                  "name": "Ingredient",
+                                  "note": "What a dish can use",
+                                  "bullets": ["Flour", "Saffron"]
+                                },
+                                {
+                                  "name": "Tool",
+                                  "note": "Reusable equipment",
+                                  "bullets": ["Oven", "Mandoline", "Blowtorch"]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "groups": [
+                            {
+                              "label": "Menu",
+                              "color": "#1d4ed8",
+                              "nodes": [
+                                {
+                                  "name": "Course",
+                                  "note": "Ingredient + amounts",
+                                  "fields": ["ingredient"]
+                                },
+                                {
+                                  "name": "Menu",
+                                  "note": "A season's plan",
+                                  "fields": ["courses[]", "steps[]"]
+                                },
+                                {
+                                  "name": "Step",
+                                  "note": "Tool + timing",
+                                  "fields": ["tool", "course", "next_steps[]"]
+                                },
+                                {
+                                  "name": "NextStep",
+                                  "note": "Where cooking goes next",
+                                  "fields": ["to_step"]
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Pantry",
+                              "color": "#047857",
+                              "nodes": [
+                                {
+                                  "name": "Shelf",
+                                  "note": "Jar, crate, fridge"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "groups": [
+                            {
+                              "label": "Cooking",
+                              "color": "#7c3aed",
+                              "nodes": [
+                                {
+                                  "name": "Service",
+                                  "note": "One evening's covers",
+                                  "fields": ["menu", "cooks[]", "shelves[]"]
+                                },
+                                {
+                                  "name": "Cook",
+                                  "note": "One person's station",
+                                  "fields": [
+                                    "menu",
+                                    "head_cook",
+                                    "shelves[]",
+                                    "tasks[]",
+                                    {
+                                      "name": "current_tasks[]",
+                                      "derived": true
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "Task",
+                                  "note": "One step, done once",
+                                  "fields": ["step", "shelves[]", "timers[]"]
+                                },
+                                {
+                                  "name": "Timer",
+                                  "note": "Set by a task",
+                                  "fields": ["shelves[]"]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "edges": [
+                        {
+                          "from": "Course.ingredient",
+                          "to": "Ingredient"
+                        },
+                        {
+                          "from": "Menu.courses[]",
+                          "to": "Course",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Menu.steps[]",
+                          "to": "Step",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Step.tool",
+                          "to": "Tool"
+                        },
+                        {
+                          "from": "Step.course",
+                          "to": "Course",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Step.next_steps[]",
+                          "to": "NextStep",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "NextStep.to_step",
+                          "to": "Step"
+                        },
+                        {
+                          "from": "Service.menu",
+                          "to": "Menu"
+                        },
+                        {
+                          "from": "Service.cooks[]",
+                          "to": "Cook"
+                        },
+                        {
+                          "from": "Service.shelves[]",
+                          "to": "Shelf"
+                        },
+                        {
+                          "from": "Cook.menu",
+                          "to": "Menu"
+                        },
+                        {
+                          "from": "Cook.head_cook",
+                          "to": "Cook"
+                        },
+                        {
+                          "from": "Cook.shelves[]",
+                          "to": "Shelf"
+                        },
+                        {
+                          "from": "Cook.tasks[]",
+                          "to": "Task",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Cook.current_tasks[]",
+                          "to": "Task"
+                        },
+                        {
+                          "from": "Task.step",
+                          "to": "Step"
+                        },
+                        {
+                          "from": "Task.shelves[]",
+                          "to": "Shelf"
+                        },
+                        {
+                          "from": "Task.timers[]",
+                          "to": "Timer",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Timer.shelves[]",
+                          "to": "Shelf"
+                        }
+                      ]
+                    }
+                  </script>
+                </ui-diagram>
+              </ui-example>
+              <ui-example description="A flat spec, put in columns">
+                <ui-diagram columns="2">
+                  <script type="application/json">
+                    {
+                      "nodes": [
+                        {
+                          "name": "Order",
+                          "note": "One customer's basket",
+                          "fields": ["customer", "lines[]"]
+                        },
+                        {
+                          "name": "Customer",
+                          "note": "Someone who buys"
+                        },
+                        {
+                          "name": "Line",
+                          "note": "A product and how many",
+                          "fields": ["product"]
+                        },
+                        {
+                          "name": "Product",
+                          "note": "Something we sell"
+                        }
+                      ],
+                      "edges": [
+                        {
+                          "from": "Order.customer",
+                          "to": "Customer"
+                        },
+                        {
+                          "from": "Order.lines[]",
+                          "to": "Line",
+                          "kind": "contains"
+                        },
+                        {
+                          "from": "Line.product",
+                          "to": "Product"
+                        }
+                      ]
+                    }
+                  </script>
+                </ui-diagram>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="views-feed" label="Feed" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -1515,7 +1899,7 @@
                     </ui-tree-node>
                     <ui-tree-node label="Print" edge-label="body">
                       <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
-                      <ui-tree-node label="Text &quot;fizzbuzz&quot;" detail="text"></ui-tree-node>
+                      <ui-tree-node label='Text "fizzbuzz"' detail="text"></ui-tree-node>
                     </ui-tree-node>
                     <ui-tree-node label="If …" edge-label="otherwise"></ui-tree-node>
                   </ui-tree-node>
@@ -2267,6 +2651,42 @@
           </ui-section>
 
           <ui-section id="spell-ui-s-own" label="Spell UI's own" sticky="stack" collapsible dividing>
+            <ui-section id="spell-ui-s-own-app-menu" label="App menu" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  An app menu is an app&#39;s top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar&#39;s centre, and an end section for buttons.
+                  <a href="ui-app-menu.html">App menu page</a>
+                </p>
+                <ui-app-menu aria-label="Editor demo">
+                  <ui-item slot="start" icon="magic"><b>My App</b></ui-item>
+                  <ui-item slot="start">File</ui-item>
+                  <ui-item slot="start">Edit</ui-item>
+                  <ui-item slot="start">View</ui-item>
+                  <ui-menu appearance="segmented" aria-label="Mode">
+                    <ui-item value="run" icon="play">Run</ui-item>
+                    <ui-item value="edit" icon="pencil alternate" selected>Edit</ui-item>
+                  </ui-menu>
+                  <ui-item slot="end" link="#settings" icon="cog" aria-label="Settings"></ui-item>
+                  <ui-item slot="end" link="#you" icon="user circle" aria-label="You"></ui-item>
+                </ui-app-menu>
+              </ui-example>
+              <ui-example description="Site bar">
+                <ui-app-menu aria-label="Site demo">
+                  <ui-item slot="start" link="#side-bar" icon="columns" aria-label="Show or hide the side bar"></ui-item>
+                  <ui-item slot="start">
+                    <ui-breadcrumbs aria-label="Where you are">
+                      <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                      <ui-breadcrumb link="#guides">Guides</ui-breadcrumb>
+                      <ui-breadcrumb selected>Getting started</ui-breadcrumb>
+                    </ui-breadcrumbs>
+                  </ui-item>
+                  <ui-item slot="end" link="#notices" icon="bell" aria-label="Notices"></ui-item>
+                  <ui-item slot="end" link="#help" icon="circle question" aria-label="Help"></ui-item>
+                  <ui-avatar slot="end" link="#you" tooltip="You">O</ui-avatar>
+                </ui-app-menu>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-code" label="Code" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -2290,6 +2710,26 @@
               </ui-example>
               <ui-example description="From a file, language guessed">
                 <ui-code source="examples/sample.json" line-numbers></ui-code>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-dimension" label="Dimension" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A dimension shows one measure in the reader&#39;s own units:  5 ft 8 in in the US, 172 cm elsewhere.
+                  <a href="ui-dimension.html">Dimension page</a>
+                </p>
+                <p>
+                  Luke is <ui-dimension value="172" dimension="length" unit="cm"></ui-dimension> tall, and weighs
+                  <ui-dimension value="77" dimension="weight" unit="kg"></ui-dimension>.
+                </p>
+              </ui-example>
+              <ui-example description="In the units it&#39;s asked for">
+                <p>
+                  <ui-dimension value="172" dimension="length" unit="cm" in="feet and inches"></ui-dimension>,
+                  <ui-dimension value="172" dimension="length" unit="cm" in="cm"></ui-dimension>,
+                  <ui-dimension value="100" dimension="temperature" unit="°C" in="°F"></ui-dimension>
+                </p>
               </ui-example>
             </ui-section>
 

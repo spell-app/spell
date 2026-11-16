@@ -1,4 +1,5 @@
 "theme-editor usage" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Theme Editor
 		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.</>

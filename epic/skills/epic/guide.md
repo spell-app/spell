@@ -57,7 +57,9 @@ An agent that can start background agents keeps its own session free to answer t
 <path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
 `epic turns run test -- yarn test`.  Else, the steps below, here.
 Each piece of work goes into `main` the moment it's done and merges cleanly (`epic merge <epic>`), never held for the
-phase's end, so the person sees it at once (the same section;  a standing rule).  It can't:  say why on its item.
+phase's end, so the person sees it at once (the same section;  a standing rule).  Never ask whether to merge:
+`epic worktree merge-main` first, always;  failures that aren't this work's don't hold it.  It can't:  say why on its
+item.
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
 

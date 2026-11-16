@@ -6,7 +6,6 @@
  */
 export * from "./monaco"
 export * from "./LspToMonaco"
-export * from "./AppAddresses"
 export * from "./SpellTokensProvider"
 export * from "./SpellHeadings"
 export * from "./BubblyMarks"

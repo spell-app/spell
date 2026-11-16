@@ -240,6 +240,93 @@ describe("<ui-site-nav> pages' extras", () => {
     await expectAccessible(host)
   })
 
+  /** Two groups, as a Spell site's `group` lines make them (epic `mockup` T34):  icons on all but Notes. */
+  const GROUPS: SiteNavPage[] = [
+    {
+      title: "Design",
+      band: "group",
+      pages: [
+        { title: "Explore", icon: "binoculars", href: "#/explore" },
+        { title: "Notes", href: "#/notes" }
+      ]
+    },
+    { title: "Run", band: "group", pages: [{ title: "Jobs", icon: "briefcase", href: "#/jobs" }] }
+  ]
+
+  it("a group opens by itself while it holds the page shown, with no arrow;  a click goes to its first page", async () => {
+    const host = await navOf(GROUPS, { current: "#/explore", appearance: "nav" })
+    const design = row(host, "Design")
+    expect(design.hasAttribute("open")).toBe(true)
+    expect(row(host, "Run").hasAttribute("open")).toBe(false)
+    expect(getComputedStyle(design.shadowRoot!.querySelector('[part~="toggle"]')!).display).toBe("none")
+    const went: string[] = []
+    host.addEventListener("ui-navigating", (event) => {
+      went.push((event as CustomEvent<{ href: string }>).detail.href)
+      event.preventDefault()
+    })
+    // a shut group:  it opens, and goes to its first page
+    click(host, "Run")
+    await ElementFixture.settle()
+    expect(went).toEqual(["#/jobs"])
+    expect(row(host, "Run").hasAttribute("open")).toBe(true)
+    // the group holding the page shown stays open, and goes to its first page
+    click(host, "Design")
+    await ElementFixture.settle()
+    expect(went).toEqual(["#/jobs", "#/explore"])
+    expect(design.hasAttribute("open")).toBe(true)
+    // another open group closes:  both were open at once till then
+    click(host, "Run")
+    await ElementFixture.settle()
+    expect(row(host, "Run").hasAttribute("open")).toBe(false)
+    expect(went).toHaveLength(2)
+  })
+
+  it("a page with no icon beside pages with one keeps an icon's room;  `collapsed` shows its first letter", async () => {
+    const host = await navOf(GROUPS, { current: "#/explore", appearance: "nav" })
+    await settleDeep(host)
+    const letter = row(host, "Notes").querySelector<HTMLElement>(':scope > [slot="icon"]')!
+    expect(letter.textContent).toBe("N")
+    expect(getComputedStyle(letter).visibility).toBe("hidden")
+    expect(row(host, "Design").querySelector(':scope > [slot="icon"]')).toBeNull()
+    host.setAttribute("collapsed", "")
+    await ElementFixture.settle()
+    expect(host.matches(":state(collapsed)")).toBe(true)
+    expect(getComputedStyle(letter).visibility).toBe("visible")
+    expect(row(host, "Explore").getAttribute("title")).toBe("Explore")
+    const label = row(host, "Explore").shadowRoot!.querySelector('[part~="label"]')!
+    expect(getComputedStyle(label).display).toBe("none")
+  })
+
+  it("a group's icon shows before its label, its pages a step in;  `collapsed`, one column, an iconless group a line (I20)", async () => {
+    const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
+    const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
+    await settleDeep(host)
+    const rowOf = (title: string) => row(host, title).shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!
+    const startOf = (title: string) => parseFloat(getComputedStyle(rowOf(title)).paddingInlineStart)
+    expect(row(host, "Design").getAttribute("icon")).toBe("palette")
+    // a small step in (Owen, I20:  "less indent"):  1em more than its group's label
+    expect(startOf("Explore") - startOf("Design")).toBeGreaterThan(8)
+    expect(startOf("Explore") - startOf("Design")).toBeLessThan(20)
+    // Run, with no icon, keeps an icon's room beside Design's
+    expect(row(host, "Run").querySelector(':scope > [slot="icon"]')).not.toBeNull()
+    host.setAttribute("collapsed", "")
+    await ElementFixture.settle()
+    // collapsed:  a group's page a slight step in from the group's icon (Owen, I20)
+    const step = startOf("Explore") - startOf("Design")
+    expect(step).toBeGreaterThan(2)
+    expect(step).toBeLessThan(10)
+    const runRow = row(host, "Run").shadowRoot!.querySelector('[part~="row"]')!
+    expect(getComputedStyle(runRow).backgroundImage).toContain("gradient")
+    expect(getComputedStyle(row(host, "Design").shadowRoot!.querySelector('[part~="row"]')!).backgroundImage).toBe(
+      "none"
+    )
+  })
+
+  it("a list with no icons keeps no icon's room", async () => {
+    const host = await navOf([{ title: "Input", href: "#/input" }])
+    expect(row(host, "Input").querySelector(':scope > [slot="icon"]')).toBeNull()
+  })
+
   it("reveals the shown page's row in whatever scrolls it", async () => {
     const pages = Array.from({ length: 40 }, (_, index) => ({ title: `Page ${index}`, href: `#/p${index}` }))
     const box = (await ElementFixture.render(

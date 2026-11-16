@@ -1,4 +1,5 @@
 "description api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Description
 		<header>A description is the text of a card, item, modal, list item, step or comment.</>

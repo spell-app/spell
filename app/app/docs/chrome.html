@@ -94,14 +94,14 @@
                 <ui-code language="typescript"
                   ><script type="text/plain">
                     <AppMenu class="EditorBar">
-                      <Submenu left spring>
+                      <Submenu slot="start" left spring>
                         <ProjectBarMenu useRunner={props.mode === "run"} />
                         <AppBarMenus mode={props.mode} />
                       </Submenu>
                       <Submenu center spring>
                         <ModeButtons current={props.mode} />
                       </Submenu>
-                      <Submenu right spring class="BarTools">
+                      <Submenu slot="end" right spring class="BarTools">
                         <Submenu appearance="capsule">
                           <Show when={props.mode === "edit"}>
                             <InspectAppButton id={INSPECT_APP_ID} />
@@ -135,7 +135,7 @@
             </ui-accordion>
             <ul>
               <li>
-                The bars: <code>&lt;AppMenu&gt;</code>, joined to the top of the window, is Spell UI's window bar, a <code>&lt;ui-menu appearance="header"&gt;</code>; <code>&lt;PanelMenu&gt;</code>, on top of a pane, is a plain menu, which the theme shapes (<code title="app/src/app/solid/EditorTheme.css">EditorTheme.css</code>). Each holds <code>&lt;ui-item&gt;</code>s.
+                The bars: <code>&lt;AppMenu&gt;</code>, joined to the top of the window, is Spell UI's app bar, <a href="../ui/ui-app-menu.html"><code>&lt;ui-app-menu&gt;</code></a>, its sections by <code>slot</code> (<code>start</code>, none for the middle, <code>end</code>); <code>&lt;PanelMenu&gt;</code>, on top of a pane, is a plain menu, which the theme shapes (<code title="app/src/app/solid/EditorTheme.css">EditorTheme.css</code>). Each holds <code>&lt;ui-item&gt;</code>s.
               </li>
               <li>
                 <code>&lt;Submenu&gt;</code>: a left, middle or right section, each at least a third of the bar, so the

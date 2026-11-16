@@ -48,10 +48,21 @@ export const treeVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "valueOnly",
-      values: ["nav"],
+      values: ["nav", "columns"],
       description:
         "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the " +
-        "primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands."
+        "primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.  " +
+        "`columns`:  a column per level, side by side, as a Mac's Finder shows folders:  picking a row shows the rows " +
+        "inside it in the next column, and closes the columns after that."
+    },
+    {
+      name: "column-titles",
+      group: "appearance",
+      kind: "string",
+      description:
+        '`appearance="columns"`:  a title over each column, by level, separated by commas ' +
+        "(`Clients, Projects, Files`);  the last one names every column deeper than the list goes.  " +
+        "None:  no titles."
     },
     {
       name: "sticky-path",
@@ -91,13 +102,19 @@ export const treeVocabulary = {
   ],
   states: [
     { name: "filtering", description: "It has a `filter`." },
-    { name: "no-matches", description: "Its `filter` matches no row." }
+    { name: "no-matches", description: "Its `filter` matches no row." },
+    { name: "columns", description: "Its `appearance` is `columns`:  a column per level, side by side." }
   ],
   texts: [
     {
       key: "noMatches",
       text: "Nothing matches",
       description: "Shown when `filter` matches no row and no `empty` is given."
+    },
+    {
+      key: "resizeColumn",
+      text: "Resize this column",
+      description: '`appearance="columns"`:  the name of the line after a column, for a screen reader.'
     }
   ]
 } as const satisfies E.ComponentVocabulary

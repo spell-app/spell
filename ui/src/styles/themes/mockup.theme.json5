@@ -65,6 +65,8 @@
     "inset": "{own.mockup-inset}",
     "strong": "{own.mockup-page}",
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  white light (nothing is paler than its bar);  the inset's grey dark, a step off the bar
+    "side-panel": { "light": "#ffffff", "dark": "#2a2a2a" },
     "code": "{own.mockup-inset}",
     "highlight": "{own.mockup-accent-wash}"
   },
