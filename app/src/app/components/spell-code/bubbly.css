@@ -1709,13 +1709,15 @@
     /*
      * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
      * - how strong it is:  `--bubbly-selection-strength`
+     * - while the editor has the focus too:  CodeMirror's own rule for that, more specific than a plain
+     *   `.cm-focused .cm-selectionBackground`, painted it solid lavender over the text, which vanished (I115)
      */
     .cm-selectionLayer {
       z-index: 1 !important;
       pointer-events: none;
     }
     .cm-selectionBackground,
-    &.cm-focused .cm-selectionBackground {
+    &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
       background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
     }
 
