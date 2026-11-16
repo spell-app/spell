@@ -78,8 +78,12 @@ export class CodeMirrorBubbly {
   }
 }
 
-/** The lines a slice shows, `from` the first's start `to` the last's end:  offsets into its file. */
-export type Slice = { from: number; to: number }
+/**
+ * The lines a slice shows, `from` the first's start `to` the last's end:  offsets into its file.
+ * - `hiddenIndent`:  how many characters of indent are hidden at the start of each line, when it's shown dedented:
+ *   its rails and feet stand that much further left, under its bands (epic `language` I128)
+ */
+export type Slice = { from: number; to: number; hiddenIndent?: number }
 
 /** The editor's own classes:  a `.bubbly`, so `bubbly.css` reaches it, and ours. */
 const EDITOR_CLASSES = "bubbly cmb-editor"
@@ -106,7 +110,7 @@ class BubblyDecorations {
     }
   ) {
     this.text = drawing.text
-    this.decorations = new CodeMirrorDecorations(state)
+    this.decorations = new CodeMirrorDecorations(state, options.slice?.hiddenIndent)
   }
 
   /** The decorations, sorted as CodeMirror wants them. */
