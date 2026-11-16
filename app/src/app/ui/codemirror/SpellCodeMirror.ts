@@ -11,7 +11,12 @@ import type { WorkspaceEdit } from "vscode-languageserver"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
-import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spell/app/app/ui/ui.types"
+import {
+  codeEditors,
+  type CodeEditorCommand,
+  type CodeEditorHandle,
+  type EditorSelection
+} from "spell/app/app/ui/ui.types"
 // types only:  the editor page's keys bring the app with them, which `<spell-editor>`'s chunk mustn't
 import type { Hotkey } from "spell/app/app/pages/editorHotkeys"
 import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
@@ -125,6 +130,9 @@ export class SpellCodeMirror implements CodeEditorHandle {
     if (file === this.file && SpellCodeMirror.states.fileShownIn(this.view) === file) return
     this.file = file
     SpellCodeMirror.states.show(this.view, file, this.host())
+    // its words the app's now, at once:  put right later, a scroll asked for meanwhile would be lost,
+    // as CodeMirror lays out afresh for new words (a Go to … jump into this file, epic `codemirror` I11)
+    CodeMirrorSetup.speakNow(this.view)
   }
 
   /** Let go of the file's state, which is kept, e.g. before the view is destroyed. */
@@ -260,23 +268,32 @@ export class SpellCodeMirror implements CodeEditorHandle {
   ////////////////
 
   /**
-   * Select from `anchor` to `head`, offsets in the file shown, bringing `head` into the middle of the view when it's out
-   * of it:  the file's place restored, e.g. where it was last left.
+   * Select from `anchor` to `head`, offsets in the file shown, and bring it into view, as `show` says:
+   * - `"place"` (the default):  the file's place restored, e.g. where it was last left:
+   *   `head` into the middle of the view when it's out of it
+   * - `"block"`:  a Go to … jump's, from another file:  the whole block it lands in (`CodeMirrorSetup.revealBlock()`)
    * - Never takes the keyboard's focus.
    */
-  selectRange(anchor: number, head: number): void {
-    const isShown = CodeMirrorFollowed.isInView(this.view, head)
-    this.view.dispatch({
-      selection: { anchor, head },
-      effects: isShown ? [] : EditorView.scrollIntoView(head, { y: "center" })
-    })
+  selectRange(anchor: number, head: number, show: EditorSelection["show"] = "place"): void {
+    const { view } = this
+    const effects =
+      show === "block"
+        ? CodeMirrorSetup.revealBlock(view.state, Math.min(anchor, head))
+        : CodeMirrorFollowed.isInView(view, head)
+          ? []
+          : EditorView.scrollIntoView(head, { y: "center" })
+    view.dispatch({ selection: { anchor, head }, effects })
   }
 
-  /** Select `location`'s range, in this file, and show it. */
+  /**
+   * Select `location`'s range, in this file, and show the whole block it's in:  a Go to … jump landing here
+   * (Go to Definition, a use listed, Go to Symbol;  `CodeMirrorSetup.revealBlock()`, epic `codemirror` I11).
+   */
   select(location: CodeMirrorLocation): void {
-    const { from, to } = LspToCodeMirror.range(this.view.state.doc, location.range)
-    this.view.dispatch({ selection: { anchor: from, head: to }, scrollIntoView: true })
-    this.view.focus()
+    const { view } = this
+    const { from, to } = LspToCodeMirror.range(view.state.doc, location.range)
+    view.dispatch({ selection: { anchor: from, head: to }, effects: CodeMirrorSetup.revealBlock(view.state, from) })
+    view.focus()
   }
 
   /**

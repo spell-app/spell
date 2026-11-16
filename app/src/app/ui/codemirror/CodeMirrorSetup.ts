@@ -2,7 +2,14 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirro
 import { codeFolding, foldable, foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
 import { lintKeymap } from "@codemirror/lint"
 import { openSearchPanel, searchKeymap } from "@codemirror/search"
-import { Compartment, EditorSelection, EditorState, type Extension, StateEffect } from "@codemirror/state"
+import {
+  Compartment,
+  EditorSelection,
+  EditorState,
+  type Extension,
+  type SelectionRange,
+  StateEffect
+} from "@codemirror/state"
 import {
   EditorView,
   ViewPlugin,
@@ -39,6 +46,8 @@ import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
  *   `editor.dragAndDrop: false` (`PRESS_STARTS_SELECTION`, epic `codemirror` I9).
  * - A quadruple click selects the block its line is in, the one its fold arrow folds;
  *   each click after that, the block around it (`CLICKS_SELECT_BLOCKS`, epic `codemirror` T15).
+ * - A Go to … jump shows the whole block it lands in, its head a row below the top (`revealBlock()`,
+ *   epic `codemirror` I11).
  * - Its position in the import graph:  CodeMirror and the app's texts;  never a file or the parser.
  ****************/
 export class CodeMirrorSetup {
@@ -56,6 +65,8 @@ export class CodeMirrorSetup {
       PRESS_STARTS_SELECTION,
       // four clicks select a block, five the block around it ... (epic `codemirror` T15)
       CLICKS_SELECT_BLOCKS,
+      // a Go to … jump shows its whole block (epic `codemirror` I11)
+      REVEALS_BLOCKS,
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
       // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
@@ -78,6 +89,32 @@ export class CodeMirrorSetup {
       // room for the place in focus's mark (`<FollowAlong>`)
       CodeMirrorFollowed.extension()
     ]
+  }
+
+  ////////////////
+  // ## Showing a block
+  ////////////////
+
+  /**
+   * The scroll that shows the whole block at `pos`, for a Go to … jump (epic `codemirror` I11):
+   * dispatched with the selection it lands on.
+   * - The block is the one four clicks select there (`CLICKS_SELECT_BLOCKS`):  what its head line's fold arrow folds,
+   *   or the innermost block `pos` is in;  a line in no block is its line alone.
+   * - Its head lands at least one row below the pane's top, so the line above shows;  at the file's start, at the top.
+   * - Scrolled as little as that takes:  a block already wholly in view, with its row above, doesn't move.
+   * - Taller than the pane:  its head one row below the top.
+   * - Worked out as CodeMirror scrolls, after the file's lines are drawn and measured (`REVEALS_BLOCKS`):
+   *   so a jump into another file shows right too, the bubbly look's heights and all.
+   */
+  static revealBlock(state: EditorState, pos: number): StateEffect<unknown> {
+    const { doc } = state
+    const block = blockAround(state, pos, 0)
+    const head = doc.lineAt(block?.from ?? pos)
+    const last = block ? doc.lineAt(block.to === doc.length ? block.to : block.to - 1) : head
+    // its head the range's head:  CodeMirror draws the lines around a scroll's head first
+    const range = EditorSelection.range(last.to, head.from)
+    BLOCK_REVEALS.add(range)
+    return EditorView.scrollIntoView(range)
   }
 
   ////////////////
@@ -293,6 +330,39 @@ function blockAround(state: EditorState, pos: number, outward: number): { from: 
   }
   return found
 }
+
+/** The scroll targets `CodeMirrorSetup.revealBlock()` made:  `REVEALS_BLOCKS` scrolls these its own way. */
+const BLOCK_REVEALS = new WeakSet<SelectionRange>()
+
+/**
+ * Scrolls a block `CodeMirrorSetup.revealBlock()` asked for into view, as CodeMirror is about to scroll to it:
+ * its lines drawn and measured by then.
+ * - Any other scroll is CodeMirror's own.
+ * - Its row above:  the line before its head, however tall it's drawn:  a tall bubbly line, or a short blank one.
+ * - Sideways, all the way left:  the head line's start.
+ * - NEVER asks CodeMirror for coordinates (`coordsAtPos()`):  it runs inside CodeMirror's update, where they throw.
+ * - A view whose words change before it scrolls is laid out afresh, and the scroll is lost:
+ *   `SpellCodeMirror.show()` puts a file's words right at once, so a jump into another file isn't.
+ */
+const REVEALS_BLOCKS = EditorView.scrollHandler.of((view, range) => {
+  if (!BLOCK_REVEALS.has(range)) return false
+  const scroller = view.scrollDOM
+  const shown = scroller.getBoundingClientRect()
+  // a line block's top, in the scroller's scrolled coordinates
+  const offset = view.documentTop - shown.top + scroller.scrollTop
+  const bottom = offset + view.lineBlockAt(range.anchor).bottom
+  // the highest the pane's top may be:  the row above's top, or the very top at the file's start
+  const ceiling = range.head > 0 ? offset + view.lineBlockAt(range.head - 1).top : 0
+  const current = scroller.scrollTop
+  const pane = scroller.clientHeight
+  let target = current
+  if (ceiling < current) target = ceiling
+  else if (bottom > current + pane) target = Math.min(bottom - pane, ceiling)
+  scroller.scrollTop = Math.max(0, target)
+  // its head is a line's start:  in view only scrolled all the way left
+  scroller.scrollLeft = 0
+  return true
+})
 
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"

@@ -130,7 +130,8 @@ function FileInputEditor() {
           const { start, end } = location.range
           void editor.showFileAt(location.path, {
             anchor: { line: start.line, ch: start.character },
-            head: { line: end.line, ch: end.character }
+            head: { line: end.line, ch: end.character },
+            show: "block"
           })
           return true
         }}

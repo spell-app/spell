@@ -1896,10 +1896,10 @@ export class EditorStore extends Observable {
     delete file.initialSelection
 
     const { view } = inputEditor
-    const { scroll, anchor, head } = initialSelection
+    const { scroll, anchor, head, show } = initialSelection
     if (scroll) view.scrollDOM.scrollTop = scroll.current
     if (anchor && head) {
-      inputEditor.selectRange(offsetIn(anchor), offsetIn(head))
+      inputEditor.selectRange(offsetIn(anchor), offsetIn(head), show)
     }
     if (!initialSelection.quiet) view.focus()
 

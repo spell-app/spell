@@ -14,6 +14,12 @@ export type EditorSelection = {
   head?: EditorPosition
   /** Show it without taking the keyboard's focus:  following along, not going there. */
   quiet?: boolean
+  /**
+   * How it's brought into view:
+   * - `"place"` (the default):  a place restored, centred when it's out of view
+   * - `"block"`:  a Go to … jump's, the whole block it lands in, its head a row below the top (epic `codemirror` I11)
+   */
+  show?: "place" | "block"
 }
 
 /**
