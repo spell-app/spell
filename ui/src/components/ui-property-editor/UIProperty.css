@@ -5,7 +5,9 @@
  *   `:state(half)`.  `grid-column` is ignored outside a grid, so it needs no state of its own.
  *   - Below about 18em of form, everything takes a whole row (the form root is the `ui-form` container).
  *   - On a grid its width is the cell's (`--_property-editor-field-width`, set by the grid), not its `N wide`.
- * - `:state(inline-check)`:  a compact editor's yes or no, the box then its label then its tip, on one line.
+ * - `:state(inline-check)`:  a compact editor's yes or no, the box then its label then its tip, on one line;
+ *   half a row, as a select (its kind's `width`), its tip's icon at the row's end.
+ * - `:state(compact)`:  the tip's icon shows only while the field is hovered or holds the focus.
  * - `:state(set)` under `:state(show-defaults)`:  its value bold, through the owner token every control reads
  *   (`InputOwnerTokens.weight`).
  * - Where its value comes from (`PropertyOrigin`):  `:state(here)`, a dot before its label;  `:state(inherited)`,
@@ -53,15 +55,32 @@
     /* a toggle a size smaller, for the form's density (epic `editor` I177) */
     --ui-checkbox-toggle-width: 2.5em;
     --ui-checkbox-toggle-handle: 1.25em;
+    /* its keyboard ring as heavy as the selects' beside it, on the smaller toggle (I199) */
+    --ui-checkbox-focus-width: 2px;
   }
   :host(:state(inline-check)) .inline.field > .row > .label {
     cursor: var(--ui-control-cursor);
   }
+  /* its row takes the rest of the line, so its tip's icon ends it, under the others' (epic `editor` I199) */
+  :host(:state(inline-check)) .inline.field > .row {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  :host(:state(inline-check)) .inline.field > .row > .label {
+    margin-inline-end: auto;
+  }
 
-  /* ## Compact:  the tip's icon at the text's size */
+  /* ## Compact:  the tip's icon at the text's size, shown only while the field is pointed at or in use (I199) */
   :host(:state(compact)) .field > .row > .info {
     width: 12px;
     height: 12px;
+    opacity: 0;
+  }
+  :host(:state(compact):is(:hover, :focus-within)) .field > .row > .info {
+    opacity: 0.4;
+  }
+  :host(:state(compact)) .field > .row > .info:is(:hover, :focus-visible) {
+    opacity: 1;
   }
 
   /* ## A value other than its default, bold */

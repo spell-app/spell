@@ -1671,8 +1671,7 @@ export const HELP_TABLE: Readonly<
       size: "Text size, `mini` ...",
       color: "Hue of the top edge; with `inverted`, the fill.",
       appearance:
-        "The look, several words at once: `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below; `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page: no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box: no background, border or shadow), `secondary` (less emphasis: a tinted surface, muted text), `tertiary` (least emphasis: a darker tint).",
-      placeholder: "A tinted, centred block reserving room for content.",
+        "The look, several words at once: `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below; `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page: no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box: no background, border or shadow), `secondary` (less emphasis: a tinted surface, muted text), `tertiary` (least emphasis: a darker tint), `placeholder` (a tinted, centred block reserving room for content).",
       padding:
         "Its padding: `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.",
       clearing: "Contains its floated children.",

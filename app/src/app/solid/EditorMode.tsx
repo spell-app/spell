@@ -208,11 +208,13 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
  * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Draft", as plain words
  *   (Owen, 2026-11-16, I192:  "Change text from 'Editing a Draft' to just 'Draft'").
  *   - Its tooltip says what a draft is:  only you see it;  Publish makes it everyone's, Discard throws it away.
- * - Then "Discard", a link with a trash can, in the theme's primary colour, so it doesn't read as part of the label:
+ * - Then "Publish", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
+ * - Right:  "Discard", a link with a trash can, in the theme's primary colour, so it doesn't read as part of the label:
  *   the project menu's Delete Draft, which asks first, its red "Throw It Away" (`editor.deleteDraft()`;
  *   Owen, 2026-11-14, T67;  2026-11-16, T85:  "make `Discard` look like a link";
  *   I192:  "Text + icon should be purple to distinguish it from the label").
- * - Right:  "Publish Draft", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
+ *   - After Publish, not between it and "Draft" (I203, Owen:  "looks like discard trash can is annotating 'Draft'";
+ *     "Swap Publish and Discard buttons").
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
 function PublishDraft(): JSX.Element {
@@ -224,6 +226,9 @@ function PublishDraft(): JSX.Element {
           <ui-icon name={DRAFT_ICON} />
           {appTexts.text("draft")}
         </span>
+        <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
+          {appTexts.text("publishDraft")}
+        </ui-button>
         <ui-button
           class="DiscardDraft"
           appearance="tertiary"
@@ -231,9 +236,6 @@ function PublishDraft(): JSX.Element {
           onClick={() => void editor.deleteDraft()}
         >
           {appTexts.text("discardDraft")}
-        </ui-button>
-        <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
-          {appTexts.text("publishDraft")}
         </ui-button>
       </span>
     </Show>

@@ -14093,7 +14093,7 @@
         {
           "key": "none",
           "text": "none",
-          "description": "What a property's select shows, in italics, when it has no value and no default."
+          "description": "What a property's select shows, muted, when it has no value and no default."
         }
       ],
       "mainTag": "ui-form",
@@ -28722,7 +28722,7 @@
         {
           "key": "none",
           "text": "none",
-          "description": "What a property's select shows, in italics, when it has no value and no default."
+          "description": "What a property's select shows, muted, when it has no value and no default."
         }
       ],
       "mainTag": "ui-property-editor",
@@ -35002,14 +35002,10 @@
             "circular",
             "basic",
             "secondary",
-            "tertiary"
+            "tertiary",
+            "placeholder"
           ],
-          "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`."
-        },
-        {
-          "name": "placeholder",
-          "kind": "keyOnly",
-          "description": "A tinted, centred block reserving room for content."
+          "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint), `placeholder` (a tinted, centred block reserving room for content).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`, `placeholder`."
         },
         {
           "name": "padding",
@@ -54526,7 +54522,8 @@
         },
         {
           "name": "--ui-button-icon-spacing",
-          "default": "var(--ui-space-xs)",
+          "default": "0.35714em",
+          "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)",
           "type": "length"
         },
         {
@@ -60808,6 +60805,11 @@
           "name": "--ui-property-editor-band-transform",
           "default": "none",
           "type": "other"
+        },
+        {
+          "name": "--ui-property-editor-band-spacing",
+          "default": "0",
+          "type": "length"
         },
         {
           "name": "--ui-property-editor-band-weight",
