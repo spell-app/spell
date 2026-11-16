@@ -28,11 +28,15 @@
   --spell-code-paper: light-dark(white, #1c1b22);
   /*
    * a side panel's body:  the Inspector's cards, the site editor's board and form (epic `mockup` I18)
-   * - the theme's primary at its palest, Owen's "primary-25":  Spell UI has no steps of a colour,
-   *   so it's the primary mixed into the code's paper
-   * - a theme sets its own here
+   * - the theme's own side panel surface, `surfaces.side-panel` (`--ui-side-panel-background`):
+   *   its bar's colour at its palest in light, a step lighter than the bar in dark;
+   *   Spell's is its brand-25, #fcfdff, in light
+   * - a theme without one:  its primary at its palest, mixed into the code's paper
    */
-  --spell-panel-background: color-mix(in oklab, var(--ui-primary) 5%, var(--spell-code-paper));
+  --spell-panel-background: var(
+    --ui-side-panel-background,
+    color-mix(in oklab, var(--ui-primary) 5%, var(--spell-code-paper))
+  );
   /*
    * the top bar's fill as it's seen, for a bar inside a panel to match it (epic `mockup` I18):
    * the Inspector's card headers, the code's file tabs, the site editor's board bar
