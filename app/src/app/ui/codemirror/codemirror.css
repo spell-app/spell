@@ -59,26 +59,26 @@
     font-size: 14px;
   }
   .cm-tooltip-autocomplete > ul > li {
-    padding: 3px 10px !important;
+    padding: 4px 8px !important;
   }
   .cm-tooltip-autocomplete > ul > li[aria-selected] {
     background: light-dark(#e9e4fb, #3a3550);
     color: var(--bubbly-bold-ink);
   }
   .cm-completionDetail {
-    margin-left: 10px;
+    margin-left: 8px;
     font-style: normal;
     color: var(--bubbly-comment-ink);
   }
   .cm-tooltip.cm-completionInfo {
     max-width: 420px;
-    padding: 8px 10px;
+    padding: 8px 12px;
   }
   .cm-tooltip-lint {
     padding: 0;
   }
   .cm-diagnostic {
-    padding: 6px 10px;
+    padding: 8px 12px;
     white-space: pre-line;
   }
   .cm-lintRange-error {
@@ -216,7 +216,7 @@
   input {
     box-sizing: border-box;
     width: 220px;
-    padding: 3px 6px;
+    padding: 4px 8px;
     border: 1px solid var(--ui-primary, #6e56cf);
     border-radius: 4px;
     background: var(--bubbly-paper);
@@ -227,7 +227,7 @@
 }
 .cmb-rename-message {
   max-width: 420px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   white-space: pre-line;
 }
 
@@ -319,7 +319,7 @@
     max-width: min(480px, 90vw);
   }
   .cmb-error-row {
-    padding: 6px 10px;
+    padding: 8px 12px;
     white-space: pre-line;
   }
   /* and between the hover's sections, its info and its errors */
@@ -426,7 +426,7 @@
     min-width: 120px;
     height: var(--CodeMirrorFind-height);
     margin-inline-end: 4px;
-    padding: 0 2px 0 6px;
+    padding: 0 4px 0 8px;
     border: 1px solid var(--CodeMirrorFind-border);
     border-radius: 4px;
     background: var(--bubbly-paper, var(--ui-background, light-dark(white, #1c1b22)));

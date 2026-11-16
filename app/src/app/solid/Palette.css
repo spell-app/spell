@@ -22,7 +22,7 @@
 .PaletteBody {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   width: var(--palette-width);
   /* within the window, below the top bar:  its body scrolls only when even that's too short */
   max-height: calc(100dvh - 64px);
@@ -271,7 +271,7 @@ ui-popup.PaletteGroupPopup::part(popup) {
 .PaletteHead {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 
   & .PaletteHint {
     flex: 1;

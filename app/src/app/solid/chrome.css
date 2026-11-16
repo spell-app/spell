@@ -13,7 +13,7 @@ ui-menu.PanelMenu::part(menu) {
   box-shadow: var(--ui-shadow-raised);
 }
 ui-menu.PanelMenu > ui-item[kind="header"]::part(item) {
-  padding-left: 1em;
+  padding-left: var(--ui-space-m);
 }
 
 /* `<AppMenu>`:  its sub-menus' items fill the bar's height too, with no room of their own above or below
@@ -71,6 +71,10 @@ ui-item.spring::part(item) {
 ui-icon.PanelClose {
   /* a box of its own (a `<ui-icon>` is `display: contents`):  its margin and its tooltip need one */
   display: inline-flex;
+  /* its box the glyph's own, with no room after it for a label it hasn't:  so the bar's room ends at the drawn ✕
+     (epic `editor` I213;  that room and the glyph's own inset stood it 15px from the card's edge) */
+  --ui-icon-width: auto;
+  --ui-icon-distance: 0;
   flex: none;
   align-self: center;
   margin-inline: var(--spell-panel-close-gap) 0;
@@ -87,7 +91,7 @@ ui-icon.IconAction {
   display: inline-flex;
   align-self: center;
   font-size: 1.15em;
-  margin-inline: 0.35em;
+  margin-inline: round(0.35em, var(--ui-grid, 4px));
 }
 
 /*
@@ -257,9 +261,9 @@ ui-menu.ModeTabs ui-item:not([appearance~="circular"]) + ui-item[appearance~="ci
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
-  gap: 0.4em;
+  gap: round(0.4em, var(--ui-grid, 4px));
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
-  padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
+  padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, round(0.9em, var(--ui-grid, 4px)));
 }
 /* ... its icons alone (the code, the compiled code, Inspect app, Add) are Spell UI's circular items
    (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
@@ -348,7 +352,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   box-sizing: border-box;
   block-size: var(--spell-draft-height);
   margin-inline-start: var(--spell-bar-icon-gap, 12px);
-  padding: var(--spell-draft-inset) 11px;
+  padding: var(--spell-draft-inset) 12px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);
   box-shadow:
@@ -368,7 +372,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     --ui-button-radius: 999px;
     --ui-button-font-size: 1em;
     --ui-button-padding-block: 0;
-    --ui-button-padding-inline: 10px;
+    --ui-button-padding-inline: 12px;
     margin: 0;
   }
   /* no padding above or below:  a tertiary button's own (Discard's) pushed its words 2.4px under the label's */

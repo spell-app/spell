@@ -8,9 +8,10 @@
 
 :root,
 :host {
-  --spell-tight-padding: 0.3em;
-  --spell-normal-padding: 0.6em;
-  --spell-loose-padding: 1em;
+  /* each on the spacing grid (`--ui-grid`, Spell UI's 4px):  4px, 8px and 12px at 13px (epic `editor` I213) */
+  --spell-tight-padding: round(0.3em, var(--ui-grid, 4px));
+  --spell-normal-padding: round(0.6em, var(--ui-grid, 4px));
+  --spell-loose-padding: round(1em, var(--ui-grid, 4px));
 
   /* the page behind the panes:  see-through, so the theme's own page shows (its background, Fruity's wallpaper) */
   --spell-page-background: transparent;

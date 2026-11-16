@@ -38,7 +38,7 @@
   /* their titles the theme editor's bands (a group is a panel band:  `UIPropertyGroup`), out to the card's edges
      through its padding (`.InspectorSection`) */
   & ui-property-editor {
-    --ui-panel-padding: 14px;
+    --ui-panel-padding: 12px;
     /* a band 12px under the fields above it, not the panels' 20px */
     --ui-panel-band-space: 12px;
     /* the chevron down while open, as the theme editor's (the brand theme points it up) */
@@ -225,7 +225,7 @@ ui-panel.InspectorCard > .InspectorSection {
  *   "lose background shading underneath").
  */
 .SpellPage .InspectorSplit {
-  --ui-split-panel-bar-size: 6px;
+  --ui-split-panel-bar-size: 8px;
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -282,11 +282,11 @@ ui-panel.InspectorCard > .InspectorSection {
   max-height: none;
 }
 
-/* a card's body:  scrolling by itself, its content 14px in, 8px under the card's header (I210) */
+/* a card's body:  scrolling by itself, its content 12px in (14px till I213's 4px grid), 8px under the card's header (I210) */
 .InspectorSection {
   display: flex;
   flex-direction: column;
-  padding: var(--spell-card-body-top) 14px 12px;
+  padding: var(--spell-card-body-top) 12px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
   /* its scroll, which its edges' shades follow (below) */
@@ -308,7 +308,7 @@ ui-panel.InspectorCard > .InspectorSection {
   z-index: 3;
   flex: none;
   height: var(--spell-scroll-shade-size);
-  margin-inline: -14px;
+  margin-inline: -12px;
   pointer-events: none;
   opacity: 0;
   animation: auto linear both;
@@ -380,7 +380,7 @@ ui-section.InspectorEvent {
   /* one value:  above and below */
   --ui-section-margin: 4px;
   --ui-section-title-padding: 2px 0;
-  --ui-section-title-gap: 6px;
+  --ui-section-title-gap: 8px;
   --ui-section-h3: 1;
   --ui-section-content-padding: 4px 0 0 0;
   --ui-section-fold-icon-size: 12px;
@@ -399,7 +399,7 @@ ui-section.InspectorEvent {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 13px;
   font-weight: var(--ui-font-weight-semibold, 600);
 
@@ -415,7 +415,7 @@ ui-section.InspectorEvent {
   & > h3 {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin: 0;
     font-size: 13px;
     font-weight: var(--ui-font-weight-semibold, 600);
@@ -441,7 +441,7 @@ ui-section.InspectorEvent {
 .InspectorActionSignature {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
   font-weight: var(--ui-font-weight-normal, 400);
 
@@ -530,7 +530,7 @@ ui-button.InspectorActionButton::part(button):focus-visible {
 .InspectorTree {
   /* rows run the card's width:  its padding taken back */
   display: block;
-  margin: -4px -14px 0;
+  margin: -4px -12px 0;
   font-size: 13px;
 }
 .InspectorFilter {
@@ -685,7 +685,7 @@ ui-menu.InspectorTrail {
 
 @media (--ui-mobile) {
   .InspectorPane {
-    --InspectorPane-room: var(--spell-gap, 14px);
+    --InspectorPane-room: var(--spell-gap, 16px);
     --InspectorPane-corner: calc(var(--spell-pane-radius, 12px) + var(--InspectorPane-room));
     position: fixed;
     inset: auto 0 0;
@@ -822,8 +822,8 @@ ui-menu.InspectorTrail {
 
 /* a link worked out from a data place:  the places it read, after its chip */
 .InspectorDataMark {
-  margin-inline-start: 6px;
-  padding: 1px 6px;
+  margin-inline-start: 8px;
+  padding: 1px 8px;
   border-radius: 8px;
   font-size: 12px;
   color: var(--ui-text-muted);
@@ -848,8 +848,8 @@ ui-menu.InspectorTrail {
   -webkit-backdrop-filter: var(--spell-pane-filter);
   backdrop-filter: var(--spell-pane-filter);
 }
-/* a card's code box takes back some of the card's 14px each side, so its lines have room (Owen, I164:
-   "Reduce margin around the input") */
+/* a card's code box takes back some of the card's 12px each side, so its lines have room (Owen, I164:
+   "Reduce margin around the input"):  the box 8px from the card's edges, on the 4px grid (I213) */
 .InspectorSection .CodeSlice {
-  margin-inline: -6px;
+  margin-inline: -4px;
 }

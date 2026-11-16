@@ -30,8 +30,8 @@
 .RestartNeededBar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 6px 6px 14px;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
   border: 1px solid var(--ui-popup-border-color, var(--ui-border-color));
   border-radius: var(--ui-popup-radius, var(--ui-radius-m));
   background: var(--ui-popup-background, var(--ui-surface));

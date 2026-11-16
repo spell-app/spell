@@ -19,10 +19,13 @@
   border-start-start-radius: var(--spell-pane-radius, 0);
   border-start-end-radius: var(--spell-pane-radius, 0);
   --ui-panel-pane-bar-background: transparent;
-  /* the room left and right of the tabs the same as above them, 7.5px (Owen, epic `editor` T88:  "Less padding to the
-     left and right, make it equal to the padding at the top of card.spell"):  a tab's own 2px inset on the left,
-     the ✕'s glyph's 3.3px on the right;  inline only, start and end, as `<ui-panel>` reads it */
-  --ui-panel-pane-bar-padding: 5.5px 4.2px;
+  /* the room left and right of the tabs the same as above them (Owen, epic `editor` T88:  "Less padding to the
+     left and right, make it equal to the padding at the top of card.spell"), on the 4px grid:  8px (I213;  was 7.5px)
+     - on the left, 6px and the bar's own 2px before its actions;  on the right, to the ✕'s glyph, its box its own
+       (`.HideCode`, `SpellEditor.spell`)
+     - above and below, 7.5px:  the 24px tabs in the 39px over the bar's hairline (J:  a 41px bar, or 23px tabs)
+     - inline only, start and end, as `<ui-panel>` reads it */
+  --ui-panel-pane-bar-padding: 6px 8px;
 
   &::before {
     content: "";

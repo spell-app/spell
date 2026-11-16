@@ -342,6 +342,9 @@ a "file tab bar" is a view
 		/* the ✕ that hides the code, at the bar's far right:  every panel's ✕, the editor's tokens (`PanelClose`, T95) */
 		.HideCode {
 			display: inline-flex;
+			/* its box the glyph's own, no room after it for a label:  the bar's 8px ends at the drawn ✕ (I213) */
+			--ui-icon-width: auto;
+			--ui-icon-distance: 0;
 			flex: none;
 			margin-inline: var(--spell-panel-close-gap) 0;
 			color: var(--spell-panel-close-color);

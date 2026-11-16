@@ -93,7 +93,7 @@ ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"]) > .InspectorEv
 /* the body's code:  on the code's paper, no field's border, its top-left curving out of the band */
 ui-section.InspectorEvent.bubbly > :is(.CodeSlice, pre.InspectorCode) {
   /* from the rail, not over it:  only its right takes back some of the card's room (`Inspector.css`, I164) */
-  margin-inline: 0 -6px;
+  margin-inline: 0 -4px;
   border: 0;
   border-radius: var(--bubbly-inner-top) 4px 4px var(--bubbly-block-inner-corner);
   background: var(--spell-code-paper, var(--bubbly-paper));
