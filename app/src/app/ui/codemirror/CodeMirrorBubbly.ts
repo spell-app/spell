@@ -51,6 +51,7 @@ export class CodeMirrorBubbly {
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
       CodeMirrorMarkup.tabStops,
+      CodeMirrorMarkup.tagBlocks,
       CodeMirrorSelection.extension,
       DescriptionRoom.extension
     ]

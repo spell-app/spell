@@ -107,11 +107,11 @@ describe("SpellLanguageService.formatting() re-indents by structure (epic `edito
     expect(edited(split, service.formatting(file, OPTIONS))).toBe(split)
   })
 
-  test("...a tag laid out as Enter lays it out, Prettier's way (I133):  kept as it is", async () => {
+  test("...a tag laid out as Enter lays it out (I133), its `>` at the end of its last attribute (I135):  kept as it is", async () => {
     const laidOut = await formattedSolitaire()
     const split = laidOut.replace(
       '\t\t<container columns="7" padding="small" spacing="xs">',
-      '\t\t<container\n\t\t\tcolumns="7"\n\t\t\tpadding="small"\n\t\t\tspacing="xs"\n\t\t>'
+      '\t\t<container\n\t\t\tcolumns="7"\n\t\t\tpadding="small"\n\t\t\tspacing="xs">'
     )
     expect(split).not.toBe(laidOut)
     const { file } = await opened("Solitaire", "Solitaire.spell", split)

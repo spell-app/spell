@@ -274,7 +274,7 @@ describe("SpellTyping.tagOpenAt() (I142)", () => {
   })
 })
 
-describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, as Prettier lays out a long tag (I133)", () => {
+describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, the tag laid out (I133, I135)", () => {
   const TABS = { insertSpaces: false, tabSize: 2 }
   /** Solitaire's toolbar, a drawing's tag three levels in, then its first child. */
   const TOOLBAR = [
@@ -287,11 +287,10 @@ describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, as Pretti
     `\t\t\t\tappearance="pills"`,
     `\t\t\t\tinverted`,
     `\t\t\t\tsize="small"`,
-    `\t\t\t\tshrinkable`,
-    `\t\t\t>`
+    `\t\t\t\tshrinkable>`
   ]
 
-  test("each attribute on its own line a level in from the tag, its `>` back at the tag's level;  the caret before the next", () => {
+  test("each attribute on its own line a level in from the tag, its `>` at the end of the last;  the caret before the next", () => {
     const column = TOOLBAR[0]!.indexOf("appearance") - 1
     expect(SpellTyping.tagLaidOut(TOOLBAR, 0, column, TABS)).toEqual({
       from: 0,
@@ -310,26 +309,30 @@ describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, as Pretti
     expect(layout).toMatchObject({ from: 0, to: 1, lines: LAID_OUT })
     // in `inverted`, where it was:  `inv|erted`
     expect(layout.caret).toEqual({ line: 3, column: 7 })
-    expect(SpellTyping.tagLaidOut(LAID_OUT, 3, 4, TABS)).toMatchObject({ from: 0, to: 6, lines: LAID_OUT })
+    expect(SpellTyping.tagLaidOut(LAID_OUT, 3, 4, TABS)).toMatchObject({ from: 0, to: 5, lines: LAID_OUT })
+  })
+
+  test("a `>` alone on a line under its attributes (as I133 laid it out) comes up onto the last", () => {
+    const alone = [...LAID_OUT.slice(0, -1), `\t\t\t\tshrinkable`, `\t\t\t>`, TOOLBAR[1]!]
+    expect(SpellTyping.tagLaidOut(alone, 2, 6, TABS)).toMatchObject({ from: 0, to: 6, lines: LAID_OUT })
   })
 
   test("a `/>`, a `{…}` and a quoted value with spaces kept whole;  what follows the tag stays after its `>`", () => {
     expect(
       SpellTyping.tagLaidOut([`\t<card-image rank=ace suit={its suit} title="a b" />`], 0, 13, TABS)!.lines
-    ).toEqual([`\t<card-image`, `\t\trank=ace`, `\t\tsuit={its suit}`, `\t\ttitle="a b"`, `\t/>`])
+    ).toEqual([`\t<card-image`, `\t\trank=ace`, `\t\tsuit={its suit}`, `\t\ttitle="a b" />`])
     expect(SpellTyping.tagLaidOut([`<text slot="title" heavy>Spell</>`], 0, 19, TABS)!.lines).toEqual([
       `<text`,
       `\tslot="title"`,
-      `\theavy`,
-      `>Spell</>`
+      `\theavy>Spell</>`
     ])
   })
 
-  test("after the last attribute:  a line of its own for the next, the caret on it", () => {
+  test("after the last attribute:  a line of its own for the next, the caret on it, before the `/>`", () => {
     expect(SpellTyping.tagLaidOut([`<action "cheat" />`], 0, 16, TABS)).toEqual({
       from: 0,
       to: 0,
-      lines: [`<action`, `\t"cheat"`, `\t`, `/>`],
+      lines: [`<action`, `\t"cheat"`, `\t/>`],
       caret: { line: 2, column: 1 }
     })
   })
@@ -337,7 +340,7 @@ describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, as Pretti
   test("in a file indented with spaces, a level of spaces;  in Spanish's tags too", () => {
     expect(
       SpellTyping.tagLaidOut([`  <barra clase="x" pequeña>`], 0, 18, { insertSpaces: true, tabSize: 2 })!.lines
-    ).toEqual([`  <barra`, `    clase="x"`, `    pequeña`, `  >`])
+    ).toEqual([`  <barra`, `    clase="x"`, `    pequeña>`])
   })
 
   test("not between a tag's attributes, or a tag with none:  none", () => {
@@ -347,7 +350,7 @@ describe("SpellTyping.tagLaidOut():  Enter between a tag's attributes, as Pretti
   })
 })
 
-describe("SpellTyping.tagLineJoined():  Backspace at an attribute line's start (I133)", () => {
+describe("SpellTyping.tagLineJoined():  Backspace at an attribute line's start (I133, I135)", () => {
   test("the line joins the one above, a space between", () => {
     const lines = [`\t\t\t<toolbar class="GameBar"`, `\t\t\t\tappearance="pills" inverted>`, `\t\t\t\t<text />`]
     expect(SpellTyping.tagLineJoined(lines, 1, 4)).toEqual({
@@ -358,7 +361,7 @@ describe("SpellTyping.tagLineJoined():  Backspace at an attribute line's start (
     })
   })
 
-  test("its attributes all back on the tag's line, a `>` alone under it comes up too, no space before it", () => {
+  test("a `>` alone under the joined line comes up onto it, no space before it", () => {
     const lines = [`<toolbar class="GameBar"`, `\tshrinkable`, `>`]
     expect(SpellTyping.tagLineJoined(lines, 1, 1)).toMatchObject({
       from: 0,
@@ -366,6 +369,21 @@ describe("SpellTyping.tagLineJoined():  Backspace at an attribute line's start (
       lines: [`<toolbar class="GameBar" shrinkable>`]
     })
     expect(SpellTyping.tagLineJoined([`<action "x"`, `/>`], 1, 0)).toMatchObject({ lines: [`<action "x" />`] })
+    // the last attribute joined onto the one above it, not the tag's line:  the `>` comes up too (I135)
+    expect(SpellTyping.tagLineJoined([`<toolbar`, `\tclass="GameBar"`, `\tshrinkable`, `>`], 2, 1)).toMatchObject({
+      from: 1,
+      to: 3,
+      lines: [`\tclass="GameBar" shrinkable>`]
+    })
+  })
+
+  test("the last attribute's `>` stays at the end of its line as it joins the one above", () => {
+    const lines = [`<toolbar`, `\tclass="GameBar"`, `\tshrinkable>`, `\t<text />`]
+    expect(SpellTyping.tagLineJoined(lines, 2, 1)).toMatchObject({
+      from: 1,
+      to: 2,
+      lines: [`\tclass="GameBar" shrinkable>`]
+    })
   })
 
   test("only at the start of an attribute line, after its indent", () => {
