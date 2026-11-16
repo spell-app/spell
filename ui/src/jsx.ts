@@ -31902,12 +31902,12 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:columns"?: number | `${number}`
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   origins?: unknown
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `origins` -- `prop:` stays only for compiled spell
    */

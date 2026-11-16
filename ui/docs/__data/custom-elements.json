@@ -30147,7 +30147,7 @@
             },
             {
               "name": "here",
-              "description": "Its value is set on this thing (its editor's `origins`):  a dot by its label."
+              "description": "Its value is set on this thing (its editor's `origins`);  draws nothing of its own."
             },
             {
               "name": "inherited",
@@ -30726,7 +30726,7 @@
             {
               "kind": "field",
               "name": "origins",
-              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
+              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }

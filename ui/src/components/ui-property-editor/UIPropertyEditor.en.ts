@@ -67,7 +67,7 @@ const OWN_ATTRIBUTES = [
     reflect: false,
     description:
       "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  " +
-      "`here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  " +
+      "`here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  " +
       "`action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  " +
       "`readonly` makes it read only.  A property it doesn't name looks as it always did."
   },

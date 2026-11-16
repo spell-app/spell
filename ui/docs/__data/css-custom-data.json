@@ -12518,7 +12518,7 @@
       "name": ":state(here)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-property>`:  Its value is set on this thing (its editor's `origins`):  a dot by its label.\n- `<ui-theme-token>`:  The theme sets the token (●)."
+        "value": "Custom state of:\n\n- `<ui-property>`:  Its value is set on this thing (its editor's `origins`);  draws nothing of its own.\n- `<ui-theme-token>`:  The theme sets the token (●)."
       }
     },
     {

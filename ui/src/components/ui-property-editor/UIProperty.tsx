@@ -89,7 +89,7 @@ function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | un
  *   - in a `compact` editor (`:state(compact)`):  a yes or no on one line, the box then its label;  its hint at the
  *     label row's end
  *   - `:state(set)`:  its value isn't its default (`default`, else the schema's);  bold under `show-defaults`
- *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, a dot by its label;
+ *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, nothing drawn;
  *     `:state(inherited)`, a quieter label;  `worked out`, read only;  its label's tooltip says where, and a small
  *     button at the row's end says it was pressed (`ui-reset`, `ui-show-code`)
  *   - `data`:  kept in a place outside the program, `:state(data)`;  its `mark` at the row's end says where in short,
