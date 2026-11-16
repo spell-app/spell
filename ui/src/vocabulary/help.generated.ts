@@ -1879,7 +1879,7 @@ export const HELP_TABLE: Readonly<
       resizable: "A bar between each two panes, to drag or to move with the arrow keys.",
       grows:
         "The one pane that takes every change: `first`, `last` or its number from 1, such as the app between its tools.",
-      "min-size": "The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes."
+      "min-size": "The smallest a dragged pane may get, `10%` for shares or `60px` for any pane."
     }
   },
   "ui-stack": {
