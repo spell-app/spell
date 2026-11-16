@@ -1961,7 +1961,12 @@
       margin-top: var(--cmb-band-margin);
       padding-inline: var(--bubbly-bracket-pad);
       background: var(--bubbly-pill);
-      border-radius: var(--bubbly-tag-corner);
+      /*
+       * each end a point at a tag's slant, its tip half way down:  each corner `--bubbly-tag-point` across and half the
+       * pill down (I118);  `--bubbly-tag-corner` itself is a corner's two radii, so as the shorthand's two values it made
+       * the top-right and bottom-left corners 10.78px each way and the others 6.68px:  45° ends, the tip 2px low
+       */
+      border-radius: var(--bubbly-tag-point) / calc(var(--bubbly-pill-height) / 2);
       corner-shape: bevel;
       white-space: pre;
     }
@@ -2046,23 +2051,28 @@
     .cmb-tag-link > :is(.cmb-tag-pill, .cmb-tag-band) {
       margin-top: 0;
     }
+    /*
+     * ... reaching out of its box to each tag's point:  past the room beside that tag, then under its point
+     * - a tag at its end too (`<number "score" />` before `</>`):  that tag's room after it is outside the box as well,
+     *   so the lines reach one room further, to the end tag's point (they stopped 2.34px short of it, a notch;  I118)
+     */
+    --cmb-tag-room: calc((var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale));
     .cmb-tag-link::before {
       content: "";
       position: absolute;
-      inset: 0
-        calc(
-          -1 *
-            (
-              (var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale) +
-                var(--bubbly-tag-point)
-            )
-        );
+      inset: 0 calc(-1 * (var(--cmb-tag-room) + var(--bubbly-tag-point)));
       z-index: -1;
       background:
         linear-gradient(var(--bubbly-pill) 0 0) top / 100%
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat,
         linear-gradient(var(--bubbly-pill) 0 0) bottom / 100%
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat;
+    }
+    .cmb-tag-link:has(> .cmb-tag-pill:last-child)::before {
+      right: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
+    }
+    .cmb-tag-link:has(> .cmb-tag-pill:first-child)::before {
+      left: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
     }
     /* spacers, injected beside HTML's tags (`CodeMirrorMarkup`):  their widths the shared rules' */
     .bubbly-spacer {
