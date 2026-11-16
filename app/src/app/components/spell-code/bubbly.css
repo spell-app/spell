@@ -2131,6 +2131,15 @@
      * one mark, and the code keeps its inverted pill;  without it its light words were on the paper (I126)
      */
     .cmb-tag-link.bubbly-expression {
+      /* in the middle of the tags' band, as the code in a tag is in its pill (it stood 1px high) */
+      --cmb-code-inset: calc(
+        (
+            var(--bubbly-pill-height) - (var(--bubbly-input-height) + var(--bubbly-input-pad-top)) *
+              var(--bubbly-editor-scale)
+          ) /
+          2
+      );
+      margin-top: calc(var(--cmb-band-margin) + var(--cmb-code-inset));
       padding-inline: var(--bubbly-code-pad);
       border-radius: var(--bubbly-input-radius);
       corner-shape: round;
@@ -2152,6 +2161,10 @@
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat,
         linear-gradient(var(--bubbly-pill) 0 0) bottom / 100%
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat;
+    }
+    /* ... its lines along the band's edges all the same, outside its pill */
+    .cmb-tag-link.bubbly-expression::before {
+      inset-block: calc(-1 * var(--cmb-code-inset));
     }
     .cmb-tag-link:has(> .cmb-tag-pill:last-child)::before {
       right: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
