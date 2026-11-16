@@ -37,7 +37,8 @@
  * - NOTE: left out, on purpose:
  *   - the dropdown's other types (`search`, `inline`, `button`, `labeled`, `pointing` ...):
  *     a native select is one closed box;  use `<ui-dropdown>` for those
- *   - menu height variations (`short`, `long` ...):  the picker is capped at `--ui-select-picker-max-height`
+ *   - menu height variations (`short`, `long` ...):  the picker is capped at `--ui-select-picker-max-height`,
+ *     and always at the room beside the select
  *   - `loading`:  a native select has nothing to wait for
  */
 
@@ -287,7 +288,12 @@
     .ui.select::picker(select) {
       box-sizing: border-box;
       min-width: anchor-size(width);
-      max-height: var(--_ui-select-picker-max-height);
+      /*
+       * Never taller than the room beside the select:  `100%` is that room (its `position-area`), less its offset
+       * from the select and as much again from the window's edge;  a longer list scrolls.
+       * `--ui-select-picker-max-height` caps it lower (a length;  `100dvh`:  only the room).
+       */
+      max-height: min(var(--_ui-select-picker-max-height), calc(100% - 2 * var(--_ui-select-picker-offset)));
       margin: var(--_ui-select-picker-offset) 0;
       padding: 0;
       overflow: hidden auto;
@@ -298,8 +304,12 @@
       box-shadow: var(--_ui-select-picker-shadow);
       color: var(--_ui-select-picker-color);
       font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+      /* the menu's words upright, whatever the closed box shows (a placeholder's `font-style`) */
+      font-style: normal;
       position-area: block-end span-inline-end;
       position-try-fallbacks: flip-block, flip-inline;
+      /* below or above, whichever has more room */
+      position-try-order: most-block-size;
       opacity: 0;
       transition-property: opacity, display, overlay;
       transition-duration: var(--_ui-select-duration);
