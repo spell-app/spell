@@ -79,7 +79,7 @@ import "./Inspector.css"
  * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click selects it:
  *   a drawn thing or a Spell UI control (an input, a button);  Alt-click selects any Spell UI element.
  *   - It starts as the Inspector opens, and stops once something's selected:  the app works as ever again.
- *   - The top bar's Inspect app (its crosshairs) starts it again;  Esc stops it.
+ *   - Its crosshairs button starts it again;  Esc stops it.
  *   - The click goes to the Inspector, never to the app:  selecting a button doesn't press it.
  *   - Shift, Command or Control adds to what's selected, and keeps inspecting;
  *     so does dragging across the app's background, a rubber band (`PartSelector`).
@@ -2944,8 +2944,8 @@ function pinnedAt(height: number): Keyframe {
  * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
  * `<ui-property-editor>` of every property it has, those it sets first
  * (Owen:  "lose that [More]. Show all of the properties").
- * - Inspecting again is the top bar's Inspect app (`<InspectAppButton>`):  the card has no button of its own
- *   (Owen, 2026-11-15, T78).
+ * - Inspecting again:  Inspect app, in the card's header as in the top bar (`<InspectAppButton>`;
+ *   Owen, 2026-11-15:  "Put the inspector crosshair back in this header", T78).
  * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
@@ -2998,6 +2998,8 @@ function PropertiesCard(): JSX.Element {
           )}
         </Show>
       }
+      // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78)
+      actions={<InspectAppButton slot="right" />}
     >
       <Show
         when={inspected()}
@@ -3699,14 +3701,15 @@ export function InspectorToggle(): JSX.Element {
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after Edit:
+ * Inspect app, in the top bar's Run | Edit group, after Edit (and in the Inspector card's header):
  * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
+ * - `slot`:  the bare icon's place in a toolbar, `right` in a card's header.
  ****************/
-export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.Element {
+export function InspectAppButton(props: { id?: string; item?: boolean; slot?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
   const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
   const inspect = () => {
@@ -3727,6 +3730,7 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   ) : (
     <ui-icon
       id={props.id}
+      slot={props.slot}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}

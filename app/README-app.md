@@ -557,7 +557,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
 - The click goes to the Inspector, never the app;  inspecting stops once something's selected,
-  and the top bar's crosshairs start it again.  Esc stops it.
+  and the crosshairs start it again.  Esc stops it.
 - To select several while inspecting:  Shift takes everything from the last one clicked, Command or Control adds or
   takes away, and dragging across the app's background draws a rubber band over what it touches.
   The Views tree takes the same clicks.

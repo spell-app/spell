@@ -174,9 +174,9 @@ describe("inspecting", () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
     flush()
     expect(Inspector.selected).toBeUndefined()
-    // nothing selected:  the tip;  no inspect button in the card's header, the top bar's does it (T78)
+    // nothing selected:  the tip, and the inspect button in the card's header (I60;  kept, T78)
     expect(host.querySelector(".InspectorTip")).not.toBeNull()
-    expect(host.querySelector(".InspectorCard .InspectAppButton")).toBeNull()
+    expect(host.querySelector('.InspectorCard [slot="actions"] .InspectAppButton')).not.toBeNull()
 
     Inspector.select(area.querySelector("ui-input")!)
     flush()
