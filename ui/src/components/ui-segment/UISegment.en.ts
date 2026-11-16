@@ -44,7 +44,18 @@ export const segmentVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: ["raised", "stacked", "tall-stacked", "piled", "vertical", "circular", "basic", "secondary", "tertiary"],
+      values: [
+        "raised",
+        "stacked",
+        "tall-stacked",
+        "piled",
+        "vertical",
+        "circular",
+        "basic",
+        "secondary",
+        "tertiary",
+        "placeholder"
+      ],
       classes: { "tall-stacked": "tall stacked" },
       replaces: [
         { from: "raised", value: "raised" },
@@ -54,21 +65,17 @@ export const segmentVocabulary = {
         { from: "circular", value: "circular" },
         { from: "basic", value: "basic" },
         { from: "secondary", value: "secondary" },
-        { from: "tertiary", value: "tertiary" }
+        { from: "tertiary", value: "tertiary" },
+        { from: "placeholder", value: "placeholder" }
       ],
       description:
         "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page " +
         "peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` " +
         "(a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no " +
         "box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), " +
-        "`tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, " +
-        "`vertical`, `circular`, `basic`, `secondary`, `tertiary`."
-    },
-    {
-      name: "placeholder",
-      group: "form",
-      kind: "keyOnly",
-      description: "A tinted, centred block reserving room for content."
+        "`tertiary` (least emphasis:  a darker tint), `placeholder` (a tinted, centred block reserving room for " +
+        "content).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, " +
+        "`secondary`, `tertiary`, `placeholder`."
     },
     {
       name: "padding",
@@ -119,7 +126,7 @@ export const segmentVocabulary = {
     },
     {
       name: "seamless",
-      group: "appearance",
+      group: "layout",
       kind: "keyOnly",
       description: "With `attach-to`:  no line where attached segments meet."
     },

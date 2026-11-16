@@ -171,7 +171,7 @@ export const fieldVocabulary = {
     {
       key: "none",
       text: "none",
-      description: "What a property's select shows, in italics, when it has no value and no default."
+      description: "What a property's select shows, muted, when it has no value and no default."
     }
   ]
 } as const satisfies E.ComponentVocabulary

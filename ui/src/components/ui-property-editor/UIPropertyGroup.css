@@ -6,7 +6,8 @@
  * - `:state(grid)`:  its content a grid of `--_property-editor-columns` columns (its own `columns`, else its
  *   editor's);  its properties say how much of a row they take (`UIProperty.css`).
  * - `:state(compact)` (its editor's;  epic `debut` P31):  a tight band, 4px above and below its title, its look
- *   the theme's:  `--ui-property-editor-band-transform` (case), `-band-weight`, `-band-size`, `-band-background`.
+ *   the theme's:  `--ui-property-editor-band-transform` (case), `-band-spacing` (between letters), `-band-weight`,
+ *   `-band-size`, `-band-background`.
  *   Spell UI's own:  Title Case as written, 13px bold, on the panel's quiet band.
  */
 
@@ -48,6 +49,7 @@
   /* ## A compact editor's band:  tight, its look the theme's */
   :host(:state(compact)) .ui.section.panel.sub {
     --_ui-property-editor-band-transform: var(--ui-property-editor-band-transform, none);
+    --_ui-property-editor-band-spacing: var(--ui-property-editor-band-spacing, 0);
     --_ui-property-editor-band-weight: var(--ui-property-editor-band-weight, var(--ui-font-weight-bold, 700));
     --_ui-property-editor-band-size: var(--ui-property-editor-band-size, 13px);
     --_ui-property-editor-band-background: var(
@@ -74,7 +76,7 @@
   :host(:state(compact)) .ui.section.panel.sub > .title > .heading > .toggle {
     font-size: var(--_ui-property-editor-band-size);
     font-weight: var(--_ui-property-editor-band-weight);
-    letter-spacing: 0;
+    letter-spacing: var(--_ui-property-editor-band-spacing);
     text-transform: var(--_ui-property-editor-band-transform);
   }
   :host(:state(compact)) .ui.section.panel.sub > .title > .heading > .toggle {

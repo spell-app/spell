@@ -5,6 +5,7 @@ import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, Widg
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import { type MarkMaker, type MarkedStretch, type Spacer, spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
+import { CodeMirrorSelection } from "./CodeMirrorSelection"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
 /****************
@@ -29,7 +30,8 @@ export class CodeMirrorMarkup {
     return [
       CodeMirrorRelayout.extension((state) => CodeMirrorMarkup.decorationsOf(state), CodeMirrorMarkup.RELAYOUT_MSEC),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
-      CodeMirrorMarkup.tabStops
+      CodeMirrorMarkup.tabStops,
+      CodeMirrorSelection.extension
     ]
   }
 
@@ -230,7 +232,14 @@ export class CodeMirrorDecorations {
    */
   private readonly lines = new Map<number, LineDecoration>()
 
-  constructor(readonly state: EditorState) {
+  /**
+   * - `hiddenIndent`:  the characters of indent hidden at each line's start, a slice shown dedented (`<CodeSlice>`):
+   *   not counted in a line's indent, so its rails stand where its bands are drawn (epic `language` I128)
+   */
+  constructor(
+    readonly state: EditorState,
+    private readonly hiddenIndent = 0
+  ) {
     this.text = state.doc.toString()
   }
 
@@ -310,10 +319,13 @@ export class CodeMirrorDecorations {
     this.ranges.push(range)
   }
 
-  /** How far in the line `at` is on is `at`:  its tabs and spaces, which a rail starts at. */
+  /**
+   * How far in the line `at` is on is `at`, as shown:  its tabs and spaces, which a rail starts at.
+   * - less a slice's hidden indent, which isn't drawn
+   */
   indentAt(at: number): Indent {
     const line = this.state.doc.lineAt(at)
-    const indent = this.text.slice(line.from, at)
+    const indent = this.text.slice(Math.min(line.from + this.hiddenIndent, at), at)
     return { tabs: indent.split("\t").length - 1, spaces: indent.replaceAll("\t", "").length }
   }
 

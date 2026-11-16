@@ -623,6 +623,7 @@ export const APP_TEXTS = {
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
   // the Inspector card's Close, right of Inspect app:  hides the column (I186)
+  inspectorSpellUIDocs: "Spell UI docs for <{tag}>",
   inspectorClose: "Close the Inspector",
   inspectorAddEvent: "Add Event",
   inspectorAddAction: "Add Action",

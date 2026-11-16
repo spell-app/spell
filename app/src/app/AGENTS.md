@@ -159,6 +159,8 @@ and in the app's build folder, `app/` at the app folder's root.
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
     - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
       as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
+    - Four clicks select a block (epic `codemirror` T15):  the one the clicked line's fold arrow folds, or the
+      innermost one it's in;  each click after, the block around it (`CLICKS_SELECT_BLOCKS`).
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
     the scope explorer's packs use it too.
   - What a hover says and which code actions show are decided once, editor-free, in
@@ -176,6 +178,9 @@ and in the app's build folder, `app/` at the app folder's root.
       editor in them;  pointed ends.
     - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
       ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
+    - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
+      letter in its own colour under it ([CodeMirrorSelection](ui/codemirror/CodeMirrorSelection.ts), epic `language`
+      I124):  drawn in place of CodeMirror's own, which the sheet hides.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
       [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.

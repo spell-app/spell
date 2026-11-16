@@ -53,6 +53,22 @@ describe("CodeMirrorBubbly", () => {
     expect(rails.get('\t\t<card-image rank={its rank} direction="down" />')).toBe(1)
   })
 
+  test("a slice shown dedented:  its rails, bands and feet a column in from where it's drawn, not the file's (I128)", () => {
+    const text = `a "card" is a view
+\tto play it
+\t\tif it is face up
+\t\t\tplay the card
+`
+    const state = EditorState.create({ doc: text })
+    const from = state.doc.line(3).from
+    const to = state.doc.line(4).to
+    // its two tabs hidden on each line:  the \`if\`'s band, rail and foot at the first column, under where it's drawn
+    const shown = { from, to, hiddenIndent: 2 }
+    expect(columnsOf(text, shown)).toEqual({ bands: [0], rails: ["0"], feet: [0] })
+    // shown as in the file:  two columns in, as before
+    expect(columnsOf(text, { from, to })).toEqual({ bands: [2], rails: ["2"], feet: [2] })
+  })
+
   test("a body opening with a group:  no inside corner under its band, the group's band hung right there (I119)", () => {
     const text = `calculator is an app
 \tgroup "What It Keeps"
@@ -231,6 +247,28 @@ function marksOf(text: string, slice?: { from: number; to: number }): Array<{ te
 /** The text of each mark with class `name`, in order. */
 function textWith(marked: Array<{ text: string; classes: string[] }>, name: string): string[] {
   return marked.filter((mark) => mark.classes.includes(name)).map((mark) => mark.text)
+}
+
+/** The column of each band, of each railed line's rails, and of each foot, as `slice` shows `text`. */
+function columnsOf(text: string, slice: { from: number; to: number; hiddenIndent?: number }) {
+  const bands: number[] = []
+  const rails: string[] = []
+  const feet: number[] = []
+  CodeMirrorBubbly.decorationsOf(EditorState.create({ doc: text }), undefined, slice).between(
+    0,
+    text.length,
+    (from, to, decoration) => {
+      const spec = decoration.spec as { class?: string; widget?: Foot; attributes?: Record<string, string> }
+      const style = spec.attributes?.style ?? ""
+      if (spec.widget && "column" in spec.widget) feet.push(spec.widget.column)
+      else if (from === to && style.startsWith("--cmb-rails"))
+        rails.push(
+          [...new Set([...style.matchAll(/--cmb-line-pad\) \+ (\d+) \* var\(--cmb-indent\)/g)].map((m) => m[1]))].join()
+        )
+      else if (spec.class?.split(" ").includes("cmb-band")) bands.push(Number(/--cmb-column: (\d+)/.exec(style)?.[1]))
+    }
+  )
+  return { bands, rails: [...new Set(rails)], feet }
 }
 
 /** How many rails each railed line draws, by its text;  `slice`:  the lines shown. */

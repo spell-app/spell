@@ -97,6 +97,10 @@ export const propertyVocabulary = {
         name: "half",
         description: "Half a row on its editor's grid:  its kind's width (a number, a select), or its `width`."
       },
+      {
+        name: "in-row",
+        description: "One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share."
+      },
       { name: "inline-check", description: "A yes or no in a compact editor:  the box, then its label, on one line." },
       { name: "here", description: "Its value is set on this thing (its editor's `origins`):  a dot by its label." },
       {

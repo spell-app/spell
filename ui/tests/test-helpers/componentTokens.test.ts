@@ -88,7 +88,9 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-checkbox-toggle-width":
       "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)",
     "--ui-checkbox-toggle-handle":
-      "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)"
+      "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)",
+    "--ui-checkbox-focus-width":
+      "the smaller toggle's keyboard ring a size thinner, as heavy as the selects' (epic `editor` I199)"
   },
   "ui-theme-editor/UIThemeEditor.css": {
     "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",

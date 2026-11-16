@@ -38510,8 +38510,8 @@ export interface UISegmentAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.
-   * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `vertical` · `circular` · `basic` · `secondary` · `tertiary`
+   * The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint), `placeholder` (a tinted, centred block reserving room for content).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`, `placeholder`.
+   * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `vertical` · `circular` · `basic` · `secondary` · `tertiary` · `placeholder`
    */
   appearance?: string
   /**
@@ -38519,16 +38519,6 @@ export interface UISegmentAttributes {
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
-  /**
-   * A tinted, centred block reserving room for content.
-   * - takes:  flag (present / absent)
-   */
-  placeholder?: boolean | ""
-  /**
-   * `placeholder`, as the DOM element's property.
-   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
-   */
-  "prop:placeholder"?: boolean | ""
   /**
    * Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names were `fitted`, `compact`, `padded`.
    * - takes:  `none` · `none-x` · `none-y` · `compact` · `md` · `lg`
@@ -43277,7 +43267,7 @@ export interface UISplitPanelAttributes {
    */
   "prop:grows"?: string
   /**
-   * The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.
+   * The smallest a dragged pane may get, `10%` for shares or `60px` for any pane.  Default:  `5%` and `0px`.  A pane's own `min-width` / `max-width` (`min-height` / `max-height` in rows) bound it too;  one whose least and most are the same isn't resized:  a bar beside it sizes the panes across it.
    * - takes:  text
    */
   "min-size"?: string

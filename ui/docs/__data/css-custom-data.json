@@ -313,7 +313,7 @@
       "name": "--ui-button-icon-spacing",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-button>`'s token.  Default:  `var(--ui-space-xs)`"
+        "value": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)\n\n`<ui-button>`'s token.  Default:  `0.35714em`"
       }
     },
     {
@@ -7464,6 +7464,13 @@
       }
     },
     {
+      "name": "--ui-property-editor-band-spacing",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-property-editor>`'s token.  Default:  `0`"
+      }
+    },
+    {
       "name": "--ui-property-editor-band-weight",
       "description": {
         "kind": "markdown",
@@ -12672,7 +12679,7 @@
       "name": ":state(in-row)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-term>`:  Set while its `<ui-terms>` is `direction=\"horizontal\"`."
+        "value": "Custom state of:\n\n- `<ui-property>`:  One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share.\n- `<ui-term>`:  Set while its `<ui-terms>` is `direction=\"horizontal\"`."
       }
     },
     {
