@@ -11,6 +11,7 @@ import { Constant } from "./Constant"
 import { KnownConstant } from "./KnownConstant"
 
 constants.addRule(Constant, {
+  roles: { match: "written value" },
   tests: [
     {
       tests: [
@@ -23,6 +24,7 @@ constants.addRule(Constant, {
 })
 
 constants.addRule(KnownConstant, {
+  roles: { match: "written value" },
   tests: [
     {
       compileAs: "known_constant", // TODO: to "expression"

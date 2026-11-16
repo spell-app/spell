@@ -70,10 +70,12 @@ methods.addRule(WithPropsArg, {
 })
 
 methods.addRule(MethodSignature, {
+  roles: { bare_type_arg: "blank", method_arg: "blank" },
   syntax: `({bare_type_arg}|{method_keyword}|\\( {method_arg} \\))+`
 })
 
 methods.addRule(QuotedSignatureWords, {
+  roles: { method_arg: "blank" },
   syntax: `({method_keyword}|\\( {method_arg} \\))+`
 })
 
@@ -83,6 +85,7 @@ methods.addRule(QuotedMethodSignature)
 methods.addRule(QuotedActionSignature)
 
 methods.addRule(ToDoSomething, {
+  roles: { band: "action", asTest: "declaration", signature: "declaration" },
   syntax: `to (asTest:test)? {signature:method_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
   tests: [
     {
@@ -1042,6 +1045,7 @@ methods.addRule(CreateAnimation, {
 })
 
 methods.addRule(QuotedTypeExpression, {
+  roles: { band: "property", signature: "declaration" },
   syntax: "(a|an) {type:singular_type} {signature:quoted_method_signature} (if|is)? :? {expression_body}?",
   tests: [
     {
@@ -1366,6 +1370,7 @@ methods.addRule(QuotedTypeExpression, {
 // what runs as a thing is made, in its type's outline:  `- when creating a task (with ...):` (epic `language`),
 // also `- when created:` and `- when creating it:` (epic `spanish` P28)
 methods.addRule(CreateHook, {
+  roles: { band: "action", signature: "declaration" },
   syntax: "when {signature:method_signature} :? {statement_body}?",
   tests: [
     {
@@ -1932,6 +1937,7 @@ methods.addRule(CancelThisAction, {
 })
 
 methods.addRule(AfterHook, {
+  roles: { band: "action", signature: "declaration" },
   syntax: "after {signature:method_signature} :? {statement_body}?",
   tests: [
     {

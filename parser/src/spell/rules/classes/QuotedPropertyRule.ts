@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import {
   InfixOperatorSuffix,
@@ -17,6 +18,9 @@ import { placeholderData, placeholderValueIndex, type QuotedPropertyFormulaBits 
  * - Reads ONLY its statics, so a project's declarations can rebuild it elsewhere -- see `P.Rule.specialize()`.
  */
 export class QuotedPropertyRule extends InfixOperatorSuffix {
+  /** what it is to a reader, in the bubbly look:  its syntax is built while parsing, so its roles are its class's */
+  declare roles: SP.BubblyRuleRoles
+  @proto static roles: SP.BubblyRuleRoles = { match: "question" }
   @proto static importableAs = "quoted_property"
   /** A user's alias wins over a built-in suffix matching the same words, e.g. `is the queen of spades`. */
   @proto static priority = Priority.userDeclared

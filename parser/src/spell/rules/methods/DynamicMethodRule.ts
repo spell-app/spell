@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { Priority } from "spell/parser/spell/rules/rules.types"
@@ -27,6 +28,9 @@ const TEST_METHOD = /^test_/
  *   so there's no subclass that needs a different `Groups`/`MatchData`.
  */
 export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|props?", DynamicMethodData> {
+  /** what it is to a reader, in the bubbly look:  its syntax is built while parsing, so its roles are its class's */
+  declare roles: SP.BubblyRuleRoles
+  @proto static roles: SP.BubblyRuleRoles = { match: "action call" }
   @proto static importableAs = "method_call"
   @proto static operandInExpressions = true
   // a call is a value:  as an action's last line, what it gives back (epic `language` I47)

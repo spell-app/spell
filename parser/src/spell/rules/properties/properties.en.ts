@@ -238,7 +238,7 @@ properties.addRule(TheOwnProperty, {
   ]
 })
 
-properties.addRule(PossessiveMark)
+properties.addRule(PossessiveMark, { roles: { match: "name" } })
 properties.addRule(PossessiveOwner)
 
 // more tests:  `NameMeanings.test.ts`, inside an action

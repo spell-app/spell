@@ -143,6 +143,7 @@ events.addRule(InputState.specialize({ reads: "thingUnderMouse", datatype: "thin
 })
 
 events.addRule(On, {
+  roles: { band: "action" },
   syntax: "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
   tests: [
     {

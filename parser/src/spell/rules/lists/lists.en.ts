@@ -400,6 +400,7 @@ lists.addRule(
 )
 
 lists.addRule(PositionExpression, {
+  roles: { arg: "plain" },
   syntax: "{arg:singular_identifier} {position:expression} of {expression:operand}",
   tests: [
     {
@@ -723,6 +724,7 @@ lists.addRule(SortKeyOrder, {
 })
 
 lists.addRule(ListSortedBy, {
+  roles: { match: "value" },
   syntax: ",? sorted by {inline_expression}?",
   tests: [
     {
@@ -1039,6 +1041,7 @@ lists.addRule(ListMove, {
 })
 
 lists.addRule(CanTake, {
+  roles: { match: "question" },
   syntax: "{operator:can_or_cannot} (add|take) {expression:operand}",
   tests: [
     {
@@ -1057,6 +1060,7 @@ lists.addRule(CanTake, {
 })
 
 lists.addRule(CanGiveUp, {
+  roles: { match: "question" },
   syntax: "{operator:can_or_cannot} (release|remove|give up|let go of) {expression:operand}",
   tests: [
     {
@@ -1289,6 +1293,7 @@ lists.addRule(ListIterationWhere, {
 
 // a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
 lists.addRule(EachInStatement, {
+  roles: { item: "value", list: "value" },
   syntax: "{statement} (each|every) {item:singular_identifier} in {list:expression}",
   tests: [
     {
@@ -1314,6 +1319,7 @@ lists.addRule(EachInStatement, {
 
 // a thing's action on a list of them, done to each (epic `language` T126):  `turn the cards in the deck face down`
 lists.addRule(PluralCallStatement, {
+  roles: { item: "value", list: "value" },
   syntax: "{statement} the? {item:plural_identifier} (in|of) {list:expression}",
   tests: [
     {
