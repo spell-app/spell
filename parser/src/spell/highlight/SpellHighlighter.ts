@@ -53,12 +53,24 @@ export class SpellHighlighter {
     }
     try {
       const match = parsed ?? parser.parse(text, "block")
-      if (match) SpellHighlighter.walk(match, byStart, new Set())
+      if (match) for (const span of SpellHighlighter.matchSpans(match)) byStart.set(span.start, span)
     } catch {
       // a parse that throws:  the token colours stand
     }
     const spans = [...byStart.values()].sort((a, b) => a.start - b.start)
     return spans.filter((span, index) => index === 0 || span.start >= spans[index - 1]!.end)
+  }
+
+  /**
+   * The stretches `match`'s rules colour (the second pass):  each match's own tokens by its rule's `highlightAs`,
+   * in no order, a later match's over an earlier one's at the same start.
+   * - `keep`:  which tokens to colour, e.g. only those really in the file where they say they are
+   *   (a page's twins, the app's `CodeMirrorTokens`)
+   */
+  static matchSpans(match: P.Match, keep: (token: P.Token) => boolean = () => true): SpellHighlightSpan[] {
+    const byStart = new Map<number, SpellHighlightSpan>()
+    SpellHighlighter.walk(match, byStart, new Set(), keep)
+    return [...byStart.values()]
   }
 
   /** Scope for `token` from its class alone (first pass);  `undefined` for none. */
@@ -72,8 +84,16 @@ export class SpellHighlighter {
     return undefined
   }
 
-  /** Colour `match`'s own tokens by its rule's `highlightAs`, then its children's (`seen`:  shared matches once). */
-  private static walk(match: P.Match, byStart: Map<number, SpellHighlightSpan>, seen: Set<P.Match>) {
+  /**
+   * Colour `match`'s own tokens by its rule's `highlightAs`, then its children's (`seen`:  shared matches once);
+   * only those `keep` says.
+   */
+  private static walk(
+    match: P.Match,
+    byStart: Map<number, SpellHighlightSpan>,
+    seen: Set<P.Match>,
+    keep: (token: P.Token) => boolean
+  ) {
     if (seen.has(match)) return
     seen.add(match)
     const highlightAs = match.rule.highlightAs
@@ -91,9 +111,10 @@ export class SpellHighlighter {
         )
       )
         continue
+      if (!keep(item)) continue
       byStart.set(item.start, { start: item.start, end: item.end, kind: SpellHighlighter.SCOPES[highlightAs] })
     }
-    for (const child of SpellHighlighter.children(match)) SpellHighlighter.walk(child, byStart, seen)
+    for (const child of SpellHighlighter.children(match)) SpellHighlighter.walk(child, byStart, seen, keep)
   }
 
   /** `match`'s child matches:  in `matched`, and in `data` (where some rules keep theirs), errors left out. */
