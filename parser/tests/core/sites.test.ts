@@ -442,6 +442,29 @@ describe("a running site", () => {
       expect(layout("MainLayout")?.querySelector(':scope > ui-site-nav[slot="drawer"]')).toBeTruthy()
     })
 
+    test("wears its `theme` on a layout too:  the drawer, app menu, page menu and page all inside its themed frame (I29)", async () => {
+      Object.defineProperty(charts, "theme", { value: "mockup" })
+      core.siteHost = {
+        address: () => "/films",
+        go: () => {},
+        listen: () => {},
+        themeTokens: async (name) => `--ui-font-family: ${name}`
+      }
+      charts.start()
+      expect(await shown()).toContain("Films")
+      const frame = element.querySelector(".spell-site-frame")!
+      expect(frame.getAttribute("data-theme")).toBe("mockup")
+      expect(frame.getAttribute("style")).toContain("--ui-font-family: mockup")
+      for (const part of [
+        layout("MainLayout"),
+        layout("MainLayout")?.querySelector(':scope > ui-site-nav[slot="drawer"]'),
+        region("MainLayout", "menu"),
+        region("MainLayout", "page-menu")
+      ]) {
+        expect(part?.closest(".spell-site-frame")).toBe(frame)
+      }
+    })
+
     test("no flash:  a page in the same layout redraws only the page, its menu and navigation the same elements", async () => {
       await charts.showAddress("/films")
       await shown()
