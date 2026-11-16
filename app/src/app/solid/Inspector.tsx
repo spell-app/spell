@@ -3553,7 +3553,7 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
             when={typeof read().value === "boolean"}
             fallback={<ui-input size="small" appearance="transparent" readonly="" value={computedText(read())} />}
           >
-            <ui-checkbox readonly="" selected={read().value ? "" : undefined} />
+            <ui-checkbox appearance="toggle" padding="none" readonly="" selected={read().value ? "" : undefined} />
           </Show>
         </ui-property>
       }

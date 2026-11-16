@@ -870,7 +870,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
   })
 
-  test("the palette shows every part, and closes once one is chosen (I174, I176)", async () => {
+  test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
     await page.locator("#AddPartButton").click()
@@ -878,6 +878,16 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     // no "N more":  what was behind it shows, under its topic
     expect(await page.locator(".PalettePopup .PaletteMore").count()).toBe(0)
     expect(await page.locator('.PalettePopup ui-tree-item[label="Grid"]').count()).toBe(1)
+    // a group of buttons, ready-made;  everything fits, in 5 columns, with no scrolling (I180)
+    expect(await page.locator('.PalettePopup ui-tree-item[label="Buttons"]').count()).toBe(1)
+    const fits = await page.evaluate(() => {
+      const groups = document.querySelector(".PalettePopup .PaletteGroups")!
+      const columns = new Set(
+        [...document.querySelectorAll(".PalettePopup .PaletteGroup")].map((group) => group.getBoundingClientRect().x)
+      )
+      return { scrolls: groups.scrollHeight > groups.clientHeight + 1, columns: columns.size }
+    })
+    expect(fits).toEqual({ scrolls: false, columns: 5 })
     await page.locator(".PalettePopup .PaletteSearch input").fill("grid")
     await page.waitForTimeout(600)
     expect(await page.locator(".PalettePopup .PaletteGroup:not(.ThisApp) ui-tree-item").count()).toBeGreaterThan(0)

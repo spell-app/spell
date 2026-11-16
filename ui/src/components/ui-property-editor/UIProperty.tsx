@@ -335,6 +335,7 @@ export class UIProperty extends UIField {
 
   /**
    * The kind of control it draws:  `as`, else its type's default.
+   * - A compact editor draws a yes or no as a toggle, not a checkbox.
    * - `undefined` until the page's runtime has loaded.
    */
   get controlKind(): string | undefined {
@@ -346,7 +347,10 @@ export class UIProperty extends UIField {
       !!choices?.length &&
       choices.length <= MOST_SEGMENTS &&
       choices.every(UIProperty.hasIcon)
-    return isIconRow ? SEGMENTED_KIND : UI.propertyControls.kindFor(this.valueType)
+    if (isIconRow) return SEGMENTED_KIND
+    const kind = UI.propertyControls.kindFor(this.valueType)
+    // A switch, as the editor's own settings:  denser forms read it faster than a box (epic `editor` I177)
+    return kind === CHECKBOX_KIND && this.isCompact ? TOGGLE_KIND : kind
   }
 
   /** What its kind draws, while the runtime is in. */
@@ -878,6 +882,10 @@ const DROPDOWN_TAG = "ui-dropdown"
 /** The value type of a choice, and the kind a row of icons draws as. */
 const CHOICE: ValueType = "choice"
 const SEGMENTED_KIND = "buttons"
+
+/** The built-in kind of a yes or no, a box;  and its switch, which a compact editor draws instead. */
+const CHECKBOX_KIND = "checkbox"
+const TOGGLE_KIND = "toggle"
 
 /** A segmented menu's look word. */
 const SEGMENTED = "segmented"

@@ -197,8 +197,10 @@
       "text-color": "{brand.primary.on}"
     },
     "checkbox": {
-      // round checks:  the to-do circle of Reminders
-      "radius": "{radii.circle}"
+      // a box with soft corners, never a circle:  a round one reads as a radio (epic `editor` I177)
+      "radius": "4px",
+      // a toggle's knob is white in dark too:  the surface would sink into the dark lane
+      "handle-background": "white"
     },
     "input": {
       "radius": "{radii.m}",
