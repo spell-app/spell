@@ -1,6 +1,6 @@
 import h from "@solidjs/h"
 
-import { schemaOf } from "spell/util"
+import { PrefStore, schemaOf } from "spell/util"
 import { waitUntil } from "spell/util/timing"
 import { compilePattern, filledPattern, type AddressParams } from "spell/util/addressPattern"
 
@@ -47,6 +47,12 @@ export class SiteBase extends App {
 
   /** Where it lives, when its line says:  `"owen@spell/galaxy"`, `"cloud"`. */
   static livesAt?: string
+
+  /**
+   * Its top bar, when it lists one:  `- it has a top bar` (epic `mockup` T35).
+   * - Its buttons are the view of its name, when the program declares one (`view`).
+   */
+  static topBar?: SiteOverlayEntry
 
   /**
    * SIDE EFFECT:  the running program's first site is its site, `core.RUNTIME.site`:
@@ -321,6 +327,10 @@ export class SiteBase extends App {
    * - Two columns of its own, not `<ui-page>`:
    *   that's a whole window's frame and root, and Run draws the site inside the editor's page.
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
+   * - A site with a top bar (`topBar`) draws it above the page, and the bar's side bar button replaces the narrow
+   *   width's menu button (`drawTopBar()`).
+   * - No tabs of its own:  a page that wants its family as tabs writes `<site-tabs/>`, which follows the navigation
+   *   around it, and its tabs are links this follows (epic `mockup` T38).
    */
   draw(): Drawing {
     return h(
@@ -336,16 +346,18 @@ export class SiteBase extends App {
         onKeyDown: (event: KeyboardEvent) => this.closeNavOnEscape(event)
       },
       h("style", {}, NARROW_SITE_CSS),
-      h("ui-button", {
-        class: "spell-site-menu",
-        icon: "bars",
-        appearance: "basic",
-        size: "small",
-        "aria-label": core.message("site-menu"),
-        title: core.message("site-menu"),
-        "aria-expanded": () => (this.isNavOpen ? "true" : "false"),
-        onClick: () => (this.isNavOpen = !this.isNavOpen)
-      }),
+      this.siteClass.topBar
+        ? null
+        : h("ui-button", {
+            class: "spell-site-menu",
+            icon: "bars",
+            appearance: "basic",
+            size: "small",
+            "aria-label": core.message("site-menu"),
+            title: core.message("site-menu"),
+            "aria-expanded": () => (this.isNavOpen ? "true" : "false"),
+            onClick: () => (this.isNavOpen = !this.isNavOpen)
+          }),
       this.drawSite()
     ) as unknown as Drawing
   }
@@ -360,6 +372,38 @@ export class SiteBase extends App {
 
   set isNavOpen(open: boolean) {
     this.setState("navOpen", open)
+  }
+
+  /**
+   * Its navigation shows only its icons (`<ui-site-nav collapsed>`):  the top bar's side bar button, on a wide site
+   * (epic `mockup` T35).
+   * - Remembered for each person, for each site, across pages and visits (`PrefStore`, `spell-sites:<Site>.collapsed`).
+   * - Only a site with a top bar collapses:  without one, nothing would open it again.
+   */
+  get isNavCollapsed(): boolean {
+    if (!this.siteClass.topBar) return false
+    const set = this.getState<boolean>("navCollapsed")
+    return set ?? PrefStore.getAt(this.collapsedKey) === true
+  }
+
+  set isNavCollapsed(collapsed: boolean) {
+    this.setState("navCollapsed", collapsed)
+    PrefStore.setAt(this.collapsedKey, collapsed || undefined)
+  }
+
+  /** Where it remembers `isNavCollapsed`:  `spell-sites:<Site>.collapsed`. */
+  private get collapsedKey(): string {
+    return `${SITES_PREFS}:${this.constructor.name}.collapsed`
+  }
+
+  /**
+   * The top bar's side bar button:  on a wide site, its navigation shows only its icons, or all of it again;
+   * narrow, where the navigation slides over the page, it slides it in or out.
+   */
+  toggleNav(event: Event): void {
+    const nav = (event.currentTarget as Element | null)?.closest(".spell-site")?.querySelector(".spell-site-nav")
+    if (nav && isSlidOver(nav)) this.isNavOpen = !this.isNavOpen
+    else this.isNavCollapsed = !this.isNavCollapsed
   }
 
   /** Escape closes the navigation open over the page. */
@@ -384,29 +428,93 @@ export class SiteBase extends App {
         // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
         pages: () => JSON.stringify(this.navPages()),
         current: () => this.navCurrent(),
+        // only its icons:  never while it's slid over a narrow page
+        collapsed: () => (this.isNavCollapsed && !this.isNavOpen ? "" : undefined),
         "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
           event.preventDefault()
           this.isNavOpen = false
           this.navigate(event.detail.href)
         }
       }),
-      h(
-        "div",
-        { class: "spell-site-page", style: PAGE_LAYOUT },
-        // the shown page's family as tabs (`<ui-site-tabs>`), when it has one:  pages write nothing
-        h("ui-site-tabs", {
-          class: "spell-site-tabs",
-          pages: () => JSON.stringify(this.navPages()),
-          current: () => this.tabsCurrent(),
-          "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
-            event.preventDefault()
-            this.navigate(event.detail.href)
-          }
-        }),
-        () => made(this.drawShowing())
-      ),
+      h("div", { class: "spell-site-page", style: PAGE_LAYOUT }, this.drawTopBar(), () => made(this.drawShowing())),
       () => made(this.drawOverlay())
     ) as unknown as Drawing
+  }
+
+  /**
+   * Its top bar, above the page, when it has one (`- it has a top bar`, epic `mockup` T35):  Spell UI's `<ui-app-menu>`.
+   * - At its start:  the side bar button (`toggleNav()`), then where you are, as a breadcrumb (`crumbs()`).
+   * - At its end:  the buttons its view draws, when the program declares one (`a "top bar" is a view`).
+   * - Drawn once, and hidden on a page whose line says `, no top bar`:  so its view's element is never made again.
+   */
+  private drawTopBar(): Drawing | null {
+    if (!this.siteClass.topBar) return null
+    const view = this.topBarView()
+    return h(
+      "ui-app-menu",
+      {
+        class: "spell-site-top-bar",
+        hidden: () => (this.isTopBarHidden ? "" : undefined)
+      },
+      h("ui-item", {
+        slot: "start",
+        class: "spell-site-side-bar",
+        icon: "columns",
+        "aria-label": core.message("site-side-bar"),
+        title: core.message("site-side-bar"),
+        onClick: (event: MouseEvent) => this.toggleNav(event)
+      }),
+      h(
+        "ui-item",
+        { slot: "start", class: "spell-site-where" },
+        h("ui-breadcrumbs", { "aria-label": core.message("site-where") }, () =>
+          this.crumbs().map((crumb) =>
+            made(
+              h(
+                "ui-breadcrumb",
+                { ...(crumb.link && { link: crumb.link }), ...(crumb.isShown && { selected: "" }) },
+                crumb.title
+              )
+            )
+          )
+        )
+      ),
+      view ? h("div", { slot: "end", class: "spell-site-top-bar-end" }, core.drawThing(view)) : null
+    ) as unknown as Drawing
+  }
+
+  /** The page shown says `, no top bar`. */
+  get isTopBarHidden(): boolean {
+    const showing = this.getState<Showing>("showing")
+    return showing?.kind === "page" && !!showing.entry.noTopBar
+  }
+
+  /** The view its top bar draws its buttons with, made the first time:  `undefined` when the program has none. */
+  private topBarView(): object | undefined {
+    const name = this.siteClass.topBar?.view
+    const View = name ? core.things.classNamed(name) : undefined
+    if (View) this.topBarViewMade ??= new (View as new () => object)()
+    return this.topBarViewMade
+  }
+
+  /**
+   * Where you are, as the top bar's breadcrumb says it:  the group of the page shown, the pages above it, then it.
+   * - e.g. `Hardware › Systems`;  a film's page:  `Films › Film`
+   * - The group is only a name;  each page above is a link to it, unless it needs a parameter;  the page shown is
+   *   `isShown`.
+   * - None for the not found and error pages.
+   */
+  crumbs(): SiteCrumb[] {
+    const path = this.shownPath()
+    const crumbs: SiteCrumb[] = []
+    const group = path[0]?.group
+    if (group) crumbs.push({ title: group })
+    path.forEach((entry, at) => {
+      const title = entry.title ?? entry.name
+      if (at === path.length - 1) crumbs.push({ title, isShown: true })
+      else crumbs.push({ title, ...(!entry.params?.length && { link: entry.address }) })
+    })
+    return crumbs
   }
 
   /**
@@ -420,7 +528,10 @@ export class SiteBase extends App {
   }
 
   /**
-   * `entries` as navigation rows:  those under a `<group>` together, under a heading of its name;  the rest as themselves.
+   * `entries` as navigation rows:  those under a `<group>` together, under its name, a quiet label with no arrow
+   *   (`band: "group"`, epic `mockup` T34):  it opens by itself while the page shown is in it, and a click on it goes
+   *   to its first page;  the rest as themselves.
+   * - A group's row shows the icon its line names (`groupIcon`, epic `mockup` I20).
    * - `listed` reads a run of entries that share a group, or none.
    */
   private static underGroups(
@@ -430,13 +541,14 @@ export class SiteBase extends App {
     if (!entries.some((entry) => entry.group)) return SiteBase.navRows(entries, listed)
     const rows: SiteNavPage[] = []
     for (let at = 0; at < entries.length;) {
-      const { group } = entries[at]!
+      const { group, groupIcon } = entries[at]!
       let end = at + 1
       while (end < entries.length && entries[end]!.group === group) end++
       const run = entries.slice(at, end)
       const pages = SiteBase.navRows(run, listed)
-      if (group) rows.push({ title: group, id: `group:${group}`, band: "heading", pages })
-      else rows.push(...pages)
+      if (group) {
+        rows.push({ title: group, id: `group:${group}`, band: "group", ...(groupIcon && { icon: groupIcon }), pages })
+      } else rows.push(...pages)
       at = end
     }
     return rows
@@ -452,6 +564,7 @@ export class SiteBase extends App {
           title: entry.title ?? entry.name,
           href: entry.address,
           id: entry.name,
+          ...(entry.icon && { icon: entry.icon }),
           ...(entry.tab && { tab: entry.tab }),
           ...(entry.tags && { tags: entry.tags })
         }
@@ -464,8 +577,14 @@ export class SiteBase extends App {
    * (a film's page marks Films);  `""` for the not found and error pages.
    */
   navCurrent(): string {
+    const listed = this.shownPath().filter((entry) => !entry.params?.length)
+    return listed.at(-1)?.address ?? ""
+  }
+
+  /** The page shown, and the pages above it, from the site's top:  none for the not found and error pages. */
+  private shownPath(): SitePageEntry[] {
     const showing = this.getState<Showing>("showing")
-    if (showing?.kind !== "page") return ""
+    if (showing?.kind !== "page") return []
     const pathTo = (entries: SitePageEntry[] | undefined, above: SitePageEntry[]): SitePageEntry[] | undefined => {
       for (const entry of entries ?? []) {
         // by name:  a page compiled in as it's shown leaves the site with a new list of the same pages
@@ -475,17 +594,7 @@ export class SiteBase extends App {
       }
       return undefined
     }
-    const listed = (pathTo(this.siteClass.pages, []) ?? []).filter((entry) => !entry.params?.length)
-    return listed.at(-1)?.address ?? ""
-  }
-
-  /**
-   * The page `<ui-site-tabs>` marks as shown:  the page shown;  `""`, no tabs, for one with a parameter
-   * or for the not found and error pages.
-   */
-  tabsCurrent(): string {
-    const showing = this.getState<Showing>("showing")
-    return showing?.kind === "page" && !showing.entry.params?.length ? showing.entry.address : ""
+    return pathTo(this.siteClass.pages, []) ?? []
   }
 
   /**
@@ -635,6 +744,9 @@ export class SiteBase extends App {
 
   /** The views of its dialogs and sidebars, made the first time each opens, by name. */
   private overlayViews = new Map<string, object>()
+
+  /** The view its top bar draws, once made:  see `topBarView()`. */
+  private topBarViewMade?: object
 }
 
 ////////////////
@@ -646,15 +758,43 @@ type SiteNavPage = {
   title: string
   href?: string
   id: string
+  icon?: string
   tab?: string
   tags?: string[]
-  band?: "heading"
+  band?: "group"
   pages?: SiteNavPage[]
 }
 
-/** A site's two columns:  its navigation, then the page. */
-const SITE_LAYOUT =
-  "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); gap: 1em; align-items: start"
+/** One step of the top bar's breadcrumb:  see `SiteBase.crumbs()`. */
+type SiteCrumb = {
+  /** what it says:  a group's name, a page's title */
+  title: string
+  /** where it goes:  a page above the page shown */
+  link?: string
+  /** it's the page shown */
+  isShown?: boolean
+}
+
+/** The store a site keeps what each person chose in:  `spell-sites:<Site>.collapsed`. */
+const SITES_PREFS = "spell-sites"
+
+/**
+ * Is `nav` slid over a narrow page, rather than beside it (`NARROW_SITE_CSS`)?
+ * - Asks its style, where the width is decided:  a container query, so the page's style sheet stays the one truth.
+ * - No styles (a page with no layout, under node):  beside it.
+ */
+function isSlidOver(nav: Element): boolean {
+  return typeof getComputedStyle === "function" && getComputedStyle(nav).position === "absolute"
+}
+
+/**
+ * A site's two columns:  its navigation, then the page.
+ * - Each as tall as the taller, and the site at least as tall as the box it's drawn in (`NARROW_SITE_CSS`):
+ *   the navigation runs from top to bottom (epic `mockup` T34).
+ * - No gap between them:  the page keeps its own distance from the navigation, so its top bar meets the
+ *   navigation, the navigation's line their only edge (`NARROW_SITE_CSS`, epic `mockup` I22).
+ */
+const SITE_LAYOUT = "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); align-items: stretch"
 
 /** The page's column:  as wide as it's given. */
 const PAGE_LAYOUT = "min-width: 0"
@@ -667,11 +807,35 @@ const PAGE_LAYOUT = "min-width: 0"
 const NARROW_SITE_CSS = `
 .spell-site-frame { container: spell-site / inline-size; position: relative }
 .spell-site-menu { display: none }
-/* its own scroller, so showing the page's row never scrolls the page */
-.spell-site-nav { position: sticky; inset-block-start: 0.5em; max-height: calc(100dvh - 4em); overflow: auto }
+/* the whole height of the box its element is drawn in (Run's):  that element, whatever its tag, a column */
+:has(> .spell-site-frame) { display: flex; flex-direction: column; min-height: 100% }
+.spell-site-frame { flex: 1 0 auto; display: flex; flex-direction: column }
+.spell-site { flex: 1 0 auto }
+/* the whole height, on a fill of its own and a line at its right;  its list its own scroller, stuck at the top,
+   so showing the page's row never scrolls the page */
+.spell-site-nav {
+  background: var(--ui-surface-muted, Canvas); border-inline-end: 1px solid var(--ui-border-color, GrayText)
+}
+.spell-site-nav::part(nav) { position: sticky; inset-block-start: 0; max-height: 100dvh; overflow: auto }
+/* its top bar (\`- it has a top bar\`):  above the page, its buttons at its end;  hidden on a page with none
+   (its element is \`display: contents\`:  its box is its menu part) */
+.spell-site-top-bar::part(menu) { margin-block-end: 1em }
+/* the page a font size from the navigation, but its top bar up against it:  the navigation's line their only edge
+   (in pixels, \`--ui-font-size\`:  the bar's own em is its smaller text's) */
+.spell-site-page { padding-inline-start: var(--ui-font-size, 16px) }
+.spell-site-top-bar::part(menu) {
+  margin-inline-start: calc(-1 * var(--ui-font-size, 16px)); width: calc(100% + var(--ui-font-size, 16px))
+}
+.spell-site-top-bar[hidden] { display: none }
+/* ... its last one as far in from the bar's end as the side bar button's icon from its start (a menu item's padding) */
+.spell-site-top-bar-end { display: flex; align-items: center; gap: 0.5em; padding-inline-end: 1.14286em }
+/* only its icons (\`collapsed\`):  as narrow as they are */
+.spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: auto minmax(0, 1fr) !important }
 @container spell-site (width < 40em) {
   .spell-site-menu { display: inline-flex; margin-block-end: 0.5em }
-  .spell-site { grid-template-columns: minmax(0, 1fr) !important }
+  .spell-site-page { padding-inline-start: 0 }
+  .spell-site-top-bar::part(menu) { margin-inline-start: 0; width: 100% }
+  .spell-site, .spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: minmax(0, 1fr) !important }
   .spell-site-nav {
     position: absolute; inset-inline-start: 0; inset-block-start: 2.75em; z-index: var(--ui-z-popup, 1000); width: min(16em, 85%);
     max-height: calc(100% - 2.75em); overflow: auto; background: var(--ui-background, Canvas);

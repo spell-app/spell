@@ -1680,6 +1680,7 @@
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_top_bar",
             "site_page_state",
             "site_card_color",
             "site_not_found_page",
@@ -1811,6 +1812,9 @@
             },
             {
               "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
+            },
+            {
+              "syntax": "(barra superior|cabecera)"
             },
             {
               "syntax": "((old:antigua|antiguo)|(new:nueva|nuevo)|(mocked:maquetada|maquetado)|(built:construida|construido))"
@@ -5043,7 +5047,7 @@
           "ruleNames": ["create_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateListType.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "`a deck is a list of cards` or `create a type called Deck as a list of cards` -- declares `type` as a new class extending `List`, with its `instanceType` set to `instanceType`.",
           "syntaxes": [
             {
@@ -6137,7 +6141,7 @@
               }
             },
             {
-              "syntax": "{type:subject_implied} grupo {group:text} ((con|,) color|, de color) {color:site_card_color}",
+              "syntax": "{type:subject_implied} grupo {group:text} ((con|,) color|, de color) {color:site_card_color} (, icono {icon:text})?",
               "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\tgrupo \"Inicio\", color rojo\n\ttiene una portada en \"/\"",
               "outputs": {
                 "js": {
@@ -6148,6 +6152,21 @@
                 },
                 "py": {
                   "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\", \"group\": \"Inicio\"}]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} grupo {group:text}, icono {icon:text}",
+              "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\tgrupo \"Inicio\", icono \"home\"\n\ttiene una portada en \"/\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\",\n    group: \"Inicio\",\n    groupIcon: \"home\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "ts": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\",\n    group: \"Inicio\",\n    groupIcon: \"home\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "py": {
+                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [\n        {\n            \"name\": \"portada\",\n            \"page\": \"Portada\",\n            \"address\": \"/\",\n            \"group\": \"Inicio\",\n            \"group_icon\": \"home\",\n        },\n    ]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
                 }
               }
             }
@@ -8808,21 +8827,21 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
               "syntax": "{type:type_words} es (un|una) {superType:type} (en {address:text}|(cloud:en la nube))? {with_nested_statements}?",
-              "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\t- tiene una portada en \"/\"",
+              "example": "una \"portada\" es una página\nuna \"entrada\" es una página\nuna \"barra superior\" es una vista\nguía galáctica es un sitio:\n\t- tiene una barra superior\n\t- tiene una portada en \"/\"\n\t- tiene una entrada en \"/entrar\", sin barra superior",
               "outputs": {
                 "js": {
-                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class Entrada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class BarraSuperior extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }, {\n    name: \"entrada\",\n    page: \"Entrada\",\n    address: \"/entrar\",\n    noTopBar: true\n  }]\n  static topBar = { name: \"barra superior\", view: \"BarraSuperior\" }\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
                 },
                 "ts": {
-                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class Entrada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class EntradaElement extends SpellElement<Entrada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-entrada\", \"entrada\", [])\n}\ncore.useElement(Entrada, EntradaElement)\nexport class BarraSuperior extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class BarraSuperiorElement extends SpellElement<BarraSuperior> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-barra-superior\", \"barra superior\", [])\n}\ncore.useElement(BarraSuperior, BarraSuperiorElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }, {\n    name: \"entrada\",\n    page: \"Entrada\",\n    address: \"/entrar\",\n    noTopBar: true\n  }]\n  static topBar = { name: \"barra superior\", view: \"BarraSuperior\" }\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
                 },
                 "py": {
-                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"}]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
+                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass Entrada(Page):\n    element_tag = \"syntax-block-entrada\"\n\nclass BarraSuperior(View):\n    element_tag = \"syntax-block-barra-superior\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [\n        {\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"},\n        {\"name\": \"entrada\", \"page\": \"Entrada\", \"address\": \"/entrar\", \"no_top_bar\": True},\n    ]\n    top_bar = {\"name\": \"barra superior\", \"view\": \"BarraSuperior\"}\n\nguía_galáctica = GuíaGaláctica()"
                 }
               }
             }
@@ -8834,20 +8853,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 49,
+          "line": 53,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, (no_top_bar:sin barra superior))? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, (no_top_bar:sin barra superior))? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, (no_top_bar:sin barra superior))? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})? (, (no_top_bar:sin barra superior))? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -8857,7 +8876,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 38,
+          "line": 43,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -9674,12 +9693,12 @@
           "ruleNames": ["value_otherwise"],
           "internal": false,
           "file": "src/spell/rules/if/ValueOtherwise.ts",
-          "line": 14,
+          "line": 21,
           "purpose": "`black otherwise` -- the value when no `value_if` line above was the answer: `return 'black'`.",
           "syntaxes": [
             {
-              "syntax": "(value:{expression}|{constant}) (de lo contrario|sino)",
-              "example": "para elegir un color:\n\tblack de lo contrario",
+              "syntax": "(((de lo contrario|sino) (value:{expression}|{constant}))|((value:{expression}|{constant}) (de lo contrario|sino)))",
+              "example": "para elegir un color:\n\tsino black",
               "outputs": {
                 "js": {
                   "code": "export function elegirUnColor() {\n  return core.asAction({ undoneAs: \"Elegir un Color\" }, () => {\n    return \"black\"\n  })\n}"

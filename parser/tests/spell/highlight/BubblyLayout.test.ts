@@ -123,14 +123,15 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(drawing, "choice")).toEqual(["ace", "2 ... 10", "jack", "queen", "king"])
   })
 
-  it("draws everything after an action's `to` as ONE pill, each blank in it underlined, not bold (epic `language` I109)", () => {
+  it("draws everything after an action's `to` as ONE pill, each blank in it underlined, its kind word bold (epic `language` I109)", () => {
     const heads = (text: string, parser?: SP.SpellParser) => {
       const laidOut = SP.BubblyLayout.of(text, parser)
       return blocksOf(laidOut.nodes)
         .filter((block) => block.partOfSpeech === "action")
         .map((block) => [
           ...block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`),
-          ...block.head.underlines.map(({ start, end, kind }) => `underline ${kind}:${text.slice(start, end)}`)
+          ...block.head.underlines.map(({ start, end, kind }) => `underline ${kind}:${text.slice(start, end)}`),
+          ...(block.head.pillNames ?? []).map(({ start, end }) => `name:${text.slice(start, end)}`)
         ])
     }
     const deck = [
@@ -145,7 +146,14 @@ describe("SP.BubblyLayout", () => {
     expect(heads(deck)).toEqual([
       ["words:to ", "input:test a new deck"],
       ["words:to ", "reference:draw", "words: it"],
-      ["words:to ", "input:move (a card) to (a pile)", "underline value:a card", "underline value:a pile"]
+      [
+        "words:to ",
+        "input:move (a card) to (a pile)",
+        "underline value:a card",
+        "underline value:a pile",
+        "name:card",
+        "name:pile"
+      ]
     ])
     // what its head line says about it, after its words:  Spell's words plain, a quoted name a pill of its own
     const pile = [
@@ -162,7 +170,8 @@ describe("SP.BubblyLayout", () => {
         "mark:,",
         "words: undoable as ",
         'input:"Move Card"',
-        "underline value:a pile"
+        "underline value:a pile",
+        "name:pile"
       ],
       ["words:to ", 'input:"deal the cards"', "words: with title ", 'input:"Deal"', "mark:,", "words: undoable"]
     ])
@@ -185,14 +194,14 @@ describe("SP.BubblyLayout", () => {
       "\t\treturn 1"
     ].join("\n")
     const [, play, fromQuoted, unquoted, bracketed, after] = heads(quoted)
-    expect(play).toEqual(["words:to ", "input:play a card", "underline value:a card"])
-    const blanks = ["underline value:a card", "underline value:a pile"]
+    expect(play).toEqual(["words:to ", "input:play a card", "underline value:a card", "name:card"])
+    const blanks = ["underline value:a card", "underline value:a pile", "name:card", "name:pile"]
     expect(unquoted).toEqual(["words:to ", "input:count the points for a card on a pile", ...blanks])
     expect(fromQuoted).toEqual(["words:to ", 'input:"count the points for a card on a pile"', ...blanks])
     expect(bracketed).toEqual(["words:to ", 'input:"move (a card) to (a pile)"', ...blanks])
     // steps at an action's end draw as its head does (epic `language` P56)
     expect(after).toEqual(["words:after ", "input:putting a card on a pile", ...blanks])
-    // the editors:  ONE pill between its curly marks, its words plain, not bold as a quoted name is
+    // the editors:  ONE pill between its curly marks, its words plain but its blanks' kind words, not bold as a quoted name is
     const laidOut = SP.BubblyLayout.of(quoted)
     const head = blocksOf(laidOut.nodes).filter((block) => block.partOfSpeech === "action")[2]!
     const stretches = SP.BubblyStretches.ofLine(quoted, head.head, { band: head.partOfSpeech })
@@ -203,6 +212,8 @@ describe("SP.BubblyLayout", () => {
       'quote-open:"',
       "input:count the points for a card on a pile",
       'quote-close:"',
+      "reference:card",
+      "reference:pile",
       "underline:a card",
       "underline:a pile"
     ])
@@ -225,16 +236,20 @@ describe("SP.BubblyLayout", () => {
         "words:para ",
         'input:"los puntos por (una carta) en (una pila)"',
         "underline value:una carta",
-        "underline value:una pila"
+        "underline value:una pila",
+        "name:carta",
+        "name:pila"
       ],
-      ["words:para ", "input:jugar una carta", "underline value:una carta"],
+      ["words:para ", "input:jugar una carta", "underline value:una carta", "name:carta"],
       expect.anything(),
       // `después de` both outside its pill (Owen, 2026-11-15)
       [
         "words:después de ",
         "input:poner una carta en una pila",
         "underline value:una carta",
-        "underline value:una pila"
+        "underline value:una pila",
+        "name:carta",
+        "name:pila"
       ]
     ])
   })
@@ -323,14 +338,15 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
-  it("draws a drag handler's and a create hook's head as an action's:  ONE pill after its first word, its thing underlined (epic `language` I109)", () => {
+  it("draws a drag handler's and a create hook's head as an action's:  ONE pill after its first word, its thing underlined, its kind word bold (epic `language` I109)", () => {
     const heads = (text: string, parser?: SP.SpellParser) =>
       blocksOf(SP.BubblyLayout.of(text, parser).nodes)
         .filter((block) => block.partOfSpeech === "action")
         .map((block) =>
           [
             ...block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`),
-            ...block.head.underlines.map(({ start, end }) => `underline:${text.slice(start, end)}`)
+            ...block.head.underlines.map(({ start, end }) => `underline:${text.slice(start, end)}`),
+            ...(block.head.pillNames ?? []).map(({ start, end }) => `name:${text.slice(start, end)}`)
           ].join(" | ")
         )
     const english = [
@@ -352,12 +368,12 @@ describe("SP.BubblyLayout", () => {
       "\t\tprint 1"
     ].join("\n")
     expect(heads(english)).toEqual([
-      "words:when  | input:creating a pile | underline:a pile",
-      "words:when  | input:a card is dropped | words:\t\t | comment:-- put the card on the pile | underline:a card",
-      "words:when  | input:a card is dragged over | underline:a card",
-      "words:when  | input:a card is dragged out of it | underline:a card",
-      "words:while  | input:a card is dragged over it | underline:a card",
-      "words:when  | input:creating solitaire | underline:solitaire"
+      "words:when  | input:creating a pile | underline:a pile | name:pile",
+      "words:when  | input:a card is dropped | words:\t\t | comment:-- put the card on the pile | underline:a card | name:card",
+      "words:when  | input:a card is dragged over | underline:a card | name:card",
+      "words:when  | input:a card is dragged out of it | underline:a card | name:card",
+      "words:while  | input:a card is dragged over it | underline:a card | name:card",
+      "words:when  | input:creating solitaire | underline:solitaire | name:solitaire"
     ])
     const spanish = [
       'una "carta" es una vista',
@@ -373,10 +389,52 @@ describe("SP.BubblyLayout", () => {
       "\t\timprimir 1"
     ].join("\n")
     expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
-      "words:al  | input:crear una pila | underline:una pila",
-      "words:cuando  | input:una carta se suelta | underline:una carta",
-      "words:mientras  | input:una carta se arrastra sobre ella | underline:una carta",
-      "words:al  | input:crear el solitario | underline:el solitario"
+      "words:al  | input:crear una pila | underline:una pila | name:pila",
+      "words:cuando  | input:una carta se suelta | underline:una carta | name:carta",
+      "words:mientras  | input:una carta se arrastra sobre ella | underline:una carta | name:carta",
+      "words:al  | input:crear el solitario | underline:el solitario | name:solitario"
+    ])
+  })
+
+  it("draws the kind a type's head says it is bold whole, one name, its abilities bold too (epic `language` I111)", () => {
+    const heads = (text: string, parser?: SP.SpellParser) =>
+      blocksOf(SP.BubblyLayout.of(text, parser).nodes).map((block) =>
+        block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`).join(" | ")
+      )
+    const english = [
+      'a "card" is a draggable two sided view',
+      "\tprint 1",
+      'a "pile" is a droppable viewable list of cards',
+      "\tprint 1",
+      'a "deck" is a list of cards',
+      "\tprint 1",
+      'a "foundation" is a pile',
+      "\tprint 1",
+      "solitaire is an app",
+      "\tprint 1"
+    ].join("\n")
+    expect(heads(english)).toEqual([
+      'words:a  | input:"card" | words: is a  | reference:draggable two sided view',
+      'words:a  | input:"pile" | words: is a  | reference:droppable viewable list of cards',
+      'words:a  | input:"deck" | words: is a  | reference:list of cards',
+      'words:a  | input:"foundation" | words: is a  | reference:pile',
+      "input:solitaire | words: is an  | reference:app"
+    ])
+    const spanish = [
+      'una "carta" es una vista reversible arrastrable',
+      "\timprimir 1",
+      'una "pila" es una lista visible soltable de cartas',
+      "\timprimir 1",
+      'un "mazo" es una lista de cartas',
+      "\timprimir 1",
+      'una "fundación" es una pila',
+      "\timprimir 1"
+    ].join("\n")
+    expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
+      'words:una  | input:"carta" | words: es una  | reference:vista reversible arrastrable',
+      'words:una  | input:"pila" | words: es una  | reference:lista visible soltable de cartas',
+      'words:un  | input:"mazo" | words: es una  | reference:lista de cartas',
+      'words:una  | input:"fundación" | words: es una  | reference:pila'
     ])
   })
 

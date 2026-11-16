@@ -1,4 +1,5 @@
 "stack api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Stack
 		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>

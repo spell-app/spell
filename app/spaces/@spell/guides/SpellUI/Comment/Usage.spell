@@ -1,4 +1,5 @@
 "comment usage" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>

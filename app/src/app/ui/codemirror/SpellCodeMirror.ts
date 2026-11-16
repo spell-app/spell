@@ -27,7 +27,7 @@ import { tags } from "@lezer/highlight"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
-import { CodeMirrorAddresses, CodeMirrorLanguage, type CodeMirrorLocation, offsetOf } from "./CodeMirrorLanguage"
+import { CodeMirrorLanguage, type CodeMirrorLocation, offsetOf } from "./CodeMirrorLanguage"
 import { CodeMirrorTexts } from "./CodeMirrorTexts"
 import { CodeMirrorTyping } from "./CodeMirrorTyping"
 
@@ -44,13 +44,14 @@ import "./codemirror.css"
  * - Its words (find, folds, suggestions, problems, the merge view's) are the page's language's:  `speak()`,
  *   from `CodeMirrorTexts`.
  * - Its position in the import graph:  CodeMirror, the parser, the language service, `bubbly.css`.
- *   NEVER Monaco:  `SpellTyping`'s pure helpers only, whose file imports Monaco's types alone.
+ *   NEVER Monaco:  the typing helps' rules and the files' addresses are the language service's
+ *   (`LSP.SpellTyping`, `LSP.AppAddresses`), shared with Monaco.
  * - NEVER saves anything:  edits go into the project file's text, and are parsed, but never written to disk.
  ****************/
 export class SpellCodeMirror {
   /** The page's one language service for CodeMirror's editors, made on first use. */
   static get service(): LSP.SpellLanguageService {
-    SpellCodeMirror.#service ??= new LSP.SpellLanguageService(new CodeMirrorAddresses())
+    SpellCodeMirror.#service ??= new LSP.SpellLanguageService(new LSP.AppAddresses())
     return SpellCodeMirror.#service
   }
   static #service: LSP.SpellLanguageService | undefined

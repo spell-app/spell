@@ -386,12 +386,16 @@ export type SitePart = {
   address?: string
   /** A page's title, for its link:  `Films`;  none goes by its name.  A group's words, as they're written. */
   title?: string
+  /** A page's or group's icon in the site's navigation, if its line says:  `film` (epic `mockup` T34, I20). */
+  icon?: string
   /** A page's state, if its line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14). */
   state?: string
   /** A thumbnail of a page, a file of the project:  `snapshots/films.png`. */
   thumbnail?: string
   /** The real page it stands for, on the live site:  what its card's new-tab icon opens. */
   live?: string
+  /** A page drawn without the site's top bar, when its line says `, no top bar` (epic `mockup` T35). */
+  noTopBar?: boolean
   /** What its tab says, if its line says. */
   tab?: string
   /** What it's filed under, as its line writes it:  `Forms, Inputs`. */
@@ -418,8 +422,8 @@ export type SitePart = {
   indent: string
 }
 
-/** What a site's part is. */
-export type SitePartKind = "page" | "dialog" | "sidebar" | "group"
+/** What a site's part is:  a page, a dialog, a sidebar, a group, or its top bar (`it has a top bar`, epic `mockup` T35). */
+export type SitePartKind = "page" | "dialog" | "sidebar" | "group" | "topBar"
 
 /** Where something is in a text:  from `start` up to `end`, as offsets. */
 export type TextSpan = { start: number; end: number }
@@ -449,18 +453,20 @@ export type SitePartPlace = { where: "before" | "after" | "into"; part: string }
 
 /** What a part's kind is, from the last word of its name:  `settings dialog` is a dialog. */
 function kindOfName(name: string): SitePartKind {
+  if (/^(?:top|app) bar$/.test(name)) return "topBar"
   if (/\b(?:dialog|modal)$/.test(name)) return "dialog"
   if (/\b(?:sidebar|flyout)$/.test(name)) return "sidebar"
   return "page"
 }
 
 /** A `group` line as a part:  the lines after it, up to the next group, are its `parts`. */
-function groupPart(title: string, line: TextLine, color?: string): SitePart {
+function groupPart(title: string, line: TextLine, color?: string, icon?: string): SitePart {
   return {
     kind: "group",
     name: SiteEdits.groupKey(title),
     title,
     color,
+    ...(icon && { icon }),
     parts: [],
     depth: 0,
     line: { start: line.start, end: line.end },
@@ -480,14 +486,30 @@ function codePartsIn(text: string, start: number): SitePart[] {
     const heading = CODE_GROUP.exec(line.text)
     if (heading) {
       open.length = 0
-      group = groupPart(heading[1]!, line, heading[2] ?? heading[3])
+      group = groupPart(heading[1]!, line, heading[2] ?? heading[3], heading[4])
       top.push(group)
       continue
     }
     const written = CODE_PART.exec(line.text)
     if (!written) continue
-    const [, indent, bullet, written_name, address, title, tab, tags, state, thumbnail, live, row, column, color] =
-      written
+    const [
+      ,
+      indent,
+      bullet,
+      written_name,
+      address,
+      title,
+      icon,
+      tab,
+      tags,
+      state,
+      thumbnail,
+      live,
+      noTopBar,
+      row,
+      column,
+      color
+    ] = written
     const isQuoted = /^".*"$/.test(written_name!)
     const name = isQuoted ? written_name!.slice(1, -1) : written_name!
     while (open.length && open.at(-1)!.indent.length >= indent!.length) open.pop()
@@ -496,11 +518,13 @@ function codePartsIn(text: string, start: number): SitePart[] {
       name,
       address,
       title,
+      icon,
       tab,
       tags,
       state,
       thumbnail,
       live,
+      ...(noTopBar && { noTopBar: true }),
       row: numberIn(row),
       column: numberIn(column),
       color,
@@ -586,19 +610,34 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
 type PartWords = {
   address?: string
   title?: string
+  icon?: string
   tab?: string
   tags?: string
   state?: string
   thumbnail?: string
   live?: string
+  noTopBar?: boolean
   row?: number
   column?: number
   color?: string
 }
 
 /** What `part`'s line says now, besides its name. */
-function wordsOf({ address, title, tab, tags, state, thumbnail, live, row, column, color }: SitePart): PartWords {
-  return { address, title, tab, tags, state, thumbnail, live, row, column, color }
+function wordsOf({
+  address,
+  title,
+  icon,
+  tab,
+  tags,
+  state,
+  thumbnail,
+  live,
+  noTopBar,
+  row,
+  column,
+  color
+}: SitePart): PartWords {
+  return { address, title, icon, tab, tags, state, thumbnail, live, noTopBar, row, column, color }
 }
 
 /** `text` as a number;  none for none. */
@@ -610,20 +649,22 @@ function numberIn(text: string | undefined): number | undefined {
 function codeLineWith(
   line: string,
   part: SitePart,
-  { address, title, tab, tags, state, thumbnail, live, row, column, color }: PartWords
+  { address, title, icon, tab, tags, state, thumbnail, live, noTopBar, row, column, color }: PartWords
 ): string {
   const ending = line.endsWith("\n") ? "\n" : ""
   const at = address === undefined ? "" : ` at ${JSON.stringify(address)}`
   const named = title === undefined || !address ? "" : `, named ${JSON.stringify(title)}`
+  const iconed = icon === undefined || !address ? "" : `, icon ${JSON.stringify(icon)}`
   const tabbed = tab === undefined || !address ? "" : `, tab ${JSON.stringify(tab)}`
   const tagged = tags === undefined || !address ? "" : `, tagged ${JSON.stringify(tags)}`
   const stated = state === undefined || !address ? "" : `, ${state}`
   const pictured = thumbnail === undefined || !address ? "" : `, thumbnail ${JSON.stringify(thumbnail)}`
   const lived = live === undefined || !address ? "" : `, live ${JSON.stringify(live)}`
+  const barless = noTopBar && address ? ", no top bar" : ""
   const placed = row === undefined || column === undefined ? "" : `, in row ${row} column ${column}`
   const colored = color === undefined ? "" : `, colored ${color}`
   const name = part.isQuoted ? JSON.stringify(part.name) : part.name
-  return `${part.indent}${part.bullet ?? ""}it has ${articleOf(part.name)} ${name}${at}${named}${tabbed}${tagged}${stated}${pictured}${lived}${placed}${colored}${ending}`
+  return `${part.indent}${part.bullet ?? ""}it has ${articleOf(part.name)} ${name}${at}${named}${iconed}${tabbed}${tagged}${stated}${pictured}${lived}${barless}${placed}${colored}${ending}`
 }
 
 /** `a` or `an`, for `name`. */
@@ -635,15 +676,17 @@ function articleOf(name: string): string {
  * A site's group line:  `group "Hardware"`;  bulleted by an older writer, `- group "Hardware"`.
  * - Its section's colour after it, in any of the language's forms (epic `language` T112):
  *   `, color yellow`, `with color yellow`, `, colored yellow`
+ * - Then its icon in the site's navigation, if it names one:  `, icon "microchip"` (epic `mockup` I20)
  */
-const CODE_GROUP = /^[ \t]+(?:- )?group "([^"]+)"(?:(?:,| with) colou?r (\w+)|, colou?red (\w+))?\s*$/
+const CODE_GROUP =
+  /^[ \t]+(?:- )?group "([^"]+)"(?:(?:,| with) colou?r (\w+)|, colou?red (\w+))?(?:, icon "([^"]*)")?\s*$/
 
 /**
  * A site's part line:  `it has a films page at "/films", named "Films"`, `it has a settings dialog`;
  * bulleted by an older writer, `- it has ...`.
  */
 const CODE_PART =
-  /^([ \t]+)(- )?it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, thumbnail "([^"]*)")?(?:, live "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
+  /^([ \t]+)(- )?it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, icon "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, thumbnail "([^"]*)")?(?:, live "([^"]*)")?(?:, (no top bar))?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
 
 /** A name a part may have:  it starts with a letter or number, and has no quotes or brackets;  it's often a title. */
 const PART_NAME = /^[\p{L}\p{N}][^"<>{}\n]*$/u

@@ -11,10 +11,10 @@ export const treeEs = {
   tag: "ui-tree",
   name: "arbol",
   aka: ["vista de arbol", "esquema", "jerarquia", "arbol de archivos"],
-  attributes: { filter: "filtro", "sticky-path": "ruta-fija" },
-  values: { appearance: { nav: "navegacion" } },
+  attributes: { filter: "filtro", "sticky-path": "ruta-fija", "column-titles": "titulos-de-columnas" },
+  values: { appearance: { nav: "navegacion", columns: "columnas" } },
   events: { "ui-selecting": "ui-seleccionando" },
   slots: { empty: "vacio" },
   parts: { empty: "vacio", path: "ruta", "path-row": "fila-de-ruta" },
-  texts: { noMatches: "Nada coincide" }
+  texts: { noMatches: "Nada coincide", resizeColumn: "Cambiar el ancho de esta columna" }
 } as const satisfies E.TagDictionary

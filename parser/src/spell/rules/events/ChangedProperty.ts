@@ -29,12 +29,17 @@ export class ChangedProperty extends P.Pattern {
     const subject = P.SubjectScope.of(scope)?.subjectType
     if (!subject) return undefined
     const names = new Map<string, string>()
+    const said = SpellType.lowerWords(tokens, tokens.length).join(" ")
+    const wordsOf = (variable: P.ScopeVariable) => `${variable.name}`.split("_").join(" ").toLowerCase()
+    // only a property whose words start these matters (`P.Outline`)
+    const isSaid = (variable: P.ScopeVariable) => `${said} `.startsWith(`${wordsOf(variable)} `)
     for (const type of subject.chain()) {
-      for (const variable of type.variables.get()) {
+      for (const variable of type.variables.scan(isSaid)) {
         const words = `${variable.name}`.split("_").join(" ").toLowerCase()
         if (!names.has(words)) names.set(words, variable.name)
       }
       // declared further down, a drawing's tag too (`<number "score"/>`, epic `language` P55)
+      type.notePropertiesAheadSaid(said)
       for (const key of type.propertiesAhead ?? []) {
         const words = key.split("_").join(" ").toLowerCase()
         if (!names.has(words)) names.set(words, key)

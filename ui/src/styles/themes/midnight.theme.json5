@@ -58,6 +58,8 @@
     "inset": "{own.midnight-inset}",
     "strong": "{own.midnight-panel}",
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  the bar's blue-grey at its palest:  `midnight-panel` light, `midnight-inset` dark (a step off the bar)
+    "side-panel": { "light": "#fbfcfd", "dark": "#121a24" },
     "code": "{own.midnight-inset}",
     "highlight": "{own.midnight-accent-wash}"
   },

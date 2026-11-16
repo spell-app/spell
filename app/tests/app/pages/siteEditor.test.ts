@@ -113,6 +113,17 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await page.locator(".spell-site").count()).toBe(0)
   })
 
+  test("a page's card shows its icon before its title, and its address under it (T34)", async () => {
+    const films = page.locator('.SiteCard[data-part="films page"]')
+    await expect.poll(() => films.locator(".heading ui-icon").getAttribute("name")).toBe("film")
+    expect(await films.locator(".heading .title").textContent()).toBe("Films")
+    expect(await films.locator(".line").textContent()).toMatch(/^\/films\b/)
+    expect(await films.locator("a.new-tab").count()).toBe(1)
+    // a dialog has no icon, and says what it is
+    const settings = page.locator('.SiteCard[data-part="settings dialog"]')
+    expect(await settings.locator(".heading ui-icon").count()).toBe(0)
+  })
+
   test("the bar's Run | Edit | Site:  Site chosen here, and only for a site", async () => {
     const modes = page.locator("ui-menu.ModeTabs > ui-item")
     expect(await modes.count()).toBe(3)
@@ -165,7 +176,12 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await stories.locator("li").last().locator('input[type="checkbox"]').check()
     await page.waitForTimeout(SETTLE_MS)
     expect(await text()).toContain('<story "S4" done></story>')
-    expect(await cardWith("/films · 3 of 4 stories").count()).toBe(1)
+    expect(
+      await page
+        .locator(".SiteCard", { hasText: "/films" })
+        .filter({ has: page.locator(".line.stories", { hasText: "3 of 4 stories" }) })
+        .count()
+    ).toBe(1)
   })
 
   test("a story moves by its thumb;  deleting one asks first, unless Option is held", async () => {

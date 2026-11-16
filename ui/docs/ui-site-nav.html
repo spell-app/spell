@@ -94,6 +94,27 @@
                   ></ui-site-nav>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-variations-groups" label="Groups" sticky="stack" collapsible dividing>
+                <ui-example description="A page's `band=&quot;group&quot;` is a quiet label over its pages, with no arrow, as a Spell site's groups are:  it opens by itself while the page shown is under it, and a click on it opens it and goes to its first page.  Its `icon` shows before its label, and its pages are a step in from it.  A page with no `icon` beside pages with one keeps an icon's room, so the titles line up.">
+                  <ui-site-nav
+                    appearance="nav"
+                    style="max-width: 16em"
+                    current="#explore"
+                    pages='[{ "title": "Design", "band": "group", "icon": "palette", "pages": [{ "title": "Explore", "icon": "binoculars", "href": "#explore" }, { "title": "Validations", "icon": "clipboard check", "href": "#validations" }, { "title": "Notes", "href": "#notes" }] }, { "title": "Run", "band": "group", "icon": "play", "pages": [{ "title": "Jobs", "icon": "briefcase", "href": "#jobs" }, { "title": "Queue", "icon": "calendar check", "href": "#queue" }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-collapsed" label="Collapsed" sticky="stack" collapsible dividing>
+                <ui-example description="`collapsed` shows only the icons, each row's title its tooltip:  every icon in one column, with no step in:  a page with no icon shows its title's first letter, and a group with no icon is a thin line.">
+                  <ui-site-nav
+                    appearance="nav"
+                    collapsed
+                    style="width: 3.5em"
+                    current="#explore"
+                    pages='[{ "title": "Design", "band": "group", "icon": "palette", "pages": [{ "title": "Explore", "icon": "binoculars", "href": "#explore" }, { "title": "Validations", "icon": "clipboard check", "href": "#validations" }, { "title": "Notes", "href": "#notes" }] }, { "title": "Run", "band": "group", "pages": [{ "title": "Jobs", "icon": "briefcase", "href": "#jobs" }, { "title": "Queue", "icon": "calendar check", "href": "#queue" }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
             </ui-section>
             <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
               <ui-section id="examples-states-remembered" label="Remembered" sticky="stack" collapsible dividing>

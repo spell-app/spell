@@ -109,6 +109,7 @@ export const COMPONENTS = [
   "ui-site-nav",
   "ui-site-tabs",
   "ui-toolbar",
+  "ui-app-menu",
   "ui-action",
   "ui-property-editor",
   "ui-include",

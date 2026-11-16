@@ -1,4 +1,5 @@
 "embed examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Embed
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked

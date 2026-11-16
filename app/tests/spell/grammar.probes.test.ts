@@ -477,6 +477,12 @@ describe("grammar probes", () => {
         },
         configurable: true
       })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
+        },
+        configurable: true
+      })
       export class Tableau extends Pile {}
       ---"
     `)
@@ -498,6 +504,12 @@ describe("grammar probes", () => {
       Object.defineProperty(Card.prototype, "pile", {
         get() {
           return Pile.ownerOf(this)
+        },
+        configurable: true
+      })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
         },
         configurable: true
       })
@@ -524,6 +536,12 @@ describe("grammar probes", () => {
       Object.defineProperty(Card.prototype, "pile", {
         get() {
           return Pile.ownerOf(this)
+        },
+        configurable: true
+      })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
         },
         configurable: true
       })
@@ -561,6 +579,12 @@ describe("grammar probes", () => {
       Object.defineProperty(Card.prototype, "pile", {
         get() {
           return Pile.ownerOf(this)
+        },
+        configurable: true
+      })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
         },
         configurable: true
       })
@@ -624,6 +648,12 @@ describe("grammar probes", () => {
         },
         configurable: true
       })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
+        },
+        configurable: true
+      })
       export class Tableau extends Pile {
         canTake(card) {
           return this.isEmpty
@@ -670,6 +700,12 @@ describe("grammar probes", () => {
         },
         configurable: true
       })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
+        },
+        configurable: true
+      })
       ---
       core.move(card, pile)
       export const moved = core.move(card, pile)
@@ -700,6 +736,12 @@ describe("grammar probes", () => {
       Object.defineProperty(Card.prototype, "pile", {
         get() {
           return Pile.ownerOf(this)
+        },
+        configurable: true
+      })
+      Object.defineProperty(Card.prototype, "lastPile", {
+        get() {
+          return Pile.lastOwnerOf(this)
         },
         configurable: true
       })

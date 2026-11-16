@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SpellTyping } from "spell/app/app/ui/monaco/SpellTyping"
+import { LSP } from "spell/app/lsp"
+
+const { SpellTyping } = LSP
 
 /** Solitaire's card, shortened:  a blank line ends `its "symbol" is`'s choices, before the next group. */
 const CARD = [
@@ -303,5 +305,24 @@ describe("SpellTyping.spaceAtEnd() (I160)", () => {
     expect(SpellTyping.spaceAtEnd(`\tits "face" is \t`)).toBe(2)
     expect(SpellTyping.spaceAtEnd(`\tits "face" is`)).toBe(0)
     expect(SpellTyping.spaceAtEnd(`\t\t`)).toBe(2)
+  })
+})
+
+describe("SpellTyping.enterRuleFor() (epic `codemirror` P1)", () => {
+  test("between `<x>` and `</x>`, the caret a level in and the closing tag on its own line", () => {
+    expect(SpellTyping.enterRuleFor(`\t<content>`, `</content>`)?.indent).toBe("indentOutdent")
+    expect(SpellTyping.enterRuleFor(`\t<content>`, ``)?.indent).toBe("indent")
+  })
+
+  test("a level in after a `:`, a line going on, or before a comment after code", () => {
+    expect(SpellTyping.enterRuleFor(`to draw it:`, ``)?.indent).toBe("indent")
+    expect(SpellTyping.enterRuleFor(`\tif it is empty and`, ``)?.indent).toBe("indent")
+    expect(SpellTyping.enterRuleFor(`\tits "face" is`, `-- the card it draws`)?.indent).toBe("indent")
+  })
+
+  test("none on a plain line, after a tag that closes itself, or inside a comment", () => {
+    expect(SpellTyping.enterRuleFor(`\tset the band to 3`, ``)).toBeUndefined()
+    expect(SpellTyping.enterRuleFor(`\t<divider />`, ``)).toBeUndefined()
+    expect(SpellTyping.enterRuleFor(`\t-- a note`, `-- more`)).toBeUndefined()
   })
 })

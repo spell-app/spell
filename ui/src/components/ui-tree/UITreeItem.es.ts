@@ -11,7 +11,7 @@ export const treeItemEs = {
   name: "rama",
   aka: ["nodo", "fila de arbol"],
   attributes: { which: "cual", expandable: "desplegable", band: "franja", count: "cuenta" },
-  values: { band: { heading: "titular", subheading: "subtitular" } },
+  values: { band: { heading: "titular", subheading: "subtitular", group: "grupo" } },
   parts: { row: "fila", toggle: "triangulo", count: "cuenta" },
   texts: { open: "Abrir", close: "Cerrar" }
 } as const satisfies E.TagDictionary

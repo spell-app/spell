@@ -39,6 +39,7 @@
     --ui-surface-muted: var(--paper-inset);
     --ui-surface-strong: var(--paper-panel);
     --ui-bar-background: var(--ui-background);
+    --ui-side-panel-background: light-dark(#fffcf4, #241c15);
     --ui-code-background: var(--paper-inset);
     --ui-highlight: var(--paper-accent-wash);
     --ui-border-color: var(--paper-border);

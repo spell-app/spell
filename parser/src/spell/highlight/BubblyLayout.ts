@@ -12,6 +12,7 @@ import type {
   BubblyPiece,
   BubblyPieceKind,
   BubblyRulePresentation,
+  BubblyPillName,
   BubblyUnderline
 } from "./highlight.types"
 import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
@@ -74,11 +75,17 @@ export class BubblyLayout {
   /** Every statement's underlines, from the parse:  each line takes those inside it. */
   private readonly underlines: BubblyUnderline[] = []
 
+  /** The names inside the head pill being laid out, bold:  `BubblyLine.pillNames` (`paintTyped()`). */
+  private pillNames: BubblyPillName[] = []
+
   /** Where each tag that declares a member starts:  `BubblyDrawing.declaringTags`. */
   private readonly declaringTags = new Set<number>()
 
   /** Words that point back (`it`, `its`):  drawn plain. */
   private readonly pronouns: Set<string>
+
+  /** Words a blank's kind follows, never part of it:  its language's articles and pronouns (`a`, `el`, `its`). */
+  private readonly smallWords: Set<string>
 
   /** The words that say an ability (`draggable`):  a name, in a head whose row `namesAbility`. */
   private readonly abilityWord: RegExp
@@ -88,7 +95,9 @@ export class BubblyLayout {
     parser: SP.SpellParser,
     parsed?: P.Match
   ) {
-    this.pronouns = (parser.language ?? SP.Language.default).words.pronouns
+    const { words } = parser.language ?? SP.Language.default
+    this.pronouns = words.pronouns
+    this.smallWords = new Set([...words.memberStopWords, ...words.pronouns])
     this.abilityWord = parser.declarations.abilityWord
     this.paint = Array.from({ length: text.length })
     this.spans = SP.SpellHighlighter.spans(text, parser, parsed)
@@ -463,13 +472,24 @@ export class BubblyLayout {
   /** `line`'s pieces:  a head's (`head`), a drawing's markup, or a step's. */
   private lineOf(line: SourceLine, { depth, head }: { depth: number; head?: Head }): BubblyLine {
     const { start, end } = line
+    this.pillNames = []
     this.paintSpans(start, end, head)
     for (const overlay of this.overlays) if (overlay.start >= start && overlay.end <= end) this.paintOverlay(overlay)
     if (head) this.paintHead(head)
     const codes = this.isMarkup(line) ? this.paintMarkup(start, end) : []
     const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
     const pieces = this.piecesOf(start, end, [...underlines, ...codes])
-    return { kind: "line", start, end, depth, pieces, underlines, ...(codes.length ? { codes } : {}) }
+    const { pillNames } = this
+    return {
+      kind: "line",
+      start,
+      end,
+      depth,
+      pieces,
+      underlines,
+      ...(codes.length ? { codes } : {}),
+      ...(pillNames.length ? { pillNames } : {})
+    }
   }
 
   /** Paint each span from `start` to `end` as what it is:  in a head, what was typed is an input. */
@@ -523,12 +543,43 @@ export class BubblyLayout {
           this.abilityWord.test(this.text.slice(span.start, span.end))
         )
           this.paintRange(span.start, span.end, "reference")
+    this.paintKind(head)
     // a drawing's head, `to draw its placeholder`:  what it draws a name, no pill (epic `language` I99)
     if (this.paintDrawing(head)) return
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
     if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
+  }
+
+  /**
+   * The kind a type's head says it is (`namesKind`), bold whole, ONE name (epic `language` I111):
+   * `a "pile" is a droppable **viewable list of cards**`, `una "pila" es una **lista visible de cartas**`.
+   * - It ends where its row's group ends (`instanceType`, `superType`), from the parse.
+   * - It starts after the first article past the name (`is a`, `es una`), past any more small words and abilities:
+   *   an ability inside it (`lista visible soltable de cartas`) is bold anyway.
+   */
+  private paintKind({ statement, row }: Head) {
+    if (!row.namesKind) return
+    const groups = statement.groups as Record<string, P.Match | P.Match[] | undefined>
+    const [kind] = [groups[row.namesKind]].flat()
+    if (kind?.start === undefined || kind.end === undefined) return
+    const names = [groups.type, groups.aka].flat().filter((each) => each?.end !== undefined && each.end <= kind.start!)
+    const nameEnd = Math.max(...names.map((each) => each!.end!), statement.start!)
+    const abilities = [groups.ability].flat().filter((each) => each?.start !== undefined && each.end !== undefined)
+    let from: number | undefined
+    let pastArticle = false
+    for (const word of this.text.slice(nameEnd, kind.start).matchAll(/\S+/g)) {
+      const at = nameEnd + word.index
+      const isSmall = this.smallWords.has(word[0].toLowerCase())
+      const isAbility = abilities.some((ability) => at >= ability!.start! && at < ability!.end!)
+      if (!pastArticle) pastArticle = isSmall
+      else if (!isSmall && !isAbility) {
+        from = at
+        break
+      }
+    }
+    this.paintRange(from ?? kind.start, kind.end, "reference")
   }
 
   /**
@@ -567,7 +618,8 @@ export class BubblyLayout {
    * An action head's words after its first, to the end of its last input or parameter, as ONE pill
    * (`typedAfterLead`):  `to <play a card>`, `after <putting a card on a pile>`, `when <a card is dropped>`,
    * `when <creating solitaire>` (epic `language` I109).
-   * - Its blanks are in it, plain, each its own dotted line (`blanksOf()`), never bold.
+   * - Its blanks are in it, each its own dotted line (`blanksOf()`), its kind word bold, `a **card**`:
+   *   what the spans painted a name there before the pill (`pillNames`)
    * - Quoted, `to "play a card"`, its `"` marks are its pill's own, at either end, as any quoted input's.
    */
   private paintTyped({ statement, row }: Head) {
@@ -584,7 +636,40 @@ export class BubblyLayout {
     const end = row.typedToEnd
       ? this.headEnd(statement)
       : (this.quotedName(statement, from)?.end ?? Math.max(...typed, 0))
-    if (end > from) this.paintRange(from, end, "input")
+    if (end <= from) return
+    for (const blank of this.blanksOf(statement, row)) this.pillNames.push(...this.namesIn(blank.start, blank.end))
+    this.paintRange(from, end, "input")
+  }
+
+  /**
+   * A blank's bold words, from `start` to `end`:  the runs painted a name, `card` in `a card`;
+   * none painted one (a create hook's signature, an input already), its words past the small words it starts with
+   * (`smallWords`), `pile` in `a pile`, `solitario` in `el solitario`.
+   */
+  private namesIn(start: number, end: number): BubblyPillName[] {
+    const names = this.namedRuns(start, end)
+    if (names.length) return names
+    let from = start
+    for (const word of this.text.slice(start, end).matchAll(/\S+/g)) {
+      const at = start + word.index
+      if (at !== from || !this.smallWords.has(word[0].toLowerCase())) break
+      from = at + word[0].length
+      while (this.text[from] === " ") from++
+    }
+    return from < end ? [{ start: from, end }] : []
+  }
+
+  /** The runs from `start` to `end` painted a name, a single space between two words of one joined. */
+  private namedRuns(start: number, end: number): BubblyPillName[] {
+    const names: BubblyPillName[] = []
+    for (let at = start; at < end; at++) {
+      if (this.paint[at] !== "reference") continue
+      const last = names.at(-1)
+      // `card image`:  one name
+      if (last && (last.end === at || (last.end === at - 1 && this.text[at - 1] === " "))) last.end = at + 1
+      else names.push({ start: at, end: at + 1 })
+    }
+    return names
   }
 
   /** Where `statement`'s head ends:  before its body and a comment after it, its spaces and a `:` left out. */

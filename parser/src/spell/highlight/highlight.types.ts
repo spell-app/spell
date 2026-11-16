@@ -81,6 +81,22 @@ export type BubblyLine = {
    * - only on a markup line with code
    */
   codes?: BubblyCode[]
+  /**
+   * the NAMES inside an action head's pill, bold:  each blank's kind word, `card` in `to <play a **card**>`,
+   * `solitaire` in `when <creating **solitaire**>`, `carta` in `para <jugar una **carta**>` (epic `language` I109)
+   * - drawn over the pill's one piece, never cutting it:  its white, and its quote marks, stay one pill
+   * - never its `a`, `una`, `el`:  only what the parse reads as a name
+   * - only on a head with such a pill
+   */
+  pillNames?: BubblyPillName[]
+}
+
+/** A name inside an action head's pill, bold:  `card` in `to <play a card>` (`BubblyLine.pillNames`). */
+export type BubblyPillName = {
+  /** first character */
+  start: number
+  /** one past the last */
+  end: number
 }
 
 /** A `{…}` in a drawing's markup:  Spell code, its braces included. */
@@ -180,7 +196,7 @@ export type BubblyRulePresentation = {
   /**
    * an action's head:  everything after its first word (`to`, `para`, `after`, `when`), to the end of its last input
    * or parameter, is what a person typed, ONE pill:  `to <test a new deck>`, `to <play a card>`
-   * - its blanks in it plain, each underlined:  `to <move (a card) to (a pile)>` (epic `language` I109)
+   * - its blanks in it, each underlined, its kind word bold:  `to <move (a card) to (a pile)>` (epic `language` I109)
    */
   typedAfterLead?: boolean
   /** ... its pill from this group's start, not after the first word:  `después de <poner una carta en una pila>` */
@@ -208,6 +224,12 @@ export type BubblyRulePresentation = {
    * `droppable` in `it is droppable when`):  the words its parser reads as one (`SP.DeclarationPatterns.abilityWord`)
    */
   namesAbility?: boolean
+  /**
+   * its group whose end ends the KIND its head says it is, the kind bold whole, ONE name (epic `language` I111):
+   * `superType` in `a "card" is a draggable **two sided view**`, `instanceType` in `a "pile" is a **viewable list of cards**`
+   * - the kind starts after the article that follows the name, past any ability (`draggable`, bold on its own)
+   */
+  namesKind?: string
   /** a part of the name before it, bold with it:  `'s` in `pile's` */
   isNamePart?: boolean
   /** its group whose end ends a name it starts, bold through it:  `type` in `a new foundation with suit = hearts` */

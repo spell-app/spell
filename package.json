@@ -672,6 +672,11 @@
       "types": "./ui/dist-types/src/components/ui-action/index.d.ts",
       "default": "./ui/src/components/ui-action/index.ts"
     },
+    "./ui/components/ui-app-menu": {
+      "spell-source": "./ui/src/components/ui-app-menu/index.ts",
+      "types": "./ui/dist-types/src/components/ui-app-menu/index.d.ts",
+      "default": "./ui/src/components/ui-app-menu/index.ts"
+    },
     "./ui/components/ui-toolbar": {
       "spell-source": "./ui/src/components/ui-toolbar/index.ts",
       "types": "./ui/dist-types/src/components/ui-toolbar/index.d.ts",

@@ -70,7 +70,8 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
     match.data.readings = ActionButton.readingsOf(scope, element)
     const { value } = element.quotedWord
     const words = (value instanceof P.TextToken ? value.innerText : `${value?.raw ?? ""}`).trim()
-    const types = ActionButton.typesFor(scope)
+    // only a type with the action matters (`P.Outline`)
+    const types = ActionButton.typesFor(scope, (type) => !!DefineMenu.actionNamed(type, words))
     const found = DefineMenu.appActionNamed(scope, words) ?? ActionButton.actionIn(types, words)
     match.data.action = found ?? DefineMenu.methodNameFor(words)
     // declared further down, or nowhere:  refused once the whole program has parsed, if it's still nowhere
@@ -190,11 +191,14 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
   /**
    * Where an action may be, in order:  the drawing's own type and its super-types first, then every other type
    * the program knows, as any of them may be up its thing's chain when it draws (a card's game, the app).
+   * - `test`:  which of them matter to the caller, for an outline (`P.ScopeList.scan()`).
    */
-  private static typesFor(scope: P.Scope): P.TypeScope[] {
+  private static typesFor(scope: P.Scope, test?: (type: P.TypeScope) => boolean): P.TypeScope[] {
     const own = ActionButton.ownTypeOf(scope)
     const others: P.TypeScope[] = []
-    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) others.push(...(at.types?.get() ?? []))
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) {
+      others.push(...((test ? at.types?.scan(test) : at.types?.get()) ?? []))
+    }
     return [...new Set(own ? [own, ...others] : others)]
   }
 

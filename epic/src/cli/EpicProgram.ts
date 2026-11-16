@@ -163,11 +163,12 @@ export class EpicProgram {
 
     requests(epic.command("merge"))
       .description(
-        "a standing epic's phase onto main at once, fast-forward only;  run in the main checkout;  a stray snapshot " +
+        "a standing epic's phase onto main at once, fast-forward only;  main taken into the branch first when it moved;  " +
+          "a stray snapshot " +
           "or generated file there is moved aside first, and --ditch moves up to 3 others too, once you say so;  " +
           "one merge at a time on the machine (epic turns)"
       )
-      .usage("<epic> [--ditch]")
+      .usage("<epic> [--ditch] [--as <agent>]")
       .addHelpText("after", example("epic merge epic-workflow"))
 
     this.verb(epic.command("pr"), (args) => new PullRequest().run(args))

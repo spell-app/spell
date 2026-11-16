@@ -1,4 +1,5 @@
 "site-tabs usage" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Site tabs
 		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
@@ -13,7 +14,11 @@
 
 	<section label="Using it">
 		<markdown>
-			Hand it the same `pages` you hand `<ui-site-nav>`, and put it above the page's content.
+			Put it above the page's content. Inside a site with a `<ui-site-nav>`, that's all: with no `pages` of its own,
+			it follows the navigation around it, its pages and the page it marks shown. A page of a Spell site writes a bare
+			`<site-tabs/>`; the site draws no tabs by itself.
+
+			- Elsewhere, hand it the same `pages` you hand `<ui-site-nav>`.
 
 			- `pages`: each page's `title` and `href`, its `pages` under it.
 			  A parent page's `tab` is what its tab says, when not its `title`.
@@ -21,7 +26,7 @@
 			- A parent with no `href` only holds pages, so it has no tab, and a page whose address has a parameter
 			  (`/films/:film`) isn't one either. A family of fewer than two tabs draws nothing.
 			- Picking a tab goes there. A site that shows its pages itself cancels `ui-navigating` and shows
-			  `event.detail.page`. A middle click or Command-click opens a new tab, as any link does.
+			  `event.detail.page`, or follows the tab's link as any link to one of its pages, as a Spell site does. A middle click or Command-click opens a new tab, as any link does.
 		</>
 		<markdown>
 			```js

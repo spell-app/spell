@@ -385,19 +385,19 @@ a "review dialog" is a view
 galaxy guide is a site
 	its "theme" is "mockup"
 		// The theme its pages wear:  a hand-drawn sketch, while it's a mockup
-	it has a films page at "/films", named "Films"
+	it has a films page at "/films", named "Films", icon "film"
 		it has a film page at "/films/:film", named "Film"
-	it has a people page at "/people", named "People"
+	it has a people page at "/people", named "People", icon "users"
 		it has a person page at "/people/:person", named "Person"
-	it has a planets page at "/planets", named "Planets"
+	it has a planets page at "/planets", named "Planets", icon "globe"
 		it has a planet page at "/planets/:planet", named "Planet"
-	it has a species list page at "/species", named "Species"
+	it has a species list page at "/species", named "Species", icon "dna"
 		it has a species page at "/species/:species", named "Species"
-	it has a vehicles page at "/vehicles", named "Vehicles"
+	it has a vehicles page at "/vehicles", named "Vehicles", icon "car"
 		it has a vehicle page at "/vehicles/:vehicle", named "Vehicle"
-	it has a starships page at "/starships", named "Starships"
+	it has a starships page at "/starships", named "Starships", icon "rocket"
 		it has a starship page at "/starships/:starship", named "Starship"
-	it has a reviews page at "/reviews", named "Reviews"
+	it has a reviews page at "/reviews", named "Reviews", icon "star"
 	it has a settings dialog
 	it has a review dialog
 	it has a person sidebar

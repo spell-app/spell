@@ -19,7 +19,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
  */
 describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () => {
   const game = projectIn("tic-tac-toe", "TicTacToe.spell", "<content>")
-  const solitario = projectIn("Solitario", "Carta.es.spell", '<texto color="azul">')
+  const solitario = projectIn("Solitario", "Carta.es.spell", "<texto color={su color}>")
 
   // Spell UI's help table loads the first time it's asked for
   beforeAll(async () => {

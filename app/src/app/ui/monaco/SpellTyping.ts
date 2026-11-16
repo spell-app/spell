@@ -59,7 +59,9 @@ import type { monaco } from "./monaco"
  *     so only the one typed in helps, at its own caret (epic `editor` I150).
  *   - Every help writes only on the lines it's working on:  an edit anywhere else is dropped, with an error saying so,
  *     so a help gone wrong never breaks a file silently (`write()`).
- * - Only Monaco's TYPE (`import type`):  its rules are plain functions of the lines, tested without an editor.
+ * - This class is only the Monaco wiring:  what each help decides, from the lines, is the language service's
+ *   `LSP.SpellTyping`, which the CodeMirror test page's `CodeMirrorTyping` reads too (epic `codemirror` P1).
+ * - Only Monaco's TYPE (`import type`).
  ****************/
 export class SpellTyping {
   constructor(
@@ -110,7 +112,7 @@ export class SpellTyping {
     const selection = selections[0]!
     const pasted = text.replace(/\r\n?/g, "\n").split("\n")
     const before = model.getLineContent(selection.startLineNumber).slice(0, selection.startColumn - 1)
-    const lines = SpellTyping.pastedLines(pasted, before, indentSettingsOf(model))
+    const lines = LSP.SpellTyping.pastedLines(pasted, before, indentSettingsOf(model))
     if (lines.join("\n") === pasted.join("\n")) return false
     const pastedOn = { from: selection.startLineNumber, to: selection.endLineNumber }
     editor.pushUndoStop()
@@ -151,7 +153,7 @@ export class SpellTyping {
     if (selections.length !== 1 || !selection || selection.startLineNumber !== selection.endLineNumber) return
     const line = selection.startLineNumber
     const text = model.getLineContent(line)
-    const indent = indentOf(text)
+    const indent = LSP.SpellTyping.indentOf(text)
     if ((isOut && !indent) || !text.trim()) return
     const isAtIndent = selection.isEmpty() && selection.startColumn === indent.length + 1
     if ((isBackspace || isTab) && !isAtIndent) return
@@ -160,38 +162,39 @@ export class SpellTyping {
     const lines = model.getLinesContent()
     // a line of a tag's attributes, under its first line, moves alone:  its indent tabs then spaces again (I142);
     // Backspace there is Monaco's, a space at a time
-    const isAttributeLine = !!SpellTyping.tagOpenAt(lines, line - 1, 0)
+    const isAttributeLine = !!LSP.SpellTyping.tagOpenAt(lines, line - 1, 0)
     if (isAttributeLine && isBackspace) return
     // a comment line moves alone:  what's under it is the body of the line above it (I161)
-    const isComment = LSP.SpellKeywords.COMMENT_AFTER.test(text)
-    const under = isAttributeLine || isComment ? 0 : SpellTyping.linesUnder(lines, line - 1)
+    const isComment = LSP.SpellTyping.isComment(text)
+    const under = isAttributeLine || isComment ? 0 : LSP.SpellTyping.linesUnder(lines, line - 1)
     if (!under && !isAttributeLine) return
     const settings = indentSettingsOf(model)
     // how far the lines move:  out to the level before, or in a level
     // (a tag's attribute line:  a whole level, so its spaces stay lined up)
     const outBy = isAttributeLine
       ? settings.tabSize
-      : widthOf(indent, settings.tabSize) - outdentWidth(indent, settings.tabSize)
+      : LSP.SpellTyping.widthOf(indent, settings.tabSize) - LSP.SpellTyping.outdentWidth(indent, settings.tabSize)
     const by = isIn ? settings.tabSize : -outBy
     const edits = lines.slice(line - 1, line + under).flatMap((each, at) => {
-      const its = indentOf(each)
+      const its = LSP.SpellTyping.indentOf(each)
       if (!each.trim()) return []
       const lineNumber = line + at
-      const width = Math.max(0, widthOf(its, settings.tabSize) + by)
+      const width = Math.max(0, LSP.SpellTyping.widthOf(its, settings.tabSize) + by)
       const range = {
         startLineNumber: lineNumber,
         startColumn: 1,
         endLineNumber: lineNumber,
         endColumn: its.length + 1
       }
-      return [{ range, text: indentOfWidth(width, settings) }]
+      return [{ range, text: LSP.SpellTyping.indentOfWidth(width, settings) }]
     })
     event.preventDefault()
     event.stopPropagation()
     editor.pushUndoStop()
     this.write(edits, { from: line, to: line + under })
     // Tab:  the caret stays where typing goes, at the end of the line's new indent
-    if (isTab) editor.setPosition({ lineNumber: line, column: indentOf(model.getLineContent(line)).length + 1 })
+    if (isTab)
+      editor.setPosition({ lineNumber: line, column: LSP.SpellTyping.indentOf(model.getLineContent(line)).length + 1 })
     editor.pushUndoStop()
   }
 
@@ -204,7 +207,7 @@ export class SpellTyping {
    * lined up under the tag's first attribute, `columns`, as one undo (Owen, 2026-11-14, I142).
    * - Lined up as the editor draws it, not by counting letters:  its font isn't monospace, and the bubbly look
    *   leaves room round some words.  So it measures where the first attribute is, then writes tabs, then spaces
-   *   for what's left (`indentOfWidth()`).
+   *   for what's left (`LSP.SpellTyping.indentOfWidth()`).
    * - The spaces before the caret go:  no trailing space left on the tag's line.
    * - Returns whether it did:  `false` leaves the key to Monaco (several carets, a selection, suggestions showing,
    *   not between a tag's attributes).
@@ -216,7 +219,7 @@ export class SpellTyping {
     if (!model || !selection) return false
     const line = selection.startLineNumber
     const lines = model.getLinesContent()
-    const tag = SpellTyping.tagOpenAt(lines, line - 1, selection.startColumn - 1)
+    const tag = LSP.SpellTyping.tagOpenAt(lines, line - 1, selection.startColumn - 1)
     const firstAttribute = tag?.firstAttribute
     if (!tag || firstAttribute === undefined) return false
     if (tag.line === line - 1 && selection.startColumn - 1 <= firstAttribute) return false
@@ -225,7 +228,7 @@ export class SpellTyping {
     const after = text.slice(selection.startColumn - 1).replace(/^[ \t]+/, "")
     const { spaceWidth } = editor.getOption(FONT_INFO as monaco.editor.EditorOption.fontInfo)
     const width = Math.round(editor.getOffsetForColumn(tag.line + 1, firstAttribute + 1) / spaceWidth)
-    const indent = indentOfWidth(width, indentSettingsOf(model))
+    const indent = LSP.SpellTyping.indentOfWidth(width, indentSettingsOf(model))
     const range = {
       startLineNumber: line,
       startColumn: before.length + 1,
@@ -249,10 +252,10 @@ export class SpellTyping {
   /**
    * Enter before a comment after code (`its "face" is\t\t-- the card it draws`):  the comment goes on its own line,
    * at the level of the body under that line, so the body still reads as its body (Owen, 2026-11-15, I155, I161).
-   * - The body's level is its first line's (`SpellTyping.commentIndent()`), else a level in from the code's line.
+   * - The body's level is its first line's (`LSP.SpellTyping.commentIndent()`), else a level in from the code's line.
    * - The tabs and spaces round the caret go:  none left at the end of the code's line, none before the comment.
    * - One undo.
-   * - Returns whether it did:  `false` leaves the key to Monaco, whose Enter rule (`CODE_BEFORE`, `COMMENT_AFTER`)
+   * - Returns whether it did:  `false` leaves the key to Monaco, whose Enter rule (`LSP.SpellTyping.ENTER_RULES`)
    *   writes a level in, as VS Code's does.
    */
   private enterBeforeComment(event: monaco.IKeyboardEvent): boolean {
@@ -265,7 +268,7 @@ export class SpellTyping {
     const before = text.slice(0, selection.startColumn - 1)
     const after = text.slice(selection.startColumn - 1)
     if (!LSP.SpellKeywords.CODE_BEFORE.test(before) || !LSP.SpellKeywords.COMMENT_AFTER.test(after)) return false
-    const indent = SpellTyping.commentIndent(model.getLinesContent(), line - 1, indentSettingsOf(model))
+    const indent = LSP.SpellTyping.commentIndent(model.getLinesContent(), line - 1, indentSettingsOf(model))
     const range = {
       startLineNumber: line,
       startColumn: before.trimEnd().length + 1,
@@ -328,7 +331,7 @@ export class SpellTyping {
     if (!model || selections.length !== 1 || !selections[0]!.isEmpty() || editor.getRawOptions().readOnly) return
     if (!this.languages.indents.includes(model.getLanguageId()) || editor.getPosition()?.lineNumber !== line) return
     const text = model.getLineContent(line)
-    const indent = SpellTyping.indentToSnap(model.getLinesContent(), line - 1)
+    const indent = LSP.SpellTyping.indentToSnap(model.getLinesContent(), line - 1)
     if (!indent) return
     const column = text.length + 1
     const range = { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
@@ -384,15 +387,15 @@ export class SpellTyping {
     // where the caret is once the keystroke is in:  after what was typed
     const caret = { lineNumber: line, column: typedAt + 2 }
     if (this.languages.indents.includes(languageId)) {
-      const indent = SpellTyping.indentToAdd(lines, line - 1, typedAt)
+      const indent = LSP.SpellTyping.indentToAdd(lines, line - 1, typedAt)
       if (indent) return this.help(() => this.indent(line, typedAt, indent), caret)
     }
     if (this.languages.quotes.includes(languageId) && change.text === " ") {
       const lang = SP.Language.langOfFile(model.uri.path) ?? "en"
-      const tag = SpellTyping.tagBeforeSpace(lines, line - 1, typedAt)
+      const tag = LSP.SpellTyping.tagBeforeSpace(lines, line - 1, typedAt)
       const rest = tag && LSP.CompletionShapes.spaceAfterTag(this.scopeOf(model, lang), tag)
       if (rest) return this.help(() => this.finishTag(rest), caret)
-      if (SpellTyping.opensQuotes(lines, line - 1, lang)) this.help(() => this.openQuotes(), caret)
+      if (LSP.SpellTyping.opensQuotes(lines, line - 1, lang)) this.help(() => this.openQuotes(), caret)
     }
   }
 
@@ -402,8 +405,8 @@ export class SpellTyping {
    * - The last parse, not one of the text as it is now:  a type declared since isn't known till the next.
    */
   private scopeOf(model: monaco.editor.ITextModel, lang: string): P.Scope {
-    // the app's address for a file, `spell:/<path>` (`AppAddresses`, which loads Monaco's own code:  not here)
-    const file = model.uri.scheme === APP_SCHEME ? SP.SpellFile.registry.get(model.uri.path.slice(1)) : undefined
+    const path = LSP.AppAddresses.pathOf(model.uri)
+    const file = path === undefined ? undefined : SP.SpellFile.registry.get(path)
     return file?.scope ?? file?.project.scope ?? SP.Language.for(lang).rootScope
   }
 
@@ -475,7 +478,7 @@ export class SpellTyping {
     const model = this.editor.getModel()
     if (!model || line >= model.getLineCount()) return
     const text = model.getLineContent(line)
-    const trailing = SpellTyping.spaceAtEnd(text)
+    const trailing = LSP.SpellTyping.spaceAtEnd(text)
     if (!trailing) return
     const range = {
       startLineNumber: line,
@@ -534,186 +537,6 @@ export class SpellTyping {
 
   /** It's writing a help:  the edits it makes aren't typing. */
   private isHelping = false
-
-  ////////////////
-  // ## The rules
-  ////////////////
-
-  /**
-   * The indent to write before the letter just typed at `column` (0-based) of `lines[index]`, if any:
-   * the next non-blank line's, less what the line has already.
-   * - Only for the line's first letter, typed on a line of nothing but tabs and spaces,
-   *   and only when those are the start of that indent:  `""` otherwise.
-   * - None at the end of a body:  the next line is the top level's, so is this one.
-   */
-  static indentToAdd(lines: readonly string[], index: number, column: number): string {
-    const text = lines[index] ?? ""
-    const before = text.slice(0, column)
-    const typed = text.slice(column)
-    if (!/^[ \t]*$/.test(before) || !/^\S$/u.test(typed)) return ""
-    return indentStillToWrite(lines, index, before)
-  }
-
-  /**
-   * The indent to write on blank line `lines[index]` as the caret lands on it, so it's in the body it's drawn in:
-   * the next non-blank line's, less the tabs and spaces it has already.
-   * - `""` when the line isn't blank, or is already that far in, or is drawn at the top level.
-   */
-  static indentToSnap(lines: readonly string[], index: number): string {
-    const text = lines[index] ?? ""
-    return /^[ \t]*$/.test(text) ? indentStillToWrite(lines, index, text) : ""
-  }
-
-  /**
-   * Does the space just typed at the end of `lines[index]` follow a word whose next slot is a quoted name,
-   * in language `lang` (`en`, `es` ...)?  See `QUOTED_NAME_WORDS`.
-   * - Only a line of its indent, ONE word and the space:  `group `, `\tits `.
-   * - The word counts only where the line is:
-   *   - at the top level:  a type's word (`a "card" is ...`)
-   *   - one level in, under a type:  a member's (`group "Rank"`, `its "rank" is ...`)
-   *   - under a property:  a choice's (`it "is a (rank)"`)
-   */
-  static opensQuotes(lines: readonly string[], index: number, lang: string): boolean {
-    const words = QUOTED_NAME_WORDS[lang]
-    const match = /^([ \t]*)(\S+) $/u.exec(lines[index] ?? "")
-    if (!words || !match) return false
-    const [, indent, typedWord] = match
-    const word = typedWord!.toLowerCase()
-    if (!indent) return words.types.includes(word)
-    const parent = parentOf(lines, index, indent!.length)
-    if (!parent) return false
-    const parentWord = parent.text.trim().split(/\s/)[0]!.toLowerCase()
-    if (!parent.indent && words.types.includes(parentWord)) return words.members.includes(word)
-    return words.properties.includes(parentWord) && words.choices.includes(word)
-  }
-
-  /**
-   * The tag the space just typed at `column` (0-based) of `lines[index]` follows, if it ends one's name:
-   * `<action ` => `action`.
-   * - Only when nothing more of the tag is written after the space:  the line's end, or another tag.
-   * - `undefined` for a space anywhere else:  after an attribute, inside quotes, in text.
-   */
-  static tagBeforeSpace(lines: readonly string[], index: number, column: number): string | undefined {
-    const text = lines[index] ?? ""
-    if (text[column] !== " ") return undefined
-    const name = /<([\p{L}\p{M}][\p{L}\p{M}\d_-]*)$/u.exec(text.slice(0, column))?.[1]
-    if (!name || !NOTHING_MORE_OF_THE_TAG.test(text.slice(column + 1))) return undefined
-    return name
-  }
-
-  /**
-   * The tag whose attributes `column` (0-based) of `lines[index]` is between, if any:
-   * after its name, before its `>`, outside quotes.
-   * - `line`:  the index of the line the tag starts on
-   * - `firstAttribute`:  the column of the first word after its name on that line;
-   *   `undefined` when its name ends that line
-   * - Looks back at most `TAG_LINES_BACK` lines, so a long file isn't read for each key.
-   */
-  static tagOpenAt(lines: readonly string[], index: number, column: number): OpenTag | undefined {
-    for (let at = index; at >= Math.max(0, index - TAG_LINES_BACK); at--) {
-      const line = lines[at] ?? ""
-      const text = at === index ? line.slice(0, column) : line
-      const start = [...text.matchAll(TAG_START)].at(-1)
-      if (!start) continue
-      const nameEnd = start.index + start[0].length
-      const since = at === index ? [text.slice(nameEnd)] : [text.slice(nameEnd), ...lines.slice(at + 1, index)]
-      if (at !== index) since.push((lines[index] ?? "").slice(0, column))
-      if (!isStillOpen(since.join("\n"))) return undefined
-      const word = /\S/.exec(line.slice(nameEnd))
-      return { line: at, firstAttribute: word ? nameEnd + word.index : undefined }
-    }
-    return undefined
-  }
-
-  /**
-   * The indent a comment after the code on `lines[index]` takes on its own line (I161):  the level of the body under
-   * that line, so the body still reads as its body.
-   * - The next non-blank line's indent, when it's further in than the line's:  its body's first line.
-   * - Else a level in from the line's, in the file's tabs or spaces:  a body of only that comment.
-   */
-  static commentIndent(lines: readonly string[], index: number, settings: IndentSettings): string {
-    const own = indentOf(lines[index] ?? "")
-    const next = lines.slice(index + 1).find((line) => line.trim())
-    const body = next === undefined ? "" : indentOf(next)
-    if (widthOf(body, settings.tabSize) > widthOf(own, settings.tabSize)) return body
-    return own + (settings.insertSpaces ? " ".repeat(settings.tabSize) : "\t")
-  }
-
-  /** How many tabs and spaces end `text`:  the ones Enter leaves at the end of the line it splits (I160). */
-  static spaceAtEnd(text: string): number {
-    return /[ \t]*$/.exec(text)![0].length
-  }
-
-  /**
-   * `pasted`'s lines as they should land after `before`, the text before the caret on its line.
-   * - The indent they're laid out from:
-   *   - the caret's, when `before` is only an indent:  the first line's own indent goes
-   *   - the line's, when `before` has text:  the first line follows it as it was
-   *   - the first line's own, at the line's very start
-   * - A drawing's markup (its first line a tag):  each line one level under each tag still open above it,
-   *   a closing tag back at its tag's level.
-   * - Anything else:  each line keeps its indent from the first line, shifted with it.
-   * - One line, or none:  as it is.
-   */
-  static pastedLines(pasted: readonly string[], before: string, settings: IndentSettings): string[] {
-    if (pasted.length < 2) return [...pasted]
-    const lines = SpellTyping.reindented(pasted, before, settings)
-    // a paste that ends its last line (`restart the game\n`) leaves what was after the caret on a line of its own:
-    // at the caret's indent, so it stays in its body (Owen, 2026-11-14, I53)
-    if (!pasted.at(-1)!.trim())
-      lines[lines.length - 1] = indentOfWidth(SpellTyping.pasteBase(before, pasted[0]!, settings), settings)
-    return lines
-  }
-
-  /** The indent width a paste lands at:  the caret's, when it's in a line's indent, else its line's (or the paste's). */
-  private static pasteBase(before: string, first: string, { tabSize }: IndentSettings): number {
-    const isIndent = !!before && !before.trim()
-    return isIndent ? widthOf(before, tabSize) : widthOf(indentOf(before || first), tabSize)
-  }
-
-  /** `pastedLines()`' re-indenting, its last line left as it came. */
-  private static reindented(pasted: readonly string[], before: string, settings: IndentSettings): string[] {
-    const { tabSize } = settings
-    const first = pasted[0]!
-    const isIndent = !!before && !before.trim()
-    const base = SpellTyping.pasteBase(before, first, settings)
-    const firstLine = isIndent ? first.trimStart() : first
-    const isMarkup = /^\s*</.test(pasted.find((line) => line.trim()) ?? "")
-    if (isMarkup) {
-      const indent = (width: number) => indentOfWidth(width, settings)
-      const [, ...rest] = LSP.MarkupIndent.layout(pasted, { base, tabSize, indentOfWidth: indent })
-      return [firstLine, ...rest]
-    }
-    const from = widthOf(indentOf(first), tabSize)
-    const rest = pasted.slice(1).map((line) => {
-      if (!line.trim()) return ""
-      const width = Math.max(0, base + widthOf(indentOf(line), tabSize) - from)
-      return indentOfWidth(width, settings) + line.trimStart()
-    })
-    return [firstLine, ...rest]
-  }
-
-  /**
-   * How many lines after `lines[index]` sit under it, and so move with it:
-   * the ones indented further (blank lines among them, not after them), then its closing tag if it opens one.
-   */
-  static linesUnder(lines: readonly string[], index: number): number {
-    const text = lines[index] ?? ""
-    const indent = indentOf(text).length
-    let under = 0
-    for (let at = index + 1; at < lines.length; at++) {
-      const line = lines[at]!
-      if (!line.trim()) continue
-      if (indentOf(line).length <= indent) {
-        const closes =
-          indentOf(line) === indentOf(text) && line.trim().startsWith("</") && LSP.MarkupIndent.depthChange(text) > 0
-        if (closes) under = at - index
-        break
-      }
-      under = at - index
-    }
-    return under
-  }
 }
 
 ////////////////
@@ -728,82 +551,8 @@ export type SpellTypingLanguages = {
   quotes: readonly string[]
 }
 
-/** A language's words whose next slot is a quoted name, by where the line is -- see `SpellTyping.opensQuotes()`. */
-export type QuotedNameWords = {
-  /** start a type at the top level:  `a "card" is ...` */
-  types: string[]
-  /** start a type's member, one level in:  `group "Rank"`, `its "rank" is ...`, `it "is a face card" if ...` */
-  members: string[]
-  /** start a property, whose choices go under it:  `its "rank" is one of ...` */
-  properties: string[]
-  /** start a property's choice, under it:  `it "is a (rank)"` */
-  choices: string[]
-}
-
-/**
- * Each language's `QuotedNameWords`, by its code.
- * - A hand list, NOT from the packs' rules:  a rule's syntax puts a quoted name after many shapes of words
- *   (`{type:subject_implied} group {group:text}`), and the same words start lines with no name after them
- *   (`its rank && "of" && its suit` as a property's value, Spanish's `para cada ...`).
- *   So only these, where the line's place says a name comes next.
- * - Spanish has no `it` for a choice:  `"es un (palo)"` starts with its quotes.
- */
-export const QUOTED_NAME_WORDS: Record<string, QuotedNameWords> = {
-  en: { types: ["a", "an"], members: ["group", "its", "it"], properties: ["its"], choices: ["it"] },
-  es: { types: ["un", "una"], members: ["grupo", "su", "sus"], properties: ["su", "sus"], choices: [] }
-}
-
-/** How a file indents:  tabs or spaces, and how wide a tab or a level is. */
-export type IndentSettings = {
-  /** Spaces for a level, not a tab. */
-  insertSpaces: boolean
-  /** Columns a tab, and a level, takes. */
-  tabSize: number
-}
-
-/** A tag `SpellTyping.tagOpenAt()` found open:  the line it starts on, and its first attribute's column there. */
-export type OpenTag = {
-  /** index of the line the tag starts on */
-  line: number
-  /** column (0-based) of the first word after its name on that line;  `undefined` when the name ends the line */
-  firstAttribute: number | undefined
-}
-
-/** How far back `SpellTyping.tagOpenAt()` looks for the tag's start:  a tag's attributes span a few lines at most. */
-const TAG_LINES_BACK = 20
-
-/** A tag's start, `<` and its name:  `<container`, `<ui-button`;  never a closing tag's `</`. */
-const TAG_START = /<[\p{L}][\p{L}\p{M}\d_.:-]*/gu
-
-/** Is a tag still open at the end of `text`, what follows its name:  no `>` outside quotes, and not inside quotes? */
-function isStillOpen(text: string): boolean {
-  let quote = ""
-  for (const char of text) {
-    if (quote) {
-      if (char === quote) quote = ""
-    } else if (char === '"' || char === "'") quote = char
-    else if (char === ">") return false
-  }
-  return !quote
-}
-
-/** How wide `indent` is, a tab `tabSize` columns. */
-const widthOf = LSP.MarkupIndent.widthOf
-
-/** How wide one level out takes off `indent`:  back to the tab stop before its end. */
-function outdentWidth(indent: string, tabSize: number): number {
-  const width = widthOf(indent, tabSize)
-  return width % tabSize ? width - (width % tabSize) : Math.max(0, width - tabSize)
-}
-
-/** An indent `width` columns wide, in the file's tabs or spaces. */
-function indentOfWidth(width: number, { insertSpaces, tabSize }: IndentSettings): string {
-  if (insertSpaces) return " ".repeat(width)
-  return "\t".repeat(Math.floor(width / tabSize)) + " ".repeat(width % tabSize)
-}
-
 /** `model`'s indent settings. */
-function indentSettingsOf(model: monaco.editor.ITextModel): IndentSettings {
+function indentSettingsOf(model: monaco.editor.ITextModel): LSP.IndentSettings {
   const { insertSpaces, tabSize } = model.getOptions()
   return { insertSpaces, tabSize }
 }
@@ -826,9 +575,6 @@ const MONACO_PASTE = "paste"
 
 /** What Monaco's right-click Paste hands its `"paste"` handler. */
 type MonacoPaste = { text: string; pasteOnNewLine?: boolean }
-
-/** What's after a tag's name when none of the rest of it is written yet:  the line's end, or another tag. */
-const NOTHING_MORE_OF_THE_TAG = /^\s*(?:<|$)/
 
 /** Monaco's snippet writer's contribution id:  its `SnippetController2.ID`. */
 const MONACO_SNIPPETS = "snippetController2"
@@ -853,9 +599,6 @@ const SPELL_TYPING = "spell-typing"
 /** What an Enter writes:  a new line and its indent (two, between `<x>` and `</x>`). */
 const NEW_LINES = /^(?:\r?\n[ \t]*)+$/
 
-/** The app's scheme for its files' addresses:  `AppAddresses.SCHEME`. */
-const APP_SCHEME = "spell"
-
 /** What moves the caret onto a line it snaps on:  a click or a key, never code (`"api"`) nor its own edits. */
 const MOVED_BY = ["mouse", "keyboard"]
 
@@ -867,34 +610,3 @@ const CURSOR_MOVED_EXPLICITLY = 3
 
 /** A line the caret snapped on, and what it had before. */
 type Snapped = { line: number; before: string }
-
-/**
- * What's still to write of the next non-blank line's indent after `before`, the start of `lines[index]`:
- * `""` when `before` isn't the start of it, or is all of it.
- */
-function indentStillToWrite(lines: readonly string[], index: number, before: string): string {
-  const next = lines.slice(index + 1).find((line) => line.trim())
-  const indent = next ? indentOf(next) : ""
-  return indent.length > before.length && indent.startsWith(before) ? indent.slice(before.length) : ""
-}
-
-/** `line`'s indent:  its leading tabs and spaces. */
-function indentOf(line: string): string {
-  return /^[ \t]*/.exec(line)![0]
-}
-
-/** The nearest line above `lines[index]` indented less than `indent`, comments and blank lines aside. */
-function parentOf(
-  lines: readonly string[],
-  index: number,
-  indent: number
-): { text: string; indent: number } | undefined {
-  for (let above = index - 1; above >= 0; above--) {
-    const text = lines[above]!
-    const trimmed = text.trim()
-    if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("#")) continue
-    const its = indentOf(text).length
-    if (its < indent) return { text, indent: its }
-  }
-  return undefined
-}

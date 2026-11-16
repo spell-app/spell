@@ -319,11 +319,58 @@ ifEs.addRule(ValueIf, {
 
 ifEs.addRule(ValueOtherwise, {
   // Not `si no`:  `negro si no` would be `negro` if `no`
-  syntax: "(value:{expression}|{constant}) (de lo contrario|sino)",
+  // el valor antes o después de su palabra:  `negro sino`, `sino negro` (epic `language` I110)
+  syntax:
+    "(((de lo contrario|sino) (value:{expression}|{constant}))|((value:{expression}|{constant}) (de lo contrario|sino)))",
   tests: [
     {
       compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        ;(scope as P.BlockScope).variables.add("bar")
+      },
       tests: [
+        [
+          ["para elegir un color:", "\tsino black"],
+          [
+            "export function elegirUnColor() {",
+            '  return core.asAction({ undoneAs: "Elegir un Color" }, () => {',
+            '    return "black"',
+            "  })",
+            "}"
+          ]
+        ],
+        [
+          ["para elegir un color:", "\tde lo contrario black"],
+          [
+            "export function elegirUnColor() {",
+            '  return core.asAction({ undoneAs: "Elegir un Color" }, () => {',
+            '    return "black"',
+            "  })",
+            "}"
+          ]
+        ],
+        [
+          ["para contar los puntos:", "\tdevolver", "\t\t- 10 si bar", "\t\t- sino 0"],
+          [
+            "export function contarLosPuntos() {",
+            '  return core.asAction({ undoneAs: "Contar los Puntos" }, () => {',
+            "    if (bar) return 10",
+            "    return 0",
+            "  })",
+            "}"
+          ]
+        ],
+        [
+          ["para contar los puntos:", "\tsi bar", "\t\timprimir 1", "\tsino imprimir 2"],
+          [
+            "export function contarLosPuntos() {",
+            '  return core.asAction({ undoneAs: "Contar los Puntos" }, () => {',
+            "    if (bar) core.console.log(1)",
+            "    else core.console.log(2)",
+            "  })",
+            "}"
+          ]
+        ],
         [
           ["para elegir un color:", "\tblack de lo contrario"],
           [

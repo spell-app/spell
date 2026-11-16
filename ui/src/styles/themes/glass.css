@@ -63,6 +63,7 @@
     --ui-surface-muted: var(--glass-surface);
     --ui-surface-strong: light-dark(#ffffffe6, #3a3846cc);
     --ui-bar-background: var(--glass-bar);
+    --ui-side-panel-background: light-dark(#f9f7fd, #1e1c26);
     --ui-code-background: light-dark(#ffffff80, #00000040);
     --ui-highlight: var(--glass-accent-wash);
     --ui-border-color: var(--glass-hairline);

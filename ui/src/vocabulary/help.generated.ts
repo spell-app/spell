@@ -62,6 +62,52 @@ export const HELP_TABLE: Readonly<
       test: 'A placeholder: a grey box saying "Ad" (bare `test`), or the given text (`test="Your ad here"`).'
     }
   },
+  "ui-app-menu": {
+    description:
+      "An app menu is an app's top bar, joined to the top of its window or page: a start section (a menu or sidebar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.",
+    attributes: {
+      size: "Size, `mini` ...",
+      color: "Hue of the active item; with `inverted`, the menu's fill; `segmented`, the selected item's fill.",
+      appearance:
+        "The look, several words at once: `tabular` (tabs on a rule), `pointing` (the active item points at the content; an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control: a bordered group of joined items, the selected one filled with `color`, else the primary colour; it moves `selected` to the item chosen itself; `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive: a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone: a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar; with `segmented`: the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` (a nested menu of actions, grouped on one rounded piece of glass).",
+      name: "A `segmented` menu's name in a form: the form reads its `value` and writes it back, as a select's (epic `debut` P31).",
+      value:
+        "A `segmented` menu's chosen item, by its `value` (else its text): setting it selects that item; choosing one sets it, and sends `ui-changed` with `{ value }`.",
+      choose:
+        "A `segmented` menu's choice: `one` (the default) selects the item chosen and unselects the rest; `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.",
+      position: "Sub-menu: pushes it to the `right` / `left` end, or the `center`.",
+      direction: "Which way the items run: `horizontal` (the default) or `vertical`, stacked top to bottom.",
+      pagination: "Page links: compact, centred items.",
+      icon: "Icon-only items.",
+      labeled: "Labeled icon items: a large icon above each item's text.",
+      fluid: "Takes the full width of its container.",
+      stackable: "Stacks its items on mobile.",
+      centered: "Centred in its container, items centred.",
+      wrapping: "Items wrap onto more lines when they don't fit.",
+      wrap: "With `wrapping`: square corners where the lines meet.",
+      inverted: "The dark scheme; with `color`, filled with the colour.",
+      padding:
+        "`none`: no item padding; `none-x` / `none-y` keep only the top and bottom, or the left and right; `compact`: only as wide as its items.",
+      "attach-to":
+        "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).",
+      fixed: "Fixed to an edge of the viewport.",
+      align:
+        "Where the items sit: `fluid` -- they fill the bar; `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).",
+      equal:
+        'Every item the same width, from the items themselves (no count): with `align="fluid"` each takes an equal share of the bar; otherwise each is as wide as the widest, packed.',
+      items:
+        'Older, count-based alias of `equal`: divides the width evenly between N items (`items="3"` => `three item`); `items="equal"` => `equal width` (Fomantic\'s, ~== `equal alignment="fluid"`).',
+      shrinkable:
+        "Fits its items' titles to its width: every title whole while they fit; then the longest cut first, each ending in `…`; once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip; an item with no icon shows its title's first letter); once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).",
+      ticks:
+        "A menu of things that are on or off: each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.",
+      "icon-column":
+        "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.",
+      tabs: "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`): one Tab stop, arrow keys between them.",
+      interactive:
+        "An application menubar (`role=menubar`): one Tab stop, arrow keys between items, every item a `menuitem`."
+    }
+  },
   "ui-audio": {
     description: "An audio plays a sound file: in the browser's own player, or unseen, when the page says.",
     empty: true,
@@ -78,7 +124,8 @@ export const HELP_TABLE: Readonly<
     attributes: { link: "Renders a link (`<a>`), e.g.", target: "Link target, with `link`." }
   },
   "ui-avatar": {
-    description: "A small picture of a person: a comment's or a card's.",
+    description:
+      "A small picture of a person: a comment's or a card's; on its own, a circle with their picture or initial.",
     attributes: {
       src: "Image URL; renders the `<img>` (or slot one).",
       tooltip: "Who it is: the picture's tooltip and its alternative text for screen readers."
@@ -1723,6 +1770,8 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the navigation.",
       appearance:
         '`nav`: the docs site\'s look, its pages a tree with `appearance="nav"`: taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.',
+      collapsed:
+        "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.",
       remember: "Keep which pages are open for each person, under this name, across reloads and visits."
     }
   },
@@ -2210,6 +2259,8 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the tree.",
       appearance:
         "`nav`: a site's side navigation, as the docs site's is: taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.",
+      "column-titles":
+        '`appearance="columns"`: a title over each column, by level, separated by commas (`Clients, Projects, Files`); the last one names every column deeper than the list goes.',
       "sticky-path":
         "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit."
     }
@@ -2236,7 +2287,7 @@ export const HELP_TABLE: Readonly<
       selected: "It's selected.",
       expandable: "It can open though it has no rows inside it yet: for rows drawn only once it opens.",
       group: "It only holds rows: a click opens or closes it, and it's never selected.",
-      band: "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`: `heading`, a tinted band that stays at the top while its rows scroll; `subheading`, a lighter one inside it.",
+      band: "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`: `heading`, a tinted band that stays at the top while its rows scroll; `subheading`, a lighter one inside it; `group`, a group's quiet label, with no arrow.",
       count: "A number in a small round label after its words: how many rows are inside it, say.",
       badge: "A word in a small label after its words: `Planned`, `In progress`."
     }

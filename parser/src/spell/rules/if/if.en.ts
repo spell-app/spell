@@ -291,11 +291,22 @@ _if_.addRule(ValueIf, {
 })
 
 _if_.addRule(ValueOtherwise, {
-  syntax: "(value:{expression}|{constant}) (otherwise|else)",
+  // the value before its word, or after it, as a sentence puts it:  `black otherwise`, `otherwise black` (epic `language` I110)
+  syntax: "(((otherwise|else) (value:{expression}|{constant}))|((value:{expression}|{constant}) (otherwise|else)))",
   tests: [
     {
       compileAs: "block",
       tests: [
+        [
+          ["to pick a color:", "\totherwise black"],
+          [
+            "export function pickAColor() {",
+            '  return core.asAction({ undoneAs: "Pick a Color" }, () => {',
+            '    return "black"',
+            "  })",
+            "}"
+          ]
+        ],
         [
           ["to pick a color:", "\tblack otherwise"],
           [
@@ -306,6 +317,72 @@ _if_.addRule(ValueOtherwise, {
             "}"
           ]
         ]
+      ]
+    },
+    {
+      title:
+        "The word first, as the last line of a ladder;  a statement after it stays `else`'s (epic `language` I110)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na card has a value as number\na pile is a list of cards")
+        ;(scope as P.BlockScope).variables.add("bar")
+      },
+      tests: [
+        {
+          input: ["a pile:", '\t- its "value" is', "\t\t0 if it is empty", "\t\totherwise the value of its last card"],
+          js: [
+            'Object.defineProperty(Pile.prototype, "value", {',
+            "  get() {",
+            "    if (this.isEmpty) return 0",
+            "    return this.lastItem.value",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Pile { readonly value: number }",
+            'Object.defineProperty(Pile.prototype, "value", {',
+            "  get(this: Pile) {",
+            "    if (this.isEmpty) return 0",
+            "    return this.lastItem!.value",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        },
+        {
+          input: ["to count the points:", "\treturn", "\t\t- 10 if bar", "\t\t- otherwise 0"],
+          js: [
+            "export function countThePoints() {",
+            '  return core.asAction({ undoneAs: "Count the Points" }, () => {',
+            "    if (bar) return 10",
+            "    return 0",
+            "  })",
+            "}"
+          ]
+        },
+        {
+          input: ["to count the points:", "\tif bar", "\t\tprint 1", "\totherwise print 2"],
+          js: [
+            "export function countThePoints() {",
+            '  return core.asAction({ undoneAs: "Count the Points" }, () => {',
+            "    if (bar) core.console.log(1)",
+            "    else core.console.log(2)",
+            "  })",
+            "}"
+          ]
+        },
+        {
+          input: ["to count the points:", "\tif bar", "\t\tprint 1", "\totherwise bar = 2"],
+          js: [
+            "export function countThePoints() {",
+            '  return core.asAction({ undoneAs: "Count the Points" }, () => {',
+            "    if (bar) core.console.log(1)",
+            "    else bar = 2",
+            "  })",
+            "}"
+          ]
+        }
       ]
     }
   ]

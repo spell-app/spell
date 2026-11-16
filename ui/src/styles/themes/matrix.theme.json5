@@ -87,6 +87,8 @@
     "inset": "{own.matrix-inset}",
     "strong": "{own.matrix-raised}",
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  the bar's green-grey at its palest:  `matrix-raised` light, `matrix-panel` dark (a step off the bar)
+    "side-panel": { "light": "#fafcfb", "dark": "#0d1518" },
     "code": "{own.matrix-inset}",
     "highlight": "{own.matrix-accent-wash}"
   },

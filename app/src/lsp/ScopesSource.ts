@@ -8,10 +8,13 @@
  */
 import JSON5 from "json5"
 
+import { escapeRegExp } from "spell/util/string"
+
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull in the language service.
 import {
   SCOPE_PACK_GLOBAL,
   scopePath,
+  scopeSegment,
   scopeTreeFromPacks,
   type ScopeDetails,
   type ScopeLine,
@@ -118,7 +121,10 @@ export function scopesFromPacks(packs: ScopePack[], hooks: ScopesSourceHooks = {
       })
       markers.set(projectId, found)
     }
-    return (await found).find((it) => it.file === filePath && it.declares.includes(declared))?.code
+    const inFile = (await found).filter((it) => it.file === filePath)
+    const marker =
+      inFile.find((it) => it.declares.includes(declared)) ?? inFile.find((it) => isLastOwnerOf(declared, it.owner))
+    return marker?.code
   }
 
   /** Index `node`, and everything below it, by `path`. */
@@ -174,6 +180,11 @@ type CompiledMarker = {
   declares: string[]
   /** Its compiled javascript. */
   code: string
+  /**
+   * The path of the member it declares naming a thing's list, `type:Card/property:pile`,
+   * when it's `a card belongs to one pile`:  so the list it was in before, `last pile`, finds this code too.
+   */
+  owner?: string
 }
 
 /**
@@ -196,7 +207,7 @@ function compiledMarkers(compiled: string): CompiledMarker[] {
     const fileEnd = compiled.indexOf(FILE_SEPARATOR, from)
     const to = fileEnd >= 0 && fileEnd < next ? fileEnd : next
     const code = declarationCode(compiled.slice(from, to), indent)
-    return [{ file: defined[1]!, declares: declaredPaths(declaration), code }]
+    return [{ file: defined[1]!, declares: declaredPaths(declaration), code, owner: ownerPath(declaration) }]
   })
 }
 
@@ -219,8 +230,29 @@ function declaredCode(compiled: string, { statements, codeLines = [] }: Compiled
     const fileEnd = compiled.indexOf(FILE_SEPARATOR, from)
     const to = fileEnd >= 0 && fileEnd < next ? fileEnd : next
     const code = declarationCode(compiled.slice(from, to), indent)
-    return [{ file: defined[1]!, declares: declaredPaths(declaration), code }]
+    return [{ file: defined[1]!, declares: declaredPaths(declaration), code, owner: ownerPath(declaration) }]
   })
+}
+
+/**
+ * The member `declaration` gives a thing naming the list it's in, `type:Card/property:pile`,
+ * if it's `a card belongs to one pile`'s (an `exclusive` property).
+ */
+function ownerPath({ of, property, exclusive }: MarkerDeclaration): string | undefined {
+  return of && property && exclusive ? scopePath(scopePath("", "type", of), "property", property) : undefined
+}
+
+/**
+ * Is `declared` the member naming the list a thing was in before its latest move, beside `owner`'s?
+ * - `type:Card/property:last pile` beside `type:Card/property:pile`;  Spanish's `última pila` beside `pila`:
+ *   one word of the language's, then the owner's name (`SP.Language.lastListName()`).
+ */
+function isLastOwnerOf(declared: string, owner: string | undefined): boolean {
+  if (!owner) return false
+  const { name } = scopeSegment(owner)
+  const prefix = owner.slice(0, owner.length - name.length)
+  if (!declared.startsWith(prefix)) return false
+  return new RegExp(`^\\S+ ${escapeRegExp(name)}$`).test(declared.slice(prefix.length))
 }
 
 /** What marker `comment` says its statement declared -- `undefined` if it can't be read. */
@@ -295,6 +327,8 @@ export type MarkerDeclaration = {
   syntax?: string
   constants?: string[]
   enumeration?: Array<string | number>
+  /** `a card belongs to one pile`'s member, `pile`:  see `ownerPath()`. */
+  exclusive?: boolean
   defined?: string
 }
 
@@ -364,8 +398,11 @@ function linesOf(source: string | undefined, line: ScopeLine): string | undefine
     .trimEnd()
 }
 
-/** Project id and file path of spell file `uri`, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell`. */
+/**
+ * Project id and file path of spell file `uri`, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell`.
+ * - The app's address (`LSP.AppAddresses.uriOf()`), read here by hand:  this file loads without the parser.
+ */
 function splitSpellUri(uri: string): { projectId: string; filePath: string } {
-  const { projectId, rest } = SpellUrls.split(decodeURI(uri.replace(/^spell:\//, "")))
+  const { projectId, rest } = SpellUrls.split(decodeURIComponent(uri.replace(/^spell:\//, "")))
   return { projectId, filePath: rest && `/${rest}` }
 }

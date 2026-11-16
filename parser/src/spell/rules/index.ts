@@ -29,6 +29,7 @@ import { statements } from "./statements"
 import { _if_ } from "./if"
 import {
   JSX,
+  SpellJSX,
   ActionButton,
   spellTagsIn,
   isBareComponentName,
@@ -112,9 +113,10 @@ export type { JSXMatchData }
 /**
  * Export so editors can offer spell's own JSX tags, e.g. `<children/>` -- see `spellTagsIn()`,
  * and the actions an `<action "...">` may name -- see `ActionButton.actionsIn()`;
- * and so others can tell a component's bare name -- see `isBareComponentName()`.
+ * and so others can tell a component's bare name -- see `isBareComponentName()`;
+ * and so editors draw a project's own views as the compiler decides them -- see `SpellJSX.isDrawnType()`.
  */
-export { spellTagsIn, type SpellTag, ActionButton, isBareComponentName }
+export { spellTagsIn, type SpellTag, ActionButton, isBareComponentName, SpellJSX }
 
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }

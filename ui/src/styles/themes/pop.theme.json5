@@ -62,6 +62,8 @@
     "inset": "{own.pop-inset}",
     "strong": "{own.pop-panel}",
     "bar": "{surfaces.page}",
+    // a side panel's body (the editor's Inspector cards, the site editor's board and form):  the bar's peach halfway to white light;  `pop-inset` dark (a step off the bar)
+    "side-panel": { "light": "#fffaf4", "dark": "#24122f" },
     "code": "{own.pop-inset}",
     "highlight": "{own.pop-accent-wash}"
   },

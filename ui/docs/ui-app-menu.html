@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>App menu | Spell UI</title>
+    <meta
+      name="description"
+      content="An app menu is an app&#39;s top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar&#39;s centre, and an end section for buttons."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="App menu">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-app-menu%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            App menu
+            <ui-header>An app menu is an app&#39;s top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar&#39;s centre, and an end section for buttons.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-app-menu" label="App menu" sticky="stack" collapsible dividing>
+                <ui-example description="An editor's bar:  the app's name and its menus at the start, its modes on the bar's centre, settings and the person at the end.">
+              <ui-app-menu aria-label="Editor demo">
+                <ui-item slot="start" icon="magic"><b>My App</b></ui-item>
+                <ui-item slot="start">File</ui-item>
+                <ui-item slot="start">Edit</ui-item>
+                <ui-item slot="start">View</ui-item>
+                <ui-menu appearance="segmented" aria-label="Mode">
+                  <ui-item value="run" icon="play">Run</ui-item>
+                  <ui-item value="edit" icon="pencil alternate" selected>Edit</ui-item>
+                </ui-menu>
+                <ui-item slot="end" link="#settings" icon="cog" aria-label="Settings"></ui-item>
+                <ui-item slot="end" link="#you" icon="user circle" aria-label="You"></ui-item>
+              </ui-app-menu>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-site-bar" label="Site bar" sticky="stack" collapsible dividing>
+                <ui-example description="A site's bar:  a button that shows or hides the side bar, then where you are as a breadcrumb;  its icons and the person's avatar at the end.">
+              <ui-app-menu aria-label="Site demo">
+                <ui-item slot="start" link="#side-bar" icon="columns" aria-label="Show or hide the side bar"></ui-item>
+                <ui-item slot="start">
+                  <ui-breadcrumbs aria-label="Where you are">
+                    <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                    <ui-breadcrumb link="#guides">Guides</ui-breadcrumb>
+                    <ui-breadcrumb selected>Getting started</ui-breadcrumb>
+                  </ui-breadcrumbs>
+                </ui-item>
+                <ui-item slot="end" link="#notices" icon="bell" aria-label="Notices"></ui-item>
+                <ui-item slot="end" link="#help" icon="circle question" aria-label="Help"></ui-item>
+                <ui-avatar slot="end" link="#you" tooltip="You">O</ui-avatar>
+              </ui-app-menu>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Put `<ui-app-menu>` first in its page or window, outside any padding:  it runs the whole width,
+                  with a hairline under it.
+
+                  - Its items go in one of three sections, by their `slot`:
+                    - `slot="start"`:  a menu or side bar button first, then the app's name, a title or a breadcrumb
+                    - no slot:  the middle, which stays on the bar's centre (a page's modes, its tabs)
+                    - `slot="end"`:  buttons, pushed to the bar's end
+                  - A section may hold a sub-menu (`<ui-menu slot="start">`) instead of loose items:
+                    its items are the bar's all the same.
+                  - It is a `<ui-menu>`:  every menu attribute works (`interactive` for a menubar, `size` ...),
+                    and it sends the menu's `ui-choosing`.
+                  - Too narrow for all three sections, the bar scrolls sideways:  it never overlaps or wraps.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  As a menu's:  Tab reaches each link and button;  with `interactive`, the bar is one Tab stop,
+                  and the arrow keys, Home and End move between its items.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - It's a `<nav>` landmark, or a `menubar` with `interactive`:  give it an `aria-label`.
+                  - An item that shows only an icon needs an `aria-label` of its own.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-app-menu" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-app-menu" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-app-menu" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-app-menu" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-app-menu" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-app-menu" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-app-menu" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-app-menu aria-label="Editor demo">
+                  <ui-item slot="start" icon="magic"><b>My App</b></ui-item>
+                  <ui-item slot="start">File</ui-item>
+                  <ui-item slot="start">Edit</ui-item>
+                  <ui-item slot="start">View</ui-item>
+                  <ui-menu appearance="segmented" aria-label="Mode">
+                    <ui-item value="run" icon="play">Run</ui-item>
+                    <ui-item value="edit" icon="pencil alternate" selected>Edit</ui-item>
+                  </ui-menu>
+                  <ui-item slot="end" link="#settings" icon="cog" aria-label="Settings"></ui-item>
+                  <ui-item slot="end" link="#you" icon="user circle" aria-label="You"></ui-item>
+                </ui-app-menu>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  each dresses the bar as it dresses
+                  its other bars, through `--ui-bar-rest-background` and `--ui-bar-rest-filter`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+<!--
+  `<ui-app-menu>`'s types, as element markup (no class-grammar twin:  its sections are the element's own).
+-->
+<div class="ui-stack">
+  <section>
+    <h4>App menu</h4>
+    <ui-app-menu aria-label="Editor demo">
+      <ui-item slot="start" icon="magic"><b>My App</b></ui-item>
+      <ui-item slot="start">File</ui-item>
+      <ui-item slot="start">Edit</ui-item>
+      <ui-item slot="start">View</ui-item>
+      <ui-menu appearance="segmented" aria-label="Mode">
+        <ui-item value="run" icon="play">Run</ui-item>
+        <ui-item value="edit" icon="pencil alternate" selected>Edit</ui-item>
+      </ui-menu>
+      <ui-item slot="end" link="#settings" icon="cog" aria-label="Settings"></ui-item>
+      <ui-item slot="end" link="#you" icon="user circle" aria-label="You"></ui-item>
+    </ui-app-menu>
+  </section>
+
+  <section>
+    <h4>Site bar</h4>
+    <ui-app-menu aria-label="Site demo">
+      <ui-item slot="start" link="#side-bar" icon="columns" aria-label="Show or hide the side bar"></ui-item>
+      <ui-item slot="start">
+        <ui-breadcrumbs aria-label="Where you are">
+          <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+          <ui-breadcrumb link="#guides">Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Getting started</ui-breadcrumb>
+        </ui-breadcrumbs>
+      </ui-item>
+      <ui-item slot="end" link="#notices" icon="bell" aria-label="Notices"></ui-item>
+      <ui-item slot="end" link="#help" icon="circle question" aria-label="Help"></ui-item>
+      <ui-avatar slot="end" link="#you" tooltip="You">O</ui-avatar>
+    </ui-app-menu>
+  </section>
+</div>

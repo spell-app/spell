@@ -34,10 +34,21 @@ export class BubblyPresentation {
 
     // things:  `a "card" is a draggable two sided view`, `solitaire is an app`, `a card` re-opened;
     // the name a head defines a pill, quoted or bare (`solitaire`, `a card is a thing`;  epic `language` T131)
-    create_type: { head: "thing", inputs: ["quoted_type", "type_words"], namesAbility: true },
-    create_list_type: { head: "thing", inputs: ["quoted_type", "type_words"], namesAbility: true },
-    create_viewable_list_type: { head: "thing", inputs: ["quoted_type", "type_words"], namesAbility: true },
-    create_one_of_a_kind: { head: "thing", inputs: ["type_words"], namesAbility: true },
+    // the kind it is bold whole, one name:  `two sided view`, `viewable list of cards` (epic `language` I111)
+    create_type: { head: "thing", inputs: ["quoted_type", "type_words"], namesAbility: true, namesKind: "superType" },
+    create_list_type: {
+      head: "thing",
+      inputs: ["quoted_type", "type_words"],
+      namesAbility: true,
+      namesKind: "instanceType"
+    },
+    create_viewable_list_type: {
+      head: "thing",
+      inputs: ["quoted_type", "type_words"],
+      namesAbility: true,
+      namesKind: "instanceType"
+    },
+    create_one_of_a_kind: { head: "thing", inputs: ["type_words"], namesAbility: true, namesKind: "superType" },
     reopen_type: { head: "thing" },
     // places and sites:  `family cookbook is saved in the cloud`, `galaxy guide is a site`
     create_place: { head: "thing", inputs: ["type_words"] },
@@ -59,7 +70,7 @@ export class BubblyPresentation {
 
     // actions and handlers:  `to deal the cards`, `to draw its front`, `when its score changes`, `on click`;
     // an action's head:  everything after `to` is what a person typed, ONE pill (Owen, 2026-11-11), its blanks
-    // underlined in it, plain (epic `language` I109)
+    // underlined in it, their kind words bold, `a card` (epic `language` I109)
     to_do_something: {
       head: "action",
       inputs: ["method_keyword"],

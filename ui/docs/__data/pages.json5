@@ -16,6 +16,11 @@
       "summary": "An ad displays third-party promotional content.",
       "status": "done"
     },
+    "ui-app-menu": {
+      "title": "App menu",
+      "summary": "An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.",
+      "status": "done"
+    },
     "ui-breadcrumbs": {
       "title": "Breadcrumb",
       "summary": "A breadcrumb is used to show hierarchy between content.",
