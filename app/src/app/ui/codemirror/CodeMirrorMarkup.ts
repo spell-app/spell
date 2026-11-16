@@ -299,9 +299,25 @@ export class CodeMirrorDecorations {
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     const ranges = [...this.ranges]
-    for (const [range, { classes, attributes }] of this.marks) {
+    const marks = [...this.marks].map(([range, mark]) => {
       const [start, end] = range.split(":").map(Number) as [number, number]
-      ranges.push(Decoration.mark({ class: [...classes].join(" "), attributes }).range(start, end))
+      return { start, end, ...mark }
+    })
+    // a quote mark's `"` shown as its curly mark;  where they start and end
+    const quotes = marks.filter((mark) => mark.classes.has(QUOTE_MARK))
+    const quoteStarts = new Set(quotes.map((quote) => quote.start))
+    const quoteEnds = new Set(quotes.map((quote) => quote.end))
+    for (const { start, end, classes, attributes } of marks) {
+      if (classes.has(QUOTE_MARK)) {
+        ranges.push(QuoteWidget.over(classes).range(start, end))
+        continue
+      }
+      // a mark starting or ending with a quote holds it:  CodeMirror draws a widget at a mark's edge outside it,
+      // unless the mark's inclusive there;  every one at that edge, so they still nest as they did
+      const inclusiveStart = quoteStarts.has(start)
+      const inclusiveEnd = quoteEnds.has(end)
+      const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd })
+      ranges.push(mark.range(start, end))
     }
     for (const [from, { classes, rails, stopped, ended }] of this.lines) {
       const innermost = rails.at(-1)
@@ -355,6 +371,56 @@ export function railsStyle(
 
 /** A rail's size in a row it stops short in:  the row's width, its height less the corner's reach into it. */
 const STOPPED_RAIL = "100% max(0px, 100% - var(--cmb-foot-lift))"
+
+/** The class the shared marks give a quoted value's own `"` (`MarkupMarks`, `CodeMirrorBubbly`). */
+const QUOTE_MARK = "bubbly-quote-mark"
+
+/** The quote classes renamed for the editor's own:  `bubbly-quote-open` => `cmb-quote-open` ... */
+const QUOTE_CLASS = /^bubbly-(?=quote-|tag-quote|tag-word-quote)/
+
+/****************
+ * ### `QuoteWidget`
+ * A quoted value's `"` drawn as its curly mark:  `“` before it, `”` after it, the mark the look's (`cmb-quote`).
+ * - Shown IN PLACE of the file's `"`, which stays in the file:  the caret and a selection step over it as one
+ *   letter, and a copy copies the `"`.
+ * - Nothing see-through left under it:  the file's own `"`, kept transparent with its curly mark drawn over it,
+ *   came back as a straight quote beside the curly one whenever it was selected (epic `language` I115)
+ * - Its classes:  the mark's, `bubbly-quote-*` and `bubbly-tag-*quote` as `cmb-*`, so none of the drawn-bubbly
+ *   page's rules for its own `"` reach it
+ ****************/
+class QuoteWidget extends WidgetType {
+  constructor(
+    readonly classes: string,
+    readonly mark: string
+  ) {
+    super()
+  }
+
+  /** The decoration showing a `"` marked `classes` as its curly mark. */
+  static over(classes: ReadonlySet<string>): Decoration {
+    const isOpen = classes.has("bubbly-quote-open")
+    const own = [...classes].filter((each) => each !== QUOTE_MARK).map((each) => each.replace(QUOTE_CLASS, "cmb-"))
+    return Decoration.replace({ widget: new QuoteWidget(["cmb-quote", ...own].join(" "), isOpen ? "“" : "”") })
+  }
+
+  eq(other: QuoteWidget): boolean {
+    return other.classes === this.classes && other.mark === this.mark
+  }
+
+  /** `<span class="cmb-quote ..."><span class="cmb-quote-glyph">“</span></span>`:  the glyph placed in its box. */
+  toDOM(): HTMLElement {
+    const box = document.createElement("span")
+    box.className = this.classes
+    const glyph = box.appendChild(document.createElement("span"))
+    glyph.className = "cmb-quote-glyph"
+    glyph.textContent = this.mark
+    return box
+  }
+
+  ignoreEvent(): boolean {
+    return false
+  }
+}
 
 /** Room beside a mark, an empty inline box, its width the sheet's. */
 

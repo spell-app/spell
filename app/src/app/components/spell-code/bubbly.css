@@ -1733,6 +1733,14 @@
     &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
       background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
     }
+    /*
+     * ... and a character with a mark drawn over it stays see-through in it:  a tag's `<`, `>` and `/`, a description's
+     * `--`;  the browser's own selection drew them again in its colour, beside their marks (I115)
+     */
+    .cm-line :is(.bubbly-angle, .bubbly-closing-slash, .bubbly-end-slash, .bubbly-dash)::selection {
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
 
     /****** a declaration's head:  its band ******/
     .cmb-hue {
@@ -2113,64 +2121,83 @@
       display: inline-block;
     }
     /*
+     * a quoted value's `"`, shown as its curly mark (`QuoteWidget`, in `CodeMirrorMarkup`):  the mark is the editor's
+     * own text, in place of the `"`, so nothing see-through is left to come back when it's selected (I115)
+     * - Times' bold curly quotes at the editor's size, leaning with the band;  their colour 10% darker than the
+     *   other marks, as an `=`'s (`.bubbly-quote-mark::after`, the drawn-bubbly page's)
+     */
+    .cm-line .cmb-quote {
+      display: inline-block;
+      width: 0;
+    }
+    .cm-line .cmb-quote-glyph {
+      position: absolute;
+      color: color-mix(in oklab, color-mix(in srgb, var(--bubbly-ink) 33%, var(--bubbly-input)), black 10%);
+      font-family: var(--bubbly-quote-font);
+      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
+      font-weight: 700;
+      transform: rotate(var(--bubbly-quote-rotation));
+      pointer-events: none;
+    }
+    /*
      * a quoted input's curly marks on a Spell band, as Monaco drew them (I114:  "Curlies lost their curl", "comma too
-     * faint"):  at the editor's size, outside its white, where Monaco's `"` was, a gap and half a `"` from it;
+     * faint"):  outside its white, where Monaco's `"` was, a gap and half a `"` from it;
      * the opening one high and centred there, the closing one low and tucked in, clear of a comma after it
-     * - placed from the white, their `"` no wider than nothing inside it;  they were a size bigger, the closing one
+     * - placed from the white (each mark's box takes no room in it);  they were a size bigger, the closing one
      *   right over the comma
      */
     --cmb-quote-reach: calc(var(--bubbly-input-gap) * var(--bubbly-editor-scale) + 0.23em);
-    .cm-line .bubbly-quoted > .bubbly-quote-mark::after {
-      right: auto;
-      bottom: auto;
+    /* ... CodeMirror's 1em marks beside each, no height:  on the baseline they lifted the white 1px */
+    .cm-line .bubbly-quoted > .cm-widgetBuffer {
+      height: 0;
+    }
+    .cm-line .bubbly-quoted > .cmb-quote > .cmb-quote-glyph {
       /* from the top of the white, on a line as tall as the editor's, as Monaco's were on theirs */
       top: calc(-0.1em - 0.18px);
       line-height: var(--cmb-line-height);
-      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
     }
-    .cm-line .bubbly-quoted > .bubbly-quote-open::after {
+    .cm-line .bubbly-quoted > .cmb-quote-open > .cmb-quote-glyph {
       left: calc(-1 * var(--cmb-quote-reach));
       translate: -50% 0;
     }
-    .cm-line .bubbly-quoted > .bubbly-quote-close::after {
+    .cm-line .bubbly-quoted > .cmb-quote-close > .cmb-quote-glyph {
       left: calc(100% + var(--cmb-quote-reach));
       top: calc(0.25em - 0.18px);
       translate: -85% 0;
     }
     /*
-     * a tag's quoted value's marks:  the file's `"` keeps its width,
-     * its curly mark drawn over it;  a Spell pill's own quoted marks are the page's
+     * a tag's quoted value's marks:  each mark's box as wide as the `"` it shows (0.4625em, the editor's `"`),
+     * its top at the text's, its curly mark over its middle, leaning more
      */
-    .cm-line .bubbly-tag-quote {
+    .cm-line .cmb-tag-quote {
+      --bubbly-quote-rotation: 30deg;
       position: relative;
-      display: inline;
+      width: 0.4625em;
+      height: 0;
+      vertical-align: text-top;
     }
     /*
      * a value in a tag close after its opening quote mark, as Monaco's (I114):  at the white's usual 2px gap, the mark
      * stood 1.5px further from it than Monaco's
      */
-    .cm-line .bubbly-quote-open + .bubbly-input-spacer + .bubbly-input,
-    .cm-line .bubbly-quote-open + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input {
+    .cm-line .cmb-quote-open + .bubbly-input-spacer + .bubbly-input,
+    .cm-line .cmb-quote-open + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input,
+    .cm-line .cmb-quote-open + .cm-widgetBuffer + .bubbly-input-spacer + .bubbly-input,
+    .cm-line .cmb-quote-open + .cm-widgetBuffer + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input {
       margin-left: 0.5px;
     }
-    .cm-line .bubbly-tag-quote::after {
+    .cm-line .cmb-tag-quote > .cmb-quote-glyph {
       left: 50%;
-      right: auto;
-      bottom: auto;
       top: 0;
       line-height: inherit;
       translate: -50% 0;
-      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
     }
-    .cm-line .bubbly-tag-quote.bubbly-quote-open::after {
+    .cm-line .cmb-tag-quote.cmb-quote-open > .cmb-quote-glyph {
       translate: -75% -0.3em;
     }
-    .cm-line .bubbly-tag-quote.bubbly-quote-close::after {
+    .cm-line .cmb-tag-quote.cmb-quote-close > .cmb-quote-glyph {
       top: 0.25em;
       translate: -85% 0;
-    }
-    .bubbly-tag-quote {
-      --bubbly-quote-rotation: 30deg;
     }
     /*
      * ... but either side of an input, a tag's value, and before a block's tags:  the pill's or band's own padding is
