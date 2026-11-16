@@ -139,6 +139,8 @@ export const APP_TEXTS = {
   startTaskListLine: "Add tasks, check them off, make it yours.",
   startDice: "Roll a Six",
   startDiceLine: "A little game, a few lines long.",
+  startSite: "Site",
+  startSiteLine: "Pages at their own addresses, in one frame.",
   startSolitaire: "Solitaire",
   startSolitaireLine: "A whole game.  Change something and see.",
   startSolitaireInvite: "Click a card, then change its suit at the right.",
