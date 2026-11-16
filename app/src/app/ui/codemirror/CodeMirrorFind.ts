@@ -14,12 +14,16 @@ import {
 import { EditorSelection, EditorState, type Extension } from "@codemirror/state"
 import { EditorView, type KeyBinding, type Panel, type ViewUpdate, runScopeHandlers } from "@codemirror/view"
 
+import { editorPrefs } from "spell/app/app/editorPrefs"
+
 /****************
  * ### `CodeMirrorFind`
  * The find and replace bar every CodeMirror editor shows on ⌘F, drawn like VS Code's find widget (epic `codemirror` I8).
  * - One row to find:  the field, with its three switches inside it on the right (match case `Aa`, whole word `ab`,
  *   regular expression `.*`), the match count ("3 of 12", "No results"), previous / next, close.
- * - A chevron at its left shows a second row to replace:  the field, Replace and Replace All.
+ * - A second row to replace, showing when it opens:  the field, Replace and Replace All (Owen, I8 C1).
+ *   - The chevron at its left folds it away;  folded, it stays folded, in every editor and after a reload,
+ *     until the chevron or ⌥⌘F shows it again (`REPLACE_PREF`, the editor's preferences).
  *   - Not in an editor that only shows code (the compiled pane):  nothing there can be replaced.
  * - A card floating over the code's top right corner, as VS Code's:  the code doesn't move down when it opens.
  * - The keys, as VS Code's:
@@ -34,7 +38,7 @@ import { EditorView, type KeyBinding, type Panel, type ViewUpdate, runScopeHandl
  * - Plain DOM, no Solid and no Spell UI elements:  CodeMirror owns the panel's element and its focus,
  *   and `<spell-editor>` has it too, on pages with no app.
  *   Spell UI's look comes in through its tokens (`codemirror.css`).
- * - Its position in the import graph:  CodeMirror only.
+ * - Its position in the import graph:  CodeMirror, and the editor's preferences (`editorPrefs`, `spell/util` only).
  ****************/
 export class CodeMirrorFind implements Panel {
   /** The find bar, CodeMirror's search with it as the panel, and its keys:  for `CodeMirrorSetup`. */
@@ -57,10 +61,13 @@ export class CodeMirrorFind implements Panel {
     ]
   }
 
-  /** Open the bar in `view` with its replace row showing, the replace field in focus if there's a word to find. */
+  /**
+   * Open the bar in `view` with its replace row showing, the replace field in focus if there's a word to find.
+   * - SIDE EFFECT:  unfolds the replace row for every editor from now on, as the chevron would.
+   */
   static openToReplace(view: EditorView): boolean {
     if (view.state.readOnly) return openSearchPanel(view)
-    SHOWS_REPLACE.add(view)
+    editorPrefs.set(REPLACE_PREF, true)
     openSearchPanel(view)
     const bar = BARS.get(view)
     bar?.showReplace(true)
@@ -143,7 +150,7 @@ export class CodeMirrorFind implements Panel {
       element("div", { class: "rows" }, [findRow, ...(this.replaceRow ? [this.replaceRow] : [])])
     ])
     this.dom.addEventListener("keydown", (event) => this.keydown(event))
-    this.showReplace(canReplace && SHOWS_REPLACE.has(view))
+    this.showReplace(canReplace && editorPrefs.get(REPLACE_PREF) === true)
     this.showQuery()
     BARS.set(view, this)
   }
@@ -261,14 +268,16 @@ export class CodeMirrorFind implements Panel {
 
   /** Whether the replace row shows. */
   private get showsReplace(): boolean {
-    return SHOWS_REPLACE.has(this.view)
+    return this.replaceRow?.hidden === false
   }
 
-  /** Show or hide the replace row:  remembered for the editor, so it's as it was when the bar opens again. */
+  /**
+   * Show or hide the replace row.
+   * - SIDE EFFECT:  remembered in the editor's preferences, so every bar opens as the person left this one.
+   */
   private showReplace(shows: boolean): void {
     if (!this.replaceRow || !this.expander) return
-    if (shows) SHOWS_REPLACE.add(this.view)
-    else SHOWS_REPLACE.delete(this.view)
+    editorPrefs.set(REPLACE_PREF, shows)
     this.replaceRow.hidden = !shows
     this.expander.setAttribute("aria-expanded", String(shows))
     this.dom.classList.toggle("replacing", shows)
@@ -377,8 +386,12 @@ const MOST_COUNTED = 1000
 /** Each editor's bar, while it shows:  for ⌥⌘F, which opens it, then shows its replace row. */
 const BARS = new WeakMap<EditorView, CodeMirrorFind>()
 
-/** The editors whose bar shows its replace row:  kept while the bar's closed, so it opens as it was. */
-const SHOWS_REPLACE = new WeakSet<EditorView>()
+/**
+ * The preference that says whether a bar opens with its replace row showing:  shown unless the person folded it.
+ * - `spellEditor:findShowsReplace` in the browser's storage;  `<spell-editor>` on other pages keeps its own there.
+ */
+const REPLACE_PREF = "findShowsReplace"
+editorPrefs.declare(REPLACE_PREF, { type: "choice", default: true })
 
 /** Everything of `query` but its words:  its switches, and how it reads the words. */
 function queryOptions(query: SearchQuery) {
