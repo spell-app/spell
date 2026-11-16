@@ -307,11 +307,36 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     ])
     expect([...card.querySelectorAll(".InspectorEventWords")].map((words) => words.textContent)).toEqual(["on click"])
     expect(card.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
-    // its header:  Add Event, an icon and its words (T79);  Add Action only for a thing, and a Spell UI element isn't one
+    // its header:  Add Event, an icon and its words (T79);  Add Action goes to the view drawing it (I197), and none does
     const addEvent = card.querySelector('ui-dropdown.InspectorAddEvent[slot="right"]')!
     expect(addEvent.querySelector(".InspectorAddWords")!.textContent).toBe("Add Event")
     expect(addEvent.querySelector('[slot="trigger"] ui-icon')!.getAttribute("name")).toBe("bolt")
     expect(card.querySelector(".InspectorAddAction")).toBeNull()
+  })
+
+  test("a Spell UI element in a view's drawing:  Add Action beside Add Event, for that view (I197);  the empty card names both", async () => {
+    /** A stand-in for a drawn spell view. */
+    class Board {}
+    const board = new Board()
+    const area = await inArea(`<test-board></test-board>`)
+    cleanups.push(Inspector.watch(area))
+    const view = area.querySelector("test-board")!
+    Object.assign(view, { component: { currentThing: board } })
+    // its drawing, in its shadow root, as a view's is
+    view.attachShadow({ mode: "open" }).innerHTML = `<ui-segment></ui-segment>`
+    const segment = view.shadowRoot!.querySelector("ui-segment")!
+    expect(Inspector.actionHomeOf(segment)).toBe(board)
+    expect(Inspector.actionHomeOf(view)).toBe(board)
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    Inspector.select(segment)
+    flush()
+    await ElementFixture.settle(host)
+    const card = host.querySelector(".InspectorCard[data-panel=code]")!
+    const addAction = card.querySelector('ui-button.InspectorAddAction[slot="right"]')!
+    expect(addAction.getAttribute("icon")).toBe("fa7-free:circle-play")
+    expect(addAction.querySelector(".InspectorAddWords")!.textContent).toBe("Add Action")
+    expect(card.querySelector(".InspectorTip")!.textContent).toBe("No code yet.\nAdd Event or Add Action to start.")
   })
 
   test("a drawn thing's events by its own words;  an ability with no condition, a hand and its words alone", async () => {

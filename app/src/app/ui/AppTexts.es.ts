@@ -379,7 +379,7 @@ const APP_TEXTS_ES: AppTextPack = {
   "inspectorGroup.advanced": "Avanzado",
   inspectorNone: "ninguno",
   inspectorCode: "Código",
-  inspectorCodeNone: "Aún no hay código.  + añade un evento.",
+  inspectorCodeNone: "Aún no hay código.\nAñadir evento o Añadir acción para empezar.",
   inspectorEvents: "Eventos",
   inspectorActions: "Acciones",
   inspectorTests: "Pruebas",
