@@ -96,7 +96,7 @@ describe("<spell-markdown>", () => {
       block.addEventListener("ui-coloured", () => resolve(), { once: true })
     })
     await new Promise((resolve) => requestAnimationFrame(resolve))
-    // `pile`, the name its head defines, is a pill of its own (epic `language` T131):  `cards` is what it refers to
-    expect(block.shadowRoot!.querySelector(".drawing .bubbly-reference")!.textContent).toBe("cards")
+    // `pile`, the name its head defines, is a pill of its own (epic `language` T131):  `list of cards`, its kind, is what it refers to (J214)
+    expect(block.shadowRoot!.querySelector(".drawing .bubbly-reference")!.textContent).toBe("list of cards")
   })
 })

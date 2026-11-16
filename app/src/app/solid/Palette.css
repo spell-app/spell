@@ -251,9 +251,17 @@ ui-popup.PaletteGroupPopup::part(popup) {
   }
 }
 
-/* the pin while the palette is kept open:  the popup's, and the bar's */
+/* the pin while the palette is kept open:  the popup's in the theme's primary colour */
 .PalettePin.pinned {
   color: var(--ui-primary);
+}
+/* ... the bar's, quiet:  the text's ink, a size smaller than the bar's icons, so it never vies with Spell's hat above it
+   (epic `editor` I191:  "Make pin in add view more subtle and black.  Fighting with the spell logo") */
+.PaletteStrip .PalettePin,
+.PaletteStrip .PalettePin.pinned {
+  font-size: 0.95em;
+  color: var(--ui-text-color);
+  opacity: 0.75;
 }
 
 .PaletteGhost {

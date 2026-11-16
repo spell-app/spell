@@ -399,13 +399,13 @@ export function testPiles() {
     const stock = new Pile({ id: "stock" })
     core.expect(stock.color, `stock's color`, "none", `"none"`)
     core.expect(stock.value, `stock's value`, 0, `0`)
-    core.echoTestAction(`add a new card with rank queen, suit  spades and direction up to the stock`)
+    core.echoTestAction(`add a new card with rank queen, suit spades and direction up to the stock`)
     stock.append(new Card({
       rank: "queen",
       suit: "spades",
       direction: "up"
     }))
-    core.echoTestAction(`add a new card with rank 7, suit  hearts and direction down to the stock`)
+    core.echoTestAction(`add a new card with rank 7, suit hearts and direction down to the stock`)
     stock.append(new Card({
       rank: 7,
       suit: "hearts",

@@ -292,10 +292,11 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
- * - "Editing a Draft" plain words in deep amber;  "Publish Draft" the primary button, a round thumb 2px inside its end
- * - "Discard Draft" between them, a link in the same amber, 4px from Publish
+ * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside its end
+ * - "Discard" between them, a link in the theme's primary colour (Glass's purple), as text, 4px from Publish
  *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft";
- *   2026-11-16, T85:  "Instead of a grey button, make `Discard` look like a link")
+ *   2026-11-16, T85:  "make `Discard` look like a link";  I192:  "Text + icon should be purple")
+ * - all three on one centre line (I192)
  */
 .ModeButtons > .PublishDraft {
   --spell-draft-height: 28px;
@@ -323,19 +324,6 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     --ui-icon-width: auto;
     --ui-icon-distance: 0;
   }
-  /* its words:  "Editing a Draft", or "Draft" while the top bar is compact (T89):  the long words made the bar
-     scroll under 1300px on a site's editor (its Site tab too) */
-  & .DraftShort {
-    display: none;
-  }
-  @media (width < 1360px) {
-    & .DraftLong {
-      display: none;
-    }
-    & .DraftShort {
-      display: inline;
-    }
-  }
   & > ui-button {
     --ui-button-radius: 999px;
     --ui-button-font-size: 1em;
@@ -343,14 +331,16 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     --ui-button-padding-inline: 10px;
     margin: 0;
   }
+  /* no padding above or below:  a tertiary button's own (Discard's) pushed its words 2.4px under the label's */
   & > ui-button::part(button) {
     block-size: calc(var(--spell-draft-height) - 2 * var(--spell-draft-inset));
     margin: 0;
+    padding-block: 0;
   }
-  /* Discard, a link (T85):  the draft's amber words, no fill and no room of its own, underlined on hover (a tertiary
-     button's own line) */
+  /* Discard, a link (T85):  the theme's primary colour in its text shade, words and icon (I192), no fill and no room of its own,
+     underlined on hover (a tertiary button's own line) */
   & > ui-button.DiscardDraft {
-    --ui-color-text: var(--ui-yellow-header);
+    --ui-color-text: var(--ui-primary-text);
     --ui-button-tertiary-padding: 0px;
   }
   & > ui-button.DiscardDraft + ui-button {

@@ -412,7 +412,7 @@ describe("typing Spell in a real CodeMirror editor", () => {
       })
 
       test("Enter at the end of the group's last line still goes on in its body", () => {
-        const code = shownOf(4, GROUPS[3]!.length + 1)
+        shownOf(4, GROUPS[3]!.length + 1)
         press("Enter")
         expect(withCaret().split("\n")[4]).toBe(`\t|`)
       })

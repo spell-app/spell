@@ -37,8 +37,8 @@ to test piles
 	set the stock to a new pile with id "stock"
 	stock's color should be "none"
 	stock's value should be 0
-	add a new card with rank queen, suit  spades and direction up to the stock
-	add a new card with rank 7, suit  hearts and direction down to the stock
+	add a new card with rank queen, suit spades and direction up to the stock
+	add a new card with rank 7, suit hearts and direction down to the stock
 	stock's color should be red
 	stock's value should be 7
 	stock's short name should be "stock: Q♠↑ 7♥↓"
