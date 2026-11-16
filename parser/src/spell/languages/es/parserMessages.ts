@@ -272,6 +272,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "{AType} no tiene {property}:  la línea de un tipo solo da valores a lo que tiene su clase",
   "one-each-a-statement": 'Un solo "cada ... en" por instrucción:  recorre el otro con "para cada ... en", alrededor',
   "create-hook-names-another-type": 'Nombra el tipo en el que está:  "al {verb} {aType}"',
+  "not-an-item-it":
+    'eso es {what} aquí, que no es {aItem}, y {list} guarda {items}:  di qué {item}, u "obtener" eso antes',
+  "not-an-item": '"{thing}" es {what}, que no es {aItem}:  {list} guarda {items}',
   "cant-save-built-in-inline":
     "No se puede guardar el tipo {type} dentro:  viene incorporado, y todos los proyectos lo comparten",
   "cant-publish-built-in":

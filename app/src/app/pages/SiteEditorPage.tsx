@@ -60,7 +60,7 @@ function SiteProjectRoute(props: { params: RouteSectionProps["params"] }) {
  * - The board, on the left:  a block per section, a card per page, dialog and sidebar (`<SiteBoardView>`);
  *   a click picks it, a double click opens it in Edit, at the line that declares it, with "Back to the site" in the
  *   editor's bar;  dragging moves it, or drops it into another page as its first page.
- *   - Its bar:  the way back to the group's sites, the Pages / Data switch, "Add a page" and "Run the site".
+ *   - Its bar:  the Pages / Data switch, "Add a page", "Add a section" and "Run the site".
  *   - No tree of the pages beside it since epic `mockup` I13:  the board does all it did.
  * - The form, on the right:  the picked part's name, title and address;  its address's parameters, read only.
  *   - A page's STORIES under it (epic `mockup` P6):  what it must let people do, plain lines or Agile stories,
@@ -90,6 +90,13 @@ export function SiteEditorPage() {
     setPicked(name)
     setTab("pages")
   }
+  /** A new section at the board's end, picked so its title can be typed in the form (epic `mockup` T36). */
+  const addSection = () => {
+    const name = SiteWrites.addSection()
+    if (!name) return
+    setPicked(name)
+    setTab("pages")
+  }
   return (
     <SpellPage id="SiteEditorPage" fillWindow dark rows>
       <EditorToolbar mode="site" />
@@ -115,14 +122,6 @@ export function SiteEditorPage() {
             <main class="board">
               <header>
                 <span class="title">
-                  <ui-button
-                    size="small"
-                    appearance="basic"
-                    icon="arrow left"
-                    onClick={() => editor.showSiteEditor(editor.projectRoot?.path)}
-                  >
-                    {appTexts.text("siteGroupBack")}
-                  </ui-button>
                   <h1>{appTexts.text("siteEditorTitle", { project: editor.project?.projectName ?? "" })}</h1>
                 </span>
                 <ui-buttons size="small" class="tabs">
@@ -146,6 +145,9 @@ export function SiteEditorPage() {
                 <span class="end">
                   <ui-button size="small" appearance="basic" icon="plus" onClick={addPage}>
                     {appTexts.text("siteAddPage")}
+                  </ui-button>
+                  <ui-button size="small" appearance="basic" icon="plus" onClick={addSection}>
+                    {appTexts.text("siteAddSection")}
                   </ui-button>
                   <ui-button size="small" appearance="basic" icon="play" onClick={() => void editor.showRunner()}>
                     {appTexts.text("siteRunSite")}
@@ -201,7 +203,7 @@ export function SiteEditorPage() {
                           void SiteWrites.removePart(part().name).then((isRemoved) => isRemoved && setPicked(undefined))
                         }
                       >
-                        {appTexts.text("siteRemovePart", { name: part().name })}
+                        {appTexts.text("siteRemovePart", { name: SiteEditorPage.titleOf(part()) })}
                       </ui-button>
                     </div>
                   </>

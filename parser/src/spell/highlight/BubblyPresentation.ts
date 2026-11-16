@@ -119,6 +119,13 @@ export class BubblyPresentation {
     can_take: { isQuestion: true },
     can_give_up: { isQuestion: true },
     there_is_a: { isQuestion: true },
+    // a call of an action the project declares, whole:  `turn over the next card`, `put the card on end pile`,
+    // its blanks' values bold inside it;  a built-in template's (`turn the card face up`) a plain step (epic `language` I108)
+    method_call: { isCall: true },
+    // `each <card> in <the deck>`, `the <cards> in <the stock>`:  ONE value, the words that say it and the list
+    // (`add <each card in the cards> to the stock`;  epic `language` I108)
+    each_in_statement: { readsEach: true },
+    plural_call_statement: { readsEach: true },
     // more of the value before it:  `"foo" as lower case`, `its height in feet`
     as_lowercase: { continuesValue: true },
     as_uppercase: { continuesValue: true },

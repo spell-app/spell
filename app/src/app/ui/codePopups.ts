@@ -146,9 +146,6 @@ export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
  */
 export const codeHover: { detail: LSP.HoverDetail } = { detail: hoverDetailFor(CODE_POPUP_DEFAULTS) }
 
-/** The page's class while the code is drawn bubbly (`markBubbly()`). */
-const BUBBLY_CLASS = "spell-bubbly"
-
 /**
  * Is the code drawn in the bubbly look now, one for the page;  and who hears it change.
  * - `SpellBubbly` reads it for each editor, and follows it;  `CodeSettings` changes it (`showBubbly()`).
@@ -158,23 +155,12 @@ export const codeLook: { isBubbly: boolean; followers: Set<() => void> } = {
   isBubbly: CODE_POPUP_DEFAULTS.bubbly,
   followers: new Set()
 }
-markBubbly()
 
 /** Draw the code bubbly, or not, in every editor on the page:  tells `codeLook`'s followers when it changes. */
 export function showBubbly(isBubbly: boolean): void {
   if (codeLook.isBubbly === isBubbly) return
   codeLook.isBubbly = isBubbly
-  markBubbly()
   for (const follower of codeLook.followers) follower()
-}
-
-/**
- * Mark the page `spell-bubbly` while the code is drawn bubbly:  the Inspector's cards then take the code's paper
- * (`Inspector.css`;  epic `editor` I153).
- * - SIDE EFFECT:  the page's root class;  nothing where there's no page (node's tests).
- */
-function markBubbly(): void {
-  globalThis.document?.documentElement.classList.toggle(BUBBLY_CLASS, codeLook.isBubbly)
 }
 
 /** The class on an editor's container that hides the docs pane beside its suggestions. */

@@ -1697,11 +1697,27 @@ export class SpellLanguageService {
 
     /** Is `match` a use of `subject`, which isn't a property? */
     function isOccurrence(match: P.Match): boolean {
-      if (subject.kind === "method") return subject.record.instance === SP.SpellStatement.statementRuleOf(match.rule)
+      if (subject.kind === "method") {
+        const rule = SP.SpellStatement.statementRuleOf(match.rule)
+        return rule === subject.record.instance || SpellLanguageService.isCallAheadOf(rule, subject.record.instance)
+      }
       if (!match.rule.highlightAs) return false
       const { scopeVar, scopeType, scopeConstant } = match.data as Record<string, unknown>
       return (scopeVar ?? scopeType ?? scopeConstant) === (subject as { record?: unknown }).record
     }
+  }
+
+  /**
+   * Is `rule` the call of `method` registered AHEAD of its definition (`MethodDefinition.callAhead()`)?
+   * - A line above the definition is parsed with that rule, a rule of its own:
+   *   `restart the game` in `when creating solitaire`, above `to "restart the game"` (epic `editor` I170).
+   * - The same method:  the same name, on the same type.
+   */
+  private static isCallAheadOf(rule: P.Rule, method: P.Rule | undefined): boolean {
+    type CallRule = P.Rule & { ahead?: boolean; methodName?: string; thisType?: unknown }
+    const { ahead, methodName, thisType } = rule as CallRule
+    const real = method as CallRule
+    return !!ahead && !!methodName && methodName === real.methodName && thisType === real.thisType
   }
 
   /**
@@ -2293,6 +2309,7 @@ export class SpellLanguageService {
    * - NOT for a line that's just unfinished, e.g. `set x to` -- see `isUnfinished()`.
    * - Goes just above the top-level statement the line is in, as a method is only visible to lines AFTER it.
    * - See `methodSignatureFor()` for how the words become a signature.
+   * - And "Make it code" / "Make it text" on the attribute value the caret is in (`codeOrText()`, epic `editor` T74).
    */
   codeActions(file: SP.SpellFile, range: Range): CodeAction[] {
     if (!file.match) return []
@@ -2327,7 +2344,27 @@ export class SpellLanguageService {
         edit: { changes: { [this.addresses.uriFor(file)]: [{ range: { start: position, end: position }, newText }] } }
       })
     }
+    const switched = this.codeOrText(file, from)
+    if (switched) actions.push(switched)
     return actions
+  }
+
+  /**
+   * "Make it code" on a drawing's attribute value the caret is in, `color="blue"` => `color={blue}`;
+   * "Make it text" on code, back (epic `editor` T74):  in the right-click menu's Refactor and the light bulb.
+   * - `undefined` outside a value, or for one whose words can't switch (`LSP.CodeOrText.switched()`).
+   */
+  private codeOrText(file: SP.SpellFile, offset: number): CodeAction | undefined {
+    const text = file.parseText
+    const value = LSP.CodeOrText.valueAt(text, offset)
+    const newText = value && LSP.CodeOrText.switched(text, value)
+    if (!value || newText === undefined) return undefined
+    const range = { start: this.positionAt(file, value.start), end: this.positionAt(file, value.end) }
+    return {
+      title: LSP.LspTexts.of(this.scopeAt(file, offset)).text(value.kind === "text" ? "makeItCode" : "makeItText"),
+      kind: CodeActionKind.RefactorRewrite,
+      edit: { changes: { [this.addresses.uriFor(file)]: [{ range, newText }] } }
+    }
   }
 
   /**

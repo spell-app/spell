@@ -41,7 +41,7 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
             : shape.kind === "tag-link"
               ? `link ${shape.start.side} to ${shape.end.side}`
               : shape.isExpression
-                ? `expression ${shape.inTag}`
+                ? `expression ${shape.inTag} ${shape.room?.join("+") ?? ""}`.trim()
                 : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
@@ -87,22 +87,42 @@ describe("MarkupMarks", () => {
     expect([textOf(link.start.place), textOf(link.end.place)]).toEqual(["<text>", "</text>"])
   })
 
-  test("a `{…}` value:  an inverted pill in its tag's colour, its braces darker;  its words Spell's to mark (Owen)", () => {
+  test("a `{…}` value:  ONE inverted pill in its tag's colour, its braces part of it;  its words Spell's to mark (Owen, epic `editor` I144 C1)", () => {
     const spell = `to draw it\n\t<text color={its color}>{its picture}</text>`
     const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [])
     expect(shapesOf(marks, spell)).toEqual([
       "link start to end:  <text color={its color}>",
       "pill start:  <text color={its color}>",
-      "expression property:  its color}>{its picture}",
+      "expression property:  {its color}>{its picture",
       "pill end tag:  </text>"
     ])
-    const braces = marks.marks.filter((mark) => /bubbly-brace/.test(mark.options.inlineClassName ?? ""))
-    expect(braces.map(({ range }) => spell.split("\n")[1]!.slice(range.startColumn - 1, range.endColumn - 1))).toEqual([
-      "{",
-      "}"
-    ])
+    const marked = (classes: RegExp) =>
+      marks.marks
+        .filter((mark) => classes.test(mark.options.inlineClassName ?? ""))
+        .map(({ range }) => spell.split("\n")[1]!.slice(range.startColumn - 1, range.endColumn - 1))
+    expect(marked(/bubbly-code-brace/)).toEqual(["{", "}"])
+    expect(marked(/bubbly-expression/)).toEqual(["{", "its color", "}"])
     // the tag's marks stop at the value:  Spell marks what's in it
     expect(marks.tags.map(({ start, end }) => spell.slice(start, end))).toEqual(["<text color=", ">", "</text>"])
+  })
+
+  test("a Spell drawing's code between its tags (its `codes`):  an inverted pill in its element's colour (I144 C1), past the start tag's room, the end tag's past its own, so none touch;  its own narrow room either side, its braces at its ends (I162)", () => {
+    const spell = `to draw it\n\t<text>{its picture}</text>`
+    const codes = [{ start: spell.indexOf("{"), end: spell.indexOf("}") + 1 }]
+    const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [], { codes })
+    expect(shapesOf(marks, spell)).toEqual([
+      "link start to end:  <text>{its picture}</tex",
+      "pill start:  <text>{its picture}</tex",
+      "expression property tag:  {its picture}</text>",
+      "pill end code+tag:  </text>"
+    ])
+    const spacers = marks.marks.flatMap(({ options }) =>
+      [options.before, options.after].map((spacer) => spacer?.inlineClassName ?? "").filter((name) => /code/.test(name))
+    )
+    expect(spacers).toEqual([
+      "bubbly-spacer bubbly-code-spacer bubbly-spacer-before",
+      "bubbly-spacer bubbly-code-spacer bubbly-spacer-after"
+    ])
   })
 
   test("a tag that declares the member it draws:  its shape and its brackets and `/` marked to be drawn round;  any other tag's not (epic `editor` I84)", () => {

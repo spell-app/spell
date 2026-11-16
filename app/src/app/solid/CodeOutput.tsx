@@ -1,4 +1,5 @@
 import { For, Loading, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -12,18 +13,34 @@ import { InspectorWrites } from "./InspectorWrites"
 import { LazyMonaco } from "./LazyMonaco"
 
 import "./CodeOutput.css"
-// the top bar's menu look, as text:  for the ⋯'s shadow root (`adoptMenuLook()`)
-import menuLook from "./MenuBar.css?inline"
 
-/** The targets the compiled-code pane shows, in its menu's order, each with its code editor language and name. */
+/**
+ * How each language of compiled code looks, wherever the editor names one:
+ * the compiled code's tabs, the top bar's button for it, the Program panel's tabs.
+ * - `icon`:  Font Awesome's brand icon (the app's `<ui-root icons="fa7-brands, fomantic">`)
+ * - `text`:  its name's key, `JavaScript`
+ * - `tip`:  the top bar's button's tooltip, `Compiled JavaScript`
+ */
+export const LANGUAGE_LOOKS = {
+  javascript: { icon: "js", text: "javascriptTab", tip: "compiledJavaScript" },
+  typescript: { icon: "typescript", text: "typescriptTab", tip: "compiledTypeScript" },
+  python: { icon: "python", text: "pythonTab", tip: "compiledPython" }
+} as const satisfies Record<string, { icon: string; text: AppTextKey; tip: AppTextKey }>
+
+/** The targets the compiled-code pane shows, in its tabs' order, each with its code editor language. */
 const OUTPUT_TARGETS = {
-  "js/solid": { language: "javascript", text: "javascriptTab", icon: "js" },
-  "ts/solid": { language: "typescript", text: "typescriptTab", icon: "code" },
-  py: { language: "python", text: "pythonTab", icon: "python" }
-} as const satisfies Record<string, { language: string; text: AppTextKey; icon: string }>
+  "js/solid": { language: "javascript" },
+  "ts/solid": { language: "typescript" },
+  py: { language: "python" }
+} as const satisfies Record<string, { language: keyof typeof LANGUAGE_LOOKS }>
 
 /** A target the compiled-code pane shows. */
 export type OutputTarget = keyof typeof OUTPUT_TARGETS
+
+/** How `target`'s code looks where it's named:  its language's icon and words. */
+function lookOf(target: OutputTarget) {
+  return LANGUAGE_LOOKS[OUTPUT_TARGETS[target].language]
+}
 
 /** The remembered value for no compiled code. */
 const NO_OUTPUT = "off"
@@ -46,6 +63,11 @@ export class CodeOutputShown {
     return target in OUTPUT_TARGETS ? (target as OutputTarget) : undefined
   }
 
+  /** The target showing, else the one `toggle()` would show:  what the top bar's button names (reactive). */
+  static get shownOrNext(): OutputTarget {
+    return CodeOutputShown.target ?? lastShown
+  }
+
   /** Show `target`'s code;  `undefined`:  hide it. */
   static set(target: OutputTarget | undefined): void {
     if (target) lastShown = target
@@ -53,7 +75,7 @@ export class CodeOutputShown {
     editorPrefs.set(OUTPUT_PREF, target ?? NO_OUTPUT)
   }
 
-  /** View › Compiled Code:  hide it, or show the one shown last (JavaScript the first time). */
+  /** View › Compiled Code, and the top bar's button:  hide it, or show the one shown last (JavaScript the first time). */
   static toggle(): void {
     CodeOutputShown.set(CodeOutputShown.target ? undefined : lastShown)
   }
@@ -62,90 +84,28 @@ export class CodeOutputShown {
 /** The compiled code shown last, what View › Compiled Code shows again. */
 let lastShown: OutputTarget = CodeOutputShown.target ?? "js/solid"
 
-/** The top bar's menu look as one sheet, built the first time a shadow root needs it. */
-let menuLookSheet: CSSStyleSheet | undefined
-
-/**
- * Give the shadow root `element` is drawn in the top bar's menu look (`MenuBar.css`), so a menu there looks like
- * the bar's;  nothing in the page's own tree, which has it already.
- * - Once per root;  after its own sheets, so the menu rules win as they do in the page.
- */
-function adoptMenuLook(element: Element) {
-  const root = element.getRootNode()
-  if (!(root instanceof ShadowRoot)) return
-  if (!menuLookSheet) {
-    menuLookSheet = new CSSStyleSheet()
-    menuLookSheet.replaceSync(menuLook)
-  }
-  if (!root.adoptedStyleSheets.includes(menuLookSheet)) {
-    root.adoptedStyleSheets = [...root.adoptedStyleSheets, menuLookSheet]
-  }
-}
-
-/** The ⋯'s id, its popup's target:  one code pane per page. */
-const MORE_MENU_ID = "CodeMoreMenu"
-
 /****************
- * ### `<CodeMoreMenu>`
- * The code pane's ⋯, at the right of its bar:  which compiled code to show beside the code.
- * - A menu of ticks, as the top bar's are (`<BarMenu ticks>`):  each target keeps its icon,
- *   a tick before it on the one showing (Owen, epic `editor` I73).
- * - A click on the ticked one hides it;  on another, shows that one instead.  No "None" row.
- * - Not a `<ui-dropdown>`:  a dropdown has no column for ticks, and swapped the showing row's icon for one.
- * - Drawn inside the file tab bar's shadow root (`SpellEditor.spell`'s view), where the page's `MenuBar.css`
- *   doesn't reach:  it brings that look in itself (`adoptMenuLook()`;  epic `editor` I128).
+ * ### `<CompiledCodeButton>`
+ * The top bar's compiled-code button, between the code's `</>` and Inspect app (epic `editor` T76):
+ * shows the compiled code beside the code, or hides it, as View › Compiled Code does.
+ * - Its icon is the language it shows, `js` for JavaScript:  the one showing, else the one it'd show.
+ * - Its tooltip names it, "Compiled JavaScript".
+ * - A plain toggle, no menu (Owen:  "I can change it when the compiled code is visible"):
+ *   the compiled code's own tabs choose the language.
+ * - `aria-pressed` while the compiled code shows, as the code's icon has it (`<ModeButtons>`).
+ * - An item of the mode tabs' menu, handed to `<ModeButtons>` as `compiled`.
  ****************/
-export function CodeMoreMenu() {
-  let popup: (HTMLElement & { visible?: boolean }) | undefined
-  const choose = (target: OutputTarget) => {
-    CodeOutputShown.set(CodeOutputShown.target === target ? undefined : target)
-    if (popup) popup.visible = false
-  }
+export function CompiledCodeButton(): JSX.Element {
+  const look = () => lookOf(CodeOutputShown.shownOrNext)
   return (
-    <>
-      <ui-icon
-        slot="right"
-        id={MORE_MENU_ID}
-        class="CodeMoreMenu"
-        name="ellipsis horizontal"
-        link=""
-        aria-haspopup="menu"
-        label={appTexts.text("codeMore")}
-        title={appTexts.text("codeMore")}
-        ref={(element: HTMLElement) => queueMicrotask(() => adoptMenuLook(element))}
-      />
-      <ui-popup
-        slot="right"
-        for={MORE_MENU_ID}
-        open-on="click"
-        position="bottom right"
-        class="BarMenuPopup"
-        aria-label={appTexts.text("codeMore")}
-        ref={(element: HTMLElement) => (popup = element)}
-      >
-        <ui-menu
-          direction="vertical"
-          size="small"
-          class="BarMenuItems"
-          icon-column=""
-          ticks=""
-          aria-label={appTexts.text("codeOutputMenu")}
-        >
-          <ui-item kind="header">{appTexts.text("codeOutputMenu")}</ui-item>
-          <For each={Object.keys(OUTPUT_TARGETS) as OutputTarget[]}>
-            {(target) => (
-              <ui-action
-                icon={OUTPUT_TARGETS[target].icon}
-                selected={CodeOutputShown.target === target ? "" : undefined}
-                onClick={() => choose(target)}
-              >
-                {appTexts.text(OUTPUT_TARGETS[target].text)}
-              </ui-action>
-            )}
-          </For>
-        </ui-menu>
-      </ui-popup>
-    </>
+    <ui-item
+      icon={look().icon}
+      class="CompiledCodeToggle"
+      label={appTexts.text(look().tip)}
+      title={appTexts.text(look().tip)}
+      aria-pressed={CodeOutputShown.target ? "true" : "false"}
+      onClick={() => CodeOutputShown.toggle()}
+    />
   )
 }
 
@@ -196,11 +156,11 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
         <For each={Object.keys(OUTPUT_TARGETS) as OutputTarget[]}>
           {(target) => (
             <ui-item
-              icon={OUTPUT_TARGETS[target].icon}
+              icon={lookOf(target).icon}
               selected={props.target === target}
               onClick={() => CodeOutputShown.set(target)}
             >
-              {appTexts.text(OUTPUT_TARGETS[target].text)}
+              {appTexts.text(lookOf(target).text)}
             </ui-item>
           )}
         </For>
@@ -237,6 +197,8 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
  * - By statement, as the source map is (Owen:  "This is fine").
  * - Quiet:  it never takes the keyboard's focus, scrolls only what's out of view, and leaves the code alone while
  *   someone's typing in it.
+ * - A part clicked (inspected in the app, a row of the tree) puts the code's caret where it's written too,
+ *   on its tag (epic `editor` I158;  Owen:  "I'd expect it to select `<action "cheat" />` and put the cursor there").
  * - A line that draws or makes something selects it:  every card, for the line that makes them all;  a line inside
  *   a tag, what that tag draws.
  * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was,
@@ -268,7 +230,7 @@ export function FollowAlong() {
       const file = InspectorWrites.fileNamed(followed.path)
       if (!file) return
       // the file showing read, not followed:  opening another one here would run this again (I98)
-      if (file.path === untrack(() => editor.file?.path)) return follower.show(codeEditor, [followed.line])
+      if (file.path === untrack(() => editor.file?.path)) return follower.show(codeEditor, [followed.line], followed)
       if (followed === openedFor) return
       openedFor = followed
       void editor
@@ -276,7 +238,8 @@ export function FollowAlong() {
         .then(() => {
           const shown = editor.shownCodeEditor
           // still the place in focus, and nobody typing:  mark its line in the file now showing
-          if (editor.followed === followed && shown && !shown.hasTextFocus()) follower.show(shown, [followed.line])
+          if (editor.followed === followed && shown && !shown.hasTextFocus())
+            follower.show(shown, [followed.line], followed)
         })
         .catch((error: unknown) => editor.showError(error as Error))
     }
@@ -345,9 +308,16 @@ function lineFollower() {
   onCleanup(clear)
   return {
     clear,
-    /** Mark `lines`, from 0, in `codeEditor`, and bring the first into view;  none:  no mark. */
-    show(codeEditor: monaco.editor.IStandaloneCodeEditor, lines: readonly number[]): void {
+    /**
+     * Mark `lines`, from 0, in `codeEditor`, and bring the first into view;  none:  no mark.
+     * - `caretAt`, a part's place with its column:  the caret goes there, without the keyboard's focus.
+     *   Moved by code, not the mouse or keys, so it isn't followed back (`isCursorMovedToFollow()`).
+     */
+    show(codeEditor: monaco.editor.IStandaloneCodeEditor, lines: readonly number[], caretAt?: FollowedPlace): void {
       if (markedIn !== codeEditor) clear()
+      if (caretAt?.column !== undefined) {
+        codeEditor.setPosition({ lineNumber: caretAt.line + 1, column: caretAt.column + 1 })
+      }
       if (!lines.length) return clear()
       markedIn = codeEditor
       marks ??= codeEditor.createDecorationsCollection()

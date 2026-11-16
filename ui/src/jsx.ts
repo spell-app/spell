@@ -50220,6 +50220,16 @@ export interface UIToolbarAttributes {
    */
   "prop:remember"?: string
   /**
+   * With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone.
+   * - takes:  icon name
+   */
+  "all-items-icon"?: string
+  /**
+   * `all-items-icon`, as the DOM element's property.
+   * @deprecated write `all-items-icon` -- `prop:` stays only for compiled spell
+   */
+  "prop:allItemsIcon"?: string
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */

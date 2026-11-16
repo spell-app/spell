@@ -2,6 +2,8 @@
  * `<FileTabs>`'s place over the code (`FileTabs.tsx`);  the tabs are a pane's bar, in `SpellEditor.spell`'s `file tab bar`.
  * - Its height while its Spell loads:  the code below stays where it'll be.
  * - The bar follows the pane's rounded top.
+ * - Its fill is the top bar's, as seen (`--spell-menu-bar-background`, `spell.css`;
+ *   Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu").
  */
 
 .FileTabs {
@@ -10,4 +12,5 @@
   min-height: var(--ui-panel-pane-bar-height, max(40px, calc(var(--ui-control-height, 0px) + 12px)));
   border-start-start-radius: var(--spell-pane-radius, 0);
   border-start-end-radius: var(--spell-pane-radius, 0);
+  --ui-panel-pane-bar-background: var(--spell-menu-bar-background);
 }

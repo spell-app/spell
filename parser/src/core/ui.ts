@@ -25,14 +25,6 @@ export function isGoingToTheTop(): boolean {
  */
 export const uiMethods = defineCoreModule({
   /**
-   * The page's say over ⌘Z and ⇧⌘Z, asked before the program's history (`listenForUndoKeys()`):
-   * true if it took the key.
-   * - The editor's, in Edit:  a program's move isn't what people mean to undo there, the side bar's change is.
-   * - None, as on any other page:  they're the program's.
-   */
-  pageUndoKey: undefined as ((action: "undo" | "redo") => boolean) | undefined,
-
-  /**
    * Bring the top of the app back into view:  what `scroll to the top` compiles to.
    * - Under node, or before the app's drawn:  nothing.
    */
@@ -519,6 +511,8 @@ const NON_TEXT_INPUTS = new Set(["button", "checkbox", "radio", "range", "reset"
  *   a modal open over the app keeps its own keys (Q19).
  * - A text field keeps its own ⌘Z:  the key passes on to it.  So does a key with nothing to undo.
  * - `layered`:  over the page's own ⌘Z on purpose (the editor's), which gets what this passes on (epic `editor` I104).
+ *   - So in the editor, a key pressed in the app or on nothing undoes the program's move first;
+ *     with none to undo, the editor's change (epic `editor` I167).
  * - A page drawing a program that runs elsewhere (Python's) undoes there:  the app's `undo` action, run by the core
  *   (`core.runAction()`), as its `<action "undo"/>` is (epic `language` P54).
  * - No Spell UI on the page (node, a bare page):  nothing listens.
@@ -550,7 +544,6 @@ function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "und
   const [focused] = path
   if (isTypedIn(focused)) return false
   if (!path.includes(element) && focused !== element.ownerDocument.body) return false
-  if (core.pageUndoKey?.(action)) return true
   const { history, actions, app } = core.RUNTIME
   // a program running elsewhere (Python's) undoes in its own history:  its app's action, run there
   if (core.remote) return app ? core.runAction(app, action, "key") : false

@@ -118,13 +118,24 @@ function describeError(error: Error): ErrorInfo {
   }
 }
 
-/** Where a floating message sits:  fixed, centered near the top of the page.  On a WRAPPER:  hosts are `contents`. */
+/**
+ * Where a floating message sits:  fixed, centered near the top of the page, 500px wide.
+ * - Every notice, error and "takes effect on restart" message the editor floats over the page.
+ * - On a WRAPPER:  hosts are `contents`.
+ * - Drawn over EVERYTHING else the editor puts over the page (Owen, 2026-11-15, epic `editor` I163:
+ *   "It should also appear on the top, above selection ants"):
+ *   - the Inspector's boxes, the selection's marching ants among them (`Inspector.css`, 2147483000)
+ *   - the palette (`Palette.css`, 2147483646)
+ *   - only a dialog draws over it:  the top layer is above every z-index
+ */
 export const FLOATING_MESSAGE_STYLE: JSX.CSSProperties = {
   position: "fixed",
   top: "60px",
-  left: "calc(50% - 250px)",
+  left: "50%",
+  translate: "-50% 0",
   width: "500px",
-  "z-index": 100
+  "max-width": "calc(100vw - 32px)",
+  "z-index": 2147483647
 }
 
 /****************

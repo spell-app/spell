@@ -163,6 +163,7 @@ describe("BubblyMarks.of()", () => {
       '        tag-link:  <text color="blue">{its rank}</text>',
       '        tag:  <text color="blue">{its rank}</text>',
       '        input:  blue">{its rank}</text>',
+      "        input:  {its rank}</text>",
       "        tag:  </text>"
     ])
   })

@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { refuseIfNotAnItem } from "./lists.shared"
 
 /**
  * `list_move` rule:  `move the card to the tableau` -- moves it, if the pile it belongs to lets it go
@@ -20,6 +21,12 @@ export class ListMove extends SpellStatement<"thing|list"> {
   @proto static datatype: P.Datatype = "choice"
   /** `move x to the pile is yes` => `core.move(x, pile) == true` -- see `operandInExpressions`. */
   @proto static operandInExpressions = true
+
+  /** SIDE EFFECT:  it won't compile if `thing` can't be what `list` holds (`refuseIfNotAnItem()`). */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    return match && refuseIfNotAnItem(match, match.groups.thing, match.groups.list)
+  }
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { thing, list } = match.groups

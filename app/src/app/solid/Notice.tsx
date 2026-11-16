@@ -1,14 +1,23 @@
 import { Show, createEffect } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { FLOATING_MESSAGE_STYLE, on, tracked } from "spell/app/app/solid"
+
+import "./Notice.css"
 
 /****************
  * ### `<Notice>`
  * `editor.notice` as a success `<ui-message>`, fixed near the top of the page;  closing it calls
  * `editor.hideNotice()`.
  * - Its first line is the heading, any more under it, each on its own line.
+ * - Each line on ONE line, never wrapped
+ *   (Owen, 2026-11-15, epic `editor` I163:  "Published message shouldn't line wrap"):
+ *   the box grows past its 500px to fit, up to the window's width,
+ *   then cuts the line short with "…" (`Notice.css`).
+ * - Over everything else the editor floats over the page, the selection's marching ants too
+ *   (`FLOATING_MESSAGE_STYLE`).
  * - SIDE EFFECT:  hides it after 3s (`editor.hideNotice()`), unless `autoHide` is `false` -- only if
  *   `editor.notice` is still the one the timer was started for.
  * - SEE:  its App UI components page, `app/docs/Notice.html` (`/components/app/Notice.html`).
@@ -33,7 +42,7 @@ export function Notice(props: NoticeProps) {
   return (
     <Show when={notice()}>
       {(notice) => (
-        <div class="Notice" style={FLOATING_MESSAGE_STYLE}>
+        <div class="Notice" style={NOTICE_STYLE}>
           {/* its first line the heading, the rest under it, a line each (epic `editor` I124) */}
           <ui-message state="success" heading={notice().split("\n")[0]} dismissible="" ref={on("ui-closing", dismiss)}>
             <Show when={notice().split("\n").slice(1).join("\n")}>{(rest) => <p>{rest()}</p>}</Show>
@@ -98,6 +107,13 @@ export type NoticeProps = {
   /** Hide after 3s.  Default:  `true`. */
   // TODO: boolean | number in seconds?
   autoHide?: boolean
+}
+
+/** Where `<Notice>` sits:  a floating message, as wide as its longest line, 500px at least. */
+const NOTICE_STYLE: JSX.CSSProperties = {
+  ...FLOATING_MESSAGE_STYLE,
+  width: "max-content",
+  "min-width": "min(500px, calc(100vw - 32px))"
 }
 
 /** How long a notice shows, ms, at least. */

@@ -45419,6 +45419,14 @@
               "fieldName": "remember"
             },
             {
+              "name": "all-items-icon",
+              "description": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "allItemsIcon"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {

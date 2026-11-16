@@ -27,7 +27,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>
  *       <nav class="ui … menu" part="menu">  <slot>  </nav>       (the menu's own box, which scrolls)
  *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
- *       <button class="all-items" part="all-items" aria-label title>▾</button>     (`max-visible`, while some are put away)
+ *       <button class="all-items" part="all-items" aria-label title>[icon] ▾</button>   (`max-visible`, while some are put away)
  *       <div class="right" part="right">  <slot name="right">  </div>      (pushed to the end)
  *     </div>
  *
@@ -59,6 +59,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - The row keeps the page's order.  The item chosen longest ago leaves it first;  the chosen one never does.
  *   - An item left out is `hidden`, so the menu's own rules skip it, and its overflow menu is the list.
  *   - `remember` keeps the row across reloads.
+ *   - `all-items-icon` draws an icon before the button's caret, saying what the list is of
+ *     (the editor's file tabs:  `file outline`;  epic `editor` T76).
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -229,6 +231,12 @@ export class UIToolbar extends UIMenu {
   /** The list's button's icon. */
   readonly allItemsGlyph = new E.IconGlyph({ owner: this, name: () => (this.isLimited ? ALL_ITEMS_ICON : undefined) })
 
+  /** `all-items-icon`'s icon, before the list's caret:  what the list is of (a project's files). */
+  readonly allItemsKindGlyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.isLimited ? this.attributes["all-items-icon"] || undefined : undefined)
+  })
+
   /** `putAwayTheRest()` once after Solid's update, however often asked. */
   private readonly limitRefresh = new E.Queued({ when: E.afterSolidUpdate, run: () => this.putAwayTheRest() })
 
@@ -317,6 +325,7 @@ export class UIToolbar extends UIMenu {
           onClick={() => (this.isOverflowOpen ? this.closeOverflow() : this.openOverflow())}
           onKeyDown={this.onOverflowButtonKey}
         >
+          {this.allItemsKindGlyph.svg}
           {this.allItemsGlyph.svg}
         </button>
       </Show>

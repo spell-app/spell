@@ -392,6 +392,30 @@ describe("the cards' heights (I140)", () => {
     // the Code card its bar:  the room left goes to Views
     expect(pane("code").getBoundingClientRect().height).toBeLessThanOrEqual(41)
   })
+
+  test("the last open card reaches the column's bottom (I165);  Views folded, the card above it does", async () => {
+    const host = await mount(() => <InspectorColumn />)
+    host.className = "SpellPage"
+    Inspector.toggle()
+    flush()
+    host.querySelector<HTMLElement>(".InspectorColumn")!.style.height = "900px"
+    await ElementFixture.settle(host)
+    const split = host.querySelector<HTMLElement>(".InspectorSplit")!
+    const bottom = (element: Element) => element.getBoundingClientRect().bottom
+    const pane = (panel: string) => host.querySelector(`.InspectorCard[data-panel=${panel}]`)!.parentElement!
+    // Views shows only its tree's few rows, and still ends where the column does
+    expect(Math.abs(bottom(pane("views")) - bottom(split))).toBeLessThan(1)
+    // folded, its bar ends the column, and Properties, the last open card, reaches down to the Code card's bar
+    Inspector.toggleFolded("views")
+    flush()
+    await ElementFixture.settle(host)
+    expect(Math.abs(bottom(pane("views")) - bottom(split))).toBeLessThan(1)
+    expect(pane("views").getBoundingClientRect().height).toBeLessThanOrEqual(41)
+    expect(pane("properties").getBoundingClientRect().height).toBeGreaterThan(600)
+    // as it was, for the other tests
+    Inspector.toggleFolded("views")
+    flush()
+  })
 })
 
 describe("the phone's sheet", () => {

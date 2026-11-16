@@ -191,3 +191,39 @@ describe("SiteEdits:  a card's place and colour", () => {
     )
   })
 })
+
+describe("SiteBoard:  groups (epic `mockup` T36)", () => {
+  const GROUPS = site(
+    '\tgroup "Home", color red',
+    '\tit has a Home at "/", in row 1 column 2',
+    "\tit has a Notices dialog, in row 1 column 3",
+    '\tgroup "My Stuff", color orange',
+    '\tit has a Inbox at "/my-stuff/inbox", in row 1 column 2',
+    "\tit has a not found page"
+  )
+
+  test("a group heads its section, drawn as a line;  a page heads its own as a card", () => {
+    expect(boardOf(GROUPS).map((section) => SiteBoard.isGroup(section))).toEqual([true, true])
+    expect(boardOf(FILMS).map((section) => SiteBoard.isGroup(section))).toEqual([false, false, false])
+  })
+
+  test("a group moved after another takes its pages with it", () => {
+    const home = SiteEdits.groupKey("Home")
+    const moved = SiteEdits.withPartMoved(GROUPS, home, { where: "after", part: SiteEdits.groupKey("My Stuff") })
+    expect(boardOf(moved).map((section) => section.head?.title)).toEqual(["My Stuff", "Home"])
+    expect(placesIn(moved, 1)).toEqual([`${home} 1:1`, "Home 1:2", "Notices dialog 1:3"])
+  })
+
+  test("a section added goes at the end, at the site's indent, named apart from the others", () => {
+    const added = SiteBoard.withSectionAdded(GROUPS, "New section")
+    expect(added.name).toBe(SiteEdits.groupKey("New section"))
+    expect(added.text).toBe(`${GROUPS}\tgroup "New section"\n`)
+    const again = SiteBoard.withSectionAdded(added.text, "New section")
+    expect(again.name).toBe(SiteEdits.groupKey("New section 2"))
+    expect(boardOf(again.text).at(-1)!.cards.map((card) => card.part.name)).toEqual([again.name])
+  })
+
+  test("a site with no parts has no line to add a section after", () => {
+    expect(() => SiteBoard.withSectionAdded(site(), "New section")).toThrow(TypeError)
+  })
+})

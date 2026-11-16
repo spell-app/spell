@@ -71,6 +71,21 @@ export type BubblyLine = {
   pieces: BubblyPiece[]
   /** the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does */
   underlines: BubblyUnderline[]
+  /**
+   * a drawing's markup line's CODE, each `{…}` in it (`onClick={count up}`, `<text>{its name}</text>`):
+   * worked out as the program runs, so drawn apart from what's typed in -- an inverted pill, its braces part of it
+   * - its braces included;  each starts and ends where a piece does
+   * - only on a markup line with code
+   */
+  codes?: BubblyCode[]
+}
+
+/** A `{…}` in a drawing's markup:  Spell code, its braces included. */
+export type BubblyCode = {
+  /** its `{` */
+  start: number
+  /** one past its `}` */
+  end: number
 }
 
 /**
@@ -79,6 +94,7 @@ export type BubblyLine = {
  * - `value`:  a value read, `the pile's suit`, `its pile`, `a new deck`, `the first card of the pile`
  * - `question`:  a yes-or-no asked of a thing, with the thing, `the card is on top of its pile`, `pile is a foundation`
  * - `quantity`:  a number and its unit, `300 msec`
+ * - `call`:  a call of an action the project declares, `turn over the next card`, `put the card on end pile`
  * - Outermost only:  a value inside a value or a question gets no line of its own.
  * - Never a line's break:  a stretch going on onto the next line is one underline on each.
  */
@@ -88,7 +104,7 @@ export type BubblyUnderline = {
   /** one past the last */
   end: number
   /** what it groups */
-  kind: "value" | "question" | "quantity"
+  kind: "value" | "question" | "quantity" | "call"
 }
 
 /**
@@ -193,6 +209,18 @@ export type BubblyRulePresentation = {
    * - the thing:  what comes before it, back to the last `and` or `or`, as the compiler binds it
    */
   isQuestion?: boolean
+  /**
+   * a CALL of an action:  ONE underline over the whole of it (`turn over the next card`, `play the card`),
+   * its blanks' values bold inside it, never underlined on their own
+   * - only an action a project declares (this one, or one it imports):  a built-in template's
+   *   (`turn the card face up`, a two sided view's) draws as a plain step, as Spell's own statements do
+   */
+  isCall?: boolean
+  /**
+   * runs its statement once for each item of a list, said in it (`add each card in the deck to the stock`):
+   * ONE value from the word saying `each` (`each`, `every`, `cada`, `the`) to the list's end, `each card in the deck`
+   */
+  readsEach?: boolean
   /** more of the value before it (`as lower case`, `in feet`):  ONE underline from that value to its end */
   continuesValue?: boolean
   /** joins two yes-or-nos (`and`, `or`):  a question after it is asked of what follows it */

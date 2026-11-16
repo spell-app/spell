@@ -54,6 +54,21 @@ function underlinesOf(drawing: SP.BubblyDrawing): string[] {
   return found
 }
 
+/** `drawing`'s code, each `{…}` in its markup, as written. */
+function codesOf(drawing: SP.BubblyDrawing): string[] {
+  const found: string[] = []
+  const walk = (nodes: SP.BubblyNode[]) => {
+    for (const node of nodes) {
+      if (node.kind === "gap") continue
+      const line = node.kind === "line" ? node : node.head
+      for (const { start, end } of line.codes ?? []) found.push(drawing.text.slice(start, end))
+      if (node.kind !== "line") walk(node.body)
+    }
+  }
+  walk(drawing.nodes)
+  return found
+}
+
 /** Every block in `nodes`, depth first. */
 function blocksOf(nodes: SP.BubblyNode[]): SP.BubblyBlock[] {
   return nodes.flatMap((node) => (node.kind === "block" ? [node, ...blocksOf(node.body)] : []))
@@ -358,9 +373,27 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(drawing, "words")).toEqual(expect.arrayContaining(["it is a face card"]))
   })
 
-  it("draws a drawing's markup", () => {
+  it("draws a drawing's markup, each `{…}` in it code, its braces pieces of their own", () => {
     expect(piecesOf(drawing, "tag")).toEqual(["text", "text"])
-    expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">{", "}</", ">"]))
+    expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">", "{", "}", "</", ">"]))
+    expect(codesOf(drawing)).toEqual(["{its picture}"])
+  })
+
+  it("reads a tag's `{` as code up to its own `}`, a text in it Spell's, never the tag's value (epic `editor` I144)", () => {
+    const text = 'to draw it\n\t<button "OK" onClick={say "a}b"} padding={its size}/>'
+    const markup = SP.BubblyLayout.of(text)
+    expect(codesOf(markup)).toEqual(['{say "a}b"}', "{its size}"])
+    // past the head's `draw it`
+    expect(piecesOf(markup, "input").slice(1)).toEqual(['"OK"'])
+  })
+
+  it('draws a `{` with no `}` as a mark alone, and a `"` right after a word plain:  the pills after it stay on their words (I144)', () => {
+    const text = 'to draw it\n\t<container columns="7" padding={small" spacing="xs">'
+    const markup = SP.BubblyLayout.of(text)
+    // past the head's `draw it`
+    expect(piecesOf(markup, "input").slice(1)).toEqual(['"7"', '"xs"'])
+    expect(codesOf(markup)).toEqual([])
+    expect(piecesOf(markup, "words")).toEqual(expect.arrayContaining(['small" spacing']))
   })
 
   it("draws a control line going on onto the lines under it (`and ...`) as ONE head, its body after them", () => {
@@ -565,6 +598,98 @@ una "pila" es una lista soltable de cartas
       "question:la carta es un trébol"
     ])
     expect(piecesOf(laidOut, "reference")).toEqual(expect.arrayContaining(["soltable", "arrastrables"]))
+  })
+
+  it("underlines a call of an action the project declares whole, its blanks' values bold in it;  Spell's own steps as before (epic `language` I108)", () => {
+    const GAME = `a "pile" is a list of cards
+a "card" is a two sided view
+a card
+	to play it
+		turn it face up
+solitaire is an app
+	its "stock" is a pile
+	its "score" is a number
+	to "turn over the next card"
+		add 1 to the stock
+	to "the points for (a card) on (a pile)"
+		return 10
+	to "deal"
+		turn over the next card
+		set the card to the first card of the stock
+		play the card
+		add (the points for the card on the stock) to the score
+		turn the card face up
+`
+    const file = parseSpellProject([{ path: "/Game.spell", contents: GAME }]).files[0]!
+    const within = { match: file.match, inputLines: GAME.split("\n") } as unknown as SP.SpellFile
+    const laidOut = SP.BubblyLayout.of(GAME, SP.spellParser, { within })
+    const deal = GAME.indexOf('\tto "deal"')
+    const lines = (nodes: SP.BubblyNode[]): SP.BubblyLine[] =>
+      nodes.flatMap((node) =>
+        node.kind === "gap" ? [] : node.kind === "line" ? [node] : [node.head, ...lines(node.body)]
+      )
+    const underlines = lines(laidOut.nodes)
+      .flatMap((line) => line.underlines)
+      .filter((each) => each.start > deal)
+      .map(({ start, end, kind }) => `${kind}:${GAME.slice(start, end)}`)
+    expect(underlines).toEqual([
+      // no blanks
+      "call:turn over the next card",
+      "value:the card",
+      "value:the first card of the stock",
+      // with blanks:  one line under the whole call, none under its values
+      "call:play the card",
+      "call:the points for the card on the stock",
+      "value:the score",
+      // a built-in template's (a two sided view's):  Spell's own step
+      "value:the card"
+    ])
+    expect(piecesOf(laidOut, "reference")).toEqual(expect.arrayContaining(["card", "stock"]))
+  })
+
+  it("underlines `each card in the deck` as ONE value, in English and Spanish;  a Spanish call of the project's own whole (epic `language` I108)", () => {
+    const GAME = `a "pile" is a list of cards
+a "card" is a two sided view
+solitaire is an app
+	its "stock" is a pile
+	its "deck" is a pile
+	to "deal"
+		add each card in the deck to the stock
+		add every card in the deck to the stock
+		turn each card in the stock face down
+`
+    const file = parseSpellProject([{ path: "/Game.spell", contents: GAME }]).files[0]!
+    const within = { match: file.match, inputLines: GAME.split("\n") } as unknown as SP.SpellFile
+    const laidOut = SP.BubblyLayout.of(GAME, SP.spellParser, { within })
+    expect(underlinesOf(laidOut)).toEqual([
+      "value:each card in the deck",
+      "value:the stock",
+      "value:every card in the deck",
+      "value:the stock",
+      "value:each card in the stock"
+    ])
+    expect(piecesOf(laidOut, "reference")).toEqual(expect.arrayContaining(["card", "deck", "stock"]))
+
+    const JUEGO = `una "pila" es una lista de cartas
+una "carta" es una vista reversible
+solitario es una aplicación
+	su "reserva" es una pila
+	su "mazo" es una pila
+	para "reiniciar la reserva"
+		voltear cada carta de la reserva boca abajo
+	para "repartir"
+		agregar cada carta del mazo a la reserva
+		reiniciar la reserva
+`
+    const archivo = parseSpellProject([{ path: "/Juego.es.spell", contents: JUEGO }]).files[0]!
+    const dentro = { match: archivo.match, inputLines: JUEGO.split("\n") } as unknown as SP.SpellFile
+    expect(underlinesOf(SP.BubblyLayout.of(JUEGO, SP.Language.for("es").parser, { within: dentro }))).toEqual([
+      "value:cada carta de la reserva",
+      "value:cada carta del mazo",
+      "value:la reserva",
+      // a call of the project's own action, in Spanish too
+      "call:reiniciar la reserva"
+    ])
   })
 
   it("notes each drawing tag that declares a member, as the parse decides:  not one said on a line of its own, nor any other tag (epic `editor` I84)", () => {

@@ -19,7 +19,8 @@ export const toolbarEs = {
     "show-keys": "mostrar-teclas",
     "scroll-first": "desplazar-primero",
     "max-visible": "max-visibles",
-    remember: "recordar"
+    remember: "recordar",
+    "all-items-icon": "icono-de-todos"
   },
   slots: { title: "titulo", center: "centro", right: "derecha", overflow: "desborde" },
   parts: { center: "centro", right: "derecha", overflow: "desborde", "overflow-menu": "menu-desborde" },

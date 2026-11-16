@@ -189,6 +189,24 @@ export class Match<
   declare private _data: MatchData | undefined
 
   /**
+   * The clone an incremental parse put in our place, with a new body (`BlockLine.reparseBody()`), if one did.
+   * - Scope records keep the statement that declared them (`declaredBy`):  read its body through `current`.
+   * - `declare`d, as `_data`:  only a re-bodied statement carries it.
+   */
+  declare replacedBy: Match | undefined
+
+  /**
+   * The match standing for us in the latest parse:  us, or the clone that replaced us (`replacedBy`), and so on.
+   * - What reads a declaring statement's BODY reads it here, e.g. whether a method waits:
+   *   its record still names the statement first parsed, whose body an edit has replaced.
+   */
+  get current(): Match {
+    let match = this as Match
+    while (match.replacedBy) match = match.replacedBy
+    return match
+  }
+
+  /**
    * New match with our plumbing fields plus a shallow copy of `data`, changed by `overrides`.
    * - Memoized `groups` / `nestedScope` / `AST` are NOT copied:  the clone works them out afresh,
    *   e.g. a fresh nested scope for re-parsing a statement's body -- see `BlockLine.reparseBody()`.

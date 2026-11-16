@@ -50,6 +50,23 @@ export class SiteWrites {
   }
 
   /**
+   * Add a section to the end of the site's board:  a new `group` line, titled from the editor's words ("New section").
+   * - ONE step of the editor's history (epic `mockup` T36).
+   * - Answers the group's part name, for the caller to pick it, so its title can be typed;  none when it wasn't added.
+   * - NEVER throws:  what can't be added shows in the error banner.
+   */
+  static addSection(): string | undefined {
+    let name: string | undefined
+    const title = appTexts.text("siteNewSectionTitle")
+    const changed = SiteWrites.change(appTexts.text("siteAddSection"), undefined, (text) => {
+      const added = SiteBoard.withSectionAdded(text, title)
+      name = added.name
+      return added.text
+    })
+    return changed ? name : undefined
+  }
+
+  /**
    * Open part `name`'s own page in the editor (epic `mockup` P17):  its declaration, in whichever file has it.
    * - No page for it yet:  made first, a file of its own beside the site's.
    * - A group, or a part another project declares (a notebook a site imports):  its line in the site.
@@ -101,10 +118,14 @@ export class SiteWrites {
     }
     if (under.length) {
       const pages = under.map((part) => part.title ?? part.name).join(", ")
-      const message = appTexts.text("siteRemoveWithPages", { name, count: under.length, pages })
+      const message = appTexts.text(under.length === 1 ? "siteRemoveWithPage" : "siteRemoveWithPages", {
+        name: SiteWrites.shownName(name),
+        count: under.length,
+        pages
+      })
       if (!(await editor.confirm({ message, ok: appTexts.text("siteRemoveAll") }))) return false
     }
-    return SiteWrites.change(appTexts.text("siteRemovePart", { name }), undefined, (text) =>
+    return SiteWrites.change(appTexts.text("siteRemovePart", { name: SiteWrites.shownName(name) }), undefined, (text) =>
       SiteEdits.withPartRemoved(text, name)
     )
   }
@@ -221,7 +242,7 @@ export class SiteWrites {
    * - NEVER throws:  a move `SiteEdits` refuses shows in the error banner.
    */
   static movePart(name: string, place: SitePartPlace): boolean {
-    return SiteWrites.change(appTexts.text("siteMovePart", { name }), undefined, (text) =>
+    return SiteWrites.change(appTexts.text("siteMovePart", { name: SiteWrites.shownName(name) }), undefined, (text) =>
       SiteEdits.withPartMoved(text, name, place)
     )
   }
@@ -231,9 +252,18 @@ export class SiteWrites {
    * - NEVER throws:  a drop `SiteBoard` refuses shows in the error banner.
    */
   static dropCard(name: string, drop: CardDrop): boolean {
-    return SiteWrites.change(appTexts.text("siteMovePart", { name }), undefined, (text) =>
+    return SiteWrites.change(appTexts.text("siteMovePart", { name: SiteWrites.shownName(name) }), undefined, (text) =>
       SiteBoard.withCardDropped(text, name, drop)
     )
+  }
+
+  /**
+   * What part `name` is called in the history's step titles (Undo's menu):  a group by its title, `Home`,
+   * never its key (`SiteEdits.groupKey()`);  anything else by its name.
+   */
+  private static shownName(name: string): string {
+    const part = SiteWrites.parts() && SiteEdits.allParts(SiteWrites.parts()!).find((each) => each.name === name)
+    return part?.kind === "group" ? (part.title ?? name) : name
   }
 
   /**

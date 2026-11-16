@@ -3,6 +3,8 @@
  * of one width, so a section's columns line up with the others'.
  * - A card's DOM element has no box (`display: contents`):  its `::part(card)` is what sits in the grid,
  *   at its `--SiteCard-row` and `--SiteCard-column`.
+ * - A section is its group's line, if it has one, over a grid of its cards, `.SiteGrid`:
+ *   a group's cards are drawn a column to the left (`--SiteGrid-shift`), as its line takes the place of its card.
  * - On a board with any thumbnail, every card is the same size, and a thumbnail shows only as much of itself as fits,
  *   from its top:  a tall sidebar is cut off.
  */
@@ -18,28 +20,15 @@
   padding: 12px 14px 20px 14px;
 }
 
-.SiteBoard:has(.SiteCard[image]) .SiteSection {
+.SiteBoard:has(.SiteCard[image]) .SiteGrid {
   grid-auto-rows: 152px;
 }
 
 .SiteSection {
   position: relative;
-  display: grid;
-  grid-auto-columns: var(--SiteBoard-card-width);
-  grid-auto-rows: minmax(76px, auto);
-  gap: var(--SiteBoard-gap);
-  width: max-content;
-
-  /* every spot a card can land on, behind the cards:  only while one is moving */
-  .spot {
-    pointer-events: none;
-    border-radius: 14px;
-
-    &.extra-row,
-    &.extra-column {
-      display: none;
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
   /* where a dragged section would land:  a line above or below this one */
   &[data-drop]::after {
@@ -55,6 +44,57 @@
   }
   &[data-drop="after"]::after {
     bottom: -14px;
+  }
+}
+
+/* a group's line:  its title in its colour, quiet as a heading is, a hairline of the colour under it */
+.SiteGroupHeader {
+  --_color: var(--SiteGroupHeader-color, var(--ui-text-color));
+  display: flex;
+  align-items: center;
+  padding: 2px 4px 4px 4px;
+  border-bottom: 1px solid color-mix(in oklab, var(--_color) 45%, transparent);
+  cursor: grab;
+  user-select: none;
+
+  h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: var(--ui-font-weight-bold);
+    letter-spacing: 0.02em;
+    color: color-mix(in oklab, var(--_color) 70%, var(--ui-text-color));
+  }
+  &:hover h2 {
+    color: var(--_color);
+  }
+  &.selected {
+    border-bottom: 2px solid var(--ui-primary-color, var(--ui-focus-color));
+  }
+  &[data-being-moved] {
+    opacity: 0.45;
+    cursor: grabbing;
+  }
+}
+
+.SiteGrid {
+  --SiteGrid-shift: 0;
+  display: grid;
+  grid-auto-columns: var(--SiteBoard-card-width);
+  grid-auto-rows: minmax(76px, auto);
+  gap: var(--SiteBoard-gap);
+  width: max-content;
+
+  /* every spot a card can land on, behind the cards:  only while one is moving */
+  .spot {
+    grid-row: var(--SiteCard-row);
+    grid-column: calc(var(--SiteCard-column) - var(--SiteGrid-shift));
+    pointer-events: none;
+    border-radius: 14px;
+
+    &.extra-row,
+    &.extra-column {
+      display: none;
+    }
   }
 }
 
@@ -85,7 +125,7 @@
 
   &::part(card) {
     grid-row: var(--SiteCard-row);
-    grid-column: var(--SiteCard-column);
+    grid-column: calc(var(--SiteCard-column) - var(--SiteGrid-shift));
     position: relative;
     min-height: 76px;
     height: 100%;

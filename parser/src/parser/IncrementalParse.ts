@@ -11,6 +11,8 @@ import { P } from "spell/parser/parser"
  *   - only ONE item's indented body changed:  rewind to just before that body, re-parse it, then replay
  *     everything after it -- later items and later files are kept as they are.
  *     Only if the body's changes stay inside it -- see `Parser.reparseBody()`.
+ *     - First, the innermost body inside it, if only one changed:  one method's steps in a type's body
+ *       (`Parser.reparseInnerBody()`), keeping the type and its other members as well.
  *   - otherwise:  rewind to the first changed item, and re-parse from there to the end of the file.
  *     That also took back every LATER file, which must be re-parsed too -- `P.IncrementalProject` does that.
  * - With `keepLastGood`, a line being edited into a BROKEN state keeps its last working declarations, so later
@@ -212,6 +214,14 @@ export class IncrementalParse {
     if (!(oldBody instanceof P.BlockToken && newBody instanceof P.BlockToken)) return false
     const position = this.items.findIndex((item) => item.match?.tokens[1] === oldBody)
     const item = this.items[position]
+
+    // Just one body inside it, e.g. one method's steps in a type's body?  Then the rest of it is kept too.
+    const inner = item?.match && this.parser.reparseInnerBody(item.match, newBody, { oldText: this.text, text })
+    if (inner) {
+      this.items[position] = { ...item!, match: inner }
+      this.keepAround(index, oldRoot, newRoot, inner.tokens[1] as P.BlockToken, text)
+      return true
+    }
     const bodyMark = item?.match && this.parser.getBodyMark(item.match)
     if (!item?.match || !bodyMark || !this.journal.has(bodyMark)) return false
 
@@ -227,17 +237,22 @@ export class IncrementalParse {
       return false
     }
     this.journal.replay(later)
-
-    // Keep the other items' tokens, in one root with the new body...
-    const laterTokens = oldRoot.tokens.slice(index + 1)
-    const tokens = [...oldRoot.tokens.slice(0, index), newBody, ...laterTokens]
     this.items[position] = { ...item, match: newMatch }
+    this.keepAround(index, oldRoot, newRoot, newBody, text)
+    return true
+  }
+
+  /**
+   * After the body at `index` was re-parsed as `body`:  our match, in one root with the other items' tokens, kept,
+   * and moved by however much the body grew or shrank.
+   */
+  private keepAround(index: number, oldRoot: P.BlockToken, newRoot: P.BlockToken, body: P.BlockToken, text: string) {
+    const laterTokens = oldRoot.tokens.slice(index + 1)
+    const tokens = [...oldRoot.tokens.slice(0, index), body, ...laterTokens]
     this.match = this.assemble(newRoot, tokens)
-    // ...moved by however much the body grew or shrank.
     const delta = laterTokens.length ? newRoot.tokens[index + 1]!.start - laterTokens[0]!.start : 0
     this.parser.tokenizer.moveTokens(laterTokens, delta, text)
     this.text = text
-    return true
   }
 
   /** Parse `tokens` from `index` on, one item at a time -- see `parseItem()`. */

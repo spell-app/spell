@@ -14,7 +14,8 @@ import {
   type MarkupBlockShape,
   type MarkupLinkShape,
   type MarkupShape,
-  type MarkupTagShape
+  type MarkupTagShape,
+  type TagRoom
 } from "./MarkupMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
@@ -41,7 +42,10 @@ import "spell/app/app/components/spell-code/bubbly.css"
  *   - its model is Spell, not a page file (`SP.formOfText()`);  a notebook example's code is drawn, as it's Spell
  *   - or it's an HTML file (`.html`):  drawn as the drawn-bubbly page draws HTML (`MarkupMarks`), the box a
  *     `.bubbly-html` too, so the sheet's HTML settings reach it
- *   - it isn't one side of a diff, whose lines must line up, nor left out (`leaveOut()`:  `<CodeSlice>`)
+ *   - either side of a diff too (`<DiffView>`, epic `editor` T75):  Monaco's diff editor lines its two sides up
+ *     round each side's own view zones, and the taller lines are the same on both
+ * - A `<CodeSlice>`'s editor, a few lines of a file alone, is drawn too (`showSlice()`, epic `editor` T72):
+ *   only what's wholly in its lines;  the declaration whose body it shows draws nothing of its own.
  * - NEVER throws:  a layout that fails leaves the code as Monaco colours it, and logs why.
  ****************/
 export class SpellBubbly {
@@ -55,12 +59,19 @@ export class SpellBubbly {
     })
   }
 
-  /** Never draw `editor` bubbly, e.g. a `<CodeSlice>`, which shows a few lines of a file alone. */
-  static leaveOut(editor: monaco.editor.ICodeEditor): void {
+  /**
+   * Draw `editor` as a slice of its file (`<CodeSlice>`):  only the shapes wholly in `shown()`, its other lines hidden.
+   * - A declaration it shows only part of, e.g. the action whose body it is, draws nothing of its own:
+   *   its band, rail and foot would be cut off at the slice's edges, and its room under its last line too.
+   *   What's inside it is drawn as usual.
+   * - `shown` `undefined`:  the editor is kept out of the page (`SlicePool`), so it isn't laid out or drawn
+   *   till it's shown again;  its marks stay, so its lines needn't be measured again.
+   */
+  static showSlice(editor: monaco.editor.ICodeEditor, shown: (() => monaco.IRange | null) | undefined): void {
     const drawing = SpellBubbly.drawings.get(editor)
     if (!drawing) return
-    drawing.isLeftOut = true
-    drawing.refresh()
+    drawing.slice = shown ? { shown } : { shown: () => null, isKept: true }
+    if (shown) drawing.refreshSoon()
   }
 
   /** The drawing of `editor`, if it has one:  for tests and a look in devtools. */
@@ -70,6 +81,12 @@ export class SpellBubbly {
 
   /** Each editor's drawing. */
   private static drawings = new WeakMap<monaco.editor.ICodeEditor, SpellBubbly>()
+
+  /** Each model's Spell as last laid out, for its text's version and its project's parse of it:  `spellMarks()`. */
+  private static laidOutByModel = new WeakMap<
+    monaco.editor.ITextModel,
+    { version: number; parse: SP.SpellFile["match"]; marks: BubblyMarks }
+  >()
 
   /** Is it drawing now? */
   isDrawing = false
@@ -82,16 +99,17 @@ export class SpellBubbly {
     private readonly languages: readonly string[]
   ) {
     // in a microtask, never in the middle of Monaco's own work:  Monaco gives a new editor its model inside
-    // `create()`, before whoever made it can say to leave it out (`<CodeSlice>`'s `leaveOut()`)
+    // `create()`, before whoever made it can say it's a slice (`<CodeSlice>`'s `showSlice()`)
     const later = () => this.refreshSoon()
     const redrawSoon = () => this.redrawSoon()
     codeLook.followers.add(later)
     editor.onDidChangeModel(later)
     editor.onDidChangeModelLanguage(later)
-    editor.onDidChangeModelContent(() => {
+    editor.onDidChangeModelContent(({ changes }) => {
       if (!this.isDrawing) return
       this.relayoutSoon()
-      this.redrawSoon()
+      // a slice's shapes stay put through an edit to other lines of its file:  drawn again once it's laid out
+      if (changes.some(({ range }) => this.isNearShown(range))) this.redrawSoon()
     })
     editor.onDidScrollChange(() => {
       this.follow()
@@ -101,7 +119,11 @@ export class SpellBubbly {
     editor.onDidContentSizeChange(redrawSoon)
     editor.onDidChangeHiddenAreas(redrawSoon)
     editor.onDidChangeConfiguration((event) => {
-      if (event.hasChanged(monaco.editor.EditorOption.fontInfo)) this.measured = undefined
+      if (event.hasChanged(monaco.editor.EditorOption.fontInfo)) {
+        this.measured = undefined
+        // their height is a share of the line's:  marked again
+        this.shortLinesKey = undefined
+      }
       redrawSoon()
     })
     editor.onDidDispose(() => {
@@ -118,6 +140,8 @@ export class SpellBubbly {
 
   /** Start or stop drawing, as the setting, the model and its text say;  lay it out again if drawing. */
   refresh(): void {
+    // a slice kept out of the page:  laid out again once it's shown
+    if (this.slice?.isKept) return
     if (this.shouldDraw()) {
       // from Spell to HTML or back:  its box's classes and the sheet's sizes change
       if (this.isDrawing && this.isMarkup !== isMarkupFile(this.editor.getModel()!)) this.stop()
@@ -140,8 +164,7 @@ export class SpellBubbly {
   private shouldDraw(): boolean {
     const { editor } = this
     const model = editor.getModel()
-    if (!codeLook.isBubbly || this.isLeftOut || !model || editor.getOption(monaco.editor.EditorOption.inDiffEditor))
-      return false
+    if (!codeLook.isBubbly || !model) return false
     if (isMarkupFile(model)) return true
     return this.languages.includes(model.getLanguageId()) && SP.formOfText(model.getValue()) !== "page"
   }
@@ -173,6 +196,7 @@ export class SpellBubbly {
     this.isDrawing = false
     clearTimeout(this.relayoutTimer)
     this.marks?.clear()
+    this.clearShortFootLines()
     this.laidOut = undefined
     this.setZones([])
     this.layer?.remove()
@@ -206,51 +230,88 @@ export class SpellBubbly {
     try {
       if (this.isMarkup) {
         this.laidOut = MarkupMarks.of(model.getValue())
-        this.shortenFootLines(this.laidOut)
         this.marks!.set(this.laidOut.marks)
         return this.redraw()
       }
-      // its project's parse of it, if it's a project's file:  what the compiler sees, names from other files too
-      const text = model.getValue()
-      const path = AppAddresses.pathOf(model.uri)
-      const within = path === undefined ? undefined : SP.SpellFile.registry.get(path)
-      // typed and not parsed yet (`SpellModels`):  parsed now, so it lays out the project's parse, not a reading of its own
-      if (within?.project.isTextWaiting) void within.project.parseWaitingText().catch(() => undefined)
-      const drawing = SP.BubblyLayout.of(text, parserFor(model), { within })
-      // the project hasn't parsed this text yet:  read alone for now, and again once it has
-      if (within && !SP.BubblyLayout.isParseOf(within, text) && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()
-      else this.parseWaits = 0
-      this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize, (tag) => isViewTag(within, tag))
-      this.shortenFootLines(this.laidOut)
+      const laidOut = this.spellMarks(model)
+      // the marks it has already, e.g. a slice shown again (`showSlice()`):  only drawn again
+      if (laidOut === this.laidOut) return this.redraw()
+      this.laidOut = laidOut
       this.marks!.set(this.laidOut.marks)
       this.resetDescriptions()
     } catch (error) {
       console.error("SpellBubbly.relayout():  couldn't lay the code out", error)
       this.laidOut = undefined
       this.marks?.clear()
+      this.clearShortFootLines()
     }
     this.redraw()
   }
 
   /**
+   * `model`'s Spell laid out and marked:  the one laid out last for its text and its project's parse of it,
+   * so a file's editors share it (the code pane, each `<CodeSlice>` of it:  ~100ms each for Solitaire's main file).
+   * - throws if the layout does
+   */
+  private spellMarks(model: monaco.editor.ITextModel): BubblyMarks {
+    // its project's parse of it, if it's a project's file:  what the compiler sees, names from other files too
+    const path = AppAddresses.pathOf(model.uri)
+    const within = path === undefined ? undefined : SP.SpellFile.registry.get(path)
+    const version = model.getVersionId()
+    const kept = SpellBubbly.laidOutByModel.get(model)
+    if (kept && kept.version === version && kept.parse === within?.match) {
+      this.parseWaits = 0
+      return kept.marks
+    }
+    const text = model.getValue()
+    // typed and not parsed yet (`SpellModels`):  parsed now, so it lays out the project's parse, not a reading of its own
+    if (within?.project.isTextWaiting) void within.project.parseWaitingText().catch(() => undefined)
+    const drawing = SP.BubblyLayout.of(text, parserFor(model), { within })
+    const marks = BubblyMarks.of(drawing, model.getOptions().tabSize, (tag) => isViewTag(within, tag))
+    // the project hasn't parsed this text yet:  read alone for now, and again once it has;  kept only once it has
+    const isWaiting = !!within && !SP.BubblyLayout.isParseOf(within, text)
+    if (isWaiting && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()
+    else this.parseWaits = 0
+    if (!isWaiting) SpellBubbly.laidOutByModel.set(model, { version, parse: within?.match, marks })
+    return marks
+  }
+
+  /**
    * Each HTML block's end tag on its own line, `</segment>` or `</>`:  its line only its tiny pill's row tall
    * (`--bubbly-foot-tiny-row`, Owen, Q61), so nested ones stack close, as on the page.
-   * - Monaco's own line height for the lines a mark spans (`lineHeight`, a multiple of the editor's):
-   *   on the mark holding the end tag's place.
+   * - Monaco's own line height for a line (`lineHeight`, a multiple of the editor's):
+   *   a mark of its own on each end tag, beside the end tag's mark, so the file's marks stay as they are.
+   * - Only on the lines the editor shows:  Monaco gives a hidden line's height to the next line it shows,
+   *   so an end tag above a slice made the slice's first line short, its band cut off at the top (epic `editor` I164).
+   * - Marked again only when they've moved, so a redraw can call it each time.
    */
-  private shortenFootLines(laidOut: BubblyMarks | MarkupMarks) {
+  private markShortFootLines(): void {
+    const { laidOut } = this
+    if (!laidOut || !this.marks) return
     const { footTinyRow, lineHeight } = this.measures()
-    const multiple = footTinyRow / lineHeight
-    const shorten = (shapes: Shape[]) => {
+    const ranges = this.marks.getRanges()
+    const short: monaco.editor.IModelDeltaDecoration[] = []
+    const collect = (shapes: Shape[]) => {
       for (const shape of shapes) {
-        if (shape.kind === "markup-block" && shape.foot !== undefined) {
-          const mark = laidOut.marks[shape.foot]!
-          mark.options = { ...mark.options, lineHeight: multiple }
+        const range = shape.kind === "markup-block" && shape.foot !== undefined ? ranges[shape.foot] : undefined
+        if (range && this.isShown(range)) {
+          short.push({ range, options: { lineHeight: footTinyRow / lineHeight } })
         }
-        if ("inside" in shape) shorten(shape.inside)
+        if ("inside" in shape) collect(shape.inside)
       }
     }
-    shorten(laidOut.shapes)
+    collect(laidOut.shapes)
+    const key = short.map(({ range }) => range.startLineNumber).join()
+    if (key === this.shortLinesKey) return
+    this.shortLinesKey = key
+    this.shortLines ??= this.editor.createDecorationsCollection()
+    this.shortLines.set(short)
+  }
+
+  /** No end tag's line short any more (`markShortFootLines()`). */
+  private clearShortFootLines(): void {
+    this.shortLines?.clear()
+    this.shortLinesKey = undefined
   }
 
   ////////////////
@@ -259,11 +320,11 @@ export class SpellBubbly {
 
   /** Draw the shapes again before the next paint, once however many changes come first. */
   private redrawSoon() {
-    if (!this.isDrawing || this.isRedrawQueued) return
+    if (!this.isDrawing || this.isRedrawQueued || this.slice?.isKept) return
     this.isRedrawQueued = true
     requestAnimationFrame(() => {
       this.isRedrawQueued = false
-      if (this.isDrawing) this.redraw()
+      if (this.isDrawing && !this.slice?.isKept) this.redraw()
     })
   }
 
@@ -285,6 +346,8 @@ export class SpellBubbly {
   private redraw() {
     const { editor, laidOut, shapes } = this
     if (!laidOut || !shapes) return
+    // first:  a slice's lines may have changed, and with them which end tags' lines are short
+    this.markShortFootLines()
     const ranges = this.marks!.getRanges()
     // across first:  where each band starts, and so how far below its last line each foot goes
     const view: View = {
@@ -468,6 +531,11 @@ export class SpellBubbly {
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
+      // a slice's:  a declaration it shows part of draws only what's inside it, anything else is left out
+      if (!this.isShown(range)) {
+        if (shape.kind === "block" || shape.kind === "markup-block") elements.push(...this.drawAll(shape.inside, view))
+        continue
+      }
       if (shape.kind === "block") {
         const block = this.drawBlock(shape, range, view)
         if (block) elements.push(block)
@@ -517,7 +585,7 @@ export class SpellBubbly {
     }
     if (hasBody) {
       const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
-      // its last line may be an HTML end tag's, shorter than the rest (`shortenFootLines()`)
+      // its last line may be an HTML end tag's, shorter than the rest (`markShortFootLines()`)
       const lastBottom = lastTop + this.lineHeightOf(lastLine)
       const footTop = lastBottom + measures.footRoom - measures.footHeight + this.footDrop(shape, view)
       const height = footTop - bodyTop
@@ -545,7 +613,7 @@ export class SpellBubbly {
    *   its end tag's band likewise (`bubbly-tag-foot-spacer`).
    * - A start tag on lines of its own:  one tall band (`drawTall()`), its body from under its last line.
    * - Its end tag on its own line, named or `</>`:  a TINY pill at the rail's turn, the body down to it (Q61);
-   *   its line only the pill's row tall (`shortenFootLines()`).
+   *   its line only the pill's row tall (`markShortFootLines()`).
    */
   private drawMarkupBlock(shape: MarkupBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
     const { editor } = this
@@ -674,11 +742,7 @@ export class SpellBubbly {
    */
   private tagLeft(shape: MarkupTagShape, range: monaco.Range, view: View): number {
     const { measures } = view
-    const room = (shape.room ?? []).reduce(
-      (sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"],
-      0
-    )
-    return this.xOf(range.startLineNumber, range.startColumn) + room - measures.bracketPad
+    return this.xOf(range.startLineNumber, range.startColumn) + roomOf(shape.room, measures) - measures.bracketPad
   }
 
   /** Where a tag's pill on one line ends:  a bracket's room after its `>`, or its line's end. */
@@ -717,10 +781,11 @@ export class SpellBubbly {
 
   /**
    * A pill under the words in `range`:  from the room before them to the end of the room after.
-   * - a tag's `{…}` value's inverted, in a shade of its tag's colour (`bubbly-expression`, Owen)
+   * - code's, a `{…}` in a drawing's markup, inverted, in a shade of its tag's colour (`bubbly-expression`, Owen):
+   *   its own narrower room either side, so its braces sit at its ends (I162);  past a tag's room right before it
    */
   private drawInput(
-    { isChoice, inTag, isExpression, afterHeadSpacer }: BubblyInputShape,
+    { isChoice, inTag, isExpression, afterHeadSpacer, room }: BubblyInputShape,
     range: monaco.Range,
     view: View
   ): HTMLElement | undefined {
@@ -728,8 +793,9 @@ export class SpellBubbly {
     const line = range.startLineNumber
     if (range.endLineNumber !== line) return undefined
     // the column's x is before everything injected there:  a top-level head's spacer too, outside the pill
-    const left = this.xOf(line, range.startColumn) + (afterHeadSpacer ? measures.headSpacer : 0)
-    const right = this.xOf(line, range.endColumn) + measures.inputSpacer
+    const left =
+      this.xOf(line, range.startColumn) + (afterHeadSpacer ? measures.headSpacer : 0) + roomOf(room, measures)
+    const right = this.xOf(line, range.endColumn) + (isExpression ? measures.codeSpacer : measures.inputSpacer)
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     // a tag's value in its tag's hue:  the layer draws it beside its tag's pill, not in it, so it can't inherit it
     const classes = [
@@ -769,7 +835,7 @@ export class SpellBubbly {
       for (const shape of shapes) {
         if (shape.kind !== "block") continue
         const range = view.ranges[shape.place]
-        if (range && shape.hasBody && range.endLineNumber > range.startLineNumber) {
+        if (range && shape.hasBody && range.endLineNumber > range.startLineNumber && this.isShown(range)) {
           // its lowest foot's bottom, then the gap to the band on the next line, whose top is down its line a little
           const { footRoom, footGap, pillHeight } = view.measures
           const footBottom = footRoom + this.footDrop(shape, view)
@@ -798,9 +864,27 @@ export class SpellBubbly {
   // ## Where Monaco draws
   ////////////////
 
-  /** How tall `line` is:  the editor's line height, or a shorter one's (`shortenFootLines()`). */
+  /** How tall `line` is:  the editor's line height, or a shorter one's (`markShortFootLines()`). */
   private lineHeightOf(line: number): number {
     return this.editor.getLineHeightForPosition({ lineNumber: line, column: 1 })
+  }
+
+  /** Is `range` wholly in what the editor shows:  always, but in a slice (`showSlice()`). */
+  private isShown(range: monaco.IRange): boolean {
+    if (!this.slice) return true
+    const shown = this.slice.shown()
+    return !!shown && monaco.Range.containsRange(shown, range)
+  }
+
+  /**
+   * Is `range`, where an edit was before it, at or next to the lines the editor shows:  always, but in a slice.
+   * - Loosely:  an edit just above a slice that moved it counts too, and only costs a redraw.
+   */
+  private isNearShown(range: monaco.IRange): boolean {
+    if (!this.slice) return true
+    const shown = this.slice.shown()
+    if (!shown) return false
+    return range.startLineNumber <= shown.endLineNumber + 1 && range.endLineNumber >= shown.startLineNumber - 1
   }
 
   /** Has Monaco drawn `line` on the page, so its letters' places can be measured?  A line out of view hasn't. */
@@ -860,6 +944,7 @@ export class SpellBubbly {
       scale,
       lineHeight: Math.round(fontSize * ratio),
       inputSpacer: spacerWidth("bubbly-input-spacer"),
+      codeSpacer: spacerWidth("bubbly-code-spacer"),
       headSpacer: spacerWidth("bubbly-head-spacer"),
       quoteSpacer: spacerWidth("bubbly-quote-spacer"),
       tagSpacer: spacerWidth("bubbly-tag-spacer"),
@@ -889,14 +974,17 @@ export class SpellBubbly {
   // ## State
   ////////////////
 
-  /** Never drawn:  `leaveOut()`. */
-  private isLeftOut = false
+  /** A slice's lines (`showSlice()`):  `isKept` while it's out of the page. */
+  private slice: { shown: () => monaco.IRange | null; isKept?: boolean } | undefined
 
   /** Drawing an HTML file, not Spell. */
   private isMarkup = false
 
   /** The editor's decorations:  the marks. */
   private marks: monaco.editor.IEditorDecorationsCollection | undefined
+  /** The end tags' short lines (`markShortFootLines()`), and the lines they were on. */
+  private shortLines: monaco.editor.IEditorDecorationsCollection | undefined
+  private shortLinesKey: string | undefined
 
   /** The layer behind the editor, and the shapes in it, while drawing. */
   private layer: HTMLElement | undefined
@@ -952,6 +1040,8 @@ type Measures = {
   lineHeight: number
   /** the spacer either side of a pill's words */
   inputSpacer: number
+  /** ... of code's, a `{…}` in a drawing's markup:  narrower, its braces at its pill's ends (I162) */
+  codeSpacer: number
   /** the spacer before a head line's words */
   headSpacer: number
   /** the spacer outside a quoted input's marks */
@@ -1036,6 +1126,16 @@ function isMarkupFile(model: monaco.editor.ITextModel): boolean {
 /** A shape's element, its classes `classes`. */
 /** A flush tall tag's class (`drawTall()`). */
 const FLUSH = "bubbly-tag-tall-flush"
+
+/** The room injected before a pill, each spacer's kind (`MarkupTagShape.room`), in the editor's pixels. */
+function roomOf(room: readonly TagRoom[] | undefined, measures: Measures): number {
+  const widths: Record<TagRoom, number> = {
+    tag: measures.tagSpacer,
+    touch: measures.touchSpacer,
+    code: measures.codeSpacer
+  }
+  return (room ?? []).reduce((sum, kind) => sum + widths[kind], 0)
+}
 
 /** A tall start tag's end:  flush, its rows one width;  or short, its rows overhanging its `>`;  else neither. */
 function tallEnd(shape: { isFlush?: boolean; isShortTail?: boolean }): string {

@@ -1,5 +1,6 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
+import type { TextEdit } from "vscode-languageserver"
 
 import { UIError, kebabCase, setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
@@ -11,6 +12,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 // by file:  the language service itself loads with the code editor
 import { RenameError } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
+import type { TextChange } from "spell/app/app/EditorHistory"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
@@ -46,6 +48,8 @@ import {
   startingValues,
   oneOfWritten,
   declaredActionPlace,
+  declaredEventSpan,
+  handlerSpanInSource,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
   propertyCodePlace,
@@ -297,7 +301,7 @@ export class Inspector {
     Inspector.selectAll(next)
     clicks.pivot = pivot
     const place = Inspector.writtenPlaceOf(element)?.place
-    if (place) editor.followed = { path: place.path, line: place.line, from: "parts" }
+    if (place) editor.followed = { path: place.path, line: place.line, column: place.column, from: "parts" }
   }
 
   /**
@@ -556,7 +560,7 @@ export class Inspector {
    * (Owen:  "keep everything EXACTLY THE SAME across page moves").
    * - `rows`:  the app's parts, as the parts tree walks them (`partsIn()`).
    * - While what's selected is still in the app, only its outline is put on what the trail leads to again.
-   * - Found by its place among the parts and its tag (`PartAddress`), for this project:  none there, nothing's selected.
+   * - Found by its path among the parts (`SelectionAddress`), for this project:  none there, nothing's selected.
    */
   static restoreSelection(rows: readonly PartRow[]): void {
     const parts = selectedParts()
@@ -631,15 +635,28 @@ export class Inspector {
     wordsReadyNext = true
   }
 
-  /** The element at `address`:  the same place in the source if it has one, else the same place among the parts. */
+  /**
+   * The element at `address`:  the part at the same path (`partKeysFor()`), else the one with the same tag and `id`
+   * anywhere, a card dealt to another column;  `undefined` while it isn't drawn yet.
+   * - A path is never found by its place in the source or among the parts:
+   *   while the app draws (Solitaire's deal), those name another part (epic `editor` I171).
+   * - An address remembered before paths:  the same place in the source, else the same place among the parts.
+   */
   private static elementAt(address: SelectionAddress, rows: readonly PartRow[]): Element | undefined {
+    if (address.path) {
+      const keys = partKeysFor(rows)
+      const last = address.path.slice(address.path.lastIndexOf("/"))
+      const byId = last.includes("#") ? (key: string) => key.endsWith(last) : () => false
+      const entries = [...keys]
+      return (entries.find(([, key]) => key === address.path) ?? entries.find(([, key]) => byId(key)))?.[0]
+    }
     if (address.place) {
       const same = rows.filter((row) => writtenKeyOf(row.element) === address.place)
       const element = same[address.nth ?? 0]?.element
       if (element?.localName === address.tag) return element
     }
-    const row = rows[address.index]
-    return row?.element.localName === address.tag ? row.element : undefined
+    const row = address.index === undefined ? undefined : rows[address.index]
+    return row && row.element.localName === address.tag ? row.element : undefined
   }
 
   /**
@@ -649,14 +666,10 @@ export class Inspector {
   private static rememberSelection(elements: readonly Element[]): void {
     const area = appArea
     const rows = area ? Inspector.partsIn(area) : []
+    const keys = partKeysFor(rows)
     const addresses = elements.flatMap((element): SelectionAddress[] => {
-      const index = rows.findIndex((row) => row.element === element)
-      if (index < 0) return []
-      const place = writtenKeyOf(element)
-      const nth = place
-        ? rows.filter((row) => writtenKeyOf(row.element) === place).findIndex((row) => row.element === element)
-        : 0
-      return [{ index, tag: element.localName, place, nth }]
+      const path = keys.get(element)
+      return path ? [{ path }] : []
     })
     if (addresses.length) editorPrefs.set(Inspector.selectionPref, addresses)
   }
@@ -673,19 +686,6 @@ export class Inspector {
           ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
           : Inspector.partsIn(child, depth)
     )
-  }
-
-  /** `element`'s key among the app's parts, as a string (`addressKey()`):  `undefined` outside the app. */
-  static keyOf(element: Element): string | undefined {
-    const address = Inspector.addressOf(element)
-    return address && addressKey(address)
-  }
-
-  /** Where `element` sits among the app's parts, to find it again:  `undefined` outside the app. */
-  private static addressOf(element: Element): PartAddress | undefined {
-    const area = appArea
-    const index = area ? Inspector.partsIn(area).findIndex((row) => row.element === element) : -1
-    return index < 0 ? undefined : { index, tag: element.localName }
   }
 
   /** The pref remembering what's selected, the project's own:  `inspector:selected:@spell/examples/tic-tac-toe`. */
@@ -752,10 +752,11 @@ export class Inspector {
   /**
    * Is `element` a part the Inspector shows:  a drawn thing, or a Spell UI element?
    * - Or an element of a component built on Spell UI's, its vocabulary its own:  a notebook's `<spell-example>`.
+   * - Or any other tag the drawing writes, a `<spacer />` (`isWrittenTag()`;  epic `editor` I169).
    * - An arrow:  handed on as it is (`NotebookController.cellAt()`).
    */
   static isPart = (element: Element): boolean => {
-    return !!SpellElement.thingOf(element) || isUIElement(element)
+    return !!SpellElement.thingOf(element) || isUIElement(element) || isWrittenTag(element)
   }
 
   /**
@@ -877,7 +878,11 @@ export class Inspector {
    * Call `thing`'s action `action` `newWords`, wherever it's named (epic `editor` I111):  its head, each call and each
    * `<action "...">`, in every file of the project, as the language service finds them (`renameActionAt()`).
    * - ONE step of the editor's history, however many files it changes;  then a compile.
-   * - Answers whether it renamed it.
+   * - Each place it's named is a change of its own, the last first (I168):
+   *   one change from its first place to its last replaced every line between,
+   *   and each code slice on those lines showed other lines until the Code card was drawn again.
+   * - Answers once the files are changed, with the compile that follows (`compiled`, which NEVER rejects:
+   *   a failure shows in the error banner);  `undefined` when it wasn't renamed.
    * - throws a `UIError` when the name is refused (empty, taken, not words ...):  its message says why, in words,
    *   for the field it was typed in;  any other failure shows in the error banner
    */
@@ -885,7 +890,7 @@ export class Inspector {
     thing: object,
     action: { words: string; name: string },
     newWords: string
-  ): Promise<boolean> {
+  ): Promise<{ compiled: Promise<void> } | undefined> {
     const place = declaredActionPlace(action, classNamesOf(thing), declarationPlaces())
     const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
     const head = file?.contents?.split("\n")[place!.line] ?? ""
@@ -900,21 +905,23 @@ export class Inspector {
       editor.history.transaction(title, () => {
         for (const [uri, edits] of Object.entries(changes)) {
           const at = editor.project?.spellFiles.find((each) => addresses.uriFor(each) === uri)
-          const before = at?.contents ?? ""
-          if (!at || !edits.length) continue
-          const { span, newText } = SourceEdits.editBetween(before, SourceEdits.applied(before, edits))
-          editor.history.change(
-            { file: at, at: span.start, before: before.slice(span.start, span.end), after: newText },
-            { title }
-          )
+          if (!at) continue
+          // the last first:  so the places before it are still where the service said
+          for (const edit of [...edits].sort(laterFirst)) {
+            const before = at.contents ?? ""
+            const { span, newText } = SourceEdits.editBetween(before, SourceEdits.applied(before, [edit]))
+            editor.history.change(
+              { file: at, at: span.start, before: before.slice(span.start, span.end), after: newText },
+              { title }
+            )
+          }
         }
       })
-      void editor.compileApp().catch((error: unknown) => editor.showError(error as Error))
-      return true
+      return { compiled: editor.compileApp().catch((error: unknown) => editor.showError(error as Error)) }
     } catch (error) {
       if (!(error instanceof RenameError)) {
         editor.showError(error as Error)
-        return false
+        return undefined
       }
       throw new UIError(renameRefusal(error, newWords, action.words))
     }
@@ -1265,6 +1272,51 @@ export class Inspector {
     )
   }
 
+  /**
+   * Remove `element`'s event `row` from the program (epic `editor` T73):  its head and its code, as a step of
+   * `editor.history`, so one undo puts it back.
+   * - `when`:  `"after asking"` (a click on its ✕) asks first, naming it;  `"at once"` (an ⌥-click) doesn't.
+   * - A drawn thing's:  its lines in its type (`declaredEventSpan()`).
+   * - A Spell UI element's:  its ` onClick={...}` (`handlerSpanInSource()`).
+   * - Nothing happens where it can't be found.
+   * - NEVER throws.
+   */
+  static async removeEvent(
+    element: Element,
+    row: WrittenEvent & { key?: string },
+    when: "after asking" | "at once"
+  ): Promise<void> {
+    const title = appTexts.text("inspectorRemoveEvent", { event: row.words })
+    if (when === "after asking") {
+      if (!Inspector.removalOf(element, row)) return
+      const message = appTexts.text("inspectorRemoveEventConfirm", { event: row.words })
+      const ok = appTexts.text("inspectorRemoveEventOk")
+      if (!(await editor.confirm({ message, ok, danger: true }).catch(() => false))) return
+    }
+    // found again after asking:  the file may have changed meanwhile
+    const removal = Inspector.removalOf(element, row)
+    if (removal) editor.history.change(removal, { title })
+  }
+
+  /**
+   * The change that removes `element`'s event `row` (`removeEvent()`):  `undefined` when it isn't found,
+   * or what's there isn't it, e.g. the code typed since its last compile moved it.
+   */
+  private static removalOf(element: Element, row: WrittenEvent & { key?: string }): TextChange | undefined {
+    const thing = SpellElement.thingOf(element)
+    const sources = new Map(sourceFiles().map((file) => [file.path, file.text]))
+    const handling = [element, ...(element.shadowRoot?.querySelectorAll("*") ?? [])]
+    const span = thing
+      ? declaredEventSpan(row, classNamesOf(thing), declarationPlaces(), sourceFiles())
+      : handling.map((at) => (row.key ? handlerSpanInSource(at, sources, row.key) : undefined)).find(Boolean)
+    const file = span && sliceOf({ path: span.path, from: 1, to: 1 })?.file
+    if (!span || !file) return undefined
+    const before = (file.contents ?? "").slice(span.start, span.end)
+    const named = thing ? row.words : `on${upperFirst(row.key ?? "")}`
+    if (!before.replace(/\s+/g, " ").toLowerCase().includes(named.replace(/\s+/g, " ").toLowerCase())) return undefined
+    return { file, at: span.start, before, after: "" }
+  }
+
   /** The words or DOM event of the row added last (`addEvent()`), for it to take the cursor;  `""` once it has. */
   static get justAdded(): string {
     return justAdded()
@@ -1286,7 +1338,7 @@ export class Inspector {
         label: Inspector.labelFor(element)
       }
     }
-    if (isUIElement(element)) {
+    if (isUIElement(element) || isWrittenTag(element)) {
       // its attributes as its vocabulary lists them:  those it sets first, the rest under "More"
       const component = (element as Element & { component?: { vocabulary?: { attributes?: FieldSpec[] } } }).component
       const fields = component?.vocabulary?.attributes ?? []
@@ -1465,15 +1517,12 @@ const POSITION_SUFFIX = "-position"
 /** One of the app's parts, as the parts tree lists it:  the part, and how deep it sits. */
 export type PartRow = { element: Element; depth: number }
 
-/** Where a part is among the app's parts (`partsIn()`), and its tag. */
-export type PartAddress = { index: number; tag: string }
-
 /**
- * Where a selected part was, to select it again.
- * - By where it's written first (`place`), the `nth` drawn from that place, so a move in the program doesn't lose it.
- * - Its place among the parts, for what's written nowhere:  something a widget made.
+ * Where a selected part was, to select it again:  its `path` among the parts (`partKeysFor()`).
+ * - Remembered before paths (epic `editor` I171), and still read:  where it's written first (`place`), the `nth` drawn
+ *   from that place;  else its place among the parts (`index`) and its `tag`.
  */
-type SelectionAddress = PartAddress & { place?: string; nth?: number }
+type SelectionAddress = { path?: string; index?: number; tag?: string; place?: string; nth?: number }
 
 /** `element`'s own words, its text children's, shortened to `WORDS_LENGTH` characters:  `""` for none. */
 function ownWords(element: Element): string {
@@ -1544,9 +1593,32 @@ function isMadeUpId(id: string, thing: object): boolean {
   return new RegExp(`^${kebabCase(thing.constructor.name) || "thing"}-[0-9a-z]{8}$`).test(id)
 }
 
-/** A part's place as one key:  `4:tic-tac-toe-square`. */
-export function addressKey(address: PartAddress): string {
-  return `${address.index}:${address.tag}`
+/**
+ * Each part's key, from `rows` (`Inspector.partsIn()`):  its PATH, which stays the same while the app draws more.
+ * - Its parent's key, then its tag and its `id`:  `/solitaire-app:0/ui-container:0/solitaire-column#C5`;
+ *   with no `id`, which of its parent's parts of that tag with no `id` it is:  `ui-action:2`.
+ * - Never its place among all the parts:  that moves whenever a part is added above it.
+ *   So the Views tree's rows opened by hand, and the selection, followed the place, not the part:
+ *   a column opened by hand moved to another column each time Solitaire's deal added a card above it,
+ *   so columns opened and closed as the cards came (epic `editor` I171).
+ */
+export function partKeysFor(rows: readonly PartRow[]): Map<Element, string> {
+  const keys = new Map<Element, string>()
+  // the parts round the row walked now, outermost first:  each one's key, and how many of each tag it holds with no `id`
+  const around: { key: string; counts: Map<string, number> }[] = []
+  const topCounts = new Map<string, number>()
+  for (const { element, depth } of rows) {
+    around.length = depth
+    const parent = around.at(-1)
+    const counts = parent?.counts ?? topCounts
+    const tag = element.localName
+    const nth = counts.get(tag) ?? 0
+    if (!element.id) counts.set(tag, nth + 1)
+    const key = `${parent?.key ?? ""}/${tag}${element.id ? `#${element.id}` : `:${nth}`}`
+    keys.set(element, key)
+    around.push({ key, counts: new Map() })
+  }
+  return keys
 }
 
 /** What the Inspector reads of a Spell UI attribute:  its name and kind (`size`, `color` ...). */
@@ -1577,6 +1649,8 @@ const UI_PREFIX = "ui-"
 /** Spell UI's controls:  what a plain click selects, beside a drawn thing (Alt-click:  any Spell UI element). */
 const CONTROL_TAGS = new Set([
   "ui-button",
+  // an action's button, `<action "cheat" />`:  it runs its action, with no handler of its own to find it by (I158)
+  "ui-action",
   "ui-input",
   "ui-textarea",
   "ui-checkbox",
@@ -1606,12 +1680,24 @@ const ADDED_TAGS = new Set([
   "ui-image"
 ])
 
-/** Does a click on `element` mean it, by its tag? */
+/**
+ * Does a click on `element` mean it, by its tag?
+ * - A Spell UI control (`CONTROL_TAGS`), anywhere
+ * - What the palette adds (`ADDED_TAGS`), or any other tag the drawing writes (`isWrittenTag()`:  a `<spacer />`),
+ *   when it isn't in a drawn thing's shadow root:  there it's how the thing looks, and a click means the thing.
+ */
 function isClickableTag(element: Element): boolean {
-  return (
-    CONTROL_TAGS.has(element.localName) ||
-    (ADDED_TAGS.has(element.localName) && !(element.getRootNode() instanceof ShadowRoot))
-  )
+  if (CONTROL_TAGS.has(element.localName)) return true
+  return (ADDED_TAGS.has(element.localName) || isWrittenTag(element)) && !(element.getRootNode() instanceof ShadowRoot)
+}
+
+/**
+ * Is `element` a tag the drawing writes that's neither a drawn thing nor a Spell UI element:
+ * a `<spacer />`, which only takes room (epic `editor` I169;  Owen:  "I should be able to select a spacer").
+ * - It's in the code (stamped with where:  `SourceMarks.placeOfDrawn()`), so the code's caret can go to it.
+ */
+function isWrittenTag(element: Element): boolean {
+  return !SpellElement.thingOf(element) && !isUIElement(element) && !!SourceMarks.placeOfDrawn(element)
 }
 
 editorPrefs.declare(OPEN_PREF, { type: "choice" })
@@ -1916,6 +2002,7 @@ const SOLID_HANDLER = /^_\$\$([a-z]+)$/
  */
 function drawnBox(element: Element): DOMRect {
   const own = element.getBoundingClientRect()
+  if (isFlat(own) && !element.shadowRoot) return roomOf(element, own)
   if (own.width || own.height || !element.shadowRoot) return own
   const boxes = [...element.shadowRoot.children]
     .map((child) => child.getBoundingClientRect())
@@ -1926,6 +2013,37 @@ function drawnBox(element: Element): DOMRect {
   const right = Math.max(...boxes.map((box) => box.right))
   const bottom = Math.max(...boxes.map((box) => box.bottom))
   return new DOMRect(left, top, right - left, bottom - top)
+}
+
+/** Is `box` a line, no wider or no taller than nothing, but not nothing at all? */
+function isFlat(box: DOMRect): boolean {
+  return (box.width === 0) !== (box.height === 0)
+}
+
+/**
+ * The room a box-less element takes between its neighbours:  a toolbar's `<spacer />` is 0px wide,
+ * and the gap between the buttons on each side of it is what it makes (epic `editor` I169).
+ * - `own` 0px wide:  from the right of the one before it to the left of the one after, as tall as `own`;
+ *   0px tall:  from the bottom of the one before to the top of the one after, as wide.
+ * - No neighbour drawn on a side:  its own edge there.
+ */
+function roomOf(element: Element, own: DOMRect): DOMRect {
+  const before = element.previousElementSibling && drawnBox(element.previousElementSibling)
+  const after = element.nextElementSibling && drawnBox(element.nextElementSibling)
+  const isDrawn = (box: DOMRect | null) => !!box && (box.width > 0 || box.height > 0)
+  if (own.width === 0) {
+    const left = isDrawn(before) && before!.right <= own.left ? before!.right : own.left
+    const right = isDrawn(after) && after!.left >= own.right ? after!.left : own.right
+    return new DOMRect(left, own.top, right - left, own.height)
+  }
+  const top = isDrawn(before) && before!.bottom <= own.top ? before!.bottom : own.top
+  const bottom = isDrawn(after) && after!.top >= own.bottom ? after!.top : own.bottom
+  return new DOMRect(own.left, top, own.width, bottom - top)
+}
+
+/** Is `point` inside `box`? */
+function isInside(point: { x: number; y: number }, box: DOMRect): boolean {
+  return point.x >= box.left && point.x <= box.right && point.y >= box.top && point.y <= box.bottom
 }
 
 /**
@@ -2334,17 +2452,22 @@ class PartSelector {
   private static canRing(element: Element): boolean {
     if (element.getRootNode() !== document) return false
     if (getComputedStyle(element).display === "contents") return false
+    // a box-less spacer:  a box stands in, over the room it takes (`roomOf()`)
+    if (isFlat(element.getBoundingClientRect())) return false
     // its own `::after`, unless it's our ring already
     return element.hasAttribute(HOVER_MARK) || getComputedStyle(element, "::after").content === "none"
   }
 
   /**
    * The part under the event's pointer:  the innermost on its path, inside `area`, that's
-   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button ...)
+   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button,
+   *   an action's button ...)
    * - or a Spell UI element with a handler of its own:  a menu item that acts as a button
    *   (Owen:  "I can't e.g. inspect buttons in the solitaire app header (e.g. cheat button)")
    * - with Alt held, any Spell UI element:  the text or label inside a card too
    * - Not one inside a Spell UI element's own shadow root:  a button's icon is the button's.
+   * - A box-less tag the drawing writes, in the room it takes:  a toolbar's `<spacer />`, 0px wide,
+   *   in the gap between the buttons on each side of it (`spacerAt()`;  epic `editor` I169).
    */
   static partAt(event: Event, area: HTMLElement): Element | undefined {
     const anyElement = (event as MouseEvent).altKey
@@ -2354,8 +2477,24 @@ class PartSelector {
       if (target.hasAttribute(EDITOR_OWN)) return undefined
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
+      const spacer = PartSelector.spacerAt(target, event as MouseEvent)
+      if (spacer) return spacer
       const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)
       if (isPart && Inspector.partFor(target)) return target
+    }
+    return undefined
+  }
+
+  /**
+   * The box-less tag the drawing writes among `element`'s children whose room holds the pointer (`roomOf()`):
+   * a click can't land on a 0px wide `<spacer />` itself, only in the gap it makes.
+   */
+  private static spacerAt(element: Element, event: MouseEvent): Element | undefined {
+    const point = { x: event.clientX, y: event.clientY }
+    for (const child of element.children) {
+      if (!isClickableTag(child) || !isWrittenTag(child)) continue
+      const own = child.getBoundingClientRect()
+      if (isFlat(own) && isInside(point, roomOf(child, own))) return child
     }
     return undefined
   }
@@ -2438,6 +2577,8 @@ class PartSelector {
  * - Each card folds to its header (`<InspectorCard>`):
  *   a folded card keeps its header's height, the others share the rest.
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
+ *   - except the last open card, which reaches the column's bottom, its body scrolling when it's long (I165):
+ *     the column reads as one, with no empty page under it
  * - As the selection changes or a card folds, the cards glide to their new sizes (`CardGlide`, T69).
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
@@ -2655,7 +2796,8 @@ function hasCodeCard(): boolean {
  *   column (Owen, 2026-11-14, I81).  Its own `id`, so a drag then is kept apart from the split you set while inspecting.
  *   - the top card needs no size of its own for that:  it's as tall as its tip, as any card is as tall as what it shows
  *   - the Code card its bar alone:  folded for good (`<NoCodeCard>`, T69)
- * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140).
+ * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140);
+ *   the last open card takes what's left, to the column's bottom (I165).
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
 function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {
@@ -3700,3 +3842,8 @@ async function loadBrandTokens(): Promise<void> {
 const BRAND_THEME = "spell"
 /** A load of the brand's tokens has started. */
 let loadingBrandTokens = false
+
+/** Sorts text edits from the last in the file to the first:  made in that order, each one's place still holds. */
+function laterFirst(one: TextEdit, other: TextEdit): number {
+  return other.range.start.line - one.range.start.line || other.range.start.character - one.range.start.character
+}

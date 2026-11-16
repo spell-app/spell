@@ -5,7 +5,7 @@ import type { monaco } from "./monaco"
 
 /****************
  * ### `SpellTyping`
- * Seven helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
+ * Nine helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
  * is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicking or arrowing onto a blank line inside a body writes that body's indent (the next line's, as below),
@@ -47,8 +47,13 @@ import type { monaco } from "./monaco"
  *   on a type or a property, its body.  One undo for all of it.
  *   Tab there, or Cmd / Ctrl+], moves them in a level the same way.
  *   - A line of a tag's attributes under its first line moves alone, its indent tabs then spaces (I142).
+ *   - So does a comment line:  the lines after it are the body of the line above it (I161).
  * - Enter between a tag's attributes lines the rest up under its first attribute (epic `editor` I142):
  *   `<container columns="7" |spacing="xs">` puts `spacing` under `columns`, tabs then spaces, as it's drawn.
+ * - Enter before a comment after code puts the comment on its own line, at the level of the body under it (I155, I161):
+ *   `its "face" is |-- the card it draws`, the comment then its body's first line.
+ * - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):
+ *   the ones just before the caret go, in the same undo step.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
  *   - Several editors can show one file (the Code card's slices show the code editor's):  each hears every edit,
  *     so only the one typed in helps, at its own caret (epic `editor` I150).
@@ -129,7 +134,7 @@ export class SpellTyping {
    * - A line with nothing under it is left to Monaco.
    */
   private keyDown(event: monaco.IKeyboardEvent) {
-    if (this.enterInTag(event)) return
+    if (this.enterBeforeComment(event) || this.enterInTag(event)) return
     const { editor } = this
     const model = editor.getModel()
     const { browserEvent: key } = event
@@ -157,7 +162,9 @@ export class SpellTyping {
     // Backspace there is Monaco's, a space at a time
     const isAttributeLine = !!SpellTyping.tagOpenAt(lines, line - 1, 0)
     if (isAttributeLine && isBackspace) return
-    const under = isAttributeLine ? 0 : SpellTyping.linesUnder(lines, line - 1)
+    // a comment line moves alone:  what's under it is the body of the line above it (I161)
+    const isComment = LSP.SpellKeywords.COMMENT_AFTER.test(text)
+    const under = isAttributeLine || isComment ? 0 : SpellTyping.linesUnder(lines, line - 1)
     if (!under && !isAttributeLine) return
     const settings = indentSettingsOf(model)
     // how far the lines move:  out to the level before, or in a level
@@ -205,15 +212,8 @@ export class SpellTyping {
   private enterInTag(event: monaco.IKeyboardEvent): boolean {
     const { editor } = this
     const model = editor.getModel()
-    const key = event.browserEvent
-    if (key.key !== "Enter" || key.shiftKey || key.metaKey || key.ctrlKey || key.altKey || key.isComposing) return false
-    if (!model || editor.getRawOptions().readOnly || !this.languages.indents.includes(model.getLanguageId()))
-      return false
-    const selections = editor.getSelections() ?? []
-    const selection = selections[0]
-    if (selections.length !== 1 || !selection?.isEmpty()) return false
-    // Enter takes a suggestion while the list shows:  Monaco's
-    if (editor.getDomNode()?.querySelector(SUGGESTIONS_SHOWING)) return false
+    const selection = this.plainEnter(event)
+    if (!model || !selection) return false
     const line = selection.startLineNumber
     const lines = model.getLinesContent()
     const tag = SpellTyping.tagOpenAt(lines, line - 1, selection.startColumn - 1)
@@ -240,6 +240,63 @@ export class SpellTyping {
     editor.pushUndoStop()
     editor.revealPosition(editor.getPosition()!)
     return true
+  }
+
+  ////////////////
+  // ## Enter before a comment after code
+  ////////////////
+
+  /**
+   * Enter before a comment after code (`its "face" is\t\t-- the card it draws`):  the comment goes on its own line,
+   * at the level of the body under that line, so the body still reads as its body (Owen, 2026-11-15, I155, I161).
+   * - The body's level is its first line's (`SpellTyping.commentIndent()`), else a level in from the code's line.
+   * - The tabs and spaces round the caret go:  none left at the end of the code's line, none before the comment.
+   * - One undo.
+   * - Returns whether it did:  `false` leaves the key to Monaco, whose Enter rule (`CODE_BEFORE`, `COMMENT_AFTER`)
+   *   writes a level in, as VS Code's does.
+   */
+  private enterBeforeComment(event: monaco.IKeyboardEvent): boolean {
+    const { editor } = this
+    const model = editor.getModel()
+    const selection = this.plainEnter(event)
+    if (!model || !selection) return false
+    const line = selection.startLineNumber
+    const text = model.getLineContent(line)
+    const before = text.slice(0, selection.startColumn - 1)
+    const after = text.slice(selection.startColumn - 1)
+    if (!LSP.SpellKeywords.CODE_BEFORE.test(before) || !LSP.SpellKeywords.COMMENT_AFTER.test(after)) return false
+    const indent = SpellTyping.commentIndent(model.getLinesContent(), line - 1, indentSettingsOf(model))
+    const range = {
+      startLineNumber: line,
+      startColumn: before.trimEnd().length + 1,
+      endLineNumber: line,
+      endColumn: text.length - after.trimStart().length + 1
+    }
+    event.preventDefault()
+    event.stopPropagation()
+    editor.pushUndoStop()
+    this.write([{ range, text: model.getEOL() + indent }], { from: line, to: line })
+    editor.setPosition({ lineNumber: line + 1, column: indent.length + 1 })
+    editor.pushUndoStop()
+    editor.revealPosition(editor.getPosition()!)
+    return true
+  }
+
+  /**
+   * The caret, when `event` is an Enter this class may take:  no modifier, one caret and nothing selected,
+   * no suggestions showing (Enter takes one, Monaco's), in a Spell editor that can be written in.
+   */
+  private plainEnter(event: monaco.IKeyboardEvent): monaco.Selection | undefined {
+    const { editor } = this
+    const model = editor.getModel()
+    const key = event.browserEvent
+    if (key.key !== "Enter" || key.shiftKey || key.metaKey || key.ctrlKey || key.altKey || key.isComposing) return
+    if (!model || editor.getRawOptions().readOnly || !this.languages.indents.includes(model.getLanguageId())) return
+    const selections = editor.getSelections() ?? []
+    const selection = selections[0]
+    if (selections.length !== 1 || !selection?.isEmpty()) return
+    if (editor.getDomNode()?.querySelector(SUGGESTIONS_SHOWING)) return
+    return selection
   }
 
   ////////////////
@@ -318,6 +375,7 @@ export class SpellTyping {
     if (!this.editor.hasTextFocus()) return
     const change = event.changes[0]!
     const model = this.editor.getModel()
+    if (model && NEW_LINES.test(change.text)) return this.help(() => this.trimBeforeEnter(change.range.startLineNumber))
     if (!model || change.rangeLength !== 0 || !/^.$/su.test(change.text)) return
     const languageId = model.getLanguageId()
     const line = change.range.startLineNumber
@@ -404,6 +462,28 @@ export class SpellTyping {
     }
     this.editor.executeEdits(SPELL_TYPING, edits, caret)
     return true
+  }
+
+  /**
+   * Enter split `line` (1-based):  take the tabs and spaces off its end, the ones that were just before the caret,
+   * so none is left at the end of a line (Owen, 2026-11-15, I160).
+   * - Any Enter in a Spell editor:  Monaco's own (its `trimAutoWhitespace` takes only the indent IT wrote), or a rule's.
+   * - The same undo step as the Enter:  one undo gives the line back as it was.
+   * - Only the line's end:  what's after the caret, on the new line, is left as it was.
+   */
+  private trimBeforeEnter(line: number) {
+    const model = this.editor.getModel()
+    if (!model || line >= model.getLineCount()) return
+    const text = model.getLineContent(line)
+    const trailing = SpellTyping.spaceAtEnd(text)
+    if (!trailing) return
+    const range = {
+      startLineNumber: line,
+      startColumn: text.length - trailing + 1,
+      endLineNumber: line,
+      endColumn: text.length + 1
+    }
+    this.write([{ range, text: "" }], { from: line, to: line })
   }
 
   /**
@@ -543,6 +623,25 @@ export class SpellTyping {
       return { line: at, firstAttribute: word ? nameEnd + word.index : undefined }
     }
     return undefined
+  }
+
+  /**
+   * The indent a comment after the code on `lines[index]` takes on its own line (I161):  the level of the body under
+   * that line, so the body still reads as its body.
+   * - The next non-blank line's indent, when it's further in than the line's:  its body's first line.
+   * - Else a level in from the line's, in the file's tabs or spaces:  a body of only that comment.
+   */
+  static commentIndent(lines: readonly string[], index: number, settings: IndentSettings): string {
+    const own = indentOf(lines[index] ?? "")
+    const next = lines.slice(index + 1).find((line) => line.trim())
+    const body = next === undefined ? "" : indentOf(next)
+    if (widthOf(body, settings.tabSize) > widthOf(own, settings.tabSize)) return body
+    return own + (settings.insertSpaces ? " ".repeat(settings.tabSize) : "\t")
+  }
+
+  /** How many tabs and spaces end `text`:  the ones Enter leaves at the end of the line it splits (I160). */
+  static spaceAtEnd(text: string): number {
+    return /[ \t]*$/.exec(text)![0].length
   }
 
   /**
@@ -745,11 +844,14 @@ type LspCompletionFields = { insertText?: string; command?: { command: string } 
 /** A model, with the colouring Monaco keeps for it but leaves out of its types. */
 type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokenization?(line: number): void } }
 
-/** The source of the edits it makes, for Monaco's undo and the editor's listeners. */
 /** Monaco's list of suggestions, while it shows:  Tab then takes one. */
 const SUGGESTIONS_SHOWING = ".suggest-widget.visible"
 
+/** The source of the edits it makes, for Monaco's undo and the editor's listeners. */
 const SPELL_TYPING = "spell-typing"
+
+/** What an Enter writes:  a new line and its indent (two, between `<x>` and `</x>`). */
+const NEW_LINES = /^(?:\r?\n[ \t]*)+$/
 
 /** The app's scheme for its files' addresses:  `AppAddresses.SCHEME`. */
 const APP_SCHEME = "spell"

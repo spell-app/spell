@@ -95,6 +95,18 @@
     fill: currentColor;
     pointer-events: none;
   }
+  /* `all-items-icon`:  its icon, an item's size, then the caret, side by side;  the button as wide as they need */
+  .ui.toolbar > .all-items:has(> svg + svg) {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    width: auto;
+    padding: 0 8px;
+  }
+  .ui.toolbar > .all-items > svg:first-child:not(:last-child) {
+    width: 1em;
+    height: 1em;
+  }
 
   /*
    * the menu's own box scrolls (the scrolling row's sheet):  it takes the room left, its items never shrunk

@@ -659,9 +659,13 @@ const START_LINE = "if (!core.isCarryingOver) "
 /**
  * What says what the program's classes are, and is run again as written:
  * its imports, a section's heading, a class's own statement (`Card.declareProp(...)`), a stylesheet, an action's menu.
+ * - And what's kept on each class, so the new one has it too:  an action's description, the events it sends
+ *   (`core.describeEvent()`), an action's after hooks (`core.addAfterHook()`).
+ *   Left out, every edit as the program ran lost them:  Solitaire's column stopped turning its last card up
+ *   (epic `language` I107).
  */
 const KEPT_STATEMENT =
-  /^(?:import\s|export\s*\{|core\.(?:heading|describeAction|describeMenu|installStyles|useElement)\(|\p{Lu}[\p{L}\p{N}_$]*[.(]|Object\.defineProperty\(\p{Lu})/u
+  /^(?:import\s|export\s*\{|core\.(?:heading|describeAction|describeEvent|addAfterHook|describeMenu|installStyles|useElement)\(|\p{Lu}[\p{L}\p{N}_$]*[.(]|Object\.defineProperty\(\p{Lu})/u
 
 /** A property declared in a class:  its name, and what's said of it. */
 const DECLARED_PROPERTY = /declareProp\("([^"]+)",\s*(\{.*?\})\s*\)/g
