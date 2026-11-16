@@ -161,6 +161,16 @@ describe("<ui-property-editor> schema", () => {
     await userEvent.click(items[0]!)
     await settle(host)
     expect(thing.direction).toBe("up")
+    // the same words, the same list:  a new one each read made its control again on every change around it
+    // (epic `codemirror` I6:  Solid's EFFECT_RELAY_TEAR, typing in the Inspector's Code card, in Spanish)
+    const property = host.querySelector("ui-property[name=direction]") as HTMLElement & {
+      component: { choices: unknown }
+    }
+    expect(property.component.choices).toBe(property.component.choices)
+    const control = items[0]!.parentElement
+    host.value = { direction: "down" }
+    await settle(host)
+    expect(host.querySelector("ui-property[name=direction] ui-item")!.parentElement).toBe(control)
   })
 
   it("writes what the person types back to the thing, and sends `ui-changed` from the editor and the property", async () => {
