@@ -1,0 +1,342 @@
+/*
+ * Spell's CodeMirror editor, drawn bubbly (epic `editor` P30, the CodeMirror test):  what's the editor's own.
+ * - The look itself is `bubbly.css`'s, the look's one sheet:  the editor's box is a `.bubbly` (`CodeMirrorBubbly`),
+ *   so its settings and its page rules reach the marks in the text, which are real elements, as on the page.
+ * - Here:  the box, the lines' size, a tab stop's width, the bands, rails and feet, a drawing's tags, the selection,
+ *   and the find panel, suggestions and hover in the page's colours.
+ * - Light and dark from one set, `light-dark()`, as `bubbly.css`:  the page's `color-scheme` picks.
+ */
+
+.bubbly.cmb-editor {
+  /* a tab stop:  how far a body's lines sit in from its band */
+  --cmb-indent: 24px;
+  /* room before a line's words:  a top-level band's round end, half a tab further left, still shows */
+  --cmb-line-pad: 22px;
+  /* a band starts this far left of its words, and its rail there */
+  --cmb-band-inset: 10px;
+  /* a rail's width, a foot's height */
+  --cmb-rail: 3px;
+  /* a line's height:  room for a band, with a little between two */
+  --cmb-line-height: 26px;
+
+  /* each part of speech's band over the paper, for the rails a line draws (the bands themselves are `--bubbly-pill`) */
+  --cmb-band-thing: light-dark(
+    color-mix(in srgb, var(--bubbly-thing) 20%, white),
+    color-mix(in srgb, var(--bubbly-thing) 34%, var(--bubbly-paper-dark))
+  );
+  --cmb-band-action: light-dark(
+    color-mix(in srgb, var(--bubbly-action) 20%, white),
+    color-mix(in srgb, var(--bubbly-action) 34%, var(--bubbly-paper-dark))
+  );
+  --cmb-band-property: light-dark(
+    color-mix(in srgb, var(--bubbly-property) 20%, white),
+    color-mix(in srgb, var(--bubbly-property) 34%, var(--bubbly-paper-dark))
+  );
+  --cmb-band-plain: light-dark(
+    color-mix(in srgb, var(--bubbly-plain) 20%, white),
+    color-mix(in srgb, var(--bubbly-plain) 34%, var(--bubbly-paper-dark))
+  );
+  --cmb-band-control: light-dark(
+    color-mix(in srgb, var(--bubbly-control) 20%, white),
+    color-mix(in srgb, var(--bubbly-control) 34%, var(--bubbly-paper-dark))
+  );
+
+  /* the drawing's box is the editor's:  its paper, no border, padding or margin of its own */
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  max-width: none;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: var(--cmb-line-height);
+
+  .cm-scroller {
+    font-family: var(--bubbly-font-family);
+    line-height: var(--cmb-line-height);
+  }
+  .cm-content {
+    tab-size: var(--cmb-indent);
+    padding: 8px 0;
+    caret-color: var(--bubbly-bold-ink);
+  }
+  .cm-line {
+    padding: 0 16px 0 var(--cmb-line-pad);
+    /* the rails of the blocks it's inside:  one stripe each (`CodeMirrorBubbly`) */
+    background-image: var(--cmb-rails, none);
+  }
+  .cm-gutters {
+    background: transparent;
+    border: 0;
+  }
+  .cm-cursor {
+    border-left-color: var(--bubbly-bold-ink);
+  }
+
+  /*
+   * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
+   * - Monaco's sheet does the same for its shapes (`--bubbly-selection-strength`)
+   */
+  .cm-selectionLayer {
+    z-index: 1 !important;
+    pointer-events: none;
+  }
+  .cm-selectionBackground,
+  &.cm-focused .cm-selectionBackground {
+    background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
+  }
+
+  /****** a declaration's head:  its band ******/
+  .cmb-hue {
+    --bubbly-pill: light-dark(
+      color-mix(in srgb, var(--bubbly-hue) 20%, white),
+      color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark))
+    );
+    --bubbly-input: light-dark(
+      color-mix(in srgb, white var(--bubbly-input-opacity), transparent),
+      color-mix(
+        in srgb,
+        color-mix(in srgb, var(--bubbly-hue) 14%, var(--bubbly-input-dark)) var(--bubbly-input-opacity),
+        transparent
+      )
+    );
+    --bubbly-expression-pill: light-dark(
+      color-mix(in srgb, var(--bubbly-hue) 62%, #1f1f26),
+      color-mix(in srgb, var(--bubbly-hue) 45%, white)
+    );
+    --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
+  }
+  .bubbly-group.cmb-hue {
+    --bubbly-pill: light-dark(
+      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
+      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+    );
+  }
+  .cmb-band {
+    position: relative;
+    display: inline-block;
+    height: var(--bubbly-pill-height);
+    line-height: var(--bubbly-pill-height);
+    vertical-align: middle;
+    /* its words stay on their tab stop:  the band reaches left of them */
+    margin-left: calc(-1 * var(--cmb-band-inset));
+    padding: 0 var(--bubbly-pill-pad-right) 0 var(--cmb-band-inset);
+    border-radius: var(--bubbly-pill-radius);
+    background: var(--bubbly-pill);
+    white-space: pre;
+  }
+  /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line */
+  .cmb-band-open {
+    border-bottom-left-radius: 0;
+  }
+  .cmb-band-open::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: var(--cmb-rail);
+    height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
+    background: var(--bubbly-pill);
+  }
+
+  /* a block's foot:  a short bar off its rail, on a thin line of its own */
+  .cmb-foot-row {
+    position: relative;
+    height: calc(var(--cmb-rail) + 4px);
+    background-image: var(--cmb-rails, none);
+  }
+  .cmb-foot {
+    position: absolute;
+    top: 0;
+    left: calc(var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) - var(--cmb-band-inset));
+    width: calc(var(--cmb-rail) * 6);
+    height: var(--cmb-rail);
+    border-radius: 0 var(--cmb-rail) var(--cmb-rail) var(--cmb-rail);
+    background: var(--bubbly-pill);
+  }
+
+  /****** a drawing's tag:  a band of the structure's blue, as the drawn-bubbly page draws HTML ******/
+  .cmb-tag {
+    display: inline-block;
+    line-height: var(--bubbly-pill-height);
+    padding: 0 3px;
+    border-radius: 6px;
+    background: var(--bubbly-pill);
+  }
+  .cmb-tag .bubbly-tag {
+    font-weight: var(--bubbly-bold);
+    color: var(--bubbly-bold-ink);
+  }
+  .cmb-tag-close {
+    font-size: 0.85em;
+    opacity: 0.8;
+  }
+
+  /****** popups:  the find panel, suggestions, hover, problems, in the page's colours ******/
+  .cm-panels {
+    background: light-dark(#f6f5fa, #26252e);
+    color: var(--bubbly-ink);
+    border-color: light-dark(#e6e4ee, #34323f);
+    font-family: var(--bubbly-font-family);
+  }
+  .cm-search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 36px 8px 12px;
+    font-size: 13px;
+
+    input[type="text"],
+    .cm-textfield {
+      font: inherit;
+      padding: 4px 8px;
+      border: 1px solid light-dark(#d7d4e2, #45434f);
+      border-radius: 6px;
+      background: var(--bubbly-paper);
+      color: var(--bubbly-ink);
+      min-width: 180px;
+    }
+    .cm-button {
+      font: inherit;
+      padding: 3px 10px;
+      border: 1px solid light-dark(#d7d4e2, #45434f);
+      border-radius: 6px;
+      background: light-dark(white, #302f39);
+      background-image: none;
+      color: var(--bubbly-ink);
+      text-transform: capitalize;
+    }
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    button[name="close"] {
+      top: 8px;
+      right: 10px;
+      font-size: 18px;
+      color: var(--bubbly-comment-ink);
+    }
+  }
+  .cm-searchMatch {
+    background: color-mix(in srgb, #f2c94c 45%, transparent);
+    outline: 1px solid color-mix(in srgb, #f2c94c 80%, transparent);
+  }
+  .cm-searchMatch-selected {
+    background: color-mix(in srgb, #f2994a 55%, transparent);
+  }
+  .cm-tooltip {
+    border: 1px solid light-dark(#e6e4ee, #34323f);
+    border-radius: 8px;
+    background: var(--bubbly-paper);
+    color: var(--bubbly-ink);
+    box-shadow: 0 6px 24px rgb(0 0 0 / 18%);
+    font-family: var(--bubbly-font-family);
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .cm-tooltip-autocomplete > ul > li {
+    padding: 3px 10px !important;
+  }
+  .cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: light-dark(#e9e4fb, #3a3550);
+    color: var(--bubbly-bold-ink);
+  }
+  .cm-completionDetail {
+    margin-left: 10px;
+    font-style: normal;
+    color: var(--bubbly-comment-ink);
+  }
+  .cm-tooltip.cm-completionInfo {
+    max-width: 420px;
+    padding: 8px 10px;
+  }
+  .cm-tooltip-lint {
+    padding: 0;
+  }
+  .cm-diagnostic {
+    padding: 6px 10px;
+    white-space: pre-line;
+  }
+  .cm-lintRange-error {
+    background-image: none;
+    text-decoration: underline wavy #e5484d;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+  }
+  .cm-lintRange-warning {
+    background-image: none;
+    text-decoration: underline wavy #e2a336;
+    text-underline-offset: 3px;
+  }
+}
+
+/* a hover's words:  its text, its code blocks */
+.cmb-hover {
+  max-width: 480px;
+  padding: 8px 12px;
+  line-height: 1.45;
+
+  p {
+    margin: 0 0 6px;
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+  hr {
+    margin: 6px 0;
+    border: 0;
+    border-top: 1px solid light-dark(#e6e4ee, #34323f);
+  }
+  pre {
+    margin: 0 0 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: light-dark(#f4f2f9, #2a2932);
+    font:
+      12px / 1.4 ui-monospace,
+      Menlo,
+      monospace;
+    white-space: pre-wrap;
+  }
+}
+
+/****** another language's code (the compiled javascript):  coloured by the page's code colours ******/
+.cmb-code.cm-editor {
+  height: 100%;
+  font-size: 13px;
+  background: var(--ui-code-background, light-dark(white, #1c1b22));
+  color: var(--ui-code-color, light-dark(#3a3a44, #dedde6));
+
+  .cm-scroller {
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  .cm-gutters {
+    background: transparent;
+    border: 0;
+    color: var(--ui-code-gutter-color, #999);
+  }
+}
+
+/****** the merge view:  each change's arrow, its sides' colours ******/
+.cm-mergeView {
+  height: 100%;
+
+  .cm-merge-revert button {
+    cursor: pointer;
+    border: 0;
+    border-radius: 4px;
+    background: light-dark(#ece9f6, #34323f);
+    color: var(--bubbly-ink, inherit);
+  }
+  .cm-changedLine,
+  .cm-deletedChunk {
+    background-color: color-mix(in srgb, #f2c94c 14%, transparent) !important;
+  }
+  .cm-changedText,
+  .cm-deletedText {
+    background: color-mix(in srgb, #f2994a 40%, transparent) !important;
+  }
+}
