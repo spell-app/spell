@@ -2198,10 +2198,15 @@
      * own text, in place of the `"`, so nothing see-through is left to come back when it's selected (I115)
      * - Times' bold curly quotes at the editor's size, leaning with the band;  their colour 10% darker than the
      *   other marks, as an `=`'s (`.bubbly-quote-mark::after`, the drawn-bubbly page's)
+     * - Its box tall enough to reach the middle of the letters, up from their baseline:  CodeMirror finds the place
+     *   under the pointer from its pieces' boxes, and took one of no height for a piece above or below the pointer,
+     *   so a press or a drag left of a quote landed after its value (epic `codemirror` I10);  no taller, or it lifted
+     *   the white 1px
      */
     .cm-line .cmb-quote {
       display: inline-block;
       width: 0;
+      height: 0.7em;
     }
     .cm-line .cmb-quote-glyph {
       position: absolute;
@@ -2240,13 +2245,13 @@
     }
     /*
      * a tag's quoted value's marks:  each mark's box as wide as the `"` it shows (0.4625em, the editor's `"`),
-     * its top at the text's, its curly mark over its middle, leaning more
+     * as tall as the letters, its top at theirs (I10, above), its curly mark over its middle, leaning more
      */
     .cm-line .cmb-tag-quote {
       --bubbly-quote-rotation: 30deg;
       position: relative;
       width: 0.4625em;
-      height: 0;
+      height: 1em;
       vertical-align: text-top;
     }
     /*
