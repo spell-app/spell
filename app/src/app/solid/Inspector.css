@@ -724,11 +724,11 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 
 /*
  * The Inspector's cards on the code's paper while the code is drawn bubbly, so the two columns match
- * (Owen, epic `editor` I153):  `--bubbly-paper` (`bubbly.css`), which is only set inside a `.bubbly`
+ * (Owen, epic `editor` I153):  `--spell-code-paper` (`spell.css`), as `--bubbly-paper` is only set inside a `.bubbly`
  * - the page's `spell-bubbly` class:  `markBubbly()`, `codePopups.ts`
  */
 :root.spell-bubbly .InspectorColumn .SplitPane::before {
-  background: light-dark(white, #1c1b22);
+  background: var(--spell-code-paper);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }

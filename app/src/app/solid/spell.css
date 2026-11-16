@@ -20,6 +20,12 @@
   --spell-pane-shadow: var(--ui-shadow-subtle);
   /* what a pane shows (the code, the console, the tree, the program):  the pane's own, unless a look sees through */
   --spell-view-background: var(--spell-pane-background);
+  /*
+   * the code's paper while it's drawn bubbly (`--bubbly-paper`, `bubbly.css`):  white, or near-black in dark
+   * - the panes beside the code take it too, so the columns match (the page's `spell-bubbly`:  `codePopups.ts`):
+   *   the Inspector's cards (epic `editor` I153), the site editor's board and form (epic `mockup` I17)
+   */
+  --spell-code-paper: light-dark(white, #1c1b22);
 }
 
 /*

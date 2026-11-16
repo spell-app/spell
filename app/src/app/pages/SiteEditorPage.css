@@ -3,11 +3,22 @@
  * picked part's form, side by side under the top bar.
  * - Each is one of the editor's own panes (`.EditorColumns` of `.SplitPane`s:  `SplitPane.css`, `EditorTheme.css`),
  *   so the room round them, their corners, shadow and glass are the theme's, as on the Edit page (epic `mockup` I13):
- *   only what's inside a pane is here.
+ *   only what's inside a pane is here, and their fill (below).
  */
 
 /* Spell UI's breakpoints (`@custom-media`), inlined at build time */
 @import "spell/ui/styles/media.css";
+
+/*
+ * the two panes on the code's paper while the code is drawn bubbly, as Edit's code and Inspector are (epic `mockup`
+ * I17;  Owen:  "the white aesthetic of the code editor & inspector sidebar"):  `--spell-code-paper` (`spell.css`)
+ * - the pane's own glass, a theme's see-through fill, read as lilac on the theme's page
+ */
+:root.spell-bubbly .SiteEditorPage > .SplitPane::before {
+  background: var(--spell-code-paper);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 
 .SiteEditorPage {
   flex: 1 1 auto;

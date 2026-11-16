@@ -88,6 +88,17 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     // no tree of the pages beside the board (epic `mockup` I13):  the board and the form, each a pane as Edit's are
     expect(await page.locator("ui-tree-item").count()).toBe(0)
     expect(await page.locator(".SiteEditorPage.EditorColumns > .SplitPane").count()).toBe(2)
+    // ... on the code's paper, as Edit's code and Inspector are while it's drawn bubbly (epic `mockup` I17)
+    const fills = await page.evaluate(() => {
+      const paper = document.createElement("div")
+      paper.style.background = "var(--spell-code-paper)"
+      document.body.append(paper)
+      const expected = getComputedStyle(paper).backgroundColor
+      paper.remove()
+      const panes = [...document.querySelectorAll(".SiteEditorPage > .SplitPane")]
+      return { expected, panes: panes.map((pane) => getComputedStyle(pane, "::before").backgroundColor) }
+    })
+    expect(fills.panes).toEqual([fills.expected, fills.expected])
     // the app isn't run here:  nothing of the site is drawn over the page
     expect(await page.locator(".spell-site").count()).toBe(0)
   })

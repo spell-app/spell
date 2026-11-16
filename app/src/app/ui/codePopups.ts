@@ -169,8 +169,8 @@ export function showBubbly(isBubbly: boolean): void {
 }
 
 /**
- * Mark the page `spell-bubbly` while the code is drawn bubbly:  the Inspector's cards then take the code's paper
- * (`Inspector.css`;  epic `editor` I153).
+ * Mark the page `spell-bubbly` while the code is drawn bubbly:  the Inspector's cards and the site editor's
+ * board and form then take the code's paper (`--spell-code-paper`;  epic `editor` I153, epic `mockup` I17).
  * - SIDE EFFECT:  the page's root class;  nothing where there's no page (node's tests).
  */
 function markBubbly(): void {
