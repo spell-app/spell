@@ -61,6 +61,8 @@ export class SourceEdits {
    * - Reads both shapes alike, and any language:  it only looks at the shape of a tag.
    * - A tag's quoted word, `<example "one counter">`, is its name's, never its attributes:
    *   a new attribute goes after it (`namedEnd`).
+   * - A value may be a bare word, as Spell writes a choice:  `<foundation "clubs" suit=clubs/>`,
+   *   in any language's letters (`palo=tréboles`).
    * - `undefined` when no tag opens there.
    */
   static tagAt(text: string, opening: number): WrittenTag | undefined {
@@ -72,7 +74,7 @@ export class SourceEdits {
     const namedEnd = nameEnd + (quotedName?.[0].length ?? 0)
     const attributes: WrittenAttribute[] = []
     // a quoted text on its own is skipped:  no attribute's
-    const inside = /"[^"]*"|'[^']*'|([a-zA-Z][\w-]*)(?:=("[^"]*"|'[^']*'|\{))?/g
+    const inside = /"[^"]*"|'[^']*'|([\p{L}_][\p{L}\p{N}_-]*)(?:=("[^"]*"|'[^']*'|\{|[^\s"'{}<>/=]+))?/gu
     inside.lastIndex = namedEnd
     let match: RegExpExecArray | null
     while ((match = inside.exec(text)) && match.index < end) {
@@ -91,11 +93,16 @@ export class SourceEdits {
         })
       } else {
         const stop = start + whole.length
+        const isQuoted = value?.[0] === '"' || value?.[0] === "'"
         attributes.push({
           name,
-          quote: value ? (value[0] as '"' | "'") : undefined,
+          quote: !value ? undefined : isQuoted ? (value[0] as '"' | "'") : "bare",
           span: { start, end: stop },
-          valueSpan: value ? { start: stop - value.length + 1, end: stop - 1 } : undefined
+          valueSpan: !value
+            ? undefined
+            : isQuoted
+              ? { start: stop - value.length + 1, end: stop - 1 }
+              : { start: stop - value.length, end: stop }
         })
       }
     }
@@ -105,10 +112,18 @@ export class SourceEdits {
   /**
    * The edits that say `word="value"` on the tag at `opening`, keeping its quotes as written.
    * - `true`:  a bare `word`;  `false`, `undefined`, or `""`:  the attribute goes.
+   * - A bare value stays bare (`suit=hearts`) while the new one is a single word;  else it's quoted.
+   * - `quote`:  how a NEW attribute's value is written, `"bare"` for a choice's word;  quoted by default.
    * - throws `TypeError` when no tag opens there, or its value is written as an expression:
    *   that's code, which the side bar doesn't rewrite.
    */
-  static settingAttribute(text: string, opening: number, word: string, value: AttributeValue): TextEdit[] {
+  static settingAttribute(
+    text: string,
+    opening: number,
+    word: string,
+    value: AttributeValue,
+    quote: WrittenAttribute["quote"] = '"'
+  ): TextEdit[] {
     const tag = SourceEdits.tagAt(text, opening)
     if (!tag) throw new TypeError(`SourceEdits.settingAttribute():  no tag opens at ${opening};  find it again first`)
     const attribute = tag.attributes.find((each) => each.name === word)
@@ -121,7 +136,8 @@ export class SourceEdits {
       return [SourceEdits.replacing(text, { start: attribute.span.start - 1, end: attribute.span.end }, "")]
     }
     if (isGone) return []
-    const written = value === true ? word : `${word}=${quoted(String(value), attribute?.quote ?? '"')}`
+    const written =
+      value === true ? word : `${word}=${valueWritten(String(value), attribute ? attribute.quote : quote)}`
     if (attribute) return [SourceEdits.replacing(text, attribute.span, written)]
     return [SourceEdits.replacing(text, { start: tag.namedEnd, end: tag.namedEnd }, ` ${written}`)]
   }
@@ -386,8 +402,8 @@ export type WrittenTag = {
 export type WrittenAttribute = {
   /** its word as written:  `color`, `onClick` */
   name: string
-  /** how its value is written:  `undefined` for a bare one */
-  quote: '"' | "'" | "{" | undefined
+  /** how its value is written:  `"bare"` for a bare word (`suit=clubs`), `undefined` for no value at all (`hidden`) */
+  quote: '"' | "'" | "{" | "bare" | undefined
   /** the whole attribute */
   span: TextSpan
   /** its value, inside its quotes or braces */
@@ -472,6 +488,18 @@ function isProse(code: string): boolean {
 }
 
 /** `value` in `quote`, a `"` in it written `&quot;`, a `'` as `&#39;`. */
+/**
+ * `value` as an attribute's value is written, `quote` how the attribute had it:
+ * bare while it's a single word, else in its quotes (double quotes for a bare one, or one with none).
+ */
+function valueWritten(value: string, quote: WrittenAttribute["quote"]): string {
+  if (quote === "bare" && BARE_VALUE.test(value)) return value
+  return quoted(value, quote === "'" ? "'" : '"')
+}
+
+/** A value an attribute may hold bare:  one word, no quote, brace, tag or `=` in it. */
+const BARE_VALUE = /^[^\s"'{}<>/=]+$/u
+
 function quoted(value: string, quote: '"' | "'"): string {
   return quote + value.replaceAll(quote, quote === '"' ? "&quot;" : "&#39;") + quote
 }

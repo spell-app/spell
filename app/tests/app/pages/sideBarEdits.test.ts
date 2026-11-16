@@ -135,6 +135,8 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
 
   // a context each:  the Inspector remembers being open
   beforeEach(async () => {
+    // each test starts from the files as they are:  a save an earlier test's AutoSave made is no reload's
+    saved.clear()
     context = await (await browser).newContext({ viewport: { width: 1440, height: 800 }, colorScheme: "dark" })
     await contextWithNoSaving(context)
   })
@@ -158,7 +160,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     expect(wasDirty).toBeFalsy()
     expect(before).toContain(`suit=clubs`)
 
-    // a foundation's suit:  a literal, on the line that made it
+    // a foundation's suit:  a word, on the tag that made it (language I143)
     await select(page, "solitaire-foundation")
     await change(page, "suit", "hearts")
     const edited = await fileState(page, "Solitaire.spell")
@@ -497,38 +499,37 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
-    "this one:  typed in a real field, added to the line that made it, and reset takes it off",
+    "this one:  typed in a real field, added to the tag that made it, and reset takes it off",
     { timeout: 150_000 },
     async () => {
       const page = await context.newPage()
       await open(page, "Solitaire", { codeEditor: true })
       const { text: before } = await fileState(page, "Solitaire.spell")
       await select(page, "solitaire-foundation")
-      const name = page.locator("ui-property[name=name]")
+      const suit = page.locator("ui-property[name=suit]")
 
-      // set here:  a dot and a reset, and its tooltip says so
-      expect(await name.evaluate((field) => field.matches(":state(here)"))).toBe(true)
-      expect(await name.locator(".label").getAttribute("title")).toBe("Set here")
+      // set here, on its tag (language I143):  a dot and a reset, and its tooltip says so
+      expect(await suit.evaluate((field) => field.matches(":state(here)"))).toBe(true)
+      expect(await suit.locator(".label").getAttribute("title")).toBe("Set here")
 
-      // a real field, typed in
-      const input = name.locator("input")
+      // a real field, typed in:  not on its tag yet, so it's added there, quoted, after its quoted word
+      const input = page.locator("ui-property[name=name] input")
       await input.fill("mine")
       await input.press("Tab")
       await page.waitForTimeout(400)
-      const named = before.replace(`name = "clubs"`, `name = "mine"`)
+      const named = before.replace(`<foundation "clubs" suit=clubs/>`, `<foundation "clubs" name="mine" suit=clubs/>`)
       expect((await fileState(page, "Solitaire.spell")).text).toBe(named)
 
-      // the reset takes it off the line, comma and all, as a step of its own
-      const suit = page.locator("ui-property[name=suit]")
+      // the reset takes it off the tag, space and all, as a step of its own
       await suit.locator("button.origin").click({ force: true })
       await page.waitForTimeout(400)
-      const noSuit = named.replace(`name = "mine", suit = clubs`, `name = "mine"`)
+      const noSuit = named.replace(`name="mine" suit=clubs/>`, `name="mine"/>`)
       expect((await fileState(page, "Solitaire.spell")).text).toBe(noSuit)
 
-      // not on its line now:  quieter, and a change adds it back
+      // not on its tag now:  quieter, and a change adds it back, a choice's bare word
       await page.waitForFunction(() => document.querySelector("ui-property[name=suit]")?.matches(":state(inherited)"))
       await change(page, "suit", "hearts")
-      const added = noSuit.replace(`name = "mine"`, `name = "mine", suit = hearts`)
+      const added = noSuit.replace(`<foundation "clubs" name="mine"/>`, `<foundation "clubs" suit=hearts name="mine"/>`)
       expect((await fileState(page, "Solitaire.spell")).text).toBe(added)
 
       // what it wrote is what the program does:  started afresh, that foundation is hearts
@@ -708,7 +709,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.waitForTimeout(300)
       expect(await selection(page)).toMatchObject({ count: 1, treeRows: 1 })
 
-      // Shift:  each foundation has a line of its own, so it isn't in a list, and it toggles
+      // Shift:  each foundation has a tag of its own, so it isn't in a list, and it toggles
       await page.keyboard.down("Shift")
       await page.mouse.click(foundations[3]!.x, foundations[3]!.y)
       await page.keyboard.up("Shift")
@@ -786,7 +787,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
 
     // they differ:  the field says so
     const nameField = page.locator('ui-property[name="name"]')
-    expect(await page.locator('ui-property[name="name"][mixed]').count()).toBe(1)
+    expect(await page.locator('ui-property[name="suit"][mixed]').count()).toBe(1)
 
     // real typing in the real field
     const steps = await historyLength(page)
@@ -795,8 +796,9 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     await page.keyboard.press("Tab")
     await page.waitForTimeout(400)
     const { text: edited } = await fileState(page, "Solitaire.spell")
-    expect(edited).toContain(`a new foundation with name = "piled", suit = clubs`)
-    expect(edited).toContain(`a new foundation with name = "piled", suit = diamonds`)
+    // each on the tag that made it (language I143)
+    expect(edited).toContain(`<foundation "clubs" name="piled" suit=clubs/>`)
+    expect(edited).toContain(`<foundation "diamonds" name="piled" suit=diamonds/>`)
     expect(await historyLength(page)).toBe(steps + 1)
 
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
