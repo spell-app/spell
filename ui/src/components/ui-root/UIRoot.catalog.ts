@@ -918,6 +918,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "pure"
     ]
   },
+  "ui-page-layout": {
+    folder: "ui-page-layout",
+    skeleton: { width: "24em", parts: [{ shape: "paragraph", lines: 4 }] },
+    attributes: ["drawer"]
+  },
   "ui-panel": {
     folder: "ui-panel",
     skeleton: { parts: [{ shape: "header" }, { shape: "paragraph" }] },
@@ -1354,10 +1359,32 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["size", "value", "sides", "disabled", "readonly", "name", "parameter", "required"],
     formControl: true
   },
+  "ui-site-breadcrumbs": { folder: "ui-site-breadcrumbs", attributes: ["pages", "current", "label"] },
   "ui-site-nav": {
     folder: "ui-site-nav",
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
     attributes: ["pages", "current", "label", "appearance", "collapsed", "remember"]
+  },
+  "ui-site-nav-button": {
+    folder: "ui-site-nav-button",
+    skeleton: { display: "inline", width: "2.5em", height: "2.5em" },
+    attributes: [
+      "color",
+      "position",
+      "value",
+      "label",
+      "description",
+      "icon",
+      "image",
+      "flag",
+      "link",
+      "target",
+      "appearance",
+      "disabled",
+      "selected",
+      "padding",
+      "kind"
+    ]
   },
   "ui-site-tabs": { folder: "ui-site-tabs", attributes: ["pages", "current", "label"] },
   "ui-slider": {

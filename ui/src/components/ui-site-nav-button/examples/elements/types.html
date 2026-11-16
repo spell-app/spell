@@ -1,0 +1,14 @@
+<!-- `<ui-site-nav-button>`:  the drawer's button, in the app menu of a page layout -->
+<ui-page-layout style="min-height: 12em">
+  <ui-app-menu slot="menu">
+    <ui-site-nav-button slot="start"></ui-site-nav-button>
+    <ui-item slot="start">My site</ui-item>
+  </ui-app-menu>
+  <ui-site-nav
+    slot="drawer"
+    appearance="nav"
+    current="#home"
+    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Films", "href": "#films", "icon": "film" }]'
+  ></ui-site-nav>
+  <p>Press the button: the drawer shows only its icons, or all of it again.</p>
+</ui-page-layout>

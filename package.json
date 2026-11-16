@@ -707,6 +707,21 @@
       "types": "./ui/dist-types/src/components/ui-site-tabs/index.d.ts",
       "default": "./ui/src/components/ui-site-tabs/index.ts"
     },
+    "./ui/components/ui-site-breadcrumbs": {
+      "spell-source": "./ui/src/components/ui-site-breadcrumbs/index.ts",
+      "types": "./ui/dist-types/src/components/ui-site-breadcrumbs/index.d.ts",
+      "default": "./ui/src/components/ui-site-breadcrumbs/index.ts"
+    },
+    "./ui/components/ui-site-nav-button": {
+      "spell-source": "./ui/src/components/ui-site-nav-button/index.ts",
+      "types": "./ui/dist-types/src/components/ui-site-nav-button/index.d.ts",
+      "default": "./ui/src/components/ui-site-nav-button/index.ts"
+    },
+    "./ui/components/ui-page-layout": {
+      "spell-source": "./ui/src/components/ui-page-layout/index.ts",
+      "types": "./ui/dist-types/src/components/ui-page-layout/index.d.ts",
+      "default": "./ui/src/components/ui-page-layout/index.ts"
+    },
     "./ui/components/ui-diagram": {
       "spell-source": "./ui/src/components/ui-diagram/index.ts",
       "types": "./ui/dist-types/src/components/ui-diagram/index.d.ts",

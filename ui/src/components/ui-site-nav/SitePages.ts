@@ -1,10 +1,13 @@
 import { isServer } from "@solidjs/web"
 
+import { E } from "spell/ui/core"
+
 /****************
  * ### `SitePages`
- * What `<ui-site-nav>` and `<ui-site-tabs>` share about a site's list of pages:
- * which pages are well-formed, what each is known by, and whether a page is the one shown.
- * - Plain data, no element:  each family imports this file, and neither draws the other.
+ * What `<ui-site-nav>`, `<ui-site-tabs>` and `<ui-site-breadcrumbs>` share about a site's list of pages:
+ * which pages are well-formed, what each is known by, and whether a page is the one shown;
+ * and following the site navigation around an element (`followNavAround()`).
+ * - No element of its own:  each family imports this file, and none draws another.
  ****************/
 export class SitePages {
   /** What `page` is known by, to open, find and remember it:  its `id`, else its `href`, else its `title`. */
@@ -52,10 +55,55 @@ export class SitePages {
     return loose.length ? [...filed, { tag: untagged, pages: loose }] : filed
   }
 
+  /** `page`'s address has a parameter in it (`/films/:film`), so a link can't go there. */
+  static hasParameter(page: SitePage): boolean {
+    return !!page.href && PARAMETER.test(page.href)
+  }
+
   /** `event` is a click the browser opens elsewhere:  a middle click, or one with Command, Control, Shift or Alt. */
   static isOpenElsewhere(event: Event | undefined): boolean {
     if (!(event instanceof MouseEvent)) return false
     return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
+  }
+
+  ////////////////
+  // ## Following the site navigation
+  ////////////////
+
+  /**
+   * Follow the site navigation around `element`:  `read` its `pages` (parsed, not yet checked) and `current` now,
+   * and again each time either changes (epic `mockup` T38, T39).
+   * - The navigation:  the `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow
+   *   roots (`navAround()`).
+   * - It reads the navigation's attributes, what a Spell site writes:  not its `pages` property set from a script.
+   * - Returns how to stop following;  `undefined` with no navigation around it, and `read` isn't called.
+   */
+  static followNavAround(element: Element, read: (followed: FollowedSiteNav) => void): (() => void) | undefined {
+    const nav = SitePages.navAround(element)
+    if (!nav) return undefined
+    const readNav = () =>
+      read({ pages: SitePages.parsed(nav.getAttribute(PAGES)), current: nav.getAttribute(CURRENT) ?? undefined })
+    readNav()
+    // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches the site navigation around it, another element
+    const observer = new MutationObserver(readNav)
+    observer.observe(nav, { attributes: true, attributeFilter: [PAGES, CURRENT] })
+    return () => observer.disconnect()
+  }
+
+  /** The `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow roots. */
+  private static navAround(element: Element): Element | undefined {
+    const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV})`)
+    return box?.querySelector(`:scope > ${SITE_NAV}`) ?? undefined
+  }
+
+  /** The pages in a navigation's `pages` text;  `undefined` for none, or text that isn't JSON. */
+  private static parsed(text: string | null): unknown {
+    if (!text) return undefined
+    try {
+      return JSON.parse(text)
+    } catch {
+      return undefined
+    }
   }
 
   /**
@@ -93,3 +141,19 @@ export type SitePageGroup<Page extends SitePage = SitePage> = {
   /** its pages, in the site's order */
   pages: readonly Page[]
 }
+
+/** What a family follows of the site navigation around it:  its `pages` (parsed, not yet checked) and `current`. */
+export type FollowedSiteNav = {
+  /** the navigation's `pages`, parsed from its attribute:  checked by `wellFormed()` before use */
+  pages: unknown
+  /** the navigation's `current` */
+  current: string | undefined
+}
+
+/** The site navigation's tag, and the two attributes of it that are followed. */
+const SITE_NAV = "ui-site-nav"
+const PAGES = "pages"
+const CURRENT = "current"
+
+/** A parameter in an address (`/films/:film`), in the kit's ONE address grammar (`spell/util/addressPattern`). */
+const PARAMETER = /\/:|\*/
