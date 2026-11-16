@@ -6,7 +6,9 @@ import { setDebugGlobal } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { codeLook, showBubbly } from "spell/app/app/ui/codePopups"
+import { codeLook, showBubbly, showCodeChoices } from "spell/app/app/ui/codePopups"
+import { EDITOR_HOTKEYS, editorHotkeys } from "spell/app/app/pages/editorHotkeys"
+import { CodeSettings, CodeSettingsPanel } from "spell/app/app/solid"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import {
   CodeMirrorEditor,
@@ -39,6 +41,13 @@ import "./CodeMirrorTest.css"
  * - The page's language (English, Español) and look (light, dark), by the bar too, or `?lang=es&scheme=dark`:
  *   CodeMirror's words follow the app's (`appTexts.lang`).
  * - Line numbers, off or on, as the app's View › Line Numbers:  CodeMirror's alone (`?lines=on`).
+ * - Settings…, the code pane's card (`<CodeSettingsPanel>`):  each choice changes both editors live
+ *   (`CodeSettings`, `codeChoices`;  epic `codemirror` P5).
+ * - The editor page's keys (`editorHotkeys()`), so ⌘Z with the focus off the code reaches the code's undo (I167),
+ *   and the right-click menu's Cut, Copy and Paste are the Edit menu's;  in CodeMirror, Save (⌘S) saves the file now.
+ * - `?project=@spell/examples/CajaDeRecetas`:  another project, its first file shown, e.g. a Spanish one for its
+ *   accent fixes as you type.
+ * - `?highlights=on`:  CodeMirror marks the uses of the word at the caret, which Monaco has off (and so CodeMirror).
  * - `?only=cm` or `?only=monaco`:  one editor alone, for measuring it (`?view=diff`, `?file=Card` likewise).
  * - Each edit is saved 2 seconds after it, as the app's AutoSave saves (after 800 msec);
  *   but NOTHING is written:  every write the page would send to the server is answered here (`answerWrites()`).
@@ -47,7 +56,10 @@ import "./CodeMirrorTest.css"
  ****************/
 function CodeMirrorTest(props: { project: SP.SpellProject }) {
   const query = new URLSearchParams(location.search)
-  const [fileName, setFileName] = createSignal(FILE_QUERIES[query.get("file") ?? ""] ?? "Solitaire.spell")
+  const [fileName, setFileName] = createSignal(
+    FILE_QUERIES[query.get("file") ?? ""] ??
+      (query.get("project") ? nameOf(props.project.spellFiles[0]!.path) : "Solitaire.spell")
+  )
   const [look, setLook] = createSignal(codeLook.isBubbly ? "on" : "off")
   const [target, setTarget] = createSignal<CompiledLanguage>(
     (query.get("target") as CompiledLanguage | null) ?? "javascript"
@@ -80,6 +92,8 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
   }
   /** The CodeMirror editor, once it shows a file. */
   let codeMirror: SpellCodeMirror | undefined
+  // the editor page's keys, never in Run here
+  editorHotkeys(() => false)
   return (
     <div class="CodeMirrorTest">
       <header>
@@ -154,7 +168,15 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
           ]}
           onPick={changeLines}
         />
+        <ui-button size="small" icon="cog" onClick={() => CodeSettings.toggleShowing()}>
+          {appTexts.text("codeSettings")}
+        </ui-button>
       </header>
+      <Show when={CodeSettings.isShowing}>
+        <div class="CodeMirrorTestSettings">
+          <CodeSettingsPanel />
+        </div>
+      </Show>
       <Show when={view() === "edit"}>
         <Sides
           only={only}
@@ -271,6 +293,9 @@ function CodeMirrorSide(props: CodeMirrorSideProps) {
           return true
         }}
         onContextMenu={(editor, at) => void CodeMirrorMenu.open(editor, at)}
+        onReferences={(editor, at, locations) => CodeMirrorMenu.openReferences(editor, at, locations)}
+        hotkeys={TEST_HOTKEYS}
+        highlights={new URLSearchParams(location.search).get("highlights") === "on"}
         onMount={(editor) => {
           timings.codemirror ??= { madeMsec: nowMsec() - started }
           afterPaint(() => (timings.codemirror!.firstDrawAtMsec ??= nowMsec()))
@@ -327,6 +352,8 @@ function loadMonaco(): Promise<MonacoModule> {
     const started = nowMsec()
     const module = await import("spell/app/app/solid/monaco")
     timings.monaco = { loadMsec: nowMsec() - started }
+    // Settings… reaches Monaco's editors too, as in the app (`LazyMonaco`)
+    CodeSettings.follow(module.monaco)
     return module
   })()
   return monacoModule
@@ -577,6 +604,24 @@ function saveSoon(file: SP.AnySpellFile) {
   saveWaits.set(file.path, wait)
 }
 
+/**
+ * The editor page's keys, as the page's CodeMirror editor takes them:  Save saves the file shown now, as nothing here
+ * has the app's project for `editor.saveAll()`.
+ */
+const TEST_HOTKEYS = {
+  ...EDITOR_HOTKEYS,
+  saveAll: { ...EDITOR_HOTKEYS.saveAll, run: () => saveAllNow() }
+}
+
+/** Save every file waiting to be, now. */
+function saveAllNow() {
+  for (const [path, wait] of saveWaits) {
+    wait.cancel()
+    saveWaits.delete(path)
+    saves.push(path)
+  }
+}
+
 /** How long after its last edit a file is saved, in msec. */
 const SAVE_AFTER_MSEC = 2000
 
@@ -593,10 +638,12 @@ async function start() {
   measureTyping()
   const query = new URLSearchParams(location.search)
   showScheme(query.get("scheme") === "dark" ? "dark" : "light")
+  // what Settings… has chosen, as the app starts on
+  showCodeChoices(CodeSettings.choices)
   if (query.get("look") === "off") showBubbly(false)
   await uiReady
   if (query.get("lang") === "es") await showLanguage("es")
-  const project = new SP.SpellProject(SP.SpellProject.projectIdForImport(PROJECT))
+  const project = new SP.SpellProject(SP.SpellProject.projectIdForImport(query.get("project") ?? PROJECT))
   await project.load()
   await project.parse()
   timings.projectReadyAtMsec = nowMsec()
@@ -604,7 +651,7 @@ async function start() {
   render(() => <CodeMirrorTest project={project} />, document.getElementById("codemirror-test")!)
 }
 
-/** The project the page shows. */
+/** The project the page shows, unless `?project=` names another (`@spell/examples/CajaDeRecetas`, for Spanish). */
 const PROJECT = "@spell/examples/Solitaire"
 
 void start().catch((error: unknown) => console.error("CodeMirror test:  couldn't start", error))

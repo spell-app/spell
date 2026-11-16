@@ -1,10 +1,11 @@
-import type { Position } from "vscode-languageserver"
+import type { Position, WorkspaceEdit } from "vscode-languageserver"
 
+import { after } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
-import { appTexts, renameRefusal } from "spell/app/app/ui/AppTexts"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
-import type * as UIT from "spell/app/app/ui/ui.types"
+import { RenameRefusedError, type EditorSelection } from "spell/app/app/ui/ui.types"
 import { monaco } from "./monaco"
 import { LspToMonaco } from "./LspToMonaco"
 import type { SpellModels } from "./SpellModels"
@@ -18,7 +19,7 @@ import type { SpellModels } from "./SpellModels"
  * - Answers from each file's current parse, kept up to date by `SpellModels` + `project.takeText()`.
  *   Asks nothing of a model whose file hasn't parsed, or whose text isn't its file's.
  * - A rename saves every file it touched -- see `SpellModels.saveAfterEdit()`.
- * - An action renames as the Inspector renames it (`renameActionAt()`), refused in its words (`renameRefusal()`);
+ * - An action renames as the Inspector renames it, refused in its words (`CodeEditorFeatures.rename()`);
  *   the right-click menu shows Rename Symbol only where something can be renamed (`followRenameRow()`, I147).
  * - Going to a declaration in another file asks `open` to show it, as do links in hovers.
  */
@@ -27,7 +28,7 @@ export class SpellLanguageFeatures {
   declare addresses: LSP.AppAddresses
   declare models: SpellModels
   /** Show the file at `path`, selecting `selection` -- asked by editor `source`, if we know it.  `true` if shown. */
-  declare open: (path: string, selection?: UIT.EditorSelection, source?: monaco.editor.ICodeEditor) => boolean
+  declare open: (path: string, selection?: EditorSelection, source?: monaco.editor.ICodeEditor) => boolean
 
   constructor(props: SpellLanguageFeaturesProps) {
     Object.assign(this, props)
@@ -232,12 +233,13 @@ export class SpellLanguageFeatures {
     const file = this.fileOf(model)
     const prepared = file && this.service.prepareRename(file, LspToMonaco.lspPosition(position))
     if (!prepared)
-      return { range: new monaco.Range(1, 1, 1, 1), text: "", rejectReason: appTexts.text("renameNothingHere") }
+      return { range: new monaco.Range(1, 1, 1, 1), text: "", rejectReason: CodeEditorFeatures.renameNothingHere() }
     return { range: LspToMonaco.range(prepared.range), text: prepared.placeholder }
   }
 
   /**
-   * Edits renaming the thing at `position` to `newName`, in every file.
+   * Edits renaming the thing at `position` to `newName`, in every file:  an action as the Inspector renames it,
+   * its calls and buttons too, refused in its words (`CodeEditorFeatures.rename()`;  I111, I139).
    * - SIDE EFFECT:  each file it touches saves once its model takes the edit.
    */
   private rename(
@@ -246,21 +248,14 @@ export class SpellLanguageFeatures {
     newName: string
   ): (monaco.languages.WorkspaceEdit & monaco.languages.Rejection) | null {
     const file = this.fileOf(model)
-    const at = LspToMonaco.lspPosition(position)
-    let edit: ReturnType<LSP.SpellLanguageService["rename"]> | undefined
+    const oldName = model.getWordAtPosition(position)?.word ?? ""
+    let edit: WorkspaceEdit
     try {
-      // an action:  as the Inspector renames it, its calls and buttons too, and refused in its words (I111, I139)
-      edit =
-        file && this.service.subjectAt(file, at)?.kind === "method"
-          ? this.service.renameActionAt(file, at, newName)
-          : file && this.service.rename(file, at, newName)
+      if (!file) throw new RenameRefusedError(appTexts.text("renameRefused", { oldName, newName }))
+      edit = CodeEditorFeatures.rename(this.service, file, LspToMonaco.lspPosition(position), { newName, oldName })
     } catch (error) {
-      if (!(error instanceof LSP.RenameError)) throw error
-      return this.refuseRename(model, position, renameRefusal(error, newName))
-    }
-    if (!edit) {
-      const oldName = model.getWordAtPosition(position)?.word ?? ""
-      return this.refuseRename(model, position, appTexts.text("renameRefused", { oldName, newName }))
+      if (!(error instanceof RenameRefusedError)) throw error
+      return this.refuseRename(model, position, error.message)
     }
     const files = Object.keys(edit.changes ?? {}).flatMap((uri) => this.addresses.fileFor(uri) ?? [])
     this.models.saveAfterEdit(files)
@@ -279,7 +274,7 @@ export class SpellLanguageFeatures {
   ): monaco.languages.WorkspaceEdit & monaco.languages.Rejection {
     const editor = monaco.editor.getEditors().find((each) => each.getModel() === model && each.hasWidgetFocus())
     const messages = editor?.getContribution(MONACO_MESSAGES) as MessageController | null | undefined
-    setTimeout(() => messages?.showMessage(why, position))
+    void after(0, () => messages?.showMessage(why, position))
     return { edits: [], rejectReason: why }
   }
 
@@ -443,7 +438,7 @@ export type SpellLanguageFeaturesProps = {
   /** Our models, e.g. to save after a rename. */
   models: SpellModels
   /** Show the file at `path`, selecting `selection` -- asked by editor `source`, if we know it.  `true` if shown. */
-  open: (path: string, selection?: UIT.EditorSelection, source?: monaco.editor.ICodeEditor) => boolean
+  open: (path: string, selection?: EditorSelection, source?: monaco.editor.ICodeEditor) => boolean
 }
 
 /** Editor with focus, if any -- where a hover's link was clicked, say. */

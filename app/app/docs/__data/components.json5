@@ -1199,6 +1199,14 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "CodeMirrorMenu",
+          "file": "src/app/ui/codemirror/CodeMirrorMenu.tsx"
+        },
+        {
+          "name": "CodeRows",
+          "file": "src/app/ui/codemirror/CodeMirrorMenu.tsx"
+        },
+        {
           "name": "DialogAction",
           "file": "src/app/solid/Actions.tsx"
         },

@@ -88,6 +88,30 @@ export class SpellTyping {
   }
 
   ////////////////
+  // ## The quoted value at the caret
+  ////////////////
+
+  /**
+   * The attribute value the caret at `column` (0-based) of `line` is in, inside its quotes:
+   * `spacing="x|s"` => `{ from: 9, to: 11 }`, the columns of `xs`.
+   * - What an attribute's words show under (`ValuePopups`'s choices) and what a picker writes over:
+   *   both editors ask here, so they agree on where a value is.
+   * - On the caret's line only, as an attribute's value is;  a name and `="` right before it,
+   *   so a quoted name (`group "Rank"`) isn't one.
+   * - `end`:
+   *   - `closing-quote` (the default):  only a value whose closing quote is written
+   *   - `closing-quote-or-caret`:  one still being typed, with no closing quote yet, runs to the caret
+   */
+  static quotedValueAt(line: string, column: number, end: QuotedValueEnd = "closing-quote"): QuotedValue | undefined {
+    const open = ATTRIBUTE_VALUE_OPEN.exec(line.slice(0, column))
+    if (!open) return undefined
+    const from = line.indexOf('"', open.index) + 1
+    const close = line.indexOf('"', column)
+    if (close >= 0) return { from, to: close }
+    return end === "closing-quote-or-caret" ? { from, to: column } : undefined
+  }
+
+  ////////////////
   // ## Enter
   ////////////////
 
@@ -331,6 +355,20 @@ export type OpenTag = {
   /** column (0-based) of the first word after its name on that line;  `undefined` when the name ends the line */
   firstAttribute: number | undefined
 }
+
+/** An attribute value `SpellTyping.quotedValueAt()` found:  the columns (0-based) of its text, inside its quotes. */
+export type QuotedValue = {
+  /** column of its first character, just after the opening quote */
+  from: number
+  /** column just after its last:  the closing quote's, or the caret's when it has none yet */
+  to: number
+}
+
+/** Where a quoted value ends, for `SpellTyping.quotedValueAt()`:  at its closing quote only, or at the caret too. */
+export type QuotedValueEnd = "closing-quote" | "closing-quote-or-caret"
+
+/** An attribute's name and its opening quote, then its value up to the caret:  `spacing="x`. */
+const ATTRIBUTE_VALUE_OPEN = /[\p{L}\p{M}\d-]="[^"]*$/u
 
 /** How far back `SpellTyping.tagOpenAt()` looks for the tag's start:  a tag's attributes span a few lines at most. */
 const TAG_LINES_BACK = 20

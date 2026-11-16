@@ -1,3 +1,6 @@
+import { after, type CancelablePromise } from "spell/util/timing"
+import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
+import type { HoverMode } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
 
 /****************
@@ -14,6 +17,7 @@ import { monaco } from "./monaco"
  *   or an edit.
  * - Wears Monaco's hover look, `.monaco-hover`, which the app themes (`MonacoEditor.css`).
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
+ * - When it shows is `CodeEditorFeatures.showsErrorsAlone()`, the rule CodeMirror's `CodeMirrorHovers` follows too.
  ****************/
 export class ErrorHover implements monaco.editor.IContentWidget {
   /** The popup:  one row per error. */
@@ -23,7 +27,7 @@ export class ErrorHover implements monaco.editor.IContentWidget {
   /** Where the popup points:  the first error's start. */
   private position: monaco.IPosition | null = null
   /** Shows it, once the hover's delay has passed. */
-  private timer: ReturnType<typeof setTimeout> | undefined
+  private timer: CancelablePromise<void> | undefined
   /** In the editor's content widgets? */
   private isAdded = false
 
@@ -46,7 +50,8 @@ export class ErrorHover implements monaco.editor.IContentWidget {
   private moved(event: monaco.editor.IEditorMouseEvent): void {
     const { enabled, delay } = this.editor.getOption(monaco.editor.EditorOption.hover)
     // Monaco's own hover shows them:  always, or now, with ⌥ held
-    const isMonacos = enabled === "on" || (enabled === "onKeyboardModifier" && event.event.altKey)
+    const mode = HOVER_MODE_OF[String(enabled)] ?? "always"
+    const isMonacos = !CodeEditorFeatures.showsErrorsAlone(mode, event.event.altKey)
     const { position } = event.target
     const model = this.editor.getModel()
     const under =
@@ -57,7 +62,7 @@ export class ErrorHover implements monaco.editor.IContentWidget {
     this.hide()
     if (!under.length) return
     this.shown = under
-    this.timer = setTimeout(() => this.show(), delay)
+    this.timer = after(delay / 1000, () => this.show())
   }
 
   /** Show `shown`, under or over the first one's start. */
@@ -80,7 +85,7 @@ export class ErrorHover implements monaco.editor.IContentWidget {
 
   /** Hide it, and forget what was about to show. */
   private hide(): void {
-    clearTimeout(this.timer)
+    this.timer?.cancel()
     this.timer = undefined
     this.shown = []
     if (!this.isAdded) return
@@ -107,6 +112,15 @@ export class ErrorHover implements monaco.editor.IContentWidget {
     const { ABOVE, BELOW } = monaco.editor.ContentWidgetPositionPreference
     return this.position && { position: this.position, preference: [ABOVE, BELOW] }
   }
+}
+
+/** The hover mode each of Monaco's `hover.enabled` is (`codePopups`' `HOVER_ENABLED`, the other way round). */
+const HOVER_MODE_OF: Partial<Record<string, HoverMode>> = {
+  onKeyboardModifier: "withAlt",
+  on: "always",
+  true: "always",
+  off: "never",
+  false: "never"
 }
 
 /** The class of each row, for its kind of error. */

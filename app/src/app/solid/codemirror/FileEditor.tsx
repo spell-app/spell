@@ -65,14 +65,21 @@ export function FileEditor(props: FileEditorProps) {
       file,
       // read now:  always the latest
       onOpen: (location) => props.onOpen?.(location) ?? false,
-      onContextMenu: (shown, at) => props.onContextMenu?.(shown, at)
+      onContextMenu: (shown, at) => props.onContextMenu?.(shown, at),
+      onReferences: (shown, at, locations) => props.onReferences?.(shown, at, locations),
+      // read once, as it's made
+      hotkeys: untrack(() => props.hotkeys),
+      highlights: untrack(() => props.highlights)
     })
     props.onMount?.(editor)
   }
 }
 
 /** Props for `<FileEditor>`. */
-export type FileEditorProps = Pick<SpellCodeMirrorOptions, "onOpen" | "onContextMenu"> & {
+export type FileEditorProps = Pick<
+  SpellCodeMirrorOptions,
+  "onOpen" | "onContextMenu" | "onReferences" | "hotkeys" | "highlights"
+> & {
   /** File to edit, if we have one yet. */
   file: SP.AnySpellFile | undefined
   /** Called with the editor once it first shows a file. */

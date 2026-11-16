@@ -110,3 +110,43 @@ export const EDITOR_OWN = "data-editor-own"
  * - Run in the app pane, its views show as zones, one each (`<EditorZones>`, T63), not as an app.
  */
 export const EDITOR_PIECES = "@spell/editor"
+
+// ## The code editors
+
+/**
+ * Thrown by `CodeEditorFeatures.rename()` where the thing at the caret can't be renamed so:
+ * its message is what the editor shows, over the name, in the app's language.
+ */
+export class RenameRefusedError extends Error {}
+RenameRefusedError.prototype.name = "RenameRefusedError"
+
+/**
+ * What the page's keys and menus ask of a code editor, whichever it is:  the neutral names of `EDITOR_HOTKEYS`'
+ * code-editor commands (epic `codemirror` P5).
+ * - Each editor runs them its own way:  Monaco by its own action ids (`MONACO_COMMANDS`, `editorHotkeys.ts`),
+ *   CodeMirror by its commands (`SpellCodeMirror.run()`).
+ */
+export type CodeEditorCommand =
+  | "undo"
+  | "redo"
+  | "find"
+  | "cut"
+  | "copy"
+  | "paste"
+  | "goToDefinition"
+  | "goToTypeDefinition"
+  | "findReferences"
+  | "rename"
+
+/**
+ * A code editor as the page's keys and menus reach it, whichever it is (`editorHotkeys.ts`):
+ * the one with the focus, or last with it.
+ */
+export type CodeEditorHandle = {
+  /** Has it a step to `action`, in its own history? */
+  canUndo(action: "undo" | "redo"): boolean
+  /** Undo or redo its last step, leaving the focus where it is:  on the thing selected in the app, say. */
+  undo(action: "undo" | "redo"): void
+  /** Run `command` in it, focusing it first. */
+  run(command: CodeEditorCommand): void
+}

@@ -178,13 +178,15 @@ and in the app's build folder, `app/` at the app folder's root.
     - the right-click menu's Refactor… and the light bulb do it too, "Make it code" / "Make it text"
       (`LSP.CodeOrText`, which both ask, so VS Code has them as well)
   - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥
-    ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97)
+    ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97);  the rule is `CodeEditorFeatures.showsHoverInfo()`
   - Rename Symbol (F2) renames an action as the Inspector's Code card does, its calls and buttons too, one undo,
-    refused in the same words (`renameRefusal()`, epic `editor` I147);  the right-click menu shows it only where
-    something can be renamed (`SpellLanguageFeatures.followRenameRow()`), and F2 elsewhere says what can
+    refused in the same words (`CodeEditorFeatures.rename()`, over the service's `renameSaying()`, epic `editor` I147);
+    the right-click menu shows it only where something can be renamed (`SpellLanguageFeatures.followRenameRow()`),
+    and F2 elsewhere says what can
   - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code,
     whatever key the hover takes
-    ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101)
+    ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101);  the addresses in a line are `CodeEditorFeatures`'
+  - Heading comments bold ([SpellHeadings](ui/monaco/SpellHeadings.ts));  which lines are, `CodeEditorFeatures.headingIn()`
   - Drawn bubbly, the code starts 8px from the pane's edge, the fold arrows half over it (`MonacoEditor.css`);
     a press on one folds through [FoldArrows](ui/monaco/FoldArrows.ts), as Monaco would take it as one on the code
     (epic `editor` I154)
@@ -193,6 +195,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - An attribute's words show quietly under its value once the caret rests in it for a second, the value ticked
     ([ValueChoices](ui/monaco/ValueChoices.ts), epic `editor` T70):  typing or moving hides them, the keys stay with
     the code;  ⌥↓ steps in, a click chooses, Ctrl+Space is the suggestion list
+  - Both popups are drawn by [ValuePopups](ui/ValuePopups.ts), editor-neutral, which CodeMirror's use too;
+    where the value is, `LSP.SpellTyping.quotedValueAt()` (epic `codemirror` P5)
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
     the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
     ONE table, `LSP.SpellTyping.ENTER_RULES`, which `SpellMonaco.CONFIGURATION` is built from,
@@ -210,7 +214,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`, with no Monaco in it:
     the scope explorer's packs and the CodeMirror test page use it too (epic `codemirror` P1)
   - What a hover says and which code actions show are decided once for both editors, Monaco-free:
-    [CodeEditorFeatures](ui/CodeEditorFeatures.ts)
+    [CodeEditorFeatures](ui/CodeEditorFeatures.ts);  so are what Rename Symbol says, the hover's ⌥ rule, the web
+    addresses and heading comments in a line (epic `codemirror` P5)
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:
@@ -248,6 +253,24 @@ and in the app's build folder, `app/` at the app folder's root.
     - the caret's snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
     - Enter between a tag's attributes measures tabs and spaces as CodeMirror draws them:  the bubbly look's tab stop
       isn't 4 of the font's spaces, so its text can differ from Monaco's, lined up all the same
+  - Every other language feature of Monaco's (P5), each Monaco-free half lifted once and called by both editors:
+    - Rename Symbol, F2:  [CodeMirrorRename](ui/codemirror/CodeMirrorRename.ts), a field over the name;  each file's
+      edits through `FileStates.applyEdits()`, one undo each;  refused in the Inspector's words
+    - signature help (⇧⌘Space, or as a space is typed while Settings… says), highlights of the word at the caret
+      (off, as Monaco's are, unless the editor asks), go to type definition, accent fixes as you type:
+      [CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts);  hovers and signature help drawn by `<ui-markdown>`
+    - the value picker and choices ([CodeMirrorValues](ui/codemirror/CodeMirrorValues.ts), on `ValuePopups`), link
+      icons and ⌘-click ([CodeMirrorLinks](ui/codemirror/CodeMirrorLinks.ts)), the error hover's ⌥ rule
+      ([CodeMirrorHovers](ui/codemirror/CodeMirrorHovers.ts)), comment headings
+      ([CodeMirrorHeadings](ui/codemirror/CodeMirrorHeadings.ts))
+    - Settings… drives it from the same table as Monaco, live:  `codeMirrorOptionsFor()`, the twin of
+      `monacoOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following
+      `codeChoices`, which `CodeSettings` sets
+    - its keys are `EDITOR_HOTKEYS`' (`SpellCodeMirror.keymapFor()`);  its right-click menu ([CodeMirrorMenu](ui/codemirror/CodeMirrorMenu.tsx))
+      is the part menu's popup, `<MenuPopup>`, Cut / Copy / Paste through `cutCopyOrPaste()`;  Find All References
+      lists the uses in the same popup
+    - while it has the focus it's the page's code editor (`codeEditors.focused`):  ⌘Z off the code reaches its
+      history in I167's order (`undoInEdit()`)
   - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
     and the test page, types aside:  it's to load lazily, as Monaco does.
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).
@@ -260,6 +283,8 @@ and in the app's build folder, `app/` at the app folder's root.
     - Route components call `followRoute()`, which hands the URL's params to `editor.selectPath()`.
   - The editor page's shortcuts are ONE list, `EDITOR_HOTKEYS` ([editorHotkeys.ts](pages/editorHotkeys.ts)):
     the page's keys (on Spell UI's keyboard), the code editor's commands and the top bar's menus all read it.
+    - The code editor's own are by neutral names (`codeEditorCommand`:  `undo`, `find`, `rename` ...;  epic `codemirror`
+      P5), which Monaco runs by its own ids and CodeMirror by its commands (`UIT.CodeEditorHandle`).
 - `index.html` wraps the app in `<ui-root icons="fomantic">`.
   - So the app's icon names are Fomantic's ([loadUI.ts](solid/loadUI.ts)).
   - It still links `semantic.min.css`:  running programs draw with Semantic UI's class words.

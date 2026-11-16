@@ -1,6 +1,7 @@
 /**
  * Barrel for `spell/app/app/ui` (`UI`):  the types the app's UI shares.
- * - `ui.types.ts`:  editor selections, the explorers' saved state -- types only.
+ * - `ui.types.ts`:  editor selections, the explorers' saved state, the code editors' commands -- types, and one small
+ *   error class, `RenameRefusedError`.
  * - NOT the app's own UI:  that's Solid, on `spell-ui`, in `spell/app/app/solid`.
  *   Spell PROGRAMS draw with Spell UI's `<ui-*>` elements
  *   (epic `output-targets` P11 retired the React kit that lived here).
@@ -14,6 +15,8 @@
  *   - `./codemirror`:  CodeMirror's, loaded on first use too
  *   - `./CodeRules`, `./TextMarks`, `./MarkupMarks`:  what both editors share of the code's colours and the bubbly
  *     look, imported by path by each editor's lazy plumbing
+ *   - `./CodeEditorFeatures`, `./ValuePopups`:  what both editors decide and draw alike of the language features
+ *     (epic `codemirror` P5), imported by path by each editor's lazy plumbing too
  *   - `syntax.css`:  the syntax colours, imported by the Solid viewers that use them
  */
 

@@ -24,7 +24,7 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
     - read through `LspTexts.of(scope)`
   - `SpellKeywords`:  a language pack's keywords, as editors want them (accent fixes, the VS Code grammar's keywords)
   - `SpellTyping`:  the rules behind the app's typing helps, plain functions of the lines (where a letter on a blank
-    line lands, which words open quotes, the Enter rules' ONE table ...):  the app's Monaco and CodeMirror editors
+    line lands, which words open quotes, the Enter rules' ONE table, where an attribute's quoted value is ...):  the app's Monaco and CodeMirror editors
     each wire them to their own keys (epic `codemirror` P1)
   - `AppAddresses`:  how the app's editors address files, `spell:/<file.path>`, with no editor's code in it
   - `SpellLanguageServer`:  wires it to an LSP connection

@@ -1,19 +1,15 @@
+import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { monaco } from "./monaco"
 
 /**
  * Heading comments -- `#`, `##` ... at the start of a line, after any indent -- in bold, in every spell model.
  * - By DECORATION, NOT theme:  each heading gets classes `spell-heading spell-heading-<level>`, styled in
  *   `MonacoEditor.css` -- so any theme works, and each level can be styled on its own.
- * - Found by the same rule as the tokenizer's `matchComment()`, straight from the text:  no waiting for a parse.
+ * - Found by `CodeEditorFeatures.headingIn()`, straight from the text:  no waiting for a parse.
+ *   CodeMirror's twin is `CodeMirrorHeadings` (epic `codemirror` P5).
  * - On the MODEL, so every editor showing it gets them.
  */
 export class SpellHeadings {
-  /** A heading line:  its indent, then its `#`s. */
-  static HEADING = /^([ \t]*)(#+)/
-
-  /** Deepest level with its own class -- deeper headings share it, as `LSP.SpellLanguageService.MAX_HEADING`. */
-  static MAX_LEVEL = 4
-
   /**
    * Decorate the headings of models in `languages` -- those there now, and each made from now on -- as they're edited.
    * - Call once, e.g. from `SpellMonaco.register()`.
@@ -44,11 +40,10 @@ export class SpellHeadings {
   static decorationsFor(model: monaco.editor.ITextModel): monaco.editor.IModelDeltaDecoration[] {
     const decorations: monaco.editor.IModelDeltaDecoration[] = []
     for (let line = 1; line <= model.getLineCount(); line++) {
-      const heading = SpellHeadings.HEADING.exec(model.getLineContent(line))
+      const heading = CodeEditorFeatures.headingIn(model.getLineContent(line))
       if (!heading) continue
-      const level = Math.min(heading[2]!.length, SpellHeadings.MAX_LEVEL)
-      const range = new monaco.Range(line, heading[1]!.length + 1, line, model.getLineMaxColumn(line))
-      decorations.push({ range, options: { inlineClassName: `spell-heading spell-heading-${level}` } })
+      const range = new monaco.Range(line, heading.start + 1, line, heading.end + 1)
+      decorations.push({ range, options: { inlineClassName: `spell-heading spell-heading-${heading.level}` } })
     }
     return decorations
   }

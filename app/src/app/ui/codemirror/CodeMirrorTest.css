@@ -27,6 +27,14 @@ body {
       font-size: 17px;
     }
   }
+
+  /* Settings…, the code pane's card, over the editors' top right corner */
+  .CodeMirrorTestSettings {
+    position: absolute;
+    top: 64px;
+    right: 16px;
+    z-index: 10;
+  }
 }
 
 .CodeMirrorTestSides {

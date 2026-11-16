@@ -769,7 +769,17 @@ export const APP_TEXTS = {
   cmSelectionDeleted: "Selection deleted",
   // its right-click menu's rows
   cmGoToDefinition: "Go to Definition",
-  cmFindMenu: "Find…"
+  cmGoToTypeDefinition: "Go to Type Definition",
+  cmFindReferences: "Find All References",
+  cmRenameSymbol: "Rename Symbol",
+  // its list of a thing's uses:  `{file}`, a file's name;  `{line}`, a line's number
+  cmReferenceAt: "{file}:{line}",
+  cmNoReferences: "No uses found",
+  cmReferences: "Uses",
+  cmFindMenu: "Find…",
+  // a web address in the code, its tip on a plain hover, in either editor (`CodeEditorFeatures.linkTip()`)
+  codeLinkTipMac: "⌘-click to open",
+  codeLinkTip: "Ctrl-click to open"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

@@ -22,12 +22,17 @@ import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
+import { CodeMirrorHeadings } from "./CodeMirrorHeadings"
+import { CodeMirrorHovers } from "./CodeMirrorHovers"
 import { CodeMirrorLanguage } from "./CodeMirrorLanguage"
+import { CodeMirrorLinks } from "./CodeMirrorLinks"
 import { CodeMirrorLook } from "./CodeMirrorLook"
 import { CodeMirrorMarkup } from "./CodeMirrorMarkup"
+import { CodeMirrorPopups } from "./CodeMirrorPopups"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 import { CodeMirrorTokens } from "./CodeMirrorTokens"
 import { CodeMirrorTyping } from "./CodeMirrorTyping"
+import { CodeMirrorValues } from "./CodeMirrorValues"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
@@ -325,9 +330,13 @@ export class FileStates {
               closeBrackets(),
               keymap.of(closeBracketsKeymap),
               CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang),
-              CodeMirrorCodeOrText.extension()
+              CodeMirrorCodeOrText.extension(),
+              CodeMirrorHovers.extension(),
+              CodeMirrorHeadings.extension()
             ]
           : [],
+        CodeMirrorLinks.extension(),
+        CodeMirrorPopups.extension(),
         CodeMirrorLook.extension((isBubbly) =>
           isBubbly
             ? CodeMirrorBubbly.extension(fileOf, (state) => state.field(sliceShown))
@@ -433,6 +442,9 @@ export class FileStates {
           autocompletion({ override: [language.completions], icons: false }),
           CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
           CodeMirrorCodeOrText.extension(),
+          CodeMirrorValues.extension(language.attributeValuesAt),
+          CodeMirrorHovers.extension(),
+          CodeMirrorHeadings.extension(),
           language.extensions(),
           CodeMirrorLook.extension((isBubbly) =>
             isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
@@ -450,6 +462,9 @@ export class FileStates {
       }),
       FileStates.host.of([]),
       spell,
+      CodeMirrorLinks.extension(),
+      // Settings…' choices, changed live
+      CodeMirrorPopups.extension(),
       CodeMirrorSetup.extensions()
     ]
   }

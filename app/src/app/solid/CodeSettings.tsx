@@ -9,10 +9,8 @@ import {
   SUGGEST_MODES,
   SUGGEST_MODES_RENAMED,
   OWN_WRAP,
-  codeHover,
-  hoverDetailFor,
   monacoOptionsFor,
-  showBubbly,
+  showCodeChoices,
   suggestsByItself,
   type CodePopupChoices
 } from "spell/app/app/ui/codePopups"
@@ -28,7 +26,7 @@ import "./CodeSettings.css"
  * and whether long lines wrap (epic `editor` I110:  the code pane and the Inspector's code alike).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every Monaco editor on the page, and the browser remembers it
- *   (`spellEditor:codeHover` ...).
+ *   (`spellEditor:codeHover` ...);  CodeMirror's editors follow `codeChoices`, which it sets (`showCodeChoices()`).
  * - Defaults, and what each choice means to Monaco:  `codePopups.ts`.
  * - Static, like `LineNumbers`:  ONE set of choices per page.
  ****************/
@@ -55,7 +53,7 @@ export class CodeSettings {
     setChoices(chosen)
     editorPrefs.set(PREFS[key], value)
     for (const each of monacoApi?.editor.getEditors() ?? []) CodeSettings.applyTo(each)
-    showBubbly(chosen.bubbly)
+    showCodeChoices(chosen)
   }
 
   /**
@@ -65,7 +63,7 @@ export class CodeSettings {
   static follow(api: typeof monaco): void {
     if (monacoApi) return
     monacoApi = api
-    showBubbly(chosen.bubbly)
+    showCodeChoices(chosen)
     for (const each of api.editor.getEditors()) CodeSettings.setUp(each)
     api.editor.onDidCreateEditor((each) => CodeSettings.setUp(each))
   }
@@ -89,7 +87,6 @@ export class CodeSettings {
   static applyTo(codeEditor: monaco.editor.ICodeEditor): void {
     const { wordWrap, ...options } = monacoOptionsFor(chosen)
     codeEditor.updateOptions(wrapsItsOwn.has(codeEditor) ? options : { ...options, wordWrap })
-    codeHover.detail = hoverDetailFor(chosen)
     codeEditor.getContainerDomNode().classList.toggle(SUGGEST_DETAILS_HIDDEN, !chosen.suggestDetails)
   }
 }

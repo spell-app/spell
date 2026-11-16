@@ -1,3 +1,5 @@
+import { after, type CancelablePromise } from "spell/util/timing"
+import { CodeEditorFeatures, type AddressAt as AddressInLine } from "spell/app/app/ui/CodeEditorFeatures"
 import { monaco } from "./monaco"
 
 /****************
@@ -20,6 +22,8 @@ import { monaco } from "./monaco"
  *   and a click on its icon moves no caret;
  *   the bubbly look's shapes take no clicks, so it works there too.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
+ * - Where the addresses are, which key opens them and the tip's words are `CodeEditorFeatures`':
+ *   CodeMirror's twin is `CodeMirrorLinks` (epic `codemirror` P5).
  ****************/
 export class LinkClick implements monaco.editor.IContentWidget {
   /** The tip:  "⌘-click to open". */
@@ -33,13 +37,12 @@ export class LinkClick implements monaco.editor.IContentWidget {
   /** The icon after each address in the code. */
   private readonly icons: monaco.editor.IEditorDecorationsCollection
   /** Shows the tip, once the hover's delay has passed. */
-  private timer: ReturnType<typeof setTimeout> | undefined
+  private timer: CancelablePromise<void> | undefined
   /** The tip's in the editor's content widgets? */
   private isAdded = false
 
   constructor(private readonly editor: monaco.editor.ICodeEditor) {
     this.node.className = "monaco-hover LinkClickTip"
-    this.node.textContent = IS_MAC ? "⌘-click to open" : "Ctrl-click to open"
     this.marks = editor.createDecorationsCollection()
     this.icons = editor.createDecorationsCollection()
     this.drawIcons()
@@ -88,7 +91,7 @@ export class LinkClick implements monaco.editor.IContentWidget {
   private addressPressed(event: MouseEvent): AddressAt | undefined {
     if (event.button !== 0) return undefined
     const onIcon = event.composedPath().some((node) => (node as Element).classList?.contains(ICON_CLASS))
-    if (!onIcon && !isOpenKey(event)) return undefined
+    if (!onIcon && !CodeEditorFeatures.isOpenKey(event)) return undefined
     const target = this.editor.getTargetAtClientPoint(event.clientX, event.clientY)
     if (!target) return undefined
     return onIcon ? this.addressEndingAt(target) : this.addressAt(target)
@@ -99,19 +102,19 @@ export class LinkClick implements monaco.editor.IContentWidget {
     // over its icon:  that opens with a plain click, so no tip, and no underline
     const isOnIcon = !!event.target.element?.classList.contains(ICON_CLASS)
     const address = isOnIcon ? undefined : this.addressAt(event.target)
-    this.isKeyHeld = isOpenKey(event.event.browserEvent)
+    this.isKeyHeld = CodeEditorFeatures.isOpenKey(event.event.browserEvent)
     if (address?.url !== this.under?.url || !sameRange(address?.range, this.under?.range)) {
       this.hideTip()
       this.under = address
       if (address)
-        this.timer = setTimeout(() => this.showTip(), this.editor.getOption(monaco.editor.EditorOption.hover).delay)
+        this.timer = after(this.editor.getOption(monaco.editor.EditorOption.hover).delay / 1000, () => this.showTip())
     }
     this.mark()
   }
 
   /** ⌘ pressed or let go with the mouse still:  mark it, or not. */
   private keyChanged(event: KeyboardEvent): void {
-    this.isKeyHeld = isOpenKey(event)
+    this.isKeyHeld = CodeEditorFeatures.isOpenKey(event)
     this.mark()
   }
 
@@ -134,7 +137,9 @@ export class LinkClick implements monaco.editor.IContentWidget {
   private addressAt(target: monaco.editor.IMouseTarget): AddressAt | undefined {
     const model = this.editor.getModel()
     if (!model || !target.position || target.type !== monaco.editor.MouseTargetType.CONTENT_TEXT) return undefined
-    return addressAt(model.getLineContent(target.position.lineNumber), target.position)
+    const { lineNumber, column } = target.position
+    const address = CodeEditorFeatures.addressAt(model.getLineContent(lineNumber), column - 1)
+    return address && rangeOf(address, lineNumber)
   }
 
   /** The address whose icon is at `target`:  the one on its line ending nearest it. */
@@ -155,7 +160,8 @@ export class LinkClick implements monaco.editor.IContentWidget {
   private drawIcons(): void {
     const model = this.editor.getModel()
     const icons: monaco.editor.IModelDeltaDecoration[] = []
-    for (const match of model?.findMatches(ADDRESS.source, false, true, false, null, false) ?? []) {
+    const pattern = CodeEditorFeatures.ADDRESS.source
+    for (const match of model?.findMatches(pattern, false, true, false, null, false) ?? []) {
       const { startLineNumber: line } = match.range
       for (const address of addressesIn(model!.getLineContent(line), line)) {
         if (address.range.startColumn !== match.range.startColumn) continue
@@ -173,6 +179,8 @@ export class LinkClick implements monaco.editor.IContentWidget {
   /** Show "⌘-click to open" over the address. */
   private showTip(): void {
     if (!this.under) return
+    // its words now, in the app's language now
+    this.node.textContent = CodeEditorFeatures.linkTip()
     if (this.isAdded) this.editor.layoutContentWidget(this)
     else this.editor.addContentWidget(this)
     this.isAdded = true
@@ -180,7 +188,7 @@ export class LinkClick implements monaco.editor.IContentWidget {
 
   /** Hide the tip, and forget it was about to show. */
   private hideTip(): void {
-    clearTimeout(this.timer)
+    this.timer?.cancel()
     this.timer = undefined
     if (!this.isAdded) return
     this.editor.removeContentWidget(this)
@@ -217,14 +225,6 @@ type AddressAt = {
   range: monaco.Range
 }
 
-/** Is this a Mac?  ⌘ opens there;  Ctrl elsewhere. */
-const IS_MAC = typeof navigator !== "undefined" && /mac/i.test(navigator.platform || navigator.userAgent)
-
-/** Is the key that opens an address held:  ⌘ on a Mac, else Ctrl? */
-function isOpenKey(event: MouseEvent | KeyboardEvent): boolean {
-  return IS_MAC ? event.metaKey : event.ctrlKey
-}
-
 /** The class of the icon after each address:  a click on it opens the address. */
 const ICON_CLASS = "LinkClickIcon"
 
@@ -237,34 +237,14 @@ const ICON: monaco.editor.IModelDecorationOptions = {
   }
 }
 
-/** A web address, to its first space, quote or angle bracket:  its end trimmed by `trimmedAddress()`. */
-const ADDRESS = /https?:\/\/[^\s"'<>`]+/g
-
-/** The address in `line` at `position`, if there's one there. */
-export function addressAt(line: string, position: monaco.IPosition): AddressAt | undefined {
-  return addressesIn(line, position.lineNumber).find(
-    ({ range }) => position.column >= range.startColumn && position.column <= range.endColumn
-  )
-}
-
 /** Every address in `line`, line `lineNumber` of the code. */
-export function addressesIn(line: string, lineNumber: number): AddressAt[] {
-  return [...line.matchAll(ADDRESS)].map((match) => {
-    const url = trimmedAddress(match[0])
-    const start = match.index + 1
-    return { url, range: new monaco.Range(lineNumber, start, lineNumber, start + url.length) }
-  })
+function addressesIn(line: string, lineNumber: number): AddressAt[] {
+  return CodeEditorFeatures.addressesIn(line).map((address) => rangeOf(address, lineNumber))
 }
 
-/**
- * `address` without what ends the sentence or the brackets around it:  a final `.`, `,` ... and each `)` it never
- * opened, `[wikipedia](https://x.org/a_(b))` => `https://x.org/a_(b)`.
- */
-export function trimmedAddress(address: string): string {
-  let url = address.replace(/[.,;:!?]+$/, "")
-  const count = (text: string, char: string) => text.split(char).length - 1
-  while (url.endsWith(")") && count(url, ")") > count(url, "(")) url = url.slice(0, -1).replace(/[.,;:!?]+$/, "")
-  return url
+/** `address`, found in line `lineNumber`, with its range in the code. */
+function rangeOf({ url, start, end }: AddressInLine, lineNumber: number): AddressAt {
+  return { url, range: new monaco.Range(lineNumber, start + 1, lineNumber, end + 1) }
 }
 
 /** Are `a` and `b` the same range, or both none? */

@@ -1349,17 +1349,29 @@ export class SpellLanguageService {
     return range ? { range, placeholder: subject!.nameMatch.raw! } : null
   }
 
-  /** Edits renaming the thing at `position` to `newName` wherever it's used, in every file -- see `prepareRename()`. */
+  /**
+   * Edits renaming the thing at `position` to `newName` wherever it's used, in every file -- see `prepareRename()`.
+   * - `null` where it can't:  `renameSaying()` says why, for an action.
+   */
   rename(file: SP.SpellFile, position: Position, newName: string): WorkspaceEdit | null {
-    const subject = this.subjectAt(file, position)
-    if (subject?.kind === "method") {
-      try {
-        return this.renameActionAt(file, position, newName)
-      } catch (error) {
-        if (error instanceof LSP.RenameError) return null
-        throw error
-      }
+    try {
+      return this.renameSaying(file, position, newName)
+    } catch (error) {
+      if (error instanceof LSP.RenameError) return null
+      throw error
     }
+  }
+
+  /**
+   * `rename()`, but an action renamed as the Inspector renames it, saying why it can't (epic `editor` I111, I139, I147):
+   * its calls and buttons too (`renameActionAt()`).
+   * - What the app's editors ask, Monaco's and CodeMirror's alike, so F2 refuses in the Inspector's words.
+   * - `null` where anything else can't be renamed `newName`.
+   * - throws `LSP.RenameError` for an action that can't be:  `cause.kind` says why.
+   */
+  renameSaying(file: SP.SpellFile, position: Position, newName: string): WorkspaceEdit | null {
+    const subject = this.subjectAt(file, position)
+    if (subject?.kind === "method") return this.renameActionAt(file, position, newName)
     if (!SpellLanguageService.RENAMABLE_WORD.test(newName)) return null
     const occurrences = subject && this.renamable(subject)
     if (!occurrences) return null

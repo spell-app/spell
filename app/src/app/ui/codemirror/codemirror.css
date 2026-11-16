@@ -183,34 +183,57 @@
   }
 }
 
-/* a hover's words:  its text, its code blocks */
-.cmb-hover {
+/* a hover's words and signature help's, drawn by Spell UI's `<ui-markdown>` (`CodeMirrorLanguage`) */
+.cmb-hover,
+.cmb-signature {
   max-width: 480px;
   padding: 8px 12px;
   line-height: 1.45;
 
-  p {
-    margin: 0 0 6px;
+  ui-markdown {
+    --ui-font-size: 13px;
+    font-size: 13px;
   }
-  p:last-child {
-    margin-bottom: 0;
+}
+
+/* the uses of the word at the caret, when asked (`?highlights=on`):  a read, and a write */
+.cmb-highlight {
+  border-radius: 3px;
+  background: light-dark(rgb(120 100 220 / 14%), rgb(170 150 255 / 18%));
+}
+.cmb-highlight-write {
+  background: light-dark(rgb(220 140 60 / 18%), rgb(255 180 100 / 20%));
+}
+
+/* Rename Symbol's field over the name (`CodeMirrorRename`), and what it says where it can't */
+.cmb-rename {
+  /* the tooltip's border, this padding, the field's border and padding:  1 + 4 + 1 + 6 */
+  --cmb-rename-inset: 12px;
+  padding: 4px;
+  /* the field's text starts where the name's does:  the tooltip pulled left by what's before the text */
+  margin-left: calc(-1 * var(--cmb-rename-inset));
+
+  input {
+    box-sizing: border-box;
+    width: 220px;
+    padding: 3px 6px;
+    border: 1px solid var(--ui-primary, #6e56cf);
+    border-radius: 4px;
+    background: var(--bubbly-paper);
+    color: var(--bubbly-ink);
+    font: inherit;
+    outline: none;
   }
-  hr {
-    margin: 6px 0;
-    border: 0;
-    border-top: 1px solid light-dark(#e6e4ee, #34323f);
-  }
-  pre {
-    margin: 0 0 6px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    background: light-dark(#f4f2f9, #2a2932);
-    font:
-      12px / 1.4 ui-monospace,
-      Menlo,
-      monospace;
-    white-space: pre-wrap;
-  }
+}
+.cmb-rename-message {
+  max-width: 420px;
+  padding: 6px 10px;
+  white-space: pre-line;
+}
+
+/* the suggestions' details hidden, as Settings… says (`CodeMirrorPopups`, Monaco's class) */
+.cm-editor.suggest-details-hidden .cm-completionInfo {
+  display: none;
 }
 
 /****** another language's code (the compiled javascript):  coloured by the page's code colours ******/
@@ -248,5 +271,70 @@
   .cm-changedText,
   .cm-deletedText {
     background: color-mix(in srgb, #f2994a 40%, transparent) !important;
+  }
+}
+
+/*
+ * Web addresses, errors on a plain hover, heading comments (epic `codemirror` P5):
+ * `CodeMirrorLinks`, `CodeMirrorHovers`, `CodeMirrorHeadings`, drawn as Monaco's are (`MonacoEditor.css`).
+ */
+.cm-editor.cmb {
+  /* a web address with ⌘ held over it:  underlined, a hand to click it with */
+  .cmb-link-ready {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  /* its tip on a plain hover, "⌘-click to open":  the hover's look */
+  .cmb-link-tip {
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+
+  /*
+   * the icon after each web address:  Font Awesome's up-right-from-square, small and muted
+   * (Font Awesome Free 7.3.1 by @fontawesome, https://fontawesome.com, icons CC BY 4.0);
+   * a plain click on it opens the address, so it shows a hand, and the link's colour when hovered
+   */
+  .cmb-link-icon {
+    display: inline-block;
+    width: 0.75em;
+    height: 0.75em;
+    margin-inline-start: 0.25em;
+    /* its bottom on the text's baseline (`overflow` makes it so), a little below, as the letters' feet */
+    overflow: hidden;
+    vertical-align: -0.1em;
+    background-color: currentColor;
+    opacity: 0.45;
+    mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290.4 19.8C295.4 7.8 307.1 0 320 0L480 0c17.7 0 32 14.3 32 32l0 160c0 12.9-7.8 24.6-19.8 29.6s-25.7 2.2-34.9-6.9L400 157.3 246.6 310.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L354.7 112 297.4 54.6c-9.2-9.2-11.9-22.9-6.9-34.9zM0 176c0-44.2 35.8-80 80-80l80 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-80 0c-8.8 0-16 7.2-16 16l0 256c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-80c0-17.7 14.3-32 32-32s32 14.3 32 32l0 80c0 44.2-35.8 80-80 80L80 512c-44.2 0-80-35.8-80-80L0 176z"/></svg>')
+      center / contain no-repeat;
+    cursor: pointer;
+    &:hover {
+      background-color: var(--ui-link, light-dark(#006ab1, #3794ff));
+      opacity: 1;
+    }
+  }
+
+  /* an error's message on a hover over its squiggle:  a row per error;  a message in short lines keeps them */
+  .cmb-errors {
+    max-width: min(480px, 90vw);
+  }
+  .cmb-error-row {
+    padding: 6px 10px;
+    white-space: pre-line;
+  }
+  /* and between the hover's sections, its info and its errors */
+  .cmb-error-row + .cmb-error-row,
+  .cm-tooltip-section:not(.cm-tooltip-lint) ~ .cm-tooltip-section:not(.cm-tooltip-lint) {
+    border-top: 1px solid light-dark(#e6e4ee, #34323f);
+  }
+  /* CodeMirror's own problems popup, left empty (`CodeMirrorHovers`):  hidden, and the hover with nothing else in it */
+  .cm-tooltip-lint.cm-tooltip-section:empty,
+  .cm-tooltip-hover:not(:has(> .cm-tooltip-section:not(.cm-tooltip-lint:empty))) {
+    display: none;
+  }
+
+  /* a heading comment, `#` ... to its line's end, with the look off:  bold;  the bubbly look draws its own */
+  &:not(.bubbly) .spell-heading {
+    font-weight: bold;
   }
 }
