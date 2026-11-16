@@ -10,6 +10,10 @@ import { P } from "spell/parser/parser"
  *   `replay()` puts some or all of that back -- marks included, so marks stay valid.
  * - NOTE: only changes to state which exists at the mark need recording.  Anything created after it is either
  *   thrown away (re-parsed) or brought back in the same state by `replay()`.
+ * - Most changes are OPERATIONS (epic `language` P59):  `replay()` makes them again onto the state as it is now,
+ *   e.g. a record added to a list goes on the end of the list's items as they are now.
+ *   So after an earlier file parsed again, a later file's changes can be put back onto the earlier file's NEW records:
+ *   see `P.JournalChange`, `P.IncrementalProject`.
  */
 export class ParseJournal {
   /** Changes in the order they happened, with marks between them. */
@@ -65,12 +69,26 @@ export class ParseJournal {
    * - A new record goes through `ScopeList.add()`, which journals itself.
    */
   static assign<T extends object>(journal: ParseJournal | undefined, target: T, next: Partial<T>) {
-    const previous = Object.fromEntries(Object.keys(next).map((key) => [key, target[key as keyof T]])) as Partial<T>
-    Object.assign(target, next)
-    journal?.record({
-      undo: () => Object.assign(target, previous),
-      redo: () => Object.assign(target, next)
-    })
+    const keys = Object.keys(next) as Array<keyof T>
+    const change: P.JournalChangeKind & { kind: "assign" } = {
+      kind: "assign",
+      target,
+      next: next as Record<string, unknown>,
+      previous: {}
+    }
+    // what was there when it was (re)done:  an earlier file parsed again may have left something else
+    const apply = () => {
+      change.previous = Object.fromEntries(keys.map((key) => [key, target[key]]))
+      Object.assign(target, next)
+    }
+    apply()
+    journal?.record({ undo: () => Object.assign(target, change.previous), redo: apply, change })
+  }
+
+  /** Entries from `mark` on, `mark` included:  e.g. what a file's parse recorded, from its first mark.  `[]` if it's gone. */
+  entriesFrom(mark: P.JournalMark): P.JournalEntry[] {
+    const index = this.#entries.indexOf(mark)
+    return index === -1 ? [] : this.#entries.slice(index)
   }
 
   /** Redo `entries` from `rewindTo()` in order, putting them -- and their marks -- back in the journal. */

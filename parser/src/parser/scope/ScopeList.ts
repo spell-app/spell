@@ -9,12 +9,22 @@ import type { P } from "spell/parser/parser"
  * - `InputType` lets `add()` / `replace()` accept raw input (e.g. plain props) that gets normalized
  *   to `ListType` via `transformer`.
  * - SIDE EFFECT: `add()` / `replace()` record themselves in `target.parser.journal`, if there is one, so
- *   incremental parsing can take them back -- see `P.ParseJournal`.  That's why they swap in a NEW items array
- *   rather than changing the old one:  undo / redo just swap the arrays back.
+ *   incremental parsing can take them back -- see `P.ParseJournal`.  They swap in a NEW items array
+ *   rather than changing the old one:  undo swaps the old one back.
+ *   - Redo adds the same items again, onto the items as they are THEN (epic `language` P59):
+ *     so a later file's records go back after an earlier file's NEW ones -- see `P.IncrementalProject`.
+ * - SIDE EFFECT: while a file parses, `get()` notes what it looked up in its `P.Outline` (`ScopeList.outline`):
+ *   after an earlier file changes, a file whose lookups all find the same is kept.
  */
 export class ScopeList<ListType = any, InputType = ListType> {
+  /**
+   * What the file parsing now looks up, if anyone's asking -- see `P.Outline`.
+   * - Set by `P.IncrementalParse` while it parses;  `undefined` the rest of the time, and nothing's noted.
+   */
+  static outline: P.Outline | undefined
+
   /** Backing array of items, in insertion order.  NEVER changed in place -- see above. */
-  #items: ListType[] = []
+  #items: readonly ListType[] = []
 
   /**
    * Each item's normalized key, worked out once:  `get()` reads every item's key on every lookup.
@@ -66,11 +76,38 @@ export class ScopeList<ListType = any, InputType = ListType> {
   get(): readonly ListType[]
   get(key: string, localOnly?: "LOCAL_ONLY"): ListType
   get(key?: string, localOnly?: "LOCAL_ONLY") {
-    if (key === undefined) return this.#items
+    if (key === undefined) {
+      ScopeList.outline?.lookedUp(this, undefined)
+      return this.#items
+    }
     key = this.normalizeKey(key)
     const item = this.#items.find((it) => key === this.getKeyFor(it)) ?? this.getByAlias(key)
+    ScopeList.outline?.lookedUp(this, key, item)
     if (!item && !localOnly) return this.parent?.get(key)
     return item
+  }
+
+  /**
+   * ALL our own items, for a caller looking through them for those `test` passes -- e.g. every property listing a value.
+   * - Same as `get()` with no key, but an outline notes only `test`, not every item:
+   *   after an earlier file changes, a file is kept if no item that changed passes it (`P.Outline`, epic `language` P59).
+   * - `test`:  would this item matter to the caller?  Generous is fine:  one passed too many only re-parses a file.
+   * - NEVER change the array -- see the class.
+   */
+  scan(test: (item: ListType) => boolean): readonly ListType[] {
+    ScopeList.outline?.lookedUp(this, test as P.OutlineTest)
+    return this.#items
+  }
+
+  /**
+   * Does `test` pass any of our own items?  As `scan(test).some(test)`, but an outline notes the item it found:
+   * after an earlier file changes, a file is kept if that item didn't change, or, when it found none,
+   * if no item that changed passes (`P.Outline`, epic `language` P59).
+   */
+  some(test: (item: ListType) => boolean): boolean {
+    const found = this.#items.find(test)
+    ScopeList.outline?.lookedUp(this, { test: test as P.OutlineTest, found })
+    return found !== undefined
   }
 
   /** Our own item whose alias is (normalized) `key`, if we have an `aliasProp`. */
@@ -89,7 +126,7 @@ export class ScopeList<ListType = any, InputType = ListType> {
    */
   add(...items: Array<ListType | InputType>) {
     const transformed = items.map(this.transform)
-    this.setItems([...this.#items, ...transformed])
+    this.change(transformed, (current) => [...current, ...transformed])
     for (const item of transformed) ScopeList.noteDeclared(item)
     return transformed
   }
@@ -116,23 +153,37 @@ export class ScopeList<ListType = any, InputType = ListType> {
    */
   replace(...items: Array<ListType | InputType>) {
     const transformed = items.map(this.transform)
-    let next = this.#items
-    for (const item of transformed) {
-      const key = this.getKeyFor(item)
-      next = [...next.filter((it) => this.getKeyFor(it) !== key), item]
-    }
-    this.setItems(next)
+    this.change(
+      transformed,
+      (current) => {
+        let next = current
+        for (const item of transformed) {
+          const key = this.getKeyFor(item)
+          next = [...next.filter((it) => this.getKeyFor(it) !== key), item]
+        }
+        return next
+      },
+      true
+    )
     return transformed
   }
 
-  /** Swap in `next` items, recording the swap in our scope's journal (if any) so it can be undone. */
-  private setItems(next: ListType[]) {
-    const previous = this.#items
-    this.#items = next
+  /**
+   * Swap in the items `apply` makes of ours, recording it in our scope's journal (if any) so it can be undone.
+   * - Redone, it's applied to our items as they are then:  see the class.
+   */
+  private change(items: ListType[], apply: (current: readonly ListType[]) => readonly ListType[], replace?: true) {
+    let previous = this.#items
+    const redo = () => {
+      previous = this.#items
+      this.#items = apply(previous)
+    }
+    redo()
     const journal = (this.props.target as P.Scope | undefined)?.parser?.journal
     journal?.record({
       undo: () => (this.#items = previous),
-      redo: () => (this.#items = next)
+      redo,
+      change: { kind: "list", list: this, items, ...(replace && { replace }) }
     })
   }
 
