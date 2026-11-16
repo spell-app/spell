@@ -121,8 +121,12 @@ class BubblyDecorations {
     return this.decorations.build()
   }
 
-  /** `nodes`, inside the blocks `rails` holds, outermost first. */
-  private nodes(nodes: SP.BubblyNode[], rails: Rail[]) {
+  /**
+   * `nodes`, inside the blocks `rails` holds, outermost first.
+   * - `isGroupBody`:  they're a group's body, drawn:  its own lines, its notes, where its members' words are
+   *   (`cmb-group-line`;  epic `language` I134)
+   */
+  private nodes(nodes: SP.BubblyNode[], rails: Rail[], isGroupBody = false) {
     for (let index = 0; index < nodes.length; index++) {
       const node = nodes[index]!
       if (node.kind === "line" && this.text[node.start] === "<") {
@@ -134,7 +138,7 @@ class BubblyDecorations {
           this.decorations.line(node.start, rails)
           break
         case "line":
-          this.decorations.line(node.start, rails)
+          this.decorations.line(node.start, rails, isGroupBody ? ["cmb-group-line"] : [])
           this.line(node)
           break
         case "block":
@@ -193,7 +197,7 @@ class BubblyDecorations {
     if (!hasBody) return
     // a block the slice cuts:  its body drawn, its rail not
     const inside = isShown ? [...rails, { ...indent, partOfSpeech }] : rails
-    this.nodes(block.body, inside)
+    this.nodes(block.body, inside, isShown && block.isGroup)
     if (!isShown) return
     this.foot(block, indent, rails)
   }

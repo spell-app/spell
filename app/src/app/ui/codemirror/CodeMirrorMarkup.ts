@@ -128,7 +128,7 @@ class MarkupShapes {
           const kind = shape.isAlone ? "cmb-tag-band" : "cmb-tag-pill"
           const classes = [kind, ...hueOf(shape.partOfSpeech), `cmb-tag-${shape.side}`]
           if (shape.declares) classes.push("cmb-tag-round")
-          this.on(shape.place, classes)
+          this.tagOn(shape.place, classes, shape.partOfSpeech)
           break
         }
         case "tag-link": {
@@ -175,14 +175,14 @@ class MarkupShapes {
     const hue = hueOf(block.partOfSpeech)
     // folded:  its start tag alone, a band pointed at both ends, the fold's `…` in its end (I116)
     if (this.decorations.isFoldedAt(head.start)) {
-      this.on(block.head, ["cmb-tag-band", "cmb-band-folded", "cmb-tag-start", ...hue])
+      this.tagOn(block.head, ["cmb-tag-band", "cmb-band-folded", "cmb-tag-start", ...hue], block.partOfSpeech)
       return
     }
-    this.on(block.head, ["cmb-tag-band", "cmb-band-open", "cmb-tag-start", ...hue])
+    this.tagOn(block.head, ["cmb-tag-band", "cmb-band-open", "cmb-tag-start", ...hue], block.partOfSpeech)
     const inside = [...rails, { ...this.decorations.indentAt(head.start), partOfSpeech: block.partOfSpeech }]
-    // the rail:  every line under its start tag, to its end tag's
+    // the rail:  every line under its start tag's first, its attributes' lines too (I133), to its end tag's
     const { doc } = this.decorations.state
-    const first = doc.lineAt(head.end).number + 1
+    const first = doc.lineAt(head.start).number + 1
     const last = doc.lineAt(whole.end).number
     for (let number = first; number <= last; number++) this.decorations.line(doc.line(number).from, inside, hue)
     const foot = block.foot === undefined ? undefined : this.marks[block.foot]
@@ -198,6 +198,35 @@ class MarkupShapes {
     }
 
     this.draw(block.inside, inside)
+  }
+
+  /**
+   * A tag's classes `classes` on the mark at `place`, a tag of `partOfSpeech`'s.
+   * - A start tag over several lines, its attributes on lines of their own (`<toolbar`, `class="GameBar"` ... `>`,
+   *   as Enter lays it out;  epic `language` I133):  its band on its first line, `classes`;  on each line under it,
+   *   a pill of its colour round that line's words (`cmb-tag-row`), never round the line's indent, which drew a band
+   *   from the margin across the rails round it.
+   */
+  private tagOn(place: number, classes: string[], partOfSpeech: string) {
+    const stretch = this.marks[place]
+    if (!stretch) return
+    const { doc } = this.decorations.state
+    const firstLine = doc.lineAt(stretch.start)
+    if (stretch.end <= firstLine.to) return this.on(place, classes)
+    this.decorations.mark(stretch.start, firstLine.to, [...classes, "cmb-tag-continued"])
+    for (let number = firstLine.number + 1; number <= doc.lineAt(stretch.end).number; number++) {
+      const line = doc.line(number)
+      const from = line.from + /^\s*/.exec(line.text)![0].length
+      const to = Math.min(line.to, stretch.end)
+      if (to <= from) continue
+      const row = ["cmb-tag-band", "cmb-tag-row", ...hueOf(partOfSpeech)]
+      if (to === stretch.end) row.push("cmb-tag-row-last")
+      // its `>` alone on its line, back at the tag's level:  the end of its band, at the band's left edge
+      if (/^\/?>$/.test(doc.sliceString(from, to))) row.push("cmb-tag-row-close")
+      // round what's marked on the line, never merged into a mark of the same stretch (a `>` alone, a bare attribute):
+      // CodeMirror puts an inclusive mark outside an exclusive one over the same text
+      this.decorations.add(Decoration.mark({ class: row.join(" "), inclusive: true }).range(from, to))
+    }
   }
 
   /** Classes `classes` on the mark at `place`. */

@@ -1269,12 +1269,6 @@
         var(--bubbly-pill-pad-left) + var(--bubbly-tab) * (1 + var(--bubbly-depth, 0)) - var(--bubbly-gutter)
       );
     }
-    /* a group's own lines (its description) are under its `group` line, a tab further in than its members */
-    .bubbly-group > .bubbly-body > .bubbly-line {
-      padding-left: calc(
-        var(--bubbly-pill-pad-left) + var(--bubbly-tab) * (2 + var(--bubbly-depth, 0)) - var(--bubbly-gutter)
-      );
-    }
     /* a tag's name in the plain hue, as the editor colours it:  its text isn't inside its block's element there */
     .bubbly-tag {
       --bubbly-hue: var(--bubbly-plain);
@@ -1719,6 +1713,15 @@
       padding-left: calc(var(--cmb-line-pad) + var(--cmb-band-left) + var(--cmb-band-inset));
     }
     /*
+     * a group's own lines, its notes (`// Each kind of pile ...`):  their words where its members' are, on their bands
+     * (Owen, epic `language` I134)
+     * - a group's members are written at its own indent, so its notes are too:  drawn there, they stood on its rail,
+     *   a band's room out from the members under it
+     */
+    .cm-line.cmb-group-line {
+      padding-left: calc(var(--cmb-line-pad) + var(--cmb-band-left) + var(--cmb-band-inset) + var(--cmb-indent));
+    }
+    /*
      * a band's words, a tag's, and those between a one-line element's tags:  a pixel up off their band's own line,
      * so their small letters are in its middle (Owen, I114:  "move text up one pixel");  their band stays where it is
      * - the browser puts text on whole pixels:  any lift from about 0.9px to 1.9px moves it one, so the middle of that
@@ -2091,6 +2094,30 @@
     .cmb-tag-start {
       padding-left: 0;
     }
+    /*
+     * a start tag over several lines, its attributes on lines of their own, as Enter lays a long one out (epic
+     * `language` I133):  its band on its first line, no `⟩` end there;  each line under it a pill of its colour round
+     * that line's words, hanging on its rail as its body's tags do, the last one's right end its `⟩`'s point
+     */
+    .cmb-tag-continued {
+      border-top-right-radius: var(--bubbly-pill-radius);
+      border-bottom-right-radius: var(--bubbly-pill-radius);
+      corner-shape: round;
+    }
+    .cmb-tag-row {
+      padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
+      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) 0;
+      corner-shape: round;
+    }
+    /* ... a `>` alone on its line, back at the tag's level:  the end of the tag's band, from the band's left edge */
+    .cmb-tag-row.cmb-tag-row-close {
+      margin-left: var(--cmb-band-left);
+    }
+    .cmb-tag-row.cmb-tag-row-last {
+      border-radius: 0 var(--bubbly-tag-point) var(--bubbly-tag-point) 0 / 0 calc(var(--bubbly-pill-height) / 2)
+        calc(var(--bubbly-pill-height) / 2) 0;
+      corner-shape: bevel;
+    }
     /* a tag that declares the member it draws:  round (epic `editor` I84) */
     .cmb-tag-round {
       border-radius: calc(var(--bubbly-pill-height) / 2);
@@ -2314,6 +2341,13 @@
       .bubbly-tag-foot-bare-spacer
     ) {
       width: 0;
+    }
+    /*
+     * ... but after an attribute's `=`, a space's room before its opening quote mark, as a quote after a space has:
+     * its mark stood up against the `=` (epic `language` I133)
+     */
+    .cm-line .bubbly-equals + .bubbly-quote-spacer {
+      width: var(--cmb-space);
     }
   }
 }
