@@ -328,6 +328,19 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     --ui-icon-width: auto;
     --ui-icon-distance: 0;
   }
+  /* its words:  "Editing a Draft", or "Draft" while the top bar is compact (T89):  the long words made the bar
+     scroll under 1300px on a site's editor (its Site tab too) */
+  & .DraftShort {
+    display: none;
+  }
+  @media (width < 1360px) {
+    & .DraftLong {
+      display: none;
+    }
+    & .DraftShort {
+      display: inline;
+    }
+  }
   & > ui-button {
     --ui-button-radius: 999px;
     --ui-button-font-size: 1em;

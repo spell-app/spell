@@ -153,6 +153,8 @@ export const APP_TEXTS = {
   discardDraft: "Discard",
   publishDraft: "Publish",
   editingDraft: "Editing a Draft",
+  /** "Editing a Draft" while the top bar is compact (epic `editor` T89). */
+  draftShort: "Draft",
   draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
