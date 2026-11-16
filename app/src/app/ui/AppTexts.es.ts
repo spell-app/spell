@@ -163,6 +163,7 @@ const APP_TEXTS_ES: AppTextPack = {
   updatedInYourDraft: "Actualizado en tu borrador.",
   discardChanges: "Descartar los cambios",
   closeTab: "Cerrar",
+  hideCode: "Ocultar el código",
   versions: "Versiones",
   deleteDraft: "Borrar el borrador",
   deleteDraftHeading: "¿Tirar tu borrador?",
