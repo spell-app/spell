@@ -47,6 +47,7 @@ async function open(page: Page, project: string, { codeEditor }: { codeEditor: b
   await page.evaluate(() => {
     const { Inspector } = window as unknown as DebugGlobals
     if (!Inspector.isOpen) Inspector.toggle()
+    else Inspector.startInspecting()
   })
   await page.waitForTimeout(1000)
 }
@@ -111,7 +112,7 @@ function fileState(page: Page, name: string) {
 /** The page's debug globals, what's used of them. */
 type DebugGlobals = {
   editor: { loadRuntime(): Promise<{ core: { things: { all(): object[] } } }> }
-  Inspector: { inspectThing(thing: object): void; isOpen: boolean; toggle(): void }
+  Inspector: { inspectThing(thing: object): void; isOpen: boolean; toggle(): void; startInspecting(): void }
 }
 
 /** How many steps the side bar's history holds. */
