@@ -56,8 +56,12 @@ export class Palette {
     return opens
   }
 
-  /** Keep it open, or stop;  remembered. */
+  /**
+   * Keep it open, or stop;  remembered.
+   * - Its menus close either way (epic `editor` I175):  pinned, the bar shows in the popup's place.
+   */
   static togglePinned(): void {
+    Palette.closeMenus()
     const pinned = !isPinned()
     setPinned(pinned)
     editorPrefs.set(PINNED_PREF, pinned)
@@ -71,6 +75,17 @@ export class Palette {
 
   /** Shows the menu:  `<AddPartButton>`'s, while it's drawn. */
   static showMenu: (() => void) | undefined
+
+  /**
+   * Close its menus, the popup and the pinned bar's:  what's added, or dragged, lands on a page you can see
+   * (epic `editor` I176).
+   */
+  static closeMenus(): void {
+    for (const menu of menus) {
+      if (menu.isConnected) menu.visible = false
+      else menus.delete(menu)
+    }
+  }
 
   /** Load what it offers, the first time. */
   static load(): void {
@@ -142,6 +157,15 @@ let loading: Promise<void> | undefined
 
 /** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
+
+/** Its menus, the popup and the pinned bar's:  `Palette.closeMenus()` closes them, forgetting those gone. */
+const menus = new Set<HTMLElement & { visible?: boolean }>()
+
+/** A `ref` for one of its popups:  closed by `Palette.closeMenus()`, and by a drag starting from it. */
+function closesWithPalette(popup: HTMLElement & { visible?: boolean }): void {
+  menus.add(popup)
+  PartEdits.onPaletteDrag = () => Palette.closeMenus()
+}
 
 /**
  * What `definition` adds to `file`, in its language.
@@ -289,9 +313,6 @@ function stepTitle(definition: ComponentDefinition): string {
 export function AddPartButton(): JSX.Element {
   let popup: (HTMLElement & { visible?: boolean }) | undefined
   onSettled(() => {
-    PartEdits.onPaletteDrag = () => {
-      if (popup) popup.visible = false
-    }
     Palette.showMenu = () => {
       if (popup) popup.visible = true
     }
@@ -317,6 +338,7 @@ export function AddPartButton(): JSX.Element {
         aria-label={appTexts.text("addPart")}
         ref={(element: HTMLElement) => {
           popup = element
+          closesWithPalette(element)
         }}
       >
         <PaletteMenu />
