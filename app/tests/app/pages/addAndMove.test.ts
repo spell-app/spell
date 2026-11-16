@@ -89,7 +89,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
   /** Drag `label` from the palette to (`toX`, `toY`). */
   async function fromPalette(label: string, toX: number, toY: number): Promise<void> {
-    await page.locator("#AddPartButton").click()
+    await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(800)
     const row = await page.locator(`.PalettePopup ui-tree-item[label="${label}"]`).first().boundingBox()
     await drag(row!.x + 40, row!.y + 10, toX, toY)
@@ -119,9 +119,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     })
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/TaskList`, { timeout: 60_000 })
-    await page.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await page.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(6000)
-    await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+    await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
     await page.waitForTimeout(1000)
   }, 120_000)
 
@@ -390,7 +390,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("a card made in a loop can't move or go alone, and the editor says why", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
     await other.waitForTimeout(7000)
     const notice = () => other.evaluate(() => (window as unknown as { editor: { notice?: string } }).editor.notice)
     const source = () =>
@@ -440,7 +440,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("cards are a list, so Shift takes a run;  and in Run a program keeps its right click", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
     await other.waitForTimeout(7000)
     // the last test's right click is remembered with the project
     await other.evaluate(() => {
@@ -511,7 +511,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("in Edit, a part inside a program menu shows its items first, a thick line, then ours;  Run's is its own (I76)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
     await other.waitForTimeout(7000)
     // a face-down card on top of a pile, as it's drawn now
     const topCard = () =>
@@ -637,7 +637,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("a right click on a card:  the menu at once, for it;  never the browser's, even on the menu (Owen, 2026-11-12)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
     await other.waitForTimeout(7000)
     // every right click, as the page has dealt with it:  did the browser's own menu stay away?
     await other.evaluate(() => {
@@ -736,7 +736,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("in Edit, the game's own right-click menu comes first, a thick line, then the editor's (T120)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
     await other.waitForTimeout(7000)
     await other.evaluate(() => (window as unknown as { Inspector: { letGo(): void } }).Inspector.letGo())
     // a pile, and the top card of the last one:  each its own element, the game's menu up their chain
@@ -831,10 +831,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80)", async () => {
+  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
-    await page.locator("#AddPartButton").click()
+    await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(600)
     expect(await popupShows()).toBe(true)
     await page.locator(".PalettePopup .PalettePin").click()
@@ -844,6 +844,35 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.reload()
     await page.waitForSelector(".PaletteStrip .PaletteGroupName", { timeout: 60_000 })
     await page.waitForTimeout(1000)
+
+    // its pin at its far left, Add View in bold, each topic with its icon;  at 1290px wide, nothing scrolls (T86, T92)
+    await page.setViewportSize({ width: 1290, height: 800 })
+    await page.waitForTimeout(600)
+    const bar = () =>
+      page.evaluate(() => {
+        const strip = document.querySelector(".PaletteStrip")!
+        const left = (el: Element | null | undefined) => el?.getBoundingClientRect().left ?? -1
+        const names = [...strip.querySelectorAll("ui-item.PaletteGroupName")]
+        return {
+          overflowing: strip.querySelector("ui-toolbar.PaletteStripGroups")!.matches(":state(overflowing)"),
+          pinFirst: left(strip.querySelector(".PalettePin")) < left(strip.querySelector(".PaletteStripLabel")),
+          label: strip.querySelector(".PaletteStripLabel")?.textContent,
+          bold: Number(getComputedStyle(strip.querySelector(".PaletteStripLabel")!).fontWeight) >= 700,
+          withIcons: names.every((name) => !!name.getAttribute("icon")),
+          closes: strip.querySelectorAll(".PaletteClose").length,
+          searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width
+        }
+      })
+    expect(await bar()).toMatchObject({
+      overflowing: false,
+      pinFirst: true,
+      label: "Add View",
+      bold: true,
+      withIcons: true,
+      closes: 0
+    })
+    const idleWidth = (await bar()).searchWidth
+    await page.setViewportSize({ width: 1440, height: 800 })
 
     // the pinned bar:  a topic's name opens its menu, every part filed there;  choosing one closes it (I176)
     const menusOpen = () =>
@@ -876,6 +905,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await search.click()
     await page.keyboard.type("butt", { delay: 30 })
     await page.waitForTimeout(800)
+    // the field keeps its width typed in, with a ✕ inside it (T87)
+    expect((await bar()).searchWidth).toBe(idleWidth)
+    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(1)
     const shown = await matches()
     expect(shown.length).toBeGreaterThan(1)
     expect(shown.flatMap(({ labels }) => labels)).toContain("Button")
@@ -912,6 +944,15 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await search.fill("")
     await page.waitForTimeout(600)
     expect(await matches()).toEqual([])
+    // its ✕ empties it and closes them, and the field keeps the focus (T87)
+    await search.fill("grid")
+    await page.waitForTimeout(600)
+    await page.locator(".PaletteStrip .PaletteStripClear").click()
+    await page.waitForTimeout(600)
+    expect(await matches()).toEqual([])
+    expect(await search.inputValue()).toBe("")
+    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
+    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(0)
     // choosing a match closes them all (I176)
     const grids = ((await text()).match(/<(ui-)?grid\b/g) ?? []).length
     await search.fill("grid")
@@ -921,7 +962,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await matches()).toEqual([])
     expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids + 1)
 
-    await page.locator(".PaletteStrip .PaletteClose").click()
+    // its pin unpins it (T92)
+    await page.locator(".PaletteStrip .PalettePin").click()
     await page.waitForTimeout(600)
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
   })
@@ -929,7 +971,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
-    await page.locator("#AddPartButton").click()
+    await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(600)
     // no "N more":  what was behind it shows, under its topic
     expect(await page.locator(".PalettePopup .PaletteMore").count()).toBe(0)

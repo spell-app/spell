@@ -38,19 +38,27 @@
     color-mix(in oklab, var(--ui-primary) 5%, var(--spell-code-paper))
   );
   /*
-   * the top bar's fill as it's seen, for a bar inside a panel to match it (epic `mockup` I18):
+   * the top bar's fill as it's seen, for a bar inside a panel to match it (epic `mockup` I18, `editor` T83):
    * the Inspector's card headers, the code's file tabs, the site editor's board bar
-   * - the top bar's own fill (`--spell-menu-bar-fill`), over the page under it (`--ui-background`):
-   *   a theme's bar is often see-through, on the page, where these sit on a panel
+   * - the top bar's own fill (`--spell-menu-bar-fill`), over the page under it:  a theme's bar is often see-through,
+   *   on the page, where these sit on a panel
+   * - so the page is painted again under it:  a theme's wallpaper, as Spell UI's bars over a panel paint it
+   *   (`--ui-bar-wallpaper`:  Fruity's washes), then the page's colour (`--ui-background`)
+   *   (Owen, T83:  "Left sidebar:  top should be same color as the menubar")
    * - its fill is `<ui-app-menu>`'s (the menu's window bar), the same tokens in the same order (`UIMenu.css`, "Bar")
-   * - a background's layers, so it's for `background`, never `background-color`
+   * - a background's layers, so it's for `background`, never `background-color`;
+   *   MUST be drawn with `background-attachment: fixed`, as the page's wallpaper is, or the washes land elsewhere
    */
   --spell-menu-bar-fill: var(
     --ui-menu-header-bar-background,
     var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))
   );
   --spell-menu-bar-background:
-    linear-gradient(var(--spell-menu-bar-fill), var(--spell-menu-bar-fill)), var(--ui-background);
+    linear-gradient(var(--spell-menu-bar-fill), var(--spell-menu-bar-fill)),
+    var(--ui-bar-wallpaper, linear-gradient(transparent, transparent)),
+    var(--ui-bar-wallpaper-color, var(--ui-background));
+  /* the top bar's blur, for what sits on the page beside it (the palette kept open, `Palette.css`) */
+  --spell-menu-bar-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
 }
 
 /*

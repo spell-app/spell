@@ -691,6 +691,10 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     border-radius: 999px;
     background: color-mix(in oklab, var(--ui-text-muted) 45%, transparent);
   }
+  /* the sheet's own Close, in its bar, puts it away:  no second one in its top card's header */
+  ui-icon.InspectorClose {
+    display: none;
+  }
   .InspectorSheetBar > ui-icon.InspectorSheetClose {
     position: absolute;
     inset-inline-end: 4px;
@@ -772,15 +776,17 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 }
 
 /*
- * The Inspector's cards on a panel's own fill, `--spell-panel-background` (`spell.css`), in every theme
- * (Owen, epic `mockup` I18:  "In the inspector panels, make the bg --ui-primary-25")
- * - before, epic `editor` I153:  the code's white paper, and only while the code was drawn bubbly
- * - solid, so no glass behind it:  a see-through theme's blur read as the page's lilac
+ * The Inspector's cards each a pane of the left code panel's look:  the panel's glass inside each card, the page in
+ * the seams between them, so each reads as its own pane (Owen, epic `editor` I190:  "Code doesn't look like a
+ * separate pane.  Put that background *inside* the panels, rather than in the background of the sidebar")
+ * - the card's corners its pane's;  its bar the top bar's colour (`.InspectorCard`, above)
+ * - before:  a panel's own solid fill, `--spell-panel-background` (epic `mockup` I18), then the glass behind the
+ *   whole column (T83, undone by I190)
  */
 :root[data-spell-theme] .InspectorColumn .InspectorSplit > .SplitPane::before {
-  background: var(--spell-panel-background);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  background: var(--spell-pane-background);
+  -webkit-backdrop-filter: var(--spell-pane-filter);
+  backdrop-filter: var(--spell-pane-filter);
 }
 /* a card's code box takes back some of the card's 14px each side, so its lines have room (Owen, I164:
    "Reduce margin around the input") */

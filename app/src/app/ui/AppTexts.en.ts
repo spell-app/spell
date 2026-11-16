@@ -43,7 +43,9 @@ export const APP_TEXTS = {
   paletteMore: "{count} more",
   paletteMoreTip: "Show everything filed under {topic}",
   palettePin: "Keep this open",
-  paletteUnpin: "Close this",
+  paletteUnpin: "Unpin",
+  paletteAddView: "Add View",
+  paletteClearSearch: "Clear the search",
   partStepAdd: "Add {part}",
   partStepMove: "Move",
   partStepCut: "Cut",
@@ -153,10 +155,14 @@ export const APP_TEXTS = {
   discardDraft: "Discard",
   publishDraft: "Publish",
   editingDraft: "Editing a Draft",
+  /** "Editing a Draft" while the top bar is compact (epic `editor` T89). */
+  draftShort: "Draft",
   draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
   closeTab: "Close",
+  /** The file bar's ✕ at its far right, which hides the code (epic `editor` T83). */
+  hideCode: "Hide the code",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftHeading: "Throw away your draft?",
@@ -617,6 +623,8 @@ export const APP_TEXTS = {
   // the phone's sheet (`<InspectorSheetBar>`)
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
+  // the Inspector card's Close, right of Inspect app:  hides the column (I186)
+  inspectorClose: "Close the Inspector",
   inspectorAddEvent: "Add Event",
   inspectorAddAction: "Add Action",
   // a Code card row's ✕ (`<RemoveEventButton>`, epic `editor` T73):  its tooltip and undo step, then what it asks
@@ -744,6 +752,18 @@ export const APP_TEXTS = {
   // `$`:  the number CodeMirror fills in
   cmReplacedMatchOnLine: "replaced match on line $",
   cmReplacedMatches: "replaced $ matches",
+  // the find bar's (`CodeMirrorFind`):  `$` its key;  `$1 of $2`, the match and how many
+  cmFindMatchCase: "Match Case ($)",
+  cmFindWholeWord: "Match Whole Word ($)",
+  cmFindRegexp: "Use Regular Expression ($)",
+  cmFindPrevious: "Previous Match ($)",
+  cmFindNext: "Next Match ($)",
+  cmFindClose: "Close ($)",
+  cmFindToggleReplace: "Toggle Replace",
+  cmFindReplace: "Replace ($)",
+  cmFindReplaceAll: "Replace All ($)",
+  cmFindNoResults: "No results",
+  cmFindCount: "$1 of $2",
   cmGoToLine: "Go to line",
   cmGo: "go",
   // folds

@@ -1694,8 +1694,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "max-visible",
       "remember",
       "all-items-icon",
-      "all-items-at-end",
-      "all-items-always"
+      "all-items-at-end"
     ],
     formControl: true
   },

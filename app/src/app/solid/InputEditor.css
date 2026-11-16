@@ -4,11 +4,17 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  /* its pane's corners, for the code's paper below */
+  border-radius: inherit;
 }
 
+/* the code on its paper, in every theme:  white, near-black in dark (`--spell-code-paper`), as the code drawn bubbly is,
+   not the pane's glass (Owen, epic `editor` T83:  "Bg under code should be white");  its bottom corners the pane's */
 .InputEditor {
   position: relative;
-  background: var(--spell-view-background);
+  background: var(--spell-code-paper);
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
   flex: 1 1 auto;
   overflow: hidden;
 }

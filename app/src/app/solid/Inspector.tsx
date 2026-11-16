@@ -74,6 +74,7 @@ import "./Inspector.css"
  * ### `Inspector`
  * Look inside the running app, and change it (epic `debut` P13):  a part selected in the app, its properties to edit.
  * - Open or closed, all its cards together:  `<InspectorToggle>` in the top bar, or View › Inspector;
+ *   closed by the Close in its top card's header too (I186);  the top bar's Inspect app opens it again;
  *   remembered in the browser (`OPEN_PREF`).
  *   No card is hidden on its own (epic `editor` T78):  each folds to its header instead.
  * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click selects it:
@@ -911,12 +912,33 @@ export class Inspector {
   /**
    * The thing whose TYPE the side bar is editing (epic `editor` P23, Q29):  what's inspected, a thing, while its
    * changes apply to all of its type (`scopeOf()`, All Cards);  `undefined` otherwise.
-   * - Then the properties card edits the type's fields, and its events, actions and tests are cards of their own.
+   * - Then the properties card edits the type's fields, and its events, actions and tests are cards of their own
+   *   (`typeWithCards`);  a one of a kind's are its Code card (I186).
    */
   static get typeEdited(): object | undefined {
     const part = Inspector.inspected
     if (!part || part.layout || !isThing(part.value) || part.crumbs.length > 1) return undefined
     return Inspector.scopeOf(part) === "all" ? part.value : undefined
+  }
+
+  /**
+   * The type whose events, actions and tests show as cards of their own (`TYPE_PANES`):  `typeEdited`,
+   * except a one of a kind's (the app), whose code is the one Code card a column's is (epic `editor` I186).
+   * - Owen:  "merge them back in like when a column is selected, with `add event` and `add action`".
+   */
+  static get typeWithCards(): object | undefined {
+    const thing = Inspector.typeEdited
+    return thing && !Inspector.isOneOfAKind(thing) ? thing : undefined
+  }
+
+  /**
+   * The thing whose Tests card shows:  All Cards' type, always;
+   * a one of a kind's, under its Code card, only while it has tests (epic `editor` I186).
+   */
+  static get typeWithTests(): object | undefined {
+    const thing = Inspector.typeEdited
+    if (!thing) return undefined
+    return !Inspector.isOneOfAKind(thing) || Inspector.testsOf(thing).length ? thing : undefined
   }
 
   /** `thing`'s type's abilities and events, as `writtenEventsOf()` says a drawn thing's:  for its type's Events card. */
@@ -1737,7 +1759,7 @@ export type InspectorPanel = (typeof INSPECTOR_PANELS)[number]
  * The cards of a TYPE, under what's selected while a change applies to all of its type (All Cards;  epic `editor` P23):
  * its events, its actions and its tests, each a card of its own, resizable (Owen:  "make Events, Actions, Tests separate
  * panes so they can be resized").
- * - Not in the menu of cards:  they show and go with the switch (`Inspector.typeEdited`).
+ * - Not in the menu of cards:  they show and go with the switch (`Inspector.typeWithCards`, `typeWithTests`).
  */
 export const TYPE_PANES = ["events", "actions", "tests"] as const
 /** One of a type's cards. */
@@ -2579,6 +2601,8 @@ class PartSelector {
  *   - what's selected (`<PropertiesCard>`)
  *   - its code (`<CodeCard>`):  its events, then its actions, while one thing is selected;
  *     while nothing is, its bar alone, folded for good (`<NoCodeCard>`, T69)
+ *   - All Cards' type's events, actions and tests, cards of their own (`TYPE_PANES`);
+ *     a one of a kind's (the app) are its Code card, its Tests card only while it has tests (I186)
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Every card shows while the column does (epic `editor` T78:  no card hidden on its own);
  *   the top bar's Inspector button opens and closes the column (`<InspectorToggle>`).
@@ -2602,8 +2626,11 @@ export function InspectorColumn(): JSX.Element {
   const rows = appParts()
   const shown = createMemo((): InspectorCardId[] => {
     const cards = INSPECTOR_PANELS.filter((panel) => panel !== "code" || hasCodeCard())
-    if (!Inspector.typeEdited) return cards
-    return [cards[0]!, ...TYPE_PANES, ...cards.slice(1)]
+    const typePanes = TYPE_PANES.filter((pane) =>
+      pane === "tests" ? Inspector.typeWithTests : Inspector.typeWithCards
+    )
+    // in the column's order:  what's selected, its Code card, its type's cards, then Views
+    return [...cards.slice(0, -1), ...typePanes, cards.at(-1)!]
   })
   const layout = createMemo(() => cardsLayout(shown(), !Inspector.inspected))
   const cardSizes = rememberedSizes(layout)
@@ -2671,7 +2698,7 @@ export function InspectorColumn(): JSX.Element {
               </Show>
             </div>
           </Show>
-          <Show when={Inspector.typeEdited} keyed>
+          <Show when={Inspector.typeWithCards} keyed>
             {(thing) => (
               <>
                 <div class="SplitPane">
@@ -2680,10 +2707,14 @@ export function InspectorColumn(): JSX.Element {
                 <div class="SplitPane">
                   <TypeActionsCard thing={thing} />
                 </div>
-                <div class="SplitPane">
-                  <TypeTestsCard thing={thing} />
-                </div>
               </>
+            )}
+          </Show>
+          <Show when={Inspector.typeWithTests} keyed>
+            {(thing) => (
+              <div class="SplitPane">
+                <TypeTestsCard thing={thing} />
+              </div>
             )}
           </Show>
           <div class="SplitPane">
@@ -2780,11 +2811,12 @@ const TALLEST_SHEET = 0.9
 /**
  * What the Code card shows:  the part selected, alone -- not several together, nor All Cards' type,
  * whose own cards say its code (`TYPE_PANES`);  `undefined`:  no Code card.
+ * - A one of a kind (the app) has it, as a column does:  its type IS it (`Inspector.typeWithCards`, I186).
  * - `element`:  its events;  `thing`:  its actions, for a drawn thing (not a Spell UI element's layout).
  */
 function codeCardPart(): { element: Element; thing?: object } | undefined {
   const part = Inspector.inspected
-  if (!part?.element || part.together || Inspector.typeEdited) return undefined
+  if (!part?.element || part.together || Inspector.typeWithCards) return undefined
   return { element: part.element, thing: part.layout ? undefined : part.value }
 }
 
@@ -2965,6 +2997,8 @@ function pinnedAt(height: number): Keyframe {
  * (Owen:  "lose that [More]. Show all of the properties").
  * - Inspecting again:  Inspect app, in the card's header as in the top bar (`<InspectAppButton>`;
  *   Owen, 2026-11-15:  "Put the inspector crosshair back in this header", T78).
+ * - Close, right of it:  hides the whole column (`Inspector.close()`, epic `editor` I186).
+ *   View › Inspector, or the top bar's Inspect app, brings it back.
  * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
@@ -3017,8 +3051,26 @@ function PropertiesCard(): JSX.Element {
           )}
         </Show>
       }
-      // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78)
-      actions={<InspectAppButton slot="right" />}
+      // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78),
+      // then Close, which hides the column (I186)
+      actions={
+        <>
+          <InspectAppButton slot="right" />
+          <ui-icon
+            slot="right"
+            name="close"
+            link=""
+            class={["IconAction", "InspectorClose"]}
+            label={appTexts.text("inspectorClose")}
+            title={appTexts.text("inspectorClose")}
+            onClick={(event: MouseEvent) => {
+              // in the card's header:  a click closes the column, never folds the card
+              event.stopPropagation()
+              Inspector.close()
+            }}
+          />
+        </>
+      }
     >
       <Show
         when={inspected()}

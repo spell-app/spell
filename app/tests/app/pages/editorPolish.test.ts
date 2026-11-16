@@ -260,7 +260,7 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
         if (message.text().includes("STRICT_READ_UNTRACKED")) warnings.push(message.text())
       })
       await open(page, "Solitaire", "Solitaire.spell")
-      await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+      await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
       await page.waitForTimeout(1000)
       await clickLine(page, await lineOf(page, `<action "cheat"/>`))
       expect(await selected(page)).toEqual(["ui-action"])

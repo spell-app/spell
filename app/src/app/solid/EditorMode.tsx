@@ -124,20 +124,28 @@ export function toggleCode() {
  * ### `<ModeButtons>`
  * Run | Edit | Site in the top bar, as the theme's segmented tabs:  the one showing is chosen;
  * Site only for a project that declares a site (`EditorMode.hasSite`);
- * then, in Edit, the code's icon, which shows the code or closes it, the compiled code's (`compiled`), then Inspect app
- * (`inspect`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and inspect buttons
- * should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector").
+ * then, in Edit, the code's icon, which shows the code or closes it, the compiled code's (`compiled`), Inspect app
+ * (`inspect`), then Add (`add`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and
+ * inspect buttons should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector";
+ * T83:  "Move `add` to the immediate right of the inspector crosshair").
  * - After the group, while you have drafts of the project:  "Editing a Draft", then Publish Draft, one pill
  *   (`<PublishDraft>`;  Owen, 2026-11-14:  "move it to the right of code/inspect buttons").
- * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
+ * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on;
+ *   Add's `aria-haspopup`, that it opens a menu.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - `compiled`:  the compiled code's item (`<CompiledCodeButton>`), handed in as `inspect` is.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
+ * - `add`:  Add's item and its menu (`<AddPartButton>`), handed in as `inspect` is.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
  * - Not on a phone, which only runs (`chrome.css`).
  ****************/
-export function ModeButtons(props: { current: Mode; compiled?: JSX.Element; inspect?: JSX.Element }): JSX.Element {
+export function ModeButtons(props: {
+  current: Mode
+  compiled?: JSX.Element
+  inspect?: JSX.Element
+  add?: JSX.Element
+}): JSX.Element {
   return (
     <ui-item class="ModeButtons">
       <ui-menu
@@ -146,9 +154,10 @@ export function ModeButtons(props: { current: Mode; compiled?: JSX.Element; insp
         class="ModeTabs"
         aria-label={appTexts.text("modes")}
         ref={on<{ item: Element }>("ui-choosing", (event) => {
-          // a toggle (Inspect app, the code's icon) is pressed, never chosen:  the thumb stays on the mode
+          // a toggle (Inspect app, the code's icon) is pressed, a menu's opener (Add) opens it, never chosen:
+          // the thumb stays on the mode
           const item = event.detail.item
-          if (item.hasAttribute("aria-pressed")) event.preventDefault()
+          if (item.hasAttribute("aria-pressed") || item.hasAttribute("aria-haspopup")) event.preventDefault()
         })}
       >
         <ModeTab mode="run" current={props.current} />
@@ -167,6 +176,7 @@ export function ModeButtons(props: { current: Mode; compiled?: JSX.Element; insp
           />
           {props.compiled}
           {props.inspect}
+          {props.add}
         </Show>
       </ui-menu>
       <PublishDraft />
@@ -194,9 +204,11 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
  * While you have drafts of the project (epic `editor` I44), right of the code and Inspect app buttons:
  * ONE pill, the size and shape of the bar's tools group, tinted a soft yellow (Owen, 2026-11-14, I77, I90, I93:
  * "one unified thing with a slight inset border").
- * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Editing a Draft", as plain words.
- * - Then "Discard Draft", a grey button with a trash can:  the project menu's Delete Draft, which asks first,
- *   its red "Throw It Away" (`editor.deleteDraft()`;  Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button").
+ * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Editing a Draft", as plain words;
+ *   "Draft" while the top bar is compact (`chrome.css`;  Owen, 2026-11-16, T89).
+ * - Then "Discard Draft", a link with a trash can:  the project menu's Delete Draft, which asks first,
+ *   its red "Throw It Away" (`editor.deleteDraft()`;  Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button";
+ *   2026-11-16, T85:  "Instead of a grey button, make `Discard` look like a link").
  * - Right:  "Publish Draft", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
@@ -207,9 +219,15 @@ function PublishDraft(): JSX.Element {
       <span class="PublishDraft" title={appTexts.text("draftTip")}>
         <span class="DraftState">
           <ui-icon name={DRAFT_ICON} />
-          {appTexts.text("editingDraft")}
+          <span class="DraftLong">{appTexts.text("editingDraft")}</span>
+          <span class="DraftShort">{appTexts.text("draftShort")}</span>
         </span>
-        <ui-button class="DiscardDraft" icon={DISCARD_ICON} onClick={() => void editor.deleteDraft()}>
+        <ui-button
+          class="DiscardDraft"
+          appearance="tertiary"
+          icon={DISCARD_ICON}
+          onClick={() => void editor.deleteDraft()}
+        >
           {appTexts.text("discardDraft")}
         </ui-button>
         <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>

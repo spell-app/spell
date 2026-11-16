@@ -3,7 +3,9 @@
  * - Its height while its Spell loads:  the code below stays where it'll be.
  * - The bar follows the pane's rounded top.
  * - Its fill is the top bar's, as seen (`--spell-menu-bar-background`, `spell.css`;
- *   Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu").
+ *   Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu";  epic `editor` T83):
+ *   painted on this box, its wallpaper fixed as the page's is, the pane's bar inside it see-through
+ *   (the pane's bar is in the Spell's shadow, where no `background-attachment` reaches).
  */
 
 .FileTabs {
@@ -12,5 +14,11 @@
   min-height: var(--ui-panel-pane-bar-height, max(40px, calc(var(--ui-control-height, 0px) + 12px)));
   border-start-start-radius: var(--spell-pane-radius, 0);
   border-start-end-radius: var(--spell-pane-radius, 0);
-  --ui-panel-pane-bar-background: var(--spell-menu-bar-background);
+  background: var(--spell-menu-bar-background);
+  background-attachment: fixed;
+  --ui-panel-pane-bar-background: transparent;
+  /* the room left and right of the tabs the same as above them, 7.5px (Owen, epic `editor` T88:  "Less padding to the
+     left and right, make it equal to the padding at the top of card.spell"):  a tab's own 2px inset on the left,
+     the ✕'s glyph's 3.3px on the right;  inline only, start and end, as `<ui-panel>` reads it */
+  --ui-panel-pane-bar-padding: 5.5px 4.2px;
 }

@@ -6,11 +6,13 @@ import type { E } from "spell/element"
 import type { UIToolbar } from "spell/ui/components/ui-toolbar"
 
 import { editor } from "spell/app/app/editor"
+import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import type { EditorSpell } from "spell/app/app/layout/layoutSpell"
 import type { EditorThing } from "spell/app/app/layout/editorNames"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorSpellWithActions } from "./MenuBar"
 import { fileIconFor } from "./chrome"
+import { CodeShown } from "./EditorMode"
 import { trackProjectFiles } from "./FileDropdown"
 import { tracked } from "./tracked"
 
@@ -31,9 +33,11 @@ import "./FileTabs.css"
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file
  *   (`editor.moveFile()`;  Owen, epic `mockup`).
- * - A button listing every file, at the bar's right end, however few files there are
- *   (its `all-items-always`, `all-items-at-end`;  epic `editor` T82);
+ * - A button listing every file, at the bar's right end, while some files aren't tabs you can see:
+ *   put away, or scrolled out of the row (its `max-visible`, `all-items-at-end`;  epic `editor` T82, T83);
  *   a file icon before its caret (`all-items-icon`, epic `editor` T76:  "The `More` dropdown is too subtle").
+ * - A ✕ at the bar's far right hides the code, as the top bar's code icon does (`CodeShown`;  epic `editor` T83:
+ *   "Add a close `x` to the far right of the file menu which hides the panel").
  * - More than eight files:  the ones opened lately (its `max-visible`), the same ones after a reload,
  *   per project (its `remember`).
  *   - Then a tab's ✕ (the Spell's `close it`), or a middle click, closes it (epic `editor` T77):
@@ -41,6 +45,8 @@ import "./FileTabs.css"
  *     the toolbar's `closeItem()` takes it out of the row, and the list still has it.
  *     Closing the chosen tab shows its neighbour's file.
  *   - No key closes one:  ⌘W is the browser's, closing the page's own tab.
+ *   - A site's own file (`HarborNew.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
+ *     showing (epic `editor` I188:  "have the `.site.spell` file open and the 'more files' button on the right").
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
@@ -65,7 +71,8 @@ export function FileTabs() {
   const tipWords = tracked(() => ({
     note: appTexts.text("updatedInYourDraft"),
     discard: appTexts.text("discardChanges"),
-    close: appTexts.text("closeTab")
+    close: appTexts.text("closeTab"),
+    hide: appTexts.text("hideCode")
   }))
 
   createEffect(
@@ -73,6 +80,8 @@ export function FileTabs() {
     ([it, { files, path }, drafts, loaded, words]) => {
       if (!it || !loaded) return
       it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
+      it.hideWords = words.hide
+      it.hideTheCode = () => CodeShown.set(editor.project?.path, false)
       const File = loaded.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
       it.files.items = files.map((each) => {
@@ -94,6 +103,9 @@ export function FileTabs() {
         file.close = () => closeTab(file)
         return file
       })
+      // a site's own file always a tab, once the tabs are drawn (I188)
+      const site = files.find((each) => SiteEdits.isRoutingOnly(each.path))
+      if (site) requestAnimationFrame(() => keepTab(site.path))
     }
   )
 
@@ -115,6 +127,16 @@ export function FileTabs() {
     const inItsPlace = toolbar.closeItem(tab)
     const next = inItsPlace && files[tabs.indexOf(inItsPlace)]
     if (next) editor.showEditor(next.path)
+  }
+
+  /** Keep the tab of the file at `path` in the row, without showing it (`UIToolbar.openItem()`). */
+  const keepTab = (path: string) => {
+    const row = tabRow()
+    const files = bar()?.files.getValues() ?? []
+    const tabs = row ? [...row.children].filter((each) => each.localName === "ui-item") : []
+    const tab = tabs[files.findIndex((each) => each.path === path)]
+    const toolbar = (row as E.DOMElement | undefined)?.component as UIToolbar | undefined
+    if (tab) toolbar?.openItem(tab)
   }
 
   /**
@@ -247,6 +269,10 @@ type FileTabBar = EditorThing<
     /** The code pane's ⋯, an editor part (`EditorSpell.parts()`). */
     more: object
     rememberAs: string
+    /** The ✕'s tooltip:  "Hide the code", in the page's language. */
+    hideWords: string
+    /** Spell's `hide the code`, the ✕ at the bar's far right:  the code's column hides (`CodeShown`). */
+    hideTheCode: () => void
   }
 >
 

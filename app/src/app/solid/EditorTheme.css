@@ -214,6 +214,12 @@
   }
 }
 
+/* The Inspector's cards' bars the top bar's colour (`--spell-menu-bar-background`, set in `Inspector.css`;
+   epic `editor` T83):  its wallpaper fixed, as the page's is */
+ui-panel.InspectorCard::part(title) {
+  background-attachment: fixed;
+}
+
 /*
  * Merlot's panels joined by hairlines:  1px of the border colour between every two panes (the bars that drag them),
  * the Inspector's cards too
@@ -241,16 +247,20 @@ ui-app-menu.AppMenu :is(ui-item.AppMark, ui-item.SpellBarMenu)::part(item) {
   display: inline-flex;
   text-decoration: none;
 }
-/* `<AppMarkLabel>`:  the hat, then the name */
+/* `<AppMarkLabel>`:  the hat, then the name, in the loading screen's wordmark (`index.html`'s `--spell-wordmark-*`;
+   epic `editor` T93:  "Less space between `hat` and `Spell`.  Make Spell bolder (same as loading screen)")
+   - the hat's glyph 4px from the word, drawn (was 12px):  its own box has 3px of room at its right, the word's
+     first letter 1px at its left;  near the loading screen's 0.18em
+   - a page without `index.html`'s words (a demo):  the theme's heading font, bold */
 .AppMarkLabel {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   color: var(--ui-text-color);
-  font-family: var(--ui-font-family-heading);
+  font-family: var(--spell-wordmark-font, var(--ui-font-family-heading));
   font-size: 1.15em;
-  font-weight: var(--ui-font-weight-bold);
-  letter-spacing: -0.01em;
+  font-weight: var(--spell-wordmark-weight, var(--ui-font-weight-bold));
+  letter-spacing: var(--spell-wordmark-tracking, -0.01em);
   text-decoration: none;
 
   /* the hat alone, in the theme's primary colour */

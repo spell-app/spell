@@ -60,26 +60,92 @@
   }
 }
 
-/* kept open:  the top bar's second row, edge to edge, a hairline between them;  its topics' names, quiet, as the
-   bar's menus are, the ✕ at its end */
+/* kept open:  the top bar's second row, edge to edge, part of the bar (epic `editor` T83;  Owen:  "Pinned Add menu should
+   look like it is part of the app menubar -- same background.  Center the buttons."):
+   - the bar's own fill and blur, over the page as the bar's is (on its `::before`, so a menu inside it isn't held in
+     its box)
+   - Add View in bold, then its topics' icons and names (T86), centred on the window, quiet, as the bar's menus are;
+     its pin at its far left (T92), its search at its end
+   - three columns:  the two outer ones share the room the names leave, so the names sit in the window's middle while
+     there's room for the end beside them;  short of that the end keeps its column and the names move left, and only
+     a window too narrow for all of them scrolls them (T86:  Owen's 1290px window scrolled them, as the names kept
+     the end's room clear on BOTH sides)
+   - the bar's hairline above it, a thin grey line between the two bars (T86), and its own under it */
 .PaletteStrip {
   flex: none;
-  display: flex;
+  position: relative;
+  isolation: isolate;
+  /* the search's width:  fixed, typed in or not (T87) */
+  --palette-search-width: 150px;
+  display: grid;
+  /* the end's column is at least as wide as the end:  a track's least size is its content's */
+  grid-template-columns: 1fr minmax(0, max-content) 1fr;
+  /* one row, the strip's height:  a toolbar's box is taller than its items, and centres them on it */
+  grid-template-rows: 100%;
   align-items: center;
-  gap: 8px;
   height: 32px;
-  /* its first name under the top bar's hat, its ✕ under the bar's last icon */
-  padding-inline: 15px 8px;
+  /* its pin under the bar's first icon, its search's end under its last */
+  padding-inline: 8px;
   min-width: 0;
-  border-block-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  border-block-end: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
 
-  & .PaletteStripGroups {
-    flex: 1;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--spell-menu-bar-fill);
+    -webkit-backdrop-filter: var(--spell-menu-bar-filter);
+    backdrop-filter: var(--spell-menu-bar-filter);
+    pointer-events: none;
+  }
+
+  /* its pin, at its far left (T92) */
+  & .PaletteStripStart {
+    grid-column: 1;
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    /* never touches Add View */
+    margin-inline-end: 12px;
+  }
+  /* Add View, then the names:  on one centre line */
+  & .PaletteStripAdd {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 4px;
     min-width: 0;
+  }
+  & .PaletteStripLabel {
+    flex: none;
+    padding-inline-end: 4px;
+    font-size: 13px;
+    font-weight: var(--ui-font-weight-bold, 700);
+    white-space: nowrap;
+  }
+  & .PaletteStripGroups {
+    min-width: 0;
+  }
+  /* centred in their room;  too many for it, they start at its start and scroll */
+  & .PaletteStripGroups::part(menu) {
+    justify-content: safe center;
+    /* no reach past its ends, as a row whose first word lines up with an edge has:  so it's centred */
+    margin-inline: 0;
+  }
+  & .PaletteStripEnd {
+    grid-column: 3;
+    justify-self: end;
+    /* the names never touch the search */
+    margin-inline-start: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   & ui-item.PaletteGroupName::part(item) {
-    padding-inline: 9px;
+    gap: 5px;
+    padding-inline: 6px;
     color: var(--ui-text-muted);
     font-size: 13px;
     font-weight: var(--ui-font-weight-normal, 400);
@@ -88,16 +154,26 @@
     color: var(--ui-text-color);
   }
 }
-
-/* its search, before the ✕:  compact, wider while it's typed in (epic `editor` J140) */
-.PaletteStrip .PaletteStripSearch {
+/* its search, at its end:  compact, the same width typed in or not (epic `editor` J140, T87);
+   a magnifying glass at its start, and its clear ✕ over its end while it holds text */
+.PaletteStrip .PaletteStripField {
+  position: relative;
   flex: none;
-  width: 130px;
-  transition: width 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+.PaletteStrip .PaletteStripSearch {
+  width: var(--palette-search-width);
 
-  &:focus-within {
-    width: 220px;
+  /* room for the ✕, so the text never runs under it */
+  &::part(control) {
+    padding-inline-end: 24px;
   }
+}
+.PaletteStrip .PaletteStripClear {
+  position: absolute;
+  inset-inline-end: 7px;
+  font-size: 12px;
 }
 
 /* its search's results:  a layer over the page, holding each topic's matches as a menu under its name;
@@ -173,10 +249,11 @@ ui-popup.PaletteGroupPopup::part(popup) {
     flex: 0 1 220px;
     min-width: 0;
   }
+}
 
-  & .PalettePin.pinned {
-    color: var(--ui-primary);
-  }
+/* the pin while the palette is kept open:  the popup's, and the bar's */
+.PalettePin.pinned {
+  color: var(--ui-primary);
 }
 
 .PaletteGhost {

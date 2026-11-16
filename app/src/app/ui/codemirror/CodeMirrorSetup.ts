@@ -1,7 +1,7 @@
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
-import { foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
+import { codeFolding, foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
 import { lintKeymap } from "@codemirror/lint"
-import { openSearchPanel, search, searchKeymap } from "@codemirror/search"
+import { openSearchPanel, searchKeymap } from "@codemirror/search"
 import { Compartment, EditorState, type Extension, StateEffect } from "@codemirror/state"
 import {
   EditorView,
@@ -16,6 +16,7 @@ import {
 
 import { observe } from "spell/util"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { CodeMirrorFind } from "./CodeMirrorFind"
 import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
 
 /****************
@@ -26,6 +27,7 @@ import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
  *   a project file's (`FileStates`), the compiled code's, the merge view's (`SpellCodeMirror`).
  *   - "On top" means BEFORE these in the list:  CodeMirror gives an earlier extension's keys the first go,
  *     so a file's own Enter wins over the plain one here.
+ * - Find and replace is the find bar, `CodeMirrorFind`, on CodeMirror's own search.
  * - The gutter:  no line numbers until asked (`showLineNumbers()`), fold arrows over the code's padding,
  *   shown while the mouse is on the edge, a folded block's always.
  *   No change bar (epic `codemirror` Q1).
@@ -50,11 +52,13 @@ export class CodeMirrorSetup {
       indentUnit.of("\t"),
       // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
       EditorState.tabSize.of(TAB_SIZE),
-      search({ top: true }),
+      // the find bar (⌘F), VS Code's look and keys
+      CodeMirrorFind.extension(),
       CodeMirrorSetup.gutter({ lineNumbers }),
       keymap.of([
-        // ⌘F finds with its replace row showing:  CodeMirror's panel always has it
+        // ⌘F finds, ⌥⌘F replaces;  the find bar's switches, ⌥⌘C, ⌥⌘W, ⌥⌘R
         { key: "Mod-f", run: openSearchPanel, preventDefault: true },
+        ...CodeMirrorFind.keys(),
         ...searchKeymap,
         ...historyKeymap,
         ...foldKeymap,
@@ -74,10 +78,13 @@ export class CodeMirrorSetup {
 
   /**
    * The gutter:  line numbers when asked, then the fold arrows.
-   * - The fold column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code (`codemirror.css`):
-   *   (epic `editor` I154).
+   * - The fold column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code (`codemirror.css`;
+   *   epic `editor` I154).
+   *   - With the bubbly look, 12px wholly over the room before a line's band, so every band is 12px in (I187).
    * - A press on an arrow folds or unfolds its block, and never moves the caret:  the gutter is outside the text.
    * - The arrows follow each new parse (`PARSED`), as the blocks that fold are the parse's.
+   * - A folded block's hidden lines are a quiet `…` after its head, no box (`foldedMore()`):
+   *   in the bubbly look, inside its band's right end (`bubbly.css`;  epic `language` I116).
    */
   static gutter({ lineNumbers: isNumbered = false }: Pick<CodeMirrorSetupOptions, "lineNumbers">): Extension {
     return [
@@ -85,7 +92,8 @@ export class CodeMirrorSetup {
       foldGutter({
         markerDOM: foldArrow,
         foldingChanged: (update) => wasParsed(update)
-      })
+      }),
+      codeFolding({ placeholderDOM: foldedMore })
     ]
   }
 
@@ -230,13 +238,28 @@ function foldArrow(isOpen: boolean): HTMLElement {
   return arrow
 }
 
+/**
+ * A folded block's hidden lines:  a quiet `…`, which unfolds them when clicked.
+ * - In place of CodeMirror's grey box;  the bubbly look draws it inside its band's right end (`cmb-fold-more`).
+ */
+function foldedMore(_view: EditorView, onclick: (event: Event) => void): HTMLElement {
+  const more = document.createElement("span")
+  more.className = "cmb-fold-more"
+  more.textContent = "…"
+  more.title = appTexts.text("cmUnfold")
+  more.setAttribute("aria-label", appTexts.text("cmFoldedCode"))
+  more.onclick = onclick
+  return more
+}
+
 /** The fold arrow's chevron, pointing down;  `codemirror.css` turns a folded block's to the right. */
 const CHEVRON =
   '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4.5 6 8 9.5 11.5 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 /**
  * Each of CodeMirror's words, by its English, to the app's text for it:  every phrase CodeMirror's packages ask for
- * (`state.phrase(...)`), as of `@codemirror/*` 6.x.  `$` is a number CodeMirror fills in.
+ * (`state.phrase(...)`), as of `@codemirror/*` 6.x;  and the find bar's (`CodeMirrorFind`).
+ * - `$` (or `$1`, `$2`) is what the asker fills in:  a number, a key.
  * - Find and replace, go to line (`@codemirror/search`);  folds (`@codemirror/language`);
  *   suggestions (`@codemirror/autocomplete`);  problems (`@codemirror/lint`);  the merge view (`@codemirror/merge`);
  *   the editor's own (`@codemirror/view`).
@@ -259,6 +282,18 @@ const PHRASE_KEYS: Record<string, AppTextKey> = {
   "on line": "cmOnLine",
   "replaced match on line $": "cmReplacedMatchOnLine",
   "replaced $ matches": "cmReplacedMatches",
+  // the find bar's own (`CodeMirrorFind`):  `$` its key
+  "Match Case ($)": "cmFindMatchCase",
+  "Match Whole Word ($)": "cmFindWholeWord",
+  "Use Regular Expression ($)": "cmFindRegexp",
+  "Previous Match ($)": "cmFindPrevious",
+  "Next Match ($)": "cmFindNext",
+  "Close ($)": "cmFindClose",
+  "Toggle Replace": "cmFindToggleReplace",
+  "Replace ($)": "cmFindReplace",
+  "Replace All ($)": "cmFindReplaceAll",
+  "No results": "cmFindNoResults",
+  "$1 of $2": "cmFindCount",
   "Go to line": "cmGoToLine",
   go: "cmGo",
   // folds

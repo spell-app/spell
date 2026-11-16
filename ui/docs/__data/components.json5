@@ -48021,7 +48021,7 @@
         {
           "name": "max-visible",
           "kind": "string",
-          "description": "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.  An item picked there joins the row, and the one chosen longest ago leaves it."
+          "description": "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.  An item picked there joins the row, and the one chosen longest ago leaves it."
         },
         {
           "name": "remember",
@@ -48037,11 +48037,6 @@
           "name": "all-items-at-end",
           "kind": "boolean",
           "description": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one."
-        },
-        {
-          "name": "all-items-always",
-          "kind": "boolean",
-          "description": "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away."
         },
         {
           "name": "disabled",
@@ -48297,7 +48292,7 @@
         },
         {
           "name": "all-items",
-          "description": "`max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
+          "description": "`max-visible`:  the button listing every item, while some are put away or scrolled out of the row."
         }
       ],
       "states": [
@@ -52813,7 +52808,7 @@
         "component groups",
         "palette table"
       ],
-      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
+      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save.",
       "noun": "palette",
       "attributes": [
         {
@@ -53083,6 +53078,11 @@
           "key": "groupName",
           "text": "Group name",
           "description": "The label of a group's name field."
+        },
+        {
+          "key": "groupIcon",
+          "text": "{group}'s icon, in the editor's Add bar",
+          "description": "A group's icon picker;  `{group}` is its name."
         },
         {
           "key": "removeGroup",
