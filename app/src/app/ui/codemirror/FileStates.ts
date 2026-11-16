@@ -3,23 +3,29 @@ import { isolateHistory } from "@codemirror/commands"
 import { setDiagnostics } from "@codemirror/lint"
 import {
   Annotation,
+  type ChangeSet,
   Compartment,
   EditorState,
   type Extension,
+  RangeSet,
   type StateEffect,
+  StateField,
   Transaction,
   type TransactionSpec
 } from "@codemirror/state"
-import { EditorView, keymap } from "@codemirror/view"
+import { Decoration, type DecorationSet, EditorView, keymap } from "@codemirror/view"
 import type { TextEdit } from "vscode-languageserver"
 
 import { observe } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
-import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
+import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorLanguage } from "./CodeMirrorLanguage"
+import { CodeMirrorLook } from "./CodeMirrorLook"
+import { CodeMirrorMarkup } from "./CodeMirrorMarkup"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
+import { CodeMirrorTokens } from "./CodeMirrorTokens"
 import { CodeMirrorTyping } from "./CodeMirrorTyping"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
@@ -42,6 +48,10 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   `applyEdits()`:  one undo step each, carrying their `EditWay` (`FileStates.EDIT_WAY`), the one "not typed" mark
  *   the typing helps read to leave them alone.
  * - Shown by a view through `show()`:  ONE view per state at a time;  a state shown nowhere still takes edits.
+ *   - A SLICE of it, some of its lines (the Inspector's Code card, `<CodeSlice>`), in as many other views as like,
+ *     through `showSlice()` (epic `codemirror` P3):  each slice's state holds the same text, never a copy
+ *     (CodeMirror's text is shared, as it's never changed in place), and every edit, the file's or a slice's,
+ *     reaches the others at once, as CodeMirror's split view does.
  * - Covers a project at a time:  a state for every spell file it parses (a rename's edits need them), plus any other
  *   file once shown.  Showing a file of another project lets go of the last one's states, UNLESS something `use()`s
  *   it, e.g. a `<spell-editor>`.
@@ -278,6 +288,81 @@ export class FileStates {
   }
 
   /**
+   * Show `lines` of `file`'s state in `view`, alone:  a slice of it, drawn as the file is, only what's wholly in its
+   * lines bubbly (epic `codemirror` P3).
+   * - `lines`:  the first and last, 1-based;  they move with edits above them
+   * - `host`:  what the view adds for itself
+   * - Its edits are the file's at once, and the file's its;  its own undo is its own edits'.
+   * - `releaseSlice()` before the view's destroyed.
+   */
+  showSlice(
+    view: EditorView,
+    file: SP.AnySpellFile,
+    lines: { first: number; last: number },
+    host: Extension = []
+  ): void {
+    this.releaseSlice(view)
+    const entry = this.entryFor(file)
+    const { doc } = entry.state
+    const first = doc.line(Math.max(1, Math.min(lines.first, doc.lines)))
+    const last = doc.line(Math.max(first.number, Math.min(lines.last, doc.lines)))
+    const shown = sliceShown.init(() => ({ from: first.from, to: last.to }))
+    const fileOf = () => (entry.file instanceof SP.SpellFile ? entry.file : undefined)
+    const state = EditorState.create({
+      doc,
+      extensions: [
+        shown,
+        EditorView.updateListener.of((update) => {
+          for (const transaction of update.transactions)
+            if (transaction.docChanged && !transaction.annotation(FileStates.SLICED))
+              this.fromSlice(entry, update.view, transaction)
+        }),
+        host,
+        CodeMirrorLook.extension((isBubbly) =>
+          isBubbly
+            ? CodeMirrorBubbly.extension(fileOf, (state) => state.field(sliceShown))
+            : CodeMirrorTokens.extension(fileOf)
+        ),
+        CodeMirrorSetup.extensions()
+      ]
+    })
+    view.setState(state)
+    entry.slices.add(view)
+  }
+
+  /** `view` shows a slice no more, e.g. before it's destroyed. */
+  releaseSlice(view: EditorView): void {
+    for (const entry of this.entries.values()) entry.slices.delete(view)
+  }
+
+  /** The mark on an edit passed on to a slice, or from one:  each takes it once, and keeps it out of its undo. */
+  private static readonly SLICED = Annotation.define<boolean>()
+
+  /** A slice's edit `transaction`:  into its file's state, and every other slice of it. */
+  private fromSlice(entry: FileEntry, slice: EditorView, transaction: Transaction): void {
+    this.slicing = slice
+    try {
+      this.dispatch(entry, {
+        changes: transaction.changes,
+        annotations: [FileStates.SLICED.of(true), Transaction.userEvent.of("input.slice")]
+      })
+    } finally {
+      this.slicing = undefined
+    }
+  }
+
+  /** `changes` made to `entry`'s state:  passed on to each slice of it, but the one they came from. */
+  private toSlices(entry: FileEntry, changes: ChangeSet): void {
+    for (const slice of entry.slices) {
+      if (slice === this.slicing) continue
+      slice.dispatch({ changes, annotations: [FileStates.SLICED.of(true), Transaction.addToHistory.of(false)] })
+    }
+  }
+
+  /** The slice whose edit is going into its file's state now. */
+  private slicing: EditorView | undefined
+
+  /**
    * Each state's place for what the view showing it adds (`show()`'s `host`).
    * - STATIC:  every file state has one, empty while it's shown nowhere.
    */
@@ -310,6 +395,7 @@ export class FileStates {
     const entry: FileEntry = {
       file,
       language,
+      slices: new Set(),
       state: EditorState.create({ doc: file.contents ?? "", extensions: this.extensionsFor(file, language) }),
       dispose: () => {
         stopContents()
@@ -324,8 +410,10 @@ export class FileStates {
 
   /**
    * What `file`'s state is made of:  how it follows its view, room for the view's own, Spell's features for a spell
-   * file, and the setup every editor takes.
+   * file, its look, and the setup every editor takes.
    * - Spell's before the setup's, so its keys (Enter) get the first go.
+   * - Its look as the page's setting says (`CodeMirrorLook`):  a Spell file bubbly, else coloured by its tokens;
+   *   an HTML file (a property editor page) bubbly, else plain (epic `codemirror` P3).
    */
   private extensionsFor(file: SP.AnySpellFile, language: CodeMirrorLanguage | undefined): Extension {
     const spell = language
@@ -335,14 +423,19 @@ export class FileStates {
           autocompletion({ override: [language.completions], icons: false }),
           CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
           language.extensions(),
-          CodeMirrorBubbly.extension(() => language.file)
+          CodeMirrorLook.extension((isBubbly) =>
+            isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
+          )
         ]
-      : []
+      : isMarkupFile(file)
+        ? [CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))]
+        : []
     return [
       EditorView.updateListener.of((update) => {
         const entry = this.entries.get(file.path)
         // only the view showing it:  another may still hold an old copy of the state
-        if (entry && update.view === entry.view) this.took(entry, update.state, update.docChanged)
+        if (entry && update.view === entry.view)
+          this.took(entry, update.state, update.docChanged ? update.changes : undefined)
       }),
       FileStates.host.of([]),
       spell,
@@ -357,13 +450,15 @@ export class FileStates {
       return
     }
     const transaction = entry.state.update(spec)
-    this.took(entry, transaction.state, transaction.docChanged)
+    this.took(entry, transaction.state, transaction.docChanged ? transaction.changes : undefined)
   }
 
-  /** `entry`'s state is now `state`:  kept, and an edit goes into its file (`stateEdited()`). */
-  private took(entry: FileEntry, state: EditorState, isEdited: boolean): void {
+  /** `entry`'s state is now `state`:  kept;  its `changes` go into its file (`stateEdited()`) and its slices. */
+  private took(entry: FileEntry, state: EditorState, changes: ChangeSet | undefined): void {
     entry.state = state
-    if (isEdited) this.stateEdited(entry)
+    if (!changes) return
+    this.toSlices(entry, changes)
+    this.stateEdited(entry)
   }
 
   /**
@@ -465,11 +560,46 @@ type FileEntry = {
   language: CodeMirrorLanguage | undefined
   /** the view showing it, if any */
   view?: EditorView
+  /** the views showing a slice of it (`showSlice()`) */
+  slices: Set<EditorView>
   /** where it was scrolled to when last shown */
   scroll?: StateEffect<unknown>
   /** stops following its file */
   dispose: () => void
 }
+
+/** Is `file` HTML, e.g. a property editor page, `Card.editor.html`:  drawn as the drawn-bubbly page draws HTML? */
+function isMarkupFile(file: SP.AnySpellFile): boolean {
+  return /\.html?$/i.test(file.path)
+}
+
+/**
+ * The lines a slice shows, moved with each edit;  the lines above and below them hidden, and out of the caret's way.
+ * - Set by `showSlice()`:  `init()`, as each slice shows its own.
+ */
+const sliceShown = StateField.define<Slice>({
+  create: () => ({ from: 0, to: 0 }),
+  update: (slice, transaction) =>
+    transaction.docChanged
+      ? { from: transaction.changes.mapPos(slice.from, -1), to: transaction.changes.mapPos(slice.to, 1) }
+      : slice,
+  provide: (field) => {
+    const hidden = (state: EditorState): DecorationSet => {
+      const { from, to } = state.field(field)
+      const ranges = []
+      if (from > 0) ranges.push(HIDDEN.range(0, from - 1))
+      if (to < state.doc.length) ranges.push(HIDDEN.range(to + 1, state.doc.length))
+      return Decoration.set(ranges)
+    }
+    return [
+      EditorView.decorations.compute([field, "doc"], hidden),
+      EditorView.atomicRanges.of((view) => hidden(view.state) as RangeSet<Decoration>)
+    ]
+  }
+})
+
+/** Lines out of a slice:  hidden, a block of nothing. */
+const HIDDEN = Decoration.replace({ block: true })
 
 /** `effects`, one or many or none, as a list. */
 function asList<T>(effects: T | readonly T[] | undefined): T[] {

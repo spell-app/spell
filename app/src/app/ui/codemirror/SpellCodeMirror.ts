@@ -1,15 +1,18 @@
 import { javascript } from "@codemirror/lang-javascript"
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language"
+import { python } from "@codemirror/lang-python"
+import { syntaxHighlighting } from "@codemirror/language"
 import { MergeView } from "@codemirror/merge"
 import type { Extension } from "@codemirror/state"
 import { EditorView, keymap } from "@codemirror/view"
-import { tags } from "@lezer/highlight"
 
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { CodeRules } from "spell/app/app/ui/CodeRules"
 import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
 import type { CodeMirrorLanguage } from "./CodeMirrorLanguage"
+import { CodeMirrorLook } from "./CodeMirrorLook"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
+import { CodeMirrorTokens } from "./CodeMirrorTokens"
 import { FileStates } from "./FileStates"
 import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
 
@@ -140,13 +143,15 @@ export class SpellCodeMirror {
   ////////////////
 
   /**
-   * What a view of another language's code takes, read only:  the compiled javascript, coloured by the page's code
-   * colours, its lines numbered.
+   * What a view of another language's code takes, read only:  the compiled javascript, TypeScript or Python,
+   * its lines numbered.
+   * - Coloured as Monaco colours the same tokens, through the ONE table of code colours (`CodeRules.codeMirrorStyle`):
+   *   the page theme's `--ui-code-<role>` tokens, light or dark as the page is.
    */
-  static codeExtensions(): Extension {
+  static codeExtensions(language: CompiledLanguage = "javascript"): Extension {
     return [
-      javascript(),
-      syntaxHighlighting(PAGE_CODE_COLOURS),
+      language === "python" ? python() : javascript({ typescript: language === "typescript" }),
+      syntaxHighlighting(CodeRules.codeMirrorStyle),
       EditorView.editorAttributes.of({ class: "cmb-code" }),
       CodeMirrorSetup.extensions({ editable: false, lineNumbers: true })
     ]
@@ -154,18 +159,23 @@ export class SpellCodeMirror {
 
   /**
    * Two sides of a file in `parent`:  `theirs` left, read only, `mine` right, editable;  each change takeable by its
-   * arrow, from theirs into yours (⌘Z puts yours back), both drawn bubbly.
+   * arrow, from theirs into yours (⌘Z puts yours back).
+   * - Both drawn bubbly while the look's on, each side on its own, lined up round the merge view's collapsed gaps
+   *   (`CodeMirrorLook`);  coloured by their tokens while it's off.
    * - `onChange`:  your side's whole text after each change
    */
   static merge(parent: HTMLElement, sides: MergeSides): MergeView {
-    const bubbly = CodeMirrorBubbly.extension(() => undefined)
+    const bubbly = () =>
+      CodeMirrorLook.extension((isBubbly) =>
+        isBubbly ? CodeMirrorBubbly.extension(() => undefined) : CodeMirrorTokens.extension(() => undefined)
+      )
     const merge = new MergeView({
       parent,
-      a: { doc: sides.theirs, extensions: [bubbly, CodeMirrorSetup.extensions({ editable: false })] },
+      a: { doc: sides.theirs, extensions: [bubbly(), CodeMirrorSetup.extensions({ editable: false })] },
       b: {
         doc: sides.mine,
         extensions: [
-          bubbly,
+          bubbly(),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) sides.onChange?.(update.state.doc.toString())
           }),
@@ -205,6 +215,9 @@ export type SpellCodeMirrorOptions = {
   onContextMenu?: (editor: SpellCodeMirror, at: { x: number; y: number }) => void
 }
 
+/** The languages `SpellCodeMirror.codeExtensions()` colours:  what Spell compiles to (`SP.TARGETS`). */
+export type CompiledLanguage = "javascript" | "typescript" | "python"
+
 /** The two sides `SpellCodeMirror.merge()` shows. */
 export type MergeSides = {
   /** the published text, left */
@@ -214,25 +227,3 @@ export type MergeSides = {
   /** your side's text after each change */
   onChange?: (mine: string) => void
 }
-
-/** Another language's code in the page's code colours, Spell UI's `--ui-code-<role>` tokens, light or dark as it is. */
-const PAGE_CODE_COLOURS = HighlightStyle.define([
-  { tag: [tags.keyword, tags.controlKeyword, tags.moduleKeyword], color: "var(--ui-code-keyword, #a626a4)" },
-  { tag: [tags.string, tags.special(tags.string)], color: "var(--ui-code-string, #50a14f)" },
-  { tag: [tags.number, tags.bool, tags.null], color: "var(--ui-code-constant, #986801)" },
-  {
-    tag: [tags.comment, tags.lineComment, tags.blockComment],
-    color: "var(--ui-code-comment, #a0a1a7)",
-    fontStyle: "italic"
-  },
-  { tag: [tags.className, tags.typeName], color: "var(--ui-code-type, #c18401)" },
-  {
-    tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
-    color: "var(--ui-code-action, #4078f2)"
-  },
-  { tag: [tags.propertyName], color: "var(--ui-code-member, #e45649)" },
-  { tag: [tags.definition(tags.variableName)], color: "var(--ui-code-name, #383a42)" },
-  { tag: [tags.punctuation, tags.bracket], color: "var(--ui-code-punctuation, #8a8f99)" },
-  { tag: [tags.tagName], color: "var(--ui-code-tag, #e45649)" },
-  { tag: [tags.attributeName], color: "var(--ui-code-attr, #986801)" }
-])

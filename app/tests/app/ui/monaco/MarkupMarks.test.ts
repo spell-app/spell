@@ -1,7 +1,22 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
-import { MarkupMarks, type MarkupShape } from "spell/app/app/ui/monaco/MarkupMarks"
+import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
+import type { monaco } from "spell/app/app/ui/monaco/monaco"
+import { MonacoMarks } from "spell/app/app/ui/monaco/MonacoMarks"
+
+/** Monaco's marks of an HTML file or a Spell drawing's tags:  the shared reading, made Monaco's decorations. */
+type MonacoMarkupMarks = MarkupMarks<monaco.editor.IModelDeltaDecoration>
+const MonacoMarkup = {
+  of: (source: string) => MarkupMarks.of(source, MonacoMarks.make),
+  within: (
+    text: string,
+    from: number,
+    to: number,
+    marks: monaco.editor.IModelDeltaDecoration[],
+    within?: MarkupWithin
+  ) => MarkupMarks.within(text, from, to, MonacoMarks.make, marks, within)
+}
 
 /** A page, as the drawn-bubbly page's examples are. */
 const PAGE = `<!doctype html>
@@ -18,7 +33,7 @@ const PAGE = `<!doctype html>
 `
 
 /** The text each mark whose classes include `classes` covers, in order. */
-function textMarked(marks: MarkupMarks, classes: string): string[] {
+function textMarked(marks: MonacoMarkupMarks, classes: string): string[] {
   const lines = PAGE.split("\n")
   return marks.marks
     .filter((mark) => mark.options.inlineClassName?.split(" ").includes(classes))
@@ -26,7 +41,7 @@ function textMarked(marks: MarkupMarks, classes: string): string[] {
 }
 
 /** Every shape, those inside a block too, as `kind:  its first line's text` lines;  `text`:  what it marked. */
-function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
+function shapesOf(marks: MonacoMarkupMarks, text = PAGE): string[] {
   const lines = text.split("\n")
   const out: string[] = []
   const walk = (shapes: MarkupShape[], depth: number) => {
@@ -53,7 +68,7 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
 
 describe("MarkupMarks", () => {
   test("blocks for elements on lines of their own, bands for tags alone, pills for tags in a line", () => {
-    expect(shapesOf(MarkupMarks.of(PAGE))).toEqual([
+    expect(shapesOf(MonacoMarkup.of(PAGE))).toEqual([
       "band start:  <!doctype html>",
       'block structure +foot:  <html lang="en">',
       '  input:  en">',
@@ -77,7 +92,7 @@ describe("MarkupMarks", () => {
 
   test("a one-line element's link runs between its two pills:  from its start tag's to its end tag's (Owen)", () => {
     const text = "<text>{its picture}</text>"
-    const marks = MarkupMarks.of(text)
+    const marks = MonacoMarkup.of(text)
     const link = marks.shapes[0]!
     if (link.kind !== "tag-link") throw new TypeError("expected a link first, under the pills")
     const textOf = (place: number) => {
@@ -89,7 +104,7 @@ describe("MarkupMarks", () => {
 
   test("a `{…}` value:  ONE inverted pill in its tag's colour, its braces part of it;  its words Spell's to mark (Owen, epic `editor` I144 C1)", () => {
     const spell = `to draw it\n\t<text color={its color}>{its picture}</text>`
-    const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [])
+    const marks = MonacoMarkup.within(spell, spell.indexOf("<text"), spell.length, [])
     expect(shapesOf(marks, spell)).toEqual([
       "link start to end:  <text color={its color}>",
       "pill start:  <text color={its color}>",
@@ -109,7 +124,7 @@ describe("MarkupMarks", () => {
   test("a Spell drawing's code between its tags (its `codes`):  an inverted pill in its element's colour (I144 C1), past the start tag's room, the end tag's past its own, so none touch;  its own narrow room either side, its braces at its ends (I162)", () => {
     const spell = `to draw it\n\t<text>{its picture}</text>`
     const codes = [{ start: spell.indexOf("{"), end: spell.indexOf("}") + 1 }]
-    const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [], { codes })
+    const marks = MonacoMarkup.within(spell, spell.indexOf("<text"), spell.length, [], { codes })
     expect(shapesOf(marks, spell)).toEqual([
       "link start to end:  <text>{its picture}</tex",
       "pill start:  <text>{its picture}</tex",
@@ -128,7 +143,7 @@ describe("MarkupMarks", () => {
   test("a tag that declares the member it draws:  its shape and its brackets and `/` marked to be drawn round;  any other tag's not (epic `editor` I84)", () => {
     const spell = `to draw it\n\t<number "score"/>\n\t<action "redo"/>\n\t<column "C1"></column>`
     const declaringTags = [spell.indexOf("<number"), spell.indexOf("<column")]
-    const marks = MarkupMarks.within(spell, spell.indexOf("<number"), spell.length, [], { declaringTags })
+    const marks = MonacoMarkup.within(spell, spell.indexOf("<number"), spell.length, [], { declaringTags })
     const lines = spell.split("\n")
     const tagsDeclaring = marks.shapes
       .filter((shape) => shape.kind === "tag" && shape.declares)
@@ -146,7 +161,7 @@ describe("MarkupMarks", () => {
 
   test("an attribute's room is the text's own space:  none drawn before its name, so a missing one shows and one typed isn't doubled (Owen)", () => {
     for (const tag of ['<toolbar class="GameBar" appearance="pills">', '<toolbar class="GameBar"appearance="pills">']) {
-      const marks = MarkupMarks.within(tag, 0, tag.length, [])
+      const marks = MonacoMarkup.within(tag, 0, tag.length, [])
       const names = marks.marks.filter((mark) => mark.options.inlineClassName?.includes("bubbly-attribute-name"))
       expect(names).toHaveLength(2)
       for (const name of names) expect(name.options.before).toBeUndefined()
@@ -156,7 +171,7 @@ describe("MarkupMarks", () => {
   test('no space after a tag\'s quoted word:  `<deck "deck"hidden />` marked as `<deck "deck" hidden/>` is (epic `language` T125)', () => {
     const markedIn = (tag: string) => {
       const spell = `to draw it\n\t${tag}`
-      const marks = MarkupMarks.within(spell, spell.indexOf("<"), spell.length, [], {
+      const marks = MonacoMarkup.within(spell, spell.indexOf("<"), spell.length, [], {
         declaringTags: [spell.indexOf("<")]
       })
       const line = spell.split("\n")[1]!
@@ -175,7 +190,7 @@ describe("MarkupMarks", () => {
   })
 
   test("a tag's brackets, names and values marked as the page draws them", () => {
-    const marks = MarkupMarks.of(PAGE)
+    const marks = MonacoMarkup.of(PAGE)
     expect(textMarked(marks, "bubbly-angle-open").slice(0, 3)).toEqual(["<", "<", "<"])
     expect(textMarked(marks, "bubbly-tag-name").slice(0, 4)).toEqual(["html", "head", "meta", "title"])
     expect(textMarked(marks, "bubbly-attribute-name")).toEqual(["lang", "charset", "id"])
@@ -184,7 +199,7 @@ describe("MarkupMarks", () => {
   })
 
   test("every end tag's `/` drawn as a bar after its `⟨`, `⟨|title⟩`, in the editor and on the page (Owen)", () => {
-    const marks = MarkupMarks.of(PAGE)
+    const marks = MonacoMarkup.of(PAGE)
     // `</spell-viewer>` drawn self-closed, `/⟩`:  not one
     expect(textMarked(marks, "bubbly-end-slash")).toHaveLength(6)
     expect(BubblyMarkup.write(PAGE).match(/bubbly-end-slash/g)).toHaveLength(6)
@@ -193,7 +208,7 @@ describe("MarkupMarks", () => {
   })
 
   test("a block's end tag's name faint, as its marks are;  a tag in a line's not", () => {
-    const marks = MarkupMarks.of(PAGE)
+    const marks = MonacoMarkup.of(PAGE)
     const faintNames = marks.marks
       .filter((mark) =>
         /bubbly-mark .*bubbly-tag-name|bubbly-tag-name .*bubbly-mark/.test(mark.options.inlineClassName ?? "")
@@ -204,7 +219,7 @@ describe("MarkupMarks", () => {
 
   test("a spacer before each line of text, none before one that starts with a tag", () => {
     const text = `<div>\n  some words\n  <b>bold</b>\n</div>\n`
-    const marks = MarkupMarks.of(text)
+    const marks = MonacoMarkup.of(text)
     const lineSpacers = marks.marks.filter((mark) =>
       mark.options.before?.inlineClassName?.includes("bubbly-line-spacer")
     )
@@ -214,12 +229,12 @@ describe("MarkupMarks", () => {
   test("a block's start and end tags a spacer in from its band's end, in an HTML file and a Spell drawing alike;  a `</>` its own, its glyph at its pill's right end", () => {
     const html = `<div>\n  <p>words</p>\n</div>\n`
     const spell = `to draw it\n\t<grid>\n\t\t<text>hi</text>\n\t</>\n`
-    const spacers = (marks: MarkupMarks, kind: string) =>
+    const spacers = (marks: MonacoMarkupMarks, kind: string) =>
       marks.marks
         .filter((mark) => mark.options.before?.inlineClassName?.includes(`bubbly-${kind}-spacer`))
         .map(({ range }) => range.startLineNumber)
-    const inHtml = MarkupMarks.of(html)
-    const inSpell = MarkupMarks.within(spell, spell.indexOf("<grid>"), spell.length, [])
+    const inHtml = MonacoMarkup.of(html)
+    const inSpell = MonacoMarkup.within(spell, spell.indexOf("<grid>"), spell.length, [])
     expect([spacers(inHtml, "tag-head"), spacers(inHtml, "tag-foot")]).toEqual([[1], [3]])
     expect([spacers(inSpell, "tag-head"), spacers(inSpell, "tag-foot")]).toEqual([[2], []])
     expect(spacers(inSpell, "tag-foot-bare")).toEqual([4])
@@ -233,7 +248,7 @@ describe("MarkupMarks", () => {
 <meta
   name="x" />
 `
-    const marks = MarkupMarks.of(text)
+    const marks = MonacoMarkup.of(text)
     const tags = marks.shapes.filter((shape) => shape.kind === "tag")
     const lineSpan = tags.map(({ place }) => {
       const { range } = marks.marks[place]!
@@ -262,7 +277,7 @@ describe("MarkupMarks", () => {
 <b
   a="1">x</b>
 `
-    const marks = MarkupMarks.of(text)
+    const marks = MonacoMarkup.of(text)
     const blocks = marks.shapes.filter((shape) => shape.kind === "markup-block")
     expect(blocks.map((shape) => shape.kind === "markup-block" && [!!shape.isFlush, !!shape.isShortTail])).toEqual([
       [true, false],
@@ -279,7 +294,7 @@ describe("MarkupMarks", () => {
 
   test("an element with nothing between its tags is ONE pill, drawn as if self-closed:  its end tag's `<` and name hidden (Q62)", () => {
     const text = `<div class="x"></div> <b> </b>`
-    const marks = MarkupMarks.of(text)
+    const marks = MonacoMarkup.of(text)
     expect(shapesOf(marks, text)).toEqual([
       'pill start:  <div class="x"></div> <b',
       'input:  x"></div> <b> </b>',
@@ -320,11 +335,11 @@ describe("MarkupMarks", () => {
   <spacer/>
 </grid>
 `
-    expect(shapesOf(MarkupMarks.of(text), text).filter((line) => line.startsWith("block"))).toEqual([
+    expect(shapesOf(MonacoMarkup.of(text), text).filter((line) => line.startsWith("block"))).toEqual([
       "block structure +foot:  <context-menu>",
       "block structure +foot:  <grid>"
     ])
-    const marks = MarkupMarks.of(text)
+    const marks = MonacoMarkup.of(text)
     const lines = text.split("\n")
     const tiny = marks.marks
       .filter((mark) => mark.options.inlineClassName?.split(" ").includes("bubbly-foot-tiny"))

@@ -6,13 +6,16 @@ import { setDebugGlobal } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { codeLook, showBubbly } from "spell/app/app/ui/codePopups"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import {
   CodeMirrorEditor,
   CodeMirrorMenu,
   CodeMirrorSetup,
+  CodeSlice,
   FileEditor,
-  SpellCodeMirror
+  SpellCodeMirror,
+  type CompiledLanguage
 } from "spell/app/app/solid/codemirror"
 
 // Every Solid computation follows spell cells (the project's files)
@@ -26,10 +29,13 @@ import "./CodeMirrorTest.css"
  * The CodeMirror test page (epic `editor` P30), `/demo/codemirror.html` on the editor's dev server:
  * Solitaire's Spell in Monaco and in CodeMirror 6, side by side, so Owen can judge a move.
  * - Three views, by the bar's buttons:
- *   - Edit:  the same file in both editors, Solitaire.spell or Card.spell;  typing in one shows in the other.
+ *   - Edit:  the same file in both editors, Solitaire.spell, Card.spell or Card.editor.html (a property editor page,
+ *     made here, never saved);  typing in one shows in the other.
  *     Switching files keeps each one's undo, folds and selection, in both (CodeMirror's `FileStates`).
- *   - Diff:  Publish's clash dialog's two sides, CodeMirror's merge view above Monaco's diff editor
- *   - Compiled:  the file's compiled javascript in both
+ *     Under a Spell file, a slice of it in both (`<CodeSlice>`):  the end of one block, cut, and the whole of the next.
+ *   - Diff:  Publish's clash dialog's two sides, CodeMirror's merge view beside Monaco's diff editor
+ *   - Compiled:  the file's compiled JavaScript, TypeScript or Python in both
+ * - The look, bubbly or not, as the code pane's "Settings…" says (`codeLook`), by the bar too, or `?look=off`.
  * - The page's language (English, Español) and look (light, dark), by the bar too, or `?lang=es&scheme=dark`:
  *   CodeMirror's words follow the app's (`appTexts.lang`).
  * - Line numbers, off or on, as the app's View › Line Numbers:  CodeMirror's alone (`?lines=on`).
@@ -41,13 +47,25 @@ import "./CodeMirrorTest.css"
  ****************/
 function CodeMirrorTest(props: { project: SP.SpellProject }) {
   const query = new URLSearchParams(location.search)
-  const [fileName, setFileName] = createSignal(query.get("file") === "Card" ? "Card.spell" : "Solitaire.spell")
+  const [fileName, setFileName] = createSignal(FILE_QUERIES[query.get("file") ?? ""] ?? "Solitaire.spell")
+  const [look, setLook] = createSignal(codeLook.isBubbly ? "on" : "off")
+  const [target, setTarget] = createSignal<CompiledLanguage>(
+    (query.get("target") as CompiledLanguage | null) ?? "javascript"
+  )
   const [view, setView] = createSignal<TestView>((query.get("view") as TestView | null) ?? "edit")
   const [lang, setLang] = createSignal(query.get("lang") === "es" ? "es" : "en")
   const [scheme, setScheme] = createSignal(query.get("scheme") === "dark" ? "dark" : "light")
   const [lines, setLines] = createSignal(query.get("lines") === "on" ? "on" : "off")
   const only = query.get("only")
-  const fileOf = (name: string) => props.project.spellFiles.find((file) => file.path.endsWith(`/${name}`))!
+  const fileOf = (name: string): SP.AnySpellFile =>
+    name === EDITOR_PAGE
+      ? editorPage(props.project)
+      : props.project.spellFiles.find((file) => file.path.endsWith(`/${name}`))!
+  const spellFileOf = (name: string) => fileOf(name) as SP.SpellFile
+  const changeLook = (next: string) => {
+    setLook(next)
+    showBubbly(next === "on")
+  }
   const changeLang = (next: string) => {
     setLang(next)
     void showLanguage(next)
@@ -82,11 +100,33 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
             value={fileName()}
             options={[
               ["Solitaire.spell", "Solitaire.spell"],
-              ["Card.spell", "Card.spell"]
+              ["Card.spell", "Card.spell"],
+              [EDITOR_PAGE, EDITOR_PAGE]
             ]}
             onPick={setFileName}
           />
         </Show>
+        <Show when={view() === "compiled"}>
+          <Choice
+            label="Target"
+            value={target()}
+            options={[
+              ["javascript", "JavaScript"],
+              ["typescript", "TypeScript"],
+              ["python", "Python"]
+            ]}
+            onPick={(next) => setTarget(next as CompiledLanguage)}
+          />
+        </Show>
+        <Choice
+          label="Bubbly look"
+          value={look()}
+          options={[
+            ["on", "Bubbly"],
+            ["off", "Not bubbly"]
+          ]}
+          onPick={changeLook}
+        />
         <Choice
           label="Language"
           value={lang()}
@@ -130,23 +170,40 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
             />
           }
         />
+        <Show when={fileName() !== EDITOR_PAGE ? fileName() : undefined} keyed>
+          {(name) => {
+            const lines = sliceOf(spellFileOf(name))
+            return (
+              <Sides
+                only={only}
+                class="Slices"
+                monaco={<MonacoSlice file={fileOf(name)} {...lines} />}
+                codemirror={<CodeSlice file={fileOf(name)} {...lines} />}
+              />
+            )
+          }}
+        </Show>
       </Show>
       <Show when={view() === "diff"}>
         <Sides
           only={only}
-          monaco={<MonacoDiff clash={clashOf(fileOf("Card.spell"))} />}
-          codemirror={<CodeMirrorDiff clash={clashOf(fileOf("Card.spell"))} />}
+          monaco={<MonacoDiff clash={clashOf(spellFileOf("Card.spell"))} />}
+          codemirror={<CodeMirrorDiff clash={clashOf(spellFileOf("Card.spell"))} />}
         />
       </Show>
       <Show when={view() === "compiled"}>
-        <Show when={fileName()} keyed>
-          {(name) => (
-            <Sides
-              only={only}
-              monaco={<MonacoCompiled text={compiledOf(fileOf(name))} />}
-              codemirror={<CodeMirrorCompiled text={compiledOf(fileOf(name))} />}
-            />
-          )}
+        <Show when={`${fileName() === EDITOR_PAGE ? "Card.spell" : fileName()}:${target()}`} keyed>
+          {(shown) => {
+            const [name, language] = shown.split(":") as [string, CompiledLanguage]
+            const text = compiledOf(spellFileOf(name), language)
+            return (
+              <Sides
+                only={only}
+                monaco={<MonacoCompiled text={text} language={language} />}
+                codemirror={<CodeMirrorCompiled text={text} language={language} />}
+              />
+            )
+          }}
         </Show>
       </Show>
     </div>
@@ -157,9 +214,9 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
 type TestView = "edit" | "diff" | "compiled"
 
 /** The two editors side by side, each with its caption;  `only` one of them, when asked. */
-function Sides(props: { only: string | null; monaco: JSX.Element; codemirror: JSX.Element }) {
+function Sides(props: { only: string | null; monaco: JSX.Element; codemirror: JSX.Element; class?: string }) {
   return (
-    <div class="CodeMirrorTestSides">
+    <div class={["CodeMirrorTestSides", props.class]}>
       <Show when={props.only !== "cm"}>
         <section class="Monaco">
           <h2>Monaco (today's editor)</h2>
@@ -228,7 +285,7 @@ function CodeMirrorSide(props: CodeMirrorSideProps) {
 /** Props for `<CodeMirrorSide>`. */
 type CodeMirrorSideProps = {
   /** the file shown */
-  file: SP.SpellFile
+  file: SP.AnySpellFile
   /** show the file at `path`, e.g. a definition's */
   onOpen: (path: string) => void
   /** the editor's made */
@@ -247,11 +304,11 @@ function CodeMirrorDiff(props: { clash: Clash }) {
   return <div class="Editor" ref={(div: HTMLDivElement) => (element = div)} />
 }
 
-/** Compiled javascript in CodeMirror, read only. */
-function CodeMirrorCompiled(props: { text: string }) {
+/** Compiled code in CodeMirror, read only. */
+function CodeMirrorCompiled(props: { text: string; language: CompiledLanguage }) {
   return (
     <div class="Editor">
-      <CodeMirrorEditor value={props.text} extensions={SpellCodeMirror.codeExtensions()} />
+      <CodeMirrorEditor value={props.text} extensions={SpellCodeMirror.codeExtensions(props.language)} />
     </div>
   )
 }
@@ -289,7 +346,7 @@ function WithMonaco(props: { make: (module: MonacoModule) => JSX.Element }) {
 }
 
 /** `file` in today's Monaco editor, its model the app's (`SpellMonaco.models`). */
-function MonacoSide(props: { file: SP.SpellFile }) {
+function MonacoSide(props: { file: SP.AnySpellFile }) {
   return (
     <WithMonaco
       make={(module) => {
@@ -322,14 +379,36 @@ function MonacoDiff(props: { clash: Clash }) {
   )
 }
 
-/** Compiled javascript in Monaco, read only. */
-function MonacoCompiled(props: { text: string }) {
+/** Lines `from` to `to` of `file` in Monaco's `<CodeSlice>`, as the Inspector's Code card shows them. */
+function MonacoSlice(props: { file: SP.AnySpellFile; from: number; to: number }) {
+  return (
+    <WithMonaco
+      make={(module) => {
+        module.SpellMonaco.models.use(untrack(() => props.file.project))
+        return createComponent(module.CodeSlice, {
+          get file() {
+            return props.file
+          },
+          get from() {
+            return props.from
+          },
+          get to() {
+            return props.to
+          }
+        })
+      }}
+    />
+  )
+}
+
+/** Compiled code in Monaco, read only. */
+function MonacoCompiled(props: { text: string; language: CompiledLanguage }) {
   return (
     <WithMonaco
       make={(module) =>
         createComponent(module.MonacoEditor, {
           value: props.text,
-          language: "javascript",
+          language: props.language,
           options: { readOnly: true, lineNumbers: "on", fontFamily: "ui-monospace, Menlo, monospace", fontSize: 13 }
         })
       }
@@ -358,9 +437,51 @@ function clashOf(file: SP.SpellFile): Clash {
   return { theirs, mine }
 }
 
-/** `file`'s compiled javascript, as the editor's compiled-code pane shows it. */
-function compiledOf(file: SP.SpellFile): string {
-  return SpellCodeMirror.service.compiled(file, "js")
+/** `file` compiled to `language`, as the editor's compiled-code pane shows it. */
+function compiledOf(file: SP.SpellFile, language: CompiledLanguage): string {
+  return SpellCodeMirror.service.compiled(file, COMPILED_TARGETS[language])
+}
+
+/** Each compiled language's target, as the language service names it. */
+const COMPILED_TARGETS = { javascript: "js", typescript: "ts", python: "py" } as const
+
+/** The property editor page the page shows:  an HTML file, made here, never saved. */
+const EDITOR_PAGE = "Card.editor.html"
+
+/** The file each `?file=` shows. */
+const FILE_QUERIES: Record<string, string> = { Card: "Card.spell", editor: EDITOR_PAGE, Solitaire: "Solitaire.spell" }
+
+/**
+ * `project`'s property editor page for its cards, `Card.editor.html`:  a page as "New Property Editor..." makes one,
+ * tweaked by hand (an element alone, a group, a line of text), so the bubbly look's every HTML shape shows.
+ */
+function editorPage(project: SP.SpellProject): SP.AnySpellFile {
+  const file = SP.SpellProject.getFileForPath(`${project.path}/${EDITOR_PAGE}`)
+  file.contents ??= CARD_EDITOR_PAGE
+  return file
+}
+
+/** The text of `editorPage()`. */
+const CARD_EDITOR_PAGE = `<ui-property-editor schema="Card" label="Card">
+  <ui-property name="rank" as="dropdown"></ui-property>
+  <ui-property name="suit" as="buttons" hint="Its symbol and colour follow."></ui-property>
+  <ui-property-group label="Look" collapsible>
+    <ui-property name="direction" as="toggle"></ui-property>
+    <p>Face up or down, <b>as dealt</b>.</p>
+  </ui-property-group>
+  <ui-divider />
+</ui-property-editor>
+`
+
+/**
+ * The lines of `file` a slice shows:  the last two of the block before `its "short name" is`, cut, then the whole of it
+ * -- or its first ten lines, when it has none.
+ */
+function sliceOf(file: SP.SpellFile): { from: number; to: number } {
+  const lines = (file.contents ?? "").split("\n")
+  const head = lines.findIndex((line) => line.includes('"short name" is'))
+  if (head < 0) return { from: 1, to: 10 }
+  return { from: head - 1, to: head + 5 }
 }
 
 /** A file's name, from its path. */
@@ -472,6 +593,7 @@ async function start() {
   measureTyping()
   const query = new URLSearchParams(location.search)
   showScheme(query.get("scheme") === "dark" ? "dark" : "light")
+  if (query.get("look") === "off") showBubbly(false)
   await uiReady
   if (query.get("lang") === "es") await showLanguage("es")
   const project = new SP.SpellProject(SP.SpellProject.projectIdForImport(PROJECT))

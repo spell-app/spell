@@ -649,7 +649,8 @@ Each one dresses the whole editor:
   - The Spell extension carries the same colours as VS Code themes:  "Spell Matrix Dark" and the rest.
 - A theme made with Spell UI's theme editor and kept in the browser is worn over its base,
   while that base is the theme chosen.
-- All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx) and [the code themes](src/app/ui/monaco/themes/).
+- All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx), [the code themes](src/app/ui/monaco/themes/) and
+  the one table of which colour each kind of code takes, in either editor, [CodeRules.ts](src/app/ui/CodeRules.ts).
 - **Not yet:**  a menu entry for that kept theme, and a design pass on Merlot and Spell,
   which were built to their first drawings with no round of polish.
 

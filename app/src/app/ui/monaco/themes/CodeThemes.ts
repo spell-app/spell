@@ -1,7 +1,7 @@
 import { ColorScheme, rgbToHex } from "spell/util"
 import { UIT } from "spell/ui/core"
 import { monaco } from "spell/app/app/ui/monaco/monaco"
-import { CodeRules, type CodeInk } from "./CodeRules"
+import { CodeRules, type CodeInk } from "spell/app/app/ui/CodeRules"
 
 /****************
  * ### `CodeThemes`

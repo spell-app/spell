@@ -1,74 +1,53 @@
-import { type EditorState, type Extension, Prec, type Range, StateEffect, StateField } from "@codemirror/state"
-import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate, WidgetType } from "@codemirror/view"
+import type { EditorState, Extension } from "@codemirror/state"
+import { Decoration, type DecorationSet, EditorView, WidgetType } from "@codemirror/view"
 
-import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
-import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
-import { CodeMirrorSetup } from "./CodeMirrorSetup"
+import { CodeMirrorDecorations, CodeMirrorMarkup, railsOf, type Rail } from "./CodeMirrorMarkup"
+import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 
 /****************
  * ### `CodeMirrorBubbly`
- * Spell drawn in the bubbly look in a CodeMirror editor (epic `editor` P30, the CodeMirror test), from the parser's
- * `SP.BubblyLayout`, the same data Monaco's `SpellBubbly` and the page's `BubblyHtml` draw from.
+ * Spell drawn in the bubbly look in a CodeMirror editor (epic `editor` P30, the CodeMirror test;  epic `codemirror`
+ * P3), from the parser's `SP.BubblyLayout`, the same data Monaco's `SpellBubbly` and the page's `BubblyHtml` draw from.
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
- *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour
+ *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
+ *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen)
  *   - its body's rail:  a line decoration on every line under it, a stripe per enclosing block (`--cmb-rails`)
  *   - its foot:  a block widget after its last line
  *   - what a person typed in white pills, a quoted one's curly marks, bold names, italic values, faint marks,
  *     one dotted line under each value and question:  marks in the classes of the look's one sheet, `bubbly.css`
- *   - a drawing's code, `{…}`, an inverted pill;  a drawing's tag in a band of its own
- * - No layer behind the text, no injected text for room:  padding round a pill is the pill's own padding,
+ *   - a drawing's tags as HTML is drawn, its ends pointed, from the page's own reading of markup
+ *     (`CodeMirrorMarkup`, `BubblyMarkup`):  the same as Monaco's, a `{…}` an inverted pill
+ * - `slice`:  a range of the file shown alone (`<CodeSlice>`):  only what's wholly in its lines is drawn, so a block it
+ *   cuts draws no band or rail cut off at its edges, as Monaco's `SpellBubbly.showSlice()`.
+ * - No layer behind the text, no injected text for room round Spell's pills:  padding round a pill is the pill's own,
  *   and the caret still lands on its letters, as CodeMirror measures the lines as they're drawn.
  * - Typing never waits for the layout:  CodeMirror moves the marks with the text,
- *   and the layout is worked out again once the typing pauses (`RELAYOUT_MSEC`).
- * - The editor's box is a `.bubbly` too (`EDITOR_CLASSES`), so the sheet's settings and rules reach it;
- *   only what's the editor's own is in `codemirror.css`.
- * - Its position in the import graph:  the parser's types and layout, CodeMirror;  never Monaco.
+ *   and the layout is worked out again once the typing pauses (`RELAYOUT_MSEC`, `CodeMirrorRelayout`).
+ * - The editor's box is a `.bubbly` too (`EDITOR_CLASSES`), so the sheet's settings and rules reach it:
+ *   its CodeMirror section draws the bands, rails, feet and tags.
+ * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks;  never Monaco.
  * - NEVER throws:  a layout that fails leaves the code plain, and logs why.
  ****************/
 export class CodeMirrorBubbly {
   /**
    * The extension drawing a Spell file bubbly.
    * - `fileOf()`:  the project file the editor shows, if it is one, so the layout reads the project's own parse of it.
+   * - `sliceOf(state)`:  the lines shown, when it's a slice of its file (`FileStates.showSlice()`)
    */
-  static extension(fileOf: () => SP.SpellFile | undefined): Extension {
-    // a block widget (a foot) can't come from a view plugin:  the layout lives in the state
-    const laidOut = StateEffect.define<DecorationSet>()
-    const layout = StateField.define<DecorationSet>({
-      create: (state) => CodeMirrorBubbly.decorationsOf(state, fileOf()),
-      update(decorations, transaction) {
-        for (const effect of transaction.effects) if (effect.is(laidOut)) return effect.value
-        // the marks follow the text at once;  laid out again once the typing pauses
-        return transaction.docChanged ? decorations.map(transaction.changes) : decorations
-      },
-      // lowest:  CodeMirror draws a lower source's marks OUTSIDE a higher's, so a found word's or a problem's mark goes
-      // inside a pill, rather than cutting it in two
-      provide: (field) => Prec.lowest(EditorView.decorations.from(field))
-    })
-    const relayout = ViewPlugin.fromClass(
-      class {
-        private timer: CancelablePromise<void> | undefined
-
-        constructor(readonly view: EditorView) {}
-
-        update(update: ViewUpdate) {
-          // laid out again after an edit, or a new parse
-          const isParsed = update.transactions.some((it) => it.effects.some((e) => e.is(CodeMirrorSetup.PARSED)))
-          if (!update.docChanged && !isParsed) return
-          this.timer?.cancel()
-          this.timer = after(CodeMirrorBubbly.RELAYOUT_MSEC / 1000, () => {
-            const decorations = CodeMirrorBubbly.decorationsOf(this.view.state, fileOf())
-            this.view.dispatch({ effects: laidOut.of(decorations) })
-          })
-        }
-
-        destroy() {
-          this.timer?.cancel()
-        }
-      }
-    )
-    return [layout, relayout, EditorView.editorAttributes.of({ class: EDITOR_CLASSES })]
+  static extension(
+    fileOf: () => SP.SpellFile | undefined,
+    sliceOf: (state: EditorState) => Slice | undefined = () => undefined
+  ): Extension {
+    return [
+      CodeMirrorRelayout.extension(
+        (state) => CodeMirrorBubbly.decorationsOf(state, fileOf(), sliceOf(state)),
+        CodeMirrorBubbly.RELAYOUT_MSEC
+      ),
+      EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
+      CodeMirrorMarkup.tabStops
+    ]
   }
 
   /** How long the typing must pause before the code's laid out again, in msec:  Monaco's `SpellBubbly` waits 300. */
@@ -77,14 +56,15 @@ export class CodeMirrorBubbly {
   /**
    * Every decoration of `state`'s text, laid out bubbly.
    * - `within`:  its project file, whose parse is read when it's of this very text.
+   * - `slice`:  the lines shown, when it's a slice:  only what's wholly in them is drawn
    * - NEVER throws:  `Decoration.none` when the layout fails.
    */
-  static decorationsOf(state: EditorState, within?: SP.SpellFile): DecorationSet {
+  static decorationsOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): DecorationSet {
     const text = state.doc.toString()
     try {
       const parser = within ? SP.Language.forFile(within.path).parser : SP.spellParser
       const drawing = SP.BubblyLayout.of(text, parser, { within })
-      return new BubblyDecorations(state, drawing, (tag) => isViewTag(within, tag)).build()
+      return new BubblyDecorations(state, drawing, { isView: (tag) => isViewTag(within, tag), slice }).build()
     } catch (error) {
       console.error("CodeMirrorBubbly:  couldn't lay the code out", error)
       return Decoration.none
@@ -92,51 +72,53 @@ export class CodeMirrorBubbly {
   }
 }
 
+/** The lines a slice shows, `from` the first's start `to` the last's end:  offsets into its file. */
+export type Slice = { from: number; to: number }
+
 /** The editor's own classes:  a `.bubbly`, so `bubbly.css` reaches it, and ours. */
 const EDITOR_CLASSES = "bubbly cmb-editor"
 
-/** One enclosing block, as a body line draws its rail:  where its band starts, in tab stops, and its colour. */
-type Rail = { column: number; partOfSpeech: SP.BubblyPartOfSpeech }
-
 /** One drawing being turned into decorations. */
 class BubblyDecorations {
-  private readonly ranges: Array<Range<Decoration>> = []
-  /**
-   * Each mark's classes, by its range (`start:end`):  ONE mark per range, its classes together.
-   * - CodeMirror nests two marks over the same range in no set order, so `bubbly-quoted` round `bubbly-input`
-   *   came out either way round;  a longer mark always holds a shorter one.
-   */
-  private readonly marks = new Map<string, Set<string>>()
+  private readonly decorations: CodeMirrorDecorations
   private readonly text: string
+  /** A drawing's tags:  drawn as HTML is (`CodeMirrorMarkup`), so Spell's marks leave them alone. */
+  private readonly tags: Array<{ start: number; end: number }> = []
 
   constructor(
     private readonly state: EditorState,
     private readonly drawing: SP.BubblyDrawing,
-    /** is a drawing's tag one of the project's own views? */
-    private readonly isView: (tag: string) => boolean
+    private readonly options: {
+      /** is a drawing's tag one of the project's own views? */
+      isView: (tag: string) => boolean
+      /** the lines shown, when it's a slice */
+      slice?: Slice | undefined
+    }
   ) {
     this.text = drawing.text
+    this.decorations = new CodeMirrorDecorations(state)
   }
 
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     this.nodes(this.drawing.nodes, [])
-    for (const [range, classes] of this.marks) {
-      const [start, end] = range.split(":").map(Number) as [number, number]
-      this.ranges.push(Decoration.mark({ class: [...classes].join(" ") }).range(start, end))
-    }
-    return Decoration.set(this.ranges, true)
+    return this.decorations.build()
   }
 
   /** `nodes`, inside the blocks `rails` holds, outermost first. */
   private nodes(nodes: SP.BubblyNode[], rails: Rail[]) {
-    for (const node of nodes) {
+    for (let index = 0; index < nodes.length; index++) {
+      const node = nodes[index]!
+      if (node.kind === "line" && this.text[node.start] === "<") {
+        index = this.markup(nodes, index, rails)
+        continue
+      }
       switch (node.kind) {
         case "gap":
-          this.lineOf(node.start, rails)
+          this.decorations.line(node.start, rails)
           break
         case "line":
-          this.lineOf(node.start, rails)
+          this.decorations.line(node.start, rails)
           this.line(node)
           break
         case "block":
@@ -146,25 +128,52 @@ class BubblyDecorations {
     }
   }
 
+  /**
+   * A drawing's lines, from `nodes[first]`, the first that starts with a tag, to the last line before the next block:
+   * its tags drawn as HTML is (`CodeMirrorMarkup.within()`), the rest as Spell;  returns the index of its last line.
+   */
+  private markup(nodes: SP.BubblyNode[], first: number, rails: Rail[]): number {
+    let last = first
+    while (nodes[last + 1] && nodes[last + 1]!.kind !== "block") last++
+    const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
+    for (const node of nodes.slice(first, last + 1)) if (node.kind !== "block") this.decorations.line(node.start, rails)
+    const tags = CodeMirrorMarkup.within(this.decorations, {
+      from: lines[0]!.start,
+      to: lines.at(-1)!.end,
+      rails,
+      isView: this.options.isView,
+      declaringTags: this.drawing.declaringTags,
+      codes: lines.flatMap((line) => line.codes ?? [])
+    })
+    this.tags.push(...tags)
+    for (const line of lines) this.line(line)
+    return last
+  }
+
   /** A declaration, or a control line with steps under it:  its band, its body, its foot. */
   private block(block: SP.BubblyBlock, rails: Rail[]) {
     const { head, partOfSpeech } = block
-    const line = this.state.doc.lineAt(head.start)
-    const column = head.start - line.from
+    const isShown = this.isWhollyShown(block)
     const hasBody = block.body.some((node) => node.kind !== "gap")
-    this.lineOf(head.start, rails, ["cmb-head"])
+    this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
+    const indent = this.decorations.indentAt(head.start)
     const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? ["bubbly-group"] : [])]
-    const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
-    this.mark(head.start, head.end, band)
-    this.line(head, partOfSpeech)
+    const hasDescription = this.line(head, partOfSpeech)
+    if (isShown) {
+      const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
+      if (hasDescription) band.push("cmb-band-described")
+      this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
+    }
     if (!hasBody) return
-    const inside = [...rails, { column, partOfSpeech }]
+    // a block the slice cuts:  its body drawn, its rail not
+    const inside = isShown ? [...rails, { ...indent, partOfSpeech }] : rails
     this.nodes(block.body, inside)
+    if (!isShown) return
     // the foot, under its last line
     const last = lastLineEnd(block)
-    this.ranges.push(
+    this.decorations.add(
       Decoration.widget({
-        widget: new FootWidget(column, partOfSpeech, rails),
+        widget: new FootWidget(indent.tabs, partOfSpeech, rails),
         block: true,
         // an inner block's foot before its parent's, when they end on the same line
         side: 1000 - block.level
@@ -172,11 +181,23 @@ class BubblyDecorations {
     )
   }
 
-  /** A line's stretches as marks:  each piece's look, a quoted input's pill and marks, the dotted lines. */
-  private line(line: SP.BubblyLine, band?: SP.BubblyPartOfSpeech) {
+  /** Is all of `block` in the lines shown:  always, but in a slice that cuts it. */
+  private isWhollyShown(block: SP.BubblyBlock): boolean {
+    const { slice } = this.options
+    return !slice || (block.head.start >= slice.from && lastLineEnd(block) <= slice.to)
+  }
+
+  /**
+   * A line's stretches as marks:  each piece's look, a quoted input's pill and marks, the dotted lines;
+   * returns whether it has a head's description.
+   */
+  private line(line: SP.BubblyLine, band?: SP.BubblyPartOfSpeech): boolean {
+    let hasDescription = false
     const stretches = SP.BubblyStretches.ofLine(this.text, line, band ? { band } : {})
     for (const [index, stretch] of stretches.entries()) {
       const { start, end, kind } = stretch
+      // a drawing's tag:  HTML's marks
+      if (this.tags.some((tag) => start >= tag.start && end <= tag.end)) continue
       switch (kind) {
         case "underline":
           this.mark(start, end, ["bubbly-underline"])
@@ -198,8 +219,14 @@ class BubblyDecorations {
           break
         }
         case "comment": {
-          this.mark(start, end, ["bubbly-comment", ...(band ? ["bubbly-band-comment"] : [])])
-          if (this.text.startsWith("--", start)) this.mark(start, start + 2, ["bubbly-dash"])
+          // a head's description:  at its band's right end (Owen)
+          const isDescription = !!band
+          hasDescription ||= isDescription
+          this.mark(start, end, [
+            "bubbly-comment",
+            ...(isDescription ? ["bubbly-band-comment", "cmb-description"] : [])
+          ])
+          if (this.text.startsWith("--", start)) this.mark(start, start + 2, [BubblyHtml.DASH])
           break
         }
         case "mark":
@@ -211,11 +238,12 @@ class BubblyDecorations {
       }
     }
     for (const code of line.codes ?? []) {
+      if (this.tags.some((tag) => code.start >= tag.start && code.end <= tag.end)) continue
       this.mark(code.start, code.end, ["bubbly-input", "bubbly-expression"])
       this.mark(code.start, code.start + 1, ["bubbly-code-brace"])
       this.mark(code.end - 1, code.end, ["bubbly-code-brace"])
     }
-    this.tags(line, this.isView)
+    return hasDescription
   }
 
   /** A Spell expression's `{` and `}` among faint marks:  a step darker, so a `{…}` reads as one. */
@@ -225,49 +253,9 @@ class BubblyDecorations {
     }
   }
 
-  /**
-   * A drawing's tags on `line`, `<text color="blue">`:  each in a band of its own, in its part of speech's colour,
-   * as Monaco's `MarkupMarks` draws them (`BubblyMarkup.partOfSpeechOf()`):  the project's own view, or a tag that
-   * declares a member (`<number "score" />`), a thing's.
-   */
-  private tags(line: SP.BubblyLine, isView: (tag: string) => boolean) {
-    const codes = line.codes ?? []
-    const isInCode = (at: number) => codes.some((code) => at >= code.start && at < code.end)
-    let open: number | undefined
-    for (let at = line.start; at < line.end; at++) {
-      if (isInCode(at)) continue
-      const char = this.text[at]
-      if (char === "<") open = at
-      else if (char === ">" && open !== undefined) {
-        const isClosing = this.text[open + 1] === "/"
-        const tag = /^<\/?([\p{L}\p{M}\d_-]*)/u.exec(this.text.slice(open, at))?.[1] ?? ""
-        const partOfSpeech =
-          isView(tag) || this.drawing.declaringTags.includes(open) ? "thing" : BubblyMarkup.partOfSpeechOf(tag)
-        const classes = ["cmb-tag", "cmb-hue", `bubbly-${partOfSpeech}`, ...(isClosing ? ["cmb-tag-close"] : [])]
-        this.mark(open, at + 1, classes)
-        open = undefined
-      }
-    }
-  }
-
-  /** The line `at` is on:  its rails, from `rails`, outermost first, and `classes`. */
-  private lineOf(at: number, rails: Rail[], classes: string[] = []) {
-    const line = this.state.doc.lineAt(at)
-    const innermost = rails.at(-1)
-    const attributes: Record<string, string> = {}
-    if (rails.length) attributes.style = `--cmb-rails: ${railsOf(rails)}`
-    const lineClasses = [...classes, ...(innermost ? ["cmb-hue", `bubbly-${innermost.partOfSpeech}`] : [])]
-    if (!lineClasses.length && !rails.length) return
-    this.ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(line.from))
-  }
-
-  /** Mark `start`-`end` with `classes`, along with any other classes the same stretch has. */
+  /** Mark `start`-`end` with `classes`. */
   private mark(start: number, end: number, classes: string[]) {
-    if (end <= start || !classes.length) return
-    const key = `${start}:${end}`
-    const marked = this.marks.get(key) ?? new Set()
-    for (const each of classes) marked.add(each)
-    this.marks.set(key, marked)
+    this.decorations.mark(start, end, classes)
   }
 }
 
@@ -275,20 +263,6 @@ class BubblyDecorations {
 function classesOf(kind: SP.BubblyStretchKind): string[] {
   if (kind === "quote-open" || kind === "quote-close" || kind === "underline") return []
   return BubblyHtml.classesFor(kind).split(" ").filter(Boolean)
-}
-
-/**
- * `rails` as a CSS background:  one stripe per enclosing block, at its band's left edge, in its band's colour.
- * - `codemirror.css` sizes a tab stop (`--cmb-indent`) and a rail (`--cmb-rail`):  only the columns are written here.
- */
-function railsOf(rails: Rail[]): string {
-  return rails
-    .map(({ column, partOfSpeech }) => {
-      const x = `calc(var(--cmb-line-pad) + ${column} * var(--cmb-indent) - var(--cmb-band-inset))`
-      const colour = `var(--cmb-band-${partOfSpeech})`
-      return `linear-gradient(to right, transparent ${x}, ${colour} ${x}, ${colour} calc(${x} + var(--cmb-rail)), transparent calc(${x} + var(--cmb-rail)))`
-    })
-    .join(", ")
 }
 
 /** Is `tag` one of `file`'s project's own views, `<stock-pile>`?  As the compiler decides it (`SP.SpellJSX.isDrawnType()`). */

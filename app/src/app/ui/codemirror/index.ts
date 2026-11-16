@@ -7,7 +7,11 @@
  */
 export * from "./LspToCodeMirror"
 export * from "./CodeMirrorSetup"
+export * from "./CodeMirrorRelayout"
+export * from "./CodeMirrorMarkup"
 export * from "./CodeMirrorBubbly"
+export * from "./CodeMirrorTokens"
+export * from "./CodeMirrorLook"
 export * from "./CodeMirrorLanguage"
 export * from "./CodeMirrorTyping"
 export * from "./FileStates"

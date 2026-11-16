@@ -1,6 +1,14 @@
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { codeLook } from "spell/app/app/ui/codePopups"
+import {
+  MarkupMarks,
+  type MarkupBlockShape,
+  type MarkupLinkShape,
+  type MarkupShape,
+  type MarkupTagShape,
+  type TagRoom
+} from "spell/app/app/ui/MarkupMarks"
 import { monaco } from "./monaco"
 import {
   BubblyMarks,
@@ -10,14 +18,7 @@ import {
   type BubblyShape,
   type BubblyUnderlineShape
 } from "./BubblyMarks"
-import {
-  MarkupMarks,
-  type MarkupBlockShape,
-  type MarkupLinkShape,
-  type MarkupShape,
-  type MarkupTagShape,
-  type TagRoom
-} from "./MarkupMarks"
+import { MonacoMarks } from "./MonacoMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
 
@@ -93,7 +94,7 @@ export class SpellBubbly {
   isDrawing = false
 
   /** The marks and shapes it last laid out. */
-  laidOut: BubblyMarks | MarkupMarks | undefined
+  laidOut: BubblyMarks | MarkupMarks<monaco.editor.IModelDeltaDecoration> | undefined
 
   private constructor(
     private readonly editor: monaco.editor.ICodeEditor,
@@ -230,7 +231,7 @@ export class SpellBubbly {
     if (!model) return
     try {
       if (this.isMarkup) {
-        this.laidOut = MarkupMarks.of(model.getValue())
+        this.laidOut = MarkupMarks.of(model.getValue(), MonacoMarks.make)
         this.marks!.set(this.laidOut.marks)
         return this.redraw()
       }
@@ -831,7 +832,7 @@ export class SpellBubbly {
    * A view zone under each line that ends declarations with a body:  room for their feet,
    * and the gap from the lowest to the band on the next line (`--bubbly-line-gap`);  if they've moved.
    */
-  private updateZones(laidOut: BubblyMarks | MarkupMarks, view: View) {
+  private updateZones(laidOut: BubblyMarks | MarkupMarks<monaco.editor.IModelDeltaDecoration>, view: View) {
     const room = new Map<number, number>()
     const measure = (shapes: Shape[]) => {
       for (const shape of shapes) {
