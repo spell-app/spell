@@ -68,6 +68,19 @@ describe("<ui-app-menu>", () => {
     expect(Math.abs(itemBox(host, ".name").left - bar.left)).toBeLessThan(1)
   })
 
+  // epic `mockup` I27 (Owen:  "Space to the right of avatar")
+  it("ends in what isn't an item (a button, an avatar):  an item's room after it, as the start's first item's icon has", async () => {
+    const { host, menu } = await appMenu(
+      800,
+      `<ui-item slot="start" icon="bars" class="first"></ui-item><span slot="end" class="bare">Me</span>`
+    )
+    const bar = menu.getBoundingClientRect()
+    const icon = host.querySelector(".first")!.shadowRoot!.querySelector("[part~=icon]")!.getBoundingClientRect()
+    const room = icon.left - bar.left
+    expect(room).toBeGreaterThan(10)
+    expect(bar.right - host.querySelector(".bare")!.getBoundingClientRect().right).toBeCloseTo(room, 0)
+  })
+
   it("fills its box's width, its items the bar's height", async () => {
     const { host, menu } = await appMenu(800)
     expect(Math.round(menu.getBoundingClientRect().width)).toBe(800)

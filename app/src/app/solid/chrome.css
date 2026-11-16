@@ -187,6 +187,10 @@ ui-menu.PanelMenu,
 ui-app-menu.AppMenu .YouAvatar {
   margin-inline: calc(var(--spell-bar-icon-gap) / 2);
 }
+/* its end is a menu of items, each with its own room:  none of the app menu's own after them (epic `mockup` I27) */
+ui-app-menu.AppMenu::part(end)::after {
+  display: none;
+}
 /*
  * the "..." menu's icon the size of the bar's other icons, and the same grey:  it drew half as wide again, and stood
  * apart;  its glyph centred on the bar (`display: flex`):  in a line of the menu's smaller text, it hung 1px low
