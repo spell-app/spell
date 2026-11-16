@@ -156,8 +156,10 @@ export const APP_TEXTS = {
   discardDraft: "Discard",
   publishDraft: "Publish",
   draft: "Draft",
-  draftTip:
-    "Your changes are a draft:  only you see them.\nPublish makes them everyone's, and keeps a version.\nDiscard throws them away.",
+  /** The top bar's pill (epic `editor` I217):  what a draft is, and what Publish and Discard each do. */
+  draftTip: "Your changes are a draft.\nOnly you see them.",
+  publishDraftTip: "Sends your changes out to everyone.\nKeeps a version.",
+  discardDraftTip: "Throws your changes away.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
   closeTab: "Close",

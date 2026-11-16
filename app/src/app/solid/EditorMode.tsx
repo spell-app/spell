@@ -208,7 +208,8 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
  * "one unified thing with a slight inset border").
  * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Draft", as plain words
  *   (Owen, 2026-11-16, I192:  "Change text from 'Editing a Draft' to just 'Draft'").
- *   - Its tooltip says what a draft is:  only you see it;  Publish makes it everyone's, Discard throws it away.
+ *   - Its tooltip says what a draft is:  only you see it.
+ *   - Publish's and Discard's each say what they do (Owen, I217):  send your changes out, or throw them away.
  * - Then "Publish", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
  * - Right:  "Discard", a link with a trash can, in the theme's primary colour, so it doesn't read as part of the label:
  *   the project menu's Delete Draft, which asks first, its red "Throw It Away" (`editor.deleteDraft()`;
@@ -231,7 +232,7 @@ function PublishDraft(): JSX.Element {
           class="Publish"
           color="primary"
           icon={PUBLISH_ICON}
-          {...barTooltip(appTexts.text("draftTip"))}
+          {...barTooltip(appTexts.text("publishDraftTip"))}
           onClick={() => void editor.publish()}
         >
           {appTexts.text("publishDraft")}
@@ -240,7 +241,7 @@ function PublishDraft(): JSX.Element {
           class="DiscardDraft"
           appearance="tertiary"
           icon={DISCARD_ICON}
-          {...barTooltip(appTexts.text("draftTip"))}
+          {...barTooltip(appTexts.text("discardDraftTip"))}
           onClick={() => void editor.deleteDraft()}
         >
           {appTexts.text("discardDraft")}

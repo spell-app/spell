@@ -162,8 +162,9 @@ const APP_TEXTS_ES: AppTextPack = {
   discardDraft: "Descartar",
   publishDraft: "Publicar",
   draft: "Borrador",
-  draftTip:
-    "Tus cambios son un borrador:  solo tú los ves.\nPublicar los muestra a todos, y guarda una versión.\nDescartar los tira.",
+  draftTip: "Tus cambios son un borrador.\nSolo tú los ves.",
+  publishDraftTip: "Envía tus cambios a todos.\nGuarda una versión.",
+  discardDraftTip: "Tira tus cambios.",
   updatedInYourDraft: "Actualizado en tu borrador.",
   discardChanges: "Descartar los cambios",
   closeTab: "Cerrar",
