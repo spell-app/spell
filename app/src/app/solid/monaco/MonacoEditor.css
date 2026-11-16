@@ -278,11 +278,14 @@
 }
 
 /*
- * Drawn bubbly, the code starts 8px from the pane's edge, its fold arrows laid over the pills' padding
- * (Owen, epic `editor` I154:  "We have enough space in the pills/etc so the vscode fold icons can overlap the pills")
- * - Monaco always keeps 16px before the code for its fold arrows (`lineDecorationsWidth: 0`, `SpellMonaco.OPTIONS`):
- *   the editor is moved 8px left, half that column under the pane's edge, and each arrow 4px right:
- *   its chevron then ends just before the code's first word (`FoldArrows` takes a press on it over the code)
+ * Drawn bubbly, every band starts 12px from the pane's left edge, its fold arrows in that margin
+ * (Owen, epic `editor` I187:  "12px padding around";  the first band is 12px under the tabs too, `FileEditor`)
+ * - Monaco always keeps 16px before the code for its fold arrows (`lineDecorationsWidth: 0`, `SpellMonaco.OPTIONS`),
+ *   and a band starts ~2.8px before its text:
+ *   so the editor is moved 1.2px left, the bands at 16px - 2.8px - 1.2px = 12px, the text at 14.8px
+ * - each arrow is moved back to where it sat before (I154's 8px move), centred in the 12px margin:
+ *   its chevron no longer over the pills' padding, but before the band (`FoldArrows` still takes every press on it)
+ *   - I154 laid them half over the code ("the vscode fold icons can overlap the pills"), the code 8px from the edge
  * - the margin above the code, so the arrows show and take their clicks
  */
 .bubbly-monaco > .monaco-editor {
@@ -294,7 +297,7 @@
   translate: calc(-1 * var(--spell-fold-overlap)) 0;
 }
 .bubbly-monaco {
-  --spell-fold-overlap: 8px;
+  --spell-fold-overlap: 1.2px;
   & .monaco-editor .margin {
     z-index: 6;
     overflow: visible;
@@ -302,6 +305,7 @@
     contain: none !important;
   }
   & .monaco-editor .margin .cldr[class*="codicon-folding"] {
-    translate: calc(var(--spell-fold-overlap) / 2);
+    /* 4px left of where Monaco puts it, whatever the editor's move:  centred in the 12px margin */
+    translate: calc(var(--spell-fold-overlap) - 4px);
   }
 }

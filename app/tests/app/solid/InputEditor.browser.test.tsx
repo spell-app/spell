@@ -68,6 +68,15 @@ describe("<InputEditor>", () => {
     expect(two.initialSelection).toBeUndefined()
   })
 
+  test("the code starts 9px down, so its first band's top is 12px under the file tabs (I187)", async () => {
+    setEditor("file", fakeFile("test-project/one.js", "let one = 1\n"))
+    const host = await mount(() => <InputEditor />)
+    const inputEditor = await waitForInputEditor(host)
+    const { monaco } = await import("spell/app/app/solid/monaco")
+    expect(inputEditor.getOption(monaco.editor.EditorOption.padding).top).toBe(9)
+    expect(inputEditor.getTopForLineNumber(1)).toBe(9)
+  })
+
   test("unmounting disposes of the editor;  `editor` forgets it", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const dispose = await mountKept(() => <InputEditor />)

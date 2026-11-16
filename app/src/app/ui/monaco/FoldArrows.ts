@@ -3,9 +3,10 @@ import { monaco } from "./monaco"
 /****************
  * ### `FoldArrows`
  * A press on a fold arrow folds or unfolds its block, wherever the arrow is drawn (epic `editor` I154).
- * - Drawn bubbly, the code starts closer to the pane's edge, and each arrow is drawn half over the code
- *   (`MonacoEditor.css`;  Owen:  "the vscode fold icons can overlap the pills").
- *   Monaco places a press by where it is, not what's under it, so it would take a press on that half as one on the code.
+ * - Drawn bubbly, the code starts closer to the pane's edge than Monaco's fold column is wide, and each arrow is
+ *   drawn where it fits, in the 12px margin before the bands (`MonacoEditor.css`, epic `editor` I187;
+ *   I154 had them half over the pills).
+ *   Monaco places a press by where it is, not what's under it, so it could take a press on an arrow as one on the code.
  * - So this takes every press on an arrow before Monaco does (a capturing listener), and folds through Monaco's own
  *   commands, `editor.fold` / `editor.unfold`:  no caret moves.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
