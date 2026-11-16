@@ -155,6 +155,7 @@ export const APP_TEXTS = {
   draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
+  closeTab: "Close",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftHeading: "Throw away your draft?",

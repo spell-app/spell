@@ -135,8 +135,10 @@ export const EDITOR_NAMES = {
       place: { kind: "value", words: "place", for: "the tab chosen" },
       draftNote: { kind: "value", words: "draft note", for: "the pen's tip" },
       discardWords: { kind: "value", words: "discard words", for: "the tip's Discard changes" },
+      closeWords: { kind: "value", words: "close words", for: "the tab's ✕'s tooltip" },
       show: { kind: "action", words: "show it", for: "a click on the tab" },
-      discard: { kind: "action", words: "discard it", for: "the tip's Discard changes" }
+      discard: { kind: "action", words: "discard it", for: "the tip's Discard changes" },
+      close: { kind: "action", words: "close it", for: "the tab's ✕" }
     }
   },
   FileTabBar: {
