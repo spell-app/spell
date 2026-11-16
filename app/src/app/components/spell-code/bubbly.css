@@ -1983,15 +1983,6 @@
       border-width: 0 0 var(--cmb-rail) var(--cmb-rail);
       border-bottom-left-radius: var(--cmb-foot-corner);
     }
-    /* an HTML block's end tag alone on its line:  the line only as tall as its tiny pill and the paper round it */
-    .cm-line.cmb-foot-line {
-      --cmb-line-height: calc(var(--bubbly-foot-tiny-row) * var(--bubbly-editor-scale));
-      line-height: var(--cmb-line-height);
-    }
-    /* ... CodeMirror's 1em mark beside a spacer from its top, as the pill is:  on the baseline it made the line 2px taller */
-    .cm-line.cmb-foot-line .cm-widgetBuffer {
-      vertical-align: top;
-    }
 
     /****** a head's description, `-- A playing card`:  at its band's right end, the band to the box's edge (Owen) ******/
 
@@ -2244,6 +2235,102 @@
       height: var(--cmb-tag-inner-down);
       background: var(--bubbly-pill);
       clip-path: polygon(0 0, var(--cmb-rail) 0, 100% 100%, 0 100%);
+    }
+
+    /*
+     * a run of HTML end tags alone on their lines, `</>` closing `<toolbar>` then `</>` closing `<segment>`:  ONE row,
+     * a foot for each (`CodeMirrorDecorations.feetRow()`;  Owen, 2026-11-16, epic `language` I132)
+     * - each foot:  its block's rail turning out at a tag's slant, as thick as the rail, then a short bar, then the end
+     *   tag itself, small, in a pill pointed at both ends as a tag in a line is
+     * - nested as Spell's feet (I125):  each one round the one before it, a step below it and a rail further left
+     * - the row on whole pixels, so every line under it starts on one (I114)
+     */
+    /* how far down the rail turns, before its slant;  the slant's height;  the bar after it */
+    --cmb-feet-top: 3px;
+    --cmb-feet-turn: 6px;
+    --cmb-feet-bar: 12px;
+    /* each foot this far below the one before it:  its pill's height and a little paper */
+    --cmb-feet-step: calc(var(--cmb-foot-tiny-height) + 3px);
+    /* paper under the last pill */
+    --cmb-feet-bottom: 4px;
+    /*
+     * - each end tag a block of its own in the row, a step under the one before it:  so CodeMirror, finding the place
+     *   under the pointer from top to bottom, finds each one (placed over the row, the one further left but later in
+     *   the file, a click on the first landed after the second)
+     * - what else is in the row (its indent, CodeMirror's marks beside widgets) takes no room:  no letters of its own
+     */
+    .cm-line.cmb-feet-row {
+      /* on whole pixels:  `--cmb-feet-top` is one, so the rest is too */
+      height: calc(
+        round(
+            calc(
+              var(--cmb-feet-top) + (var(--cmb-feet) - 1) * var(--cmb-feet-step) + var(--cmb-foot-tiny-height) +
+                var(--cmb-feet-bottom)
+            ),
+            1px
+          ) -
+          var(--cmb-feet-top)
+      );
+      /* its padding on top of its height:  room under it (below) adds to the row */
+      box-sizing: content-box;
+      padding-top: var(--cmb-feet-top);
+      font-size: 0;
+      line-height: 0;
+    }
+    /* ... right above a band:  room under it, so the two blocks stand apart (T141), as under a Spell foot */
+    .cm-line.cmb-feet-row.cmb-feet-above-band {
+      padding-bottom: var(--cmb-block-gap);
+    }
+    .cm-line.cmb-feet-row .cmb-tag-foot {
+      /* its tip at its slant, as an inline tag's:  as slanted as a tag's, for its height */
+      --cmb-feet-point: calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope));
+      /* from its rail's left edge to its tip:  the rail, the slant across, the bar */
+      --cmb-feet-reach: calc(var(--cmb-rail) + var(--cmb-feet-turn) * var(--bubbly-tag-slope) + var(--cmb-feet-bar));
+      /* its top:  its step down the row */
+      --cmb-feet-pill-top: calc(var(--cmb-feet-top) + var(--cmb-foot-level) * var(--cmb-feet-step));
+      display: block;
+      width: fit-content;
+      margin: calc(min(var(--cmb-foot-level), 1) * (var(--cmb-feet-step) - var(--cmb-foot-tiny-height))) 0 0
+        calc(
+          var(--cmb-column) * var(--cmb-indent) + var(--cmb-spaces) * var(--cmb-space) + var(--cmb-band-left) +
+            var(--cmb-feet-reach)
+        );
+      padding: 0 calc(var(--cmb-feet-point) + 1px);
+      font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-editor-scale));
+      border-radius: var(--cmb-feet-point) / calc(var(--cmb-foot-tiny-height) / 2);
+      corner-shape: bevel;
+    }
+    .cm-line.cmb-feet-row .cmb-tag-foot:has(> .bubbly-end-bare) {
+      padding-left: calc(var(--cmb-feet-point) + 1px);
+    }
+    /*
+     * ... its rail, from the row's top, turning at the slant into the bar, the bar on to its tip:  one stroke, the rail's
+     * thickness all along, cut square at its joins (`--cmb-feet-across`:  the slant's width across, cut level)
+     */
+    .cm-line.cmb-feet-row .cmb-tag-foot::before {
+      --r: var(--cmb-rail);
+      --slope: var(--bubbly-tag-slope);
+      --h: var(--cmb-feet-turn);
+      --cmb-feet-across: calc(var(--r) * sqrt(1 + var(--slope) * var(--slope)));
+      --e: calc((var(--cmb-feet-across) - var(--r)) / 2);
+      left: auto;
+      right: calc(100% - var(--cmb-feet-point));
+      /* a pixel up into the line above, over its rail's end:  no seam where they meet at a fractional y */
+      top: calc(-1 * var(--cmb-feet-pill-top) - 1px);
+      bottom: auto;
+      z-index: auto;
+      width: calc(var(--cmb-feet-reach) + var(--cmb-feet-point));
+      height: calc(var(--cmb-feet-pill-top) + 1px + var(--cmb-foot-tiny-height) / 2 + var(--r) / 2);
+      clip-path: polygon(
+        0 0,
+        var(--r) 0,
+        var(--r) calc(100% - var(--r) / 2 - var(--h) - var(--e) / var(--slope)),
+        calc(var(--r) / 2 + (var(--h) - var(--r) / 2) * var(--slope) + var(--cmb-feet-across) / 2) calc(100% - var(--r)),
+        100% calc(100% - var(--r)),
+        100% 100%,
+        calc(var(--r) / 2 + (var(--h) + var(--r) / 2) * var(--slope) - var(--cmb-feet-across) / 2) 100%,
+        0 calc(100% - var(--r) / 2 - var(--h) + var(--e) / var(--slope))
+      );
     }
     /*
      * a one-line element with something between its tags:  a line along the top and bottom of their bands between them

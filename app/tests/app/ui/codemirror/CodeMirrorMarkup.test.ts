@@ -60,8 +60,41 @@ describe("CodeMirrorMarkup", () => {
     expect(rails.get("    <title>A demo</title>")).toBe(2)
     expect(rails.get("  </head>")).toBe(2)
     expect(rails.get("  <body>")).toBe(1)
-    expect(rails.get("</html>")).toBe(1)
+    // `</body>` and `</html>`:  one row, `</body>`'s line's, inside both
+    expect(rails.get("  </body>")).toBe(2)
+    expect(rails.get("</html>")).toBeUndefined()
     expect(rails.get("<!doctype html>")).toBeUndefined()
+  })
+
+  test("a run of end tags alone on their lines:  ONE row of feet, nested, the line breaks between them hidden (I132)", () => {
+    const state = EditorState.create({ doc: PAGE })
+    const rows = new Map<string, { classes: string; style: string }>()
+    const feet: Array<{ text: string; style: string }> = []
+    const joins: Array<{ text: string; isAtomic: boolean }> = []
+    eachDecoration(CodeMirrorMarkup.decorationsOf(state), (from, to, spec) => {
+      const style = (spec.attributes as Record<string, string> | undefined)?.style ?? ""
+      const classes = typeof spec.class === "string" ? spec.class : ""
+      if (classes.includes("cmb-feet-row")) rows.set(state.doc.lineAt(from).text, { classes, style })
+      if (classes.includes("cmb-tag-foot")) feet.push({ text: PAGE.slice(from, to), style })
+      if (to > from && PAGE.slice(from, to).includes("\n"))
+        joins.push({ text: PAGE.slice(from, to), isAtomic: !!spec.atomic })
+    })
+    // `</head>` alone:  a row of one foot, room under it before `<body>`'s band (T141);  `</body>` and `</html>`:  one row
+    expect([...rows.keys()]).toEqual(["  </head>", "  </body>"])
+    expect(rows.get("  </head>")!.classes).toContain("cmb-feet-above-band")
+    expect(rows.get("  </head>")!.style).toContain("--cmb-feet: 1")
+    expect(rows.get("  </body>")!.classes).not.toContain("cmb-feet-above-band")
+    expect(rows.get("  </body>")!.style).toContain("--cmb-feet: 2")
+    // the blocks' own rails end in the row:  each foot draws its own
+    expect(rows.get("  </body>")!.style).toContain("--cmb-rail-sizes: 0 0, 0 0")
+    // each foot at its block's rail, the outer one a step down
+    expect(feet.map(({ text, style }) => [text, style])).toEqual([
+      ["</head>", "--cmb-column: 0; --cmb-spaces: 2; --cmb-foot-level: 0"],
+      ["</body>", "--cmb-column: 0; --cmb-spaces: 2; --cmb-foot-level: 0"],
+      ["</html>", "--cmb-column: 0; --cmb-spaces: 0; --cmb-foot-level: 1"]
+    ])
+    // the line break between `</body>` and `</html>` hidden, one step for the caret;  nothing else
+    expect(joins).toEqual([{ text: "\n", isAtomic: true }])
   })
 
   test("a one-line element with something between its tags:  a link between its pills", () => {

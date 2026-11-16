@@ -20,7 +20,9 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  *   - a tag alone on its line, a block's start tag:  a band, its ends pointed (`cmb-tag-band`)
  *   - a start tag over several lines, an attribute on each:  ONE block round them all, its `>` at its right edge
  *     (`cmb-tag-block`, `CodeMirrorMarkup.tagBlocks`)
- *   - a block's body:  a rail on each line (`--cmb-rails`);  its end tag on its own line a tiny pill (`cmb-tag-foot`)
+ *   - a block's body:  a rail on each line (`--cmb-rails`);  its end tag on its own line a foot, its rail turning out
+ *     at a tag's slant into a small pill pointed at both ends, end tags on lines one after another ONE row of feet
+ *     (`cmb-tag-foot`, `cmb-feet-row`;  epic `language` I132)
  *   - a one-line element with something between its tags:  a line along the top and bottom between them
  * - The editor's box is a `.bubbly .bubbly-html` (`EDITOR_CLASSES`), so the look's one sheet, `bubbly.css`, reaches it.
  * - Its position in the import graph:  CodeMirror, the shared marks.
@@ -221,13 +223,10 @@ class MarkupShapes {
     const foot = block.foot === undefined ? undefined : this.marks[block.foot]
     if (foot) {
       this.on(block.foot!, ["cmb-tag-foot", ...hue])
-      // alone on its line:  the line only as tall as its tiny pill and the paper round it, as Monaco's (I113)
+      // alone on its line:  a foot, on one row with the end tags alone on the lines round it (I132)
       const line = doc.lineAt(foot.start)
-      if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end)) {
-        this.decorations.line(foot.start, inside, ["cmb-foot-line"])
-        // its own rail ends at the foot's top, as Monaco's did (I114):  the foot draws the bit above it, and its corner
-        this.decorations.endRail(foot.start, inside.length - 1)
-      }
+      if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end))
+        this.decorations.footAlone(foot, inside)
     }
 
     this.draw(block.inside, inside)
@@ -333,6 +332,8 @@ export class CodeMirrorDecorations {
    * `ended`, those not drawn in it at all:  an HTML block's own, in its foot's row.
    */
   private readonly lines = new Map<number, LineDecoration>()
+  /** The end tags alone on their lines, drawn as feet (`footAlone()`). */
+  private readonly feet: FootAlone[] = []
 
   /**
    * - `hiddenIndent`:  the characters of indent hidden at each line's start, a slice shown dedented (`<CodeSlice>`):
@@ -448,6 +449,76 @@ export class CodeMirrorDecorations {
   }
 
   /**
+   * `foot`, an HTML block's end tag alone on its line, inside the blocks `rails` holds, its own the last:
+   * drawn as a foot, on one row with the end tags alone on the lines round it (`feetRow()`;  epic `language` I132).
+   */
+  footAlone(foot: { start: number; end: number }, rails: Rail[]): void {
+    this.feet.push({ start: foot.start, end: foot.end, rails })
+  }
+
+  /** Each run of end tags alone on lines one after another:  one row of feet (`feetRow()`). */
+  private feetRows() {
+    const { doc } = this.state
+    const feet = [...this.feet].sort((one, other) => one.start - other.start)
+    const lineOf = (foot: FootAlone) => doc.lineAt(foot.start).number
+    for (let first = 0; first < feet.length;) {
+      let last = first
+      while (feet[last + 1] && lineOf(feet[last + 1]!) === lineOf(feet[last]!) + 1) last++
+      this.feetRow(feet.slice(first, last + 1))
+      first = last + 1
+    }
+  }
+
+  /**
+   * A run of end tags alone on lines one after another (`</>` closing `<toolbar>`, then `</>` closing `<segment>`):
+   * their lines drawn as ONE row, a foot for each (Owen, 2026-11-16;  epic `language` I132)
+   * - each end tag the file's own text, drawn small in a pill pointed at both ends, at the end of its block's foot:
+   *   its rail turning out at a tag's slant, then a short bar (`.cmb-feet-row`, `bubbly.css`)
+   * - the feet nested as Spell's (I125):  each one round the one before it, below it and a rail further left
+   * - the line breaks between them hidden, so the caret, a click and Delete reach each end tag as before
+   * - its blocks' rails end in it:  each foot draws its own, down to its turn
+   * - right above a band:  room under it, so the two blocks stand apart, as under a Spell foot (T141)
+   */
+  private feetRow(run: FootAlone[]) {
+    const { doc } = this.state
+    const row = doc.lineAt(run[0]!.start)
+    const rails = run.reduce((most, foot) => (foot.rails.length > most.length ? foot.rails : most), run[0]!.rails)
+    const classes = ["cmb-feet-row"]
+    if (this.isBandAt(doc.lineAt(run.at(-1)!.end).to + 1)) classes.push("cmb-feet-above-band")
+    this.line(row.from, rails, classes)
+    const rowDecoration = this.decorationOf(row.from)
+    rowDecoration.feet = run.length
+    for (const [level, foot] of run.entries()) {
+      // a line joined to the row:  its own decoration not drawn, a rail stopping short in it (a Spell foot's under it) the row's
+      const line = doc.lineAt(foot.start).from
+      if (level) {
+        for (const rail of this.lines.get(line)?.stopped ?? []) rowDecoration.stopped.add(rail)
+        this.lines.delete(line)
+      }
+      const rail = foot.rails.length - 1
+      const { tabs, spaces } = foot.rails[rail]!
+      this.endRail(row.from, rail)
+      this.mark(foot.start, foot.end, [], {
+        style: `--cmb-column: ${tabs}; --cmb-spaces: ${spaces}; --cmb-foot-level: ${level}`
+      })
+      const next = run[level + 1]
+      // the line break to the next one hidden, one step for the caret
+      if (next) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
+    }
+  }
+
+  /** Does a band start the line `at` is on, a block's start tag or a Spell declaration's head? */
+  private isBandAt(at: number): boolean {
+    if (at > this.state.doc.length) return false
+    const { from, to } = this.state.doc.lineAt(at)
+    for (const [range, { classes }] of this.marks) {
+      const start = Number(range.split(":")[0])
+      if (start >= from && start <= to && (classes.has("cmb-band") || classes.has("cmb-band-open"))) return true
+    }
+    return false
+  }
+
+  /**
    * How far in the line `at` is on is `at`, as shown:  its tabs and spaces, which a rail starts at.
    * - less a slice's hidden indent, which isn't drawn
    */
@@ -459,6 +530,7 @@ export class CodeMirrorDecorations {
 
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
+    this.feetRows()
     const ranges = [...this.ranges]
     const marks = [...this.marks].map(([range, mark]) => {
       const [start, end] = range.split(":").map(Number) as [number, number]
@@ -495,18 +567,26 @@ export class CodeMirrorDecorations {
       const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd })
       ranges.push(mark.range(start, end))
     }
-    for (const [from, { classes, rails, stopped, ended }] of this.lines) {
+    for (const [from, { classes, rails, stopped, ended, feet }] of this.lines) {
       const innermost = rails.at(-1)
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
-      const attributes: Record<string, string> = rails.length ? { style: railsStyle(rails, stopped, ended) } : {}
+      const styles = rails.length ? [railsStyle(rails, stopped, ended)] : []
+      if (feet) styles.push(`--cmb-feet: ${feet}`)
+      const attributes: Record<string, string> = styles.length ? { style: styles.join("; ") } : {}
       ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(from))
     }
     return Decoration.set(ranges, true)
   }
 }
 
-/** A line's decoration being made:  its classes, the rails of the blocks round it, which of them stop short or end. */
-type LineDecoration = { classes: Set<string>; rails: Rail[]; stopped: Set<number>; ended: Set<number> }
+/**
+ * A line's decoration being made:  its classes, the rails of the blocks round it, which of them stop short or end;
+ * `feet`, how many feet it draws, a row of them (`CodeMirrorDecorations.feetRow()`).
+ */
+type LineDecoration = { classes: Set<string>; rails: Rail[]; stopped: Set<number>; ended: Set<number>; feet?: number }
+
+/** An HTML block's end tag alone on its line:  where it is, the rails of the blocks round it, its own the last. */
+type FootAlone = { start: number; end: number; rails: Rail[] }
 
 /** How far in a line's words start:  its tabs, then its spaces. */
 export type Indent = { tabs: number; spaces: number }
@@ -713,9 +793,40 @@ class SpacerWidget extends WidgetType {
     const edge = room.getBoundingClientRect()
     if (quote?.matches(".cmb-quote"))
       return caretAt(outsideOf(quote as HTMLElement, isBefore ? "before" : "after"), letter)
-    // a pill's room inside it:  at its words' edge, where a letter typed goes
-    if (room.matches(".bubbly-input-spacer")) return caretAt(isBefore ? letter.left : letter.right, letter)
+    // a pill's room inside it:  at its words' edge, where a letter typed goes;
+    // an end tag's in a row of feet too:  the room's left in the row, its tag a block of its own (I132)
+    if (room.matches(".bubbly-input-spacer") || room.closest(".cmb-feet-row"))
+      return caretAt(isBefore ? letter.left : letter.right, letter)
     return caretAt(isBefore ? edge.right : edge.left, letter)
+  }
+
+  ignoreEvent(): boolean {
+    return false
+  }
+}
+
+/****************
+ * ### `FeetJoinWidget`
+ * The line break, and the next line's indent, hidden between two end tags in a row of feet
+ * (`CodeMirrorDecorations.feetRow()`;  epic `language` I132):  nothing drawn, one step for the caret.
+ * - The caret beside it stands at the end tag beside it, not at the row's left, where its empty box is.
+ ****************/
+class FeetJoinWidget extends WidgetType {
+  /** The hiding decoration:  `atomic`, so `CodeMirrorRelayout` makes it one step for the caret. */
+  static readonly decoration = Decoration.replace({ widget: new FeetJoinWidget(), atomic: true })
+
+  eq(): boolean {
+    return true
+  }
+
+  toDOM(): HTMLElement {
+    return document.createElement("span")
+  }
+
+  /** `pos` 0, before it:  after the end tag above;  else before the end tag below. */
+  coordsAt(join: HTMLElement, pos: number): Rect | null {
+    const letter = letterBeside(join, pos === 0 ? "before" : "after")
+    return letter ? caretAt(pos === 0 ? letter.right : letter.left, letter) : null
   }
 
   ignoreEvent(): boolean {
