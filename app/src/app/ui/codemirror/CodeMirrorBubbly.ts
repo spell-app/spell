@@ -90,6 +90,8 @@ class BubblyDecorations {
   private readonly tags: Array<{ start: number; end: number }> = []
   /** The feet under each line end, by where it is, innermost first:  as they stack. */
   private readonly feet = new Map<number, FootWidget[]>()
+  /** Where each line with a band starts. */
+  private readonly bandLines = new Set<number>()
 
   constructor(
     private readonly state: EditorState,
@@ -108,6 +110,8 @@ class BubblyDecorations {
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     this.nodes(this.drawing.nodes, [])
+    // a band right under a foot:  room between the two blocks (T141)
+    for (const [at, feet] of this.feet) if (this.bandLines.has(at + 1)) feet.at(-1)!.isAboveBand = true
     return this.decorations.build()
   }
 
@@ -178,6 +182,7 @@ class BubblyDecorations {
       // a body opening with a group:  the group's band hangs on the rail right under this one, so no inside corner (I119)
       if (hasBody && opensWithGroup(block)) band.push("cmb-band-opens-group")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
+      this.bandLines.add(this.state.doc.lineAt(head.start).from)
     }
     if (!hasBody) return
     // a block the slice cuts:  its body drawn, its rail not
@@ -500,6 +505,9 @@ function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
  *   - a row with another foot under it is as tall as their rails are apart across (`drop`), so each foot is that far
  *     below the one above it
  *   - the last row takes the rest, so the line under the stack starts on a whole pixel, as under one foot (I114)
+ * - Right above a band, the last row has room under its foot (`--cmb-block-gap`), so the two blocks stand apart
+ *   (Owen:  "add some space between the pill blocks";  T141):  in the foot's row, not the band's line,
+ *   so the band's fold arrow stays centred on it, and a click there lands where a click on the foot does.
  * - A group's foot is in its parent's hue:  it turns out of the rail the group hangs on, its parent's, drawn over its own.
  ****************/
 class FootWidget extends WidgetType {
@@ -526,12 +534,16 @@ class FootWidget extends WidgetType {
   /** The tabs the rows above it in its stack take. */
   dropsAbove = 0
 
+  /** Is the next line a band:  then its row has room under the foot, so the two blocks stand apart (T141). */
+  isAboveBand = false
+
   eq(other: FootWidget): boolean {
     return (
       other.column === this.column &&
       other.partOfSpeech === this.partOfSpeech &&
       other.drop === this.drop &&
       other.dropsAbove === this.dropsAbove &&
+      other.isAboveBand === this.isAboveBand &&
       other.style === this.style
     )
   }
@@ -541,6 +553,7 @@ class FootWidget extends WidgetType {
     row.className = "cmb-foot-row"
     row.style.cssText = this.style
     if (this.drop) row.classList.add("cmb-foot-over")
+    if (this.isAboveBand) row.classList.add("cmb-foot-above-band")
 
     const foot = document.createElement("div")
     foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}`

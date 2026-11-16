@@ -1888,6 +1888,18 @@
     .cmb-foot-row.cmb-foot-over {
       height: calc(var(--cmb-foot-drop-tabs) * var(--cmb-indent));
     }
+    /*
+     * ... the last one, right above a band:  room under its foot, so the two blocks stand apart, the rails round them
+     * running on through it (Owen:  "add some space between the pill blocks";  T141)
+     * - `--cmb-block-gap`:  a blank line's height on the page at the editor's size, on whole pixels (8px), so the
+     *   lines under it start on one
+     */
+    --cmb-block-gap: round(calc(var(--bubbly-gap-height) * var(--bubbly-editor-scale)), 1px);
+    .cmb-foot-row.cmb-foot-above-band {
+      /* on top of its height (the page's sizing counts padding in it) */
+      box-sizing: content-box;
+      padding-bottom: var(--cmb-block-gap);
+    }
     .cmb-foot {
       position: absolute;
       top: var(--cmb-foot-drop);
