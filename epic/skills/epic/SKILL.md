@@ -521,7 +521,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
 - Everything longer goes to a NAMED background agent, as the root `CLAUDE.md`'s "Delegated work" says:
   a phase, an item's fix, a check run, Add Details, a revisit now.
   - `epic agents add <name> "<task>" --files <path,...>`, then the `Agent` call, its full name first in its
-    description;  `epic agents done <name>` when it's back
+    description;  then AT ONCE `epic agents set <name> --task-id <the agent's id>`, the id from the `Agent` result
+    (what resumes it after a restart, "After a restart" below);  `epic agents done <name>` when it's back
   - In Codex:  no background agents:  do it here, one item at a time, and check `epic inbox <epic>` between steps.
 - Several agents share ONE worktree, so its brief tells each one to:
   - claim the files it will change, as it starts (`--files`) or as it finds them
@@ -540,6 +541,23 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
 - `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
   each saying who has it while it waits.
+
+### After a restart
+
+A restart of VS Code (or a window reload) ends every background agent with the session that started them, and the
+session's own `epic inbox wait` (epic `epic-engine` I310;  Owen, 2026-11-15:  `mockup` sat idle an hour on four
+cut-off agents, "it should have restarted automatically").
+- The plugin's `SessionStart` hook wakes the session at once (`hooks/restarted.mjs`, `RestartWake`) with a `📬` line
+  naming each agent still listed that the restart cut off, its id and its task.
+- Woken so, before anything else:
+  - resume each agent with `SendMessage` to its id (its work and transcript are saved);  tell it it was cut off, to
+    check what it already committed, and to finish
+  - one with no id:  start it again from its task, `Agent` with the same name and brief, then `epic agents set
+    <name> --task-id <its new id>`
+  - start `epic inbox wait <epic>` again, in the background
+  - then one line to the person:  "the restart cut off N agents:  resumed <names>"
+- No agents listed:  no wake.  The inbox poller's own hook listens again by itself.
+- In Codex:  no background agents to cut off:  `epic guide` says to start the epic's open items again from the page.
 
 ## 5. Each phase
 
