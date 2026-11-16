@@ -1614,13 +1614,22 @@
      *   (`CodeMirrorMarkup.tabStops`);  a guess till then
      */
     --cmb-indent: 8.44px;
-    /* room before a line's words:  a top-level band's round end 12px in, clear of the fold arrows over the first 8px */
-    --cmb-line-pad: calc(12px + var(--cmb-band-inset));
+    /*
+     * room before a line's words:  a top-level band's round end 12px in, clear of the fold arrows over the first 8px;
+     * so a top-level line's words start `--cmb-band-left` before that
+     */
+    --cmb-line-pad: calc(12px - var(--cmb-band-left));
+    /*
+     * where a band starts, and its rail, from its line's indent:  half a rail before its body's lines start, so the
+     * caret at the start of a body line stands in the middle of the rail it hangs on (Owen:  "slide the expanded pills
+     * over so the cursor is right in the center of the gutter line";  epic `language` I131)
+     * - a body's words, and its tags' `⟨`s (`.cmb-tag-start`), start right at the line's indent
+     */
+    --cmb-band-left: calc(var(--cmb-indent) - var(--cmb-rail) / 2);
 
     /*
-     * a band starts this far left of its line's indent, and its rail there:  the page's, at the editor's size (2.81px)
-     * - a head's words a tab further in, on its band (`--bubbly-pill-left-shift`'s place), so they line up with its
-     *   body's lines, a tab in from the line's indent, as Monaco drew them (I113)
+     * the room on a band before its words, less a tab:  the page's, at the editor's size (2.81px)
+     * - a head's words a tab further in, on its band (`--bubbly-pill-left-shift`'s place), as Monaco drew them (I113)
      */
     --cmb-band-inset: calc(var(--bubbly-pill-pad-left) * var(--bubbly-editor-scale));
     /* a rail's width, a foot's height */
@@ -1702,6 +1711,14 @@
       background-repeat: no-repeat;
     }
     /*
+     * a line in no block, with no band of its own (a top-level comment, an Inspector's box of a body alone):
+     * its words just in from where a top-level band's round end is, as before the rails moved under the caret (I131),
+     * not out at the edge of the box
+     */
+    .cm-line:not([style*="--cmb-rails"]):not(:has(.cmb-band, .cmb-tag-band.cmb-band-open)) {
+      padding-left: calc(var(--cmb-line-pad) + var(--cmb-band-left) + var(--cmb-band-inset));
+    }
+    /*
      * a band's words, a tag's, and those between a one-line element's tags:  a pixel up off their band's own line,
      * so their small letters are in its middle (Owen, I114:  "move text up one pixel");  their band stays where it is
      * - the browser puts text on whole pixels:  any lift from about 0.9px to 1.9px moves it one, so the middle of that
@@ -1722,8 +1739,13 @@
           var(--cmb-words-lift)
       );
     }
+    /*
+     * the caret's middle right on its place, so at a body line's start it's in the middle of the rail (I131):  a whole
+     * pixel wide, as the browser draws CodeMirror's 1.2px, but half of it each side, not 0.6px before and 0.4px after
+     */
     .cm-cursor {
-      border-left-color: var(--bubbly-bold-ink);
+      border-left: 1px solid var(--bubbly-bold-ink);
+      margin-left: -0.5px;
     }
 
     /*
@@ -1805,8 +1827,8 @@
        */
       vertical-align: top;
       margin-top: var(--cmb-band-margin);
-      /* its round end left of its line's indent, its rail there;  its words a tab in, over its body's lines */
-      margin-left: calc(-1 * var(--cmb-band-inset));
+      /* its round end where its body's lines start, less half a rail, its rail there;  its words a tab further in */
+      margin-left: var(--cmb-band-left);
       padding: 0 var(--bubbly-pill-pad-right) calc(2 * var(--cmb-words-lift))
         calc(var(--cmb-band-inset) + var(--cmb-indent));
       border-radius: var(--bubbly-pill-radius);
@@ -1815,7 +1837,7 @@
     }
     /* a group's:  a tab further out, on its parent's rail, its words where they'd be (`CodeMirrorBubbly`) */
     .cmb-band.cmb-band-hung {
-      margin-left: calc(-1 * (var(--cmb-band-inset) + var(--cmb-indent)));
+      margin-left: calc(var(--cmb-band-left) - var(--cmb-indent));
       padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
     }
     /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line, round its inside corner */
@@ -1921,7 +1943,7 @@
       position: absolute;
       top: var(--cmb-foot-drop);
       left: calc(
-        var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) - var(--cmb-band-inset) + var(--cmb-foot-corner)
+        var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) + var(--cmb-band-left) + var(--cmb-foot-corner)
       );
       width: calc(var(--bubbly-foot-width) * var(--bubbly-editor-scale) - var(--cmb-foot-corner));
       height: var(--cmb-rail);
@@ -1955,8 +1977,8 @@
     .cmb-band-described {
       box-sizing: border-box;
       width: calc(
-        100cqw - var(--cmb-gutter-width) - var(--cmb-line-pad) - var(--cmb-column, 0) * var(--cmb-indent) +
-          var(--cmb-band-inset) - 16px
+        100cqw - var(--cmb-gutter-width) - var(--cmb-line-pad) - var(--cmb-column, 0) * var(--cmb-indent) -
+          var(--cmb-band-left) - 16px
       );
       max-width: none;
       padding-right: 14px;
@@ -2062,6 +2084,13 @@
       corner-shape: bevel;
       white-space: pre;
     }
+    /*
+     * a start tag's `⟨` right at its pill's left end, so the caret before it, at a body line's start, stands where its
+     * rail is (epic `language` I131;  it was a bracket's 0.5px in)
+     */
+    .cmb-tag-start {
+      padding-left: 0;
+    }
     /* a tag that declares the member it draws:  round (epic `editor` I84) */
     .cmb-tag-round {
       border-radius: calc(var(--bubbly-pill-height) / 2);
@@ -2073,7 +2102,7 @@
      */
     .cmb-tag-band.cmb-band-open {
       position: relative;
-      margin-left: calc(-1 * var(--cmb-band-inset));
+      margin-left: var(--cmb-band-left);
       padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
       border-bottom-left-radius: 0;
     }
@@ -2103,7 +2132,7 @@
       /* its `⟨` just past its rail, as Monaco's */
       padding: 0 var(--bubbly-foot-tiny-pad-right) 0 calc(var(--bubbly-foot-tiny-pad-left) * var(--bubbly-editor-scale));
       margin-top: calc((var(--cmb-line-height) - var(--cmb-foot-tiny-height)) / 2);
-      margin-left: calc(-1 * var(--cmb-band-inset));
+      margin-left: var(--cmb-band-left);
       border-radius: 0 calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--bubbly-foot-tiny-cut) * var(--bubbly-editor-scale)) / 0 calc(var(--cmb-foot-tiny-height) / 2)
