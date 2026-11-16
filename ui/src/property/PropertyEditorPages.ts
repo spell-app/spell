@@ -20,7 +20,7 @@ import { PropertySchemas } from "./PropertySchemas"
  * - `write()`:  a schema's default page, one property per attribute, in order.
  * - `check()`:  what's wrong with a page, against its schema as it is now.
  *   - a property the page names that the schema dropped
- *   - an attribute of the schema the page doesn't name
+ *   - an attribute of the schema the page doesn't name, nor leaves out (`data-omit`)
  *   - a control (`as`) that no longer fits its type (`select` for a value that has no choices any more)
  * - `compile()`:  the page as ONE javascript module defining `<card-editor>` (epic `property-editor` P7).
  *   - Its layout and schema are inlined, so it needs Spell UI's property editor and nothing else:
@@ -51,7 +51,8 @@ export class PropertyEditorPages {
   /** What's wrong with the page whose editor is `editor`, against `schema`;  `[]` when nothing is. */
   static check(editor: Element, schema: V.PropertySchema): PageProblem[] {
     const problems: PageProblem[] = []
-    const named = new Set<string>()
+    // left out on purpose (`data-omit`, as a Spell UI tag's layout writes it):  never missing
+    const named = new Set<string>((editor.getAttribute("data-omit") ?? "").split(/\s+/).filter(Boolean))
     for (const property of editor.querySelectorAll(PROPERTY_TAG)) {
       const name = property.getAttribute("name") ?? ""
       named.add(name.split(".")[0]!)

@@ -191,6 +191,8 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
+    /* in a grid (a property editor's), a whole row of it;  elsewhere nothing */
+    grid-column: 1 / -1;
     margin: 0 calc(var(--_ui-form-gutter, var(--ui-form-gutter, 1em)) / -2)
       var(--_ui-form-row-distance, var(--ui-form-row-distance, 1em));
   }
