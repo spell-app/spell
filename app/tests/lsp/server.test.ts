@@ -60,7 +60,7 @@ describe("spell language server over stdio", () => {
       hoverProvider: true,
       documentFormattingProvider: true,
       signatureHelpProvider: { triggerCharacters: [" "] },
-      codeActionProvider: { codeActionKinds: ["quickfix"] },
+      codeActionProvider: { codeActionKinds: ["quickfix", "refactor.rewrite"] },
       semanticTokensProvider: { full: { delta: true }, range: true }
     })
     await connection.sendNotification("initialized", {})

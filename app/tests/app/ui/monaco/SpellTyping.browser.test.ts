@@ -173,6 +173,78 @@ describe("typing Spell in a real Monaco editor", () => {
     })
   })
 
+  describe("Enter before a comment after code (I155, I161), and at a line's end (I160)", () => {
+    /** Press Enter, no modifier, in the editor's text area, as the keyboard does. */
+    const pressEnter = () => {
+      const area = editor!.getDomNode()!.querySelector("textarea")!
+      const key = { key: "Enter", code: "Enter", bubbles: true, cancelable: true }
+      if (!area.dispatchEvent(new KeyboardEvent("keydown", key))) return
+      // typed in:  only the editor that has the keyboard helps (I150)
+      editor!.focus()
+      editor!.trigger("keyboard", "type", { text: "\n" })
+    }
+    /** Once the helps a keystroke sets off are in:  they wait for its own edit. */
+    const helped = () => new Promise((resolve) => setTimeout(resolve))
+    /** Solitaire's card's `face`, its comment after its head. */
+    const FACE = [
+      `\tits "face" is\t\t\t-- the card it draws`,
+      `\t\tits card if its card exists`,
+      `\t\ta new card whose rank is its rank and suit is its suit otherwise`,
+      `\tits "color" is`
+    ]
+
+    test("the comment goes at its body's level, no tabs left at the end of the head;  one undo", async () => {
+      const code = editorOf(FACE, 1, 18)
+      pressEnter()
+      await helped()
+      expect(code.getValue().split("\n")).toEqual([`\tits "face" is`, `\t\t-- the card it draws`, ...FACE.slice(1)])
+      expect(code.getPosition()).toMatchObject({ lineNumber: 2, column: 3 })
+      void code.getModel()!.undo()
+      expect(code.getValue().split("\n")).toEqual(FACE)
+    })
+
+    test("with the caret before the tabs too:  the comment still at its body's level", async () => {
+      const code = editorOf(FACE, 1, 15)
+      pressEnter()
+      await helped()
+      expect(code.getValue().split("\n").slice(0, 2)).toEqual([`\tits "face" is`, `\t\t-- the card it draws`])
+    })
+
+    test("Tab on the comment line moves it alone;  Shift+Tab takes it back", async () => {
+      const lines = [`\tits "face" is`, `\t\t-- the card it draws`, ...FACE.slice(1)]
+      const code = editorOf(lines, 2, 3)
+      const area = code.getDomNode()!.querySelector("textarea")!
+      const press = (shiftKey: boolean) =>
+        area.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Tab", code: "Tab", shiftKey, bubbles: true, cancelable: true })
+        )
+      area.focus()
+      // left to Monaco:  its Tab indents the line the caret's on
+      expect(press(false)).toBe(true)
+      code.trigger("keyboard", "tab", null)
+      expect(code.getValue().split("\n")).toEqual([lines[0], `\t\t\t-- the card it draws`, ...lines.slice(2)])
+      expect(press(true)).toBe(true)
+      code.trigger("keyboard", "outdent", null)
+      expect(code.getValue().split("\n")).toEqual(lines)
+    })
+
+    test("any Enter takes the tabs and spaces before the caret off the line's end, in the same undo step", async () => {
+      const code = editorOf([`\tits "rank" is 1 \t`, `\tits "suit" is`], 1, 19)
+      pressEnter()
+      await helped()
+      expect(code.getValue().split("\n")).toEqual([`\tits "rank" is 1`, `\t`, `\tits "suit" is`])
+      void code.getModel()!.undo()
+      expect(code.getValue().split("\n")).toEqual([`\tits "rank" is 1 \t`, `\tits "suit" is`])
+    })
+
+    test("only what's before the caret:  the spaces after it go with the rest to the new line", async () => {
+      const code = editorOf([`its "x" is  1`], 1, 12)
+      pressEnter()
+      await helped()
+      expect(code.getValue().split("\n")).toEqual([`its "x" is`, ` 1`])
+    })
+  })
+
   describe("Enter after an opening tag (I65)", () => {
     const enter = () => editor!.trigger("keyboard", "type", { text: "\n" })
 

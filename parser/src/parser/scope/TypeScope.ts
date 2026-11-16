@@ -517,9 +517,11 @@ export class TypeScope extends BlockScope {
    * - REPLACES a property of that name another statement declared, journaled,
    *   e.g. one auto-declared by `set the pile of the card to ...`
    * - Ours from an earlier parse of the same statement:  ours again, as `declareProperty()`.
+   * - `name`:  another member the statement gives, also naming one of us, e.g. `last pile`, the pile a card left
+   *   (epic `language` P56):  read-only too.
    */
-  declareOwnerMember(itemType: TypeScope, declaredBy: P.Match): void {
-    const name = P.instanceCase(this.runtimeName ?? this.name)
+  declareOwnerMember(itemType: TypeScope, declaredBy: P.Match, name = this.ownerMemberName): void {
+    const lastOwner = name !== this.ownerMemberName || undefined
     const existing = itemType.variables.get(name, "LOCAL_ONLY")
     if (existing && existing.declaredBy === declaredBy) return
     if (existing?.exclusive && TypeScope.sameStatement(existing.declaredBy, declaredBy)) {
@@ -533,13 +535,18 @@ export class TypeScope extends BlockScope {
       return
     }
     // only what's there:  a declaration writes out what a record holds
-    const props: P.ScopeVariableProps = { name, datatype: this.name, exclusive: true, declaredBy }
+    const props: P.ScopeVariableProps = { name, datatype: this.name, exclusive: true, lastOwner, declaredBy }
     if (!existing) {
       itemType.variables.add(props)
       return
     }
     const [replaced] = itemType.variables.replace(props)
     P.ScopeList.noteDeclared(replaced)
+  }
+
+  /** The member naming us on a type that belongs to one of us, e.g. `pile` on `Card`:  `declareOwnerMember()`. */
+  get ownerMemberName(): string {
+    return P.instanceCase(this.runtimeName ?? this.name)
   }
 
   /**

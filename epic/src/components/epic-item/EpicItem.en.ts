@@ -104,7 +104,9 @@ export const epicItemVocabulary = {
       description:
         "TAKEN UP IN A PHASE (epic `epic-engine` I128):  the phase that fixed or did it (`p-fix-open-issues`), set " +
         "when an issue or todo is closed while that phase is active, or when a done phase's text links it " +
-        "(`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state."
+        "(`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state.  " +
+        "A FINISHED item (done, canceled, decided) draws no pill for it, its id chip's tooltip naming the phase " +
+        "instead (epic `epic-engine` I307)."
     },
     {
       name: "changed",
@@ -335,7 +337,13 @@ export const epicItemVocabulary = {
       description:
         "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic " +
         "`epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that " +
-        "fixed or did it."
+        "has it, while the item is still to finish (I307)."
+    },
+    {
+      name: "done-in",
+      description:
+        "With `taken-in` on a finished item (done, canceled, decided):  a grey `done in P20` at its line's end, where " +
+        "its plane was, linking the phase it was done in (epic `epic-engine` J231)."
     },
     {
       name: "git",
@@ -425,6 +433,16 @@ export const epicItemVocabulary = {
       description: "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
     },
     { key: "handledIn", text: "in {phase}", description: "Its line's link to the phase that handled it:  `in P4`." },
+    {
+      key: "doneIn",
+      text: "done in {phase}",
+      description: "A finished item's link to the phase it was done in, where its plane was:  `done in P20` (J231)."
+    },
+    {
+      key: "donePillTip",
+      text: "Click:  go to {phase}.",
+      description: "The `done in P20` pill's tooltip's second line (epic `epic-engine` J231)."
+    },
     {
       key: "handledTip",
       text: "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",

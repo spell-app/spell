@@ -78,8 +78,18 @@ class Card(TwoSidedView):
     def draw_back(self) -> Element:
         return h("test-project-card-image", {"direction": "down", "part": "back"})
 
+    def put_on_pile(self, pile: Pile) -> None:
+        """The card, and every card on it, onto the pile, if the piles' rules let it go and take it"""
+        # - refused, nothing moves, and there's nothing to undo
+        # - a game adds its own steps after it:  `after putting a card on a pile`
+        assert self.pile is not None
+        if (not core.can_give_up(self.pile, self)) or (not core.can_take(pile, self)):
+            core.cancel()
+        for card in self.pile.starting_with(self):
+            core.move(card, pile)
+
     @property
-    def is_on_top(self) -> bool:
+    def is_on_top_of_its_pile(self) -> bool:
         """the card the next one goes on"""
         assert self.pile is not None
         return self == self.pile.last_item
@@ -91,31 +101,20 @@ class Card(TwoSidedView):
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
                 return False
-            return await self.put_on_pile(end_pile)
+            return self.put_on_pile(end_pile)
 
-    async def put_on_pile(self, pile: Pile) -> bool:
-        """the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved"""
-        # - the pile it left turns its new last card up;  the move counts, and scores
-        start_pile = self.pile
-        assert start_pile is not None
-        if not core.can_give_up(start_pile, self):
-            return False
-        if not core.can_take(pile, self):
-            return False
-        points = self.count_the_points_for_card_on_pile(pile)
-        for card in start_pile.starting_with(self):
-            core.move(card, pile)
-        if isinstance(start_pile, Column) and (start_pile):
-            await core.pause_for(200, "msec")
-            start_pile.last_item.turn_face_up()
-        solitaire.score = solitaire.score + points
-        return True
+    def after_put_on_pile(self, pile: Pile) -> None:
+        """The move scores;  the column it left turns its new last card face up"""
+        solitaire.score = solitaire.score + self.the_points_for_card_on_pile(pile)
+        it_2 = self.last_pile
+        if isinstance(it_2, Column) and (it_2):
+            it_2.last_item.turn_face_up()
 
-    def count_the_points_for_card_on_pile(self, pile: Pile) -> float:
-        """what the move scores:  10 on a foundation, 5 from the discard pile, else nothing"""
+    def the_points_for_card_on_pile(self, pile: Pile) -> float:
+        """What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing"""
         if isinstance(pile, Foundation):
             return 10
-        if self.pile == solitaire.discard_pile:
+        if self.last_pile == solitaire.discard_pile:
             return 5
         return 0
 
@@ -130,10 +129,15 @@ class Card(TwoSidedView):
         """a card is in one pile at a time:  putting it on another pile takes it off this one"""
         return Pile.owner_of(self)
 
+    @property
+    def last_pile(self) -> Any:
+        return Pile.last_owner_of(self)
 
+
+core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card", "cancels": True})
 core.describe_action(Card, "play", {"title": "Play Card", "undone_as": "Play Card"})
-core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card"})
-core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count the Points for Card on Pile", "undone_as": "Count the Points for Card on Pile"})
+core.add_after_hook(Card, "put_on_pile", {"hook": "after_put_on_pile"})
+core.describe_action(Card, "the_points_for_card_on_pile", {"title": "The Points for Card on Pile", "undone_as": "The Points for Card on Pile"})
 # It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 # Ace is low:  ace = 1 ... king = 13
@@ -327,14 +331,12 @@ class Pile(ViewableList):
 
     @property
     def color(self) -> str:
-        """Its last card's:  what the next card goes on"""
         if not self:
             return "none"
         return self.last_item.color
 
     @property
     def value(self) -> float:
-        """Its last card's"""
         if not self:
             return 0
         return self.last_item.value
@@ -347,8 +349,9 @@ class Pile(ViewableList):
             summary = f"{summary} {card.short_name}"
         return summary
 
-    async def when_card_dropped_on(self, card: Card) -> None:
-        await card.put_on_pile(self)
+    def when_card_dropped_on(self, card: Card) -> None:
+        """put the card on the pile, if it is a legal move"""
+        card.put_on_pile(self)
 
     droppable = True
 
@@ -512,17 +515,14 @@ class Foundation(Pile):
         return False
 
     def draw_its_placeholder(self) -> Element:
-        """a light grey ace of its suit, face up"""
+        # a light grey ace of its suit, face up
         return h(
             "test-project-card-image",
             {"rank": "ace", "prop:suit": self.suit, "part": "placeholder"},
         )
 
     def can_take(self, card: Card) -> bool:
-        assert card.pile is not None
-        if card != card.pile.last_item:
-            return False
-        return self.suit == card.suit and self.value + 1 == card.value
+        return self.suit == card.suit and self.value == card.value - 1 and card.is_on_top_of_its_pile
 
     droppable = True
 
@@ -576,9 +576,9 @@ class Solitaire(App):
                     core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
                     h("spacer"),
-                    core.draw_action(self, "undo", {"icon-only": True, "in-menu": True}),
-                    core.draw_action(self, "redo", {"icon-only": True, "in-menu": True}),
-                    h("ui-text", {"slot": "right"}, "Score ", self.score),
+                    core.draw_action(self, "undo", {"in-menu": True}),
+                    core.draw_action(self, "redo", {"in-menu": True}),
+                    h("ui-text", {"slot": "right"}, "Score: ", self.score),
                 ),
             ),
             h(
@@ -601,7 +601,14 @@ class Solitaire(App):
             ),
             core.draw_context_menu(
                 self,
-                ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                [
+                    "auto_play",
+                    "cheat",
+                    "restart_the_game",
+                    "-",
+                    ["undo", {"icon-only": True}],
+                    ["redo", {"icon-only": True}],
+                ],
             ),
         ]
 
@@ -734,8 +741,6 @@ core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts":
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
 
 # play the card on click if it is a legal move
-
-# drop the card on the pile if it is a legal move
 
 ##############
 # ## The piles

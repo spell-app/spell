@@ -91,6 +91,7 @@ export type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: mona
  */
 export type SpacerKind =
   | "input"
+  | "code"
   | "quote"
   | "tag-quote"
   | "line"

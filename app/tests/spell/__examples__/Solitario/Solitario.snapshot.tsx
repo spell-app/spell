@@ -71,35 +71,34 @@ export class Carta extends TwoSidedView {
     return <test-project-imagen-de-carta dirección={"abajo"} part="back" />
   }
 
+  /** La carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y la toman */
+  ponerEnPila(pila: Pila) {
+    // - rechazado, nada se mueve, y no hay nada que deshacer
+    // - un juego agrega sus propios pasos después:  `después de poner una carta en una pila`
+    if (!core.canGiveUp(this.pila, this) || !core.canTake(pila, this)) core.cancel()
+    this.pila.startingWith(this).forEach((carta) => core.move(carta, pila))
+  }
+
   async jugar() {
     if (this.pila === solitario.reserva) await solitario.robarDeLaReserva()
     else {
       const pilaFinal = core.filter(core.everyThing(Pila), (pila: Pila) => core.canTake(pila, this)).firstItem
       if (pilaFinal === undefined) return false
-      return await this.ponerEnPila(pilaFinal)
+      return this.ponerEnPila(pilaFinal)
     }
   }
 
-  /** la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió */
-  async ponerEnPila(pila: Pila) {
-    /** - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos */
-    const pilaInicial = this.pila
-    if (!core.canGiveUp(pilaInicial, this)) return false
-    if (!core.canTake(pila, this)) return false
-    const puntos = this.contarLosPuntosDeCartaEnPila(pila)
-    pilaInicial.startingWith(this).forEach((carta) => core.move(carta, pila))
-    if (pilaInicial instanceof Columna && !pilaInicial.isEmpty) {
-      await core.pauseFor(200, "msec")
-      pilaInicial.lastItem?.turnFaceUp()
-    }
-    solitario.puntuación = solitario.puntuación + puntos
-    return true
+  /** El movimiento suma puntos;  la columna que dejó voltea su nueva última carta */
+  afterPonerEnPila(pila: Pila) {
+    solitario.puntuación = solitario.puntuación + this.losPuntosPorEnPila(pila)
+    const it2 = this.últimaPila
+    if (it2 instanceof Columna && !it2.isEmpty) it2.lastItem?.turnFaceUp()
   }
 
-  /** lo que suma el movimiento:  10 en una fundación, 5 desde los descartes, si no nada */
-  contarLosPuntosDeCartaEnPila(pila: Pila) {
+  /** Lo que suma un movimiento:  10 a una fundación, 5 desde los descartes, si no nada */
+  losPuntosPorEnPila(pila: Pila) {
     if (pila instanceof Fundación) return 10
-    if (this.pila === solitario.descartes) return 5
+    if (this.últimaPila === solitario.descartes) return 5
     return 0
   }
 
@@ -112,6 +111,10 @@ export class Carta extends TwoSidedView {
   /** una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta */
   get pila() {
     return Pila.ownerOf(this)!
+  }
+
+  get últimaPila() {
+    return Pila.lastOwnerOf(this)
   }
 }
 
@@ -139,16 +142,20 @@ export class CartaElement extends SpellElement<Carta> {
     return this.currentThing?.drawBack()
   }
 
-  jugar() {
-    return this.currentThing?.jugar()
-  }
-
   ponerEnPila(pila: Pila) {
     return this.currentThing?.ponerEnPila(pila)
   }
 
-  contarLosPuntosDeCartaEnPila(pila: Pila) {
-    return this.currentThing?.contarLosPuntosDeCartaEnPila(pila)
+  jugar() {
+    return this.currentThing?.jugar()
+  }
+
+  afterPonerEnPila(pila: Pila) {
+    return this.currentThing?.afterPonerEnPila(pila)
+  }
+
+  losPuntosPorEnPila(pila: Pila) {
+    return this.currentThing?.losPuntosPorEnPila(pila)
   }
 
   onClick(event: ClickEvent) {
@@ -156,9 +163,10 @@ export class CartaElement extends SpellElement<Carta> {
   }
 }
 core.useElement(Carta, CartaElement)
+core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Mover carta", cancels: true })
 core.describeAction(Carta, "jugar", { title: "Jugar Carta", undoneAs: "Jugar carta" })
-core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Mover carta" })
-core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar los Puntos de Carta en Pila", undoneAs: "Contar los Puntos de Carta en Pila" })
+core.addAfterHook(Carta, "ponerEnPila", { hook: "afterPonerEnPila" })
+core.describeAction(Carta, "losPuntosPorEnPila", { title: "Los Puntos por Carta en Pila", undoneAs: "Los Puntos por Carta en Pila" })
 // Es una vista reversible:  cada lado es una imagen de carta (abajo):  boca arriba la suya, boca abajo el dorso que comparten todas las cartas.
 // En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
 // El as es bajo:  as = 1 ... rey = 13
@@ -396,8 +404,9 @@ export class Pila extends ViewableList<Carta> {
     return resumen
   }
 
-  async whenCartaDroppedOn(carta: Carta) {
-    await carta.ponerEnPila(this)
+  /** poner la carta en la pila, si es un movimiento válido */
+  whenCartaDroppedOn(carta: Carta) {
+    carta.ponerEnPila(this)
   }
 
   static droppable = true
@@ -906,8 +915,6 @@ core.describeAction(Solitario, "jugarSolo", { title: "Jugar Solo", shortcuts: ["
 core.describeAction(Solitario, "hacerTrampa", { title: "Hacer Trampa", shortcuts: ["C"], icon: "eye", undoneAs: "Hacer Trampa" })
 
 // jugar la carta al pulsarla, si es un movimiento válido
-
-// soltar la carta sobre la pila, si es un movimiento válido
 
 core.heading("Las pilas")
 ///////////////

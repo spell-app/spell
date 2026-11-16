@@ -290,3 +290,30 @@ describe("liveClient after a server restart", () => {
     await page.close()
   }, 30_000)
 })
+
+// epic `epic-engine` I309 (Owen, of VS Code's side bar sitting grey:  "This is happening a lot, several times an hour"):
+// a reload asked for while the server is down waits for it, never loading the browser's error page
+describe("liveClient's reload while the server is down", () => {
+  it("waits for the server to come back, then reloads the page itself", async () => {
+    const page = await browser.newPage()
+    await page.goto(`http://127.0.0.1:${server.info.port}/docs/page.html`)
+    await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reload?: unknown } }).SPELL_SERVER?.reload)
+    await page.evaluate(() => Object.assign(window, { marker: 1 }))
+    const down = page.evaluate(() => new Promise((resolve) => addEventListener("spell-server:down", resolve)))
+    const port = server.info.port
+    // its socket open first:  only an open socket's closing says the server went down
+    await page.waitForTimeout(1000)
+    await server.stop()
+    await down
+    await page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    await page.waitForTimeout(1500)
+    // still the page, not an error page:  nothing navigated
+    expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1)
+    server = await new PageServer({ root }).start({ port, routes: false, pidFile: false })
+    await page.waitForFunction(() => !(window as unknown as { marker?: number }).marker && !!document.title, null, {
+      timeout: 15_000
+    })
+    expect(await page.title()).toBe("T")
+    await page.close()
+  }, 30_000)
+})

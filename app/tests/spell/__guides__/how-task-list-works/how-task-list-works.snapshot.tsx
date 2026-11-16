@@ -52,6 +52,10 @@ export class Task extends View {
   get checklist() {
     return Checklist.ownerOf(this)!
   }
+
+  get lastChecklist() {
+    return Checklist.lastOwnerOf(this)
+  }
 }
 
 /**

@@ -583,9 +583,11 @@ describe("<epic-item> review controls", () => {
       `<epic-item id="j10" title="Talked over" status="open" state="open" review-as="revisit"></epic-item>`
     )
     for (const host of [approved, answered]) {
-      expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
+      // a finished call draws two (Revisit, Saw it;  J231), an open one three
+      expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(actions(host).map(() => "none"))
+      // no "· done" on a button:  Saw it's own words say "It's done" (J231), which is its name, not a state
       for (const action of actions(host))
-        expect(button(host, action).getAttribute("aria-label")).not.toMatch(/\bdone\b/)
+        expect(button(host, action).getAttribute("aria-label")).not.toMatch(/·\s*done\b/)
     }
     const look = (host: Element) => {
       const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
@@ -723,7 +725,7 @@ describe("<epic-item> review controls", () => {
   test("the review label goes:  each review button's tooltip says it (`Approve:  Fine as it is · reviewed 10/7/26`)", async () => {
     await adoptClient()
     const host = await render(
-      `<epic-item id="j5" title="A call" status="done" reviewed="2026-10-07"><p>Text</p></epic-item>`
+      `<epic-item id="j5" title="A call" status="open" reviewed="2026-10-07"><p>Text</p></epic-item>`
     )
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
     expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")

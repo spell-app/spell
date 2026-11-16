@@ -54,6 +54,21 @@ function underlinesOf(drawing: SP.BubblyDrawing): string[] {
   return found
 }
 
+/** `drawing`'s code, each `{…}` in its markup, as written. */
+function codesOf(drawing: SP.BubblyDrawing): string[] {
+  const found: string[] = []
+  const walk = (nodes: SP.BubblyNode[]) => {
+    for (const node of nodes) {
+      if (node.kind === "gap") continue
+      const line = node.kind === "line" ? node : node.head
+      for (const { start, end } of line.codes ?? []) found.push(drawing.text.slice(start, end))
+      if (node.kind !== "line") walk(node.body)
+    }
+  }
+  walk(drawing.nodes)
+  return found
+}
+
 /** Every block in `nodes`, depth first. */
 function blocksOf(nodes: SP.BubblyNode[]): SP.BubblyBlock[] {
   return nodes.flatMap((node) => (node.kind === "block" ? [node, ...blocksOf(node.body)] : []))
@@ -358,9 +373,27 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(drawing, "words")).toEqual(expect.arrayContaining(["it is a face card"]))
   })
 
-  it("draws a drawing's markup", () => {
+  it("draws a drawing's markup, each `{…}` in it code, its braces pieces of their own", () => {
     expect(piecesOf(drawing, "tag")).toEqual(["text", "text"])
-    expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">{", "}</", ">"]))
+    expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">", "{", "}", "</", ">"]))
+    expect(codesOf(drawing)).toEqual(["{its picture}"])
+  })
+
+  it("reads a tag's `{` as code up to its own `}`, a text in it Spell's, never the tag's value (epic `editor` I144)", () => {
+    const text = 'to draw it\n\t<button "OK" onClick={say "a}b"} padding={its size}/>'
+    const markup = SP.BubblyLayout.of(text)
+    expect(codesOf(markup)).toEqual(['{say "a}b"}', "{its size}"])
+    // past the head's `draw it`
+    expect(piecesOf(markup, "input").slice(1)).toEqual(['"OK"'])
+  })
+
+  it('draws a `{` with no `}` as a mark alone, and a `"` right after a word plain:  the pills after it stay on their words (I144)', () => {
+    const text = 'to draw it\n\t<container columns="7" padding={small" spacing="xs">'
+    const markup = SP.BubblyLayout.of(text)
+    // past the head's `draw it`
+    expect(piecesOf(markup, "input").slice(1)).toEqual(['"7"', '"xs"'])
+    expect(codesOf(markup)).toEqual([])
+    expect(piecesOf(markup, "words")).toEqual(expect.arrayContaining(['small" spacing']))
   })
 
   it("draws a control line going on onto the lines under it (`and ...`) as ONE head, its body after them", () => {

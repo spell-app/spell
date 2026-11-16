@@ -102,6 +102,8 @@ import {
   planDocsOf,
   samePage,
   serverBaseIn,
+  SILENT_FRAME_MS,
+  silentFrameStep,
   stamped,
   windowEpic,
   worktreeEpic
@@ -190,6 +192,9 @@ const SERVER_WAIT = { timeout: 180, every: 1 }
 
 /** What a view says while its page server is down (`waitForServer()`). */
 const SERVER_DOWN = "The page server is restarting.  The page will show here by itself once it's back."
+
+/** What a view says when its page loaded again and again, and still never drew (`recover()`). */
+const FRAME_SILENT = "The page didn't load.  Reload it with this view's reload button, or ask for it again."
 
 /** What a view says when its page server didn't come back (`waitForServer()`). */
 const SERVER_GONE =
@@ -573,19 +578,24 @@ export class DocView implements vscode.WebviewViewProvider {
     view.onDidDispose(() => {
       if (this.view === view) this.view = undefined
     })
-    view.webview.onDidReceiveMessage((message: Place | Ready | OpenLink | EditCommand | Clipboard | ListPick) => {
-      if (message?.spell === "pick") return void this.pick(message.file)
-      if (message?.spell === "pick-epic") return void this.pickListEpic()
-      if (message?.spell === "open") return void DocView.open(message)
-      if (message?.spell === "edit") return void this.edit(message)
-      if (message?.spell === "clipboard") return void vscode.env.clipboard.writeText(message.text ?? "")
-      if (message?.spell === "ready") return void this.restore(message.url)
-      if (message?.spell !== "place") return
-      this.current = message.url
-      void DocView.memory?.update(`${this.id}.page`, message.url)
-      void vscode.commands.executeCommand("setContext", `${this.id}.canGoBack`, !!message.canGoBack)
-      void vscode.commands.executeCommand("setContext", `${this.id}.canGoForward`, !!message.canGoForward)
-    })
+    view.webview.onDidReceiveMessage(
+      (message: Place | Ready | Silent | OpenLink | EditCommand | Clipboard | ListPick) => {
+        if (message?.spell === "pick") return void this.pick(message.file)
+        if (message?.spell === "pick-epic") return void this.pickListEpic()
+        if (message?.spell === "open") return void DocView.open(message)
+        if (message?.spell === "edit") return void this.edit(message)
+        if (message?.spell === "clipboard") return void vscode.env.clipboard.writeText(message.text ?? "")
+        if (message?.spell === "ready") return void this.restore(message.url)
+        if (message?.spell === "silent") return void this.recover(message.url)
+        if (message?.spell !== "place") return
+        this.reloads = 0
+        if (this.notice === FRAME_SILENT) this.say(undefined)
+        this.current = message.url
+        void DocView.memory?.update(`${this.id}.page`, message.url)
+        void vscode.commands.executeCommand("setContext", `${this.id}.canGoBack`, !!message.canGoBack)
+        void vscode.commands.executeCommand("setContext", `${this.id}.canGoForward`, !!message.canGoForward)
+      }
+    )
     if (!this.isListing) this.url ??= await this.remembered()
     if (this.name === "docs") this.url ??= await DocView.home?.()
     if (this.name === "details" && !this.url) this.isListing = true
@@ -642,6 +652,33 @@ export class DocView implements vscode.WebviewViewProvider {
   /** The page asked for while its server was down (`navigate()`);  `undefined` when not waiting. */
   private waiting: string | undefined
 
+  /** Times in a row `recover()` loaded a silent frame's page again;  back to 0 when a page says where it is. */
+  private reloads = 0
+
+  /** The line over the page in view (`say()`), if any. */
+  private notice: string | undefined
+
+  /**
+   * The frame loaded, but its page never said where it is (`SILENT_FRAME_MS`):  it's the browser's error page, or a
+   * page that never finished loading -- the grey view (epic `epic-engine` I309;  Owen:  "This is happening a lot,
+   * several times an hour").  Load the page in view again, as `silentFrameStep()` says:
+   * - its server down:  wait for it (`waitForServer()`), saying so
+   * - up:  load it again, at most `SILENT_FRAME_RELOADS` times in a row;  then say so
+   * - `url`:  the frame's address, for a view that has no page of its own yet
+   * - NEVER throws
+   */
+  async recover(url: string | null | undefined): Promise<void> {
+    const page = this.here ?? url ?? undefined
+    if (this.isListing || !page || this.waiting !== undefined) return
+    const step = silentFrameStep({ serverUp: !!(await serverAt(new URL(page).origin)), reloads: this.reloads })
+    if (step === "wait") return this.waitForServer(page)
+    if (step === "say") return this.say(FRAME_SILENT)
+    this.reloads += 1
+    this.current = undefined
+    this.url = page
+    void this.view?.webview.postMessage({ spell: "navigate", url: stamped(page) })
+  }
+
   /**
    * Wait for `url`'s page server to answer, saying so in the view, then load the page asked for LAST (`waiting`).
    * - one wait at a time:  a second ask only replaces the page waited for
@@ -667,6 +704,7 @@ export class DocView implements vscode.WebviewViewProvider {
    * - drawn by the view's script (`notice`), so the page under it stays as it was
    */
   say(text: string | undefined): void {
+    this.notice = text
     void this.view?.webview.postMessage({ spell: "notice", text: text ?? null })
   }
 
@@ -718,6 +756,20 @@ export class DocView implements vscode.WebviewViewProvider {
       // the page server's origins, as the CSP's frame-src:  keys and clicks from anywhere else aren't passed on
       const LOOPBACK = /^http:\\/\\/(127\\.0\\.0\\.1|localhost)(:\\d+)?$/
       let frame = document.querySelector("iframe")
+      // a frame whose page never says where it is (its place message), SILENT_FRAME_MS after it loads:  the browser's
+      // error page, or a page stuck loading;  the extension loads it again (recover())
+      let silent
+      function startClock() {
+        clearTimeout(silent)
+        if (frame) silent = setTimeout(() => vscode.postMessage({ spell: "silent", url: frame.src }), ${SILENT_FRAME_MS})
+      }
+      function watchFrame() {
+        startClock()
+        // its page may have said where it is before the frame loaded:  ask again, and its answer stops the clock
+        frame?.contentWindow?.postMessage({ spell: "where" }, "*")
+      }
+      frame?.addEventListener("load", watchFrame)
+      startClock()
       const EDITS = ["copy", "cut", "paste", "selectAll", "undo", "redo"]
       const execCommand = document.execCommand.bind(document)
       document.execCommand = (command, ...rest) => {
@@ -728,6 +780,7 @@ export class DocView implements vscode.WebviewViewProvider {
       addEventListener("message", (event) => {
         if (frame && event.source === frame.contentWindow) {
           const kind = event.data?.spell
+          if (kind === "place") clearTimeout(silent)
           if (kind !== "key" && kind !== "menu") return vscode.postMessage(event.data)
           if (!LOOPBACK.test(event.origin)) return
           return void (kind === "key" ? press(event.data) : rightClick(event.data))
@@ -769,8 +822,10 @@ export class DocView implements vscode.WebviewViewProvider {
           frame.setAttribute("allow", ${JSON.stringify(ALLOW)})
           document.querySelector(".empty")?.remove()
           document.body.prepend(frame)
+          frame.addEventListener("load", watchFrame)
         }
         frame.src = url
+        startClock()
       }
 
       /**
@@ -1048,6 +1103,9 @@ type QueuedPage = { url: string; file?: string }
 type ListPick = { spell: "pick"; file?: string } | { spell: "pick-epic" }
 
 type Place = { spell: "place"; url?: string; canGoBack?: boolean; canGoForward?: boolean }
+
+/** The view's frame loaded and its page never said where it is (`SILENT_FRAME_MS`):  `DocView.recover()`. */
+type Silent = { spell: "silent"; url?: string | null }
 
 /** The view's wrapper (re)loaded, its frame at `url` (`null`:  no frame yet):  `DocView.restore()`. */
 type Ready = { spell: "ready"; url?: string | null }

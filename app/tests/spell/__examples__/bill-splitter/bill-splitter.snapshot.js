@@ -91,6 +91,10 @@ export class Diner extends View {
   get table() {
     return Table.ownerOf(this)
   }
+
+  get lastTable() {
+    return Table.lastOwnerOf(this)
+  }
 }
 
 /** The diners, one a row */

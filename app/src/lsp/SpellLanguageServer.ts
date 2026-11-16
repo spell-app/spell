@@ -45,7 +45,7 @@ export class SpellLanguageServer {
     renameProvider: { prepareProvider: true },
     completionProvider: { triggerCharacters: [" "] },
     signatureHelpProvider: { triggerCharacters: [" "] },
-    codeActionProvider: { codeActionKinds: [CodeActionKind.QuickFix] },
+    codeActionProvider: { codeActionKinds: [CodeActionKind.QuickFix, CodeActionKind.RefactorRewrite] },
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
     documentOnTypeFormattingProvider: {

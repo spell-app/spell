@@ -71,6 +71,21 @@ export type BubblyLine = {
   pieces: BubblyPiece[]
   /** the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does */
   underlines: BubblyUnderline[]
+  /**
+   * a drawing's markup line's CODE, each `{…}` in it (`onClick={count up}`, `<text>{its name}</text>`):
+   * worked out as the program runs, so drawn apart from what's typed in -- an inverted pill, its braces part of it
+   * - its braces included;  each starts and ends where a piece does
+   * - only on a markup line with code
+   */
+  codes?: BubblyCode[]
+}
+
+/** A `{…}` in a drawing's markup:  Spell code, its braces included. */
+export type BubblyCode = {
+  /** its `{` */
+  start: number
+  /** one past its `}` */
+  end: number
 }
 
 /**

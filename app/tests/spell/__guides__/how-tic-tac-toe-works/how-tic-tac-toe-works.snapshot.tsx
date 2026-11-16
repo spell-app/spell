@@ -41,6 +41,10 @@ export class Square extends Thing {
   get board() {
     return Board.ownerOf(this)!
   }
+
+  get lastBoard() {
+    return Board.lastOwnerOf(this)
+  }
 }
 
 export class Board extends List<Square> {

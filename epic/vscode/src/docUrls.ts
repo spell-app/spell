@@ -240,3 +240,29 @@ export function tabShows(label: string, title: string): boolean {
   if (label === full) return true
   return full.length > TAB_TITLE_LENGTH && label === `${full.substring(0, TAB_TITLE_LENGTH - 1)}…`
 }
+
+/**
+ * How long a view's frame may stay SILENT after it loads -- its page never saying where it is (the live client's
+ * `place`) -- before the view steps in (`silentFrameStep()`), in ms.
+ * - every page the page server serves says so as it starts;  a page that doesn't is the browser's error page, or
+ *   one that never finished loading
+ */
+export const SILENT_FRAME_MS = 10_000
+
+/** How many times in a row a view loads a silent frame's page again, before it says so instead. */
+export const SILENT_FRAME_RELOADS = 2
+
+/**
+ * What a view does about a frame that stayed silent (`SILENT_FRAME_MS`;  epic `epic-engine` I309, Owen, of the
+ * side bar sitting grey:  "This is happening a lot, several times an hour"):
+ * - `"wait"`:  its page server is down (restarting:  every merge into main does it):  wait for it, then load the page
+ * - `"reload"`:  the server answers:  load the page again
+ * - `"say"`:  loaded again `SILENT_FRAME_RELOADS` times and still silent:  say so, and stop trying
+ */
+export function silentFrameStep({ serverUp, reloads }: { serverUp: boolean; reloads: number }): SilentFrameStep {
+  if (!serverUp) return "wait"
+  return reloads < SILENT_FRAME_RELOADS ? "reload" : "say"
+}
+
+/** `silentFrameStep()`'s answer. */
+export type SilentFrameStep = "wait" | "reload" | "say"

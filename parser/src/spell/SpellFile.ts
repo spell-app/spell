@@ -148,9 +148,16 @@ export class SpellFile extends TextFile {
     this.setState("AST", AST)
   }
 
-  /** Our `compiled` output as javascript. */
+  /**
+   * Our `compiled` output as javascript:  this file written on its own, as the editor's output pane shows it.
+   * - Written when first read after a `compile()`, not by it (epic `language` P57):
+   *   the project writes its files together (`SP.SpellProject.combineCompiled()`), from our `AST`,
+   *   so writing each one alone too, every compile, was a second write of the whole project that nothing read.
+   * - Without the declaration markers compiling leaves in:  they're for our project's declarations file,
+   *   which reads them from our `AST` -- see `SP.SpellDeclarations`.
+   */
   /*@state*/ get compiled(): string | undefined {
-    return this.getState("compiled", () => undefined)
+    return this.getState("compiled", () => this.writtenAlone())
   }
   set compiled(compiled: string | undefined) {
     this.setState("compiled", compiled)
@@ -258,18 +265,25 @@ export class SpellFile extends TextFile {
   }
 
   /**
-   * Compile our content.
-   * - `compiled` without the declaration markers compiling leaves in:  they're for our project's declarations file,
-   *   which reads them from our `AST` -- see `SP.SpellDeclarations`.
+   * Compile our content:  parse it, and keep its `AST` for our project to write.
+   * - Our own `compiled` code is written when it's read, from the new `AST`.
+   * - Returns it only when our `AST` isn't a block of statements, which the project can't write itself:
+   *   the project takes it as it is.
    */
   async compile(parentScope?: P.Scope): Promise<string | undefined> {
     const match = await this.parse(parentScope)
-    const compiled = P.JSWriter.instance.writeMatch(match)
     batch(() => {
       this.setState("AST", match?.AST)
-      this.setState("compiled", typeof compiled === "string" ? SP.SpellDeclarations.stripComments(compiled) : undefined)
+      this.resetState("compiled")
     })
-    return this.compiled
+    return match?.AST instanceof P.ASTStatementGroup ? undefined : this.compiled
+  }
+
+  /** Our code written on its own, from the `AST` our last `compile()` kept:  `undefined` before one. */
+  private writtenAlone(): string | undefined {
+    if (!this.AST) return undefined
+    const compiled = P.JSWriter.instance.writeMatch(this.match)
+    return typeof compiled === "string" ? SP.SpellDeclarations.stripComments(compiled) : undefined
   }
 
   ////////////////

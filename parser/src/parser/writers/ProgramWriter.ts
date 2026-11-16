@@ -803,6 +803,8 @@ export abstract class ProgramWriter extends Writer {
     const owner = this.kindOf(call.thing)
     const method = this.project.methodOf(owner, call.methodName)
     if (!method || method.inline || this.nothingBeingTold.has(method)) return false
+    // it says what it gives back:  an action that may `cancel` answers yes or no (epic `language` P56)
+    if (method.datatype && method.datatype !== "nothing") return false
     this.nothingBeingTold.add(method)
     try {
       // its own returns:  not one in a function inside it

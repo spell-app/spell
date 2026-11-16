@@ -372,8 +372,10 @@ ui-section.InspectorEvent {
     flex-direction: column;
     gap: 4px;
   }
+  /* snug round the name:  little room at its ends (Owen, I157:  "don't need so much white space in the input field") */
   & .InspectorActionNameField {
-    width: 14em;
+    --ui-input-padding-inline: 0.5em;
+    width: 11em;
   }
   & .InspectorActionNameError {
     max-width: 24em;

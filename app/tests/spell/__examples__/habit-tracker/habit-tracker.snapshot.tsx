@@ -105,6 +105,10 @@ export class Habit extends View {
   get week() {
     return Week.ownerOf(this)!
   }
+
+  get lastWeek() {
+    return Week.lastOwnerOf(this)
+  }
 }
 
 /**

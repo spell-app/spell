@@ -64,6 +64,10 @@ class Card(Thing):
     def pile(self) -> Pile | None:
         return Pile.owner_of(self)
 
+    @property
+    def last_pile(self) -> Any:
+        return Pile.last_owner_of(self)
+
 
 class Pile(List):
     item_type = Card

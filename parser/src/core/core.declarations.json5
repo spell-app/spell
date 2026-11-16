@@ -2717,6 +2717,24 @@
     },
     {
       "kind": "method",
+      "name": "addAfterHook",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "Run `Class`'s member `hook` at the end of its action `name`, inside its undo step:  an after hook (epic `language` P56)."
+    },
+    {
+      "kind": "method",
       "name": "describeEvent",
       "of": "core",
       "module": "described",
@@ -2934,6 +2952,13 @@
         }
       ],
       "description": "Run `act`, a top-level action's steps, as an action:  ONE undo step titled `undoneAs`, or none (`cantBeUndone`). Returns what `act` returns."
+    },
+    {
+      "kind": "method",
+      "name": "cancel",
+      "of": "core",
+      "module": "acting",
+      "description": "Call off the action running, compiled from `cancel` (epic `language` P56):  `if (!core.canTake(pile, this)) core.cancel()`."
     },
     {
       "kind": "method",

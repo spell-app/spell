@@ -13,10 +13,10 @@ export const words = {
       value: "value",
       symbol: "symbol",
       shortName: "short name",
-      isOnTop: "is on top",
-      play: "play a card",
       putOnPile: "put a card on a pile",
-      countThePointsForCardOnPile: "count the points for a card on a pile",
+      isOnTopOfItsPile: "is on top of its pile",
+      play: "play a card",
+      thePointsForCardOnPile: "the points for (a card) on (a pile)",
       pile: "pile"
     },
     CardImage: {
@@ -80,8 +80,7 @@ export const words = {
       { name: "Card Rank & Suit", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "suit", "color"] },
       { name: "Aliases", description: "Spell for identifying cards", members: ["isAFaceCard", "isANumberCard", "isTheRankOfSuit"] },
       { name: "Names", description: "identifying a card", members: ["name", "value", "symbol", "shortName"] },
-      { name: "Game Play", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
-      { name: "A pile of cards", members: ["pile"] }
+      { name: "Game Play", members: ["play", "thePointsForCardOnPile"] }
     ],
     Solitaire: [
       { name: "Dealing & the Stock Pile", members: ["restartTheGame", "turnOverTheNextCard", "resetTheStock"] },

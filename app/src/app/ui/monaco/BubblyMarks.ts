@@ -2,7 +2,7 @@ import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import type { MarkupPartOfSpeech } from "spell/app/app/components/spell-code/BubblyMarkup"
 import type { monaco } from "./monaco"
-import { MarkupMarks, type MarkupShape } from "./MarkupMarks"
+import { MarkupMarks, type MarkupShape, type TagRoom } from "./MarkupMarks"
 import { TextMarks, spacer, type Spacers } from "./TextMarks"
 
 /****************
@@ -103,7 +103,8 @@ export class BubblyMarks extends TextMarks {
     const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
     const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks, {
       isView: this.isView,
-      declaringTags: this.drawing.declaringTags
+      declaringTags: this.drawing.declaringTags,
+      codes: lines.flatMap((line) => line.codes ?? [])
     })
     this.tags.push(...tags.tags)
     into.push(...tags.shapes)
@@ -310,8 +311,13 @@ export type BubblyInputShape = {
   afterHeadSpacer?: boolean
   /** an HTML tag's value:  the tag's part of speech, whose hue its pill's edge takes, as on the page */
   inTag?: MarkupPartOfSpeech
-  /** a tag's `{…}` value, worked out as it runs:  its pill inverted, a shade of its tag's colour (Owen) */
+  /**
+   * code, a `{…}` in a drawing's markup, worked out as it runs:  its pill inverted, a shade of its tag's colour
+   * (Owen), its braces at its ends (I162)
+   */
   isExpression?: boolean
+  /** code right after a tag (`<text>{its size}`):  the room injected after that tag, which its pill starts past */
+  room?: TagRoom[]
 }
 
 /** The class of the spacer before a head's description, then its number:  `bubbly-description-3`. */

@@ -1008,6 +1008,36 @@ listsEs.addRule(CanGiveUp, {
   ]
 })
 
+// el otro orden:  `la pila puede dejar ir a la carta` (epic `language` P56)
+listsEs.addRule(CanGiveUp, {
+  syntax: "{operator:can_or_cannot} dejar ir a {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+        scope.variables?.add("stock")
+      },
+      tests: [["stock puede dejar ir a card", "core.canGiveUp(stock, card)"]]
+    }
+  ]
+})
+
+// ... y `la pila no puede dejar card ir`
+listsEs.addRule(CanGiveUp, {
+  syntax: "{operator:can_or_cannot} dejar {expression:operand} ir",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+        scope.variables?.add("stock")
+      },
+      tests: [["stock no puede dejar card ir", "!core.canGiveUp(stock, card)"]]
+    }
+  ]
+})
+
 listsEs.addRule(ListReverse, {
   syntax: "invertir ((el|la|los|las)? {arg:plural_identifier} (en|de|del))? {list:expression}",
   tests: [

@@ -1,3 +1,4 @@
+import type { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import {
   BubblyMarkup,
@@ -29,7 +30,8 @@ import type { BubblyInputShape } from "./BubblyMarks"
  *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
  *     attributes' names, as the page draws them
  *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it;
- *     a `{…}` one's (Spell, worked out as it runs) an inverted pill, its braces darker
+ *     a `{…}` one's (Spell, worked out as it runs) an inverted pill, its braces part of it, as a quoted one's marks
+ *     are of its white (Owen, epic `editor` I144 C1);  a Spell drawing's `{…}` between its tags too
  *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
  *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
  * - Shapes are placed by `SpellBubbly`, from where Monaco draws each line and letter.
@@ -47,15 +49,17 @@ export class MarkupMarks extends TextMarks {
    * - `isView`:  is a tag one of the project's own views, `<tableau "T1"/>`?  Then it draws a thing:  purple.
    * - `declaringTags`:  where each tag that declares a member starts (`SP.BubblyDrawing.declaringTags`):
    *   drawn round, `bubbly-tag-declares` (epic `editor` I84)
+   * - `codes`:  the lines' code, each `{…}` (`SP.BubblyLine.codes`):  one between tags an inverted pill, as a
+   *   `{…}` value's is
    */
   static within(
     text: string,
     from: number,
     to: number,
     marks: monaco.editor.IModelDeltaDecoration[],
-    { isView = () => false, declaringTags = [] }: MarkupWithin = {}
+    { isView = () => false, declaringTags = [], codes = [] }: MarkupWithin = {}
   ): MarkupMarks {
-    return new MarkupMarks(text, { from, to, isInSpell: true, isView, declaringTags }, marks)
+    return new MarkupMarks(text, { from, to, isInSpell: true, isView, declaringTags, codes }, marks)
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
@@ -64,7 +68,10 @@ export class MarkupMarks extends TextMarks {
   /** Where each tag is:  a Spell drawing leaves them to these marks.  Not a `{…}` value in one:  that's Spell. */
   readonly tags: Array<{ start: number; end: number }> = []
 
-  /** The room injected after each tag in a line, by where it ends:  a tag right after it starts past it too. */
+  /**
+   * The room injected after each tag or code pill in a line, by where it ends:  a tag (or code) right after it starts
+   * past it too.
+   */
   private readonly roomAfter = new Map<number, TagRoom>()
 
   /** Lines of Spell, whose own marks are Spell's:  no spacers before them. */
@@ -76,6 +83,9 @@ export class MarkupMarks extends TextMarks {
   /** Where each tag that declares a member starts:  `within()`'s. */
   private readonly declaringTags: ReadonlySet<number>
 
+  /** A Spell drawing's code, each `{…}`:  `within()`'s. */
+  private readonly codes: readonly SP.BubblyCode[]
+
   private constructor(
     source: string,
     {
@@ -83,7 +93,8 @@ export class MarkupMarks extends TextMarks {
       to,
       isInSpell,
       isView = () => false,
-      declaringTags = []
+      declaringTags = [],
+      codes = []
     }: { from: number; to: number; isInSpell: boolean } & MarkupWithin,
     marks?: monaco.editor.IModelDeltaDecoration[]
   ) {
@@ -91,6 +102,7 @@ export class MarkupMarks extends TextMarks {
     this.isInSpell = isInSpell
     this.isView = isView
     this.declaringTags = new Set(declaringTags)
+    this.codes = codes
     this.nodes(BubblyMarkup.treeOf(source, from, to), this.shapes)
   }
 
@@ -98,12 +110,19 @@ export class MarkupMarks extends TextMarks {
   // ## The file's nodes
   ////////////////
 
-  /** Mark `nodes`, adding their shapes to `into`. */
-  private nodes(nodes: MarkupNode[], into: MarkupShape[]) {
+  /**
+   * Mark `nodes`, adding their shapes to `into`;  `partOfSpeech`:  the element they're in, whose shade a Spell
+   * drawing's code between its tags takes.
+   */
+  private nodes(nodes: MarkupNode[], into: MarkupShape[], partOfSpeech: MarkupPartOfSpeech = "plain") {
     for (const node of nodes) {
       if (node.kind === "element") this.element(node, into)
       else if (node.kind === "doctype") this.doctype(node, into)
       else if (!this.isInSpell) this.lines(node, node.kind === "comment" ? COMMENT : "")
+      else
+        for (const code of this.codes)
+          if (code.start >= node.start && code.end <= node.end)
+            this.expression(code.start, code.end, partOfSpeech, into)
     }
   }
 
@@ -131,7 +150,7 @@ export class MarkupMarks extends TextMarks {
       const touch = !hasInside
       const first = into.length
       const start = this.tagPill(open, { partOfSpeech, side: "start", touch }, into)
-      this.nodes(element.children, into)
+      this.nodes(element.children, into, partOfSpeech)
       if (!close) return
       const end = this.tagPill(close, { partOfSpeech, side: "end", touch }, into)
       // something between them on one line:  the two pills linked, under them, between them (Owen, Q58)
@@ -152,7 +171,7 @@ export class MarkupMarks extends TextMarks {
     // its `⟨` clear of its band's cut corner, an HTML file's or a Spell drawing's alike
     if (this.startsLine(open.start)) this.mark(open.start, open.start + 1, "", { before: spacer("tag-head", "before") })
     this.startTag(open, partOfSpeech, block.inside)
-    this.nodes(element.children, block.inside)
+    this.nodes(element.children, block.inside, partOfSpeech)
     if (footStartsLine) {
       block.foot = this.place(close.start, close.end)
       // a `</>`:  its `⟨|⟩` at its pill's right end (Owen)
@@ -371,19 +390,29 @@ export class MarkupMarks extends TextMarks {
   }
 
   /**
-   * A `{…}` value, worked out as the program runs (`color={its color}`):  its braces darker than the tag's marks,
-   * its words on an INVERTED pill, so it stands apart from a value typed in (Owen);  its words are Spell's to mark.
+   * Code worked out as the program runs, a `{…}` value (`color={its color}`) or one between a drawing's tags:
+   * its words and braces on ONE inverted pill, so it stands apart from a value typed in (Owen);
+   * its braces part of it, as a quoted value's marks are of its white (I144 C1);  its words are Spell's to mark.
    */
   private expression(start: number, end: number, partOfSpeech: MarkupPartOfSpeech, into: MarkupShape[]) {
-    this.mark(start, start + 1, BRACE)
-    this.mark(end - 1, end, BRACE)
-    if (end - start <= 2) return
-    const place = this.mark(start + 1, end - 1, EXPRESSION, {
-      before: spacer("input", "before"),
-      after: spacer("input", "after")
-    })
+    this.mark(start, start + 1, CODE_BRACE)
+    this.mark(start + 1, end - 1, EXPRESSION)
+    this.mark(end - 1, end, CODE_BRACE)
+    // its own room, narrower than a value's:  its braces at its pill's ends (I162);  a tag's room before it, when it
+    // follows one right on (`<text>{its size}`), and its own before a tag right after it, so their pills don't touch
+    const place = this.mark(start, end, "", { before: spacer("code", "before"), after: spacer("code", "after") })
+    const behind = this.roomAfter.get(start)
+    this.roomAfter.set(end, "code")
     if (place >= 0)
-      into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
+      into.push({
+        kind: "input",
+        place,
+        isChoice: false,
+        isQuoted: false,
+        inTag: partOfSpeech,
+        isExpression: true,
+        ...(behind && { room: [behind] })
+      })
   }
 
   ////////////////
@@ -514,10 +543,15 @@ export type MarkupWithin = {
   isView?: (tag: string) => boolean
   /** where each tag that declares a member starts:  `SP.BubblyDrawing.declaringTags` */
   declaringTags?: readonly number[]
+  /** the lines' code, each `{…}`:  `SP.BubblyLine.codes` */
+  codes?: readonly SP.BubblyCode[]
 }
 
-/** A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch. */
-export type TagRoom = "tag" | "touch"
+/**
+ * A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch;
+ * or a code pill's, `{its size}</text>`, which a tag right after it starts past (I162).
+ */
+export type TagRoom = "tag" | "touch" | "code"
 
 /** A tag's `<` and `>`, drawn as `⟨` `⟩` over the file's own, faint. */
 const MARK = "bubbly-mark"
@@ -562,9 +596,9 @@ const EQUALS = `${MARK} bubbly-equals`
 /** A value's words:  a white pill under them. */
 const INPUT = "bubbly-input"
 
-/** A `{…}` value's words:  an inverted pill under them;  its braces darker than a mark (Owen). */
+/** Code's words, a `{…}`:  an inverted pill under them (Owen);  its braces part of it (I144 C1). */
 const EXPRESSION = "bubbly-expression"
-const BRACE = `${MARK} ${BubblyHtml.BRACE}`
+const CODE_BRACE = `${EXPRESSION} ${BubblyHtml.CODE_BRACE}`
 
 /** A quoted value's own `"`:  see-through, its curly mark drawn over it. */
 const QUOTE_MARK = "bubbly-quote-mark"

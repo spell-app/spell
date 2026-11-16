@@ -222,6 +222,16 @@ export class Language {
   }
 
   /**
+   * The member naming the list of `listType`'s family a thing was in before its latest move (epic `language` P56):
+   * `last pile`, Spanish's `última pila` -- see `LanguageWords.lastListWords`, and spell's `belongs_to_one`.
+   */
+  lastListName(listType: P.TypeScope): string {
+    const words = this.words.lastListWords
+    const word = (listType.gender && words[listType.gender]) || words.default
+    return `${word} ${listType.ownerMemberName.replace(/_/g, " ")}`
+  }
+
+  /**
    * `noun` with the article it takes, for a message's example:  `an apple`, `the card`, `una carta`, `la dirección`.
    * - `kind`:  `indefinite` (`a`, `un` ...) or `definite` (`the`, `el` ...).
    * - `type`:  the type `noun` names, if any;  Spanish's gender is the type's.
@@ -400,6 +410,20 @@ export type LanguageWords = {
   memberLeadingWords: Set<string>
   /** Little words after which a method's name keeps its receiver's type, e.g. `of` in `update_the_total_of_calculator`. */
   danglingWords: Set<string>
+  /**
+   * The word before a list's name that names the one a thing was in before its latest move (epic `language` P56):
+   * English's `last`, `the card's last pile`;  Spanish's `último`, or `última` for a feminine list, `la última pila`.
+   * - By the list type's gender (`P.TypeScope.gender`);  `default` for one with none, or none the table names.
+   * - See `belongs_to_one`.
+   */
+  lastListWords: { default: string } & Record<string, string>
+  /**
+   * The verbs an action's words may start with, given how an `after` hook says it (epic `language` P56):
+   * English's gerund, `putting` => `put` (and `putt`, `putte`:  the hook takes the one an action has);
+   * none:  the verb as written, Spanish's `poner` in `después de poner una carta en una pila`.
+   * - See `after_hook`.
+   */
+  verbsForDoing?: (doing: string) => string[]
   /**
    * Little words an action's title writes in lower case, unless first:  `Put Card on Pile` (epic `language` J156).
    * - Its articles, conjunctions and short prepositions:  English's `a`, `the`, `and`, `on`;  Spanish's `la`, `y`, `en`.

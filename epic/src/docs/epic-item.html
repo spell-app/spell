@@ -511,7 +511,9 @@ holding its id (Q7).  Its colour says where the item stands."
                       as a handled question's is, but the item stays green. Set when an issue or todo is closed while
                       that phase is active, or when a done phase's text links it (the latest such phase); reopened or
                       canceled, it goes. The <code>in P1</code> pill is the item's button for its phase (I271): a click goes to the phase, an
-                      ⌥-click starts it, and a todo in a phase draws no plane.
+                      ⌥-click starts it, and a todo in a phase draws no plane. A finished item (done, canceled,
+                      decided) draws <code>done in P1</code> instead (J231), where its plane would be: it has no plane, and
+                      the pill goes to the phase.
                     </td>
                     <td></td>
                   </tr>
@@ -896,8 +898,9 @@ holding its id (Q7).  Its colour says where the item stands."
               <p>
                 Then the line ends with three buttons in one group: Make Todo (green), Revisit (blue), Approve
                 (green); on an issue or a judgement call the first is Do this, the plane, worked in the item itself
-                with no todo made. An open issue ends in the x instead (close it: not needed), and a fixed one waiting
-                for you shows Send back, Revisit, Accept the fix (epic <code>epic-engine</code> I299: one icon per meaning). The plane is the icon alone; its words, "Send to Claude", are the page's own Send's, at the top (I305). No Do Now (the wand) since 2026-10-25: "In practice, I'm never using the wand." Each
+                with no todo made. An open issue ends in the x instead (close it: not needed), a fixed one waiting
+                for you shows Revisit and Accept the fix (epic <code>epic-engine</code> I299: one icon per meaning), and a
+                finished one Revisit and Saw it, its <code>done in P1</code> pill where the plane was (J231). The plane is the icon alone; its words, "Send to Claude", are the page's own Send's, at the top (I305). No Do Now (the wand) since 2026-10-25: "In practice, I'm never using the wand." Each
                 wears the fill rule, which says how far a mark has got:
               </p>
               <ul>

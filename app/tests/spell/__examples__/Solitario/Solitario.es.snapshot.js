@@ -13,9 +13,9 @@ export const words = {
       valor: "valor",
       símbolo: "símbolo",
       nombreCorto: "nombre corto",
-      jugar: "jugar una carta",
       ponerEnPila: "poner una carta en una pila",
-      contarLosPuntosDeCartaEnPila: "contar los puntos de una carta en una pila",
+      jugar: "jugar una carta",
+      losPuntosPorEnPila: "los puntos por (una carta) en (una pila)",
       pila: "pila"
     },
     ImagenDeCarta: {
@@ -166,7 +166,7 @@ export const words = {
       { name: "Rango y Palo", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "palo", "color"] },
       { name: "Alias", description: "Spell para identificar cartas", members: ["esUnaFigura", "esUnaCartaNumérica", "esElRangoDePalo"] },
       { name: "Nombres", description: "identificar una carta", members: ["nombre", "valor", "símbolo", "nombreCorto"] },
-      { name: "Juego", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
+      { name: "Juego", members: ["jugar", "losPuntosPorEnPila"] },
       { name: "Una pila de cartas", members: ["pila"] }
     ],
     Solitario: [

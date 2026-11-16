@@ -50,6 +50,10 @@ UndoAction = Literal["undo", "redo"]
 STEPS_KEPT = 100
 
 
+class ActionCanceled(Exception):  # noqa: N818 -- the JavaScript core's name:  a sentinel, not an error
+    """What `cancel` raises, in an action (epic `language` P56):  the action stops, called off -- see `run_acting()`."""
+
+
 class UndoRecord(Protocol):
     """One change in a step:  how to put it back, and how to make it again."""
 
@@ -100,6 +104,10 @@ class UndoHistory:
         self._applying = False
         # how many actions that can't be undone are running:  nothing they change is recorded
         self._unrecorded = 0
+        # what each action that may cancel has changed so far, innermost last:  `recording_changes()`
+        self._changes_being_made: list[ChangesMade] = []
+        # each value the core keeps for a thing itself, changed in the open step:  `note_kept()`
+        self._kept: dict[tuple[int, object], KeptRecord] = {}
 
     ################
     # ## The history
@@ -129,6 +137,11 @@ class UndoHistory:
     def steps(self) -> list[UndoStep]:
         """The steps it can undo, oldest first:  a copy."""
         return list(self._undo_steps)
+
+    @property
+    def is_applying(self) -> bool:
+        """Is it undoing or redoing now?  Then nothing records."""
+        return self._applying
 
     @property
     def is_in_transaction(self) -> bool:
@@ -248,7 +261,10 @@ class UndoHistory:
 
         - Its first change in the step keeps `was`;  each later one only moves its value now.
         - `SpellObject.set_prop()` calls it, for every property write of a thing that's made.
+        - Noted too for every action that may `cancel` (`recording_changes()`).
         """
+        for changes in self._changes_being_made:
+            changes.note(target, ("prop", name), lambda: setattr(target, name, was))
         if not self.is_recording:
             return
         key = (id(target), name)
@@ -263,7 +279,11 @@ class UndoHistory:
 
         - Its first change in the step keeps `before`;  each later one only moves `after`.
         - `List._write_items()` calls it, for every change to a list.
+        - Noted too for every action that may `cancel` (`recording_changes()`).
         """
+        kept_before = list(before)
+        for changes in self._changes_being_made:
+            changes.note(items, "items", lambda: setattr(items, "items", list(kept_before)))
         if not self.is_recording:
             return
         change = self._lists.get(id(items))
@@ -271,6 +291,52 @@ class UndoHistory:
             change = self._lists[id(items)] = ItemsRecord(items, list(before))
             self._record(change)
         change.after = list(after)
+
+    def note_kept(self, target: object, key: object, was: object, value: object, put: Callable[[object], None]) -> None:
+        """A value the core keeps for `target` itself is changing from `was` to `value`, e.g. a card's last pile.
+
+        - Recorded into the open step as `note_setting()` records a property, but put back through `put`.
+        - Noted too for every action that may `cancel`.
+        - `ListFamily` calls it, as an item moves (`List.last_owner_of()`).
+        """
+        if was is value:
+            return
+        for changes in self._changes_being_made:
+            changes.note(target, ("kept", key), lambda: put(was))
+        if not self.is_recording:
+            return
+        record_key = (id(target), key)
+        kept = self._kept.get(record_key)
+        if kept is None:
+            kept = self._kept[record_key] = KeptRecord(put, was)
+            self._record(kept)
+        kept.value = value
+
+    def recording_changes(self) -> "ChangesMade":
+        """Note every change made from now on, to put back if the action that started it cancels:  `run_acting()`."""
+        changes = ChangesMade(self._changes_being_made)
+        self._changes_being_made.append(changes)
+        return changes
+
+    def drop_unchanged_records(self) -> None:
+        """Drop the open step's records whose changes were all put back, e.g. by an action that canceled.
+
+        - So a step left with none is no step, and Undo isn't lit for nothing.
+        - Its notes forget them too:  a later change in the step is a record of its own again.
+        """
+        if self._open is None:
+            return
+        kept: list[UndoRecord] = []
+        for record in self._open.records:
+            if not _is_unchanged(record):
+                kept.append(record)
+            elif isinstance(record, SettingRecord):
+                self._settings.pop((id(record.target), record.name), None)
+            elif isinstance(record, ItemsRecord):
+                self._lists.pop(id(record.items), None)
+            elif isinstance(record, KeptRecord):
+                self._kept = {key: each for key, each in self._kept.items() if each is not record}
+        self._open.records = kept
 
     def _record(self, record: UndoRecord) -> None:
         """SIDE EFFECT:  `record` joins the open step."""
@@ -283,6 +349,7 @@ class UndoHistory:
         self._open = step
         self._settings = {}
         self._lists = {}
+        self._kept = {}
         return step
 
     def _close(self, step: UndoStep) -> None:
@@ -292,6 +359,7 @@ class UndoHistory:
         self._open = None
         self._settings = {}
         self._lists = {}
+        self._kept = {}
         if not step.records:
             return
         self._undo_steps = [*self._undo_steps, step][-STEPS_KEPT:]
@@ -313,12 +381,21 @@ class UndoHistory:
 ################
 
 
-def declare_action(cls: type, name: str, undone_as: str | None, cant_be_undone: str | None = None) -> None:
+def declare_action(
+    cls: type,
+    name: str,
+    undone_as: str | None,
+    cant_be_undone: str | None = None,
+    cancels: bool = False,
+    after: list[str] | None = None,
+) -> None:
     """Make `cls`'s method `name` an action that's ONE undo step, titled `undone_as`:  see `UndoHistory.run()`.
 
     - What `core.describe_action()` does for a description with `"undone_as"`.
     - Or, with no `undone_as`, one that can't be undone (`cant_be_undone`, `"keeps history"`):  nothing it changes is
       recorded (`UndoHistory.run_unrecorded()`).
+    - `cancels`:  it may `cancel`;  `after`:  the methods of `cls` that run after it, its after hooks, in order --
+      a live list, so a hook added later runs too (`core.add_after_hook()`).  See `run_acting()`.
     - SIDE EFFECT:  replaces the method on `cls` with one that runs it through the running program's history.
       - Only once:  a sub-class describing it again doesn't wrap it twice.
     - throws `TypeError` if `name` isn't a method of `cls`
@@ -329,11 +406,15 @@ def declare_action(cls: type, name: str, undone_as: str | None, cant_be_undone: 
     if getattr(method, UNDONE_AS_KEY, None) is not None:
         return
 
-    setattr(cls, name, action_of(method, undone_as, cant_be_undone))
+    setattr(cls, name, action_of(method, undone_as, cant_be_undone, cancels, after))
 
 
 def action_of[**Params, Result](
-    function: Callable[Params, Result], undone_as: str | None, cant_be_undone: str | None = None
+    function: Callable[Params, Result],
+    undone_as: str | None,
+    cant_be_undone: str | None = None,
+    cancels: bool = False,
+    after: list[str] | None = None,
 ) -> Callable[Params, Result]:
     """`function`, as an action that's ONE undo step titled `undone_as`:  what runs in its place.
 
@@ -349,9 +430,15 @@ def action_of[**Params, Result](
         from spell_core.things import program_core
 
         history = program_core().RUNTIME.history
+        # an after hook is a method of the thing it runs on, given the action's blanks
+        hooks = [functools.partial(getattr(args[0], hook), *args[1:], **kwargs) for hook in after or []]
+
+        def act() -> Any:
+            return run_acting(history, lambda: function(*args, **kwargs), cancels, hooks)
+
         if undone_as is None:
-            return history.run_unrecorded(lambda: function(*args, **kwargs))
-        return history.run(undone_as, lambda: function(*args, **kwargs))
+            return history.run_unrecorded(act)
+        return history.run(undone_as, act)
 
     setattr(action, UNDONE_AS_KEY, undone_as if undone_as is not None else cant_be_undone)
     return action
@@ -359,6 +446,99 @@ def action_of[**Params, Result](
 
 # What an action's method made undoable is marked with:  its step's title
 UNDONE_AS_KEY = "_spell_undone_as"
+
+
+def run_acting(history: UndoHistory, act: Callable[[], Any], cancels: bool, after: list[Callable[[], Any]]) -> Any:
+    """Run `act`, an action's steps, then its after hooks (`after`), in order, as ONE action that may be called off.
+
+    - The JavaScript core's `runActing()` (epic `language` P56).
+    - `cancel` in its steps or a hook (`ActionCanceled`) calls it off:  every change it made is put back
+      (`recording_changes()`), it leaves no undo step (`drop_unchanged_records()`), its hooks stop, and it answers
+      `False`.
+    - Done, an action that may cancel (`cancels`) answers `True`, unless it gave back something else.
+    - A coroutine (an `async def` action, or a hook):  what's returned is one, awaiting the rest in turn.
+    - Neither to do:  `act` just runs.
+    """
+    if not cancels and not after:
+        return act()
+    changes = history.recording_changes()
+
+    def done(value: Any) -> Any:
+        changes.close()
+        return True if cancels and value is None else value
+
+    def called_off() -> bool:
+        changes.put_back()
+        history.drop_unchanged_records()
+        return False
+
+    try:
+        result = act()
+        if inspect.iscoroutine(result):
+            return _acting_async(result, after, done, called_off, changes)
+        for at, hook in enumerate(after):
+            ran = hook()
+            if inspect.iscoroutine(ran):
+                return _acting_async(ran, after[at + 1 :], lambda _: done(result), called_off, changes)
+        return done(result)
+    except ActionCanceled:
+        return called_off()
+    except BaseException:
+        changes.close()
+        raise
+
+
+async def _acting_async(
+    running: Coroutine[Any, Any, Any],
+    rest: list[Callable[[], Any]],
+    finish: Callable[[Any], Any],
+    called_off: Callable[[], bool],
+    changes: "ChangesMade",
+) -> Any:
+    """`running`, then each of `rest` in turn, awaited:  `run_acting()`'s, once something waits."""
+    try:
+        value = await running
+        for hook in rest:
+            ran = hook()
+            if inspect.iscoroutine(ran):
+                await ran
+        return finish(value)
+    except ActionCanceled:
+        return called_off()
+    except BaseException:
+        changes.close()
+        raise
+
+
+class ChangesMade:
+    """What an action that may cancel has changed:  how to put each prop, list and kept value back as it was."""
+
+    def __init__(self, open_list: "list[ChangesMade]") -> None:
+        """Noting, on `open_list`, the history's open recorders, until `close()`."""
+        self._open_list = open_list
+        # which of each target's values are noted already, by the target's id
+        self._keys: set[tuple[int, object]] = set()
+        # how to put each back, in the order they were first changed, with their targets kept alive
+        self._undos: list[tuple[object, Callable[[], object]]] = []
+
+    def note(self, target: object, key: object, undo: Callable[[], object]) -> None:
+        """Keep `undo` for `target`'s `key`, unless one's kept already:  the first change's is the one to put back."""
+        record_key = (id(target), key)
+        if record_key in self._keys:
+            return
+        self._keys.add(record_key)
+        self._undos.append((target, undo))
+
+    def close(self) -> None:
+        """Stop noting changes.  Nothing is put back."""
+        if self in self._open_list:
+            self._open_list.remove(self)
+
+    def put_back(self) -> None:
+        """Stop noting, and put every change back as it was:  the newest first, through the setters."""
+        self.close()
+        for _target, undo in reversed(self._undos):
+            undo()
 
 
 ################
@@ -407,6 +587,36 @@ class ItemsRecord:
     def redo(self) -> None:
         """Through its `items` setter, as `undo()`."""
         self.items.items = list(self.after)
+
+
+class KeptRecord:
+    """One value the core keeps for a thing itself, changed in a step (`note_kept()`):  put back through `put`."""
+
+    def __init__(self, put: Callable[[object], None], was: object) -> None:
+        """Its value `was` before the step's first change."""
+        self.put = put
+        self.was = was
+        # its value after the step's last change
+        self.value: object = None
+
+    def undo(self) -> None:
+        """Put its value back."""
+        self.put(self.was)
+
+    def redo(self) -> None:
+        """Make its value again."""
+        self.put(self.value)
+
+
+def _is_unchanged(record: UndoRecord) -> bool:
+    """Does `record` change nothing in the end:  its value, or its items, as they were?"""
+    if isinstance(record, SettingRecord | KeptRecord):
+        return record.value is record.was or record.value == record.was
+    if isinstance(record, ItemsRecord):
+        return len(record.before) == len(record.after) and all(
+            a is b for a, b in zip(record.before, record.after, strict=True)
+        )
+    return False
 
 
 def english_title(action: UndoAction, title: str | None) -> str:

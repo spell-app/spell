@@ -787,6 +787,13 @@ lists.addRule(ListAdd, {
         ["add thing to the back of my-list", "core.append(myList, thing)"],
         ["add thing to the top of my-list", "core.append(myList, thing)"]
       ]
+    },
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "score", datatype: "number" })
+      },
+      tests: [["add 10 to score", "score = score + 10"]]
     }
   ]
 })
@@ -1062,6 +1069,42 @@ lists.addRule(CanGiveUp, {
         ["stock can give up card", "core.canGiveUp(stock, card)"],
         ["stock can let go of card", "core.canGiveUp(stock, card)"],
         ["stock can't release card", "!core.canGiveUp(stock, card)"]
+      ]
+    }
+  ]
+})
+
+// its other word order, what it gives up in the middle:  `the pile can give it up`, `can give the card up` (epic `language` P56)
+lists.addRule(CanGiveUp, {
+  syntax: "{operator:can_or_cannot} give {expression:operand} up",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+        scope.variables?.add("stock")
+      },
+      tests: [
+        ["stock can give card up", "core.canGiveUp(stock, card)"],
+        ["stock cannot give the card up", "!core.canGiveUp(stock, card)"]
+      ]
+    }
+  ]
+})
+
+// ... and `the pile can let it go`
+lists.addRule(CanGiveUp, {
+  syntax: "{operator:can_or_cannot} let {expression:operand} go",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+        scope.variables?.add("stock")
+      },
+      tests: [
+        ["stock can let card go", "core.canGiveUp(stock, card)"],
+        ["stock can't let the card go", "!core.canGiveUp(stock, card)"]
       ]
     }
   ]

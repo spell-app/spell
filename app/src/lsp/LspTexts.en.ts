@@ -60,6 +60,10 @@ export const LSP_TEXTS = {
 
   define: "Define `{signature}`",
 
+  // an attribute's value switched between text and code (`LSP.CodeOrText`, epic `editor` T74)
+  makeItCode: "Make it code",
+  makeItText: "Make it text",
+
   ////////////////
   // ## The Template Explorer's tree (`ScopeExplorer`)
   ////////////////

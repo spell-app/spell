@@ -11,6 +11,7 @@ import { SpellTyping } from "./SpellTyping"
 import { ValuePicker } from "./ValuePicker"
 import { ValueChoices } from "./ValueChoices"
 import { ErrorHover } from "./ErrorHover"
+import { CodeOrTextTyping } from "./CodeOrTextTyping"
 import { FoldArrows } from "./FoldArrows"
 import { LinkClick } from "./LinkClick"
 import { SpellTokensProvider } from "./SpellTokensProvider"
@@ -185,6 +186,8 @@ export class SpellMonaco {
     SpellBubbly.watch(LANGUAGES)
     monaco.editor.onDidCreateEditor((editor) => {
       new SpellTyping(editor, { indents: LANGUAGES, quotes: [LANGUAGE] })
+      // `{` in a tag's quoted value makes it code, `"` right after a code value's `{` text (epic `editor` T74)
+      new CodeOrTextTyping(editor, LANGUAGES)
       // the right-click menu's Rename Symbol only where something can be renamed (epic `editor` I147)
       SpellMonaco.#registered?.features.followRenameRow(editor)
       // an attribute's words under its value, once the caret rests in it (epic `editor` T70)

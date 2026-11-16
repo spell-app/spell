@@ -29,9 +29,11 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
 /**
  * Whose controls (`buttons`), which picks the buttons:
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
- * - `issue`:  a judgement call's, a closed issue's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
+ * - `issue`:  an open judgement call's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
  * - `issue-open`:  an open issue, nothing fixed (epic `epic-engine` I299):  Do this, Revisit, the x (`ISSUE_OPEN_BUTTONS`)
- * - `issue-fixed`:  an issue or call fixed, waiting for Owen (I299):  Send back, Revisit, Accept (`ISSUE_FIXED_BUTTONS`)
+ * - `issue-fixed`:  an issue or call fixed, waiting for Owen (I299):  Revisit, Accept (`ISSUE_FIXED_BUTTONS`)
+ * - `issue-done`:  an issue or call finished -- done, canceled, decided (epic `epic-engine` J231):  Revisit, Saw it
+ *   (`ISSUE_DONE_BUTTONS`);  no plane, its `done in P20` pill in the plane's place when a phase took it
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `todo-in-phase`:  a todo already in a phase (its `in P52` pill, epic `epic-engine` I271):  Revisit and the x
  *   (`TODO_IN_PHASE_BUTTONS`);  the pill does what the plane would
@@ -64,6 +66,7 @@ export const REVIEW_KINDS = [
   "issue",
   "issue-open",
   "issue-fixed",
+  "issue-done",
   "todo",
   "todo-in-phase",
   "todo-done",
@@ -195,7 +198,8 @@ const DO_THIS: ReviewButtonSpec = {
 }
 
 /**
- * A judgement call's review buttons, and a closed issue's (epic `epic-engine` I232):  Do this, Revisit, Approve.
+ * An OPEN judgement call's review buttons (epic `epic-engine` I232):  Do this, Revisit, Approve;
+ * a finished one draws `ISSUE_DONE_BUTTONS` (J231).
  * - Do this, the plane (a `todo` mark, as a phase's):  act on it, in the item itself;
  *   no todo made, it stays where it is until handled (`PlanDoc.doThis()`)
  * - Approve, the check:  an open call agreed with (closed, accepted);  a closed item, reviewed
@@ -216,14 +220,25 @@ export const ISSUE_OPEN_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
- * An issue or a call FIXED, waiting for Owen's review (orange;  epic `epic-engine` I299):  Send back, Revisit, Accept.
- * - Send back, the plane (the same `todo` mark, I292's way to send a fix back):  not fixed, fix it again here
+ * An issue or a call FIXED, waiting for Owen's review (orange;  epic `epic-engine` I299):  Revisit, Accept.
  * - Accept, the check:  the fix is good;  `inbox apply` closes it (`PlanDoc.acceptFix()`)
+ * - no plane (epic `epic-engine` J231;  Owen, 2026-11-15:  "make it replace the plane when the issue is complete"):
+ *   sending a fix back is Revisit's job, with a note saying what's still wrong (it reopens the item, I303)
  */
 export const ISSUE_FIXED_BUTTONS: readonly ReviewButtonSpec[] = [
-  { ...DO_THIS, label: "sendBack", tip: "sendBackTip" },
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
   { action: "approve", color: "green", icon: "check", label: "acceptFix", tip: "acceptFixTip" }
+]
+
+/**
+ * An issue or a call FINISHED -- done, canceled, decided (epic `epic-engine` J231):  Revisit, then Saw it.
+ * - no plane:  nothing left to send;  the item's `done in P20` pill stands in its place when a phase took it
+ *   (`EpicItem.donePill`)
+ * - Saw it (`approve`):  reviewed, its update label off, as a finished todo's (I296)
+ */
+export const ISSUE_DONE_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
+  { action: "approve", color: "green", icon: "check", label: "sawIt", tip: "sawItTip" }
 ]
 
 /**
@@ -355,6 +370,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   issue: ISSUE_BUTTONS,
   "issue-open": ISSUE_OPEN_BUTTONS,
   "issue-fixed": ISSUE_FIXED_BUTTONS,
+  "issue-done": ISSUE_DONE_BUTTONS,
   todo: TODO_BUTTONS,
   "todo-in-phase": TODO_IN_PHASE_BUTTONS,
   "todo-done": TODO_DONE_BUTTONS,

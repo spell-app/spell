@@ -27,6 +27,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "untyped-property": 'Di qué es "{name}", p. ej. "{line} como {type}"',
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
   "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
+  "cancel-outside-an-action": '"{text}" cancela una acción:  va en sus pasos, bajo "para ..." o "después de ..."',
+  "after-names-no-action":
+    '"{text}" se ejecuta después de una acción, pero ninguna acción antes se lee así:  como en "después de poner una carta en una pila", para "para poner una carta en una pila"',
   "made-from-each-other":
     '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
   "not-made-yet":

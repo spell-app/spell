@@ -18,10 +18,13 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  *     as is a list type of spell's own, e.g. `one list`:  it'd make every list hold a card once.
  * - SIDE EFFECT:  the item type gains a READ-ONLY member naming the list type, `the pile of a card`:
  *   the pile holding it, or nothing.  Declared by THIS line -- see `P.TypeScope.declareOwnerMember()`.
+ *   - And a second, the one it was in before its latest move, `the card's last pile` (epic `language` P56):
+ *     nothing before its first, and part of the undo step that moved it (`List.lastOwnerOf()`).
+ *     Its word is the language's, `last`, Spanish's `última pila` (`SP.LanguageWords.lastListWords`).
  *   - A built-in item type, e.g. `a thing belongs to one bag`, gets NO member:
  *     it would go on a type every project shares.  Its lists still hold each OBJECT once.
  * - Compiles to two patched members (`P.ASTPatchedMember`), the member first:
- *   - the member, `get pile() { return Pile.ownerOf(this) }`
+ *   - the member, `get pile() { return Pile.ownerOf(this) }`;  then `get lastPile() { return Pile.lastOwnerOf(this) }`
  *   - `static exclusive = true` on `Pile`:  the runtime `List` keeps who holds each item
  *   - Each is written in its class's body when the project declares the class (`P.WriterProject.movedMembers`),
  *     else patched on where we are, after both classes.
@@ -109,7 +112,11 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
   mutateScope(match: P.MatchFor<this>) {
     const { type, list } = match.groups
     const itemType = getKnownType(type)
-    if (!SP.isBuiltInTypeScope(itemType)) getKnownType(list).declareOwnerMember(itemType, match)
+    if (SP.isBuiltInTypeScope(itemType)) return
+    const listType = getKnownType(list)
+    listType.declareOwnerMember(itemType, match)
+    const { savedField } = match.data as { savedField?: string }
+    if (!savedField) listType.declareOwnerMember(itemType, match, SP.Language.of(match.scope).lastListName(listType))
   }
 
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
@@ -143,7 +150,12 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
     // the member first:  what the line declares, so its `SPELL: DECLARES` moves with it -- see class docs
     const statements: P.ASTStatement[] = [new P.ASTPatchedMember(match, { member: exclusive })]
     if (!P.isBuiltInType(SP.typeName(`${type.value}`))) {
-      statements.unshift(BelongsToOne.ownerMemberAST(match, P.matchAST<P.ASTTypeExpression>(type), listAST))
+      const itemAST = P.matchAST<P.ASTTypeExpression>(type)
+      const lastName = SP.Language.of(match.scope).lastListName(getKnownType(list)).replace(/ /g, "_")
+      statements.unshift(
+        BelongsToOne.ownerMemberAST(match, itemAST, listAST),
+        BelongsToOne.ownerMemberAST(match, itemAST, listAST, { property: lastName, methodName: "lastOwnerOf" })
+      )
     }
     return new P.ASTStatementGroup(match, { statements })
   }
@@ -158,21 +170,23 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
    * The item type's member naming the list type, patched on,
    * e.g. `Object.defineProperty(Card.prototype, 'pile', { get() { return Pile.ownerOf(this) }, ... })`.
    * - Named as `declareOwnerMember()` names it, e.g. `stock_pile` for `a stock-pile`.
+   * - `last`:  the member naming the list it was in before, `get lastPile() { return Pile.lastOwnerOf(this) }`.
    */
   static ownerMemberAST(
     match: P.MatchFor<BelongsToOne>,
     itemAST: P.ASTTypeExpression,
-    listAST: P.ASTTypeExpression
+    listAST: P.ASTTypeExpression,
+    last?: { property: string; methodName: "lastOwnerOf" }
   ): P.ASTPatchedMember {
     const owner = new P.ASTScopedMethodInvocation(match, {
       thing: listAST,
-      methodName: "ownerOf",
+      methodName: last?.methodName ?? "ownerOf",
       args: [new P.ASTSelfLiteral(match)]
     })
     return new P.ASTPatchedMember(match, {
       member: new P.ASTPropertyDefinition(match, {
         type: itemAST,
-        property: P.instanceCase(listAST.runtimeName),
+        property: last?.property ?? P.instanceCase(listAST.runtimeName),
         get: new P.ASTMethodDefinition(match, { body: new P.ASTReturnStatement(match, { value: owner }) })
       })
     })
