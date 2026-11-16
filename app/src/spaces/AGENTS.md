@@ -97,6 +97,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `@spell/examples`, `@spell/library`, `@spell/guides`, `@spell/sites` | `spaces/@spell/<group>/`, committed |
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
+  | `owen@acme`, any person's space in another org | spell.spaces' `@acme/owen@/`:  found by its address (`personSpaceGroup()`), opened but not listed (epic `repo-split` P26) |
 
   - spell.spaces:  beside the kit's main checkout (`~/www/spell.spaces`):
     ONE folder for main and every worktree.
@@ -492,6 +493,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `/editor`
   - It starts the editor once the page server listens, and stops it with the page server:
     [EditorServer.ts](server/node/routes/EditorServer.ts), vite's dev server, run in `app/`.
+    - In an npm install of `spell`:  the BUILT editor (`app/dist/`, `yarn build`, which `spell publish` ships), on a
+      small server of its own passing the page server's paths on as vite's proxy does, the ONE list of them in
+      [editorPaths.ts](server/node/routes/editorPaths.ts) (epic `repo-split` P26).
+    - Never the house-network site from an install:  only a source checkout starts it.
   - The house-network test site the same way:  [LocalSiteServer.ts](server/node/routes/LocalSiteServer.ts),
     the cloud and Caddy, from the main checkout's page server alone, on a Mac `spell space local setup` has set up
     (epic `atmosphere` T58).

@@ -181,3 +181,30 @@ function orgProgramGroup(place: string): SP.ProjectRootSpec | undefined {
 }
 
 SpellSetup.addProjectRootFinder(orgProgramGroup)
+
+/** A person's space in an org, `owen@acme`, or a project in it:  never its own folders, `ana@rs/__inbox`. */
+const PERSON_SPACE = /^([a-z][a-z0-9_]*@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
+
+/**
+ * The project group of a person's space in an org other than this machine's person's (epic `repo-split` P26):
+ * `owen@acme` for `owen@acme/harbor-new`, in `<spell-spaces>/@acme/owen@/`;  `undefined` for anything else.
+ * - found by its address, as `orgProgramGroup()` finds an org's:  so the editor OPENS its projects
+ *   (`/edit/owen@acme/harbor-new`), but doesn't list them;  only this machine's person's space is a listed group
+ * - only projects:  a data folder's address reads the same, and never asks
+ */
+function personSpaceGroup(place: string): SP.ProjectRootSpec | undefined {
+  const space = PERSON_SPACE.exec(place)?.[1] as SP.ProjectRootPath | undefined
+  if (!space || space === `${LOCAL_PERSON}@${HOME_ORG}`) return undefined
+  return {
+    path: space,
+    space,
+    domain: "projects",
+    title: "Projects",
+    Type: "Project",
+    type: "project",
+    description: `${space}'s projects`,
+    icon: "folder"
+  }
+}
+
+SpellSetup.addProjectRootFinder(personSpaceGroup)
