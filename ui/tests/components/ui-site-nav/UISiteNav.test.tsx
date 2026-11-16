@@ -278,16 +278,31 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(getComputedStyle(label).display).toBe("none")
   })
 
-  it("a group's icon shows before its label, its pages a step in;  `collapsed`, one column, centred, an iconless group a line (I20, I31)", async () => {
+  it("a group's icon shows before its label, its pages 8px in, inside an open group's well;  `collapsed`, one column, centred, an iconless group a line (I20, I31)", async () => {
     const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
     const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
     await ShadowTree.settle(host)
     const rowOf = (title: string) => row(host, title).shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!
-    const startOf = (title: string) => parseFloat(getComputedStyle(rowOf(title)).paddingInlineStart)
+    // where a row's icon starts, from the nav's edge
+    const startOf = (title: string) =>
+      rowOf(title).getBoundingClientRect().left -
+      host.getBoundingClientRect().left +
+      parseFloat(getComputedStyle(rowOf(title)).paddingInlineStart)
     expect(row(host, "Design").getAttribute("icon")).toBe("palette")
-    // a small step in (Owen, I20:  "less indent"):  1em more than its group's label
-    expect(startOf("Explore") - startOf("Design")).toBeGreaterThan(8)
-    expect(startOf("Explore") - startOf("Design")).toBeLessThan(20)
+    // 8px in from its group's label at 16px text (Owen, I31:  "move the inset items 8px to the right"):  0.5em
+    const textSize = parseFloat(getComputedStyle(host).fontSize)
+    expect(startOf("Explore") - startOf("Design")).toBeCloseTo(textSize / 2, 1)
+    // the open group a slight inset well round its label and its pages (Owen's A, I31);  a shut one, none
+    // - its label on the bar's own fill, the well's fill only under it, round its pages (I32)
+    const design = getComputedStyle(row(host, "Design"))
+    expect(design.backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(design.outlineStyle).toBe("solid")
+    expect(parseFloat(design.borderTopLeftRadius)).toBeGreaterThan(0)
+    expect(getComputedStyle(rowOf("Design")).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    const pages = row(host, "Design").shadowRoot!.querySelector<HTMLElement>('[part~="group"]')!
+    expect(getComputedStyle(pages).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    expect(pages.getBoundingClientRect().top).toBeCloseTo(rowOf("Design").getBoundingClientRect().bottom, 0)
+    expect(getComputedStyle(row(host, "Run")).outlineStyle).toBe("none")
     // Run, with no icon, keeps an icon's room beside Design's
     expect(row(host, "Run").querySelector(':scope > [slot="icon"]')).not.toBeNull()
     host.setAttribute("collapsed", "")

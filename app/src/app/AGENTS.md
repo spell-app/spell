@@ -157,6 +157,10 @@ and in the app's build folder, `app/` at the app folder's root.
     - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
       the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
+    - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
+      as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
+    - Four clicks select a block (epic `codemirror` T15):  the one the clicked line's fold arrow folds, or the
+      innermost one it's in;  each click after, the block around it (`CLICKS_SELECT_BLOCKS`).
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
     the scope explorer's packs use it too.
   - What a hover says and which code actions show are decided once, editor-free, in
@@ -172,8 +176,13 @@ and in the app's build folder, `app/` at the app folder's root.
       [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from [MarkupMarks](ui/MarkupMarks.ts), the page's own
       reading of it (`BubblyMarkup`);  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no
       editor in them;  pointed ends.
+      - A tag's `⟨` and `⟩` and the bar of its `|⟩` are a step darker than its other marks, all one colour
+        (`--bubbly-angle-ink`, the editor's `--bubbly-angle-mark`;  epic `codemirror` T17).
     - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
       ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
+    - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
+      letter in its own colour under it ([CodeMirrorSelection](ui/codemirror/CodeMirrorSelection.ts), epic `language`
+      I124):  drawn in place of CodeMirror's own, which the sheet hides.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
       [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
@@ -192,7 +201,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - Pinned lines (Settings… › Pinned lines, epic `codemirror` T8):
     the lines opening the blocks the top of the code is inside stay at the top while it scrolls
     ([CodeMirrorPinned](ui/codemirror/CodeMirrorPinned.ts)).
-  - Nine helps as Spell is typed, in every Spell editor, the look on or off
+  - Ten helps as Spell is typed, in every Spell editor, the look on or off
     ([CodeMirrorTyping](ui/codemirror/CodeMirrorTyping.ts)):  what each decides from the lines is the language
     service's `LSP.SpellTyping`;  each one undo
     - each writes with its key, so only the editor typed in helps:  a file's editor and a slice of it both have them
@@ -208,15 +217,20 @@ and in the app's build folder, `app/` at the app folder's root.
       any other, its closing tag written out, `<segment ` => `<segment |></segment>`;  one undo leaves `<action `
       - the shape choosing it from the suggestion list writes, from the same table (`LSP.CompletionShapes.spaceAfterTag()`)
       - only with nothing more of the tag written after the caret
+    - `|>` typed in a tag writes `/>`, which the bubbly look draws as a bar and a point, `|⟩` (epic `codemirror` T16):
+      only between a tag's attributes, never in a value, text or Spell code;  one undo leaves the `|>` typed
+      - an HTML file's editor has this help alone (`CodeMirrorTyping.markupExtension()`)
     - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
       Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
       and closing tag, a body;  one undo
       - a line of a tag's attributes, under its first line, moves alone (I142);  so does a comment line (I161)
-    - Enter between a tag's attributes puts the rest on a new line, lined up under its first attribute (epic `editor` I142):
-      measured as CodeMirror draws it, tabs then spaces;  one undo
-      - a tab is 2 spaces wide (Monaco's, epic `language` I113), but the bubbly look's bands and pills take room of
-        their own, so the text it writes can differ from one look to the other, lined up all the same
+    - Enter between a tag's attributes lays the tag out as Prettier lays out a long one (epic `language` I133):
+      each attribute on its own line, a level in from the tag's, its `>` or `/>` on its own line back at the tag's level;
+      one undo (`LSP.SpellTyping.tagLaidOut()`;  before, epic `editor` I142 lined the rest up under the first attribute)
+      - Backspace at an attribute line's start joins it to the line above, a space between;  with every attribute back
+        on the tag's line, its `>` comes up too (`LSP.SpellTyping.tagLineJoined()`)
+      - Format Document keeps such a tag as it is
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step

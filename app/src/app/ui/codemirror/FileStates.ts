@@ -336,7 +336,7 @@ export class FileStates {
         CodeMirrorPopups.extension(),
         CodeMirrorLook.extension((isBubbly) =>
           isBubbly
-            ? CodeMirrorBubbly.extension(fileOf, (state) => state.field(sliceShown))
+            ? CodeMirrorBubbly.extension(fileOf, (state) => drawnSlice(state))
             : CodeMirrorTokens.extension(fileOf)
         ),
         CodeMirrorSetup.extensions()
@@ -454,7 +454,10 @@ export class FileStates {
           )
         ]
       : isMarkupFile(file)
-        ? [CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))]
+        ? [
+            CodeMirrorTyping.markupExtension(),
+            CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))
+          ]
         : []
     return [
       EditorView.updateListener.of((update) => {
@@ -660,16 +663,12 @@ const HIDDEN_WORDS = Decoration.replace({})
 
 /**
  * The common indent of lines `first` to `last` of `doc`, hidden on each:  the slice's lines shown as if dedented.
- * - Blank lines don't count toward it, and lose only what they have of it.
+ * - Blank lines lose only what they have of it.
  * - A first line whose code starts at `from`, past its indent, keeps what's before it to `HIDDEN_WORDS`.
  */
 function indentHidden(doc: EditorState["doc"], first: number, last: number, from: number) {
-  let common = Infinity
-  for (let number = first; number <= last; number++) {
-    const { text } = doc.line(number)
-    if (text.trim()) common = Math.min(common, text.length - text.trimStart().length)
-  }
-  if (!common || common === Infinity) return []
+  const common = commonIndentOf(doc, first, last)
+  if (!common) return []
   const ranges = []
   for (let number = first; number <= last; number++) {
     const line = doc.line(number)
@@ -677,6 +676,27 @@ function indentHidden(doc: EditorState["doc"], first: number, last: number, from
     if (indent && line.from >= from) ranges.push(HIDDEN_WORDS.range(line.from, line.from + indent))
   }
   return ranges
+}
+
+/** How many characters of indent lines `first` to `last` of `doc` all start with;  blank lines don't count. */
+function commonIndentOf(doc: EditorState["doc"], first: number, last: number): number {
+  let common = Infinity
+  for (let number = first; number <= last; number++) {
+    const { text } = doc.line(number)
+    if (text.trim()) common = Math.min(common, text.length - text.trimStart().length)
+  }
+  return common === Infinity ? 0 : common
+}
+
+/**
+ * The slice `state` shows, as the bubbly look draws it:  its lines, and the indent hidden on each when it's dedented,
+ * so its rails and feet stand under its bands, where the hidden indent leaves them (epic `language` I128).
+ */
+function drawnSlice(state: EditorState): Slice {
+  const { from, to, dedent } = state.field(sliceShown)
+  if (!dedent) return { from, to }
+  const { doc } = state
+  return { from, to, hiddenIndent: commonIndentOf(doc, doc.lineAt(from).number, doc.lineAt(to).number) }
 }
 
 /** `effects`, one or many or none, as a list. */

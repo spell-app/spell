@@ -1,8 +1,8 @@
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
-import { codeFolding, foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
+import { codeFolding, foldable, foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
 import { lintKeymap } from "@codemirror/lint"
 import { openSearchPanel, searchKeymap } from "@codemirror/search"
-import { Compartment, EditorState, type Extension, StateEffect } from "@codemirror/state"
+import { Compartment, EditorSelection, EditorState, type Extension, StateEffect } from "@codemirror/state"
 import {
   EditorView,
   ViewPlugin,
@@ -35,6 +35,10 @@ import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
  *   - CodeMirror asks for each by its English, through one table (`EditorState.phrases`)
  *   - `PHRASE_KEYS` turns that English into our keys
  *   - the editors follow `appTexts.lang`:  each one's words change when the app's do, a Spanish page's included
+ * - Selected text never drags:  a press inside the selection starts a new one, as VS Code's
+ *   `editor.dragAndDrop: false` (`PRESS_STARTS_SELECTION`, epic `codemirror` I9).
+ * - A quadruple click selects the block its line is in, the one its fold arrow folds;
+ *   each click after that, the block around it (`CLICKS_SELECT_BLOCKS`, epic `codemirror` T15).
  * - Its position in the import graph:  CodeMirror and the app's texts;  never a file or the parser.
  ****************/
 export class CodeMirrorSetup {
@@ -48,6 +52,10 @@ export class CodeMirrorSetup {
       highlightSpecialChars(),
       drawSelection(),
       dropCursor(),
+      // a press inside the selection starts a new one:  selections don't drag (epic `codemirror` I9)
+      PRESS_STARTS_SELECTION,
+      // four clicks select a block, five the block around it ... (epic `codemirror` T15)
+      CLICKS_SELECT_BLOCKS,
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
       // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
@@ -212,6 +220,79 @@ const SPEAKS_NOW = ViewPlugin.fromClass(
     }
   }
 )
+
+/**
+ * A press inside the selection starts a new selection there, as a press outside it does:
+ * selected text never drags to move (or, with ⌥, copy) it.
+ * - CodeMirror has no setting for it:  a plain press inside the main selection always waits to see if it's a drag
+ *   (`MouseSelection.dragging`), and lets the browser drag the text.
+ * - So the press first puts the caret where it landed, then CodeMirror's own press handling runs, with no selection
+ *   to drag:  a drag from there selects, a click leaves the caret there, a double-click picks the word.
+ *   - NOT blocking `dragstart`:  CodeMirror would still wait 10px before selecting, and select nothing on a short drag.
+ * - Left alone:  ⇧ (extend the selection), ⌘ (add or drop a cursor), and text dragged in from outside, which still drops.
+ */
+const PRESS_STARTS_SELECTION = EditorView.domEventHandlers({
+  mousedown(event, view) {
+    if (event.button !== 0 || event.detail > 1 || event.shiftKey || event.metaKey || event.ctrlKey) return false
+    const { main } = view.state.selection
+    if (main.empty) return false
+    const pressed = view.posAtCoords({ x: event.clientX, y: event.clientY })
+    if (pressed === null || pressed < main.from || pressed > main.to) return false
+    view.dispatch({ selection: { anchor: pressed }, userEvent: "select.pointer" })
+    // CodeMirror's own handler runs next
+    return false
+  }
+})
+
+/**
+ * A quadruple click selects the whole block the clicked line is in:  its head line and every line of its body,
+ * a tag's closing line too.
+ * - One click puts the caret, two pick the word, three the line (CodeMirror's own);  four the block.
+ *   - On a head line (`to draw solitaire`, `a "card" is a view`, `<content>`), the block it opens.
+ *   - On a line of a body, the innermost block it's in.
+ *   - Each click after the fourth, the block around that one, up to the outermost.
+ *   - On a line in no block, the line, as three clicks select it.
+ * - A block is what folds, from the head line whose fold arrow folds it (`foldable()`):
+ *   Spell's from the language service (`CodeMirrorLanguage.folding()`), another language's from its own syntax.
+ * - The block as picked on the press:  dragging after it doesn't grow it.
+ * - Left to CodeMirror:  ⇧ (extend the selection), ⌘ (add a cursor).
+ * - The press lands inside the line three clicks selected:  `PRESS_STARTS_SELECTION` lets it be, as it's no single press.
+ */
+const CLICKS_SELECT_BLOCKS = EditorView.mouseSelectionStyle.of((view, event) => {
+  if (event.button !== 0 || event.detail < 4 || event.shiftKey || event.metaKey || event.ctrlKey) return null
+  const pressed = view.posAtCoords({ x: event.clientX, y: event.clientY })
+  if (pressed === null) return null
+  const block = blockAround(view.state, pressed, event.detail - 4)
+  if (!block) return null
+  return {
+    get: () => EditorSelection.create([EditorSelection.range(block.from, block.to)]),
+    update: () => {}
+  }
+})
+
+/**
+ * The block around `pos`, from its head line's start through its last line's newline, as three clicks take a line;
+ * `outward`:  how many blocks further out (0, the innermost);  past the outermost, the outermost.
+ * - `undefined` where `pos` is in no block.
+ */
+function blockAround(state: EditorState, pos: number, outward: number): { from: number; to: number } | undefined {
+  const { doc } = state
+  const pressedLine = doc.lineAt(pos)
+  let found: { from: number; to: number } | undefined
+  let outer = 0
+  // up from the pressed line, each head whose block reaches down to it
+  for (let number = pressedLine.number; number >= 1; number--) {
+    const head = doc.line(number)
+    const fold = foldable(state, head.from, head.to)
+    // the whole of its last line:  a syntax's fold may stop before a closing `}`
+    const last = fold && doc.lineAt(fold.to)
+    if (!last || last.number < pressedLine.number) continue
+    const to = last.to < doc.length ? last.to + 1 : last.to
+    found = { from: head.from, to }
+    if (outer++ === outward) break
+  }
+  return found
+}
 
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"

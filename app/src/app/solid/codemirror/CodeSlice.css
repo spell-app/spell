@@ -35,14 +35,21 @@
   }
 
   /*
-   * the bubbly look:  12px from the box's border to the bands on every side (epic `editor` I187), the editor's own room
-   * - above and below, its lines' (`codemirror.css`);  left, a line's room before its band (`--cmb-line-pad`)
-   * - right, a line's room after its words, 16px, less the 4px the editor reaches past the box, clipped
+   * the bubbly look:  8px from the box's border to the bands on every side (epic `language` I128, Owen:  "The code
+   * inside the box border should have 8px of padding";  epic `editor` I187 had 12px)
+   * - above and below, its lines' room round their bands counted in it;  left, a top-level band's round end 8px in
+   *   (`--cmb-line-pad`, not the code pane's 12px, kept clear of its fold arrows);  right, a line's end 8px in
    */
   &:has(> .CodeMirrorEditor > .cmb-editor) {
     padding: 0;
   }
   .cm-editor.cmb.cmb-editor {
-    margin-right: -4px;
+    --cmb-line-pad: calc(8px - var(--cmb-band-left));
+    .cm-content {
+      padding-block: calc(8px - var(--cmb-band-margin));
+    }
+    .cm-line {
+      padding-right: 8px;
+    }
   }
 }

@@ -143,17 +143,41 @@ export class CodeMirrorLanguage {
     )
   }
 
-  /** What folds:  each block the service says, from its head line to its last. */
+  /**
+   * What folds:  each block the service says, from its head line to its last.
+   * - The fold arrows ask it line by line, and so does a quadruple click (`CodeMirrorSetup`'s `CLICKS_SELECT_BLOCKS`):
+   *   so each parse's blocks are worked out once (`blocksOf()`).
+   */
   private folding(): Extension {
     return foldService.of((state, lineStart) => {
       const { file } = this
-      if (!file.match || file.contents !== state.doc.toString()) return null
+      const text = state.doc.toString()
+      if (!file.match || file.contents !== text) return null
       const line = state.doc.lineAt(lineStart).number - 1
-      const range = this.service.foldingRanges(file).find((each) => each.startLine === line)
-      if (!range) return null
-      return { from: state.doc.line(line + 1).to, to: state.doc.line(range.endLine + 1).to }
+      const endLine = this.blocksOf(file.match, text).get(line)
+      if (endLine === undefined) return null
+      return { from: state.doc.line(line + 1).to, to: state.doc.line(endLine + 1).to }
     })
   }
+
+  /**
+   * Each block's last line, by its head line (both from 0), for the parse `match` of `text`;  kept until the next one.
+   * - The text too:  a parse may keep its match as it takes an edit in.
+   */
+  private blocksOf(match: object, text: string): Map<number, number> {
+    if (this.blocks?.match !== match || this.blocks.text !== text) {
+      const byHead = new Map<number, number>()
+      for (const range of this.service.foldingRanges(this.file)) {
+        // the first one the service lists for a line, as `find()` took it
+        if (!byHead.has(range.startLine)) byHead.set(range.startLine, range.endLine)
+      }
+      this.blocks = { match, text, byHead }
+    }
+    return this.blocks.byHead
+  }
+
+  /** the last parse's blocks (`blocksOf()`) */
+  private blocks?: { match: object; text: string; byHead: Map<number, number> }
 
   ////////////////
   // ## Go to definition, code actions

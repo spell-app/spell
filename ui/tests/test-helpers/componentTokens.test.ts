@@ -60,7 +60,9 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   },
   "ui-page-layout/UIPageLayout.css": {
     "--ui-menu-header-bar-background":
-      "the menu beside the drawer's top takes the drawer's fill:  the two read as one surface (epic `mockup` I25)"
+      "the menu beside the drawer's top takes the drawer's fill:  the two read as one surface (epic `mockup` I25)",
+    "--ui-menu-header-bar-border":
+      "the menu beside the drawer's top has no line under it:  the page's box below sets itself apart by its shadow (I32)"
   },
   "ui-zoom/UIZoom.css": {
     "--ui-modal-dimmer-background":

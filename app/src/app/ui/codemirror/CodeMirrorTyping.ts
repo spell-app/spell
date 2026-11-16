@@ -17,13 +17,12 @@ import { EditorView, keymap } from "@codemirror/view"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
-import { CodeMirrorSetup } from "./CodeMirrorSetup"
 import { FileStates } from "./FileStates"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorTyping`
- * The nine helps as a person types Spell in a CodeMirror editor
+ * The ten helps as a person types Spell in a CodeMirror editor
  * (epic `codemirror` P4), so what they see is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicked or arrowed onto, a blank line inside a body gets that body's indent, the caret after it.
@@ -43,7 +42,10 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   Tab there, or ⌘], moves them in.  One undo.
  *   - A line of a tag's attributes under its first line moves alone, its indent tabs then spaces;
  *     so does a comment line.
- * - Enter between a tag's attributes lines the rest up under its first attribute, measured as it's drawn.
+ * - `|>` typed in a tag writes `/>`, which the bubbly look draws as a bar and a point, `|⟩`;
+ *   one undo leaves the `|>` typed.  HTML files have this one alone (`markupExtension()`).
+ * - Enter between a tag's attributes lays the tag out as Prettier lays out a long one:  each attribute on its own line,
+ *   a level in, its `>` on its own line;  Backspace at an attribute line's start joins it to the line above.
  * - Enter before a comment after code puts the comment on its own line, at the level of the body under it.
  * - Enter keeps the line's indent and follows Spell's Enter rules (`LSP.SpellTyping.ENTER_RULES`),
  *   and leaves no tabs or spaces at the end of the line it splits.
@@ -68,7 +70,10 @@ export class CodeMirrorTyping {
           { key: "Enter", run: (view) => CodeMirrorTyping.enter(view) },
           { key: "Tab", run: (view) => CodeMirrorTyping.moveLines(view, "in", "tab") },
           { key: "Shift-Tab", run: (view) => CodeMirrorTyping.moveLines(view, "out", "tab") },
-          { key: "Backspace", run: (view) => CodeMirrorTyping.moveLines(view, "out", "backspace") },
+          {
+            key: "Backspace",
+            run: (view) => backspaceInTag(view) || CodeMirrorTyping.moveLines(view, "out", "backspace")
+          },
           { key: "Mod-[", run: (view) => CodeMirrorTyping.moveLines(view, "out", "mod") },
           { key: "Mod-]", run: (view) => CodeMirrorTyping.moveLines(view, "in", "mod") }
         ])
@@ -82,6 +87,17 @@ export class CodeMirrorTyping {
         return text
       })
     ]
+  }
+
+  /**
+   * The help an HTML file's editor has (a property editor page, `Card.editor.html`):
+   * `|>` in a tag writes `/>`, as in a Spell file's drawing.
+   */
+  static markupExtension(): Extension {
+    return EditorView.inputHandler.of(
+      (view, from, to, text) =>
+        from === to && text === ">" && view.state.selection.ranges.length === 1 && closeWithBar(view, from)
+    )
   }
 
   ////////////////
@@ -235,6 +251,7 @@ export class CodeMirrorTyping {
     const index = line.number - 1
     lines[index] = line.text.slice(0, column) + text + line.text.slice(column)
     const onLine = { from: line.number, to: line.number }
+    if (text === ">" && closeWithBar(view, from)) return true
     const indent = LSP.SpellTyping.indentToAdd(lines, index, column)
     // the letter and its indent, one undo step
     if (indent)
@@ -347,72 +364,80 @@ function enterBeforeComment(view: EditorView): boolean {
 }
 
 /**
- * Enter between a tag's attributes (`<container columns="7" |spacing="xs">`):  the rest goes to a new line
- * lined up under the tag's first attribute, `columns` (I142).
- * - Lined up as the editor draws it, not by counting letters:  its font needn't be monospace, and the bubbly look
- *   leaves room round some words.  So it measures where the first attribute is, then writes tabs, then spaces
- *   for what's left (`LSP.SpellTyping.indentOfWidth()`).
- * - The spaces before the caret go:  no trailing space left on the tag's line.
- * - Returns whether it did:  `false` leaves the key to Spell's Enter rules (not between a tag's attributes,
- *   or before its first).
+ * Enter between a tag's attributes (`<toolbar class="GameBar" |appearance="pills">`):  the tag laid out as Prettier
+ * lays out a long one, each attribute on its own line a level in, its `>` on its own line (epic `language` I133;
+ * `LSP.SpellTyping.tagLaidOut()`);  one undo.
+ * - Returns whether it did:  `false` leaves the key to Spell's Enter rules (not between a tag's attributes).
  */
 function enterInTag(view: EditorView): boolean {
   const { state } = view
   const caret = state.selection.main.head
   const line = state.doc.lineAt(caret)
-  const column = caret - line.from
-  const tag = LSP.SpellTyping.tagOpenAt(state.doc.toJSON(), line.number - 1, column)
-  const firstAttribute = tag?.firstAttribute
-  if (!tag || firstAttribute === undefined) return false
-  if (tag.line === line.number - 1 && column <= firstAttribute) return false
-  const before = line.text.slice(0, column).replace(/[ \t]+$/, "")
-  const after = line.text.slice(column).replace(/^[ \t]+/, "")
-  const indent = attributeIndent(view, tag.line, firstAttribute)
-  const from = line.from + before.length
+  const layout = LSP.SpellTyping.tagLaidOut(
+    state.doc.toJSON(),
+    line.number - 1,
+    caret - line.from,
+    indentSettingsOf(state)
+  )
+  return !!layout && writeLayout(view, layout)
+}
+
+/**
+ * Backspace at the start of a tag's attribute line, after its indent:  the line joins the one above, a space between
+ * (epic `language` I133;  `LSP.SpellTyping.tagLineJoined()`);  one undo.
+ * - Returns whether it did.
+ */
+function backspaceInTag(view: EditorView): boolean {
+  const { state } = view
+  const selection = state.selection.main
+  if (state.readOnly || state.selection.ranges.length !== 1 || !selection.empty) return false
+  const line = state.doc.lineAt(selection.head)
+  const layout = LSP.SpellTyping.tagLineJoined(state.doc.toJSON(), line.number - 1, selection.head - line.from)
+  return !!layout && writeLayout(view, layout, "delete.backward")
+}
+
+/** Write `layout` over the lines it replaces, the caret where it says. */
+function writeLayout(view: EditorView, layout: LSP.TagLayout, userEvent = "input"): boolean {
+  const { doc, lineBreak } = view.state
+  const from = doc.line(layout.from + 1).from
+  const to = doc.line(layout.to + 1).to
+  const anchor = from + layout.lines.slice(0, layout.caret.line - layout.from).join(lineBreak).length
   return write(
     view,
-    { from: line.number, to: line.number },
+    { from: layout.from + 1, to: layout.to + 1 },
     {
-      changes: { from, to: line.to - after.length, insert: state.lineBreak + indent },
-      selection: { anchor: from + 1 + indent.length },
+      changes: { from, to, insert: layout.lines.join(lineBreak) },
+      selection: { anchor: anchor + (layout.caret.line > layout.from ? lineBreak.length : 0) + layout.caret.column },
       scrollIntoView: true,
-      userEvent: "input"
+      userEvent
     }
   )
 }
 
-/**
- * The indent that puts a new line's words where a tag's first attribute is drawn:  `column` (0-based) of line `index`
- * (0-based);  tabs, then spaces for what's left.
- * - Measured on the page:  a tab is as wide as the editor draws it (the bubbly look's tab stop isn't 4 of the font's
- *   spaces), a space the font's.
- * - Counted where the line isn't drawn:  a tab `tabSize` columns.
- * - In a file indented with spaces:  spaces only.
- */
-function attributeIndent(view: EditorView, index: number, column: number): string {
-  const { state } = view
-  const settings = indentSettingsOf(state)
-  const line = state.doc.line(index + 1)
-  const start = view.coordsAtPos(line.from, 1)
-  // the end of the space before it:  where its pill starts, the bubbly look's room round its words after that
-  const at = view.coordsAtPos(line.from + column, -1)
-  const { space, tab } = indentWidthsOf(view)
-  if (!start || !at || !space || !tab) {
-    const width = LSP.SpellTyping.widthOf(line.text.slice(0, column).replace(/\S/g, " "), state.tabSize)
-    return LSP.SpellTyping.indentOfWidth(width, settings)
-  }
-  const width = Math.max(0, at.left - start.left)
-  if (settings.insertSpaces) return " ".repeat(Math.round(width / space))
-  const tabs = Math.floor(width / tab)
-  return "\t".repeat(tabs) + " ".repeat(Math.round((width - tabs * tab) / space))
-}
+////////////////
+// ## `|>` closes a tag
+////////////////
 
-/** How wide a space and a tab are drawn in `view`, in pixels (`CodeMirrorSetup.widthIn()`). */
-function indentWidthsOf(view: EditorView): { space: number; tab: number } {
-  return {
-    space: CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
-    tab: CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
-  }
+/**
+ * A `>` typed at `at`, right after a `|` in a tag:  the `|>` becomes `/>`, the caret after it (epic `codemirror` T16).
+ * - The `>` is written first, as typed, then the `/` over the `|` as a step of its own:
+ *   one undo leaves the `|>` typed, as the other helps leave what was typed.
+ * - Returns whether it did:  `false` leaves the key to the editor (`LSP.SpellTyping.closesWithBar()`).
+ */
+function closeWithBar(view: EditorView, at: number): boolean {
+  const { state } = view
+  if (state.readOnly) return false
+  const line = state.doc.lineAt(at)
+  const column = at - line.from
+  const lines = state.doc.toJSON()
+  lines[line.number - 1] = line.text.slice(0, column) + ">" + line.text.slice(column)
+  if (!LSP.SpellTyping.closesWithBar(lines, line.number - 1, column)) return false
+  view.dispatch({ changes: { from: at, insert: ">" }, selection: { anchor: at + 1 }, userEvent: "input.type" })
+  return write(
+    view,
+    { from: line.number, to: line.number },
+    { changes: { from: at - 1, to: at, insert: "/" }, selection: { anchor: at + 1 }, userEvent: "input" }
+  )
 }
 
 ////////////////
