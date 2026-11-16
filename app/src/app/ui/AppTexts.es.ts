@@ -43,7 +43,7 @@ const APP_TEXTS_ES: AppTextPack = {
   menuDuplicate: "Duplicar",
   menuDelete: "Eliminar",
   addPart: "Añadir a la aplicación",
-  paletteSearch: "Buscar",
+  paletteSearch: "Buscar vistas",
   paletteHint: "Haz clic o arrastra para añadir a la página",
   paletteMore: "{count} más",
   paletteMoreTip: "Mostrar todo lo que hay en {topic}",

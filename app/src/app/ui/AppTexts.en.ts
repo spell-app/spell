@@ -38,7 +38,7 @@ export const APP_TEXTS = {
   menuDuplicate: "Duplicate",
   menuDelete: "Delete",
   addPart: "Add to the app",
-  paletteSearch: "Search",
+  paletteSearch: "Search Views",
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
   paletteMoreTip: "Show everything filed under {topic}",
