@@ -1139,6 +1139,11 @@
           "description": "Just its icon, `title` its tooltip:  a `<ui-icon link>` instead of a menu `<ui-item>`."
         },
         {
+          "name": "inBar",
+          "type": "boolean",
+          "description": "An `iconOnly` action in the editor's top bar:  its tooltip Spell UI's (`barTooltip()`), not the browser's."
+        },
+        {
           "name": "menu",
           "type": "boolean",
           "description": "An item of the top bar's menus:  a `<ui-action>`, its icon, title and `shortcut`, in the menu's icon column."
