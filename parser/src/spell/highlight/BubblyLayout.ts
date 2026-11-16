@@ -199,6 +199,8 @@ export class BubblyLayout {
         const [number] = descendantsNamed(match, [NUMBER_RULE])
         if (number) return this.underline(number.start!, end, "quantity")
       }
+      if (row?.isCall && BubblyLayout.isOwnCall(match)) return this.underline(start, end, "call")
+      if (row?.readsEach) return this.underlineEach(match)
       if (row?.isQuestion) return this.underline(start, end, "question")
       if (isCombination(match)) return this.underlineCombination(match)
       if (!row?.isCombination && isExpression(match.rule)) return this.underline(start, end, "value")
@@ -250,6 +252,51 @@ export class BubblyLayout {
       // an operator:  its words plain, what's in it (its right side) underlined
       else for (const child of childrenOf(part.match)) this.underlineIn(child)
     }
+  }
+
+  /**
+   * Is `match`, a call of an action, one of an action a project declares (this one, or one it imports)?
+   * - Not a built-in template's (`turn the card face up`, a two sided view's):  that's Spell's own, as `add ... to` is.
+   * - By the method the call found as it parsed, where that was declared;  else by the type the action is on
+   *   (a call whose receiver's type isn't known, `turn its last card face up`, finds no method).
+   */
+  private static isOwnCall(match: P.Match): boolean {
+    const { method } = match.data as { method?: P.ScopeMethod }
+    if (method) return !SP.builtInTemplateFileFor(method.declaredAt?.path ?? "")
+    const { thisType } = match.rule as P.Rule & { thisType?: P.Datatype }
+    // a template's class, `TwoSidedView`
+    return !(thisType && Object.values(SP.BUILT_IN_TEMPLATES).includes(thisType))
+  }
+
+  /**
+   * `add each card in the cards to the stock`:  `each card in the cards` ONE value, from its `each` to the list's end;
+   * the rest of the statement underlined as it would be, but for what's inside that stretch.
+   * - A call of the project's own around it (`deal each card in the deck`) is underlined whole, the stretch inside it.
+   * - Its `each` (or `the`, `the cards in the stock`):  the word before the item, when the rule reads it there.
+   */
+  private underlineEach(match: P.Match) {
+    const { item, list, statement } = match.groups as { item?: P.Match; list?: P.Match; statement?: P.Match }
+    const before = this.underlines.length
+    if (statement) this.underlineIn(statement)
+    if (item?.start === undefined || list?.end === undefined) return
+    // never from the list's start:  a contraction's list (`del mazo`) starts with an article read apart, `el`
+    const from = BubblyLayout.eachStart(match, item)
+    const to = list.end
+    const inner = this.underlines.splice(before)
+    if (inner.some((each) => each.start <= from && each.end >= to)) return void this.underlines.push(...inner)
+    this.underlines.push(...inner.filter((each) => each.end <= from || each.start >= to))
+    this.underline(from, to, "value")
+  }
+
+  /** Where `match`'s `each` starts:  the word before its `item`, when its rule reads that word there;  else the item. */
+  private static eachStart(match: P.Match, item: P.Match): number {
+    const tokens = match.tokens ?? []
+    let at = tokens.findIndex((token) => token.start >= item.start!) - 1
+    while (at >= 0 && tokens[at] instanceof P.WhitespaceToken) at--
+    const word = (match.rule as P.Sequence).rules?.[1]
+    // `.length`:  an optional word (`the?`) reads nothing as a match too
+    const said = at >= 0 ? word?.parse(match.scope, tokens.slice(at)) : undefined
+    return said?.length ? tokens[at]!.start : item.start!
   }
 
   /** Underline `start` to `end`, as `kind`:  one on each line it's on, its spaces at either end left out. */
