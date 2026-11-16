@@ -17,4 +17,8 @@
   background: var(--spell-menu-bar-background);
   background-attachment: fixed;
   --ui-panel-pane-bar-background: transparent;
+  /* the room left and right of the tabs the same as above them, 7.5px (Owen, epic `editor` T88:  "Less padding to the
+     left and right, make it equal to the padding at the top of card.spell"):  a tab's own 2px inset on the left,
+     the ✕'s glyph's 3.3px on the right;  inline only, start and end, as `<ui-panel>` reads it */
+  --ui-panel-pane-bar-padding: 5.5px 4.2px;
 }

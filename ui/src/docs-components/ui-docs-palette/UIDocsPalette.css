@@ -73,6 +73,17 @@
     color: var(--ui-text-muted);
     cursor: grab;
   }
+  /* its icon:  the glyph alone, its picker's field shrunk to it */
+  & .icon {
+    flex: none;
+  }
+  & .icon::part(text) {
+    display: none;
+  }
+  & .icon::part(field) {
+    min-width: 0;
+    padding-inline: 6px;
+  }
   & .name {
     flex: 1;
     min-width: 0;

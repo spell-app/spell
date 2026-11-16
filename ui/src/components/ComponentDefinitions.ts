@@ -43,6 +43,8 @@ export type PaletteTableGroup = {
   topic?: ComponentTopic
   /** Its own name, as written, in every language:  in place of its topic's word. */
   title?: string
+  /** Its icon, beside its name in the editor's pinned Add bar (`hand pointer`;  epic `editor` T86). */
+  icon?: string
   /** Its components' tags, in order. */
   tags: string[]
 }
@@ -184,9 +186,10 @@ export class ComponentDefinitions {
   static paletteGroups(table: PaletteTable = PALETTE_TABLE): PaletteGroup[] {
     const hidden = new Set(table.hidden ?? [])
     const placed = new Set<string>()
-    const groups: PaletteGroup[] = table.groups.map(({ topic, title, tags }) => ({
+    const groups: PaletteGroup[] = table.groups.map(({ topic, title, icon, tags }) => ({
       topic,
       title,
+      icon,
       parts: tags.flatMap((tag) => {
         const definition = ComponentDefinitions.byTag(tag)
         if (!definition || placed.has(tag) || NEVER_ADDED.has(tag)) return []

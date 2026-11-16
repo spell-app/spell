@@ -218,6 +218,17 @@ ui-menu.ModeTabs ui-item::part(item) {
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
+/* ... its icons alone (the code, the compiled code, Inspect app, Add) in circles, not pills:  as wide as they're tall,
+   the glyph centred (Owen, epic `editor` T90:  "Make the surrounds on these buttons circular rather than pills");
+   so their glyphs stand about the bar's 12px apart */
+ui-menu.ModeTabs ui-item:not(:has(.ModeText))::part(item) {
+  box-sizing: border-box;
+  inline-size: calc(1lh + 2 * var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em));
+  padding-inline: 0;
+  justify-content: center;
+  gap: 0;
+  border-radius: 50%;
+}
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {
@@ -287,8 +298,9 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
  * - "Editing a Draft" plain words in deep amber;  "Publish Draft" the primary button, a round thumb 2px inside its end
- * - "Discard Draft" between them, the same round thumb in a neutral grey, 4px from Publish
- *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft")
+ * - "Discard Draft" between them, a link in the same amber, 4px from Publish
+ *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft";
+ *   2026-11-16, T85:  "Instead of a grey button, make `Discard` look like a link")
  */
 .ModeButtons > .PublishDraft {
   --spell-draft-height: 28px;
@@ -316,6 +328,19 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     --ui-icon-width: auto;
     --ui-icon-distance: 0;
   }
+  /* its words:  "Editing a Draft", or "Draft" while the top bar is compact (T89):  the long words made the bar
+     scroll under 1300px on a site's editor (its Site tab too) */
+  & .DraftShort {
+    display: none;
+  }
+  @media (width < 1360px) {
+    & .DraftLong {
+      display: none;
+    }
+    & .DraftShort {
+      display: inline;
+    }
+  }
   & > ui-button {
     --ui-button-radius: 999px;
     --ui-button-font-size: 1em;
@@ -327,14 +352,14 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     block-size: calc(var(--spell-draft-height) - 2 * var(--spell-draft-inset));
     margin: 0;
   }
+  /* Discard, a link (T85):  the draft's amber words, no fill and no room of its own, underlined on hover (a tertiary
+     button's own line) */
   & > ui-button.DiscardDraft {
-    --ui-button-background: light-dark(oklch(0.9 0 0), oklch(0.4 0 0));
-    --ui-button-background-hover: light-dark(oklch(0.86 0 0), oklch(0.45 0 0));
-    --ui-button-background-down: light-dark(oklch(0.82 0 0), oklch(0.5 0 0));
-    --ui-button-color: var(--ui-text-color);
+    --ui-color-text: var(--ui-yellow-header);
+    --ui-button-tertiary-padding: 0px;
   }
   & > ui-button.DiscardDraft + ui-button {
-    margin-inline-start: -4px;
+    margin-inline-start: 4px;
   }
 }
 

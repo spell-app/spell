@@ -242,6 +242,27 @@ export class UIToolbar extends UIMenu {
   /** The list's button, while drawn. */
   private allItemsButton: HTMLButtonElement | undefined
 
+  /** The list's button's width, as last drawn:  what the dropdown frees by hiding it. */
+  private allItemsWidth = 0
+
+  /**
+   * Room the dropdown frees by hiding the list's button, which the row takes back (epic `editor` I189):
+   * so the row comes back only when it fits beside the button, and the two never take turns.
+   * - Its width as last drawn;  never drawn yet, an item's height, as wide as its icon and caret.
+   */
+  protected override get fitHoldBack(): number {
+    if (this.visibleLimit === undefined) return 0
+    const button = this.allItemsButton
+    const width = button?.isConnected ? button.getBoundingClientRect().width : 0
+    if (width) {
+      // its margins, and the bar's gap before it:  all of it comes back when it hides
+      const style = getComputedStyle(button!)
+      const gap = parseFloat(getComputedStyle(button!.parentElement!).columnGap) || 0
+      this.allItemsWidth = width + (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0) + gap
+    }
+    return this.allItemsWidth || ALL_ITEMS_FALLBACK_WIDTH
+  }
+
   protected override get overflowOpener(): HTMLButtonElement | undefined {
     return this.isDropdown ? super.overflowOpener : this.allItemsButton
   }
@@ -299,6 +320,8 @@ export class UIToolbar extends UIMenu {
     if (!open.length) open = items.slice(0, limit).map((each) => UIToolbar.valueOf(each))
     for (const item of items) this.showInRow(item, open.includes(UIToolbar.valueOf(item)))
     this.isLimited = true
+    // fitted while every item showed, the row may have been the dropdown:  fitted again to the few left (I188)
+    this.refitTitles()
     this.keepOpenValues(open)
     if (chosen && chosenValue !== this.followedValue) {
       this.followedValue = chosenValue
@@ -463,6 +486,8 @@ const CENTER = "center"
 const RIGHT = "right"
 
 /** Class word and part of the button listing every item. */
+/** The list's button's width before it's ever drawn:  icon and caret, roughly. */
+const ALL_ITEMS_FALLBACK_WIDTH = 44
 const ALL_ITEMS = "all-items"
 
 /** Its class word with `all-items-at-end`:  at the bar's far end. */

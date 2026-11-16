@@ -503,6 +503,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       children: () => this.fitChildren(),
       isSegmented: () => this.isSegmented,
       scrollsFirst: () => this.scrollsFirst,
+      holdBack: () => this.fitHoldBack,
       onAnswer: (answer) => this.onFitAnswer(answer)
     })
     this.titleFit = fit
@@ -512,6 +513,19 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       this.titleFit = undefined
       this.fitAnswer = WHOLE
     }
+  }
+
+  /**
+   * Room a smaller stage frees that the whole look takes back:  none here (`TitleFit`'s `holdBack`);
+   * a toolbar's list button (`<ui-toolbar>`).
+   */
+  protected get fitHoldBack(): number {
+    return 0
+  }
+
+  /** Fit a `shrinkable` menu's titles again, soon:  a subclass changed which items show (`<ui-toolbar max-visible>`). */
+  protected refitTitles() {
+    this.titleFit?.update()
   }
 
   /** A new stage:  the thumb follows its choice's box, the overflow menu closes once it's gone. */
@@ -524,13 +538,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /**
    * What `TitleFit` fits:  the box's own items with words (each its box and title box), and everything else in
-   * the row (another button, a sub-menu, an item with only an icon).
+   * the row (another button, a sub-menu, an item with only an icon);  never a hidden one
+   * (epic `editor` I188:  a project's 59 files, 57 put away, counted 58 gaps, and the 2 tabs left became a dropdown).
    */
   @E.untracked
   private fitChildren(): { rows: FitRow[]; others: Element[] } {
     const rows: FitRow[] = []
     const others: Element[] = []
     for (const element of this.rowElements()) {
+      // a hidden item (a toolbar's `max-visible` puts the rest away) takes no room, and no gap
+      if ((element as HTMLElement).hidden) continue
       const item = this.fittedItem(element)
       if (item) rows.push({ box: item.focusTarget!, title: item.titleBox! })
       else others.push(element)
@@ -694,13 +711,14 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     delete panel.dataset.columns
     panel.style.removeProperty(ROWS_PER_COLUMN)
     const rows = panel.querySelectorAll<HTMLElement>(ROWS)
-    const rowHeight = rows[0]?.getBoundingClientRect().height
-    if (!rowHeight) return
     const opener = this.overflowOpener?.getBoundingClientRect()
-    const room = opener ? Math.max(window.innerHeight - opener.bottom, opener.top) : window.innerHeight
-    const perColumn = Math.max(1, Math.floor((room - OVERFLOW_MENU_ROOM) / rowHeight))
-    if (rows.length <= perColumn) return
-    const columns = Math.ceil(rows.length / perColumn)
+    const room =
+      (opener ? Math.max(window.innerHeight - opener.bottom, opener.top) : window.innerHeight) - OVERFLOW_MENU_ROOM
+    const perColumn = () => Math.max(1, Math.floor(room / (rows[0]?.getBoundingClientRect().height || room)))
+    if (rows.length <= perColumn()) return
+    // in columns its rows are tighter (`UIMenu.css`):  measured again in that look
+    panel.dataset.columns = ""
+    const columns = Math.ceil(rows.length / perColumn())
     panel.dataset.columns = String(columns)
     panel.style.setProperty(ROWS_PER_COLUMN, String(Math.ceil(rows.length / columns)))
   }

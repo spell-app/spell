@@ -55,7 +55,8 @@
   );
   --spell-menu-bar-background:
     linear-gradient(var(--spell-menu-bar-fill), var(--spell-menu-bar-fill)),
-    var(--ui-bar-wallpaper, linear-gradient(transparent, transparent)), var(--ui-bar-wallpaper-color, var(--ui-background));
+    var(--ui-bar-wallpaper, linear-gradient(transparent, transparent)),
+    var(--ui-bar-wallpaper-color, var(--ui-background));
   /* the top bar's blur, for what sits on the page beside it (the palette kept open, `Palette.css`) */
   --spell-menu-bar-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
 }

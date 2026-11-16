@@ -21,12 +21,12 @@ export const docsPaletteVocabulary = {
   noun: "palette",
   description:
     "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another " +
-    "group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
+    "group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save.",
   attributes: [],
   events: [],
   slots: [],
   parts: [
-    { name: "bar", description:"Its bar:  what to do, Add group, Save and how the save went." },
+    { name: "bar", description: "Its bar:  what to do, Add group, Save and how the save went." },
     { name: "groups", description: "The groups, a column each, and Not in the palette last." }
   ],
   states: [],
@@ -49,7 +49,16 @@ export const docsPaletteVocabulary = {
     { key: "saveFailed", text: "Couldn't save:  {error}", description: "When a save fails;  `{error}` says why." },
     { key: "newGroup", text: "New group", description: "A new group's name." },
     { key: "groupName", text: "Group name", description: "The label of a group's name field." },
-    { key: "removeGroup", text: "Remove {group}:  its components go to Not in the palette", description: "A group's remove button." },
+    {
+      key: "groupIcon",
+      text: "{group}'s icon, in the editor's Add bar",
+      description: "A group's icon picker;  `{group}` is its name."
+    },
+    {
+      key: "removeGroup",
+      text: "Remove {group}:  its components go to Not in the palette",
+      description: "A group's remove button."
+    },
     { key: "moveGroup", text: "Drag to move {group}", description: "A group's drag handle." },
     { key: "notOffered", text: "Not in the palette", description: "The last column:  what the palette leaves out." }
   ]

@@ -393,13 +393,16 @@ const ADD_BUTTON_ID = "AddPartButton"
 
 /**
  * The palette kept open:  the top bar's second row, edge to edge, of its topics' names (epic `editor` T80).
+ * - Its pin at its far left, pinned:  a click unpins it, closing the bar (epic `editor` T92;  a ✕ by the search before).
+ * - Add View, in bold, then each topic's icon and name (epic `editor` T86).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
- * - This app (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › when they don't fit.
- * - Its search, before the ✕, looks as the popup's does (epic `editor` J140, revisited):
+ * - This app (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
+ *   the window beside the search (`Palette.css`).
+ * - Its search, at its end, looks as the popup's does (epic `editor` J140, revisited):
  *   every topic with a match opens its menu at once, each listing only its matches, side by side under its name.
+ *   - A magnifying glass at its start, a fixed width, and a ✕ inside its end while it holds text (epic `editor` T87).
  *   - Escape, clearing the field, a click elsewhere, or choosing or dragging a row closes them;  typing opens them again.
  *   - ↓ goes into the first one;  Escape there comes back to the field.
- * - The ✕ at its end stops keeping it open.
  */
 export function PaletteStrip(): JSX.Element {
   const [filter, setFilter] = createSignal("")
@@ -419,6 +422,12 @@ export function PaletteStrip(): JSX.Element {
   const backToSearch = () => {
     search?.focus()
     setDismissed(true)
+  }
+  /** The field's ✕:  emptied, the menus closed, the field still focused. */
+  const clearSearch = () => {
+    if (search) (search as HTMLElement & { value: string }).value = ""
+    setFilter("")
+    backToSearch()
   }
 
   onSettled(() => {
@@ -474,44 +483,60 @@ export function PaletteStrip(): JSX.Element {
 
   return (
     <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
-      <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
-        <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
-          <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()}>
-            <ThisGroupRows words={() => ""} />
-          </PaletteGroupMenu>
-        </Show>
-        <For each={offered()}>
-          {(group) => (
-            <PaletteGroupMenu id={groupMenuId(group)} name={upperFirst(groupName(group))}>
-              <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
+      <div class="PaletteStripStart">
+        <PinIcon />
+      </div>
+      <div class="PaletteStripAdd">
+        <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>
+        <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
+          <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
+            <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON}>
+              <ThisGroupRows words={() => ""} />
             </PaletteGroupMenu>
-          )}
-        </For>
-      </ui-toolbar>
+          </Show>
+          <For each={offered()}>
+            {(group) => (
+              <PaletteGroupMenu
+                id={groupMenuId(group)}
+                name={upperFirst(groupName(group))}
+                icon={group.icon ?? GROUP_ICON}
+              >
+                <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
+              </PaletteGroupMenu>
+            )}
+          </For>
+        </ui-toolbar>
+      </div>
       <div class="PaletteStripEnd">
-        <ui-input
-        class="PaletteStripSearch"
-        size="small"
-        aria-label={appTexts.text("paletteSearch")}
-        placeholder={appTexts.text("paletteSearch")}
-        onFocusIn={() => setDismissed(false)}
-        ref={(element: HTMLElement) => {
-          search = element
-          element.addEventListener("keydown", onSearchKey, { capture: true })
-          on<{ value: string }>("ui-typed", (event) => {
-            setFilter(event.detail.value)
-            setDismissed(false)
-          })(element)
-        }}
-      />
-      <ui-icon
-        name="close"
-        link=""
-        class={["IconAction", "PaletteClose"]}
-        label={appTexts.text("paletteUnpin")}
-        title={appTexts.text("paletteUnpin")}
-        onClick={() => Palette.togglePinned()}
-      />
+        <div class="PaletteStripField">
+          <ui-input
+            class="PaletteStripSearch"
+            size="small"
+            icon="search"
+            icon-position="left"
+            aria-label={appTexts.text("paletteSearch")}
+            placeholder={appTexts.text("paletteSearch")}
+            onFocusIn={() => setDismissed(false)}
+            ref={(element: HTMLElement) => {
+              search = element
+              element.addEventListener("keydown", onSearchKey, { capture: true })
+              on<{ value: string }>("ui-typed", (event) => {
+                setFilter(event.detail.value)
+                setDismissed(false)
+              })(element)
+            }}
+          />
+          <Show when={filter()}>
+            <ui-icon
+              name="close"
+              link=""
+              class={["IconAction", "PaletteStripClear"]}
+              label={appTexts.text("paletteClearSearch")}
+              title={appTexts.text("paletteClearSearch")}
+              onClick={clearSearch}
+            />
+          </Show>
+        </div>
       </div>
       <div
         popover="manual"
@@ -661,13 +686,20 @@ function matchPlaces(
 
 /**
  * ### `<PaletteGroupMenu>`
- * One topic of the pinned bar:  its name, a quiet button;  a click opens its rows under it.
+ * One topic of the pinned bar:  its icon and name, a quiet button;  a click opens its rows under it.
  * - Choosing a row closes it, as a drag from it does (`Palette.closeMenus()`).
  */
-function PaletteGroupMenu(props: { id: string; name: string; children: JSX.Element }): JSX.Element {
+function PaletteGroupMenu(props: { id: string; name: string; icon: string; children: JSX.Element }): JSX.Element {
   return (
     <>
-      <ui-item id={props.id} appearance="link" class="PaletteGroupName" aria-haspopup="menu" aria-label={props.name}>
+      <ui-item
+        id={props.id}
+        appearance="link"
+        class="PaletteGroupName"
+        icon={props.icon}
+        aria-haspopup="menu"
+        aria-label={props.name}
+      >
         {props.name}
       </ui-item>
       <ui-popup
@@ -818,6 +850,9 @@ function startsOwnDrag(element: Element, view: OwnView): void {
 
 /** The icon of the app's own views, in the palette. */
 const OWN_VIEW_ICON = "cube"
+
+/** The icon of a topic in the pinned bar whose group names none (`paletteGroups.json`'s `icon`). */
+const GROUP_ICON = "shapes"
 
 /** The icon of a page's new view of its own, in the palette. */
 const NEW_VIEW_ICON = "plus square outline"
