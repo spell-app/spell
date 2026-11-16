@@ -133,9 +133,12 @@ export class IncrementalProject {
       const { parser } = entry
       const types = parser.declaredTypes(text).join()
       if (this.isBroken || types !== entry.types) return this.parseAll(path, text)
-      if (parser.changesMethods(this.scope, file.text, text, this.keepLastGood)) return this.parseAll(path, text)
-      if (parser.changesProperties(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
-      if (parser.changesTypeKinds(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
+      // a declaration's line being typed in keeps what it declared till the next full parse;  an edit of many lines
+      // (a rename, its head and every call) is a change like any other (epic `editor` I170)
+      const keepEdited = this.keepLastGood && changesOneLine(file.text, text)
+      if (parser.changesMethods(this.scope, file.text, text, keepEdited)) return this.parseAll(path, text)
+      if (parser.changesProperties(file.text, text, keepEdited)) return this.parseAll(path, text)
+      if (parser.changesTypeKinds(file.text, text, keepEdited)) return this.parseAll(path, text)
       const kindsBefore = this.typeKinds()
       const result = file.update(text)
       if (result === "same") return []
@@ -275,4 +278,17 @@ export type IncrementalProjectProps = {
     /** It's alone, and this is what the project knows of it. */
     head?: P.FileHead
   }>
+}
+
+/**
+ * Is `after` `before` with one line changed, and no line added or taken away:  a line being typed in?
+ * - What `IncrementalProject.update()` lets keep its declarations till the next full parse (`keepLastGood`).
+ */
+function changesOneLine(before: string, after: string): boolean {
+  const was = before.split("\n")
+  const now = after.split("\n")
+  if (was.length !== now.length) return false
+  let changed = 0
+  for (let at = 0; at < was.length && changed < 2; at++) if (was[at] !== now[at]) changed++
+  return changed <= 1
 }

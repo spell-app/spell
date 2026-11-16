@@ -1861,7 +1861,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`).
-      With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
+      With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse:
+      only an edit of that one line, so a rename of its head and every call re-parses (epic `editor` I170).
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
     - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file.
