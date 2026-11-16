@@ -223,6 +223,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `takeNewClasses()`:  each old class empties, and sits on the new one, so every thing reads the new code,
     still the same object;  a family of exclusive lists keeps who holds what (`carryListFamily()`).
   - `drawAgain()`:  only the types that changed draw again, each thing they hold keeping its element.
+    - A view's tag named by its id (`<column "C1" />`) keeps its element too, and what's in it:
+      core's `h()` hands back the one the page has (epic `editor` I182).
     - A drawing made of PARTS (`drawPart()`, what a notebook's example compiles to):  only the parts that changed draw
       again, each found by its code (epic `notebook` P4).
       - A part holds parts:  a section around its examples (epic `notebook` I6).
