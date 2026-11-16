@@ -54,6 +54,33 @@ ui-item.spring::part(item) {
   flex: 1 1 auto;
 }
 
+/*
+ * A panel's Close ✕ (epic `editor` T95, Owen:  "X's should be light still until hovered, consistent size and spacing"):
+ * the file bar's, the Inspector card's, the compiled code's, ONE look.
+ * - Its values are tokens, so a ✕ drawn in a view's shadow root (the file bar's, `SpellEditor.spell`'s `.HideCode`)
+ *   reads the same ones:  this sheet can't reach in there.
+ * - Light, the theme's muted ink, until hovered;  then the text's.
+ * - The bar's own size, right after the button beside it, as the file bar's always was (3px between what's drawn).
+ * - A panel's action beside its bar, not in it (`<InspectorCard close>`):  so the room before it is the same in each.
+ */
+:root {
+  --spell-panel-close-color: var(--ui-text-muted);
+  --spell-panel-close-hover-color: var(--ui-text-color);
+  --spell-panel-close-gap: 0px;
+}
+ui-icon.PanelClose {
+  /* a box of its own (a `<ui-icon>` is `display: contents`):  its margin and its tooltip need one */
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+  margin-inline: var(--spell-panel-close-gap) 0;
+  color: var(--spell-panel-close-color);
+  cursor: var(--ui-control-cursor, pointer);
+}
+ui-icon.PanelClose:hover {
+  color: var(--spell-panel-close-hover-color);
+}
+
 /* An icon-only action (`<Action iconOnly>`):  a bare icon, a little bigger, its title a tooltip below it.
    - A box of its own:  a `<ui-icon>` is `display: contents`, which draws no tooltip;  centred in its bar. */
 ui-icon.IconAction {

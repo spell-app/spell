@@ -64,6 +64,7 @@ import { InspectorData } from "./InspectorData"
 import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
+import { NotebookDocs } from "./notebook/NotebookDocs"
 import { PageLoading } from "./PageLoading"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -807,6 +808,30 @@ export class Inspector {
     const drawn = (element as E.DOMElement).component as { actionToDraw?: object } | undefined
     if (drawn?.actionToDraw) return ACTION_ICON
     return Inspector.vocabularyOf(element)?.icon ?? CONTROL_ICON
+  }
+
+  /**
+   * `element`'s Spell UI tag, `ui-segment`, when it's a Spell UI element:  for its docs (`<SpellUIDocsButton>`, T95).
+   * - Its vocabulary's own tag, so a translated element (`<es-segmento>`) finds the English page.
+   * - `undefined`:  a drawn thing (a program's own view, the app), or not Spell UI's.
+   */
+  static spellUITagOf(element: Element): string | undefined {
+    if (SpellElement.thingOf(element)) return undefined
+    const tag = Inspector.vocabularyOf(element)?.tag
+    return tag?.startsWith("ui-") ? tag : undefined
+  }
+
+  /**
+   * Open `tag`'s page of Spell UI's docs, on the page server (`SPELL_UI_DOCS`), in ONE browser tab every time
+   * (`window.open()`'s name, `spell-ui-docs`;  Owen, T95:  "Re-use the same tab for all components").
+   * - Its page as the docs' data says (`SiteData.tag()`):  a tag with no page of its own, its family's, at its section
+   *   (`ui-column` => `ui-grid.html#ui-column`);  until the data's in, `<tag>.html`.
+   * - SIDE EFFECT:  starts loading the data, for the next one.
+   */
+  static openSpellUIDocs(tag: string): void {
+    const page = docsPages?.[tag] ?? `${tag}.html`
+    window.open(new URL(`${SPELL_UI_DOCS}${page}`, location.href).href, DOCS_TAB)
+    loadDocsPages()
   }
 
   /** A Spell UI element's vocabulary, once its family has loaded. */
@@ -2239,6 +2264,29 @@ const INSPECTING_MARK = "data-inspecting"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
+/** Where Spell UI's docs pages are:  the page server's, which the editor's dev server passes `/components/` on to. */
+const SPELL_UI_DOCS = "/components/ui/"
+/** The browser tab every Spell UI docs page opens in (`Inspector.openSpellUIDocs()`). */
+const DOCS_TAB = "spell-ui-docs"
+
+/** Each Spell UI tag's docs page (`ui-grid.html#ui-column`), once the docs' data is in (`loadDocsPages()`). */
+let docsPages: Record<string, string> | undefined
+
+/**
+ * Load each tag's docs page from Spell UI's docs data, once (`NotebookDocs.dataUrl`, through `SiteData`).
+ * - NEVER throws:  without it, a tag's page is guessed (`<tag>.html`).
+ */
+function loadDocsPages(): void {
+  if (docsPages) return
+  docsPages = {}
+  void import("spell/ui/docs-components/SiteData")
+    .then(async ({ SiteData }) => {
+      SiteData.url ??= NotebookDocs.dataUrl
+      const data = await SiteData.load()
+      for (const entry of data.components) if (entry.href) docsPages![entry.tag] = entry.href
+    })
+    .catch((error: unknown) => console.error("loadDocsPages():  couldn't load Spell UI's docs data", error))
+}
 const CONTROL_ICON = "square outline"
 /** An action's icon, wherever the Inspector shows one:  Font Awesome's circled play (epic `editor` I116, I131). */
 export const ACTION_ICON = "fa7-free:circle-play"
@@ -3047,15 +3095,22 @@ function PropertiesCard(): JSX.Element {
               // a thing alone, with no trail:  ONE segmented control, [Card "King of Diamonds" | All Cards] (Owen)
               fallback={<ScopeSwitch part={part()} />}
             >
-              <span slot="title" class="InspectorTrail">
+              <ui-menu
+                slot="title"
+                appearance="segmented link header"
+                class="InspectorTrail"
+                ref={on("ui-choosing", (event) => event.preventDefault())}
+              >
                 <For each={part().crumbs}>
                   {(crumb) => (
                     <>
                       <Show when={crumb.depth}>
                         <span class="InspectorTrailStep">›</span>
                       </Show>
-                      <span
+                      <ui-item
                         class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
+                        icon={!crumb.depth && part().element ? Inspector.iconFor(part().element!) : THING_ICON}
+                        selected={crumb.depth === part().crumbs.length - 1}
                         title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
                         onClick={(event: MouseEvent) => {
                           if (crumb.depth === part().crumbs.length - 1) return
@@ -3064,35 +3119,33 @@ function PropertiesCard(): JSX.Element {
                         }}
                       >
                         <span class="InspectorPartTagText">{crumb.label}</span>
-                      </span>
+                      </ui-item>
                     </>
                   )}
                 </For>
-              </span>
+              </ui-menu>
               <ScopeSwitch part={part()} />
             </Show>
           )}
         </Show>
       }
       // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78),
-      // then Close, which hides the column (I186)
-      actions={
-        <>
-          <InspectAppMenu slot="right" />
-          <ui-icon
-            slot="right"
-            name="close"
-            link=""
-            class={["IconAction", "InspectorClose"]}
-            label={appTexts.text("inspectorClose")}
-            title={appTexts.text("inspectorClose")}
-            onClick={(event: MouseEvent) => {
-              // in the card's header:  a click closes the column, never folds the card
-              event.stopPropagation()
-              Inspector.close()
-            }}
-          />
-        </>
+      // then Close, which hides the column (I186):  a panel's ✕, as the file bar's is (`PanelClose`, T95)
+      actions={<InspectAppMenu slot="right" />}
+      close={
+        <ui-icon
+          slot="actions"
+          name="close"
+          link=""
+          class={["PanelClose", "InspectorClose"]}
+          label={appTexts.text("inspectorClose")}
+          title={appTexts.text("inspectorClose")}
+          onClick={(event: MouseEvent) => {
+            // in the card's header:  a click closes the column, never folds the card
+            event.stopPropagation()
+            Inspector.close()
+          }}
+        />
       }
     >
       <Show
@@ -3814,8 +3867,12 @@ export function InspectAppButton(props: { id?: string }): JSX.Element {
 
 /****************
  * ### `<InspectAppMenu>`
- * Inspect app in the Inspector card's header:  its button in a menu of its own, the top bar's group's look
- * (a header's segmented menu), so it's drawn as the top bar's is.
+ * The Inspector card's header buttons, at its right:  the file bar's look, a header's segmented menu, each an icon
+ * in a soft round (`appearance="circular"`), as the top bar's are (epic `editor` T95:
+ * "Make these tabs look like the ones in the file menu").
+ * - Spell UI docs, while a Spell UI element is selected (`<SpellUIDocsButton>`)
+ * - Inspect app (`<InspectAppButton>`)
+ * - The card's Close is after it, outside:  a panel's ✕, as the file bar's (`PanelClose`)
  * - Pressed, never chosen:  the menu's choosing is turned away.
  * - `slot`:  its place in the card's bar, `right`.
  ****************/
@@ -3827,8 +3884,40 @@ function InspectAppMenu(props: { slot: string }): JSX.Element {
       class="InspectAppMenu"
       ref={on("ui-choosing", (event) => event.preventDefault())}
     >
+      <SpellUIDocsButton />
       <InspectAppButton />
     </ui-menu>
+  )
+}
+
+/****************
+ * ### `<SpellUIDocsButton>`
+ * Spell UI's docs for what's selected, left of Inspect app, while it's a Spell UI element (epic `editor` T95):
+ * a `<ui-segment>`, or a program's `<segment>` drawn as one.
+ * - A click opens its page of Spell UI's docs (`Inspector.openSpellUIDocs()`), every one in the same browser tab.
+ * - Not for a program's own view, nor the app:  they have no page.
+ ****************/
+function SpellUIDocsButton(): JSX.Element {
+  const tag = () => {
+    const element = Inspector.inspected?.element
+    return element ? Inspector.spellUITagOf(element) : undefined
+  }
+  return (
+    <Show when={tag()}>
+      {(shown) => (
+        <ui-item
+          icon="book"
+          appearance="circular"
+          class="SpellUIDocsButton"
+          label={appTexts.text("inspectorSpellUIDocs", { tag: shown() })}
+          title={appTexts.text("inspectorSpellUIDocs", { tag: shown() })}
+          onClick={(event: MouseEvent) => {
+            event.stopPropagation()
+            Inspector.openSpellUIDocs(shown())
+          }}
+        />
+      )}
+    </Show>
   )
 }
 
