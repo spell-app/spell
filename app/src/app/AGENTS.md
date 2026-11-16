@@ -157,6 +157,8 @@ and in the app's build folder, `app/` at the app folder's root.
     - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
       the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
+    - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
+      as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
     the scope explorer's packs use it too.
   - What a hover says and which code actions show are decided once, editor-free, in

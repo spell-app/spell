@@ -35,6 +35,8 @@ import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
  *   - CodeMirror asks for each by its English, through one table (`EditorState.phrases`)
  *   - `PHRASE_KEYS` turns that English into our keys
  *   - the editors follow `appTexts.lang`:  each one's words change when the app's do, a Spanish page's included
+ * - Selected text never drags:  a press inside the selection starts a new one, as VS Code's
+ *   `editor.dragAndDrop: false` (`PRESS_STARTS_SELECTION`, epic `codemirror` I9).
  * - Its position in the import graph:  CodeMirror and the app's texts;  never a file or the parser.
  ****************/
 export class CodeMirrorSetup {
@@ -48,6 +50,8 @@ export class CodeMirrorSetup {
       highlightSpecialChars(),
       drawSelection(),
       dropCursor(),
+      // a press inside the selection starts a new one:  selections don't drag (epic `codemirror` I9)
+      PRESS_STARTS_SELECTION,
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
       // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
@@ -209,6 +213,29 @@ const SPEAKS_NOW = ViewPlugin.fromClass(
     }
   }
 )
+
+/**
+ * A press inside the selection starts a new selection there, as a press outside it does:
+ * selected text never drags to move (or, with ⌥, copy) it.
+ * - CodeMirror has no setting for it:  a plain press inside the main selection always waits to see if it's a drag
+ *   (`MouseSelection.dragging`), and lets the browser drag the text.
+ * - So the press first puts the caret where it landed, then CodeMirror's own press handling runs, with no selection
+ *   to drag:  a drag from there selects, a click leaves the caret there, a double-click picks the word.
+ *   - NOT blocking `dragstart`:  CodeMirror would still wait 10px before selecting, and select nothing on a short drag.
+ * - Left alone:  ⇧ (extend the selection), ⌘ (add or drop a cursor), and text dragged in from outside, which still drops.
+ */
+const PRESS_STARTS_SELECTION = EditorView.domEventHandlers({
+  mousedown(event, view) {
+    if (event.button !== 0 || event.detail > 1 || event.shiftKey || event.metaKey || event.ctrlKey) return false
+    const { main } = view.state.selection
+    if (main.empty) return false
+    const pressed = view.posAtCoords({ x: event.clientX, y: event.clientY })
+    if (pressed === null || pressed < main.from || pressed > main.to) return false
+    view.dispatch({ selection: { anchor: pressed }, userEvent: "select.pointer" })
+    // CodeMirror's own handler runs next
+    return false
+  }
+})
 
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"
