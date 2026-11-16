@@ -43,7 +43,11 @@ async function open(page: Page, project: string, { codeEditor }: { codeEditor: b
   // with no code editor to wait for, the page's loading hero gives up after 8 seconds
   else await page.waitForTimeout(9000)
   await page.waitForTimeout(4000)
-  await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+  // as the top bar's Inspect app does (its Inspector button is gone):  open the column, inspecting
+  await page.evaluate(() => {
+    const { Inspector } = window as unknown as DebugGlobals
+    if (!Inspector.isOpen) Inspector.toggle()
+  })
   await page.waitForTimeout(1000)
 }
 
@@ -107,7 +111,7 @@ function fileState(page: Page, name: string) {
 /** The page's debug globals, what's used of them. */
 type DebugGlobals = {
   editor: { loadRuntime(): Promise<{ core: { things: { all(): object[] } } }> }
-  Inspector: { inspectThing(thing: object): void }
+  Inspector: { inspectThing(thing: object): void; isOpen: boolean; toggle(): void }
 }
 
 /** How many steps the side bar's history holds. */
