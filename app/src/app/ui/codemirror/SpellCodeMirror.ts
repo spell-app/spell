@@ -2,7 +2,6 @@ import { redo, redoDepth, undo, undoDepth } from "@codemirror/commands"
 import { javascript } from "@codemirror/lang-javascript"
 import { python } from "@codemirror/lang-python"
 import { syntaxHighlighting } from "@codemirror/language"
-import { MergeView } from "@codemirror/merge"
 import { openSearchPanel } from "@codemirror/search"
 import type { Extension } from "@codemirror/state"
 import { EditorView, type KeyBinding, keymap, type ViewUpdate } from "@codemirror/view"
@@ -39,7 +38,7 @@ import "./codemirror.css"
  * Spell's main typing helps and a right-click menu of the page's own;  and the other views code is shown in.
  * - `SpellCodeMirror.edit()` makes an editor of a view (`<CodeMirrorEditor>`'s), showing one file's state at a time:
  *   `show()` another, and switching back finds it as it was left, undo and folds too (`FileStates`).
- * - `codeExtensions()` shows another language's code (the compiled javascript);  `merge()` shows two sides of a file,
+ * - `codeExtensions()` shows another language's code (the compiled javascript);  two sides of a file are `CodeMirrorMerge`,
  *   each change takeable, as Publish's clash dialog does.
  * - Every one of them starts from the one base setup, `CodeMirrorSetup`:  keys, undo, find, the gutter,
  *   CodeMirror's words in the app's language.
@@ -389,53 +388,6 @@ export class SpellCodeMirror implements CodeEditorHandle {
       CodeMirrorSetup.extensions()
     ]
   }
-
-  /**
-   * Two sides of a file in `parent`:  `theirs` left, read only, `mine` right, editable;  each change takeable by its
-   * arrow, from theirs into yours (⌘Z puts yours back).
-   * - Both drawn bubbly while the look's on, each side on its own, lined up round the merge view's collapsed gaps
-   *   (`CodeMirrorLook`);  coloured by their tokens while it's off.
-   * - `onChange`:  your side's whole text after each change
-   */
-  static merge(parent: HTMLElement, sides: MergeSides): MergeView {
-    const bubbly = () =>
-      CodeMirrorLook.extension((isBubbly) =>
-        isBubbly ? CodeMirrorBubbly.extension(() => undefined) : CodeMirrorTokens.extension(() => undefined)
-      )
-    const merge = new MergeView({
-      parent,
-      a: { doc: sides.theirs, extensions: [bubbly(), CodeMirrorSetup.extensions({ editable: false })] },
-      b: {
-        doc: sides.mine,
-        extensions: [
-          bubbly(),
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) sides.onChange?.(update.state.doc.toString())
-          }),
-          CodeMirrorSetup.extensions()
-        ]
-      },
-      revertControls: "a-to-b",
-      highlightChanges: true,
-      gutter: true,
-      collapseUnchanged: { margin: 3, minSize: 6 }
-    })
-    rootOnceConnected(parent, [merge.a, merge.b])
-    return merge
-  }
-}
-
-/**
- * Give `views` their root (the page, or a shadow root) once `parent` is in it.
- * - HACK: a view made in an element that's not in the page yet (Solid draws a branch, then inserts it) takes that
- *   element's own tree as its root, and puts its style sheet there:  the editor then draws with none of CodeMirror's
- *   own CSS.  `setRoot()` moves it.
- */
-function rootOnceConnected(parent: HTMLElement, views: EditorView[], frames = 60) {
-  if (parent.isConnected) {
-    const root = parent.getRootNode() as Document | ShadowRoot
-    for (const view of views) if (view.root !== root) view.setRoot(root)
-  } else if (frames > 0) requestAnimationFrame(() => rootOnceConnected(parent, views, frames - 1))
 }
 
 /** How `SpellCodeMirror.edit()` makes an editor. */
@@ -485,13 +437,3 @@ const CODEMIRROR_MODIFIERS: Record<string, string> = {
 
 /** The languages `SpellCodeMirror.codeExtensions()` colours:  what Spell compiles to (`SP.TARGETS`). */
 export type CompiledLanguage = "javascript" | "typescript" | "python"
-
-/** The two sides `SpellCodeMirror.merge()` shows. */
-export type MergeSides = {
-  /** the published text, left */
-  theirs: string
-  /** your draft, right:  the result */
-  mine: string
-  /** your side's text after each change */
-  onChange?: (mine: string) => void
-}

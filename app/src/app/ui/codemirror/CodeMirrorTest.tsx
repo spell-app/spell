@@ -1,6 +1,5 @@
 import { For, Show, createSignal, onSettled, untrack } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
-import type { MergeView } from "@codemirror/merge"
 
 import { setDebugGlobal } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
@@ -12,6 +11,7 @@ import { CodeSettings, CodeSettingsPanel } from "spell/app/app/solid"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import {
   CodeMirrorEditor,
+  CodeMirrorMerge,
   CodeMirrorSetup,
   CodeSlice,
   FileEditor,
@@ -292,10 +292,14 @@ type CodeMirrorSideProps = {
 
 /** Publish's two sides in CodeMirror's merge view. */
 function CodeMirrorDiff(props: { clash: Clash }) {
-  let merge: MergeView | undefined
+  let merge: CodeMirrorMerge | undefined
   let element!: HTMLDivElement
   onSettled(() => {
-    merge = SpellCodeMirror.merge(element, { theirs: props.clash.theirs, mine: props.clash.mine })
+    merge = new CodeMirrorMerge(element, {
+      theirs: props.clash.theirs,
+      mine: props.clash.mine,
+      words: { take: appTexts.text("publishClashTake"), putBack: appTexts.text("publishClashPutBack") }
+    })
     setDebugGlobal({ codemirrorMerge: merge })
     return () => merge?.destroy()
   })
