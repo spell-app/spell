@@ -167,6 +167,7 @@ export function SiteEditorPage() {
                     picked={picked()}
                     titleOf={SiteEditorPage.cardTitleOf}
                     lineOf={SiteEditorPage.lineOf}
+                    storiesLineOf={SiteEditorPage.storiesLineOf}
                     iconOf={(part) => part.icon}
                     thumbnailOf={SiteEditorPage.thumbnailOf}
                     newTabOf={SiteEditorPage.newTabOf}
@@ -228,15 +229,17 @@ const SITE_COLUMNS = { id: "siteEditor-boardAndForm", sizes: "*,320px" }
 /** The narrowest a dragged panel may get. */
 const MIN_PANEL_SIZE = "180px"
 
+/** A card's second line:  a page's address, else what it is (`/films/:film`, `Dialog`). */
+SiteEditorPage.lineOf = (part: SitePart): string => part.address ?? appTexts.text(`siteKind.${part.kind}` as AppTextKey)
+
 /**
- * A card's second line:  a page's address, else what it is;  and how many of its stories are done, when it has some.
- * - e.g. `/films/:film · 1 of 3 stories`
+ * A card's third line, on its own under the address (Owen):  how many of a page's stories are done, when it has some.
+ * - e.g. `1 of 3 stories`;  `undefined` for a page with none, and for anything that isn't a page
  */
-SiteEditorPage.lineOf = (part: SitePart): string => {
-  const where = part.address ?? appTexts.text(`siteKind.${part.kind}` as AppTextKey)
+SiteEditorPage.storiesLineOf = (part: SitePart): string | undefined => {
   const stories = part.kind === "page" ? SiteWrites.storiesOf(part.name) : undefined
-  if (!stories?.length) return where
-  return `${where} · ${appTexts.text("siteStoriesCount", { done: PageStories.doneIn(stories), count: stories.length })}`
+  if (!stories?.length) return undefined
+  return appTexts.text("siteStoriesCount", { done: PageStories.doneIn(stories), count: stories.length })
 }
 
 /** What a part says:  its title, else its name. */

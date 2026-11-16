@@ -112,6 +112,7 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
           <span class="title">{props.titleOf(part())}</span>
         </div>
         <div class="line">{props.lineOf(part())}</div>
+        <Show when={props.storiesLineOf(part())}>{(stories) => <div class="line stories">{stories()}</div>}</Show>
       </div>
       <Show when={props.newTabOf(part())}>
         {(link) => (
@@ -154,6 +155,8 @@ export type SiteBoardViewProps = {
   titleOf: (part: SitePart) => string
   /** The quiet line under its title. */
   lineOf: (part: SitePart) => string
+  /** A line of its own under that one, if it has one:  how many of a page's stories are done (`1 of 2 stories`). */
+  storiesLineOf: (part: SitePart) => string | undefined
   /** The icon before its title, if it has one:  a page's, from its line (`icon "film"`). */
   iconOf: (part: SitePart) => string | undefined
   /** The address of its thumbnail, if it has one. */

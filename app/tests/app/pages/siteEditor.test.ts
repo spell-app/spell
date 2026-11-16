@@ -176,7 +176,12 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await stories.locator("li").last().locator('input[type="checkbox"]').check()
     await page.waitForTimeout(SETTLE_MS)
     expect(await text()).toContain('<story "S4" done></story>')
-    expect(await cardWith("/films · 3 of 4 stories").count()).toBe(1)
+    expect(
+      await page
+        .locator(".SiteCard", { hasText: "/films" })
+        .filter({ has: page.locator(".line.stories", { hasText: "3 of 4 stories" }) })
+        .count()
+    ).toBe(1)
   })
 
   test("a story moves by its thumb;  deleting one asks first, unless Option is held", async () => {
