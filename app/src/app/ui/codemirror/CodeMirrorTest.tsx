@@ -50,7 +50,7 @@ import "./CodeMirrorTest.css"
  *   accent fixes as you type.
  * - `?highlights=on`:  marks the uses of the word at the caret, which the app has off.
  * - `?view=diff`, `?file=Card`, `?target=python`:  a view, a file or a language at once.
- * - Each edit is saved 2 seconds after it, as the app's AutoSave saves (after 800 msec);
+ * - Each edit is saved 2 seconds after it, as the app's AutoSave saves;
  *   but NOTHING is written:  every write the page would send to the server is answered here (`answerWrites()`).
  * - What it measures, for a probe to read:  the debug global `codemirrorTest` (`timings`, `latencies`).
  * - Its position in the import graph:  a demo page's entry, importing CodeMirror's folders statically, as only it may.
@@ -456,7 +456,7 @@ async function showLanguage(lang: string) {
 }
 
 /**
- * Save `file` 2 seconds after its last edit (the phase's Goal;  the app's AutoSave waits 800 msec):
+ * Save `file` 2 seconds after its last edit (the phase's Goal, and the app's AutoSave):
  * answered here, nothing written.
  * - One wait per file:  an edit to another file doesn't put this one's off.
  */

@@ -1694,13 +1694,25 @@
       background-repeat: no-repeat;
     }
     /*
-     * what a person typed, on its band:  in the middle of it, its words on the band's own line (I113)
-     * - as tall as Monaco's, the page's at the editor's size;  no room over its words, which would put them off its
-     *   middle or off the band's line
+     * a band's words, a tag's, and those between a one-line element's tags:  a pixel up off their band's own line,
+     * so their small letters are in its middle (Owen, I114:  "move text up one pixel");  their band stays where it is
+     * - the browser puts text on whole pixels:  any lift from about 0.9px to 1.9px moves it one, so the middle of that
+     */
+    --cmb-words-lift: 1.4px;
+    /*
+     * what a person typed, on its band:  in the middle of it (I113), its words' small letters in the middle of its
+     * white (I114), so it stays put on its band while the band's words go up
+     * - as tall as Monaco's, the page's at the editor's size
      */
     .cm-line .bubbly-input {
+      box-sizing: border-box;
+      height: calc((var(--bubbly-input-height) + var(--bubbly-input-pad-top)) * var(--bubbly-editor-scale));
       padding-top: 0;
-      line-height: calc((var(--bubbly-input-height) + var(--bubbly-input-pad-top)) * var(--bubbly-editor-scale));
+      padding-bottom: calc(2 * var(--cmb-words-lift));
+      line-height: calc(
+        (var(--bubbly-input-height) + var(--bubbly-input-pad-top)) * var(--bubbly-editor-scale) - 2 *
+          var(--cmb-words-lift)
+      );
     }
     .cm-cursor {
       border-left-color: var(--bubbly-bold-ink);
@@ -1709,13 +1721,15 @@
     /*
      * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
      * - how strong it is:  `--bubbly-selection-strength`
+     * - while the editor has the focus too:  CodeMirror's own rule for that, more specific than a plain
+     *   `.cm-focused .cm-selectionBackground`, painted it solid lavender over the text, which vanished (I115)
      */
     .cm-selectionLayer {
       z-index: 1 !important;
       pointer-events: none;
     }
     .cm-selectionBackground,
-    &.cm-focused .cm-selectionBackground {
+    &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
       background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
     }
 
@@ -1748,8 +1762,10 @@
     .cmb-band {
       position: relative;
       display: inline-block;
+      box-sizing: border-box;
       height: var(--bubbly-pill-height);
-      line-height: var(--bubbly-pill-height);
+      /* its words up off its line by the lift (above) */
+      line-height: calc(var(--bubbly-pill-height) - 2 * var(--cmb-words-lift));
       /*
        * in the middle of its line:  from its top, never `middle`, which is the font's middle, not the line's
        * (it sat 2px low;  I113)
@@ -1758,7 +1774,8 @@
       margin-top: var(--cmb-band-margin);
       /* its round end left of its line's indent, its rail there;  its words a tab in, over its body's lines */
       margin-left: calc(-1 * var(--cmb-band-inset));
-      padding: 0 var(--bubbly-pill-pad-right) 0 calc(var(--cmb-band-inset) + var(--cmb-indent));
+      padding: 0 var(--bubbly-pill-pad-right) calc(2 * var(--cmb-words-lift))
+        calc(var(--cmb-band-inset) + var(--cmb-indent));
       border-radius: var(--bubbly-pill-radius);
       background: var(--bubbly-pill);
       white-space: pre;
@@ -1797,10 +1814,16 @@
     --cmb-foot-lift: calc(var(--cmb-foot-corner) - var(--cmb-foot-drop) - var(--cmb-rail));
     .cmb-foot-row {
       position: relative;
-      /* so the band on the next line is the page's line gap below the foot */
-      height: calc(
-        var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) * var(--bubbly-editor-scale) -
-          var(--cmb-band-margin)
+      /*
+       * so the band on the next line is the page's line gap below the foot;  on whole pixels, so every line under it
+       * starts on one and its words sit as on the lines above (they're placed on whole pixels;  it was 5.03px, I114)
+       */
+      height: round(
+        calc(
+          var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) * var(--bubbly-editor-scale) -
+            var(--cmb-band-margin)
+        ),
+        1px
       );
       background-image: var(--cmb-rails, none);
       background-size: var(--cmb-rail-sizes, auto);
@@ -1862,13 +1885,21 @@
       /* its rows as tall as the page's (`--bubbly-html-row`) */
       --cmb-line-height: var(--bubbly-html-row);
     }
+    /* an HTML block's inner corners, its rail turning under its band and into its foot:  cut at a tag's slant (I114) */
+    --cmb-tag-inner-down: calc(15px * var(--bubbly-editor-scale));
+    --cmb-tag-inner-across: calc(var(--cmb-tag-inner-down) * var(--bubbly-tag-slope));
+    /* a tiny foot at the editor's size */
+    --cmb-foot-tiny-height: calc(var(--bubbly-foot-tiny-height) * var(--bubbly-editor-scale));
     .cmb-tag-pill,
     .cmb-tag-band,
-    .cmb-tag-foot {
+    .cmb-tag-foot,
+    .cmb-tag-link {
       display: inline-block;
       box-sizing: border-box;
       height: var(--bubbly-pill-height);
-      line-height: var(--bubbly-pill-height);
+      /* its words up off its line by the lift, as a Spell band's */
+      line-height: calc(var(--bubbly-pill-height) - 2 * var(--cmb-words-lift));
+      padding-bottom: calc(2 * var(--cmb-words-lift));
       /* in the middle of its line, as a band is */
       vertical-align: top;
       margin-top: var(--cmb-band-margin);
@@ -1883,47 +1914,128 @@
       border-radius: calc(var(--bubbly-pill-height) / 2);
       corner-shape: round;
     }
-    /* a block's start tag:  its band from its rail's left edge, its `⟨` clear of its cut corner, as the page's */
+    /*
+     * a block's start tag:  its band from its rail's left edge, its `⟨` clear of its cut corner, as the page's;
+     * its `⟩` in its point, as every tag's (it had a bracket's room more there, the point past it;  I114)
+     */
     .cmb-tag-band.cmb-band-open {
+      position: relative;
       margin-left: calc(-1 * var(--cmb-band-inset));
       padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
-      padding-right: var(--bubbly-tag-pad-left);
       border-bottom-left-radius: 0;
     }
+    /*
+     * ... its rail dropping from it, its corner with its body cut, as Monaco's:  under the text, into the line below
+     * (`z-index`), the rows' own rails carrying on from it
+     */
     .cmb-tag-band.cmb-band-open::after {
       content: "";
       position: absolute;
       left: 0;
       top: 100%;
-      width: var(--cmb-rail);
-      height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
+      z-index: -1;
+      width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
+      height: var(--cmb-tag-inner-down);
       background: var(--bubbly-pill);
+      clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
-    .cmb-tag-band.cmb-band-open {
-      position: relative;
-    }
-    /* a block's end tag on its own line:  a tiny pill at its rail's turn, its letters tiny (Q61) */
+    /*
+     * a block's end tag on its own line:  a tiny pill at its rail's turn, its letters tiny (Q61);  as Monaco's (I114):
+     * its top-left square, the rail running into it;  its right end a point at a tag's slant, its bottom-left cut
+     */
     .cmb-tag-foot {
-      height: var(--bubbly-foot-tiny-height);
-      line-height: var(--bubbly-foot-tiny-height);
-      margin-top: calc((var(--cmb-line-height) - var(--bubbly-foot-tiny-height)) / 2);
+      position: relative;
+      height: var(--cmb-foot-tiny-height);
+      line-height: var(--cmb-foot-tiny-height);
+      /* its `⟨` just past its rail, as Monaco's */
+      padding: 0 var(--bubbly-foot-tiny-pad-right) 0 calc(var(--bubbly-foot-tiny-pad-left) * var(--bubbly-editor-scale));
+      margin-top: calc((var(--cmb-line-height) - var(--cmb-foot-tiny-height)) / 2);
       margin-left: calc(-1 * var(--cmb-band-inset));
-      padding: 0 var(--bubbly-foot-tiny-pad-right) 0 var(--cmb-band-inset);
-
-      border-radius: 0 var(--bubbly-foot-tiny-height) var(--bubbly-foot-tiny-height) 0 / 0
-        calc(var(--bubbly-foot-tiny-height) / 2) calc(var(--bubbly-foot-tiny-height) / 2) 0;
+      border-radius: 0 calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
+        calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
+        calc(var(--bubbly-foot-tiny-cut) * var(--bubbly-editor-scale)) / 0 calc(var(--cmb-foot-tiny-height) / 2)
+        calc(var(--cmb-foot-tiny-height) / 2) calc(var(--bubbly-foot-tiny-cut) * var(--bubbly-editor-scale));
       font-size: var(--bubbly-foot-tiny-font);
     }
-    /* a one-line element with something between its tags:  a line along the top and bottom between them (Q58) */
+    /* a `</>` foot as wide as Monaco's, its `⟨|⟩` at its right end (it was 10px narrower) */
+    .cmb-tag-foot:has(> .bubbly-end-bare) {
+      padding-left: calc(var(--bubbly-foot-bare-pad-left) * var(--bubbly-editor-scale));
+    }
+    /*
+     * ... the rail coming down into it, its corner with the body cut:  the row's own rail ends at the foot's top
+     * (`CodeMirrorMarkup`), so none shows under it
+     */
+    .cmb-tag-foot::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 100%;
+      z-index: -1;
+      width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
+      height: var(--cmb-tag-inner-down);
+      background: var(--bubbly-pill);
+      clip-path: polygon(0 0, var(--cmb-rail) 0, 100% 100%, 0 100%);
+    }
+    /*
+     * a one-line element with something between its tags:  a line along the top and bottom of their bands between them
+     * (Q58), from one tag's point to the other's, under the tags, as Monaco drew it (I114);  its words on the tags' line
+     * - its own box a band's, so a tag inside it sits in it as in its line
+     */
     .cmb-tag-link {
+      position: relative;
+      padding-inline: 0;
+      background: none;
+      border-radius: 0;
+    }
+    .cmb-tag-link > :is(.cmb-tag-pill, .cmb-tag-band) {
+      margin-top: 0;
+    }
+    .cmb-tag-link::before {
+      content: "";
+      position: absolute;
+      inset: 0
+        calc(
+          -1 *
+            (
+              (var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale) +
+                var(--bubbly-tag-point)
+            )
+        );
+      z-index: -1;
       background:
-        linear-gradient(var(--bubbly-pill) 0 0) top / 100% var(--bubbly-tag-link-width) no-repeat,
-        linear-gradient(var(--bubbly-pill) 0 0) bottom / 100% var(--bubbly-tag-link-width) no-repeat;
-      padding-block: calc((var(--bubbly-pill-height) - 1lh) / 2);
+        linear-gradient(var(--bubbly-pill) 0 0) top / 100%
+          calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat,
+        linear-gradient(var(--bubbly-pill) 0 0) bottom / 100%
+          calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat;
     }
     /* spacers, injected beside HTML's tags (`CodeMirrorMarkup`):  their widths the shared rules' */
     .bubbly-spacer {
       display: inline-block;
+    }
+    /*
+     * a quoted input's curly marks on a Spell band, as Monaco drew them (I114:  "Curlies lost their curl", "comma too
+     * faint"):  at the editor's size, outside its white, where Monaco's `"` was, a gap and half a `"` from it;
+     * the opening one high and centred there, the closing one low and tucked in, clear of a comma after it
+     * - placed from the white, their `"` no wider than nothing inside it;  they were a size bigger, the closing one
+     *   right over the comma
+     */
+    --cmb-quote-reach: calc(var(--bubbly-input-gap) * var(--bubbly-editor-scale) + 0.23em);
+    .cm-line .bubbly-quoted > .bubbly-quote-mark::after {
+      right: auto;
+      bottom: auto;
+      /* from the top of the white, on a line as tall as the editor's, as Monaco's were on theirs */
+      top: calc(-0.1em - 0.18px);
+      line-height: var(--cmb-line-height);
+      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-editor-scale));
+    }
+    .cm-line .bubbly-quoted > .bubbly-quote-open::after {
+      left: calc(-1 * var(--cmb-quote-reach));
+      translate: -50% 0;
+    }
+    .cm-line .bubbly-quoted > .bubbly-quote-close::after {
+      left: calc(100% + var(--cmb-quote-reach));
+      top: calc(0.25em - 0.18px);
+      translate: -85% 0;
     }
     /*
      * a tag's quoted value's marks:  the file's `"` keeps its width,
@@ -1932,6 +2044,14 @@
     .cm-line .bubbly-tag-quote {
       position: relative;
       display: inline;
+    }
+    /*
+     * a value in a tag close after its opening quote mark, as Monaco's (I114):  at the white's usual 2px gap, the mark
+     * stood 1.5px further from it than Monaco's
+     */
+    .cm-line .bubbly-quote-open + .bubbly-input-spacer + .bubbly-input,
+    .cm-line .bubbly-quote-open + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input {
+      margin-left: 0.5px;
     }
     .cm-line .bubbly-tag-quote::after {
       left: 50%;
