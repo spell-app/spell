@@ -246,7 +246,8 @@ class MarkupShapes {
    *     should be indented as much as `class`")
    *   - every row from the block's left edge, its band's, to its right edge, past its widest row:
    *     how far each reaches past its words is measured once it's drawn (`tagBlocks`)
-   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139)
+   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139),
+   *     alone on the line under it too, the line break before it hidden (I144)
    */
   private tagOn(place: number, classes: string[], partOfSpeech: string) {
     const stretch = this.marks[place]
@@ -255,7 +256,7 @@ class MarkupShapes {
     const firstLine = doc.lineAt(stretch.start)
     if (stretch.end <= firstLine.to) return this.on(place, classes)
     const block = this.decorations.nextBlock()
-    const lastLine = doc.lineAt(stretch.end)
+    const closeLine = doc.lineAt(stretch.end)
     const isOpen = classes.includes("cmb-band-open")
     const rowOf = (extra: string[]) => {
       const row = this.decorations.nextRow()
@@ -278,11 +279,21 @@ class MarkupShapes {
     const joined = /^<[^\s"'=>]+\s*$/.test(name) ? doc.line(firstLine.number + 1) : undefined
     const joinedFrom = joined ? joined.from + /^\s*/.exec(joined.text)![0].length : 0
     const isJoined = joined !== undefined && joinedFrom < Math.min(joined.to, stretch.end)
-    const firstEnd = isJoined ? Math.min(joined.to, stretch.end) : firstLine.to
-    if (isJoined) {
-      this.decorations.add(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
-      if (firstEnd === stretch.end) first.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
+    // its `>` alone on the line under its last attribute (Solitaire's toolbar):  drawn on that attribute's line
+    // too, the line break and indent before it hidden (I144)
+    const close = /^\s*(\/?>)$/.exec(doc.sliceString(closeLine.from, stretch.end))
+    const isCloseAlone = close !== null && !(isJoined && joined.number === closeLine.number)
+    const lastLine = isCloseAlone ? doc.line(closeLine.number - 1) : closeLine
+    if (isCloseAlone) {
+      const words = lastLine.from + lastLine.text.trimEnd().length
+      this.decorations.add(TagJoinWidget.closeDecoration.range(words, stretch.end - close[1]!.length))
     }
+    const firstRowLine = isJoined ? joined.number : firstLine.number
+    const firstEnd =
+      firstRowLine === lastLine.number ? stretch.end : isJoined ? Math.min(joined.to, stretch.end) : firstLine.to
+    if (firstEnd === stretch.end) first.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
+    if (isJoined)
+      this.decorations.add(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
     // the tag's own mark (`bubbly-piece`) on its first row alone:  over all its lines, it cut the last row in two
     const own = this.decorations.unmark(stretch.start, stretch.end)
     this.decorations.mark(
@@ -295,13 +306,12 @@ class MarkupShapes {
     for (let number = after; number <= lastLine.number; number++) {
       const line = doc.line(number)
       const from = line.from + /^\s*/.exec(line.text)![0].length
-      const to = Math.min(line.to, stretch.end)
-      if (to <= from) continue
       const isLast = number === lastLine.number
+      // the last row round its `>` too, alone on the line under or not
+      const to = isLast ? stretch.end : Math.min(line.to, stretch.end)
+      if (to <= from) continue
       const row = rowOf(["cmb-tag-band", "cmb-tag-row", ...hueOf(partOfSpeech)])
       if (isLast) row.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
-      // its `>` alone on its line, back at the tag's level (as I133 laid it out):  from the band's left edge
-      if (/^\/?>$/.test(doc.sliceString(from, to))) row.classes.push("cmb-tag-row-close")
       // round what's marked on the line, never merged into a mark of the same stretch (a `>` alone, a bare attribute):
       // CodeMirror puts an inclusive mark outside an exclusive one over the same text
       this.decorations.add(
@@ -309,8 +319,8 @@ class MarkupShapes {
       )
     }
     // its `>` or `/>` past its last attribute
-    const close = /\/?>$/.exec(doc.sliceString(lastLine.from, stretch.end))
-    if (close) this.decorations.point(stretch.end - close[0].length, stretch.end)
+    const point = /\/?>$/.exec(doc.sliceString(lastLine.from, stretch.end))
+    if (point) this.decorations.point(stretch.end - point[0].length, stretch.end)
   }
 
   /** Classes `classes` on the mark at `place`. */
@@ -871,23 +881,42 @@ class FeetJoinWidget extends WidgetType {
  * `⟨ toolbar class="GameBar"`, the file still `<toolbar`, then `class="GameBar"` on a line of its own.
  * - One step for the caret, as the feet's join (`FeetJoinWidget`):  before it, after the name;  after it, before
  *   the attribute
+ * - Also the line break and indent before a `>` alone on the line under the last attribute, drawn as nothing,
+ *   so the `>` is on that attribute's line (epic `language` I144;  Owen:  "End `>` is supposed to be on same line
+ *   as `shrinkable`")
  ****************/
 class TagJoinWidget extends WidgetType {
-  /** The hiding decoration:  `atomic`, so `CodeMirrorRelayout` makes it one step for the caret. */
-  static readonly decoration = Decoration.replace({ widget: new TagJoinWidget(), atomic: true })
+  /**
+   * The hiding decorations:  `atomic`, so `CodeMirrorRelayout` makes each one step for the caret.
+   * - `decoration`:  between the tag's name and its first attribute, drawn as a space
+   * - `closeDecoration`:  between its last attribute and a `>` alone on the line under it, drawn as nothing,
+   *   the `>`'s own room before it (`TagPointWidget`;  I144)
+   */
+  static readonly decoration = Decoration.replace({ widget: new TagJoinWidget(" ", "cmb-tag-join"), atomic: true })
+  static readonly closeDecoration = Decoration.replace({
+    widget: new TagJoinWidget("", "cmb-tag-close-join"),
+    atomic: true
+  })
 
-  eq(): boolean {
-    return true
+  constructor(
+    readonly shown: string,
+    readonly className: string
+  ) {
+    super()
+  }
+
+  eq(other: TagJoinWidget): boolean {
+    return other.className === this.className
   }
 
   toDOM(): HTMLElement {
     const join = document.createElement("span")
-    join.className = "cmb-tag-join"
-    join.textContent = " "
+    join.className = this.className
+    join.textContent = this.shown
     return join
   }
 
-  /** `pos` 0, before it:  after the tag's name;  else before its first attribute. */
+  /** `pos` 0, before it:  after the tag's name, or its last attribute;  else before its first attribute, or its `>`. */
   coordsAt(join: HTMLElement, pos: number): Rect | null {
     const letter = letterBeside(join, pos === 0 ? "before" : "after")
     const box = join.getBoundingClientRect()
@@ -985,8 +1014,7 @@ function measureTagBlocks(view: EditorView): TagRow[] {
       left: box.left + reach("--cmb-reach-before"),
       right: box.right - after
     }
-    if (element.matches(".cmb-tag-row:not(.cmb-tag-row-close)"))
-      row.words = box.left + parseFloat(style.paddingLeft) - reach("--cmb-reach-in")
+    if (element.matches(".cmb-tag-row")) row.words = box.left + parseFloat(style.paddingLeft) - reach("--cmb-reach-in")
     const point = element.querySelector<HTMLElement>(".cmb-tag-point")
     if (point) {
       // its first ink:  a `/>`'s bar, drawn at its slash's left edge, else its `⟩`
