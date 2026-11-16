@@ -46483,6 +46483,11 @@
           "description": "With `max-visible`:  a name to keep the row's items under, so they're the same after a reload."
         },
         {
+          "name": "all-items-icon",
+          "kind": "icon",
+          "description": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,

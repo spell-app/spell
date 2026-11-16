@@ -7,7 +7,6 @@ import { editor } from "spell/app/app/editor"
 import type { EditorSpell } from "spell/app/app/layout/layoutSpell"
 import type { EditorThing } from "spell/app/app/layout/editorNames"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { CodeMoreMenu } from "./CodeOutput"
 import { editorSpellWithActions } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
@@ -24,7 +23,6 @@ import "./FileTabs.css"
  * - what showing one does:  `editor.showEditor()`
  * - a drafted file's pen's tip, in the page's language:  "Updated in your draft.", and its link, Discard changes,
  *   which discards THAT file's draft (`editor.discardDraftOf()`;  epic `editor` I92)
- * - the bar's ⋯ (`<CodeMoreMenu>`)
  * - A tab's right-click menu is the Spell's too, a `<context-menu>` inside each tab:  Duplicate, Rename, Delete,
  *   the app's actions, which the editor does (`editorSpellWithActions()`);  the page's right click on the bar finds it.
  *   - The right click shows that file first, so its actions are about it.
@@ -32,7 +30,8 @@ import "./FileTabs.css"
  * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file
  *   (`editor.moveFile()`;  Owen, epic `mockup`).
  * - More than eight files:  the ones opened lately, and a button listing every file (its `max-visible`),
- *   the same ones after a reload, per project (its `remember`).
+ *   the same ones after a reload, per project (its `remember`);  a file icon before its caret (`all-items-icon`,
+ *   epic `editor` T76:  "The `More` dropdown is too subtle").
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
@@ -48,7 +47,6 @@ export function FileTabs() {
       // the Spell without its file tab bar (renamed):  no tabs, and the load's notice says why
       if (!made) return
       setSpell(() => loaded)
-      Object.assign(made, loaded.parts({ more: { draw: () => <CodeMoreMenu /> } }))
       setBar(() => made)
     },
     // no tabs:  the code still shows, and File > Open is a way round
@@ -106,8 +104,7 @@ export function FileTabs() {
     if (isInTip(event)) return undefined
     const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as HTMLElement | undefined
     if (!tab?.parentElement) return undefined
-    // by its place among the TABS:  the bar's ⋯ sits among them too, an icon and its popup (`<CodeMoreMenu>`;
-    // epic `editor` T50)
+    // by its place among the TABS, the bar's only items (its ⋯ sat among them until epic `editor` T76;  T50)
     const tabs = [...tab.parentElement.children].filter((each) => each.localName === "ui-item") as HTMLElement[]
     const files = bar()?.files.getValues() ?? []
     const file = files[tabs.indexOf(tab)]

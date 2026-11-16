@@ -124,18 +124,20 @@ export function toggleCode() {
  * ### `<ModeButtons>`
  * Run | Edit | Site in the top bar, as the theme's segmented tabs:  the one showing is chosen;
  * Site only for a project that declares a site (`EditorMode.hasSite`);
- * then, in Edit, the code's icon, which shows the code or closes it, then Inspect app (`inspect`)
- * (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and inspect buttons should be swapped").
+ * then, in Edit, the code's icon, which shows the code or closes it, the compiled code's (`compiled`), then Inspect app
+ * (`inspect`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and inspect buttons
+ * should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector").
  * - After the group, while you have drafts of the project:  "Editing a Draft", then Publish Draft, one pill
  *   (`<PublishDraft>`;  Owen, 2026-11-14:  "move it to the right of code/inspect buttons").
- * - Neither icon is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
+ * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
+ * - `compiled`:  the compiled code's item (`<CompiledCodeButton>`), handed in as `inspect` is.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
  * - Not on a phone, which only runs (`chrome.css`).
  ****************/
-export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JSX.Element {
+export function ModeButtons(props: { current: Mode; compiled?: JSX.Element; inspect?: JSX.Element }): JSX.Element {
   return (
     <ui-item class="ModeButtons">
       <ui-menu
@@ -163,6 +165,7 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
           />
+          {props.compiled}
           {props.inspect}
         </Show>
       </ui-menu>

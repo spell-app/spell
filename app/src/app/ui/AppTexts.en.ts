@@ -646,9 +646,11 @@ export const APP_TEXTS = {
   "event.keydown": "key down",
   "event.keyup": "key up",
   closeProgram: "Close the Program panel",
-  codeMore: "More for this code",
   codeOutputHeader: "Compiled code",
-  codeOutputMenu: "Show Compiled Code",
+  // the top bar's compiled-code button's tooltip, its language's (`<CompiledCodeButton>`)
+  compiledJavaScript: "Compiled JavaScript",
+  compiledTypeScript: "Compiled TypeScript",
+  compiledPython: "Compiled Python",
   codeOutputClose: "Hide the compiled code",
   referenceTab: "Reference",
   // the Reference tab (`<SpellReference>`):  what you can use
