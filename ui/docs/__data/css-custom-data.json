@@ -7457,6 +7457,13 @@
       }
     },
     {
+      "name": "--ui-property-editor-band-spacing",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-property-editor>`'s token.  Default:  `0`"
+      }
+    },
+    {
       "name": "--ui-property-editor-band-weight",
       "description": {
         "kind": "markdown",

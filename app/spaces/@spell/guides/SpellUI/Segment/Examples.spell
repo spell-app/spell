@@ -28,13 +28,13 @@
 		<!-- GAP I59:  the placeholder doesn't centre its buttons / fields (Fomantic:  centred blocks, an `inline` row). -->
 		<section label="Placeholder Segment" sticky collapsible dividing>
 			<example "Placeholder Segment" description="A segment can be used to reserve space for conditionally displayed content.">
-				<segment placeholder="">
+				<segment appearance="placeholder">
 					<header icon><icon name="file pdf outline"/> No documents are listed for this customer.</header>
 					<button color="primary">Add Document</button>
 				</segment>
 			</example>
 			<example "Placeholder Segment">
-				<segment placeholder="">
+				<segment appearance="placeholder">
 					<header icon><icon name="search"/> We don't have any documents matching your query</header>
 					<buttons spacing="md">
 						<button color="primary">Clear Query</button>
@@ -46,7 +46,7 @@
 
 			<!-- GAP I45:  Fomantic's grid is `stackable`, but a stacked grid keeps the divider vertical and clips the form (phones):  left out. -->
 			<example "Placeholder Segment">
-				<segment placeholder="">
+				<segment appearance="placeholder">
 					<grid columns="2" align="center">
 						<divider direction="vertical">Or</divider>
 						<row vertical-align="middle">

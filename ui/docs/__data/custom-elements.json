@@ -31137,6 +31137,10 @@
               "default": "none"
             },
             {
+              "name": "--ui-property-editor-band-spacing",
+              "default": "0"
+            },
+            {
               "name": "--ui-property-editor-band-weight",
               "default": "var(--ui-font-weight-bold, 700)"
             },
@@ -35093,19 +35097,11 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.",
+              "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint), `placeholder` (a tinted, centred block reserving room for content).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`, `placeholder`.",
               "type": {
                 "text": "string"
               },
               "fieldName": "appearance"
-            },
-            {
-              "name": "placeholder",
-              "description": "A tinted, centred block reserving room for content.",
-              "type": {
-                "text": "boolean"
-              },
-              "fieldName": "placeholder"
             },
             {
               "name": "padding",

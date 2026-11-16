@@ -1391,9 +1391,19 @@ export const DEFAULTS_TABLE: Readonly<
       name: "appearance",
       kind: "multiple",
       group: "appearance",
-      values: ["raised", "stacked", "tall-stacked", "piled", "vertical", "circular", "basic", "secondary", "tertiary"]
+      values: [
+        "raised",
+        "stacked",
+        "tall-stacked",
+        "piled",
+        "vertical",
+        "circular",
+        "basic",
+        "secondary",
+        "tertiary",
+        "placeholder"
+      ]
     },
-    { name: "placeholder", kind: "keyOnly", group: "form" },
     {
       name: "padding",
       kind: "valueOnly",
@@ -1403,7 +1413,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "clearing", kind: "keyOnly", group: "appearance" },
     { name: "align", kind: "textAlign", group: "layout", values: ["left", "center", "right"] },
     { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
-    { name: "seamless", kind: "keyOnly", group: "appearance" },
+    { name: "seamless", kind: "keyOnly", group: "layout" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "loading", kind: "keyOnly", group: "states" },
     { name: "disabled", kind: "keyOnly", group: "states" },
