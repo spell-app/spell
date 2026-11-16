@@ -11,13 +11,15 @@ import "./SiteBoardView.css"
 /****************
  * ### `<SiteBoardView>`
  * The site editor's board:  a block per section, one under the other, each a grid of `<ui-card>`s (`SiteBoard`).
+ * - A group's section is headed by a line, its title in its colour (`<GroupHeader>`, epic `mockup` T36), not a card:
+ *   its cards start a column to the left (`--SiteGrid-shift`), so the file's places stay as they were.
  * - A card takes its section's colour (`<ui-card background>`);  a page's is rounded, a dialog's square,
  *   a section's bold and bigger;  its thumbnail on top, when it has one.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
  * - A page's card has a link in its corner, opening it in a tab of its own:  `newTabOf`.
  *   - The tab is named for its address (`tabNameFor()`), so a second click goes back to the same tab (`mockup` I19).
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
- *   - a section's card:  up or down, the whole section before or after another, a line showing where;
+ *   - a section's card, or a group's line:  up or down, the whole section before or after another, a line showing where;
  *     or onto a spot of another section, which it joins, its pages with it
  *   - any other card:  to a spot of its own section or another, the spot lit up
  *   - any card onto the middle of a page's card:  into that page, as its first page, the page's card lit up
@@ -33,23 +35,52 @@ export function SiteBoardView(props: SiteBoardViewProps) {
       <For each={sections()} keyed={(section) => section.key}>
         {(section) => (
           <section class="SiteSection" data-section={section().key} data-headed={section().head ? "" : undefined}>
-            <For each={SiteBoard.spotsOf(section())} keyed={(spot) => `${spot.row}:${spot.column}`}>
-              {(spot) => (
-                <div
-                  class={["spot", { "extra-row": spot().isExtraRow, "extra-column": spot().isExtraColumn }]}
-                  data-row={spot().row}
-                  data-column={spot().column}
-                  style={{ "grid-row": spot().row, "grid-column": spot().column }}
-                />
-              )}
-            </For>
-            <For each={section().cards} keyed={(card) => card.part.name}>
-              {(card) => <SiteCard {...props} card={card()} section={section()} />}
-            </For>
+            <Show when={SiteBoard.isGroup(section()) && section().cards[0]}>
+              {(head) => <GroupHeader {...props} card={head()} section={section()} />}
+            </Show>
+            <div class="SiteGrid" style={{ "--SiteGrid-shift": SiteBoard.isGroup(section()) ? 1 : 0 }}>
+              <For each={SiteBoard.spotsOf(section())} keyed={(spot) => `${spot.row}:${spot.column}`}>
+                {(spot) => (
+                  <div
+                    class={["spot", { "extra-row": spot().isExtraRow, "extra-column": spot().isExtraColumn }]}
+                    data-row={spot().row}
+                    data-column={spot().column}
+                    style={{ "--SiteCard-row": spot().row, "--SiteCard-column": spot().column }}
+                  />
+                )}
+              </For>
+              <For
+                each={SiteBoard.isGroup(section()) ? section().cards.slice(1) : section().cards}
+                keyed={(card) => card.part.name}
+              >
+                {(card) => <SiteCard {...props} card={card()} section={section()} />}
+              </For>
+            </div>
           </section>
         )}
       </For>
     </div>
+  )
+}
+
+/**
+ * A group's line over its section (epic `mockup` T36):  its title in its colour, quiet, as a heading is.
+ * - A click picks the group, a double click opens its line;  a drag moves the whole group, its pages with it,
+ *   before or after another section.
+ */
+function GroupHeader(props: SiteBoardViewProps & { card: BoardCard; section: BoardSection }) {
+  const part = () => props.card.part
+  return (
+    <header
+      class={["SiteGroupHeader", { selected: props.picked === part().name }]}
+      data-part={part().name}
+      style={{ "--SiteGroupHeader-color": props.card.color ? `var(--ui-${props.card.color})` : undefined }}
+      onClick={() => props.onPick(part().name)}
+      onDblClick={() => props.onOpen(part().name)}
+      onPointerDown={(event: PointerEvent) => startMove(event, props.card, props.section)}
+    >
+      <h2>{props.titleOf(part())}</h2>
+    </header>
   )
 }
 
@@ -146,6 +177,7 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
   if (event.button !== 0) return
   const host = event.currentTarget as HTMLElement
   const board = host.closest(".SiteBoard") as HTMLElement
+  const onlyBeside = card.isSectionCard && !SiteEdits.canGoUnder(card.part)
   let marked: HTMLElement | undefined
   let opened: HTMLElement | undefined
   const mark = (element: HTMLElement | undefined, where?: string) => {
@@ -172,6 +204,12 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
     placing: (x, y) => {
       host.setAttribute(BEING_MOVED, "")
       scrollNearEdge(board.parentElement!, x, y)
+      // a group lands only beside another section:  no spots to show it
+      if (onlyBeside) {
+        const beside = sectionBeside(board, section, y)
+        mark(beside?.element, beside?.where)
+        return
+      }
       board.setAttribute(MOVING, "")
       open(
         document.elementsFromPoint(x, y).find((each) => each.classList.contains("SiteSection")) as

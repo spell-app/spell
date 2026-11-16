@@ -225,6 +225,34 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       expect(await text()).toBe(before)
     })
 
+    test("a section added at the end, picked;  its line dragged above another moves it;  ⌘Z takes each back", async () => {
+      const before = await text()
+      const addSection = page.locator(".SiteEditorPage ui-button", { hasText: "Add a section" })
+      await addSection.click()
+      await page.waitForTimeout(SETTLE_MS)
+      await addSection.click()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toBe(`${before}\tgroup "New section"\n\tgroup "New section 2"\n`)
+      // the new one is picked, a line over its section, not a card
+      await page.locator('.SiteGroupHeader.selected[data-part="#group New section 2"]').waitFor({ timeout: 5000 })
+      expect(await page.locator(".SiteCard[data-part^='#group']").count()).toBe(0)
+      const first = (await page.locator('.SiteSection[data-section="#group New section"]').boundingBox())!
+      await dragTo(page.locator('.SiteGroupHeader[data-part="#group New section 2"]'), async () => ({
+        x: first.x + 40,
+        y: first.y + 2
+      }))
+      expect(await page.locator('.SiteSection[data-section="#group New section"][data-drop="before"]').count()).toBe(1)
+      // a group lands only beside a section:  no spots shown
+      expect(await page.locator(".SiteBoard[data-moving]").count()).toBe(0)
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toBe(`${before}\tgroup "New section 2"\n\tgroup "New section"\n`)
+      await undo()
+      await undo()
+      await undo()
+      expect(await text()).toBe(before)
+    })
+
     test("a card to an empty spot of its section:  the spot lights up, its place is written", async () => {
       const before = await text()
       await dragTo(cardOf("film page"), () => spotCentre("films page", 1, 3))
@@ -270,12 +298,8 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       await page.waitForTimeout(150)
       await page.mouse.up()
       await page.waitForTimeout(SETTLE_MS)
-      expect(await text()).toContain(
-        [
-          '\tit has a reviews page at "/reviews", named "Reviews"',
-          '\t\tit has a starship page at "/starships/:starship", named "Starship"'
-        ].join("\n")
-      )
+      // whatever else the reviews page's line says (its title, its icon), the starship page is now under it
+      expect(await text()).toMatch(/\tit has a reviews page at "\/reviews"[^\n]*\n\t\tit has a starship page at /)
       await undo()
       expect(await text()).toBe(before)
     })
@@ -320,7 +344,9 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       await card.click()
       await page.waitForURL(/\/site\/@spell\/examples\/StarWarsSite$/, { timeout: 30_000 })
       await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
-      await page.locator(".SiteEditorPage ui-button", { hasText: "All sites" }).click()
+      // no "All sites" in the bar since epic `mockup` T36:  the browser's Back
+      expect(await page.locator(".SiteEditorPage ui-button", { hasText: "All sites" }).count()).toBe(0)
+      await page.goBack()
       await page.waitForURL(/\/site\/@spell\/examples$/, { timeout: 30_000 })
       await card.waitFor({ timeout: 30_000 })
       await card.click()

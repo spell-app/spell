@@ -28,6 +28,32 @@ export class SiteBoard {
     return blocks.map(({ head, parts: loose }) => SiteBoard.laidOut(head, loose))
   }
 
+  /** Is `section` headed by a `group` line, drawn as a line over its cards rather than as a card (epic `mockup` T36)? */
+  static isGroup(section: BoardSection): boolean {
+    return section.head?.kind === "group"
+  }
+
+  /**
+   * `text` with a new, empty group at the end of its site, titled `title`, or `title 2` ... when that's taken.
+   * - Its line is written as the site's other lines are:  `group "New section"`, at their indent.
+   * - Answers the text and the group's part name (`SiteEdits.groupKey()`), for the caller to pick it.
+   * - throws `TypeError` for a site with no parts yet:  there's no line to write it after
+   */
+  static withSectionAdded(text: string, title: string): { text: string; name: string } {
+    const parts = SiteEdits.partsIn(text) ?? []
+    const last = parts.at(-1)
+    if (!last) {
+      throw new TypeError("SiteBoard.withSectionAdded():  this site has no pages yet;  add a page first")
+    }
+    const taken = parts.filter((part) => part.kind === "group").map((part) => part.title ?? "")
+    const free = SiteEdits.freeName(title, taken)
+    const at = last.span.end
+    const line = `${parts[0]!.indent}group ${JSON.stringify(free)}`
+    const before = text.slice(0, at)
+    const after = before.endsWith("\n") || !before ? `${before}${line}\n` : `${before}\n${line}`
+    return { text: after + text.slice(at), name: SiteEdits.groupKey(free) }
+  }
+
   /**
    * Every spot of `section` a card can be dropped on:  its rows and columns, one more of each, past its section card.
    * - `isExtraRow`, `isExtraColumn`:  it's in that one more row or column, there only while a card is being moved.
