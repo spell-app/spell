@@ -241,6 +241,13 @@ and in the app's build folder, `app/` at the app folder's root.
       rules and CodeMirror's highlight tags;  the compiled JavaScript, TypeScript and Python pane is coloured by it
     - a slice of a file, `CodeSlice`:  `FileStates.showSlice()`, the file's own text in another view, its edits the
       file's;  only what's wholly in its lines bubbly;  both sides of a diff bubbly
+  - All nine typing helps, Monaco's, on the same rules (`LSP.SpellTyping`), one undo each (P4):
+    [CodeMirrorTyping](ui/codemirror/CodeMirrorTyping.ts);  and the code-or-text switch, `{` and `"` in an attribute's
+    value, [CodeMirrorCodeOrText](ui/codemirror/CodeMirrorCodeOrText.ts) (`LSP.CodeOrText`)
+    - each writes with its key, so only the editor typed in helps:  a file's editor and a slice of it both have them
+    - the caret's snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
+    - Enter between a tag's attributes measures tabs and spaces as CodeMirror draws them:  the bubbly look's tab stop
+      isn't 4 of the font's spaces, so its text can differ from Monaco's, lined up all the same
   - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
     and the test page, types aside:  it's to load lazily, as Monaco does.
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).

@@ -91,6 +91,22 @@ export class CodeMirrorSetup {
   }
 
   /**
+   * `text`'s width in `element`'s font, as the browser lays it out, in px;  a tab `tabSize` spaces, as CodeMirror's is.
+   * - A hidden probe in the scroller, beside the text, never in it:  CodeMirror reads any change to its content as an edit.
+   * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (16.875px, 4 spaces of 4.234px).
+   * - SIDE EFFECT:  lays the page out, if it's due;  call it where reading layout is fine.
+   */
+  static widthIn(element: HTMLElement, text: string, tabSize = 4): number {
+    const probe = document.createElement("span")
+    probe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; tab-size: ${tabSize}`
+    probe.textContent = text
+    element.append(probe)
+    const width = probe.getBoundingClientRect().width
+    probe.remove()
+    return width
+  }
+
+  /**
    * Sent with a file's new parse, so whatever reads the parse looks again:  the fold arrows, the bubbly look.
    * - STATIC:  one effect for every editor on the page, so each extension can ask for it.
    */

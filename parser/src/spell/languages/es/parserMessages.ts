@@ -53,6 +53,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "cant-go-without-waiting": "Solo una llamada puede ir sin esperar:  esto tiene un valor o un cuerpo que esperar",
   "cant-wait-for-toast-that-stays":
     "No se puede esperar a un aviso que se queda:  los clics esperarían hasta que se cierre",
+  "not-a-duration": '"{said}" no es una duración:  di cuánto tiempo, como en "300 mseg" o "5 minutos"',
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "enabled-and-disabled-when": 'Una acción dice "activa cuando" o "inactiva cuando", no las dos:  deja una',
   "place-read-only":

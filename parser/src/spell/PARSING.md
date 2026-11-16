@@ -567,7 +567,7 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   - Each unit is worked out in base units as it parses:  `factor`, and `offset` for one `starting at` somewhere else.
   - They compile to `core.defineDimension("Length")` and a `core.defineUnit()` each, in the core's
     [dimensions.ts](../core/dimensions.ts) and Python's `spell_core/dimensions.py`.
-- The built-in six come from the core's `dimensions/dimensions.spell` and `dimensions.es.spell`, compiled ONCE by
+- The built-in seven come from the core's `dimensions/dimensions.spell` and `dimensions.es.spell`, compiled ONCE by
   `yarn core:gen:templates` ([builtInDimensionFiles.ts](node/builtInDimensionFiles.ts)) into two tables:
   the kit's `spell/util/measures/dimensions.generated.ts`, every language's words, which each root loads
   (`SP.loadBuiltInDimensions()`), the JavaScript core and Spell UI's `<ui-dimension>` convert by;  and Python's.
@@ -575,6 +575,10 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   compiles to `core.measureShown()` (`SP.shownMeasureAST()`);  `<ui-dimension value={its height}>` is handed
   `dimension` and `unit` (`SpellJSX.withMeasure()`).  The reader's system is the kit's `MeasureSystem`.
   - The Spanish twin pairs with the English line by line, so `pulgada` is the inch's id.
+- A DURATION (T140):  the built-in dimension of how long, its units millisecond (`ms`, `msec`), second, a tick (1/60 of a
+  second, HyperCard's), minute, hour and day.  `pause for 300 msec` and a place's `check it every 5 minutes` read one
+  (`SP.durationUnitOf()`):  a measure written out, anything that measures one (`pause for the delay`), or a number then a
+  duration's unit (`pause for (10 + 10) sec`);  a pause compiles to the core's name for its unit, `SP.CORE_TIME_UNITS`.
 - A property that measures:  `its "height" is a length in cm` (`outline_specifier_measure`) holds a `number`, and its
   record says what it measures, `P.ScopeVariable.measure`.
 - A PERCENT (P34):  the built-in proportion dimension (`SP.PROPORTION`), its measures KEPT as their fraction, its base

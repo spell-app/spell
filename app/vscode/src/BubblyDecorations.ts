@@ -15,7 +15,7 @@ import { RunnerPanel } from "./RunnerPanel"
  *   a little room beside it, a space of its own before and after it (a decoration's attachment), NEVER padding on
  *   the text, which would move the caret off its letters.
  * - The layout is the language server's (`spell/bubbly`):  the same layout and stretches as the app's Monaco editor
- *   (`SP.BubblyLayout`, `SP.BubblyStretches`), so how each rule presents is `SP.BubblyPresentation`'s, not ours.
+ *   (`SP.BubblyLayout`, `SP.BubblyStretches`), so how each rule presents is its roles' (`SP.BubblyRoles`), not ours.
  * - Its colours, weights and sizes are the look's one sheet's, `bubbly.css`:  VS Code can't load CSS, so they come
  *   from its generated table, `bubbly.values.json`, bundled in when the extension is built.
  *   - Light or dark:  VS Code picks each decoration's `light` or `dark` half by the colour theme's kind.

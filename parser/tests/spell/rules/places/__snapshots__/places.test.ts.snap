@@ -6,7 +6,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "asked_by": "collection|fields",
   "cancel_action": "action",
   "checked_at": "type|hour?|minute?|half?|zone?",
-  "checked_every": "type|number?|unit?",
+  "checked_every": "type|interval?|number?|unit?",
   "collection_at": "collection|path",
   "collection_searched_with": "collection|param|path?",
   "confirmed_join": "collection|address",

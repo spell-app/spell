@@ -177,93 +177,105 @@ export type BubblyDrawing = {
 }
 
 ////////////////
-// ## How each rule presents
+// ## Roles:  what each part of a rule is to a reader
 ////////////////
 
 /**
- * How lines a rule matched present in the bubbly look:  a row of `SP.BubblyPresentation`'s table.
- * - Every field is optional:  a rule with no row draws as a plain step.
+ * What a part of a rule's match IS to a reader (epic `language` P60, Q68):  each role draws one way, the same in every
+ * rule (`SP.BubblyLayout`;  the roles-to-look table is in `bubbly.css`).
+ * - `declaration`:  what a person typed in a declaration's head, a white pill:  `a «"pile"» is ...`, `to «play a card»`
+ * - `blank`:  a blank an action's head introduces, underlined in its pill, its kind word bold:  `to play «a card»`
+ * - `name`:  a name, bold:  `droppable` in `it is droppable when`, `a new foundation`, `'s`
+ * - `value`:  one value read, one dotted underline:  `as lower case` (more of the value before it), `each card in the deck`
+ * - `question`:  a yes or no asked of a thing, underlined with that thing:  `the card is on top of its pile`
+ * - `action call`:  a call of an action the project declares, underlined whole:  `turn over the next card`
+ * - `quantity`:  a number and its unit, underlined:  `300 msec`
+ * - `written value`:  a value written in a step, italic, never underlined:  `10`, `yes`, `"Score"`
+ * - `plain`:  Spell's own words, never bold:  `item` in `item column of [...]`
+ */
+export type BubblyRole =
+  | "declaration"
+  | "blank"
+  | "name"
+  | "value"
+  | "question"
+  | "action call"
+  | "quantity"
+  | "written value"
+  | "plain"
+
+/**
+ * A rule's ROLES, beside its syntax where it's registered (`addRule(Rule, { syntax, roles })`;  epic `language` P60):
+ * what its match, and each part of it, is to a reader.
+ * - ONE per rule class, every language's:  its groups are named alike in each, so English's says it for all;
+ *   another language's may say it too, the same (`SP.BubblyRoles.record()` throws if not).
+ * - A rule built while parsing (a phrase, `quoted_property`) says its roles on its class:  `@proto static roles`.
+ * - Kept and read by `SP.BubblyRoles`.
+ * - `band`:  its match is a declaration's HEAD, on a band of this colour (`to play a card` on the action band)
+ * - `match`:  the role of everything it matched (`is a {type}`:  `question`)
+ * - each of its groups, by name:  that part's role (`signature: "declaration"`, `item: "blank"`)
+ * - `literal`:  a word of its syntax that's a name, `{ droppable: "name" }`;  any other word is Spell's own, plain
+ * - A rule with no roles draws by the defaults:  names that read or set something bold, Spell's own words plain,
+ *   written values italic.
+ */
+export type BubblyRuleRoles = {
+  /** a declaration's head, on a band of this colour */
+  readonly band?: BubblyPartOfSpeech
+  /** the role of everything it matched */
+  readonly match?: BubblyRole
+  /** words of its syntax with a role of their own, lower case:  `{ droppable: "name" }` */
+  readonly literal?: Readonly<Record<string, BubblyRole>>
+} & {
+  /** each group's role, by the group's name in its syntax */
+  readonly [group: string]: BubblyRole | BubblyPartOfSpeech | Readonly<Record<string, BubblyRole>> | undefined
+}
+
+////////////////
+// ## How each rule presents:  its shape
+////////////////
+
+/**
+ * The SHAPE of a rule's lines in the bubbly look, what its roles don't say:  a row of `SP.BubblyPresentation`'s table.
+ * - Every field is optional:  a rule with no row draws by its roles alone.
  * - Rule names, never class names:  a rule's `name` is what its syntax strings call it (`{define_property_has}`),
  *   the same in every language;  a rule built while parsing (a phrase, `is_a_$suit`) goes by its `importableAs`.
+ * - Its CHECKS, each a look no role says yet (epic `language` P60, Q69):  `namesKind`, `namesWhatItDraws`, `choices`,
+ *   `blankAfterVerb`.
  */
 export type BubblyRulePresentation = {
-  /** a DECLARATION:  its line is a head, on a band of this part of speech */
-  head?: BubblyPartOfSpeech
   /** a group:  its body holds the declarations after it, up to the next group */
   isGroup?: boolean
-  /** its child rules that are a person's words, each a pill (`quoted_member`:  `its "rank"`) */
-  inputs?: readonly string[]
-  /**
-   * an action's head:  everything after its first word (`to`, `para`, `after`, `when`), to the end of its last input
-   * or parameter, is what a person typed, ONE pill:  `to <test a new deck>`, `to <play a card>`
-   * - its blanks in it, each underlined, its kind word bold:  `to <move (a card) to (a pile)>` (epic `language` I109)
-   */
-  typedAfterLead?: boolean
-  /** ... its pill from this group's start, not after the first word:  `después de <poner una carta en una pila>` */
-  typedFrom?: string
-  /** ... and its pill to the head's end, not its last input:  `when <a card is dropped>`, `while <a card is dragged over it>` */
-  typedToEnd?: boolean
-  /** its child rules that are the parameters it introduces, `(a card)`:  each a blank, underlined in its pill */
-  params?: readonly string[]
-  /** its blank:  from its pill's start to the end of this group, `when <a card> is dropped` (`item`) */
-  blankThrough?: string
-  /** its blank:  this group but its first word, `when creating <a card image>`, `al crear <el solitario>` (`signature`) */
-  blankAfterVerb?: string
-  /** a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
-  namesWhatItDraws?: boolean
-  /** its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
-  choices?: readonly string[]
-  /** its child rules drawn as a step, even in a head (`it "is a face card" if <its rank is jack>`) */
-  steps?: readonly string[]
-  /** its child rules drawn plain, never bold (`item` in `item column of the list`) */
-  plain?: readonly string[]
   /** a CONTROL line:  its steps in a bracket */
   isControl?: boolean
-  /**
-   * the words of its head that say an ability it gives are names, bold (`draggable` in `a "card" is a draggable view`,
-   * `droppable` in `it is droppable when`):  the words its parser reads as one (`SP.DeclarationPatterns.abilityWord`)
-   */
-  namesAbility?: boolean
-  /**
-   * its group whose end ends the KIND its head says it is, the kind bold whole, ONE name (epic `language` I111):
-   * `superType` in `a "card" is a draggable **two sided view**`, `instanceType` in `a "pile" is a **viewable list of cards**`
-   * - the kind starts after the article that follows the name, past any ability (`draggable`, bold on its own)
-   */
-  namesKind?: string
-  /** a part of the name before it, bold with it:  `'s` in `pile's` */
-  isNamePart?: boolean
-  /** its group whose end ends a name it starts, bold through it:  `type` in `a new foundation with suit = hearts` */
-  namesThrough?: string
-  /**
-   * a YES-OR-NO asked of the thing before it (`is on top of its pile`, `is a king`, `is empty`):  ONE underline from
-   * that thing to its end, its own words plain
-   * - the thing:  what comes before it, back to the last `and` or `or`, as the compiler binds it
-   */
-  isQuestion?: boolean
-  /**
-   * a CALL of an action:  ONE underline over the whole of it (`turn over the next card`, `play the card`),
-   * its blanks' values bold inside it, never underlined on their own
-   * - only an action a project declares (this one, or one it imports):  a built-in template's
-   *   (`turn the card face up`, a two sided view's) draws as a plain step, as Spell's own statements do
-   */
-  isCall?: boolean
-  /**
-   * runs its statement once for each item of a list, said in it (`add each card in the deck to the stock`):
-   * ONE value from the word saying `each` (`each`, `every`, `cada`, `the`) to the list's end, `each card in the deck`
-   */
-  readsEach?: boolean
-  /** more of the value before it (`as lower case`, `in feet`):  ONE underline from that value to its end */
-  continuesValue?: boolean
+  /** its child rules drawn as a step, even in a head (`it "is a face card" if <its rank is jack>`) */
+  steps?: readonly string[]
   /** joins two yes-or-nos (`and`, `or`):  a question after it is asked of what follows it */
   isJoin?: boolean
   /** holds other expressions, each underlined on its own (`(it is empty and the card is a king)`), never itself */
   isCombination?: boolean
   /** its groups that hold what it SETS (`set <the score> to 0`):  each underlined whole, one value of its own */
   sets?: readonly string[]
-  /** its number and the rest of it are one quantity:  underlined (`pause for <300 msec>`) */
-  isQuantity?: boolean
-  /** a value written in:  italic, never underlined (a number, a text, yes or no, a list's value) */
-  isValue?: boolean
+
+  ////////////////
+  // ## Checks:  a look no role says yet
+  ////////////////
+
+  /**
+   * CHECK:  its group whose end ends the KIND its head says it is, the kind bold whole, ONE name (epic `language` I111):
+   * `superType` in `a "card" is a draggable **two sided view**`, `instanceType` in `a "pile" is a **viewable list of cards**`
+   * - the kind starts after the article that follows the name, past any ability (`draggable`), the commas between
+   *   them included;  Spanish's starts with words of its syntax, `una **lista visible, soltable de cartas**`
+   */
+  namesKind?: string
+  /** CHECK:  a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
+  namesWhatItDraws?: boolean
+  /** CHECK:  its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
+  choices?: readonly string[]
+  /**
+   * CHECK:  its blank, this group but its first word, `when creating <a card image>`, `al crear <el solitario>`
+   * (`signature`), its kind its words past the small words it starts with, whatever the parse read
+   */
+  blankAfterVerb?: string
 }
 
 /** How `SP.BubblyLayout.of()` reads its text. */

@@ -27,7 +27,7 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * Spell in a Monaco editor drawn in the BUBBLY LOOK as it's typed (epic `language` P50), while its text stays
  * ordinary text to edit:  the look `<spell-code>` draws on a page, from the same layout and the same sheet.
  * - One per editor, made as each editor is (`watch()`, from `SpellMonaco.register()`).
- * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), from its project's
+ * - It lays the code out with the parser (`SP.BubblyLayout`, by each rule's roles, `SP.BubblyRoles`), from its project's
  *   own parse of it when it's a project's file, then:
  *   - marks the text:  each piece's weight, slant and ink, room round what a person typed, a quoted input's curly
  *     marks (`BubblyMarks`, Monaco decorations)

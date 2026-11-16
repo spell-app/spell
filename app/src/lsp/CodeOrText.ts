@@ -4,7 +4,7 @@
  * (epic `editor` T74):  the same words, their two quotes turned into braces or back.
  * - Two ways in, which agree because both ask this class:
  *   - typing:  a `{` typed inside a quoted value makes it code;  a `"` typed right after a code value's `{` makes it
- *     text (the app's typing helps, `CodeOrTextTyping`)
+ *     text (the app's typing helps:  Monaco's `CodeOrTextTyping`, CodeMirror's `CodeMirrorCodeOrText`)
  *   - the right-click menu and the light bulb:  "Make it code" / "Make it text" on the value the caret is in
  *     (`SpellLanguageService.codeActions()`), so VS Code has them too
  * - Only an attribute's value, after its `=`:  not a tag's quoted word (`<action "redo" />`), and not the words

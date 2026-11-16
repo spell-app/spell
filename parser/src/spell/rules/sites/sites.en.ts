@@ -425,6 +425,7 @@ sites.addRule(SitePartWords, {
 
 // a site, and where it lives:  `spell ui is a site at "owen@spell/spell-ui":`, `galaxy guide is a site in the cloud`
 sites.addRule(CreateSite, {
+  roles: { band: "thing", type: "declaration" },
   syntax:
     "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
   tests: [
@@ -809,6 +810,7 @@ sites.addRule(CreateSite, {
 
 // a page of a site, at its address:  `- it has a film page at "/films/:film", named "Film"`
 sites.addRule(SitePage, {
+  roles: { band: "property" },
   syntax: `{type:subject_it} has (a|an) {part:site_part_words} at {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 

@@ -1,0 +1,135 @@
+==== /Money.spell
+⟪# Money⟫
+⟦// An amount as dollars and cents:  12.5 is "$12.50".⟧
+
+[action to_do_something L0]
+| to «write (amount as a number) as money»    ‾value(amount as a number) bold(amount) bold(number)
+|   set **cents** to round (**amount** * _100_)    ‾value(cents) ‾value(round (amount * 100))
+|   set **dollars** to (**cents** / _100_) as an integer    ‾value(dollars) ‾value((cents / 100) as an integer)
+|   set **left over** to **cents** - **dollars** * _100_    ‾value(left over) ‾value(cents) ‾value(dollars)
+|   if **left over** < _10_ return _"$"_ + **dollars** + _".0"_ + **left over**    ‾value(left over) ‾value(dollars) ‾value(left over)
+|   return _"$"_ + **dollars** + _"."_ + **left over**    ‾value(dollars) ‾value(left over)
+
+[action to_do_something L0]
+| to «test money»
+|   write _12.5_ as money should be _"$12.50"_    ‾call(write 12.5 as money)
+|   write _3.07_ as money should be _"$3.07"_    ‾call(write 3.07 as money)
+|   write _0_ as money should be _"$0.00"_    ‾call(write 0 as money)
+
+==== /Diner.spell
+⟪# A diner⟫
+⟦// Someone at the table:  their name, what they ordered, and what they owe.⟧
+⟦// Each diner is its own element on the page, a row of Spell UI's fields bound to it:⟧
+⟦// typing a name or an amount changes the diner, and every sum follows.⟧
+
+[thing create_type L0]
+| a «"diner"» is a **view**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"amount"» is a **number**
+|   |   ⟦// What they ordered, before the tip⟧
+|   [property property_value_getter L1]
+|   | its «"tip"» is the **amount** * **bill splitter's percent**
+|   |   ⟦// Their share of the tip:  the same part of it as their part of the bill⟧
+|   [property property_value_getter L1]
+|   | its «"share"» is the **amount** + the **tip**
+|   |   ⟦// What they owe⟧
+
+|   [action to_do_something L1]
+|   | to «remove it»: remove it from **bill splitter's diners**
+|   |   ⟦// Takes them off the bill⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// Their name, their amount, what they owe, and a button to take them off⟧
+|   |   <⟨form⟩ value={it}>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"»>
+|   |       <⟨input⟩ name=«"name"» placeholder=«"Name"» aria-label=«"Name"» fluid/>
+|   |       <⟨input⟩ name=«"amount"» type=«"number"» min=«"0"» step=«"0.01"» placeholder=«"Amount"» aria-label=«"Amount"» fluid/>
+|   |       <⟨text⟩ bold>{write the **share** as money}</⟨text⟩>    code({write the share as money})
+|   |       <⟨button⟩ icon=«"close"» appearance=«"basic"» aria-label=«"Remove"» onClick={remove it}/>    code({remove it})
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+[thing create_viewable_list_type L0]
+| a «"table"» is a **viewable list of diners**
+|   ⟦// The diners, one a row⟧
+|   [action draw_it L1]
+|   | to **draw** its **placeholder**
+|   |   <⟨text⟩ color=«"grey"»>Nobody yet:  add someone</⟨text⟩>
+
+[property belongs_to_one L0]
+| a **diner** belongs to one **table**
+|   ⟦// a diner sits at one table⟧
+
+==== /BillSplitter.spell
+⟪# Bill Splitter⟫
+⟦// Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.⟧
+⟦// Change a name, an amount or the tip, and every sum follows.⟧
+⟦// A diner is this project's own, in `Diner.spell`, and how money is written is in `Money.spell`:⟧
+⟦// this file holds the bill.⟧
+
+⟪## The bill⟫
+
+[thing create_one_of_a_kind L0]
+| «bill splitter» is an **app**
+|   [property define_property_has L1]
+|   | «"diners"» is **a new table**
+|   [property define_property_has L1]
+|   | its «"percent"» is a percent starting at «18%»
+|   |   ⟦// The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18⟧
+|   [property property_value_getter L1]
+|   | its «"subtotal"» is
+|   |   ⟦// What everyone ordered, added up⟧
+|   |   set **added up** to _0_    ‾value(added up)
+|   |   [control list_iteration L2]
+|   |   | for **diner** in the **diners**    ‾value(the diners)
+|   |   |   set **added up** to **added up** + the **diner's amount**    ‾value(added up) ‾value(added up) ‾value(the diner's amount)
+|   |   return **added up**    ‾value(added up)
+|   [property property_value_getter L1]
+|   | its «"tip"» is the **subtotal** * the **percent**
+|   [property property_value_getter L1]
+|   | its «"total"» is the **subtotal** + the **tip**
+
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   ⟦// Three diners to start with⟧
+|   |   add (**a new diner** with **name** _"Ana"_, **amount** = _24_) to the **diners**    ‾value(a new diner with name "Ana", amount = 24) ‾value(the diners)
+|   |   add (**a new diner** with **name** _"Ben"_, **amount** = _18.5_) to the **diners**    ‾value(a new diner with name "Ben", amount = 18.5) ‾value(the diners)
+|   |   add (**a new diner** with **name** _"Cleo"_, **amount** = _31.25_) to the **diners**    ‾value(a new diner with name "Cleo", amount = 31.25) ‾value(the diners)
+|   [action to_do_something L1]
+|   | to «"add someone"» with icon «"plus"»
+|   |   ⟦// An empty row, for the next person⟧
+|   |   add (**a new diner** with **name** _""_, **amount** = _0_) to the **diners**    ‾value(a new diner with name "", amount = 0) ‾value(the diners)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// The tip, the diners, then the sums⟧
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩>
+|   |       <⟨header⟩ level=«"2"»>Bill Splitter</⟨header⟩>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» wrap>
+|   |           <⟨text⟩ bold>Tip</⟨text⟩>
+|   |           <⟨input⟩ name=«"percent"» type=«"percent"» min=«"0"» step=«"1"» aria-label=«"Tip percent"»/>
+|   |           <⟨buttons⟩ size=«"small"» appearance=«"basic"»>
+|   |             <⟨button⟩ onClick={set the **percent** to _15%_}>15%</⟨button⟩>    code({set the percent to 15%})
+|   |             <⟨button⟩ onClick={set the **percent** to _18%_}>18%</⟨button⟩>    code({set the percent to 18%})
+|   |             <⟨button⟩ onClick={set the **percent** to _20%_}>20%</⟨button⟩>    code({set the percent to 20%})
+|   |           </⟨buttons⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨form⟩>
+|   |       {draw the **diners**}
+|   |       <⟨stack⟩ direction=«"horizontal"»>
+|   |         <⟨button⟩ appearance=«"basic"» icon=«"plus"» onClick={add someone}>Add someone</⟨button⟩>    code({add someone})
+|   |       </⟨stack⟩>
+|   |       <⟨segment⟩>
+|   |         <⟨statistics⟩ widths=«"3"» size=«"small"» stackable stack-with=«"page"»>
+|   |           <⟨statistic⟩ value={write the **subtotal** as money} label=«"Ordered"»/>    code({write the subtotal as money})
+|   |           <⟨statistic⟩ value={write the **tip** as money} label=«"Tip"»/>    code({write the tip as money})
+|   |           <⟨statistic⟩ value={write the **total** as money} label=«"Total"» color=«"green"»/>    code({write the total as money})
+|   |         </⟨statistics⟩>
+|   |       </⟨segment⟩>
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>

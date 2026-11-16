@@ -1195,7 +1195,8 @@ And what IS here, though you might look elsewhere:
 - **The bubbly look, as data:**  `SP.BubblyLayout.of(text)` lays a snippet out as Spell's pages draw it:
   each declaration a head on a band with what was typed in pills, its body under it, a control line's steps in a
   bracket.
-  - How each rule presents is ONE table, by rule name:  `SP.BubblyPresentation`.
+  - How each rule presents is its ROLES, beside its syntax (`addRule(Rule, { syntax, roles })`, `SP.BubblyRuleRoles`),
+    each role drawn one way;  a line's shape (a control line's bracket, a group) is `SP.BubblyPresentation`'s.
   - The app draws it (`<spell-code>`, every `<ui-code language="spell">`);  so will the code editors.
 - **Node-only helpers**, never in the entry (`spell/parser/spell/node/...`):
   the TypeScript check and its build, pyright, the syntax table.

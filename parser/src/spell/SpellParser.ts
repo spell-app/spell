@@ -2,6 +2,8 @@ import { P } from "spell/parser/parser"
 // Import directly, NOT through the `spell/parser/core` barrel:  the parser MUST NOT load `core` itself.
 // Each runner runs its own copy:  see `spellRuntime.ts`.
 import { SP } from "spell/parser/spell"
+// Import directly:  rule modules register while the `SP` barrel loads
+import { BubblyRoles } from "spell/parser/spell/highlight/BubblyRoles"
 
 // Registers `RulexParser` on `P.Parser.rulexParser` -- MUST load before any rule with a `syntax:` string.
 import "spell/parser/parser/rulex"
@@ -213,16 +215,24 @@ export class SpellParser extends P.Parser {
   /**
    * Register a rule class with ONLY its `syntax` + `tests` -- everything else lives on the class as `@proto static`.
    * - Why:  the class is the rule, reusable by another language's parser with its own `syntax`.
+   * - And its `roles`, beside its syntax, keyed by its groups' names (`SP.BubblyRuleRoles`;  epic `language` P60):
+   *   ONE per rule class, kept on the class for every language's rule of it (`SP.BubblyRoles.record()`), never on
+   *   the rule itself.
    * - TYPE-ONLY narrowing of `P.Parser.addRule()`, same behaviour.
    */
-  addRule<RuleType extends P.Rule>(rule: Class<RuleType>, definition?: P.SyntaxAndTests): P.Rule | undefined
+  addRule<RuleType extends P.Rule>(rule: Class<RuleType>, definition?: SpellRuleDefinition): P.Rule | undefined
   addRule(rule: P.Rule | P.RuleConstructor, ruleName?: string | string[]): P.Rule | undefined
   addRule(
     rule: P.Rule | P.RuleConstructor,
     namesOrDefinition?: string | string[] | P.RuleDefinitionProps
   ): P.Rule | undefined {
-    const definition =
+    let definition =
       typeof namesOrDefinition === "object" && !Array.isArray(namesOrDefinition) ? namesOrDefinition : undefined
+    if (typeof rule === "function" && definition && "roles" in definition) {
+      const { roles, ...rest } = definition as SpellRuleDefinition
+      if (roles) BubblyRoles.record(rule, roles)
+      definition = namesOrDefinition = rest
+    }
     // NOTE:  duck-typed, not `instanceof SP.SpellStatement`:  rule modules register while the `SP` barrel loads
     if (typeof rule === "function" && definition && (rule.prototype as OperandTwinned).operandInExpressions) {
       const statement = this.addStatementAndOperand(rule as unknown as typeof P.Rule, definition)
@@ -975,6 +985,12 @@ export class SpellParser extends P.Parser {
  * - See `SP.SpellStatement.operandInExpressions`.
  */
 type OperandTwinned = { operandInExpressions?: boolean }
+
+/** What a rule class is registered with:  its `syntax` and `tests`, and its `roles` (`SpellParser.addRule()`). */
+type SpellRuleDefinition = P.SyntaxAndTests & {
+  /** what its match, and each of its groups, is to a reader:  ONE per rule class, every language's */
+  roles?: SP.BubblyRuleRoles
+}
 
 /** A method definition's first line:  `to ...`, `animation ...`, `create animation ...` -- see `declaredMethods()`. */
 /**

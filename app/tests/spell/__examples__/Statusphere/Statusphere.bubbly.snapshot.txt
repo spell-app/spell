@@ -1,0 +1,101 @@
+==== /Status.spell
+⟦// Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records' shape, as Spell says it.⟧
+⟦// - "status" holds at most 32 bytes:  Spell says lengths in letters⟧
+[thing create_type L0]
+| a «"status"» is a **thing**
+|   it is published as _"xyz.statusphere.status"_
+|   [property define_property_has L1]
+|   | its «"status"» is required **text**, with maximum length «1»
+|   [property define_property_has L1]
+|   | its «"created at"» is a required **date**
+
+==== /Statusphere.api.spell
+⟪## Statusphere:  where the statuses are kept⟫
+⟦// Everyone's statuses, each in its owner's own atmosphere account:  yours go in yours, once you sign in.⟧
+⟦// Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell space lexicon read".⟧
+⟦// What's drawn and done with them is in Statusphere.spell.⟧
+[thing create_place L0]
+| «status board» is a personal atmosphere account
+|   **statuses** live at _"xyz.statusphere.status"_
+|   a **status**'s **created** is its _"created at"_
+
+a **status** is saved in the **status board**    ‾value(the status board)
+
+[property define_property_has L0]
+| a **status** has an **owner** as **text**
+|   ⟦// whose it is:  the account it's in, which a record can't claim⟧
+
+==== /Statusphere.spell
+⟪# Statusphere⟫
+⟦// Bluesky's example app, in Spell:  set your status, an emoji, and see everyone's as they arrive.⟧
+⟦// Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.⟧
+
+⟦// Every emoji to pick is a big, plain button⟧
+<⟨ui-defaults⟩>
+  <⟨ui-button⟩ size=«"large"» appearance=«"basic"»/>
+</⟨ui-defaults⟩>
+
+⟪## A status:  the emoji, who set it, and when⟫
+
+[thing reopen_type L0]
+| a **status**
+|   [property property_value_getter L1]
+|   | its «"who"» is
+|   |   ⟦// Its owner's handle, once their account says so;  else the account itself⟧
+|   |   set **account** to its **owner**    ‾value(account) ‾value(its owner)
+|   |   set **person** to the first **person** in everyone here where its **id** is **account**    ‾value(person) ‾value(the first person in everyone here where its id is account)
+|   |   [control if L2]
+|   |   | if **person** is nothing    ‾value(person) ‾value(nothing)
+|   |   |   return **account**    ‾value(account)
+|   |   return **person's name**    ‾value(person's name)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ direction=«"horizontal"» align=«"center"»>
+|   |     <⟨text⟩ size=«"big"»>{its **status**}</⟨text⟩>    code({its status})
+|   |     <⟨text⟩>@{its **who**}</⟨text⟩>    code({its who})
+|   |     <⟨text⟩ color=«"grey"» size=«"small"»>{its **created at**}</⟨text⟩>    code({its created at})
+|   |   </⟨stack⟩>
+
+⟪## The app:  the emoji to pick, then everyone's statuses, newest first⟫
+
+[thing create_one_of_a_kind L0]
+| «statusphere» is an **app**
+|   [property property_value_getter L1]
+|   | its «"recent"» is
+|   |   ⟦// Newest first:  by when each was set⟧
+|   |   return every **status** sorted by its **created**, newest first    ‾value(every status sorted by its created, newest first)
+
+|   [action to_do_something L1]
+|   | to «post (emoji as text)»    ‾value(emoji as text) bold(emoji) bold(text)
+|   |   ⟦// Your status:  a new record in your own account, as Statusphere writes one⟧
+|   |   add (**a new status** with **status** = **emoji**, **created at** = **a new date**) to the **statuses**    ‾value(a new status with status = emoji, created at = a new date) ‾value(the statuses)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// One narrow column:  its title, the emoji to pick, then the statuses⟧
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩ align=«"start"»>
+|   |       <⟨header⟩ size=«"large"»>Statusphere</⟨header⟩>
+|   |       <⟨text⟩ color=«"grey"»>Set your status on the Atmosphere</⟨text⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨card⟩ fluid>
+|   |       <⟨content⟩>
+|   |         <⟨header⟩ size=«"small"»>Set your status</⟨header⟩>
+|   |         <⟨stack⟩ direction=«"horizontal"» wrap>
+|   |           <⟨button⟩ onClick={post _"👍"_}>👍</⟨button⟩>    code({post "👍"})
+|   |           <⟨button⟩ onClick={post _"👎"_}>👎</⟨button⟩>    code({post "👎"})
+|   |           <⟨button⟩ onClick={post _"💙"_}>💙</⟨button⟩>    code({post "💙"})
+|   |           <⟨button⟩ onClick={post _"😎"_}>😎</⟨button⟩>    code({post "😎"})
+|   |           <⟨button⟩ onClick={post _"🦋"_}>🦋</⟨button⟩>    code({post "🦋"})
+|   |           <⟨button⟩ onClick={post _"🚀"_}>🚀</⟨button⟩>    code({post "🚀"})
+|   |         </⟨stack⟩>
+|   |       </⟨content⟩>
+|   |     </⟨card⟩>
+|   |     <⟨header⟩ size=«"small"»>Recent</⟨header⟩>
+|   |     <⟨for⟩ status in the recent loading=«"Finding statuses"»>
+|   |       <⟨empty⟩>
+|   |         <⟨text⟩ color=«"grey"»>No statuses yet. Be the first!</⟨text⟩>
+|   |       </⟨empty⟩>
+|   |     </⟨for⟩>
+|   |   </⟨container⟩>

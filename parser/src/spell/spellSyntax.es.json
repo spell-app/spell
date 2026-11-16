@@ -143,7 +143,7 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
@@ -168,7 +168,7 @@
           "ruleNames": ["boolean"],
           "internal": false,
           "file": "src/spell/rules/core/BooleanLiteral.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "Boolean literal -- also accepts common synonyms like `yes`/`no`, `ok`/`cancel`, `always`/`never`.",
           "syntaxes": [
             {
@@ -832,7 +832,7 @@
           "ruleNames": ["measure_literal"],
           "internal": false,
           "file": "src/spell/rules/expressions/MeasureLiteral.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`, `18%`.",
           "syntaxes": [
             {
@@ -1670,11 +1670,9 @@
             "create_method",
             "create_hook_words",
             "cancel_when",
-            "pause_units",
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
-            "check_unit",
             "day_half",
             "clock_zone",
             "size_unit",
@@ -1785,9 +1783,6 @@
               "syntax": "((if:si)|(unless:a menos que|salvo que))"
             },
             {
-              "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
-            },
-            {
               "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo json)|(plain_file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja|archivo csv)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
             },
             {
@@ -1795,9 +1790,6 @@
             },
             {
               "syntax": "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)"
-            },
-            {
-              "syntax": "((second:segundo|segundos)|(minute:minuto|minutos)|(hour:hora|horas)|(day:día|días|dia|dias))"
             },
             {
               "syntax": "((am:de la mañana|am|AM)|(pm:de la tarde|de la noche|pm|PM))"
@@ -4507,7 +4499,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/classes/QuotedPropertyRule.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Calls a quoted property formula's generated method: `is not? the queen of spades` => `card.is_the_$rank_of_$suits('queen', 'spades')`.",
           "syntaxes": [],
           "aliases": []
@@ -6952,11 +6944,11 @@
           "ruleNames": ["pause"],
           "internal": false,
           "file": "src/spell/rules/async/Pause.ts",
-          "line": 14,
-          "purpose": "Delay for a certain amount of time, e.g. `pause for 2 seconds`.",
+          "line": 18,
+          "purpose": "Wait a while, e.g. `pause for 2 seconds`, `pause for 3 ticks`, `pause for the delay`.",
           "syntaxes": [
             {
-              "syntax": "pausar (por|durante)? {number:expression} {units:pause_units}",
+              "syntax": "pausar (por|durante)? {duration:expression} {unit:unit_words}?",
               "example": "pausar 2 segundos",
               "outputs": {
                 "js": {
@@ -8312,14 +8304,17 @@
           "ruleNames": ["checked_every"],
           "internal": false,
           "file": "src/spell/rules/places/CheckedEvery.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "How often to ask a place that can't announce what changed.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_implied} se revisa cada {number} {unit:check_unit}?"
+              "syntax": "{type:subject_implied} se revisa cada {interval:measure_literal}"
             },
             {
-              "syntax": "{type:subject_implied} se revisa cada {unit:check_unit}"
+              "syntax": "{type:subject_implied} se revisa cada {number}"
+            },
+            {
+              "syntax": "{type:subject_implied} se revisa cada {unit:unit_words}"
             }
           ],
           "aliases": ["statement"]
@@ -9978,7 +9973,7 @@
           "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})? (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}? ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))? {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)? (con {okButton:text})? (wait:y esperar)?",
+              "syntax": "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})? (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}? ((durante ({time:measure_literal}|{time:expression} {unit:unit_words}))|(untilClicked:hasta un clic|hasta que se haga clic))? {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)? (con {okButton:text})? (wait:y esperar)?",
               "example": "notificar \"Yo!\"",
               "outputs": {
                 "js": {
@@ -10159,7 +10154,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/DynamicMethodRule.ts",
-          "line": 29,
+          "line": 30,
           "purpose": "Rule `constructor` for a plain (non-instance, non-operator) dynamically-defined method's CALL SITE, e.g. matching `notify 1` after `to notify (message): ...` defined it.",
           "syntaxes": [],
           "aliases": []
@@ -10179,7 +10174,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodInfixRule.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "`card nerds out with thing`: calls a quoted method defined as an infix expression: e.g. `card.nerdsOutWithAnother(thing)`.",
           "syntaxes": [],
           "aliases": []
@@ -10189,7 +10184,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodPostfixRule.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`card is face up` -- reads a quoted method defined as a postfix expression, e.g. `card.isFaceUp`.",
           "syntaxes": [],
           "aliases": []

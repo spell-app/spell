@@ -111,6 +111,21 @@ def test_ticks_are_sixtieths_of_a_second(core: Core) -> None:
     assert core.TIME_UNITS_MAP["ticks"] == pytest.approx(1000 / 60)
 
 
+def test_every_duration_unit_converts_as_javascript_does(core: Core) -> None:
+    # the units a duration compiles to (spell's `CORE_TIME_UNITS`):  `pause for 2 minutes`
+    expected = {
+        "msec": 1,
+        "seconds": 1000,
+        "ticks": 1000 / 60,
+        "minutes": 60_000,
+        "hours": 3_600_000,
+        "days": 86_400_000,
+    }
+    for unit, milliseconds in expected.items():
+        assert core.TIME_UNITS_MAP[unit] == pytest.approx(milliseconds)
+    assert core._milliseconds(2, "minutes") == 120_000
+
+
 def test_a_pause_waits_unless_pauses_are_off(core: Core) -> None:
     start = time.perf_counter()
     asyncio.run(core.pause_for(30, "msec"))

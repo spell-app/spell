@@ -8,8 +8,8 @@ import { SpellKeywords } from "./SpellKeywords"
  * which words open quotes, what a space after a tag writes, where Enter puts the caret ...
  * - Plain functions of the lines and columns, so the app's Monaco and CodeMirror editors decide alike
  *   (epic `codemirror` P1;  the helps themselves:  epic `language` P50, epic `editor` P28).
- *   - Each editor wires them to its own keys and edits:  the app's Monaco `SpellTyping`, the test page's
- *     `CodeMirrorTyping`.
+ *   - Each editor wires them to its own keys and edits:  Monaco's `SpellTyping`, CodeMirror's `CodeMirrorTyping`
+ *     (epic `codemirror` P4).
  * - The Enter rules are ONE table (`ENTER_RULES`):  Monaco's language settings are built from it,
  *   and a test holds VS Code's `language-configuration.json` to it.
  * - Knows nothing of any editor:  no Monaco, no CodeMirror, no DOM, so the language service stays browser-safe and

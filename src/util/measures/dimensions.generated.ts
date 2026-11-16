@@ -293,6 +293,63 @@ export const BUILT_IN_DIMENSIONS: BuiltInDimensionData[] = [
     ]
   },
   {
+    name: "Duration",
+    words: {
+      en: "duration",
+      es: "duración"
+    },
+    units: [
+      {
+        id: "second",
+        names: {
+          en: ["second", "sec", "seconds", "secs"],
+          es: ["segundo", "seg", "segundos"]
+        },
+        factor: 1
+      },
+      {
+        id: "millisecond",
+        names: {
+          en: ["millisecond", "ms", "msec", "milliseconds", "msecs"],
+          es: ["milisegundo", "ms", "mseg", "milisegundos"]
+        },
+        factor: 0.001
+      },
+      {
+        id: "tick",
+        names: {
+          en: ["tick", "ticks"],
+          es: ["tic", "tics"]
+        },
+        factor: 0.0166666666667
+      },
+      {
+        id: "minute",
+        names: {
+          en: ["minute", "min", "minutes", "mins"],
+          es: ["minuto", "min", "minutos"]
+        },
+        factor: 60
+      },
+      {
+        id: "hour",
+        names: {
+          en: ["hour", "hr", "hours", "hrs"],
+          es: ["hora", "h", "horas"]
+        },
+        factor: 3600
+      },
+      {
+        id: "day",
+        names: {
+          en: ["day", "days"],
+          es: ["día", "días", "dia", "dias"]
+        },
+        factor: 86400
+      }
+    ]
+  },
+  {
     name: "Proportion",
     words: {
       en: "proportion",

@@ -76,6 +76,8 @@ export const PARSER_MESSAGES = {
     "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
   "cant-go-without-waiting": "Only a call can go without waiting:  this has a value or a body to wait for",
   "cant-wait-for-toast-that-stays": "A toast that stays can't be waited for:  clicks would wait until it's closed",
+  /** `pause for 2`, `check it every 2 cm`:  how long isn't a duration (epic `language` T140). */
+  "not-a-duration": '"{said}" isn\'t a duration:  say how long, as in "300 msec" or "5 minutes"',
   "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
   /** An action's body with both `- enabled when` and `- disabled when` (epic `language` T132). */
   "enabled-and-disabled-when": 'An action says "enabled when" or "disabled when", not both:  keep one',

@@ -54,6 +54,12 @@ class RuntimeMethods:
         "msec": 1,
         "tick": 1000 / 60,
         "ticks": 1000 / 60,
+        "minute": 60_000,
+        "minutes": 60_000,
+        "hour": 3_600_000,
+        "hours": 3_600_000,
+        "day": 86_400_000,
+        "days": 86_400_000,
     }
 
     console: "SpellConsole"

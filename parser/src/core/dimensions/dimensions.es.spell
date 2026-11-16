@@ -40,6 +40,16 @@ la velocidad es una dimensión
 	una "milla por hora", alias "mph", alias "millas por hora", es 0.44704 m/s
 	un "nudo", alias "kn", alias "nudos", es 1852/3600 m/s
 
+// cuánto tarda algo:  `pausar 300 mseg`, `se revisa cada 5 minutos`
+// un tic es el de Spell (el de HyperCard), 1/60 de segundo:  `pausar 3 tics`
+la duración es una dimensión
+	su base es "segundo", alias "seg", alias "segundos"
+	un "milisegundo", alias "ms", alias "mseg", alias "milisegundos", es 1/1000 seg
+	un "tic", alias "tics", es 1/60 seg
+	un "minuto", alias "min", alias "minutos", es 60 seg
+	una "hora", alias "h", alias "horas", es 60 min
+	un "día", alias "días", alias "dia", alias "dias", es 24 h
+
 // una parte de un todo, como se escribe:  18 % son 18 centésimas
 // un porcentaje se GUARDA como su fracción, 0.18, así que `la cuenta * 18 %` es el 18 % de la cuenta;  se muestra con su signo %
 la proporción es una dimensión

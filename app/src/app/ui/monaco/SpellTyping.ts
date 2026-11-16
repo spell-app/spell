@@ -60,7 +60,7 @@ import type { monaco } from "./monaco"
  *   - Every help writes only on the lines it's working on:  an edit anywhere else is dropped, with an error saying so,
  *     so a help gone wrong never breaks a file silently (`write()`).
  * - This class is only the Monaco wiring:  what each help decides, from the lines, is the language service's
- *   `LSP.SpellTyping`, which the CodeMirror test page's `CodeMirrorTyping` reads too (epic `codemirror` P1).
+ *   `LSP.SpellTyping`, which CodeMirror's `CodeMirrorTyping` reads too (epic `codemirror` P1, P4).
  * - Only Monaco's TYPE (`import type`).
  ****************/
 export class SpellTyping {
