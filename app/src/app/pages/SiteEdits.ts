@@ -386,6 +386,8 @@ export type SitePart = {
   address?: string
   /** A page's title, for its link:  `Films`;  none goes by its name.  A group's words, as they're written. */
   title?: string
+  /** A page's icon in the site's navigation, if its line says:  `film` (epic `mockup` T34). */
+  icon?: string
   /** A page's state, if its line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14). */
   state?: string
   /** A thumbnail of a page, a file of the project:  `snapshots/films.png`. */
@@ -486,8 +488,23 @@ function codePartsIn(text: string, start: number): SitePart[] {
     }
     const written = CODE_PART.exec(line.text)
     if (!written) continue
-    const [, indent, bullet, written_name, address, title, tab, tags, state, thumbnail, live, row, column, color] =
-      written
+    const [
+      ,
+      indent,
+      bullet,
+      written_name,
+      address,
+      title,
+      icon,
+      tab,
+      tags,
+      state,
+      thumbnail,
+      live,
+      row,
+      column,
+      color
+    ] = written
     const isQuoted = /^".*"$/.test(written_name!)
     const name = isQuoted ? written_name!.slice(1, -1) : written_name!
     while (open.length && open.at(-1)!.indent.length >= indent!.length) open.pop()
@@ -496,6 +513,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
       name,
       address,
       title,
+      icon,
       tab,
       tags,
       state,
@@ -586,6 +604,7 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
 type PartWords = {
   address?: string
   title?: string
+  icon?: string
   tab?: string
   tags?: string
   state?: string
@@ -597,8 +616,8 @@ type PartWords = {
 }
 
 /** What `part`'s line says now, besides its name. */
-function wordsOf({ address, title, tab, tags, state, thumbnail, live, row, column, color }: SitePart): PartWords {
-  return { address, title, tab, tags, state, thumbnail, live, row, column, color }
+function wordsOf({ address, title, icon, tab, tags, state, thumbnail, live, row, column, color }: SitePart): PartWords {
+  return { address, title, icon, tab, tags, state, thumbnail, live, row, column, color }
 }
 
 /** `text` as a number;  none for none. */
@@ -610,11 +629,12 @@ function numberIn(text: string | undefined): number | undefined {
 function codeLineWith(
   line: string,
   part: SitePart,
-  { address, title, tab, tags, state, thumbnail, live, row, column, color }: PartWords
+  { address, title, icon, tab, tags, state, thumbnail, live, row, column, color }: PartWords
 ): string {
   const ending = line.endsWith("\n") ? "\n" : ""
   const at = address === undefined ? "" : ` at ${JSON.stringify(address)}`
   const named = title === undefined || !address ? "" : `, named ${JSON.stringify(title)}`
+  const iconed = icon === undefined || !address ? "" : `, icon ${JSON.stringify(icon)}`
   const tabbed = tab === undefined || !address ? "" : `, tab ${JSON.stringify(tab)}`
   const tagged = tags === undefined || !address ? "" : `, tagged ${JSON.stringify(tags)}`
   const stated = state === undefined || !address ? "" : `, ${state}`
@@ -623,7 +643,7 @@ function codeLineWith(
   const placed = row === undefined || column === undefined ? "" : `, in row ${row} column ${column}`
   const colored = color === undefined ? "" : `, colored ${color}`
   const name = part.isQuoted ? JSON.stringify(part.name) : part.name
-  return `${part.indent}${part.bullet ?? ""}it has ${articleOf(part.name)} ${name}${at}${named}${tabbed}${tagged}${stated}${pictured}${lived}${placed}${colored}${ending}`
+  return `${part.indent}${part.bullet ?? ""}it has ${articleOf(part.name)} ${name}${at}${named}${iconed}${tabbed}${tagged}${stated}${pictured}${lived}${placed}${colored}${ending}`
 }
 
 /** `a` or `an`, for `name`. */
@@ -643,7 +663,7 @@ const CODE_GROUP = /^[ \t]+(?:- )?group "([^"]+)"(?:(?:,| with) colou?r (\w+)|, 
  * bulleted by an older writer, `- it has ...`.
  */
 const CODE_PART =
-  /^([ \t]+)(- )?it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, thumbnail "([^"]*)")?(?:, live "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
+  /^([ \t]+)(- )?it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, icon "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, thumbnail "([^"]*)")?(?:, live "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
 
 /** A name a part may have:  it starts with a letter or number, and has no quotes or brackets;  it's often a title. */
 const PART_NAME = /^[\p{L}\p{N}][^"<>{}\n]*$/u

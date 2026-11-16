@@ -7,9 +7,17 @@
   position: relative;
   background: var(--spell-view-background);
 
+  /* a column, so the program's element is at least as tall as the pane:  a site's navigation runs to its bottom
+     (epic `mockup` T34);  the element stays a block for what the program draws in it */
   &.scrolling {
+    display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
     overflow: auto;
+
+    > .App {
+      flex: 1 0 auto;
+    }
   }
 
   /* no room round it (`<AppRoot>`'s default):  a `<ui-grid>`'s pull-out, half its gutter each side, is only its

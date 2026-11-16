@@ -23,6 +23,7 @@ import treeCSS from "./UITree.css?inline"
  * - How deep it is comes from its place, read as it connects:  it pads its row, so a selected row fills the width.
  * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
  *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
+ *   - `band="group"`:  a quiet label over its rows, with no arrow:  whatever holds the tree opens it.
  *   - Its rows stay drawn while it's closed (shut, and out of the keys' and a screen reader's reach), so they ease open
  *     and shut, as the docs site's folds do (`--ui-tree-nav-open-duration` ...).  Every other tree draws them only
  *     while it's open.

@@ -25,6 +25,8 @@ import {
  * - e.g. `- it has a film page at "/films/:film", in row 2 column 3, colored blue`:
  *   where its card sits in its section of the site editor's board, and its colour (epic `mockup` T31);
  *   any part's line may end so
+ * - e.g. `- it has a films page at "/films", named "Films", icon "film"`:  the icon before its title in the site's
+ *   navigation, one of Spell UI's icons (epic `mockup` T34)
  * - e.g. `- it has a button usage page at "/button", named "Button", tab "Usage"`:  what its tab says, when it has pages
  *   under it and shouldn't read as the navigation does (epic `notebook` P10, Q10)
  * - e.g. `- it has a button usage page at "/button", tagged "Forms, Inputs"`:  what it's filed under, to group and search
@@ -47,7 +49,7 @@ import {
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.
  */
 export class SitePage extends SpellStatement<
-  "type|part|address|title?|tab?|tags?|state?|thumbnail?|live?|row?|column?|color?|with_nested_statements?|body?",
+  "type|part|address|title?|icon?|tab?|tags?|state?|thumbnail?|live?|row?|column?|color?|with_nested_statements?|body?",
   { entry?: SitePageEntry }
 > {
   @proto static priority = Priority.declaration + 1
@@ -84,6 +86,7 @@ export class SitePage extends SpellStatement<
       return SpellStatement.refuse(match, language.parserMessage("site-address-taken", { address, page: taken }))
     }
     const title = match.groups.title ? textIn(match.groups.title) : undefined
+    const icon = match.groups.icon ? textIn(match.groups.icon) : undefined
     const tab = match.groups.tab ? textIn(match.groups.tab) : undefined
     const tags = match.groups.tags ? tagsIn(textIn(match.groups.tags)) : undefined
     const state = Wording.meaningOf(match.groups.state)
@@ -96,6 +99,7 @@ export class SitePage extends SpellStatement<
       page: page?.name ?? classFor(name),
       address,
       ...(title && { title }),
+      ...(icon && { icon }),
       ...(tab && { tab }),
       ...(tags?.length && { tags }),
       ...(state && { state }),

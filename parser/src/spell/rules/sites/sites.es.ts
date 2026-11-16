@@ -17,7 +17,7 @@ export const sitesEs = new SpellParser({ module: "sites" })
 
 /** Lo que la línea de una página dice tras su dirección. */
 const PAGE_DETAILS =
-  "(, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})?"
+  "(, (llamada|llamado) {title:text})? (, icono {icon:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})?"
 
 /** An indefinite article, either gender:  `un sitio`, `una página`. */
 const A = "(un|una)"
@@ -273,7 +273,7 @@ sitesEs.addRule(CreateSite, {
           input: [
             'una "portada" es una página',
             "guía galáctica es un sitio en la nube:",
-            '\t- tiene una portada en "/"'
+            '\t- tiene una portada en "/", icono "home"'
           ],
           js: [
             "export class Portada extends Page {",
@@ -284,7 +284,8 @@ sitesEs.addRule(CreateSite, {
             "  static pages = [{",
             '    name: "portada",',
             '    page: "Portada",',
-            '    address: "/"',
+            '    address: "/",',
+            '    icon: "home"',
             "  }]",
             '  static livesAt = "cloud"',
             "}",
@@ -310,7 +311,8 @@ sitesEs.addRule(CreateSite, {
             "  static pages = [{",
             '    name: "portada",',
             '    page: "Portada",',
-            '    address: "/"',
+            '    address: "/",',
+            '    icon: "home"',
             "  }]",
             '  static livesAt = "cloud"',
             "}",

@@ -139,7 +139,7 @@
     pointer-events: none;
   }
   /* its title and line, centred in what's left under a thumbnail */
-  &::part(content) {
+  .words {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
@@ -148,15 +148,29 @@
     padding: 8px 10px;
     text-align: center;
   }
-  &::part(header) {
+  .heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
     font-size: 13px;
+    font-weight: var(--ui-font-weight-bold);
     line-height: 1.25;
     white-space: nowrap;
+  }
+  .heading .title {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  &::part(description) {
+  .heading .icon {
+    flex: none;
+    margin: 0;
+    --ui-icon-distance: 0;
+  }
+  .line {
     margin-top: 2px;
+    color: var(--ui-text-muted);
     font-size: 11px;
     white-space: nowrap;
     overflow: hidden;
@@ -168,7 +182,7 @@
   &.kind-sidebar {
     --ui-card-radius: 0px;
   }
-  &.section::part(header) {
+  &.section .heading {
     font-size: 15px;
     font-weight: var(--ui-font-weight-bold);
   }

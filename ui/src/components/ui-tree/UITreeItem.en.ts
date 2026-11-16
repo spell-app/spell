@@ -46,10 +46,11 @@ export const treeItemVocabulary = {
       name: "band",
       group: "appearance",
       kind: "valueOnly",
-      values: ["heading", "subheading"],
+      values: ["heading", "subheading", "group"],
       description:
         "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a " +
-        "tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it."
+        "tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it;  " +
+        "`group`, a group's quiet label, with no arrow."
     },
     {
       name: "count",

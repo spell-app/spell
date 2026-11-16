@@ -386,6 +386,8 @@ export type SitePageEntry = {
   address: string
   /** what the site calls it, in its navigation, if the line names it:  `Film` */
   title?: string
+  /** the icon before its title in its navigation, one of Spell UI's, if the line names it:  `film` */
+  icon?: string
   /** what its tab says in `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
   tab?: string
   /** what the line files it under, to group and search a site's pages by:  `["Forms", "Inputs"]` */

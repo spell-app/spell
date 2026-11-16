@@ -15,6 +15,8 @@ import "./SiteBoardView.css"
  *   its cards start a column to the left (`--SiteGrid-shift`), so the file's places stay as they were.
  * - A card takes its section's colour (`<ui-card background>`);  a page's is rounded, a dialog's square,
  *   a section's bold and bigger;  its thumbnail on top, when it has one.
+ *   - Its title, after its page's icon when it has one, and under it its address (`iconOf`, `lineOf`;  epic `mockup`
+ *     T34):  its own words in the card, not the card's `heading` shorthand, which can hold no icon.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
  * - A page's card has a link in its corner, opening it in a tab of its own:  `newTabOf`.
  *   - The tab is named for its address (`tabNameFor()`), so a second click goes back to the same tab (`mockup` I19).
@@ -98,14 +100,19 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
       data-can-nest={SiteEdits.canNest(part()) ? "" : undefined}
       background={props.card.color as UICardJSXAttributes["background"]}
       image={props.thumbnailOf(part())}
-      heading={props.titleOf(part())}
-      description={props.lineOf(part())}
       title={props.lineOf(part())}
       style={{ "--SiteCard-row": props.card.row, "--SiteCard-column": props.card.column }}
       onClick={() => props.onPick(part().name)}
       onDblClick={() => props.onOpen(part().name)}
       onPointerDown={(event: PointerEvent) => startMove(event, props.card, props.section)}
     >
+      <div class="words">
+        <div class="heading">
+          <Show when={props.iconOf(part())}>{(icon) => <ui-icon class="icon" name={icon()} />}</Show>
+          <span class="title">{props.titleOf(part())}</span>
+        </div>
+        <div class="line">{props.lineOf(part())}</div>
+      </div>
       <Show when={props.newTabOf(part())}>
         {(link) => (
           <a
@@ -147,6 +154,8 @@ export type SiteBoardViewProps = {
   titleOf: (part: SitePart) => string
   /** The quiet line under its title. */
   lineOf: (part: SitePart) => string
+  /** The icon before its title, if it has one:  a page's, from its line (`icon "film"`). */
+  iconOf: (part: SitePart) => string | undefined
   /** The address of its thumbnail, if it has one. */
   thumbnailOf: (part: SitePart) => string | undefined
   /** The link in a part's corner, opening it in a new tab, and what it says:  none for what has no page to open. */

@@ -167,6 +167,7 @@ export function SiteEditorPage() {
                     picked={picked()}
                     titleOf={SiteEditorPage.cardTitleOf}
                     lineOf={SiteEditorPage.lineOf}
+                    iconOf={(part) => part.icon}
                     thumbnailOf={SiteEditorPage.thumbnailOf}
                     newTabOf={SiteEditorPage.newTabOf}
                     onPick={setPicked}

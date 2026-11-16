@@ -3,6 +3,8 @@
  * - Tokens:
  *   | `--ui-site-nav-padding` | the room around the tree |
  * - The rows' look is the tree's own (`--ui-tree-*`).
+ * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts;
+ *   a page with no icon its first letter, a group's label a thin line.
  */
 @layer ui.components {
   :host {
@@ -47,5 +49,39 @@
     .star {
       opacity: 0.4;
     }
+  }
+
+  /* a page with no icon, among pages with them:  an icon's room, so its title lines up;  its first letter shows only
+     while `collapsed` */
+  .letter {
+    visibility: hidden;
+    font-weight: var(--ui-font-weight-bold);
+    line-height: 1;
+  }
+
+  /* ## `collapsed`:  the icons alone, each centred in its row, the titles their tooltips */
+  :host(:state(collapsed)) {
+    --_ui-site-nav-padding: var(--ui-site-nav-padding, 0.5em 0);
+  }
+  :host(:state(collapsed)) .letter {
+    visibility: visible;
+  }
+  :host(:state(collapsed)) ui-tree-item::part(label),
+  :host(:state(collapsed)) ui-tree-item::part(count),
+  :host(:state(collapsed)) ui-tree-item::part(badge),
+  :host(:state(collapsed)) ui-tree-item::part(toggle),
+  :host(:state(collapsed)) .star {
+    display: none;
+  }
+  :host(:state(collapsed)) ui-tree-item::part(row) {
+    justify-content: center;
+    padding-inline: 0.5em;
+  }
+  /* a group's label, a thin line across:  still a row to click, its line drawn through its middle */
+  :host(:state(collapsed)) ui-tree-item[band="group"]::part(row) {
+    min-height: 1em;
+    margin-block: 0.25em;
+    padding: 0;
+    background: linear-gradient(var(--ui-border-color), var(--ui-border-color)) center / 60% 1px no-repeat;
   }
 }

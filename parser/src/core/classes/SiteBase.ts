@@ -420,7 +420,9 @@ export class SiteBase extends App {
   }
 
   /**
-   * `entries` as navigation rows:  those under a `<group>` together, under a heading of its name;  the rest as themselves.
+   * `entries` as navigation rows:  those under a `<group>` together, under its name, a quiet label with no arrow
+   *   (`band: "group"`, epic `mockup` T34):  it opens by itself while the page shown is in it, and a click on it goes
+   *   to its first page;  the rest as themselves.
    * - `listed` reads a run of entries that share a group, or none.
    */
   private static underGroups(
@@ -435,7 +437,7 @@ export class SiteBase extends App {
       while (end < entries.length && entries[end]!.group === group) end++
       const run = entries.slice(at, end)
       const pages = SiteBase.navRows(run, listed)
-      if (group) rows.push({ title: group, id: `group:${group}`, band: "heading", pages })
+      if (group) rows.push({ title: group, id: `group:${group}`, band: "group", pages })
       else rows.push(...pages)
       at = end
     }
@@ -452,6 +454,7 @@ export class SiteBase extends App {
           title: entry.title ?? entry.name,
           href: entry.address,
           id: entry.name,
+          ...(entry.icon && { icon: entry.icon }),
           ...(entry.tab && { tab: entry.tab }),
           ...(entry.tags && { tags: entry.tags })
         }
@@ -646,15 +649,20 @@ type SiteNavPage = {
   title: string
   href?: string
   id: string
+  icon?: string
   tab?: string
   tags?: string[]
-  band?: "heading"
+  band?: "group"
   pages?: SiteNavPage[]
 }
 
-/** A site's two columns:  its navigation, then the page. */
+/**
+ * A site's two columns:  its navigation, then the page.
+ * - Each as tall as the taller, and the site at least as tall as the box it's drawn in (`NARROW_SITE_CSS`):
+ *   the navigation runs from top to bottom (epic `mockup` T34).
+ */
 const SITE_LAYOUT =
-  "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); gap: 1em; align-items: start"
+  "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); gap: 1em; align-items: stretch"
 
 /** The page's column:  as wide as it's given. */
 const PAGE_LAYOUT = "min-width: 0"
@@ -667,8 +675,18 @@ const PAGE_LAYOUT = "min-width: 0"
 const NARROW_SITE_CSS = `
 .spell-site-frame { container: spell-site / inline-size; position: relative }
 .spell-site-menu { display: none }
-/* its own scroller, so showing the page's row never scrolls the page */
-.spell-site-nav { position: sticky; inset-block-start: 0.5em; max-height: calc(100dvh - 4em); overflow: auto }
+/* the whole height of the box its element is drawn in (Run's):  that element, whatever its tag, a column */
+:has(> .spell-site-frame) { display: flex; flex-direction: column; min-height: 100% }
+.spell-site-frame { flex: 1 0 auto; display: flex; flex-direction: column }
+.spell-site { flex: 1 0 auto }
+/* the whole height, on a fill of its own and a line at its right;  its list its own scroller, stuck at the top,
+   so showing the page's row never scrolls the page */
+.spell-site-nav {
+  background: var(--ui-surface-muted, Canvas); border-inline-end: 1px solid var(--ui-border-color, GrayText)
+}
+.spell-site-nav::part(nav) { position: sticky; inset-block-start: 0; max-height: 100dvh; overflow: auto }
+/* only its icons (\`collapsed\`):  as narrow as they are */
+.spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: auto minmax(0, 1fr) !important }
 @container spell-site (width < 40em) {
   .spell-site-menu { display: inline-flex; margin-block-end: 0.5em }
   .spell-site { grid-template-columns: minmax(0, 1fr) !important }

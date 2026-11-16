@@ -19,6 +19,17 @@ describe("SiteEdits", () => {
     )
   })
 
+  test("a page's icon is read, and kept when its line is written again (T34)", () => {
+    const code = 's is a site:\n\tit has a films page at "/films", named "Films", icon "film", new\n'
+    expect(SiteEdits.partsIn(code)![0]).toMatchObject({ title: "Films", icon: "film", state: "new" })
+    expect(SiteEdits.withPartPlaced(code, "films page", { row: 1, column: 2 })).toContain(
+      '\tit has a films page at "/films", named "Films", icon "film", new, in row 1 column 2\n'
+    )
+    expect(SiteEdits.withPartChanged(code, "films page", { title: "Movies" })).toContain(
+      '\tit has a films page at "/films", named "Movies", icon "film", new\n'
+    )
+  })
+
   test("a page's or view's own thumbnail is found in the file declaring it (P16)", () => {
     expect(SiteEdits.thumbnailOf('"a page" is a page\n\tits thumbnail is "x.jpg"\n', "a page")).toBe("x.jpg")
     expect(SiteEdits.thumbnailOf('films page is a page:\n\tits thumbnail is "v.jpg"\n', "films page")).toBe("v.jpg")

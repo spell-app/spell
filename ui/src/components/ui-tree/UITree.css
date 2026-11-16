@@ -11,7 +11,7 @@
  * - `appearance="nav"` (the rows' `:state(nav)`):  the docs site's side navigation, its look matched to `<ui-docs-nav>`'s
  *   (epic `mockup` P5), with these tokens of its own:
  *   | `--ui-tree-nav-band-background` / `-color` | a `band="heading"` row |
- *   | `--ui-tree-nav-subheading-color` | a `band="subheading"` row |
+ *   | `--ui-tree-nav-subheading-color` | a `band="subheading"` or `band="group"` row |
  *   | `--ui-tree-nav-border-color` | the line above a band |
  *   | `--ui-tree-nav-current-background` / `-color` | the selected row, the page shown |
  *   | `--ui-tree-nav-open-duration` / `-close-duration` | how long a row's rows take to ease open, and shut |
@@ -356,6 +356,26 @@
   :host(:state(nav)) > .row.subheading .count::part(label) {
     font-family: var(--ui-font-family);
     letter-spacing: 0;
+  }
+  /* a label, `band="group"`:  a quiet word over its rows, no arrow, no fill;  its rows open by themselves (epic `mockup`
+     T34), so it takes no room for a triangle, and lines up with the rows' icons */
+  :host(:state(nav)) > .row.group {
+    min-height: 2em;
+    margin-block-start: 0.5em;
+    padding-block: 0.25em;
+    padding-inline: calc(0.75em / 0.8125) 0.75em;
+    color: var(--_ui-tree-nav-subheading-color);
+    font-size: 0.8125em;
+    font-weight: 500;
+  }
+  :host(:state(nav):first-child) > .row.group {
+    margin-block-start: 0;
+  }
+  :host(:state(nav)) > .row.group > .toggle {
+    display: none;
+  }
+  :host(:state(nav)) > .row.group:hover {
+    color: var(--ui-text-dark);
   }
   :host(:state(nav):state(band)) > .row:hover {
     background-color: transparent;
