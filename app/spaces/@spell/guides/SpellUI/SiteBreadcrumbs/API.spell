@@ -1,0 +1,45 @@
+"site-breadcrumbs api" is a notebook page
+	<header level="1">
+		Site breadcrumbs
+		<header>Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#properties">Properties</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+			<item link="#texts">Texts</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-site-breadcrumbs" only="attributes"></>
+		</>
+	</>
+
+	<section label="Properties">
+		<html>
+			<ui-docs-api tag="ui-site-breadcrumbs" only="properties"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-site-breadcrumbs" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-site-breadcrumbs" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api tag="ui-site-breadcrumbs" only="texts"></>
+		</>
+	</>

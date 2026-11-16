@@ -140,6 +140,7 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
  * The ways to start making something, under the hero, in the group of cards the projects use:
  * - Blank:  an empty app, the palette open, so what it can hold shows at once
  * - a few tiny starters, each the person's own to change
+ * - Site:  a site with its main page layout and a home page (epic `mockup` T40)
  * - Solitaire:  a whole game to change something in, with an invitation to
  * - Import:  a project they exported, the way back after clearing a browser
  ****************/
@@ -176,6 +177,11 @@ function StartCards() {
           name={appTexts.text("startDice")}
           line={appTexts.text("startDiceLine")}
           start={() => void editor.startFrom("dice")}
+        />
+        <StartCard
+          name={appTexts.text("startSite")}
+          line={appTexts.text("startSiteLine")}
+          start={() => void editor.startFrom("site")}
         />
         <StartCard
           name={appTexts.text("startSolitaire")}

@@ -1,0 +1,48 @@
+"site-nav-button usage" is a notebook page
+	<header level="1">
+		Site nav button
+		<header>A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put it at the start of the top bar of a `<ui-page-layout>`, in its `menu` slot:
+			it finds the layout around it, across shadow roots, and calls its `toggleDrawer()`.
+			A Spell site's page layout writes a bare `<site-nav-button slot="start" />` in its app menu.
+
+			- It takes no attributes of its own:  an item's, for its look in a menu
+			  (its `icon`, `aria-label` and `title` replace its own).
+			- With one inside it, the layout draws no menu button of its own at a narrow width.
+			- Outside a menu, it's a small basic button with the same icon.
+			- The layout sends `ui-toggle` as the drawer changes:
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-page-layout").addEventListener("ui-toggle", (event) => {
+			  console.log("the drawer is now", event.detail.newState)
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			It's a button:  Tab reaches it, Enter or Space presses it.
+			In a menu bar, the bar's arrow keys reach it too.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			Its name and tooltip are "Show or hide the side bar", unless the page gives its own `aria-label` and `title`;
+			`aria-expanded` says whether the drawer shows all of it.
+		</>
+	</>

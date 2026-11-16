@@ -1135,6 +1135,23 @@ describe("spell app create", () => {
   test("a name spell can't use", () => {
     expect(spell(["app", "create", "9 lives", "--in", TEMP]).status).toBe(2)
   })
+
+  test("--site:  a site, its main page layout and its home page, that lint clean (epic `mockup` T40)", () => {
+    const { status, stderr } = spell(["app", "create", "Atlas", "--site", "--in", TEMP])
+    expect(status).toBe(0)
+    expect(stderr).toContain("try  spell app serve")
+    const folder = resolve(TEMP, "Atlas")
+    expect(JSON.parse(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8"))).toEqual({
+      imports: [
+        { path: "/Atlas.site.spell", active: true },
+        { path: "/main.page-layout.spell", active: true },
+        { path: "/home.spell", active: true }
+      ]
+    })
+    expect(readFileSync(resolve(folder, "Atlas.site.spell"), "utf8")).toMatch(/^my site is a site$/m)
+    expect(readFileSync(resolve(folder, "main.page-layout.spell"), "utf8")).toMatch(/^main layout is a page layout$/m)
+    expect(spell(["lint", "."], folder).status).toBe(0)
+  })
 })
 
 /** Resolve once `condition()` holds, checking every 50ms -- or reject after `ms`. */

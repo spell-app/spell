@@ -298,7 +298,9 @@
     margin: 0;
     padding-block: 0;
     padding-inline: var(--ui-panel-pane-bar-padding, 6px 8px);
-    border-bottom: 1px solid var(--ui-border-color);
+    /* its line a shadow inside its bottom edge, not a border:  it takes no room, so what's in the bar sits in its middle
+       (a 24px control 8px from its top and bottom in the 40px bar, was 7.5px over a 1px border;  epic `editor` I216) */
+    box-shadow: inset 0 -1px 0 var(--ui-border-color);
     border-radius: 0;
     background: var(--ui-panel-pane-bar-background, none);
     color: var(--ui-text-color);
@@ -379,7 +381,7 @@
     padding: 0;
   }
   :host(:state(pane):state(collapsed)) > .ui.pane.section.panel:not(.sub) > .title {
-    border-bottom: 0;
+    box-shadow: none;
     border-radius: 0;
   }
 }
