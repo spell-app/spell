@@ -856,9 +856,34 @@ galaxy guide is a site
 
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
 - `live=` is the real page it stands for:  its card in the site editor opens it.
-- `it has a top bar` draws a bar above every page:  a button that shows only the side bar's icons, where you are as a
-  breadcrumb, and the buttons a view named `top bar` draws.
-  A page whose line ends `, no top bar` is drawn without it.
+
+A PAGE LAYOUT is what stays on screen around a site's pages:  its menu, its drawer, side bars and a footer.
+Going between pages in the same layout redraws only the page, so nothing around it flashes.
+
+```spell
+main layout is a page layout
+	to draw its app menu
+		<app-menu>
+			<site-nav-button slot="start" />
+			<site-breadcrumbs slot="start" />
+			<button slot="end" icon="bell" appearance="tertiary" title="Notices" />
+		</app-menu>
+	to draw its footer
+		<text color="grey">Made with Spell</text>
+
+login page is a page, no layout
+print page is a page, in the bare layout
+```
+
+- Its slots:  `app menu` (the top bar), `page menu` (a row under it:  the page's family as tabs, unless it draws
+  something else), `drawer` (the site's navigation, unless it draws its own), `left sidebar`, `right sidebar`, `footer`.
+  A slot nothing draws takes no room.
+- Every page is in the `main layout`;  a page picks another, or none, at the end of its own line.
+- A page may draw a slot itself, `to draw its right sidebar`:  its own shows while it's shown.
+- A layout can build on another, `wide layout is a main layout`, drawing one slot again.
+- `<site-nav-button />` shows only the drawer's icons, or all of it again;  resting the pointer on the icons opens it
+  over the page.  Each person's choice is kept, for each site and layout.
+- A site with no main layout draws its navigation and the page, nothing else.
 
 Every move names the page, never its address:
 
