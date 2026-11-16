@@ -1798,6 +1798,14 @@
     border-radius: var(--_ui-menu-radius);
     box-shadow: var(--ui-shadow-raised);
   }
+  /* too many rows for the window's height:  columns, top to bottom, then across (`fitColumns()`), each as wide as its
+     longest row;  the chosen one still ticked */
+  .overflow-menu[popover]:popover-open[data-columns] {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--_ui-menu-overflow-rows), auto);
+    overflow: auto;
+  }
   .overflow-menu > .row {
     display: flex;
     align-items: center;

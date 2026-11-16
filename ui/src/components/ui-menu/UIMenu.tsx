@@ -85,6 +85,8 @@ function isSameFolded(a: readonly FoldedItem[], b: readonly FoldedItem[]): boole
  *   whole, then cut with `…`, then icons only, then every item folded into ONE overflow button,
  *   `<button part="overflow">` first in its box, whose menu (`<div role="menu" popover part="overflow-menu">`)
  *   holds a row per item;  picking a row clicks the real item, so `selected` and the page's listeners work as ever.
+ *   - Too many rows for the window's height, they lay out in columns, top to bottom, then across (`fitColumns()`;
+ *     epic `editor` T84:  "Files menu should go multi-column when it is long").
  *   - A `segmented` one has two stages:  whole, else a dropdown, its button showing the chosen item.
  *   - Its items draw their titles in a box of their own while it is (`ItemContext.shrinkable`).
  ****************/
@@ -668,15 +670,39 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   protected onOverflowOpenChanged(isOpen: boolean, isConnected: boolean) {
     const hide = this.overflowMenu.follow(this.overflowPanel, isOpen && isConnected)
     if (hide)
-      E.afterSolidUpdate(() =>
+      E.afterSolidUpdate(() => {
+        this.fitColumns()
         this.focusRow(
           Math.max(
             0,
             this.folded.findIndex((row) => row.isSelected)
           )
         )
-      )
+      })
     return hide
+  }
+
+  /**
+   * Lay the overflow menu's rows out in columns when they're too many for the window's height:
+   * top to bottom, then across, as few columns as fit, the columns as even as can be (`data-columns`, `UIMenu.css`).
+   * - The room is the window's, above or below its button, whichever is more, as the menu can open either way.
+   * - Few enough to fit:  one column, as ever.
+   */
+  private fitColumns() {
+    const panel = this.overflowPanel
+    if (!panel) return
+    delete panel.dataset.columns
+    panel.style.removeProperty(ROWS_PER_COLUMN)
+    const rows = panel.querySelectorAll<HTMLElement>(ROWS)
+    const rowHeight = rows[0]?.getBoundingClientRect().height
+    if (!rowHeight) return
+    const opener = this.overflowOpener?.getBoundingClientRect()
+    const room = opener ? Math.max(window.innerHeight - opener.bottom, opener.top) : window.innerHeight
+    const perColumn = Math.max(1, Math.floor((room - OVERFLOW_MENU_ROOM) / rowHeight))
+    if (rows.length <= perColumn) return
+    const columns = Math.ceil(rows.length / perColumn)
+    panel.dataset.columns = String(columns)
+    panel.style.setProperty(ROWS_PER_COLUMN, String(Math.ceil(rows.length / columns)))
   }
 
   /** Open the overflow menu, its rows read fresh. */
@@ -1146,6 +1172,10 @@ const DISABLED_CLASS = "disabled"
 
 /** Selector of the overflow menu's rows, in its box. */
 const ROWS = `:scope > .${ROW}`
+/** The overflow menu's rows in each column, while it has columns (`fitColumns()`). */
+const ROWS_PER_COLUMN = "--_ui-menu-overflow-rows"
+/** Room the overflow menu keeps round its rows, top and bottom:  its margin, padding and border, and some to spare. */
+const OVERFLOW_MENU_ROOM = 24
 
 ////////////////
 // ## Item types

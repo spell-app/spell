@@ -43,7 +43,12 @@ async function open(page: Page, project: string, { codeEditor }: { codeEditor: b
   // with no code editor to wait for, the page's loading hero gives up after 8 seconds
   else await page.waitForTimeout(9000)
   await page.waitForTimeout(4000)
-  await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+  // as the top bar's Inspect app does (its Inspector button is gone):  open the column, inspecting
+  await page.evaluate(() => {
+    const { Inspector } = window as unknown as DebugGlobals
+    if (!Inspector.isOpen) Inspector.toggle()
+    else Inspector.startInspecting()
+  })
   await page.waitForTimeout(1000)
 }
 
@@ -107,7 +112,7 @@ function fileState(page: Page, name: string) {
 /** The page's debug globals, what's used of them. */
 type DebugGlobals = {
   editor: { loadRuntime(): Promise<{ core: { things: { all(): object[] } } }> }
-  Inspector: { inspectThing(thing: object): void }
+  Inspector: { inspectThing(thing: object): void; isOpen: boolean; toggle(): void; startInspecting(): void }
 }
 
 /** How many steps the side bar's history holds. */
@@ -271,15 +276,37 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.waitForTimeout(800)
       expect(await page.locator(".InspectorScope").count()).toBe(0)
       expect(await page.locator(".InspectorTrail").innerText()).toContain("Solitaire")
-      // its type's cards, as All Cards has:  its type is it
+      // its code is ONE Code card, as a column's is, with Add Event and Add Action (I186):  no tests, no Tests card
       const cards = await page
         .locator(".InspectorCard")
         .evaluateAll((all) => all.map((one) => (one as HTMLElement).dataset.panel))
-      expect(cards).toEqual(["properties", "events", "actions", "tests", "views"])
+      expect(cards).toEqual(["properties", "code", "views"])
+      const code = page.locator(".InspectorCard[data-panel=code]")
+      expect(await code.innerText()).toMatch(/when creating/i)
+      expect(await code.locator(".InspectorAddEvent").count()).toBe(1)
+      expect(await code.locator(".InspectorAddAction").count()).toBe(1)
       expect(await page.locator(".InspectorColumn").innerText()).not.toMatch(/All Solitaires/i)
       // a change it can't keep still says why, in words that name no "all"
       await change(page, "score", 7)
       expect(await page.locator(".InspectorNotSaved").textContent()).not.toMatch(/\ball\b/i)
+      await page.close()
+    }
+  )
+
+  test(
+    "the Inspector card's Close hides the column;  the top bar's Inspect app brings it back (I186)",
+    { timeout: 90_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Counter", { codeEditor: false })
+      const close = page.locator(".InspectorCard[data-panel=properties] ui-icon.InspectorClose")
+      expect(await close.count()).toBe(1)
+      await close.click()
+      await page.waitForTimeout(500)
+      expect(await page.locator(".InspectorColumn").count()).toBe(0)
+      await page.locator(".InspectAppButton").first().click({ force: true })
+      await page.waitForTimeout(500)
+      expect(await page.locator(".InspectorColumn").count()).toBe(1)
       await page.close()
     }
   )

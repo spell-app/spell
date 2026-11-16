@@ -27,7 +27,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>
  *       <nav class="ui … menu" part="menu">  <slot>  </nav>       (the menu's own box, which scrolls)
  *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
- *       <button class="all-items" part="all-items" aria-label title>[icon] ▾</button>   (`max-visible`, while some are put away;  `all-items-always`, always)
+ *       <button class="all-items" part="all-items" aria-label title>[icon] ▾</button>   (`max-visible`, while some are put away or scrolled out of the row)
  *       <div class="right" part="right">  <slot name="right">  </div>      (pushed to the end)
  *     </div>
  *
@@ -55,18 +55,18 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - It holds through `shrinkable`'s stages:  cut titles and icons stay on their tracks, the `…` button is a pill.
  * - `max-visible`:  a row of many (a project's files) shows only the ones chosen lately, and a button lists them all.
  *   - Only with more items than that;  a bare `max-visible` means 8.
+ *   - The button shows while some items aren't in view:  put away, or scrolled out of the row;
+ *     with every item in view, there's none (epic `editor` T83, reversing T82's `all-items-always`).
  *     An attribute, not on by default:  a toolbar of actions has nothing chosen to go by.
  *   - The row keeps the page's order.  The item chosen longest ago leaves it first;  the chosen one never does.
  *   - An item left out is `hidden`, so the menu's own rules skip it, and its overflow menu is the list.
  *   - `remember` keeps the row across reloads.
  *   - `closeItem()` closes one of the row's items:  it leaves the row, but stays in the list
- *     (the editor's file tabs' ✕;  epic `editor` T77).
+ *     (the editor's file tabs' ✕;  epic `editor` T77);  `openItem()` opens one without choosing it (I188).
  *   - `all-items-icon` draws an icon before the button's caret, saying what the list is of
  *     (the editor's file tabs:  `file outline`;  epic `editor` T76).
  *   - `all-items-at-end` puts the button at the bar's far end, however few items show:
  *     without it, it sits right after the last one (the editor's file tabs;  epic `editor` I173).
- *   - `all-items-always` shows the button even while every item is in the row:
- *     a list of every file, always in the same spot (the editor's file tabs;  epic `editor` T82).
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -230,9 +230,13 @@ export class UIToolbar extends UIMenu {
     return super.hasOverflowMenu || this.showsAllItems
   }
 
-  /** The button listing every item is there:  some are put away, or `all-items-always`. */
+  /**
+   * The button listing every item is there:  with `max-visible`, while some items aren't in view,
+   * put away (`isLimited`) or scrolled out of the row (`isOverflowing`).
+   * - Steady:  the button takes room from the row, so a row that overflowed without it still does with it.
+   */
   get showsAllItems(): boolean {
-    return this.isLimited || !!this.allItemsAlways
+    return this.isLimited || (this.visibleLimit !== undefined && this.isOverflowing)
   }
 
   /** The list's button, while drawn. */
@@ -325,6 +329,21 @@ export class UIToolbar extends UIMenu {
     return row[at + 1] ?? row[at - 1]
   }
 
+  /**
+   * Open `item` in the row beside the ones there, without choosing it:  the opposite of `closeItem()`
+   * (the editor's site file, always a tab;  epic `editor` I188).
+   * - Only while some items are put away (`isLimited`):  else every item is in the row already.
+   * - It joins as the item chosen most lately after the chosen one, so it's the last to leave.
+   * - SIDE EFFECT:  kept under `remember`, as every change to the row is.
+   */
+  @E.untracked
+  openItem(item: Element) {
+    const value = UIToolbar.valueOf(item)
+    if (!this.isLimited || this.openValues.includes(value)) return
+    this.keepOpenValues([value, ...this.openValues])
+    this.limitRefresh.ask()
+  }
+
   /** Show `item` in the row, or put it away:  only ever hides what it can show again. */
   private showInRow(item: HTMLElement, isShown: boolean) {
     if (isShown) {
@@ -348,7 +367,7 @@ export class UIToolbar extends UIMenu {
   }
   private static madeStore?: PrefStore
 
-  /** The button that lists every item:  always there, outside the row that scrolls. */
+  /** The button that lists every item, while some aren't in view (`showsAllItems`):  outside the row that scrolls. */
   private allItems(): JSX.Element {
     return (
       <Show when={this.showsAllItems && !this.isDropdown}>

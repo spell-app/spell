@@ -74,8 +74,9 @@ export class CodeMirrorSetup {
 
   /**
    * The gutter:  line numbers when asked, then the fold arrows.
-   * - The fold column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code (`codemirror.css`):
-   *   (epic `editor` I154).
+   * - The fold column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code (`codemirror.css`;
+   *   epic `editor` I154).
+   *   - With the bubbly look, 12px wholly over the room before a line's band, so every band is 12px in (I187).
    * - A press on an arrow folds or unfolds its block, and never moves the caret:  the gutter is outside the text.
    * - The arrows follow each new parse (`PARSED`), as the blocks that fold are the parse's.
    */

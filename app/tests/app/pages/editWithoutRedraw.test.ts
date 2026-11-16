@@ -189,7 +189,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await page.waitForTimeout(500)
     await noteTheGame()
     const before = await textOf("Solitaire.spell")
-    await page.locator("#AddPartButton").click()
+    await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(800)
     const row = await page.locator('.PalettePopup ui-tree-item[label="Button"]').first().boundingBox()
     // just above the board's first pile

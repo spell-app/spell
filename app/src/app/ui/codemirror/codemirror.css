@@ -139,6 +139,10 @@
  * - no line numbers until asked;  then they come first
  * - the fold arrows' column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code:
  *   its chevron ends well before a line's first word
+ * - with the bubbly look, 12px of room round the code (epic `editor` I187;  Owen:  "12px padding around"):
+ *   - the first band's top 12px under the editor's top, and the last's bottom 12px over its end
+ *   - every top-level band 12px in from the editor's left edge:  the fold column, 12px, lies wholly over the line's
+ *     room before its band (`--cmb-line-pad`), its chevron in the middle of it, so the gutter takes no width
  * - an arrow shows while the mouse is on the edge, a folded block's always
  * - no change bar (epic `codemirror` Q1)
  */
@@ -165,7 +169,7 @@
     justify-content: center;
     width: var(--cmb-fold-width);
     height: 100%;
-    translate: calc(var(--cmb-fold-overlap) / 2) 0;
+    translate: var(--cmb-fold-shift, calc(var(--cmb-fold-overlap) / 2)) 0;
     cursor: pointer;
     color: light-dark(#6b6a76, #a3a1ae);
     opacity: 0;
@@ -180,6 +184,24 @@
   }
   .cmb-fold-folded svg {
     rotate: -90deg;
+  }
+}
+
+/* the bubbly look's room round the code, 12px (epic `editor` I187):  the gutter section's comment above */
+.cm-editor.cmb.cmb-editor {
+  --cmb-fold-width: 12px;
+  --cmb-fold-overlap: 12px;
+  --cmb-fold-shift: 0px;
+  /* the gutter takes no width:  a band with a description still reaches the box's right edge */
+  --cmb-gutter-width: 0px;
+
+  .cm-content {
+    /* a band sits `--cmb-band-margin` down its line */
+    padding-block: calc(12px - var(--cmb-band-margin));
+  }
+  /* the chevron, 16px, centred over its 12px column, not squeezed into it */
+  .cmb-fold svg {
+    flex: none;
   }
 }
 

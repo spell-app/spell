@@ -3,7 +3,7 @@
  */
 .CodeSlice {
   min-height: 1.5em;
-  /* room round the lines, so a block's band, rail and foot at the first and last lines show whole (epic `editor` I164) */
+  /* with the look off, room round the lines;  with it on, the editor's own (below) */
   padding: 4px 8px;
   border: 1px solid var(--ui-border-color);
   /* 4px, whatever the theme's radii (Owen, T72:  "4px round on these so they look like type-in-text fields";
@@ -29,5 +29,17 @@
   }
   .cm-editor {
     font-size: 14px;
+  }
+
+  /*
+   * the bubbly look:  12px from the box's border to the bands on every side (epic `editor` I187), the editor's own room
+   * - above and below, its lines' (`codemirror.css`);  left, a line's room before its band (`--cmb-line-pad`)
+   * - right, a line's room after its words, 16px, less the 4px the editor reaches past the box, clipped
+   */
+  &:has(> .CodeMirrorEditor > .cmb-editor) {
+    padding: 0;
+  }
+  .cm-editor.cmb.cmb-editor {
+    margin-right: -4px;
   }
 }

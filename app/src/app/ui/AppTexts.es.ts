@@ -416,6 +416,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorCollapseAll: "Plegar todo",
   inspectorSheetHandle: "Arrastra para hacerlo más alto o más bajo;  hacia abajo, para guardarlo",
   inspectorSheetClose: "Guardar el inspector",
+  inspectorClose: "Cerrar el inspector",
   inspectorAddEvent: "Añadir evento",
   inspectorAddAction: "Añadir acción",
   inspectorRemoveEvent: "Quitar {event}",

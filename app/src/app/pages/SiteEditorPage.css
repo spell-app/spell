@@ -49,6 +49,7 @@
     border-start-start-radius: var(--spell-pane-radius, 0);
     border-start-end-radius: var(--spell-pane-radius, 0);
     background: var(--spell-menu-bar-background);
+    background-attachment: fixed;
   }
   h1 {
     margin: 0;

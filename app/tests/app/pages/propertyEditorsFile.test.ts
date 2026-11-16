@@ -62,7 +62,7 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.editor.spell`, { timeout: 60_000 })
     await new CodeEditor(page).shown()
     await page.waitForTimeout(4000)
-    await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+    await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
     await page.waitForTimeout(1000)
   }, 120_000)
 

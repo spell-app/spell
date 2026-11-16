@@ -347,7 +347,7 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
 })
 
 describe("the cards", () => {
-  test("a card folds, and has no ✕ of its own (T78);  the column opens again with every card", async () => {
+  test("a card folds, and has no ✕ of its own (T78);  the top card's Close hides the column (I186), which opens again with every card", async () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     flush()
@@ -359,11 +359,16 @@ describe("the cards", () => {
     Inspector.toggleFolded("views")
     flush()
     expect(titles()).toEqual([false, true, true])
-    // no card is hidden on its own:  no ✕ in any card's header
-    expect(host.querySelector(".InspectorCard ui-icon[name=close]")).toBeNull()
-    // closed, then opened again, a click each:  every card, the folded one still folded
-    Inspector.toggle()
+    // no card is hidden on its own:  the one ✕ is the top card's Close, right of Inspect app, which hides the column (I186)
+    const closes = host.querySelectorAll<HTMLElement>(".InspectorCard ui-icon[name=close]")
+    expect(closes).toHaveLength(1)
+    expect(closes[0]!.matches('[data-panel="properties"] [slot="actions"] .InspectAppButton ~ .InspectorClose')).toBe(
+      true
+    )
+    // closed by it, then opened again:  every card, the folded one still folded
+    closes[0]!.click()
     flush()
+    expect(Inspector.isOpen).toBe(false)
     expect(host.querySelector(".InspectorCard")).toBeNull()
     Inspector.toggle()
     flush()

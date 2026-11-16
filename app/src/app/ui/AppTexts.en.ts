@@ -617,6 +617,8 @@ export const APP_TEXTS = {
   // the phone's sheet (`<InspectorSheetBar>`)
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
+  // the Inspector card's Close, right of Inspect app:  hides the column (I186)
+  inspectorClose: "Close the Inspector",
   inspectorAddEvent: "Add Event",
   inspectorAddAction: "Add Action",
   // a Code card row's ✕ (`<RemoveEventButton>`, epic `editor` T73):  its tooltip and undo step, then what it asks
