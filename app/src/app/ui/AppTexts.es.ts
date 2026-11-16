@@ -412,12 +412,8 @@ const APP_TEXTS_ES: AppTextPack = {
     "Aquí no hay nada que renombrar.\nSe puede renombrar:\nuna acción del propio programa que no toma nada,\nuna propiedad, un tipo o un nombre escrito igual en todas partes.",
   renameRefused:
     "{oldName} no se puede llamar {newName}:\nusa letras, números y guiones,\ny un nombre que nada más tenga.",
-  inspectorProperties: "Propiedades",
-  inspectorClose: "Cerrar el Inspector",
-  inspectorHide: "Ocultar esta tarjeta",
   inspectorExpandAll: "Desplegar todo",
   inspectorCollapseAll: "Plegar todo",
-  inspectorPanels: "Mostrar u ocultar paneles",
   inspectorSheetHandle: "Arrastra para hacerlo más alto o más bajo;  hacia abajo, para guardarlo",
   inspectorSheetClose: "Guardar el inspector",
   inspectorAddEvent: "Añadir evento",

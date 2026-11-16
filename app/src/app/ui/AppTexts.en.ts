@@ -612,12 +612,8 @@ export const APP_TEXTS = {
   // F2's new name refused, for a property, a type or a name
   renameRefused:
     "{oldName} can't be renamed {newName}:\nuse letters, numbers and dashes,\nand a name nothing else has.",
-  inspectorProperties: "Properties",
-  inspectorClose: "Close the Inspector",
-  inspectorHide: "Hide this card",
   inspectorExpandAll: "Expand all",
   inspectorCollapseAll: "Collapse all",
-  inspectorPanels: "Show or hide panels",
   // the phone's sheet (`<InspectorSheetBar>`)
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
