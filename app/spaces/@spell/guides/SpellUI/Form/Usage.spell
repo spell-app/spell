@@ -29,6 +29,7 @@ a "task list" is a view:
 		</form>
 
 "form usage" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>

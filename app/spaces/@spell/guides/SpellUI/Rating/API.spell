@@ -1,4 +1,5 @@
 "rating api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>

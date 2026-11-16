@@ -1,4 +1,5 @@
 "modal examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Modal
 		<header>A modal displays content that temporarily blocks interactions with the main view of a

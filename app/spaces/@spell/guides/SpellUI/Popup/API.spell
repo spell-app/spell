@@ -1,4 +1,5 @@
 "popup api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Popup
 		<header>A popup displays additional information on top of a page.</>

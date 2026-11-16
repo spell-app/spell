@@ -31,7 +31,13 @@ import siteTabsCSS from "./UISiteTabs.css?inline"
  *   never the page).
  *   - It's `<ui-toolbar>`'s scrolling row, the section tabs' too:  a `‹` / `›` and a fade at each end with more that way
  *     (epic `notebook` I11).
- * - Plain data in, no fetching:  a Spell site's pages come from its site file, whoever draws it hands them in.
+ * - Plain data in, no fetching:  `pages` and `current`, set on it by hand.
+ * - Without `pages`, it follows the site navigation it's inside (epic `mockup` T38):
+ *   - the nearest box around it with a `<ui-site-nav>` of its own, across shadow roots (`siteNavAround()`)
+ *   - its `pages` and `current` are that navigation's, kept up as they change:  so a page of a Spell site writes
+ *     a bare `<site-tabs/>`, and its tabs are the shown page's family
+ *   - a tab's click is a link's, which the site follows itself, as any link to one of its pages
+ *   - it reads the navigation's attributes, what a Spell site writes:  not its `pages` property set from a script
  ****************/
 export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   @E.proto static vocabulary = siteTabsVocabulary
@@ -44,15 +50,67 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   // ## The family
   ////////////////
 
-  /** `pages`, the well-formed ones:  each with a `title`, and its pages checked the same way. */
+  /** `pages`, else the site navigation's, the well-formed ones:  each with a `title`, its pages checked the same way. */
   @E.derived
   get sitePages(): readonly SiteTabsPage[] {
-    return SitePages.wellFormed(this.pages)
+    return SitePages.wellFormed(this.isFollowing ? this.followed?.pages : this.pages)
   }
 
-  /** Which page is shown, as `current` says it, else the browser's address. */
+  /** Which page is shown:  `current`, else the site navigation's while following it, else the browser's address. */
   get currentKey(): string {
-    return this.current ?? (isServer ? "" : location.pathname)
+    const current = this.current ?? (this.isFollowing ? this.followed?.current : undefined)
+    return current ?? (isServer ? "" : location.pathname)
+  }
+
+  ////////////////
+  // ## Following the site navigation
+  ////////////////
+
+  /** The site navigation's `pages` and `current`, while it's inside one;  `undefined` outside any. */
+  @E.state accessor followed: FollowedNav | undefined = undefined
+
+  /** It has no `pages` of its own, so it shows the site navigation's. */
+  get isFollowing(): boolean {
+    return this.pages === undefined
+  }
+
+  /**
+   * While connected:  read the site navigation around it, and again each time its `pages` or `current` changes.
+   * - Nothing around it:  nothing to follow, and it draws only what it's given.
+   */
+  @E.whileConnected
+  protected followSiteNav() {
+    const nav = UISiteTabs.siteNavAround(this.domElement)
+    if (!nav) return
+    const read = () =>
+      (this.followed = {
+        pages: UISiteTabs.parsed(nav.getAttribute(PAGES)),
+        current: nav.getAttribute(CURRENT) ?? undefined
+      })
+    read()
+    // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches the site navigation around it, another element
+    const observer = new MutationObserver(read)
+    observer.observe(nav, { attributes: true, attributeFilter: [PAGES, CURRENT] })
+    return () => {
+      observer.disconnect()
+      this.followed = undefined
+    }
+  }
+
+  /** The `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow roots. */
+  private static siteNavAround(element: Element): Element | undefined {
+    const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV})`)
+    return box?.querySelector(`:scope > ${SITE_NAV}`) ?? undefined
+  }
+
+  /** The pages in a navigation's `pages` text;  `undefined` for none, or text that isn't JSON. */
+  private static parsed(text: string | null): unknown {
+    if (!text) return undefined
+    try {
+      return JSON.parse(text)
+    } catch {
+      return undefined
+    }
   }
 
   /** Is `page` the one shown? */
@@ -215,6 +273,14 @@ export type SiteTabsPage = SitePage & {
   /** the pages under it */
   pages?: readonly SiteTabsPage[]
 }
+
+/** What it follows of the site navigation around it:  its `pages` (parsed, not yet checked) and `current`. */
+type FollowedNav = { pages: unknown; current: string | undefined }
+
+/** The site navigation's tag, and the two attributes of it that it follows. */
+const SITE_NAV = "ui-site-nav"
+const PAGES = "pages"
+const CURRENT = "current"
 
 /** A row of fewer tabs than this draws nothing:  a single tab goes nowhere. */
 const MINIMUM_TABS = 2

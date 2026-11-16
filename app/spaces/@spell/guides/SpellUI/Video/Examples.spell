@@ -1,4 +1,5 @@
 "video examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Video
 		<header>A video plays a video file in the browser's own player.</>

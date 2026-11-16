@@ -1,4 +1,5 @@
 "emoji theming" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>

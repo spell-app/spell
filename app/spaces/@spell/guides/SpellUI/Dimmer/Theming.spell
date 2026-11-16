@@ -1,4 +1,5 @@
 "dimmer theming" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>

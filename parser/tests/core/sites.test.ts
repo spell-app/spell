@@ -101,6 +101,18 @@ class GalaxyGuide extends Site {
   static sidebars = [{ name: "film sidebar", view: "FilmSidebar" }]
 }
 
+/** A page that wants its family as tabs (epic `mockup` T38):  `<site-tabs/>` above its header. */
+class TabbedPage extends Page {
+  draw(): Drawing {
+    return h("div", null, h("ui-site-tabs", null), h("h1", null, "Tabbed")) as unknown as Drawing
+  }
+}
+
+/** A site whose one page draws tabs. */
+class TabbedGuide extends Site {
+  static pages = [{ name: "tabbed page", page: "TabbedPage", address: "/tabbed" }]
+}
+
 /** A page drawn without the top bar. */
 class LoginPage extends Page {
   draw(): Drawing {
@@ -351,6 +363,25 @@ describe("a running site", () => {
     columns().dispatchEvent(Object.assign(new Event("keydown", { bubbles: true }), { key: "Escape" }))
     await shown()
     expect(columns().classList.contains("nav-open")).toBe(false)
+  })
+
+  test("draws no tabs of its own:  a page that wants them draws `<site-tabs/>`, inside the box beside its navigation (T38)", async () => {
+    drawSite()
+    await site.showAddress("/films")
+    await shown()
+    expect(element.querySelector("ui-site-tabs")).toBeNull()
+    dispose?.()
+    new TabbedPage()
+    const tabbed = new TabbedGuide()
+    dispose = render(() => core.drawThing(tabbed) as never, element)
+    await tabbed.showAddress("/tabbed")
+    await shown()
+    const tabs = element.querySelectorAll("ui-site-tabs")
+    expect(tabs.length).toBe(1)
+    // the box `<ui-site-tabs>` follows the navigation of:  the one with a `<ui-site-nav>` of its own
+    const box = element.querySelector(".spell-site")!
+    expect(box.contains(tabs[0]!)).toBe(true)
+    expect([...box.children].some((child) => child.localName === "ui-site-nav")).toBe(true)
   })
 
   test("a link to one of its addresses is followed here", async () => {
