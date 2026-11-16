@@ -150,11 +150,11 @@ describe("typing Spell in a real CodeMirror editor", () => {
 
   describe("Enter and Tab between a tag's attributes (I142)", () => {
     test("Enter lines the rest up under the first attribute, tabs then spaces, as one undo", () => {
-      // `columns` is 15 columns in, a tab 4:  3 tabs, then 3 spaces
+      // `columns` is 13 columns in, a tab 2 (I113):  6 tabs, then a space
       const code = editorOf([`\t<container columns="7" spacing="xs">`, `\t</container>`], 1, 25)
       press("Enter")
-      expect(text(code)).toBe([`\t<container columns="7"`, `\t\t\t   spacing="xs">`, `\t</container>`].join("\n"))
-      expect(position()).toMatchObject({ lineNumber: 2, column: 7 })
+      expect(text(code)).toBe([`\t<container columns="7"`, `\t\t\t\t\t\t spacing="xs">`, `\t</container>`].join("\n"))
+      expect(position()).toMatchObject({ lineNumber: 2, column: 8 })
       const { doc } = code.state
       const caretLeft = code.coordsAtPos(code.state.selection.main.head)!.left
       const columnsLeft = code.coordsAtPos(doc.line(1).from + doc.line(1).text.indexOf("c", 3))!.left
@@ -170,11 +170,12 @@ describe("typing Spell in a real CodeMirror editor", () => {
     })
 
     test("Tab at the start of an attribute line moves that line alone;  Shift+Tab takes it back", () => {
-      const lines = [`\t<container columns="7"`, `\t\t\t   spacing="xs">`, `\t\t<text "hi" />`, `\t</container>`]
-      const code = editorOf(lines, 2, 7)
+      const lines = [`\t<container columns="7"`, `\t\t\t\t\t\t spacing="xs">`, `\t\t<text "hi" />`, `\t</container>`]
+      const code = editorOf(lines, 2, 8)
       press("Tab")
-      expect(text(code).split("\n")).toEqual([lines[0], `\t\t\t\t   spacing="xs">`, ...lines.slice(2)])
-      expect(position()).toMatchObject({ lineNumber: 2, column: 8 })
+      expect(text(code).split("\n")).toEqual([lines[0], `\t\t\t\t\t\t\t spacing="xs">`, ...lines.slice(2)])
+      expect(position()).toMatchObject({ lineNumber: 2, column: 9 })
+
       press("Tab", { shift: true })
       expect(text(code).split("\n")).toEqual(lines)
     })

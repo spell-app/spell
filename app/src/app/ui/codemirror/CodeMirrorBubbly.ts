@@ -3,7 +3,7 @@ import { Decoration, type DecorationSet, EditorView, WidgetType } from "@codemir
 
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
-import { CodeMirrorDecorations, CodeMirrorMarkup, railsOf, type Rail } from "./CodeMirrorMarkup"
+import { CodeMirrorDecorations, CodeMirrorMarkup, railsStyle, type Indent, type Rail } from "./CodeMirrorMarkup"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 
 /****************
@@ -85,6 +85,8 @@ class BubblyDecorations {
   private readonly text: string
   /** A drawing's tags:  drawn as HTML is (`CodeMirrorMarkup`), so Spell's marks leave them alone. */
   private readonly tags: Array<{ start: number; end: number }> = []
+  /** The feet under each line end, by where it is, innermost first:  as they stack. */
+  private readonly feet = new Map<number, FootWidget[]>()
 
   constructor(
     private readonly state: EditorState,
@@ -157,12 +159,16 @@ class BubblyDecorations {
     const isShown = this.isWhollyShown(block)
     const hasBody = block.body.some((node) => node.kind !== "gap")
     this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
-    const indent = this.decorations.indentAt(head.start)
+    // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it,
+    // as Monaco drew them (I113)
+    const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
+    const indent = hung(this.decorations.indentAt(head.start), isHung)
     const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? ["bubbly-group"] : [])]
     const hasDescription = this.line(head, partOfSpeech)
     if (isShown) {
       const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
       if (hasDescription) band.push("cmb-band-described")
+      if (isHung) band.push("cmb-band-hung")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
     }
     if (!hasBody) return
@@ -172,13 +178,21 @@ class BubblyDecorations {
     if (!isShown) return
     // the foot, under its last line
     const last = lastLineEnd(block)
+    const at = this.state.doc.lineAt(last).to
+    const foot = new FootWidget(indent.tabs, partOfSpeech, rails)
+    // its rail stops short in the row above its foot, where the foot's round corner turns:  its last line, or the foot of
+    // a block in it that ends there too
+    const above = this.feet.get(at)?.at(-1)
+    if (above) above.stopped.add(rails.length)
+    else this.decorations.stopRail(last, rails.length)
+    this.feet.set(at, [...(this.feet.get(at) ?? []), foot])
     this.decorations.add(
       Decoration.widget({
-        widget: new FootWidget(indent.tabs, partOfSpeech, rails),
+        widget: foot,
         block: true,
         // an inner block's foot before its parent's, when they end on the same line
         side: 1000 - block.level
-      }).range(this.state.doc.lineAt(last).to)
+      }).range(at)
     )
   }
 
@@ -197,8 +211,14 @@ class BubblyDecorations {
     const stretches = SP.BubblyStretches.ofLine(this.text, line, band ? { band } : {})
     for (const [index, stretch] of stretches.entries()) {
       const { start, end, kind } = stretch
-      // a drawing's tag:  HTML's marks
-      if (this.tags.some((tag) => start >= tag.start && end <= tag.end)) continue
+      // a drawing's tag:  HTML's marks;  a stretch running across tags, `/></>`, only its pieces between them, so no
+      // mark of Spell's cuts a tag's pill in two (one over `/></>` split `<number "score" />`'s pill;  epic `language` I114)
+      const outside = this.outsideTags(start, end)
+      if (outside.length !== 1 || outside[0]!.start !== start || outside[0]!.end !== end) {
+        for (const piece of outside)
+          this.mark(piece.start, piece.end, kind === "mark" ? ["bubbly-mark"] : classesOf(kind))
+        continue
+      }
       switch (kind) {
         case "underline":
           this.mark(start, end, ["bubbly-underline"])
@@ -258,6 +278,19 @@ class BubblyDecorations {
   private mark(start: number, end: number, classes: string[]) {
     this.decorations.mark(start, end, classes)
   }
+
+  /** The pieces of `start`-`end` outside every drawing's tag, in order;  none when it's all in tags. */
+  private outsideTags(start: number, end: number): Array<{ start: number; end: number }> {
+    const pieces: Array<{ start: number; end: number }> = []
+    let from = start
+    const crossing = this.tags.filter((tag) => tag.start < end && tag.end > start).sort((a, b) => a.start - b.start)
+    for (const tag of crossing) {
+      if (tag.start > from) pieces.push({ start: from, end: tag.start })
+      from = Math.max(from, tag.end)
+    }
+    if (from < end) pieces.push({ start: from, end })
+    return pieces
+  }
 }
 
 /** A stretch's classes in the sheet, as the page's (`BubblyHtml.classesFor()`). */
@@ -272,7 +305,13 @@ function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
   return !!type && SP.SpellJSX.isDrawnType(type)
 }
 
+/** `indent`, a tab further out when `isHung`:  where a group's band and rail start. */
+function hung(indent: Indent, isHung: boolean): Indent {
+  return isHung ? { ...indent, tabs: indent.tabs - 1 } : indent
+}
+
 /** Where `block`'s last line that isn't a gap ends. */
+
 function lastLineEnd(block: SP.BubblyBlock): number {
   const last = block.body.findLast((node) => node.kind !== "gap")
   if (!last) return block.head.end
@@ -281,8 +320,10 @@ function lastLineEnd(block: SP.BubblyBlock): number {
 
 /****************
  * ### `FootWidget`
- * A block's foot:  a short bar off the bottom of its rail, on a line of its own under its last line.
- * - The rails of the blocks around it run on beside it.
+ * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner, as Monaco's did (I113),
+ * on a line of its own under its last line.
+ * - The rails of the blocks around it run on beside it;
+ *   one whose own foot is in the row under it stops short there, for that foot's corner (`stopped`).
  ****************/
 class FootWidget extends WidgetType {
   constructor(
@@ -293,18 +334,22 @@ class FootWidget extends WidgetType {
     super()
   }
 
+  /** The rails beside it, by their place in `rails`, whose feet are in the row under it:  set while it's laid out. */
+  readonly stopped = new Set<number>()
+
   eq(other: FootWidget): boolean {
     return (
       other.column === this.column &&
       other.partOfSpeech === this.partOfSpeech &&
-      railsOf(other.rails) === railsOf(this.rails)
+      railsStyle(other.rails, other.stopped) === railsStyle(this.rails, this.stopped)
     )
   }
 
   toDOM(): HTMLElement {
     const row = document.createElement("div")
     row.className = "cmb-foot-row"
-    if (this.rails.length) row.style.setProperty("--cmb-rails", railsOf(this.rails))
+    if (this.rails.length) row.style.cssText = railsStyle(this.rails, this.stopped)
+
     const foot = document.createElement("div")
     foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}`
     foot.style.setProperty("--cmb-column", String(this.column))

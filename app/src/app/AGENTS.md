@@ -207,8 +207,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - a line of a tag's attributes, under its first line, moves alone (I142);  so does a comment line (I161)
     - Enter between a tag's attributes puts the rest on a new line, lined up under its first attribute (epic `editor` I142):
       measured as CodeMirror draws it, tabs then spaces;  one undo
-      - the bubbly look's tab stop isn't 4 of the font's spaces, so the text it writes can differ from one look to
-        the other, lined up all the same
+      - a tab is 2 spaces wide (Monaco's, epic `language` I113), but the bubbly look's bands and pills take room of
+        their own, so the text it writes can differ from one look to the other, lined up all the same
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step

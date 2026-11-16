@@ -34,7 +34,7 @@ export class CodeMirrorMarkup {
 
   /**
    * The editor's tab stop and space, as its font draws them, for the sheet:  `--cmb-indent`, `--cmb-space`.
-   * - A tab is CodeMirror's 4 spaces (its own `tab-size`):  the rails and feet, placed by these, stand
+   * - A tab is CodeMirror's 2 spaces (its own `tab-size`, `TAB_SIZE`):  the rails and feet, placed by these, stand
    *   at their bands' ends, at any level (measured:  a guessed 24px left them 7px off a level, epic `codemirror` P3).
    * - Measured once the editor's drawn, and again whenever its font may have changed (a new theme, a zoom).
    */
@@ -157,7 +157,17 @@ class MarkupShapes {
     const last = doc.lineAt(whole.end).number
     for (let number = first; number <= last; number++) this.decorations.line(doc.line(number).from, inside, hue)
     const foot = block.foot === undefined ? undefined : this.marks[block.foot]
-    if (foot) this.on(block.foot!, ["cmb-tag-foot", ...hue])
+    if (foot) {
+      this.on(block.foot!, ["cmb-tag-foot", ...hue])
+      // alone on its line:  the line only as tall as its tiny pill and the paper round it, as Monaco's (I113)
+      const line = doc.lineAt(foot.start)
+      if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end)) {
+        this.decorations.line(foot.start, inside, ["cmb-foot-line"])
+        // its own rail ends at the foot's top, as Monaco's did (I114):  the foot draws the bit above it, and its corner
+        this.decorations.endRail(foot.start, inside.length - 1)
+      }
+    }
+
     this.draw(block.inside, inside)
   }
 
@@ -186,8 +196,12 @@ export class CodeMirrorDecorations {
   private readonly ranges: Array<Range<Decoration>> = []
   /** Each mark's classes and attributes, by its stretch (`start:end`). */
   private readonly marks = new Map<string, { classes: Set<string>; attributes: Record<string, string> }>()
-  /** Each line's classes and rails, by where it starts. */
-  private readonly lines = new Map<number, { classes: Set<string>; rails: Rail[] }>()
+  /**
+   * Each line's classes and rails, by where it starts;
+   * `stopped`, the rails (by their place in `rails`) that stop short above a foot's round corner in the row under it;
+   * `ended`, those not drawn in it at all:  an HTML block's own, in its foot's row.
+   */
+  private readonly lines = new Map<number, LineDecoration>()
 
   constructor(readonly state: EditorState) {
     this.text = state.doc.toString()
@@ -209,11 +223,35 @@ export class CodeMirrorDecorations {
   /** The line `at` is on:  inside the blocks `rails` holds, outermost first, and in `classes`. */
   line(at: number, rails: Rail[], classes: string[] = []): void {
     const from = this.state.doc.lineAt(at).from
-    const line = this.lines.get(from) ?? { classes: new Set(), rails: [] }
+    const line = this.decorationOf(from)
     for (const each of classes) line.classes.add(each)
     // the most a line's in:  a drawing's tags inside a Spell block hold its rails, and their own
     if (rails.length >= line.rails.length) line.rails = rails
     this.lines.set(from, line)
+  }
+
+  /**
+   * The rail `rail` (its place among the line's rails, outermost 0) stops short on the line `at` is on:
+   * a foot's round corner, in the row under it, takes its place there.
+   */
+  stopRail(at: number, rail: number): void {
+    const from = this.state.doc.lineAt(at).from
+    const line = this.decorationOf(from)
+    line.stopped.add(rail)
+    this.lines.set(from, line)
+  }
+
+  /** The rail `rail` (its place among the line's rails, outermost 0) isn't drawn on the line `at` is on. */
+  endRail(at: number, rail: number): void {
+    const from = this.state.doc.lineAt(at).from
+    const line = this.decorationOf(from)
+    line.ended.add(rail)
+    this.lines.set(from, line)
+  }
+
+  /** The decoration so far of the line starting at `from`, or a new one. */
+  private decorationOf(from: number): LineDecoration {
+    return this.lines.get(from) ?? { classes: new Set(), rails: [], stopped: new Set(), ended: new Set() }
   }
 
   /** Room `spacer` injected at `at`, before or after the text there. */
@@ -244,15 +282,18 @@ export class CodeMirrorDecorations {
       const [start, end] = range.split(":").map(Number) as [number, number]
       ranges.push(Decoration.mark({ class: [...classes].join(" "), attributes }).range(start, end))
     }
-    for (const [from, { classes, rails }] of this.lines) {
+    for (const [from, { classes, rails, stopped, ended }] of this.lines) {
       const innermost = rails.at(-1)
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
-      const attributes: Record<string, string> = rails.length ? { style: `--cmb-rails: ${railsOf(rails)}` } : {}
+      const attributes: Record<string, string> = rails.length ? { style: railsStyle(rails, stopped, ended) } : {}
       ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(from))
     }
     return Decoration.set(ranges, true)
   }
 }
+
+/** A line's decoration being made:  its classes, the rails of the blocks round it, which of them stop short or end. */
+type LineDecoration = { classes: Set<string>; rails: Rail[]; stopped: Set<number>; ended: Set<number> }
 
 /** How far in a line's words start:  its tabs, then its spaces. */
 export type Indent = { tabs: number; spaces: number }
@@ -265,7 +306,7 @@ export type Rail = Indent & { partOfSpeech: string }
  * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`) and a rail (`--cmb-rail`):
  *   only the columns are written here.
  */
-export function railsOf(rails: Rail[]): string {
+function railsOf(rails: Rail[]): string {
   return rails
     .map(({ tabs, spaces, partOfSpeech }) => {
       const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) - var(--cmb-band-inset))`
@@ -275,7 +316,27 @@ export function railsOf(rails: Rail[]): string {
     .join(", ")
 }
 
+/**
+ * `rails` as a row's style:  `--cmb-rails`, and `--cmb-rail-sizes` when any of them, by their place in `rails`,
+ * stops short above a foot's round corner in the row under it (`stopped`, `--cmb-foot-lift` in `bubbly.css`), or isn't
+ * drawn in it (`ended`).
+ */
+export function railsStyle(
+  rails: Rail[],
+  stopped: ReadonlySet<number> = new Set(),
+  ended: ReadonlySet<number> = new Set()
+): string {
+  const style = `--cmb-rails: ${railsOf(rails)}`
+  if (![...stopped, ...ended].some((rail) => rail < rails.length)) return style
+  const sizes = rails.map((_, rail) => (ended.has(rail) ? "0 0" : stopped.has(rail) ? STOPPED_RAIL : "100% 100%"))
+  return `${style}; --cmb-rail-sizes: ${sizes.join(", ")}`
+}
+
+/** A rail's size in a row it stops short in:  the row's width, its height less the corner's reach into it. */
+const STOPPED_RAIL = "100% max(0px, 100% - var(--cmb-foot-lift))"
+
 /** Room beside a mark, an empty inline box, its width the sheet's. */
+
 class SpacerWidget extends WidgetType {
   constructor(readonly classes: string) {
     super()

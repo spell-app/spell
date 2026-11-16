@@ -331,7 +331,7 @@ export class CodeMirrorLanguage {
     const { doc } = view.state
     const file = await this.fileReady(doc)
     if (!file || view.state.doc !== doc) return
-    const edits = this.service.formatting(file, { tabSize: 4, insertSpaces: false })
+    const edits = this.service.formatting(file, { tabSize: view.state.tabSize, insertSpaces: false })
     if (!edits.length) return
     view.dispatch({ changes: LspToCodeMirror.changes(doc, edits), userEvent: "input.format" })
   }
