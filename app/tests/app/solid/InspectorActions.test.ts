@@ -31,7 +31,7 @@ class Card extends TwoSidedView {
   play() {}
   // the create hook:  run as a card is made, never an action (I109)
   create() {}
-  putOnPile(_pile: Pile) {
+  moveToPile(_pile: Pile) {
     return Promise.resolve()
   }
   onClick() {}
@@ -48,7 +48,7 @@ class Foundation extends Pile {}
 /** Spell's words for them, as a words file has them. */
 const WORDS = {
   lang: "en",
-  types: { Card: { play: "play a card", putOnPile: "put a card on a pile" } }
+  types: { Card: { play: "play a card", moveToPile: "move a card to a pile" } }
 } as unknown as SP.SpellWordsData
 
 /** A stand-in core:  its things, which actions are enabled, its console. */
@@ -67,33 +67,33 @@ function coreFor(things: object[], enabled = (_name: string) => true): Core {
 describe("InspectorActions.of()", () => {
   test("its own actions first, then the template's;  no drawing, event, condition, question or hook (`create`)", () => {
     const actions = InspectorActions.of(new Card(), coreFor([]), WORDS)
-    expect(actions.map((action) => action.words)).toEqual(["play it", "put it on a pile", "turn face up", "turn over"])
+    expect(actions.map((action) => action.words)).toEqual(["play it", "move it to a pile", "turn face up", "turn over"])
   })
 
   test("what it takes, from its words:  `a pile` is the program's `Pile`", () => {
-    const put = InspectorActions.of(new Card(), coreFor([]), WORDS).find((action) => action.name === "putOnPile")!
-    expect(put.parameters).toEqual([{ words: "a pile", type: "Pile" }])
-    // its button leaves the field's words to the field:  `put it on` [a pile ▾]
-    expect(put.label).toBe("put it on")
+    const move = InspectorActions.of(new Card(), coreFor([]), WORDS).find((action) => action.name === "moveToPile")!
+    expect(move.parameters).toEqual([{ words: "a pile", type: "Pile" }])
+    // its button leaves the field's words to the field:  `move it to` [a pile ▾]
+    expect(move.label).toBe("move it to")
   })
 
   test("no words file:  each by its method's name, what it takes unnamed", () => {
-    const put = InspectorActions.of(new Card(), coreFor([])).find((action) => action.name === "putOnPile")!
-    expect(put).toMatchObject({ words: "put on pile", parameters: [{ words: "" }] })
+    const move = InspectorActions.of(new Card(), coreFor([])).find((action) => action.name === "moveToPile")!
+    expect(move).toMatchObject({ words: "move to pile", parameters: [{ words: "" }] })
   })
 })
 
 describe("InspectorActions.run()", () => {
   test("does it with what it takes, and hands back its wait;  not while it isn't enabled", async () => {
     const card = new Card()
-    const spy = vi.spyOn(card, "putOnPile")
+    const spy = vi.spyOn(card, "moveToPile")
     const foundation = new Foundation("clubs")
-    const put = InspectorActions.of(card, coreFor([]), WORDS).find((action) => action.name === "putOnPile")!
+    const move = InspectorActions.of(card, coreFor([]), WORDS).find((action) => action.name === "moveToPile")!
     realCore.resetRuntime()
-    await InspectorActions.run(realCore, card, put, [foundation])
+    await InspectorActions.run(realCore, card, move, [foundation])
     expect(spy).toHaveBeenCalledWith(foundation)
     const notEnabled = vi.spyOn(realCore, "runAction").mockReturnValueOnce(false)
-    expect(InspectorActions.run(realCore, card, put, [foundation])).toBeUndefined()
+    expect(InspectorActions.run(realCore, card, move, [foundation])).toBeUndefined()
     expect(spy).toHaveBeenCalledTimes(1)
     notEnabled.mockRestore()
   })

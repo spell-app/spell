@@ -11,7 +11,7 @@ import type { MarkdownPlaceKind } from "./UIMarkdown.types"
  *   - `formatted`:  bold, italic, struck and links drawn, no marks, as a word processor;  written back as markdown
  *     as it's kept (`MarkdownFormats.markdownOf()`).  A piece that wouldn't come back exactly (raw HTML, an escaped
  *     mark) stays in `marks`, and the switch's tooltip says why.
- * - The bar:  bold, italic, strikethrough, link, the piece's shape (Paragraph, H2-H4, bulleted, numbered), clear
+ * - The bar:  bold, italic, strikethrough, inline code (a button only:  ⌘E is Claude Code's), link, the piece's shape (Paragraph, H2-H4, bulleted, numbered), clear
  *   formatting, then the switch.  Placed by CSS anchor positioning just above the box (below it near the window's
  *   top):  it never moves the page.  Its buttons never take the focus, so the cursor and selection stay.
  * - Keys:  ⌘B, ⌘I, ⌘K, ⌘⇧X (Ctrl elsewhere), stopped so the window's own (VS Code's) never see them;  never ⌘E,
@@ -123,6 +123,7 @@ export class MarkdownBox {
     if (action === "view") return this.switchView()
     if (action === "link") return this.askAddress()
     if (action === "bullet" || action === "numbered") return this.reshape(this.shape === action ? "paragraph" : action)
+    if (action === "code" && this.view === "formatted") return this.toggleCode()
     if (this.view === "formatted") {
       this.field.ownerDocument.execCommand(FORMATTED_COMMANDS[action])
       if (action === "clear") this.field.ownerDocument.execCommand("unlink")
@@ -130,6 +131,30 @@ export class MarkdownBox {
       const edit = this.edit()
       this.apply(action === "clear" ? MarkdownFormats.clear(edit) : MarkdownFormats.toggle(edit, WRAPS[action]))
     }
+    this.changed()
+  }
+
+  /**
+   * Inline code in the formatted view:  the selection wrapped in a `<code>`, or the `<code>` the cursor is in unwrapped.
+   * - No editing command makes one, so the box does it;  `markdownOf()` writes it back in backticks.
+   */
+  private toggleCode() {
+    const range = MarkdownBox.rangeIn(this.field)
+    if (!range) return
+    const document = this.field.ownerDocument
+    const node = range.startContainer
+    const code = (node.nodeType === 1 ? (node as Element) : node.parentElement)?.closest("code")
+    if (code && this.field.contains(code)) {
+      const text = document.createTextNode(code.textContent ?? "")
+      code.replaceWith(text)
+      document.getSelection()?.setBaseAndExtent(text, 0, text, text.data.length)
+    } else if (!range.collapsed) {
+      const wrapped = document.createElement("code")
+      wrapped.textContent = range.toString()
+      range.deleteContents()
+      range.insertNode(wrapped)
+      document.getSelection()?.selectAllChildren(wrapped)
+    } else return
     this.changed()
   }
 
@@ -358,7 +383,9 @@ export class MarkdownBox {
       if (command && document.queryCommandState(command)) formats.add(format)
     }
     const node = MarkdownBox.rangeIn(this.field)?.startContainer
-    if ((node?.nodeType === 1 ? (node as Element) : node?.parentElement)?.closest("a")) formats.add("link")
+    const element = node?.nodeType === 1 ? (node as Element) : node?.parentElement
+    if (element?.closest("a")) formats.add("link")
+    if (element?.closest("code")) formats.add("code")
     return formats
   }
 
@@ -470,6 +497,7 @@ export type BarAction =
   | "bold"
   | "italic"
   | "strikethrough"
+  | "code"
   | "link"
   | "shape"
   | "bullet"
@@ -482,6 +510,7 @@ const BAR_ACTIONS: BarAction[] = [
   "bold",
   "italic",
   "strikethrough",
+  "code",
   "link",
   "shape",
   "bullet",
@@ -509,6 +538,7 @@ const ICONS: Record<Exclude<BarAction, "shape">, string> = {
   bold: "bold",
   italic: "italic",
   strikethrough: "strikethrough",
+  code: "code",
   link: "link",
   bullet: "list ul",
   numbered: "list ol",
@@ -517,7 +547,7 @@ const ICONS: Record<Exclude<BarAction, "shape">, string> = {
 }
 
 /** The mark each wrapping format puts on, in the marks view. */
-const WRAPS: Record<string, WrapMark> = { bold: "**", italic: "*", strikethrough: "~~" }
+const WRAPS: Record<string, WrapMark> = { bold: "**", italic: "*", strikethrough: "~~", code: "`" }
 
 /** The editing command each format is in the formatted view. */
 const FORMATTED_COMMANDS: Record<string, string> = {
@@ -532,6 +562,7 @@ const FORMAT_STATES: Record<Format, string> = {
   bold: "bold",
   italic: "italic",
   strikethrough: "strikeThrough",
+  code: "",
   link: ""
 }
 

@@ -39,6 +39,23 @@ describe("MarkdownFormats.toggle()", () => {
   })
 })
 
+describe("MarkdownFormats inline code (epic-engine T67)", () => {
+  it("wraps a selection in backticks, and takes a code span off from inside it", () => {
+    const code = MarkdownFormats.toggle(edit("call ⟨run()⟩ now"), "`")
+    expect(shown(code)).toBe("call `⟨run()⟩` now")
+    expect(shown(MarkdownFormats.toggle(code, "`"))).toBe("call ⟨run()⟩ now")
+    expect(MarkdownFormats.toggle({ text: "a `bc` d", start: 4, end: 4 }, "`").text).toBe("a bc d")
+  })
+
+  it("knows the cursor is in code, clears it, and keeps other marks inside it as code", () => {
+    expect([...MarkdownFormats.formatsAt("a `bc` d", 4)]).toEqual(["code"])
+    expect(MarkdownFormats.clear(edit("a `b` c")).text).toBe("a b c")
+    const runs = MarkdownFormats.runsOf("x `**y**` z")
+    expect(runs.map((run) => run.text).join("")).toBe("x `**y**` z")
+    expect(runs.find((run) => run.text === "**y**")).toMatchObject({ formats: ["code"], isMark: false })
+  })
+})
+
 describe("MarkdownFormats.link() and clear()", () => {
   it("links a selection, changes a link's address, and takes a link off", () => {
     const linked = MarkdownFormats.link(edit("see ⟨the docs⟩"), "/docs")

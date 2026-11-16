@@ -82,7 +82,7 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     const file = workspace.fileFor(uri)!
     expect(service.prepareRename(file, positionOf(text, 'to "cheat"', "cheat"))?.placeholder).toBe("cheat")
     expect(service.prepareRename(file, positionOf(text, "to draw solitaire", "draw"))).toBeNull()
-    expect(service.prepareRename(file, positionOf(text, "to play a card", "play"))).toBeNull()
+    expect(service.prepareRename(file, positionOf(text, 'to "play a card"', "play"))).toBeNull()
   })
 
   test("refuses an empty name, one another member has, and what isn't an action", async () => {

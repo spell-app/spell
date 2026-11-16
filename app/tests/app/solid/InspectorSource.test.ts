@@ -70,7 +70,7 @@ describe("eventsDeclared()", () => {
     expect(rows[0]!.code).toBe("")
     expect(rows[1]!.code).toBe("the card is face up")
     expect(rows[2]!.code.split("\n")[0]).toBe("it is empty and the card is a king")
-    expect(rows[3]!.code).toBe("put the card on the pile")
+    expect(rows[3]!.code).toBe("move the card to the pile")
   })
 
   test("an event:  `on click:`, its code under it", () => {

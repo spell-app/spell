@@ -39,6 +39,7 @@ export const markdownEs = {
     bold: "Negrita (⌘B)",
     italic: "Cursiva (⌘I)",
     strikethrough: "Tachado (⌘⇧X)",
+    code: "Código en línea",
     link: "Enlace (⌘K)",
     linkAddress: "Dirección del enlace:  Intro lo pone, vacía lo quita",
     shape: "Párrafo o título",

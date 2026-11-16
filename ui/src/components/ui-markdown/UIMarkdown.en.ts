@@ -120,6 +120,11 @@ export const markdownVocabulary = {
     { key: "bold", text: "Bold (⌘B)", description: "`editable`:  the bar's bold button." },
     { key: "italic", text: "Italic (⌘I)", description: "`editable`:  the bar's italic button." },
     { key: "strikethrough", text: "Strikethrough (⌘⇧X)", description: "`editable`:  the bar's strikethrough button." },
+    {
+      key: "code",
+      text: "Inline code",
+      description: "`editable`:  the bar's inline code button (no key:  ⌘E is Claude Code's)."
+    },
     { key: "link", text: "Link (⌘K)", description: "`editable`:  the bar's link button." },
     {
       key: "linkAddress",
