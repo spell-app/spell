@@ -10,12 +10,19 @@
  *   but the menu flush against it, the drawer's line their only edge.
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
  *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
+ * - Motion (epic `mockup` I25), the theme's `--ui-duration-normal`:
+ *   - the open box grows out from the column's edge and shrinks back into it, its shadow fading in and out;
+ *     closing, it keeps its fill and its place over the page until it's back (the delayed `transition`s)
+ *   - switching between compact and all of it, the column narrows or widens, the page following
+ *     (`interpolate-size`:  where a browser has none, it jumps)
+ *   - reduced motion, or `animation="none"` round it (`--ui-motion: none`):  none of it
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the
  *   start, shown by `:state(open)`;  reduced motion, no slide.
  */
 @layer ui.components {
   :host {
     --_ui-page-layout-gap: var(--ui-page-layout-gap, var(--ui-font-size, 16px));
+    --_ui-page-layout-duration: var(--ui-duration-normal, 200ms);
     /* its own width decides narrow:  a site drawn in a narrow box is narrow */
     container-type: inline-size;
     display: flex;
@@ -30,17 +37,23 @@
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
   }
+  /* the drawer's column as wide as the drawer:  its own width, so it can move between compact and all of it */
   .layout:has(> .drawer) {
-    grid-template-columns: minmax(10em, 16em) minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   /* ## The drawer */
   .drawer {
+    interpolate-size: allow-keywords;
+    inline-size: 16em;
     min-inline-size: 0;
+    transition: inline-size var(--_ui-page-layout-duration) var(--ui-ease, ease);
     background: var(--ui-surface-muted, Canvas);
     border-inline-end: 1px solid var(--ui-border-color, GrayText);
   }
   .drawer-box {
+    /* its own width moves only between lengths:  a keyword (auto) would follow the column as it moves */
+    interpolate-size: numeric-only;
     position: sticky;
     inset-block-start: 0;
     max-block-size: 100dvh;
@@ -83,9 +96,26 @@
   }
 
   /* ## `compact`:  only the icons, as narrow as they are;  open, all of it over the page */
-  :host(:state(compact)) .layout:has(> .drawer) {
-    grid-template-columns: var(--_page-layout-compact-width, auto) minmax(0, 1fr);
+  :host(:state(compact)) .drawer {
+    inline-size: var(--_page-layout-compact-width, fit-content);
   }
+  /* opening, the column takes its kept width at once:  it stays as it is */
+  :host(:state(compact):state(open):not(:state(narrow))) .drawer {
+    transition: none;
+  }
+  /* closed:  the box as wide as its column;  closing, its fill and place over the page wait until it's back */
+  :host(:state(compact):not(:state(narrow))) .drawer-box {
+    inline-size: 100%;
+    box-shadow: 0 0 0 transparent;
+    transition:
+      inline-size var(--_ui-page-layout-duration) var(--ui-ease-in, ease-in),
+      box-shadow var(--_ui-page-layout-duration) var(--ui-ease-in, ease-in),
+      z-index 0s var(--_ui-page-layout-duration) allow-discrete,
+      min-block-size 0s var(--_ui-page-layout-duration),
+      background 0s var(--_ui-page-layout-duration) allow-discrete,
+      border-inline-end 0s var(--_ui-page-layout-duration) allow-discrete;
+  }
+  /* open:  all of it, grown out from the column's edge over the page */
   :host(:state(compact):state(open):not(:state(narrow))) .drawer-box {
     z-index: var(--ui-z-popup, 1000);
     inline-size: 16em;
@@ -94,15 +124,18 @@
     background: linear-gradient(var(--ui-surface-muted, Canvas), var(--ui-surface-muted, Canvas)) Canvas;
     border-inline-end: 1px solid var(--ui-border-color, GrayText);
     box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2));
+    transition:
+      inline-size var(--_ui-page-layout-duration) var(--ui-ease-out, ease-out),
+      box-shadow var(--_ui-page-layout-duration) var(--ui-ease-out, ease-out);
   }
 
   /* ## Narrow:  one column, the drawer slid over the page from the start */
   @container (width < 40em) {
-    .layout:has(> .drawer),
-    :host(:state(compact)) .layout:has(> .drawer) {
+    .layout:has(> .drawer) {
       grid-template-columns: minmax(0, 1fr);
     }
-    .drawer {
+    .drawer,
+    :host(:state(compact)) .drawer {
       position: absolute;
       inset-inline-start: 0;
       inset-block-start: 2.75em;
@@ -117,8 +150,8 @@
       translate: calc(-100% - 1em);
       visibility: hidden;
       transition:
-        translate 0.2s,
-        visibility 0.2s;
+        translate var(--_ui-page-layout-duration),
+        visibility var(--_ui-page-layout-duration);
     }
     :host(:state(open)) .drawer {
       translate: 0;
@@ -139,8 +172,20 @@
     }
   }
 
+  /* no motion:  nothing waits either */
   @media (prefers-reduced-motion: reduce) {
-    .drawer {
+    .drawer,
+    :host(:state(compact)) .drawer,
+    :host(:state(compact):not(:state(narrow))) .drawer-box,
+    :host(:state(compact):state(open):not(:state(narrow))) .drawer-box {
+      transition: none;
+    }
+  }
+  @container style(--ui-motion: none) {
+    .drawer,
+    :host(:state(compact)) .drawer,
+    :host(:state(compact):not(:state(narrow))) .drawer-box,
+    :host(:state(compact):state(open):not(:state(narrow))) .drawer-box {
       transition: none;
     }
   }
