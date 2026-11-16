@@ -48,7 +48,8 @@ export class CodeMirrorSetup {
       dropCursor(),
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
-      EditorState.tabSize.of(4),
+      // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
+      EditorState.tabSize.of(TAB_SIZE),
       search({ top: true }),
       CodeMirrorSetup.gutter({ lineNumbers }),
       keymap.of([
@@ -96,10 +97,10 @@ export class CodeMirrorSetup {
   /**
    * `text`'s width in `element`'s font, as the browser lays it out, in px;  a tab `tabSize` spaces, as CodeMirror's is.
    * - A hidden probe in the scroller, beside the text, never in it:  CodeMirror reads any change to its content as an edit.
-   * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (16.875px, 4 spaces of 4.234px).
+   * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (8.44px, 2 spaces of 4.22px).
    * - SIDE EFFECT:  lays the page out, if it's due;  call it where reading layout is fine.
    */
-  static widthIn(element: HTMLElement, text: string, tabSize = 4): number {
+  static widthIn(element: HTMLElement, text: string, tabSize = TAB_SIZE): number {
     const probe = document.createElement("span")
     probe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; tab-size: ${tabSize}`
     probe.textContent = text
@@ -206,6 +207,9 @@ const SPEAKS_NOW = ViewPlugin.fromClass(
 
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"
+
+/** How many spaces wide a tab is:  2, as Monaco's was (epic `language` I113);  `codemirror.css`'s `tab-size` too. */
+const TAB_SIZE = 2
 
 /** Whether `update` brought a new parse:  `CodeMirrorSetup.PARSED`. */
 function wasParsed(update: ViewUpdate): boolean {
