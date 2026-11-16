@@ -2017,6 +2017,10 @@
       ],
       "usedIn": [
         {
+          "name": "CodeMirrorSide",
+          "file": "src/app/ui/codemirror/CodeMirrorTest.tsx"
+        },
+        {
           "name": "FileInputEditor",
           "file": "src/app/solid/InputEditor.tsx"
         }

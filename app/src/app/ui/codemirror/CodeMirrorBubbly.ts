@@ -5,6 +5,7 @@ import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
+import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
 /****************
  * ### `CodeMirrorBubbly`
@@ -52,7 +53,9 @@ export class CodeMirrorBubbly {
         constructor(readonly view: EditorView) {}
 
         update(update: ViewUpdate) {
-          if (!update.docChanged) return
+          // laid out again after an edit, or a new parse
+          const isParsed = update.transactions.some((it) => it.effects.some((e) => e.is(CodeMirrorSetup.PARSED)))
+          if (!update.docChanged && !isParsed) return
           this.timer?.cancel()
           this.timer = after(CodeMirrorBubbly.RELAYOUT_MSEC / 1000, () => {
             const decorations = CodeMirrorBubbly.decorationsOf(this.view.state, fileOf())

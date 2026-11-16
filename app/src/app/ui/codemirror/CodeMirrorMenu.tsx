@@ -5,7 +5,6 @@ import type { CodeAction } from "vscode-languageserver"
 
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
-import { CodeMirrorTexts } from "./CodeMirrorTexts"
 import type { SpellCodeMirror } from "./SpellCodeMirror"
 
 // the editor's menu look:  the top bar's and the part menu's
@@ -23,17 +22,15 @@ import "spell/app/app/solid/MenuBar.css"
  * - `CodeMirrorMenu.open()` shows one;  it goes once a row is chosen, or the popup closes.
  ****************/
 export class CodeMirrorMenu {
-  /** Show the menu for `editor` at `at`, its rows in `lang`. */
-  static async open(editor: SpellCodeMirror, at: { x: number; y: number }, lang: string): Promise<void> {
+  /** Show the menu for `editor` at `at`, its rows in the app's language. */
+  static async open(editor: SpellCodeMirror, at: { x: number; y: number }): Promise<void> {
     CodeMirrorMenu.close?.()
-    const actions = await editor.language.codeActionsAt(editor.view)
+    const actions = (await editor.language?.codeActionsAt(editor.view)) ?? []
     const root = document.createElement("div")
     root.className = "CodeMirrorMenuRoot"
     document.body.append(root)
     const dispose = render(
-      () => (
-        <MenuPopup editor={editor} at={at} actions={actions} lang={lang} onClose={() => CodeMirrorMenu.close?.()} />
-      ),
+      () => <MenuPopup editor={editor} at={at} actions={actions} onClose={() => CodeMirrorMenu.close?.()} />,
       root
     )
     CodeMirrorMenu.close = () => {
@@ -50,7 +47,6 @@ export class CodeMirrorMenu {
 /** The popup and its rows. */
 function MenuPopup(props: MenuPopupProps) {
   const [isOpen, setOpen] = createSignal(true)
-  const text = (key: Parameters<typeof CodeMirrorTexts.text>[0]) => CodeMirrorTexts.text(key, props.lang)
   const view = () => props.editor.view
   const hasSelection = () => !view().state.selection.main.empty
 
@@ -111,13 +107,16 @@ function MenuPopup(props: MenuPopupProps) {
               shortcut="F12"
               onClick={choose(() => props.editor.goToDefinition(view().state.selection.main.head))}
             >
-              {text("goToDefinition")}
+              {appTexts.text("cmGoToDefinition")}
             </ui-action>
             <Show when={props.actions.length}>
               <ui-action kind="divider" />
               <For each={props.actions}>
                 {(action) => (
-                  <ui-action icon="magic" onClick={choose(() => props.editor.language.applyCodeAction(view(), action))}>
+                  <ui-action
+                    icon="magic"
+                    onClick={choose(() => props.editor.language?.applyCodeAction(view(), action))}
+                  >
                     {action.title}
                   </ui-action>
                 )}
@@ -129,7 +128,7 @@ function MenuPopup(props: MenuPopupProps) {
               shortcut={EDITOR_HOTKEYS.find.shortcut}
               onClick={choose(() => openSearchPanel(view()))}
             >
-              {text("find")}
+              {appTexts.text("cmFindMenu")}
             </ui-action>
           </ui-menu>
         </div>
@@ -146,8 +145,6 @@ type MenuPopupProps = {
   at: { x: number; y: number }
   /** the language service's code actions for its selection */
   actions: CodeAction[]
-  /** the language the rows are in */
-  lang: string
   /** the popup is going */
   onClose: () => void
 }
