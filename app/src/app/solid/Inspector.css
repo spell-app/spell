@@ -92,17 +92,6 @@ ui-panel.InspectorCard > .InspectorSection {
   &.locked {
     --ui-panel-pane-bar-padding: 20px 16px;
   }
-  /* what's selected, as its title:  a blue pill (Owen) */
-  & .InspectorPartTag {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 2px 10px;
-    border-radius: 999px;
-    background: color-mix(in oklab, var(--ui-blue) 14%, transparent);
-    color: color-mix(in oklab, var(--ui-blue) 80%, var(--ui-text-color));
-    font-size: 0.9em;
-  }
 }
 
 /* the tip, while nothing's selected:  the Theme Creator's 14px tips */
@@ -532,35 +521,26 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   color: var(--ui-text-muted);
 }
 
-/* the trail in the properties card's header:  a pill a step, `›` between;  an earlier step goes back to it */
-.InspectorTrail {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+/* the trail in the properties card's header:  what's selected a tab of the file bar's, its icon and its words, chosen
+   (T95:  "Make these tabs look like the ones in the file menu");  a step a tab, `›` between;  an earlier step goes back */
+ui-menu.InspectorTrail {
   min-width: 0;
   overflow: hidden;
 
   & > .InspectorTrailStep {
+    align-self: center;
     color: var(--ui-text-muted);
   }
-  & > .InspectorPartTag {
+  & > ui-item.InspectorPartTag {
     flex: 0 1 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    min-width: 0;
     white-space: nowrap;
   }
   & .InspectorPartTagText {
+    display: block;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  & > .InspectorPartTag.back {
-    cursor: var(--ui-control-cursor);
-    opacity: 0.75;
-  }
-  & > .InspectorPartTag.back:hover {
-    opacity: 1;
   }
 }
 

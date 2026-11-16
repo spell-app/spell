@@ -29,7 +29,7 @@ import { on } from "./on"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its `close`.
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - No ✕:  a card isn't hidden on its own;  the top bar's Inspector button shows and hides the whole column
  *   (Owen, 2026-11-15, epic `editor` T78:  "no need to hide the sections of the inspector sidebar separately").
@@ -47,6 +47,11 @@ export function InspectorCard(props: {
   bar?: JSX.Element
   /** Its own buttons, at its bar's right:  `slot="right"`. */
   actions?: JSX.Element
+  /**
+   * Its ✕, after the bar, as the file bar's is:  a panel's action beside the bar, not in it (`PanelClose`, T95),
+   * so its size and the room before it are the file bar's own.
+   */
+  close?: JSX.Element
   /** The body's class. */
   class?: string
   /** The body. */
@@ -79,6 +84,7 @@ export function InspectorCard(props: {
         {props.bar}
         {props.actions}
       </ui-toolbar>
+      {props.close}
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
       </Show>

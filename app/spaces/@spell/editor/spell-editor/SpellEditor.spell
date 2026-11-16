@@ -339,15 +339,16 @@ a "file tab bar" is a view
 		ui-toolbar {
 			--ui-toolbar-scroll-min: 0px;
 		}
-		/* the ✕ that hides the code, at the bar's far right:  the bar's icons' size and grey */
+		/* the ✕ that hides the code, at the bar's far right:  every panel's ✕, the editor's tokens (`PanelClose`, T95) */
 		.HideCode {
+			display: inline-flex;
 			flex: none;
-			margin-inline: 4px 0;
-			color: var(--ui-text-muted);
+			margin-inline: var(--spell-panel-close-gap) 0;
+			color: var(--spell-panel-close-color);
 			cursor: pointer;
 		}
 		.HideCode:hover {
-			color: var(--ui-text-color);
+			color: var(--spell-panel-close-hover-color);
 		}
 		.NotSaved[hidden],
 		.Drafted[hidden] {
