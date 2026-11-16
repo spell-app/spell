@@ -1456,6 +1456,13 @@
     .cm-line .bubbly-mark.bubbly-brace {
       color: var(--bubbly-brace-ink);
     }
+    /*
+     * ... but a code pill's own, part of it:  its light words' ink, faded toward the pill, as on the page;
+     * the paper's dark brace ink was lost on the pill (I127)
+     */
+    .cm-line .bubbly-mark.bubbly-code-brace {
+      color: var(--bubbly-code-brace-ink);
+    }
     /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
     .cm-line .bubbly-expression {
       --bubbly-ink: var(--bubbly-expression-ink);

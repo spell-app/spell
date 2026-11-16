@@ -198,4 +198,37 @@ describe("code in a drawing's tags, in the bubbly look", () => {
     expect(getComputedStyle(words).color).toBe(getComputedStyle(wordsOf(inTag!)).color)
     expect(getComputedStyle(words).color).not.toBe(getComputedStyle(between!).backgroundColor)
   })
+
+  // epic `language` I127:  a code pill's braces were the paper's dark brace ink, lost on the dark pill
+  test("a code pill's braces read on it:  light, as its words are", async () => {
+    const host = document.body.appendChild(document.createElement("div"))
+    host.style.cssText = "width: 800px; height: 300px"
+    const doc = "card is a view\n\tto draw it\n\t\t<text color={its color}>{its picture}</text>\n"
+    const state = EditorState.create({
+      doc,
+      extensions: [CodeMirrorSetup.extensions(), CodeMirrorBubbly.extension(() => undefined)]
+    })
+    view = new EditorView({ parent: host, state })
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const pills = [...view.contentDOM.querySelectorAll(".bubbly-input.bubbly-expression")]
+    expect(pills).toHaveLength(2)
+    for (const pill of pills) {
+      const braces = [...pill.querySelectorAll(".bubbly-code-brace")]
+      expect(braces.map((brace) => brace.textContent)).toEqual(["{", "}"])
+      const fill = lightnessOf(getComputedStyle(pill).backgroundColor)
+      for (const brace of braces) expect(lightnessOf(getComputedStyle(brace).color) - fill).toBeGreaterThan(0.3)
+    }
+  })
 })
+
+/** A colour's lightness, 0 to 1:  the mean of its red, green and blue, as `rgb()` or `color(srgb ...)`. */
+function lightnessOf(colour: string): number {
+  const channels = /color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/.exec(colour)?.slice(1).map(Number)
+  const rgb =
+    channels ??
+    /rgba?\((\d+), (\d+), (\d+)/
+      .exec(colour)!
+      .slice(1)
+      .map((each) => Number(each) / 255)
+  return (rgb[0]! + rgb[1]! + rgb[2]!) / 3
+}
