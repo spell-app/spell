@@ -79,10 +79,9 @@
  * the editor's forms, `<ui-property-editor compact>`:  ONE look, the Inspector's, wherever one is
  * (the Inspector's cards, the site editor's page form;  epic `mockup` I14)
  * - fields less round than a theme's pills (Owen)
- * - a select with nothing chosen reads "none", in italics (Owen)
+ * - a select with nothing chosen reads "none", muted but upright, as its menu's choices (Owen, epic `editor` I198)
  */
 ui-property-editor[compact] {
   --ui-input-radius: 6px;
   --ui-select-radius: 6px;
-  --ui-select-placeholder-style: italic;
 }
