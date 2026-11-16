@@ -163,6 +163,8 @@ class MarkupShapes {
       const line = doc.lineAt(foot.start)
       if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end)) {
         this.decorations.line(foot.start, inside, ["cmb-foot-line"])
+        // its own rail ends at the foot's top, as Monaco's did (I114):  the foot draws the bit above it, and its corner
+        this.decorations.endRail(foot.start, inside.length - 1)
       }
     }
 
@@ -196,9 +198,10 @@ export class CodeMirrorDecorations {
   private readonly marks = new Map<string, { classes: Set<string>; attributes: Record<string, string> }>()
   /**
    * Each line's classes and rails, by where it starts;
-   * `stopped`, the rails (by their place in `rails`) that stop short above a foot's round corner in the row under it.
+   * `stopped`, the rails (by their place in `rails`) that stop short above a foot's round corner in the row under it;
+   * `ended`, those not drawn in it at all:  an HTML block's own, in its foot's row.
    */
-  private readonly lines = new Map<number, { classes: Set<string>; rails: Rail[]; stopped: Set<number> }>()
+  private readonly lines = new Map<number, LineDecoration>()
 
   constructor(readonly state: EditorState) {
     this.text = state.doc.toString()
@@ -220,7 +223,7 @@ export class CodeMirrorDecorations {
   /** The line `at` is on:  inside the blocks `rails` holds, outermost first, and in `classes`. */
   line(at: number, rails: Rail[], classes: string[] = []): void {
     const from = this.state.doc.lineAt(at).from
-    const line = this.lines.get(from) ?? { classes: new Set(), rails: [], stopped: new Set<number>() }
+    const line = this.decorationOf(from)
     for (const each of classes) line.classes.add(each)
     // the most a line's in:  a drawing's tags inside a Spell block hold its rails, and their own
     if (rails.length >= line.rails.length) line.rails = rails
@@ -233,9 +236,22 @@ export class CodeMirrorDecorations {
    */
   stopRail(at: number, rail: number): void {
     const from = this.state.doc.lineAt(at).from
-    const line = this.lines.get(from) ?? { classes: new Set(), rails: [], stopped: new Set<number>() }
+    const line = this.decorationOf(from)
     line.stopped.add(rail)
     this.lines.set(from, line)
+  }
+
+  /** The rail `rail` (its place among the line's rails, outermost 0) isn't drawn on the line `at` is on. */
+  endRail(at: number, rail: number): void {
+    const from = this.state.doc.lineAt(at).from
+    const line = this.decorationOf(from)
+    line.ended.add(rail)
+    this.lines.set(from, line)
+  }
+
+  /** The decoration so far of the line starting at `from`, or a new one. */
+  private decorationOf(from: number): LineDecoration {
+    return this.lines.get(from) ?? { classes: new Set(), rails: [], stopped: new Set(), ended: new Set() }
   }
 
   /** Room `spacer` injected at `at`, before or after the text there. */
@@ -266,15 +282,18 @@ export class CodeMirrorDecorations {
       const [start, end] = range.split(":").map(Number) as [number, number]
       ranges.push(Decoration.mark({ class: [...classes].join(" "), attributes }).range(start, end))
     }
-    for (const [from, { classes, rails, stopped }] of this.lines) {
+    for (const [from, { classes, rails, stopped, ended }] of this.lines) {
       const innermost = rails.at(-1)
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
-      const attributes: Record<string, string> = rails.length ? { style: railsStyle(rails, stopped) } : {}
+      const attributes: Record<string, string> = rails.length ? { style: railsStyle(rails, stopped, ended) } : {}
       ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(from))
     }
     return Decoration.set(ranges, true)
   }
 }
+
+/** A line's decoration being made:  its classes, the rails of the blocks round it, which of them stop short or end. */
+type LineDecoration = { classes: Set<string>; rails: Rail[]; stopped: Set<number>; ended: Set<number> }
 
 /** How far in a line's words start:  its tabs, then its spaces. */
 export type Indent = { tabs: number; spaces: number }
@@ -299,12 +318,17 @@ function railsOf(rails: Rail[]): string {
 
 /**
  * `rails` as a row's style:  `--cmb-rails`, and `--cmb-rail-sizes` when any of them, by their place in `rails`,
- * stops short above a foot's round corner in the row under it (`--cmb-foot-lift`, `bubbly.css`).
+ * stops short above a foot's round corner in the row under it (`stopped`, `--cmb-foot-lift` in `bubbly.css`), or isn't
+ * drawn in it (`ended`).
  */
-export function railsStyle(rails: Rail[], stopped: ReadonlySet<number> = new Set()): string {
+export function railsStyle(
+  rails: Rail[],
+  stopped: ReadonlySet<number> = new Set(),
+  ended: ReadonlySet<number> = new Set()
+): string {
   const style = `--cmb-rails: ${railsOf(rails)}`
-  if (![...stopped].some((rail) => rail < rails.length)) return style
-  const sizes = rails.map((_, rail) => (stopped.has(rail) ? STOPPED_RAIL : "100% 100%"))
+  if (![...stopped, ...ended].some((rail) => rail < rails.length)) return style
+  const sizes = rails.map((_, rail) => (ended.has(rail) ? "0 0" : stopped.has(rail) ? STOPPED_RAIL : "100% 100%"))
   return `${style}; --cmb-rail-sizes: ${sizes.join(", ")}`
 }
 

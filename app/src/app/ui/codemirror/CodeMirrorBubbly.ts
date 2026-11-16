@@ -211,8 +211,14 @@ class BubblyDecorations {
     const stretches = SP.BubblyStretches.ofLine(this.text, line, band ? { band } : {})
     for (const [index, stretch] of stretches.entries()) {
       const { start, end, kind } = stretch
-      // a drawing's tag:  HTML's marks
-      if (this.tags.some((tag) => start >= tag.start && end <= tag.end)) continue
+      // a drawing's tag:  HTML's marks;  a stretch running across tags, `/></>`, only its pieces between them, so no
+      // mark of Spell's cuts a tag's pill in two (one over `/></>` split `<number "score" />`'s pill;  epic `language` I114)
+      const outside = this.outsideTags(start, end)
+      if (outside.length !== 1 || outside[0]!.start !== start || outside[0]!.end !== end) {
+        for (const piece of outside)
+          this.mark(piece.start, piece.end, kind === "mark" ? ["bubbly-mark"] : classesOf(kind))
+        continue
+      }
       switch (kind) {
         case "underline":
           this.mark(start, end, ["bubbly-underline"])
@@ -271,6 +277,19 @@ class BubblyDecorations {
   /** Mark `start`-`end` with `classes`. */
   private mark(start: number, end: number, classes: string[]) {
     this.decorations.mark(start, end, classes)
+  }
+
+  /** The pieces of `start`-`end` outside every drawing's tag, in order;  none when it's all in tags. */
+  private outsideTags(start: number, end: number): Array<{ start: number; end: number }> {
+    const pieces: Array<{ start: number; end: number }> = []
+    let from = start
+    const crossing = this.tags.filter((tag) => tag.start < end && tag.end > start).sort((a, b) => a.start - b.start)
+    for (const tag of crossing) {
+      if (tag.start > from) pieces.push({ start: from, end: tag.start })
+      from = Math.max(from, tag.end)
+    }
+    if (from < end) pieces.push({ start: from, end })
+    return pieces
   }
 }
 
