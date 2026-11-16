@@ -20,6 +20,11 @@ export class ExpectTest extends SpellStatement<"expression|value?"> {
     SpellConstant.declareValue(match, match.groups.value)
   }
 
+  /** Only when it declared a value -- see `SpellConstant.valueScopeChanges()`. */
+  getScopeChanges(match?: P.MatchFor<this>): P.ScopeChanges | undefined {
+    return SpellConstant.valueScopeChanges(match)
+  }
+
   getAST(match: P.MatchFor<this>) {
     const { expression, value } = match.groups
     // `Match.raw` is a `declare`d field, always statically present, so `"raw" in value` can't narrow it here

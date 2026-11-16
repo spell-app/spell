@@ -139,15 +139,22 @@ export function describeWarnings(match: P.Match | undefined): string[] {
 /**
  * Fresh `P.IncrementalProject` of `files`, set up as `parseSpellProject()` sets up a project.
  * - `keepLastGood`:  a broken line keeps its last working declarations (see `P.IncrementalProject`).
+ * - `parentScope` and `projectPath`:  as `parseSpellProject()` takes them, e.g. a project's imports.
  * - Compare it with a full parse:  `summarizeIncremental(project)` against `summarize(parseSpellProject(files))`.
  */
-export function incrementalSpellProject(files: SpellSourceFile[], keepLastGood = false): P.IncrementalProject {
-  const rootScope = SP.Language.rootScopeFor(languagesOf(files))
+export function incrementalSpellProject(
+  files: SpellSourceFile[],
+  keepLastGood = false,
+  {
+    parentScope = SP.Language.rootScopeFor(languagesOf(files)),
+    projectPath = "/test-project"
+  }: { parentScope?: P.Scope; projectPath?: string } = {}
+): P.IncrementalProject {
   const scope = new P.ProjectScope({
     name: "test-project",
-    path: "/test-project",
-    parser: rootScope.parser!.clone({ module: "/test-project" }),
-    parentScope: rootScope
+    path: projectPath,
+    parser: parentScope.parser!.clone({ module: projectPath }),
+    parentScope
   })
   return new P.IncrementalProject({
     scope,

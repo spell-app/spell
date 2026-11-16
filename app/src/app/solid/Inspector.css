@@ -84,6 +84,8 @@ ui-panel.InspectorCard > .InspectorSection {
   min-height: 0;
 }
 .InspectorCard {
+  /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu") */
+  --ui-panel-pane-bar-background: var(--spell-menu-bar-background);
   /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
      (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
   &.locked {
@@ -737,12 +739,13 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 }
 
 /*
- * The Inspector's cards on the code's paper while the code is drawn bubbly, so the two columns match
- * (Owen, epic `editor` I153):  `--bubbly-paper` (`bubbly.css`), which is only set inside a `.bubbly`
- * - the page's `spell-bubbly` class:  `markBubbly()`, `codePopups.ts`
+ * The Inspector's cards on a panel's own fill, `--spell-panel-background` (`spell.css`), in every theme
+ * (Owen, epic `mockup` I18:  "In the inspector panels, make the bg --ui-primary-25")
+ * - before, epic `editor` I153:  the code's white paper, and only while the code was drawn bubbly
+ * - solid, so no glass behind it:  a see-through theme's blur read as the page's lilac
  */
-:root.spell-bubbly .InspectorColumn .SplitPane::before {
-  background: light-dark(white, #1c1b22);
+:root[data-spell-theme] .InspectorColumn .InspectorSplit > .SplitPane::before {
+  background: var(--spell-panel-background);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }

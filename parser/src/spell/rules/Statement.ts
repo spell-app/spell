@@ -739,6 +739,7 @@ export type SpellStatementProps = Prettify<
  *     -- see `P.IncrementalParse`
  *   - parse the body in its nested scope
  * - `mutateScopeFromBody()` on it, e.g. a method records what its body returns
+ * - then `bodyEndMark`, after the body, so a body re-parsed on its own keeps what follows it
  * - NOTE: this is the ONLY place a parsed statement changes scope.
  *   - Candidates which lose the line never do, so their types / rules / variables can't leak.
  *   - Call it for any statement you parse on its own and keep, e.g. a JSX `on...` handler.
@@ -759,6 +760,7 @@ export function commitStatement(statement: P.Match, nextItem?: P.Token): Committ
     committed.body = statement.rule.parseNestedBlock(statement, nextItem)
   }
   committed.fromBody = statement.rule.mutateScopeFromBody(statement)
+  if (committed.bodyMark) committed.bodyEndMark = statement.scope.parser?.journal?.mark()
   return committed
 }
 
@@ -768,6 +770,11 @@ export type CommittedStatement = {
   body?: P.Match
   /** Journal mark just before the nested body was parsed, if there's a journal. */
   bodyMark?: P.JournalMark
+  /**
+   * Journal mark just after the body and what `mutateScopeFromBody()` recorded, with `bodyMark`:
+   * what the journal holds from there on is the lines after it, which a re-parsed body keeps.
+   */
+  bodyEndMark?: P.JournalMark
   /** What `mutateScopeFromBody()` recorded, if anything. */
   fromBody?: string
 }

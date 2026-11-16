@@ -1153,7 +1153,7 @@ function literalKey(key: string): string {
  */
 function waits(declaredBy: P.Match | undefined): boolean {
   let found: P.ASTMethodDefinition | undefined
-  P.forEachNode(declaredBy?.AST, (node) => {
+  P.forEachNode(declaredBy?.current.AST, (node) => {
     if (!found && node instanceof P.ASTMethodDefinition) found = node
   })
   return !!found?.isAsync
@@ -1165,7 +1165,7 @@ function waits(declaredBy: P.Match | undefined): boolean {
  */
 function titleOf(declaredBy: P.Match | undefined): string | undefined {
   let found: string | undefined
-  P.forEachNode(declaredBy?.AST, (node) => {
+  P.forEachNode(declaredBy?.current.AST, (node) => {
     if (!found && node instanceof P.ASTTypeDescription && node.describes === "action") found = node.title
   })
   return found

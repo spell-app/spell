@@ -202,9 +202,29 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
     if (found && found !== NONE) return
     const { scope } = statement
     const name = `${constant.raw}`
-    const known = scope.constants?.get(name) ?? scope.constants?.add({ name, declaredBy: statement })[0]
+    let known = scope.constants?.get(name)
+    if (!known) {
+      known = scope.constants?.add({ name, declaredBy: statement })[0]
+      ;(statement.data as DeclaresValueData).declaredValue = true
+    }
     if (known) constant.data.scopeConstant = known
   }
+
+  /**
+   * What `statement`, a rule calling `declareValue()`, changes in scope -- its rule's `getScopeChanges()`:
+   * - `"global"` if it declared a value, as every later line, in every file, may now know it
+   * - nothing if each of its values was known already, e.g. `queen` in `its rank should be queen`, a card's rank:
+   *   so editing an action's steps around it re-parses only those steps
+   */
+  static valueScopeChanges(statement: P.Match | undefined): P.ScopeChanges | undefined {
+    return (statement?.data as DeclaresValueData | undefined)?.declaredValue ? "global" : undefined
+  }
+}
+
+/** What `declareValue()` stashes on the statement it declared a value for. */
+type DeclaresValueData = {
+  /** It declared a value no line had before:  see `valueScopeChanges()`. */
+  declaredValue?: boolean
 }
 
 /** What constant rules stash on their matches. */

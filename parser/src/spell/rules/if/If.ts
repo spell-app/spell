@@ -52,6 +52,11 @@ export class If extends SpellStatement<"condition|body?"> {
     }
   }
 
+  /** Only when its condition's subject took an `it` name, which later lines go round -- see `mutateScope()`. */
+  getScopeChanges(match?: P.MatchFor<this>): P.ScopeChanges | undefined {
+    return (match?.data as IfData | undefined)?.subjectIt ? "global" : undefined
+  }
+
   getNestedScopeForMatch(match: P.MatchFor<this>): P.Scope {
     return new P.BlockScope({ name: "if", parentScope: match.scope })
   }

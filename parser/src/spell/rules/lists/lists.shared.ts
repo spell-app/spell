@@ -1,8 +1,11 @@
 /**
  * The `lists` rule module's shared types and helpers:  what several of its rule files use.
  */
+import { NONE } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+// Import directly to avoid circular import
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 ////////////////
 // ## Shared types
@@ -185,8 +188,48 @@ function getterWaits(member: P.ScopeVariable, seen: Set<object>): boolean {
   if (!declaredBy || seen.has(member)) return false
   seen.add(member)
   let waits = false
-  P.forEachNode([declaredBy.AST as P.ASTNode], (node) => {
+  P.forEachNode([declaredBy.current.AST as P.ASTNode], (node) => {
     waits ||= node instanceof P.ASTPropertyDefinition && !!node.get?.waitsItself
   })
-  return waits || readsAWaitingProperty(declaredBy, seen)
+  return waits || readsAWaitingProperty(declaredBy.current, seen)
+}
+
+////////////////
+// ## What a list holds
+////////////////
+
+/**
+ * `match`, a line putting `thing` into `list` (`add`, `move`, `put` ... `to`) -- or a parse error,
+ * when `thing` can't be what `list` holds (epic `language` I106, Q67).
+ * - e.g. `add it to the discard pile` in solitaire's action, where `it` is the solitaire:
+ *   `it is solitaire here, which isn't a card, and the discard pile holds cards:  say which card, or "get" it first`
+ *   - it compiled to `this.discardPile.append(this)`, and the page froze
+ * - Only when SURE:  both kinds known, and neither is the other or a sub-type of it (`P.Scope.couldBeA()`).
+ * - A lookup:  call it WHILE PARSING, from `parse()`.
+ */
+export function refuseIfNotAnItem(match: P.Match, thing: P.Match, list: P.Match): P.Match {
+  const { scope } = match
+  const item = scope.getItemType(list.datatype)
+  if (scope.couldBeA(thing.datatype, item)) return match
+  const itemType = scope.getType(item)
+  const thingType = scope.getType(thing.datatype)
+  if (!itemType || !thingType) return match
+  const language = SP.Language.of(scope)
+  const itemWord = SP.SpellWarnings.exampleNoun(scope, itemType, "definite").split(/\s+/).slice(1).join(" ")
+  const params = {
+    thing: thing.inputText.trim(),
+    what: SP.SpellWarnings.exampleNoun(scope, thingType),
+    aItem: SP.SpellWarnings.exampleNoun(scope, itemType),
+    item: itemWord,
+    items: language.inflector.pluralize(itemWord),
+    list: list.inputText.trim()
+  }
+  const read = (thing.data as { scopeVar?: P.ScopeVariable | typeof NONE }).scopeVar
+  const readsIt = !!read && read !== NONE && read.name === "it"
+  // one of a kind:  by its name, `solitaire` -- the project's, as in its own action `solitaire` is `this`
+  const onlyName = thingType.name.replace(P.CAMEL_WORD_BOUNDARY, "_").toLowerCase()
+  const only = readsIt ? (match.getScopeOfType(P.ProjectScope) ?? scope).variables?.get(onlyName) : undefined
+  if (only?.kind === "only") params.what = only.name
+  const message = language.parserMessage(readsIt ? "not-an-item-it" : "not-an-item", params)
+  return SpellStatement.refuse(match, message)
 }

@@ -389,7 +389,7 @@ export class WriterProject {
         if (seen.has(type) || !type.savedPlace()) continue
         seen.add(type)
         for (const variable of type.variables?.get() ?? []) {
-          forEachNode([variable.declaredBy?.AST], (node) => {
+          forEachNode([variable.declaredBy?.current.AST], (node) => {
             if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
           })
         }

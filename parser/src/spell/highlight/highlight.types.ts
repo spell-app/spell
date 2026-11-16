@@ -69,7 +69,10 @@ export type BubblyLine = {
   depth: number
   /** its pieces, in order */
   pieces: BubblyPiece[]
-  /** the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does */
+  /**
+   * the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does,
+   * but an action's blanks, inside its pill (`to play <a card>`;  epic `language` I109)
+   */
   underlines: BubblyUnderline[]
   /**
    * a drawing's markup line's CODE, each `{…}` in it (`onClick={count up}`, `<text>{its name}</text>`):
@@ -94,6 +97,7 @@ export type BubblyCode = {
  * - `value`:  a value read, `the pile's suit`, `its pile`, `a new deck`, `the first card of the pile`
  * - `question`:  a yes-or-no asked of a thing, with the thing, `the card is on top of its pile`, `pile is a foundation`
  * - `quantity`:  a number and its unit, `300 msec`
+ * - `call`:  a call of an action the project declares, `turn over the next card`, `put the card on end pile`
  * - Outermost only:  a value inside a value or a question gets no line of its own.
  * - Never a line's break:  a stretch going on onto the next line is one underline on each.
  */
@@ -103,7 +107,7 @@ export type BubblyUnderline = {
   /** one past the last */
   end: number
   /** what it groups */
-  kind: "value" | "question" | "quantity"
+  kind: "value" | "question" | "quantity" | "call"
 }
 
 /**
@@ -174,23 +178,27 @@ export type BubblyRulePresentation = {
   /** its child rules that are a person's words, each a pill (`quoted_member`:  `its "rank"`) */
   inputs?: readonly string[]
   /**
-   * an action's head:  everything after its first word (`to`, `para`), to the end of its last input, is what a
-   * person typed, ONE pill:  `to <test a new deck>`, `to <draw its front>`, `to <draw it>`
-   * - but for the parameters it introduces, `params`, bold between its pills:  `to <move> (a card) <to> (a pile)`
+   * an action's head:  everything after its first word (`to`, `para`, `after`, `when`), to the end of its last input
+   * or parameter, is what a person typed, ONE pill:  `to <test a new deck>`, `to <play a card>`
+   * - its blanks in it plain, each underlined:  `to <move (a card) to (a pile)>` (epic `language` I109)
    */
   typedAfterLead?: boolean
-  /** its child rules that are the parameters it introduces, `(a card)`, with the brackets round them */
+  /** ... and its pill to the head's end, not its last input:  `when <a card is dropped>`, `while <a card is dragged over it>` */
+  typedToEnd?: boolean
+  /** its child rules that are the parameters it introduces, `(a card)`:  each a blank, underlined in its pill */
+  params?: readonly string[]
+  /** its blank:  from its pill's start to the end of this group, `when <a card> is dropped` (`item`) */
+  blankThrough?: string
+  /** its blank:  this group but its first word, `when creating <a card image>`, `al crear <el solitario>` (`signature`) */
+  blankAfterVerb?: string
   /** a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
   namesWhatItDraws?: boolean
-  params?: readonly string[]
   /** its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
   choices?: readonly string[]
   /** its child rules drawn as a step, even in a head (`it "is a face card" if <its rank is jack>`) */
   steps?: readonly string[]
   /** its child rules drawn plain, never bold (`item` in `item column of the list`) */
   plain?: readonly string[]
-  /** its groups drawn bold, names, though they're Spell's words (`moment`:  `dropped` in `when a card is dropped`) */
-  names?: readonly string[]
   /** a CONTROL line:  its steps in a bracket */
   isControl?: boolean
   /**
@@ -208,6 +216,18 @@ export type BubblyRulePresentation = {
    * - the thing:  what comes before it, back to the last `and` or `or`, as the compiler binds it
    */
   isQuestion?: boolean
+  /**
+   * a CALL of an action:  ONE underline over the whole of it (`turn over the next card`, `play the card`),
+   * its blanks' values bold inside it, never underlined on their own
+   * - only an action a project declares (this one, or one it imports):  a built-in template's
+   *   (`turn the card face up`, a two sided view's) draws as a plain step, as Spell's own statements do
+   */
+  isCall?: boolean
+  /**
+   * runs its statement once for each item of a list, said in it (`add each card in the deck to the stock`):
+   * ONE value from the word saying `each` (`each`, `every`, `cada`, `the`) to the list's end, `each card in the deck`
+   */
+  readsEach?: boolean
   /** more of the value before it (`as lower case`, `in feet`):  ONE underline from that value to its end */
   continuesValue?: boolean
   /** joins two yes-or-nos (`and`, `or`):  a question after it is asked of what follows it */
