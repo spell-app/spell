@@ -150,6 +150,8 @@ and in the app's build folder, `app/` at the app folder's root.
       [MarkupMarks](ui/monaco/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
       `.bubbly-html` too;  both kinds of marks are made by [TextMarks](ui/monaco/TextMarks.ts).
   - Nine helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
+    what each decides from the lines is the language service's `LSP.SpellTyping`, which the CodeMirror test page
+    reads too (epic `codemirror` P1);  Monaco's file holds only its wiring
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
@@ -192,7 +194,8 @@ and in the app's build folder, `app/` at the app folder's root.
     the code;  ⌥↓ steps in, a click chooses, Ctrl+Space is the suggestion list
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
     the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
-    `SpellMonaco.CONFIGURATION`, with VS Code's `language-configuration.json` kept the same by a test
+    ONE table, `LSP.SpellTyping.ENTER_RULES`, which `SpellMonaco.CONFIGURATION` is built from,
+    with VS Code's `language-configuration.json` kept the same by a test
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
@@ -203,6 +206,10 @@ and in the app's build folder, `app/` at the app folder's root.
       `<action "|" />`, `<divider />`, `<content>` a line in then `</>`, `color="|"` with its words listed at once;
       a tag that closes itself always with a space before its `/>` (I70 C4).
       The shapes are ONE table, the language service's `LSP.CompletionShapes`, so VS Code writes the same.
+  - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`, with no Monaco in it:
+    the scope explorer's packs and the CodeMirror test page use it too (epic `codemirror` P1)
+  - What a hover says and which code actions show are decided once for both editors, Monaco-free:
+    [CodeEditorFeatures](ui/CodeEditorFeatures.ts)
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:

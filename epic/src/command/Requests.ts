@@ -20,6 +20,7 @@ import {
   parseVerbArgs,
   stringFlag,
   type EpicRequest,
+  type MergeMainReport,
   type MergeOptions,
   type MergeResult,
   type PastedImage,
@@ -30,9 +31,11 @@ import {
 import { EpicCheckout } from "./EpicCheckout"
 import { parseTarget, phaseLabel, phaseOf } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
+import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { StrayFiles } from "./StrayFiles"
 import { Turns } from "./Turns"
+import { Worktrees } from "./Worktrees"
 
 /****************
  * ### `Requests`
@@ -57,8 +60,10 @@ import { Turns } from "./Turns"
  *     - `file <epic> <id> "<where>"`, no phase:  only marked filed, saying where it went (`"dropped:  done in P3"`)
  *     - `--from` and `--file` (the request as html):  taken as given rather than read from the epic's `requests/`
  *   - `home [<epic>]`:  the TOOLING HOME, the epic dev-tooling requests go to;  with `<epic>`, set it
- *   - `merge <epic> [--ditch]`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in the main
- *     checkout
+ *   - `merge <epic> [--ditch] [--as <agent>]`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in
+ *     the main checkout
+ *     - `main` moved past the branch:  taken into it first, in its worktree, as `epic worktree merge-main` does
+ *       (`mergeTakingMain()`, epic `epic-engine` T83);  `--as`:  the merging agent, whose own claims don't block it
  *     - a multi-repo top (epic `epic-engine` P10):  each repo whose branch `<epic>` has commits (`mergeEach()`)
  *     - stray files in a main checkout (`StrayFiles`):  generated ones moved aside by themselves;  `--ditch`, once Owen
  *       says so, the few others too
@@ -95,9 +100,9 @@ export class Requests {
     if (!verb) throw new EpicCommandError(`which verb?  ${VERBS}`)
     if (verb === "merge") {
       if (!named) throw new EpicCommandError("merge:  which epic?")
-      // one merge at a time on the machine (`Turns`, epic `epic-engine` T77)
+      // one merge at a time on the machine (`Turns`, epic `epic-engine` T77);  `main` taken in first (T83)
       const merged = Turns.take("merge", `epic merge ${named}`, () =>
-        Requests.mergeEach(named, undefined, { ditch: Boolean(flags.ditch) })
+        Requests.mergeTakingMain(named, undefined, { ditch: Boolean(flags.ditch), as: stringFlag(flags.as) })
       )
       for (const { repo, ditched, ditchedTo } of merged.filter(({ ditched }) => ditched.length)) {
         CLI.out(`${repo ? `${repo}:  ` : ""}moved ${ditched.length} stray file(s) aside, into ${ditchedTo}:`)
@@ -453,7 +458,7 @@ export class Requests {
    *     - with `ditch`, up to `StrayFiles.ASK_LIMIT` others too:  only once Owen said so;  more is somebody's work
    *     - moved aside into `ditched` (`StrayFiles.folderFor()`), never deleted, and only once every check passed
    *   - branch `<epic>` holds all of `main`:  else `main` moved, and the branch merges it first
-   *     (`epic worktree merge-main`, in its worktree)
+   *     (`epic worktree merge-main`, in its worktree);  the verb does that itself first (`mergeTakingMain()`)
    * - Refused in one line where `main` takes only pull requests (`baseBranchProtected`).
    * - Returns the commits it brought onto `main`, oldest first (`[]`:  nothing to merge), and what it moved aside.
    * - throws an `EpicCommandError` saying what to do, for any check that fails:  then nothing moved, nothing merged
@@ -509,6 +514,64 @@ export class Requests {
       )
     }
     return stray
+  }
+
+  /**
+   * `epic merge <epic>`:  `main` taken into the branch first when it moved (`takeMainIn()`), then `mergeEach()`
+   * (epic `epic-engine` T83;  Owen, 2026-11-15:  "You should automatically merge main in before attempting to merge").
+   * - says so in one line when it took `main` in
+   * - throws as `takeMainIn()` and `mergeEach()` do;  "main has moved" only when the epic has no worktree to merge in
+   */
+  static mergeTakingMain(
+    epic: string,
+    cwd = process.cwd(),
+    { as, ...options }: MergeOptions & { as?: string } = {}
+  ): MergeResult[] {
+    const took = Requests.takeMainIn(epic, cwd, { as })
+    if (took) CLI.out(`took ${took.base} into ${epic} first (epic worktree merge-main):  ${took.result}`)
+    return Requests.mergeEach(epic, cwd, options)
+  }
+
+  /**
+   * `main` merged into branch `<epic>`, in its worktree, when `main` has moved past it:  `epic worktree merge-main`'s own
+   * code (`MainMerge.runAll()`), inside the caller's merge turn (`Turns` lets a process re-enter its own turn).
+   * - returns what it did (`base`, the merge's `result`), or `null` when nothing needed taking in, or the epic has no
+   *   worktree (then `mergeCheck()` refuses as before)
+   * - a file another running agent claims is never moved aside (`Worktrees.claimsIn()`, agent `as` left out):
+   *   `MainMerge` throws, naming who
+   * - throws an `EpicCommandError` naming the files on a conflict it can't settle, and on a repo that couldn't merge
+   */
+  static takeMainIn(epic: string, cwd = process.cwd(), { as }: { as?: string } = {}): TookMain | null {
+    const main = Git.mainRoot(cwd)
+    const config = new EpicConfig(main)
+    const worktree = config.worktreeFolder(epic)
+    if (!existsSync(join(worktree, ".git"))) return null
+    const repos = config.top
+      ? config.top
+          .repoCheckouts(epic)
+          .filter(({ found }) => !found)
+          .map(({ main: checkout }) => checkout)
+      : [main]
+    const behind = repos.filter((checkout) => {
+      const base = new EpicConfig(checkout).baseBranch
+      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok
+      return branch && !Git.run(["merge-base", "--is-ancestor", base, epic], checkout).ok
+    })
+    if (!behind.length) return null
+    const claimOf = Worktrees.claimsIn(worktree, as)
+    const reports = MainMerge.runAll(worktree, "start", (root) => new MainMerge({ root, claimOf }))
+    const named = (report: MergeMainReport) => (report.repo ? `${report.repo}:  ` : "")
+    const failed = reports.find((report) => report.error)
+    if (failed)
+      throw new EpicCommandError(`merge:  ${named(failed)}couldn't take ${config.baseBranch} in:  ${failed.error}`)
+    const conflicted = reports.find((report) => report.result === "conflicts")
+    if (conflicted)
+      throw new EpicCommandError(
+        `merge:  ${named(conflicted)}taking ${config.baseBranch} into ${epic} conflicts in ` +
+          `${conflicted.conflicts.join(", ")}:  settle them in its worktree (${worktree}), then ` +
+          "epic worktree merge-main --continue, then epic merge again;  nothing merged"
+      )
+    return { base: config.baseBranch, result: reports.map((report) => named(report) + report.result).join(", ") }
   }
 
   /**
@@ -701,6 +764,9 @@ export type RecordMergedOptions = { cwd?: string; record?: (argv: string[], root
 
 /** The verbs, for errors. */
 const VERBS = "send, requests, file, home or merge"
+
+/** What `Requests.takeMainIn()` did:  the base branch taken in, and how the merge went (`merged`, `fast-forward`). */
+type TookMain = { base: string; result: string }
 
 /** How `file` is called, for its errors. */
 /** An issue's id in `epic file`'s "where it went":  `I234`. */

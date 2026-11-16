@@ -77,6 +77,10 @@ const ana = person("ana")
 // ## Tests
 ////////////////
 
+// each test drives git and the end-of-turn hook in real child processes:  up to 3s alone, several times that under a full run's
+// load (both browser projects and every node file side by side), well over vitest's 5s default (epic `epic-engine` T84)
+vi.setConfig({ testTimeout: 30_000 })
+
 describe("TurnEnd.end()", () => {
   // the first turn commits the epic repo's own .gitignore / .gitattributes block too (`Shared.keepRepoFiles()`)
   test("commits the epic folder's changes, one commit per epic, and syncs them:  pushed to the remote", async () => {
@@ -148,7 +152,7 @@ describe("the end-of-turn hook (shared-commit.mjs)", () => {
     chmodSync(stub, 0o755)
     const args = TurnEnd.inBackground({ session_id: "s-42", cwd: ana.main }, { epic: stub })
     expect(args).toEqual([stub, "turn", "end", "--quiet", "--session", "s-42"])
-    await vi.waitFor(() => expect(existsSync(record)).toBe(true), { timeout: 10_000 })
+    await vi.waitFor(() => expect(existsSync(record)).toBe(true), { timeout: 20_000 })
     expect(JSON.parse(readFileSync(record, "utf8"))).toEqual({
       args: ["turn", "end", "--quiet", "--session", "s-42"],
       cwd: ana.main
@@ -165,11 +169,12 @@ describe("the end-of-turn hook (shared-commit.mjs)", () => {
       status: 0,
       stdout: ""
     })
-    await vi.waitFor(() => expect(remoteLog().length).toBe(before + 1), { timeout: 30_000, interval: 250 })
+    // the detached `epic turn end` starts a whole `epic` (tsx), commits and pushes:  ~2s alone, far more under load
+    await vi.waitFor(() => expect(remoteLog().length).toBe(before + 1), { timeout: 45_000, interval: 250 })
     // anywhere else:  nothing, and still 0
     expect(await hook({ cwd: TEMP })).toEqual({ status: 0, stdout: "" })
     expect(await hook({})).toEqual({ status: 0, stdout: "" })
-  }, 40_000)
+  }, 60_000)
 })
 
 // epic `epic-engine` T78:  the end-of-turn tidy runs only in an epic's worktree, at most once an hour

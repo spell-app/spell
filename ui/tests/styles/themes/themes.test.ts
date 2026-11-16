@@ -122,11 +122,11 @@ describe("spell.css", () => {
     await vi.waitFor(() => expect(Own.color("--spell-accent")).toBe("rgb(184, 180, 255)")) // violet-300:  lilac
   })
 
-  it("a ticked checkbox is the brand's done to-do:  a filled purple circle, white check", async () => {
+  it("a ticked checkbox is the brand's done to-do:  filled purple, white check;  a box, never round like a radio (epic `editor` I177)", async () => {
     await Own.use("spell")
     const { box } = await ThemeHarness.inner(`<ui-checkbox selected>Drink water</ui-checkbox>`, ".ui.checkbox > label")
     await vi.waitFor(() => expect(getComputedStyle(box, "::before").backgroundColor).toBe("rgb(101, 80, 202)"))
-    expect(getComputedStyle(box, "::before").borderTopLeftRadius).toBe("50%")
+    expect(getComputedStyle(box, "::before").borderTopLeftRadius).toBe("4px")
     expect(getComputedStyle(box, "::after").backgroundColor).toMatch(/^(rgb\(255, 255, 255\)|oklch\(1 0 0\))$/) // white
   })
 })

@@ -117,7 +117,7 @@ export function monacoOptionsFor(choices: CodePopupChoices): monaco.editor.IEdit
  * - Each is the text before the caret, right as the list is due:  the moment its first letter can be typed.
  *   Monaco keeps the list open, filtering, as the word is typed after it.
  * - `its`, `of` and the rest only after a word:  a line starting `its ` declares a property, its name quoted
- *   (`SpellTyping`).
+ *   (`LSP.SpellTyping.opensQuotes()`).
  */
 export const SUGGEST_WHERE_IT_HELPS: readonly { place: string; before: RegExp }[] = [
   { place: "a tag, after <", before: /(?:^\s*|[>({])<$/u },
@@ -134,6 +134,13 @@ export function suggestsByItself(before: string): boolean {
   return SUGGEST_WHERE_IT_HELPS.some(({ before: place }) => place.test(before))
 }
 
+/**
+ * How long the mouse rests on a word before its hover shows, in seconds:  the page's own wait, `--ui-hover-delay`.
+ * - The CodeMirror test page's hover waits this long (epic `codemirror` P1);
+ *   the app's Monaco keeps its own (`hover.delay`) until it's swapped for CodeMirror.
+ */
+export const HOVER_DELAY = 0.8
+
 /** How much the hover says for `choices`:  Monaco has no option for it. */
 export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
   return choices.compilerWords ? "full" : "plain"
@@ -141,7 +148,7 @@ export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
 
 /**
  * How much the code editor's hover says now, one for the page.
- * - `SpellLanguageFeatures` reads it for each hover;  `CodeSettings` changes it.
+ * - Every editor's hover reads it, through `CodeEditorFeatures.hover()`;  `CodeSettings` changes it.
  * - An object, since a hover provider is registered once and has no editor to ask.
  */
 export const codeHover: { detail: LSP.HoverDetail } = { detail: hoverDetailFor(CODE_POPUP_DEFAULTS) }

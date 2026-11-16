@@ -1,6 +1,7 @@
 import { type EditorState, type Extension, Prec, type Range, StateEffect, StateField } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate, WidgetType } from "@codemirror/view"
 
+import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
@@ -46,21 +47,21 @@ export class CodeMirrorBubbly {
     })
     const relayout = ViewPlugin.fromClass(
       class {
-        private timer: ReturnType<typeof setTimeout> | undefined
+        private timer: CancelablePromise<void> | undefined
 
         constructor(readonly view: EditorView) {}
 
         update(update: ViewUpdate) {
           if (!update.docChanged) return
-          clearTimeout(this.timer)
-          this.timer = setTimeout(() => {
+          this.timer?.cancel()
+          this.timer = after(CodeMirrorBubbly.RELAYOUT_MSEC / 1000, () => {
             const decorations = CodeMirrorBubbly.decorationsOf(this.view.state, fileOf())
             this.view.dispatch({ effects: laidOut.of(decorations) })
-          }, CodeMirrorBubbly.RELAYOUT_MSEC)
+          })
         }
 
         destroy() {
-          clearTimeout(this.timer)
+          this.timer?.cancel()
         }
       }
     )
@@ -287,14 +288,11 @@ function railsOf(rails: Rail[]): string {
     .join(", ")
 }
 
-/** Is `tag` one of `file`'s project's own views, `<stock-pile>`?  As Monaco's `SpellBubbly` asks. */
+/** Is `tag` one of `file`'s project's own views, `<stock-pile>`?  As the compiler decides it (`SP.SpellJSX.isDrawnType()`). */
 function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
   const type = tag && file?.scope?.getType(SP.typeName(tag))
-  return !!type && DRAWN_BASE_TYPES.some((base) => type.isA(base))
+  return !!type && SP.SpellJSX.isDrawnType(type)
 }
-
-/** What a project's own view is built on:  SEE SpellJSX's `DRAWN_BASE_TYPES`, which this follows. */
-const DRAWN_BASE_TYPES = ["View", "ViewableList"]
 
 /** Where `block`'s last line that isn't a gap ends. */
 function lastLineEnd(block: SP.BubblyBlock): number {

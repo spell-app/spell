@@ -21,7 +21,7 @@ import {
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { Worktrees } from "spell/epic/command/Worktrees"
@@ -63,6 +63,10 @@ function hook(command: "create" | "remove", input: Record<string, unknown>) {
   })
   return { status: run.status, stdout: run.stdout.trim(), stderr: run.stderr }
 }
+
+// each test drives git and the worktree hook in real child processes:  up to 3s alone, several times that under a full run's
+// load (both browser projects and every node file side by side), well over vitest's 5s default (epic `epic-engine` T84)
+vi.setConfig({ testTimeout: 30_000 })
 
 describe("worktree hook", () => {
   test("a new worktree goes beside the repo, on its branch;  stdout is its path alone", () => {

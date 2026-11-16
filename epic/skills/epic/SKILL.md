@@ -554,7 +554,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     - NEVER ask the person whether to merge (Owen, 2026-11-15, on codemirror asking "Should I merge main into the branch,
       re-run the checks, and merge P1?":  "You shouldn't have to ask this.  You should automatically merge main in before
       attempting to merge.  If tests are failing that aren't yours, just go ahead and merge."):
-      - main moved, or the branch is behind:  `epic worktree merge-main` first, always, then `epic merge`
+      - main moved, or the branch is behind:  `epic worktree merge-main` first, always, then `epic merge`;  `epic merge`
+        takes `main` in itself when it moved (T83), stopping only on a conflict it can't settle, which it names
       - failures that aren't this work's (failing on `main` too, or in files it didn't touch):  merge anyway, naming them
         in the report;  only failures this work caused hold the merge
       - an agent's `merge-main` or `merge` refused by its permission check:  the SESSION runs them itself, no question

@@ -42,6 +42,31 @@ const DICTIONARIES: Readonly<Record<string, Dictionary>> = { es }
 const NEVER_ADDED = new Set(["ui-root", "ui-components"])
 
 /**
+ * Tags the palette offers though they aren't their folder's main tag (`ui-<folder>`):  each stands alone
+ * (epic `editor` I180).
+ * - groups of their folder's main tag (`<ui-cards>` ...), and the tags a folder holds beside it (`<ui-textarea>`)
+ * - NOT the parts that only go inside another (`<ui-cell>`, `<ui-field>`, `<ui-tree-item>`, the content parts)
+ */
+const STANDS_ALONE = new Set([
+  "ui-audio",
+  "ui-cards",
+  "ui-comments",
+  "ui-icons",
+  "ui-images",
+  "ui-labels",
+  "ui-radio",
+  "ui-sections",
+  "ui-segments",
+  "ui-statistics",
+  "ui-steps",
+  "ui-tabs",
+  "ui-textarea"
+])
+
+/** Folders' main tags the palette never offers:  each only goes inside another of its folder's (`<ui-tab>` in `<ui-tabs>`). */
+const ONLY_INSIDE = new Set(["ui-step", "ui-tab"])
+
+/**
  * A vocabulary module's folder:
  * - `./ui-button/UIOr.en.ts` => `ui-button`
  * - `../docs-components/ui-docs-api/UIDocsApi.en.ts` => `ui-docs-api`
@@ -133,14 +158,15 @@ export class ComponentDefinitions {
   /**
    * Every other component the palette could add, by topic, as `paletteByTopic()` files them:
    * after its ready-made ones.
-   * - A folder's main tag only (`ui-tabs`, never `ui-tab`):  a part that only makes sense inside another isn't offered.
+   * - A folder's main tag (`ui-<folder>`), and the others that stand alone (`STANDS_ALONE`, `<ui-tabs>` ...):
+   *   a part that only makes sense inside another isn't offered (`<ui-tab>`, `<ui-cell>`;  `ONLY_INSIDE`).
    * - Each under its first topic, sorted by name;  none has a snippet, so adding one writes its bare tag.
    */
   static paletteOthersByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
     const offered = new Set(ComponentDefinitions.palette())
     const others = ComponentDefinitions.all.filter(
       (definition) =>
-        definition.tag === definition.folder &&
+        (definition.tag === definition.folder ? !ONLY_INSIDE.has(definition.tag) : STANDS_ALONE.has(definition.tag)) &&
         !offered.has(definition) &&
         !NEVER_ADDED.has(definition.tag) &&
         definition.topics.length

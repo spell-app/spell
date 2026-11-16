@@ -449,7 +449,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
     const pending = this.pendingSelection
     const module = this.monacoModule
     const model = this.monacoEditor?.getModel()
-    if (!pending || !model || !module || model.uri.toString() !== module.AppAddresses.uriOf(pending.path)) return
+    if (!pending || !model || !module || LSP.AppAddresses.pathOf(model.uri) !== pending.path) return
     this.pendingSelection = undefined
     const { anchor, head = anchor } = pending.selection
     if (!anchor || !head) return

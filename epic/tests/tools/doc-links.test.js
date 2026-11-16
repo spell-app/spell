@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { describe, expect, it } from "vite-plus/test"
+import { describe, expect, it, vi } from "vite-plus/test"
 
 import { PACKAGE, docLinksRun } from "spell/epic/tools/pages.js"
 
@@ -22,6 +22,10 @@ function tempPage(body) {
   writeFileSync(file, `<!doctype html><html><head><title>t</title></head><body>${body}</body></html>\n`)
   return file
 }
+
+// each test drives git and the doc-links command in real child processes:  up to 3s alone, several times that under a full run's
+// load (both browser projects and every node file side by side), well over vitest's 5s default (epic `epic-engine` T84)
+vi.setConfig({ testTimeout: 30_000 })
 
 describe("command line", () => {
   it("--check prints a line per page and its problems, and exits 1 on any", () => {

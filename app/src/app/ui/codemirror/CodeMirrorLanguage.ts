@@ -21,8 +21,11 @@ import type {
 } from "vscode-languageserver"
 
 import { observe } from "spell/util"
+import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
+import { HOVER_DELAY, suggestsByItself } from "spell/app/app/ui/codePopups"
 
 /****************
  * ### `CodeMirrorLanguage`
@@ -32,7 +35,10 @@ import { LSP } from "spell/app/lsp"
  * - Follows ONE project file both ways (`follow()`):  what's typed goes into the file and is parsed once the typing
  *   pauses;  the file's text changed from elsewhere (another editor showing it) comes into the editor.
  * - Asks nothing of a file whose text isn't the editor's:  `fileReady()` parses what's waiting first.
- * - Its position in the import graph:  the parser, the language service, CodeMirror;  never Monaco.
+ * - What a hover says and which code actions show are the app's, as Monaco's are (`CodeEditorFeatures`);
+ *   where suggestions show by themselves and how long a hover waits, Settings…' table (`codePopups`).
+ * - Its position in the import graph:  the parser, the language service, the app's editor-neutral `ui` files,
+ *   CodeMirror;  never Monaco.
  * - NEVER saves:  the test page has no Save.
  ****************/
 export class CodeMirrorLanguage {
@@ -93,19 +99,20 @@ export class CodeMirrorLanguage {
 
   /** Parse the file's waiting text once the typing pauses for `PARSE_WAIT` msec. */
   private parseSoon() {
-    clearTimeout(this.parseTimer)
-    this.parseTimer = setTimeout(() => this.parseNow(), CodeMirrorLanguage.PARSE_WAIT)
+    this.parseTimer?.cancel()
+    this.parseTimer = after(CodeMirrorLanguage.PARSE_WAIT / 1000, () => void this.parseNow())
   }
 
   /** How long the typing must pause before what's typed is parsed, in msec:  as Monaco's `SpellModels.PARSE_WAIT`. */
   static PARSE_WAIT = 200
 
   /** Timer of a pending `parseSoon()`. */
-  private parseTimer: ReturnType<typeof setTimeout> | undefined
+  private parseTimer: CancelablePromise<void> | undefined
 
   /** Parse what's typed and not parsed yet, now.  NEVER throws. */
   parseNow(): Promise<unknown> {
-    clearTimeout(this.parseTimer)
+    this.parseTimer?.cancel()
+    this.parseTimer = undefined
     return this.file.project.parseWaitingText().catch((error: unknown) => {
       console.error("CodeMirrorLanguage:  couldn't parse", error)
     })
@@ -127,7 +134,7 @@ export class CodeMirrorLanguage {
     const word = context.matchBefore(/[\p{L}\p{M}\d_-]*/u)
     const line = context.state.doc.lineAt(context.pos)
     const before = context.state.sliceDoc(line.from, word?.from ?? context.pos)
-    if (!context.explicit && !SUGGEST_WHERE_IT_HELPS.test(before)) return null
+    if (!context.explicit && !suggestsByItself(before)) return null
     const file = await this.fileReady(context.state.doc)
     if (!file || context.aborted) return null
     const { items } = this.service.completion(file, positionOf(context.state.doc, context.pos))
@@ -166,22 +173,20 @@ export class CodeMirrorLanguage {
   // ## Hover, problems, folding
   ////////////////
 
-  /** What a word is, and its docstring, on a hover that rests `HOVER_MSEC`. */
+  /** What a word is, and its docstring, on a hover that rests `HOVER_DELAY`, saying as much as Monaco's does. */
   private hover(): Extension {
     return hoverTooltip(
       async (view, pos): Promise<Tooltip | null> => {
         const file = await this.fileReady(view.state.doc)
-        const hover = file && this.service.hover(file, positionOf(view.state.doc, pos), "full")
+        const hover = file && CodeEditorFeatures.hover(this.service, file, positionOf(view.state.doc, pos))
         if (!hover) return null
         const range = hover.range ? rangeOf(view.state.doc, hover.range) : { from: pos, to: pos }
         return { pos: range.from, end: range.to, above: true, create: () => ({ dom: hoverDom(hover) }) }
       },
-      { hoverTime: CodeMirrorLanguage.HOVER_MSEC }
+      // CodeMirror's own wait, in msec
+      { hoverTime: HOVER_DELAY * 1000 }
     )
   }
-
-  /** How long a hover rests before what's under it shows, in msec:  the page's own wait (`--ui-hover-delay`). */
-  static HOVER_MSEC = 800
 
   /** The file's problems, as squiggles and in the gutter:  its parse's diagnostics. */
   private problems(): Extension {
@@ -220,7 +225,7 @@ export class CodeMirrorLanguage {
   async definitionAt(view: EditorView, pos: number): Promise<CodeMirrorLocation | undefined> {
     const file = await this.fileReady(view.state.doc)
     const [location] = file ? this.service.definition(file, positionOf(view.state.doc, pos)) : []
-    const path = location && CodeMirrorAddresses.pathOf(location.uri)
+    const path = location && LSP.AppAddresses.pathOf(location.uri)
     if (!location || path === undefined) return undefined
     return { path, range: location.range }
   }
@@ -231,54 +236,18 @@ export class CodeMirrorLanguage {
     if (!file) return []
     const { from, to } = view.state.selection.main
     const range = { start: positionOf(view.state.doc, from), end: positionOf(view.state.doc, to) }
-    return this.service.codeActions(file, range).filter((action) => !!action.edit)
+    return CodeEditorFeatures.codeActions(this.service, file, range)
   }
 
   /** Make `action`'s edits to this file in `view`, one undo step. */
   applyCodeAction(view: EditorView, action: CodeAction): void {
-    const edits = action.edit?.changes?.[CodeMirrorAddresses.uriOf(this.file.path)] ?? []
+    const edits = action.edit?.changes?.[LSP.AppAddresses.uriOf(this.file.path)] ?? []
     view.dispatch({ changes: edits.map((edit) => changeOf(view.state.doc, edit)), userEvent: "input.codeAction" })
   }
 }
 
 /** A place in a project file:  its path and range. */
 export type CodeMirrorLocation = { path: string; range: Range }
-
-/****************
- * ### `CodeMirrorAddresses`
- * How the CodeMirror test addresses files to the language service:  `spell:/<file.path>`, as the app's Monaco does
- * (`AppAddresses`, which loads Monaco's own code:  not here).
- ****************/
-export class CodeMirrorAddresses implements LSP.FileAddresses {
-  /** URI for the file at `path`. */
-  static uriOf(path: string): string {
-    return `${SCHEME}:/${path.split("/").map(encodeURIComponent).join("/")}`
-  }
-
-  /** `file.path` a URI is for, or `undefined` if it isn't one of ours. */
-  static pathOf(uri: string): string | undefined {
-    const prefix = `${SCHEME}:/`
-    return uri.startsWith(prefix) ? decodeURIComponent(uri.slice(prefix.length)) : undefined
-  }
-
-  fileFor(uri: string): SP.SpellFile | undefined {
-    const path = CodeMirrorAddresses.pathOf(uri)
-    return path === undefined ? undefined : SP.SpellFile.registry.get(path)
-  }
-
-  uriFor(file: SP.SpellFile | SP.SpellJSFile | SP.SpellProject): string {
-    return CodeMirrorAddresses.uriOf(file.path)
-  }
-}
-
-/** The app's URI scheme for a project file. */
-const SCHEME = "spell"
-
-/**
- * Where suggestions show by themselves, as the app's Monaco shows them (`SUGGEST_WHERE_IT_HELPS`, `codePopups.ts`):
- * a tag after `<`, an attribute inside a tag, a property after `its` / `'s` / `of`.  Ctrl+Space lists them anywhere.
- */
-const SUGGEST_WHERE_IT_HELPS = /<[^<>]*$|(?:^|\s)(?:its|of|su|de)\s+$|'s\s+$/iu
 
 /** The command a suggestion asks for to list the next ones at once:  VS Code's, which the service names. */
 const LSP_SHOW_SUGGESTIONS = "editor.action.triggerSuggest"

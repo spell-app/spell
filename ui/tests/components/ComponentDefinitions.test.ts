@@ -87,9 +87,13 @@ describe("ComponentDefinitions.paletteGroups()", () => {
     const tags = groups.flatMap(({ parts }) => parts.map((definition) => definition.tag))
     expect(new Set(tags).size).toBe(tags.length)
     expect(tags).toEqual(expect.arrayContaining(ComponentDefinitions.palette().map((definition) => definition.tag)))
-    expect(tags).toEqual(expect.arrayContaining(["ui-tab", "ui-table", "ui-modal"]))
+    expect(tags).toEqual(expect.arrayContaining(["ui-tabs", "ui-table", "ui-modal"]))
+    // a tag that stands alone, though not its folder's main one (epic `editor` I180)
+    expect(tags).toEqual(expect.arrayContaining(["ui-buttons", "ui-steps", "ui-textarea", "ui-cards"]))
     // a part only inside another, and what a page holds once, are never offered
     expect(tags).not.toContain("ui-tree-item")
+    expect(tags).not.toContain("ui-tab")
+    expect(tags).not.toContain("ui-or")
     expect(tags).not.toContain("ui-root")
     expect(groups.every(({ parts }) => parts.length > 0)).toBe(true)
     // in each topic, the ready-made ones (a snippet of their own) before the rest

@@ -74,7 +74,11 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   },
   "ui-property-editor/UIProperty.css": {
     "--ui-checkbox-label-distance":
-      "a compact editor's yes or no:  its label is the field's, beside the box, not the box's own"
+      "a compact editor's yes or no:  its label is the field's, beside the box, not the box's own",
+    "--ui-checkbox-toggle-width":
+      "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)",
+    "--ui-checkbox-toggle-handle":
+      "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)"
   },
   "ui-theme-editor/UIThemeEditor.css": {
     "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",
