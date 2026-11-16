@@ -59492,13 +59492,23 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.\n\nTakes:  `nav`"
+            "value": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.  `columns`:  a column per level, side by side, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column, and closes the columns after that.\n\nTakes:  `nav` · `columns`"
           },
           "values": [
             {
               "name": "nav"
+            },
+            {
+              "name": "columns"
             }
           ]
+        },
+        {
+          "name": "column-titles",
+          "description": {
+            "kind": "markdown",
+            "value": "`appearance=\"columns\"`:  a title over each column, by level, separated by commas (`Clients, Projects, Files`);  the last one names every column deeper than the list goes.  None:  no titles.\n\nTakes:  text"
+          }
         },
         {
           "name": "sticky-path",

@@ -2130,6 +2130,10 @@ sidebars any of them opens.
 - Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
 - Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
   (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.
+- Its top bar (epic `mockup` T35):  `- it has a top bar` (`site_overlay`, by the wording `site_top_bar`;  Spanish
+  `- tiene una barra superior`):  `static topBar`, its buttons the view of its name, as a dialog's are.
+  - A page drawn without it says so on its line, `, no top bar` (Spanish `, sin barra superior`):  its entry's `noTopBar`.
+  - Not a part to go to:  `go to` and `show` never name it, and the site doesn't list it among its parts.
 - Going between its pages (P2), naming the PAGE, never its address:
   - `go to the film page for this film`, `show the settings dialog` (`show_site_part`, a statement and an expression, for a
     handler):  `core.showSitePart("film page", film)`

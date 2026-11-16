@@ -1,0 +1,173 @@
+/*
+ * `<ui-tree appearance="columns">` (`UITree.tsx`, `UITreeItem.tsx`):  a column per level, side by side,
+ * as a Mac's Finder shows folders.  Both tags adopt this sheet.
+ * - The rows are nested as in every tree:  each open row draws the rows inside it as the next column.
+ *   - That column is `position: fixed`, placed against the tree's box of columns, which `contain: layout` makes its
+ *     containing block:  so it sits beside the column it's drawn in, not inside it, and scrolls on its own.
+ *   - The box of columns scrolls sideways;  the tree has a height of its own (18em), which a page sets.
+ *   - Each column's width and start come from the tree (`UITree.columnWidthCSS()`, `columnStartCSS()`):
+ *     the token's width, or the one a person dragged it to.
+ *   - The line after each column is a few px wide strip over its border (`.column-edge`):  dragging it sizes the column.
+ * - Tokens:
+ *   | `--ui-tree-column-width` | each column's width |
+ *   | `--ui-tree-column-picked-background` | a row picked in an earlier column:  one of the chain of open rows |
+ *   | `--ui-tree-column-selected-background` / `-color` | the selected row, the chain's last pick |
+ */
+@layer ui.components {
+  /* ## The tree:  `:state(columns)`;  each of its rows says `:state(in-columns)` */
+  :host(:state(columns)) {
+    height: 18em;
+  }
+  .columns {
+    --_ui-tree-column-width: var(--ui-tree-column-width, 14em);
+    --_ui-tree-title-height: calc(var(--_ui-tree-row-height) + 6px);
+    display: flex;
+    box-sizing: border-box;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* every open row's column is placed against this box, wherever in the rows it's drawn */
+    contain: layout;
+  }
+  .column {
+    flex: none;
+    box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+    /* no row is the browser's scroll anchor:  a column opening beside one never scrolls this one */
+    overflow-anchor: none;
+    border-inline-end: 1px solid var(--ui-border-color);
+  }
+
+  /* the line after a column:  a strip over its border, centred on it, which sizes the column it ends */
+  .column-edge {
+    position: absolute;
+    inset-block: 0;
+    z-index: 2;
+    width: 7px;
+    margin-inline-start: -4px;
+    cursor: col-resize;
+    touch-action: none;
+    outline: none;
+  }
+  .column-edge::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 3px;
+    width: 1px;
+  }
+  .column-edge:hover::after,
+  .column-edge:active::after {
+    width: 2px;
+    margin-inline-start: -0.5px;
+    background: color-mix(in oklab, var(--ui-text-color) 30%, var(--ui-border-color));
+  }
+  .column-edge:focus-visible::after {
+    width: var(--ui-focus-width);
+    background: var(--ui-focus-color);
+  }
+  /* what an unsized column's width comes to, in px, for a drag to start from */
+  .column-probe {
+    position: absolute;
+    visibility: hidden;
+    width: var(--_ui-tree-column-width);
+    height: 0;
+  }
+
+  /* a column's title:  the same height in every column, so they read as one row of headers */
+  .column-title {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: var(--_ui-tree-title-height);
+    padding-inline: 10px;
+    overflow: hidden;
+    border-block-end: 1px solid var(--ui-border-color);
+    background: var(--ui-background);
+    color: var(--ui-text-muted);
+    font-size: 0.85em;
+    font-weight: var(--ui-font-weight-bold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ## A row */
+  :host(:state(in-columns)) {
+    --_ui-tree-column-picked-background: var(
+      --ui-tree-column-picked-background,
+      color-mix(in oklab, var(--ui-text-color) 13%, transparent)
+    );
+    --_ui-tree-column-selected-background: var(--ui-tree-column-selected-background, var(--ui-primary));
+    --_ui-tree-column-selected-color: var(--ui-tree-column-selected-color, var(--ui-primary-on));
+  }
+  :host(:state(in-columns)) > .row {
+    margin-inline: 4px;
+    padding-inline: 6px 4px;
+    border-radius: var(--ui-radius-s, 4px);
+  }
+  /* picked in an earlier column:  grey;  the last pick, selected:  the accent */
+  :host(:state(in-columns):state(open)) > .row {
+    background: var(--_ui-tree-column-picked-background);
+  }
+  :host(:state(in-columns):state(selected)) > .row {
+    background: var(--_ui-tree-column-selected-background);
+    color: var(--_ui-tree-column-selected-color);
+  }
+  :host(:state(in-columns):state(selected)) > .row .icon,
+  :host(:state(in-columns):state(selected)) > .row > ::slotted([slot="icon"]),
+  :host(:state(in-columns):state(selected)) > .row .which,
+  :host(:state(in-columns):state(selected)) > .row > .toggle {
+    color: inherit;
+  }
+
+  /* the chevron, at the row's end, pointing to the next column;  no room kept for it on a row with none */
+  :host(:state(in-columns)) > .row > .toggle {
+    order: 99;
+    flex-basis: 1em;
+    margin-inline-start: auto;
+  }
+  :host(:state(in-columns):not(:state(has-items))) > .row > .toggle {
+    visibility: hidden;
+  }
+  :host(:state(in-columns):state(has-items)) > .row > .toggle::before,
+  :host(:state(in-columns):state(open):state(has-items)) > .row > .toggle::before {
+    width: 0.42em;
+    height: 0.42em;
+    background: none;
+    clip-path: none;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    rotate: -45deg;
+    transition: none;
+  }
+  :host(:state(in-columns):state(has-items):dir(rtl)) > .row > .toggle::before {
+    rotate: 45deg;
+  }
+  :host(:state(in-columns)) > .row > .actions {
+    margin-inline-start: 0;
+  }
+
+  /* the rows inside an open row:  the next column, beside the one it's in */
+  :host(:state(in-columns)) > .rows {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: var(--_ui-tree-column-start);
+    box-sizing: border-box;
+    width: var(--_ui-tree-column-own-width);
+    overflow-y: auto;
+    overflow-anchor: none;
+    border-inline-end: 1px solid var(--ui-border-color);
+  }
+  :host(:state(in-columns)) > .rows > .folded > slot {
+    display: block;
+    padding-block: 4px;
+  }
+  .column > slot {
+    display: block;
+    padding-block: 4px;
+  }
+}

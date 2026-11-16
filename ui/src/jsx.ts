@@ -51641,15 +51641,25 @@ export interface UITreeAttributes {
    */
   "prop:label"?: string
   /**
-   * `nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.
-   * - takes:  `nav`
+   * `nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.  `columns`:  a column per level, side by side, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column, and closes the columns after that.
+   * - takes:  `nav` · `columns`
    */
-  appearance?: "nav"
+  appearance?: "nav" | "columns"
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
-  "prop:appearance"?: "nav"
+  "prop:appearance"?: "nav" | "columns"
+  /**
+   * `appearance="columns"`:  a title over each column, by level, separated by commas (`Clients, Projects, Files`);  the last one names every column deeper than the list goes.  None:  no titles.
+   * - takes:  text
+   */
+  "column-titles"?: string
+  /**
+   * `column-titles`, as the DOM element's property.
+   * @deprecated write `column-titles` -- `prop:` stays only for compiled spell
+   */
+  "prop:columnTitles"?: string
   /**
    * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
    * - takes:  flag (present / absent)

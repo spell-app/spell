@@ -10404,6 +10404,34 @@
       }
     },
     {
+      "name": "--ui-tree-column-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `14em`"
+      }
+    },
+    {
+      "name": "--ui-tree-column-picked-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `color-mix(in oklab, var(--ui-text-color) 13%, transparent)`"
+      }
+    },
+    {
+      "name": "--ui-tree-column-selected-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-primary)`"
+      }
+    },
+    {
+      "name": "--ui-tree-column-selected-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-primary-on)`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",
@@ -12144,6 +12172,13 @@
       }
     },
     {
+      "name": ":state(columns)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-tree>`:  Its `appearance` is `columns`:  a column per level, side by side."
+      }
+    },
+    {
       "name": ":state(compact)",
       "description": {
         "kind": "markdown",
@@ -12435,6 +12470,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-card>`:  In a `<ui-cards>` group:  sized and spaced by it, `role=listitem`."
+      }
+    },
+    {
+      "name": ":state(in-columns)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-tree-item>`:  Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
       }
     },
     {

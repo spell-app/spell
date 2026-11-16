@@ -19,6 +19,7 @@ import { overlayViewNamed, type SiteOverlayEntry, type SitePageEntry } from "./s
  *     with the icon that group's line names (`groupIcon`, epic `mockup` I20)
  *   - `static dialogs` and `static sidebars` (`site_overlay`)
  *   - `static notFoundPage` and `static errorPage`, when it lists them (`site_overlay`, epic `mockup` P2)
+ *   - `static topBar`, when it has one (`- it has a top bar`, `site_overlay`, epic `mockup` T35)
  *   - `static livesAt`, when its line says where it lives:  an address, or `"cloud"`
  * - Its own words win over `create_one_of_a_kind`'s for a site:  a line naming anything but a site isn't ours.
  */
@@ -36,7 +37,7 @@ export class CreateSite extends CreateOneOfAKind {
   /** Its class, with its pages, dialogs and sidebars, then its one instance -- see the class. */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const group = super.getAST(match)
-    const { pages, dialogs, sidebars, notFoundPage, errorPage } = CreateSite.partsOf(match)
+    const { pages, dialogs, sidebars, notFoundPage, errorPage, topBar } = CreateSite.partsOf(match)
     const groups = match.groups as P.MatchGroups & { address?: P.Match; cloud?: P.Match }
     const livesAt = groups.address ? textIn(groups.address) : groups.cloud ? CLOUD : undefined
     const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
@@ -47,6 +48,7 @@ export class CreateSite extends CreateOneOfAKind {
     ]
     if (notFoundPage) statics.push(["notFoundPage", notFoundPage])
     if (errorPage) statics.push(["errorPage", errorPage])
+    if (topBar) statics.push(["topBar", topBar])
     if (livesAt) statics.push(["livesAt", livesAt])
     const members = statics
       .filter(([, value]) => !Array.isArray(value) || value.length)
@@ -57,15 +59,17 @@ export class CreateSite extends CreateOneOfAKind {
     return new P.ASTStatementGroup(match, { statements })
   }
 
-  /** Everything the lines under `match` say:  its pages, nested as written, its dialogs and its sidebars. */
+  /** Everything the lines under `match` say:  its pages, nested as written, its dialogs, its sidebars and its top bar. */
   static partsOf(match: P.Match): {
     pages: SitePageEntry[]
     dialogs: SiteOverlayEntry[]
     sidebars: SiteOverlayEntry[]
     notFoundPage?: SiteOverlayEntry
     errorPage?: SiteOverlayEntry
+    topBar?: SiteOverlayEntry
   } {
     let notFoundPage: SiteOverlayEntry | undefined
+    let topBar: SiteOverlayEntry | undefined
     let errorPage: SiteOverlayEntry | undefined
     const dialogs: SiteOverlayEntry[] = []
     const sidebars: SiteOverlayEntry[] = []
@@ -104,6 +108,7 @@ export class CreateSite extends CreateOneOfAKind {
           const entry = view ? { ...read, view } : read
           if (kind === "notFound") notFoundPage = entry
           else if (kind === "error") errorPage = entry
+          else if (kind === "topBar") topBar = entry
           else (kind === "dialog" ? dialogs : sidebars).push(entry)
           return
         }
@@ -116,7 +121,7 @@ export class CreateSite extends CreateOneOfAKind {
       return pages
     }
     const pages = pagesUnder((match.rule as CreateSite).getBody(match as never))
-    return { pages, dialogs, sidebars, notFoundPage, errorPage }
+    return { pages, dialogs, sidebars, notFoundPage, errorPage, topBar }
   }
 }
 

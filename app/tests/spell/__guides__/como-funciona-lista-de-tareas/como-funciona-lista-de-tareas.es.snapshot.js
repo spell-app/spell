@@ -103,6 +103,8 @@ export const words = {
     "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",
     "site-page-failed-why": "{page} falló:  {why}",
     "site-menu": "Páginas",
+    "site-side-bar": "Mostrar u ocultar la barra lateral",
+    "site-where": "Dónde estás",
     "table-edit": "Editar tabla"
   },
   groups: {

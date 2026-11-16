@@ -30,6 +30,19 @@ describe("SiteEdits", () => {
     )
   })
 
+  test("a top bar is its own kind of part, and a page's `no top bar` is kept when its line is written again (T35)", () => {
+    const code = 's is a site:\n\tit has a top bar\n\tit has a login page at "/login", icon "key", no top bar\n'
+    const [bar, login] = SiteEdits.partsIn(code)!
+    expect(bar).toMatchObject({ kind: "topBar", name: "top bar" })
+    expect(login).toMatchObject({ kind: "page", icon: "key", noTopBar: true })
+    expect(SiteEdits.withPartPlaced(code, "login page", { row: 1, column: 2 })).toContain(
+      '\tit has a login page at "/login", icon "key", no top bar, in row 1 column 2\n'
+    )
+    expect(SiteEdits.withPartChanged(code, "login page", { title: "Log in" })).toContain(
+      '\tit has a login page at "/login", named "Log in", icon "key", no top bar\n'
+    )
+  })
+
   test("a page's or view's own thumbnail is found in the file declaring it (P16)", () => {
     expect(SiteEdits.thumbnailOf('"a page" is a page\n\tits thumbnail is "x.jpg"\n', "a page")).toBe("x.jpg")
     expect(SiteEdits.thumbnailOf('films page is a page:\n\tits thumbnail is "v.jpg"\n', "films page")).toBe("v.jpg")

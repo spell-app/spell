@@ -47774,9 +47774,15 @@
           "name": "appearance",
           "kind": "valueOnly",
           "values": [
-            "nav"
+            "nav",
+            "columns"
           ],
-          "description": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands."
+          "description": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.  `columns`:  a column per level, side by side, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column, and closes the columns after that."
+        },
+        {
+          "name": "column-titles",
+          "kind": "string",
+          "description": "`appearance=\"columns\"`:  a title over each column, by level, separated by commas (`Clients, Projects, Files`);  the last one names every column deeper than the list goes.  None:  no titles."
         },
         {
           "name": "sticky-path",
@@ -47991,6 +47997,10 @@
           "description": "Its `filter` matches no row."
         },
         {
+          "name": "columns",
+          "description": "Its `appearance` is `columns`:  a column per level, side by side."
+        },
+        {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
         },
@@ -48032,6 +48042,11 @@
           "key": "noMatches",
           "text": "Nothing matches",
           "description": "Shown when `filter` matches no row and no `empty` is given."
+        },
+        {
+          "key": "resizeColumn",
+          "text": "Resize this column",
+          "description": "`appearance=\"columns\"`:  the name of the line after a column, for a screen reader."
         }
       ],
       "mainTag": "ui-tree",
@@ -48684,6 +48699,10 @@
         {
           "name": "nav",
           "description": "Its tree's `appearance` is `nav`:  it takes the side navigation's look."
+        },
+        {
+          "name": "in-columns",
+          "description": "Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
         },
         {
           "name": "disabled",
@@ -62045,6 +62064,26 @@
           "name": "--ui-tree-nav-ease",
           "default": "var(--ui-ease-out)",
           "type": "other"
+        },
+        {
+          "name": "--ui-tree-column-width",
+          "default": "14em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-column-picked-background",
+          "default": "color-mix(in oklab, var(--ui-text-color) 13%, transparent)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-column-selected-background",
+          "default": "var(--ui-primary)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-column-selected-color",
+          "default": "var(--ui-primary-on)",
+          "type": "color"
         }
       ]
     },
