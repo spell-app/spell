@@ -358,7 +358,11 @@ describe("Translator:  an action's `enabled when` and `disabled when`", () => {
     }
     const names = new TranslationNames(back, { from: SPANISH, to: ENGLISH })
     const translator = new Translator({ from: SPANISH, to: ENGLISH, names })
-    const english = translator.translateFile({ path: "/Carta.es.spell", contents: spanishSource, match: files[0]!.match })
+    const english = translator.translateFile({
+      path: "/Carta.es.spell",
+      contents: spanishSource,
+      match: files[0]!.match
+    })
     expect(english.lines[3]).toBe("\t\t- enabled when its direction is down")
     expect(english.lines[6]).toBe("\t\t- disabled when its direction is up")
   })
