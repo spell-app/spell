@@ -361,11 +361,13 @@ describe.skipIf(!SERVING)("code follows along", () => {
     ] as const) {
       const looks = await (await browser).newContext({ viewport: { width: 1440, height: 800 }, colorScheme })
       await contextWithNoSaving(looks)
-      await looks.route(/spell-site/, (route) =>
-        route.request().method() === "GET"
-          ? route.fulfill({ contentType: "text/plain", body: JSON.stringify({ theme, scheme: colorScheme }) })
-          : route.fulfill({ status: 200, body: "{}" })
-      )
+      // the editor's own choice, from the person's space (its store `spell-app`, `EditorTheme`):  the space's answer
+      // always wins over the browser's copy, so a run answering only `spell-site` showed the space's real scheme
+      const chosen: Record<string, string> = { theme, scheme: colorScheme }
+      await looks.route(/\/api\/prefs\/load\?store=spell-app&key=(theme|scheme)$/, (route) => {
+        const key = new URL(route.request().url()).searchParams.get("key")!
+        return route.fulfill({ contentType: "application/json", body: JSON.stringify({ value: chosen[key] }) })
+      })
       await looks.addInitScript(
         ([name, scheme]) => {
           localStorage.setItem("spell-site:theme", name)
