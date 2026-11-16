@@ -43267,7 +43267,7 @@ export interface UISplitPanelAttributes {
    */
   "prop:grows"?: string
   /**
-   * The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.
+   * The smallest a dragged pane may get, `10%` for shares or `60px` for any pane.  Default:  `5%` and `0px`.  A pane's own `min-width` / `max-width` (`min-height` / `max-height` in rows) bound it too;  one whose least and most are the same isn't resized:  a bar beside it sizes the panes across it.
    * - takes:  text
    */
   "min-size"?: string

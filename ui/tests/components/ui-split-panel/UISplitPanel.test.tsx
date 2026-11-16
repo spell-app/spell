@@ -147,6 +147,70 @@ describe("<ui-split-panel>", () => {
     await expectAccessible(host)
   })
 
+  it("a pane's own `min-width` and `max-width` bound a drag, a share's and a fixed pane's alike", async () => {
+    const host = await panel(
+      'columns="50%,50%" resizable',
+      '<div style="min-width: 150px">a</div><div style="max-width: 400px">b</div>'
+    )
+    // the second at its most, 400:  the first keeps the rest of the 592, above its least
+    dragAcross(bars(host)[0], -500)
+    expect(widths(host)).toEqual([192, 400])
+    ;(host.children[1] as HTMLElement).style.maxWidth = ""
+    dragAcross(bars(host)[0], -200)
+    expect(widths(host)[0]).toBe(150)
+    dragAcross(bars(host)[0], 600)
+    // the second's least is 0, so the first may take the rest
+    expect(widths(host)[1]).toBeLessThanOrEqual(30)
+    const fixed = await panel(
+      'columns="*,200px" resizable',
+      '<div style="max-width: 450px">a</div><div style="min-width: 120px">b</div>'
+    )
+    // the first at its most, 450:  the second keeps the rest, above its least
+    dragAcross(bars(fixed)[0], 300)
+    expect(widths(fixed)).toEqual([450, 142])
+    ;(fixed.children[0] as HTMLElement).style.maxWidth = ""
+    dragAcross(bars(fixed)[0], 300)
+    expect(widths(fixed)[1]).toBe(120)
+  })
+
+  it("a pane that can't be resized (least === most) is skipped:  a bar beside it sizes the panes across it", async () => {
+    const host = await panel(
+      'rows="50%,40px,50%" resizable',
+      '<div style="min-height: 30px">a</div><div style="min-height: 40px; max-height: 40px">folded</div><div style="min-height: 30px">c</div>'
+    )
+    const heights = () => [...host.children].map((child) => Math.round(child.getBoundingClientRect().height))
+    const [top, , bottom] = heights()
+    const dragDown = (bar: HTMLElement, moved: number) => {
+      const { x, y } = bar.getBoundingClientRect()
+      bar.setPointerCapture = () => undefined
+      const fire = (type: string, clientY: number) =>
+        bar.dispatchEvent(new PointerEvent(type, { clientX: x, clientY, button: 0, bubbles: true, composed: true }))
+      fire("pointerdown", y)
+      flush()
+      fire("pointermove", y + moved)
+      fire("pointerup", y + moved)
+      flush()
+    }
+    // either bar:  the folded pane keeps its 40px, the other two trade
+    dragDown(bars(host)[0], 30)
+    expect(heights()).toEqual([top + 30, 40, bottom - 30])
+    dragDown(bars(host)[1], -60)
+    expect(heights()).toEqual([top - 30, 40, bottom + 30])
+    // and neither gets smaller than its own least
+    dragDown(bars(host)[1], 500)
+    expect(heights()[2]).toBe(30)
+    dragDown(bars(host)[0], -500)
+    expect(heights()[0]).toBe(30)
+    expect(heights()[1]).toBe(40)
+    // nothing on one side to size:  the bar doesn't move
+    const end = await panel(
+      'rows="*,40px" resizable',
+      '<div>a</div><div style="min-height: 40px; max-height: 40px">b</div>'
+    )
+    dragDown(bars(end)[0], -50)
+    expect(Math.round((end.children[1] as HTMLElement).getBoundingClientRect().height)).toBe(40)
+  })
+
   it("not resizable:  bars don't drag or take the focus", async () => {
     const host = await panel("columns", "<div>a</div><div>b</div>")
     const bar = bars(host)[0]
