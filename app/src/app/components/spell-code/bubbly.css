@@ -28,6 +28,7 @@
  *   | declaration   | a group, a word     | a white pill:  what a person typed             | `.bubbly-input`     | `a "pile" is ...` |
  *   | blank         | a group             | dotted underline in its pill, its kind bold    | `.bubbly-underline` | `to play a card`  |
  *   | name          | a group, a word     | bold                                           | `.bubbly-reference` | `it is droppable` |
+ *   | choice        | a group             | a bold pill for each value                     | `.bubbly-choice`    | `one of ace, 2`   |
  *   | value         | the rule, its groups| one dotted underline, outermost only           | `.bubbly-underline` | `each card in it` |
  *   | question      | the rule            | one dotted underline, with what it asks of     | `.bubbly-underline` | `it is face up`   |
  *   | action call   | the rule            | one dotted underline, whole                    | `.bubbly-underline` | `reset the stock` |
@@ -1796,7 +1797,11 @@
       left: 0;
       top: 100%;
       width: var(--cmb-rail);
-      height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
+      /* ... through the rows a description takes under it (`.cmb-head-description-below`) */
+      height: calc(
+        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px + var(--cmb-description-rows, 0) *
+          var(--cmb-line-height)
+      );
       background: var(--bubbly-pill);
     }
     /*
@@ -1900,6 +1905,31 @@
     }
     .cmb-description {
       float: right;
+      /* too wide for the room beside the head's words:  wrapped, under them */
+      white-space: pre-wrap;
+    }
+    /*
+     * ... one that doesn't fit there:  in rows of its own under the head, its words under the head's, wrapped,
+     * each row a line's height, so nothing below is drawn over (`DescriptionRoom`, which measures them;  I120)
+     * - `--cmb-description-rows`:  how many it takes
+     * - as wide as its words, so `DescriptionRoom` can tell when a wider editor has room for it at the band's end again
+     */
+    .cm-line.cmb-head-description-below {
+      padding-bottom: calc(var(--cmb-description-rows) * var(--cmb-line-height));
+      --cmb-description-left: calc(var(--cmb-band-inset) + var(--cmb-indent));
+      .cmb-band-hung {
+        --cmb-description-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
+      }
+      .cmb-description {
+        position: absolute;
+        /* the top of the row under the head */
+        top: calc(var(--cmb-line-height) - var(--cmb-band-margin));
+        left: var(--cmb-description-left);
+        float: none;
+        width: max-content;
+        max-width: calc(100% - var(--cmb-description-left) - 14px);
+        line-height: var(--cmb-line-height);
+      }
     }
 
     /****** a folded block (I116):  its head alone, a pill, the fold's `…` in its right end, a click there unfolds it ******/

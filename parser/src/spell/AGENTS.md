@@ -127,7 +127,8 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       ```
 
       - `band` (a declaration's head), `match` (everything it matched:  `question`, `value`, `written value` ...),
-        each group's role, and `literal` for a word of its syntax that's a name (`{ droppable: "name" }`)
+        each group's role (`choice`:  a list's values, each a bold pill), and `literal` for a word of its syntax
+        that's a name (`{ droppable: "name" }`)
       - Another language's registration says none:  English's are its class's (`SP.BubblyRoles.record()`, through
         `SP.SpellParser.addRule()`);  [BubblyRoles.test.ts](../../tests/spell/highlight/BubblyRoles.test.ts) checks
         each names only groups every language's syntax has.
