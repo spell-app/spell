@@ -29,9 +29,13 @@ import splitPanelCSS from "./UISplitPanel.css?inline"
  *   - a bar sizes the pane on its other side, in px, and the growing pane takes the difference
  *   - so the panes between keep their widths, and slide
  *   - the panel's own growth and shrinking is that pane's too;  past its `min-width`, the others give way
- * - A pane's own `min-height` / `max-height` (`min-width` / `max-width` side by side), in px, bound a drag too.
- *   - One whose least and most are the same can't be resized, e.g. a folded card, its header alone:
- *     a bar beside it sizes the nearest panes that can be, across it, and it keeps its size.
+ * - A dragged bar stays under the pointer, until a pane's least or most stops it:
+ *   - the panes on each side of it take the move, the nearest first:  one at its most (or least) passes the rest on
+ *   - a pane's own `min-height` / `max-height` (`min-width` / `max-width` side by side) bound it, whatever they say:
+ *     px, a percent, `max-content`
+ *   - one whose least and most are the same can't be resized, e.g. a folded card, its header alone:
+ *     a bar beside it sizes the nearest panes that can be, across it, and it keeps its size
+ *   - let go, each pane keeps its kind of size:  a share's new share puts it where it was dragged to
  * - Keyboard:  a bar takes the focus;  the arrow keys along it move it, Shift by ten times as much.
  ****************/
 export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
@@ -190,6 +194,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   /** Let go:  say where the sizes ended up. */
   @E.untracked private readonly stopDragging = () => {
     if (!this.dragged) return
+    this.settle(this.dragged)
     this.dragged = undefined
     this.isDragging = false
     this.findBarPlaces()
@@ -203,6 +208,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
     const held = this.measure(bar, 0)
     if (!held) return
     this.moveTo(held, direction * KEY_STEP_PX * (event.shiftKey ? SHIFT_STEPS : 1))
+    this.settle(held)
     this.findBarPlaces()
     this.sendSizes()
     event.preventDefault()
@@ -215,8 +221,8 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
 
   /**
    * What moving bar `bar` works from, with the pointer at `pointer`:  `undefined` when it can't move.
-   * - The panes it sizes are the nearest on each side that can be resized (`PaneBounds`):
-   *   a pane that can't is skipped, and keeps its size.
+   * - Every pane's size and its least and most (`PaneBounds`), whatever sets them.
+   * - `undefined` when no pane on one side of the bar can be resized (its least and most the same).
    * - Measures ONCE, here:  `getBoundingClientRect()` is too slow for every move.
    */
   private measure(bar: number, pointer: number): BarDrag | undefined {
@@ -226,74 +232,113 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
       const { width, height } = pane.getBoundingClientRect()
       return isRows ? height : width
     })
-    const bounds = this.panes.map((pane) => UISplitPanel.boundsOf(pane, isRows))
+    const total = lengths.reduce((sum, length) => sum + length, 0)
+    const bounds = this.panes.map((pane, index) => {
+      const own = UISplitPanel.boundsOf(pane, isRows)
+      const shareLeast = this.sizes[index]?.units === "%" ? (total * minShare) / 100 : 0
+      // never above its most, nor above what it is now:  a pane can always stay as it is
+      const least = Math.min(Math.max(own.least, minPixels, shareLeast), own.most, lengths[index])
+      return { least, most: Math.max(own.most, lengths[index]) }
+    })
     const canResize = (index: number) => bounds[index].most - bounds[index].least >= 1
     let pane1 = bar
     while (pane1 >= 0 && !canResize(pane1)) pane1--
     let pane2 = bar + 1
     while (pane2 < this.panes.length && !canResize(pane2)) pane2++
     if (pane1 < 0 || pane2 >= this.panes.length) return undefined
-    const shareOfOthers = this.sizes.reduce(
-      (total, size, index) => (index === pane1 || index === pane2 || size.units !== "%" ? total : total + size.value),
-      0
-    )
     return {
+      bar,
       lengths,
+      bounds,
+      sizes: this.sizes,
       pane1,
       pane2,
       pointerStart: pointer,
       size1: lengths[pane1],
       size2: lengths[pane2],
-      bounds1: { least: Math.max(minPixels, bounds[pane1].least), most: bounds[pane1].most },
-      bounds2: { least: Math.max(minPixels, bounds[pane2].least), most: bounds[pane2].most },
-      activeShare: Math.max(100 - shareOfOthers, minShare * 2),
-      minShare,
+      bounds1: bounds[pane1],
+      bounds2: bounds[pane2],
       minPixels
     }
   }
 
   /**
-   * Move the bar to `pointer`.
-   * - A fixed pane takes the move in px, and the shares take up the difference:  no fixed pane moves.
-   *   - Beside an `auto` pane, it's only limited by `min-size`:  the panel grows with it.
-   *   - An `auto` pane with nothing fixed beside it becomes fixed.
-   * - Two shares:  the first takes the share at the pointer, clamped to 2 decimals, the second what's left.
-   * - Neither pane goes past its own least or most (`PaneBounds`), nor `min-size`.
+   * Move the bar to `pointer`:  it stays under it, until a pane's least or most stops it.
+   * - The panes before the bar take the move, the nearest first, each up to its most (or down to its least);
+   *   the panes after it give it up, the same way.
+   *   - So a pane that can't be resized is skipped, and one at its most passes the rest on.
+   * - While dragging, every pane is held at its size in px:  shares laid out by `flex` would spread a move over
+   *   every pane, and a pane CSS stops (`max-height: max-content`) passes its part to the others.
+   *   Let go (`settle()`), they're shares again.
+   * - Beside an `auto` pane, a fixed pane takes the move, limited only by `min-size`:  the panel grows with it.
    */
   private moveTo(held: BarDrag, pointer: number) {
-    const { pane1, pane2, pointerStart, size1, size2, bounds1, bounds2, activeShare, minShare } = held
-    const moved = pointer - pointerStart
+    const moved = pointer - held.pointerStart
     const growing = this.growingPane
     if (growing !== undefined) return this.moveBeside(held, growing, moved)
-    const units = (index: number) => this.sizes[index]?.units
-    const fixed =
-      [pane1, pane2].find((index) => units(index) !== "%" && units(index) !== AUTO) ??
-      [pane1, pane2].find((index) => units(index) !== "%")
-    if (fixed !== undefined) {
-      const other = fixed === pane1 ? pane2 : pane1
-      const wanted = fixed === pane1 ? size1 + moved : size2 - moved
-      const [own, others] = fixed === pane1 ? [bounds1, bounds2] : [bounds2, bounds1]
-      const isOtherAuto = units(other) === AUTO
-      const most = Math.min(own.most, isOtherAuto ? Infinity : size1 + size2 - others.least)
-      const least = Math.max(own.least, isOtherAuto ? 0 : size1 + size2 - others.most)
-      const value = Math.round(Math.min(most, Math.max(least, wanted)))
-      this.apply(this.sizes.map((size, index) => (index === fixed ? { value, units: "px" } : size)))
-      return
+    const { pane1, pane2, sizes } = held
+    if (sizes[pane1]?.units === AUTO || sizes[pane2]?.units === AUTO) return this.moveBesideAuto(held, moved)
+    const { lengths, bounds, bar } = held
+    const before = lengths.map((_, index) => bar - index).filter((index) => index >= 0)
+    const after = lengths.map((_, index) => bar + 1 + index).filter((index) => index < lengths.length)
+    const [gaining, losing] = moved >= 0 ? [before, after] : [after, before]
+    const room = (list: number[], way: "grow" | "shrink") =>
+      list.reduce(
+        (sum, index) =>
+          sum + (way === "grow" ? bounds[index].most - lengths[index] : lengths[index] - bounds[index].least),
+        0
+      )
+    let left = Math.min(Math.abs(moved), room(gaining, "grow"), room(losing, "shrink"))
+    const next = [...lengths]
+    let gain = left
+    for (const index of gaining) {
+      const step = Math.min(gain, bounds[index].most - lengths[index])
+      next[index] += step
+      gain -= step
     }
-    const room = size1 + size2
-    if (!room) return
-    const most1 = Math.min(bounds1.most, room - bounds2.least)
-    const least1 = Math.max(bounds1.least, room - bounds2.most)
-    const share = (Math.min(most1, Math.max(least1, size1 + moved)) * activeShare) / room
-    const value1 = Math.round(Math.min(activeShare - minShare, Math.max(minShare, share)) * 100) / 100
-    const value2 = Math.round((activeShare - value1) * 100) / 100
+    for (const index of losing) {
+      const step = Math.min(left, lengths[index] - bounds[index].least)
+      next[index] -= step
+      left -= step
+    }
+    held.moved = next
+    this.apply(next.map((length) => ({ value: Math.round(length * 100) / 100, units: "px" })))
+  }
+
+  /**
+   * Let go of a move:  the panes go back to their kinds of size, at the sizes they were moved to.
+   * - A share's new share is its part of what the shares have now, so laid out by `flex` it's as tall (wide) as it
+   *   was moved to:  every share in proportion to its size, and none stopped by its least or most.
+   * - A fixed pane keeps its size in px;  an `auto` pane moved is fixed in px, one not moved stays `auto`.
+   */
+  private settle(held: BarDrag) {
+    const moved = held.moved
+    if (!moved) return
+    const { sizes, lengths } = held
+    const isShare = (index: number) => sizes[index]?.units === "%"
+    const shares = sizes.reduce((sum, size, index) => (isShare(index) ? sum + size.value : sum), 0)
+    const room = moved.reduce((sum, length, index) => (isShare(index) ? sum + length : sum), 0)
     this.apply(
-      this.sizes.map((size, index) => {
-        if (index === pane1) return { value: value1, units: "%" }
-        if (index === pane2) return { value: value2, units: "%" }
-        return size
+      sizes.map((size, index) => {
+        if (isShare(index))
+          return { value: room ? Math.round(((moved[index] * shares) / room) * 100) / 100 : size.value, units: "%" }
+        return Math.abs(moved[index] - lengths[index]) < 0.5 ? size : { value: Math.round(moved[index]), units: "px" }
       })
     )
+  }
+
+  /**
+   * Move a bar beside an `auto` pane:  the fixed pane takes the move in px, the `auto` one is as big as its content.
+   * - Only limited by `min-size` and the fixed pane's own bounds:  the panel grows with it.
+   * - Two `auto` panes:  the first becomes fixed.
+   */
+  private moveBesideAuto(held: BarDrag, moved: number) {
+    const { pane1, pane2, size1, size2, bounds1, bounds2, sizes } = held
+    const fixed = [pane1, pane2].find((index) => sizes[index]?.units !== AUTO) ?? pane1
+    const wanted = fixed === pane1 ? size1 + moved : size2 - moved
+    const own = fixed === pane1 ? bounds1 : bounds2
+    const value = Math.round(Math.min(own.most, Math.max(own.least, held.minPixels, wanted)))
+    this.apply(sizes.map((size, index) => (index === fixed ? { value, units: "px" } : size)))
   }
 
   /**
@@ -359,15 +404,28 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
 
   /**
    * The least and most `pane` may be dragged to, px:  its own `min-` and `max-height` (`-width` side by side).
-   * - Only px count:  `none`, `auto`, a percent or `max-content` set no bound.
+   * - Its least:  only px count;  `auto` is 0.
+   * - Its most:  whatever its `max-height` says, `max-content` or a percent too, found by asking for far more
+   *   and measuring what it takes;  `none` is `Infinity`.
+   * - SIDE EFFECT:  lays the page out again, once per pane with a most.
    */
   private static boundsOf(pane: HTMLElement, isRows: boolean): PaneBounds {
     const style = getComputedStyle(pane)
-    const px = (text: string) => (text.endsWith("px") ? parseFloat(text) : undefined)
+    const least = isRows ? style.minHeight : style.minWidth
+    const most = isRows ? style.maxHeight : style.maxWidth
     return {
-      least: px(isRows ? style.minHeight : style.minWidth) ?? 0,
-      most: px(isRows ? style.maxHeight : style.maxWidth) ?? Infinity
+      least: least.endsWith("px") ? parseFloat(least) : 0,
+      most: most === "none" ? Infinity : UISplitPanel.mostOf(pane, isRows)
     }
+  }
+
+  /** How big `pane` gets when asked for far more than there's room for, px:  what its `max-height` allows. */
+  private static mostOf(pane: HTMLElement, isRows: boolean): number {
+    const flex = pane.style.flex
+    pane.style.flex = `0 0 ${FAR_MORE_PX}px`
+    const { width, height } = pane.getBoundingClientRect()
+    pane.style.flex = flex
+    return isRows ? height : width
   }
 
   /** `min-size`, as the smallest share and the smallest px. */
@@ -399,8 +457,16 @@ type PaneBounds = {
 
 /** What moving a bar works from, measured once as it starts. */
 type BarDrag = {
+  /** Index of the bar. */
+  bar: number
   /** Every pane's size as it started, px. */
   lengths: number[]
+  /** Every pane's least and most, px, `min-size` included. */
+  bounds: PaneBounds[]
+  /** The sizes given as it started:  each pane's kind of size, which it goes back to when let go. */
+  sizes: PaneSize[]
+  /** Every pane's size now, px, once the bar has moved. */
+  moved?: number[]
   /** Index of the pane before the bar. */
   pane1: number
   /** Index of the pane after it. */
@@ -415,10 +481,6 @@ type BarDrag = {
   bounds1: PaneBounds
   /** The least and most `pane2` may be, px, `min-size` included. */
   bounds2: PaneBounds
-  /** Percent the two panes share. */
-  activeShare: number
-  /** Smallest share either may have. */
-  minShare: number
   /** Smallest size a fixed pane may have, px. */
   minPixels: number
 }
@@ -435,6 +497,8 @@ const MIDDLE = 50
 const NUMBER_WITH_UNITS = /^([0-9]*\.?[0-9]+)(px|em|rem|%)?$/
 /** Smallest share a pane may be dragged to, unless `min-size` says. */
 const DEFAULT_MIN_SHARE = 5
+/** Far more than any pane could be, px:  what a pane is asked for to find its most. */
+const FAR_MORE_PX = 100_000
 /** How far an arrow key moves a bar, px. */
 const KEY_STEP_PX = 16
 /** How many steps Shift makes it. */

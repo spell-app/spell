@@ -101,12 +101,58 @@ describe("<ui-split-panel>", () => {
     expect(panes).toEqual([...host.children])
   })
 
-  it("a fixed pane takes the move in px, and the shares take up the difference", async () => {
+  it("a fixed pane takes the move in px, the share beside it the difference, and the others don't move", async () => {
     const host = await panel('columns="*,*,200px" resizable')
+    const [first, second] = widths(host)
     dragAcross(bars(host)[1], -50)
-    const [first, second, fixed] = widths(host)
-    expect(fixed).toBe(250)
-    expect(first).toBe(second)
+    expect(widths(host)).toEqual([first, second - 50, 250])
+    expect(host.getAttribute("columns")).toBe("*,*,200px")
+    expect((host.children[2] as HTMLElement).style.flex).toBe("0 0 250px")
+  })
+
+  it("the bar follows the pointer, step by step, until a pane's least or most stops it, and comes back with it", async () => {
+    // a share as big as its content at most (`max-content`), a share up to 120px, and one that takes the rest
+    const host = (await ElementFixture.render(
+      `<ui-split-panel rows="40%,30%,30%" resizable style="width: 200px; height: 400px">
+         <div style="min-height: 30px; max-height: max-content"><div style="height: 200px">a</div></div>
+         <div style="min-height: 30px; max-height: 120px">b</div>
+         <div style="min-height: 30px">c</div>
+       </ui-split-panel>`
+    )) as HTMLElement
+    const [top, middle] = [...host.children].map((child) => child.getBoundingClientRect().height)
+    const bar = bars(host)[0]
+    bar.setPointerCapture = () => undefined
+    const place = () => {
+      const { top, height } = bar.getBoundingClientRect()
+      return top + height / 2
+    }
+    const start = place()
+    const fire = (type: string, clientY: number) =>
+      bar.dispatchEvent(new PointerEvent(type, { clientX: 10, clientY, button: 0, bubbles: true, composed: true }))
+    fire("pointerdown", start)
+    flush()
+    const misses: string[] = []
+    const moveTo = (moved: number, expected: number) => {
+      fire("pointermove", start + moved)
+      if (Math.abs(place() - (start + expected)) > 1) misses.push(`${moved}:  ${(place() - start).toFixed(1)}`)
+    }
+    // the first pane is as big as its content at most:  200px
+    const down = 200 - top
+    // up, the middle pane takes the room up to its 120px, then the last takes the rest;  down to the first's least
+    const up = 30 - top
+    for (let moved = 0; moved <= 100; moved += 10) moveTo(moved, Math.min(moved, down))
+    for (let moved = 100; moved >= -200; moved -= 10) moveTo(moved, Math.max(Math.min(moved, down), up))
+    for (let moved = -200; moved <= 0; moved += 10) moveTo(moved, Math.max(moved, up))
+    expect(misses).toEqual([])
+    expect(middle).toBeLessThan(120)
+    // let go:  shares again, the bar where it was let go
+    fire("pointermove", start - 40)
+    fire("pointerup", start - 40)
+    flush()
+    expect(Math.abs(place() - (start - 40))).toBeLessThanOrEqual(1)
+    expect([...host.children].map((child) => (child as HTMLElement).style.flex)).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^[\d.]+ [\d.]+ 0px$/)])
+    )
   })
 
   it("beside an `auto` pane, a fixed pane grows past both, the panel with it, down to `min-size`", async () => {
