@@ -38,7 +38,7 @@ export const APP_TEXTS = {
   menuDuplicate: "Duplicate",
   menuDelete: "Delete",
   addPart: "Add to the app",
-  paletteSearch: "Search",
+  paletteSearch: "Search Views",
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
   paletteMoreTip: "Show everything filed under {topic}",
@@ -568,7 +568,7 @@ export const APP_TEXTS = {
   inspectorNone: "none",
   // the Inspector's Code card:  a part's events, abilities and actions, each with its code (`<CodeCard>`)
   inspectorCode: "Code",
-  inspectorCodeNone: "No code yet.  + adds an event.",
+  inspectorCodeNone: "No code yet.\nAdd Event or Add Action to start.",
   // a type's cards, while All Cards edits it (`TYPE_PANES`):  its events and abilities, its actions, its tests
   inspectorEvents: "Events",
   inspectorActions: "Actions",
@@ -623,6 +623,7 @@ export const APP_TEXTS = {
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
   // the Inspector card's Close, right of Inspect app:  hides the column (I186)
+  inspectorSpellUIDocs: "Spell UI docs for <{tag}>",
   inspectorClose: "Close the Inspector",
   inspectorAddEvent: "Add Event",
   inspectorAddAction: "Add Action",

@@ -29,7 +29,7 @@ import { on } from "./on"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its `close`.
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - No ✕:  a card isn't hidden on its own;  the top bar's Inspector button shows and hides the whole column
  *   (Owen, 2026-11-15, epic `editor` T78:  "no need to hide the sections of the inspector sidebar separately").
@@ -47,6 +47,11 @@ export function InspectorCard(props: {
   bar?: JSX.Element
   /** Its own buttons, at its bar's right:  `slot="right"`. */
   actions?: JSX.Element
+  /**
+   * Its ✕, after the bar, as the file bar's is:  a panel's action beside the bar, not in it (`PanelClose`, T95),
+   * so its size and the room before it are the file bar's own.
+   */
+  close?: JSX.Element
   /** The body's class. */
   class?: string
   /** The body. */
@@ -79,6 +84,7 @@ export function InspectorCard(props: {
         {props.bar}
         {props.actions}
       </ui-toolbar>
+      {props.close}
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
       </Show>
@@ -574,8 +580,12 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  * - Its header's Add Event and Add Action, icon and words (Owen, 2026-11-15, epic `editor` T79;  a bare "+" before):
  *   - Add Event:  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *     handler in its place (`Inspector.addEvent()`), which then takes the cursor
- *   - Add Action, for a thing:  an empty action in its type, `to "new action"` (`Inspector.addAction()`),
- *     which then takes the cursor;  its name is changed as any action's is, in its signature
+ *   - Add Action, beside it for every part (Owen, 2026-11-16, I197:  "Bring back (>) Add Action"):
+ *     an empty action, `to "new action"` (`Inspector.addAction()`), which then takes the cursor;
+ *     its name is changed as any action's is, in its signature
+ *     - a thing's:  in its own type
+ *     - a Spell UI element's:  in the type of the view drawing it (`Inspector.actionHomeOf()`),
+ *       which is selected then, so its card shows the new action;  the element's handlers can call it (J160)
  *   - In a narrow column, their icons alone (`Inspector.css`):  the header never wraps.
  * - Each event's ✕, at its row's right (`<RemoveEventButton>`):  removes it, after asking unless ⌥ is held;  one undo.
  * - Resized and folded as the other cards are;  shown by the column while one part is selected.
@@ -599,11 +609,15 @@ export function CodeCard(props: {
     })
   })
   const actions = createMemo(() => {
+    // read again as each run ends:  a live edit keeps the thing, and an action added (Add Action) is its type's then
+    void editor.programRuns
     const core = runtimeCore()
     return core && props.thing && isThing(props.thing)
       ? InspectorActions.of(props.thing, core, editor.programWords)
       : []
   })
+  // a thing's own type;  a Spell UI element's, the view drawing it (I197)
+  const actionHome = () => (props.thing && isThing(props.thing) ? props.thing : Inspector.actionHomeOf(props.element))
   const addable = () =>
     DEFAULT_EVENTS.filter((event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event))))
   return (
@@ -632,8 +646,8 @@ export function CodeCard(props: {
               <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
             </ui-dropdown>
           </Show>
-          <Show when={props.thing && isThing(props.thing) ? props.thing : undefined}>
-            {(thing) => (
+          <Show when={actionHome()}>
+            {(home) => (
               <ui-button
                 slot="right"
                 size="mini"
@@ -644,7 +658,7 @@ export function CodeCard(props: {
                 title={appTexts.text("inspectorAddAction")}
                 onClick={(event: MouseEvent) => {
                   event.stopPropagation()
-                  Inspector.addAction(thing(), actions())
+                  Inspector.addAction(home(), home() === props.thing ? undefined : props.element)
                 }}
               >
                 <span class="InspectorAddWords">{appTexts.text("inspectorAddAction")}</span>
@@ -908,6 +922,8 @@ function TypeEventCode(props: { thing: object; row: EventRow }): JSX.Element {
  ****************/
 export function TypeActionsCard(props: { thing: object }): JSX.Element {
   const actions = createMemo(() => {
+    // read again as each run ends, as the Code card's are
+    void editor.programRuns
     const core = runtimeCore()
     return core ? InspectorActions.of(props.thing, core, editor.programWords) : []
   })

@@ -14093,7 +14093,7 @@
         {
           "key": "none",
           "text": "none",
-          "description": "What a property's select shows, in italics, when it has no value and no default."
+          "description": "What a property's select shows, muted, when it has no value and no default."
         }
       ],
       "mainTag": "ui-form",
@@ -28601,6 +28601,10 @@
           "description": "Half a row on its editor's grid:  its kind's width (a number, a select), or its `width`."
         },
         {
+          "name": "in-row",
+          "description": "One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share."
+        },
+        {
           "name": "inline-check",
           "description": "A yes or no in a compact editor:  the box, then its label, on one line."
         },
@@ -28722,7 +28726,7 @@
         {
           "key": "none",
           "text": "none",
-          "description": "What a property's select shows, in italics, when it has no value and no default."
+          "description": "What a property's select shows, muted, when it has no value and no default."
         }
       ],
       "mainTag": "ui-property-editor",
@@ -35002,14 +35006,10 @@
             "circular",
             "basic",
             "secondary",
-            "tertiary"
+            "tertiary",
+            "placeholder"
           ],
-          "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`."
-        },
-        {
-          "name": "placeholder",
-          "kind": "keyOnly",
-          "description": "A tinted, centred block reserving room for content."
+          "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint), `placeholder` (a tinted, centred block reserving room for content).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`, `placeholder`."
         },
         {
           "name": "padding",
@@ -39197,7 +39197,7 @@
         {
           "name": "min-size",
           "kind": "string",
-          "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`."
+          "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for any pane.  Default:  `5%` and `0px`.  A pane's own `min-width` / `max-width` (`min-height` / `max-height` in rows) bound it too;  one whose least and most are the same isn't resized:  a bar beside it sizes the panes across it."
         },
         {
           "name": "disabled",
@@ -54526,7 +54526,8 @@
         },
         {
           "name": "--ui-button-icon-spacing",
-          "default": "var(--ui-space-xs)",
+          "default": "0.35714em",
+          "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)",
           "type": "length"
         },
         {
@@ -60808,6 +60809,11 @@
           "name": "--ui-property-editor-band-transform",
           "default": "none",
           "type": "other"
+        },
+        {
+          "name": "--ui-property-editor-band-spacing",
+          "default": "0",
+          "type": "length"
         },
         {
           "name": "--ui-property-editor-band-weight",

@@ -169,6 +169,7 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
           slot="right"
           name="close"
           link=""
+          class="PanelClose"
           label={appTexts.text("codeOutputClose")}
           title={appTexts.text("codeOutputClose")}
           onClick={() => CodeOutputShown.set(undefined)}

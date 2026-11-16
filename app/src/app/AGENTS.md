@@ -178,6 +178,9 @@ and in the app's build folder, `app/` at the app folder's root.
       editor in them;  pointed ends.
     - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
       ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
+    - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
+      letter in its own colour under it ([CodeMirrorSelection](ui/codemirror/CodeMirrorSelection.ts), epic `language`
+      I124):  drawn in place of CodeMirror's own, which the sheet hides.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
       [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.

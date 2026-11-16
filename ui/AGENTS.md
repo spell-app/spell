@@ -390,8 +390,48 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - Used by axe in `UI<Name>.test.tsx`, `yarn dev` and `yarn test:visual`.
 - `examples/elements/`, its `<example>.visual.ts`:  optional OPEN states for the visual tests
   ([the visual testing doc](../spell.epics/guides/ui/notes/visual-testing.md)).
+- `<tag>.editor.html`:  the tag's PROPERTY EDITOR LAYOUT, one per vocabulary (below, "Property editor layouts").
+  - Named for its TAG, not its component (`ui-event.editor.html` beside `UIFeedEvent.en.ts`):
+    an editor page is named for its schema, as a program's `Card.editor.html` is, and a tag's schema is its tag.
 - Tools that look a family file up by name go through [the family files](src/tools/FamilyFiles.ts).
   The rest match suffixes (`*.en.ts`), whatever the file's name.
+
+### Property editor layouts
+
+Where each of a tag's attributes goes in a property editor:  the spell editor's Inspector, and any
+`<ui-property-editor schema="ui-button">` (epic `editor` T97).
+- One file per tag, `<tag>.editor.html` beside its vocabulary, for tweaking by hand:
+  an editor page, the same shape as a program's own (`Card.editor.html`).
+
+  ```html
+  <ui-property-editor schema="ui-action" data-omit="value link target">
+    <ui-property-group label="Appearance" data-group="appearance">
+      <ui-fields>
+        <ui-property name="label"></ui-property>
+        <ui-property name="icon"></ui-property>
+      </ui-fields>
+      <ui-property name="color"></ui-property>
+    </ui-property-group>
+  </ui-property-editor>
+  ```
+
+- To tweak one:
+  - move a `<ui-property>` up or down, or into another group, to move its field
+  - wrap fields in a `<ui-fields>` to put them side by side on one row, each the same share of it
+    (no `<ui-fields>`:  a field takes a row, or half a row by its kind, a size or a yes or no)
+  - list an attribute in `data-omit` to leave it out of the editor
+  - each `<ui-property-group>` is a section, in order:  `data-group` is its vocabulary group, which the Inspector
+    titles in its own words;  `label` is the title elsewhere
+- A NEW attribute in the vocabulary is never hidden ([PropertyLayouts](src/property/PropertyLayouts.ts), `place()`):
+  - it shows in its group's section, after the section's own fields;  in a section of its own at the end when
+    the layout has none for its group
+  - `inverted` goes right after `color` instead, wherever `color` is (Owen, epic `editor` T94)
+  - [the layouts test](tests/property/PropertyLayouts.test.ts) fails, naming it
+    ("ui-button has attributes its layout doesn't place:  ..."), until it's given a place or left out
+- A NEW tag needs its file:  the same test fails, printing the file to start from
+  (`PropertyLayouts.write()`, the vocabulary's own order, which changes nothing until it's tweaked).
+- The test also fails on a name the tag doesn't have (renamed or dropped), and a section with no group.
+- Each file is its own small chunk, loaded the first time a property editor needs it (`PropertyLayouts.load()`).
 
 ### The docs site
 

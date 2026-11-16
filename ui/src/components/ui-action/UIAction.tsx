@@ -73,6 +73,16 @@ export class UIAction extends UIItem {
     return this.attributes.icon ?? this.actionToDraw?.icon
   }
 
+  /**
+   * What it shows for attribute `name` while it isn't set:  its action's title for `label`, its icon for `icon`.
+   * - A property editor shows it as that field's placeholder (`UIProperty`;  epic `editor` I208).
+   */
+  unsetValueOf(name: string): string | undefined {
+    if (name === LABEL) return this.actionToDraw?.title || undefined
+    if (name === ICON) return this.actionToDraw?.icon || undefined
+    return undefined
+  }
+
   /** Its shortcut:  its own `shortcut` attribute, else the action's. */
   get shortcut(): string | undefined {
     return this.attributes.shortcut || this.actionToDraw?.shortcut
@@ -243,6 +253,10 @@ export type ActionToDraw = {
 
 /** Its attribute that shows its icon alone. */
 const ICON_ONLY = "icon-only"
+
+/** Its attributes whose unset value is its action's (`unsetValueOf()`). */
+const LABEL = "label"
+const ICON = "icon"
 
 /** Class word and part of the key caps' box. */
 const SHORTCUT = "shortcut"

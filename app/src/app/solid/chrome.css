@@ -54,6 +54,33 @@ ui-item.spring::part(item) {
   flex: 1 1 auto;
 }
 
+/*
+ * A panel's Close ✕ (epic `editor` T95, Owen:  "X's should be light still until hovered, consistent size and spacing"):
+ * the file bar's, the Inspector card's, the compiled code's, ONE look.
+ * - Its values are tokens, so a ✕ drawn in a view's shadow root (the file bar's, `SpellEditor.spell`'s `.HideCode`)
+ *   reads the same ones:  this sheet can't reach in there.
+ * - Light, the theme's muted ink, until hovered;  then the text's.
+ * - The bar's own size, right after the button beside it, as the file bar's always was (3px between what's drawn).
+ * - A panel's action beside its bar, not in it (`<InspectorCard close>`):  so the room before it is the same in each.
+ */
+:root {
+  --spell-panel-close-color: var(--ui-text-muted);
+  --spell-panel-close-hover-color: var(--ui-text-color);
+  --spell-panel-close-gap: 0px;
+}
+ui-icon.PanelClose {
+  /* a box of its own (a `<ui-icon>` is `display: contents`):  its margin and its tooltip need one */
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+  margin-inline: var(--spell-panel-close-gap) 0;
+  color: var(--spell-panel-close-color);
+  cursor: var(--ui-control-cursor, pointer);
+}
+ui-icon.PanelClose:hover {
+  color: var(--spell-panel-close-hover-color);
+}
+
 /* An icon-only action (`<Action iconOnly>`):  a bare icon, a little bigger, its title a tooltip below it.
    - A box of its own:  a `<ui-icon>` is `display: contents`, which draws no tooltip;  centred in its bar. */
 ui-icon.IconAction {
@@ -216,6 +243,18 @@ ui-app-menu.AppMenu ui-item.ThemeMenu::part(item) {
 ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
+/*
+ * ... its round icons stand `--spell-bar-icon-gap` after the tabs, pill edge to circle edge (epic `editor` I202,
+ * Owen:  "Add space between Edit and code button"):  the tabs' track keeps its options 1px apart,
+ * which left the chosen tab's pill touching the code's pressed circle
+ * - the tabs and the icons are two halves of one group:  the icons keep their own 1px apart,
+ *   their glyphs ~14px apart, the rule's 12px and a little
+ * - on the first icon's drawn button:  the `<ui-item>` itself draws no box
+ */
+ui-menu.ModeTabs ui-item:not([appearance~="circular"]) + ui-item[appearance~="circular"]::part(item) {
+  /* less the 1px the header tabs' track already keeps between its options (Spell UI's `UIMenu.css`) */
+  margin-inline-start: calc(var(--spell-bar-icon-gap) - 1px);
+}
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   gap: 0.4em;
@@ -292,10 +331,12 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
- * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside its end
- * - "Discard" between them, a link in the theme's primary colour (Glass's purple), as text, 4px from Publish
- *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft";
- *   2026-11-16, T85:  "make `Discard` look like a link";  I192:  "Text + icon should be purple")
+ * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside the pill
+ * - "Discard" after it, a link in the theme's primary colour (Glass's purple), as text
+ *   (Owen, 2026-11-14, T67;  2026-11-16, T85:  "make `Discard` look like a link";  I192:  "Text + icon should be purple";
+ *   I203:  "Swap Publish and Discard buttons")
+ * - the three stand the bar's icon gap apart, edge to drawn edge, each icon close to its own word (Spell UI's own
+ *   distance):  at 8px "Discard"'s trash can sat closer to "Draft" than to its own word (I203)
  * - all three on one centre line (I192)
  */
 .ModeButtons > .PublishDraft {
@@ -303,11 +344,11 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   --spell-draft-inset: 2px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spell-bar-icon-gap, 12px);
   box-sizing: border-box;
   block-size: var(--spell-draft-height);
   margin-inline-start: var(--spell-bar-icon-gap, 12px);
-  padding: var(--spell-draft-inset) var(--spell-draft-inset) var(--spell-draft-inset) 11px;
+  padding: var(--spell-draft-inset) 11px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);
   box-shadow:
@@ -315,14 +356,13 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     inset 0 0 0 1px color-mix(in oklab, var(--ui-yellow-border) 32%, transparent);
   white-space: nowrap;
 
+  /* its pen close to "Draft":  Spell UI's own distance after an icon, no gap on top (I203) */
   & > .DraftState {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     font-weight: 500;
     color: var(--ui-yellow-header);
     --ui-icon-width: auto;
-    --ui-icon-distance: 0;
   }
   & > ui-button {
     --ui-button-radius: 999px;
@@ -342,9 +382,6 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   & > ui-button.DiscardDraft {
     --ui-color-text: var(--ui-primary-text);
     --ui-button-tertiary-padding: 0px;
-  }
-  & > ui-button.DiscardDraft + ui-button {
-    margin-inline-start: 4px;
   }
 }
 

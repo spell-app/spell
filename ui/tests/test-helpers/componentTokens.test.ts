@@ -74,7 +74,11 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-select-padding-inline": "a compact editor's selects are tight, as its inputs",
     "--ui-dropdown-padding-block": "a compact editor's dropdowns (pills) are tight, as its inputs",
     "--ui-dropdown-padding-inline": "a compact editor's dropdowns (pills) are tight, as its inputs",
-    "--ui-menu-segmented-item-padding": "a compact editor's segmented rows (icons) fit half a row"
+    "--ui-menu-segmented-item-padding": "a compact editor's segmented rows (icons) fit half a row",
+    "--ui-select-picker-max-height":
+      "a compact editor's select shows every choice, up to the window's room (epic `editor` I198)",
+    "--ui-select-item-divider-color":
+      "a compact editor's select menus draw no line between choices (epic `editor` I198)"
   },
   "ui-property-editor/UIProperty.css": {
     "--ui-checkbox-label-distance":
@@ -82,7 +86,9 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-checkbox-toggle-width":
       "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)",
     "--ui-checkbox-toggle-handle":
-      "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)"
+      "a compact editor's yes or no is a toggle a size smaller, for its density (epic `editor` I177)",
+    "--ui-checkbox-focus-width":
+      "the smaller toggle's keyboard ring a size thinner, as heavy as the selects' (epic `editor` I199)"
   },
   "ui-theme-editor/UIThemeEditor.css": {
     "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",

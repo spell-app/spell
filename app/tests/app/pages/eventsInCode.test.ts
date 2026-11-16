@@ -211,4 +211,30 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     await page.waitForTimeout(800)
     expect(await mainFile()).toBe(before)
   })
+
+  test("Add Action on a Spell UI element writes the action into the view drawing it, which is selected (I197)", async () => {
+    const beforeFiles = await allFiles()
+    // a Spell UI element in the app's drawing:  its first `<ui-*>` that's drawn
+    await page.evaluate(() => {
+      const app = document.querySelector("solitaire-app")!
+      const element = [...app.querySelectorAll("*")].find(
+        (each) => each.localName.startsWith("ui-") && each.getBoundingClientRect().width > 10
+      )!
+      ;(window as unknown as { Inspector: { select(element: Element): void } }).Inspector.select(element)
+    })
+    await page.waitForTimeout(SETTLE_MS)
+    const addAction = page.locator(".InspectorCard[data-panel=code] ui-button.InspectorAddAction")
+    expect(await addAction.count()).toBe(1)
+    expect(await addAction.getAttribute("icon")).toBe("fa7-free:circle-play")
+    await addAction.click()
+    await page.waitForTimeout(SETTLE_MS)
+    // one more action than before, `to "new action"`, in the app's own type;  the app selected, its row with the cursor
+    const after = await allFiles()
+    expect(after.split('to "new action"').length).toBe(beforeFiles.split('to "new action"').length + 1)
+    expect(await page.locator(".InspectorTrail").innerText()).toContain("Solitaire")
+    expect(await page.evaluate(() => !!document.activeElement?.closest(".CodeSlice"))).toBe(true)
+    await page.evaluate(() => (window as unknown as { editor: { history: { undo(): void } } }).editor.history.undo())
+    await page.waitForTimeout(800)
+    expect(await allFiles()).toBe(beforeFiles)
+  })
 })
