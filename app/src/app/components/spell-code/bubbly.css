@@ -1456,6 +1456,13 @@
     .cm-line .bubbly-mark.bubbly-brace {
       color: var(--bubbly-brace-ink);
     }
+    /*
+     * ... but a code pill's own, part of it:  its light words' ink, faded toward the pill, as on the page;
+     * the paper's dark brace ink was lost on the pill (I127)
+     */
+    .cm-line .bubbly-mark.bubbly-code-brace {
+      color: var(--bubbly-code-brace-ink);
+    }
     /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
     .cm-line .bubbly-expression {
       --bubbly-ink: var(--bubbly-expression-ink);
@@ -1855,17 +1862,31 @@
       /*
        * so the band on the next line is the page's line gap below the foot;  on whole pixels, so every line under it
        * starts on one and its words sit as on the lines above (they're placed on whole pixels;  it was 5.03px, I114)
+       * - the last of a stack of feet under one line:  the rows above it in the stack (`--cmb-foot-drops-above`, in
+       *   tabs) and it, together, on whole pixels (I125)
        */
-      height: round(
-        calc(
-          var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) * var(--bubbly-editor-scale) -
-            var(--cmb-band-margin)
-        ),
-        1px
+      --cmb-foot-above: calc(var(--cmb-foot-drops-above, 0) * var(--cmb-indent));
+      height: calc(
+        round(
+            calc(
+              var(--cmb-foot-above) + var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) *
+                var(--bubbly-editor-scale) - var(--cmb-band-margin)
+            ),
+            1px
+          ) -
+          var(--cmb-foot-above)
       );
       background-image: var(--cmb-rails, none);
       background-size: var(--cmb-rail-sizes, auto);
       background-repeat: no-repeat;
+    }
+    /*
+     * ... one with a foot under it, a block round it ending on the same line:  as tall as their rails are apart across
+     * (`--cmb-foot-drop-tabs`), so that one's foot is as far below this one as its rail is left of it (Owen, 2026-11-11;
+     * Monaco's and the drawn-bubbly page's stack, I125)
+     */
+    .cmb-foot-row.cmb-foot-over {
+      height: calc(var(--cmb-foot-drop-tabs) * var(--cmb-indent));
     }
     .cmb-foot {
       position: absolute;
@@ -2100,6 +2121,7 @@
     .cmb-tag-link.bubbly-expression {
       padding-inline: var(--bubbly-code-pad);
       border-radius: var(--bubbly-input-radius);
+      corner-shape: round;
       background: var(--bubbly-expression-pill);
     }
     /*

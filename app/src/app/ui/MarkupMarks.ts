@@ -390,7 +390,9 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
       this.mark(end, end + 1, `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-close`, { after: spacer("tag-quote", "after") })
     }
     const place = this.mark(start, end, INPUT, { before: spacer("input", "before"), after: spacer("input", "after") })
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted, inTag })
+    // a value written bare, `direction=down`:  drawn with its curly marks all the same (epic `language` I123)
+    const isBare = !isQuoted && !isTagWord
+    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted, inTag, ...(isBare && { isBare }) })
   }
 
   /**
@@ -560,6 +562,11 @@ export type BubblyInputShape = {
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
+  /**
+   * an attribute's value written without quotes (`direction=down`):  drawn with curly marks all the same,
+   * which aren't in the text (epic `language` I123)
+   */
+  isBare?: boolean
   /**
    * a top-level head's bare name (`solitaire is an app`):  the head spacer is injected at its words too, before its
    * own, so its pill starts past it (epic `language` I84)
