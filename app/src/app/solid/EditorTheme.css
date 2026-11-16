@@ -263,8 +263,11 @@ ui-app-menu.AppMenu :is(ui-item.AppMark, ui-item.SpellBarMenu)::part(item) {
   letter-spacing: var(--spell-wordmark-tracking, -0.01em);
   text-decoration: none;
 
-  /* the hat alone, in the theme's primary colour */
+  /* the hat alone, in the theme's primary colour;  raised 2px, so its brim sits on the word's baseline but 1px and
+     its middle by the capitals' (it hung 3px under the baseline, its middle 1px low;  epic `editor` I191:  "Move hat
+     icon up to align with Spell text") */
   .hat {
+    translate: 0 -2px;
     width: 24px;
     height: 24px;
     background: var(--ui-primary, currentColor);
