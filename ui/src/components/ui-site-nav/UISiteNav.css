@@ -76,6 +76,8 @@
    *   its pages (I32, Owen:  "don't darken under the header bit")
    * - one faint line round both, so they read as one box:  an outline, drawn over the pages' fill
    * - its rows a little in from the well's sides, so the current page's pill sits inside it
+   * - no room of its own at the bottom (I33, Owen:  "Less padding at bottom of expanded panels"):  the pages' own room
+   *   below the last one matches the room above its label
    * - the well 4px in from the column, its rows 4px in from the well:  the rows stay where they were, 8px from the
    *   column's edges, as it opens and shuts
    */
@@ -90,7 +92,6 @@
   ui-tree-item[band="group"]:state(open)::part(group) {
     border-end-start-radius: var(--_ui-site-nav-group-radius);
     border-end-end-radius: var(--_ui-site-nav-group-radius);
-    padding-block-end: 0.25em;
     background: var(--_ui-site-nav-group-background);
     box-shadow: inset 0 1px 2px light-dark(oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.3));
   }
