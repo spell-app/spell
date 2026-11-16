@@ -568,17 +568,20 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Hold the mouse over what you selected to see where it is written:
   `Written in Deck.spell, line 8:  52 of these come from this one place`.
 - Esc lets go of what's selected.
-- The Inspector's cards come and go together:  the top bar's Inspector button shows or hides the whole column,
+- The Inspector's cards come and go together:  View › Inspector shows or hides the whole column,
   and each card folds to its title, but none is hidden on its own.
+- Its cards' bars are the top bar's colour, and behind them the column is a panel's glass, as the code's is.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
 **Not yet:**  an event's code typed there isn't written back into the code.
 
 ### Adding and moving what's on the page
 
-The `+` in the top bar opens a palette of what can be added:  click adds it beside what's selected, drag places it.
+The `+` in the top bar, right after the crosshairs, opens a palette of what can be added:
+click adds it beside what's selected, drag places it.
 - What it offers is every component whose vocabulary has a `snippet`, the tag it writes, with its Spanish in its dictionary.
-- The pin in its header keeps it open as a pane, remembered.
+- The pin in its header keeps it open, remembered:  a second row of the top bar, in the bar's own colour,
+  its topics' names centred, its search and ✕ at the right.
 
 Dragging a selected part, or a row of the Views tree, moves it.
 A line shows where it would land between its neighbours, or a ring round what it would go in:
@@ -716,19 +719,22 @@ The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
 - File · Edit · View · Run · Help, each item showing its key
   - File:  New Spell File (⌥⌘N:  ⌘N is the browser's New Window), New CSS File, ─, Save, AutoSave, ─,
     Duplicate File, Revert Changes to the file
-- Run | Edit, in the middle, then in Edit the code's `</>`, the compiled code's button (its language's icon)
-  and Inspect app's crosshairs
-- at the right, one group of icons:  in Edit, Inspect app and the Inspector's menu, a thin line;
-  then Restart, the theme menu, a palette, and you, as an avatar
+- Run | Edit, in the middle, then in Edit the code's `</>`, the compiled code's button (its language's icon),
+  Inspect app's crosshairs and the `+` that adds a part
+- at the right, one group of icons:  Restart, the theme menu, a palette, and you, as an avatar
+  - no Inspector button:  View › Inspector shows or hides it
 
 Every project group has ONE icon, the same in its menus and the landing page's cards:
 a folder for your projects, a lightbulb for examples, an open book for guides,
 a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/models/projectGroups.ts)).
 
 The code column:
-- every file of the project as a tab, none closing, a dot on one not saved;
-  too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
-  - more than eight, the ones opened lately, and a file icon and ▾ beside them that list every file
+- every file of the project as a tab, a dot on one not saved, on the top bar's colour;  the code under them on white
+  (near-black in dark);  too many, ‹ › scroll them, however narrow
+  - a file icon and ▾ at the bar's right list every file, while some aren't in view:  scrolled out of the row, or,
+    with more than eight, the ones not opened lately;  a long list goes into columns
+  - a site's own file (`X.site.spell`) is always a tab
+  - the ✕ at the bar's far right hides the code, as the top bar's `</>` does
   - drag a tab along the row to move its file:  the new order is saved in the project file
 - Save, Revert Changes and New Spell File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
   - Save saves every file with changes not saved, not just the one showing.
