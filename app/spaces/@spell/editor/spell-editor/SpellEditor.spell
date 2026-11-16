@@ -158,7 +158,7 @@ an "editor bar" is a view
 	its "mode buttons" is an editor part
 		// Run and Edit, then Inspect app and the code's icon in Edit
 	its "tools" is an editor part
-		// Add and the Inspector's menu in Edit, then Restart and the theme
+		// Add and the Inspector's button in Edit, then Restart and the theme
 	its "you" is an editor part
 		// The person's own menu
 
