@@ -214,20 +214,8 @@
   }
 }
 
-/*
- * The Inspector's column (epic `editor` T83;  Owen:  "Right Sidebar:  top should be same color as the menubar.
- * Bg under panels should be what the left sidebar bg currently is"):
- * - behind its cards, a panel's glass, as the code's column has:  its seams no longer the page
- *   (`Inspector.css` takes the column's own fill away;  this puts the panel's back)
- * - its cards' bars the top bar's colour (`--spell-menu-bar-background`, set in `Inspector.css`):
- *   its wallpaper fixed, as the page's is
- */
-:root[data-spell-theme] .SpellPage .InspectorPane > .SplitPane {
-  box-shadow: var(--spell-pane-shadow);
-}
-:root[data-spell-theme] .SpellPage .InspectorPane > .SplitPane::before {
-  content: "";
-}
+/* The Inspector's cards' bars the top bar's colour (`--spell-menu-bar-background`, set in `Inspector.css`;
+   epic `editor` T83):  its wallpaper fixed, as the page's is */
 ui-panel.InspectorCard::part(title) {
   background-attachment: fixed;
 }

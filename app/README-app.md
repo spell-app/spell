@@ -570,7 +570,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Esc lets go of what's selected.
 - The Inspector's cards come and go together:  View › Inspector shows or hides the whole column,
   and each card folds to its title, but none is hidden on its own.
-- Its cards' bars are the top bar's colour, and behind them the column is a panel's glass, as the code's is.
+- Its cards' bars are the top bar's colour;  each card is a pane of the code panel's glass, the page in the seams between them.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
 **Not yet:**  an event's code typed there isn't written back into the code.
