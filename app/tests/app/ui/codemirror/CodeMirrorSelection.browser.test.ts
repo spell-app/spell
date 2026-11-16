@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
+import { cursorCharLeft, cursorCharRight } from "@codemirror/commands"
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 
@@ -80,6 +81,39 @@ describe("the selection in the bubbly look", () => {
     )
     expect([...pill!.querySelectorAll(":scope > .cmb-quote")].map((quote) => quote.textContent)).toEqual(["“", "”"])
   })
+
+  /** The caret as drawn:  its left edge and height. */
+  async function caretAt(view: EditorView, move?: (view: EditorView) => boolean) {
+    move?.(view)
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    return { left: caret.left, height: caret.height }
+  }
+
+  /** The line's height, as a caret on plain text there draws it. */
+  const LINE_CARET = 18
+
+  // epic `language` I122:  past a closing quote, or before an opening one, the caret was drawn no height at all
+  for (const [where, quoted] of [
+    ["a Spell value", '"Dealing & the Stock Pile"'],
+    ["a tag's value", '"auto play"']
+  ] as const) {
+    test(`the caret beside ${where}'s quote marks:  as tall as the line, a step further each arrow`, async () => {
+      const view = await bubblyEditorOf(QUOTED, { focused: true })
+      const before = QUOTED.indexOf(quoted)
+      view.dispatch({ selection: { anchor: before } })
+      // before the opening mark, after it, before the closing one, after it
+      const stops = [await caretAt(view), await caretAt(view, cursorCharRight)]
+      view.dispatch({ selection: { anchor: before + quoted.length - 1 } })
+      stops.push(await caretAt(view), await caretAt(view, cursorCharRight))
+      for (const stop of stops) expect(stop.height).toBeCloseTo(LINE_CARET, 0)
+      const lefts = stops.map((stop) => stop.left)
+      expect(lefts).toEqual([...lefts].sort((a, b) => a - b))
+      expect(new Set(lefts).size).toBe(4)
+      // arrowing back over the closing mark, the caret's where it was
+      expect(await caretAt(view, cursorCharLeft)).toEqual(stops[2])
+    })
+  }
 
   for (const focused of [true, false]) {
     test(`selected, ${focused ? "focused" : "not focused"}:  a character drawn over stays see-through`, async () => {

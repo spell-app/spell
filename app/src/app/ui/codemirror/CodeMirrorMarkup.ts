@@ -1,6 +1,6 @@
 import { foldedRanges } from "@codemirror/language"
 import { type EditorState, type Extension, type Range } from "@codemirror/state"
-import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
+import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
@@ -417,13 +417,84 @@ class QuoteWidget extends WidgetType {
     return box
   }
 
+  /**
+   * Where the caret stands beside the mark:  outside it, or at the quoted words' edge, as tall as they are.
+   * - CodeMirror's own measure was the box's:  no height, since its glyph is placed on its own (epic `language` I122:
+   *   no caret after a closing quote, or before an opening one)
+   * - `pos` 0 is before the `"`, 1 after it
+   */
+  coordsAt(box: HTMLElement, pos: number): Rect | null {
+    const isOpen = this.mark === "“"
+    const words = letterBeside(box, isOpen ? "after" : "before")
+    if (!words) return null
+    const isOutside = pos === 0 ? isOpen : !isOpen
+    return caretAt(isOutside ? outsideOf(box, isOpen ? "before" : "after") : isOpen ? words.left : words.right, words)
+  }
+
   ignoreEvent(): boolean {
     return false
   }
 }
 
-/** Room beside a mark, an empty inline box, its width the sheet's. */
+/**
+ * The first letter after `element` on its line (`"after"`), or the last one before it;  else any letter on its line.
+ * - What a caret beside a widget takes its height from:  a widget's own box may have none
+ */
+function letterBeside(element: HTMLElement, side: "before" | "after"): DOMRect | undefined {
+  const line = element.closest(".cm-line")
+  if (!line) return undefined
+  const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) =>
+      node.textContent?.trim() && !node.parentElement?.closest(".cmb-quote")
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_SKIP
+  })
+  const letters: Text[] = []
+  while (walker.nextNode()) letters.push(walker.currentNode as Text)
+  const isAfter = (text: Text) => Boolean(element.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING)
+  const beside = side === "after" ? letters.find(isAfter) : letters.findLast((text) => !isAfter(text))
+  const text = beside ?? letters[0]
+  if (!text) return undefined
+  // its first letter, or its last:  past any spaces at that end
+  const content = text.textContent!
+  const at = side === "after" || !beside ? content.search(/\S/) : content.trimEnd().length - 1
+  const range = document.createRange()
+  range.setStart(text, at)
+  range.setEnd(text, at + 1)
+  return range.getBoundingClientRect()
+}
 
+/** The element next to `element` on `side`, past CodeMirror's buffers beside a widget. */
+function besideOf(element: Element, side: "before" | "after"): Element | undefined {
+  let next = side === "after" ? element.nextElementSibling : element.previousElementSibling
+  while (next?.matches(".cm-widgetBuffer"))
+    next = side === "after" ? next.nextElementSibling : next.previousElementSibling
+  return next ?? undefined
+}
+
+/**
+ * Where a caret stands outside a quote's curly mark, `side` of it.
+ * - A tag's mark:  past the room outside it, where the text beside it starts, so the caret's at one place whichever
+ *   way it came;  without that room, its box's edge, as wide as the `"`, the mark over its middle
+ * - A Spell value's has no box, its mark outside the white:  the mark's own edge
+ */
+function outsideOf(quote: HTMLElement, side: "before" | "after"): number {
+  const room = besideOf(quote, side)
+  const box = quote.getBoundingClientRect()
+  const edges = room?.matches(".bubbly-spacer")
+    ? room.getBoundingClientRect()
+    : box.width >= 1
+      ? box
+      : (quote.firstElementChild ?? quote).getBoundingClientRect()
+  return side === "before" ? edges.left : edges.right
+}
+
+/** A caret at `x`, as tall as `letter`. */
+function caretAt(x: number, letter: DOMRect): Rect {
+  return { left: x, right: x, top: letter.top, bottom: letter.bottom }
+}
+
+/** Room beside a mark, an empty inline box, its width the sheet's. */
 class SpacerWidget extends WidgetType {
   constructor(readonly classes: string) {
     super()
@@ -437,6 +508,24 @@ class SpacerWidget extends WidgetType {
     const room = document.createElement("span")
     room.className = this.classes
     return room
+  }
+
+  /**
+   * Where the caret stands beside the room:  at its edge by the text, as tall as the letters there;
+   * beside a quote's curly mark, outside the mark;  inside a pill, at its words' edge.
+   * - CodeMirror's own measure was the box's:  no height (epic `language` I122)
+   */
+  coordsAt(room: HTMLElement): Rect | null {
+    const isBefore = room.classList.contains("bubbly-spacer-before")
+    const letter = letterBeside(room, isBefore ? "after" : "before")
+    if (!letter) return null
+    const quote = besideOf(room, isBefore ? "after" : "before")
+    const edge = room.getBoundingClientRect()
+    if (quote?.matches(".cmb-quote"))
+      return caretAt(outsideOf(quote as HTMLElement, isBefore ? "before" : "after"), letter)
+    // a pill's room inside it:  at its words' edge, where a letter typed goes
+    if (room.matches(".bubbly-input-spacer")) return caretAt(isBefore ? letter.left : letter.right, letter)
+    return caretAt(isBefore ? edge.right : edge.left, letter)
   }
 
   ignoreEvent(): boolean {
