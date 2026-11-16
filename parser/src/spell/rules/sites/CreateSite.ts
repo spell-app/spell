@@ -12,6 +12,9 @@ import { mainLayoutOf, overlayViewNamed, type SiteOverlayEntry, type SitePageEnt
  * - e.g. `star wars guide is a site:`, then its parts under it:
  *   `- it has a film page at "/films/:film", named "Film"`, `- it has a settings dialog`
  * - e.g. `spell ui is a site at "owen@spell/spell-ui":`, `galaxy guide is a site in the cloud:`:  where it lives
+ * - e.g. `galaxy guide is a site with theme "mockup"`:  its own values for a site's properties, on its line,
+ *   as a type's are (`CreateType`'s `defaults`;  epic `mockup` I30)
+ *   - the same as its body's `its "theme" is "mockup"`
  * - A site is made from spell's built-in template `site`, an app (`Site`, in the core);
  *   so it's one of a kind, as `solitaire is an app` is.
  * - Gathers what the lines under it say into its class, for whatever shows its pages:

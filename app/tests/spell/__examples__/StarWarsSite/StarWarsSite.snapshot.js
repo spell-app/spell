@@ -635,8 +635,12 @@ core.describeAction(ReviewDialog, "saveTheReview", { title: "Save the Review", u
 core.heading("The site:  where each page is, its dialogs and sidebars, and the theme it wears")
 //# The site:  where each page is, its dialogs and sidebars, and the theme it wears
 
+/** The Star Wars guide:  its pages, dialogs and sidebars, hand-drawn in the Mockup theme while it's a mockup */
 export class GalaxyGuide extends Site {
   static elementTag = core.defineElement(this, "test-project")
+  get theme() {
+    return "mockup"
+  }
   static pages = [{
     name: "films page",
     page: "FilmsPage",
@@ -727,11 +731,6 @@ export class GalaxyGuide extends Site {
   static notFoundPage = { name: "not found page" }
   static errorPage = { name: "error page" }
   static mainLayout = "MainLayout"
-
-  /** The theme its pages wear:  a hand-drawn sketch, while it's a mockup */
-  get theme() {
-    return "mockup"
-  }
 }
 export const galaxyGuide = new GalaxyGuide()
 // -----------

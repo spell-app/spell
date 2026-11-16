@@ -497,13 +497,13 @@
     {
       "type": "GalaxyGuide",
       "superType": "Site",
-      "defined": "/StarWarsSite.spell:16158-17248"
+      "defined": "/StarWarsSite.spell:16158-17280"
     },
     {
       "property": "theme",
       "of": "GalaxyGuide",
       "datatype": "text",
-      "defined": "/StarWarsSite.spell:16182-16205"
+      "defined": "/StarWarsSite.spell:16186-16200"
     },
     {
       "type": "MainLayout",
@@ -568,8 +568,8 @@
     579,
     610,
     615,
-    637,
-    731,
-    741
+    638,
+    640,
+    740
   ]
 }
