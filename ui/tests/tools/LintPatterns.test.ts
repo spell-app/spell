@@ -161,6 +161,11 @@ const ALLOWED: readonly Allowed[] = [
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
+    file: "src/components/ui-site-tabs/UISiteTabs.tsx",
+    rule: "no-mutation-observer",
+    reason: "watches the site navigation around it, another element"
+  },
+  {
     file: "src/components/ui-table/TableClassMirror.ts",
     rule: "no-mutation-observer",
     reason: "a helper class, watching ANOTHER element (the table)"

@@ -570,8 +570,12 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  *   Code it can't find in the file shows as written, to read.
  * - Each folds on its own, by its words, remembered for the project (`rowFold()`, Owen:  "event handlers / actions
  *   should be collapsible").
- * - The card's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
- *   handler in its place (`Inspector.addEvent()`), which then takes the cursor.
+ * - Its header's Add Event and Add Action, icon and words (Owen, 2026-11-15, epic `editor` T79;  a bare "+" before):
+ *   - Add Event:  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
+ *     handler in its place (`Inspector.addEvent()`), which then takes the cursor
+ *   - Add Action, for a thing:  an empty action in its type, `to "new action"` (`Inspector.addAction()`),
+ *     which then takes the cursor;  its name is changed as any action's is, in its signature
+ *   - In a narrow column, their icons alone (`Inspector.css`):  the header never wraps.
  * - Each event's ✕, at its row's right (`<RemoveEventButton>`):  removes it, after asking unless ⌥ is held;  one undo.
  * - Resized and folded as the other cards are;  shown by the column while one part is selected.
  ****************/
@@ -608,21 +612,45 @@ export function CodeCard(props: {
       label={appTexts.text("inspectorCode")}
       bar={<span slot="title">{appTexts.text("inspectorCode")}</span>}
       actions={
-        <Show when={addable().length}>
-          <ui-dropdown
-            slot="right"
-            class="InspectorAddEvent"
-            aria-label={appTexts.text("inspectorAddEvent")}
-            title={appTexts.text("inspectorAddEvent")}
-            onClick={(event: MouseEvent) => event.stopPropagation()}
-            ref={on<{ value: string }>("ui-changed", (event) => {
-              if (event.detail.value) Inspector.addEvent(props.element, event.detail.value)
-            })}
-          >
-            <ui-icon slot="trigger" name="plus" />
-            <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
-          </ui-dropdown>
-        </Show>
+        <>
+          <Show when={addable().length}>
+            <ui-dropdown
+              slot="right"
+              class={["InspectorAddButton", "InspectorAddEvent"]}
+              aria-label={appTexts.text("inspectorAddEvent")}
+              title={appTexts.text("inspectorAddEvent")}
+              onClick={(event: MouseEvent) => event.stopPropagation()}
+              ref={on<{ value: string }>("ui-changed", (event) => {
+                if (event.detail.value) Inspector.addEvent(props.element, event.detail.value)
+              })}
+            >
+              <span slot="trigger" class="InspectorAddTrigger">
+                <ui-icon name={EVENT_ICON} />
+                <span class="InspectorAddWords">{appTexts.text("inspectorAddEvent")}</span>
+              </span>
+              <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
+            </ui-dropdown>
+          </Show>
+          <Show when={props.thing && isThing(props.thing) ? props.thing : undefined}>
+            {(thing) => (
+              <ui-button
+                slot="right"
+                size="mini"
+                appearance="link"
+                icon={ACTION_ICON}
+                class={["InspectorAddButton", "InspectorAddAction"]}
+                aria-label={appTexts.text("inspectorAddAction")}
+                title={appTexts.text("inspectorAddAction")}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  Inspector.addAction(thing(), actions())
+                }}
+              >
+                <span class="InspectorAddWords">{appTexts.text("inspectorAddAction")}</span>
+              </ui-button>
+            )}
+          </Show>
+        </>
       }
     >
       <Show
@@ -771,8 +799,13 @@ function RemoveEventButton(props: { element: Element; row: EventRow }): JSX.Elem
 /** One of a thing's actions:  its signature as Spell writes it (`<ActionSignature>`), then its code, in the file. */
 function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Element {
   // read once, as it's drawn:  its editor follows its lines from then on
-  const place = untrack(() => Inspector.placeOfAction(props.thing, props.action))
+  const { place, isAdded } = untrack(() => ({
+    place: Inspector.placeOfAction(props.thing, props.action),
+    isAdded: Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.action.words)
+  }))
   const { open: foldOpen, follow: followFold } = rowFold(untrack(() => `action|${props.action.name}`))
+  // once drawn:  a write while drawing is refused
+  if (isAdded) queueMicrotask(() => Inspector.tookCursor())
   return (
     <ui-section
       class="InspectorEvent action"
@@ -788,7 +821,7 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
       <Show when={props.action.parameters.length === 0}>
         <ActionRunButton thing={props.thing} action={props.action} />
       </Show>
-      <Show when={place}>{(found) => <WrittenCode place={found()} code="" />}</Show>
+      <Show when={place}>{(found) => <WrittenCode place={found()} code="" focus={isAdded} />}</Show>
     </ui-section>
   )
 }

@@ -1,4 +1,5 @@
 "radio api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>

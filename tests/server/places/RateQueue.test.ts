@@ -40,7 +40,8 @@ describe("RateQueue.run()", () => {
     const asks = [1, 2, 3, 4, 5].map((number) => queue.run(async () => void started.push(number)))
     await Promise.all(asks)
     expect(started).toEqual([1, 2, 3, 4, 5])
-    expect(clock.slept).toEqual([10_000, 10_000])
+    // each window plus its arrival slack (100ms):  the service counts arrivals, not starts
+    expect(clock.slept).toEqual([10_100, 10_100])
   })
 
   test("a 429 with a `retry-after`:  EVERYTHING waits that long, then it goes round again", async () => {

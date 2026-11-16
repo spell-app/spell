@@ -1,4 +1,5 @@
 "step theming" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>

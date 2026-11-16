@@ -1,4 +1,5 @@
 "list theming" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		List
 		<header>A list is used to group related content.</>

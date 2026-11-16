@@ -543,12 +543,43 @@ export class BubblyLayout {
           this.abilityWord.test(this.text.slice(span.start, span.end))
         )
           this.paintRange(span.start, span.end, "reference")
+    this.paintKind(head)
     // a drawing's head, `to draw its placeholder`:  what it draws a name, no pill (epic `language` I99)
     if (this.paintDrawing(head)) return
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
     if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
+  }
+
+  /**
+   * The kind a type's head says it is (`namesKind`), bold whole, ONE name (epic `language` I111):
+   * `a "pile" is a droppable **viewable list of cards**`, `una "pila" es una **lista visible de cartas**`.
+   * - It ends where its row's group ends (`instanceType`, `superType`), from the parse.
+   * - It starts after the first article past the name (`is a`, `es una`), past any more small words and abilities:
+   *   an ability inside it (`lista visible soltable de cartas`) is bold anyway.
+   */
+  private paintKind({ statement, row }: Head) {
+    if (!row.namesKind) return
+    const groups = statement.groups as Record<string, P.Match | P.Match[] | undefined>
+    const [kind] = [groups[row.namesKind]].flat()
+    if (kind?.start === undefined || kind.end === undefined) return
+    const names = [groups.type, groups.aka].flat().filter((each) => each?.end !== undefined && each.end <= kind.start!)
+    const nameEnd = Math.max(...names.map((each) => each!.end!), statement.start!)
+    const abilities = [groups.ability].flat().filter((each) => each?.start !== undefined && each.end !== undefined)
+    let from: number | undefined
+    let pastArticle = false
+    for (const word of this.text.slice(nameEnd, kind.start).matchAll(/\S+/g)) {
+      const at = nameEnd + word.index
+      const isSmall = this.smallWords.has(word[0].toLowerCase())
+      const isAbility = abilities.some((ability) => at >= ability!.start! && at < ability!.end!)
+      if (!pastArticle) pastArticle = isSmall
+      else if (!isSmall && !isAbility) {
+        from = at
+        break
+      }
+    }
+    this.paintRange(from ?? kind.start, kind.end, "reference")
   }
 
   /**

@@ -127,6 +127,32 @@ describe("<ui-site-tabs>", () => {
     expect(selected(host)).toEqual(["Examples"])
   })
 
+  test("without `pages`, follows the site navigation around it:  its pages, its shown page, as they change (epic `mockup` T38)", async () => {
+    const site = await ElementFixture.render(
+      `<div><ui-site-nav current="/button/api"></ui-site-nav><main><div><ui-site-tabs style="width: 700px"></ui-site-tabs></div></main></div>`
+    )
+    const nav = site.querySelector("ui-site-nav")!
+    nav.setAttribute("pages", JSON.stringify(PAGES))
+    const host = site.querySelector("ui-site-tabs")!
+    await settleDeep(host)
+    expect(words(host)).toEqual(["Usage", "Examples", "API", "Theming"])
+    expect(selected(host)).toEqual(["API"])
+    nav.setAttribute("current", "/films/stars")
+    await settleDeep(host)
+    expect(words(host)).toEqual(["Films", "Stars"])
+    expect(selected(host)).toEqual(["Stars"])
+    // its own `pages` win
+    host.setAttribute("pages", JSON.stringify([{ title: "A", href: "#a", pages: [{ title: "B", href: "#b" }] }]))
+    await settleDeep(host)
+    expect(words(host)).toEqual([])
+  })
+
+  test("with no site navigation around it and no `pages`, draws nothing", async () => {
+    const host = await ElementFixture.render(`<ui-site-tabs current="/button"></ui-site-tabs>`)
+    await settleDeep(host)
+    expect(items(host)).toEqual([])
+  })
+
   test("a click asks `ui-navigating`:  cancelled, nothing moves and the link isn't followed", async () => {
     const host = await siteTabs()
     const navigating = vi.fn((event: Event) => event.preventDefault())

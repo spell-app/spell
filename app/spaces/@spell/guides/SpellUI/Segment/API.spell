@@ -1,4 +1,5 @@
 "segment api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>

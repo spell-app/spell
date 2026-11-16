@@ -1,4 +1,5 @@
 "tree examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Tree
 		<header>A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.</>

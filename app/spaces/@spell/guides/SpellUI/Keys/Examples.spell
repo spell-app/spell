@@ -1,4 +1,5 @@
 "keys examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Keys
 		<header>Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.</>

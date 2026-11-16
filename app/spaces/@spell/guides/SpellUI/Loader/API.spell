@@ -1,4 +1,5 @@
 "loader api" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>

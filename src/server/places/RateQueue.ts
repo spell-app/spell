@@ -11,6 +11,13 @@ const MOST_WAIT_MS = 64_000
 /** Up to this much more, at random, so many waiting don't all come back at once. */
 const JITTER_MS = 1000
 
+/**
+ * Room left between the window's edge and the next start:  the service counts requests as they ARRIVE, and one
+ * start a few ms later on the wire than the next would put six in its second (epic `epic-engine` T84:  the Airtable
+ * stub saw a limit hit under a full test run's load, every start on time).
+ */
+const ARRIVAL_SLACK_MS = 100
+
 /** Every queue with a name. */
 const QUEUES = new Map<string, RateQueue>()
 
@@ -104,7 +111,7 @@ export class RateQueue {
   /** How long until one can start:  0 or less for now. */
   private msUntilRoom(): number {
     const now = this.clock.now()
-    const windowMs = this.limit.perSeconds * 1000
+    const windowMs = this.limit.perSeconds * 1000 + ARRIVAL_SLACK_MS
     while (this.starts.length && this.starts[0]! <= now - windowMs) this.starts.shift()
     const untilOutOfWindow = this.starts.length < this.limit.requests ? 0 : this.starts[0]! + windowMs - now
     return Math.max(untilOutOfWindow, this.pausedUntil - now)

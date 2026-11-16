@@ -1,4 +1,5 @@
 "site-nav theming" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Site nav
 		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
