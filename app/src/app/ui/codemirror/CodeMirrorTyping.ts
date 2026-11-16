@@ -23,7 +23,7 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorTyping`
- * The nine helps as a person types Spell in a CodeMirror editor
+ * The ten helps as a person types Spell in a CodeMirror editor
  * (epic `codemirror` P4), so what they see is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicked or arrowed onto, a blank line inside a body gets that body's indent, the caret after it.
@@ -43,6 +43,8 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   Tab there, or ⌘], moves them in.  One undo.
  *   - A line of a tag's attributes under its first line moves alone, its indent tabs then spaces;
  *     so does a comment line.
+ * - `|>` typed in a tag writes `/>`, which the bubbly look draws as a bar and a point, `|⟩`;
+ *   one undo leaves the `|>` typed.  HTML files have this one alone (`markupExtension()`).
  * - Enter between a tag's attributes lines the rest up under its first attribute, measured as it's drawn.
  * - Enter before a comment after code puts the comment on its own line, at the level of the body under it.
  * - Enter keeps the line's indent and follows Spell's Enter rules (`LSP.SpellTyping.ENTER_RULES`),
@@ -82,6 +84,17 @@ export class CodeMirrorTyping {
         return text
       })
     ]
+  }
+
+  /**
+   * The help an HTML file's editor has (a property editor page, `Card.editor.html`):
+   * `|>` in a tag writes `/>`, as in a Spell file's drawing.
+   */
+  static markupExtension(): Extension {
+    return EditorView.inputHandler.of(
+      (view, from, to, text) =>
+        from === to && text === ">" && view.state.selection.ranges.length === 1 && closeWithBar(view, from)
+    )
   }
 
   ////////////////
@@ -235,6 +248,7 @@ export class CodeMirrorTyping {
     const index = line.number - 1
     lines[index] = line.text.slice(0, column) + text + line.text.slice(column)
     const onLine = { from: line.number, to: line.number }
+    if (text === ">" && closeWithBar(view, from)) return true
     const indent = LSP.SpellTyping.indentToAdd(lines, index, column)
     // the letter and its indent, one undo step
     if (indent)
@@ -413,6 +427,32 @@ function indentWidthsOf(view: EditorView): { space: number; tab: number } {
     space: CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
     tab: CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
   }
+}
+
+////////////////
+// ## `|>` closes a tag
+////////////////
+
+/**
+ * A `>` typed at `at`, right after a `|` in a tag:  the `|>` becomes `/>`, the caret after it (epic `codemirror` T16).
+ * - The `>` is written first, as typed, then the `/` over the `|` as a step of its own:
+ *   one undo leaves the `|>` typed, as the other helps leave what was typed.
+ * - Returns whether it did:  `false` leaves the key to the editor (`LSP.SpellTyping.closesWithBar()`).
+ */
+function closeWithBar(view: EditorView, at: number): boolean {
+  const { state } = view
+  if (state.readOnly) return false
+  const line = state.doc.lineAt(at)
+  const column = at - line.from
+  const lines = state.doc.toJSON()
+  lines[line.number - 1] = line.text.slice(0, column) + ">" + line.text.slice(column)
+  if (!LSP.SpellTyping.closesWithBar(lines, line.number - 1, column)) return false
+  view.dispatch({ changes: { from: at, insert: ">" }, selection: { anchor: at + 1 }, userEvent: "input.type" })
+  return write(
+    view,
+    { from: line.number, to: line.number },
+    { changes: { from: at - 1, to: at, insert: "/" }, selection: { anchor: at + 1 }, userEvent: "input" }
+  )
 }
 
 ////////////////

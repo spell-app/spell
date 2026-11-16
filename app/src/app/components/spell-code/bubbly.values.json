@@ -20,6 +20,10 @@
       "light": "#c0c0c3",
       "dark": "#5a5961"
     },
+    "--bubbly-angle-ink": {
+      "light": "#a8a8ac",
+      "dark": "#727179"
+    },
     "--bubbly-comment-ink": {
       "light": "#7d7d84",
       "dark": "#9c9ba3"
@@ -347,6 +351,14 @@
     "--bubbly-end-mark": {
       "light": "#c8c8cb",
       "dark": "#525159"
+    },
+    "--bubbly-angle-mark": {
+      "light": "#a8a8ac",
+      "dark": "#727179"
+    },
+    "--bubbly-end-angle-mark": {
+      "light": "#aeaeb2",
+      "dark": "#6b6a72"
     },
     "--bubbly-tag-block-inset": {
       "light": "3px",

@@ -99,6 +99,32 @@ export class SpellTyping {
   }
 
   ////////////////
+  // ## `|>` closes a tag
+  ////////////////
+
+  /**
+   * Does the `>` just typed at `column` (0-based) of `lines[index]` follow a `|` that's meant as a tag's `/`?
+   * The bubbly look draws a tag's `/>` as a bar and a point, `|⟩`, so a person copying what they see types `|>`
+   * (epic `codemirror` T16):  the editor writes `/>` instead.
+   * - Only between a tag's attributes (`tagOpenAt()`):  never in a quoted value, in a `{…}` code value, in an
+   *   unquoted value (`<x a=b|>`, HTML's), in text or in Spell code.
+   * - `|` alone is no part of a tag anywhere in Spell's markup, nor in HTML's outside a value.
+   */
+  static closesWithBar(lines: readonly string[], index: number, column: number): boolean {
+    const text = lines[index] ?? ""
+    if (text[column] !== ">" || text[column - 1] !== "|") return false
+    const bar = column - 1
+    const tag = SpellTyping.tagOpenAt(lines, index, bar)
+    if (!tag) return false
+    const since = [...lines.slice(tag.line, index), text.slice(0, bar)].join("\n")
+    const tagText = since.slice(since.lastIndexOf("<"))
+    // in a `{…}` code value:  its braces outside quotes don't match up
+    if (bracesOpenIn(tagText)) return false
+    // right after an unquoted value's `=`:  the `|` is the value's own
+    return !/=[^\s"'{}]*$/.test(tagText)
+  }
+
+  ////////////////
   // ## The quoted value at the caret
   ////////////////
 
@@ -408,6 +434,20 @@ function isStillOpen(text: string): boolean {
     else if (char === ">") return false
   }
   return !quote
+}
+
+/** Is a `{…}` still open at the end of `text`:  more `{` than `}`, outside quotes? */
+function bracesOpenIn(text: string): boolean {
+  let quote = ""
+  let depth = 0
+  for (const char of text) {
+    if (quote) {
+      if (char === quote) quote = ""
+    } else if (char === '"' || char === "'") quote = char
+    else if (char === "{") depth++
+    else if (char === "}") depth = Math.max(0, depth - 1)
+  }
+  return depth > 0
 }
 
 /**

@@ -176,6 +176,8 @@ and in the app's build folder, `app/` at the app folder's root.
       [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from [MarkupMarks](ui/MarkupMarks.ts), the page's own
       reading of it (`BubblyMarkup`);  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no
       editor in them;  pointed ends.
+      - A tag's `⟨` and `⟩` and the bar of its `|⟩` are a step darker than its other marks, all one colour
+        (`--bubbly-angle-ink`, the editor's `--bubbly-angle-mark`;  epic `codemirror` T17).
     - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
       ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
     - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
@@ -197,7 +199,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - Pinned lines (Settings… › Pinned lines, epic `codemirror` T8):
     the lines opening the blocks the top of the code is inside stay at the top while it scrolls
     ([CodeMirrorPinned](ui/codemirror/CodeMirrorPinned.ts)).
-  - Nine helps as Spell is typed, in every Spell editor, the look on or off
+  - Ten helps as Spell is typed, in every Spell editor, the look on or off
     ([CodeMirrorTyping](ui/codemirror/CodeMirrorTyping.ts)):  what each decides from the lines is the language
     service's `LSP.SpellTyping`;  each one undo
     - each writes with its key, so only the editor typed in helps:  a file's editor and a slice of it both have them
@@ -213,6 +215,9 @@ and in the app's build folder, `app/` at the app folder's root.
       any other, its closing tag written out, `<segment ` => `<segment |></segment>`;  one undo leaves `<action `
       - the shape choosing it from the suggestion list writes, from the same table (`LSP.CompletionShapes.spaceAfterTag()`)
       - only with nothing more of the tag written after the caret
+    - `|>` typed in a tag writes `/>`, which the bubbly look draws as a bar and a point, `|⟩` (epic `codemirror` T16):
+      only between a tag's attributes, never in a value, text or Spell code;  one undo leaves the `|>` typed
+      - an HTML file's editor has this help alone (`CodeMirrorTyping.markupExtension()`)
     - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
       Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
