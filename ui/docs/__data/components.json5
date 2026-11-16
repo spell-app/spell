@@ -52803,7 +52803,7 @@
         "component groups",
         "palette table"
       ],
-      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
+      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save.",
       "noun": "palette",
       "attributes": [
         {
@@ -53073,6 +53073,11 @@
           "key": "groupName",
           "text": "Group name",
           "description": "The label of a group's name field."
+        },
+        {
+          "key": "groupIcon",
+          "text": "{group}'s icon, in the editor's Add bar",
+          "description": "A group's icon picker;  `{group}` is its name."
         },
         {
           "key": "removeGroup",

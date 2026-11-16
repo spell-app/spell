@@ -8,7 +8,8 @@
  * - `GET /api/ui/palette-groups`:  the table, `PaletteTable`
  * - `PUT /api/ui/palette-groups` `PaletteTable`:  writes it whole, formatted as `yarn format` does;  answers `{ ok: true }`
  *   - needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
- *   - a body that isn't a table (groups each with a list of tags, a topic or title as text) is a 400, naming why
+ *   - a body that isn't a table is a 400, naming why:
+ *     groups each with a list of tags, a topic or title as text, and an icon's name or none
  * - Node only:  it reads and writes the file, and imports nothing of the components.
  */
 import { readFileSync, writeFileSync } from "node:fs"
@@ -63,10 +64,12 @@ export function paletteTableOrDie(body: unknown): PaletteTable {
     if (!group || !isTags(group.tags)) die(`group ${at + 1} needs \`tags\`, a list of tags`)
     if (group.topic !== undefined && !isText(group.topic)) die(`group ${at + 1}'s \`topic\` isn't text`)
     if (group.title !== undefined && !isText(group.title)) die(`group ${at + 1}'s \`title\` isn't text`)
+    if (group.icon !== undefined && !isText(group.icon)) die(`group ${at + 1}'s \`icon\` isn't text`)
     if (group.topic === undefined && group.title === undefined) die(`group ${at + 1} needs a \`topic\` or a \`title\``)
     return {
       ...(group.topic !== undefined && { topic: group.topic }),
       ...(group.title !== undefined && { title: group.title }),
+      ...(group.icon !== undefined && { icon: group.icon }),
       tags: group.tags
     }
   })

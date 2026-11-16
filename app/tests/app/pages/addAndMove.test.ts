@@ -831,7 +831,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80)", async () => {
+  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
     await page.locator("#AddPartButton [part~=item]").click()
@@ -844,6 +844,35 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.reload()
     await page.waitForSelector(".PaletteStrip .PaletteGroupName", { timeout: 60_000 })
     await page.waitForTimeout(1000)
+
+    // its pin at its far left, Add View in bold, each topic with its icon;  at 1290px wide, nothing scrolls (T86, T92)
+    await page.setViewportSize({ width: 1290, height: 800 })
+    await page.waitForTimeout(600)
+    const bar = () =>
+      page.evaluate(() => {
+        const strip = document.querySelector(".PaletteStrip")!
+        const left = (el: Element | null | undefined) => el?.getBoundingClientRect().left ?? -1
+        const names = [...strip.querySelectorAll("ui-item.PaletteGroupName")]
+        return {
+          overflowing: strip.querySelector("ui-toolbar.PaletteStripGroups")!.matches(":state(overflowing)"),
+          pinFirst: left(strip.querySelector(".PalettePin")) < left(strip.querySelector(".PaletteStripLabel")),
+          label: strip.querySelector(".PaletteStripLabel")?.textContent,
+          bold: Number(getComputedStyle(strip.querySelector(".PaletteStripLabel")!).fontWeight) >= 700,
+          withIcons: names.every((name) => !!name.getAttribute("icon")),
+          closes: strip.querySelectorAll(".PaletteClose").length,
+          searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width
+        }
+      })
+    expect(await bar()).toMatchObject({
+      overflowing: false,
+      pinFirst: true,
+      label: "Add View",
+      bold: true,
+      withIcons: true,
+      closes: 0
+    })
+    const idleWidth = (await bar()).searchWidth
+    await page.setViewportSize({ width: 1440, height: 800 })
 
     // the pinned bar:  a topic's name opens its menu, every part filed there;  choosing one closes it (I176)
     const menusOpen = () =>
@@ -876,6 +905,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await search.click()
     await page.keyboard.type("butt", { delay: 30 })
     await page.waitForTimeout(800)
+    // the field keeps its width typed in, with a ✕ inside it (T87)
+    expect((await bar()).searchWidth).toBe(idleWidth)
+    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(1)
     const shown = await matches()
     expect(shown.length).toBeGreaterThan(1)
     expect(shown.flatMap(({ labels }) => labels)).toContain("Button")
@@ -912,6 +944,15 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await search.fill("")
     await page.waitForTimeout(600)
     expect(await matches()).toEqual([])
+    // its ✕ empties it and closes them, and the field keeps the focus (T87)
+    await search.fill("grid")
+    await page.waitForTimeout(600)
+    await page.locator(".PaletteStrip .PaletteStripClear").click()
+    await page.waitForTimeout(600)
+    expect(await matches()).toEqual([])
+    expect(await search.inputValue()).toBe("")
+    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
+    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(0)
     // choosing a match closes them all (I176)
     const grids = ((await text()).match(/<(ui-)?grid\b/g) ?? []).length
     await search.fill("grid")
@@ -921,7 +962,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await matches()).toEqual([])
     expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids + 1)
 
-    await page.locator(".PaletteStrip .PaletteClose").click()
+    // its pin unpins it (T92)
+    await page.locator(".PaletteStrip .PalettePin").click()
     await page.waitForTimeout(600)
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
   })
