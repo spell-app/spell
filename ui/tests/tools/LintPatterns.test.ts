@@ -161,7 +161,7 @@ const ALLOWED: readonly Allowed[] = [
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "src/components/ui-site-tabs/UISiteTabs.tsx",
+    file: "src/components/ui-site-nav/SitePages.ts",
     rule: "no-mutation-observer",
     reason: "watches the site navigation around it, another element"
   },

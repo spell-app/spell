@@ -4,14 +4,14 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `async.<lang>.ts` (epic `spanish`).
  */
-import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
+import { Negatable } from "spell/parser/spell/rules/expressions"
 
 import { _async } from "./async.parser"
 import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
 import { Meanwhile } from "./Meanwhile"
-import { Pause, PAUSE_UNITS } from "./Pause"
+import { Pause } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
 import { WithoutWaiting } from "./WithoutWaiting"
@@ -57,22 +57,20 @@ _async.addRule(Await, {
   ]
 })
 
-// a pause's unit, each meaning the runtime's name for it (`core.TIME_UNITS_MAP`):  `seconds` for `seconds`
-_async.addRule(Wording.specialize({ ruleName: "pause_units", meanings: PAUSE_UNITS }), {
-  syntax:
-    "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
-})
-
 _async.addRule(Pause, {
-  syntax: "pause for {number:expression} {units:pause_units}",
+  syntax: "pause for {duration:expression} {unit:unit_words}?",
   tests: [
     {
       compileAs: "statement",
       tests: [
-        [`pause for 2 seconds"`, 'await core.pauseFor(2, "seconds")'],
-        [`pause for 500 msec"`, 'await core.pauseFor(500, "msec")'],
-        [`pause for 10 ticks"`, 'await core.pauseFor(10, "ticks")'],
-        [`pause for (10 + 10) sec`, 'await core.pauseFor(10 + 10, "sec")']
+        [`pause for 2 seconds`, 'await core.pauseFor(2, "seconds")'],
+        [`pause for 1 second`, 'await core.pauseFor(1, "seconds")'],
+        [`pause for 500 msec`, 'await core.pauseFor(500, "msec")'],
+        [`pause for 300 ms`, 'await core.pauseFor(300, "msec")'],
+        [`pause for 10 ticks`, 'await core.pauseFor(10, "ticks")'],
+        [`pause for 1 minute 30 seconds`, 'await core.pauseFor(90, "seconds")'],
+        [`pause for 2 hours`, 'await core.pauseFor(2, "hours")'],
+        [`pause for (10 + 10) sec`, 'await core.pauseFor(10 + 10, "seconds")']
       ]
     }
   ]

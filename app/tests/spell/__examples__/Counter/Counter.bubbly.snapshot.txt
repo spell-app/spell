@@ -1,0 +1,39 @@
+==== /Counter.spell
+⟪# Counter⟫
+⟦// A button that counts its clicks:  the smallest app there is.⟧
+
+⟪## A counter⟫
+⟦// Each counter is its own element on the page.⟧
+
+[thing create_type L0]
+| a «"counter"» is a **view**
+|   [property define_property_has L1]
+|   | its «"count"» is a **number** starting at «0»
+|   |   ⟦// How many times it's been clicked:  a new counter starts at 0⟧
+|   [action to_do_something L1]
+|   | to «count up»: set the **count** to the **count** + «1»
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// A button saying how many times it's been clicked:  a click counts up⟧
+|   |   <⟨button⟩ size=«"huge"» color=«"primary"» onClick={count up}>Clicked {the **count**} times</⟨button⟩>    code({count up}) code({the count})
+
+|   [action to_do_something L1]
+|   | to «test counting»
+|   |   set the **counter** to **a new counter**    ‾value(the counter) ‾value(a new counter)
+|   |   the **counter's count** should be _0_    ‾value(the counter's count)
+|   |   count up of the **counter**    ‾call(count up of the counter)
+|   |   count up of the **counter**    ‾call(count up of the counter)
+|   |   the **counter's count** should be _2_    ‾value(the counter's count)
+
+⟪## The app:  one counter, drawn⟫
+
+[thing create_one_of_a_kind L0]
+| «counter app» is an **app**
+|   [property define_property_has L1]
+|   | «"counter"» is **a new counter**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩>
+|   |     <⟨stack⟩ align=«"center"»>{draw the **counter**}</⟨stack⟩>    code({draw the counter})
+|   |   </⟨container⟩>

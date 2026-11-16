@@ -1,0 +1,534 @@
+==== /Carta.es.spell
+[thing create_type L0]
+| una «"carta"» es una **vista reversible arrastrable** 			⟦-- Una carta de la baraja⟧
+|   ⟦-- Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.⟧
+|   ⟦-- Es una vista reversible:  cada lado es una imagen de carta (abajo):  boca arriba la suya, boca abajo el dorso que comparten todas las cartas.⟧
+|   ⟦-- En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.⟧
+|   [plain group define_group L1]
+|   | grupo «"Rango y Palo"» ⟦-- El as es bajo:  as = 1 ... rey = 13⟧
+|   |   [property define_property_has L2]
+|   |   | su «"rango"» es uno de ‹as›, ‹2 ... 10›, ‹jota›, ‹dama›, ‹rey›
+|   |   [property define_property_has L2]
+|   |   | su «"palo"» es uno de ‹tréboles›, ‹diamantes›, ‹corazones› o ‹espadas›
+|   |   [property property_value_getter L2]
+|   |   | su «"color"» es uno de ‹rojo›, ‹negro›
+|   |   |   _rojo_ si es un _diamante_ o es un _corazón_    ‾question(es un diamante)
+|   |   |   _negro_ de lo contrario
+
+|   [plain group define_group L1]
+|   | grupo «"Alias"» 								⟦-- Spell para identificar cartas⟧
+|   |   [property quoted_type_expression L2]
+|   |   | «"es una figura"» si su **rango** es _jota_, _dama_ o _rey_    ‾value(su rango)
+|   |   [property quoted_type_expression L2]
+|   |   | «"es una carta numérica"» si no es una figura    ‾question(no es una figura)
+|   |   [property quoted_property_formula L2]
+|   |   | «"es el (rango) de (palo)"»  ⟦-- p. ej. la carta es el dos de espadas⟧
+
+|   [plain group define_group L1]
+|   | grupo «"Nombres"» 								⟦-- identificar una carta⟧
+|   |   [property property_value_getter L2]
+|   |   | su «"nombre"» es su **rango** && «"de"» && su **palo**
+|   |   [property property_value_getter L2]
+|   |   | su «"valor"» es la posición de su **rango**
+|   |   [property property_value_getter L2]
+|   |   | su «"símbolo"» es
+|   |   |   _"♣"_ si es un _trébol_    ‾question(es un trébol)
+|   |   |   _"♦"_ si es un _diamante_    ‾question(es un diamante)
+|   |   |   _"♥"_ si es un _corazón_    ‾question(es un corazón)
+|   |   |   _"♠"_ de lo contrario
+|   |   [property property_value_getter L2]
+|   |   | su «"nombre corto"» es
+|   |   |   ⟦// Su nombre corto:  D♠↓ es la dama de espadas, boca abajo⟧
+|   |   |   **letra** es _10_ si su **valor** es _10_ de lo contrario la primera **letra** de su **rango** como mayúsculas    ‾value(letra) ‾value(su valor) ‾value(la primera letra de su rango como mayúsculas)
+|   |   |   **flecha** es _"↑"_ si está boca arriba de lo contrario _"↓"_    ‾value(flecha) ‾question(está boca arriba)
+|   |   |   devolver **letra** + su **símbolo** + **flecha**    ‾value(letra) ‾value(su símbolo) ‾value(flecha)
+
+|   [plain group define_group L1]
+|   | grupo «"Dibujo"»
+|   |   [action draw_it L2]
+|   |   | para **dibujar** su **frente**
+|   |   |   <⟨imagen-de-carta⟩ carta={eso} />    code({eso})
+|   |   [action draw_it L2]
+|   |   | para **dibujar** su **dorso**
+|   |   |   <⟨imagen-de-carta⟩ dirección=abajo />
+
+|   |   [action to_do_something L2]
+|   |   | para «probar la preparación de la carta»
+|   |   |   obtener **una nueva carta** cuyo **rango** es _dama_, **palo** es _espadas_ y **dirección** es _abajo_    ‾value(una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo)
+|   |   |   su **nombre** debería ser _"dama de espadas"_    ‾value(su nombre)
+|   |   |   su **color** debería ser _negro_    ‾value(su color)
+|   |   |   su **valor** debería ser _12_    ‾value(su valor)
+|   |   |   su **nombre corto** debería ser _"D♠↓"_    ‾value(su nombre corto)
+|   |   |   es una figura debería ser _sí_    ‾question(es una figura)
+|   |   |   es una _espada_ debería ser _sí_    ‾question(es una espada)
+|   |   |   es un _trébol_ debería ser _no_    ‾question(es un trébol)
+|   |   |   es una _dama_ debería ser _sí_    ‾question(es una dama)
+|   |   |   es un _2_ debería ser _no_    ‾question(es un 2)
+|   |   |   es la dama de espadas debería ser _sí_    ‾question(es la dama de espadas)
+|   |   |   es la dama de tréboles debería ser _no_    ‾question(es la dama de tréboles)
+
+|   |   |   voltear eso    ‾value(eso)
+|   |   |   está boca arriba debería ser _sí_    ‾question(está boca arriba)
+|   |   |   su **nombre corto** debería ser _"D♠↑"_    ‾value(su nombre corto)
+
+|   |   |   poner **siete** a **una nueva carta** cuyo **rango** es _7_ y **palo** es _corazones_    ‾value(siete) ‾value(una nueva carta cuyo rango es 7 y palo es corazones)
+|   |   |   **siete** es una carta numérica debería ser _sí_    ‾question(siete es una carta numérica)
+|   |   |   el **color** del **siete** debería ser _rojo_    ‾value(el color del siete)
+
+[thing create_type L0]
+| una «"imagen de carta"» es una **vista**			⟦-- El dibujo de una carta:  el único lugar donde vive el aspecto de una carta⟧
+|   ⟦-- Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta} />`, `<imagen-de-carta rango=as palo={su palo} />`.⟧
+|   ⟦-- Está boca arriba, salvo con `dirección=abajo`:  entonces es el dorso que comparten todas las cartas.⟧
+|   ⟦-- Hoy es una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css⟧
+|   ⟦-- Dibujos de verdad de las cartas pueden ocupar su lugar:  solo cambian su dibujo y `para dibujar eso`.⟧
+|   [property define_property_has L1]
+|   | su «"carta"» es una **carta**			⟦-- la carta que dibuja⟧
+|   [property define_property_has L1]
+|   | su «"rango"» es un **rango de carta**
+|   [property define_property_has L1]
+|   | su «"palo"» es un **palo de carta**
+|   [property define_property_has L1]
+|   | su «"dirección"» es ‹arriba› o ‹abajo›
+|   [property quoted_property_formula L1]
+|   | «"está boca (dirección)"»
+|   [action create_hook L1]
+|   | al «crear una imagen de carta»    ‾value(una imagen de carta) bold(imagen de carta)
+|   |   ⟦-- con una carta:  su rango y su palo son los de la carta;  con un rango y un palo:  su carta es una nueva de ellos (su dorso no necesita ninguna)⟧
+|   |   [control if L2]
+|   |   | si su **carta** existe    ‾question(su carta existe)
+|   |   |   poner su **rango** al **rango** de su **carta**    ‾value(su rango) ‾value(rango de su carta)
+|   |   |   poner su **palo** al **palo** de su **carta**    ‾value(su palo) ‾value(palo de su carta)
+|   |   [control else_if L2]
+|   |   | de lo contrario si no está boca abajo    ‾question(no está boca abajo)
+|   |   |   poner su **carta** a **una nueva carta** cuyo **rango** es su **rango** y **palo** es su **palo**    ‾value(su carta) ‾value(una nueva carta cuyo rango es su rango y palo es su palo)
+|   [property property_value_getter L1]
+|   | su «"color"» es
+|   |   _azul_ si está boca abajo    ‾question(está boca abajo)
+|   |   el **color** de su **carta** de lo contrario    ‾value(el color de su carta)
+|   [property property_value_getter L1]
+|   | su «"dibujo"» es
+|   |   ⟦-- dibujar la letra unicode de las imágenes de carta⟧
+|   |   ⟦-- ver https://www.compart.com/en/unicode/block/U+1F0A0⟧
+|   |   [control if L2]
+|   |   | si está boca abajo    ‾question(está boca abajo)
+|   |   |   devolver _"🂠"_
+|   |   poner **lugar** al **valor** de su **carta**    ‾value(lugar) ‾value(valor de su carta)
+|   |   [control if L2]
+|   |   | si su **carta** es un _trébol_    ‾question(su carta es un trébol)
+|   |   |   devolver el elemento **lugar** de [_"🃑"_, _"🃒"_, _"🃓"_, _"🃔"_, _"🃕"_, _"🃖"_, _"🃗"_, _"🃘"_, _"🃙"_, _"🃚"_, _"🃛"_, _"🃝"_, _"🃞"_]    ‾value(el elemento lugar de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"])
+|   |   [control if L2]
+|   |   | si su **carta** es un _diamante_    ‾question(su carta es un diamante)
+|   |   |   devolver el elemento **lugar** de [_"🃁"_, _"🃂"_, _"🃃"_, _"🃄"_, _"🃅"_, _"🃆"_, _"🃇"_, _"🃈"_, _"🃉"_, _"🃊"_, _"🃋"_, _"🃍"_, _"🃎"_]    ‾value(el elemento lugar de ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"])
+|   |   [control if L2]
+|   |   | si su **carta** es un _corazón_    ‾question(su carta es un corazón)
+|   |   |   devolver el elemento **lugar** de [_"🂱"_, _"🂲"_, _"🂳"_, _"🂴"_, _"🂵"_, _"🂶"_, _"🂷"_, _"🂸"_, _"🂹"_, _"🂺"_, _"🂻"_, _"🂽"_, _"🂾"_]    ‾value(el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"])
+|   |   devolver el elemento **lugar** de [_"🂡"_, _"🂢"_, _"🂣"_, _"🂤"_, _"🂥"_, _"🂦"_, _"🂧"_, _"🂨"_, _"🂩"_, _"🂪"_, _"🂫"_, _"🂭"_, _"🂮"_]    ‾value(el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"])
+|   [action draw_it L1]
+|   | para **dibujar** eso
+|   |   <⟨texto⟩ color={su **color**}>{su **dibujo**}</⟨texto⟩>    code({su color}) code({su dibujo})
+
+|   [action to_do_something L1]
+|   | para «probar las imágenes de carta»
+|   |   poner **dama** a **una nueva carta** cuyo **rango** es _dama_, **palo** es _espadas_ y **dirección** es _abajo_    ‾value(dama) ‾value(una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo)
+|   |   obtener **una nueva imagen de carta** cuya **carta** es la **dama**    ‾value(una nueva imagen de carta cuya carta es la dama)
+|   |   su **palo** debería ser _espadas_    ‾value(su palo)
+|   |   su **dibujo** debería ser _"🂭"_    ‾value(su dibujo)
+|   |   su **color** debería ser _negro_    ‾value(su color)
+
+|   |   poner **siete** a **una nueva imagen de carta** cuyo **rango** es _7_ y **palo** es _corazones_    ‾value(siete) ‾value(una nueva imagen de carta cuyo rango es 7 y palo es corazones)
+|   |   el **nombre** de la **carta** del **siete** debería ser _"7 de corazones"_    ‾value(el nombre de la carta del siete)
+|   |   el **dibujo** del **siete** debería ser _"🂷"_    ‾value(el dibujo del siete)
+|   |   el **color** del **siete** debería ser _rojo_    ‾value(el color del siete)
+
+|   |   el **dibujo** de **una nueva imagen de carta** cuyo **rango** es _as_ y **palo** es _tréboles_ debería ser _"🃑"_    ‾value(el dibujo de una nueva imagen de carta cuyo rango es as y palo es tréboles)
+|   |   el **dibujo** de **una nueva imagen de carta** cuyo **rango** es _rey_ y **palo** es _diamantes_ debería ser _"🃎"_    ‾value(el dibujo de una nueva imagen de carta cuyo rango es rey y palo es diamantes)
+
+|   |   obtener **una nueva imagen de carta** cuya **dirección** es _abajo_    ‾value(una nueva imagen de carta cuya dirección es abajo)
+|   |   su **dibujo** debería ser _"🂠"_    ‾value(su dibujo)
+|   |   su **color** debería ser _azul_    ‾value(su color)
+
+==== /Mazo.es.spell
+⟪# Un mazo⟫
+⟦// Las 52 cartas de una baraja estándar, el as de tréboles primero.⟧
+
+[thing create_list_type L0]
+| un «"mazo"» es una **lista de cartas**
+|   [action create_hook L1]
+|   | al «crear un mazo»    ‾value(un mazo) bold(mazo)
+|   |   ⟦// Una carta de cada, el as de tréboles primero:  cada una empieza boca abajo, como toda vista reversible⟧
+|   |   [control list_iteration L2]
+|   |   | para **rango** en **rangos** de **carta**    ‾value(rangos de carta)
+|   |   |   [control list_iteration L3]
+|   |   |   | para **palo** en **palos** de **carta**    ‾value(palos de carta)
+|   |   |   |   agregar **una nueva carta** con **rango** y **palo** al **mazo**    ‾value(una nueva carta con rango y palo) ‾value(mazo)
+|   [property property_value_getter L1]
+|   | su «"nombre corto"» es
+|   |   ⟦// Los nombres cortos de sus cartas, de arriba abajo⟧
+|   |   poner **nombres** a una nueva lista de **texto**    ‾value(nombres) ‾value(una nueva lista de texto)
+|   |   [control list_iteration L2]
+|   |   | para **carta** en el **mazo**    ‾value(el mazo)
+|   |   |   agregar el **nombre corto** de la **carta** a **nombres**    ‾value(el nombre corto de la carta) ‾value(nombres)
+|   |   devolver _"mazo: "_ + **nombres**    ‾value(nombres)
+
+|   [action to_do_something L1]
+|   | para «probar la creación del mazo»
+|   |   el **mazo** es **un nuevo mazo**    ‾value(el mazo) ‾value(un nuevo mazo)
+|   |   el número de **cartas** en el **mazo** debería ser _52_    ‾value(el número de cartas en el mazo)
+|   |   el número de (**cartas** en el **mazo** donde es una _dama_) debería ser _4_    ‾value(el número de (cartas en el mazo donde es una dama))
+|   |   el **nombre corto** de la primera **carta** del **mazo** debería ser _"A♣↓"_    ‾value(el nombre corto de la primera carta del mazo)
+|   |   el **nombre** de la última **carta** del **mazo** debería ser _"rey de espadas"_    ‾value(el nombre de la última carta del mazo)
+|   |   barajar el **mazo**    ‾value(el mazo)
+|   |   el número de **cartas** en el **mazo** debería ser _52_    ‾value(el número de cartas en el mazo)
+
+==== /Pila.es.spell
+⟪# Una pila de cartas⟫
+⟦// La reserva de un juego, sus descartes, una columna en la mesa:  el juego nombra sus pilas, y dice qué toma cada tipo.⟧
+⟦// Cada pila es su propio elemento alrededor de los elementos de sus cartas, `<solitario-columna>` alrededor de `<solitario-carta>`s.⟧
+⟦// Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias reglas (`soltable`).⟧
+
+[thing create_viewable_list_type L0]
+| una «"pila"» es una **lista visible, soltable de cartas**
+|   [property define_property_has L1]
+|   | su «"disposición"» es uno de ‹apilada› o ‹vertical›
+|   |   ⟦// Cómo están sus cartas:  una sobre otra, o hacia abajo en una columna -- styles.css⟧
+|   [property property_value_getter L1]
+|   | su «"color"» es
+|   |   ⟦// El de su última carta:  sobre qué va la siguiente carta⟧
+|   |   _"ninguno"_ si está vacía    ‾question(está vacía)
+|   |   el **color** de su última **carta** de lo contrario    ‾value(el color de su última carta)
+|   [property property_value_getter L1]
+|   | su «"valor"» es
+|   |   ⟦// El de su última carta⟧
+|   |   _0_ si está vacía    ‾question(está vacía)
+|   |   el **valor** de su última **carta** de lo contrario    ‾value(el valor de su última carta)
+|   [property property_value_getter L1]
+|   | su «"nombre corto"» es
+|   |   ⟦// Su id, luego los nombres cortos de sus cartas:  reserva: D♠↑ 7♥↓⟧
+|   |   poner **resumen** a su **id** + _":"_    ‾value(resumen) ‾value(su id)
+|   |   [control list_iteration L2]
+|   |   | para **carta** en la **pila**    ‾value(la pila)
+|   |   |   poner **resumen** a **resumen** + _" "_ + el **nombre corto** de la **carta**    ‾value(resumen) ‾value(resumen) ‾value(el nombre corto de la carta)
+|   |   devolver **resumen**    ‾value(resumen)
+
+|   [action drag_handler L1]
+|   | cuando «una carta se suelta sobre ella»		⟦-- mover la carta a la pila, si es un movimiento válido⟧    ‾value(una carta) bold(carta)
+|   |   mover la **carta** a la **pila**    ‾call(mover la carta a la pila)
+
+|   [action to_do_something L1]
+|   | para «mover una carta a una pila»    ‾value(una carta) ‾value(una pila) bold(carta) bold(pila)
+|   |   ⟦// La carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y la toman⟧
+|   |   ⟦// - rechazado, nada se mueve, y no hay nada que deshacer⟧
+|   |   ⟦// - un juego agrega sus propios pasos después:  `después de mover una carta a una pila`⟧
+|   |   cancelar si la **pila** de la **carta** no puede soltar la **carta**    ‾question(la pila de la carta no puede soltar la carta)
+|   |     o la **pila** no puede tomar la **carta**    ‾question(la pila no puede tomar la carta)
+|   |   [control list_iteration L2]
+|   |   | para **carta** en (las **cartas** en la **pila** de la **carta** empezando con la **carta**)    ‾value(las cartas en la pila de la carta empezando con la carta)
+|   |   |   agregar eso a la **pila**    ‾value(eso) ‾value(la pila)
+
+|   [action to_do_something L1]
+|   | para «probar las pilas»
+|   |   poner la **reserva** a **una nueva pila** con **id** _"reserva"_    ‾value(la reserva) ‾value(una nueva pila con id "reserva")
+|   |   el **color** de la **reserva** debería ser _"ninguno"_    ‾value(el color de la reserva)
+|   |   el **valor** de la **reserva** debería ser _0_    ‾value(el valor de la reserva)
+|   |   agregar (**una nueva carta** cuyo **rango** es _dama_, **palo** es _espadas_ y **dirección** es _arriba_) a la **reserva**    ‾value(una nueva carta cuyo rango es dama, palo es espadas y dirección es arriba) ‾value(la reserva)
+|   |   agregar (**una nueva carta** cuyo **rango** es _7_ y **palo** es _corazones_) a la **reserva**    ‾value(una nueva carta cuyo rango es 7 y palo es corazones) ‾value(la reserva)
+|   |   el **color** de la **reserva** debería ser _rojo_    ‾value(el color de la reserva)
+|   |   el **valor** de la **reserva** debería ser _7_    ‾value(el valor de la reserva)
+|   |   el **nombre corto** de la **reserva** debería ser _"reserva: D♠↑ 7♥↓"_    ‾value(el nombre corto de la reserva)
+
+|   |   ⟦// una carta está en una sola pila a la vez⟧
+|   |   poner los **descartes** a **una nueva pila** con **id** _"descartes"_    ‾value(los descartes) ‾value(una nueva pila con id "descartes")
+|   |   obtener la **carta** de arriba de la **reserva**    ‾value(la carta de arriba de la reserva)
+|   |   agregar eso a los **descartes**    ‾value(eso) ‾value(los descartes)
+|   |   su **pila** es los **descartes** debería ser _sí_    ‾value(su pila) ‾value(los descartes)
+|   |   el número de **cartas** en la **reserva** debería ser _1_    ‾value(el número de cartas en la reserva)
+|   |   el **nombre corto** de los **descartes** debería ser _"descartes: 7♥↓"_    ‾value(el nombre corto de los descartes)
+
+[property belongs_to_one L0]
+| una **carta** pertenece a una **pila**
+|   ⟦// una carta está en una sola pila a la vez:  moverla a otra pila la quita de esta⟧
+
+==== /Solitario.es.spell
+# Solitario Klondike
+⟦// Reparte siete columnas, luego arma cuatro fundaciones, del as al rey, un palo cada una:⟧
+⟦// la [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) tiene sus reglas, y cómo se llama cada pila.⟧
+⟦// Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pila`.⟧
+⟦// Cada pila se declara donde se dibuja, `<columna "C1"/>`, y también la puntuación, `<número "puntuación"/>`.⟧
+
+[thing create_one_of_a_kind L0]
+| «solitario» es una **aplicación**
+|   [property define_property_has L1]
+|   | «"mazo"» es **un nuevo mazo**
+
+|   [action create_hook L1]
+|   | al «crear el solitario»    ‾value(el solitario) bold(solitario)
+|   |   agregar cada **carta** del **mazo** a la **reserva**    ‾value(cada carta del mazo) ‾value(la reserva)
+|   |   reiniciar el juego    ‾call(reiniciar el juego)
+
+|   [action draw_it L1]
+|   | para **dibujar** eso
+|   |   <⟨segmento⟩ invertido unir-a=«"arriba"» color=«""»>
+|   |     <⟨barra-herramientas⟩ class=«"GameBar"» aria-label=«"Juego"» apariencia=«"pildoras"» invertido tamano=«"pequeño"» encogible>
+|   |       <⟨texto⟩ slot=«"titulo"» tamano=«"grande"» extranegrita>Solitario</⟨texto⟩>
+|   |       <⟨acci⟩ón «"jugar solo"»/>
+|   |       <⟨acci⟩ón «"hacer trampa"»/>
+|   |       <⟨acci⟩ón «"reiniciar el juego"»/>
+|   |       <⟨divisor⟩/>
+|   |       <⟨acci⟩ón «"deshacer"» solo-icono/>
+|   |       <⟨acci⟩ón «"rehacer"» solo-icono/>
+|   |       <⟨texto⟩ slot=«"derecha"»>Puntos: <⟨n⟩úmero «"puntuación"»/></>    declares@30
+|   |     </⟨barra-herramientas⟩>
+|   |   </⟨segmento⟩>
+|   |   <⟨contenedor⟩ relleno=«"pequeño"» columnas=«"7"» separacion=«"xs"»>
+|   |     <⟨pila-de-reserva⟩ «"reserva"»/>    declares@0
+|   |     <⟨pila-de-descartes⟩ «"descartes"»/>    declares@0
+|   |     <⟨espaciador⟩/>
+|   |     <⟨fundaci⟩ón «"tréboles"» palo=tréboles/>    declares@0
+|   |     <⟨fundaci⟩ón «"diamantes"» palo=diamantes/>    declares@0
+|   |     <⟨fundaci⟩ón «"corazones"» palo=corazones/>    declares@0
+|   |     <⟨fundaci⟩ón «"espadas"» palo=espadas/>    declares@0
+|   |     <⟨columna⟩ «"C1"»/>    declares@0
+|   |     <⟨columna⟩ «"C2"»/>    declares@0
+|   |     <⟨columna⟩ «"C3"»/>    declares@0
+|   |     <⟨columna⟩ «"C4"»/>    declares@0
+|   |     <⟨columna⟩ «"C5"»/>    declares@0
+|   |     <⟨columna⟩ «"C6"»/>    declares@0
+|   |     <⟨columna⟩ «"C7"»/>    declares@0
+|   |   </⟨contenedor⟩>
+|   |   <⟨men⟩ú-contextual>
+|   |     <⟨acci⟩ón «"jugar solo"»/>
+|   |     <⟨acci⟩ón «"hacer trampa"»/>
+|   |     <⟨acci⟩ón «"reiniciar el juego"»/>
+|   |     <⟨divisor⟩/>
+|   |     <⟨acci⟩ón «"deshacer"»/>
+|   |     <⟨acci⟩ón «"rehacer"»/>
+|   |   </>
+
+|   [plain group define_group L1]
+|   | grupo «"Repartir"»
+|   |   [action to_do_something L2]
+|   |   | para «"reiniciar el juego"» con atajo «"R"», icono «"sync alternate"»
+|   |   |   limpiar la **puntuación**    ‾value(la puntuación)
+|   |   |   repartir las cartas    ‾call(repartir las cartas)
+
+|   |   [action to_do_something L2]
+|   |   | para «repartir las cartas»
+|   |   |   ⟦// Junta cada carta en la reserva, barájala, y reparte las columnas⟧
+|   |   |   [control list_iteration L3]
+|   |   |   | para **carta** en el **mazo**    ‾value(el mazo)
+|   |   |   |   poner **pila inicial** a la **pila** de la **carta**    ‾value(pila inicial) ‾value(la pila de la carta)
+|   |   |   |   voltear la **carta** boca abajo    ‾value(la carta)
+|   |   |   |   [control if L4]
+|   |   |   |   | si **pila inicial** no es la **reserva**    ‾value(pila inicial) ‾value(la reserva)
+|   |   |   |   |   agregar la **carta** a la **reserva**    ‾value(la carta) ‾value(la reserva)
+|   |   |   |   |   pausar _50_ mseg    ‾quantity(50 mseg)
+|   |   |   barajar la **reserva**    ‾value(la reserva)
+|   |   |   ⟦// la primera carta de cada fila cae boca abajo, y se voltea donde queda⟧
+|   |   |   [control list_range_iteration L3]
+|   |   |   | para **fila** desde _1_ hasta _7_
+|   |   |   |   [control list_range_iteration L4]
+|   |   |   |   | para **lugar** desde **fila** hasta _7_    ‾value(fila)
+|   |   |   |   |   agregar la **carta** de arriba de la **reserva** al elemento **lugar** de las **columnas**    ‾value(la carta de arriba de la reserva) ‾value(elemento lugar de las columnas)
+|   |   |   |   |   [control if L5]
+|   |   |   |   |   | si **lugar** es igual a **fila**    ‾value(lugar) ‾value(fila)
+|   |   |   |   |   |   voltear la última **carta** de (el elemento **lugar** de las **columnas**) boca arriba    ‾value(la última carta de (el elemento lugar de las columnas))
+|   |   |   |   |   pausar _50_ mseg    ‾quantity(50 mseg)
+|   |   |   robar de la reserva    ‾call(robar de la reserva)
+
+|   |   [action to_do_something L2]
+|   |   | para «robar de la reserva», deshacible como «"Voltear carta"»
+|   |   |   ⟦// Voltea la siguiente carta de la reserva, sobre los descartes:  los descartes de vuelta a la reserva cuando está vacía⟧
+|   |   |   ⟦// - un clic en la reserva, un paso para deshacer;  el del reparto ninguno, pues empieza el juego⟧
+|   |   |   [control if L3]
+|   |   |   | si la **reserva** está vacía    ‾question(la reserva está vacía)
+|   |   |   |   rehacer la reserva    ‾call(rehacer la reserva)
+|   |   |   obtener la **carta** de arriba de la **reserva**    ‾value(la carta de arriba de la reserva)
+|   |   |   voltear eso boca arriba    ‾value(eso)
+|   |   |   ⟦// lo que tarda su giro (styles.css), así se voltea antes de moverse⟧
+|   |   |   pausar _300_ mseg    ‾quantity(300 mseg)
+|   |   |   agregar eso a los **descartes**    ‾value(eso) ‾value(los descartes)
+
+|   |   [action to_do_something L2]
+|   |   | para «rehacer la reserva»
+|   |   |   ⟦// Los descartes, volteados, de vuelta a la reserva⟧
+|   |   |   poner **cartas** a una copia de la lista (los **descartes**) como una **pila**    ‾value(cartas) ‾value(una copia de la lista (los descartes) como una pila)
+|   |   |   invertir las **cartas**    ‾value(las cartas)
+|   |   |   agregar cada **carta** de las **cartas** a la **reserva**    ‾value(cada carta de las cartas) ‾value(la reserva)
+|   |   |   voltear cada **carta** de la **reserva** boca abajo    ‾value(cada carta de la reserva)
+
+|   [plain group define_group L1]
+|   | grupo «"Juego"»
+
+|   |   [action to_do_something L2]
+|   |   | para «jugar una carta»    ‾value(una carta) bold(carta)
+|   |   |   deshacible como _"Jugar carta"_
+|   |   |   [control if L3]
+|   |   |   | si la **carta** está en la **reserva**    ‾value(la carta) ‾value(la reserva)
+|   |   |   |   robar de la reserva    ‾call(robar de la reserva)
+|   |   |   [control else L3]
+|   |   |   | de lo contrario
+|   |   |   |   poner **pila final** a la primera **pila** en cada **pila** donde puede tomar la **carta**    ‾value(pila final) ‾value(la primera pila en cada pila donde puede tomar la carta)
+|   |   |   |   si no hay una **pila final** devolver _no_    ‾question(no hay una pila final)
+|   |   |   |   devolver mover la **carta** a **pila final**    ‾call(mover la carta a pila final)
+
+|   |   [action after_hook L2]
+|   |   | después de «mover una carta a una pila»    ‾value(una carta) ‾value(una pila) bold(carta) bold(pila)
+|   |   |   ⟦// El movimiento suma puntos;  la columna que dejó voltea su nueva última carta⟧
+|   |   |   agregar (los puntos por la **carta** en la **pila**) a la **puntuación** del **solitario**    ‾call(los puntos por la carta en la pila) ‾value(la puntuación del solitario)
+|   |   |   [control if L3]
+|   |   |   | si la **última pila** de la **carta** es una **columna** y no está vacía    ‾question(la última pila de la carta es una columna) ‾value(la última pila de la carta)
+|   |   |   |   voltear su última **carta** boca arriba    ‾value(su última carta)
+
+|   |   [action to_do_something L2]
+|   |   | para «"jugar solo"» con atajo «"A"», icono «"play"»
+|   |   |   ⟦// Juega cada carta que puede ir a algún lado, hasta que ninguna pueda⟧
+|   |   |   poner **hubo cambios** a _no_    ‾value(hubo cambios)
+|   |   |   [control if L3]
+|   |   |   | si los **descartes** no está vacía    ‾question(los descartes no está vacía)
+|   |   |   |   poner **candidata** a la última **carta** de los **descartes**    ‾value(candidata) ‾value(la última carta de los descartes)
+|   |   |   |   [control if L4]
+|   |   |   |   | si jugar **candidata**    ‾call(jugar candidata)
+|   |   |   |   |   poner **hubo cambios** a _sí_    ‾value(hubo cambios)
+|   |   |   |   |   pausar _500_ mseg    ‾quantity(500 mseg)
+|   |   |   ⟦// la última carta de cada columna a su fundación⟧
+|   |   |   [control list_iteration L3]
+|   |   |   | para **pila** en las **columnas**    ‾value(las columnas)
+|   |   |   |   si la **pila** está vacía devolver    ‾question(la pila está vacía)
+|   |   |   |   poner **candidata** a la última **carta** de la **pila**    ‾value(candidata) ‾value(la última carta de la pila)
+|   |   |   |   poner **fundación** a la primera **pila** en las **fundaciones** donde su **palo** es el **palo** de **candidata**    ‾value(fundación) ‾value(la primera pila en las fundaciones donde su palo es el palo de candidata)
+|   |   |   |   [control if L4]
+|   |   |   |   | si la **fundación** puede tomar **candidata**    ‾question(la fundación puede tomar candidata)
+|   |   |   |   |   poner **hubo cambios** a _sí_    ‾value(hubo cambios)
+|   |   |   |   |   jugar **candidata**    ‾call(jugar candidata)
+|   |   |   |   |   pausar _100_ mseg    ‾quantity(100 mseg)
+|   |   |   ⟦// las cartas boca arriba de cada columna, todas juntas, a otra columna⟧
+|   |   |   [control list_iteration L3]
+|   |   |   | para **pila** en las **columnas**    ‾value(las columnas)
+|   |   |   |   poner **cartas visibles** a las **cartas** en la **pila** donde la **carta** está boca arriba    ‾value(cartas visibles) ‾value(las cartas en la pila donde la carta está boca arriba)
+|   |   |   |   si **cartas visibles** está vacía devolver    ‾question(cartas visibles está vacía)
+|   |   |   |   poner **candidata** a la primera **carta** de **cartas visibles**    ‾value(candidata) ‾value(la primera carta de cartas visibles)
+|   |   |   |   si **candidata** es un _rey_ y **candidata** es la primera **carta** de la **pila** devolver    ‾question(candidata es un rey) ‾value(candidata) ‾value(la primera carta de la pila)
+|   |   |   |   [control if L4]
+|   |   |   |   | si jugar **candidata**    ‾call(jugar candidata)
+|   |   |   |   |   poner **hubo cambios** a _sí_    ‾value(hubo cambios)
+|   |   |   |   |   pausar _500_ mseg    ‾quantity(500 mseg)
+|   |   |   si **hubo cambios** jugar solo    ‾value(hubo cambios) ‾call(jugar solo)
+
+|   |   [action to_do_something L2]
+|   |   | para «"hacer trampa"» con atajo «"C"», icono «"eye"»
+|   |   |   ⟦// Voltea una carta boca abajo de una columna, al azar, sobre los descartes⟧
+|   |   |   poner **pilas restantes** a las **pilas** en las **columnas** donde no está vacía y su primera **carta** está boca abajo    ‾value(pilas restantes) ‾value(las pilas en las columnas donde no está vacía y su primera carta está boca abajo)
+|   |   |   si **pilas restantes** está vacía devolver    ‾question(pilas restantes está vacía)
+|   |   |   poner la **pila** a una **pila** al azar de **pilas restantes**    ‾value(la pila) ‾value(una pila al azar de pilas restantes)
+|   |   |   poner la **carta** a una **carta** al azar de (las **cartas** en la **pila** donde la **carta** está boca abajo)    ‾value(la carta) ‾value(una carta al azar de (las cartas en la pila donde la carta está boca abajo))
+|   |   |   ⟦// volteada mientras se mueve:  se alza boca abajo sobre su columna, luego se voltea mientras pasa a los descartes⟧
+|   |   |   agregar la **carta** a los **descartes**    ‾value(la carta) ‾value(los descartes)
+|   |   |   voltear la **carta** boca arriba    ‾value(la carta)
+
+|   |   [action to_do_something L2]
+|   |   | para «"los puntos por (una carta) en (una pila)"»    ‾value(una carta) ‾value(una pila) bold(carta) bold(pila)
+|   |   |   ⟦// Lo que suma un movimiento:  10 a una fundación, 5 desde los descartes, si no nada⟧
+|   |   |   si **pila** es una **fundación** devolver _10_    ‾question(pila es una fundación)
+|   |   |   si la **última pila** de la **carta** es los **descartes** devolver _5_    ‾value(la última pila de la carta) ‾value(los descartes)
+|   |   |   devolver _0_
+
+|   |   [action on L2]
+|   |   | cuando su **puntuación** cambia
+|   |   |   [control if L3]
+|   |   |   | si el número de **cartas** en las **fundaciones** es _52_    ‾value(el número de cartas en las fundaciones)
+|   |   |   |   avisar _"¡Ganaste!"_ con _"Juego nuevo"_
+|   |   |   |   reiniciar el juego    ‾call(reiniciar el juego)
+
+[thing reopen_type L0]
+| una **carta**		⟦-- jugar la carta al pulsarla, si es un movimiento válido⟧
+|   [action on L1]
+|   | cuando se pulsa
+|   |   [control if L2]
+|   |   | si está boca arriba o su **pila** es la **reserva** del **solitario**    ‾question(está boca arriba) ‾value(su pila) ‾value(la reserva del solitario)
+|   |   |   jugar la **carta**    ‾call(jugar la carta)
+
+
+[plain group define_group L0]
+| grupo «"Las pilas"»
+|   ⟦// Cada tipo de pila, qué puede tomar o soltar, y cómo están sus cartas.⟧
+|   ⟦// Mientras está vacía, muestra su marcador, si tiene uno.⟧
+
+|   [thing create_type L1]
+|   | una «"pila de reserva"» es una **pila** con **disposición** «"apilada"»
+|   |   ⟦// Las cartas aún sin jugar, boca abajo:  un clic voltea la siguiente, así que no se le puede quitar ninguna⟧
+|   |   [property list_guard L2]
+|   |   | nunca puede tomar una **carta**
+|   |   [property list_guard L2]
+|   |   | nunca puede soltar una **carta**
+|   |   [action draw_it L2]
+|   |   | para **dibujar** su **marcador**
+|   |   |   <⟨imagen-de-carta⟩ dirección=abajo />
+|   |   [action on L2]
+|   |   | cuando se pulsa
+|   |   |   robar de la reserva    ‾call(robar de la reserva)
+
+|   [thing create_type L1]
+|   | una «"pila de descartes"» es una **pila** con **disposición** «"apilada"»		⟦-- Adonde van las cartas de la reserva al voltearse⟧
+|   |   [property list_guard L2]
+|   |   | nunca puede tomar una **carta**
+|   |   [property list_guard L2]
+|   |   | sus **cartas** son **arrastrables** cuando la **carta** es su última **carta**    ‾value(la carta) ‾value(su última carta)
+
+|   [thing create_type L1]
+|   | una «"fundación"» es una **pila** con **disposición** «"apilada"»		⟦-- Donde se arma un palo, del as al rey, una carta a la vez⟧
+|   |   [property define_property_has L2]
+|   |   | su «"palo"» es un **palo de carta**
+|   |   [property list_guard L2]
+|   |   | nunca puede soltar una **carta**
+|   |   [property list_guard L2]
+|   |   | es **soltable** cuando
+|   |   |   devolver _no_ si la **carta** no es la última **carta** de la **pila** de la **carta**    ‾value(la carta) ‾value(la última carta de la pila de la carta)
+|   |   |   devolver su **palo** es el **palo** de la **carta** y    ‾value(su palo) ‾value(el palo de la carta)
+|   |   |     su **valor** + _1_ es el **valor** de la **carta**    ‾value(su valor) ‾value(el valor de la carta)
+|   |   [action draw_it L2]
+|   |   | para **dibujar** su **marcador**			⟦-- un as gris claro de su palo, boca arriba⟧
+|   |   |   <⟨imagen-de-carta⟩ rango=as palo={su **palo**} />    code({su palo})
+
+|   [thing create_type L1]
+|   | una «"columna"» es una **pila** con **disposición** «"vertical"»			⟦-- Una columna, armada hacia abajo del rey al as, rojo y negro alternados⟧
+|   |   [property list_guard L2]
+|   |   | sus **cartas** son **arrastrables** cuando la **carta** está boca arriba    ‾question(la carta está boca arriba)
+|   |   [property list_guard L2]
+|   |   | es **soltable** cuando
+|   |   |   está vacía y la **carta** es un _rey_    ‾question(está vacía) ‾question(la carta es un rey)
+|   |   |   o
+|   |   |   su **color** no es el **color** de la **carta** y    ‾value(su color) ‾value(el color de la carta)
+|   |   |     su **valor** es el **valor** de la **carta** + _1_    ‾value(su valor) ‾value(el valor de la carta)
+
+|   [action to_do_something L1]
+|   | para «probar los movimientos»
+|   |   poner la **columna** a **una nueva columna** con **id** _"T1"_    ‾value(la columna) ‾value(una nueva columna con id "T1")
+|   |   poner el **rey** a **una nueva carta** cuyo **rango** es _rey_, **palo** es _espadas_ y **dirección** es _arriba_    ‾value(el rey) ‾value(una nueva carta cuyo rango es rey, palo es espadas y dirección es arriba)
+|   |   poner la **dama** a **una nueva carta** cuyo **rango** es _dama_, **palo** es _corazones_ y **dirección** es _arriba_    ‾value(la dama) ‾value(una nueva carta cuyo rango es dama, palo es corazones y dirección es arriba)
+|   |   poner la **jota** a **una nueva carta** cuyo **rango** es _jota_, **palo** es _tréboles_ y **dirección** es _arriba_    ‾value(la jota) ‾value(una nueva carta cuyo rango es jota, palo es tréboles y dirección es arriba)
+
+|   |   ⟦// una columna vacía toma solo un rey, luego uno más bajo del otro color⟧
+|   |   la **columna** puede tomar la **dama** debería ser _no_    ‾question(la columna puede tomar la dama)
+|   |   la **columna** puede tomar el **rey** debería ser _sí_    ‾question(la columna puede tomar el rey)
+|   |   agregar el **rey** a la **columna**    ‾value(el rey) ‾value(la columna)
+|   |   la **columna** puede tomar la **jota** debería ser _no_    ‾question(la columna puede tomar la jota)
+|   |   la **columna** puede tomar la **dama** debería ser _sí_    ‾question(la columna puede tomar la dama)
+|   |   agregar la **dama** a la **columna**    ‾value(la dama) ‾value(la columna)
+|   |   el **nombre corto** de la **columna** debería ser _"T1: R♠↑ D♥↑"_    ‾value(el nombre corto de la columna)
+|   |   la **columna** puede soltar la **dama** debería ser _sí_    ‾question(la columna puede soltar la dama)
+|   |   voltear la **dama** boca abajo    ‾value(la dama)
+|   |   la **columna** puede soltar la **dama** debería ser _no_    ‾question(la columna puede soltar la dama)
+
+|   |   ⟦// una fundación toma su palo, el as primero, luego uno más alto:  cada una la última carta de su pila⟧
+|   |   poner la **fundación** a **una nueva fundación** con **palo** = _corazones_    ‾value(la fundación) ‾value(una nueva fundación con palo = corazones)
+|   |   poner el **dos** a **una nueva carta** cuyo **rango** es _2_, **palo** es _corazones_ y **dirección** es _arriba_    ‾value(el dos) ‾value(una nueva carta cuyo rango es 2, palo es corazones y dirección es arriba)
+|   |   poner el **as** a **una nueva carta** cuyo **rango** es _as_, **palo** es _corazones_ y **dirección** es _arriba_    ‾value(el as) ‾value(una nueva carta cuyo rango es as, palo es corazones y dirección es arriba)
+|   |   poner la **columna** a **una nueva columna** con **id** _"T2"_    ‾value(la columna) ‾value(una nueva columna con id "T2")
+|   |   agregar el **dos** a la **columna**    ‾value(el dos) ‾value(la columna)
+|   |   agregar el **as** a la **columna**    ‾value(el as) ‾value(la columna)
+|   |   la **fundación** puede tomar el **dos** debería ser _no_    ‾question(la fundación puede tomar el dos)
+|   |   la **fundación** puede tomar el **as** debería ser _sí_    ‾question(la fundación puede tomar el as)
+|   |   mover el **as** a la **fundación**    ‾call(mover el as a la fundación)
+|   |   la **fundación** puede tomar el **dos** debería ser _sí_    ‾question(la fundación puede tomar el dos)
+|   |   agregar la **dama** a la **columna**    ‾value(la dama) ‾value(la columna)
+|   |   la **fundación** puede tomar la **dama** debería ser _no_    ‾question(la fundación puede tomar la dama)

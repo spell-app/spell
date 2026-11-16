@@ -1,0 +1,93 @@
+==== /PicnicLetter.api.spell
+⟪## Picnic Letter:  where its parts are read from⟫
+⟦// One page for every attendee:  the organizers send it as a pointer in their inboxes, and it reads, as whoever opens it,⟧
+⟦// three places:  this text, the published sheet's shifts, and their own inbox.⟧
+⟦// Your event's letter names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.⟧
+
+[thing create_place L0]
+| «published sheet» is a data folder at «"picnic@rs/sheet"»
+|   ⟦// Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection.⟧
+|   **listings** live at _"volunteers"_
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"listing"» is a **thing**
+|   it lives in the **published sheet**    ‾value(the published sheet)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"shift"» is **text**
+
+[thing create_place L0]
+| «my inbox» is a data folder at «"@rs/__inbox"»
+|   ⟦// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.⟧
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"message"» is a **thing**
+|   it lives in **my inbox**    ‾value(my inbox)
+|   [property define_property_has L1]
+|   | its «"text"» is **text**
+|   [property define_property_has L1]
+|   | its «"thread"» is **text**
+
+==== /PicnicLetter.spell
+⟪# Picnic Letter⟫
+⟦// The picnic's letter:  the same rules and details for everyone, then what's yours alone.⟧
+⟦// Each part shows only what its reader may see:  your own shifts, your own invitations.⟧
+
+⟪## A shift you signed up for⟫
+
+[thing reopen_type L0]
+| a **listing**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨label⟩ class=«"shift"»>{its **shift**}</⟨label⟩>    code({its shift})
+
+⟪## Your invitations' count, from your inbox⟫
+
+[thing reopen_type L0]
+| a **message**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨text⟩ class=«"count"»>{its **text**}</⟨text⟩>    code({its text})
+
+⟪## The letter⟫
+
+[thing create_one_of_a_kind L0]
+| «picnic letter» is an **app**
+|   [property property_value_getter L1]
+|   | its «"shifts"» is every **listing** where its **person** is them
+|   [property property_value_getter L1]
+|   | its «"counts"» is every **message** where its **thread** is «"invitations"»
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ class=«"letter"»>
+|   |     <⟨stack⟩>
+|   |       <⟨header⟩ size=«"large"»>The Picnic:  your letter</⟨header⟩>
+|   |       <⟨segment⟩ class=«"details"»>
+|   |         <⟨header⟩ size=«"medium"»>The day</⟨header⟩>
+|   |         <⟨text⟩ paragraph>Saturday from 9 to 4, at Riverside Park, by the bandstand.  Bring a chair, and something to share.</⟨text⟩>
+|   |         <⟨text⟩ paragraph>Your ticket's guest gets into the attendees' space once an organizer confirms it:  the map and the day's news are there.</⟨text⟩>
+|   |       </⟨segment⟩>
+|   |       <⟨segment⟩ class=«"your-shifts"»>
+|   |         <⟨header⟩ size=«"medium"»>You have signed up for these shifts</⟨header⟩>
+|   |         <⟨stack⟩ class=«"shifts"» direction=«"horizontal"» spacing=«"sm"» wrap>
+|   |           <⟨for⟩ listing in its shifts loading=«"Reading the sheet"»>
+|   |             <⟨empty⟩><⟨text⟩ color=«"grey"»>No shifts yet:  sign up on the sheet.</⟨text⟩></⟨empty⟩>
+|   |             <⟨failed⟩><⟨text⟩ color=«"grey"»>Sign in to see your shifts.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨segment⟩>
+|   |       <⟨segment⟩ class=«"your-invitations"»>
+|   |         <⟨header⟩ size=«"medium"»>Your invitations</⟨header⟩>
+|   |         <⟨stack⟩ class=«"counts"» spacing=«"sm"»>
+|   |           <⟨for⟩ message in its counts>
+|   |             <⟨empty⟩><⟨text⟩ color=«"grey"»>You haven't asked for any yet.</⟨text⟩></⟨empty⟩>
+|   |             <⟨failed⟩><⟨text⟩ color=«"grey"»>Sign in to see your invitations.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨segment⟩>
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>

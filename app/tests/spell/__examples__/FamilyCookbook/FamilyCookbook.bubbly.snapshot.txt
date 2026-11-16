@@ -1,0 +1,120 @@
+==== /FamilyCookbook.api.spell
+⟪## Family Cookbook:  your recipes, saved in the cloud⟫
+⟦// The next line keeps them in your own space on Spell's server:  sign in on any device, and they're there.⟧
+⟦// Until you sign in, they're kept in this browser, and the page says so;  once you do, they go up.⟧
+⟦// What's drawn and done with them is in FamilyCookbook.spell.⟧
+[thing saved_in_the_cloud L0]
+| «family cookbook» is saved in the cloud
+
+[thing create_type L0]
+| a «"recipe"» is a **thing**
+|   it lives in **family cookbook**    ‾value(family cookbook)
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"servings"» is a **number**
+|   [property define_property_has L1]
+|   | its «"notes"» is **text**
+
+==== /FamilyCookbook.spell
+⟪# Family Cookbook⟫
+⟦// Your recipes, on cards, saved in the cloud:  sign in on your laptop and your phone, and both show the same ones.⟧
+⟦// Where they're kept is in FamilyCookbook.api.spell, and only its first line knows.⟧
+
+⟦// Every notes box grows as you type⟧
+<⟨ui-defaults⟩>
+  <⟨ui-textarea⟩ grow/>
+</⟨ui-defaults⟩>
+
+⟪## A recipe:  a card you can read and change⟫
+
+[thing reopen_type L0]
+| a **recipe**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨card⟩>
+|   |     <⟨content⟩>
+|   |       <⟨form⟩ value={it} class=«"recipe"»>    code({it})
+|   |         <⟨field⟩ label=«"Recipe name"»>
+|   |           <⟨button⟩ slot=«"actions"» class=«"remove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Remove"» title=«"Remove"» onClick={remove it from the **recipes**}/>    code({remove it from the recipes})
+|   |           <⟨input⟩ name=«"title"» class=«"title"» size=«"large"»/>
+|   |         </⟨field⟩>
+|   |         <⟨field⟩ label=«"Serves"» inline>
+|   |           <⟨input⟩ class=«"serves"» name=«"servings"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"»/>
+|   |         </⟨field⟩>
+|   |         <⟨field⟩ label=«"Notes"»>
+|   |           <⟨textarea⟩ name=«"notes"» rows=«"2"»/>
+|   |         </⟨field⟩>
+|   |       </⟨form⟩>
+|   |     </⟨content⟩>
+|   |   </⟨card⟩>
+
+⟪## The box:  the card for a new recipe, then a card for each one you have⟫
+
+[thing create_one_of_a_kind L0]
+| «cookbook» is an **app**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [property define_property_has L1]
+|   | «"new recipe"» is **a new recipe** with **servings** = «4»
+|   [property define_menu L1]
+|   | its «"box menu"» is a menu of «"undo"»
+
+|   [property property_value_getter L1]
+|   | its «"matches"» is
+|   |   ⟦// Newest first, by when each was saved⟧
+|   |   return every **recipe** where its **title** includes the **search**, sorted by its **created**, newest first    ‾value(every recipe where its title includes the search, sorted by its created, newest first)
+
+|   [action to_do_something L1]
+|   | to «add the new recipe»
+|   |   add the **new recipe** to the **recipes**    ‾value(the new recipe) ‾value(the recipes)
+|   |   set its **new recipe** to **a new recipe** with **servings** = _4_    ‾value(its new recipe) ‾value(a new recipe with servings = 4)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩>
+|   |     <⟨stack⟩ direction=«"horizontal"» wrap align=«"end"» justify=«"between"»>
+|   |       <⟨stack⟩ align=«"start"»>
+|   |         <⟨header⟩ size=«"large"»>Family Cookbook</⟨header⟩>
+|   |         <⟨text⟩ color=«"grey"»>Everything you type is saved as you go:  in the cloud, once you sign in.</⟨text⟩>
+|   |       </⟨stack⟩>
+|   |       <⟨toolbar⟩ class=«"undo"» menu=«"box menu"» aria-label=«"Recipes"»/>
+|   |       <⟨form⟩ value={it} class=«"find"» fluid>    code({it})
+|   |         <⟨field⟩ label=«"Search"»>
+|   |           <⟨input⟩ name=«"search"» class=«"search"» icon=«"search"»/>
+|   |         </⟨field⟩>
+|   |       </⟨form⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨cards⟩>
+|   |       <⟨card⟩ class=«"new"»>
+|   |         <⟨content⟩>
+|   |           <⟨form⟩ value={its **new recipe**}>    code({its new recipe})
+|   |             <⟨header⟩ size=«"small"»>Add a recipe</⟨header⟩>
+|   |             <⟨field⟩ label=«"Recipe name"»>
+|   |               <⟨input⟩ name=«"title"» class=«"draft"» size=«"large"»/>
+|   |             </⟨field⟩>
+|   |             <⟨field⟩ label=«"Serves"» inline>
+|   |               <⟨input⟩ class=«"serves"» name=«"servings"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"»/>
+|   |             </⟨field⟩>
+|   |             <⟨field⟩ label=«"Notes"»>
+|   |               <⟨textarea⟩ name=«"notes"» rows=«"2"»/>
+|   |             </⟨field⟩>
+|   |           </⟨form⟩>
+|   |         </⟨content⟩>
+|   |         <⟨extra⟩>
+|   |           <⟨button⟩ class=«"add"» size=«"small"» color=«"primary"» disabled={its **new recipe's title** is _""_} onClick={add the new recipe}>Add recipe</⟨button⟩>    code({its new recipe's title is ""}) code({add the new recipe})
+|   |         </⟨extra⟩>
+|   |       </⟨card⟩>
+|   |       <⟨for⟩ recipe in the matches loading=«"Finding your recipes"»>
+|   |         <⟨empty⟩>
+|   |           <⟨text⟩ class=«"none"» color=«"grey"»>{_"No recipes yet. Add your first one."_ if the **search** is _""_ otherwise _"No recipes match your search."_}</⟨text⟩>    code({"No recipes yet. Add your first one." if the search is "" otherwise "No recipes match your search."})
+|   |         </⟨empty⟩>
+|   |         <⟨failed⟩>
+|   |           <⟨message⟩ class=«"failed"» color=«"red"»>
+|   |             We can't reach your recipes right now.
+|   |             <⟨button⟩ class=«"again"» onClick={try again}>Try again</⟨button⟩>    code({try again})
+|   |           </⟨message⟩>
+|   |         </⟨failed⟩>
+|   |       </⟨for⟩>
+|   |     </⟨cards⟩>
+|   |   </⟨container⟩>

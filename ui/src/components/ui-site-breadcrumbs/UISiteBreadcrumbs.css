@@ -1,0 +1,20 @@
+/*
+ * `<ui-site-breadcrumbs>` (`UISiteBreadcrumbs.tsx`):  where you are in a site, drawn with `<ui-breadcrumbs>`.
+ * - The trail's look is the breadcrumb's own (`--ui-breadcrumb-*`, `::part(breadcrumbs)` for its box).
+ * - In an app menu's start, it sits as an item does there:  centred in the bar, an item's room either side
+ *   (`--ui-site-breadcrumbs-padding`).
+ * - Nothing to show (`:state(empty)`):  no room at all.
+ */
+@layer ui.components {
+  :host {
+    --_ui-site-breadcrumbs-padding: var(--ui-site-breadcrumbs-padding, 0 1.14286em);
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: var(--_ui-site-breadcrumbs-padding);
+  }
+
+  :host(:state(empty)) {
+    display: none;
+  }
+}

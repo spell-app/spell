@@ -1,15 +1,21 @@
 /* The palette, and what shows where a part would land:  `Palette.tsx`, `PartEdits.ts`. */
-/* as tall as what it shows, up to the window's bottom;  wider windows, more columns, so it's shorter (epic `editor` I180):
-   - 4 columns, then 5 from 1280px wide, 6 from 1800px */
+/* as tall as what it shows, up to the window's bottom;  wider windows, more columns, so it's shorter (epic `editor` I180, I185):
+   - 4 columns, then 5 from 1280px wide, 6 from 1400px, 7 from 1800px
+   - its rows 20px tall, not a tree's 22px:  a topic stays whole in its column, so Owen's longer topics
+     (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling */
 .PalettePopup {
   --palette-width: min(740px, 88vw);
   --ui-popup-max-width: calc(var(--palette-width) + 40px);
+  --ui-tree-row-height: 20px;
 
   @media (width >= 1280px) {
     --palette-width: 940px;
   }
-  @media (width >= 1800px) {
+  @media (width >= 1400px) {
     --palette-width: 1100px;
+  }
+  @media (width >= 1800px) {
+    --palette-width: 1300px;
   }
 }
 

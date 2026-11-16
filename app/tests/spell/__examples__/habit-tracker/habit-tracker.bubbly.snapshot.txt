@@ -1,0 +1,150 @@
+==== /HabitTracker.spell
+⟪# Habit Tracker⟫
+⟦// A week of checkboxes for each habit:  tick a day when you did it.⟧
+⟦// Each habit counts its days, and its streak:  the most days in a row you kept it up.⟧
+
+⟪## A habit⟫
+⟦// Its name, a yes or no for each day of the week, and what they add up to.⟧
+⟦// Each habit is its own element on the page, `<habit-tracker-habit>`.⟧
+
+[thing create_type L0]
+| a «"habit"» is a **view**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+
+|   [plain group define_group L1]
+|   | group «"Days"»
+|   |   ⟦// A yes or no for each day of the week⟧
+|   |   [property define_property_has L2]
+|   |   | its «"monday"» is yes or no
+|   |   [property define_property_has L2]
+|   |   | its «"tuesday"» is yes or no
+|   |   [property define_property_has L2]
+|   |   | its «"wednesday"» is yes or no
+|   |   [property define_property_has L2]
+|   |   | its «"thursday"» is yes or no
+|   |   [property define_property_has L2]
+|   |   | its «"friday"» is yes or no
+|   |   [property define_property_has L2]
+|   |   | its «"saturday"» is yes or no
+|   |   [property define_property_has L2]
+|   |   | its «"sunday"» is yes or no
+
+|   [plain group define_group L1]
+|   | group «"Totals"»
+|   |   ⟦// Worked out from its days, again as each one is ticked⟧
+|   |   [property property_value_getter L2]
+|   |   | its «"days"» is
+|   |   |   ⟦// Its week as one list, Monday first⟧
+|   |   |   [the **monday**, the **tuesday**, the **wednesday**, the **thursday**, the **friday**, the **saturday**, the **sunday**]    ‾value([the monday, the tuesday, the wednesday, the thursday, the friday, the saturday, the sunday])
+|   |   [property property_value_getter L2]
+|   |   | its «"count"» is the number of **days** in the **days** where it is _yes_
+|   |   |   ⟦// How many days this week it was done⟧
+|   |   [property property_value_getter L2]
+|   |   | its «"streak"» is
+|   |   |   ⟦// The most days in a row it was done⟧
+|   |   |   set **run** to _0_    ‾value(run)
+|   |   |   set **best** to _0_    ‾value(best)
+|   |   |   [control list_iteration L3]
+|   |   |   | for **day** in the **days**    ‾value(the days)
+|   |   |   |   [control if L4]
+|   |   |   |   | if **day** is _yes_    ‾value(day)
+|   |   |   |   |   set **run** to **run** + _1_    ‾value(run) ‾value(run)
+|   |   |   |   |   if **run** > **best**: set **best** to **run**    ‾value(run) ‾value(best) ‾value(best) ‾value(run)
+|   |   |   |   [control else L4]
+|   |   |   |   | otherwise
+|   |   |   |   |   set **run** to _0_    ‾value(run)
+|   |   |   return **best**    ‾value(best)
+
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   ⟦// A form of its own, bound to it:  ticking a day, or typing a name, changes the habit⟧
+|   |   |   <⟨segment⟩>
+|   |   |     <⟨form⟩ value={it}>    code({it})
+|   |   |       <⟨stack⟩ spacing=«"sm"»>
+|   |   |         <⟨stack⟩ direction=«"horizontal"» justify=«"between"»>
+|   |   |           <⟨input⟩ name=«"name"» aria-label=«"Habit"» appearance=«"transparent"»/>
+|   |   |           <⟨labels⟩>
+|   |   |             <⟨label⟩>{the **count**} days</⟨label⟩>    code({the count})
+|   |   |             <⟨label⟩ color=«"orange"» icon=«"fire"»>{the **streak**} in a row</⟨label⟩>    code({the streak})
+|   |   |           </⟨labels⟩>
+|   |   |         </⟨stack⟩>
+|   |   |         <⟨stack⟩ direction=«"horizontal"» justify=«"between"» wrap>
+|   |   |           <⟨checkbox⟩ name=«"monday"» label=«"Mon"»/>
+|   |   |           <⟨checkbox⟩ name=«"tuesday"» label=«"Tue"»/>
+|   |   |           <⟨checkbox⟩ name=«"wednesday"» label=«"Wed"»/>
+|   |   |           <⟨checkbox⟩ name=«"thursday"» label=«"Thu"»/>
+|   |   |           <⟨checkbox⟩ name=«"friday"» label=«"Fri"»/>
+|   |   |           <⟨checkbox⟩ name=«"saturday"» label=«"Sat"»/>
+|   |   |           <⟨checkbox⟩ name=«"sunday"» label=«"Sun"»/>
+|   |   |         </⟨stack⟩>
+|   |   |       </⟨stack⟩>
+|   |   |     </⟨form⟩>
+|   |   |   </⟨segment⟩>
+
+|   |   [action to_do_something L2]
+|   |   | to «test streaks»
+|   |   |   set the **habit** to **a new habit** with **name** _"Read"_, **monday** = _yes_, **tuesday** = _yes_, **thursday** = _yes_    ‾value(the habit) ‾value(a new habit with name "Read", monday = yes, tuesday = yes, thursday = yes)
+|   |   |   the **habit's count** should be _3_    ‾value(the habit's count)
+|   |   |   the **habit's streak** should be _2_    ‾value(the habit's streak)
+|   |   |   set the **habit's wednesday** to _yes_    ‾value(the habit's wednesday)
+|   |   |   the **habit's streak** should be _4_    ‾value(the habit's streak)
+
+⟪## The week⟫
+⟦// The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.⟧
+
+[thing create_viewable_list_type L0]
+| a «"week"» is a **viewable list of habits**
+|   its items can be reordered immediately
+|     ⟦// on the page, its habits can be dragged to another place⟧
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// Its habits one under the other;  while it's empty, a line saying so⟧
+|   |   <⟨stack⟩ spacing=«"sm"»>
+|   |     <⟨if⟩ it is empty>
+|   |       <⟨text⟩ color=«"grey"»>No habits yet:  add one above</⟨text⟩>
+|   |     </⟨if⟩>
+|   |     <⟨children⟩/>
+|   |   </⟨stack⟩>
+[property belongs_to_one L0]
+| a **habit** belongs to one **week**
+|   ⟦// a habit is in one week⟧
+
+⟪## The tracker⟫
+⟦// The new habit's field, then a habit a row.⟧
+
+[thing create_one_of_a_kind L0]
+| «habit tracker» is an **app**
+|   [property define_property_has L1]
+|   | «"habits"» is **a new week**
+|   [property define_property_has L1]
+|   | its «"draft"» is **text**
+|   |   ⟦// The next habit's name, as the new habit's field holds it⟧
+
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   ⟦// A new tracker starts with three habits, a few days ticked⟧
+|   |   add (**a new habit** with **name** _"Read"_, **monday** = _yes_, **tuesday** = _yes_, **wednesday** = _yes_, **friday** = _yes_) to the **habits**    ‾value(a new habit with name "Read", monday = yes, tuesday = yes, wednesday = yes, friday = yes) ‾value(the habits)
+|   |   add (**a new habit** with **name** _"Walk"_, **tuesday** = _yes_, **wednesday** = _yes_, **thursday** = _yes_, **friday** = _yes_) to the **habits**    ‾value(a new habit with name "Walk", tuesday = yes, wednesday = yes, thursday = yes, friday = yes) ‾value(the habits)
+|   |   add (**a new habit** with **name** _"Stretch"_, **monday** = _yes_, **saturday** = _yes_) to the **habits**    ‾value(a new habit with name "Stretch", monday = yes, saturday = yes) ‾value(the habits)
+
+|   [action to_do_something L1]
+|   | to «add the draft»
+|   |   ⟦// The draft, as a new habit at the end;  the field empties⟧
+|   |   if the **draft** is _""_ return    ‾value(the draft)
+|   |   add (**a new habit** with **name** = the **draft**) to the **habits**    ‾value(a new habit with name = the draft) ‾value(the habits)
+|   |   clear the **draft**    ‾value(the draft)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩>
+|   |       <⟨header⟩ level=«"2"»>This week</⟨header⟩>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨input⟩ name=«"draft"» placeholder=«"A habit to keep, e.g. Read"» aria-label=«"New habit"» fluid action>
+|   |           <⟨button⟩ slot=«"action"» color=«"primary"» disabled={the **draft** is _""_} onClick={add the draft}>Add</⟨button⟩>    code({the draft is ""}) code({add the draft})
+|   |         </⟨input⟩>
+|   |       </⟨form⟩>
+|   |       {draw the **habits**}
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>

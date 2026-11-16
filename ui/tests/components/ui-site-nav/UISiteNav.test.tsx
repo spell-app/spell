@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { ShadowTree } from "spell/ui/test-helpers/ShadowTree"
 import { UISiteNav, type SiteNavPage } from "spell/ui/components/ui-site-nav"
 
 /** A site:  Films (Film), People (Person), and Help, which only holds pages (About). */
@@ -98,26 +99,6 @@ describe("<ui-site-nav>", () => {
     PrefStore.setAt(`ui-site-nav:${key}`, undefined)
   })
 })
-
-/** Wait for every element in `host`'s shadow tree, all the way down. */
-async function settleDeep(host: Element) {
-  for (let round = 0; round < 4; round++) {
-    const hosts: Element[] = []
-    const walk = (root: ShadowRoot | null) => {
-      for (const element of root?.querySelectorAll("*") ?? []) {
-        hosts.push(element)
-        walk(element.shadowRoot)
-      }
-    }
-    walk(host.shadowRoot)
-    const ready = hosts.flatMap((each) => {
-      const waited = (each as Element & { ready?: Promise<unknown> }).ready
-      return waited ? [waited] : []
-    })
-    await Promise.all(ready)
-    await ElementFixture.settle()
-  }
-}
 
 describe("<ui-site-nav> pages' extras", () => {
   /** A nav of `pages`, showing `current`, in `appearance` if given. */
@@ -232,7 +213,7 @@ describe("<ui-site-nav> pages' extras", () => {
     const navigating = vi.fn()
     host.addEventListener("ui-starred", (event) => starred((event as CustomEvent).detail.starred))
     host.addEventListener("ui-navigating", navigating)
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     const star = row(host, "Input").querySelector<HTMLElement>(":scope > .star")!
     star.shadowRoot!.querySelector("button")!.click()
     expect(starred).toHaveBeenCalledWith(true)
@@ -283,7 +264,7 @@ describe("<ui-site-nav> pages' extras", () => {
 
   it("a page with no icon beside pages with one keeps an icon's room;  `collapsed` shows its first letter", async () => {
     const host = await navOf(GROUPS, { current: "#/explore", appearance: "nav" })
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     const letter = row(host, "Notes").querySelector<HTMLElement>(':scope > [slot="icon"]')!
     expect(letter.textContent).toBe("N")
     expect(getComputedStyle(letter).visibility).toBe("hidden")
@@ -300,7 +281,7 @@ describe("<ui-site-nav> pages' extras", () => {
   it("a group's icon shows before its label, its pages a step in;  `collapsed`, one column, an iconless group a line (I20)", async () => {
     const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
     const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     const rowOf = (title: string) => row(host, title).shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!
     const startOf = (title: string) => parseFloat(getComputedStyle(rowOf(title)).paddingInlineStart)
     expect(row(host, "Design").getAttribute("icon")).toBe("palette")
@@ -334,7 +315,7 @@ describe("<ui-site-nav> pages' extras", () => {
     )) as HTMLElement
     const host = box.querySelector<HTMLElement & { revealCurrent(): void }>("ui-site-nav")!
     host.setAttribute("pages", JSON.stringify(pages))
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(box.scrollHeight).toBeGreaterThan(box.clientHeight)
     host.revealCurrent()
     await ElementFixture.settle()

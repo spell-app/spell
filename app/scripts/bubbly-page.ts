@@ -4,6 +4,7 @@
  * - Solitaire's four files, then the Spanish card, then two HTML pages (`BubblyMarkup`), each laid out by the parser (`SP.BubblyLayout`) and drawn by
  *   `BubblyHtml`:  what `<spell-code>` shows, with each declaration in a `<ui-section>` the page's comments anchor to.
  * - The English files are laid out as ONE text, so each file's steps know the others' types and phrases.
+ * - Then "Roles":  the roles-to-look table (epic `language` P60), each role's example a line of Solitaire, drawn.
  * - Also `bubbly.css` beside it:  a GENERATED copy of the app's sheet, the look's one home, which the analysis
  *   page's mock-ups link too.
  * - `--out`:  the page's folder, by default the epic repo's `epics/language/details/` (`epic config contentFolder`).
@@ -14,6 +15,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
 import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
 
@@ -45,6 +47,65 @@ const ENGLISH_ORDER = [
   "Solitaire/Solitaire.spell"
 ]
 
+/**
+ * The roles-to-look table (epic `language` P60):  what each role is put on, how it draws, and a line of Solitaire that
+ * shows it, found by its words.  The same table, as text:  `bubbly.css`'s header.
+ */
+const ROLES = [
+  {
+    role: "band",
+    on: "the rule",
+    draws: "the head's band, in its part of speech's colour",
+    line: "after moving a card to a pile"
+  },
+  {
+    role: "declaration",
+    on: "a group, a word",
+    draws: "a white pill:  what a person typed",
+    line: 'its "suit" is one of'
+  },
+  {
+    role: "blank",
+    on: "a group",
+    draws: "dotted underline in its pill, its kind word bold",
+    line: "to move a card to a pile"
+  },
+  { role: "name", on: "a group, a word", draws: "bold", line: "it is droppable when" },
+  {
+    role: "value",
+    on: "the rule, its groups",
+    draws: "one dotted underline, outermost only",
+    line: "add each card in the deck to the stock"
+  },
+  {
+    role: "question",
+    on: "the rule",
+    draws: "one dotted underline, with what it asks of",
+    line: "and the card is on top of its pile"
+  },
+  { role: "action call", on: "the rule", draws: "one dotted underline, whole", line: "turn over the next card" },
+  { role: "quantity", on: "the rule", draws: "one dotted underline", line: "pause for 10 msec" },
+  {
+    role: "written value",
+    on: "the rule",
+    draws: "italic, never underlined",
+    line: "set seven to a new card whose rank is 7"
+  },
+  { role: "plain", on: "a group", draws: "no bold, no underline", line: "return item column of" }
+]
+
+/** Solitaire's files, each drawn in its project's parse, as the editor draws them:  the roles' examples. */
+const solitaireDrawings = parseSpellProject(
+  ENGLISH_ORDER.map((file) => ({
+    path: `/${file.split("/")[1]}`,
+    contents: readFileSync(join(EXAMPLES, file), "utf8")
+  }))
+).files.map(({ contents, scope, match }) =>
+  SP.BubblyLayout.of(contents, scope.parser as SP.SpellParser, {
+    within: { match, inputLines: contents.split("\n") } as unknown as SP.SpellFile
+  })
+)
+
 const ids = new Set<string>()
 const drawn = new Map<string, string>()
 const english = ENGLISH_ORDER.map((file) => readFileSync(join(EXAMPLES, file), "utf8"))
@@ -69,6 +130,20 @@ for (const { files } of DRAWINGS.filter((drawing) => drawing.html)) {
   const html = readFileSync(resolve(files[0]!), "utf8").replace(/[ \t]*<style\b[\s\S]*?<\/style>[ \t]*\n?/gi, "")
   drawn.set(files[0]!, BubblyMarkup.write(html))
 }
+
+const rolesSection = `
+          <ui-section id="roles" label="${DRAWINGS.length + 1}. Roles:  what each part is, and how it draws" sticky collapsible dividing open="false">
+            <p>Each grammar rule says what its parts ARE, its roles, beside its syntax;  each role draws one way.
+              A rule with no roles draws by the defaults:  names bold, Spell's own words plain, written values italic.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable><table>
+              <thead><tr><th>Role</th><th>Put on</th><th>Draws as</th><th>In Solitaire</th></tr></thead>
+              <tbody>${ROLES.map(
+                ({ role, on, draws, line }) =>
+                  `<tr><td><code>${role}</code></td><td>${on}</td><td>${draws}</td><td>${exampleLine(line)}</td></tr>`
+              ).join("")}</tbody>
+            </table></ui-table>
+          </ui-section>
+`
 
 const sections = DRAWINGS.map(
   ({ id, label, files }, index) => `
@@ -124,7 +199,7 @@ writeFileSync(
             it:  its card, the game, its piles and its deck, then the card in Spanish;  last, two of the app's HTML pages, drawn the same way with their corners cut. Comment on any block with its
             bullhorn, or select some text and press ⌘ I.
           </p>
-${sections}        </main>
+${sections}${rolesSection}        </main>
       </div>
     </ui-root>
     <script src="/_epic/assets/highlight.min.js"></script>
@@ -141,6 +216,36 @@ writeFileSync(
 ${readFileSync(SHEET, "utf8")}`
 )
 console.info(`Wrote card-bubbly.html and bubbly.css in ${OUT}`)
+
+/**
+ * The first line of Solitaire starting with `words`, drawn alone:  a head on its band, no body;  a step as it is.
+ * - Drawn as the editor draws it, in its project's parse (`solitaireDrawings`):  a call of its own actions is one.
+ * - throws if no line holds them:  the table's example has gone from Solitaire
+ */
+function exampleLine(words: string): string {
+  for (const drawing of solitaireDrawings) {
+    const node = lineIn(drawing, words)
+    if (node) return BubblyHtml.write({ ...drawing, nodes: [node] })
+  }
+  throw new TypeError(`bubbly-page:  no line of Solitaire starts \`${words}\`;  pick another for its role`)
+}
+
+/** `drawing`'s first line starting with `words`:  a head with no body, or a step at no depth. */
+function lineIn(drawing: SP.BubblyDrawing, words: string): SP.BubblyNode | undefined {
+  const holds = (line: SP.BubblyLine) => drawing.text.slice(line.start, line.end).startsWith(words)
+  const find = (nodes: SP.BubblyNode[]): SP.BubblyNode | undefined => {
+    for (const node of nodes) {
+      if (node.kind === "line" && holds(node)) return { ...node, depth: 0 }
+      if (node.kind === "block") {
+        if (holds(node.head)) return { ...node, level: 0, body: [] }
+        const found = find(node.body)
+        if (found) return found
+      }
+    }
+    return undefined
+  }
+  return find(drawing.nodes)
+}
 
 /** Where `node` starts. */
 function startOf(node: SP.BubblyNode): number {

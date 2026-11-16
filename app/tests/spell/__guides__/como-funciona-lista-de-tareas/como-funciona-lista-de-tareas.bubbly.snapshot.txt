@@ -1,0 +1,133 @@
+==== /ComoFuncionaListaDeTareas.es.spell
+⟪## Cómo funciona Lista de tareas⟫
+⟦// El ejemplo Lista de tareas es una lista de cosas por hacer:  escribe una tarea, márcala cuando esté hecha,⟧
+⟦// y elige si ver todas, solo las pendientes, o solo las hechas.⟧
+⟦// Está escrito en español:  cada línea de código también.⟧
+⟦// Tres ideas hacen el trabajo:⟧
+⟦// - cada tarea es una COSA propia, que se dibuja como una fila con una casilla⟧
+⟦// - la lista elige tareas con "donde":  "tareas en sus tareas donde está pendiente"⟧
+⟦// - la lista dibuja cada tarea, o la salta, según dice su filtro⟧
+⟦//⟧
+⟦// Esta guía tiene esas tres, sin arrastrar, seleccionar, el editor de propiedades,⟧
+⟦// ni dónde se guardan las tareas:  aquí están en memoria, y empiezan de nuevo cada vez.⟧
+⟦// Abre Lista de tareas, en los Ejemplos, para verlo todo.  Task List es la misma lista, en inglés.⟧
+
+
+⟪## Una tarea⟫
+[thing create_type L0]
+| una «"tarea"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"título"» es **texto**
+|   [property define_property_has L1]
+|   | su «"hecha"» es sí o no
+|   [property quoted_type_expression L1]
+|   | «"está hecha"» si su **hecha** es _sí_    ‾value(su hecha)
+|   [property quoted_type_expression L1]
+|   | «"está pendiente"» si su **hecha** es _no_    ‾value(su hecha)
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   ⟦// un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"⟧
+|   |   devolver <es-formulario value={eso}>    ‾value(<es-formulario value={eso}>)
+|   |     <⟨es-pila⟩ direccion=«"horizontal"» separacion=«"sm"»>    ‾value(<es-pila direccion="horizontal" separacion="sm">)
+|   |       <⟨es-casilla⟩ name=«"hecha"» aria-label=«"Hecha"»/>    ‾value(<es-casilla name="hecha" aria-label="Hecha"/>)
+|   |       <⟨es-texto⟩>{su **título**}</⟨es-texto⟩>    ‾value(<es-texto>{su título}</es-texto>) code({su título})
+|   |     </⟨es-pila⟩>    ‾value(</es-pila>)
+|   |   </⟨es-formulario⟩>    ‾value(</es-formulario>)
+
+
+⟪## La agenda:  las tareas, mostradas según su filtro⟫
+[thing create_viewable_list_type L0]
+| una «"agenda"» es una **lista visible de tareas**
+|   [property define_property_has L1]
+|   | su «"mostrando"» es una de ‹todas›, ‹pendientes› o ‹hechas›
+|   |   ⟦// lo que muestra:  todas las tareas, las pendientes, o las hechas⟧
+|   [action draw_it L1]
+|   | para **dibujar** cada **elemento**
+|   |   ⟦// cada tarea, salvo que el filtro la oculte:  "devolver nada" no dibuja nada⟧
+|   |   si su **mostrando** es _"pendientes"_ y la **tarea** está hecha devolver nada    ‾value(su mostrando) ‾question(la tarea está hecha) ‾value(nada)
+|   |   si su **mostrando** es _"hechas"_ y la **tarea** está pendiente devolver nada    ‾value(su mostrando) ‾question(la tarea está pendiente) ‾value(nada)
+|   |   devolver dibujar la **tarea**    ‾value(la tarea)
+
+[property belongs_to_one L0]
+| una **tarea** pertenece a una **agenda**
+
+
+⟪## La aplicación⟫
+[thing create_one_of_a_kind L0]
+| «lista de tareas» es una **aplicación**
+|   [property define_property_has L1]
+|   | sus «"tareas"» es **una nueva agenda**
+|   [property property_value_getter L1]
+|   | su «"cuenta pendiente"» es el **largo** de (**tareas** en sus **tareas** donde está pendiente)
+|   |   ⟦// cuántas quedan:  las tareas elegidas con "donde", contadas⟧
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   devolver <es-contenedor texto>    ‾value(<es-contenedor texto>)
+|   |     <⟨es-menu⟩ apariencia=«"secundario"»>    ‾value(<es-menu apariencia="secundario">)
+|   |       <⟨es-elemento⟩ clase=«"encabezado"»>{su **cuenta pendiente** + _" pendientes"_}</⟨es-elemento⟩>    ‾value(<es-elemento clase="encabezado">{su cuenta pendiente + " pendientes"}</es-elemento>) code({su cuenta pendiente + " pendientes"})
+|   |       <⟨es-elemento⟩ seleccionado={el **mostrando** de sus **tareas** es _"todas"_} onClick={poner el **mostrando** de sus **tareas** a _"todas"_}>Todas</⟨es-elemento⟩>    ‾value(<es-elemento seleccionado={el mostrando de sus tareas es "todas"} onClick={poner el mostrando de sus tareas a "todas"}>Todas</es-elemento>) code({el mostrando de sus tareas es "todas"}) code({poner el mostrando de sus tareas a "todas"})
+|   |       <⟨es-elemento⟩ seleccionado={el **mostrando** de sus **tareas** es _"pendientes"_} onClick={poner el **mostrando** de sus **tareas** a _"pendientes"_}>Pendientes</⟨es-elemento⟩>    ‾value(<es-elemento seleccionado={el mostrando de sus tareas es "pendientes"} onClick={poner el mostrando de sus tareas a "pendientes"}>Pendientes</es-elemento>) code({el mostrando de sus tareas es "pendientes"}) code({poner el mostrando de sus tareas a "pendientes"})
+|   |       <⟨es-elemento⟩ seleccionado={el **mostrando** de sus **tareas** es _"hechas"_} onClick={poner el **mostrando** de sus **tareas** a _"hechas"_}>Hechas</⟨es-elemento⟩>    ‾value(<es-elemento seleccionado={el mostrando de sus tareas es "hechas"} onClick={poner el mostrando de sus tareas a "hechas"}>Hechas</es-elemento>) code({el mostrando de sus tareas es "hechas"}) code({poner el mostrando de sus tareas a "hechas"})
+|   |     </⟨es-menu⟩>    ‾value(</es-menu>)
+|   |     {dibujar sus **tareas**}    ‾value({dibujar sus tareas})
+|   |   </⟨es-contenedor⟩>    ‾value(</es-contenedor>)
+
+
+⟪## Inicio:  tres tareas, una de ellas hecha⟫
+poner el **mostrando** de las **tareas** de la **lista de tareas** a _todas_    ‾value(el mostrando de las tareas de la lista de tareas)
+agregar (**una nueva tarea** con **título** = _"Leer esta guía"_, **hecha** = _sí_) a las **tareas** de la **lista de tareas**    ‾value(una nueva tarea con título = "Leer esta guía", hecha = sí) ‾value(las tareas de la lista de tareas)
+agregar (**una nueva tarea** con **título** = _"Marcar una casilla a la derecha"_) a las **tareas** de la **lista de tareas**    ‾value(una nueva tarea con título = "Marcar una casilla a la derecha") ‾value(las tareas de la lista de tareas)
+agregar (**una nueva tarea** con **título** = _"Probar el filtro Pendientes"_) a las **tareas** de la **lista de tareas**    ‾value(una nueva tarea con título = "Probar el filtro Pendientes") ‾value(las tareas de la lista de tareas)
+
+
+⟪## Una prueba⟫
+[action to_do_something L0]
+| para «probar la cuenta pendiente»
+|   poner la **lista** a **una nueva agenda**    ‾value(la lista) ‾value(una nueva agenda)
+|   agregar (**una nueva tarea** con **título** = _"a"_, **hecha** = _sí_) a la **lista**    ‾value(una nueva tarea con título = "a", hecha = sí) ‾value(la lista)
+|   agregar (**una nueva tarea** con **título** = _"b"_) a la **lista**    ‾value(una nueva tarea con título = "b") ‾value(la lista)
+|   el **largo** de (**tareas** en la **lista** donde está pendiente) debería ser _1_    ‾value(el largo de (tareas en la lista donde está pendiente))
+
+
+⟪## Pruébalo⟫
+⟦// - Marca "Marcar una casilla a la derecha":  la cuenta del menú baja a 1.⟧
+⟦// - Haz clic en "Pendientes", luego en "Hechas":  la lista muestra solo las tareas que encajan.⟧
+⟦// - Agrega una tarea:  copia una de las líneas "agregar" del Inicio, y cambia su título.⟧
+⟦//⟧
+⟦// Y después:  Lista de tareas, en los Ejemplos, donde escribes tareas nuevas, las arrastras para ordenarlas,⟧
+⟦// y seleccionas varias para cambiarlas todas a la vez.⟧
+
+
+⟪## Dónde guarda sus tareas el ejemplo⟫
+⟦// Las tareas de esta guía viven en memoria:  recarga, y empiezan otra vez.⟧
+⟦// Lista de tareas las guarda en uno de cuatro lugares, el que la persona elige en "Guardarlas en", sobre la lista:⟧
+⟦// - Este navegador, con el que empieza:  "almacén del navegador es una base de datos en este dispositivo"⟧
+⟦// - Un archivo JSON en el servidor, un archivo por tarea:  "archivos de tareas es una carpeta de datos en "tareas""⟧
+⟦// - Un archivo CSV en el servidor, una fila por tarea:  "hoja de tareas es una hoja en "tareas.csv"", el archivo propio del proyecto⟧
+⟦// - Tu cuenta de atmosphere, el AT Protocol de Bluesky, como Statusphere:  "cielo de tareas es una cuenta personal de atmosphere"⟧
+⟦//⟧
+⟦// Cada lugar es un archivo de API propio, y cada uno tiene un GUARDIÁN con las mismas tres cosas:⟧
+⟦//       - sus "tareas guardadas" es cada tarea del navegador⟧
+⟦//       - para apuntar (título como texto):⟧
+⟦//           poner tarea a una nueva tarea del navegador con título = título⟧
+⟦//           agregar tarea a las tareas del navegador⟧
+⟦//           devolver tarea⟧
+⟦// y su clase de tarea dice cómo se tira:⟧
+⟦//       una "tarea del navegador" es una tarea:⟧
+⟦//           - vive en almacén del navegador⟧
+⟦//           - para tirarla:⟧
+⟦//               quitar eso de las tareas del navegador⟧
+⟦//⟧
+⟦// La aplicación nunca nombra un lugar.  Le pregunta a su guardián:⟧
+⟦//       para tarea en (las tareas guardadas de su guardián) ordenadas por su orden⟧
+⟦//       poner tarea a apuntar (el borrador) de su guardián⟧
+⟦//       tirar la tarea⟧
+⟦// Elegir otro lugar en "Guardarlas en" cambia su "almacén";  "cuando su almacén cambia", la aplicación toma el guardián⟧
+⟦// de ese lugar, y llena la lista con sus tareas.  Una tarea guardada en cualquier lugar se guarda sola al cambiar:⟧
+⟦// no hay paso de guardar.⟧
+⟦// Su lugar en la lista se guarda igual, como su "orden":  al soltar, cada tarea toma su lugar como orden,⟧
+⟦//       - cuando una tarea se suelta sobre ella:⟧
+⟦//           guardar el orden⟧
+⟦// así las tareas vuelven en el orden en que se arrastraron, sea cual sea el lugar que las guarda.⟧

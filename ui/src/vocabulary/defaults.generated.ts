@@ -980,6 +980,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "fixed", kind: "boolean", group: "layout" },
     { name: "pure", kind: "boolean", group: "advanced" }
   ],
+  "ui-page-layout": [{ name: "drawer", kind: "valueOnly", group: "appearance", values: ["compact"] }],
   "ui-panel": [
     { name: "label", kind: "string", group: "name" },
     { name: "hint", kind: "string", group: "form" },
@@ -1480,6 +1481,11 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" }
   ],
+  "ui-site-breadcrumbs": [
+    { name: "pages", kind: "json", group: "content" },
+    { name: "current", kind: "string", group: "content" },
+    { name: "label", kind: "string", group: "content" }
+  ],
   "ui-site-nav": [
     { name: "pages", kind: "json", group: "content" },
     { name: "current", kind: "string", group: "content" },
@@ -1487,6 +1493,23 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
     { name: "collapsed", kind: "keyOnly", group: "appearance" },
     { name: "remember", kind: "string", group: "behaviour" }
+  ],
+  "ui-site-nav-button": [
+    { name: "color", kind: "color", group: "appearance" },
+    { name: "position", kind: "valueOnly", group: "layout", values: ["left", "right"] },
+    { name: "value", kind: "string", group: "form" },
+    { name: "label", kind: "string", group: "name" },
+    { name: "description", kind: "string", group: "content" },
+    { name: "icon", kind: "icon", group: "content" },
+    { name: "image", kind: "string", group: "content" },
+    { name: "flag", kind: "string", group: "content" },
+    { name: "link", kind: "string", group: "link" },
+    { name: "target", kind: "string", group: "link" },
+    { name: "appearance", kind: "multiple", group: "appearance", values: ["link"] },
+    { name: "disabled", kind: "keyOnly", group: "states" },
+    { name: "selected", kind: "keyOnly", group: "states" },
+    { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
+    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] }
   ],
   "ui-site-tabs": [
     { name: "pages", kind: "json", group: "content" },

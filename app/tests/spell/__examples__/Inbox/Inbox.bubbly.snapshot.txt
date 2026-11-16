@@ -1,0 +1,198 @@
+==== /Inbox.api.spell
+⟪## Inbox:  where your messages are kept⟫
+⟦// Everyone in an org has an inbox there:  "@rs/__inbox" is yours in the Rock Society, whoever you are.⟧
+⟦// Sending a message is adding it to your messages:  Spell writes a copy into each inbox it's to,⟧
+⟦// so deleting yours leaves theirs.  A message can't be changed once it's sent.⟧
+⟦// Your org's inbox page names its own org on the next line.⟧
+[thing create_place L0]
+| «my inbox» is a data folder at «"@rs/__inbox"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"message"» is a **thing**
+|   ⟦// A message, or a page a Manager sent:  its title and line, worked out again when you open it.⟧
+|   it lives in **my inbox**    ‾value(my inbox)
+|   [property define_property_has L1]
+|   | its «"text"» is **text**
+|   [property define_property_has L1]
+|   | its «"recipients"» is **text**
+|   [property define_property_has L1]
+|   | its «"from"» is **text**
+|   [property define_property_has L1]
+|   | its «"thread"» is **text**
+|   [property define_property_has L1]
+|   | its «"sent"» is **text**
+|   [property define_property_has L1]
+|   | its «"page"» is **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"line"» is **text**
+
+⟦// How you hear of your inbox by mail:  one mail per message, a daily digest, or none.  The first one counts;⟧
+⟦// with none, a daily digest.  Every mail has a link that stops it.⟧
+[thing create_type L0]
+| a «"mail choice"» is a **thing**
+|   it lives in **my inbox**    ‾value(my inbox)
+|   [property define_property_has L1]
+|   | its «"how"» is **text**
+
+[thing create_type L0]
+| a «"subscription"» is a **thing**
+|   ⟦// A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update.⟧
+|   it lives in **my inbox**    ‾value(my inbox)
+|   [property define_property_has L1]
+|   | its «"space"» is **text**
+
+==== /Inbox.spell
+⟪# Inbox⟫
+⟦// Your inbox in an org:  the messages people in it send you, and the pages its Managers send.⟧
+⟦// Where it's kept is in Inbox.api.spell, and only its first line knows.⟧
+⟦// A message lands in each inbox it's to, so deleting yours leaves theirs;  it can't be changed once it's sent.⟧
+
+⟪## A row for each:  who it's from, what it says, and its conversation⟫
+
+[thing reopen_type L0]
+| a **message**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨segment⟩ class=«"message"»>
+|   |     <⟨stack⟩ spacing=«"sm"»>
+|   |       <⟨stack⟩ direction=«"horizontal"» spacing=«"md"» align=«"center"» wrap>
+|   |         <⟨text⟩ class=«"from"»>{its **from**}</⟨text⟩>    code({its from})
+|   |         <⟨text⟩ class=«"to"» color=«"grey"»>to {its **recipients**}</⟨text⟩>    code({its recipients})
+|   |         <⟨text⟩ class=«"sent"» color=«"grey"»>{its **sent**}</⟨text⟩>    code({its sent})
+|   |         <⟨button⟩ class=«"remove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Delete your copy"» title=«"Delete your copy:  everyone else keeps theirs"» onClick={remove it from the **messages**}/>    code({remove it from the messages})
+|   |       </⟨stack⟩>
+|   |       <⟨text⟩ class=«"text"»>{its **text**}</⟨text⟩>    code({its text})
+|   |       <⟨text⟩ class=«"title"»>{its **title**}</⟨text⟩>    code({its title})
+|   |       <⟨text⟩ class=«"line"» color=«"grey"»>{its **line**}</⟨text⟩>    code({its line})
+|   |       <⟨text⟩ class=«"page"» color=«"grey"»>{its **page**}</⟨text⟩>    code({its page})
+|   |     </⟨stack⟩>
+|   |   </⟨segment⟩>
+
+⟪## How you hear of it, by mail:  pick one⟫
+
+[thing reopen_type L0]
+| a **mail choice**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨form⟩ value={it} class=«"mail-choice"»>    code({it})
+|   |     <⟨field⟩ label=«"Mail me"» inline>
+|   |       <⟨select⟩ name=«"how"»>
+|   |         <⟨item⟩ value=«"each"»>One mail per message</⟨item⟩>
+|   |         <⟨item⟩ value=«"digest"»>A daily digest</⟨item⟩>
+|   |         <⟨item⟩ value=«"none"»>No mail</⟨item⟩>
+|   |       </⟨select⟩>
+|   |     </⟨field⟩>
+|   |   </⟨form⟩>
+
+⟪## A space you follow, and a button to stop⟫
+
+[thing reopen_type L0]
+| a **subscription**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"subscription"» direction=«"horizontal"» spacing=«"md"» align=«"center"»>
+|   |     <⟨text⟩>{its **space**}</⟨text⟩>    code({its space})
+|   |     <⟨button⟩ class=«"unsubscribe"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Stop following it"» title=«"Stop following it"» onClick={remove it from the **subscriptions**}/>    code({remove it from the subscriptions})
+|   |   </⟨stack⟩>
+
+⟪## The page:  write one, then every message, newest first, each with a Reply⟫
+
+[thing create_one_of_a_kind L0]
+| «inbox page» is an **app**
+|   [property define_property_has L1]
+|   | «"new message"» is **a new message**
+|   [property define_property_has L1]
+|   | «"new subscription"» is **a new subscription**
+
+|   [action to_do_something L1]
+|   | to «send it»
+|   |   add the **new message** to the **messages**    ‾value(the new message) ‾value(the messages)
+|   |   set its **new message** to **a new message**    ‾value(its new message) ‾value(a new message)
+
+|   [action to_do_something L1]
+|   | to «reply to (who as text) in (conversation as text)»    ‾value(who as text) ‾value(conversation as text) bold(who) bold(text) bold(conversation) bold(text)
+|   |   set the **recipients** of the **new message** to **who**    ‾value(the recipients of the new message) ‾value(who)
+|   |   set the **thread** of the **new message** to **conversation**    ‾value(the thread of the new message) ‾value(conversation)
+
+|   [action to_do_something L1]
+|   | to «choose how»
+|   |   add **a new mail choice** whose **how** is _"digest"_ to the **mail choices**    ‾value(a new mail choice whose how is "digest") ‾value(the mail choices)
+
+|   [action to_do_something L1]
+|   | to «subscribe»
+|   |   add the **new subscription** to the **subscriptions**    ‾value(the new subscription) ‾value(the subscriptions)
+|   |   set its **new subscription** to **a new subscription**    ‾value(its new subscription) ‾value(a new subscription)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"org-page"» spacing=«"none"»>
+|   |     <⟨toolbar⟩ class=«"top-bar"» appearance=«"text"» aria-label=«"Inbox"»>
+|   |       <⟨text⟩ slot=«"title"» size=«"large"»>Inbox</⟨text⟩>
+|   |       <⟨item⟩ link=«"OrgChat"»>Chat</⟨item⟩>
+|   |       <⟨item⟩ link=«"OrgFeed"»>Feed</⟨item⟩>
+|   |       <⟨item⟩ link=«"OrgAdmin"»>Admin</⟨item⟩>
+|   |       <⟨stack⟩ slot=«"right"» direction=«"horizontal"»>{the sign in menu}</⟨stack⟩>    code({the sign in menu})
+|   |     </⟨toolbar⟩>
+|   |     <⟨container⟩ class=«"inbox"»>
+|   |       <⟨stack⟩>
+|   |         <⟨text⟩ class=«"who-reads"» color=«"grey"»>The org's Board and its Admins can read your inbox, as they can every space in the org.</⟨text⟩>
+
+|   |         <⟨segment⟩ class=«"write"»>
+|   |           <⟨header⟩ size=«"medium"»>Write to someone</⟨header⟩>
+|   |           <⟨form⟩ value={its **new message**}>    code({its new message})
+|   |             <⟨stack⟩ spacing=«"sm"»>
+|   |               <⟨input⟩ name=«"recipients"» placeholder=«"bo@rs, cy@rs"» aria-label=«"Who it's to, by their address"» fluid/>
+|   |               <⟨input⟩ name=«"text"» placeholder=«"What you'd like to say"» aria-label=«"Your message"» fluid/>
+|   |               <⟨input⟩ name=«"thread"» placeholder=«"A conversation to answer in, if any"» aria-label=«"The conversation it answers"» fluid/>
+|   |               <⟨button⟩ class=«"send"» color=«"primary"» disabled={the **recipients** of the **new message** is _""_} onClick={send it}>Send</⟨button⟩>    code({the recipients of the new message is ""}) code({send it})
+|   |             </⟨stack⟩>
+|   |           </⟨form⟩>
+|   |         </⟨segment⟩>
+
+|   |         <⟨segment⟩ class=«"mail"»>
+|   |           <⟨header⟩ size=«"medium"»>Mail</⟨header⟩>
+|   |           <⟨stack⟩ class=«"mail-choices"» spacing=«"sm"»>
+|   |             <⟨for⟩ choice in every mail choice loading=«"Reading how you hear of it"»>
+|   |               <⟨empty⟩>
+|   |                 <⟨stack⟩ direction=«"horizontal"» spacing=«"md"» align=«"center"» wrap>
+|   |                   <⟨text⟩ color=«"grey"»>A daily digest of what's new, each morning.</⟨text⟩>
+|   |                   <⟨button⟩ class=«"choose"» size=«"small"» onClick={choose how}>Choose</⟨button⟩>    code({choose how})
+|   |                 </⟨stack⟩>
+|   |               </⟨empty⟩>
+|   |             </⟨for⟩>
+|   |           </⟨stack⟩>
+|   |         </⟨segment⟩>
+
+|   |         <⟨segment⟩ class=«"subscriptions"»>
+|   |           <⟨header⟩ size=«"medium"»>Spaces you follow</⟨header⟩>
+|   |           <⟨form⟩ value={its **new subscription**}>    code({its new subscription})
+|   |             <⟨input⟩ name=«"space"» placeholder=«"events_team@rs"» aria-label=«"A shared space of the org, by its address"» fluid action>
+|   |               <⟨button⟩ slot=«"action"» color=«"primary"» disabled={the **space** of the **new subscription** is _""_} onClick={subscribe}>Follow</⟨button⟩>    code({the space of the new subscription is ""}) code({subscribe})
+|   |             </⟨input⟩>
+|   |           </⟨form⟩>
+|   |           <⟨stack⟩ class=«"subscription-list"» spacing=«"sm"»>
+|   |             <⟨for⟩ subscription in every subscription>
+|   |               <⟨empty⟩><⟨text⟩ color=«"grey"»>None yet.</⟨text⟩></⟨empty⟩>
+|   |             </⟨for⟩>
+|   |           </⟨stack⟩>
+|   |         </⟨segment⟩>
+
+|   |         <⟨segment⟩ class=«"messages"»>
+|   |           <⟨header⟩ size=«"medium"»>Conversations</⟨header⟩>
+|   |           <⟨stack⟩ class=«"message-list"» spacing=«"sm"»>
+|   |             <⟨for⟩ message in every message sorted by its sent newest first loading=«"Reading your inbox"»>
+|   |               <⟨stack⟩ class=«"row"» spacing=«"xs"»>
+|   |                 <⟨message⟩/>
+|   |                 <⟨button⟩ class=«"reply"» icon=«"reply"» size=«"small"» appearance=«"basic"» title=«"Answer in this conversation:  fills in who it's to and the conversation"» onClick={reply to the **from** of **message** in the **thread** of **message**}>Reply</⟨button⟩>    code({reply to the from of message in the thread of message})
+|   |               </⟨stack⟩>
+|   |               <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nothing yet.</⟨text⟩></⟨empty⟩>
+|   |               <⟨failed⟩><⟨text⟩ color=«"red"»>We can't read your inbox right now.</⟨text⟩></⟨failed⟩>
+|   |             </⟨for⟩>
+|   |           </⟨stack⟩>
+|   |         </⟨segment⟩>
+|   |       </⟨stack⟩>
+|   |     </⟨container⟩>
+|   |   </⟨stack⟩>

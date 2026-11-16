@@ -2832,6 +2832,31 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-page-layout" label="Page layout" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.
+                  <a href="ui-page-layout.html">Page layout page</a>
+                </p>
+                <ui-page-layout style="min-height: 18em">
+                  <ui-app-menu slot="menu">
+                    <ui-site-nav-button slot="start"></ui-site-nav-button>
+                    <ui-site-breadcrumbs slot="start"></ui-site-breadcrumbs>
+                    <ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices"></ui-button>
+                  </ui-app-menu>
+                  <ui-site-tabs slot="page-menu"></ui-site-tabs>
+                  <ui-site-nav
+                    slot="drawer"
+                    appearance="nav"
+                    current="#api"
+                    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
+                  ></ui-site-nav>
+                  <p>The page goes here.  Going to another page redraws only this part.</p>
+                  <ui-text slot="footer" color="grey">Made with Spell</ui-text>
+                </ui-page-layout>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-panel" label="Panel" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -2951,6 +2976,47 @@
                 <ui-sides aria-label="Margin" value="10 20 10 20"></ui-sides>
                 <ui-sides aria-label="Padding" value='{ "top": 8, "bottom": 8 }'></ui-sides>
                 <ui-sides aria-label="Vertical padding" sides="top bottom" value="4 0"></ui-sides>
+              </ui-example>
+            </ui-section>
+
+            <ui-section
+              id="spell-ui-s-own-site-breadcrumbs"
+              label="Site breadcrumbs"
+              sticky="stack"
+              collapsible
+              dividing
+            >
+              <ui-example>
+                <p slot="description">
+                  Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.
+                  <a href="ui-site-breadcrumbs.html">Site breadcrumbs page</a>
+                </p>
+                <ui-site-breadcrumbs
+                  current="#systems"
+                  pages='[{ "title": "Hardware", "id": "group:Hardware", "band": "group", "pages": [{ "title": "Machines", "href": "#machines", "pages": [{ "title": "Systems", "href": "#systems" }] }] }]'
+                ></ui-site-breadcrumbs>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-site-nav-button" label="Site nav button" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.
+                  <a href="ui-site-nav-button.html">Site nav button page</a>
+                </p>
+                <ui-page-layout style="min-height: 12em">
+                  <ui-app-menu slot="menu">
+                    <ui-site-nav-button slot="start"></ui-site-nav-button>
+                    <ui-item slot="start">My site</ui-item>
+                  </ui-app-menu>
+                  <ui-site-nav
+                    slot="drawer"
+                    appearance="nav"
+                    current="#home"
+                    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Films", "href": "#films", "icon": "film" }]'
+                  ></ui-site-nav>
+                  <p>Press the button:  the drawer shows only its icons, or all of it again.</p>
+                </ui-page-layout>
               </ui-example>
             </ui-section>
 

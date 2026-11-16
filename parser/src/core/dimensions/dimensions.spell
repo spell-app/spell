@@ -43,6 +43,16 @@ speed is a dimension
 	one "mile per hour", aka "mph", aka "miles per hour", is 0.44704 m/s
 	one "knot", aka "kn", aka "knots", is 1852/3600 m/s
 
+// how long something takes:  `pause for 300 msec`, `check it every 5 minutes`
+// a tick is Spell's (HyperCard's) 1/60 of a second:  `pause for 3 ticks`
+duration is a dimension
+	its base is "second", aka "sec", aka "seconds", aka "secs"
+	one "millisecond", aka "ms", aka "msec", aka "milliseconds", aka "msecs", is 1/1000 sec
+	one "tick", aka "ticks", is 1/60 sec
+	one "minute", aka "min", aka "minutes", aka "mins", is 60 sec
+	one "hour", aka "hr", aka "hours", aka "hrs", is 60 min
+	one "day", aka "days", is 24 hr
+
 // a part of a whole, as people write it:  18% is 18 hundredths
 // a percent is KEPT as its fraction, 0.18, so `the bill * 18%` is 18% of the bill;  it's shown with its % sign
 proportion is a dimension

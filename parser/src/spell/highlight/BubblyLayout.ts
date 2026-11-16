@@ -1,6 +1,7 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { BubblyPresentation } from "./BubblyPresentation"
+import { BubblyRoles } from "./BubblyRoles"
 import type {
   BubblyBlock,
   BubblyCode,
@@ -11,7 +12,9 @@ import type {
   BubblyPartOfSpeech,
   BubblyPiece,
   BubblyPieceKind,
+  BubblyRole,
   BubblyRulePresentation,
+  BubblyRuleRoles,
   BubblyPillName,
   BubblyUnderline
 } from "./highlight.types"
@@ -87,9 +90,6 @@ export class BubblyLayout {
   /** Words a blank's kind follows, never part of it:  its language's articles and pronouns (`a`, `el`, `its`). */
   private readonly smallWords: Set<string>
 
-  /** The words that say an ability (`draggable`):  a name, in a head whose row `namesAbility`. */
-  private readonly abilityWord: RegExp
-
   private constructor(
     private readonly text: string,
     parser: SP.SpellParser,
@@ -98,7 +98,6 @@ export class BubblyLayout {
     const { words } = parser.language ?? SP.Language.default
     this.pronouns = words.pronouns
     this.smallWords = new Set([...words.memberStopWords, ...words.pronouns])
-    this.abilityWord = parser.declarations.abilityWord
     this.paint = Array.from({ length: text.length })
     this.spans = SP.SpellHighlighter.spans(text, parser, parsed)
     let at = 0
@@ -156,19 +155,48 @@ export class BubblyLayout {
     this.underlines.sort((a, b) => a.start - b.start)
   }
 
-  /** The overlays `match`'s row asks for, if it has one. */
+  /** The overlays `match`'s roles ask for:  a value written in, a name, Spell's own words. */
   private overlaysOf(match: P.Match) {
-    const row = BubblyPresentation.for(match.rule)
-    if (!row || match.start === undefined || match.end === undefined) return
+    const roles = BubblyRoles.of(match.rule)
+    if (match.start === undefined || match.end === undefined) return
     const { start, end } = match
     // yes and no:  Spell's words, but a value written in
-    if (row.isValue) this.overlays.push({ start, end, kind: "value", order: 0, overWordsOnly: true })
-    if (row.isNamePart) this.overlays.push({ start, end, kind: "reference", order: 1 })
-    // `a new foundation`:  its words to the end of its kind one name, bold (epic `language` I98)
-    const [kind] = row.namesThrough ? [match.groups[row.namesThrough]].flat() : []
-    if (kind?.end !== undefined) this.overlays.push({ start, end: kind.end, kind: "reference", order: 1 })
-    for (const plain of descendantsNamed(match, row.plain))
-      this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 2 })
+    if (roles.match === "written value")
+      this.overlays.push({ start, end, kind: "value", order: 0, overWordsOnly: true })
+    // `'s`:  part of the name before it
+    if (roles.match === "name") this.overlays.push({ start, end, kind: "reference", order: 1 })
+    // `a new foundation` (epic `language` I98), `draggable`, `it is droppable when`
+    for (const name of this.partsWith(match, roles, "name"))
+      this.overlays.push({ ...name, kind: "reference", order: 1 })
+    for (const plain of this.partsWith(match, roles, "plain")) this.overlays.push({ ...plain, kind: "words", order: 2 })
+  }
+
+  /**
+   * The parts of `match` its `roles` give `role`:  each group's match, and each word of its syntax (`literal`).
+   * - A word of its syntax:  a word of its match outside every group's.
+   */
+  private partsWith(match: P.Match, roles: BubblyRuleRoles, role: BubblyRole): Stretch[] {
+    const parts: Stretch[] = []
+    for (const group of BubblyRoles.groupsWith(roles, role))
+      for (const each of groupNamed(match, group)) parts.push({ start: each.start!, end: each.end! })
+    if (roles.literal)
+      parts.push(...this.literalsOf(match).filter(({ word }) => BubblyRoles.ofLiteral(roles, word) === role))
+    return parts.sort((a, b) => a.start - b.start)
+  }
+
+  /** The words of `match` outside every group's match:  the words of its syntax, `when`, `it`, `droppable`. */
+  private literalsOf(match: P.Match): Array<Stretch & { word: string }> {
+    const groups = Object.values(match.groups ?? {})
+      .flat()
+      .filter((each): each is P.Match => each instanceof P.Match && each.start !== undefined)
+    const words: Array<Stretch & { word: string }> = []
+    for (const found of this.text.slice(match.start, match.end).matchAll(WORD)) {
+      const start = match.start! + found.index
+      const end = start + found[0].length
+      if (!groups.some((group) => start >= group.start! && end <= group.end!))
+        words.push({ start, end, word: found[0] })
+    }
+    return words
   }
 
   ////////////////
@@ -181,11 +209,12 @@ export class BubblyLayout {
    */
   private underlineStatement(statement: P.Match) {
     if (this.text[statement.start!] === "<") return
+    const roles = BubblyRoles.of(statement.rule)
+    if (!roles.band) return this.underlineIn(statement)
     const row = BubblyPresentation.for(statement.rule)
-    if (!row?.head) return this.underlineIn(statement)
-    for (const step of descendantsNamed(statement, row.steps)) this.underlineIn(step)
-    if (row.typedAfterLead)
-      for (const blank of this.blanksOf(statement, row)) this.underline(blank.start, blank.end, "value")
+    for (const step of descendantsNamed(statement, row?.steps)) this.underlineIn(step)
+    if (this.pillOf(statement, roles))
+      for (const blank of this.blanksOf(statement, roles, row)) this.underline(blank.start, blank.end, "value")
   }
 
   /**
@@ -196,16 +225,18 @@ export class BubblyLayout {
   private underlineIn(match: P.Match) {
     if (match.rule.name === BLOCK_RULE) return
     const row = BubblyPresentation.for(match.rule)
+    const roles = BubblyRoles.of(match.rule)
     const { start, end } = match
-    if (row?.isValue) return
+    if (roles.match === "written value") return
     if (start !== undefined && end !== undefined) {
-      if (row?.isQuantity) {
+      // a quantity:  from its number to its end, `300 msec`;  a measure written out with no number rule in it, whole
+      if (roles.match === "quantity") {
         const [number] = descendantsNamed(match, [NUMBER_RULE])
-        if (number) return this.underline(number.start!, end, "quantity")
+        return this.underline(number?.start ?? start, end, "quantity")
       }
-      if (row?.isCall && BubblyLayout.isOwnCall(match)) return this.underline(start, end, "call")
-      if (row?.readsEach) return this.underlineEach(match)
-      if (row?.isQuestion) return this.underline(start, end, "question")
+      if (roles.match === "action call" && BubblyLayout.isOwnCall(match)) return this.underline(start, end, "call")
+      if (BubblyRoles.groupsWith(roles, "value").length) return this.underlineEach(match, roles)
+      if (roles.match === "question") return this.underline(start, end, "question")
       if (isCombination(match)) return this.underlineCombination(match)
       if (!row?.isCombination && isExpression(match.rule)) return this.underline(start, end, "value")
     }
@@ -234,11 +265,12 @@ export class BubblyLayout {
     for (const suffix of rhsChain?.matched ?? []) {
       if (!(suffix instanceof P.Match) || suffix.start === undefined || suffix.end === undefined) continue
       const row = BubblyPresentation.for(suffix.rule)
+      const roles = BubblyRoles.of(suffix.rule)
       const operand = suffix.groups.expression as P.Match | undefined
       const last = parts.at(-1)
-      if (row?.isQuestion && segmentStart !== undefined) {
+      if (roles.match === "question" && segmentStart !== undefined) {
         parts.splice(segment, parts.length - segment, { start: segmentStart, end: suffix.end, kind: "question" })
-      } else if (row?.continuesValue && last && parts.length > segment) {
+      } else if (roles.match === "value" && last && parts.length > segment) {
         const from =
           "kind" in last ? last.start : (last.operand ?? (last.match === lhs ? last.match : undefined))?.start
         if (from !== undefined) parts.splice(-1, 1, { start: from, end: suffix.end, kind: "value" })
@@ -273,15 +305,19 @@ export class BubblyLayout {
   }
 
   /**
+   * A rule whose groups are `value`s, ONE value from the first to the last (`each_in_statement`'s `item` and `list`):
    * `add each card in the cards to the stock`:  `each card in the cards` ONE value, from its `each` to the list's end;
    * the rest of the statement underlined as it would be, but for what's inside that stretch.
    * - A call of the project's own around it (`deal each card in the deck`) is underlined whole, the stretch inside it.
    * - Its `each` (or `the`, `the cards in the stock`):  the word before the item, when the rule reads it there.
    */
-  private underlineEach(match: P.Match) {
-    const { item, list, statement } = match.groups as { item?: P.Match; list?: P.Match; statement?: P.Match }
+  private underlineEach(match: P.Match, roles: BubblyRuleRoles) {
+    const values = new Set(BubblyRoles.groupsWith(roles, "value"))
+    const groups = Object.entries(match.groups ?? {})
+    const valueGroups = groups.filter(([name]) => values.has(name)).map(([, each]) => [each].flat()[0] as P.Match)
+    const [item, list] = [valueGroups[0], valueGroups.at(-1)]
     const before = this.underlines.length
-    if (statement) this.underlineIn(statement)
+    for (const [name, each] of groups) if (!values.has(name) && each instanceof P.Match) this.underlineIn(each)
     if (item?.start === undefined || list?.end === undefined) return
     // never from the list's start:  a contraction's list (`del mazo`) starts with an article read apart, `el`
     const from = BubblyLayout.eachStart(match, item)
@@ -371,19 +407,20 @@ export class BubblyLayout {
       }
       const statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
       const row = statement && BubblyPresentation.for(statement.rule)
+      const band = statement && BubblyRoles.of(statement.rule).band
       // a head going on onto the lines under it (`if its rank > 1` then `and its rank < 5`):  one head
-      if (statement && (row?.head || row?.isControl)) line = this.continued(line, statement)
-      if (statement && row?.head && !inSteps) {
+      if (statement && (band || row?.isControl)) line = this.continued(line, statement)
+      if (statement && band && !inSteps) {
         // a group holds the declarations after it, up to the next group;  the blank lines before that stay outside
         let members: SourceLine[] = []
-        if (row.isGroup) {
+        if (row?.isGroup) {
           let last = index + 1
           while (last < lines.length && !this.isGroupLine(lines[last]!)) last++
           while (last > index + 1 && lines[last - 1]!.isBlank) last--
           members = lines.slice(index + 1, last)
           index = last - 1
         }
-        nodes.push(this.block(line, statement, row, [...line.children, ...members], level))
+        nodes.push(this.block(line, statement, band, [...line.children, ...members], level))
         continue
       }
       if (statement && row?.isControl && line.children.length) {
@@ -421,18 +458,19 @@ export class BubblyLayout {
   private block(
     line: SourceLine,
     statement: P.Match,
-    row: BubblyRulePresentation,
+    partOfSpeech: BubblyPartOfSpeech,
     under: SourceLine[],
     level: number
   ): BubblyBlock {
-    const partOfSpeech: BubblyPartOfSpeech = row.head!
+    const row = BubblyPresentation.for(statement.rule) ?? {}
+    const roles = BubblyRoles.of(statement.rule)
     return {
       kind: "block",
       rule: statement.rule.name ?? "",
       partOfSpeech,
       isGroup: !!row.isGroup,
       level,
-      head: this.lineOf(line, { depth: 0, head: { statement, row, partOfSpeech } }),
+      head: this.lineOf(line, { depth: 0, head: { statement, row, roles, partOfSpeech } }),
       body: this.layout(under, { depth: 0, level: level + 1, inSteps: partOfSpeech === "action" })
     }
   }
@@ -531,23 +569,18 @@ export class BubblyLayout {
     }
   }
 
-  /** A head's inputs and choices, over what its spans said;  the words that say an ability, names. */
+  /**
+   * A head's declarations and choices, over what its spans said:
+   * - an action's, ONE pill (`paintTyped()`);  any other's, each part that's a `declaration` a pill
+   */
   private paintHead(head: Head) {
-    const { statement, row } = head
-    if (row.namesAbility)
-      for (const span of this.spans)
-        if (
-          span.kind === KEYWORD &&
-          span.start >= statement.start! &&
-          span.end <= statement.end! &&
-          this.abilityWord.test(this.text.slice(span.start, span.end))
-        )
-          this.paintRange(span.start, span.end, "reference")
+    const { statement, row, roles } = head
     this.paintKind(head)
     // a drawing's head, `to draw its placeholder`:  what it draws a name, no pill (epic `language` I99)
     if (this.paintDrawing(head)) return
-    for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
-    if (row.typedAfterLead) this.paintTyped(head)
+    if (head.partOfSpeech === "action") this.paintTyped(head)
+    else
+      for (const part of this.partsWith(statement, roles, "declaration")) this.paintRange(part.start, part.end, "input")
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
   }
@@ -614,39 +647,42 @@ export class BubblyLayout {
   }
 
   /**
-   * An action head's words after its first, to the end of its last input or parameter, as ONE pill
-   * (`typedAfterLead`):  `to <play a card>`, `after <putting a card on a pile>`, `when <a card is dropped>`,
+   * An action head's pill:  what a person typed, ONE pill, from its first `declaration` or `blank` to its last
+   * `declaration` (`pillOf()`):  `to <play a card>`, `after <putting a card on a pile>`, `when <a card is dropped>`,
    * `when <creating solitaire>` (epic `language` I109).
    * - Its blanks are in it, each its own dotted line (`blanksOf()`), its kind word bold, `a **card**`:
    *   what the spans painted a name there before the pill (`pillNames`)
    * - Quoted, `to "play a card"`, its `"` marks are its pill's own, at either end, as any quoted input's.
    */
-  private paintTyped({ statement, row }: Head) {
-    const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, statement.end!))
-    if (!lead) return
-    const startsAt = row.typedFrom
-      ? (statement.groups as Record<string, P.Match | undefined>)[row.typedFrom]?.start
-      : undefined
-    const from = startsAt ?? statement.start! + lead[0].length
-    const typed = [
-      ...descendantsNamed(statement, row.inputs).map((input) => input.end!),
-      ...descendantsNamed(statement, row.params).map((param) => this.bracketed(param).end)
-    ]
-    const end = row.typedToEnd
-      ? this.headEnd(statement)
-      : (this.quotedName(statement, from)?.end ?? Math.max(...typed, 0))
-    if (end <= from) return
-    for (const blank of this.blanksOf(statement, row)) this.pillNames.push(...this.namesIn(blank.start, blank.end))
-    this.paintRange(from, end, "input")
+  private paintTyped({ statement, row, roles }: Head) {
+    const pill = this.pillOf(statement, roles)
+    if (!pill) return
+    // each blank's kind:  the names the parse read in it;  a create hook's, its words past its small words
+    const byParse = !row.blankAfterVerb
+    for (const blank of this.blanksOf(statement, roles, row))
+      this.pillNames.push(...this.namesIn(blank.start, blank.end, { byParse }))
+    this.paintRange(pill.start, pill.end, "input")
+  }
+
+  /**
+   * An action head's pill:  from its first `declaration` or `blank` part to its last `declaration`'s end;
+   * `undefined` for a head with none.
+   */
+  private pillOf(statement: P.Match, roles: BubblyRuleRoles): Stretch | undefined {
+    const declared = this.partsWith(statement, roles, "declaration")
+    if (!declared.length) return undefined
+    const starts = [...declared, ...this.ownBlanks(statement, roles)].map(({ start }) => start)
+    const pill = { start: Math.min(...starts), end: Math.max(...declared.map(({ end }) => end)) }
+    return pill.end > pill.start ? pill : undefined
   }
 
   /**
    * A blank's bold words, from `start` to `end`:  the runs painted a name, `card` in `a card`;
-   * none painted one (a create hook's signature, an input already), its words past the small words it starts with
+   * none painted one, or not `byParse` (a create hook's), its words past the small words it starts with
    * (`smallWords`), `pile` in `a pile`, `solitario` in `el solitario`.
    */
-  private namesIn(start: number, end: number): BubblyPillName[] {
-    const names = this.namedRuns(start, end)
+  private namesIn(start: number, end: number, { byParse = true }: { byParse?: boolean } = {}): BubblyPillName[] {
+    const names = byParse ? this.namedRuns(start, end) : []
     if (names.length) return names
     let from = start
     for (const word of this.text.slice(start, end).matchAll(/\S+/g)) {
@@ -671,58 +707,40 @@ export class BubblyLayout {
     return names
   }
 
-  /** Where `statement`'s head ends:  before its body and a comment after it, its spaces and a `:` left out. */
-  private headEnd(statement: P.Match): number {
-    const body = (statement.data as { body?: P.Match }).body
-    let end = body?.start ?? statement.end!
-    const comment = this.spans.find(
-      (span) => span.kind === COMMENT && span.start > statement.start! && span.start < end
-    )
-    if (comment) end = comment.start
-    while (end > statement.start! && /[\s:]/.test(this.text[end - 1]!)) end--
-    return end
-  }
-
   /**
-   * A head's blanks (`typedAfterLead`), each underlined in its pill:
-   * - an action's parameters, `to play <a card>`, `to move (<a card>) to (<a pile>)` (`params`)
-   * - a drag handler's thing, from after its first word, `when <a card> is dropped` (`blankThrough`)
-   * - what a create hook makes, its signature but its first word, `when creating <a card image>` (`blankAfterVerb`)
+   * An action head's blanks, each underlined in its pill:
+   * - its own parts that are a `blank`, each with the article before it:  `when <a card> is dropped`
+   * - in its declarations, the parts their rules say are a `blank`:  an action's parameters,
+   *   `to play <a card>`, `to move (<a card>) to (<a pile>)` (`method_signature`'s)
+   * - EXCEPT a create hook's (`blankAfterVerb`, a check of its own):  its signature but its first word,
+   *   `when creating <a card image>`, `when creating <it>`
    */
-  private blanksOf(statement: P.Match, row: BubblyRulePresentation): Array<{ start: number; end: number }> {
-    const blanks = descendantsNamed(statement, row.params).map(({ start, end }) => ({ start: start!, end: end! }))
-    const groups = statement.groups as Record<string, P.Match | P.Match[] | undefined>
-    const through = row.blankThrough ? [groups[row.blankThrough]].flat()[0] : undefined
-    const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, statement.end!))?.[0].length ?? 0
-    if (through?.end !== undefined) blanks.push({ start: statement.start! + lead, end: through.end })
-    const made = row.blankAfterVerb ? [groups[row.blankAfterVerb]].flat()[0] : undefined
-    if (made?.start !== undefined && made.end !== undefined) {
+  private blanksOf(statement: P.Match, roles: BubblyRuleRoles, row: BubblyRulePresentation | undefined): Stretch[] {
+    if (row?.blankAfterVerb) {
+      const [made] = [statement.groups[row.blankAfterVerb]].flat() as Array<P.Match | undefined>
+      if (made?.start === undefined || made.end === undefined) return []
       const verb = /^\S+\s*/.exec(this.text.slice(made.start, made.end))?.[0].length ?? 0
-      if (made.start + verb < made.end) blanks.push({ start: made.start + verb, end: made.end })
+      return made.start + verb < made.end ? [{ start: made.start + verb, end: made.end }] : []
     }
-    return blanks
+    const blanks = this.ownBlanks(statement, roles)
+    const walk = (match: P.Match) => {
+      if (match.rule.name === BLOCK_RULE) return
+      const blank = this.partsWith(match, BubblyRoles.of(match.rule), "blank")
+      if (blank.length) blanks.push(...blank)
+      else for (const child of childrenOf(match)) walk(child)
+    }
+    for (const declared of BubblyRoles.groupsWith(roles, "declaration"))
+      for (const each of groupNamed(statement, declared)) walk(each)
+    return blanks.sort((a, b) => a.start - b.start)
   }
 
-  /** The stretch of `statement`'s quoted name, its `"` marks included, when it starts at `from`;  else `undefined`. */
-  private quotedName(statement: P.Match, from: number): { start: number; end: number } | undefined {
-    const signature = (statement.groups as { signature?: P.Match }).signature
-    if (!signature || signature.start !== from || this.text[from] !== '"') return undefined
-    const end = signature.end!
-    return this.text[end - 1] === '"' && end - from > 1 ? { start: from, end } : undefined
-  }
-
-  /** `param`'s stretch, with the brackets round it if it has them:  `(a card)`. */
-  private bracketed(param: P.Match): { start: number; end: number } {
-    const { text } = this
-    let start = param.start!
-    let end = param.end!
-    while (start > 0 && text[start - 1] === " ") start--
-    if (text[start - 1] === "(") start--
-    else start = param.start!
-    let after = end
-    while (text[after] === " ") after++
-    if (text[after] === ")") end = after + 1
-    return { start, end }
+  /** `statement`'s own parts that are a `blank`, each from the article before it:  `when <a card> is dropped`. */
+  private ownBlanks(statement: P.Match, roles: BubblyRuleRoles): Stretch[] {
+    return this.partsWith(statement, roles, "blank").map(({ start, end }) => {
+      const before = /(\S+)\s+$/.exec(this.text.slice(statement.start, start))
+      const isArticle = !!before && this.smallWords.has(before[1]!.toLowerCase())
+      return { start: isArticle ? start - before[0].length : start, end }
+    })
   }
 
   /** One of a list's values, a pill of its own:  its words, not the `,` or `or` its item may hold. */
@@ -885,7 +903,15 @@ type Overlay = { start: number; end: number; kind: BubblyPieceKind; order: numbe
 type LayoutPlace = { depth: number; level: number; inSteps?: boolean }
 
 /** A declaration's head being laid out. */
-type Head = { statement: P.Match; row: BubblyRulePresentation; partOfSpeech: BubblyPartOfSpeech }
+type Head = {
+  statement: P.Match
+  row: BubblyRulePresentation
+  roles: BubblyRuleRoles
+  partOfSpeech: BubblyPartOfSpeech
+}
+
+/** A stretch of the text. */
+type Stretch = { start: number; end: number }
 
 /** One line of the source, and the lines indented under it. */
 type SourceLine = {
@@ -912,9 +938,6 @@ const COMMENT_RULE = "comment"
 /** The rule of a statement's body:  never walked into for a head's inputs. */
 const BLOCK_RULE = "block"
 
-/** A comment's span. */
-const COMMENT = "comment"
-
 /** A keyword span. */
 const KEYWORD = "keyword"
 
@@ -923,6 +946,9 @@ const NUMBER_RULE = "number"
 
 /** The method a drawing's head makes, `to draw it` => `draw()`, in every language. */
 const DRAW_METHOD = "draw"
+
+/** A word of a rule's syntax (`literalsOf()`). */
+const WORD = /[\p{L}\p{N}_]+/gu
 
 /** Operators drawn faint. */
 const MARKS = new Set([",", ":"])
@@ -953,6 +979,22 @@ function childrenOf(match: P.Match): P.Match[] {
     for (const item of [value].flat()) if (item instanceof P.Match && item !== match) children.add(item)
   }
   return [...children]
+}
+
+/**
+ * The matches of `match`'s group `name`, with offsets:  its own, else its parts':
+ * - a part a `{rule}` with no group name of its own matched, named for its rule (`{bare_type_arg}`)
+ * - an unnamed part's group (a repeat's, `method_signature`'s `( {method_arg} )`)
+ */
+function groupNamed(match: P.Match, name: string): P.Match[] {
+  const hasOffsets = (each: unknown): each is P.Match =>
+    each instanceof P.Match && each.start !== undefined && each.end !== undefined
+  const own = [match.groups?.[name]].flat().filter(hasOffsets)
+  if (own.length) return own
+  return childrenOf(match).flatMap((child) => {
+    if (child.rule.name === name) return hasOffsets(child) ? [child] : []
+    return child.rule.name ? [] : groupNamed(child, name)
+  })
 }
 
 /** `match`'s descendants whose rule is one of `names`, outermost only, never inside its body;  with offsets. */
