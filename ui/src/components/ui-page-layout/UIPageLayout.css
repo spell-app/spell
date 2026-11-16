@@ -5,23 +5,30 @@
  *   An empty region isn't drawn, so takes no room.
  * - Tokens:
  *   | `--ui-page-layout-gap` | the room between the page and its side bars |
+ *   | `--ui-page-layout-shadow` | the soft shadow round the page's side, beside the drawer |
  * - The drawer:  a column the whole height, on a muted fill;  its box a scroller stuck at the top,
  *   so a long navigation scrolls by itself, never the page.
  * - The menu beside the drawer's top, flush against it and on the same fill:  one surface, no line between them
  *   (epic `mockup` I25).
- *   - The drawer's line starts under the menu (`.under-menu`'s start), the menu's own bottom line turning into it.
+ * - Under the menu, the page's side (`.under-menu`) is a box on the page's own background, set apart from the drawer
+ *   and the menu by a soft shadow, its corner by the drawer rounded (epic `mockup` I32):
+ *   - a shadow in every theme, Mockup's too:  never the theme's ink line (Owen:  "Make the black border a shadow")
+ *   - made from the theme's shadow colour (`--ui-shadow-ink`), as a theme's own raised shadow may be none or a line
  * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
  *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
  * - The open box wears the column's own fill, not one of its own (epic `mockup` I31):
  *   a theme's see-through fill blurs what's under it, so over the page it looks as the column does;
- *   its end side rounded, as the panel round the page is (`--ui-panel-radius`).
+ *   its end side rounded, as the panel round the page is (`--ui-panel-radius`);
+ *   set apart from the page by the same soft shadow as the page's side, no line (I32).
  * - Motion (epic `mockup` I25), the theme's `--ui-duration-normal`:
  *   - the open box grows out from the column's edge and shrinks back into it, its shadow fading in and out;
  *     closing, it keeps its fill and its place over the page until it's back (the delayed `transition`s)
  *   - closing always takes 0.2s, whatever the theme's duration (Owen, I31)
  *   - switching between compact and all of it, the column narrows or widens, the page following
  *     (`interpolate-size`:  where a browser has none, it jumps)
+ *   - while it moves, what's in it stays as it is with all of it shown, clipped (`:state(moving)`, I32):
+ *     narrowing, it switches to its icons only once it's narrow;  widening, to all of it before it starts
  *   - reduced motion, or `animation="none"` round it (`--ui-motion: none`):  none of it
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the
  *   start, shown by `:state(open)`;  reduced motion, no slide.
@@ -32,6 +39,13 @@
     --_ui-page-layout-duration: var(--ui-duration-normal, 200ms);
     --_page-layout-close-duration: 0.2s;
     --_page-layout-flyout-radius: var(--ui-panel-radius, var(--ui-radius-l, 14px));
+    --_ui-page-layout-shadow: var(
+      --ui-page-layout-shadow,
+      0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent),
+      0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)
+    );
+    /* all of the drawer:  its column, its open box, and what it holds while it moves */
+    --_page-layout-drawer-width: 16em;
     /* its own width decides narrow:  a site drawn in a narrow box is narrow */
     container-type: inline-size;
     display: flex;
@@ -54,7 +68,7 @@
   /* ## The drawer */
   .drawer {
     interpolate-size: allow-keywords;
-    inline-size: 16em;
+    inline-size: var(--_page-layout-drawer-width);
     min-inline-size: 0;
     transition: inline-size var(--_ui-page-layout-duration) var(--ui-ease, ease);
     background: var(--ui-surface-muted, Canvas);
@@ -102,13 +116,20 @@
   .right {
     flex: 0 0 auto;
   }
-  /* a font size in from the drawer, after its line;  the menu flush against it, on its fill */
+  /* the menu flush against the drawer, on its fill, no line under it;  the page's side a box below, a soft shadow
+     round it, its corner by the drawer rounded, the page a font size in */
+  .layout:has(> .drawer) > .body {
+    background: var(--ui-surface-muted, Canvas);
+  }
   .layout:has(> .drawer) > .body > .under-menu {
     padding-inline-start: var(--ui-font-size, 16px);
-    border-inline-start: 1px solid var(--ui-border-color, GrayText);
+    border-start-start-radius: var(--_page-layout-flyout-radius);
+    background: var(--ui-background, Canvas);
+    box-shadow: var(--_ui-page-layout-shadow);
   }
   .layout:has(> .drawer) > .body > .menu {
     --ui-menu-header-bar-background: var(--ui-surface-muted, Canvas);
+    --ui-menu-header-bar-border: none;
   }
   /* its own menu button:  only at a narrow width */
   .menu-button {
@@ -135,23 +156,34 @@
       z-index 0s var(--_page-layout-close-duration) allow-discrete,
       min-block-size 0s var(--_page-layout-close-duration),
       background 0s var(--_page-layout-close-duration) allow-discrete,
-      backdrop-filter 0s var(--_page-layout-close-duration) allow-discrete,
-      border-inline-end 0s var(--_page-layout-close-duration) allow-discrete;
+      backdrop-filter 0s var(--_page-layout-close-duration) allow-discrete;
   }
   /* open:  all of it, grown out from the column's edge over the page */
   :host(:state(compact):state(open):not(:state(narrow))) .drawer-box {
     z-index: var(--ui-z-popup, 1000);
-    inline-size: 16em;
+    inline-size: var(--_page-layout-drawer-width);
     min-block-size: min(100%, 100dvh);
     /* the column's own fill (Owen, I31:  "keep the same background color");  a see-through one blurs the page under
        it, so it reads as the column does over the page's backdrop, not the page's text */
     background: var(--ui-surface-muted, Canvas);
     backdrop-filter: blur(1.5em);
-    border-inline-end: 1px solid var(--ui-border-color, GrayText);
-    box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2));
+    /* set apart from the page by the page's own soft shadow, not a line:  Mockup's ink line too (I32) */
+    box-shadow: var(--_ui-page-layout-shadow);
     transition:
       inline-size var(--_ui-page-layout-duration) var(--ui-ease-out, ease-out),
       box-shadow var(--_ui-page-layout-duration) var(--ui-ease-out, ease-out);
+  }
+
+  /*
+   * moving between its icons and all of it (`:state(moving)`, epic `mockup` I32):  all of it drawn, at its full width,
+   * the column or the open box clipping it as it narrows or widens
+   * - so the icons stay put while it moves, and the labels go only once it's narrow:  then it switches to its icons
+   */
+  :host(:state(moving):not(:state(narrow))) .drawer-box {
+    overflow-x: hidden;
+  }
+  :host(:state(moving):not(:state(narrow))) .drawer-box ::slotted(*) {
+    min-inline-size: var(--_page-layout-drawer-width);
   }
 
   /* ## Narrow:  one column, the drawer slid over the page from the start */
@@ -187,12 +219,18 @@
       max-block-size: none;
       overflow: visible;
     }
+    .layout:has(> .drawer) > .body {
+      background: none;
+    }
     .layout:has(> .drawer) > .body > .under-menu {
       padding-inline-start: 0;
-      border-inline-start: none;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
     }
     .layout:has(> .drawer) > .body > .menu {
       --ui-menu-header-bar-background: initial;
+      --ui-menu-header-bar-border: initial;
     }
     .menu-button {
       display: inline-flex;

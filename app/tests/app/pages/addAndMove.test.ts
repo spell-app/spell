@@ -831,7 +831,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92)", async () => {
+  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92, T99)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
     await page.locator("#AddPartButton [part~=item]").click()
@@ -898,7 +898,21 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         return [...layer.querySelectorAll<HTMLElement>(".PaletteMatchPanel")].map((panel) => {
           const box = panel.getBoundingClientRect()
           const labels = [...panel.querySelectorAll("ui-tree-item")].map((row) => row.getAttribute("label") ?? "")
-          return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, labels }
+          const header = panel.querySelector<HTMLElement>(".PaletteMatchHeader")
+          const name = document.getElementById(panel.dataset.for ?? "")
+          return {
+            left: box.left,
+            right: box.right,
+            top: box.top,
+            bottom: box.bottom,
+            labels,
+            header: header?.textContent ?? "",
+            headerIcon: header?.querySelector("ui-icon")?.getAttribute("name") ?? "",
+            headerFirst: !!header && header === panel.firstElementChild,
+            headerFocusable: !!header && (header.tabIndex >= 0 || header.matches("ui-tree-item")),
+            groupName: name?.textContent?.trim() ?? "",
+            groupIcon: name?.getAttribute("icon") ?? ""
+          }
         })
       })
     const search = page.locator(".PaletteStrip .PaletteStripSearch input")
@@ -913,6 +927,14 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(shown.flatMap(({ labels }) => labels)).toContain("Button")
     // no topic with nothing to show;  none over another, none off the window
     expect(shown.every(({ labels }) => labels.length > 0)).toBe(true)
+    // each headed by its topic's icon and name, a label, not a row (T99)
+    for (const one of shown) {
+      expect(one.headerFirst).toBe(true)
+      expect(one.headerFocusable).toBe(false)
+      expect(one.header).toBe(one.groupName)
+      expect(one.headerIcon).toBe(one.groupIcon)
+    }
+    expect(shown.map(({ header }) => header)).toContain("Actions")
     const width = await page.evaluate(() => document.documentElement.clientWidth)
     for (const [at, one] of shown.entries()) {
       expect(one.left).toBeGreaterThanOrEqual(0)
@@ -923,10 +945,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         expect(apart).toBe(true)
       }
     }
-    // ↓ goes into the first;  Escape there comes back to the field, and closes them
+    // ↓ goes into the first match, past its header;  Escape there comes back to the field, and closes them
     await page.keyboard.press("ArrowDown")
     await page.waitForTimeout(200)
     expect(await page.evaluate(() => document.activeElement?.localName)).toBe("ui-tree-item")
+    expect(await page.evaluate(() => document.activeElement?.getAttribute("label"))).toBe(shown[0]!.labels[0])
     await page.keyboard.press("Escape")
     await page.waitForTimeout(400)
     expect(await matches()).toEqual([])

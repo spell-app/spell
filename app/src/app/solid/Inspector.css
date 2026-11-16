@@ -90,6 +90,9 @@ ui-panel.InspectorCard > .InspectorSection {
   /* its body's scroll shades (`.InspectorSection::before`, I201):  a dark tint, deeper on a dark page */
   --spell-scroll-shade: light-dark(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.6));
   --spell-scroll-shade-size: 16px;
+  /* the room between its header and its body's first row, in every card (Owen, 2026-11-16, epic `editor` I210:
+     "Too much space above Solitare and the rest of the panel views") */
+  --spell-card-body-top: 8px;
   /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
      (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
   &.locked {
@@ -248,6 +251,20 @@ ui-panel.InspectorCard > .InspectorSection {
     min-height: 0;
   }
 }
+/*
+ * No card is smaller than its header, and a folded card is its header alone, never resized
+ * (Owen, 2026-11-16, epic `editor` I207:  "shouldn't be able to resize it smaller than its header"):
+ * - `<ui-split-panel>` keeps a drag within a pane's own min and max height
+ * - a pane whose min and max are the same is skipped:  the bars above and below a folded card resize
+ *   the open cards across it
+ * - `CardGlide`'s frames set their own min and max, so a card still glides as it folds
+ */
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane {
+  min-height: var(--spell-pane-bar-height, 40px);
+}
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane:has(> .InspectorCard.folded) {
+  max-height: var(--spell-pane-bar-height, 40px);
+}
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
@@ -265,11 +282,11 @@ ui-panel.InspectorCard > .InspectorSection {
   max-height: none;
 }
 
-/* a card's body:  scrolling by itself, its content 14px in */
+/* a card's body:  scrolling by itself, its content 14px in, 8px under the card's header (I210) */
 .InspectorSection {
   display: flex;
   flex-direction: column;
-  padding: 12px 14px;
+  padding: var(--spell-card-body-top) 14px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
   /* its scroll, which its edges' shades follow (below) */
@@ -298,8 +315,8 @@ ui-panel.InspectorCard > .InspectorSection {
   animation-timeline: --inspector-scroll;
 }
 .InspectorSection::before {
-  top: -12px;
-  margin-block: -12px calc(12px - var(--spell-scroll-shade-size));
+  top: calc(-1 * var(--spell-card-body-top));
+  margin-block: calc(-1 * var(--spell-card-body-top)) calc(var(--spell-card-body-top) - var(--spell-scroll-shade-size));
   background: linear-gradient(to bottom, var(--spell-scroll-shade), transparent);
   animation-name: InspectorShadeShows;
   animation-range: 0 16px;
@@ -311,10 +328,10 @@ ui-panel.InspectorCard > .InspectorSection {
   animation-name: InspectorShadeHides;
   animation-range: calc(100% - 16px) 100%;
 }
-/* Views:  its path line sticks at the top, so the top shade starts under it, as its rows do */
+/* Views:  its path line sticks at the top while it's scrolled, so the top shade starts under it, as its rows do */
 .InspectorSection.InspectorViews::before {
-  top: var(--spell-views-path-height, 0px);
-  margin-block-start: 0;
+  top: var(--ui-tree-row-height, 22px);
+  margin-block: 0 calc(-1 * var(--spell-scroll-shade-size));
 }
 @keyframes InspectorShadeShows {
   from {
@@ -337,8 +354,24 @@ ui-panel.InspectorCard > .InspectorSection {
 .InspectorSection.InspectorViews {
   padding-block-start: 0;
   & > :first-child {
-    margin-block-start: 12px;
+    margin-block-start: var(--spell-card-body-top);
   }
+}
+/* the thing's own type's band, its title left out (`<ThingBands>`, I200):  the card's header names the type */
+ui-property-group.InspectorUntitled::part(title) {
+  display: none;
+}
+/* ... and its first field the card's 8px under the header, as every card's first row is (I210) */
+ui-property-group.InspectorUntitled:first-child::part(content) {
+  padding-block-start: 0;
+}
+/* a Views row brought into view (`revealRow()`, I206) stops clear of the body's edges and their shades */
+.InspectorTree ui-tree-item {
+  scroll-margin-block: 24px;
+}
+/* a Views row for what the app holds but doesn't draw (`<HiddenItem>`, T96):  muted, as its eye-with-a-slash says */
+ui-tree-item.InspectorHiddenRow::part(row) {
+  color: var(--ui-text-muted);
 }
 /* each event, ability and action of the Code card (`<ui-section>`, folding on its own;  epic `editor` I109):
    its chevron, icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
@@ -500,13 +533,6 @@ ui-button.InspectorActionButton::part(button):focus-visible {
   margin: -4px -14px 0;
   font-size: 13px;
 }
-/* a drawn thing's pill, as its row's title (`<ThingChip inRow>`):  its words as close to the icon as a plain row's
-   (Owen, epic `editor` I130:  "too much space between icon and title"),
-   the pill's rim tucked in by the room the row leaves after its icon */
-ui-button.InspectorRowChip {
-  margin-inline-start: -2px;
-  --ui-button-padding-inline: 6px;
-}
 .InspectorFilter {
   flex: 1 1 auto;
   min-width: 0;
@@ -585,16 +611,12 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   color: var(--ui-text-muted);
 }
 
-/* the trail in the properties card's header:  what's selected a tab of the file bar's, its icon and its words, chosen
-   (T95:  "Make these tabs look like the ones in the file menu");  a step a tab, `›` between;  an earlier step goes back */
+/* the properties card's header for the app or a Spell UI element:  what's selected, a tab of the file bar's, its icon
+   and its words, chosen (T95:  "Make these tabs look like the ones in the file menu";  I200:  no trail) */
 ui-menu.InspectorTrail {
   min-width: 0;
   overflow: hidden;
 
-  & > .InspectorTrailStep {
-    align-self: center;
-    color: var(--ui-text-muted);
-  }
   & > ui-item.InspectorPartTag {
     flex: 0 1 auto;
     min-width: 0;

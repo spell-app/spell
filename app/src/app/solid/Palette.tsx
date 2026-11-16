@@ -548,13 +548,18 @@ export function PaletteStrip(): JSX.Element {
         }}
       >
         <Show when={thisMatches()}>
-          <PaletteMatchPanel for={THIS_GROUP_MENU_ID} name={thisGroup()} resizes={resizes}>
+          <PaletteMatchPanel for={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON} resizes={resizes}>
             <ThisGroupRows words={words} />
           </PaletteMatchPanel>
         </Show>
         <For each={groupMatches()}>
           {(group) => (
-            <PaletteMatchPanel for={groupMenuId(group)} name={upperFirst(groupName(group))} resizes={resizes}>
+            <PaletteMatchPanel
+              for={groupMenuId(group)}
+              name={upperFirst(groupName(group))}
+              icon={group.icon ?? GROUP_ICON}
+              resizes={resizes}
+            >
               <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
             </PaletteMatchPanel>
           )}
@@ -579,10 +584,15 @@ function groupMenuId(group: PaletteGroup): string {
  * ### `<PaletteMatchPanel>`
  * One topic's search results in the pinned bar:  a menu of only its matches, under its name (`layOutMatches()`).
  * - `for`:  its name's id in the bar.
+ * - Headed by the topic's icon and name, as a menu's section is (epic `editor` T99):
+ *   with several open side by side, each says which topic it is, though its name in the bar may be off to one side.
+ *   - Only a label:  no click, no focus, so ↓ from the field still lands on the first match.
+ *   - It stays put while the rows under it scroll.
  */
 function PaletteMatchPanel(props: {
   for: string
   name: string
+  icon: string
   resizes: ResizeObserver
   children: JSX.Element
 }): JSX.Element {
@@ -593,9 +603,15 @@ function PaletteMatchPanel(props: {
   })
   return (
     <div class={MATCH_PANEL} data-for={props.for} ref={(element: HTMLElement) => (panel = element)}>
-      <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
-        {props.children}
-      </ui-tree>
+      <div class="PaletteMatchHeader" aria-hidden="true">
+        <ui-icon name={props.icon} />
+        <span>{props.name}</span>
+      </div>
+      <div class="PaletteMatchRows">
+        <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
+          {props.children}
+        </ui-tree>
+      </div>
     </div>
   )
 }

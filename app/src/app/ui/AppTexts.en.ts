@@ -294,7 +294,6 @@ export const APP_TEXTS = {
   inspectorNotSavedTypeSets: "Every one of the {types} starts with this.\nTo change it, pick All {types} first.",
   inspectorUnsavedAuto: "Spell makes this for you, so a change here can't be kept.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
-  inspectorScopeThis: "This",
   inspectorScopeThese: "These {count} {Types}",
   inspectorUnsavedSomeAuto: "Spell makes some of these for you, so those can't be changed.",
   inspectorSelectedMany: "{count} {kind}",
@@ -634,7 +633,8 @@ export const APP_TEXTS = {
   inspectorParts: "Views",
   inspectorDivider: "Divider",
   inspectorFilter: "Filter",
-  inspectorNotDrawn: "Not drawn",
+  // a row of what the app holds but doesn't draw:  its tooltip (T96)
+  inspectorHidden: "Not drawn:  hidden, or drawn by no tag",
   inspectorNoParts: "Run the app to see its parts.",
   // the Views card's sort (`<InspectorViews>`)
   inspectorSort: "Sort",

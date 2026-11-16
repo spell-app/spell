@@ -125,9 +125,13 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     )
   }
 
-  /** The navigations show only their icons:  compact, and not open over the page. */
+  /**
+   * The navigations show only their icons:  compact, not open over the page, and not moving.
+   * - While the column narrows, or the open box shrinks back, they keep all of it, clipped (`isMoving`):
+   *   they switch to their icons once it's narrow (epic `mockup` I32, Owen:  "the illusion of collapse is wonky").
+   */
   get showsIconsOnly(): boolean {
-    return this.isCompact && !this.isOpen
+    return this.isCompact && !this.isOpen && !this.isMoving
   }
 
   /** SIDE EFFECT:  each navigation in the drawer is `collapsed` while it shows only its icons. */
@@ -141,6 +145,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
    * only and all of it, and send `ui-toggle`.  Script API, on the DOM element too.
    * - From its icons to all of it, the switch waits a frame:
    *   the column first holds the width it has, so it has a width to widen from (`isWidening`).
+   * - From all of it to its icons, the column narrows to the width its icons will take (`narrowToIcons()`).
    */
   toggleDrawer() {
     if (this.isNarrow) {
@@ -151,14 +156,52 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     const newState: DrawerState = oldState === COMPACT ? FULL : COMPACT
     this.peekTimer?.cancel()
     this.cancelWidening?.()
+    this.isWidening = false
     this.isOpen = false
     if (newState === FULL) {
       this.compactWidth = this.drawerColumn?.getBoundingClientRect().width
       this.isWidening = true
       this.cancelWidening = E.beforeNextPaint(() => this.switchDrawer(newState, oldState))
     } else {
-      this.switchDrawer(newState, oldState)
+      this.narrowToIcons(oldState)
     }
+  }
+
+  /**
+   * Switch to its icons only:  the column narrows to the width they take, all of it still drawn in it, clipped;
+   * the navigations switch to their icons once it's there (`whileDrawerMoves()`).
+   * - The width is measured first, just before the next paint:
+   *   each navigation shows its icons till then, the column's own width read at `fit-content`,
+   *   and all of it is back before anything is painted.
+   */
+  private narrowToIcons(oldState: DrawerState) {
+    const navs = this.drawerNavs
+    for (const nav of navs) nav.toggleAttribute(COLLAPSED, true)
+    this.cancelWidening = E.beforeNextPaint(() => {
+      this.compactWidth = this.iconsWidth()
+      this.whileDrawerMoves()
+      this.switchDrawer(COMPACT, oldState)
+      for (const nav of navs) nav.toggleAttribute(COLLAPSED, this.showsIconsOnly)
+    })
+  }
+
+  /**
+   * The drawer's column's width at `fit-content`, read at once with no move:  what its icons take, while they're shown.
+   * - SIDE EFFECT:  the column stops where it is, if it was moving, so it narrows from there.
+   */
+  private iconsWidth(): number | undefined {
+    const column = this.drawerColumn
+    if (!column) return undefined
+    const now = column.getBoundingClientRect().width
+    column.style.transition = "none"
+    column.style.inlineSize = "fit-content"
+    const width = column.getBoundingClientRect().width
+    column.style.inlineSize = `${now}px`
+    void getComputedStyle(column).inlineSize
+    column.style.transition = ""
+    // ... its own width again once the switch reaches its style:  so it moves from `now`
+    column.style.inlineSize = ""
+    return width
   }
 
   /** Switch `drawer` to `newState`, and say so (`ui-toggle`). */
@@ -169,6 +212,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
       void getComputedStyle(this.drawerColumn).inlineSize
     }
     this.drawer = newState === COMPACT ? COMPACT : undefined
+    if (newState === FULL) this.whileDrawerMoves()
     this.send("ui-toggle", { newState, oldState })
     // ... held till it's no longer compact everywhere (`:state(compact)` follows a moment later)
     if (this.isWidening) this.cancelWidening = E.beforeNextPaint(() => (this.isWidening = false))
@@ -177,13 +221,58 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   /** Escape closes the drawer open over the page. */
   @E.on("keydown")
   protected onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Escape" && this.isOpen) this.isOpen = false
+    if (event.key === "Escape") this.close()
   }
 
   /** Going to a page from the drawer closes it. */
   @E.on("ui-navigating")
   protected onNavigating(event: Event) {
-    if (this.isOpen && this.isInDrawer(event.target)) this.isOpen = false
+    if (this.isInDrawer(event.target)) this.close()
+  }
+
+  /**
+   * Close the drawer open over the page, if it is.
+   * - Compact and wide, its box shrinks back into the column with all of it still in it, clipped (`whileDrawerMoves()`).
+   */
+  private close() {
+    if (!this.isOpen) return
+    if (this.isCompact && !this.isNarrow) this.whileDrawerMoves()
+    this.isOpen = false
+  }
+
+  ////////////////
+  // ## Moving
+  ////////////////
+
+  /**
+   * The drawer is moving between its icons and all of it:  its column narrowing or widening, or its open box growing
+   * or shrinking back.
+   * - Meanwhile what's in it is drawn as all of it, at its full width, clipped (`:state(moving)`, `UIPageLayout.css`).
+   */
+  @E.cssState("moving") @E.state accessor isMoving = false
+
+  /** Stop waiting for the drawer's moves to finish, while it waits. */
+  private cancelMoving: (() => void) | undefined
+
+  /** Each run of `whileDrawerMoves()`:  only the latest ends the move. */
+  private moveRun = 0
+
+  /**
+   * Hold `isMoving` till the drawer's column and box finish the moves the change about to be made starts.
+   * - Its moves are read just before the next paint, once the change has reached the style.
+   * - None (reduced motion, `animation="none"`):  it ends there, before anything's painted.
+   */
+  private whileDrawerMoves() {
+    const run = ++this.moveRun
+    this.isMoving = true
+    this.cancelMoving?.()
+    this.cancelMoving = E.beforeNextPaint(() => {
+      const boxes = [this.drawerColumn, this.drawerColumn?.firstElementChild]
+      const moves = boxes.flatMap((box) => box?.getAnimations() ?? [])
+      void Promise.allSettled(moves.map((move) => move.finished)).then(() => {
+        if (run === this.moveRun) this.isMoving = false
+      })
+    })
   }
 
   ////////////////
@@ -221,7 +310,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
 
   /** Close the compact drawer opened over the page. */
   private unpeek() {
-    if (this.isCompact && !this.isNarrow) this.isOpen = false
+    if (this.isCompact && !this.isNarrow) this.close()
   }
 
   /** The keyboard's focus came into the compact drawer:  open it at once. */
@@ -232,18 +321,19 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
 
   /** The keyboard's focus left the compact drawer:  close it. */
   private onDrawerFocusOut(event: FocusEvent) {
-    if (this.isCompact && !this.isNarrow && !this.isInDrawer(event.relatedTarget)) this.isOpen = false
+    if (this.isCompact && !this.isNarrow && !this.isInDrawer(event.relatedTarget)) this.close()
   }
 
   /** Open the compact drawer over the page, its column kept at the width it has now. */
   private peek() {
     this.compactWidth = this.drawerColumn?.getBoundingClientRect().width
+    this.whileDrawerMoves()
     this.isOpen = true
   }
 
-  /** Its inline style:  the compact column's kept width, while it's open over the page or about to widen. */
+  /** Its inline style:  the compact column's kept width, while it's open over the page, moving, or about to widen. */
   get layoutStyle(): Record<string, string | undefined> {
-    const isHeld = (this.isCompact && !this.isNarrow && this.isOpen) || this.isWidening
+    const isHeld = (this.isCompact && !this.isNarrow && (this.isOpen || this.isMoving)) || this.isWidening
     const width = isHeld ? this.compactWidth : undefined
     return { [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px` }
   }

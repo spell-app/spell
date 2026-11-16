@@ -90,10 +90,14 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect(await boardRows()).toEqual(inOrder)
   })
 
-  test("the deck, which isn't drawn, is in Views and shows in the Inspector", async () => {
-    const notDrawn = page.locator('[data-panel="views"] ui-tree-item[group][label="Not drawn"]')
-    await notDrawn.evaluate((group) => group.setAttribute("open", ""))
-    await page.locator('[data-panel="views"] ui-tree-item[group] > ui-tree-item[label="Deck"]').click()
+  test("the deck, which isn't drawn, is in Views where it's held, hidden, and shows in the Inspector (T96)", async () => {
+    // the app's first row, as its drawing writes it first (`<deck "deck" hidden />`):  no Not drawn group
+    const appRows = await page
+      .locator('[data-panel="views"] ui-tree > ui-tree-item[label="Solitaire"] > ui-tree-item')
+      .evaluateAll((rows) => rows.map((row) => [row.getAttribute("label"), row.getAttribute("icon")]))
+    expect(appRows[0]).toEqual(["Deck", "eye slash outline"])
+    expect(await page.locator('[data-panel="views"] ui-tree-item[group]').count()).toBe(0)
+    await page.locator('[data-panel="views"] ui-tree-item.InspectorHiddenRow[label="Deck"]').click()
     await page.waitForTimeout(800)
     expect(await page.locator(".InspectorPane").innerText()).toContain("Its 52 items")
   })
@@ -139,25 +143,25 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
         isInView: !!box && box.top >= view.top && box.bottom <= view.bottom
       }
     })()`)
-    expect(shown).toEqual({ top: ["Solitaire", "Not drawn"], isOpen: true, isInView: true })
+    expect(shown).toEqual({ top: ["Solitaire"], isOpen: true, isInView: true })
     await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     await page.waitForTimeout(800)
   })
 
-  test("opening or closing Not drawn by hand keeps the Views tree where it is (I27)", async () => {
-    // with a card still selected, from the test before
-    const notDrawn = `document.querySelector('[data-panel="views"] ui-tree-item[group][label="Not drawn"]')`
+  test("opening or closing a row by hand keeps the Views tree where it is (I27)", async () => {
+    // with a card still selected, from the test before;  the tree's last row with rows inside it
+    const lastParent = `[...document.querySelectorAll('[data-panel="views"] ui-tree-item')].filter((row) => row.querySelector("ui-tree-item")).at(-1)`
     const scroller = `(() => {
-      for (let at = ${notDrawn}.parentElement; at; at = at.parentElement) {
+      for (let at = ${lastParent}.parentElement; at; at = at.parentElement) {
         if (at.scrollHeight > at.clientHeight && /auto|scroll/.test(getComputedStyle(at).overflowY)) return at
       }
     })()`
     const scrollTop = () => page.evaluate(`${scroller}.scrollTop`) as Promise<number>
     const toggle = async () => {
-      await page.evaluate(`${notDrawn}.shadowRoot.querySelector(".toggle").click()`)
+      await page.evaluate(`${lastParent}.shadowRoot.querySelector(".toggle").click()`)
       await page.waitForTimeout(800)
     }
-    const isOpen = () => page.evaluate(`${notDrawn}.hasAttribute("open")`) as Promise<boolean>
+    const isOpen = () => page.evaluate(`${lastParent}.hasAttribute("open")`) as Promise<boolean>
     for (let tries = 0; tries < 2 && (await isOpen()); tries++) await toggle()
     expect(await isOpen()).toBe(false)
     await page.evaluate(`${scroller}.scrollTop = ${scroller}.scrollHeight`)
@@ -165,7 +169,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     const before = await scrollTop()
     expect(before).toBeGreaterThan(0)
     await toggle()
-    expect(await page.evaluate(`${notDrawn}.hasAttribute("open")`)).toBe(true)
+    expect(await page.evaluate(`${lastParent}.hasAttribute("open")`)).toBe(true)
     expect(await scrollTop()).toBe(before)
     await toggle()
     expect(await scrollTop()).toBeLessThanOrEqual(before)
