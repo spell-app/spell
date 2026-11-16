@@ -115,6 +115,26 @@ describe("the selection in the bubbly look", () => {
     })
   }
 
+  // epic `language` I123:  a bare value's curly marks aren't in the file, so the caret stays inside them
+  test("a bare value, `direction=down`:  drawn with curly marks, the caret beside its words", async () => {
+    const text = "card is a view\n\tto draw it\n\t\t<card-image direction=down />\n"
+    const view = await bubblyEditorOf(text, { focused: true })
+    expect(view.state.doc.toString()).toBe(text)
+    expect(view.contentDOM.textContent).toContain("“down”")
+    const start = text.indexOf("down")
+    view.dispatch({ selection: { anchor: start } })
+    const first = await caretAt(view)
+    view.dispatch({ selection: { anchor: start + "down".length } })
+    const last = await caretAt(view)
+    // inside the marks' boxes:  the curly marks drawn outside them
+    const [open, close] = [...view.contentDOM.querySelectorAll(".cmb-quote")].map((quote) =>
+      quote.getBoundingClientRect()
+    )
+    for (const caret of [first, last]) expect(caret.height).toBeCloseTo(LINE_CARET, 0)
+    expect(first.left).toBeGreaterThanOrEqual(open!.right - 1)
+    expect(last.left).toBeLessThanOrEqual(close!.left)
+  })
+
   for (const focused of [true, false]) {
     test(`selected, ${focused ? "focused" : "not focused"}:  a character drawn over stays see-through`, async () => {
       const view = await bubblyEditorOf(QUOTED, { selected: true, focused })

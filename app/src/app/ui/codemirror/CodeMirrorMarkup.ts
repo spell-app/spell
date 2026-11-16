@@ -3,7 +3,7 @@ import { type EditorState, type Extension, type Range } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
-import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
+import { type MarkMaker, type MarkedStretch, type Spacer, spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
@@ -139,9 +139,30 @@ class MarkupShapes {
           this.block(shape, rails)
           break
         case "input":
+          if (shape.isBare) this.bareQuotes(shape.place)
           break
       }
     }
+  }
+
+  /**
+   * A value written without quotes (`direction=down`) drawn as `direction="down"` is (epic `language` I123):
+   * its curly marks and the room outside them, as widgets beside its words, nothing added to the file.
+   * - Placed outside its pill's room, which is at its words' ends too (sides -1, 1)
+   */
+  private bareQuotes(place: number) {
+    const value = this.marks[place]
+    if (!value) return
+    const room = (kind: "quote" | "tag-quote", side: "before" | "after") => spacer(kind, side).inlineClassName
+    const { start, end } = value
+    this.decorations.add(
+      Decoration.widget({ widget: new SpacerWidget(room("quote", "before")), side: -3 }).range(start)
+    )
+    this.decorations.add(QuoteWidget.bare("open").range(start))
+    this.decorations.add(QuoteWidget.bare("close").range(end))
+    this.decorations.add(
+      Decoration.widget({ widget: new SpacerWidget(room("tag-quote", "after")), side: 3 }).range(end)
+    )
   }
 
   /** An element with what's inside it on lines of its own:  its band, its body's rail, its end tag's tiny pill. */
@@ -391,7 +412,8 @@ const QUOTE_CLASS = /^bubbly-(?=quote-|tag-quote|tag-word-quote)/
 class QuoteWidget extends WidgetType {
   constructor(
     readonly classes: string,
-    readonly mark: string
+    readonly mark: string,
+    readonly isBare = false
   ) {
     super()
   }
@@ -403,8 +425,18 @@ class QuoteWidget extends WidgetType {
     return Decoration.replace({ widget: new QuoteWidget(["cmb-quote", ...own].join(" "), isOpen ? "“" : "”") })
   }
 
+  /**
+   * A curly mark for a value written without quotes (`direction=down`), with nothing of the file under it:
+   * outside the room either side of its words (sides -2, 2), inside the room outside the marks (-3, 3).
+   */
+  static bare(end: "open" | "close"): Decoration {
+    const classes = new Set([QUOTE_MARK, "bubbly-tag-quote", `bubbly-quote-${end}`])
+    const { classes: own, mark } = (QuoteWidget.over(classes).spec as { widget: QuoteWidget }).widget
+    return Decoration.widget({ widget: new QuoteWidget(own, mark, true), side: end === "open" ? -2 : 2 })
+  }
+
   eq(other: QuoteWidget): boolean {
-    return other.classes === this.classes && other.mark === this.mark
+    return other.classes === this.classes && other.mark === this.mark && other.isBare === this.isBare
   }
 
   /** `<span class="cmb-quote ..."><span class="cmb-quote-glyph">“</span></span>`:  the glyph placed in its box. */
@@ -422,12 +454,14 @@ class QuoteWidget extends WidgetType {
    * - CodeMirror's own measure was the box's:  no height, since its glyph is placed on its own (epic `language` I122:
    *   no caret after a closing quote, or before an opening one)
    * - `pos` 0 is before the `"`, 1 after it
+   * - A bare value's mark has no `"` to step over:  the caret beside it is at its words' edge, where a letter typed
+   *   goes into the value
    */
   coordsAt(box: HTMLElement, pos: number): Rect | null {
     const isOpen = this.mark === "“"
     const words = letterBeside(box, isOpen ? "after" : "before")
     if (!words) return null
-    const isOutside = pos === 0 ? isOpen : !isOpen
+    const isOutside = !this.isBare && (pos === 0 ? isOpen : !isOpen)
     return caretAt(isOutside ? outsideOf(box, isOpen ? "before" : "after") : isOpen ? words.left : words.right, words)
   }
 
