@@ -7,7 +7,8 @@ import {
   indentColumns,
   type BubblyBlockShape,
   type BubblyInputShape,
-  type BubblyShape
+  type BubblyShape,
+  type BubblyUnderlineShape
 } from "./BubblyMarks"
 import {
   MarkupMarks,
@@ -546,7 +547,7 @@ export class SpellBubbly {
       else if (shape.kind === "tag") elements.push(this.asHtml(this.drawTag(shape, range, view)))
       else if (shape.kind === "tag-link") elements.push(this.asHtml(this.drawLink(shape, range, view)))
       else if (range.startLineNumber < view.first) continue
-      else if (shape.kind === "underline") elements.push(this.drawUnderline(range, view))
+      else if (shape.kind === "underline") elements.push(this.drawUnderline(shape, range, view))
       else {
         const element = this.drawInput(shape, range, view)
         if (element) elements.push(element)
@@ -813,9 +814,10 @@ export class SpellBubbly {
    * to its last, its dots evenly spaced under bold and plain words alike;  how far below the line's middle, the sheet's
    * (`--bubbly-underline-drop`).
    */
-  private drawUnderline(range: monaco.Range, view: View): HTMLElement {
+  private drawUnderline({ afterSpacer }: BubblyUnderlineShape, range: monaco.Range, view: View): HTMLElement {
     const line = range.startLineNumber
-    const left = this.xOf(line, range.startColumn)
+    // the column's x is before everything injected there:  a pill's spacer, when it starts one
+    const left = this.xOf(line, range.startColumn) + (afterSpacer ? view.measures.inputSpacer : 0)
     const right = this.xOf(line, range.endColumn)
     const top = this.editor.getTopForLineNumber(line) + view.lineHeight / 2
     return place(element(UNDERLINE), { left, top, width: right - left }, view.measures.scale)

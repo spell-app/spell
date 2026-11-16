@@ -58,7 +58,8 @@ export class BubblyPresentation {
     site_page: { head: "property" },
 
     // actions and handlers:  `to deal the cards`, `to draw its front`, `when its score changes`, `on click`;
-    // an action's head:  everything after `to` is what a person typed, its parameters aside (Owen, 2026-11-11)
+    // an action's head:  everything after `to` is what a person typed, ONE pill (Owen, 2026-11-11), its blanks
+    // underlined in it, plain (epic `language` I109)
     to_do_something: {
       head: "action",
       inputs: ["method_keyword"],
@@ -68,10 +69,10 @@ export class BubblyPresentation {
     // a drawing's:  its verb and the part it draws bold, `to <draw> its <placeholder>` (epic `language` I99)
     draw_it: { head: "action", namesWhatItDraws: true },
     on: { head: "action" },
-    // a drag handler's:  the moment it's for bold, a name, `when a <card> is <dropped>`, `while a <card> is <dragged over> it`
-    drag_handler: { head: "action", names: ["moment", "over"] },
-    // what runs as a thing is made:  `when creating` Spell's words, its type a reference, `when creating a deck`
-    create_hook: { head: "action", plain: ["method_keyword"] },
+    // a drag handler's and a create hook's, as an action's (epic `language` I109):  `when <a card is dropped>`,
+    // `while <a card is dragged over it>`, `when <creating solitaire>`, its thing underlined in its pill
+    drag_handler: { head: "action", typedAfterLead: true, typedToEnd: true, blankThrough: "item" },
+    create_hook: { head: "action", inputs: ["method_signature"], typedAfterLead: true, blankAfterVerb: "signature" },
     // steps at an action's end, as its own head draws:  `after <putting> a card <on> a pile` (epic `language` P56);
     // its `cancel`, as any action's, is a plain step (`cancel_this_action` needs no row)
     after_hook: {
