@@ -551,8 +551,16 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     - "cleanly":  `merge-main` with no conflict, its checks passing (a test that has failed in full runs before called
       so), no red hard-to-undo judgement call open on it, the person's uncommitted edits in the main checkout carried
       into the branch first, generated strays ditched
-    - it can't:  it says why in its report AND on its item (`epic update <epic>#<id> noted "Not merged:  <why>"`), and
-      the session tells the person in bold, on a line of its own
+    - NEVER ask the person whether to merge (Owen, 2026-11-15, on codemirror asking "Should I merge main into the branch,
+      re-run the checks, and merge P1?":  "You shouldn't have to ask this.  You should automatically merge main in before
+      attempting to merge.  If tests are failing that aren't yours, just go ahead and merge."):
+      - main moved, or the branch is behind:  `epic worktree merge-main` first, always, then `epic merge`
+      - failures that aren't this work's (failing on `main` too, or in files it didn't touch):  merge anyway, naming them
+        in the report;  only failures this work caused hold the merge
+      - an agent's `merge-main` or `merge` refused by its permission check:  the SESSION runs them itself, no question
+    - it can't (a conflict it can't settle, its own failures, a red hard-to-undo call):  it says why in its report AND on
+      its item (`epic update <epic>#<id> noted "Not merged:  <why>"`), and the session tells the person in bold, on a
+      line of its own
     - `/bedtime` too (2026-11-15);  NOT in a phase whose plan says to hold its work
     - In Codex:  the same steps, by the session itself, after each item.
 - `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
