@@ -115,7 +115,7 @@ describe("ScopeExplorer", () => {
     // the card's moves are declared in the game's file, in the game's own outline:  above its first `##` heading
     expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spell$/)
     expect(member("play a card").section).toBeUndefined()
-    expect(member("count the points for a card on a pile").section).toBeUndefined()
+    expect(member("the points for (a card) on (a pile)").section).toBeUndefined()
     // the card's own file has no `##` heading
     expect(member("suit").section).toBeUndefined()
     // a foundation's suit is under the game's `## The piles`

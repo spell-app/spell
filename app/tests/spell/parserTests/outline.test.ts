@@ -20,7 +20,7 @@ describe("outline style", () => {
     runSpellFiles(files)("")
     vi.restoreAllMocks()
     expect(lines.filter((line) => line.includes("❌"))).toEqual([])
-    // a line for each of its tests (card setup, a new deck, piles), and for every check they make
-    expect(lines.filter((line) => line.includes("✅")).length).toBe(35)
+    // a line for each of its tests (card setup, card images, a new deck, piles), and for every check they make
+    expect(lines.filter((line) => line.includes("✅")).length).toBe(42)
   })
 })
