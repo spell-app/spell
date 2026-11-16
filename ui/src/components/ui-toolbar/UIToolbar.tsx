@@ -27,7 +27,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>
  *       <nav class="ui … menu" part="menu">  <slot>  </nav>       (the menu's own box, which scrolls)
  *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
- *       <button class="all-items" part="all-items" aria-label title>[icon] ▾</button>   (`max-visible`, while some are put away)
+ *       <button class="all-items" part="all-items" aria-label title>[icon] ▾</button>   (`max-visible`, while some are put away;  `all-items-always`, always)
  *       <div class="right" part="right">  <slot name="right">  </div>      (pushed to the end)
  *     </div>
  *
@@ -65,6 +65,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *     (the editor's file tabs:  `file outline`;  epic `editor` T76).
  *   - `all-items-at-end` puts the button at the bar's far end, however few items show:
  *     without it, it sits right after the last one (the editor's file tabs;  epic `editor` I173).
+ *   - `all-items-always` shows the button even while every item is in the row:
+ *     a list of every file, always in the same spot (the editor's file tabs;  epic `editor` T82).
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -225,7 +227,12 @@ export class UIToolbar extends UIMenu {
   }
 
   protected override get hasOverflowMenu(): boolean {
-    return super.hasOverflowMenu || this.isLimited
+    return super.hasOverflowMenu || this.showsAllItems
+  }
+
+  /** The button listing every item is there:  some are put away, or `all-items-always`. */
+  get showsAllItems(): boolean {
+    return this.isLimited || !!this.allItemsAlways
   }
 
   /** The list's button, while drawn. */
@@ -236,12 +243,15 @@ export class UIToolbar extends UIMenu {
   }
 
   /** The list's button's icon. */
-  readonly allItemsGlyph = new E.IconGlyph({ owner: this, name: () => (this.isLimited ? ALL_ITEMS_ICON : undefined) })
+  readonly allItemsGlyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.showsAllItems ? ALL_ITEMS_ICON : undefined)
+  })
 
   /** `all-items-icon`'s icon, before the list's caret:  what the list is of (a project's files). */
   readonly allItemsKindGlyph = new E.IconGlyph({
     owner: this,
-    name: () => (this.isLimited ? this.attributes["all-items-icon"] || undefined : undefined)
+    name: () => (this.showsAllItems ? this.attributes["all-items-icon"] || undefined : undefined)
   })
 
   /** `putAwayTheRest()` once after Solid's update, however often asked. */
@@ -341,7 +351,7 @@ export class UIToolbar extends UIMenu {
   /** The button that lists every item:  always there, outside the row that scrolls. */
   private allItems(): JSX.Element {
     return (
-      <Show when={this.isLimited && !this.isDropdown}>
+      <Show when={this.showsAllItems && !this.isDropdown}>
         <button
           ref={(element: HTMLButtonElement) => (this.allItemsButton = element)}
           type="button"

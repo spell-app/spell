@@ -50240,6 +50240,16 @@ export interface UIToolbarAttributes {
    */
   "prop:allItemsAtEnd"?: boolean | ""
   /**
+   * The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away.
+   * - takes:  flag (present / absent)
+   */
+  "all-items-always"?: boolean | ""
+  /**
+   * `all-items-always`, as the DOM element's property.
+   * @deprecated write `all-items-always` -- `prop:` stays only for compiled spell
+   */
+  "prop:allItemsAlways"?: boolean | ""
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */

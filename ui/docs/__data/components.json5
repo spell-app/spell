@@ -46493,6 +46493,11 @@
           "description": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one."
         },
         {
+          "name": "all-items-always",
+          "kind": "boolean",
+          "description": "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -46746,7 +46751,7 @@
         },
         {
           "name": "all-items",
-          "description": "`max-visible`:  the button listing every item, while some are put away."
+          "description": "`max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
         }
       ],
       "states": [
