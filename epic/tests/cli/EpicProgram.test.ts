@@ -251,6 +251,12 @@ describe("EpicProgram.checkFlags()", () => {
     expect(EpicProgram.checkFlags("epic x", FLAGS, ["--here"], ["--here"])).toEqual(["--here"])
     expect(EpicProgram.checkFlags("epic x", undefined, ["--anything"])).toEqual(["--anything"])
   })
+
+  test("after a bare `--`, another command's flags pass through (epic `epic-engine` I313)", () => {
+    const args = ["run", "test", "--", "yarn", "vp", "test", "run", "--project", "node", "--reporter=json"]
+    expect(EpicProgram.checkFlags("epic turns run", FLAGS, args)).toEqual(args)
+    expect(() => EpicProgram.checkFlags("epic turns run", FLAGS, ["--projekt", "--", "--project"])).toThrow(/--projekt/)
+  })
 })
 
 describe("every verb's flags", () => {

@@ -838,7 +838,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 - `yarn pack:check` ~== `spell-pack check` ~== `spell pack check epics` -- exits 1 while either is stale
 - `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
   - rerun after changing an element or a page's sections, and commit `docs/__data/`
-- `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium)
+- `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium):  fast, no turn needed
+- `yarn test:integration` -- the slow tests that run real git and processes, one file at a time (`INTEGRATION_TESTS`
+  in [vitest.config.ts](../vitest.config.ts);  epic `epic-engine` I313):  in the turn, `epic turns run test -- yarn
+  test:integration`;  `yarn review` and CI run both
   - the root's `yarn test` runs them as `epics:node` / `epics:browser`
 - `yarn ts`, `yarn lint`, `yarn format`, `yarn review`
 - the docs tools' own (see "Scripts"):
