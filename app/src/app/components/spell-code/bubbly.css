@@ -2246,6 +2246,12 @@
      * - its own layer, so its feet's bars are drawn under its end tags, over its paper
      */
     .cm-line.cmb-feet-row {
+      /*
+       * its end tags half as tall again as a block's tiny foot, their letters with them (Owen, epic `language` I138:
+       * "Make the bottom footers 50% taller");  everything in the row is sized from these two
+       */
+      --cmb-feet-size: 1.5;
+      --cmb-foot-tiny-height: calc(var(--cmb-feet-size) * var(--bubbly-foot-tiny-height) * var(--bubbly-editor-scale));
       position: relative;
       isolation: isolate;
       /* on whole pixels:  `--cmb-feet-top` is one, so the rest is too */
@@ -2296,14 +2302,22 @@
           (1 - var(--cmb-feet-after)) * (var(--cmb-feet-rail) - var(--cmb-line-pad) + var(--cmb-feet-reach)) +
             var(--cmb-feet-after) * var(--cmb-feet-gap)
         );
-      /* as much room after its `⟩` as before its `⟨`, tip to ink:  4.22px and 4.28px on `</>` (measured) */
-      padding: 0 calc(var(--cmb-feet-point) + 1px);
-      font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-editor-scale));
+      /*
+       * as much room after its `⟩` as before its `⟨`, tip to ink:  4.22px and 4.28px on `</>` (measured);
+       * half as much again with its size (I138)
+       */
+      padding: 0 calc(var(--cmb-feet-point) + var(--cmb-feet-size) * 1px);
+      font-size: calc(var(--cmb-feet-size) * var(--bubbly-foot-tiny-font) * var(--bubbly-editor-scale));
       border-radius: var(--cmb-feet-point) / calc(var(--cmb-foot-tiny-height) / 2);
       corner-shape: bevel;
     }
+    /* ... its letters too, `⟨` and `⟩` included */
+    .cm-line.cmb-feet-row .bubbly-foot-tiny,
+    .cm-line.cmb-feet-row .bubbly-angle.bubbly-foot-tiny::before {
+      font-size: calc(var(--cmb-feet-size) * var(--bubbly-foot-tiny-font) * var(--bubbly-editor-scale));
+    }
     .cm-line.cmb-feet-row .cmb-tag-foot:has(> .bubbly-end-bare) {
-      padding-left: calc(var(--cmb-feet-point) + 1px);
+      padding-left: calc(var(--cmb-feet-point) + var(--cmb-feet-size) * 1px);
     }
     /*
      * ... its rail, from the row's top, turning at the slant into the bar, the bar on to its tip:  one stroke, the rail's

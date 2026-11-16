@@ -176,7 +176,14 @@ describe("a body's rail under the caret", () => {
     // the row one foot tall, on whole pixels, so the lines under it start on one, as the lines above it do
     const contentTop = view.contentDOM.getBoundingClientRect().top
     const rowBox = row.getBoundingClientRect()
-    expect(rowBox.height).toBe(16)
+    expect(rowBox.height).toBe(21)
+    // each end tag half as tall again as a block's tiny foot, 10px at the editor's size (Owen, I138), its bar
+    // meeting it in its middle
+    expect(innerBox.height).toBeCloseTo(1.5 * 10 * 0.9375, 2)
+    const innerBar = getComputedStyle(inner!, "::before")
+    const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
+    const barMiddle = rowBox.top - 1 + Number.parseFloat(innerBar.height) - rail / 2
+    expect(Math.abs(barMiddle - (innerBox.top + innerBox.height / 2))).toBeLessThan(0.1)
     const firstLine = view.contentDOM.querySelector(".cm-line")!.getBoundingClientRect().top
     expect((rowBox.top - firstLine) % 1).toBe(0)
     expect((rowBox.bottom - contentTop) % 1).toBeCloseTo((firstLine - contentTop) % 1, 5)
