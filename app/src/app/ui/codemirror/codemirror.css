@@ -66,10 +66,6 @@
     /* the rails of the blocks it's inside:  one stripe each (`CodeMirrorBubbly`) */
     background-image: var(--cmb-rails, none);
   }
-  .cm-gutters {
-    background: transparent;
-    border: 0;
-  }
   .cm-cursor {
     border-left-color: var(--bubbly-bold-ink);
   }
@@ -274,6 +270,55 @@
     background-image: none;
     text-decoration: underline wavy #e2a336;
     text-underline-offset: 3px;
+  }
+}
+
+/*
+ * Every CodeMirror editor's gutter (`CodeMirrorSetup`), as Monaco's is drawn (`MonacoEditor.css`, epic `editor` I154):
+ * - no line numbers until asked;  then they come first
+ * - the fold arrows' column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code:
+ *   its chevron ends well before a line's first word
+ * - an arrow shows while the mouse is on the edge, a folded block's always
+ * - no change bar (epic `codemirror` Q1)
+ */
+.cm-editor.cmb {
+  --cmb-fold-width: 16px;
+  --cmb-fold-overlap: 8px;
+
+  .cm-gutters {
+    background: transparent;
+    border: 0;
+  }
+  .cm-foldGutter {
+    width: var(--cmb-fold-width);
+    margin-inline-end: calc(-1 * var(--cmb-fold-overlap));
+  }
+  .cm-foldGutter .cm-gutterElement {
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+  .cmb-fold {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--cmb-fold-width);
+    height: 100%;
+    translate: calc(var(--cmb-fold-overlap) / 2) 0;
+    cursor: pointer;
+    color: light-dark(#6b6a76, #a3a1ae);
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+  .cmb-fold:hover {
+    color: light-dark(#26252e, #e6e5ee);
+  }
+  .cm-gutters:hover .cmb-fold,
+  .cmb-fold-folded {
+    opacity: 1;
+  }
+  .cmb-fold-folded svg {
+    rotate: -90deg;
   }
 }
 

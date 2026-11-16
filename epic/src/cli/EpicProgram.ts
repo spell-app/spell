@@ -991,7 +991,9 @@ export class EpicProgram {
         return [flagName(long)!, long] as const
       })
     )
-    for (const arg of args) {
+    // after a bare `--`, the words are another command's (`epic turns run test -- yarn vp test run --project node`)
+    const end = args.indexOf("--")
+    for (const arg of end === -1 ? args : args.slice(0, end)) {
       const name = flagName(arg)
       if (name === undefined || known.has(name)) continue
       const near = suggest(

@@ -10605,7 +10605,7 @@
       "name": "::part(all-items)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-toolbar>`:  `max-visible`:  the button listing every item, while some are put away."
+        "value": "Part of:\n\n- `<ui-toolbar>`:  `max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
       }
     },
     {

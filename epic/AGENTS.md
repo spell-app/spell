@@ -88,7 +88,8 @@ a folder of the kit `spell`.
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.
 - Imports:  "Imports" below.
-- Checks, from `epic/`:  `yarn ts`, `yarn test`, `yarn lint`, `yarn plugin:validate`;  over every folder:  the kit's
+- Checks, from `epic/`:  `yarn ts`, `yarn test`, `yarn test:integration` (the slow ones, in the test turn), `yarn lint`,
+  `yarn plugin:validate`;  over every folder:  the kit's
   `yarn ts` / `yarn test` / `yarn lint`, at its root.
 
 ## Imports

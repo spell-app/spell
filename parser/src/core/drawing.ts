@@ -22,9 +22,9 @@
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 
-import h from "@solidjs/h"
-import { createComponent, insert, render, type JSX } from "@solidjs/web"
-import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner } from "solid-js"
+import solidH from "@solidjs/h"
+import { createComponent, insert, render, spread, type JSX } from "@solidjs/web"
+import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner, untrack } from "solid-js"
 
 import { Cell, initialCaps } from "spell/util"
 import { untrackCells } from "spell/util/reactive"
@@ -42,8 +42,28 @@ import { standInFor } from "./waiting"
  * Solid's own `h()`, what compiled JavaScript draws with:  `import { h } from "@spell/core"`.
  * - The SAME copy core draws with, so the boundary knows its thunks (`isElementThunk()`).
  * - Epic `output-targets` P20, Q57.
+ * - One addition:  while an edit draws again (`drawAgain()`), a view's tag named by its id,
+ *   `h("solitaire-stock-pile", { id: "stock" })` (`<stock-pile "stock" />`), is the element the page has for it,
+ *   its props set again, rather than a new one (epic `editor` I182).
+ *   - So a board drawn again keeps its piles, and the cards in them:  what `drawThing()`'s kept element does
+ *     for `{draw the stock}`.
+ *   - Only a tag with no children:  one the drawing fills is made afresh, as before.
  */
-export { h }
+export const h = function h(...rawArgs: unknown[]) {
+  const made = (solidH as (...rawArgs: unknown[]) => () => Drawing)(...rawArgs)
+  const [tag, props] = rawArgs
+  if (rawArgs.length !== 2 || typeof tag !== "string" || !tag.includes("-") || !H_THUNK) return made
+  const id = (props as { id?: unknown } | null | undefined)?.id
+  if (typeof id !== "string" || !id) return made
+  const keeping = () => {
+    const kept = keptElementWithId(tag, id)
+    if (!kept) return made()
+    untrack(() => spread(kept, props as Record<string, unknown>, true))
+    return kept as unknown as Drawing
+  }
+  ;(keeping as unknown as Record<symbol, unknown>)[H_THUNK] = true
+  return keeping
+} as unknown as typeof solidH
 
 /** What a drawing is:  a Solid node, or anything Solid can put on the page (text, a list of them, nothing). */
 export type Drawing = JSX.Element
@@ -232,6 +252,7 @@ export const drawingMethods = defineCoreModule({
    * Draw the views of each of `types` again after an edit, keeping every element the page has (epic `editor`,
    * Edit Without Redraw):  each view that draws again finds the element each thing it holds already has.
    * - So a board drawn again keeps its 52 cards:  the same elements, with what they hold, moved to the new drawing.
+   *   - Its piles too, drawn by their ids (`<column "C1" />`):  `h()` finds each one's element.
    * - `everything`:  every view.
    * - `parts`:  each part of a drawing whose code changed (`drawPart()`),
    *   drawn again ALONE, from the new program's drawing (epic `notebook` P4).
@@ -245,6 +266,7 @@ export const drawingMethods = defineCoreModule({
    */
   drawAgain(types: readonly string[] | "everything", parts: readonly PartEdit[] = []): void {
     keptElements = new Map()
+    keptElementsById = new Map()
     noteElementsIn(core.appElement())
     try {
       if (types === "everything") everyDrawing.changed()
@@ -261,6 +283,7 @@ export const drawingMethods = defineCoreModule({
       core.flush()
     } finally {
       keptElements = undefined
+      keptElementsById = undefined
       letGoOfUntakenParts()
     }
   },
@@ -667,19 +690,36 @@ function partsDrawnBy(thing: object, member: string): Array<() => Drawing> {
 /** While an edit draws again:  each element on the page drawing a thing, not yet taken by the new drawing. */
 let keptElements: Map<object, HTMLElement[]> | undefined
 
+/**
+ * While an edit draws again:  each view element named by its id (`<solitaire-stock-pile id="stock">`), by tag and id,
+ * not yet taken by the new drawing -- see `h()`.
+ */
+let keptElementsById: Map<string, HTMLElement> | undefined
+
 /** Note what's in `root`, through shadow roots:  a card's element is in its pile's light DOM, a pile's in the app's. */
 function noteElementsIn(root: Element | ShadowRoot | null | undefined): void {
   if (!root) return
   for (const element of root.children as HTMLCollectionOf<HTMLElement>) {
-    const { thing } = element as HTMLElement & { thing?: unknown }
+    const { thing, component } = element as HTMLElement & { thing?: unknown; component?: { currentThing?: unknown } }
     if (thing && typeof thing === "object") {
       const elements = keptElements!.get(thing)
       if (elements) elements.push(element)
       else keptElements!.set(thing, [element])
+    } else if (element.id && typeof component?.currentThing === "object" && component.currentThing) {
+      // a view's tag the drawing named by its id:  it found its thing itself (the app's `SpellElement`)
+      keptElementsById!.set(`${element.localName}#${element.id}`, element)
     }
     noteElementsIn(element)
     noteElementsIn(element.shadowRoot)
   }
+}
+
+/** The view element with tag `tag` and id `id`, as the page has it now, if an edit is drawing again and none has taken it. */
+function keptElementWithId(tag: string, id: string): HTMLElement | undefined {
+  const key = `${tag}#${id}`
+  const kept = keptElementsById?.get(key)
+  if (kept) keptElementsById!.delete(key)
+  return kept
 }
 
 /** `thing`'s element with tag `tag`, as the page has it now, if an edit is drawing again and none has taken it. */
@@ -837,7 +877,7 @@ export function isElementThunk(value: unknown): value is () => Drawing {
  *   `h("i")` only wraps its arguments:  nothing is made, and nothing touches the page.
  * - `undefined` if an `@solidjs/h` to come stops marking them:  `drawing.test.ts` pins it.
  */
-const H_THUNK: symbol | undefined = Object.getOwnPropertySymbols(h("i"))[0]
+const H_THUNK: symbol | undefined = Object.getOwnPropertySymbols(solidH("i"))[0]
 
 /**
  * What a drawing that failed shows:  a stand-in naming the thing, after telling the program and the page.

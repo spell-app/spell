@@ -5,7 +5,7 @@ import { EditorView, keymap } from "@codemirror/view"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
-import { snippetOf } from "./CodeMirrorLanguage"
+import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorTyping`
@@ -83,7 +83,7 @@ export class CodeMirrorTyping {
     if (tag) {
       const rest = LSP.CompletionShapes.spaceAfterTag(scopeOf(fileOf(), lang), tag)
       view.dispatch({ changes: { from, insert: " " }, selection: { anchor: from + 1 }, userEvent: "input.type" })
-      if (rest.insertText) snippet(snippetOf(rest.insertText))(view, { label: tag }, from + 1, from + 1)
+      if (rest.insertText) snippet(LspToCodeMirror.snippet(rest.insertText))(view, { label: tag }, from + 1, from + 1)
       if (rest.command) queueMicrotask(() => startCompletion(view))
       return true
     }

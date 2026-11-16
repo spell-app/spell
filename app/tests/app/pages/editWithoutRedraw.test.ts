@@ -44,7 +44,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       const cards = [...area.querySelectorAll("solitaire-card")] as (HTMLElement & { thing: object })[]
       const piles = [
         ...area.querySelectorAll(
-          "solitaire-pile, solitaire-stock-pile, solitaire-discard-pile, solitaire-foundation, solitaire-tableau"
+          "solitaire-pile, solitaire-stock-pile, solitaire-discard-pile, solitaire-foundation, solitaire-column"
         )
       ]
       const state = () =>
@@ -75,7 +75,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       const cards = [...area.querySelectorAll("solitaire-card")] as (HTMLElement & { thing: object })[]
       const piles = [
         ...area.querySelectorAll(
-          "solitaire-pile, solitaire-stock-pile, solitaire-discard-pile, solitaire-foundation, solitaire-tableau"
+          "solitaire-pile, solitaire-stock-pile, solitaire-discard-pile, solitaire-foundation, solitaire-column"
         )
       ]
       return {
@@ -205,7 +205,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await page.locator(".InspectAppButton [part~=item]").first().click()
     await page.waitForTimeout(300)
     const facts = await page.evaluate(() => {
-      const card = document.querySelector(".AppPaneBody solitaire-tableau solitaire-card") as HTMLElement & {
+      const card = document.querySelector(".AppPaneBody solitaire-column solitaire-card") as HTMLElement & {
         thing: Record<string, unknown>
       }
       const pile = card.parentElement as HTMLElement & { thing: object }
@@ -213,7 +213,10 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
         thing: Record<string, unknown>
       }
       app.thing.score = 7
-      return { holdsIt: card.thing.pile === pile.thing, stock: !!app.thing.stock, type: card.thing.constructor.name }
+      // a pile drawn by its id (`<column "C1" />`) finds its thing itself:  its component holds it
+      const pileThing =
+        pile.thing ?? (pile as unknown as { component: { currentThing: object } }).component.currentThing
+      return { holdsIt: card.thing.pile === pileThing, stock: !!app.thing.stock, type: card.thing.constructor.name }
     })
     expect(facts).toEqual({ holdsIt: true, stock: true, type: "Card" })
     const discards = () => page.locator(".AppPaneBody solitaire-discard-pile solitaire-card").count()
@@ -227,15 +230,18 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
 
   test("a drawing changed in the code draws again, on the same elements", async () => {
     await noteTheGame()
-    await edit("Card.spell", '<text color="blue">', '<text color="red">')
+    // a card's look is its card image's drawing (Card.spell), in the card's shadow root, in its own
+    await edit("Card.spell", "<text color={its color}>", '<text color="red">')
     await expectGameKept()
     const backs = await page.evaluate(() => {
       const card = document.querySelector(".AppPaneBody solitaire-stock-pile solitaire-card")!
-      const shadow = card.shadowRoot!
-      return {
-        red: shadow.querySelectorAll('[color="red"]').length,
-        blue: shadow.querySelectorAll('[color="blue"]').length
-      }
+      const colored = (root: ShadowRoot, color: string): number =>
+        root.querySelectorAll(`[color="${color}"]`).length +
+        [...root.querySelectorAll("*")].reduce(
+          (count, element) => count + (element.shadowRoot ? colored(element.shadowRoot, color) : 0),
+          0
+        )
+      return { red: colored(card.shadowRoot!, "red"), blue: colored(card.shadowRoot!, "blue") }
     })
     expect(backs.blue).toBe(0)
     expect(backs.red).toBeGreaterThan(0)
@@ -267,17 +273,17 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await noteTheGame()
     const before = await textOf("Pile.spell")
     // added:  nothing running can be one of it, so the run goes on (epic `mockup` P4, J15)
-    await edit("Pile.spell", /$/, '\n<spell-view "extra part"></spell-view>\n')
+    await edit("Pile.spell", /$/, '\na "extra part" is a view\n')
     await page.waitForTimeout(SETTLE_MS)
-    expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)
+    expect(await page.locator(".RestartNeeded").count()).toBe(0)
     await expectGameKept()
     // taken out again:  a type gone waits for Restart
     await edit("Pile.spell", /[^]*/, before)
-    await page.waitForSelector(".RestartNeeded ui-message", { timeout: 10_000 })
+    await page.waitForSelector(".RestartNeeded", { timeout: 10_000 })
     await expectGameKept()
-    await page.locator(".RestartNeeded ui-button").click()
+    await page.locator(".RestartNeeded .RestartNeededButton").click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)
+    expect(await page.locator(".RestartNeeded").count()).toBe(0)
     expect((await whatsKept()).sameCards).toBe(0)
   })
 
@@ -295,6 +301,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
   })
 
   test("real typing in a drawing keeps the page:  Counter", async () => {
+    saved.clear()
     const counting = await context.newPage()
     await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
     await counting.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
@@ -338,6 +345,8 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
   })
 
   test("a selected button in a drawn thing follows its redraw:  Counter, the side bar on the new one (T52)", async () => {
+    // the last test's edit, kept by AutoSave, mustn't be the file this one opens
+    saved.clear()
     const counting = await context.newPage()
     await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
     await counting.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
@@ -396,7 +405,10 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
   )
 
   test("Discard Changes goes back to where you started, and ⌘Z brings the changes back;  the game goes on", async () => {
+    saved.clear()
     const discarding = await context.newPage()
+    // AutoSave off, so Discard Changes goes back to what was last saved:  every save here is answered, never kept
+    await discarding.addInitScript(() => localStorage.setItem("spellEditor:autoSave", "false"))
     await discarding.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
     await discarding.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
     await discarding.waitForTimeout(2500)
@@ -420,22 +432,26 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     expect(changed).not.toBe(start)
     await discarding.locator("#FileBarMenu").click()
     await discarding.waitForTimeout(400)
-    await discarding.locator('ui-popup[for=FileBarMenu] ui-action:has-text("Discard Changes")').click()
+    // a menu row's words are what shows:  the row itself draws no box of its own
+    await discarding.locator("ui-popup[for=FileBarMenu]").getByText("Discard Changes").click()
     await discarding.waitForTimeout(800)
     expect(await contents()).toBe(start)
     // greyed now:  nothing to go back to
     await discarding.locator("#FileBarMenu").click()
     await discarding.waitForTimeout(400)
+    // a row drawn in Spell greys its button, not its own attributes
     expect(
       await discarding
         .locator('ui-popup[for=FileBarMenu] ui-action:has-text("Discard Changes")')
-        .getAttribute("disabled")
-    ).not.toBeNull()
+        .evaluate((row) => !!row.shadowRoot?.querySelector("button")?.disabled)
+    ).toBe(true)
     await discarding.keyboard.press("Escape")
     await discarding.mouse.click(900, 700)
     await discarding.keyboard.press("ControlOrMeta+z")
     await discarding.waitForTimeout(800)
     expect(await contents()).toBe(changed)
+    // AutoSave as it was, for the pages after
+    await discarding.evaluate(() => localStorage.removeItem("spellEditor:autoSave"))
     await discarding.close()
   })
 
@@ -445,15 +461,27 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await menu.waitForSelector("#FileBarMenu", { timeout: 60_000 })
     await menu.waitForTimeout(2500)
     const autoSave = menu.locator('ui-popup[for=FileBarMenu] ui-action:has-text("AutoSave")')
+    // a menu row's words are what shows:  the row itself draws no box of its own
+    const clickAutoSave = () => menu.locator("ui-popup[for=FileBarMenu]").getByText("AutoSave").click()
+    // a row drawn in Spell says it's ticked by its state, not its own attributes
+    const isTicked = () => autoSave.evaluate((row) => row.matches(":state(selected)"))
     await menu.locator("#FileBarMenu").click()
     await menu.waitForTimeout(400)
-    expect(await autoSave.getAttribute("selected")).toBeNull()
-    await autoSave.click()
+    // on until a person turns it off (epic `mockup`)
+    expect(await isTicked()).toBe(true)
+    await clickAutoSave()
     await menu.waitForTimeout(400)
     await menu.locator("#FileBarMenu").click()
     await menu.waitForTimeout(400)
-    expect(await autoSave.getAttribute("selected")).not.toBeNull()
-    await autoSave.click()
+    expect(await isTicked()).toBe(false)
+    // remembered:  off on the next page too
+    await menu.reload()
+    await menu.waitForSelector("#FileBarMenu", { timeout: 60_000 })
+    await menu.waitForTimeout(2500)
+    await menu.locator("#FileBarMenu").click()
+    await menu.waitForTimeout(400)
+    expect(await isTicked()).toBe(false)
+    await clickAutoSave()
     await menu.close()
   })
 })

@@ -571,9 +571,32 @@ export class EditorStore extends Observable {
    * Why the program's last edit needs a restart to show, for the console's sake:  `undefined`:  no edit's waiting.
    * - The running app stays as it is meanwhile:  never a surprise reload (epic `editor`, Edit Without Redraw).
    * - `<RestartNeeded>` shows it, with a Restart button.
+   * - Set through `noteRestartNeeded()`, which shows the message again after a close.
    */
   @prop()
   accessor restartNeededBecause: string | undefined
+
+  /**
+   * Did the person close `<RestartNeeded>`'s message?  It stays closed until the next edit that needs a restart
+   * (`noteRestartNeeded()`).
+   * - `restartNeededBecause` stays set meanwhile:  a run that can't take an edit still starts afresh (`RunSite`).
+   */
+  @prop()
+  accessor isRestartNoticeDismissed: boolean | undefined
+
+  /**
+   * The program's run says whether its last edit needs a restart:  `reason`, or `undefined` when it took it.
+   * - SIDE EFFECT:  a new reason shows `<RestartNeeded>` again, even after a close.
+   */
+  noteRestartNeeded(reason: string | undefined): void {
+    editor.restartNeededBecause = reason
+    if (reason) editor.isRestartNoticeDismissed = false
+  }
+
+  /** Close `<RestartNeeded>`'s message till the next edit that needs a restart. */
+  dismissRestartNeeded(): void {
+    editor.isRestartNoticeDismissed = true
+  }
 
   /**
    * How many times a program has finished running on the page (reactive):  what's read off its things afresh then
@@ -710,7 +733,7 @@ export class EditorStore extends Observable {
       coreUrl: runtimeUrl(),
       keepConsole: true,
       keepThings,
-      onRestartNeeded: (reason) => (editor.restartNeededBecause = reason),
+      onRestartNeeded: (reason) => editor.noteRestartNeeded(reason),
       loadImport: fetchCompiled,
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,

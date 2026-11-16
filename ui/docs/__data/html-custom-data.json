@@ -58697,6 +58697,13 @@
           }
         },
         {
+          "name": "all-items-always",
+          "description": {
+            "kind": "markdown",
+            "value": "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

@@ -26,6 +26,7 @@ export const APP_TEXTS = {
   deleteApp: "Delete {Type}",
   restart: "Restart",
   takesEffectOnRestart: "This takes effect on restart",
+  restartNoticeClose: "Close",
   menuCode: "Code",
   emptyAppPrompt: "Drag something here from the + menu, or click one there to add it.",
   modes: "Run, edit or debug",
@@ -721,7 +722,54 @@ export const APP_TEXTS = {
     "Spell turns your app into JavaScript, the language web browsers run, every time.\nPick a language here to get a copy of your app in it too.",
   listsStartAtLabel: "Lists start at",
   listsStartAtTip:
-    "How your lists number their items.\nAt 1, the first item is number 1, the way people count.\nAt 0, it's number 0, the way JavaScript and Python count."
+    "How your lists number their items.\nAt 1, the first item is number 1, the way people count.\nAt 0, it's number 0, the way JavaScript and Python count.",
+
+  ////////////////
+  // ## The code editor's own words:  CodeMirror's (`CodeMirrorSetup`'s table), and its menu's
+  ////////////////
+
+  // find and replace
+  cmFind: "Find",
+  cmReplace: "Replace",
+  cmNext: "next",
+  cmPrevious: "previous",
+  cmAll: "all",
+  cmMatchCase: "match case",
+  cmRegexp: "regexp",
+  cmByWord: "by word",
+  cmReplaceOne: "replace",
+  cmReplaceAll: "replace all",
+  cmClose: "close",
+  cmCurrentMatch: "current match",
+  cmOnLine: "on line",
+  // `$`:  the number CodeMirror fills in
+  cmReplacedMatchOnLine: "replaced match on line $",
+  cmReplacedMatches: "replaced $ matches",
+  cmGoToLine: "Go to line",
+  cmGo: "go",
+  // folds
+  cmFoldedLines: "Folded lines",
+  cmUnfoldedLines: "Unfolded lines",
+  cmFoldLine: "Fold line",
+  cmUnfoldLine: "Unfold line",
+  cmFoldedCode: "folded code",
+  cmUnfold: "unfold",
+  cmTo: "to",
+  // suggestions and problems
+  cmCompletions: "Completions",
+  cmDiagnostics: "Problems",
+  cmNoDiagnostics: "No problems",
+  // the merge view:  its arrow takes their side's change into yours
+  cmRevertChunk: "Use their version",
+  cmAccept: "Accept",
+  cmReject: "Reject",
+  cmUnchangedLines: "$ unchanged lines",
+  // the editor's own
+  cmControlCharacter: "Control character",
+  cmSelectionDeleted: "Selection deleted",
+  // its right-click menu's rows
+  cmGoToDefinition: "Go to Definition",
+  cmFindMenu: "Find…"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

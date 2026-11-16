@@ -55,21 +55,44 @@ export function Notice(props: NoticeProps) {
 
 /****************
  * ### `<RestartNeeded>`
- * Says the program's last edit takes effect on restart, with a Restart button:  the app keeps running as it was.
+ * Says the program's last edit takes effect on restart:  the app keeps running as it was.
+ * - One compact row, low in the middle of the window, over the page:
+ *   a restart icon, the message, a primary Restart button, and a close button
+ *   (Owen, 2026-11-16, epic `editor` I181:  the wide pale box with a bare grey Restart "is ugly").
+ * - Low, not near the top as the other floating messages:  it stays till Restart or a close,
+ *   so it keeps clear of the top bar and the file tabs.
  * - While `editor.restartNeededBecause` is set:  it clears as the program restarts, or the edit's taken back.
+ * - Closing it hides it till the next edit that needs a restart (`editor.dismissRestartNeeded()`).
  * - The reason is on the console, and in the tooltip, for whoever wants to know.
+ * - Its look:  `Notice.css`.
  ****************/
 export function RestartNeeded() {
-  const reason = tracked(() => editor.restartNeededBecause)
+  const reason = tracked(() => (editor.isRestartNoticeDismissed ? undefined : editor.restartNeededBecause))
   return (
     <Show when={reason()}>
       {(why) => (
-        <div class="RestartNeeded" style={FLOATING_MESSAGE_STYLE}>
-          <ui-message state="info" heading={appTexts.text("takesEffectOnRestart")} title={why()}>
-            <ui-button size="small" onClick={() => void editor.restartApp().catch(editor.showError)}>
+        <div class="RestartNeeded" role="status" style={RESTART_NEEDED_STYLE}>
+          <div class="RestartNeededBar" title={why()}>
+            <ui-icon name="redo" />
+            <span class="RestartNeededText">{appTexts.text("takesEffectOnRestart")}</span>
+            <ui-button
+              class="RestartNeededButton"
+              size="small"
+              color="primary"
+              onClick={() => void editor.restartApp().catch(editor.showError)}
+            >
               {appTexts.text("restart")}
             </ui-button>
-          </ui-message>
+            <ui-button
+              class="RestartNeededClose"
+              appearance="circular basic"
+              size="mini"
+              icon="close"
+              aria-label={appTexts.text("restartNoticeClose")}
+              title={appTexts.text("restartNoticeClose")}
+              onClick={() => editor.dismissRestartNeeded()}
+            />
+          </div>
         </div>
       )}
     </Show>
@@ -97,6 +120,19 @@ export function BackToSite() {
       )}
     </Show>
   )
+}
+
+/**
+ * Where `<RestartNeeded>` sits:  centred, 24px above the window's bottom, as wide as what it holds.
+ * - Over everything else, as every floating message (`FLOATING_MESSAGE_STYLE`'s z-index).
+ */
+const RESTART_NEEDED_STYLE: JSX.CSSProperties = {
+  position: "fixed",
+  bottom: "24px",
+  left: "50%",
+  translate: "-50% 0",
+  "max-width": "calc(100vw - 32px)",
+  "z-index": FLOATING_MESSAGE_STYLE["z-index"]
 }
 
 /** Where `<BackToSite>` sits:  low on the left, over the page, out of the code's way. */
