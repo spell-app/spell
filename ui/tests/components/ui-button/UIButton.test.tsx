@@ -359,10 +359,10 @@ describe("<ui-button> behaviour", () => {
     expect(style.marginInlineEnd).toBe("-3px")
   })
 
-  it("an icon stands close to its own word:  a menu item's distance, 0.35714em, not 0.5em (epic `editor` I203)", async () => {
+  it("an icon stands close to its own word:  a menu item's distance, 0.35714em on the 4px grid, not 0.5em (epic `editor` I203, I213)", async () => {
     const { control } = await button(`<ui-button icon="trash">Discard</ui-button>`)
     const style = getComputedStyle(control.querySelector(".icon")!)
-    expect(parseFloat(style.marginInlineEnd) / parseFloat(style.fontSize)).toBeCloseTo(0.35714, 3)
+    expect(style.marginInlineEnd).toBe("4px")
   })
 
   it("`host.click()` presses the inner control:  submits its form, ONE click reaching the page", async () => {

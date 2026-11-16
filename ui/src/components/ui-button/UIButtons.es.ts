@@ -10,6 +10,7 @@ export const buttonsEs = {
   lang: "es",
   tag: "ui-buttons",
   name: "botones",
-  snippet: "<es-botones>\n\t<es-boton>Uno</es-boton>\n\t<es-boton>Dos</es-boton>\n\t<es-boton>Tres</es-boton>\n</es-botones>",
+  snippet:
+    "<es-botones>\n\t<es-boton>Uno</es-boton>\n\t<es-boton>Dos</es-boton>\n\t<es-boton>Tres</es-boton>\n</es-botones>",
   aka: ["botones", "grupo de botones", "control segmentado", "barra de herramientas"]
 } as const satisfies E.TagDictionary

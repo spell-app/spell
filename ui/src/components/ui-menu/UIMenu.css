@@ -236,7 +236,7 @@
     --_ui-menu-header-transform: var(--ui-menu-header-transform, none);
     --_ui-menu-header-margin: var(--ui-menu-header-margin, 0);
     --_ui-menu-disabled-color: var(--ui-menu-disabled-color, var(--ui-text-disabled));
-    --_ui-menu-icon-margin: var(--ui-menu-icon-margin, 0 0.35714em 0 0);
+    --_ui-menu-icon-margin: var(--ui-menu-icon-margin, 0 round(0.35714em, var(--ui-grid, 4px)) 0 0);
     --_ui-menu-icon-opacity: var(--ui-menu-icon-opacity, 0.9);
     --_ui-menu-icon-size: var(--ui-menu-icon-size, 1em);
     --_ui-menu-icon-display: var(--ui-menu-icon-display, inline-flex);
@@ -498,7 +498,7 @@
   }
   :host(:state(in-menu)) > .item > .image {
     height: 2.5em;
-    margin-right: 0.35714em;
+    margin-right: round(0.35714em, var(--ui-grid, 4px));
     border-radius: var(--ui-radius-circle);
     object-fit: cover;
   }
@@ -830,7 +830,7 @@
     --_ui-menu-item-margin: 0.57143em 0;
     --_ui-menu-item-padding: 0.35714em 0;
     --_ui-menu-icon-float: none;
-    --_ui-menu-icon-margin: 0 0.35714em 0 0;
+    --_ui-menu-icon-margin: 0 round(0.35714em, var(--ui-grid, 4px)) 0 0;
     --_ui-menu-header-margin: 0.57143em 0 0.71429em;
     margin: var(--_ui-menu-margin) 0;
   }
@@ -1124,7 +1124,12 @@
   .ui.segmented.header.menu {
     --_ui-menu-segmented-header-background: var(--ui-menu-segmented-header-background, transparent);
     --_ui-menu-segmented-header-font-size: var(--ui-menu-segmented-header-font-size, 13px);
-    --_ui-menu-segmented-header-item-padding: var(--ui-menu-segmented-header-item-padding, 0.42em 0.7em);
+    /* its sides on the spacing grid (`--ui-grid`):  8px at 13px, was 9.1px (epic `editor` I213);
+       above and below, 0.42em:  with the 13px line, a 24px pill */
+    --_ui-menu-segmented-header-item-padding: var(
+      --ui-menu-segmented-header-item-padding,
+      0.42em round(0.7em, var(--ui-grid, 4px))
+    );
     --_ui-menu-segmented-header-item-color: var(
       --ui-menu-segmented-header-item-color,
       var(--ui-text-dark, var(--ui-text-color))
@@ -1208,8 +1213,8 @@
     width: auto;
     min-height: var(--ui-menu-capsule-height, var(--ui-control-height, 0px));
     margin: 0;
-    padding-inline: var(--ui-menu-capsule-padding, 0.5em);
-    --_ui-menu-capsule-item-padding: var(--ui-menu-capsule-item-padding, 0.25em 0.5em);
+    padding-inline: var(--ui-menu-capsule-padding, var(--ui-space-xs));
+    --_ui-menu-capsule-item-padding: var(--ui-menu-capsule-item-padding, var(--ui-space-2xs) var(--ui-space-xs));
     --_ui-menu-item-padding: var(--_ui-menu-capsule-item-padding);
     background: var(--ui-menu-capsule-background, oklch(from var(--ui-ink) l c h / 0.06));
     border: 0;

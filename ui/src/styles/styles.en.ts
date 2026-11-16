@@ -356,6 +356,11 @@ export const sizes = {
 /**
  * Spacing ladder in `em` of the LOCAL font size, named like Web Awesome's `--wa-space-*`.
  * - `em`, so a `large` component's padding grows with it.
+ * - Each step from `2xs` up lands on the spacing grid (`--ui-grid`, 4px):  `round()`ed to it at the size it's used,
+ *   so a 13px editor gets 4px and 8px, not 3.25px and 6.5px (Owen, 2026-11-16, epic `editor` I213:
+ *   "We should be using multiples of 4 when not explicitly directed otherwise").
+ *   - At the default 16px every step is already a multiple of 4:  nothing moves.
+ *   - `3xs` (2px at 16px) is a hairline, under the grid:  left as it is.
  */
 export const spacing = {
   "3xs": 0.125,
@@ -368,6 +373,9 @@ export const spacing = {
   "2xl": 3,
   "3xl": 4
 } as const satisfies Record<string, number>
+
+/** The spacing grid, in px:  `--ui-grid`;  every spacing step big enough lands on a multiple of it (`spacing`, above). */
+export const spacingGrid = 4
 
 /**
  * Border radii by role.

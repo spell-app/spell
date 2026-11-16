@@ -15,7 +15,7 @@
 
 @layer ui.components.field.types {
   .field {
-    --_ui-field-row-gap: var(--ui-field-row-gap, 0.5em);
+    --_ui-field-row-gap: var(--ui-field-row-gap, var(--ui-space-xs));
     --_ui-field-output-color: var(--ui-field-output-color, var(--ui-text-muted));
     --_ui-field-hint-color: var(--ui-field-hint-color, var(--ui-text-muted));
     --_ui-field-error-color: var(--ui-field-error-color, var(--ui-negative-text));
@@ -231,7 +231,7 @@
     display: flex;
     flex: 1 1 12em;
     align-items: center;
-    gap: 0.5em;
+    gap: var(--ui-space-xs);
     min-width: 0;
   }
   .inline.field > :is(.hint, .error.prompt) {

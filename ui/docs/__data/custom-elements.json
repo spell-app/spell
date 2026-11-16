@@ -2530,8 +2530,8 @@
             },
             {
               "name": "--ui-button-icon-spacing",
-              "default": "0.35714em",
-              "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)"
+              "default": "round(0.35714em, var(--ui-grid, 4px))",
+              "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203); on the spacing grid, 4px at 13px (was 4.6px; I213)"
             },
             {
               "name": "--ui-button-basic-border-width",
@@ -21259,7 +21259,7 @@
             },
             {
               "name": "--ui-menu-icon-margin",
-              "default": "0 0.35714em 0 0"
+              "default": "0 round(0.35714em, var(--ui-grid, 4px)) 0 0"
             },
             {
               "name": "--ui-menu-icon-opacity",
@@ -21424,7 +21424,8 @@
             },
             {
               "name": "--ui-menu-segmented-header-item-padding",
-              "default": "0.42em 0.7em"
+              "default": "0.42em round(0.7em, var(--ui-grid, 4px))",
+              "description": "its sides on the spacing grid (`--ui-grid`): 8px at 13px, was 9.1px (epic `editor` I213); above and below, 0.42em: with the 13px line, a 24px pill"
             },
             {
               "name": "--ui-menu-segmented-header-item-color",
@@ -21436,7 +21437,7 @@
             },
             {
               "name": "--ui-menu-capsule-item-padding",
-              "default": "0.25em 0.5em"
+              "default": "var(--ui-space-2xs) var(--ui-space-xs)"
             },
             {
               "name": "--ui-menu-font-family",
@@ -21488,7 +21489,7 @@
             },
             {
               "name": "--ui-menu-capsule-padding",
-              "default": "0.5em"
+              "default": "var(--ui-space-xs)"
             },
             {
               "name": "--ui-menu-capsule-background",
@@ -31139,7 +31140,7 @@
             },
             {
               "name": "--ui-property-editor-label-distance",
-              "default": "3px"
+              "default": "4px"
             },
             {
               "name": "--ui-property-editor-band-transform",
@@ -34623,7 +34624,7 @@
             },
             {
               "name": "--ui-section-title-gap",
-              "default": "0.5em"
+              "default": "var(--ui-space-xs)"
             },
             {
               "name": "--ui-section-title-color",
@@ -47118,7 +47119,7 @@
           "cssProperties": [
             {
               "name": "--ui-toolbar-gap",
-              "default": "0.25em"
+              "default": "var(--ui-space-2xs)"
             },
             {
               "name": "--ui-toolbar-button-radius",
@@ -47138,7 +47139,7 @@
             },
             {
               "name": "--ui-toolbar-pill-gap",
-              "default": "0.75em"
+              "default": "var(--ui-space-s)"
             },
             {
               "name": "--ui-toolbar-header-action-gap",
@@ -47146,7 +47147,7 @@
             },
             {
               "name": "--ui-toolbar-pill-item-padding",
-              "default": "0.5em 0.75em"
+              "default": "var(--ui-space-xs) var(--ui-space-s)"
             }
           ]
         }

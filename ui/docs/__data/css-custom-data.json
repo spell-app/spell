@@ -313,7 +313,7 @@
       "name": "--ui-button-icon-spacing",
       "description": {
         "kind": "markdown",
-        "value": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)\n\n`<ui-button>`'s token.  Default:  `0.35714em`"
+        "value": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203); on the spacing grid, 4px at 13px (was 4.6px; I213)\n\n`<ui-button>`'s token.  Default:  `round(0.35714em, var(--ui-grid, 4px))`"
       }
     },
     {
@@ -5892,7 +5892,7 @@
       "name": "--ui-menu-icon-margin",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `0 0.35714em 0 0`"
+        "value": "`<ui-menu>`'s token.  Default:  `0 round(0.35714em, var(--ui-grid, 4px)) 0 0`"
       }
     },
     {
@@ -6179,7 +6179,7 @@
       "name": "--ui-menu-segmented-header-item-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `0.42em 0.7em`"
+        "value": "its sides on the spacing grid (`--ui-grid`): 8px at 13px, was 9.1px (epic `editor` I213); above and below, 0.42em: with the 13px line, a 24px pill\n\n`<ui-menu>`'s token.  Default:  `0.42em round(0.7em, var(--ui-grid, 4px))`"
       }
     },
     {
@@ -6200,7 +6200,7 @@
       "name": "--ui-menu-capsule-item-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `0.25em 0.5em`"
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-space-2xs) var(--ui-space-xs)`"
       }
     },
     {
@@ -6291,7 +6291,7 @@
       "name": "--ui-menu-capsule-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `0.5em`"
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-space-xs)`"
       }
     },
     {
@@ -7453,7 +7453,7 @@
       "name": "--ui-property-editor-label-distance",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-property-editor>`'s token.  Default:  `3px`"
+        "value": "`<ui-property-editor>`'s token.  Default:  `4px`"
       }
     },
     {
@@ -7894,7 +7894,7 @@
       "name": "--ui-section-title-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-section>`'s token.  Default:  `0.5em`"
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-space-xs)`"
       }
     },
     {
@@ -10274,7 +10274,7 @@
       "name": "--ui-toolbar-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `0.25em`"
+        "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-space-2xs)`"
       }
     },
     {
@@ -10309,7 +10309,7 @@
       "name": "--ui-toolbar-pill-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `0.75em`"
+        "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-space-s)`"
       }
     },
     {
@@ -10323,7 +10323,7 @@
       "name": "--ui-toolbar-pill-item-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-toolbar>`'s token.  Default:  `0.5em 0.75em`"
+        "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-space-xs) var(--ui-space-s)`"
       }
     },
     {

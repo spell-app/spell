@@ -119,8 +119,7 @@ export const toolbarVocabulary = {
     { name: "scroll-end", description: "The `›` button, shown while there's more to scroll on to." },
     {
       name: "all-items",
-      description:
-        "`max-visible`:  the button listing every item, while some are put away or scrolled out of the row."
+      description: "`max-visible`:  the button listing every item, while some are put away or scrolled out of the row."
     }
   ],
   states: [

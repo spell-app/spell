@@ -100,14 +100,14 @@ function has(host: Element, name: string, state: string): boolean {
 ////////////////
 
 describe("<ui-property-editor compact>", () => {
-  it("is tight:  13px text, regular labels, 3px under each label, and its properties and groups say so", async () => {
+  it("is tight:  13px text, regular labels, 4px under each label, and its properties and groups say so", async () => {
     const host = await editor("compact")
     expect(host.matches(":state(compact)")).toBe(true)
     expect(has(host, "name", "compact")).toBe(true)
     expect(host.querySelector("ui-property-group")!.matches(":state(compact)")).toBe(true)
     const row = field(host, "name").querySelector(".row")!
     expect(getComputedStyle(row).fontWeight).toBe("400")
-    expect(getComputedStyle(row).marginBottom).toBe("3px")
+    expect(getComputedStyle(row).marginBottom).toBe("4px")
     expect(getComputedStyle(field(host, "name")).fontSize).toBe("13px")
   })
 

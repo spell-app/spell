@@ -176,7 +176,7 @@
   .ui.section.panel:not(.sub) > .title {
     margin: calc(-1 * var(--_ui-panel-padding));
     margin-block-end: 0;
-    padding: 0.75em var(--_ui-panel-padding);
+    padding: var(--ui-space-s) var(--_ui-panel-padding);
     border-radius: calc(var(--_ui-panel-radius) - 1px) calc(var(--_ui-panel-radius) - 1px) 0 0;
     background: var(--_ui-panel-header-background);
     color: var(--_ui-panel-header-color);
@@ -192,7 +192,7 @@
   /* ## Sub-head band:  small capitals, a hairline above */
   .ui.section.panel.sub > .title {
     margin: 0;
-    padding: 0.25em var(--_ui-panel-padding);
+    padding: var(--ui-space-2xs) var(--_ui-panel-padding);
     border-top: 1px solid var(--_ui-panel-border-color);
     border-radius: 0;
     background: var(--_ui-panel-subhead-background);
@@ -235,7 +235,7 @@
 
   /* ## Subhead text (`subhead`):  small, muted, under the band */
   .ui.section.panel > .subhead {
-    padding: 0.5em 0 0;
+    padding: var(--ui-space-xs) 0 0;
     font-size: 0.8125em;
   }
   .ui.section.panel.sub > .subhead {
@@ -253,11 +253,11 @@
   }
   /* padding only while unfolded:  the section's `.content[hidden]` rule (no padding) must keep winning */
   .ui.section.panel > .content:not([hidden]) {
-    padding: 0.75em 0 0;
+    padding: var(--ui-space-s) 0 0;
   }
   /* NOTE:  no compounding of the 14px:  every section root resets to `--ui-font-size` */
   .ui.section.panel.sub > .content:not([hidden]) {
-    padding: 0.75em var(--_ui-panel-padding) 0.25em;
+    padding: var(--ui-space-s) var(--_ui-panel-padding) var(--ui-space-2xs);
   }
 }
 

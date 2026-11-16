@@ -8,7 +8,7 @@
  *   everything else here takes a whole row.
  * - `:state(compact)`:  the tight look (epic `debut` P31), through private aliases its properties and groups read,
  *   as custom properties inherit into what's slotted.
- *   - `--ui-property-editor-font-size` (13px), `-row-gap` (8px), `-column-gap` (12px), `-label-distance` (3px)
+ *   - `--ui-property-editor-font-size` (13px), `-row-gap` (8px), `-column-gap` (12px), `-label-distance` (4px)
  *   - its controls tighter, set as the page would (`componentTokens.test.ts` lists each)
  *   - its selects' menus as tall as their choices (up to the window's room), with no line between them
  */
@@ -19,8 +19,8 @@
   .footer {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5em;
-    margin: 1em 0 0;
+    gap: var(--ui-space-xs);
+    margin: var(--ui-space-m) 0 0;
   }
   .output {
     color: var(--ui-text-muted);
@@ -29,7 +29,7 @@
     font-variant-numeric: tabular-nums;
   }
   .error-line {
-    margin: 0 0 0.75em;
+    margin: 0 0 var(--ui-space-s);
     color: var(--ui-negative-text);
     font-size: 0.85714em;
   }
@@ -55,7 +55,7 @@
     --_ui-property-editor-font-size: var(--ui-property-editor-font-size, 13px);
     --_ui-property-editor-row-gap: var(--ui-property-editor-row-gap, 8px);
     --_ui-property-editor-column-gap: var(--ui-property-editor-column-gap, 12px);
-    --_ui-property-editor-label-distance: var(--ui-property-editor-label-distance, 3px);
+    --_ui-property-editor-label-distance: var(--ui-property-editor-label-distance, 4px);
     /* the form's own aliases, which its fields read:  regular labels (bold means "changed"), the text's size */
     --_ui-form-row-distance: var(--_ui-property-editor-row-gap);
     --_ui-form-label-distance: var(--_ui-property-editor-label-distance);
@@ -67,12 +67,12 @@
     --ui-control-height: 0px;
     --ui-button-padding-block: 0.3em;
     --ui-input-padding-block: 0.3em;
-    --ui-input-padding-inline: 0.6em;
+    --ui-input-padding-inline: round(0.6em, var(--ui-grid, 4px));
     --ui-select-padding-block: 0.3em;
-    --ui-select-padding-inline: 0.6em;
+    --ui-select-padding-inline: round(0.6em, var(--ui-grid, 4px));
     --ui-dropdown-padding-block: 0.3em;
-    --ui-dropdown-padding-inline: 0.6em;
-    --ui-menu-segmented-item-padding: 0.4em 0.6em;
+    --ui-dropdown-padding-inline: round(0.6em, var(--ui-grid, 4px));
+    --ui-menu-segmented-item-padding: 0.4em round(0.6em, var(--ui-grid, 4px));
     /* its selects' menus:  every choice shown (up to the window's room), no line between them (epic `editor` I198) */
     --ui-select-picker-max-height: 100dvh;
     --ui-select-item-divider-color: transparent;

@@ -24,7 +24,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5em 1.25em;
+    gap: var(--ui-space-xs) round(1.25em, var(--ui-grid, 4px));
   }
 
   /* ## On the editor's grid */
@@ -51,7 +51,7 @@
   /* ## A compact editor's yes or no:  "(o  ) Label (i)", its toggle before its label */
   :host(:state(inline-check)) .inline.field:has(> .row) {
     flex-wrap: nowrap;
-    column-gap: 0.5em;
+    column-gap: var(--ui-space-xs);
   }
   :host(:state(inline-check)) .inline.field > .control {
     order: -1;
@@ -100,7 +100,7 @@
     display: inline-block;
     width: 0.45em;
     height: 0.45em;
-    margin-inline-end: 0.35em;
+    margin-inline-end: round(0.35em, var(--ui-grid, 4px));
     vertical-align: 0.12em;
     border-radius: 50%;
     background: var(--ui-primary, currentColor);
@@ -136,7 +136,7 @@
     display: inline-block;
     width: 0.45em;
     height: 0.45em;
-    margin-inline-end: 0.35em;
+    margin-inline-end: round(0.35em, var(--ui-grid, 4px));
     vertical-align: 0.12em;
     border-radius: 0.1em;
     background: var(--ui-warning, currentColor);

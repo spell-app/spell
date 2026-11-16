@@ -181,8 +181,12 @@ const GROUPS: GroupDefinition[] = [
   {
     id: "spacing",
     title: "Spacing",
-    description: "The spacing ladder, in `em` of the local font size:  `ui-gap-*`, `ui-m-*`, `ui-p-*`.",
-    rules: [[/^--ui-space-(\w+)$/, (match) => `Spacing step \`${match[1]}\`.`]]
+    description:
+      "The spacing ladder, in `em` of the local font size, each step rounded to the grid:  `ui-gap-*`, `ui-m-*`, `ui-p-*`.",
+    rules: [
+      [/^--ui-grid$/, () => "The spacing grid:  every spacing step lands on a multiple of it, at any font size."],
+      [/^--ui-space-(\w+)$/, (match) => `Spacing step \`${match[1]}\`.`]
+    ]
   },
   {
     id: "radii",

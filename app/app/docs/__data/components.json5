@@ -4149,8 +4149,14 @@
     {
       "id": "spacing",
       "title": "Spacing",
-      "description": "The spacing ladder, in `em` of the local font size:  `ui-gap-*`, `ui-m-*`, `ui-p-*`.",
+      "description": "The spacing ladder, in `em` of the local font size, each step rounded to the grid:  `ui-gap-*`, `ui-m-*`, `ui-p-*`.",
       "tokens": [
+        {
+          "name": "--ui-grid",
+          "default": "4px",
+          "description": "The spacing grid:  every spacing step lands on a multiple of it, at any font size.",
+          "type": "length"
+        },
         {
           "name": "--ui-space-3xs",
           "default": "0.125em",
@@ -4159,49 +4165,49 @@
         },
         {
           "name": "--ui-space-2xs",
-          "default": "0.25em",
+          "default": "round(0.25em, var(--ui-grid))",
           "description": "Spacing step `2xs`.",
           "type": "length"
         },
         {
           "name": "--ui-space-xs",
-          "default": "0.5em",
+          "default": "round(0.5em, var(--ui-grid))",
           "description": "Spacing step `xs`.",
           "type": "length"
         },
         {
           "name": "--ui-space-s",
-          "default": "0.75em",
+          "default": "round(0.75em, var(--ui-grid))",
           "description": "Spacing step `s`.",
           "type": "length"
         },
         {
           "name": "--ui-space-m",
-          "default": "1em",
+          "default": "round(1em, var(--ui-grid))",
           "description": "Spacing step `m`.",
           "type": "length"
         },
         {
           "name": "--ui-space-l",
-          "default": "1.5em",
+          "default": "round(1.5em, var(--ui-grid))",
           "description": "Spacing step `l`.",
           "type": "length"
         },
         {
           "name": "--ui-space-xl",
-          "default": "2em",
+          "default": "round(2em, var(--ui-grid))",
           "description": "Spacing step `xl`.",
           "type": "length"
         },
         {
           "name": "--ui-space-2xl",
-          "default": "3em",
+          "default": "round(3em, var(--ui-grid))",
           "description": "Spacing step `2xl`.",
           "type": "length"
         },
         {
           "name": "--ui-space-3xl",
-          "default": "4em",
+          "default": "round(4em, var(--ui-grid))",
           "description": "Spacing step `3xl`.",
           "type": "length"
         }

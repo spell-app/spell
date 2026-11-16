@@ -131,7 +131,7 @@
     --_ui-section-margin: var(--ui-section-margin, 1.5em);
     --_ui-section-title-padding: var(--ui-section-title-padding, 0.25em 0);
     --_ui-section-title-weight: var(--ui-section-title-weight, var(--ui-font-weight-bold));
-    --_ui-section-title-gap: var(--ui-section-title-gap, 0.5em);
+    --_ui-section-title-gap: var(--ui-section-title-gap, var(--ui-space-xs));
     --_ui-section-title-color: var(--ui-section-title-color, var(--ui-text-color));
     --_ui-section-title-background: var(--ui-section-title-background, var(--ui-surface-strong));
     --_ui-section-title-line-height: var(--ui-section-title-line-height, 1.28571);

@@ -54526,8 +54526,8 @@
         },
         {
           "name": "--ui-button-icon-spacing",
-          "default": "0.35714em",
-          "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203)",
+          "default": "round(0.35714em, var(--ui-grid, 4px))",
+          "description": "space between the icon and its words: a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own button's; at 0.5em it stood as far from them as from what came before the button (epic `editor` I203); on the spacing grid, 4px at 13px (was 4.6px; I213)",
           "type": "length"
         },
         {
@@ -59237,7 +59237,7 @@
         },
         {
           "name": "--ui-menu-icon-margin",
-          "default": "0 0.35714em 0 0",
+          "default": "0 round(0.35714em, var(--ui-grid, 4px)) 0 0",
           "type": "length"
         },
         {
@@ -59443,7 +59443,8 @@
         },
         {
           "name": "--ui-menu-segmented-header-item-padding",
-          "default": "0.42em 0.7em",
+          "default": "0.42em round(0.7em, var(--ui-grid, 4px))",
+          "description": "its sides on the spacing grid (`--ui-grid`): 8px at 13px, was 9.1px (epic `editor` I213); above and below, 0.42em: with the 13px line, a 24px pill",
           "type": "length"
         },
         {
@@ -59458,7 +59459,7 @@
         },
         {
           "name": "--ui-menu-capsule-item-padding",
-          "default": "0.25em 0.5em",
+          "default": "var(--ui-space-2xs) var(--ui-space-xs)",
           "type": "length"
         },
         {
@@ -59523,7 +59524,7 @@
         },
         {
           "name": "--ui-menu-capsule-padding",
-          "default": "0.5em",
+          "default": "var(--ui-space-xs)",
           "type": "length"
         },
         {
@@ -60807,7 +60808,7 @@
         },
         {
           "name": "--ui-property-editor-label-distance",
-          "default": "3px",
+          "default": "4px",
           "type": "length"
         },
         {
@@ -61214,7 +61215,7 @@
         },
         {
           "name": "--ui-section-title-gap",
-          "default": "0.5em",
+          "default": "var(--ui-space-xs)",
           "type": "length"
         },
         {
@@ -63286,7 +63287,7 @@
       "tokens": [
         {
           "name": "--ui-toolbar-gap",
-          "default": "0.25em",
+          "default": "var(--ui-space-2xs)",
           "type": "length"
         },
         {
@@ -63311,7 +63312,7 @@
         },
         {
           "name": "--ui-toolbar-pill-gap",
-          "default": "0.75em",
+          "default": "var(--ui-space-s)",
           "type": "length"
         },
         {
@@ -63321,7 +63322,7 @@
         },
         {
           "name": "--ui-toolbar-pill-item-padding",
-          "default": "0.5em 0.75em",
+          "default": "var(--ui-space-xs) var(--ui-space-s)",
           "type": "length"
         }
       ]
@@ -63816,8 +63817,14 @@
     {
       "id": "spacing",
       "title": "Spacing",
-      "description": "The spacing ladder, in `em` of the local font size:  `ui-gap-*`, `ui-m-*`, `ui-p-*`.",
+      "description": "The spacing ladder, in `em` of the local font size, each step rounded to the grid:  `ui-gap-*`, `ui-m-*`, `ui-p-*`.",
       "tokens": [
+        {
+          "name": "--ui-grid",
+          "default": "4px",
+          "description": "The spacing grid:  every spacing step lands on a multiple of it, at any font size.",
+          "type": "length"
+        },
         {
           "name": "--ui-space-3xs",
           "default": "0.125em",
@@ -63826,49 +63833,49 @@
         },
         {
           "name": "--ui-space-2xs",
-          "default": "0.25em",
+          "default": "round(0.25em, var(--ui-grid))",
           "description": "Spacing step `2xs`.",
           "type": "length"
         },
         {
           "name": "--ui-space-xs",
-          "default": "0.5em",
+          "default": "round(0.5em, var(--ui-grid))",
           "description": "Spacing step `xs`.",
           "type": "length"
         },
         {
           "name": "--ui-space-s",
-          "default": "0.75em",
+          "default": "round(0.75em, var(--ui-grid))",
           "description": "Spacing step `s`.",
           "type": "length"
         },
         {
           "name": "--ui-space-m",
-          "default": "1em",
+          "default": "round(1em, var(--ui-grid))",
           "description": "Spacing step `m`.",
           "type": "length"
         },
         {
           "name": "--ui-space-l",
-          "default": "1.5em",
+          "default": "round(1.5em, var(--ui-grid))",
           "description": "Spacing step `l`.",
           "type": "length"
         },
         {
           "name": "--ui-space-xl",
-          "default": "2em",
+          "default": "round(2em, var(--ui-grid))",
           "description": "Spacing step `xl`.",
           "type": "length"
         },
         {
           "name": "--ui-space-2xl",
-          "default": "3em",
+          "default": "round(3em, var(--ui-grid))",
           "description": "Spacing step `2xl`.",
           "type": "length"
         },
         {
           "name": "--ui-space-3xl",
-          "default": "4em",
+          "default": "round(4em, var(--ui-grid))",
           "description": "Spacing step `3xl`.",
           "type": "length"
         }

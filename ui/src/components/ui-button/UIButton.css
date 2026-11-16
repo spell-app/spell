@@ -136,8 +136,9 @@
     --_ui-button-duration: var(--ui-button-duration, var(--ui-duration-fast));
     --_ui-button-icon-opacity: var(--ui-button-icon-opacity, 0.8);
     /* space between the icon and its words:  a menu item's (`--ui-menu-icon-margin`), so the icon reads as its own
-       button's;  at 0.5em it stood as far from them as from what came before the button (epic `editor` I203) */
-    --_ui-button-icon-spacing: var(--ui-button-icon-spacing, 0.35714em);
+       button's;  at 0.5em it stood as far from them as from what came before the button (epic `editor` I203);
+       on the spacing grid, 4px at 13px (was 4.6px;  I213) */
+    --_ui-button-icon-spacing: var(--ui-button-icon-spacing, round(0.35714em, var(--ui-grid, 4px)));
     /* ## Variations */
     --_ui-button-basic-border-width: var(--ui-button-basic-border-width, var(--ui-border-width));
     --_ui-button-basic-background-hover: var(--ui-button-basic-background-hover, var(--ui-surface));
@@ -199,12 +200,19 @@
         ) *
         var(--_button-density, 1) - var(--_buttons-trim, 0px)
     );
+    /* on the spacing grid (`--ui-grid`) after `compact`'s ratio:  a small compact button in the 13px Inspector had 10.24px (I213) */
     padding-inline-start: calc(
-      var(--_button-pad-inline, var(--_ui-button-padding-inline)) * var(--_button-density, 1) +
+      round(
+          var(--_button-pad-inline, var(--_ui-button-padding-inline)) * var(--_button-density, 1),
+          var(--ui-grid, 4px)
+        ) +
         var(--_button-pad-start, 0em)
     );
     padding-inline-end: calc(
-      var(--_button-pad-inline, var(--_ui-button-padding-inline)) * var(--_button-density, 1) +
+      round(
+          var(--_button-pad-inline, var(--_ui-button-padding-inline)) * var(--_button-density, 1),
+          var(--ui-grid, 4px)
+        ) +
         var(--_button-pad-end, 0em)
     );
     overflow: var(--_button-overflow, visible);

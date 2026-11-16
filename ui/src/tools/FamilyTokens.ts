@@ -165,7 +165,7 @@ const TIME_NAME = /-(duration|delay)$/
 
 /** A length, or a `calc()` / `min()` / `max()` / `clamp()` of lengths, or a foundation length token. */
 const LENGTH_VALUE =
-  /^(-?\d*\.?\d+(px|em|%|vh|vw|vmin|vmax|ch|ex|lh|cqi|cqb)|0)$|^(calc|min|max|clamp)\(.*(px|em|%|vh|vw)|^var\(--ui-(space|radius|font-size|size)\b/
+  /^(-?\d*\.?\d+(px|em|%|vh|vw|vmin|vmax|ch|ex|lh|cqi|cqb)|0)$|^(calc|min|max|clamp|round)\(.*(px|em|%|vh|vw)|^var\(--ui-(space|radius|font-size|size)\b/
 
 /** A token name that says length. */
 const LENGTH_NAME =

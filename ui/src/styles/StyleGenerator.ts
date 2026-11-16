@@ -47,6 +47,7 @@ import {
   shadows,
   sizes,
   spacing,
+  spacingGrid,
   textAlphas,
   zIndices
 } from "./styles.en"
@@ -112,7 +113,8 @@ export class StyleGenerator {
       ]),
       ["--ui-heading-ratio", String(headingRatio)],
       ["--ui-caption-ratio", String(captionRatio)],
-      ...this.entries(spacing).map(([name, em]): GeneratedDeclaration => [`--ui-space-${name}`, `${em}em`]),
+      ["--ui-grid", `${spacingGrid}px`],
+      ...this.entries(spacing).map(([name, em]): GeneratedDeclaration => [`--ui-space-${name}`, this.onGrid(em)]),
       ...this.entries(radii).map(([name, radius]): GeneratedDeclaration => [`--ui-radius-${name}`, radius]),
       ["--ui-radius", "var(--ui-radius-m)"],
       ["--ui-ink-on-light", this.oklch(neutrals.ink.onLight)],
@@ -597,6 +599,16 @@ export class StyleGenerator {
   /** `--ui-<prefix>` for key `default`, else `--ui-<prefix>-<name>`. */
   private token(prefix: string, name: string): string {
     return name === "default" ? `--ui-${prefix}` : `--ui-${prefix}-${name}`
+  }
+
+  /**
+   * A spacing step's value:  `em` rounded to the grid (`--ui-grid`) where it's used, so it lands on a multiple of 4px
+   * at any font size.
+   * - A hairline step, under the grid at the default size (`3xs`, 2px), stays plain `em`:  rounding would make it 0
+   *   or 4px.
+   */
+  private onGrid(em: number): string {
+    return em * fontSize < spacingGrid ? `${em}em` : `round(${em}em, var(--ui-grid))`
   }
 
   /** `font-family` value:  quote names with spaces, leave keywords / identifiers bare. */

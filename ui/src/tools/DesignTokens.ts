@@ -301,14 +301,19 @@ export class DesignTokens {
     const tokens: DesignTokenRow[] = []
     for (const name of this.values.keys()) {
       if (!pattern.test(name)) continue
-      const value = this.literal(name)
+      const literal = this.literal(name)
+      // a spacing step on the grid (`round(0.25em, var(--ui-grid))`):  its em, rounded below
+      const onGrid = literal && /^round\((-?[\d.]+em),\s*var\(--ui-grid\)\)$/.exec(literal)
+      const value = onGrid ? onGrid[1] : literal
       const match = value && /^(-?[\d.]+)(px|em|%)?$/.exec(value)
       if (!match) {
         this.skip(name, "length", `not a plain length:  \`${this.values.get(name)}\``)
         continue
       }
       const amount = parseFloat(match[1]!)
-      const px = match[2] === "em" ? `${Math.round(amount * base * 100) / 100}px` : match[2] ? value! : `${amount}px`
+      const grid = parseFloat(this.values.get("--ui-grid") ?? "4") || 4
+      const ems = onGrid ? Math.round((amount * base) / grid) * grid : Math.round(amount * base * 100) / 100
+      const px = match[2] === "em" ? `${ems}px` : match[2] ? value! : `${amount}px`
       const usage = match[2] === "em" ? `\`${name}\` (${value} at the ${base}px base)` : `\`${name}\``
       tokens.push({ name: this.exported(name), value: px, usage: this.usage(name, usage) })
     }
