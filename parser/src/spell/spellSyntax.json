@@ -143,7 +143,7 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
@@ -168,7 +168,7 @@
           "ruleNames": ["boolean"],
           "internal": false,
           "file": "src/spell/rules/core/BooleanLiteral.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "Boolean literal -- also accepts common synonyms like `yes`/`no`, `ok`/`cancel`, `always`/`never`.",
           "syntaxes": [
             {
@@ -4485,7 +4485,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/classes/QuotedPropertyRule.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Calls a quoted property formula's generated method: `is not? the queen of spades` => `card.is_the_$rank_of_$suits('queen', 'spades')`.",
           "syntaxes": [],
           "aliases": []
@@ -10191,7 +10191,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/DynamicMethodRule.ts",
-          "line": 29,
+          "line": 30,
           "purpose": "Rule `constructor` for a plain (non-instance, non-operator) dynamically-defined method's CALL SITE, e.g. matching `notify 1` after `to notify (message): ...` defined it.",
           "syntaxes": [],
           "aliases": []
@@ -10211,7 +10211,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodInfixRule.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "`card nerds out with thing`: calls a quoted method defined as an infix expression: e.g. `card.nerdsOutWithAnother(thing)`.",
           "syntaxes": [],
           "aliases": []
@@ -10221,7 +10221,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodPostfixRule.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`card is face up` -- reads a quoted method defined as a postfix expression, e.g. `card.isFaceUp`.",
           "syntaxes": [],
           "aliases": []

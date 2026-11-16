@@ -177,21 +177,27 @@ describe("BubblyMarks.of()", () => {
   })
 })
 
-describe("BubblyMarks and SP.BubblyPresentation", () => {
+describe("BubblyMarks, a rule's roles and SP.BubblyPresentation", () => {
   const { rules } = SP.BubblyPresentation as unknown as { rules: Record<string, SP.BubblyRulePresentation> }
   const saved = rules.define_property_has
+  // its roles are its class's, every language's:  on its prototype
+  const [rule] = (SP.spellParser.rules.define_property_has as unknown as { rules: object[] }).rules
+  const roles = Object.getPrototypeOf(rule) as { roles?: SP.BubblyRuleRoles }
+  const savedRoles = roles.roles
 
   afterEach(() => {
     rules.define_property_has = saved!
+    roles.roles = savedRoles
   })
 
-  test("changing one rule's row changes what Monaco draws for it", () => {
+  test("changing one rule's roles and row changes what Monaco draws for it", () => {
     const text = `a "card" is a view\n\tits "rank" is one of ace, king\n`
     expect(shapesOf(marked(text), text)[2]).toBe('  property pill:  its "rank" is one of ace, king')
     expect(wordsMarked(marked(text), "bubbly-choice", text)).toEqual(["ace", "king"])
 
     // a property's head drawn as a thing's, and its values no longer pills of their own
-    rules.define_property_has = { head: "thing", inputs: ["quoted_member"] }
+    roles.roles = { band: "thing", property: "declaration" }
+    rules.define_property_has = {}
     const after = marked(text)
     expect(shapesOf(after, text)[2]).toBe('  thing pill:  its "rank" is one of ace, king')
     expect(wordsMarked(after, "bubbly-choice", text)).toEqual([])

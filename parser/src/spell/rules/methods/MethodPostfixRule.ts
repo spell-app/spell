@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 import { PostfixOperatorSuffix, Precedence, SuffixLeft } from "spell/parser/spell/rules/expressions"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import type { MethodOperatorRuleProps, MethodRuleDeclared, OperatorOperands } from "./methods.shared"
@@ -12,6 +13,9 @@ import type { MethodOperatorRuleProps, MethodRuleDeclared, OperatorOperands } fr
  * - Reads ONLY its statics, so a project's declarations can rebuild it elsewhere -- see `P.Rule.specialize()`.
  */
 export class MethodPostfixRule extends PostfixOperatorSuffix {
+  /** what it is to a reader, in the bubbly look:  its syntax is built while parsing, so its roles are its class's */
+  declare roles: SP.BubblyRuleRoles
+  @proto static roles: SP.BubblyRuleRoles = { match: "question" }
   @proto static importableAs = "method_postfix"
   /** A user's alias wins over a built-in suffix matching the same words, e.g. `is face up` over `is {x}`. */
   @proto static priority = Priority.userDeclared
