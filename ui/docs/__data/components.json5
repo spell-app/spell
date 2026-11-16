@@ -2637,7 +2637,7 @@
         "user image",
         "userpic"
       ],
-      "description": "A small picture of a person:  a comment's or a card's.",
+      "description": "A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.",
       "noun": "avatar",
       "attributes": [
         {
@@ -2814,7 +2814,7 @@
       "slots": [
         {
           "name": "",
-          "description": "An `<img>`, instead of `src`."
+          "description": "An `<img>`, instead of `src`;  or, on its own, the person's initial."
         }
       ],
       "events": [],

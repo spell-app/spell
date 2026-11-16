@@ -82,7 +82,7 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-site-bar" label="Site bar" sticky="stack" collapsible dividing>
-                <ui-example description="A site's bar:  a button that shows or hides the side bar, then where you are as a breadcrumb;  its buttons at the end.">
+                <ui-example description="A site's bar:  a button that shows or hides the side bar, then where you are as a breadcrumb;  its icons and the person's avatar at the end.">
               <ui-app-menu aria-label="Site demo">
                 <ui-item slot="start" link="#side-bar" icon="columns" aria-label="Show or hide the side bar"></ui-item>
                 <ui-item slot="start">
@@ -92,8 +92,9 @@
                     <ui-breadcrumb selected>Getting started</ui-breadcrumb>
                   </ui-breadcrumbs>
                 </ui-item>
-                <ui-item slot="end" link="#search" icon="search" aria-label="Search"></ui-item>
-                <ui-item slot="end" link="#share" icon="share" aria-label="Share"></ui-item>
+                <ui-item slot="end" link="#notices" icon="bell" aria-label="Notices"></ui-item>
+                <ui-item slot="end" link="#help" icon="circle question" aria-label="Help"></ui-item>
+                <ui-avatar slot="end" link="#you" tooltip="You">O</ui-avatar>
               </ui-app-menu>
                 </ui-example>
               </ui-section>

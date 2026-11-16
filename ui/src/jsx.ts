@@ -54452,10 +54452,10 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-author": UIAuthorJSXAttributes
       /**
-       * `<ui-avatar>`:  A small picture of a person:  a comment's or a card's.
+       * `<ui-avatar>`:  A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.
        * - also known as:  profile picture, user image, userpic
        * - slots:
-       *   - default:  An `<img>`, instead of `src`.
+       *   - default:  An `<img>`, instead of `src`;  or, on its own, the person's initial.
        */
       "ui-avatar": UIAvatarJSXAttributes
       /**

@@ -24597,8 +24597,8 @@
           "name": "UIAvatar",
           "tagName": "ui-avatar",
           "customElement": true,
-          "summary": "A small picture of a person:  a comment's or a card's.",
-          "description": "A small picture of a person:  a comment's or a card's.\n\nAlso known as:  profile picture, user image, userpic.",
+          "summary": "A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.",
+          "description": "A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.\n\nAlso known as:  profile picture, user image, userpic.",
           "attributes": [
             {
               "name": "src",
@@ -24734,7 +24734,7 @@
           "slots": [
             {
               "name": "",
-              "description": "An `<img>`, instead of `src`."
+              "description": "An `<img>`, instead of `src`;  or, on its own, the person's initial."
             }
           ],
           "cssParts": [

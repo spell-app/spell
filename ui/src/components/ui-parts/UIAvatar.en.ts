@@ -23,7 +23,8 @@ export const avatarVocabulary = {
   noun: "avatar",
   partOfSpeech: "property",
   ui: false,
-  description: "A small picture of a person:  a comment's or a card's.",
+  description:
+    "A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.",
   attributes: [
     { name: "src", group: "link", kind: "string", description: "Image URL;  renders the `<img>` (or slot one)." },
     {
@@ -37,7 +38,7 @@ export const avatarVocabulary = {
     }
   ],
   events: [],
-  slots: [{ name: "", description: "An `<img>`, instead of `src`." }],
+  slots: [{ name: "", description: "An `<img>`, instead of `src`;  or, on its own, the person's initial." }],
   parts: [
     { name: "avatar", description: "The avatar box." },
     { name: "image", description: "The `<img>` rendered from `src`." }

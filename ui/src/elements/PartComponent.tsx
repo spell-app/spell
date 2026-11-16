@@ -47,6 +47,7 @@ export abstract class PartComponent<V extends E.ComponentVocabulary = E.Componen
         target={this.rootTag === "a" ? this.linkTarget : undefined}
         datetime={this.rootDatetime}
         tabindex={this.rootTabIndex}
+        aria-label={this.rootLabel}
       >
         {this.content()}
       </Dynamic>
@@ -71,6 +72,14 @@ export abstract class PartComponent<V extends E.ComponentVocabulary = E.Componen
    * - Tracked.
    */
   protected get rootTabIndex(): number | undefined {
+    return undefined
+  }
+
+  /**
+   * `aria-label` of the root, e.g. a linked avatar's:  its link's name, where its text is only an initial.
+   * - Tracked.
+   */
+  protected get rootLabel(): string | undefined {
     return undefined
   }
 

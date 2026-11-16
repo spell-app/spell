@@ -3125,7 +3125,7 @@
       "name": "ui-avatar",
       "description": {
         "kind": "markdown",
-        "value": "A small picture of a person:  a comment's or a card's.\n\nAlso known as:  profile picture, user image, userpic.\n\n**Slots:**  default"
+        "value": "A small picture of a person:  a comment's or a card's;  on its own, a circle with their picture or initial.\n\nAlso known as:  profile picture, user image, userpic.\n\n**Slots:**  default"
       },
       "attributes": [
         {
