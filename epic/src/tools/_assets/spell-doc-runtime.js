@@ -84,6 +84,7 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { slug } from "spell/util/string"
 import { PagePatch } from "spell/server/site"
 import { commentsOnPage, wireComments } from "./spell-doc-comments.js"
+import { editHtmlInPlace } from "./spell-doc-edit.js"
 import {
   FIELDS,
   addBlockAction,
@@ -319,6 +320,7 @@ async function start() {
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
   editMarkdownInPlace([main])
+  editHtmlInPlace(main, noteToast)
   highlight()
   addCodeCopies(main)
   wireImageZoom()
