@@ -1525,7 +1525,31 @@ function writtenKeyOf(element: Element): string | undefined {
 
 /** Can a click in the app select `element`, with no Alt held -- see `PartSelector.partAt()`? */
 function isSelectablePart(element: Element): boolean {
+  if (isPartOfItsThing(element)) return false
   return !!SpellElement.thingOf(element) || isClickableTag(element) || hasOwnHandler(element)
+}
+
+/**
+ * Is `element` part of the drawn thing whose drawing it's in:  a Solitaire card's card image, a pile's placeholder?
+ * - Then a click or a rubber band takes that thing, as a button's icon is the button's;
+ *   Alt-click still reaches it (epic `codemirror` I13:  a card's front and back and a foundation's placeholder are card
+ *   images since epic `language` T138, and a click on any card selected its image).
+ * - It is when it's drawn inside another drawn thing (never the app itself), and either
+ *   - draws a thing its tag made for itself (`SpellElement.drawsItsOwnThing()`), not one of the program's,
+ *   - or fills that thing:  its drawn box within a pixel of the thing's, each edge
+ */
+function isPartOfItsThing(element: Element): boolean {
+  const host = (element.getRootNode() as ShadowRoot).host
+  if (!host || !SpellElement.thingOf(element) || !SpellElement.thingOf(host)) return false
+  if (appArea && host === Inspector.partsIn(appArea)[0]?.element) return false
+  if (SpellElement.drawsItsOwnThing(element)) return true
+  const [own, its] = [element.getBoundingClientRect(), host.getBoundingClientRect()]
+  return (
+    Math.abs(own.left - its.left) <= 1 &&
+    Math.abs(own.top - its.top) <= 1 &&
+    Math.abs(own.right - its.right) <= 1 &&
+    Math.abs(own.bottom - its.bottom) <= 1
+  )
 }
 
 /** Every element under `root`, in document order, through drawn things' shadow roots. */
@@ -2550,6 +2574,7 @@ class PartSelector {
    * - or a Spell UI element with a handler of its own:  a menu item that acts as a button
    *   (Owen:  "I can't e.g. inspect buttons in the solitaire app header (e.g. cheat button)")
    * - with Alt held, any Spell UI element:  the text or label inside a card too
+   * - Not a drawn thing that is part of the one it's drawn in (`isPartOfItsThing()`):  a card's image is the card's, but with Alt
    * - Not one inside a Spell UI element's own shadow root:  a button's icon is the button's.
    * - A box-less tag the drawing writes, in the room it takes:  a toolbar's `<spacer />`, 0px wide,
    *   in the gap between the buttons on each side of it (`spacerAt()`;  epic `editor` I169).
@@ -2564,6 +2589,7 @@ class PartSelector {
       if (host?.localName.startsWith(UI_PREFIX)) continue
       const spacer = PartSelector.spacerAt(target, event as MouseEvent)
       if (spacer) return spacer
+      if (!anyElement && isPartOfItsThing(target)) continue
       const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)
       if (isPart && Inspector.partFor(target)) return target
     }
