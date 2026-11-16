@@ -145,16 +145,17 @@ describe("a body's rail under the caret", () => {
     const row = rows[0]!
     const [inner, outer] = [...row.querySelectorAll<HTMLElement>(".cmb-tag-foot")]
     expect([inner?.textContent, outer?.textContent]).toEqual(["</>", "</container>"])
-    // nested as Spell's feet:  the outer one a step down, a tab stop further left
+    // side by side on one level:  the inner one first, the outer one further along, its bar behind the inner one
     const innerBox = inner!.getBoundingClientRect()
     const outerBox = outer!.getBoundingClientRect()
-    const indent = Number.parseFloat(view.dom.style.getPropertyValue("--cmb-indent"))
-    expect(outerBox.top).toBeGreaterThan(innerBox.bottom)
-    expect(Math.abs(innerBox.left - outerBox.left - indent)).toBeLessThan(0.1)
-    // the row on whole pixels, so the lines under it start on one, as the lines above it do
+    expect(outerBox.top).toBe(innerBox.top)
+    expect(outerBox.left).toBeGreaterThan(innerBox.right)
+    const outerBar = getComputedStyle(outer!, "::before")
+    expect(Number.parseFloat(outerBar.right)).toBeGreaterThan(0)
+    // the row one foot tall, on whole pixels, so the lines under it start on one, as the lines above it do
     const contentTop = view.contentDOM.getBoundingClientRect().top
     const rowBox = row.getBoundingClientRect()
-    expect(rowBox.height % 1).toBe(0)
+    expect(rowBox.height).toBe(16)
     const firstLine = view.contentDOM.querySelector(".cm-line")!.getBoundingClientRect().top
     expect((rowBox.top - firstLine) % 1).toBe(0)
     expect((rowBox.bottom - contentTop) % 1).toBeCloseTo((firstLine - contentTop) % 1, 5)
