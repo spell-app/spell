@@ -2094,6 +2094,15 @@
       margin-top: 0;
     }
     /*
+     * ... but code alone between its tags, `<text>{its picture}</text>`:  the line and the code are one stretch, so
+     * one mark, and the code keeps its inverted pill;  without it its light words were on the paper (I126)
+     */
+    .cmb-tag-link.bubbly-expression {
+      padding-inline: var(--bubbly-code-pad);
+      border-radius: var(--bubbly-input-radius);
+      background: var(--bubbly-expression-pill);
+    }
+    /*
      * ... reaching out of its box to each tag's point:  past the room beside that tag, then under its point
      * - a tag at its end too (`<number "score" />` before `</>`):  that tag's room after it is outside the box as well,
      *   so the lines reach one room further, to the end tag's point (they stopped 2.34px short of it, a notch;  I118)
