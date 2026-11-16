@@ -417,6 +417,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorSheetHandle: "Arrastra para hacerlo más alto o más bajo;  hacia abajo, para guardarlo",
   inspectorSheetClose: "Guardar el inspector",
   inspectorAddEvent: "Añadir evento",
+  inspectorAddAction: "Añadir acción",
   inspectorRemoveEvent: "Quitar {event}",
   inspectorRemoveEventConfirm: "¿Quitar «{event}»?\nSu código se va con él.\n⌥-clic en la ✕ lo quita sin preguntar.",
   inspectorRemoveEventOk: "Quitar",

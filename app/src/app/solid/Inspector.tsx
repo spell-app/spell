@@ -1254,6 +1254,28 @@ export class Inspector {
   }
 
   /**
+   * Add an empty action to `thing`'s type, `to "new action"`, as a step of `editor.history` (epic `editor` T79):
+   * the Code card's Add Action.
+   * - Written as an event is (`newEventIn()`):  after its type's last line, its empty body a level in.
+   * - Named `new action`, else `new action 2` ... one none of `actions` has.
+   * - Its row then shows with the cursor in its code (`Inspector.justAdded`);  it's renamed in its signature.
+   * - Nothing happens where its type can't be found in the program.
+   * - TODO:  a Spanish program's own words (`para "nueva acción"`):  English is written for now, as `addEvent()` does.
+   */
+  static addAction(thing: object, actions: readonly { words: string }[]): void {
+    const words = newActionWords(actions.map((action) => action.words))
+    const written = newEventIn(InspectorActions.typeWordsOf(thing), sourceFiles(), `to "${words}"`)
+    if (!written) return
+    const file = sliceOf({ path: written.path, from: 1, to: 1 })?.file
+    if (!file) return
+    setJustAdded(words)
+    editor.history.change(
+      { file, at: written.at, before: "", after: written.code },
+      { title: appTexts.text("inspectorAddAction") }
+    )
+  }
+
+  /**
    * Remove `element`'s event `row` from the program (epic `editor` T73):  its head and its code, as a step of
    * `editor.history`, so one undo puts it back.
    * - `when`:  `"after asking"` (a click on its ✕) asks first, naming it;  `"at once"` (an ⌥-click) doesn't.
@@ -1868,7 +1890,17 @@ function isSameElements(parts: readonly SelectedPart[], elements: readonly Eleme
   return parts.length === elements.length && parts.every((part, index) => part.element === elements[index])
 }
 
-/** The row added last, by its words (a drawn thing's) or DOM event:  `Inspector.justAdded`. */
+/** A new action's name:  `new action`, else `new action 2` ..., whichever of `taken` doesn't have. */
+function newActionWords(taken: readonly string[]): string {
+  const isTaken = (words: string) => taken.some((each) => each.trim().toLowerCase() === words)
+  let words = NEW_ACTION_WORDS
+  for (let count = 2; isTaken(words); count++) words = `${NEW_ACTION_WORDS} ${count}`
+  return words
+}
+/** What Add Action names the action it writes, before it's renamed. */
+const NEW_ACTION_WORDS = "new action"
+
+/** The row added last, by its words (a drawn thing's or an action's) or DOM event:  `Inspector.justAdded`. */
 const [justAdded, setJustAdded] = createSignal("")
 
 /** Where an event's or action's code is:  its file, and its lines, 1-based (`Inspector.placeOfEvent()`). */

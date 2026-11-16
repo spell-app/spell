@@ -303,6 +303,11 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     ])
     expect([...card.querySelectorAll(".InspectorEventWords")].map((words) => words.textContent)).toEqual(["on click"])
     expect(card.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
+    // its header:  Add Event, an icon and its words (T79);  Add Action only for a thing, and a Spell UI element isn't one
+    const addEvent = card.querySelector('ui-dropdown.InspectorAddEvent[slot="right"]')!
+    expect(addEvent.querySelector(".InspectorAddWords")!.textContent).toBe("Add Event")
+    expect(addEvent.querySelector('[slot="trigger"] ui-icon')!.getAttribute("name")).toBe("bolt")
+    expect(card.querySelector(".InspectorAddAction")).toBeNull()
   })
 
   test("a drawn thing's events by its own words;  an ability with no condition, a hand and its words alone", async () => {
