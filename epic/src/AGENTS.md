@@ -206,6 +206,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - a COMMENT's field, the pane's and a thread's reply (epic `epic-engine` I267):  `Pictures.intoWords()` saves a pasted
         or dropped picture beside the page (the comments route's `POST picture`) and writes `![picture](<path>)` into the
         words, so it goes wherever they go;  `<epic-thread>` draws it as a thumbnail, a click opening it full size
+      - an ITEM's picture, `<epic-picture>` (epic `epic-engine` T87):  the person's, pasted into the chat that filed
+        the item (`epic add ... --pasted <n>`, read from the session's transcript) or a file (`--picture <file>`),
+        saved beside the page in `pictures/` (the tool's `ItemPictures`);  its trash deletes it at once, Undo in the
+        page's notices for 6s (`PictureDeletes`), then `POST delete-picture` takes it out of the item and deletes its
+        file;  [check-picture-delete.mjs](demo/check-picture-delete.mjs) checks it in a browser
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and the person's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.

@@ -72,7 +72,9 @@ After a restart, agents it started are gone:  start each again from its task, as
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
      on them -- the epic skill's "The session answers;  agents build";  a request from another session:  its words
-     and its Context both, so it never sits at "What it says on the tin")
+     and its Context both, so it never sits at "What it says on the tin";
+     a picture they pasted with it:  `--pasted <n>`, the n they pasted last into this session's chat, or
+     `--picture <file>`, repeatable:  saved beside the page, shown in the item, deletable there, its file too)
    - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`

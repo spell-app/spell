@@ -1375,6 +1375,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--start <words>":
       "taken up at once:  the person's words its body, an Underway card, the spinner on:  blue, not red (T78)",
     "--agent <name>": "with --start:  the agent on it, named on its Underway card",
+    "--picture <file>":
+      "a picture of the person's, copied to pictures/ beside the page and shown after its words;  repeat for more (T87)",
+    "--pasted <n>": "the n pictures the person pasted last into this session's chat, as --picture does (T87)",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",

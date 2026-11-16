@@ -266,7 +266,7 @@ export class Requests {
     const folder = join(epicDir, "requests", id)
     mkdirSync(folder, { recursive: true })
     const files = pictures.map((picture, at) => {
-      const name = `image-${at + 1}.${EXTENSIONS[picture.mediaType] ?? "png"}`
+      const name = `image-${at + 1}.${PICTURE_EXTENSIONS[picture.mediaType] ?? "png"}`
       writeFileSync(join(folder, name), Buffer.from(picture.data, "base64"))
       return name
     })
@@ -781,7 +781,7 @@ type PromptBlock = {
 }
 
 /** File extensions for the image types a transcript holds. */
-const EXTENSIONS: Record<string, string> = {
+export const PICTURE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/gif": "gif",

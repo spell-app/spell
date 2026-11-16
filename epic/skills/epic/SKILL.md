@@ -513,6 +513,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
       - a request from another session (`/send`, "12. Request"):  `--start` gets its words AND its Context, so the
         item never sits at "What it says on the tin" (epic `epic-engine` I292:  I287, filed from r70 with no body)
+      - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
+        `--pasted <n>`, as the guide's "build" says (`epic guide build`)
       - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
   - passes their redirects on to the agent doing that work (`SendMessage`)
   - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
@@ -1779,6 +1781,7 @@ phase <name>#P<N> planning [off]                    Claude writing its plan:  a 
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
 add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
+add <name>#I|#T "title" ... --pasted <n> | --picture <file>...   with the pictures pasted last, or files (T87)
 stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
 add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page

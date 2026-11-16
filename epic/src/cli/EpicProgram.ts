@@ -1326,6 +1326,9 @@ Prints the new item's id.  The letter after # is its kind:
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
 --calm (last):  a judgement call (grey) or issue (yellow) that wouldn't surprise you, rather than red.
+The person's pictures (T87), saved in pictures/ beside the page, shown after the item's words, deletable on the page:
+  --picture <file>    a picture file;  repeat it for more
+  --pasted <n>        the n pictures they pasted last into this session's chat (read from its transcript)
 A manual test (M), answered by you on the epic page, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> a page to open;
@@ -1339,6 +1342,7 @@ Examples:
   epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm
   epic add seo#T "Retry the upload once it's online"
   epic add seo#T "Find-in-page misses folded text" --limit
+  epic add seo#I "The menu covers the title" --requested --start "<their words>" --pasted 1
   epic add seo#M "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"
   epic add seo#choices "Upgrades on offer" --multiple   (a standing option set, s-upgrades-on-offer, in the Choices section)`
 
