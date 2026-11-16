@@ -41,10 +41,12 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
     const items = await solitaire.typed('<action "', CLOSED)
     const words = labels(items)
     expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "turn over the next card"]))
-    // in its order:  the game's own, then the app's, then the other types' (a card's `play`)
+    // in its order:  the game's own, then the app's, then the other types'
+    // - Solitaire's other types have none a button may run:  a card's `play` answers yes or no since its
+    //   `put a card on a pile` may cancel (epic `language` P56)
     const sorted = [...items].sort((a, b) => a.sortText!.localeCompare(b.sortText!)).map(({ label }) => label)
     expect(sorted.indexOf("auto play")).toBeLessThan(sorted.indexOf("undo"))
-    expect(sorted.indexOf("redo")).toBeLessThan(sorted.indexOf("play a card"))
+    expect(sorted.slice(-2)).toEqual(["undo", "redo"])
     expect(items.find(({ label }) => label === "auto play")?.detail).toBe("action of Solitaire")
     // never a drawing, a test, a question or a creation hook
     expect(words).not.toContain("draw it")

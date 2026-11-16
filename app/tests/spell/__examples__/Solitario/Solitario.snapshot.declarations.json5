@@ -240,7 +240,7 @@
       "type": "ImagenDeCarta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:2326-5165"
+      "defined": "/Carta.es.spell:2326-5164"
     },
     {
       "property": "carta",
@@ -324,7 +324,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "las imágenes de carta",
-      "defined": "/Carta.es.spell:4370-5165"
+      "defined": "/Carta.es.spell:4369-5164"
     },
     {
       "type": "Mazo",

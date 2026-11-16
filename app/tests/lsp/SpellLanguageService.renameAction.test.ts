@@ -73,7 +73,7 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(kindOf(() => service.renameActionAt(file, cheat, "score"))).toBe("taken")
     expect(kindOf(() => service.renameActionAt(file, cheat, "Cheat"))).toBeUndefined()
     expect(kindOf(() => service.renameActionAt(file, cheat, "a/b"))).toBe("not-words")
-    expect(kindOf(() => service.renameActionAt(file, positionOf(text, "to count the points", "count"), "x"))).toBe(
+    expect(kindOf(() => service.renameActionAt(file, positionOf(text, 'to "the points for', "points"), "x"))).toBe(
       "not-an-action"
     )
     // and the editor's own rename, F2, says no rather than throwing
