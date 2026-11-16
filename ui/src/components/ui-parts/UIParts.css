@@ -187,6 +187,33 @@
     object-fit: cover;
   }
 
+  /*
+   * An avatar on its own, in no card, item or comment (a top bar's "you", epic `mockup` I22):
+   * a circle, its picture, else its text (the person's initial) on the theme's primary colour.
+   * - Token:  `--ui-avatar-size`, its width and height (default `2em`).
+   * - Linked (`link`), its root is an `<a>`:  no underline, a ring when the keyboard reaches it.
+   */
+  :host(:not(:state(in-card), :state(in-item), :state(in-comment))) > .avatar {
+    --_ui-avatar-size: var(--ui-avatar-size, 2em);
+    display: inline-grid;
+    place-items: center;
+    width: var(--_ui-avatar-size);
+    height: var(--_ui-avatar-size);
+    overflow: hidden;
+    border-radius: var(--ui-radius-circle);
+    background: var(--ui-primary);
+    color: var(--ui-primary-on);
+    font-weight: var(--ui-font-weight-bold);
+    line-height: 1;
+    text-decoration: none;
+    vertical-align: middle;
+    align-self: center;
+  }
+  :host(:not(:state(in-card), :state(in-item), :state(in-comment))) > a.avatar:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: var(--ui-focus-offset);
+  }
+
   /*******************************
              Header
   *******************************/

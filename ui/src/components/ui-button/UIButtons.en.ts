@@ -19,6 +19,7 @@ export const buttonsVocabulary = {
   noun: "buttons",
   partOfSpeech: "action",
   description: "Buttons can exist together as a group.",
+  snippet: "<ui-buttons>\n\t<ui-button>One</ui-button>\n\t<ui-button>Two</ui-button>\n\t<ui-button>Three</ui-button>\n</ui-buttons>",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Size of every button in the group." },
     {

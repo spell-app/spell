@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Palette groups | Spell UI</title>
+    <meta
+      name="description"
+      content="The Spell editor's palette, a column per group:  drag components between groups, reorder, rename, add or remove groups, then save."
+    />
+    <!--
+      The palette groups page (`<ui-docs-palette>`, epic `editor` T81):  the editor palette's table, `paletteGroups.json`
+      beside `ComponentDefinitions`, to arrange and save.
+      - A working page, not a page of the docs:  it reads and writes through the page server (`paletteRoutes`), so it needs
+        the page server, and saves into the checkout that server runs.
+    -->
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Palette groups">
+      <ui-segment class="site-masthead" appearance="vertical">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            Palette groups
+            <ui-header
+              >The Spell editor's palette, a column per group: arrange it here, then save.</ui-header
+            >
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <ui-section id="palette-groups" label="The palette's groups" dividing>
+            <ui-markdown>
+              <script type="text/markdown">
+                The editor's **+** menu shows these groups, in this order, each with its components in this order.
+
+                - Drag a component to another group, or to another place in its own.
+                - Drag a group by its handle to move it;  type over its name to rename it.
+                - **Add group** adds an empty one at the end;  its ✕ removes one, its components going to **Not in the palette**.
+                - Drag a component from **Not in the palette** into a group to offer it.
+                - **Save** writes the table, `paletteGroups.json`:  the editor's palette shows it on its next load.
+
+                A new component nobody has placed yet still shows:  under its first topic, at that group's end.
+              </script>
+            </ui-markdown>
+            <ui-docs-palette></ui-docs-palette>
+          </ui-section>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

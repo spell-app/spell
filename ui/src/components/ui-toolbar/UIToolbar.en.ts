@@ -96,6 +96,14 @@ export const toolbarVocabulary = {
       description:
         "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  " +
         "Without it, it sits right after the last one."
+    },
+    {
+      name: "all-items-always",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "The button listing every item shows even while every item is in the row, so it's always in the same " +
+        "spot (a project's files, however few).  Without it, it shows only while `max-visible` puts some away."
     }
   ],
   slots: [
@@ -117,7 +125,11 @@ export const toolbarVocabulary = {
     { name: "toolbar", description: "The box around the menu and its scroll buttons." },
     { name: "scroll-start", description: "The `‹` button, shown while there's more to scroll back to." },
     { name: "scroll-end", description: "The `›` button, shown while there's more to scroll on to." },
-    { name: "all-items", description: "`max-visible`:  the button listing every item, while some are put away." }
+    {
+      name: "all-items",
+      description:
+        "`max-visible`:  the button listing every item, while some are put away;  `all-items-always`, always."
+    }
   ],
   states: [
     ...menuVocabulary.states,

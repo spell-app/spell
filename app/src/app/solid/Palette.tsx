@@ -206,10 +206,8 @@ const PINNED_PREF = "palettePinned"
 const [isPinned, setPinned] = createSignal<boolean>(editorPrefs.get(PINNED_PREF) === true)
 const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
 
-/** One topic of what's offered. */
-type PaletteGroup = ReturnType<
-  typeof import("spell/ui/components/ComponentDefinitions").ComponentDefinitions.paletteGroups
->[number]
+/** One group of what's offered:  its topic or title, and its parts (`ComponentDefinitions.paletteGroups()`). */
+type PaletteGroup = import("spell/ui/components/ComponentDefinitions").PaletteGroup
 
 /** One of the app's own views, as the palette offers it. */
 type OwnView = {
@@ -291,11 +289,12 @@ function languageOf(file: SP.AnySpellFile | undefined): string {
 }
 
 /**
- * `topic` in the editor's language, from Spell UI's dictionary:  `forms` => `formularios` on a Spanish page.
+ * `group`'s name in the editor's language:  its own title, else its topic's word from Spell UI's dictionary
+ * (`forms` => `formularios` on a Spanish page).
  * - Reactive:  redrawn when the page language's texts arrive (`appTexts.lang`).
  */
-function topicName(topic: PaletteGroup["topic"]): string {
-  return definitions?.topicIn(topic, appTexts.lang) ?? topic
+function groupName(group: PaletteGroup): string {
+  return definitions?.groupNameIn(group, appTexts.lang) ?? group.title ?? group.topic ?? ""
 }
 
 /** A step's title for adding `definition`. */
@@ -362,8 +361,8 @@ export function PaletteStrip(): JSX.Element {
         <For each={offered()}>
           {(group) => (
             <PaletteGroupMenu
-              id={`${GROUP_MENU_ID}${kebabCase(group.topic)}`}
-              name={upperFirst(topicName(group.topic))}
+              id={`${GROUP_MENU_ID}${kebabCase(group.title ?? group.topic ?? "")}`}
+              name={upperFirst(groupName(group))}
             >
               <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
             </PaletteGroupMenu>
@@ -429,7 +428,7 @@ function PinIcon(): JSX.Element {
 /**
  * The palette as a menu, in columns:
  * what to do and its search, then This app, the app's own views, then every part, by topic.
- * - Every topic shows everything filed under it, its ready-made parts first (epic `editor` I174).
+ * - Every group shows everything in it, as the palette's table orders it (`paletteGroups.json`;  epic `editor` I174, T81).
  * - A search looks through all of them, by name, other names and description.
  */
 function PaletteMenu(): JSX.Element {
@@ -440,7 +439,7 @@ function PaletteMenu(): JSX.Element {
     const matches = (part: ComponentDefinition) =>
       `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words())
     return offered()
-      .map(({ topic, parts }) => ({ topic, parts: parts.filter(matches) }))
+      .map((group) => ({ ...group, parts: group.parts.filter(matches) }))
       .filter(({ parts }) => parts.length)
   }
   const own = () => ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words()))
@@ -472,8 +471,8 @@ function PaletteMenu(): JSX.Element {
           <For each={shown()}>
             {(group) => (
               <section class="PaletteGroup">
-                <h4>{upperFirst(topicName(group.topic))}</h4>
-                <ui-tree class="PaletteTree" label={topicName(group.topic)} ref={treeChoosesRows}>
+                <h4>{upperFirst(groupName(group))}</h4>
+                <ui-tree class="PaletteTree" label={groupName(group)} ref={treeChoosesRows}>
                   <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
                 </ui-tree>
               </section>

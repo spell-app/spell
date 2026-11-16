@@ -2654,7 +2654,7 @@
             <ui-section id="spell-ui-s-own-app-menu" label="App menu" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
-                  An app menu is an app&#39;s top bar, joined to the top of its window or page:  a start section (a menu or sidebar button, then a title or breadcrumb), a middle that stays on the bar&#39;s centre, and an end section for buttons.  It takes every &lt;ui-menu&gt; attribute.
+                  An app menu is an app&#39;s top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar&#39;s centre, and an end section for buttons.
                   <a href="ui-app-menu.html">App menu page</a>
                 </p>
                 <ui-app-menu aria-label="Editor demo">
@@ -2680,8 +2680,9 @@
                       <ui-breadcrumb selected>Getting started</ui-breadcrumb>
                     </ui-breadcrumbs>
                   </ui-item>
-                  <ui-item slot="end" link="#search" icon="search" aria-label="Search"></ui-item>
-                  <ui-item slot="end" link="#share" icon="share" aria-label="Share"></ui-item>
+                  <ui-item slot="end" link="#notices" icon="bell" aria-label="Notices"></ui-item>
+                  <ui-item slot="end" link="#help" icon="circle question" aria-label="Help"></ui-item>
+                  <ui-avatar slot="end" link="#you" tooltip="You">O</ui-avatar>
                 </ui-app-menu>
               </ui-example>
             </ui-section>

@@ -124,7 +124,8 @@ export const HELP_TABLE: Readonly<
     attributes: { link: "Renders a link (`<a>`), e.g.", target: "Link target, with `link`." }
   },
   "ui-avatar": {
-    description: "A small picture of a person: a comment's or a card's.",
+    description:
+      "A small picture of a person: a comment's or a card's; on its own, a circle with their picture or initial.",
     attributes: {
       src: "Image URL; renders the `<img>` (or slot one).",
       tooltip: "Who it is: the picture's tooltip and its alternative text for screen readers."
@@ -2229,7 +2230,9 @@ export const HELP_TABLE: Readonly<
       "all-items-icon":
         "With `max-visible`: an icon before the caret of the button listing every item, saying what they are (a project's files: `file outline`).",
       "all-items-at-end":
-        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show."
+        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show.",
+      "all-items-always":
+        "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few)."
     }
   },
   "ui-transition": {

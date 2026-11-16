@@ -31,10 +31,13 @@ import "./FileTabs.css"
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file
  *   (`editor.moveFile()`;  Owen, epic `mockup`).
- * - More than eight files:  the ones opened lately, and a button listing every file (its `max-visible`),
- *   the same ones after a reload, per project (its `remember`);  a file icon before its caret (`all-items-icon`,
- *   epic `editor` T76:  "The `More` dropdown is too subtle").
+ * - A button listing every file, at the bar's right end, however few files there are
+ *   (its `all-items-always`, `all-items-at-end`;  epic `editor` T82);
+ *   a file icon before its caret (`all-items-icon`, epic `editor` T76:  "The `More` dropdown is too subtle").
+ * - More than eight files:  the ones opened lately (its `max-visible`), the same ones after a reload,
+ *   per project (its `remember`).
  *   - Then a tab's ✕ (the Spell's `close it`), or a middle click, closes it (epic `editor` T77):
+ *     the ✕ shows in the tab's file icon's place while it's hovered, taking no room of its own (T82).
  *     the toolbar's `closeItem()` takes it out of the row, and the list still has it.
  *     Closing the chosen tab shows its neighbour's file.
  *   - No key closes one:  ⌘W is the browser's, closing the page's own tab.

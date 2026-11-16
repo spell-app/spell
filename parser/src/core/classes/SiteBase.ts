@@ -791,9 +791,10 @@ function isSlidOver(nav: Element): boolean {
  * A site's two columns:  its navigation, then the page.
  * - Each as tall as the taller, and the site at least as tall as the box it's drawn in (`NARROW_SITE_CSS`):
  *   the navigation runs from top to bottom (epic `mockup` T34).
+ * - No gap between them:  the page keeps its own distance from the navigation, so its top bar meets the
+ *   navigation, the navigation's line their only edge (`NARROW_SITE_CSS`, epic `mockup` I22).
  */
-const SITE_LAYOUT =
-  "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); gap: 1em; align-items: stretch"
+const SITE_LAYOUT = "display: grid; grid-template-columns: minmax(10em, 16em) minmax(0, 1fr); align-items: stretch"
 
 /** The page's column:  as wide as it's given. */
 const PAGE_LAYOUT = "min-width: 0"
@@ -819,12 +820,21 @@ const NARROW_SITE_CSS = `
 /* its top bar (\`- it has a top bar\`):  above the page, its buttons at its end;  hidden on a page with none
    (its element is \`display: contents\`:  its box is its menu part) */
 .spell-site-top-bar::part(menu) { margin-block-end: 1em }
+/* the page a font size from the navigation, but its top bar up against it:  the navigation's line their only edge
+   (in pixels, \`--ui-font-size\`:  the bar's own em is its smaller text's) */
+.spell-site-page { padding-inline-start: var(--ui-font-size, 16px) }
+.spell-site-top-bar::part(menu) {
+  margin-inline-start: calc(-1 * var(--ui-font-size, 16px)); width: calc(100% + var(--ui-font-size, 16px))
+}
 .spell-site-top-bar[hidden] { display: none }
-.spell-site-top-bar-end { display: flex; align-items: center; gap: 0.5em }
+/* ... its last one as far in from the bar's end as the side bar button's icon from its start (a menu item's padding) */
+.spell-site-top-bar-end { display: flex; align-items: center; gap: 0.5em; padding-inline-end: 1.14286em }
 /* only its icons (\`collapsed\`):  as narrow as they are */
 .spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: auto minmax(0, 1fr) !important }
 @container spell-site (width < 40em) {
   .spell-site-menu { display: inline-flex; margin-block-end: 0.5em }
+  .spell-site-page { padding-inline-start: 0 }
+  .spell-site-top-bar::part(menu) { margin-inline-start: 0; width: 100% }
   .spell-site, .spell-site:has(> .spell-site-nav[collapsed]) { grid-template-columns: minmax(0, 1fr) !important }
   .spell-site-nav {
     position: absolute; inset-inline-start: 0; inset-block-start: 2.75em; z-index: var(--ui-z-popup, 1000); width: min(16em, 85%);

@@ -2,6 +2,7 @@
  * `<ui-app-menu>`:  an app's top bar, in three sections.
  * - Adopted after `UIMenu.css`, which draws the bar (its window bar, "Bar") and the items as for `<ui-menu>`.
  *   This sheet only lays out the three sections, and fits the items to the bar's height.
+ *   Unlike a plain menu's, its items have no hairline between them.
  * - Items adopt the top menu's sheets too:  every rule here starts at the menu's box, or an item IN an app menu.
  * - Tokens:  the menu's window bar's, `--ui-menu-header-bar-height`, `-font-size`, `-background`, `-filter`, `-border`.
  */
@@ -27,6 +28,12 @@
   }
   .ui.header.menu > .end {
     justify-content: flex-end;
+  }
+  /* no hairlines between its items:  the sections and their own spacing set them apart (epic `mockup` I22) */
+  .ui.header.menu {
+    --_ui-menu-divider-display: none;
+    --_ui-menu-divider-first-display: none;
+    --_ui-menu-divider-last-display: none;
   }
   .ui.header.menu {
     overflow-x: auto;
