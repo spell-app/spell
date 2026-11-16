@@ -11,6 +11,8 @@ import type { CodeMirrorLanguage } from "./CodeMirrorLanguage"
  * ### `CodeMirrorRename`
  * Rename Symbol (F2) in a CodeMirror editor (epic `editor` I147;  epic `codemirror` P5):
  * a field over the name, its words selected;  Enter renames it everywhere, Esc or a click away leaves it.
+ * - The field's words are the name's own:  its font, size and weight, read off the name as drawn (the editor's font
+ *   size, whatever it is), its first letter right over the name's (epic `codemirror` T11;  13px before).
  * - What it renames and what it says are the app's:  an action as the Inspector's Code card renames
  *   it, its calls and buttons too, refused in the same words (`CodeEditorFeatures.rename()`).
  * - Where nothing can be renamed, F2 says what can, over the caret (`CodeEditorFeatures.renameNothingHere()`).
@@ -38,10 +40,13 @@ export class CodeMirrorRename {
       CodeMirrorRename.say(view, pos, CodeEditorFeatures.renameNothingHere())
       return
     }
+    const nameFrom = nameStart(view, range)
+    // read off the name as drawn now:  the view can't be measured while it draws the tooltip
+    const look = nameLook(view, nameFrom, range.name)
     const tooltip: Tooltip = {
-      pos: range.from,
+      pos: nameFrom,
       above: true,
-      create: () => ({ dom: fieldDom(view, range.name, (newName) => void rename(newName)) })
+      create: () => ({ dom: fieldDom(view, range.name, look, (newName) => void rename(newName)) })
     }
     view.dispatch({ effects: SHOW.of({ tooltip, kind: "field" }) })
 
@@ -116,15 +121,47 @@ function removeListeners(view: EditorView, goes: () => void) {
 }
 
 /**
+ * Where the name's own letters start in `range`:  past its opening quote, which a rename's range takes in.
+ * - The field's words line up with the name's from there, not with the quote mark drawn before it.
+ */
+function nameStart(view: EditorView, range: { from: number; to: number; name: string }): number {
+  const at = view.state.doc.sliceString(range.from, range.to).indexOf(range.name)
+  return at < 0 ? range.from : range.from + at
+}
+
+/** What the field copies of the name's font, as drawn. */
+const FONT_PROPERTIES = ["fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing"] as const
+
+/** How the name looks where it's drawn:  its font, and how wide its letters are (px);  `undefined`:  not drawn. */
+type NameLook = { font?: Record<(typeof FONT_PROPERTIES)[number], string>; width?: number }
+
+/** How the name at `nameFrom` looks in `view`:  read before the field is drawn. */
+function nameLook(view: EditorView, nameFrom: number, name: string): NameLook {
+  const { node } = view.domAtPos(nameFrom + 1)
+  const letters = node instanceof Element ? node : node.parentElement
+  const drawn = letters && getComputedStyle(letters)
+  const [start, end] = [view.coordsAtPos(nameFrom, 1), view.coordsAtPos(nameFrom + name.length, -1)]
+  return {
+    font: drawn
+      ? (Object.fromEntries(FONT_PROPERTIES.map((property) => [property, drawn[property]])) as NameLook["font"])
+      : undefined,
+    width: start && end && end.left > start.left ? end.left - start.left : undefined
+  }
+}
+
+/**
  * The rename field:  `name` in it, selected, focused as it's drawn.
+ * - In the name's own font (`look`);  as wide as the name and a little room, at least 220px.
  * - Enter:  `done` with what's typed.
  * - Esc, or the focus going elsewhere:  closed, nothing renamed, the focus back in the code.
  */
-function fieldDom(view: EditorView, name: string, done: (newName: string) => void): HTMLElement {
+function fieldDom(view: EditorView, name: string, look: NameLook, done: (newName: string) => void): HTMLElement {
   const dom = document.createElement("div")
   dom.className = "cmb-rename"
   const field = document.createElement("input")
   field.value = name
+  if (look.font) for (const property of FONT_PROPERTIES) field.style[property] = look.font[property]
+  if (look.width) field.style.minWidth = `${Math.ceil(look.width) + 48}px`
   field.spellcheck = false
   field.setAttribute("aria-label", name)
   let isDone = false
