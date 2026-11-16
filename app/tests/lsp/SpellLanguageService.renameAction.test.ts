@@ -52,6 +52,31 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(await errors(renamed)).toEqual(await errors(text))
   })
 
+  test("renames every call, the one in `when creating solitaire` too, and back again (I170)", async () => {
+    await workspace.update(uri, text)
+    const calls = text.match(/^\s*restart the game$/gm)!.length
+    expect(calls).toBeGreaterThanOrEqual(2)
+    const edit = service.renameActionAt(
+      workspace.fileFor(uri)!,
+      positionOf(text, 'to "restart the game"', "restart the game"),
+      "restart ze game"
+    )
+    const renamed = applied(text, edit.changes![uri]!)
+    expect(renamed).not.toContain("restart the game")
+    expect(renamed.match(/^\s*restart ze game$/gm)?.length).toBe(calls)
+    // the renamed text parses at once, its call above the definition too:  no reload (an edit, not a fresh parse)
+    await workspace.update(uri, renamed)
+    const errors = service.diagnostics(workspace.fileFor(uri)!).filter(({ severity }) => severity === 1)
+    expect(errors.map(({ message }) => message)).toEqual([])
+    // and back, from the renamed text
+    const back = service.renameActionAt(
+      workspace.fileFor(uri)!,
+      positionOf(renamed, 'to "restart ze game"', "restart ze game"),
+      "restart the game"
+    )
+    expect(applied(renamed, back.changes![uri]!)).toBe(text)
+  })
+
   test("F2 can rename an action that takes nothing, not the drawing's method nor one that takes something (I147)", async () => {
     await workspace.update(uri, text)
     const file = workspace.fileFor(uri)!
@@ -73,7 +98,7 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(kindOf(() => service.renameActionAt(file, cheat, "score"))).toBe("taken")
     expect(kindOf(() => service.renameActionAt(file, cheat, "Cheat"))).toBeUndefined()
     expect(kindOf(() => service.renameActionAt(file, cheat, "a/b"))).toBe("not-words")
-    expect(kindOf(() => service.renameActionAt(file, positionOf(text, 'to "the points for', "points"), "x"))).toBe(
+    expect(kindOf(() => service.renameActionAt(file, positionOf(text, 'to "the points for', "the points"), "x"))).toBe(
       "not-an-action"
     )
     // and the editor's own rename, F2, says no rather than throwing

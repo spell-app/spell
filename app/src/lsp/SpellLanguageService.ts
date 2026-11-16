@@ -1697,11 +1697,27 @@ export class SpellLanguageService {
 
     /** Is `match` a use of `subject`, which isn't a property? */
     function isOccurrence(match: P.Match): boolean {
-      if (subject.kind === "method") return subject.record.instance === SP.SpellStatement.statementRuleOf(match.rule)
+      if (subject.kind === "method") {
+        const rule = SP.SpellStatement.statementRuleOf(match.rule)
+        return rule === subject.record.instance || SpellLanguageService.isCallAheadOf(rule, subject.record.instance)
+      }
       if (!match.rule.highlightAs) return false
       const { scopeVar, scopeType, scopeConstant } = match.data as Record<string, unknown>
       return (scopeVar ?? scopeType ?? scopeConstant) === (subject as { record?: unknown }).record
     }
+  }
+
+  /**
+   * Is `rule` the call of `method` registered AHEAD of its definition (`MethodDefinition.callAhead()`)?
+   * - A line above the definition is parsed with that rule, a rule of its own:
+   *   `restart the game` in `when creating solitaire`, above `to "restart the game"` (epic `editor` I170).
+   * - The same method:  the same name, on the same type.
+   */
+  private static isCallAheadOf(rule: P.Rule, method: P.Rule | undefined): boolean {
+    type CallRule = P.Rule & { ahead?: boolean; methodName?: string; thisType?: unknown }
+    const { ahead, methodName, thisType } = rule as CallRule
+    const real = method as CallRule
+    return !!ahead && !!methodName && methodName === real.methodName && thisType === real.thisType
   }
 
   /**

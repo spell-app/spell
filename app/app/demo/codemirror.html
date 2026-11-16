@@ -1,0 +1,22 @@
+<!doctype html>
+<!--
+  The CodeMirror test (epic `editor` P30):  Solitaire's Spell in Monaco and in CodeMirror 6, side by side --
+  served by the editor's dev server at `/demo/codemirror.html`.
+  - Edit, Diff (Publish's two sides) and Compiled (the javascript), in English or Spanish, light or dark.
+  - `?only=cm` / `?only=monaco`:  one editor alone, for measuring;  `?view=diff`, `?file=Card`, `?lang=es`, `?scheme=dark`.
+  - NOTHING is saved:  the page answers every write itself.
+  - Its code:  `spell/app/app/ui/codemirror` (`CodeMirrorTest.tsx`).
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeMirror test</title>
+  </head>
+  <body>
+    <ui-root icons="fomantic">
+      <div id="codemirror-test"></div>
+    </ui-root>
+    <script type="module" src="/src/app/ui/codemirror/CodeMirrorTest.tsx"></script>
+  </body>
+</html>

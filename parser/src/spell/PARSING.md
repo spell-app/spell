@@ -1861,9 +1861,10 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
-    - An edit which adds or deletes a method stubs and parses that file again (`parser.changesMethods()`),
-      as for a type, above.
-      With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
+    - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`):
+      every call registered ahead of its definition reads again (epic `editor` I170).
+      With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse:
+      only an edit of that one line, so a rename of its head and every call re-parses (epic `editor` I170).
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
     - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file.
@@ -2546,7 +2547,7 @@ sidebars any of them opens.
     - nothing under its lines points at a record or match that's gone, with none in its place
   - Kept:  each field under its lines pointing at an old record points at its new one, then its entries are put back.
   - Not kept:  it parses again, and what IT changed counts for the files after it.
-  - A file that declares something else (`changesMethods()`, `changesProperties()`, types, type lines) goes
+  - A file that declares something else (`changesProperties()`, types, type lines;  not methods, above) goes
     through it too (`reparseDeclaring()`):
     - rewinds to before the stubs, puts back every other file's stubs as they were (`stubMarks`, a run per kind
       and file), stubs that file again from its new text, then keeps or re-parses each file in order

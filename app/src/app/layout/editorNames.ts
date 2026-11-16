@@ -144,7 +144,6 @@ export const EDITOR_NAMES = {
     for: "the file tabs",
     members: {
       files: { kind: "value", words: "files", for: "the tabs" },
-      more: { kind: "part", words: "more", for: "the code pane's ⋯" },
       rememberAs: { kind: "value", words: "remember as", for: "what the open tabs are kept under" }
     }
   },

@@ -218,6 +218,23 @@ describe("<ui-toolbar> bar slots", () => {
       await expect.poll(() => shown(host)).toEqual(["F1", "F3"])
     })
 
+    it("`all-items-icon`:  its icon before the button's caret", async () => {
+      const { host } = await toolbar(900, items(5), `${LOOK} max-visible="3" all-items-icon="file outline"`)
+      await expect.poll(() => listButton(host)?.querySelectorAll("svg").length).toBe(2)
+    })
+
+    it("`all-items-at-end`:  the button at the bar's far end, however few items show", async () => {
+      const { host } = await toolbar(600, items(5), `${LOOK} max-visible="2" all-items-at-end`)
+      await expect.poll(() => listButton(host)).not.toBeNull()
+      const bar = host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+      expect(Math.round(listButton(host)!.getBoundingClientRect().right)).toBe(Math.round(bar.right))
+      // without it:  right after the last item
+      const plain = await toolbar(600, items(5), `${LOOK} max-visible="2"`)
+      await expect.poll(() => listButton(plain.host)).not.toBeNull()
+      const plainBar = plain.host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+      expect(listButton(plain.host)!.getBoundingClientRect().right).toBeLessThan(plainBar.right - 100)
+    })
+
     it("bare, it means 8", async () => {
       const { host } = await toolbar(900, items(8), `${LOOK} max-visible`)
       await ElementFixture.settle()

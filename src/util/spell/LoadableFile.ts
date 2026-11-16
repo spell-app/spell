@@ -114,7 +114,9 @@ export class LoadableFile<FileType, SaveResult = any> extends Loadable<FileType,
    * - By default it will save our `defaultContents` if we've never been loaded.
    * - Merges `url` / `contents` / `format` with our `saveParams` getter and per-call `params`.
    * - Note this promise returns `fetch()` results AFTER processing according to `format`.
-   * - SIDE EFFECT: if `autoUpdateContentsOnSave`, updates our `contents` to what we just saved.
+   * - SIDE EFFECT: if `autoUpdateContentsOnSave`, updates our `contents` to what we just saved
+   *   (`save({ contents })`), unless they changed while it was saving:
+   *   an edit typed or undone meanwhile is newer than what's saved, and is kept (epic `editor` I168).
    * - Throws `RequestError` if no `url` resolves.
    * - Called from `Loadable.save()` -- don't call this directly.
    */
@@ -128,8 +130,10 @@ export class LoadableFile<FileType, SaveResult = any> extends Loadable<FileType,
         params: $params
       })
     }
+    const contentsWhenSaved = this.contents
     return LoadableFile.fetch<SaveResult>($params).then((result) => {
-      if (this.autoUpdateContentsOnSave && this.contents !== $params.contents) {
+      const isChangedMeanwhile = this.contents !== contentsWhenSaved
+      if (this.autoUpdateContentsOnSave && !isChangedMeanwhile && this.contents !== $params.contents) {
         this.contents = $params.contents
       }
       return result

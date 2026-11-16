@@ -57915,6 +57915,20 @@
           }
         },
         {
+          "name": "all-items-icon",
+          "description": {
+            "kind": "markdown",
+            "value": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone.\n\nTakes:  icon name"
+          }
+        },
+        {
+          "name": "all-items-at-end",
+          "description": {
+            "kind": "markdown",
+            "value": "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

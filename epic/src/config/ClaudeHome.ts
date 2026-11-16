@@ -155,6 +155,8 @@ export type RunningSession = {
   entrypoint?: string
   /** folder it started in */
   cwd?: string
+  /** when its process started, ms:  a restart's sessions all start after the agents it cut off (`RestartWake`) */
+  startedAt?: number
   /** title the registry knows, when any;  its address (`SendMessage`'s `to`) */
   name?: string
   /** `hook`, `derived` ...:  `derived` when Claude Code made `name` up (`SessionFolders.recordTitle()`) */

@@ -11,9 +11,10 @@ import { P } from "spell/parser/parser"
  * - Before any file parses, every type and method the files declare is stubbed,
  *   so a line can name a type, or call a method, declared further down:
  *   `parser.stubDeclaredTypes()`, `stubDeclaredVariables()`, `stubDeclaredMethods()`, `stubDeclaredProperties()`.
- * - An edit which changes WHICH types, methods or properties a file declares, or what a type is, stubs that file again
+ * - An edit which changes WHICH types or properties a file declares, or what a type is, stubs that file again
  *   and parses it again whole:  the only way a line above it learns of the change (`reparseDeclaring()`).
- *   See `parser.changesMethods()`.
+ *   - WHICH methods:  everything parses again, so every call registered ahead of a definition reads again
+ *     (`parser.changesMethods()`, epic `editor` I170).
  * - Whenever a file parses again from part way, the files after it are KEPT if what they looked up finds the same
  *   (epic `language` P59):  each file's `P.Outline`, held up against the `P.ParseDiff` of what parsed again.
  *   - A kept file's journal entries are put back onto the new records (`P.JournalChange.redo`),
@@ -148,11 +149,15 @@ export class IncrementalProject {
       const { parser } = entry
       const types = parser.declaredTypes(text).join()
       if (this.isBroken) return this.parseAll(path, text)
+      // a declaration's line being typed in keeps what it declared till the next full parse;  an edit of many lines
+      // (a rename, its head and every call) is a change like any other (epic `editor` I170)
+      const keepEdited = this.keepLastGood && changesOneLine(file.text, text)
+      // which methods there are:  every call registered ahead of its definition reads again (epic `editor` I170)
+      if (parser.changesMethods(this.scope, file.text, text, keepEdited)) return this.parseAll(path, text)
       if (
         types !== entry.types ||
-        parser.changesMethods(this.scope, file.text, text, this.keepLastGood) ||
-        parser.changesProperties(file.text, text, this.keepLastGood) ||
-        parser.changesTypeKinds(file.text, text, this.keepLastGood)
+        parser.changesProperties(file.text, text, keepEdited) ||
+        parser.changesTypeKinds(file.text, text, keepEdited)
       ) {
         return this.reparseDeclaring(index, text)
       }
@@ -425,4 +430,17 @@ export type IncrementalProjectProps = {
     /** It's alone, and this is what the project knows of it. */
     head?: P.FileHead
   }>
+}
+
+/**
+ * Is `after` `before` with one line changed, and no line added or taken away:  a line being typed in?
+ * - What `IncrementalProject.update()` lets keep its declarations till the next full parse (`keepLastGood`).
+ */
+function changesOneLine(before: string, after: string): boolean {
+  const was = before.split("\n")
+  const now = after.split("\n")
+  if (was.length !== now.length) return false
+  let changed = 0
+  for (let at = 0; at < was.length && changed < 2; at++) if (was[at] !== now[at]) changed++
+  return changed <= 1
 }

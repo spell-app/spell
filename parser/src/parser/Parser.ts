@@ -290,7 +290,8 @@ export class Parser extends Derivative {
    * - A method whose first line is new, or gone, and parses alone -- see `stubDeclaredMethods()`.
    * - Then `P.IncrementalProject` re-parses everything, so every line sees the change, as a full parse would.
    * - `keepEdited`:  only a method added or deleted counts,
-   *   not a first line being edited (as many methods as before).
+   *   not a first line being edited (as many methods as before, the edit on that one line:
+   *   `P.IncrementalProject` passes it only then, so a rename, its head and every call, re-parses).
    *   The edited one's early call stays until the next full parse,
    *   as a broken line keeps its last working declarations (`keepLastGood`).
    * - Default:  `false`.  Languages override, e.g. `SpellParser`.
