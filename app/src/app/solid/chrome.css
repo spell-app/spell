@@ -218,6 +218,17 @@ ui-menu.ModeTabs ui-item::part(item) {
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
+/* ... its icons alone (the code, the compiled code, Inspect app, Add) in circles, not pills:  as wide as they're tall,
+   the glyph centred (Owen, epic `editor` T90:  "Make the surrounds on these buttons circular rather than pills");
+   so their glyphs stand about the bar's 12px apart */
+ui-menu.ModeTabs ui-item:not(:has(.ModeText))::part(item) {
+  box-sizing: border-box;
+  inline-size: calc(1lh + 2 * var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em));
+  padding-inline: 0;
+  justify-content: center;
+  gap: 0;
+  border-radius: 50%;
+}
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {
