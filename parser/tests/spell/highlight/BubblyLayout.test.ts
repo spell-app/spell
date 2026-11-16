@@ -396,6 +396,48 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
+  it("draws the kind a type's head says it is bold whole, one name, its abilities bold too (epic `language` I111)", () => {
+    const heads = (text: string, parser?: SP.SpellParser) =>
+      blocksOf(SP.BubblyLayout.of(text, parser).nodes).map((block) =>
+        block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`).join(" | ")
+      )
+    const english = [
+      'a "card" is a draggable two sided view',
+      "\tprint 1",
+      'a "pile" is a droppable viewable list of cards',
+      "\tprint 1",
+      'a "deck" is a list of cards',
+      "\tprint 1",
+      'a "foundation" is a pile',
+      "\tprint 1",
+      "solitaire is an app",
+      "\tprint 1"
+    ].join("\n")
+    expect(heads(english)).toEqual([
+      'words:a  | input:"card" | words: is a  | reference:draggable two sided view',
+      'words:a  | input:"pile" | words: is a  | reference:droppable viewable list of cards',
+      'words:a  | input:"deck" | words: is a  | reference:list of cards',
+      'words:a  | input:"foundation" | words: is a  | reference:pile',
+      "input:solitaire | words: is an  | reference:app"
+    ])
+    const spanish = [
+      'una "carta" es una vista reversible arrastrable',
+      "\timprimir 1",
+      'una "pila" es una lista visible soltable de cartas',
+      "\timprimir 1",
+      'un "mazo" es una lista de cartas',
+      "\timprimir 1",
+      'una "fundación" es una pila',
+      "\timprimir 1"
+    ].join("\n")
+    expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
+      'words:una  | input:"carta" | words: es una  | reference:vista reversible arrastrable',
+      'words:una  | input:"pila" | words: es una  | reference:lista visible soltable de cartas',
+      'words:un  | input:"mazo" | words: es una  | reference:lista de cartas',
+      'words:una  | input:"fundación" | words: es una  | reference:pila'
+    ])
+  })
+
   it("draws every name bold, one weight, the word a head declares too;  pronouns plain;  a list's values italic", () => {
     expect(piecesOf(drawing, "reference")).toEqual(
       expect.arrayContaining(["draggable two sided view", "rank", "value", "column"])

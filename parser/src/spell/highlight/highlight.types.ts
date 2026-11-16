@@ -224,6 +224,12 @@ export type BubblyRulePresentation = {
    * `droppable` in `it is droppable when`):  the words its parser reads as one (`SP.DeclarationPatterns.abilityWord`)
    */
   namesAbility?: boolean
+  /**
+   * its group whose end ends the KIND its head says it is, the kind bold whole, ONE name (epic `language` I111):
+   * `superType` in `a "card" is a draggable **two sided view**`, `instanceType` in `a "pile" is a **viewable list of cards**`
+   * - the kind starts after the article that follows the name, past any ability (`draggable`, bold on its own)
+   */
+  namesKind?: string
   /** a part of the name before it, bold with it:  `'s` in `pile's` */
   isNamePart?: boolean
   /** its group whose end ends a name it starts, bold through it:  `type` in `a new foundation with suit = hearts` */
