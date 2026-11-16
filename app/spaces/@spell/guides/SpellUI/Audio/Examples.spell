@@ -1,5 +1,4 @@
 "audio examples" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Audio
 		<header>An audio plays a sound file:  in the browser's own player, or unseen, when the page says.</>

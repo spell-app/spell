@@ -218,6 +218,17 @@ export const PARSER_MESSAGES = {
   "site-card-place-not-whole": "A card's row and column count from 1, in whole numbers:  {row} and {column} aren't",
   /** `go to the ...` naming a part no site of the program lists (epic `mockup` P3, T6):  `go to the flim page`. */
   "site-part-not-listed": 'The site has no "{part}":  its pages, dialogs and sidebars are {parts}',
+  /** A layout picked on a line that's not a page's (epic `mockup` T39):  `solitaire is an app, no layout`. */
+  "layout-not-on-a-page":
+    "Only a page has a page layout:  say it on a page's line, e.g. systems is a page, in the bare layout",
+  /** A page's layout that the program doesn't declare:  `, in the bare layout` with no `bare layout is a page layout`. */
+  "layout-not-declared": 'The program has no "{layout}":  declare it, e.g. {layout} is a page layout',
+  /** `- it has a top bar`, retired by page layouts (epic `mockup` T39). */
+  "site-top-bar-retired":
+    "A site's top bar is its main layout's app menu now:  main layout is a page layout, then - to draw its app menu, with the top bar view's lines in an <app-menu>;  this line does nothing",
+  /** `, no top bar` on a site's page, retired by page layouts (epic `mockup` T39). */
+  "site-no-top-bar-retired":
+    "A page leaves the site's layout on its own line now:  login is a page, no layout;  this does nothing",
   /** A projection of something that's no project data folder in a space (epic `atmosphere` P17). */
   "projection-not-a-folder":
     'A projection shows part of a space\'s data folder:  "{source}" isn\'t one.  Name a place written like this:  family cookbook is a data folder at "@family/recipes"',

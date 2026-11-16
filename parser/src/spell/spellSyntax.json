@@ -1664,6 +1664,7 @@
             "numbers_or_names",
             "there_are_how_many",
             "site_top_bar",
+            "site_main_layout",
             "site_page_state",
             "site_card_color",
             "site_not_found_page",
@@ -1798,6 +1799,9 @@
             },
             {
               "syntax": "(top bar|app bar)"
+            },
+            {
+              "syntax": "(main layout|main page layout)"
             },
             {
               "syntax": "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
@@ -5014,11 +5018,11 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 24,
+          "line": 29,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? (, in the {layout:type_words}|, (no_layout:no layout))? {with_nested_statements}?",
               "example": "solitaire is an app",
               "outputs": {
                 "js": {
@@ -8876,7 +8880,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -8925,7 +8929,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 43,
+          "line": 41,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {

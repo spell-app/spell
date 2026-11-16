@@ -1,5 +1,4 @@
 "site-tabs usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Site tabs
 		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
@@ -15,8 +14,8 @@
 	<section label="Using it">
 		<markdown>
 			Put it above the page's content. Inside a site with a `<ui-site-nav>`, that's all: with no `pages` of its own,
-			it follows the navigation around it, its pages and the page it marks shown. A page of a Spell site writes a bare
-			`<site-tabs/>`; the site draws no tabs by itself.
+			it follows the navigation around it, its pages and the page it marks shown. In a Spell site its page layout draws
+			them, in the row under its app menu (its `page menu`), so no page writes them.
 
 			- Elsewhere, hand it the same `pages` you hand `<ui-site-nav>`.
 

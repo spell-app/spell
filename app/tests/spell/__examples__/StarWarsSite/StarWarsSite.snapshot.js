@@ -1,4 +1,4 @@
-import { core, Thing, View, Page, Site, Place, h } from "@spell/core"
+import { core, Thing, View, Page, Site, PageLayout, Place, h } from "@spell/core"
 import { Character, Planet, Film, Species, Vehicle, Starship, WikiPage, Namespace, Title, Thumbnail, Originalimage, ContentUrl, Desktop, Mobile, Card, StarWar, Wikipedia } from "@spell/project/@spell/examples/StarWars"
 
 core.heading("Reviews:  kept on this device")
@@ -726,6 +726,7 @@ export class GalaxyGuide extends Site {
   static sidebars = [{ name: "person sidebar", view: "PersonSidebar" }]
   static notFoundPage = { name: "not found page" }
   static errorPage = { name: "error page" }
+  static mainLayout = "MainLayout"
 
   /** The theme its pages wear:  a hand-drawn sketch, while it's a mockup */
   get theme() {
@@ -733,5 +734,21 @@ export class GalaxyGuide extends Site {
   }
 }
 export const galaxyGuide = new GalaxyGuide()
+// -----------
+/**
+ * The frame round every page of the Star Wars site (epic `mockup` T39):  the site's navigation in the drawer;
+ * above each page its app menu, the drawer's button and where you are;  under that, the page's family as tabs.
+ */
+export class MainLayout extends PageLayout {
+  static elementTag = core.defineElement(this, "test-project")
+
+  drawAppMenu() {
+    return h("ui-app-menu", { part: "app_menu" },
+      h("ui-site-nav-button", { slot: "start" }),
+      h("ui-site-breadcrumbs", { slot: "start" })
+    )
+  }
+}
+export const mainLayout = new MainLayout()
 // -----------
 if (!core.isCarryingOver) galaxyGuide.start()

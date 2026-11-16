@@ -1681,6 +1681,7 @@
             "numbers_or_names",
             "there_are_how_many",
             "site_top_bar",
+            "site_main_layout",
             "site_page_state",
             "site_card_color",
             "site_not_found_page",
@@ -1815,6 +1816,9 @@
             },
             {
               "syntax": "(barra superior|cabecera)"
+            },
+            {
+              "syntax": "(diseño principal|diseno principal)"
             },
             {
               "syntax": "((old:antigua|antiguo)|(new:nueva|nuevo)|(mocked:maquetada|maquetado)|(built:construida|construido))"
@@ -5021,11 +5025,11 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 24,
+          "line": 29,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (, alias {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "{type:type_words} es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (, alias {aka:quoted_type})? (, en el {layout:type_words}|, (no_layout:sin diseño))? {with_nested_statements}?",
               "example": "solitaire es una aplicación",
               "outputs": {
                 "js": {
@@ -8839,21 +8843,21 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
               "syntax": "{type:type_words} es (un|una) {superType:type} (en {address:text}|(cloud:en la nube))? {with_nested_statements}?",
-              "example": "una \"portada\" es una página\nuna \"entrada\" es una página\nuna \"barra superior\" es una vista\nguía galáctica es un sitio:\n\t- tiene una barra superior\n\t- tiene una portada en \"/\"\n\t- tiene una entrada en \"/entrar\", sin barra superior",
+              "example": "diseño principal es un diseño\ndiseño sencillo es un diseño\nportada es una página\nentrada es una página, sin diseño\nimpresión es una página, en el diseño sencillo\nguía galáctica es un sitio:\n\t- tiene una portada en \"/\"\n\t- tiene una entrada en \"/entrar\"\n\t- tiene una impresión en \"/imprimir\"",
               "outputs": {
                 "js": {
-                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class Entrada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class BarraSuperior extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }, {\n    name: \"entrada\",\n    page: \"Entrada\",\n    address: \"/entrar\",\n    noTopBar: true\n  }]\n  static topBar = { name: \"barra superior\", view: \"BarraSuperior\" }\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                  "code": "export class DiseñoPrincipal extends PageLayout {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport const diseñoPrincipal = new DiseñoPrincipal()\nexport class DiseñoSencillo extends PageLayout {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport const diseñoSencillo = new DiseñoSencillo()\nexport class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport const portada = new Portada()\nexport class Entrada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static layout = false\n}\nexport const entrada = new Entrada()\nexport class Impresión extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static layout = \"DiseñoSencillo\"\n}\nexport const impresión = new Impresión()\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }, {\n    name: \"entrada\",\n    page: \"Entrada\",\n    address: \"/entrar\"\n  }, {\n    name: \"impresión\",\n    page: \"Impresión\",\n    address: \"/imprimir\"\n  }]\n  static mainLayout = \"DiseñoPrincipal\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
                 },
                 "ts": {
-                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class Entrada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class EntradaElement extends SpellElement<Entrada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-entrada\", \"entrada\", [])\n}\ncore.useElement(Entrada, EntradaElement)\nexport class BarraSuperior extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class BarraSuperiorElement extends SpellElement<BarraSuperior> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-barra-superior\", \"barra superior\", [])\n}\ncore.useElement(BarraSuperior, BarraSuperiorElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }, {\n    name: \"entrada\",\n    page: \"Entrada\",\n    address: \"/entrar\",\n    noTopBar: true\n  }]\n  static topBar = { name: \"barra superior\", view: \"BarraSuperior\" }\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                  "code": "export class DiseñoPrincipal extends PageLayout {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class DiseñoPrincipalElement extends SpellElement<DiseñoPrincipal> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-diseno-principal\", \"diseño principal\", [])\n}\ncore.useElement(DiseñoPrincipal, DiseñoPrincipalElement)\nexport const diseñoPrincipal = new DiseñoPrincipal()\nexport class DiseñoSencillo extends PageLayout {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class DiseñoSencilloElement extends SpellElement<DiseñoSencillo> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-diseno-sencillo\", \"diseño sencillo\", [])\n}\ncore.useElement(DiseñoSencillo, DiseñoSencilloElement)\nexport const diseñoSencillo = new DiseñoSencillo()\nexport class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport const portada = new Portada()\nexport class Entrada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static layout = false\n}\n\nexport class EntradaElement extends SpellElement<Entrada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-entrada\", \"entrada\", [])\n}\ncore.useElement(Entrada, EntradaElement)\nexport const entrada = new Entrada()\nexport class Impresión extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static layout = \"DiseñoSencillo\"\n}\n\nexport class ImpresiónElement extends SpellElement<Impresión> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-impresion\", \"impresión\", [])\n}\ncore.useElement(Impresión, ImpresiónElement)\nexport const impresión = new Impresión()\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\"\n  }, {\n    name: \"entrada\",\n    page: \"Entrada\",\n    address: \"/entrar\"\n  }, {\n    name: \"impresión\",\n    page: \"Impresión\",\n    address: \"/imprimir\"\n  }]\n  static mainLayout = \"DiseñoPrincipal\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
                 },
                 "py": {
-                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass Entrada(Page):\n    element_tag = \"syntax-block-entrada\"\n\nclass BarraSuperior(View):\n    element_tag = \"syntax-block-barra-superior\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [\n        {\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"},\n        {\"name\": \"entrada\", \"page\": \"Entrada\", \"address\": \"/entrar\", \"no_top_bar\": True},\n    ]\n    top_bar = {\"name\": \"barra superior\", \"view\": \"BarraSuperior\"}\n\nguía_galáctica = GuíaGaláctica()"
+                  "code": "class DiseñoPrincipal(PageLayout):\n    element_tag = \"syntax-block-diseno-principal\"\n\ndiseño_principal = DiseñoPrincipal()\n\nclass DiseñoSencillo(PageLayout):\n    element_tag = \"syntax-block-diseno-sencillo\"\n\ndiseño_sencillo = DiseñoSencillo()\n\nclass Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nportada = Portada()\n\nclass Entrada(Page):\n    element_tag = \"syntax-block-entrada\"\n    layout = False\n\nentrada = Entrada()\n\nclass Impresión(Page):\n    element_tag = \"syntax-block-impresion\"\n    layout = \"DiseñoSencillo\"\n\nimpresión = Impresión()\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [\n        {\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"},\n        {\"name\": \"entrada\", \"page\": \"Entrada\", \"address\": \"/entrar\"},\n        {\"name\": \"impresión\", \"page\": \"Impresión\", \"address\": \"/imprimir\"},\n    ]\n    main_layout = \"DiseñoPrincipal\"\n\nguía_galáctica = GuíaGaláctica()"
                 }
               }
             }
@@ -8888,7 +8892,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 43,
+          "line": 41,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {

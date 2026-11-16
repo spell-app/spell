@@ -1,4 +1,4 @@
-import { core, Thing, View, Page, Site, Place, prop, drawn } from "@spell/core"
+import { core, Thing, View, Page, Site, PageLayout, Place, prop, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 import { Character, Planet, Film, Species, Vehicle, Starship, WikiPage, Namespace, Title, Thumbnail, Originalimage, ContentUrl, Desktop, Mobile, Card, StarWar, Wikipedia } from "@spell/project/@spell/examples/StarWars"
 
@@ -925,6 +925,7 @@ export class GalaxyGuide extends Site {
   static sidebars = [{ name: "person sidebar", view: "PersonSidebar" }]
   static notFoundPage = { name: "not found page" }
   static errorPage = { name: "error page" }
+  static mainLayout = "MainLayout"
 
   /** The theme its pages wear:  a hand-drawn sketch, while it's a mockup */
   get theme() {
@@ -943,6 +944,39 @@ export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {
 }
 core.useElement(GalaxyGuide, GalaxyGuideElement)
 export const galaxyGuide = new GalaxyGuide()
+// -----------
+/**
+ * The frame round every page of the Star Wars site (epic `mockup` T39):  the site's navigation in the drawer;
+ * above each page its app menu, the drawer's button and where you are;  under that, the page's family as tabs.
+ */
+export class MainLayout extends PageLayout {
+  static elementTag = core.defineElement(this, "test-project")
+
+  drawAppMenu() {
+    return (
+      <ui-app-menu part="app_menu">
+        <ui-site-nav-button slot="start" />
+        <ui-site-breadcrumbs slot="start" />
+      </ui-app-menu>
+    )
+  }
+}
+
+/**
+ * `<test-project-main-layout>`:  a main layout, drawn in its own element, e.g. by `draw the main layout`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its main layout's properties;  its methods call its main layout's.
+ * - What every view's element does, e.g. drawing its main layout, is `SpellElement`'s.
+ */
+export class MainLayoutElement extends SpellElement<MainLayout> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-main-layout", "main layout", [])
+
+  drawAppMenu() {
+    return this.currentThing?.drawAppMenu()
+  }
+}
+core.useElement(MainLayout, MainLayoutElement)
+export const mainLayout = new MainLayout()
 // -----------
 if (!core.isCarryingOver) galaxyGuide.start()
 
@@ -988,6 +1022,8 @@ declare module "@solidjs/web/types/jsx.js" {
       "test-project-reviews-page": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `GalaxyGuideElement` */
       "test-project-galaxy-guide": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `MainLayoutElement` */
+      "test-project-main-layout": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
     }
   }
 }

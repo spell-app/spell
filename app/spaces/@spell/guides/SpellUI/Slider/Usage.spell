@@ -1,5 +1,4 @@
 "slider usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>

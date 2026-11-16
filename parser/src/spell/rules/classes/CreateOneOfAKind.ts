@@ -11,8 +11,9 @@ import { CreateType } from "./CreateType"
  * - No article:  it names the thing, not a kind of thing.
  *   - The type is `Solitaire`, as for `a solitaire is an app`;  its one instance is the variable `solitaire`.
  *   - So there's no `set the solitaire to a new solitaire`:  `print solitaire`, `debug the solitaire` just work.
- * - Only an app or a page, or a kind of one:  `x is a thing` isn't ours.
+ * - Only an app, a page or a page layout, or a kind of one:  `x is a thing` isn't ours.
  *   - A page:  `leaderboard is a page` (epic `elemental-spell` Q16).
+ *   - A page layout:  `main layout is a page layout` (epic `mockup` T39);  `wide layout is a main layout` builds on it.
  *   - Its kind may be several words, if DECLARED:  `klondike is a card game`, `high scores is a score page`
  *     (epic `elemental-spell` C27;  see `namesOneOfAKindType()`).
  * - The instance is made where the line is, right after its class:
@@ -20,6 +21,10 @@ import { CreateType } from "./CreateType"
  *   so its properties' starting values can make things of those types.
  * - Its body's methods that name no receiver (`- to reset:`) can be called anywhere with none, and run on it:
  *   see `DynamicMethodRule.onThis()`.
+ * - A page picks its page layout on its line (epic `mockup` T39):  `systems is a page, in the bare layout` =>
+ *   `static layout = "BareLayout"`;  `login is a page, no layout` => `static layout = false`, just the page.
+ *   - Said nothing, it's in the site's main layout, when the program has one (`static mainLayout`, `create_site`).
+ *   - Refused on anything but a page, and when the words name a type that isn't a page layout.
  */
 export class CreateOneOfAKind extends CreateType {
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type", detail: "superType" }
@@ -46,14 +51,47 @@ export class CreateOneOfAKind extends CreateType {
     return super.test(scope, tokens, start)
   }
 
-  /** Only an app or a page, or a kind of one, is one of a kind. */
+  /** Only an app, a page or a page layout, or a kind of one, is one of a kind. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     // refused (`refuseTakenNames()`), with no super-type to check:  not ours, unless it's made from itself, and only ours can say so
     const superType = match?.groups.superType as P.Match<P.MatchGroups, { scopeType?: unknown }> | undefined
     if (!superType) return (match?.data as { isFromItself?: boolean } | undefined)?.isFromItself ? match : undefined
     const { scopeType } = superType.data
-    return isOneOfAKindType(scopeType) ? match : undefined
+    if (!isOneOfAKindType(scopeType)) return undefined
+    return CreateOneOfAKind.refuseLayoutOf(match!, scopeType as P.TypeScope)
+  }
+
+  /**
+   * `match`, refused when its line picks a page layout (`, in the bare layout`, `, no layout`) it can't have:
+   * - only a page has a layout
+   * - the words must name a page layout:  checked once the whole project has parsed, as a layout may be declared in a
+   *   file parsed after this one
+   */
+  private static refuseLayoutOf(match: P.MatchFor<CreateOneOfAKind>, type: P.TypeScope): P.Match | undefined {
+    const { layout, no_layout } = match.groups as LayoutGroups
+    if (!layout && !no_layout) return match
+    const language = SP.Language.of(match.scope)
+    if (!type.isA("Page")) return CreateOneOfAKind.refuse(match, language.parserMessage("layout-not-on-a-page"))
+    if (!layout) return match
+    const words = `${layout.raw ?? layout.inputText}`.trim()
+    const named = () => match.scope.getType(CreateOneOfAKind.layoutClassFor(match))
+    SP.SpellWarnings.refuseIf(
+      match,
+      () => language.parserMessage("layout-not-declared", { layout: words }),
+      () => {
+        const found = named()
+        return !(found instanceof P.TypeScope && !found.stub && found.isA("PageLayout"))
+      },
+      layout
+    )
+    return match
+  }
+
+  /** The class of the layout `match`'s line picks:  `bare layout` => `BareLayout`. */
+  static layoutClassFor(match: P.Match): string {
+    const { layout } = match.groups as LayoutGroups
+    return P.classCase(SP.typeName(`${layout!.raw ?? layout!.inputText}`.trim().split(/\s+/).join("-")))
   }
 
   /**
@@ -77,7 +115,7 @@ export class CreateOneOfAKind extends CreateType {
 
   /** The class, then its one instance:  `export const solitaire = new Solitaire()`. */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
-    const group = super.getAST(match)
+    const group = CreateOneOfAKind.withLayout(match, super.getAST(match))
     const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
     const made = new P.ASTAssignmentStatement(match, {
       thing: new P.ASTVariableExpression(match, { name: CreateOneOfAKind.variableName(match) }),
@@ -85,6 +123,24 @@ export class CreateOneOfAKind extends CreateType {
       isNewVariable: true
     })
     return new P.ASTStatementGroup(match, { statements: [...(group.statements ?? []), made] })
+  }
+
+  /**
+   * `group`, its class given the layout its line picks:  `static layout = "BareLayout"`, or `false` for `no layout`.
+   * - Nothing when its line picks none.
+   */
+  private static withLayout(match: P.MatchFor<CreateOneOfAKind>, group: P.ASTStatementGroup): P.ASTStatementGroup {
+    const { layout, no_layout } = match.groups as LayoutGroups
+    if (!layout && !no_layout) return group
+    const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
+    const value = layout
+      ? new P.ASTStringLiteral(match, { value: JSON.stringify(CreateOneOfAKind.layoutClassFor(match)) })
+      : new P.ASTBooleanLiteral(match, false)
+    const member = new P.ASTStaticDefinition(match, { type, name: LAYOUT, value })
+    const statements = (group.statements ?? []).map((statement) =>
+      statement instanceof P.ASTClassDeclaration ? statement.withMembers([member]) : statement
+    )
+    return new P.ASTStatementGroup(match, { statements })
   }
 
   /** Name of the one instance's variable:  the line's words, `my_game` for `my game is an app`. */
@@ -109,13 +165,20 @@ function namesOneOfAKindType(scope: P.Scope, tokens: P.Token[], index: number): 
   return false
 }
 
+/** The groups a page's line picks its layout with:  `, in the {layout} layout`, `, no layout`. */
+type LayoutGroups = { layout?: P.Match; no_layout?: P.Match }
+
+/** The static a page's layout goes in:  `static layout = "BareLayout"`, read by the core's `SiteBase`. */
+const LAYOUT = "layout"
+
 /** Most words a kind's name may have:  as many as a type's (drawable-thing J7). */
 const MAX_KIND_WORDS = 4
 
 /**
- * Can `type` be one of a kind:  an app or a page, or a kind of one (`solitaire is an app`, `leaderboard is a page`).
- * - A page too (epic `elemental-spell` Q16).
+ * Can `type` be one of a kind:  an app, a page or a page layout, or a kind of one (`solitaire is an app`,
+ * `leaderboard is a page`, `main layout is a page layout`).
+ * - A page too (epic `elemental-spell` Q16);  a page layout (epic `mockup` T39).
  */
 function isOneOfAKindType(type: unknown): boolean {
-  return type instanceof P.TypeScope && (type.isA("App") || type.isA("Page"))
+  return type instanceof P.TypeScope && (type.isA("App") || type.isA("Page") || type.isA("PageLayout"))
 }

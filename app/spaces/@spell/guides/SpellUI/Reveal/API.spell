@@ -1,5 +1,4 @@
 "reveal api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>

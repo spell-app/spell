@@ -1,5 +1,4 @@
 "textarea api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>

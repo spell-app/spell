@@ -130,7 +130,7 @@ export class RunSite implements SiteHost {
    * - NEVER throws:  a section that never comes is left alone.
    */
   landOn = (id: string): void => {
-    const shown = () => document.querySelector(`.spell-site-page [id="${CSS.escape(id)}"]`)
+    const shown = () => document.querySelector(`.spell-site-frame [id="${CSS.escape(id)}"]`)
     void waitUntil(shown, { timeout: SECTION_WAIT })
       .then(async () => {
         const { HashLanding } = await import("spell/ui/components/ui-toc/HashLanding")
