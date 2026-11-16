@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
+import { cursorCharRight } from "@codemirror/commands"
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 
@@ -134,6 +135,50 @@ describe("a body's rail under the caret", () => {
         0.1
       )
     }
+  })
+
+  test("a run of end tags alone on their lines:  ONE row of feet, each end tag reached by a click and the caret (I132)", async () => {
+    const view = await bubblyEditorOf(NESTED)
+    const [end, outerEnd] = linesStarting(view, ["</>", "</container>"])
+    const rows = view.dom.querySelectorAll<HTMLElement>(".cmb-feet-row")
+    expect(rows.length).toBe(1)
+    const row = rows[0]!
+    const [inner, outer] = [...row.querySelectorAll<HTMLElement>(".cmb-tag-foot")]
+    expect([inner?.textContent, outer?.textContent]).toEqual(["</>", "</container>"])
+    // nested as Spell's feet:  the outer one a step down, a tab stop further left
+    const innerBox = inner!.getBoundingClientRect()
+    const outerBox = outer!.getBoundingClientRect()
+    const indent = Number.parseFloat(view.dom.style.getPropertyValue("--cmb-indent"))
+    expect(outerBox.top).toBeGreaterThan(innerBox.bottom)
+    expect(Math.abs(innerBox.left - outerBox.left - indent)).toBeLessThan(0.1)
+    // the row on whole pixels, so the lines under it start on one, as the lines above it do
+    const contentTop = view.contentDOM.getBoundingClientRect().top
+    const rowBox = row.getBoundingClientRect()
+    expect(rowBox.height % 1).toBe(0)
+    const firstLine = view.contentDOM.querySelector(".cm-line")!.getBoundingClientRect().top
+    expect((rowBox.top - firstLine) % 1).toBe(0)
+    expect((rowBox.bottom - contentTop) % 1).toBeCloseTo((firstLine - contentTop) % 1, 5)
+    // a click on each end tag puts the caret in it
+    const endTag = view.state.doc.line(end!)
+    const outerTag = view.state.doc.line(outerEnd!)
+    for (const [box, tag] of [
+      [innerBox, endTag],
+      [outerBox, outerTag]
+    ] as const) {
+      const at = view.posAtCoords({ x: box.left + box.width / 2, y: box.top + box.height / 2 })!
+      expect(at, tag.text).toBeGreaterThan(tag.from + tag.text.indexOf("<"))
+      expect(at, tag.text).toBeLessThan(tag.to)
+    }
+    // from the end of one end tag, one step right is the start of the next:  the line break between them one step
+    view.dispatch({ selection: { anchor: endTag.to } })
+    cursorCharRight(view)
+    expect(view.state.selection.main.head).toBe(outerTag.from + outerTag.text.indexOf("<"))
+    // ... the caret drawn there, at the outer end tag's words
+    await frames()
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    expect(caret.top).toBeGreaterThanOrEqual(outerBox.top - 1)
+    expect(caret.left).toBeGreaterThan(outerBox.left)
+    expect(caret.left).toBeLessThan(outerBox.left + outerBox.width / 2)
   })
 
   /**
