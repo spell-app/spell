@@ -181,6 +181,15 @@
   .cmb-fold-folded svg {
     rotate: -90deg;
   }
+  /* a folded block's hidden lines:  a quiet `…`, no box;  a click unfolds them (`CodeMirrorSetup`;  I116) */
+  .cmb-fold-more {
+    padding: 0 4px;
+    cursor: pointer;
+    opacity: 0.55;
+  }
+  .cmb-fold-more:hover {
+    opacity: 1;
+  }
 }
 
 /* a hover's words and signature help's, drawn by Spell UI's `<ui-markdown>` (`CodeMirrorLanguage`) */

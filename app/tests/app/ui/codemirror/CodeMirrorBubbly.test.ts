@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vite-plus/test"
+import { codeFolding, foldEffect } from "@codemirror/language"
 import { EditorState } from "@codemirror/state"
 
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
@@ -51,7 +52,74 @@ describe("CodeMirrorBubbly", () => {
     const rails = railsOf(CARD, { from, to })
     expect(rails.get('\t\t<card-image rank={its rank} direction="down" />')).toBe(1)
   })
+
+  /** A Spell block, a drawing in it, and a tag block in the drawing:  each head folds (`CodeMirrorLanguage.folding()`). */
+  const DRAWN = `a "card" is a view
+\tits "rank" is a number
+\tto draw it
+\t\t<segment inverted>
+\t\t\t<text>Hi</>
+\t\t</>
+`
+
+  test("a folded block:  its head alone, a pill;  its hidden body draws no rail, no foot, nothing (I116)", () => {
+    const state = folded(DRAWN, 1)
+    const shapes = shapesOf(state)
+    expect(shapes.bands).toEqual([{ text: 'a "card" is a view', classes: expect.arrayContaining(["cmb-band-folded"]) }])
+    expect(shapes.bands[0]!.classes).toContain("cmb-band-pill")
+    expect(shapes.bands[0]!.classes).not.toContain("cmb-band-open")
+    expect(shapes.feet).toBe(0)
+    expect(shapes.railedLines).toEqual([])
+  })
+
+  test("a folded tag block:  its start tag a band pointed at both ends;  its parent's rail and foot as for a one-line child (I116)", () => {
+    const shapes = shapesOf(folded(DRAWN, 4))
+    const segment = shapes.tagBands.find((band) => band.text.startsWith("<segment"))!
+    expect(segment.classes).toContain("cmb-band-folded")
+    expect(segment.classes).not.toContain("cmb-band-open")
+    // nothing of its body:  no `<text>` pill, no tiny foot;  the blocks round it keep their feet, the card's and the action's
+    expect(shapes.tagBands.map((band) => band.text)).toEqual(["<segment inverted>"])
+    expect(shapes.tagFeet).toBe(0)
+    expect(shapes.feet).toBe(2)
+    // the line under the action's head is in its rail and the card's, as before
+    expect(shapes.railedLines).toContain("\t\t<segment inverted>")
+  })
 })
+
+/** `text`'s state, the block whose head is on line `line` folded, as a click on its arrow folds it. */
+function folded(text: string, line: number): EditorState {
+  const state = EditorState.create({ doc: text, extensions: codeFolding() })
+  const head = state.doc.line(line)
+  const lines = text.split("\n")
+  // its last line:  the last one further in than its head
+  const indent = (each: string) => each.length - each.trimStart().length
+  let last = line
+  while (last < lines.length && lines[last]!.trim() && indent(lines[last]!) > indent(lines[line - 1]!)) last++
+  // a tag block's end tag too, as the language service folds it
+  if (lines[last]?.trimStart().startsWith("</")) last++
+  return state.update({ effects: foldEffect.of({ from: head.to, to: state.doc.line(last).to }) }).state
+}
+
+/** What `state` draws:  its bands, its tags' bands, its feet, and the lines a rail runs down. */
+function shapesOf(state: EditorState) {
+  const text = state.doc.toString()
+  const bands: Array<{ text: string; classes: string[] }> = []
+  const tagBands: Array<{ text: string; classes: string[] }> = []
+  const railedLines: string[] = []
+  let feet = 0
+  let tagFeet = 0
+  CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, to, decoration) => {
+    const spec = decoration.spec as { class?: string; block?: boolean; attributes?: Record<string, string> }
+    const classes = spec.class?.split(" ") ?? []
+    if (spec.block) feet++
+    else if (from === to && spec.attributes?.style?.startsWith("--cmb-rails"))
+      railedLines.push(state.doc.lineAt(from).text)
+    else if (classes.includes("cmb-band")) bands.push({ text: text.slice(from, to), classes })
+    else if (classes.includes("cmb-tag-band")) tagBands.push({ text: text.slice(from, to), classes })
+    else if (classes.includes("cmb-tag-foot")) tagFeet++
+  })
+  return { bands, tagBands, feet, tagFeet, railedLines }
+}
 
 /** Each mark's classes, by its stretch, and the text it's on;  `slice`:  the lines shown. */
 function marksOf(text: string, slice?: { from: number; to: number }): Array<{ text: string; classes: string[] }> {

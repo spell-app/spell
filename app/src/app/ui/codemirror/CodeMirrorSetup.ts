@@ -1,5 +1,5 @@
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
-import { foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
+import { codeFolding, foldGutter, foldKeymap, indentUnit } from "@codemirror/language"
 import { lintKeymap } from "@codemirror/lint"
 import { openSearchPanel, search, searchKeymap } from "@codemirror/search"
 import { Compartment, EditorState, type Extension, StateEffect } from "@codemirror/state"
@@ -78,6 +78,8 @@ export class CodeMirrorSetup {
    *   (epic `editor` I154).
    * - A press on an arrow folds or unfolds its block, and never moves the caret:  the gutter is outside the text.
    * - The arrows follow each new parse (`PARSED`), as the blocks that fold are the parse's.
+   * - A folded block's hidden lines are a quiet `…` after its head, no box (`foldedMore()`):
+   *   in the bubbly look, inside its band's right end (`bubbly.css`;  epic `language` I116).
    */
   static gutter({ lineNumbers: isNumbered = false }: Pick<CodeMirrorSetupOptions, "lineNumbers">): Extension {
     return [
@@ -85,7 +87,8 @@ export class CodeMirrorSetup {
       foldGutter({
         markerDOM: foldArrow,
         foldingChanged: (update) => wasParsed(update)
-      })
+      }),
+      codeFolding({ placeholderDOM: foldedMore })
     ]
   }
 
@@ -228,6 +231,20 @@ function foldArrow(isOpen: boolean): HTMLElement {
   arrow.className = isOpen ? "cmb-fold cmb-fold-open" : "cmb-fold cmb-fold-folded"
   arrow.innerHTML = CHEVRON
   return arrow
+}
+
+/**
+ * A folded block's hidden lines:  a quiet `…`, which unfolds them when clicked.
+ * - In place of CodeMirror's grey box;  the bubbly look draws it inside its band's right end (`cmb-fold-more`).
+ */
+function foldedMore(_view: EditorView, onclick: (event: Event) => void): HTMLElement {
+  const more = document.createElement("span")
+  more.className = "cmb-fold-more"
+  more.textContent = "…"
+  more.title = appTexts.text("cmUnfold")
+  more.setAttribute("aria-label", appTexts.text("cmFoldedCode"))
+  more.onclick = onclick
+  return more
 }
 
 /** The fold arrow's chevron, pointing down;  `codemirror.css` turns a folded block's to the right. */

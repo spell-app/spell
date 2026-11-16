@@ -1,3 +1,4 @@
+import { foldedRanges } from "@codemirror/language"
 import { type EditorState, type Extension, type Range } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
 
@@ -149,6 +150,11 @@ class MarkupShapes {
     const whole = this.marks[block.place]
     if (!head || !whole) return
     const hue = hueOf(block.partOfSpeech)
+    // folded:  its start tag alone, a band pointed at both ends, the fold's `…` in its end (I116)
+    if (this.decorations.isFoldedAt(head.start)) {
+      this.on(block.head, ["cmb-tag-band", "cmb-band-folded", "cmb-tag-start", ...hue])
+      return
+    }
     this.on(block.head, ["cmb-tag-band", "cmb-band-open", "cmb-tag-start", ...hue])
     const inside = [...rails, { ...this.decorations.indentAt(head.start), partOfSpeech: block.partOfSpeech }]
     // the rail:  every line under its start tag, to its end tag's
@@ -209,6 +215,21 @@ export class CodeMirrorDecorations {
 
   /** The text being drawn. */
   readonly text: string
+
+  /**
+   * Is the block whose head is on the line `at` is on folded?
+   * - Its fold starts at its head line's end (`CodeMirrorLanguage.folding()`), so it's drawn as its head alone:
+   *   a pill, no rail, no foot, nothing of its hidden body (epic `language` I116)
+   */
+  isFoldedAt(at: number): boolean {
+    const { to } = this.state.doc.lineAt(at)
+    let isFolded = false
+    foldedRanges(this.state).between(to, to, (from) => {
+      if (from === to) isFolded = true
+      return isFolded ? false : undefined
+    })
+    return isFolded
+  }
 
   /** Mark `start`-`end` with `classes`, and `attributes`, along with any the same stretch has. */
   mark(start: number, end: number, classes: string[], attributes: Record<string, string> = {}): void {

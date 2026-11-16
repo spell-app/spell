@@ -1,3 +1,4 @@
+import { foldEffect, unfoldEffect } from "@codemirror/language"
 import { type EditorState, type Extension, Prec, StateEffect, StateField } from "@codemirror/state"
 import { type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view"
 
@@ -10,6 +11,8 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  * and are worked out again once the typing pauses.
  * - Typing never waits:  CodeMirror moves the marks with each change at once (`decorations.map()`).
  * - Worked out again after an edit, or a new parse (`CodeMirrorSetup.PARSED`), once nothing has changed for `msec`.
+ * - And at once, in the same update, when a block folds or unfolds:  a folded block is drawn as its head alone
+ *   (epic `language` I116), and waiting showed its body's rails and feet under it for a moment.
  * - In the editor's state, not a view plugin's, so its decorations may be block widgets.
  * - Drawn at the lowest precedence:  CodeMirror draws a lower source's marks OUTSIDE a higher's,
  *   so a found word's or a problem's mark goes inside, rather than cutting one of these in two.
@@ -26,6 +29,9 @@ export class CodeMirrorRelayout {
       create: (state) => decorationsOf(state),
       update(decorations, transaction) {
         for (const effect of transaction.effects) if (effect.is(laidOut)) return effect.value
+        if (transaction.effects.some((effect) => effect.is(foldEffect) || effect.is(unfoldEffect))) {
+          return decorationsOf(transaction.state)
+        }
         return transaction.docChanged ? decorations.map(transaction.changes) : decorations
       },
       provide: (it) => Prec.lowest(EditorView.decorations.from(it))
