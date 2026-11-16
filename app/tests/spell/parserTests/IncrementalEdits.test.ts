@@ -30,6 +30,8 @@ import {
  * - Edits its FIRST file, whose edits reach every file after it;  `INCREMENTAL_FULL=1` edits every file
  *   (about 7 minutes:  the big examples' full parses, PublicServers' alone about 3).
  * - Solitaire's every line, edited four ways:  `IncrementalProject.test.ts`.
+ * - Files after an edited one are KEPT when what they looked up finds the same (epic `language` P59):
+ *   so every edit here also checks a kept file's output, against its full parse.
  */
 const PROJECTS: TestProjectName[] = [
   ...new Set([...EXAMPLE_PROJECTS, ...fixtureProjectNames().filter((name) => name.startsWith(`${LIBRARY_GROUP}/`))])
@@ -75,6 +77,33 @@ describe("incremental parsing after each kind of edit ~== full parse", () => {
       }
     }, 600_000)
   }
+
+  // A file whose lookups find the same after an earlier file changed is kept, not parsed again (epic `language` P59).
+  test("a rename, a new member, kind or phrase in Card.spell keeps the Solitaire files that don't use it", () => {
+    const projectName = "@spell/examples/Solitaire"
+    const files = loadFixtureProject(projectName)
+    const options = { parentScope: fixtureImportScope(projectName), projectPath: fixtureProjectId(projectName) }
+    const project = incrementalSpellProject(files, false, options)
+    const card = files[0]!
+    const parsedAfter = (edited: string) => {
+      const parsed = project.update(card.path, edited).map((parse) => parse.scope.path)
+      project.update(card.path, card.contents)
+      return parsed
+    }
+    const typeLine = '\tgroup "Card Rank & Suit"'
+    expect(parsedAfter(card.contents.replace('its "picture" is', 'its "picturez" is'))).toEqual(["/Card.spell"])
+    expect(parsedAfter(card.contents.replace(typeLine, `\tits "zz extra" is 1\n${typeLine}`))).toEqual(["/Card.spell"])
+    expect(parsedAfter(`${card.contents}\na "zz widget" is a thing\n`)).toEqual(["/Card.spell"])
+    expect(parsedAfter(card.contents.replace(typeLine, `\tit "is zz ready" if it exists\n${typeLine}`))).toEqual([
+      "/Card.spell"
+    ])
+    // the pile and the deck read a card's short name:  they parse again, the game doesn't
+    expect(parsedAfter(card.contents.replace('its "short name" is', 'its "short namez" is'))).toEqual([
+      "/Card.spell",
+      "/Pile.spell",
+      "/Deck.spell"
+    ])
+  })
 })
 
 ////////////////

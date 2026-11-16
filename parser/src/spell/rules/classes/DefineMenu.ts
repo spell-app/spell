@@ -66,11 +66,11 @@ export class DefineMenu extends SpellStatement<
    */
   static actionNamed(type: P.TypeScope, words: string): string | undefined {
     const wanted = normalWords(words)
+    const isNamed = (method: P.ScopeMethod) =>
+      (!!method.asWritten && normalWords(method.asWritten) === wanted) || normalWords(method.name) === wanted
     for (const each of type.chain()) {
-      for (const method of each.methods.get()) {
-        if (method.asWritten && normalWords(method.asWritten) === wanted) return method.name
-        if (normalWords(method.name) === wanted) return method.name
-      }
+      // only a method of that name matters (`P.Outline`)
+      for (const method of each.methods.scan(isNamed)) if (isNamed(method)) return method.name
     }
     return undefined
   }

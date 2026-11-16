@@ -42,7 +42,8 @@ export class IsListedValue extends IsEqual {
     const type = scope.getType(left?.datatype)
     const found = new Map<string, { property: P.ScopeVariable; value: string }>()
     for (const owner of type?.chain() ?? []) {
-      for (const property of owner.variables.get()) {
+      // only a property listing the number matters (`P.Outline`)
+      for (const property of owner.variables.scan((it) => !!it.listedValues?.includes(value))) {
         if (property.listedValues?.includes(value) && !found.has(`${property.name}`)) {
           found.set(`${property.name}`, { property, value: `${value}` })
         }

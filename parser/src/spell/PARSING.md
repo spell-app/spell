@@ -1830,7 +1830,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       - Its real line still `claim()`s it, with the super-type it parsed;  an edit to that line re-parses everything
         (`changesTypeKinds()`).
     - `P.IncrementalProject` and `parseSpellProject()` both do it.
-    - An edit which changes WHICH types a file declares re-parses the whole project.
+    - An edit which changes WHICH types a file declares stubs that file again, and parses it again whole;
+      other files are kept if what they looked up finds the same ("Incremental parsing", below).
     - Each file's parser stubs its own, in play (`inPlay()`):  a name is made singular by its own language,
       and the stub notes it (`P.TypeScope.lang`).
 - A type's name in ANOTHER language's grammar (epic `spanish` J89):  `cards` in a Spanish file, for an English `Card`.
@@ -1860,7 +1861,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
-    - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`).
+    - An edit which adds or deletes a method stubs and parses that file again (`parser.changesMethods()`),
+      as for a type, above.
       With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
@@ -1869,10 +1871,11 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       one tab in, bare or bulleted (`- its "suit" is ...`;  bare since epic `language` P46);
       a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
     - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.
-    - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
+    - An edit which adds or deletes a property stubs and parses that file again (`parser.changesProperties()`),
+      as for a type, above.
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
-  - An edit which changes a type's line, `a "tableau" is a pile`, re-parses the whole project too
+  - An edit which changes a type's line, `a "tableau" is a pile`, stubs and parses that file again too
     (`parser.changesTypeKinds()`):  a drawing above it decided by it whether `<tableau "T1"/>` is a view.
     With `keepLastGood`, only a type line added or deleted counts.
   - And after a rewind, what each type IS as parsed (`typeKinds()`):  changed, the whole project re-parses too (I93).
@@ -2442,9 +2445,18 @@ sidebars any of them opens.
   - recorded by:
     - `ScopeList.add()` / `.replace()`, which swap in a NEW items array
     - `Parser.addRule()`, for `#ownRules`
+    - `P.ParseJournal.assign()`, for fields set on a record that's there already (a type's `claim()`, a method's `returns`)
+    - a few of their own:  a type's names ahead (`declarePropertyAhead()`), the names its things are given
   - `mark()` a point
   - `rewindTo(mark)` undoes everything after it
   - `replay()` puts it back, marks included
+  - Each change is an OPERATION, redone onto the state as it is THEN (epic `language` P59):
+    - a record added to a list goes on the end of the list's items as they are now;  a rule merges into the rules there now
+    - an `assign()` sets its fields again, whatever's there
+    - So after an earlier file parsed again, a later file's changes go back onto the earlier file's NEW records.
+      Before, a redo swapped back whole lists:  the earlier file's OLD records with them.
+  - And says what it changed (`P.JournalChange.change`):  a list and its records, a record and its fields, a rule,
+    a note on a type.  So two parses of a file can be compared (`P.ParseDiff`, below).
   - only state existing AT the mark needs recording:  anything newer is re-parsed, or replayed back the same
 - [`P.IncrementalParse`](../parser/IncrementalParse.ts), one per file:
   - It parses TOP-LEVEL items one by one (`parser.parseItem()`), with a journal mark before each.
@@ -2486,7 +2498,8 @@ sidebars any of them opens.
           (each item records them) => `"region"`
           - replay everything after, later files too, and move its tokens
         - else => `"rewound"`:  re-parse the rest of the file
-          - That took back every LATER file too:  `IncrementalProject` re-parses them with `parseAll()`.
+          - That took back every LATER file too:  `IncrementalProject` keeps each one whose lookups find the same,
+            and re-parses the rest ("Keeping later files", below).
   - `keepLastGood`:  opt-in, and `SpellProject` turns it on.
     - Each item that ISN'T broken records its journal entries as `lastGood`.
       - Broken (`parser.isBrokenItem()`):  didn't parse, or has parse errors.
@@ -2511,6 +2524,35 @@ sidebars any of them opens.
       otherwise`) is `"global"` only when it did:  the word was new (`SpellConstant.valueScopeChanges()`).
       A word the project knew already, e.g. one of a card's ranks, changes nothing.
     - `if` is `"global"` only when its condition's subject took an `it` name (`data.subjectIt`).
+- Keeping later files (epic `language` P59):  when a file parses again from part way, or whole, each file after it
+  is KEPT if what it looked up finds the same, else it parses again.
+  - Each file's `P.Outline`:  what its parse looked up, noted as it parses (`P.ScopeList.outline`):
+    - each list it asked for a key (`ScopeList.get()`), at each list the lookup falls through to, and what it found
+    - a test, when it looked through every item for some (`ScopeList.scan(test)`, `ScopeList.some(test)`):
+      a property listing a word, a member with a stop word in its name, a type with a property
+    - a note it asked of a type:  a name ahead (`knowsPropertyAhead()`), a name given (`NewThing.namesGiven()`)
+    - `get()` with no key notes every item:  any change to the list re-parses it.
+  - `P.ParseDiff`:  what the files that parsed again changed, their journal entries then against now:
+    - a record in a list is the same as the one in its place, by key, if it holds the same
+      (its fields, written out:  a match is just "a match", another record of the same parse its key)
+    - a field set on a record that outlives the parse (a type's `claim()`), by its last value
+    - a rule, by its class and what it was made with;  a note, by its value
+    - unknown entries (no `change`):  nothing is kept
+  - A file is kept when (`P.ParseDiff.keepPlan()`):
+    - no key it looked up changed, no test of its passes a record that changed, no record it found changed
+    - a rule that changed can't match it:  a sequence one of whose required words its text doesn't have
+      (`P.Sequence.requiredWords`), e.g. a new phrase `it "is zz ready"`
+    - none of its entries sets fields on a record a file that parsed again set too
+    - nothing under its lines points at a record or match that's gone, with none in its place
+  - Kept:  each field under its lines pointing at an old record points at its new one, then its entries are put back.
+  - Not kept:  it parses again, and what IT changed counts for the files after it.
+  - A file that declares something else (`changesMethods()`, `changesProperties()`, types, type lines) goes
+    through it too (`reparseDeclaring()`):
+    - rewinds to before the stubs, puts back every other file's stubs as they were (`stubMarks`, a run per kind
+      and file), stubs that file again from its new text, then keeps or re-parses each file in order
+    - its type stubs are the same records again where they say the same (`stubDeclaredTypes()`'s `reuse`):
+      what later lines point at stays
+    - not when its types are another file's too:  only the first file's stub stands, so it parses everything again
 - If an `update()` throws (a rule crashed committing a line), `IncrementalProject.isBroken`:
   the next update re-parses every file from scratch.
 - Cost, Solitaire, against a full parse of ~110ms (a smaller grammar, a quieter machine:  a warm parse today, "Rules and matching"):
@@ -2520,6 +2562,11 @@ sidebars any of them opens.
   - comment, blank line or top-level statement, anywhere:  ~1-2ms
   - declaration edit near the END:  ~1ms
   - declaration edit near the START of the first file:  ~110ms (~= a full parse)
+  - a member added, a kind or a phrase, in Card.spell (epic `language` P59):  ~45-75ms, was ~250-410ms:
+    Card.spell parses again whole, the files after it kept
+    - a member renamed that no later file reads (`picture`):  the same;  one they read (`short name`, `rank`):
+      those files parse again too
+    - in Pile.spell or Deck.spell:  ~30-75ms, was ~160-570ms (a busy machine, best of 3)
 - spell-app's [IncrementalProject.test.ts](../../../app/tests/spell/parserTests/IncrementalProject.test.ts) edits lines of every Solitaire
   file, on ONE project.
   - Over projects written inline:  spell-parser's own [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts).

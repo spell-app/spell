@@ -238,22 +238,31 @@ export class NewThing extends SpellStatement<
     for (const type of scopeType.chain()) {
       // the project's own types only:  a built-in type's record is shared by every project
       if (!type.declaredBy) continue
-      const previous = NAMES_GIVEN.get(type)
-      const kept = (previous ?? []).filter((given) => !P.TypeScope.sameStatement(given.statement, statement))
-      const next = [...kept, { name, statement }]
-      NAMES_GIVEN.set(type, next)
+      let previous = NAMES_GIVEN.get(type)
+      // redone, onto the names given as they are then (epic `language` P59):  see `P.JournalChange.redo`
+      const redo = () => {
+        previous = NAMES_GIVEN.get(type)
+        const kept = (previous ?? []).filter((given) => !P.TypeScope.sameStatement(given.statement, statement))
+        NAMES_GIVEN.set(type, [...kept, { name, statement }])
+      }
+      redo()
       statement.scope.parser?.journal?.record({
         undo: () => (previous ? NAMES_GIVEN.set(type, previous) : NAMES_GIVEN.delete(type)),
-        redo: () => NAMES_GIVEN.set(type, next)
+        redo,
+        change: { kind: "note", target: type, value: `${NAMED}${name}` }
       })
     }
   }
 
   /** How many statements the project has naming a thing of `type`, or a sub-type, `name` -- see `noteNameGiven()`. */
   static namesGiven(type: P.TypeScope, name: string): number {
+    P.ScopeList.outline?.lookedUp(type, `${NAMED}${name}`)
     return (NAMES_GIVEN.get(type) ?? []).filter((given) => given.name === name).length
   }
 }
 
 /** The names each type's things are given in so many words, and the statements giving them -- see `noteNameGiven()`. */
 const NAMES_GIVEN = new WeakMap<P.TypeScope, Array<{ name: string; statement: P.Match }>>()
+
+/** What an outline notes `namesGiven()` asked of a type, before the name:  see `P.Outline`. */
+const NAMED = "named:"
