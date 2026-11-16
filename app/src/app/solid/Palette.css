@@ -143,9 +143,11 @@
     gap: 8px;
   }
 
+  /* each name's icon close to its word, Spell UI's own distance (its icon margin, no gap on top);
+     the names 16px apart, so an icon reads as its own name's (epic `editor` I203, Owen:  "Same with these") */
   & ui-item.PaletteGroupName::part(item) {
-    gap: 5px;
-    padding-inline: 6px;
+    gap: 0;
+    padding-inline: 8px;
     color: var(--ui-text-muted);
     font-size: 13px;
     font-weight: var(--ui-font-weight-normal, 400);

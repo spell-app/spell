@@ -331,10 +331,12 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
- * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside its end
- * - "Discard" between them, a link in the theme's primary colour (Glass's purple), as text, 4px from Publish
- *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft";
- *   2026-11-16, T85:  "make `Discard` look like a link";  I192:  "Text + icon should be purple")
+ * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside the pill
+ * - "Discard" after it, a link in the theme's primary colour (Glass's purple), as text
+ *   (Owen, 2026-11-14, T67;  2026-11-16, T85:  "make `Discard` look like a link";  I192:  "Text + icon should be purple";
+ *   I203:  "Swap Publish and Discard buttons")
+ * - the three stand the bar's icon gap apart, edge to drawn edge, each icon close to its own word (Spell UI's own
+ *   distance):  at 8px "Discard"'s trash can sat closer to "Draft" than to its own word (I203)
  * - all three on one centre line (I192)
  */
 .ModeButtons > .PublishDraft {
@@ -342,11 +344,11 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   --spell-draft-inset: 2px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spell-bar-icon-gap, 12px);
   box-sizing: border-box;
   block-size: var(--spell-draft-height);
   margin-inline-start: var(--spell-bar-icon-gap, 12px);
-  padding: var(--spell-draft-inset) var(--spell-draft-inset) var(--spell-draft-inset) 11px;
+  padding: var(--spell-draft-inset) 11px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);
   box-shadow:
@@ -354,14 +356,13 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     inset 0 0 0 1px color-mix(in oklab, var(--ui-yellow-border) 32%, transparent);
   white-space: nowrap;
 
+  /* its pen close to "Draft":  Spell UI's own distance after an icon, no gap on top (I203) */
   & > .DraftState {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     font-weight: 500;
     color: var(--ui-yellow-header);
     --ui-icon-width: auto;
-    --ui-icon-distance: 0;
   }
   & > ui-button {
     --ui-button-radius: 999px;
@@ -381,9 +382,6 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   & > ui-button.DiscardDraft {
     --ui-color-text: var(--ui-primary-text);
     --ui-button-tertiary-padding: 0px;
-  }
-  & > ui-button.DiscardDraft + ui-button {
-    margin-inline-start: 4px;
   }
 }
 
