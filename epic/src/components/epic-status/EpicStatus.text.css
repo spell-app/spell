@@ -1,0 +1,22 @@
+/*
+ * `<epic-status>`'s PAGE sheet (`EpicStatus.tsx` registers it once, `page: true`):  the gaps between its text's
+ * paragraphs and list lines (epic `epic-engine` I311;  Owen, 2026-11-15:  "Put 4px of space between these paragraphs").
+ * - IN AN ITEM (`:state(line)`) its text runs on after the heading, every slotted block `display: inline`
+ *   (`EpicStatus.css`):  the first block of each slot keeps that;  each block after it starts a line of its own,
+ *   4px under the one before.
+ * - A list's lines, in either form, 4px apart.
+ * - Light DOM:  `::slotted()` takes one element, so it can't see a block's sibling, nor a list's lines.
+ */
+
+@layer ui.components.epic-status.page;
+
+@layer ui.components.epic-status.page {
+  epic-status:state(line) > [slot="summary"] + [slot="summary"],
+  epic-status:state(line) > :not([slot]) + :not([slot]) {
+    display: block;
+    margin-block: 4px 0;
+  }
+  epic-status li + li {
+    margin-block-start: 4px;
+  }
+}
