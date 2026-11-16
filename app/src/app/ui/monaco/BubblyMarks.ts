@@ -1,9 +1,9 @@
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
-import type { MarkupPartOfSpeech } from "spell/app/app/components/spell-code/BubblyMarkup"
+import { MarkupMarks, type BubblyInputShape, type MarkupShape } from "spell/app/app/ui/MarkupMarks"
+import { TextMarks, spacer, type Spacer, type Spacers } from "spell/app/app/ui/TextMarks"
 import type { monaco } from "./monaco"
-import { MarkupMarks, type MarkupShape, type TagRoom } from "./MarkupMarks"
-import { TextMarks, spacer, type Spacers } from "./TextMarks"
+import { MonacoMarks } from "./MonacoMarks"
 
 /****************
  * ### `BubblyMarks`
@@ -24,9 +24,9 @@ import { TextMarks, spacer, type Spacers } from "./TextMarks"
  *   - The dotted line's a shape, not a mark on the text:  a mark is cut at each piece, and its dots restarted there.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
- * - Its marks are made as every drawing's are:  `TextMarks`.
+ * - Its marks are worked out as every drawing's are, `TextMarks`, and made Monaco's by `MonacoMarks`.
  ****************/
-export class BubblyMarks extends TextMarks {
+export class BubblyMarks extends TextMarks<monaco.editor.IModelDeltaDecoration> {
   /**
    * `drawing`'s marks and shapes.
    * - `isView`:  is a tag in a drawing one of the project's own views?  Its pill is a thing's (`MarkupMarks.within()`).
@@ -56,7 +56,7 @@ export class BubblyMarks extends TextMarks {
     private readonly tabSize: number,
     private readonly isView?: (tag: string) => boolean
   ) {
-    super(drawing.text)
+    super(drawing.text, MonacoMarks.make)
     this.nodes(drawing.nodes, this.shapes)
   }
 
@@ -101,11 +101,18 @@ export class BubblyMarks extends TextMarks {
     let last = first
     while (nodes[last + 1] && nodes[last + 1]!.kind !== "block") last++
     const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
-    const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks, {
-      isView: this.isView,
-      declaringTags: this.drawing.declaringTags,
-      codes: lines.flatMap((line) => line.codes ?? [])
-    })
+    const tags = MarkupMarks.within(
+      this.drawing.text,
+      lines[0]!.start,
+      lines.at(-1)!.end,
+      MonacoMarks.make,
+      this.marks,
+      {
+        isView: this.isView,
+        declaringTags: this.drawing.declaringTags,
+        codes: lines.flatMap((line) => line.codes ?? [])
+      }
+    )
     this.tags.push(...tags.tags)
     into.push(...tags.shapes)
     for (const line of lines) this.line(line, into)
@@ -305,30 +312,8 @@ export type BubblyBlockShape = {
   inside: Array<BubblyShape | MarkupShape>
 }
 
-/** A pill under what a person typed (`bubbly-input`), or one of a list's values (`bubbly-choice`). */
-export type BubblyInputShape = {
-  kind: "input"
-  /** the mark on its words:  the spacer either side of them is injected there */
-  place: number
-  /** one of a list's values */
-  isChoice: boolean
-  /** its words were quoted:  its curly marks are drawn outside it */
-  isQuoted: boolean
-  /**
-   * a top-level head's bare name (`solitaire is an app`):  the head spacer is injected at its words too, before its
-   * own, so its pill starts past it (epic `language` I84)
-   */
-  afterHeadSpacer?: boolean
-  /** an HTML tag's value:  the tag's part of speech, whose hue its pill's edge takes, as on the page */
-  inTag?: MarkupPartOfSpeech
-  /**
-   * code, a `{…}` in a drawing's markup, worked out as it runs:  its pill inverted, a shade of its tag's colour
-   * (Owen), its braces at its ends (I162)
-   */
-  isExpression?: boolean
-  /** code right after a tag (`<text>{its size}`):  the room injected after that tag, which its pill starts past */
-  room?: TagRoom[]
-}
+/** A pill under what a person typed:  `MarkupMarks`' type, as an HTML value's is too. */
+export type { BubblyInputShape }
 
 /** The class of the spacer before a head's description, then its number:  `bubbly-description-3`. */
 export const DESCRIPTION = "bubbly-description-"
@@ -346,7 +331,7 @@ const BAND_COMMENT = "bubbly-band-comment"
  * A spacer before a head line's words:  `bubbly-head-spacer`, its width the sheet's (`--bubbly-pill-left-shift`).
  * - The caret stops only after it, by the tab or the word it's before.
  */
-const HEAD_SPACER: monaco.editor.InjectedTextOptions = {
+const HEAD_SPACER: Spacer = {
   content: " ",
   inlineClassName: "bubbly-spacer bubbly-head-spacer",
   cursorStops: 1

@@ -70,3 +70,9 @@ body {
     color: light-dark(#8a8996, #8e8c9a);
   }
 }
+
+/* a slice of the file under each editor, as the Inspector's Code card shows one */
+.CodeMirrorTestSides.Slices {
+  flex: 0 0 230px;
+  padding-top: 0;
+}

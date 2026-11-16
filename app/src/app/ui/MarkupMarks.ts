@@ -8,14 +8,14 @@ import {
   type MarkupPartOfSpeech,
   type MarkupStartTag
 } from "spell/app/app/components/spell-code/BubblyMarkup"
-import type { monaco } from "./monaco"
-import { TextMarks, spacer, type Spacers } from "./TextMarks"
-import type { BubblyInputShape } from "./BubblyMarks"
+import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
 
 /****************
  * ### `MarkupMarks`
- * What Monaco draws of an HTML file in the bubbly look (epic `language`), as the drawn-bubbly page draws it
+ * What an editor draws of an HTML file in the bubbly look (epic `language`), as the drawn-bubbly page draws it
  * (`BubblyMarkup`):  the MARKS on the text, and the SHAPES drawn under it.
+ * - Every editor's (epic `codemirror` P3):  the editor hands in its own step from a stretch to its mark
+ *   (`MarkMaker`), Monaco's `MonacoMarks.make` or CodeMirror's in `CodeMirrorMarkup`.
  * - From the same reading as the page's, `BubblyMarkup.treeOf()`, so both see the same elements:
  *   - an element with what's inside it on lines of its own:  a block, its start tag the band, an end tag that starts
  *     its line, named or `</>`, a TINY pill at the rail's turn, its letters tiny, its line only the pill's row tall
@@ -34,13 +34,14 @@ import type { BubblyInputShape } from "./BubblyMarks"
  *     are of its white (Owen, epic `editor` I144 C1);  a Spell drawing's `{…}` between its tags too
  *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
  *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
- * - Shapes are placed by `SpellBubbly`, from where Monaco draws each line and letter.
- * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
+ * - Shapes are drawn by the editor:  Monaco's `SpellBubbly` places them from where it draws each line and letter;
+ *   CodeMirror's `CodeMirrorMarkup` puts them on the text itself.
+ * - Pure data:  no editor in it, so it's tested without one.
  ****************/
-export class MarkupMarks extends TextMarks {
-  /** `source`'s marks and shapes:  an HTML file or fragment. */
-  static of(source: string): MarkupMarks {
-    return new MarkupMarks(source, { from: 0, to: source.length, isInSpell: false })
+export class MarkupMarks<Mark> extends TextMarks<Mark> {
+  /** `source`'s marks and shapes, each made by `make`:  an HTML file or fragment. */
+  static of<Mark>(source: string, make: MarkMaker<Mark>): MarkupMarks<Mark> {
+    return new MarkupMarks(source, make, { from: 0, to: source.length, isInSpell: false })
   }
 
   /**
@@ -52,14 +53,15 @@ export class MarkupMarks extends TextMarks {
    * - `codes`:  the lines' code, each `{…}` (`SP.BubblyLine.codes`):  one between tags an inverted pill, as a
    *   `{…}` value's is
    */
-  static within(
+  static within<Mark>(
     text: string,
     from: number,
     to: number,
-    marks: monaco.editor.IModelDeltaDecoration[],
+    make: MarkMaker<Mark>,
+    marks: Mark[],
     { isView = () => false, declaringTags = [], codes = [] }: MarkupWithin = {}
-  ): MarkupMarks {
-    return new MarkupMarks(text, { from, to, isInSpell: true, isView, declaringTags, codes }, marks)
+  ): MarkupMarks<Mark> {
+    return new MarkupMarks(text, make, { from, to, isInSpell: true, isView, declaringTags, codes }, marks)
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
@@ -88,6 +90,7 @@ export class MarkupMarks extends TextMarks {
 
   private constructor(
     source: string,
+    make: MarkMaker<Mark>,
     {
       from,
       to,
@@ -96,9 +99,9 @@ export class MarkupMarks extends TextMarks {
       declaringTags = [],
       codes = []
     }: { from: number; to: number; isInSpell: boolean } & MarkupWithin,
-    marks?: monaco.editor.IModelDeltaDecoration[]
+    marks?: Mark[]
   ) {
-    super(source, marks)
+    super(source, make, marks)
     this.isInSpell = isInSpell
     this.isView = isView
     this.declaringTags = new Set(declaringTags)
@@ -468,7 +471,7 @@ export class MarkupMarks extends TextMarks {
 // ## Types and helpers
 ////////////////
 
-/** A shape `SpellBubbly` draws under an HTML file's text. */
+/** A shape an editor draws under an HTML file's text:  Monaco's `SpellBubbly`, CodeMirror's `CodeMirrorMarkup`. */
 export type MarkupShape = MarkupBlockShape | MarkupTagShape | MarkupLinkShape | BubblyInputShape
 
 /** An element with what's inside it on lines of its own:  its band, gutter, body, and its end tag's band. */
@@ -545,6 +548,31 @@ export type MarkupWithin = {
   declaringTags?: readonly number[]
   /** the lines' code, each `{…}`:  `SP.BubblyLine.codes` */
   codes?: readonly SP.BubblyCode[]
+}
+
+/** A pill under what a person typed (`bubbly-input`), or one of a list's values (`bubbly-choice`);  an HTML value's too. */
+export type BubblyInputShape = {
+  kind: "input"
+  /** the mark on its words:  the spacer either side of them is injected there */
+  place: number
+  /** one of a list's values */
+  isChoice: boolean
+  /** its words were quoted:  its curly marks are drawn outside it */
+  isQuoted: boolean
+  /**
+   * a top-level head's bare name (`solitaire is an app`):  the head spacer is injected at its words too, before its
+   * own, so its pill starts past it (epic `language` I84)
+   */
+  afterHeadSpacer?: boolean
+  /** an HTML tag's value:  the tag's part of speech, whose hue its pill's edge takes, as on the page */
+  inTag?: MarkupPartOfSpeech
+  /**
+   * code, a `{…}` in a drawing's markup, worked out as it runs:  its pill inverted, a shade of its tag's colour
+   * (Owen), its braces at its ends (I162)
+   */
+  isExpression?: boolean
+  /** code right after a tag (`<text>{its size}`):  the room injected after that tag, which its pill starts past */
+  room?: TagRoom[]
 }
 
 /**

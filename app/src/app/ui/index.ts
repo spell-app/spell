@@ -11,6 +11,9 @@
  *   - `./AppTexts`:  the editor's words in the page's language;  its languages are lazy chunks, `AppTexts.<lang>.ts`
  *     - imported by path (`spell/app/app/ui/AppTexts`) by `editor.ts`, the panes and the web components
  *   - `./monaco`:  Monaco's plumbing (no UI), loaded on first use through `spell/app/app/solid`'s `LazyMonaco`
+ *   - `./codemirror`:  CodeMirror's, loaded on first use too
+ *   - `./CodeRules`, `./TextMarks`, `./MarkupMarks`:  what both editors share of the code's colours and the bubbly
+ *     look, imported by path by each editor's lazy plumbing
  *   - `syntax.css`:  the syntax colours, imported by the Solid viewers that use them
  */
 

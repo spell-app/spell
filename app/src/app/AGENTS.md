@@ -147,8 +147,9 @@ and in the app's build folder, `app/` at the app folder's root.
     - A `<CodeSlice>` (the Inspector's Code card) is drawn too (`SpellBubbly.showSlice()`, epic `editor` T72):
       only what's wholly in its lines, so the action whose body it shows draws no band or rail cut off at its edges.
     - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:
-      [MarkupMarks](ui/monaco/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
-      `.bubbly-html` too;  both kinds of marks are made by [TextMarks](ui/monaco/TextMarks.ts).
+      [MarkupMarks](ui/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
+      `.bubbly-html` too;  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no editor in
+      them, and made Monaco's decorations by [MonacoMarks](ui/monaco/MonacoMarks.ts) (epic `codemirror` P3)
   - Nine helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
     what each decides from the lines is the language service's `LSP.SpellTyping`, which the CodeMirror test page
     reads too (epic `codemirror` P1);  Monaco's file holds only its wiring
@@ -226,7 +227,20 @@ and in the app's build folder, `app/` at the app folder's root.
     (no line numbers, fold arrows over the code's padding), and CodeMirror's words, which are `AppTexts` keys (`cm...`),
     following `appTexts.lang`.
   - The language service's answers reach it through one converter, `LspToCodeMirror`, the twin of `LspToMonaco`.
-  - Its Solid editors are `CodeMirrorEditor` and `FileEditor`, in [their folder](solid/codemirror/), as Monaco's are.
+  - Its Solid editors are `CodeMirrorEditor`, `FileEditor` and `CodeSlice`, in [their folder](solid/codemirror/),
+    as Monaco's are.
+  - The whole bubbly look (P3), drawn on the text itself, no layer behind it:  the look's one sheet, `bubbly.css`, has
+    a CodeMirror section, and nothing of the look is in `codemirror.css`
+    - Spell:  [CodeMirrorBubbly](ui/codemirror/CodeMirrorBubbly.ts), from the same `SP.BubblyLayout` as Monaco's;
+      a head's description at its band's right end;  a drawing's tags as HTML's
+    - HTML, an HTML file's and a drawing's tags:  [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from the
+      editors' shared `MarkupMarks`, only the step from its stretches to CodeMirror's marks its own;  pointed ends
+    - the look off (`codeLook`, through `CodeMirrorLook`'s compartment):  Spell coloured by the parser's own tokens,
+      `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own
+    - ONE colour table for both editors, [CodeRules](ui/CodeRules.ts):  a role's `--ui-code-<role>` colour, Monaco's
+      rules and CodeMirror's highlight tags;  the compiled JavaScript, TypeScript and Python pane is coloured by it
+    - a slice of a file, `CodeSlice`:  `FileStates.showSlice()`, the file's own text in another view, its edits the
+      file's;  only what's wholly in its lines bubbly;  both sides of a diff bubbly
   - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
     and the test page, types aside:  it's to load lazily, as Monaco does.
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).

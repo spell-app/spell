@@ -14,8 +14,10 @@
  *     (`scripts/bubbly-page.ts`)
  *   - Monaco (epic `language` P50):  these same names;  where the editor draws a piece differently, its rule
  *     (`&.bubbly-monaco`) right after the page's, and what only the editor has in one section at the end
- *   - the CodeMirror test (epic `editor` P30, `.cmb-editor`):  the page's rules on real elements in its lines, but not
- *     the page's "laid out as the editor" section, which zooms and re-rows a page's drawing;  its own in `codemirror.css`
+ *   - CodeMirror (epic `editor` P30, epic `codemirror` P3, `.cmb-editor`):  the page's rules on real elements in its
+ *     lines, but not the page's "laid out as the editor" section, which zooms and re-rows a page's drawing;
+ *     Monaco's rules for HTML's tags in the text, and its own section at the end (bands, rails, feet and tags drawn on
+ *     the text itself);  `codemirror.css` holds only what's the editor's own (its popups, its gutter)
  *   - VS Code (P51), which can't load CSS:  its `--bubbly-` values as a table, `bubbly.values.json`
  *     (`scripts/bubbly-values.ts`)
  * - `bubbly-name`, the name a head defines (`"card"`), is Monaco's mark for what the page finds by its place
@@ -820,18 +822,18 @@
   /*
    * a `/>` and a `</>` drawn `|⟩` and `⟨|⟩`, the bar flush between its brackets:  one glyph (Owen, 2026-11-14);
    * every end tag's too, `</text>` drawn `⟨|text⟩` (Owen:  "show this as `<|`");
-   * the file keeps its `/`, drawn as a bar over it
+   * the file keeps its `/`, drawn as a bar over it;  an editor's own rules draw it in its lines (`.view-line`, `.cm-line`)
    */
-  .bubbly-slash:is(:has(+ .bubbly-angle-close), .bubbly-end-slash):where(:not(.view-line *)) {
+  .bubbly-slash:is(:has(+ .bubbly-angle-close), .bubbly-end-slash):where(:not(:is(.view-line, .cm-line) *)) {
     font-size: 0;
     transform: none;
   }
-  .bubbly-slash:is(:has(+ .bubbly-angle-close), .bubbly-end-slash):where(:not(.view-line *))::before {
+  .bubbly-slash:is(:has(+ .bubbly-angle-close), .bubbly-end-slash):where(:not(:is(.view-line, .cm-line) *))::before {
     content: "|";
     font-size: var(--bubbly-font-size);
     font-weight: 300;
   }
-  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(.view-line *)) + .bubbly-angle-close::before {
+  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(:is(.view-line, .cm-line) *)) + .bubbly-angle-close::before {
     margin-left: 0;
   }
 
@@ -1514,21 +1516,22 @@
 
   /*
    * HTML's tags in the editor (`MarkupMarks`):  an HTML file's, and a Spell file's drawing's
-   * - the text:  the brackets drawn over the file's own, spacers where the page has room
+   * - the text:  the brackets drawn over the file's own, spacers where the page has room;  Monaco's lines
+   *   (`.view-line`) and CodeMirror's (`.cm-line`, `.cmb-editor`) alike (epic `codemirror` P3)
    * - the shapes:  in an HTML file the editor's box is a `.bubbly-html`;  in a Spell file they're drawn in a box of
    *   HTML's in the layer (`bubbly-html-shapes`), so HTML's settings and rules reach them either way
    */
-  &.bubbly-monaco {
+  &:is(.bubbly-monaco, .cmb-editor) {
     /*
      * a tag's `<` and `>`:  the file's own keep their width, see-through, the page's `⟨` `⟩` drawn over them,
      * the open one at its left, the close one at its right
      */
-    .view-line .bubbly-angle {
+    :is(.view-line, .cm-line) .bubbly-angle {
       position: relative;
       font-size: inherit;
       color: transparent;
     }
-    .view-line .bubbly-angle::before {
+    :is(.view-line, .cm-line) .bubbly-angle::before {
       position: absolute;
       top: 0;
       left: 0;
@@ -1537,7 +1540,7 @@
       font-size: calc(var(--bubbly-font-size) * var(--bubbly-monaco-scale));
       line-height: normal;
     }
-    .view-line .bubbly-angle-close::before {
+    :is(.view-line, .cm-line) .bubbly-angle-close::before {
       left: auto;
       right: 0;
     }
@@ -1546,13 +1549,13 @@
      * every end tag's `/` too, `</text>` drawn `⟨|text⟩`
      * - the file's `/` kept, see-through, narrowed to the bar's width;  the bar drawn over its left edge
      */
-    .view-line .bubbly-mark.bubbly-slash:is(.bubbly-closing-slash, .bubbly-end-slash) {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-slash:is(.bubbly-closing-slash, .bubbly-end-slash) {
       position: relative;
       transform: none;
       color: transparent;
       letter-spacing: -0.16em;
     }
-    .view-line :is(.bubbly-closing-slash, .bubbly-end-slash)::before {
+    :is(.view-line, .cm-line) :is(.bubbly-closing-slash, .bubbly-end-slash)::before {
       content: "|";
       position: absolute;
       left: 0;
@@ -1561,21 +1564,21 @@
       letter-spacing: normal;
       color: var(--bubbly-band-mark);
     }
-    .view-line .bubbly-mark.bubbly-slash.bubbly-end-bare {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-slash.bubbly-end-bare {
       letter-spacing: -0.2em;
     }
-    .view-line .bubbly-end-slash::before {
+    :is(.view-line, .cm-line) .bubbly-end-slash::before {
       left: -0.08em;
       color: var(--bubbly-end-mark);
     }
-    .view-line .bubbly-end-slash.bubbly-foot-tiny::before {
+    :is(.view-line, .cm-line) .bubbly-end-slash.bubbly-foot-tiny::before {
       color: var(--bubbly-foot-tiny-ink);
     }
     /* a `</>` foot's bar:  its `⟩` close after it, as its `⟨` is before (Owen:  "tighten up the spacing after `|`") */
-    .view-line .bubbly-mark.bubbly-slash.bubbly-end-bare.bubbly-foot-tiny {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-slash.bubbly-end-bare.bubbly-foot-tiny {
       letter-spacing: -0.32em;
     }
-    .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
+    :is(.view-line, .cm-line) .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
       letter-spacing: -0.2em;
     }
     /*
@@ -1585,27 +1588,27 @@
      * - in `em`, so a block's tiny end tag narrows as much;  for the editor's font, whose `<` is 0.61em, `⟨` 0.37em
      * - the `/`'s `⟨` 0.5px from it, its `⟩` 1px, as on the page
      */
-    .view-line .bubbly-angle-open.bubbly-tag-end {
+    :is(.view-line, .cm-line) .bubbly-angle-open.bubbly-tag-end {
       letter-spacing: -0.21em;
     }
-    .view-line .bubbly-slash + .bubbly-angle-close {
+    :is(.view-line, .cm-line) .bubbly-slash + .bubbly-angle-close {
       letter-spacing: -0.18em;
     }
     /*
      * a named end tag, `⟨|text⟩`:  a little room after its bar, before its name;  its `>` as narrow as a `</>`'s,
      * so no room after its name either (Owen, 2026-11-14:  "No space at the end of this")
      */
-    .view-line .bubbly-mark.bubbly-slash.bubbly-end-slash:not(.bubbly-end-bare) {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-slash.bubbly-end-slash:not(.bubbly-end-bare) {
       letter-spacing: -0.06em;
     }
     /* ... a tiny foot's:  as much room, in its tiny letters */
-    .view-line .bubbly-mark.bubbly-slash.bubbly-end-slash.bubbly-foot-tiny:not(.bubbly-end-bare) {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-slash.bubbly-end-slash.bubbly-foot-tiny:not(.bubbly-end-bare) {
       letter-spacing: -0.2em;
     }
-    .view-line .bubbly-angle-close.bubbly-tag-end {
+    :is(.view-line, .cm-line) .bubbly-angle-close.bubbly-tag-end {
       letter-spacing: -0.18em;
     }
-    .view-line .bubbly-angle::before {
+    :is(.view-line, .cm-line) .bubbly-angle::before {
       letter-spacing: normal;
     }
     /*
@@ -1615,47 +1618,47 @@
     --bubbly-band-mark: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
     /* ... an end tag's a little fainter (Owen:  at 22%, and its name faded on top, it didn't read) */
     --bubbly-end-mark: color-mix(in srgb, var(--bubbly-ink) 28%, var(--bubbly-paper));
-    .view-line .bubbly-mark {
+    :is(.view-line, .cm-line) .bubbly-mark {
       color: var(--bubbly-band-mark);
     }
-    .view-line .bubbly-mark.bubbly-tag-end,
-    .view-line .bubbly-angle.bubbly-tag-end::before {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-tag-end,
+    :is(.view-line, .cm-line) .bubbly-angle.bubbly-tag-end::before {
       color: var(--bubbly-end-mark);
     }
     /* an attribute's `=` 10% darker, as on the page (I145) */
-    .view-line .bubbly-mark.bubbly-equals {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-equals {
       color: color-mix(in oklab, var(--bubbly-band-mark), black 10%);
     }
     /* a `{…}`'s braces darker, as on the page */
-    .view-line .bubbly-mark.bubbly-brace {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-brace {
       color: var(--bubbly-brace-ink);
     }
     /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
-    .view-line .bubbly-expression {
+    :is(.view-line, .cm-line) .bubbly-expression {
       --bubbly-ink: var(--bubbly-expression-ink);
       --bubbly-bold-ink: var(--bubbly-expression-ink);
     }
     /* ... but a bracket's own character, under the one drawn over it */
-    .view-line .bubbly-mark.bubbly-angle {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-angle {
       color: transparent;
     }
     /* no room on the text itself:  the caret would land off its letters;  spacers instead, below */
-    .view-line :is(.bubbly-equals, .bubbly-attribute-name) {
+    :is(.view-line, .cm-line) :is(.bubbly-equals, .bubbly-attribute-name) {
       margin: 0;
     }
     /* an end tag's name not bold, as the page's;  a block's in its marks' ink, not faded under it too */
-    .view-line .bubbly-tag-name.bubbly-tag-end {
+    :is(.view-line, .cm-line) .bubbly-tag-name.bubbly-tag-end {
       font-weight: 400;
       color: var(--bubbly-end-name-ink);
     }
-    .view-line .bubbly-mark.bubbly-tag-name.bubbly-tag-end {
+    :is(.view-line, .cm-line) .bubbly-mark.bubbly-tag-name.bubbly-tag-end {
       opacity: 1;
     }
     /*
      * a block's end tag on its own line:  its own letters tiny, in its tiny pill (Q61);  the caret still lands on
      * them, as Monaco measures where each letter is drawn
      */
-    .view-line .bubbly-foot-tiny {
+    :is(.view-line, .cm-line) .bubbly-foot-tiny {
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-monaco-scale));
       /*
        * in the middle of its line, as the pill is:  on the line's own baseline, small letters sat 2px low in it
@@ -1664,13 +1667,13 @@
        */
       vertical-align: top;
     }
-    .view-line .bubbly-angle.bubbly-foot-tiny::before {
+    :is(.view-line, .cm-line) .bubbly-angle.bubbly-foot-tiny::before {
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-monaco-scale));
     }
     /* not its `/`:  see-through under its bar */
-    .view-line .bubbly-foot-tiny.bubbly-mark:not(.bubbly-angle, .bubbly-slash),
-    .view-line .bubbly-foot-tiny.bubbly-tag-name,
-    .view-line .bubbly-angle.bubbly-foot-tiny::before {
+    :is(.view-line, .cm-line) .bubbly-foot-tiny.bubbly-mark:not(.bubbly-angle, .bubbly-slash),
+    :is(.view-line, .cm-line) .bubbly-foot-tiny.bubbly-tag-name,
+    :is(.view-line, .cm-line) .bubbly-angle.bubbly-foot-tiny::before {
       color: var(--bubbly-foot-tiny-ink);
       opacity: 1;
     }
@@ -1680,7 +1683,7 @@
      * - the letters stay in the file:  the caret, a selection and a copy still work on them, as Monaco measures where
      *   each is drawn
      */
-    .view-line .bubbly-tag-hidden {
+    :is(.view-line, .cm-line) .bubbly-tag-hidden {
       font-size: 0;
     }
 
@@ -1770,7 +1773,7 @@
   }
 
   /* an HTML file in the editor:  the box is a `.bubbly-html` too;  these undo what's the page's alone */
-  &.bubbly-monaco.bubbly-html {
+  &:is(.bubbly-monaco, .cmb-editor).bubbly-html {
     /* the box is the editor's, not the page's column of rows */
     display: block;
     /* a block's band a bracket's room before its words:  every band here is HTML's, so its rails are one indent apart */
@@ -1788,7 +1791,7 @@
    * "Push the `<` and `>` to the ends of the band.  Try it for the blocks as well.")
    * - after the page's settings, so these win;  told to the layer's box of HTML's shapes too, a `.bubbly` of its own
    */
-  &:is(.bubbly-monaco, .bubbly-html-shapes) {
+  &:is(.bubbly-monaco, .bubbly-html-shapes, .cmb-editor) {
     /* a bracket's ink this close to its point */
     --bubbly-bracket-pad: 0.5px;
     /* a block's start tag keeps its room before its `⟨`, its corner as before (Owen:  "put the spacing back") */
@@ -1814,6 +1817,291 @@
 
     .bubbly-tag-foot-bare-spacer {
       width: calc((var(--bubbly-foot-bare-pad-left) - var(--bubbly-tag-block-inset)) * var(--bubbly-monaco-scale));
+    }
+  }
+
+  /****** CodeMirror (epic `editor` P30;  epic `codemirror` P3):  the look drawn on the text itself ******/
+  /*
+   * - The editor's box is a `.bubbly` (`.cmb-editor`, `CodeMirrorBubbly`), so every setting and the page's rules
+   *   reach its marks, real elements in its lines;  NO layer behind the text, as Monaco has:
+   *   - a band, a pill:  the mark round its words, the page's padding its room;  the caret still lands on its letters,
+   *     as CodeMirror measures the lines as they're drawn
+   *   - a body's rail:  a stripe per enclosing block down each of its lines (`--cmb-rails`);  its foot a widget
+   *   - HTML's tags (`CodeMirrorMarkup`):  their pieces Monaco's, by the rules above, their pills and bands here
+   */
+  &.cmb-editor {
+    /* a tab stop:  how far a body's lines sit in from its band */
+    --cmb-indent: 24px;
+    /* room before a line's words:  a top-level band's round end, half a tab further left, still shows */
+    --cmb-line-pad: 22px;
+    /* a band starts this far left of its words, and its rail there */
+    --cmb-band-inset: 10px;
+    /* a rail's width, a foot's height */
+    --cmb-rail: 3px;
+    /* a line's height:  room for a band, with a little between two */
+    --cmb-line-height: 26px;
+
+    /* each part of speech's band over the paper, for the rails a line draws (the bands themselves are `--bubbly-pill`) */
+    --cmb-band-thing: light-dark(
+      color-mix(in srgb, var(--bubbly-thing) 20%, white),
+      color-mix(in srgb, var(--bubbly-thing) 34%, var(--bubbly-paper-dark))
+    );
+    --cmb-band-action: light-dark(
+      color-mix(in srgb, var(--bubbly-action) 20%, white),
+      color-mix(in srgb, var(--bubbly-action) 34%, var(--bubbly-paper-dark))
+    );
+    --cmb-band-property: light-dark(
+      color-mix(in srgb, var(--bubbly-property) 20%, white),
+      color-mix(in srgb, var(--bubbly-property) 34%, var(--bubbly-paper-dark))
+    );
+    --cmb-band-plain: light-dark(
+      color-mix(in srgb, var(--bubbly-plain) 20%, white),
+      color-mix(in srgb, var(--bubbly-plain) 34%, var(--bubbly-paper-dark))
+    );
+    --cmb-band-control: light-dark(
+      color-mix(in srgb, var(--bubbly-control) 20%, white),
+      color-mix(in srgb, var(--bubbly-control) 34%, var(--bubbly-paper-dark))
+    );
+    --cmb-band-structure: light-dark(
+      color-mix(in srgb, var(--bubbly-structure) 20%, white),
+      color-mix(in srgb, var(--bubbly-structure) 34%, var(--bubbly-paper-dark))
+    );
+    /* a space's width in the drawing's font:  an HTML file's rails start at its lines' indent of spaces */
+    --cmb-space: 0.25em;
+    /* the editor's font over the drawing's, for the shared rules of HTML's tags in the text (15px over 16px) */
+    --bubbly-monaco-scale: 0.9375;
+    /* a tag's pointed ends, an HTML file's and a Spell file's drawing's alike:  as on the page (`&.bubbly-html`) */
+    --bubbly-tag-slope: 0.62;
+    --bubbly-tag-point: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope));
+    --bubbly-tag-corner: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
+    /* how much of the box's width the gutter takes:  a band with a description reaches the box's right edge */
+    --cmb-gutter-width: 8px;
+    /* the box's width, `100cqw`, for those bands:  the editor's own, a merge view's side's too */
+    container-type: inline-size;
+
+    /* the drawing's box is the editor's:  its paper, no border, padding or margin of its own */
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    max-width: none;
+    overflow: hidden;
+    font-size: 15px;
+    line-height: var(--cmb-line-height);
+
+    .cm-scroller {
+      font-family: var(--bubbly-font-family);
+      line-height: var(--cmb-line-height);
+    }
+    .cm-content {
+      tab-size: var(--cmb-indent);
+      padding: 8px 0;
+      caret-color: var(--bubbly-bold-ink);
+    }
+    .cm-line {
+      padding: 0 16px 0 var(--cmb-line-pad);
+      /* the rails of the blocks it's inside:  one stripe each (`CodeMirrorBubbly`) */
+      background-image: var(--cmb-rails, none);
+    }
+    .cm-cursor {
+      border-left-color: var(--bubbly-bold-ink);
+    }
+
+    /*
+     * the selection over the text, see-through:  under it, the bands' and pills' own colours would hide it
+     * - Monaco's sheet does the same for its shapes (`--bubbly-selection-strength`)
+     */
+    .cm-selectionLayer {
+      z-index: 1 !important;
+      pointer-events: none;
+    }
+    .cm-selectionBackground,
+    &.cm-focused .cm-selectionBackground {
+      background: color-mix(in srgb, light-dark(#3d7bfd, #7aa7ff) 28%, transparent);
+    }
+
+    /****** a declaration's head:  its band ******/
+    .cmb-hue {
+      --bubbly-pill: light-dark(
+        color-mix(in srgb, var(--bubbly-hue) 20%, white),
+        color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark))
+      );
+      --bubbly-input: light-dark(
+        color-mix(in srgb, white var(--bubbly-input-opacity), transparent),
+        color-mix(
+          in srgb,
+          color-mix(in srgb, var(--bubbly-hue) 14%, var(--bubbly-input-dark)) var(--bubbly-input-opacity),
+          transparent
+        )
+      );
+      --bubbly-expression-pill: light-dark(
+        color-mix(in srgb, var(--bubbly-hue) 62%, #1f1f26),
+        color-mix(in srgb, var(--bubbly-hue) 45%, white)
+      );
+      --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
+    }
+    .bubbly-group.cmb-hue {
+      --bubbly-pill: light-dark(
+        color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
+        color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+      );
+    }
+    .cmb-band {
+      position: relative;
+      display: inline-block;
+      height: var(--bubbly-pill-height);
+      line-height: var(--bubbly-pill-height);
+      vertical-align: middle;
+      /* its words stay on their tab stop:  the band reaches left of them */
+      margin-left: calc(-1 * var(--cmb-band-inset));
+      padding: 0 var(--bubbly-pill-pad-right) 0 var(--cmb-band-inset);
+      border-radius: var(--bubbly-pill-radius);
+      background: var(--bubbly-pill);
+      white-space: pre;
+    }
+    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line */
+    .cmb-band-open {
+      border-bottom-left-radius: 0;
+    }
+    .cmb-band-open::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 100%;
+      width: var(--cmb-rail);
+      height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
+      background: var(--bubbly-pill);
+    }
+
+    /* a block's foot:  a short bar off its rail, on a thin line of its own */
+    .cmb-foot-row {
+      position: relative;
+      height: calc(var(--cmb-rail) + 4px);
+      background-image: var(--cmb-rails, none);
+    }
+    .cmb-foot {
+      position: absolute;
+      top: 0;
+      left: calc(var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) - var(--cmb-band-inset));
+      width: calc(var(--cmb-rail) * 6);
+      height: var(--cmb-rail);
+      border-radius: 0 var(--cmb-rail) var(--cmb-rail) var(--cmb-rail);
+      background: var(--bubbly-pill);
+    }
+
+    /****** a head's description, `-- A playing card`:  at its band's right end, the band to the box's edge (Owen) ******/
+
+    .cmb-band-described {
+      box-sizing: border-box;
+      width: calc(
+        100cqw - var(--cmb-gutter-width) - var(--cmb-line-pad) - var(--cmb-column, 0) * var(--cmb-indent) +
+          var(--cmb-band-inset) - 16px
+      );
+      max-width: none;
+      padding-right: 14px;
+    }
+    .cmb-description {
+      float: right;
+    }
+
+    /****** HTML's tags (`CodeMirrorMarkup`):  pills and bands, their ends pointed, as the page draws them ******/
+    /* an HTML file's box:  CodeMirror's own column, its scroller the box's width, not the page's rows' */
+    &.bubbly-html {
+      display: flex;
+      align-items: stretch;
+      /* its rows as tall as Monaco's, as the page's (`--bubbly-html-row`) */
+      --cmb-line-height: var(--bubbly-html-row);
+    }
+    .cmb-tag-pill,
+    .cmb-tag-band,
+    .cmb-tag-foot {
+      display: inline-block;
+      box-sizing: border-box;
+      height: var(--bubbly-pill-height);
+      line-height: var(--bubbly-pill-height);
+      vertical-align: middle;
+      padding-inline: var(--bubbly-bracket-pad);
+      background: var(--bubbly-pill);
+      border-radius: var(--bubbly-tag-corner);
+      corner-shape: bevel;
+      white-space: pre;
+    }
+    /* a tag that declares the member it draws:  round (epic `editor` I84) */
+    .cmb-tag-round {
+      border-radius: calc(var(--bubbly-pill-height) / 2);
+      corner-shape: round;
+    }
+    /* a block's start tag:  its band from its rail's left edge, its words clear of its cut corner */
+    .cmb-tag-band.cmb-band-open {
+      margin-left: calc(-1 * var(--cmb-band-inset));
+      padding-left: var(--cmb-band-inset);
+      padding-right: var(--bubbly-tag-pad-left);
+      border-bottom-left-radius: 0;
+    }
+    .cmb-tag-band.cmb-band-open::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 100%;
+      width: var(--cmb-rail);
+      height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
+      background: var(--bubbly-pill);
+    }
+    .cmb-tag-band.cmb-band-open {
+      position: relative;
+    }
+    /* a block's end tag on its own line:  a tiny pill at its rail's turn, its letters tiny (Q61) */
+    .cmb-tag-foot {
+      height: var(--bubbly-foot-tiny-height);
+      line-height: var(--bubbly-foot-tiny-height);
+      margin-left: calc(-1 * var(--cmb-band-inset));
+      padding: 0 var(--bubbly-foot-tiny-pad-right) 0 var(--cmb-band-inset);
+      border-radius: 0 var(--bubbly-foot-tiny-height) var(--bubbly-foot-tiny-height) 0 / 0
+        calc(var(--bubbly-foot-tiny-height) / 2) calc(var(--bubbly-foot-tiny-height) / 2) 0;
+      font-size: var(--bubbly-foot-tiny-font);
+    }
+    /* a one-line element with something between its tags:  a line along the top and bottom between them (Q58) */
+    .cmb-tag-link {
+      background:
+        linear-gradient(var(--bubbly-pill) 0 0) top / 100% var(--bubbly-tag-link-width) no-repeat,
+        linear-gradient(var(--bubbly-pill) 0 0) bottom / 100% var(--bubbly-tag-link-width) no-repeat;
+      padding-block: calc((var(--bubbly-pill-height) - 1lh) / 2);
+    }
+    /* spacers, injected beside HTML's tags (`CodeMirrorMarkup`):  their widths the shared rules' */
+    .bubbly-spacer {
+      display: inline-block;
+    }
+    /*
+     * a tag's quoted value's marks, as Monaco draws them (`&.bubbly-monaco`, above):  the file's `"` keeps its width,
+     * its curly mark drawn over it;  a Spell pill's own quoted marks are the page's
+     */
+    .cm-line .bubbly-tag-quote {
+      position: relative;
+      display: inline;
+    }
+    .cm-line .bubbly-tag-quote::after {
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      top: 0;
+      line-height: inherit;
+      translate: -50% 0;
+      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-monaco-scale));
+    }
+    .cm-line .bubbly-tag-quote.bubbly-quote-open::after {
+      translate: -75% -0.3em;
+    }
+    .cm-line .bubbly-tag-quote.bubbly-quote-close::after {
+      top: 0.25em;
+      translate: -85% 0;
+    }
+    .bubbly-tag-quote {
+      --bubbly-quote-rotation: 30deg;
+    }
+    /* ... but either side of an input, a tag's value:  the pill's own padding is its room here */
+    :is(.bubbly-input-spacer, .bubbly-code-spacer, .bubbly-quote-spacer) {
+      width: 0;
     }
   }
 }
