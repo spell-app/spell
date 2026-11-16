@@ -1626,18 +1626,25 @@
      *   (`CodeMirrorMarkup.tabStops`);  a guess till then
      */
     --cmb-indent: 8.44px;
+    /* room before a line's words:  a top-level band's round end 12px in, clear of the fold arrows over the first 8px */
+    --cmb-line-pad: calc(12px + var(--cmb-band-inset));
+    /* where a band starts from its line's indent:  its room before its words further out */
+    --cmb-band-left: calc(-1 * var(--cmb-band-inset));
     /*
-     * room before a line's words:  a top-level band's round end 12px in, clear of the fold arrows over the first 8px;
-     * so a top-level line's words start `--cmb-band-left` before that
+     * room between a rail and its body's lines:  from its right edge to where each line starts, a plain line's first
+     * letter, a tag's pointed end (Owen, epic `language` I136:  "Gap wins")
      */
-    --cmb-line-pad: calc(12px - var(--cmb-band-left));
+    --cmb-rail-gap: 3px;
     /*
-     * where a band starts, and its rail, from its line's indent:  half a rail before its body's lines start, so the
-     * caret at the start of a body line stands in the middle of the rail it hangs on (Owen:  "slide the expanded pills
-     * over so the cursor is right in the center of the gutter line";  epic `language` I131)
-     * - a body's words, and its tags' `⟨`s (`.cmb-tag-start`), start right at the line's indent
+     * where a block's rail starts from its band's line's indent:  `--cmb-rail-gap` and a rail before its body's lines
+     * start, so nothing on them touches it;  the caret at a body line's start stands just right of it
+     * - its words and its bands stay where they were before I131 (Owen, I136:  "Fix the gutters so all text and tags
+     *   are inset as they were before"):  the rail drops from under its band, a little in from its round end
+     * - its feet and inside corners start from it too
      */
-    --cmb-band-left: calc(var(--cmb-indent) - var(--cmb-rail) / 2);
+    --cmb-rail-left: calc(var(--cmb-indent) - var(--cmb-rail-gap) - var(--cmb-rail));
+    /* ... from its band's left edge */
+    --cmb-rail-in: calc(var(--cmb-rail-left) - var(--cmb-band-left));
 
     /*
      * the room on a band before its words, less a tab:  the page's, at the editor's size (2.81px)
@@ -1723,21 +1730,13 @@
       background-repeat: no-repeat;
     }
     /*
-     * a line in no block, with no band of its own (a top-level comment, an Inspector's box of a body alone):
-     * its words just in from where a top-level band's round end is, as before the rails moved under the caret (I131),
-     * not out at the edge of the box
-     */
-    .cm-line:not([style*="--cmb-rails"]):not(:has(.cmb-band, .cmb-tag-band.cmb-band-open)) {
-      padding-left: calc(var(--cmb-line-pad) + var(--cmb-band-left) + var(--cmb-band-inset));
-    }
-    /*
      * a group's own lines, its notes (`// Each kind of pile ...`):  their words where its members' are, on their bands
      * (Owen, epic `language` I134)
      * - a group's members are written at its own indent, so its notes are too:  drawn there, they stood on its rail,
      *   a band's room out from the members under it
      */
     .cm-line.cmb-group-line {
-      padding-left: calc(var(--cmb-line-pad) + var(--cmb-band-left) + var(--cmb-band-inset) + var(--cmb-indent));
+      padding-left: calc(var(--cmb-line-pad) + var(--cmb-indent));
     }
     /*
      * a band's words, a tag's, and those between a one-line element's tags:  a pixel up off their band's own line,
@@ -1848,7 +1847,7 @@
        */
       vertical-align: top;
       margin-top: var(--cmb-band-margin);
-      /* its round end where its body's lines start, less half a rail, its rail there;  its words a tab further in */
+      /* its round end left of its line's indent;  its words a tab in, over its body's lines */
       margin-left: var(--cmb-band-left);
       padding: 0 var(--bubbly-pill-pad-right) calc(2 * var(--cmb-words-lift))
         calc(var(--cmb-band-inset) + var(--cmb-indent));
@@ -1861,20 +1860,20 @@
       margin-left: calc(var(--cmb-band-left) - var(--cmb-indent));
       padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
     }
-    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line, round its inside corner */
-
-    .cmb-band-open {
-      border-bottom-left-radius: 0;
-    }
+    /*
+     * a band with a body:  its rail dropping from under it to the next line, a little in from its round end, clear of
+     * its body's lines (I136), round its inside corner
+     * - from 3px up in the band:  the round end's curve is still that little above its bottom there (1.5px)
+     */
     .cmb-band-open::after {
       content: "";
       position: absolute;
-      left: 0;
-      top: 100%;
+      left: var(--cmb-rail-in);
+      top: calc(100% - 3px);
       width: var(--cmb-rail);
       /* ... through the rows a description takes under it (`.cmb-head-description-below`) */
       height: calc(
-        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px + var(--cmb-description-rows, 0) *
+        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 4px + var(--cmb-description-rows, 0) *
           var(--cmb-line-height)
       );
       background: var(--bubbly-pill);
@@ -1889,7 +1888,7 @@
     .cmb-band-open:not(.cmb-tag-band)::before {
       content: "";
       position: absolute;
-      left: var(--cmb-rail);
+      left: calc(var(--cmb-rail-in) + var(--cmb-rail));
       top: 100%;
       z-index: -1;
       width: var(--cmb-inner-top);
@@ -1964,7 +1963,7 @@
       position: absolute;
       top: var(--cmb-foot-drop);
       left: calc(
-        var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) + var(--cmb-band-left) + var(--cmb-foot-corner)
+        var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) + var(--cmb-rail-left) + var(--cmb-foot-corner)
       );
       width: calc(var(--bubbly-foot-width) * var(--bubbly-editor-scale) - var(--cmb-foot-corner));
       height: var(--cmb-rail);
@@ -2097,21 +2096,14 @@
       white-space: pre;
     }
     /*
-     * a start tag's `⟨` right at its pill's left end, so the caret before it, at a body line's start, stands where its
-     * rail is (epic `language` I131;  it was a bracket's 0.5px in)
-     */
-    .cmb-tag-start {
-      padding-left: 0;
-    }
-    /*
      * a start tag over several lines, its attributes on lines of their own, as Enter lays a long one out (epic
      * `language` I133):  ONE block of its colour round them all (I135;  Owen:  "show in a block pill"), a row on each
      * line (`.cmb-tag-block`, `CodeMirrorMarkup.tagOn()`)
      * - each row from the block's left edge, its band's, to its right edge, its widest row's:  how far it reaches past
      *   its words, `--cmb-reach-before` and `--cmb-reach-after`, measured once it's drawn (`CodeMirrorMarkup.tagBlocks`)
      * - the rows fill their lines, so the block is whole from its first line's band to its last's
-     * - its corners cut as a tag's ends are:  top left and right, bottom right, where its `>` is;  bottom left too, or
-     *   square with its rail dropping from it when it has a body
+     * - its corners cut as a tag's ends are:  top left and right, bottom right, where its `>` is, and bottom left;
+     *   with a body, its rail dropping from under it (I136)
      */
     .cmb-tag-block {
       height: calc(var(--bubbly-pill-height) + var(--cmb-band-margin));
@@ -2154,18 +2146,16 @@
     .cmb-tag-point {
       margin-left: calc(var(--cmb-tag-room) + var(--cmb-reach-after));
     }
-    /* ... a block with a body:  square bottom-left, its rail dropping from it, as a block's band (below) */
-    .cmb-tag-block-opens {
-      border-bottom-left-radius: 0;
-    }
+    /* ... a block with a body:  its rail dropping from under it, as a block's band (below) */
     .cmb-tag-block-opens::after {
       content: "";
       position: absolute;
-      left: 0;
-      top: 100%;
+      left: var(--cmb-rail-in);
+      /* from 3px up in the band:  its pointed end's cut is still that little above its bottom there (2.3px) */
+      top: calc(100% - 3px);
       z-index: -1;
       width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
-      height: var(--cmb-tag-inner-down);
+      height: calc(var(--cmb-tag-inner-down) + 3px);
       background: var(--bubbly-pill);
       clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
@@ -2175,27 +2165,27 @@
       corner-shape: round;
     }
     /*
-     * a block's start tag:  its band from its rail's left edge, its `⟨` clear of its cut corner, as the page's;
+     * a block's start tag:  its band where a Spell band starts, its `⟨` clear of its cut corner, as the page's;
      * its `⟩` in its point, as every tag's (it had a bracket's room more there, the point past it;  I114)
      */
     .cmb-tag-band.cmb-band-open {
       position: relative;
       margin-left: var(--cmb-band-left);
       padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
-      border-bottom-left-radius: 0;
     }
     /*
-     * ... its rail dropping from it, its corner with its body cut, as Monaco's:  under the text, into the line below
-     * (`z-index`), the rows' own rails carrying on from it
+     * ... its rail dropping from under it, clear of its body's lines (I136), its corner with its body cut, as
+     * Monaco's:  under the text, into the line below (`z-index`), the rows' own rails carrying on from it
      */
     .cmb-tag-band.cmb-band-open::after {
       content: "";
       position: absolute;
-      left: 0;
-      top: 100%;
+      left: var(--cmb-rail-in);
+      /* from 3px up in the band:  its pointed end's cut is still that little above its bottom there (2.3px) */
+      top: calc(100% - 3px);
       z-index: -1;
       width: calc(var(--cmb-rail) + var(--cmb-tag-inner-across));
-      height: var(--cmb-tag-inner-down);
+      height: calc(var(--cmb-tag-inner-down) + 3px);
       background: var(--bubbly-pill);
       clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
@@ -2210,7 +2200,8 @@
       /* its `⟨` just past its rail, as Monaco's */
       padding: 0 var(--bubbly-foot-tiny-pad-right) 0 calc(var(--bubbly-foot-tiny-pad-left) * var(--bubbly-editor-scale));
       margin-top: calc((var(--cmb-line-height) - var(--cmb-foot-tiny-height)) / 2);
-      margin-left: var(--cmb-band-left);
+      /* at its rail */
+      margin-left: var(--cmb-rail-left);
       border-radius: 0 calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--bubbly-foot-tiny-cut) * var(--bubbly-editor-scale)) / 0 calc(var(--cmb-foot-tiny-height) / 2)
@@ -2239,36 +2230,35 @@
 
     /*
      * a run of HTML end tags alone on their lines, `</>` closing `<toolbar>` then `</>` closing `<segment>`:  ONE row,
-     * a foot for each (`CodeMirrorDecorations.feetRow()`;  Owen, 2026-11-16, epic `language` I132)
-     * - each foot:  its block's rail turning out at a tag's slant, as thick as the rail, then a short bar, then the end
-     *   tag itself, small, in a pill pointed at both ends as a tag in a line is
-     * - nested as Spell's feet (I125):  each one round the one before it, a step below it and a rail further left
-     * - the row on whole pixels, so every line under it starts on one (I114)
+     * a foot for each, side by side (`CodeMirrorDecorations.feetRow()`;  Owen, 2026-11-16, epic `language` I132:
+     * "put multiple ending tags on one line")
+     * - each foot:  its block's rail turning out at a tag's slant, as thick as the rail, then a bar, then the end tag
+     *   itself, small, in a pill pointed at both ends as a tag in a line is
+     * - every bar on one level:  the innermost end tag first, a short bar from its rail;  each one round it further
+     *   along, its bar running on behind the end tags before it, so they sit on it
+     * - the row one foot tall, on whole pixels, so every line under it starts on one (I114)
+     * - its rails from where the rails are (`--cmb-rail-left`), as every rail's
      */
     /* how far down the rail turns, before its slant;  the slant's height;  the bar after it */
     --cmb-feet-top: 3px;
     --cmb-feet-turn: 6px;
     --cmb-feet-bar: 12px;
-    /* each foot this far below the one before it:  its pill's height and a little paper */
-    --cmb-feet-step: calc(var(--cmb-foot-tiny-height) + 3px);
-    /* paper under the last pill */
+    /* between one end tag and the next along the bar */
+    --cmb-feet-gap: 6px;
+    /* paper under the pills */
     --cmb-feet-bottom: 4px;
     /*
-     * - each end tag a block of its own in the row, a step under the one before it:  so CodeMirror, finding the place
-     *   under the pointer from top to bottom, finds each one (placed over the row, the one further left but later in
-     *   the file, a click on the first landed after the second)
-     * - what else is in the row (its indent, CodeMirror's marks beside widgets) takes no room:  no letters of its own
+     * - its end tags in a line, in the file's order, left to right:  so CodeMirror finds each under the pointer
+     * - what else is in the row (its indent, CodeMirror's marks beside widgets) takes no room:  no letters of its own,
+     *   tabs no wider than spaces
+     * - its own layer, so its feet's bars are drawn under its end tags, over its paper
      */
     .cm-line.cmb-feet-row {
+      position: relative;
+      isolation: isolate;
       /* on whole pixels:  `--cmb-feet-top` is one, so the rest is too */
       height: calc(
-        round(
-            calc(
-              var(--cmb-feet-top) + (var(--cmb-feet) - 1) * var(--cmb-feet-step) + var(--cmb-foot-tiny-height) +
-                var(--cmb-feet-bottom)
-            ),
-            1px
-          ) -
+        round(calc(var(--cmb-feet-top) + var(--cmb-foot-tiny-height) + var(--cmb-feet-bottom)), 1px) -
           var(--cmb-feet-top)
       );
       /* its padding on top of its height:  room under it (below) adds to the row */
@@ -2276,6 +2266,17 @@
       padding-top: var(--cmb-feet-top);
       font-size: 0;
       line-height: 0;
+      tab-size: 0;
+    }
+    /*
+     * ... what's between its end tags (CodeMirror's marks beside widgets, a hidden line break, a foot's room):
+     * as tall as the end tags, level with them, so CodeMirror, finding the place under the pointer along the row,
+     * takes them as beside the end tags, not above them (a click on the first landed in the second)
+     */
+    .cm-line.cmb-feet-row > :is(.cm-widgetBuffer, .cmb-feet-join, .bubbly-spacer) {
+      display: inline-block;
+      height: var(--cmb-foot-tiny-height);
+      vertical-align: top;
     }
     /* ... right above a band:  room under it, so the two blocks stand apart (T141), as under a Spell foot */
     .cm-line.cmb-feet-row.cmb-feet-above-band {
@@ -2284,17 +2285,26 @@
     .cm-line.cmb-feet-row .cmb-tag-foot {
       /* its tip at its slant, as an inline tag's:  as slanted as a tag's, for its height */
       --cmb-feet-point: calc(var(--cmb-foot-tiny-height) / 2 * var(--bubbly-tag-slope));
+      /* its rail's left edge, from the row's */
+      --cmb-feet-rail: calc(
+        var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) + var(--cmb-spaces) * var(--cmb-space) +
+          var(--cmb-rail-left, var(--cmb-band-left))
+      );
       /* from its rail's left edge to its tip:  the rail, the slant across, the bar */
       --cmb-feet-reach: calc(var(--cmb-rail) + var(--cmb-feet-turn) * var(--bubbly-tag-slope) + var(--cmb-feet-bar));
-      /* its top:  its step down the row */
-      --cmb-feet-pill-top: calc(var(--cmb-feet-top) + var(--cmb-foot-level) * var(--cmb-feet-step));
-      display: block;
-      width: fit-content;
-      margin: calc(min(var(--cmb-foot-level), 1) * (var(--cmb-feet-step) - var(--cmb-foot-tiny-height))) 0 0
+      /* where its bar ends, its tip:  its feet's bars reach it (`::before`) */
+      anchor-name: --cmb-foot;
+      anchor-scope: --cmb-foot;
+      position: static;
+      vertical-align: top;
+      /* the first, the innermost (`--cmb-foot-level` 0):  its bar's length from its rail;  each after it, a gap on */
+      --cmb-feet-after: min(var(--cmb-foot-level), 1);
+      margin: 0 0 0
         calc(
-          var(--cmb-column) * var(--cmb-indent) + var(--cmb-spaces) * var(--cmb-space) + var(--cmb-band-left) +
-            var(--cmb-feet-reach)
+          (1 - var(--cmb-feet-after)) * (var(--cmb-feet-rail) - var(--cmb-line-pad) + var(--cmb-feet-reach)) +
+            var(--cmb-feet-after) * var(--cmb-feet-gap)
         );
+      /* as much room after its `⟩` as before its `⟨`, tip to ink:  4.22px and 4.28px on `</>` (measured) */
       padding: 0 calc(var(--cmb-feet-point) + 1px);
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-editor-scale));
       border-radius: var(--cmb-feet-point) / calc(var(--cmb-foot-tiny-height) / 2);
@@ -2305,7 +2315,8 @@
     }
     /*
      * ... its rail, from the row's top, turning at the slant into the bar, the bar on to its tip:  one stroke, the rail's
-     * thickness all along, cut square at its joins (`--cmb-feet-across`:  the slant's width across, cut level)
+     * thickness all along, cut square at its joins (`--cmb-feet-across`:  the slant's width across, cut level);
+     * under the end tags it runs behind
      */
     .cm-line.cmb-feet-row .cmb-tag-foot::before {
       --r: var(--cmb-rail);
@@ -2313,14 +2324,14 @@
       --h: var(--cmb-feet-turn);
       --cmb-feet-across: calc(var(--r) * sqrt(1 + var(--slope) * var(--slope)));
       --e: calc((var(--cmb-feet-across) - var(--r)) / 2);
-      left: auto;
-      right: calc(100% - var(--cmb-feet-point));
+      left: var(--cmb-feet-rail);
+      right: calc(anchor(--cmb-foot left) - var(--cmb-feet-point));
       /* a pixel up into the line above, over its rail's end:  no seam where they meet at a fractional y */
-      top: calc(-1 * var(--cmb-feet-pill-top) - 1px);
+      top: -1px;
       bottom: auto;
-      z-index: auto;
-      width: calc(var(--cmb-feet-reach) + var(--cmb-feet-point));
-      height: calc(var(--cmb-feet-pill-top) + 1px + var(--cmb-foot-tiny-height) / 2 + var(--r) / 2);
+      z-index: -1;
+      width: auto;
+      height: calc(var(--cmb-feet-top) + 1px + var(--cmb-foot-tiny-height) / 2 + var(--r) / 2);
       clip-path: polygon(
         0 0,
         var(--r) 0,
