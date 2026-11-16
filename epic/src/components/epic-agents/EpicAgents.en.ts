@@ -28,11 +28,12 @@ export const epicAgentsVocabulary = {
     {
       name: "draws",
       kind: "enum",
-      values: ["doing", "spinner", "agents"],
+      values: ["doing", "spinner", "words", "agents"],
       description:
         "Which part it draws:  `doing` (the session's line, a grey pill with a spinner and its words), `spinner` (the " +
         "same line as a bare spinner, its words the tooltip:  beside an epic page header's Send, epic `epic-engine` " +
-        "P53;  hidden while the session answers a Send, whose own ring turns then, P55) or `agents` (the agents' button, in the header's pill:  Owen, 2026-10-25);  none:  the line and the " +
+        "P53;  hidden while the session answers a Send, whose own ring turns then, P55), `words` (that line's words " +
+        "alone, no spinner:  the header's step label turns for it instead, I316) or `agents` (the agents' button, in the header's pill:  Owen, 2026-10-25);  none:  the line and the " +
         "agents both."
     }
   ],
@@ -54,7 +55,7 @@ export const epicAgentsVocabulary = {
   ],
   states: [
     { name: "running", description: "Agents are running:  its button shows." },
-    { name: "doing", description: "The session's line shows (`doing` or `spinner`):  the session is at work." }
+    { name: "doing", description: "The session's line shows (`doing`, `spinner` or `words`):  the session is at work." }
   ],
   texts: [
     { key: "doingTip", text: "{doing}:", description: "The line's tooltip, its head:  what Claude is doing." },

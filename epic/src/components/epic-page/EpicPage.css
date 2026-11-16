@@ -321,6 +321,14 @@
     --epic-agents-radius: 0 999px 999px 0;
     --epic-agents-border-start: 0;
   }
+  /*
+   * a phase building (I316):  the label's icon is Spell UI's loading circle, turning;  its own width and right margin
+   * undone, so it takes the still icon's box exactly (it was 12px wider, the pill with it)
+   */
+  .step-pill ui-icon[slot="icon"]::part(icon) {
+    width: auto;
+    margin: 0;
+  }
   /* a label as tall as the git toggle, its icon and text on the row's middle */
   .status ui-label::part(label) {
     box-sizing: border-box;

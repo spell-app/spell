@@ -1220,7 +1220,7 @@ async function adoptAgents(routes: FakeAgents, { served = true } = {}) {
  * The shadow root of `host`'s `<epic-agents>` drawing `draws`:  the agents' button in the header's pill, or the
  * session's spinner beside Send (P53).
  */
-function agentsRoot(host: Element, draws: "agents" | "spinner" = "agents"): ShadowRoot {
+function agentsRoot(host: Element, draws: "agents" | "spinner" | "words" = "agents"): ShadowRoot {
   return host.shadowRoot!.querySelector(`epic-agents[draws="${draws}"]`)!.shadowRoot!
 }
 
@@ -1414,7 +1414,8 @@ describe("<epic-page> what Claude is doing", () => {
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
     routes.inbox.doing = { text: "Building P53", at: new Date().toISOString() }
     const client = await adoptClient(routes)
-    const host = await render(page("", ["active"]))
+    // no phase under way:  the step label names the next, so the line keeps its own spinner (I316)
+    const host = await render(page("", ["todo"]))
     const line = () => agentsRoot(host, "spinner").querySelector<HTMLElement>("[part~='doing']")
     await vi.waitFor(() => expect(line()).not.toBeNull())
     // no pill, no words:  the spinner alone, its words the tooltip
@@ -1450,6 +1451,48 @@ describe("<epic-page> what Claude is doing", () => {
     await ElementFixture.tick()
     expect(line()).toBeNull()
     expect(send().hasAttribute("working")).toBe(false)
+  })
+
+  // I316 (Owen, 2026-11-16):  "Don't need both of these indicators.  Just make the one in the pill a loading spinner"
+  test("a phase building:  the step label's icon turns, Spell UI's loading circle;  the line beside Send keeps only its words", async () => {
+    const routes = new FakeRoutes()
+    routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
+    routes.inbox.doing = { text: "Building P2", at: new Date().toISOString() }
+    const client = await adoptClient(routes)
+    const host = await render(page("", ["done", "active"]))
+    const label = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="step-pill"] ui-label')!
+    const turning = () => label().querySelector<HTMLElement>('ui-icon[slot="icon"]')
+    const line = () => host.shadowRoot!.querySelector('[part~="centre"] epic-agents')!
+    await vi.waitFor(() => expect(turning()).not.toBeNull())
+    expect([turning()!.getAttribute("name"), turning()!.hasAttribute("loading"), label().hasAttribute("icon")]).toEqual(
+      ["circle notch", true, false]
+    )
+    expect(step(host)?.words).toBe("P2")
+    // its words alone:  no second spinner
+    expect(line().getAttribute("draws")).toBe("words")
+    const doing = () => agentsRoot(host, "words").querySelector<HTMLElement>("[part~='doing']")
+    await vi.waitFor(() => expect(doing()?.textContent).toBe("Building P2"))
+    expect(doing()!.querySelector(".spinner")).toBeNull()
+    // answering a Send:  Send's ring turns, the step label stands still, its icon back
+    routes.inbox.doing = { text: "Responding", items: [{ id: "q1", title: "Which?" }], at: new Date().toISOString() }
+    await client.refresh()
+    await ElementFixture.tick()
+    expect([turning(), label().getAttribute("icon"), line().getAttribute("draws")]).toEqual([
+      null,
+      "circle notch",
+      "spinner"
+    ])
+    // idle, but Claude at work on the phase itself (`epic inbox working demo#P2 on`):  it turns again
+    routes.inbox.doing = null
+    routes.inbox.working = { p2: { action: "details", since: new Date().toISOString() } }
+    await client.refresh()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(turning()).not.toBeNull())
+    routes.inbox.working = {}
+    await client.refresh()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(turning()).toBeNull())
+    expect(label().getAttribute("icon")).toBe("circle notch")
   })
 })
 

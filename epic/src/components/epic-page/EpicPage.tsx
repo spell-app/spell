@@ -436,6 +436,22 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }
   })
 
+  /**
+   * Does the step label's icon TURN?  While it names a phase under way, and that phase is building
+   * (epic `epic-engine` I316;  Owen, 2026-11-16:  "Don't need both of these indicators.  Just make the one in the pill
+   * a loading spinner"):
+   * - the session is at work on something other than a Send (`epic inbox status`:  "Building P26"), whose line beside
+   *   Send then keeps only its words
+   * - or Claude is at work on the phase itself (`epic inbox working <epic>#P26 on`), as its row's spinner says
+   * - answering a Send, Send's own ring turns instead (P55)
+   */
+  readonly isStepTurning = createMemo((): boolean => {
+    if (this.step()?.icon !== ACTIVE_ICON) return false
+    const doing = this.review.doing()
+    if (doing && !doing.items?.length) return true
+    return this.phases().some((phase) => phase.status === ACTIVE && this.review.liveOf(phase.id).workedOn)
+  })
+
   /** The page's stage (`stage`):  `building` for none (`PageStages.read()`);  a saga page is always building. */
   get pageStage(): PageStage {
     return this.isSaga ? "building" : PageStages.read(this.stage)
@@ -762,7 +778,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           <span class={CENTRE} part={this.partForName("centre")}>
             {/* in Focus mode's bar while it's open:  one Send, one countdown */}
             <Show when={this.isFocusOpen ? undefined : this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
-            {this.isSaga ? undefined : <epic-agents draws="spinner" part={this.partForName("spinner")} />}
+            {/* its words alone while the step label turns for it (I316):  one spinner, the pill's */}
+            {this.isSaga ? undefined : (
+              <epic-agents draws={this.isStepTurning() ? "words" : "spinner"} part={this.partForName("spinner")} />
+            )}
           </span>
           <span class={STATUS} part={this.partForName("status")}>
             <Show when={this.bedtime}>
@@ -794,10 +813,14 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     data-state={this.state()?.name}
                     appearance={step().color === "green" ? undefined : "basic"}
                     color={pillColorOf(step().color)}
-                    icon={step().icon}
+                    icon={this.isStepTurning() ? undefined : step().icon}
                     link={step().href}
                     title={step().tip}
                   >
+                    {/* the phase building:  its circle turns, Spell UI's loading icon, as Send's while busy (I316) */}
+                    <Show when={this.isStepTurning()}>
+                      <ui-icon slot="icon" name={ACTIVE_ICON} loading="" part={this.partForName("step-spinner")} />
+                    </Show>
                     {step().words}
                   </ui-label>
                 )}

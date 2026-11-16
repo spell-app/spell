@@ -220,6 +220,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           `doing`), a bare spinner (`draws="spinner"`, T53), its words beside it (I210), for OTHER work only ("Building
           P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
           `epic-engine` P55, Q62 A)
+        - while a phase is building (the step label names one under way, and the session does other work, or Claude
+          is at work on that phase):  the step label's circle turns, Spell UI's loading icon (`isStepTurning()`), and
+          the line beside Send keeps its words alone (`draws="words"`;  epic `epic-engine` I316, 2026-11-16:  "Don't
+          need both of these indicators.  Just make the one in the pill a loading spinner")
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -1577,6 +1581,7 @@ In `tools/`:
         "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
         (I210:  bare, it read as "the server is listening").  Answering a
         Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
+        While a phase builds, the step label's circle turns instead, and the line keeps its words alone (I316).
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.
