@@ -430,7 +430,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       parts.push(this.translationForKey(mark.fill === "dashed" ? "tipMarkUnsent" : "tipMarkSent", { chosen }))
     }
     if (queued) parts.push(this.translationForKey("tipTodo", { work: work || queued }))
-    // finished, its `taken-in` draws no pill (I307):  the chip still says where it was done
+    // finished, its `taken-in` draws `done in P20` where the plane was (J231):  the chip still says where it was done
     if (this.takenIn && !this.phasePill)
       parts.push(this.translationForKey("takenTip", { phase: this.phaseNamed(this.takenIn).full }))
     if (reviewed) parts.push(this.translationForKey("tipReviewed", { date: PlanDates.format(reviewed) }))
@@ -619,6 +619,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
           <Show when={this.phasePill}>{this.handledMark()}</Show>
           <Show when={this.hasCommits()}>{this.gitButton()}</Show>
+          {/* where the plane was:  a finished item's phase (J231) */}
+          <Show when={this.donePill}>{this.doneMark()}</Show>
           <Show when={!this.reviewState.reviewing() && this.review()}>
             {(review) => (
               <span class={[REVIEW, review().look]} part={this.partForName("review")} title={review().tip}>
@@ -696,6 +698,39 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         }}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
+      </ui-label>
+    )
+  }
+
+  /**
+   * The phase a FINISHED item was done in (`taken-in`), for its `done in P20` pill, or `""` for none
+   * (epic `epic-engine` J231;  Owen, 2026-11-15:  "'Done in P20' is good, but ... make it replace the plane when the
+   * issue is complete"):
+   * - a finished item draws no plane (`issue-done`, `todo-done`), so the pill stands in its place, last before its
+   *   review buttons
+   * - `handled` keeps its own `in P4` pill (`phasePill`):  never both
+   */
+  get donePill(): string {
+    if (this.handled || !this.takenIn) return ""
+    return FINISHED.test(this.status ?? "") ? this.takenIn : ""
+  }
+
+  /**
+   * A finished item's `done in P20` pill (`donePill`):  the same quiet grey label as `in P4`, a click going to the
+   * phase;  no ⌥-click start, the work is done.
+   */
+  private doneMark(): JSX.Element {
+    const phase = () => this.phaseNamed(this.donePill)
+    return (
+      <ui-label
+        class={HANDLED}
+        part={this.partForName("done-in")}
+        size="mini"
+        appearance="basic"
+        link={`#${this.donePill}`}
+        title={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
+      >
+        {this.translationForKey("doneIn", { phase: phase().short })}
       </ui-label>
     )
   }
@@ -1061,7 +1096,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 }
 
-/** The statuses of a finished item:  its `taken-in` draws no pill (`phasePill`, I307). */
+/** The statuses of a finished item:  its `taken-in` draws `done in P20` (`donePill`, J231), not `in P20` (I307). */
 const FINISHED = /^(done|canceled|decided)$/
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */

@@ -10,14 +10,19 @@ import "./PublishClash.css"
 /****************
  * ### `<PublishClash>`
  * What Publish shows when a published file changed since your draft of it began (epic `editor` P24, Q25):
- * each such file, theirs and yours side by side (`<DiffView>`), then three buttons.
- * - "Publish mine anyway":  your drafts go out over theirs
+ * each such file, the published version and yours side by side (`<DiffView>`), then three buttons.
+ * - "Current Published Version" heads the left side, "Your Changes" the right (epic `editor` T75).
+ * - The right side is what you'll publish:  an arrow on a change takes that block from the published version,
+ *   ⌘Z puts yours back, and you can type in it too.
+ * - "Publish":  the right side of each file goes out, over theirs
  * - "Start again from theirs":  your drafts of those files go, back to what's published
- * - Cancel or Escape:  nothing happens
+ * - Cancel or Escape:  nothing happens, your draft as it was
  * - Show one with `openPublishClash()`, which mounts it and cleans up.
  ****************/
 export function PublishClash(props: PublishClashProps) {
   let answer: PublishClashAnswer | undefined
+  // each file's right side, as it is now:  your draft, with what you took from theirs
+  const merged = new Map(props.clashes.map(({ filePath, mine }) => [filePath, mine]))
   return (
     <ui-modal
       class="PublishClash"
@@ -33,8 +38,16 @@ export function PublishClash(props: PublishClashProps) {
           {(clash) => (
             <section>
               <h4>{clash.filePath}</h4>
+              <div class="PublishClashSides">
+                <h5>{appTexts.text("publishClashTheirs")}</h5>
+                <h5>{appTexts.text("publishClashMine")}</h5>
+              </div>
               <Loading fallback={<LazyMonaco.Loading />}>
-                <LazyMonaco.DiffView theirs={clash.theirs} mine={clash.mine} />
+                <LazyMonaco.DiffView
+                  theirs={clash.theirs}
+                  mine={clash.mine}
+                  onChange={(text) => merged.set(clash.filePath, text)}
+                />
               </Loading>
             </section>
           )}
@@ -42,19 +55,23 @@ export function PublishClash(props: PublishClashProps) {
       </ui-content>
       <ui-actions>
         <ui-button class="cancel">{appTexts.text("cancel")}</ui-button>
-        <ui-button class="approve" onClick={() => (answer = "theirs")}>
+        <ui-button class="approve" onClick={() => (answer = { choice: "theirs" })}>
           {appTexts.text("publishStartAgain")}
         </ui-button>
-        <ui-button class="approve" color="primary" onClick={() => (answer = "mine")}>
-          {appTexts.text("publishAnyway")}
+        <ui-button class="approve" color="primary" onClick={() => (answer = { choice: "mine", merged })}>
+          {appTexts.text("publishMerged")}
         </ui-button>
       </ui-actions>
     </ui-modal>
   )
 }
 
-/** Which way a clash went:  your drafts out anyway, or start again from what's published. */
-export type PublishClashAnswer = "mine" | "theirs"
+/**
+ * Which way a clash went:
+ * - `mine`:  publish each file's right side, `merged` (by file path):  your draft, with what you took from theirs
+ * - `theirs`:  start again from what's published
+ */
+export type PublishClashAnswer = { choice: "mine"; merged: Map<string, string> } | { choice: "theirs" }
 
 /** A file whose published text changed since your draft began. */
 export type PublishClashFile = {

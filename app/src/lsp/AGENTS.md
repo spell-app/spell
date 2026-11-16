@@ -18,6 +18,8 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
     the caret where you type next (`<action "|" />`, `color="|"`;  epic `editor` I70):  the ONE table of shapes
     - and what a space typed after a tag's name writes (`<segment |></segment>`;  epic `editor` T68), for the app's typing
     - a tag that closes itself always has a space before its `/>`:  `<divider />`, `<icon | />` (I70 C4)
+  - `CodeOrText`:  a drawing's attribute value switched between text, `"blue"`, and code, `{blue}` (epic `editor` T74):
+    the "Make it code" / "Make it text" rewrites, and the app's typing help that does it as `{` or `"` is typed
   - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it) (epic `spanish` P13)
     - read through `LspTexts.of(scope)`
   - `SpellKeywords`:  a language pack's keywords, as editors want them (accent fixes, the VS Code grammar's keywords)

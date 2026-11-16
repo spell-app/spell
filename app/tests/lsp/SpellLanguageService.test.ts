@@ -945,6 +945,32 @@ describe("SpellLanguageService", () => {
     test("NOT for a line that's just unfinished", async () => {
       await fixes("set y to", (titles) => expect(titles).toEqual([]))
     })
+
+    test("a drawing's attribute value:  Make it code, or Make it text, its words kept (epic `editor` T74)", () => {
+      const lines = cardText.split("\n")
+      /** The one action at `word` of the line holding `marker`, and the text with it applied. */
+      const at = (marker: string, word: string) => {
+        const line = lines.findIndex((each) => each.includes(marker))
+        const character = lines[line]!.indexOf(word) + 1
+        const range = { start: { line, character }, end: { line, character } }
+        const actions = service.codeActions(card, range)
+        const edits = actions[0]?.edit?.changes?.[cardUri]
+        return {
+          titles: actions.map(({ title }) => title),
+          changed: edits && applyEdits(cardText, edits).split("\n")[line]
+        }
+      }
+      expect(at('color="blue"', "blue")).toEqual({
+        titles: ["Make it code"],
+        changed: "\t\t<ui-text color={blue}>🂠</ui-text>"
+      })
+      expect(at("color={its color}", "its color")).toEqual({
+        titles: ["Make it text"],
+        changed: '\t\t<ui-text color="its color">{its picture}</ui-text>'
+      })
+      // not the words between tags:  no quotes to turn
+      expect(at("color={its color}", "its picture").titles).toEqual([])
+    })
   })
 
   describe("formatting", () => {

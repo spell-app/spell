@@ -220,6 +220,10 @@
       "light": "8px",
       "dark": "8px"
     },
+    "--bubbly-code-pad": {
+      "light": "2px",
+      "dark": "2px"
+    },
     "--bubbly-input-pad-top": {
       "light": "1px",
       "dark": "1px"
@@ -283,6 +287,10 @@
     "--bubbly-expression-ink": {
       "light": "#ffffff",
       "dark": "#1c1b22"
+    },
+    "--bubbly-code-brace-ink": {
+      "light": "#c3c4c8",
+      "dark": "#5e5e65"
     },
     "--bubbly-depth": {
       "light": "1",

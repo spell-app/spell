@@ -43,7 +43,8 @@ describe.skipIf(!SERVING)("Adding an event to a Spell UI element", { timeout: 18
           .filter((line) => line.getBoundingClientRect().height > 0)
           .map((line) =>
             [...line.querySelectorAll("span span")]
-              .filter((piece) => !piece.closest(".CodeSliceHidden"))
+              // nor the room the bubbly look adds round a pill (T72):  not the file's text
+              .filter((piece) => !piece.closest(".CodeSliceHidden, .bubbly-spacer"))
               .map((piece) => piece.textContent)
               .join("")
               // Monaco draws a space as a no-break space

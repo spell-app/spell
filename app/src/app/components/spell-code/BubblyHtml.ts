@@ -37,6 +37,16 @@ export class BubblyHtml {
   static readonly BRACE = "bubbly-brace"
 
   /**
+   * Round a drawing's CODE, a `{…}` in its markup (`SP.BubblyLine.codes`):  ONE inverted pill, a deep shade of its
+   * band's hue, its words light, so code worked out as the program runs reads apart from what's typed in (Owen, I144 C1)
+   * - the same pill as an HTML file's `{…}` value (`BubblyMarkup`), and Monaco's
+   */
+  static readonly CODE = "bubbly-input bubbly-expression"
+
+  /** A code pill's own `{` and `}`:  part of its pill, as a quoted value's marks are of its white (Owen, I144 C1). */
+  static readonly CODE_BRACE = "bubbly-code-brace"
+
+  /**
    * The `--` that starts a description (`-- A playing card`):  drawn as an em dash, `—`, over the file's own `--`,
    * which is kept, see-through, so a copied line copies it (Owen).
    */
@@ -136,13 +146,26 @@ class BubblyWriter {
     return `${words}<span class="${BubblyHtml.DESCRIPTION}">${this.piece(last)}</span>`
   }
 
-  /** A line's pieces as HTML, each underlined stretch round the pieces it runs under. */
+  /**
+   * A line's pieces as HTML, each underlined stretch round the pieces it runs under;  each code round its own, its
+   * braces part of its pill.
+   */
   private pieces(line: SP.BubblyLine): string {
+    const codes = line.codes ?? []
     return line.pieces
       .map((piece) => {
         const opens = line.underlines.some((each) => each.start === piece.start)
         const closes = line.underlines.some((each) => each.end === piece.end)
-        return `${opens ? `<span class="${BubblyHtml.UNDERLINE}">` : ""}${this.piece(piece)}${closes ? "</span>" : ""}`
+        const code = codes.find((each) => each.start === piece.start || each.end === piece.end)
+        const isBrace = !!code && piece.end - piece.start === 1
+        const html = isBrace ? braceHtml(this.text[piece.start]!) : this.piece(piece)
+        return (
+          (opens ? `<span class="${BubblyHtml.UNDERLINE}">` : "") +
+          (code?.start === piece.start ? `<span class="${BubblyHtml.CODE}">` : "") +
+          html +
+          (code?.end === piece.end ? "</span>" : "") +
+          (closes ? "</span>" : "")
+        )
       })
       .join("")
   }
@@ -220,6 +243,11 @@ const PIECE_CLASSES: Record<SP.BubblyPieceKind, string> = {
   value: "bubbly-value",
   choice: "bubbly-input bubbly-choice",
   tag: "bubbly-tag"
+}
+
+/** A code pill's `{` or `}`:  part of its pill (`BubblyHtml.CODE_BRACE`). */
+export function braceHtml(brace: string): string {
+  return `<span class="${BubblyHtml.CODE_BRACE}">${brace}</span>`
 }
 
 /** `text` safe in HTML. */

@@ -64,7 +64,7 @@ export class SpellLanguageFeatures {
       languages.registerCodeActionProvider(
         language,
         { provideCodeActions: (model, range) => this.codeActions(model, range) },
-        { providedCodeActionKinds: ["quickfix"] }
+        { providedCodeActionKinds: ["quickfix", "refactor.rewrite"] }
       ),
       languages.registerDefinitionProvider(language, {
         provideDefinition: (model, position) => this.locations(model, position, "definition")
@@ -177,7 +177,7 @@ export class SpellLanguageFeatures {
     return help ? { value: LspToMonaco.signatureHelp(help), dispose() {} } : null
   }
 
-  /** Quick fixes for `range`, e.g. "Define `to <phrase>`" on a line that didn't parse. */
+  /** Quick fixes and rewrites for `range`:  "Define `to <phrase>`" on a line that didn't parse, "Make it code" on a value. */
   private codeActions(model: monaco.editor.ITextModel, range: monaco.Range): monaco.languages.CodeActionList {
     const file = this.fileOf(model)
     const actions = file ? this.service.codeActions(file, LspToMonaco.lspRange(range)) : []

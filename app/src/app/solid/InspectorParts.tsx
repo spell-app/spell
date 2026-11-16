@@ -585,6 +585,7 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  *   should be collapsible").
  * - The card's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *   handler in its place (`Inspector.addEvent()`), which then takes the cursor.
+ * - Each event's ✕, at its row's right (`<RemoveEventButton>`):  removes it, after asking unless ⌥ is held;  one undo.
  * - Resized, folded and closed as the other cards are;  shown by the column while one part is selected.
  ****************/
 export function CodeCard(props: {
@@ -746,10 +747,37 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
         <ui-icon name={isEvent ? EVENT_ICON : ABILITY_ICON} />
         {props.row.words}
       </span>
+      <Show when={isEvent && place}>
+        <RemoveEventButton element={props.element} row={props.row} />
+      </Show>
       <Show when={hasCode()}>
         <WrittenCode place={place} code={props.row.code} focus={isAdded} />
       </Show>
     </ui-section>
+  )
+}
+
+/**
+ * An event's ✕, at its row's right (epic `editor` T73):  a click asks, then removes the handler, its code with it;
+ * an ⌥-click removes it at once (`Inspector.removeEvent()`).  One undo puts it back.
+ */
+function RemoveEventButton(props: { element: Element; row: EventRow }): JSX.Element {
+  const label = () => appTexts.text("inspectorRemoveEvent", { event: props.row.words })
+  return (
+    <ui-button
+      slot="actions"
+      size="mini"
+      appearance="link"
+      icon="close"
+      class={["InspectorActionButton", "InspectorRemoveEvent"]}
+      title={label()}
+      aria-label={label()}
+      // in its row's title:  a click removes it, never folds the row
+      onClick={(event: MouseEvent) => {
+        event.stopPropagation()
+        void Inspector.removeEvent(props.element, props.row, event.altKey ? "at once" : "after asking")
+      }}
+    />
   )
 }
 
@@ -1129,6 +1157,8 @@ const RESTORE_LINK = "\u0000"
  * The line under a refused name, `Restore "cheat"`:  its link, `Restore`, puts the old name back (epic `editor` I139).
  * - A link as the drafted tab's tip draws its "Discard changes":  a tertiary button.
  * - A press never takes the focus from the field:  so the field isn't left, and the refused name not tried again.
+ * - A press keeps the pointer (`setPointerCapture()`), so its click is the link's wherever it's let go:
+ *   the link is 12px tall, and a press let go a few pixels off it clicked the line around it, doing nothing (I139).
  */
 function RestoreName(props: { oldName: string; onRestore: () => void }): JSX.Element {
   // the words around the link, as each language orders them
@@ -1143,6 +1173,8 @@ function RestoreName(props: { oldName: string; onRestore: () => void }): JSX.Ele
         color="primary"
         class="InspectorActionNameRestoreLink"
         title={appTexts.text("renameActionRestoreTip", { oldName: props.oldName })}
+        // the link's own, its release too:  a press let go a few pixels off a link this small clicked nothing
+        onPointerDown={(event: PointerEvent) => (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)}
         onMouseDown={(event: MouseEvent) => event.preventDefault()}
         onClick={(event: MouseEvent) => {
           event.stopPropagation()

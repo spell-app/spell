@@ -84,6 +84,8 @@ ui-panel.InspectorCard > .InspectorSection {
   min-height: 0;
 }
 .InspectorCard {
+  /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu") */
+  --ui-panel-pane-bar-background: var(--spell-menu-bar-background);
   /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
      (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
   &.locked {
@@ -230,7 +232,7 @@ ui-panel.InspectorCard > .InspectorSection {
  * A card is as tall as what it shows, never more (Owen, 2026-11-14, epic `editor` I140:
  * "Don't have this big gap between sections when not showing"):
  * - its share of the column (`cardsLayout()`) is the most it takes;  the room it leaves goes to the others, by their shares,
- *   and what none of them needs stays under the last card
+ *   and what none of them needs goes to the last open card (below)
  * - a pane is a column its card fills, not a box the card is laid over (`SplitPane.css`), so it has a height of its own to stop at
  * - too much for the column:  each card gets its share, and scrolls inside
  */
@@ -251,6 +253,18 @@ ui-panel.InspectorCard > .InspectorSection {
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
+}
+/*
+ * The last open card reaches the column's bottom, however little it shows, its body scrolling when it's long
+ * (Owen, 2026-11-15, epic `editor` I165:  "Views panels should extend to the bottom even if its content is not enough"):
+ * - so the column ends with a card, not with the page under it
+ * - "open":  a folded card is its bar alone;  with Views folded, the card above it reaches down to Views' bar
+ */
+.SpellPage
+  .InspectorColumn
+  > .InspectorSplit
+  > .SplitPane:not(:has(> .InspectorCard.folded)):not(:has(~ .SplitPane > .InspectorCard:not(.folded))) {
+  max-height: none;
 }
 
 /* a card's body:  scrolling by itself, its content 14px in */
@@ -372,8 +386,10 @@ ui-section.InspectorEvent {
     flex-direction: column;
     gap: 4px;
   }
+  /* snug round the name:  little room at its ends (Owen, I157:  "don't need so much white space in the input field") */
   & .InspectorActionNameField {
-    width: 14em;
+    --ui-input-padding-inline: 0.5em;
+    width: 11em;
   }
   & .InspectorActionNameError {
     max-width: 24em;
@@ -723,12 +739,18 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 }
 
 /*
- * The Inspector's cards on the code's paper while the code is drawn bubbly, so the two columns match
- * (Owen, epic `editor` I153):  `--bubbly-paper` (`bubbly.css`), which is only set inside a `.bubbly`
- * - the page's `spell-bubbly` class:  `markBubbly()`, `codePopups.ts`
+ * The Inspector's cards on a panel's own fill, `--spell-panel-background` (`spell.css`), in every theme
+ * (Owen, epic `mockup` I18:  "In the inspector panels, make the bg --ui-primary-25")
+ * - before, epic `editor` I153:  the code's white paper, and only while the code was drawn bubbly
+ * - solid, so no glass behind it:  a see-through theme's blur read as the page's lilac
  */
-:root.spell-bubbly .InspectorColumn .SplitPane::before {
-  background: light-dark(white, #1c1b22);
+:root[data-spell-theme] .InspectorColumn .InspectorSplit > .SplitPane::before {
+  background: var(--spell-panel-background);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+/* a card's code box takes back some of the card's 14px each side, so its lines have room (Owen, I164:
+   "Reduce margin around the input") */
+.InspectorSection .CodeSlice {
+  margin-inline: -6px;
 }

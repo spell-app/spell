@@ -107,6 +107,41 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     expect(await page.evaluate(() => (window as any).editor.file.contents)).toBe(theirs)
   })
 
+  test("published since your draft began:  take theirs change by change, and Publish publishes the right side (T75)", async () => {
+    await edit("## Note", "## My Note")
+    await edit('"theirs"', '"mine"')
+    const theirs = published().replace("## Note", "## Their Note")
+    writeFileSync(path.join(project.folder, FILE), theirs) // as if someone else published
+    const publishing = page.evaluate(() => (window as any).editor.publish())
+    const clash = "ui-modal.PublishClash"
+    await page.waitForSelector(`${clash} .DiffView .monaco-diff-editor .revertButton`, {
+      state: "attached",
+      timeout: 20_000
+    })
+    expect(await page.locator(`${clash} .PublishClashSides h5`).allTextContents()).toEqual([
+      "Current Published Version",
+      "Your Changes"
+    ])
+    // two changes, an arrow each;  the lower one, `"mine"`, taken from theirs (an arrow shows only on hover)
+    const arrows = page.locator(`${clash} .revertButton`)
+    expect(await arrows.count()).toBe(2)
+    await arrows.evaluateAll((all) =>
+      all
+        .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[1]
+        .dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    )
+    // the right side's text, drawn bubbly or not:  `mine` gone, `theirs` in its place
+    await page.waitForFunction((clash) => {
+      const text = document.querySelector(`${clash} .modified-in-monaco-diff-editor .view-lines`)?.textContent ?? ""
+      return !text.includes("mine") && text.includes("theirs")
+    }, clash)
+    await page.locator(`${clash} ui-button[color=primary]`).click()
+    await publishing
+    expect(published()).toBe(FIRST.replace("## Note", "## My Note").replace('"words"', '"theirs"'))
+    expect(drafts()).toEqual([])
+    expect(await page.evaluate(() => (window as any).editor.file.contents)).toBe(published())
+  })
+
   test("Versions, the editor's Spell's box:  Save Current Changes lists your draft, and Restore brings it back (I115)", async () => {
     const box = "ui-modal[visible]"
     const openVersions = async () => {

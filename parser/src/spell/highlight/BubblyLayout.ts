@@ -3,6 +3,7 @@ import { SP } from "spell/parser/spell"
 import { BubblyPresentation } from "./BubblyPresentation"
 import type {
   BubblyBlock,
+  BubblyCode,
   BubblyDrawing,
   BubblyLayoutOptions,
   BubblyLine,
@@ -470,9 +471,10 @@ export class BubblyLayout {
     this.paintSpans(start, end, head)
     for (const overlay of this.overlays) if (overlay.start >= start && overlay.end <= end) this.paintOverlay(overlay)
     if (head) this.paintHead(head)
-    if (this.isMarkup(line)) this.paintMarkup(start, end)
+    const codes = this.isMarkup(line) ? this.paintMarkup(start, end) : []
     const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
-    return { kind: "line", start, end, depth, pieces: this.piecesOf(start, end, underlines), underlines }
+    const pieces = this.piecesOf(start, end, [...underlines, ...codes])
+    return { kind: "line", start, end, depth, pieces, underlines, ...(codes.length ? { codes } : {}) }
   }
 
   /** Paint each span from `start` to `end` as what it is:  in a head, what was typed is an input. */
@@ -645,35 +647,72 @@ export class BubblyLayout {
     }
   }
 
-  /** A drawing's markup:  `<`, `>`, `=`, `{`, `}` faint, a tag's name a shade, a quoted value a pill. */
-  private paintMarkup(start: number, end: number) {
+  /**
+   * A drawing's markup:  `<`, `>`, `=`, `{`, `}` faint, a tag's name a shade, a quoted value a pill;
+   * returns its CODE, each `{…}` (`BubblyLine.codes`).
+   * - A `{` starts code up to its own `}`:  what's in it is Spell, drawn as its spans say, a `"` there a text's
+   *   (`onClick={say "hi"}`), never the tag's quoted value.
+   *   - A `{` with no `}` on its line (`padding={small" spacing="xs">`, typed half way) is a faint mark alone,
+   *     so the tag's other attributes still draw as they're written (epic `editor` I144).
+   * - In a tag, a `"` right after a word (`small"`) is drawn plain:  never a value's start, which would pair the
+   *   tag's quotes off by one, every pill after it over the wrong words (I144).
+   */
+  private paintMarkup(start: number, end: number): BubblyCode[] {
     const { text } = this
+    const codes: BubblyCode[] = []
     let inTag = false
     for (let at = start; at < end; at++) {
       const char = text[at]!
-      if (char === "<" && /[/a-z]/i.test(text[at + 1] ?? "")) {
+      if (char === "{") {
+        const close = this.closingBrace(at, end)
+        this.paintRange(at, at + 1, "mark")
+        if (close < 0) continue
+        this.paintRange(close, close + 1, "mark")
+        codes.push({ start: at, end: close + 1 })
+        at = close
+      } else if (char === "<" && /[/a-z]/i.test(text[at + 1] ?? "")) {
         inTag = true
         const name = /^<\/?([\w-]*)/.exec(text.slice(at, end))!
         const markEnd = at + name[0].length - name[1]!.length
         this.paintRange(at, markEnd, "mark")
         this.paintRange(markEnd, at + name[0].length, "tag")
         at += name[0].length - 1
-      } else if (inTag && (char === ">" || (char === "/" && text[at + 1] === ">"))) {
+      } else if (!inTag) {
+        if (char === "}") this.paintRange(at, at + 1, "mark")
+      } else if (char === ">" || (char === "/" && text[at + 1] === ">")) {
         const length = char === "/" ? 2 : 1
         this.paintRange(at, at + length, "mark")
         at += length - 1
         inTag = false
-      } else if (inTag && char === "=") {
+      } else if (char === "=" || char === "}") {
         this.paintRange(at, at + 1, "mark")
-      } else if (inTag && char === '"') {
+      } else if (char === '"' && !WORD_CHARACTER.test(text[at - 1] ?? "")) {
         const close = text.indexOf('"', at + 1)
         const stop = close < 0 || close >= end ? end : close + 1
         this.paintRange(at, stop, "input")
         at = stop - 1
-      } else if (char === "{" || char === "}") {
-        this.paintRange(at, at + 1, "mark")
+      } else {
+        // an attribute's name, or a stray `"`:  plain, whatever a span said of it
+        this.paintRange(at, at + 1, "words")
       }
     }
+    return codes
+  }
+
+  /** Where the `}` closing the `{` at `open` is, before `end`:  its own, past any `{…}` and `"…"` in it;  else -1. */
+  private closingBrace(open: number, end: number): number {
+    const { text } = this
+    let depth = 0
+    for (let at = open; at < end; at++) {
+      const char = text[at]
+      if (char === '"') {
+        const close = text.indexOf('"', at + 1)
+        if (close < 0 || close >= end) return -1
+        at = close
+      } else if (char === "{") depth++
+      else if (char === "}" && --depth === 0) return at
+    }
+    return -1
   }
 
   /** Paint an overlay:  only over Spell's own words, when it says so (`overWordsOnly`). */
@@ -689,10 +728,10 @@ export class BubblyLayout {
   /**
    * The painted stretch from `start` to `end`, cut into pieces:
    * - words of one name join, a space between (`two sided view`, `card setup`)
-   * - cut where each of `underlines` starts and ends, so it starts and ends with a piece
+   * - cut where each of `stretches` starts and ends (its underlines, its code), so it starts and ends with a piece
    */
-  private piecesOf(start: number, end: number, underlines: BubblyUnderline[]): BubblyPiece[] {
-    const cuts = new Set(underlines.flatMap((each) => [each.start, each.end]))
+  private piecesOf(start: number, end: number, stretches: Array<{ start: number; end: number }>): BubblyPiece[] {
+    const cuts = new Set(stretches.flatMap((each) => [each.start, each.end]))
     const runs: BubblyPiece[] = []
     for (let at = start; at < end; at++) {
       const paint = this.paint[at] ?? "words"
@@ -783,6 +822,9 @@ const DRAW_METHOD = "draw"
 
 /** Operators drawn faint. */
 const MARKS = new Set([",", ":"])
+
+/** A letter, digit or `_`:  a `"` right after one, in a tag, is a stray, never a value's start (I144). */
+const WORD_CHARACTER = /[\p{L}\p{N}_]/u
 
 /** Kinds whose words, a space apart, are one name. */
 const JOINED = new Set<Paint>(["reference", "input"])

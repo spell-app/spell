@@ -11,6 +11,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 // by file:  the language service itself loads with the code editor
 import { RenameError } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
+import type { TextChange } from "spell/app/app/EditorHistory"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
@@ -46,6 +47,8 @@ import {
   startingValues,
   oneOfWritten,
   declaredActionPlace,
+  declaredEventSpan,
+  handlerSpanInSource,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
   propertyCodePlace,
@@ -297,7 +300,7 @@ export class Inspector {
     Inspector.selectAll(next)
     clicks.pivot = pivot
     const place = Inspector.writtenPlaceOf(element)?.place
-    if (place) editor.followed = { path: place.path, line: place.line, from: "parts" }
+    if (place) editor.followed = { path: place.path, line: place.line, column: place.column, from: "parts" }
   }
 
   /**
@@ -1265,6 +1268,51 @@ export class Inspector {
     )
   }
 
+  /**
+   * Remove `element`'s event `row` from the program (epic `editor` T73):  its head and its code, as a step of
+   * `editor.history`, so one undo puts it back.
+   * - `when`:  `"after asking"` (a click on its ✕) asks first, naming it;  `"at once"` (an ⌥-click) doesn't.
+   * - A drawn thing's:  its lines in its type (`declaredEventSpan()`).
+   * - A Spell UI element's:  its ` onClick={...}` (`handlerSpanInSource()`).
+   * - Nothing happens where it can't be found.
+   * - NEVER throws.
+   */
+  static async removeEvent(
+    element: Element,
+    row: WrittenEvent & { key?: string },
+    when: "after asking" | "at once"
+  ): Promise<void> {
+    const title = appTexts.text("inspectorRemoveEvent", { event: row.words })
+    if (when === "after asking") {
+      if (!Inspector.removalOf(element, row)) return
+      const message = appTexts.text("inspectorRemoveEventConfirm", { event: row.words })
+      const ok = appTexts.text("inspectorRemoveEventOk")
+      if (!(await editor.confirm({ message, ok, danger: true }).catch(() => false))) return
+    }
+    // found again after asking:  the file may have changed meanwhile
+    const removal = Inspector.removalOf(element, row)
+    if (removal) editor.history.change(removal, { title })
+  }
+
+  /**
+   * The change that removes `element`'s event `row` (`removeEvent()`):  `undefined` when it isn't found,
+   * or what's there isn't it, e.g. the code typed since its last compile moved it.
+   */
+  private static removalOf(element: Element, row: WrittenEvent & { key?: string }): TextChange | undefined {
+    const thing = SpellElement.thingOf(element)
+    const sources = new Map(sourceFiles().map((file) => [file.path, file.text]))
+    const handling = [element, ...(element.shadowRoot?.querySelectorAll("*") ?? [])]
+    const span = thing
+      ? declaredEventSpan(row, classNamesOf(thing), declarationPlaces(), sourceFiles())
+      : handling.map((at) => (row.key ? handlerSpanInSource(at, sources, row.key) : undefined)).find(Boolean)
+    const file = span && sliceOf({ path: span.path, from: 1, to: 1 })?.file
+    if (!span || !file) return undefined
+    const before = (file.contents ?? "").slice(span.start, span.end)
+    const named = thing ? row.words : `on${upperFirst(row.key ?? "")}`
+    if (!before.replace(/\s+/g, " ").toLowerCase().includes(named.replace(/\s+/g, " ").toLowerCase())) return undefined
+    return { file, at: span.start, before, after: "" }
+  }
+
   /** The words or DOM event of the row added last (`addEvent()`), for it to take the cursor;  `""` once it has. */
   static get justAdded(): string {
     return justAdded()
@@ -1577,6 +1625,8 @@ const UI_PREFIX = "ui-"
 /** Spell UI's controls:  what a plain click selects, beside a drawn thing (Alt-click:  any Spell UI element). */
 const CONTROL_TAGS = new Set([
   "ui-button",
+  // an action's button, `<action "cheat" />`:  it runs its action, with no handler of its own to find it by (I158)
+  "ui-action",
   "ui-input",
   "ui-textarea",
   "ui-checkbox",
@@ -2340,7 +2390,8 @@ class PartSelector {
 
   /**
    * The part under the event's pointer:  the innermost on its path, inside `area`, that's
-   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button ...)
+   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button,
+   *   an action's button ...)
    * - or a Spell UI element with a handler of its own:  a menu item that acts as a button
    *   (Owen:  "I can't e.g. inspect buttons in the solitaire app header (e.g. cheat button)")
    * - with Alt held, any Spell UI element:  the text or label inside a card too
@@ -2438,6 +2489,8 @@ class PartSelector {
  * - Each card folds to its header (`<InspectorCard>`):
  *   a folded card keeps its header's height, the others share the rest.
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
+ *   - except the last open card, which reaches the column's bottom, its body scrolling when it's long (I165):
+ *     the column reads as one, with no empty page under it
  * - As the selection changes or a card folds, the cards glide to their new sizes (`CardGlide`, T69).
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
@@ -2655,7 +2708,8 @@ function hasCodeCard(): boolean {
  *   column (Owen, 2026-11-14, I81).  Its own `id`, so a drag then is kept apart from the split you set while inspecting.
  *   - the top card needs no size of its own for that:  it's as tall as its tip, as any card is as tall as what it shows
  *   - the Code card its bar alone:  folded for good (`<NoCodeCard>`, T69)
- * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140).
+ * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140);
+ *   the last open card takes what's left, to the column's bottom (I165).
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
 function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {
