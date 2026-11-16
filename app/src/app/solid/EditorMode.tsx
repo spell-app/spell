@@ -205,8 +205,9 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
  * ONE pill, the size and shape of the bar's tools group, tinted a soft yellow (Owen, 2026-11-14, I77, I90, I93:
  * "one unified thing with a slight inset border").
  * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Editing a Draft", as plain words.
- * - Then "Discard Draft", a grey button with a trash can:  the project menu's Delete Draft, which asks first,
- *   its red "Throw It Away" (`editor.deleteDraft()`;  Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button").
+ * - Then "Discard Draft", a link with a trash can:  the project menu's Delete Draft, which asks first,
+ *   its red "Throw It Away" (`editor.deleteDraft()`;  Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button";
+ *   2026-11-16, T85:  "Instead of a grey button, make `Discard` look like a link").
  * - Right:  "Publish Draft", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
@@ -219,7 +220,12 @@ function PublishDraft(): JSX.Element {
           <ui-icon name={DRAFT_ICON} />
           {appTexts.text("editingDraft")}
         </span>
-        <ui-button class="DiscardDraft" icon={DISCARD_ICON} onClick={() => void editor.deleteDraft()}>
+        <ui-button
+          class="DiscardDraft"
+          appearance="tertiary"
+          icon={DISCARD_ICON}
+          onClick={() => void editor.deleteDraft()}
+        >
           {appTexts.text("discardDraft")}
         </ui-button>
         <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
