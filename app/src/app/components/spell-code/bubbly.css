@@ -1737,6 +1737,15 @@
       padding-left: calc(var(--cmb-line-pad) + var(--cmb-indent));
     }
     /*
+     * a plain body line's indent (`CodeMirrorBubbly`):  a tab wider, so its words are where a band's on its level are,
+     * a tab in from its indent (Owen, epic `language` I142:  "I'd prefer if `it lives` lined up where `it's name` does")
+     * - room after its tabs, not before the line:  its column 0 stays on its rail (I140);  the caret before its first
+     *   word is drawn at the word (`CodeMirrorSelection.wordsSide`, I141)
+     */
+    .cmb-plain-indent {
+      padding-right: var(--cmb-indent);
+    }
+    /*
      * a band's words, a tag's, and those between a one-line element's tags:  a pixel up off their band's own line,
      * so their small letters are in its middle (Owen, I114:  "move text up one pixel");  their band stays where it is
      * - the browser puts text on whole pixels:  any lift from about 0.9px to 1.9px moves it one, so the middle of that

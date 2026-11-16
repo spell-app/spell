@@ -546,6 +546,15 @@ export class CodeMirrorDecorations {
     return { tabs: indent.split("\t").length - 1, spaces: indent.replaceAll("\t", "").length }
   }
 
+  /**
+   * The indent before `at`, as shown, `from`-`to`:  `to` is `at`;  `from` past a slice's hidden indent.
+   * - Empty (`from === to`) when none of it is shown.
+   */
+  shownIndentBefore(at: number): { from: number; to: number } {
+    const line = this.state.doc.lineAt(at)
+    return { from: Math.min(line.from + this.hiddenIndent, at), to: at }
+  }
+
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     this.feetRows()

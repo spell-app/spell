@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
 import { cursorCharLeft, cursorCharRight, cursorLineDown } from "@codemirror/commands"
-import { EditorState } from "@codemirror/state"
+import { EditorSelection, EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
@@ -13,8 +13,8 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * each rail at its band's left edge, the band's bottom-left square into it (Owen, I137:  "put the rails back where
  * they were");  the lines it hangs on a tab and a band's room in from it.
  * - Spell's bodies and a drawing's tags' alike, at every level.
- * - A body's words under its head's (Owen, I136:  "Fix the gutters so all text and tags are inset as they were
- *   before"), a band's room right of the rail.
+ * - A body's words a band's room right of the rail (Owen, I136:  "Fix the gutters so all text and tags are inset as
+ *   they were before");  a plain line's where a band's on its level are (I142).
  * - The caret before a line's first word drawn at the word, however it got there (I141).
  */
 describe("a body's rail under the caret", () => {
@@ -121,17 +121,19 @@ describe("a body's rail under the caret", () => {
       const start = tag ? tag.getBoundingClientRect().left : await caretMiddle(view, line)
       atRails.push({ line, start, rail: railMiddle(view, line)! })
     }
-    // a plain line's words, a tag's pointed end:  a tab and a band's room right of the rail's left edge
-    for (const { line, start, rail } of atRails)
-      expect(Math.abs(start - (rail - railWidth / 2) - tab - bandRoom), view.state.doc.line(line).text).toBeLessThan(
-        0.1
-      )
+    // a tag's pointed end:  a tab and a band's room right of the rail's left edge;  Spell's words a tab further, where
+    // a band's words on their level are (I142)
+    for (const { line, start, rail } of atRails) {
+      const text = view.state.doc.line(line).text
+      const spellTab = text.trimStart().startsWith("<") ? 0 : tab
+      expect(Math.abs(start - (rail - railWidth / 2) - tab - bandRoom - spellTab), text).toBeLessThan(0.1)
+    }
     // four levels of rail, each a tab stop further in
     const rails = [...new Set(atRails.map(({ rail }) => rail.toFixed(1)))]
     expect(rails.length).toBe(4)
   })
 
-  test("each rail at its band's left edge, the band square there;  a body's words under its head's", async () => {
+  test("each rail at its band's left edge, the band square there;  a body's plain words a tab in from its head's", async () => {
     const view = await bubblyEditorOf(NESTED)
     const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
     for (const [head, body] of [
@@ -151,10 +153,11 @@ describe("a body's rail under the caret", () => {
       // the band's left edge is its rail's, its bottom-left square into it
       expect(Math.abs(left + rail / 2 - railMiddle(view, bodyLine!)!), head).toBeLessThan(0.1)
       expect(getComputedStyle(band).borderBottomLeftRadius, head).toMatch(/^0px/)
-      // a Spell body's words start where its head's do (a head in it:  a tab further in, on its band)
+      // a Spell body's plain words a tab in from its head's, where a band in it puts its words (I142)
       if (!head.startsWith("<") && !lineElement(view, bodyLine!).querySelector(".cmb-band")) {
         const words = left + Number.parseFloat(getComputedStyle(band).paddingLeft)
-        expect(Math.abs((await caretMiddle(view, bodyLine!)) - words), head).toBeLessThan(0.1)
+        const tab = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-indent"))
+        expect(Math.abs((await caretMiddle(view, bodyLine!)) - words - tab), head).toBeLessThan(0.1)
       }
     }
   })
@@ -274,6 +277,42 @@ describe("a body's rail under the caret", () => {
     cursorLineDown(view)
     expect(view.state.selection.main.head).toBe(line.from + 1)
     expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
+  })
+
+  test("a plain body line's first word where a band's words on its level are, at every level;  its column 0 on its rail (I142)", async () => {
+    for (const [text, plain, banded] of [
+      [CHARACTER, "it lives", 'its "name"'],
+      [NESTED, "// face down", 'its "rank"'],
+      [NESTED, "turn it face down", "if it is face up"]
+    ] as const) {
+      view?.dom.parentElement?.remove()
+      view?.destroy()
+      const editor = await bubblyEditorOf(text)
+      const [plainLine, bandLine] = linesStarting(editor, [plain, banded])
+      const indentEnd = (number: number) => {
+        const line = editor.state.doc.line(number)
+        return line.from + /^\t*/.exec(line.text)![0].length
+      }
+      const firstLetter = (number: number) => editor.coordsAtPos(indentEnd(number), 1)!.left
+      const indentOf = (number: number) => indentEnd(number) - editor.state.doc.line(number).from
+      // on one level, the same x;  `turn it face down`, a level in from `if it is face up`:  a tab further
+      const tab = Number.parseFloat(getComputedStyle(editor.dom).getPropertyValue("--cmb-indent"))
+      const levels = indentOf(plainLine!) - indentOf(bandLine!)
+      expect(Math.abs(firstLetter(plainLine!) - firstLetter(bandLine!) - levels * tab), plain).toBeLessThan(0.01)
+      // its column 0 where a band line's is, on the outermost rail (I140);  the caret before its word at the word, stuck
+      // to the indent or not
+      const columnZero = async (number: number) => {
+        editor.dispatch({ selection: { anchor: editor.state.doc.line(number).from } })
+        return caretX(editor)
+      }
+      expect(Math.abs((await columnZero(plainLine!)) - (await columnZero(bandLine!))), plain).toBeLessThan(0.01)
+      editor.dispatch({
+        selection: EditorSelection.single(indentEnd(plainLine!)).replaceRange(
+          EditorSelection.cursor(indentEnd(plainLine!), -1)
+        )
+      })
+      expect(Math.abs((await caretX(editor)) - firstLetter(plainLine!)), plain).toBeLessThan(1)
+    }
   })
 
   /**
