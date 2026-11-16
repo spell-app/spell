@@ -4,7 +4,7 @@
  *   This sheet only lays out the three sections, and fits the items to the bar's height.
  *   Unlike a plain menu's, its items have no hairline between them.
  * - Items adopt the top menu's sheets too:  every rule here starts at the menu's box, or an item IN an app menu.
- * - Tokens:  the menu's window bar's, `--ui-menu-header-bar-height`, `-font-size`, `-background`, `-filter`, `-border`.
+ * - Tokens:  the menu's window bar's, `--ui-menu-header-bar-height`, `-font-size`, `-background`, `-filter`, `-shadow`.
  */
 
 @layer ui.components.app-menu.types;
@@ -49,6 +49,15 @@
     scrollbar-width: none;
   }
 
+  /* a button in an app menu:  32px tall in the 40px bar, 4px above and below, on the 4px grid in every theme
+     (epic `mockup` I36, Owen:  "Menus and other components should be multiples of 4")
+     - a tertiary button's room above and below is its padding less its tertiary padding, and it fills the bar's height:
+       so with these, 8px of padding inside it and 4px round it, whatever the theme's button padding
+     - an ordinary button fills the bar's height, as before */
+  .ui.header.menu ::slotted(ui-button) {
+    --ui-button-padding-block: 12px;
+    --ui-button-tertiary-padding: 8px;
+  }
   /* an item of an app menu:  it fills the bar's height, with no room of its own above or below
      - its own items only:  a sub-menu's items adopt the sub-menu's sheets, not these */
   :host(:state(in-menu)) > .item {

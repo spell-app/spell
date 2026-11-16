@@ -596,7 +596,7 @@ export function EditorToolbar(props: { mode: Mode }) {
           <Show when={props.mode === "edit"}>
             <InspectHelp for={INSPECT_APP_ID} />
           </Show>
-          <Actions.restartApp iconOnly />
+          <Actions.restartApp iconOnly inBar />
           <ThemeMenu />
         </>
       )

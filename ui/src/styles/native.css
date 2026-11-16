@@ -556,9 +556,11 @@
     max-inline-size: calc(100vw - 1em);
     height: fit-content;
     margin-block: var(--ui-tooltip-distance);
-    margin-inline: 0;
+    /* slid in from the window's edge, it keeps this much clear of it */
+    margin-inline: 0.25em;
     overflow: visible;
-    white-space: normal;
+    /* wraps at the window, and breaks where its text does:  `"one idea\nanother"` */
+    white-space: pre-line;
     opacity: 0;
     scale: 0.8;
     transition:

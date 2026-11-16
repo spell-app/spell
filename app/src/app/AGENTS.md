@@ -149,8 +149,9 @@ and in the app's build folder, `app/` at the app folder's root.
       the uses listed on its right;  Enter or a double-click goes there, Esc closes it
       ([CodeMirrorPeek](ui/codemirror/CodeMirrorPeek.ts), plain DOM, so `<spell-editor>` has it too)
   - Spell in CodeMirror is [SpellCodeMirror](ui/codemirror/SpellCodeMirror.ts):  `edit()` makes an editor of a view,
-    `codeExtensions()` shows another language's code (the compiled JavaScript, TypeScript and Python, read-only),
-    `merge()` the two sides of a diff.
+    `codeExtensions()` shows another language's code (the compiled JavaScript, TypeScript and Python, read-only);
+    the two sides of a diff are [CodeMirrorMerge](ui/codemirror/CodeMirrorMerge.ts), yours left, theirs right,
+    each change's arrow turning into an undo icon once taken (epic `editor` T101).
   - One state per file, [FileStates](ui/codemirror/FileStates.ts):  each file keeps its text, undo, folds and selection
     while another is shown;  the files' states follow `file.contents` both ways.
     - Edits from outside the code go in through `applyEdits()`, one undo step each, marked with their `EditWay`
@@ -159,7 +160,8 @@ and in the app's build folder, `app/` at the app folder's root.
     keys, undo, find, the gutter (no line numbers, fold arrows over the code's padding),
     and CodeMirror's words, which are `AppTexts` keys (`cm...`), following `appTexts.lang`.
     - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
-      the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
+      the switches inside the find field, a match count, previous / next, the replace row showing as it opens
+      (folded by its chevron, it stays folded:  `spellEditor:findShowsReplace`, epic `codemirror` I8 C1);
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
     - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
       as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
@@ -202,7 +204,7 @@ and in the app's build folder, `app/` at the app folder's root.
       cut off at its edges.
       The card draws that band and rail itself, round the slice, from the same sheet
       (`CodeCard.css`, epic `editor` T98).
-    - Both sides of a diff too (Publish's `<DiffView>`, on CodeMirror's merge view, epic `editor` T75).
+    - Both sides of a diff too (Publish's `<DiffView>`, on CodeMirror's merge view, epic `editor` T75, T101).
   - The lines being followed (the place in focus, `editor.followed`) are a bar in the gutter
     ([CodeMirrorFollowed](ui/codemirror/CodeMirrorFollowed.ts)).
   - Pinned lines (Settings… › Pinned lines, epic `codemirror` T8):

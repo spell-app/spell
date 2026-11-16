@@ -86,6 +86,45 @@ describe("DataTooltips", () => {
     expect(bubble().getBoundingClientRect().top).toBeGreaterThanOrEqual(0)
   })
 
+  it("bottom center by the window's right edge:  slides in, wholly inside, its arrow at the target", async () => {
+    const button = Fixture.render(
+      `<button aria-label="target" style="position: fixed; right: 4px; top: 0; width: 24px; height: 24px"
+        data-tooltip="Theme and light / dark:  Fruity, Light" data-position="bottom center">x</button>`
+    )
+    await userEvent.hover(button)
+    await expect.poll(isShowing).toBe(true)
+    // its layout box:  it may still be growing in from 80%
+    const { offsetLeft: left, offsetTop: top, offsetWidth: width } = bubble()
+    const target = button.getBoundingClientRect()
+    expect(left + width).toBeLessThanOrEqual(document.documentElement.clientWidth)
+    expect(top).toBeGreaterThanOrEqual(target.bottom)
+    const arrowAt = left + Number.parseFloat(bubble().style.getPropertyValue("--ui-tooltip-arrow-at"))
+    expect(arrowAt).toBeGreaterThan(target.left)
+    expect(arrowAt).toBeLessThan(target.right)
+  })
+
+  it("breaks its text where the text does", async () => {
+    const button = framed("")
+    button.setAttribute("data-tooltip", "One idea\nAnother")
+    await userEvent.hover(button)
+    await expect.poll(isShowing).toBe(true)
+    const lineHeight = Number.parseFloat(getComputedStyle(bubble()).lineHeight)
+    expect(bubble().getBoundingClientRect().height).toBeGreaterThan(lineHeight * 2)
+  })
+
+  it("shows at the boxes a target draws when it has none of its own (display: contents)", async () => {
+    const host = Fixture.render(`<span data-tooltip="Contents" style="display: contents"></span>`)
+    const inner = host.attachShadow({ mode: "open" })
+    inner.innerHTML = `<button aria-label="target" style="position: fixed; left: 300px; top: 200px; width: 40px">x</button>`
+    const button = inner.querySelector("button")!
+    await userEvent.hover(button)
+    await expect.poll(isShowing).toBe(true)
+    const target = button.getBoundingClientRect()
+    const box = bubble().getBoundingClientRect()
+    expect(box.bottom).toBeLessThanOrEqual(target.top)
+    expect(Math.abs(box.left + box.width / 2 - (target.left + target.width / 2))).toBeLessThan(2)
+  })
+
   it("waits out the hover delay, and a focus doesn't", async () => {
     const button = framed("")
     button.style.setProperty("--ui-tooltip-delay", "400ms")

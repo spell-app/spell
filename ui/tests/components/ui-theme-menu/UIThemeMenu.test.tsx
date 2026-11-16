@@ -180,6 +180,23 @@ describe("<ui-theme-menu> markup", () => {
     await expectAccessible(host)
   })
 
+  it("the palette's tooltip, by the window's right edge:  wholly inside the window, its text in full", async () => {
+    const host = await render(`<ui-theme-menu style="position: fixed; top: 0; right: 4px"></ui-theme-menu>`)
+    const tip = part<HTMLElement & { visible: boolean }>(host, "tip")
+    expect(tip.getAttribute("size")).toBe("small")
+    tip.visible = true
+    await ElementFixture.settle()
+    const box = tip.shadowRoot!.querySelector<HTMLElement>("[part~=popup]")!
+    await Promise.all(box.getAnimations().map((animation) => animation.finished))
+    const drawn = box.getBoundingClientRect()
+    expect(drawn.right).toBeLessThanOrEqual(document.documentElement.clientWidth)
+    expect(drawn.left).toBeGreaterThanOrEqual(0)
+    // read in full:  wrapped inside its box, never cut off
+    expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth)
+    expect(box.scrollHeight).toBeLessThanOrEqual(box.clientHeight)
+    tip.visible = false
+  })
+
   it('show="scheme":  the sun / moon button alone, showing the page\'s scheme', async () => {
     const host = await render(`<ui-theme-menu show="scheme"></ui-theme-menu>`)
     const scheme = part(host, "scheme")

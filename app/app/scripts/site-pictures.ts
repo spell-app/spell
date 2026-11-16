@@ -39,6 +39,8 @@ type Picture = {
   name: string
   /** the editor's page, from its root */
   page: string
+  /** the editor's preferences to set before the page loads (`spellEditor:<key>`):  Debug's panel on a tab ... */
+  prefs?: Record<string, string>
   /** what to do first:  open a menu, show a notice ... */
   prepare?: (page: Page) => Promise<void>
   /** the element to picture (its first match) */
@@ -47,6 +49,9 @@ type Picture = {
   clip?: { x: number; y: number; width: number; height: number }
 }
 
+/** Debug, its Program panel showing the compiled JavaScript:  where `<OutputRoot>` is drawn. */
+const DEBUG_JAVASCRIPT = { programPanel: "true", programTab: "javascript" }
+
 /** Every picture, by page. */
 const PICTURES: Picture[] = [
   { name: "SpellPage", page: "", selector: ".SpellPage" },
@@ -54,8 +59,8 @@ const PICTURES: Picture[] = [
   { name: "AppContainer", page: PROJECT, selector: ".AppContainer" },
   { name: "chrome", page: PROJECT, selector: ".AppMenu" },
   { name: "InputEditor", page: PROJECT, selector: ".InputRoot" },
-  { name: "OutputEditor", page: PROJECT, selector: ".OutputRoot" },
-  { name: "CodeMirrorEditor", page: PROJECT, selector: ".OutputEditor .CodeMirrorEditor" },
+  { name: "OutputEditor", page: PROJECT, prefs: DEBUG_JAVASCRIPT, selector: ".OutputRoot" },
+  { name: "CodeMirrorEditor", page: PROJECT, prefs: DEBUG_JAVASCRIPT, selector: ".OutputEditor .CodeMirrorEditor" },
   { name: "ConsoleViewer", page: PROJECT, selector: ".ConsoleRoot" },
   {
     name: "Actions",
@@ -112,6 +117,7 @@ try {
   for (const picture of PICTURES) {
     if (only.size && !only.has(picture.name)) continue
     const page = await browser.newPage({ viewport: WINDOW })
+    if (picture.prefs) await page.addInitScript(setPrefs, picture.prefs)
     await page.goto(new URL(picture.page, EDITOR).href, { waitUntil: "networkidle" })
     await page.waitForTimeout(3000)
     await picture.prepare?.(page)
@@ -148,6 +154,14 @@ async function boxOf(page: Page, selector: string): Promise<{ x: number; y: numb
     const bottom = Math.max(...all.map((box) => box.bottom))
     return { x: left, y: top, width: right - left, height: bottom - top }
   }, selector)
+}
+
+/**
+ * Set the editor's preferences, `spellEditor:<key>` in the browser's storage, as text.
+ * - Runs in the page, before it loads.
+ */
+function setPrefs(prefs: Record<string, string>): void {
+  for (const [key, value] of Object.entries(prefs)) localStorage.setItem(`spellEditor:${key}`, value)
 }
 
 /** Click `selector` (a `<ui-dropdown>`) open, and let its menu show. */

@@ -254,16 +254,48 @@
   }
 }
 
-/****** the merge view:  each change's arrow, its sides' colours ******/
+/****** the merge view:  each change's arrow, a change taken its undo icon, its sides' colours ******/
+/* (`CodeMirrorMerge`;  epic `editor` T101:  the arrows bigger and purple, the undo icons grey, in the same place) */
 .cm-mergeView {
   height: 100%;
 
-  .cm-merge-revert button {
+  /* the undo icons' box, laid over the centre column (`.cm-merge-taken`) */
+  .cm-mergeViewEditors {
+    position: relative;
+  }
+  .cm-merge-revert {
+    width: 32px;
+  }
+  .cm-merge-taken {
+    position: absolute;
+    pointer-events: none;
+  }
+  :is(.cm-merge-revert, .cm-merge-taken) button {
+    position: absolute;
+    left: 4px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
     cursor: pointer;
     border: 0;
     border-radius: 4px;
-    background: light-dark(#ece9f6, #34323f);
-    color: var(--bubbly-ink, inherit);
+    background: none;
+    font-size: 16px;
+    pointer-events: auto;
+    /* a `<ui-icon>` draws no room after its glyph here */
+    --ui-icon-width: auto;
+    --ui-icon-distance: 0;
+  }
+  .cm-merge-revert button {
+    color: var(--ui-primary, #6435c9);
+  }
+  .cm-merge-taken button {
+    color: var(--ui-text-muted, #888);
+  }
+  :is(.cm-merge-revert, .cm-merge-taken) button:hover {
+    background: color-mix(in srgb, currentColor 14%, transparent);
   }
   .cm-changedLine,
   .cm-deletedChunk {

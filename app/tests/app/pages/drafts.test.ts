@@ -82,12 +82,12 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
   test("Publish makes it public, keeps a version, and the draft goes", async () => {
     await edit('"words"', '"text"')
     // while there's a draft:  Draft | Discard | Publish beside the modes, and a pen on its tab
-    // (I44, I90, I93, T67, I192);  the label says what a draft is, on hover
+    // (I44, I90, I93, T67, I192);  the label says what a draft is, on hover (its bar tooltip, I217)
     await page.waitForSelector(".PublishDraft", { timeout: 5000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(1)
     expect(await page.locator(".PublishDraft ui-button.DiscardDraft").count()).toBe(1)
     expect((await page.locator(".PublishDraft .DraftState").textContent())?.trim()).toBe("Draft")
-    expect(await page.locator(".PublishDraft .DraftState").getAttribute("title")).toMatch(/only you see them/)
+    expect(await page.locator(".PublishDraft .DraftState").getAttribute("data-tooltip")).toMatch(/only you see them/i)
     await page.locator(".PublishDraft ui-button.Publish").click()
     await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)
@@ -96,20 +96,22 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     expect(readdirSync(path.join(project.folder, "versions"))).toHaveLength(1)
   })
 
-  test("published since your draft began:  both side by side, and Start Again takes theirs", async () => {
+  test("published since your draft began:  both side by side, and Use Their Changes, once you're sure, takes theirs", async () => {
     await edit('"text"', '"mine"')
     const theirs = published().replace('"text"', '"theirs"')
     writeFileSync(path.join(project.folder, FILE), theirs) // as if someone else published
     const publishing = page.evaluate(() => (window as any).editor.publish())
     await page.waitForSelector("ui-modal.PublishClash .DiffView .cm-mergeView", { timeout: 20_000 })
-    await page.locator("ui-modal.PublishClash ui-button", { hasText: "Start Again" }).click()
+    await page.locator("ui-modal.PublishClash ui-button.UseTheirs").click()
+    // "Are you sure?" first (T101)
+    await page.locator("ui-modal:not(.PublishClash) ui-button.approve", { hasText: "Use Their Changes" }).click()
     await publishing
     expect(drafts()).toEqual([])
     expect(published()).toBe(theirs)
     expect(await page.evaluate(() => (window as any).editor.file.contents)).toBe(theirs)
   })
 
-  test("published since your draft began:  take theirs change by change, and Publish publishes the right side (T75)", async () => {
+  test("published since your draft began:  take theirs change by change, and Publish My Changes publishes your side, on the left (T75, T101)", async () => {
     await edit("## Note", "## My Note")
     await edit('"theirs"', '"mine"')
     const theirs = published().replace("## Note", "## Their Note")
@@ -121,8 +123,8 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
       timeout: 20_000
     })
     expect(await page.locator(`${clash} .PublishClashSides h5`).allTextContents()).toEqual([
-      "Current Published Version",
-      "Your Changes"
+      "Your Changes",
+      "Current Published Version"
     ])
     // two changes, an arrow each;  the lower one, `"mine"`, taken from theirs (CodeMirror takes it on mousedown)
     const arrows = page.locator(`${clash} .cm-merge-revert button`)
@@ -132,9 +134,9 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
         .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[1]
         .dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }))
     )
-    // the right side's text, drawn bubbly or not:  `mine` gone, `theirs` in its place
+    // your side's text, on the left, drawn bubbly or not:  `mine` gone, `theirs` in its place
     await page.waitForFunction((clash) => {
-      const text = document.querySelector(`${clash} .cm-merge-b .cm-content`)?.textContent ?? ""
+      const text = document.querySelector(`${clash} .cm-merge-a .cm-content`)?.textContent ?? ""
       return !text.includes("mine") && text.includes("theirs")
     }, clash)
     await page.locator(`${clash} ui-button[color=primary]`).click()

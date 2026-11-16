@@ -98,6 +98,7 @@ const APP_TEXTS_ES: AppTextPack = {
   partNoDrawing: "Este programa no tiene un dibujo al que añadir:\nañádele primero un <draw>.",
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
+  softWrap: "Ajuste de línea",
   // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "Acerca de Spell…",
@@ -163,8 +164,9 @@ const APP_TEXTS_ES: AppTextPack = {
   discardDraft: "Descartar",
   publishDraft: "Publicar",
   draft: "Borrador",
-  draftTip:
-    "Tus cambios son un borrador:  solo tú los ves.\nPublicar los muestra a todos, y guarda una versión.\nDescartar los tira.",
+  draftTip: "Tus cambios son un borrador.\nSolo tú los ves.",
+  publishDraftTip: "Envía tus cambios a todos.\nGuarda una versión.",
+  discardDraftTip: "Tira tus cambios.",
   updatedInYourDraft: "Actualizado en tu borrador.",
   discardChanges: "Descartar los cambios",
   closeTab: "Cerrar",
@@ -181,13 +183,18 @@ const APP_TEXTS_ES: AppTextPack = {
   publishedFile: "{count} archivo publicado:  guardado como la versión {version}.",
   publishedFiles: "{count} archivos publicados:  guardados como la versión {version}.",
   nothingToPublish: "Nada que publicar:  ningún archivo tiene borrador.",
-  publishClashHeading: "Publicado después de empezar tu borrador",
+  publishClashHeading: "Algunos archivos cambiaron desde que empezaste tu borrador.  ¿Te quedas con los cambios?",
   publishClashMessage:
-    "Alguien publicó estos archivos después de que empezaras tu borrador.\nPara quedarte con uno de sus cambios, haz clic en su flecha;  ⌘Z devuelve el tuyo.\nPublicar envía Tus cambios tal como estén.",
+    "Alguien actualizó estos archivos desde que empezaste tu borrador.\nPara aceptar un cambio, haz clic en su flecha en la columna del centro.",
+  publishClashFiles: "Archivos cambiados",
   publishClashTheirs: "Versión publicada ahora",
   publishClashMine: "Tus cambios",
-  publishStartAgain: "Empezar de nuevo desde lo suyo",
-  publishMerged: "Publicar",
+  publishClashTake: "Usar su cambio",
+  publishClashPutBack: "Deshacer:  volver a tu cambio",
+  publishUseTheirs: "Usar sus cambios",
+  publishUseTheirsHeading: "¿Usar sus cambios?",
+  publishUseTheirsConfirm: "¿Seguro?\nSe pierden todos tus cambios en estos archivos,\ny se usan los suyos.",
+  publishMine: "Publicar mis cambios",
   noVersions: "Aún no hay versiones:  cada Publicar guarda una.",
   versionsMessage:
     "Cada vez que publicas, Encanto guarda una copia de todo tu proyecto.\nElige una para traerla de vuelta como tu borrador:\nreemplaza los cambios que aún no has publicado.\nLo que ven todos no cambia hasta que hagas clic en Publicar, y sigue en esta lista.\nPara guardar tus cambios antes, haz clic en Guardar los cambios actuales:\nse añaden a la lista como tu borrador, y solo tú los ves.",

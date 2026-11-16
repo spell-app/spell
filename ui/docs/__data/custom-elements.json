@@ -21465,7 +21465,7 @@
             },
             {
               "name": "--ui-menu-header-bar-height",
-              "default": "38px"
+              "default": "40px"
             },
             {
               "name": "--ui-menu-header-bar-font-size",
@@ -21476,8 +21476,8 @@
               "default": "var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))"
             },
             {
-              "name": "--ui-menu-header-bar-border",
-              "default": "1px solid var(--ui-border-color)"
+              "name": "--ui-menu-header-bar-shadow",
+              "default": "0 1px 0 var(--ui-border-color)"
             },
             {
               "name": "--ui-menu-header-bar-filter",
@@ -23813,11 +23813,16 @@
           "cssProperties": [
             {
               "name": "--ui-page-layout-gap",
-              "default": "var(--ui-font-size, 16px)"
+              "default": "var(--_page-layout-room)"
             },
             {
               "name": "--ui-page-layout-shadow",
               "default": "0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent), 0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)"
+            },
+            {
+              "name": "--ui-page-layout-end-room",
+              "default": "round(0.5em, var(--ui-grid, 4px))",
+              "description": "the muted strip down the page's end side, beside its top-right corner (I219)"
             }
           ]
         }
@@ -38325,7 +38330,7 @@
           "cssProperties": [
             {
               "name": "--ui-site-nav-padding",
-              "default": "var(--_site-nav-padding-top) 0 0.5em"
+              "default": "var(--_site-nav-padding-top) 0 round(0.5em, var(--ui-grid, 4px))"
             },
             {
               "name": "--ui-site-nav-group-background",

@@ -448,28 +448,29 @@ describe("<ui-menu> tokens from outside", () => {
 
 // epic `design-system`, I5 / I21 / I35
 describe('<ui-menu appearance="header"> (a window\'s bar)', () => {
-  it("is flat and short:  the whole width, no corners, shadow or margin, a hairline under it", async () => {
+  it("is flat and short:  the whole width, no corners or margin, 40px tall, a hairline under it that takes no room (I36)", async () => {
     const { root } = await bar('appearance="header"')
     const style = getComputedStyle(root)
-    expect(Math.round(root.getBoundingClientRect().height)).toBe(38)
+    expect(root.getBoundingClientRect().height).toBe(40)
     expect(root.getBoundingClientRect().width).toBe(WIDTH)
     expect(style.borderRadius).toBe("0px")
-    expect(style.boxShadow).toBe("none")
+    // the hairline a shadow:  no border takes room
+    expect(style.boxShadow).toMatch(/0px 1px 0px 0px/)
     expect(style.marginTop).toBe("0px")
-    expect(style.borderBottomWidth).toBe("1px")
+    expect(style.borderBottomWidth).toBe("0px")
     expect(style.borderTopWidth).toBe("0px")
     expect(style.fontSize).toBe("13px")
   })
 
   it("takes its height, fill and line from its tokens", async () => {
     const { root } = await bar(
-      'appearance="header" style="--ui-menu-header-bar-height: 50px; --ui-menu-header-bar-background: rgb(1, 2, 3); ' +
-        '--ui-menu-header-bar-border: 0 solid transparent"'
+      'appearance="header" style="--ui-menu-header-bar-height: 48px; --ui-menu-header-bar-background: rgb(1, 2, 3); ' +
+        '--ui-menu-header-bar-shadow: none"'
     )
     const style = getComputedStyle(root)
-    expect(root.getBoundingClientRect().height).toBe(50)
+    expect(root.getBoundingClientRect().height).toBe(48)
     expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
-    expect(style.borderBottomWidth).toBe("0px")
+    expect(style.boxShadow).toBe("none")
   })
 
   it("leaves a segmented header alone:  it's the row of a pane's bar", async () => {
