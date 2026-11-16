@@ -84,8 +84,11 @@ describe("CodeMirrorMarkup", () => {
 function marksOf(text: string): Map<string, { text: string; classes: string[] }> {
   const marked = new Map<string, { text: string; classes: string[] }>()
   eachDecoration(CodeMirrorMarkup.decorationsOf(EditorState.create({ doc: text })), (from, to, spec) => {
-    if (typeof spec.class === "string" && to > from && !spec.block) {
-      marked.set(`${from}:${to}`, { text: text.slice(from, to), classes: spec.class.split(" ") })
+    // a quote mark's `"` is a widget showing its curly mark, in its own classes
+    const classes =
+      typeof spec.class === "string" ? spec.class : (spec.widget as { classes?: unknown } | undefined)?.classes
+    if (typeof classes === "string" && to > from && !spec.block) {
+      marked.set(`${from}:${to}`, { text: text.slice(from, to), classes: classes.split(" ") })
     }
   })
   return marked
