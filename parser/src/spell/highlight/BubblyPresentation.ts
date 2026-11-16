@@ -59,7 +59,7 @@ export class BubblyPresentation {
 
     // actions and handlers:  `to deal the cards`, `to draw its front`, `when its score changes`, `on click`;
     // an action's head:  everything after `to` is what a person typed, ONE pill (Owen, 2026-11-11), its blanks
-    // underlined in it, plain (epic `language` I109)
+    // underlined in it, their kind words bold, `a card` (epic `language` I109)
     to_do_something: {
       head: "action",
       inputs: ["method_keyword"],

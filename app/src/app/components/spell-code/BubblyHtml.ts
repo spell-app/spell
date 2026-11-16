@@ -156,12 +156,13 @@ class BubblyWriter {
       .map((piece) => {
         // a pill's own, its blanks (`to play <a card>`):  drawn inside it
         const inPill = piece.kind === "input" ? line.underlines.filter((each) => isInside(each, piece)) : []
+        const names = piece.kind === "input" ? (line.pillNames ?? []).filter((each) => isInside(each, piece)) : []
         const around = line.underlines.filter((each) => !inPill.includes(each))
         const opens = around.some((each) => each.start === piece.start)
         const closes = around.some((each) => each.end === piece.end)
         const code = codes.find((each) => each.start === piece.start || each.end === piece.end)
         const isBrace = !!code && piece.end - piece.start === 1
-        const html = isBrace ? braceHtml(this.text[piece.start]!) : this.piece(piece, inPill)
+        const html = isBrace ? braceHtml(this.text[piece.start]!) : this.piece(piece, inPill, names)
         return (
           (opens ? `<span class="${BubblyHtml.UNDERLINE}">` : "") +
           (code?.start === piece.start ? `<span class="${BubblyHtml.CODE}">` : "") +
@@ -173,8 +174,11 @@ class BubblyWriter {
       .join("")
   }
 
-  /** One piece as HTML;  `blanks`, the underlines inside it, when it's an action's pill (`to play <a card>`). */
-  private piece(piece: SP.BubblyPiece, blanks: SP.BubblyUnderline[] = []): string {
+  /**
+   * One piece as HTML;  when it's an action's pill (`to play <a card>`), `blanks`, the underlines inside it,
+   * and `names`, its bold words (`card`).
+   */
+  private piece(piece: SP.BubblyPiece, blanks: SP.BubblyUnderline[] = [], names: SP.BubblyPillName[] = []): string {
     const words = this.text.slice(piece.start, piece.end)
     switch (piece.kind) {
       case "words":
@@ -188,8 +192,8 @@ class BubblyWriter {
         const { start, end } = piece
         const classes = blanks.length ? `bubbly-input ${WITH_BLANKS}` : "bubbly-input"
         if (/^".*"$/s.test(words) && words.length > 1)
-          return `<span class="bubbly-quoted"><span class="${classes}">${QUOTE_OPEN}${this.wordsHtml(start + 1, end - 1, blanks)}${QUOTE_CLOSE}</span></span>`
-        return `<span class="${classes}">${this.wordsHtml(start, end, blanks)}</span>`
+          return `<span class="bubbly-quoted"><span class="${classes}">${QUOTE_OPEN}${this.wordsHtml(start + 1, end - 1, blanks, names)}${QUOTE_CLOSE}</span></span>`
+        return `<span class="${classes}">${this.wordsHtml(start, end, blanks, names)}</span>`
       }
       case "mark":
         return `<span class="${BubblyHtml.classesFor(piece.kind)}">${BubblyHtml.marksHtml(words)}</span>`
@@ -201,14 +205,31 @@ class BubblyWriter {
   }
 
   /**
-   * The text from `start` to `end` as HTML, each of `underlines` in it round its words:
-   * an action's blanks in its pill, `to play <a card>` (epic `language` I109).
+   * The text from `start` to `end` as HTML, each of `underlines` in it round its words, each of `names` bold:
+   * an action's blanks in its pill, their kind words bold, `to play <a card>` (epic `language` I109).
    */
-  private wordsHtml(start: number, end: number, underlines: SP.BubblyUnderline[]): string {
+  private wordsHtml(
+    start: number,
+    end: number,
+    underlines: SP.BubblyUnderline[],
+    names: SP.BubblyPillName[] = []
+  ): string {
     let html = ""
     let at = start
     for (const each of underlines.filter((underline) => underline.start >= start && underline.end <= end)) {
-      html += `${escape(this.text.slice(at, each.start))}<span class="${BubblyHtml.UNDERLINE}">`
+      html += `${this.namesHtml(at, each.start, names)}<span class="${BubblyHtml.UNDERLINE}">`
+      html += `${this.namesHtml(each.start, each.end, names)}</span>`
+      at = each.end
+    }
+    return html + this.namesHtml(at, end, names)
+  }
+
+  /** The text from `start` to `end` as HTML, each of `names` in it a name, bold (`bubbly-reference`). */
+  private namesHtml(start: number, end: number, names: SP.BubblyPillName[]): string {
+    let html = ""
+    let at = start
+    for (const each of names.filter((name) => name.start >= start && name.end <= end)) {
+      html += `${escape(this.text.slice(at, each.start))}<span class="${BubblyHtml.classesFor("reference")}">`
       html += `${escape(this.text.slice(each.start, each.end))}</span>`
       at = each.end
     }
@@ -247,7 +268,10 @@ const MAX_INDENT = 4
 const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`
 const QUOTE_CLOSE = `<span class="bubbly-quote-mark bubbly-quote-close">"</span>`
 
-/** An action's pill with blanks in it, `to "play a card"`:  plain, not bold as a quoted name is (epic `language` I109). */
+/**
+ * An action's pill with blanks in it, `to "play a card"`:  plain, not bold as a quoted name is,
+ * but its blanks' kind words, `card` (epic `language` I109).
+ */
 const WITH_BLANKS = "bubbly-with-blanks"
 
 /** Each piece's classes:  `words` has none;  `heading` and `input` are drawn their own way, around these. */
@@ -274,8 +298,8 @@ function escape(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
-/** Is `underline` inside `piece`, and not all of it:  an action's blank in its pill, `to play <a card>`? */
-function isInside(underline: SP.BubblyUnderline, piece: SP.BubblyPiece): boolean {
-  const { start, end } = underline
+/** Is `stretch` inside `piece`, and not all of it:  an action's blank in its pill, or its name, `to play <a card>`? */
+function isInside(stretch: SP.BubblyPillName, piece: SP.BubblyPiece): boolean {
+  const { start, end } = stretch
   return start >= piece.start && end <= piece.end && end - start < piece.end - piece.start
 }
