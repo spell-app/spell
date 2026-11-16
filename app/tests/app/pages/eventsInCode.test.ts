@@ -1,4 +1,4 @@
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
+import { chromium, type Browser, type BrowserContext, type Page, type Route } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { EDITOR, SERVING } from "./runningEditor"
@@ -6,11 +6,36 @@ import { EDITOR, SERVING } from "./runningEditor"
 /**
  * The Inspector's Code band, on Solitaire (epic `editor`, Events In Code):  each event's, ability's and action's code
  * is the code editor on its lines of the file, so typing there is typing in the file.
- * - NOTHING reaches the disk:  every save is answered here, so the built-in examples can't change.
+ * - NOTHING reaches the disk:  every save is answered here, and a later read of the file gets what was saved,
+ *   so the built-in examples can't change.
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
+
+/**
+ * A browser context whose saves go nowhere near the disk:  a read of a saved file gets the saved text.
+ * - AutoSave keeps each edit once typing pauses, and the editor reads its open file again now and then
+ *   (`editor.watchOpenFile()`):  read from the disk, a saved edit would seem undone by someone else, and be reloaded.
+ * - SEE:  editorPolish.test.ts's, the same.
+ */
+async function contextWithNoSaving(context: BrowserContext): Promise<void> {
+  const saved = new Map<string, string>()
+  // a file by where it's served:  `/api/projects/file/@spell/...` is `/spaces/@spell/...`
+  const keyOf = (url: string) => new URL(url).pathname.replace(/^\/api\/projects\/file\//, "/spaces/")
+  const answer = (route: Route) => {
+    const request = route.request()
+    const key = keyOf(request.url())
+    if (request.method() !== "GET") {
+      saved.set(key, request.postData() ?? "")
+      return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
+    }
+    const text = saved.get(key)
+    return text === undefined ? route.continue() : route.fulfill({ status: 200, contentType: "text/plain", body: text })
+  }
+  await context.route(/\/api\/projects\/file\//, answer)
+  await context.route(/\.spell(\?.*)?$/, answer)
+}
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 2500
@@ -43,11 +68,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
   beforeAll(async () => {
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1500, height: 950 } })
-    await context.route(/\/api\/projects\/file\//, (route) =>
-      route.request().method() === "GET"
-        ? route.continue()
-        : route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
-    )
+    await contextWithNoSaving(context)
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
@@ -56,8 +77,9 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
     }
     await page.waitForTimeout(1500)
-    // the lowest card on screen:  face up
-    const at = await page.evaluate(() => {
+    // the lowest card on screen:  face up;  selected itself, as a click on it selects its card image (the card's look,
+    // `<card-image card={it} />`, since Solitaire's language T138), with events of its own
+    await page.evaluate(() => {
       const cards: Element[] = []
       const walk = (root: ParentNode) => {
         for (const element of root.querySelectorAll("*")) {
@@ -66,13 +88,11 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
         }
       }
       walk(document)
-      const box = cards
-        .map((card) => card.getBoundingClientRect())
-        .filter((box) => box.width > 10)
-        .sort((a, b) => b.bottom - a.bottom)[0]!
-      return [box.x + box.width / 2, box.bottom - 8]
+      const card = cards
+        .filter((card) => card.getBoundingClientRect().width > 10)
+        .sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)[0]!
+      ;(window as unknown as { Inspector: { select(element: Element): void } }).Inspector.select(card)
     })
-    await page.mouse.click(at[0]!, at[1]!)
     await page.waitForTimeout(SETTLE_MS)
   }, 120_000)
 
@@ -107,14 +127,15 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect((await action.locator(".CodeSlice .view-lines").innerText()).replace(/\s+/g, " ")).toContain(
       "if the card is in the stock"
     )
-    // found where the compiler says it's declared, not by its words:  one whose words name another type (J58)
+    // found where the compiler says it's declared, not by its words:  one whose words name another type (J58);
+    // `the points for (a card) on (a pile)` since Solitaire's language P56 (was `count the points ...`)
     const points = page
       .locator(".InspectorEvent.action")
-      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /count/ }) })
+      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /points/ }) })
       .first()
     await expect
-      .poll(async () => (await points.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " "))
-      .toContain("if pile is a foundation return 10")
+      .poll(async () => (await points.locator(".CodeSlice .view-lines").innerText()).replace(/\s+/g, " "))
+      .toContain("return 10 if the pile is a foundation")
   })
 
   test("typing in one is typing in the file:  the app keeps running, and undo takes it back", async () => {
@@ -125,7 +146,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     // the points a move scores:  its last line, `return 0`;  found by its signature, as another row's code says its words
     const line = page
       .locator(".InspectorEvent.action")
-      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /count/ }) })
+      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /points/ }) })
       .first()
       .locator(".CodeSlice .view-line")
       .last()
