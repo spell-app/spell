@@ -308,21 +308,16 @@ def test_card_images() -> None:
 # -----------
 
 
-####################
-# ## A pile of cards
-####################
-# A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-# Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
-# A card dragged over it glows when it would take the card, by its own rules (`droppable`).
-
-
 Layout = Literal["stacked", "vertical"]
 
 
 class Pile(ViewableList):
+    """A pile of cards, e.g. in a game like solitaire"""
+
     item_type = Card
     element_tag = "test-project-pile"
 
+    # A card can only be in one pile at a time
     # How its cards lie:  on top of each other, or down a column -- styles.css
     # - its "layout" is one of stacked or vertical
     LAYOUTS = ("stacked", "vertical")
@@ -358,17 +353,16 @@ class Pile(ViewableList):
 
 def test_piles() -> None:
     with core.test("test piles"):
-        it = Pile()
         core.echo_test_action("set the stock to a new pile with id \"stock\"")
         stock = Pile(id="stock")
         core.expect(stock.color, "stock's color", "none", "\"none\"")
         core.expect(stock.value, "stock's value", 0, "0")
         core.echo_test_action(
-            "add (a new card whose rank is queen, suit is spades and direction is up) to the stock",
+            "add a new card with rank queen, suit  spades and direction up to the stock",
         )
         stock.append(Card(rank="queen", suit="spades", direction="up"))
         core.echo_test_action(
-            "add (a new card whose rank is 7, suit is hearts and direction is down) to the stock",
+            "add a new card with rank 7, suit  hearts and direction down to the stock",
         )
         stock.append(Card(rank=7, suit="hearts", direction="down"))
         core.expect(stock.color, "stock's color", "red", "red")
@@ -383,11 +377,11 @@ def test_piles() -> None:
         # a card is in one pile at a time
         discards = Pile(id="discards")
         core.echo_test_action("get the top card of the stock")
-        it_2 = stock.last_item
+        it = stock.last_item
         core.echo_test_action("add it to the discards")
-        discards.append(it_2)
+        discards.append(it)
         core.expect(
-            getattr(it_2, "pile", None) == discards,
+            getattr(it, "pile", None) == discards,
             "its pile is the discards",
             True,
             "yes",

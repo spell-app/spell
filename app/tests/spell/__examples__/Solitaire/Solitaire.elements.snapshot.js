@@ -204,17 +204,12 @@ export function testCardImages(...args) {
   return sendCall("test_card_images", args)
 }
 // -----------
-/////////////////////
-// ## A pile of cards
-/////////////////////
-// A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
-// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
-
+/** A pile of cards, e.g. in a game like solitaire */
 export class Pile extends ViewableList {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
+  // A card can only be in one pile at a time
   /** How its cards lie:  on top of each other, or down a column -- styles.css */
   // - its "layout" is one of stacked or vertical
   static Layouts = ["stacked", "vertical"]
@@ -251,7 +246,6 @@ export class Pile extends ViewableList {
 export function testPiles(...args) {
   return sendCall("test_piles", args)
 }
-
 // -----------
 /** a deck of playing cards */
 export class Deck extends ViewableList {

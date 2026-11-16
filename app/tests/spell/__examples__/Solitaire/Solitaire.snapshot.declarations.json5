@@ -173,7 +173,7 @@
         }
       ],
       "returns": "choice",
-      "defined": "/Pile.spell:922-1335"
+      "defined": "/Pile.spell:683-1096"
     },
     {
       "syntax": "{operator:is_or_is_not} on top of its pile",
@@ -183,7 +183,7 @@
       "kind": "method",
       "name": "\"is on top of its pile\"",
       "returns": "choice",
-      "defined": "/Pile.spell:2143-2203"
+      "defined": "/Pile.spell:1213-1273"
     },
     {
       "syntax": "play {thisArg:expression}",
@@ -239,7 +239,7 @@
       "of": "Card",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spell:2122-2141"
+      "defined": "/Pile.spell:1192-1211"
     },
     {
       "type": "CardImage",
@@ -347,7 +347,7 @@
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spell:335-2026"
+      "defined": "/Pile.spell:0-1096"
     },
     {
       "property": "layout",
@@ -357,25 +357,25 @@
         "stacked",
         "vertical"
       ],
-      "defined": "/Pile.spell:383-503"
+      "defined": "/Pile.spell:144-264"
     },
     {
       "property": "color",
       "of": "Pile",
-      "defined": "/Pile.spell:505-582"
+      "defined": "/Pile.spell:266-343"
     },
     {
       "property": "value",
       "of": "Pile",
       "datatype": "number",
-      "defined": "/Pile.spell:584-656"
+      "defined": "/Pile.spell:345-417"
     },
     {
       "property": "short_name",
       "asWritten": "short name",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spell:658-866"
+      "defined": "/Pile.spell:419-627"
     },
     {
       "syntax": "test piles",
@@ -384,7 +384,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spell:1338-2026"
+      "defined": "/Pile.spell:1309-1960"
     },
     {
       "type": "Deck",
@@ -691,27 +691,29 @@
     193,
     198,
     231,
-    270,
+    263,
+    269,
     275,
-    281,
+    280,
     286,
-    292,
-    307,
-    344,
-    349,
-    354,
-    361,
-    377,
-    379,
-    401,
-    403,
-    419,
-    421,
-    425,
-    447,
-    449,
+    301,
+    336,
+    341,
+    346,
+    353,
+    369,
+    371,
+    393,
+    395,
+    411,
+    413,
+    417,
+    439,
+    441,
+    459,
     467,
-    475,
+    500,
+    504,
     508,
     512,
     516,
@@ -725,13 +727,11 @@
     548,
     552,
     556,
-    560,
-    564,
-    569,
-    589,
+    561,
+    581,
+    592,
     600,
-    608,
-    643,
-    676
+    635,
+    668
   ]
 }

@@ -36,8 +36,8 @@
   ▶️ Executing   `set the stock to a new pile with id "stock"`
   ✅ As expected `stock's color` is `"none"`
   ✅ As expected `stock's value` is `0`
-  ▶️ Executing   `add (a new card whose rank is queen, suit is spades and direction is up) to the stock`
-  ▶️ Executing   `add (a new card whose rank is 7, suit is hearts and direction is down) to the stock`
+  ▶️ Executing   `add a new card with rank queen, suit  spades and direction up to the stock`
+  ▶️ Executing   `add a new card with rank 7, suit  hearts and direction down to the stock`
   ✅ As expected `stock's color` is `red`
   ✅ As expected `stock's value` is `7`
   ✅ As expected `stock's short name` is `"stock: Q♠↑ 7♥↓"`

@@ -331,20 +331,14 @@ export function testCardImages() {
   })
 }
 // -----------
-core.heading("A pile of cards")
-/////////////////////
-// ## A pile of cards
-/////////////////////
-// A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
-// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
-
 export type Layout = (typeof Pile.Layouts)[number]
 
+/** A pile of cards, e.g. in a game like solitaire */
 export class Pile extends ViewableList<Card> {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
+  // A card can only be in one pile at a time
   /** How its cards lie:  on top of each other, or down a column -- styles.css */
   // - its "layout" is one of stacked or vertical
   static Layouts = ["stacked", "vertical"] as const
@@ -401,18 +395,17 @@ core.useElement(Pile, PileElement)
 
 export function testPiles() {
   return core.test("test piles", function testPiles() {
-    const it = new Pile()
     core.echoTestAction(`set the stock to a new pile with id "stock"`)
     const stock = new Pile({ id: "stock" })
     core.expect(stock.color, `stock's color`, "none", `"none"`)
     core.expect(stock.value, `stock's value`, 0, `0`)
-    core.echoTestAction(`add (a new card whose rank is queen, suit is spades and direction is up) to the stock`)
+    core.echoTestAction(`add a new card with rank queen, suit  spades and direction up to the stock`)
     stock.append(new Card({
       rank: "queen",
       suit: "spades",
       direction: "up"
     }))
-    core.echoTestAction(`add (a new card whose rank is 7, suit is hearts and direction is down) to the stock`)
+    core.echoTestAction(`add a new card with rank 7, suit  hearts and direction down to the stock`)
     stock.append(new Card({
       rank: 7,
       suit: "hearts",
@@ -425,15 +418,14 @@ export function testPiles() {
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
     core.echoTestAction(`get the top card of the stock`)
-    const it2 = stock.lastItem
+    const it = stock.lastItem
     core.echoTestAction(`add it to the discards`)
-    discards.append(it2!)
-    core.expect(it2?.pile === discards, `its pile is the discards`, true, `yes`)
+    discards.append(it!)
+    core.expect(it?.pile === discards, `its pile is the discards`, true, `yes`)
     core.expect(stock.length, `the number of cards in the stock`, 1, `1`)
     core.expect(discards.shortName, `the discards' short name`, "discards: 7♥↓", `"discards: 7♥↓"`)
   })
 }
-
 // -----------
 /** a deck of playing cards */
 @thing
