@@ -1836,8 +1836,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "max-visible", kind: "string", group: "layout" },
     { name: "remember", kind: "string", group: "layout" },
     { name: "all-items-icon", kind: "icon", group: "content" },
-    { name: "all-items-at-end", kind: "boolean", group: "layout" },
-    { name: "all-items-always", kind: "boolean", group: "layout" }
+    { name: "all-items-at-end", kind: "boolean", group: "layout" }
   ],
   "ui-transition": [
     { name: "duration", kind: "string", group: "behaviour" },

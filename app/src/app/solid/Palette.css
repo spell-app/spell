@@ -60,22 +60,63 @@
   }
 }
 
-/* kept open:  the top bar's second row, edge to edge, a hairline between them;  its topics' names, quiet, as the
-   bar's menus are, the ✕ at its end */
+/* kept open:  the top bar's second row, edge to edge, part of the bar (epic `editor` T83;  Owen:  "Pinned Add menu should
+   look like it is part of the app menubar -- same background.  Center the buttons."):
+   - the bar's own fill and blur, over the page as the bar's is (on its `::before`, so a menu inside it isn't held in
+     its box);  the bar's hairline under it instead of between them (`.EditorBarPlace`, below)
+   - its topics' names centred on the window, quiet, as the bar's menus are;  the search and the ✕ at its end, over
+     the same cell:  the names keep the end's room clear on both sides, so their middle is the window's */
 .PaletteStrip {
   flex: none;
-  display: flex;
+  position: relative;
+  isolation: isolate;
+  /* the search's width, and the end's room:  the search, the gap, the ✕ */
+  --palette-search-width: 130px;
+  --palette-strip-end: calc(var(--palette-search-width) + 50px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  /* one row, the strip's height:  a toolbar's box is taller than its items, and centres them on it */
+  grid-template-rows: 100%;
   align-items: center;
-  gap: 8px;
   height: 32px;
-  /* its first name under the top bar's hat, its ✕ under the bar's last icon */
-  padding-inline: 15px 8px;
+  /* its ✕ under the bar's last icon */
+  padding-inline: 8px;
   min-width: 0;
-  border-block-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  border-block-end: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--spell-menu-bar-fill);
+    -webkit-backdrop-filter: var(--spell-menu-bar-filter);
+    backdrop-filter: var(--spell-menu-bar-filter);
+    pointer-events: none;
+  }
+
+  &:has(.PaletteStripSearch:focus-within) {
+    --palette-search-width: 220px;
+  }
 
   & .PaletteStripGroups {
-    flex: 1;
+    grid-area: 1 / 1;
     min-width: 0;
+    margin-inline: var(--palette-strip-end);
+    transition: margin-inline 0.15s ease;
+  }
+  /* centred in their room;  too many for it, they start at its start and scroll */
+  & .PaletteStripGroups::part(menu) {
+    justify-content: safe center;
+    /* no reach past its ends, as a row whose first word lines up with an edge has:  so it's centred */
+    margin-inline: 0;
+  }
+  & .PaletteStripEnd {
+    grid-area: 1 / 1;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   & ui-item.PaletteGroupName::part(item) {
@@ -88,16 +129,16 @@
     color: var(--ui-text-color);
   }
 }
+/* the top bar over it:  no hairline of its own, the strip's under them both */
+.EditorBarPlace:has(+ .PaletteStrip) ui-app-menu.EditorBar {
+  --ui-menu-header-bar-border: 1px solid transparent;
+}
 
 /* its search, before the ✕:  compact, wider while it's typed in (epic `editor` J140) */
 .PaletteStrip .PaletteStripSearch {
   flex: none;
-  width: 130px;
+  width: var(--palette-search-width);
   transition: width 0.15s ease;
-
-  &:focus-within {
-    width: 220px;
-  }
 }
 
 /* its search's results:  a layer over the page, holding each topic's matches as a menu under its name;

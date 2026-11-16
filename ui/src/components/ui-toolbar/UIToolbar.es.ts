@@ -21,8 +21,7 @@ export const toolbarEs = {
     "max-visible": "max-visibles",
     remember: "recordar",
     "all-items-icon": "icono-de-todos",
-    "all-items-at-end": "todos-al-final",
-    "all-items-always": "todos-siempre"
+    "all-items-at-end": "todos-al-final"
   },
   slots: { title: "titulo", center: "centro", right: "derecha", overflow: "desborde" },
   parts: { center: "centro", right: "derecha", overflow: "desborde", "overflow-menu": "menu-desborde" },

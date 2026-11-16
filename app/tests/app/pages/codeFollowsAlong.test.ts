@@ -32,7 +32,7 @@ async function open(page: Page, project: string): Promise<void> {
   await page.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
   await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
   await page.waitForTimeout(4000)
-  await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+  await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
   await page.waitForTimeout(1000)
 }
 
@@ -393,7 +393,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
       await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
       await page.waitForTimeout(4000)
-      await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+      await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
       await page.waitForTimeout(800)
       await chooseOutput(page, "JavaScript")
       const seen = await page.evaluate(() => document.documentElement.dataset.spellTheme)

@@ -29,7 +29,7 @@ async function open(page: Page): Promise<void> {
   await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
   await page.waitForTimeout(4000)
   if (!(await page.locator(".InspectorTree").count())) {
-    await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+    await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
     await page.waitForTimeout(1500)
   }
 }

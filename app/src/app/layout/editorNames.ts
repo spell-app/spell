@@ -146,7 +146,9 @@ export const EDITOR_NAMES = {
     for: "the file tabs",
     members: {
       files: { kind: "value", words: "files", for: "the tabs" },
-      rememberAs: { kind: "value", words: "remember as", for: "what the open tabs are kept under" }
+      rememberAs: { kind: "value", words: "remember as", for: "what the open tabs are kept under" },
+      hideWords: { kind: "value", words: "hide words", for: "the ✕'s tooltip, which hides the code" },
+      hide: { kind: "action", words: "hide it", for: "the ✕ at the bar's far right:  hides the code" }
     }
   },
   AboutBox: {

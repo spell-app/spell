@@ -22,7 +22,6 @@ import {
   CodeShown,
   ChangeThisBox,
   PartMenu,
-  InspectorToggle,
   ModeButtons,
   OutputEditor,
   OutputRoot,
@@ -573,10 +572,10 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
  *   then File · Edit · View · Run · Help (`MenuBar.tsx`)
- * - middle:  Run | Edit, then in Edit, the code's icon, the compiled code's (its language's icon) and Inspect app,
- *   in the same group
- * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
- *   line, then Restart, the theme, you
+ * - middle:  Run | Edit, then in Edit, the code's icon, the compiled code's (its language's icon), Inspect app and Add,
+ *   in the same group (epic `editor` T83)
+ * - right, ONE group of icons:  Restart, the theme, you
+ *   - no Inspector button (T83):  View › Inspector shows or hides it, and the Inspector card's ✕ hides it
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
  * - How they're arranged is Spell, the `editor bar` of `SpellEditor.spell`.
  * - What's in each is still the editor's, handed over here, each a thing that draws itself.
@@ -594,6 +593,7 @@ export function EditorToolbar(props: { mode: Mode }) {
           current={props.mode}
           compiled={<CompiledCodeButton />}
           inspect={<InspectAppButton id={INSPECT_APP_ID} item />}
+          add={<AddPartButton />}
         />
       )
     },
@@ -601,10 +601,7 @@ export function EditorToolbar(props: { mode: Mode }) {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
-            <AddPartButton />
             <InspectHelp for={INSPECT_APP_ID} />
-            <InspectorToggle />
-            <span class="BarToolsLine" role="separator" />
           </Show>
           <Actions.restartApp iconOnly />
           <ThemeMenu />

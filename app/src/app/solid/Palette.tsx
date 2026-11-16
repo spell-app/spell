@@ -348,7 +348,12 @@ function thisGroupMatches(words: string): boolean {
   return onPage || ownViewsMatching(words).length > 0
 }
 
-/** The top bar's `+`:  opens the palette, a menu with its search;  kept open too, beside the pinned bar. */
+/**
+ * The top bar's `+`:  opens the palette, a menu with its search;  kept open too, beside the pinned bar.
+ * - An item of the Run | Edit group, right after Inspect app (`<ModeButtons add>`;  epic `editor` T83:
+ *   "Move `add` to the immediate right of the inspector crosshair"), so it stands as its neighbours do.
+ * - It opens a menu, never becomes the mode chosen (its `aria-haspopup`).
+ */
 export function AddPartButton(): JSX.Element {
   let popup: (HTMLElement & { visible?: boolean }) | undefined
   onSettled(() => {
@@ -356,20 +361,20 @@ export function AddPartButton(): JSX.Element {
   })
   return (
     <>
-      <ui-icon
+      <ui-item
         id={ADD_BUTTON_ID}
-        name="plus"
-        link=""
-        class={["IconAction", "AddPartButton"]}
+        icon="plus"
+        class="AddPartButton"
         label={appTexts.text("addPart")}
         title={appTexts.text("addPart")}
+        aria-haspopup="menu"
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
       />
       <ui-popup
         for={ADD_BUTTON_ID}
         open-on="click"
-        position="bottom right"
+        position="bottom center"
         class="PalettePopup"
         aria-label={appTexts.text("addPart")}
         ref={(element: HTMLElement) => {
@@ -483,7 +488,8 @@ export function PaletteStrip(): JSX.Element {
           )}
         </For>
       </ui-toolbar>
-      <ui-input
+      <div class="PaletteStripEnd">
+        <ui-input
         class="PaletteStripSearch"
         size="small"
         aria-label={appTexts.text("paletteSearch")}
@@ -506,6 +512,7 @@ export function PaletteStrip(): JSX.Element {
         title={appTexts.text("paletteUnpin")}
         onClick={() => Palette.togglePinned()}
       />
+      </div>
       <div
         popover="manual"
         class="PaletteMatches"

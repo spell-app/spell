@@ -62,10 +62,10 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     )
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector("#AddPartButton", { timeout: 60_000 })
+    await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(4000)
     if (!(await page.locator('[data-panel="views"]').count())) {
-      await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+      await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
       await page.waitForTimeout(1500)
     }
   }, 120_000)
@@ -83,7 +83,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     // by tag:  `solitaire-stock-pile` last of the program's own
     expect((await boardRows()).at(-1)).toBe("Stock Pile")
     await page.reload()
-    await page.waitForSelector("#AddPartButton", { timeout: 60_000 })
+    await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(4000)
     expect((await boardRows()).at(-1)).toBe("Stock Pile")
     await sortBy("In document order")
@@ -172,7 +172,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
   })
 
   test("This app comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
-    await page.locator("#AddPartButton").click()
+    await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(1500)
     const own = await page
       .locator(".PalettePopup .ThisApp ui-tree-item")

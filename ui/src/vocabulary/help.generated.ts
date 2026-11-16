@@ -2225,14 +2225,12 @@ export const HELP_TABLE: Readonly<
       "scroll-first":
         "With `shrinkable`: once only its icons are left, they scroll with `‹` / `›`, no overflow button.",
       "max-visible":
-        "More items than this (a number; with none, 8): the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.",
+        "More items than this (a number; with none, 8): the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.",
       remember: "With `max-visible`: a name to keep the row's items under, so they're the same after a reload.",
       "all-items-icon":
         "With `max-visible`: an icon before the caret of the button listing every item, saying what they are (a project's files: `file outline`).",
       "all-items-at-end":
-        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show.",
-      "all-items-always":
-        "The button listing every item shows even while every item is in the row, so it's always in the same spot (a project's files, however few)."
+        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show."
     }
   },
   "ui-transition": {

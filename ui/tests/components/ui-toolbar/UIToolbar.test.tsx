@@ -235,20 +235,20 @@ describe("<ui-toolbar> bar slots", () => {
       expect(listButton(plain.host)!.getBoundingClientRect().right).toBeLessThan(plainBar.right - 100)
     })
 
-    it("`all-items-always`:  the button, and its list of every item, while every item is in the row", async () => {
-      const { host } = await toolbar(
-        600,
-        items(1),
-        `${LOOK} max-visible all-items-icon="file outline" all-items-at-end all-items-always`
-      )
-      await expect.poll(() => listButton(host)?.querySelectorAll("svg").length).toBe(2)
-      expect(host.matches(":state(limited)")).toBe(false)
-      expect(shown(host)).toEqual(["F0"])
-      const bar = host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
-      expect(Math.round(listButton(host)!.getBoundingClientRect().right)).toBe(Math.round(bar.right))
-      listButton(host)!.click()
+    it("every item in view:  no button;  some scrolled out of the row:  the button (epic `editor` T83)", async () => {
+      const attributes = `${LOOK} max-visible all-items-icon="file outline" all-items-at-end`
+      const { host } = await toolbar(600, items(2), attributes)
       await ElementFixture.settle()
-      expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual(["F0"])
+      expect(host.matches(":state(limited)")).toBe(false)
+      expect(listButton(host)).toBeNull()
+      const narrow = await toolbar(120, items(6), attributes)
+      await expect.poll(() => listButton(narrow.host)?.querySelectorAll("svg").length).toBe(2)
+      expect(narrow.host.matches(":state(limited)")).toBe(false)
+      const bar = narrow.host.shadowRoot!.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+      expect(Math.round(listButton(narrow.host)!.getBoundingClientRect().right)).toBe(Math.round(bar.right))
+      listButton(narrow.host)!.click()
+      await ElementFixture.settle()
+      expect(rows(narrow.host)).toHaveLength(6)
     })
 
     it("bare, it means 8", async () => {

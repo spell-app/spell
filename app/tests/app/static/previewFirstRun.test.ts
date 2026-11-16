@@ -101,7 +101,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
     async function fromPalette(label: string, toX: number, toY: number): Promise<void> {
       const row = page.locator(`.PalettePopup ui-tree-item[label="${label}"]`).first()
       if (!(await row.isVisible())) {
-        await page.locator("#AddPartButton").click()
+        await page.locator("#AddPartButton [part~=item]").click()
         await page.waitForTimeout(800)
       }
       const box = (await row.boundingBox())!
@@ -153,7 +153,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
     test("Blank:  an app of your own, with the palette open", async () => {
       await page.locator("#start .card").first().click()
       await page.waitForURL(`**/edit/${PROJECT}**`, { timeout: 60_000 })
-      await page.waitForSelector("#AddPartButton", { timeout: 60_000 })
+      await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
       await page.waitForTimeout(SETTLE_MS)
       await shot("2-blank")
       expect(await page.locator(".PalettePopup").first().isVisible()).toBe(true)
@@ -269,7 +269,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
       await page.locator("ui-modal input").fill("second app")
       await page.locator("ui-modal .approve").click()
       await page.waitForURL("**/edit/you@spell/second-app**", { timeout: 60_000 })
-      await page.waitForSelector("#AddPartButton", { timeout: 60_000 })
+      await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
       await page.waitForTimeout(SETTLE_MS)
       expect(await kept("spell-static", "you@spell/second-app/MyApp.spell")).toContain("<ui-container>")
     })

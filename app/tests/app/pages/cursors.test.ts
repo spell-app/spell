@@ -40,7 +40,7 @@ describe.skipIf(!SERVING)("the cursor over the running editor", () => {
       await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`)
       await page.waitForSelector(".monaco-editor .view-line", { timeout: 90_000 })
       await page.waitForTimeout(4000)
-      await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+      await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
       await page.waitForTimeout(2000)
 
       /////////////////////////
