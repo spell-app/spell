@@ -62,6 +62,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `site-page-waiting` | a page a site lists that isn't made yet:  JS core's | |
 | `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 | `site-menu` | a narrow site's button that opens its navigation:  JS core's | |
+| `site-side-bar`, `site-where` | a site's top bar:  its side bar button, its breadcrumb's label:  JS core's | |
 | `table-edit` | the undo step of an editable table's change:  JS core's | |
 """
 
@@ -175,6 +176,8 @@ MESSAGES: dict[str, str] = {
     "site-page-failed": "Sorry, this page couldn't be shown.",
     "site-page-failed-why": "{page} failed:  {why}",
     "site-menu": "Pages",
+    "site-side-bar": "Show or hide the side bar",
+    "site-where": "Where you are",
     "table-edit": "Edit Table",
 }
 

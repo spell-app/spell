@@ -28,6 +28,8 @@ export type SitePageEntry = {
   thumbnail?: string
   /** the real page it stands for, on the live site, if the line says:  `https://example.com/films` */
   live?: string
+  /** drawn without the site's top bar, when its line says `, no top bar` (epic `mockup` T35) */
+  noTopBar?: boolean
   /** the `<group>` it's under, at the site's top level:  `Hardware` */
   group?: string
   /** the icon its `<group>`'s line names, before the group's name in the site's navigation:  `microchip` */
@@ -180,6 +182,11 @@ export function specialPageOf(scope: P.Scope, name: string): "notFound" | "error
   if (Wording.reads(scope, "site_not_found_page", name)) return "notFound"
   if (Wording.reads(scope, "site_error_page", name)) return "error"
   return undefined
+}
+
+/** Is `name` a site's top bar, in the scope's language:  `top bar`, Spanish's `barra superior` (epic `mockup` T35)? */
+export function topBarOf(scope: P.Scope, name: string): "topBar" | undefined {
+  return Wording.reads(scope, "site_top_bar", name) ? "topBar" : undefined
 }
 
 /**

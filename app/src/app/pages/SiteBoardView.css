@@ -177,9 +177,10 @@
     text-overflow: ellipsis;
   }
 
-  /* a dialog or sidebar is square;  a section's card bold and bigger */
+  /* a dialog, a sidebar or the top bar is square;  a section's card bold and bigger */
   &.kind-dialog,
-  &.kind-sidebar {
+  &.kind-sidebar,
+  &.kind-topBar {
     --ui-card-radius: 0px;
   }
   &.section .heading {

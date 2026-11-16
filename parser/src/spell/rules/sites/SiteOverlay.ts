@@ -12,6 +12,7 @@ import {
   overlayViewNamed,
   siteOf,
   specialPageOf,
+  topBarOf,
   type SiteOverlayEntry
 } from "./sites.shared"
 
@@ -28,6 +29,10 @@ import {
  *   - pages with no address, shown in place of one
  *   - the program's own when it declares a page of that name, else a plain built-in one
  *   - every new site lists them;  one deleted still shows the built-in one
+ * - Its TOP BAR too (epic `mockup` T35):  `- it has a top bar` (`site_top_bar`).
+ *   - drawn above every page but one whose line says `, no top bar`:  a side bar button, where you are, its buttons
+ *   - the buttons are the view of its name, when the program declares one (`a "top bar" is a view`), as a dialog's are
+ *   - a site without the line has no top bar
  * - Under a page, one line in from it, it belongs to that page's section of the site editor's board;
  *   it's opened from any page all the same.
  * - Its line may end with where its card sits in its section, and its colour (epic `mockup` T31):
@@ -50,7 +55,11 @@ export class SiteOverlay extends SpellStatement<
     const name = textIn(match.groups.part) || match.groups.part.inputText.trim()
     // its kind's word:  last in English (`settings dialog`), first in Spanish (`diálogo de ajustes`)
     const words = name.split(/\s+/)
-    const kind = specialPageOf(scope, name) ?? overlayKindOf(scope, words.at(-1)) ?? overlayKindOf(scope, words[0])
+    const kind =
+      specialPageOf(scope, name) ??
+      topBarOf(scope, name) ??
+      overlayKindOf(scope, words.at(-1)) ??
+      overlayKindOf(scope, words[0])
     if (!kind) return undefined
     const view = overlayViewNamed(scope, name)
     const card = cardDetailsOf(match.groups)
@@ -60,10 +69,13 @@ export class SiteOverlay extends SpellStatement<
     return match
   }
 
-  /** SIDE EFFECT:  our site lists us, for `go to the ...` to be checked against -- see `P.TypeScope.siteOverlays`. */
+  /**
+   * SIDE EFFECT:  our site lists us, for `go to the ...` to be checked against -- see `P.TypeScope.siteOverlays`.
+   * - Not its top bar:  it's always there, never gone to.
+   */
   mutateScope(match: P.MatchFor<this>) {
-    const { entry } = match.data
-    if (entry) siteOf(match.scope)?.declareSiteOverlay(entry.name, match)
+    const { entry, kind } = match.data
+    if (entry && kind !== "topBar") siteOf(match.scope)?.declareSiteOverlay(entry.name, match)
   }
 
   /** Nothing:  see the class. */
@@ -73,4 +85,4 @@ export class SiteOverlay extends SpellStatement<
 }
 
 /** Which of a site's parts with no address a `site_overlay` line names. */
-export type SiteOverlayKind = "dialog" | "sidebar" | "notFound" | "error"
+export type SiteOverlayKind = "dialog" | "sidebar" | "notFound" | "error" | "topBar"

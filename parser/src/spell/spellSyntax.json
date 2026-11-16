@@ -1663,6 +1663,7 @@
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_top_bar",
             "site_page_state",
             "site_card_color",
             "site_not_found_page",
@@ -1794,6 +1795,9 @@
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
+            },
+            {
+              "syntax": "(top bar|app bar)"
             },
             {
               "syntax": "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
@@ -6154,7 +6158,7 @@
               }
             },
             {
-              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color}",
+              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color} (, icon {icon:text})?",
               "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", color blue\n\tit has a films page at \"/films\"",
               "outputs": {
                 "js": {
@@ -6165,6 +6169,21 @@
                 },
                 "py": {
                   "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [{\"name\": \"films page\", \"page\": \"FilmsPage\", \"address\": \"/films\", \"group\": \"Films\"}]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} group {group:text}, icon {icon:text}",
+              "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", icon \"film\"\n\tit has a films page at \"/films\"",
+              "outputs": {
+                "js": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\",\n    groupIcon: \"film\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\",\n    groupIcon: \"film\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"group\": \"Films\",\n            \"group_icon\": \"film\",\n        },\n    ]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
                 }
               }
             }
@@ -8845,7 +8864,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -8871,20 +8890,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 51,
+          "line": 53,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -8894,7 +8913,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 38,
+          "line": 43,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {
