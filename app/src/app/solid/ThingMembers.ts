@@ -43,7 +43,11 @@ export class ThingMembers {
       const groups = words?.groups?.[type] ?? []
       const grouped = new Set(groups.flatMap((group) => group.members))
       const loose = own.filter((member) => !grouped.has(member.name))
-      if (loose.length) bands.push({ key: `${type}:`, title: wordsOfName(type), members: loose })
+      if (loose.length) {
+        const band: MemberBand = { key: `${type}:`, title: wordsOfName(type), members: loose }
+        if (type === chain[0]?.type) band.isOwnType = true
+        bands.push(band)
+      }
       loose.forEach((member) => placed.add(member.name))
       for (const group of groups) {
         const inGroup = group.members.flatMap((name) => {
@@ -57,7 +61,9 @@ export class ThingMembers {
     }
     // what no type of the chain owns (a value set on it, never declared):  with its own type's
     const rest = [...members.values()].filter((member) => !placed.has(member.name))
-    if (rest.length) bands.push({ key: "rest:", title: wordsOfName(chain[0]?.type ?? ""), members: rest })
+    if (rest.length) {
+      bands.push({ key: "rest:", title: wordsOfName(chain[0]?.type ?? ""), members: rest, isOwnType: true })
+    }
     const builtIn = BUILT_IN_MEMBERS.flatMap((name) => members.get(name) ?? [])
     if (builtIn.length) bands.push({ key: BUILT_IN_BAND, title: "", members: builtIn, isBuiltIn: true })
     return bands
@@ -119,6 +125,12 @@ export type MemberBand = {
   description?: string
   /** Its members, in the file's order. */
   members: ThingMember[]
+  /**
+   * The thing's OWN type's band, named for it (`stock pile`):  its members under no group, or what no type owns.
+   * - The Inspector draws it with no title:  the card's header already names the type (epic `editor` I200).
+   * - An inherited type's band (`pile`) keeps its title:  it says where those members come from.
+   */
+  isOwnType?: boolean
   /** The built-in members' band (`id`):  it starts folded. */
   isBuiltIn?: boolean
 }

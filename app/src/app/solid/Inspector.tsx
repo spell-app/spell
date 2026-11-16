@@ -245,11 +245,18 @@ export class Inspector {
   /**
    * Select `element` (`undefined`:  nothing), outlined while it stays selected.
    * - A new selection starts the trail afresh (`inspected`);  `trail`, inspecting it again after a redraw, follows that one.
+   * - It unfolds the Views card, folded, so its row can come into view there (Owen, 2026-11-16, epic `editor` I206:
+   *   "Selecting a card should expand the views panel and scroll so the card is visible");  not `unfoldsViews: false`,
+   *   what was selected found again after a reload or a redraw, so a card folded by hand stays folded.
    * - NOTE:  the new selection and trail are passed along, never read back:
    *   a signal reads its old value until the next flush.
    */
-  static select(element: Element | undefined, { trail: steps = [] as readonly string[] } = {}): void {
+  static select(
+    element: Element | undefined,
+    { trail: steps = [] as readonly string[], unfoldsViews = true } = {}
+  ): void {
     const part = element && Inspector.partFor(element)
+    if (part && unfoldsViews && Inspector.isFolded("views")) Inspector.toggleFolded("views")
     setSelectedParts(part ? [part] : [])
     setTrail(steps)
     clicks.pivot = element
@@ -262,12 +269,14 @@ export class Inspector {
 
   /**
    * Select all of `elements` at once:  what isn't a part is left out;  one is as `select()`, none lets go.
+   * - It unfolds the Views card as `select()` does, but with `unfoldsViews: false`.
    * - The last is the one the properties card says most about (`selected`).
    * - Several have no trail:  a trail starts from one thing.
    */
-  static selectAll(elements: readonly Element[]): void {
-    if (elements.length < 2) return Inspector.select(elements[0])
+  static selectAll(elements: readonly Element[], { unfoldsViews = true } = {}): void {
+    if (elements.length < 2) return Inspector.select(elements[0], { unfoldsViews })
     const parts = elements.flatMap((element) => Inspector.partFor(element) ?? [])
+    if (parts.length && unfoldsViews && Inspector.isFolded("views")) Inspector.toggleFolded("views")
     setSelectedParts(parts)
     setTrail([])
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), [])
@@ -463,11 +472,6 @@ export class Inspector {
     Inspector.select(found.element, { trail: found.trail })
   }
 
-  /** Go back along the trail to step `depth` (0:  what's selected). */
-  static backTo(depth: number): void {
-    Inspector.followTrail(trail().slice(0, depth))
-  }
-
   /** Follow `steps` from what's selected;  remember them, and outline what they lead to when it's drawn. */
   private static followTrail(steps: readonly string[]): void {
     setTrail(steps)
@@ -570,14 +574,15 @@ export class Inspector {
     const found = [remembered ?? []].flat().flatMap((address) => Inspector.elementAt(address, rows) ?? [])
     // the trail from it too, as it was left
     const steps = (editorPrefs.get(Inspector.projectPref(TRAIL_PREF)) as string[] | undefined) ?? []
-    if (found.length > 1) return Inspector.selectAll(found)
-    if (found.length) return Inspector.select(found[0], { trail: steps })
+    // found again, not chosen anew:  the Views card stays as it was left
+    if (found.length > 1) return Inspector.selectAll(found, { unfoldsViews: false })
+    if (found.length) return Inspector.select(found[0], { trail: steps, unfoldsViews: false })
     // a part no row holds (a button in a drawn thing's own drawing):  the element drawn again from the same place
     const redrawn = parts.flatMap((part) =>
       part.element.isConnected ? part.element : (Inspector.redrawnElement(part.element) ?? [])
     )
-    if (redrawn.length > 1) Inspector.selectAll(redrawn)
-    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps })
+    if (redrawn.length > 1) Inspector.selectAll(redrawn, { unfoldsViews: false })
+    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps, unfoldsViews: false })
     else if (parts.length) Inspector.select(undefined)
   }
 
@@ -3043,7 +3048,7 @@ function pinnedAt(height: number): Keyframe {
 
 /****************
  * ### `<PropertiesCard>`
- * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
+ * What's selected:  in the card's header, what a change applies to, then a
  * `<ui-property-editor>` of every property it has, each in its vocabulary's place, set or not (I199)
  * (Owen:  "lose that [More]. Show all of the properties").
  * - Inspecting again:  Inspect app, in the card's header as in the top bar (`<InspectAppButton>`;
@@ -3054,9 +3059,12 @@ function pinnedAt(height: number): Keyframe {
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
  * - Its code is the Code card's, under it (`<CodeCard>`, epic `editor` I109).
- * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
- *   Following one, the title is the TRAIL from what was selected (`Solitaire › Discard Pile "discards"`),
- *   each step a pill that goes back to it (`Inspector.inspected`).
+ * - The header (Owen, 2026-11-16, epic `editor` I200:  "Don't need header like this, just \"Stock pile\" and
+ *   \"All Stock Piles\""):
+ *   - a thing:  only the choice of what a change applies to, `Stock pile | All Stock Piles` (`<ScopeSwitch>`)
+ *   - the app, a one of a kind, or a Spell UI element:  only what it is, a file bar's tab, its icon (T95)
+ *   - no trail of how it was reached (`Solitaire › Deck`):  another part is selected in the Views card,
+ *     where every thing the app holds is a row (T96), or in the app
  ****************/
 function PropertiesCard(): JSX.Element {
   // the same part, reached again:  its card isn't drawn again, so a field being typed in keeps the cursor
@@ -3071,40 +3079,28 @@ function PropertiesCard(): JSX.Element {
         <Show when={inspected()} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
             <Show
-              when={!hasScopeSwitch(part()) || part().crumbs.length > 1}
-              // a thing alone, with no trail:  ONE segmented control, [Card "King of Diamonds" | All Cards] (Owen)
+              when={!hasScopeSwitch(part())}
+              // a thing:  ONE segmented control, [Stock pile | All Stock Piles], and nothing more (I200)
               fallback={<ScopeSwitch part={part()} />}
             >
+              {/* the app, or a Spell UI element:  what it is, a file bar's tab (T95) */}
               <ui-menu
                 slot="title"
                 appearance="segmented link header"
                 class="InspectorTrail"
                 ref={on("ui-choosing", (event) => event.preventDefault())}
               >
-                <For each={part().crumbs}>
-                  {(crumb) => (
-                    <>
-                      <Show when={crumb.depth}>
-                        <span class="InspectorTrailStep">›</span>
-                      </Show>
-                      <ui-item
-                        class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
-                        icon={!crumb.depth && part().element ? Inspector.iconFor(part().element!) : THING_ICON}
-                        selected={crumb.depth === part().crumbs.length - 1}
-                        title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
-                        onClick={(event: MouseEvent) => {
-                          if (crumb.depth === part().crumbs.length - 1) return
-                          event.stopPropagation()
-                          Inspector.backTo(crumb.depth)
-                        }}
-                      >
-                        <span class="InspectorPartTagText">{crumb.label}</span>
-                      </ui-item>
-                    </>
-                  )}
-                </For>
+                <ui-item
+                  class="InspectorPartTag"
+                  icon={part().crumbs.length === 1 && part().element ? Inspector.iconFor(part().element!) : THING_ICON}
+                  selected
+                  title={
+                    part().crumbs.length === 1 ? Inspector.writtenPlaceTitle(part().element) || undefined : undefined
+                  }
+                >
+                  <span class="InspectorPartTagText">{part().label}</span>
+                </ui-item>
               </ui-menu>
-              <ScopeSwitch part={part()} />
             </Show>
           )}
         </Show>
@@ -3236,8 +3232,8 @@ const SCOPE_PREF = "scope"
 
 /****************
  * ### `<ScopeSwitch>`
- * `This | All Cards`, short, in the row that names what's inspected, beside its chip, which already names the thing
- * (Q32):  so it costs no height.
+ * `Card | All Cards`:  the whole of the properties card's header for a thing (Q32;  epic `editor` I200),
+ * so it costs no height.
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
  * - Never for a one of a kind, the app among them (`Inspector.isOneOfAKind()`):  its changes go to its type.
@@ -3248,14 +3244,12 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
   const typeWords = () => wordsOfType(props.part.value)
   const scope = () => Inspector.scopeOf(props.part)
   const count = () => props.part.together?.length ?? 1
-  // with no trail, the first segment IS what's selected, as its chip said it (`Card "King of Diamonds"`), its ✕ after
-  const isWhole = () => props.part.crumbs.length === 1
+  // this one, by its type, as Owen wrote it:  `Stock pile`;  several, `These 3 Cards`
   const these = () =>
     count() > 1
       ? appTexts.text("inspectorScopeThese", { count: count(), Types: titleCase(P.pluralize(typeWords())) })
-      : isWhole()
-        ? headlineCase(props.part.crumbs[0]!.label)
-        : appTexts.text("inspectorScopeThis")
+      : typeWords().charAt(0).toUpperCase() + typeWords().slice(1)
+  const isWhole = () => props.part.crumbs.length === 1
   return (
     <Show when={hasScopeSwitch(props.part)}>
       <ui-item
@@ -3475,8 +3469,14 @@ type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: Fie
  * ### `<ThingBands>`
  * A thing's properties as the properties card lists them (epic `debut` P26):
  * in folding bands named by its file's groups and headings (`rank`, `suit`, `drawing`), in the file's order
- * (`ThingMembers.bandsOf()`);  then, for a list, its items, a link each.
- * - A stored property:  a field to change it, or a link to the thing it holds (`<ThingLink>`).
+ * (`ThingMembers.bandsOf()`);  then, for a list, how many items it has.
+ * - Its own type's members under no group first, in a band with no title:  the card's header already names the type
+ *   (Owen, 2026-11-16, epic `editor` I200:  "Solitaire blue header is not necessary").
+ *   An inherited type's band (`pile`) keeps its title:  it says where those come from.
+ * - A stored property:  a field to change it.
+ * - NOT a stored property that holds another thing, nor a list's items:  they're its children, each a row of
+ *   the Views card under it, drawn or not, to select it there (Owen, 2026-11-16, epic `editor` I205:
+ *   "Ditch children in this panel -- we have the bottom pane to select them").
  * - A computed one (Value, Color, Picture, is a face card):
  *   its value, read only, live as the program changes it (`<ComputedField>`).
  * - Each by its words in the program (`is a face card`), when the words file has them.
@@ -3500,13 +3500,15 @@ function ThingBands(props: {
       const things = runtimeCore()?.things
       const properties = things && isThing(props.value) ? things.propertiesOf(props.value as never) : []
       const stored = props.schema.attributes.map((attribute) => attribute.name)
+      // a stored property holding a thing is a child:  the Views card's (I205)
+      const isChild = (member: ThingMember) => member.kind === "stored" && isThing(holds(member.name))
       const all = ThingMembers.bandsOf(props.value, { stored, properties, words: editor.programWords })
-      if (!props.isTogether) return all
       return all
         .map((band) => ({
           ...band,
           members: band.members.filter(
-            (member) => member.kind === "stored" && stored.includes(member.name) && !isThing(holds(member.name))
+            (member) =>
+              !isChild(member) && (!props.isTogether || (member.kind === "stored" && stored.includes(member.name)))
           )
         }))
         .filter((band) => band.members.length)
@@ -3523,10 +3525,12 @@ function ThingBands(props: {
           const setFolded = (folded: boolean) => Inspector.setGroupFolded(fold, folded !== !!band.isBuiltIn)
           return (
             <ui-property-group
-              label={band.isBuiltIn ? appTexts.text("inspectorBuiltIn") : band.title}
-              description={band.description}
-              collapsible=""
-              open={isFolded() ? "false" : undefined}
+              // its own type's members:  no title, as the header names the type (I200)
+              class={{ InspectorUntitled: !!band.isOwnType }}
+              label={band.isBuiltIn ? appTexts.text("inspectorBuiltIn") : band.isOwnType ? undefined : band.title}
+              description={band.isOwnType ? undefined : band.description}
+              collapsible={band.isOwnType ? undefined : ""}
+              open={isFolded() && !band.isOwnType ? "false" : undefined}
               ref={(group) => {
                 on("ui-closing", () => setFolded(true))(group)
                 on("ui-opening", () => setFolded(false))(group)
@@ -3542,16 +3546,7 @@ function ThingBands(props: {
                       when={member.kind === "stored"}
                       fallback={<ComputedField thing={props.value} member={member} />}
                     >
-                      <Show
-                        when={isThing(holds(member.name))}
-                        fallback={<ui-property name={member.name} label={memberLabel(member)} />}
-                      >
-                        <ThingLink
-                          label={memberLabel(member)}
-                          thing={holds(member.name) as object}
-                          step={member.name}
-                        />
-                      </Show>
+                      <ui-property name={member.name} label={memberLabel(member)} />
                     </Show>
                   </Show>
                 )}
@@ -3560,13 +3555,10 @@ function ThingBands(props: {
           )
         }}
       </For>
+      {/* its items are its children, in the Views tree under it, drawn or not (I205):  only how many here */}
       <Show when={items().length}>
         <div class="InspectorItems">
           <span class="InspectorItemsLabel">{appTexts.text("inspectorItems", { count: items().length })}</span>
-          {/* items the app draws are in the Views tree, under it:  not listed twice (Owen:  "don't need them twice") */}
-          <Show when={!items().every((item) => Inspector.elementDrawing(item))}>
-            <For each={items()}>{(item, index) => <ThingLink thing={item} step={`${ITEM_STEP}${index()}`} />}</For>
-          </Show>
         </div>
       </Show>
     </>
@@ -3754,22 +3746,18 @@ function ThingLink(props: {
 
 /****************
  * ### `<ThingChip>`
- * A thing made as the program runs, as a pill:  `Card "king of diamonds" ›`.
- * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree
- *   (Owen:  "Full pill for items that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
- * - `inRow`:  drawn inside a tree row, as its label:  `inert`, so a click, the keys and focus stay the row's,
- *   and no `›`, since a click there selects rather than follows.
+ * A thing made as the program runs, as a pill:  `Card "king of diamonds" ›`, the Inspector's link to it (`<ThingLink>`).
+ * - Not in the Views tree:  its rows say a thing's name as plain words (Owen, 2026-11-16, epic `editor` I209:
+ *   "Lose pill border around these items";  a pill there since "Full pill for items that are allocated objects").
  ****************/
-export function ThingChip(props: { label: string; onClick?: () => void; inRow?: boolean }): JSX.Element {
+function ThingChip(props: { label: string; onClick?: () => void }): JSX.Element {
   return (
     <ui-button
       appearance="basic"
       size="small"
-      icon={props.inRow ? undefined : "angle right"}
-      icon-position={props.inRow ? undefined : "right"}
-      class={["InspectorThingButton", { InspectorRowChip: props.inRow }]}
-      slot={props.inRow ? "label" : undefined}
-      inert={props.inRow ? "" : undefined}
+      icon="angle right"
+      icon-position="right"
+      class="InspectorThingButton"
       onClick={props.onClick}
     >
       {props.label}
