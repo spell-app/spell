@@ -334,6 +334,8 @@ function nameOf(path: string): string {
 
 /** When each editor was made and first drawn, in msec from the page's start:  for a probe to read. */
 const timings: {
+  /** Solitaire loaded and parsed, both editors' starting point */
+  projectReadyAtMsec?: number
   codemirror?: { madeMsec: number; firstDrawAtMsec?: number }
   monaco?: { loadMsec?: number; madeAtMsec?: number; firstDrawAtMsec?: number }
 } = {}
@@ -409,6 +411,7 @@ async function start() {
   const project = new SP.SpellProject(SP.SpellProject.projectIdForImport(PROJECT))
   await project.load()
   await project.parse()
+  timings.projectReadyAtMsec = nowMsec()
   setDebugGlobal({ codemirrorTest: { project, timings, latencies } })
   render(() => <CodeMirrorTest project={project} />, document.getElementById("codemirror-test")!)
 }
