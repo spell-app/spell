@@ -10,12 +10,14 @@
 @import "spell/ui/styles/media.css";
 
 /*
- * the two panes on the code's paper while the code is drawn bubbly, as Edit's code and Inspector are (epic `mockup`
- * I17;  Owen:  "the white aesthetic of the code editor & inspector sidebar"):  `--spell-code-paper` (`spell.css`)
- * - the pane's own glass, a theme's see-through fill, read as lilac on the theme's page
+ * the two panes look as the Inspector's cards do (Owen, epic `mockup` I18:  "same for the site panels",
+ * "This should look like the inspectors -- header in the menubar color, background primary-25"):
+ * - on a panel's own fill, `--spell-panel-background` (`spell.css`), solid, in every theme
+ *   (before, epic `mockup` I17:  the code's white paper, while the code was drawn bubbly)
+ * - the board's bar the top bar's colour, `--spell-menu-bar-background` (below, `header`)
  */
-:root.spell-bubbly .SiteEditorPage > .SplitPane::before {
-  background: var(--spell-code-paper);
+:root[data-spell-theme] .SiteEditorPage > .SplitPane::before {
+  background: var(--spell-panel-background);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -35,11 +37,18 @@
     padding: 14px;
   }
 
+  /* the board's bar:  out to the pane's edges and top, its corners the pane's, a hairline under it, as an Inspector card's */
   header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    margin: -14px -14px 0;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--ui-border-color);
+    border-start-start-radius: var(--spell-pane-radius, 0);
+    border-start-end-radius: var(--spell-pane-radius, 0);
+    background: var(--spell-menu-bar-background);
   }
   h1 {
     margin: 0;

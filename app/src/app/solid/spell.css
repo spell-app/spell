@@ -22,10 +22,31 @@
   --spell-view-background: var(--spell-pane-background);
   /*
    * the code's paper while it's drawn bubbly (`--bubbly-paper`, `bubbly.css`):  white, or near-black in dark
-   * - the panes beside the code take it too, so the columns match (the page's `spell-bubbly`:  `codePopups.ts`):
-   *   the Inspector's cards (epic `editor` I153), the site editor's board and form (epic `mockup` I17)
+   * - a side panel's fill is made from it (`--spell-panel-background`, below);
+   *   the Inspector's cards and the site editor's panes wore it as it is till epic `mockup` I18 (`editor` I153, I17)
    */
   --spell-code-paper: light-dark(white, #1c1b22);
+  /*
+   * a side panel's body:  the Inspector's cards, the site editor's board and form (epic `mockup` I18)
+   * - the theme's primary at its palest, Owen's "primary-25":  Spell UI has no steps of a colour,
+   *   so it's the primary mixed into the code's paper
+   * - a theme sets its own here
+   */
+  --spell-panel-background: color-mix(in oklab, var(--ui-primary) 5%, var(--spell-code-paper));
+  /*
+   * the top bar's fill as it's seen, for a bar inside a panel to match it (epic `mockup` I18):
+   * the Inspector's card headers, the code's file tabs, the site editor's board bar
+   * - the top bar's own fill (`--spell-menu-bar-fill`), over the page under it (`--ui-background`):
+   *   a theme's bar is often see-through, on the page, where these sit on a panel
+   * - its fill is `<ui-menu appearance="header">`'s, the same tokens in the same order (`UIMenu.css`, "Bar")
+   * - a background's layers, so it's for `background`, never `background-color`
+   */
+  --spell-menu-bar-fill: var(
+    --ui-menu-header-bar-background,
+    var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))
+  );
+  --spell-menu-bar-background:
+    linear-gradient(var(--spell-menu-bar-fill), var(--spell-menu-bar-fill)), var(--ui-background);
 }
 
 /*
