@@ -755,10 +755,11 @@ export class Inspector {
   /**
    * Is `element` a part the Inspector shows:  a drawn thing, or a Spell UI element?
    * - Or an element of a component built on Spell UI's, its vocabulary its own:  a notebook's `<spell-example>`.
+   * - Or any other tag the drawing writes, a `<spacer />` (`isWrittenTag()`;  epic `editor` I169).
    * - An arrow:  handed on as it is (`NotebookController.cellAt()`).
    */
   static isPart = (element: Element): boolean => {
-    return !!SpellElement.thingOf(element) || isUIElement(element)
+    return !!SpellElement.thingOf(element) || isUIElement(element) || isWrittenTag(element)
   }
 
   /**
@@ -1334,7 +1335,7 @@ export class Inspector {
         label: Inspector.labelFor(element)
       }
     }
-    if (isUIElement(element)) {
+    if (isUIElement(element) || isWrittenTag(element)) {
       // its attributes as its vocabulary lists them:  those it sets first, the rest under "More"
       const component = (element as Element & { component?: { vocabulary?: { attributes?: FieldSpec[] } } }).component
       const fields = component?.vocabulary?.attributes ?? []
@@ -1656,12 +1657,24 @@ const ADDED_TAGS = new Set([
   "ui-image"
 ])
 
-/** Does a click on `element` mean it, by its tag? */
+/**
+ * Does a click on `element` mean it, by its tag?
+ * - A Spell UI control (`CONTROL_TAGS`), anywhere
+ * - What the palette adds (`ADDED_TAGS`), or any other tag the drawing writes (`isWrittenTag()`:  a `<spacer />`),
+ *   when it isn't in a drawn thing's shadow root:  there it's how the thing looks, and a click means the thing.
+ */
 function isClickableTag(element: Element): boolean {
-  return (
-    CONTROL_TAGS.has(element.localName) ||
-    (ADDED_TAGS.has(element.localName) && !(element.getRootNode() instanceof ShadowRoot))
-  )
+  if (CONTROL_TAGS.has(element.localName)) return true
+  return (ADDED_TAGS.has(element.localName) || isWrittenTag(element)) && !(element.getRootNode() instanceof ShadowRoot)
+}
+
+/**
+ * Is `element` a tag the drawing writes that's neither a drawn thing nor a Spell UI element:
+ * a `<spacer />`, which only takes room (epic `editor` I169;  Owen:  "I should be able to select a spacer").
+ * - It's in the code (stamped with where:  `SourceMarks.placeOfDrawn()`), so the code's caret can go to it.
+ */
+function isWrittenTag(element: Element): boolean {
+  return !SpellElement.thingOf(element) && !isUIElement(element) && !!SourceMarks.placeOfDrawn(element)
 }
 
 editorPrefs.declare(OPEN_PREF, { type: "choice" })
@@ -1966,6 +1979,7 @@ const SOLID_HANDLER = /^_\$\$([a-z]+)$/
  */
 function drawnBox(element: Element): DOMRect {
   const own = element.getBoundingClientRect()
+  if (isFlat(own) && !element.shadowRoot) return roomOf(element, own)
   if (own.width || own.height || !element.shadowRoot) return own
   const boxes = [...element.shadowRoot.children]
     .map((child) => child.getBoundingClientRect())
@@ -1976,6 +1990,37 @@ function drawnBox(element: Element): DOMRect {
   const right = Math.max(...boxes.map((box) => box.right))
   const bottom = Math.max(...boxes.map((box) => box.bottom))
   return new DOMRect(left, top, right - left, bottom - top)
+}
+
+/** Is `box` a line, no wider or no taller than nothing, but not nothing at all? */
+function isFlat(box: DOMRect): boolean {
+  return (box.width === 0) !== (box.height === 0)
+}
+
+/**
+ * The room a box-less element takes between its neighbours:  a toolbar's `<spacer />` is 0px wide,
+ * and the gap between the buttons on each side of it is what it makes (epic `editor` I169).
+ * - `own` 0px wide:  from the right of the one before it to the left of the one after, as tall as `own`;
+ *   0px tall:  from the bottom of the one before to the top of the one after, as wide.
+ * - No neighbour drawn on a side:  its own edge there.
+ */
+function roomOf(element: Element, own: DOMRect): DOMRect {
+  const before = element.previousElementSibling && drawnBox(element.previousElementSibling)
+  const after = element.nextElementSibling && drawnBox(element.nextElementSibling)
+  const isDrawn = (box: DOMRect | null) => !!box && (box.width > 0 || box.height > 0)
+  if (own.width === 0) {
+    const left = isDrawn(before) && before!.right <= own.left ? before!.right : own.left
+    const right = isDrawn(after) && after!.left >= own.right ? after!.left : own.right
+    return new DOMRect(left, own.top, right - left, own.height)
+  }
+  const top = isDrawn(before) && before!.bottom <= own.top ? before!.bottom : own.top
+  const bottom = isDrawn(after) && after!.top >= own.bottom ? after!.top : own.bottom
+  return new DOMRect(own.left, top, own.width, bottom - top)
+}
+
+/** Is `point` inside `box`? */
+function isInside(point: { x: number; y: number }, box: DOMRect): boolean {
+  return point.x >= box.left && point.x <= box.right && point.y >= box.top && point.y <= box.bottom
 }
 
 /**
@@ -2384,6 +2429,8 @@ class PartSelector {
   private static canRing(element: Element): boolean {
     if (element.getRootNode() !== document) return false
     if (getComputedStyle(element).display === "contents") return false
+    // a box-less spacer:  a box stands in, over the room it takes (`roomOf()`)
+    if (isFlat(element.getBoundingClientRect())) return false
     // its own `::after`, unless it's our ring already
     return element.hasAttribute(HOVER_MARK) || getComputedStyle(element, "::after").content === "none"
   }
@@ -2396,6 +2443,8 @@ class PartSelector {
    *   (Owen:  "I can't e.g. inspect buttons in the solitaire app header (e.g. cheat button)")
    * - with Alt held, any Spell UI element:  the text or label inside a card too
    * - Not one inside a Spell UI element's own shadow root:  a button's icon is the button's.
+   * - A box-less tag the drawing writes, in the room it takes:  a toolbar's `<spacer />`, 0px wide,
+   *   in the gap between the buttons on each side of it (`spacerAt()`;  epic `editor` I169).
    */
   static partAt(event: Event, area: HTMLElement): Element | undefined {
     const anyElement = (event as MouseEvent).altKey
@@ -2405,8 +2454,24 @@ class PartSelector {
       if (target.hasAttribute(EDITOR_OWN)) return undefined
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
+      const spacer = PartSelector.spacerAt(target, event as MouseEvent)
+      if (spacer) return spacer
       const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)
       if (isPart && Inspector.partFor(target)) return target
+    }
+    return undefined
+  }
+
+  /**
+   * The box-less tag the drawing writes among `element`'s children whose room holds the pointer (`roomOf()`):
+   * a click can't land on a 0px wide `<spacer />` itself, only in the gap it makes.
+   */
+  private static spacerAt(element: Element, event: MouseEvent): Element | undefined {
+    const point = { x: event.clientX, y: event.clientY }
+    for (const child of element.children) {
+      if (!isClickableTag(child) || !isWrittenTag(child)) continue
+      const own = child.getBoundingClientRect()
+      if (isFlat(own) && isInside(point, roomOf(child, own))) return child
     }
     return undefined
   }
