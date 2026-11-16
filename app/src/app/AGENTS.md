@@ -159,6 +159,8 @@ and in the app's build folder, `app/` at the app folder's root.
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
     - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
       as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
+    - Four clicks select a block (epic `codemirror` T15):  the one the clicked line's fold arrow folds, or the
+      innermost one it's in;  each click after, the block around it (`CLICKS_SELECT_BLOCKS`).
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
     the scope explorer's packs use it too.
   - What a hover says and which code actions show are decided once, editor-free, in
