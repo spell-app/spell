@@ -490,28 +490,28 @@ export function PaletteStrip(): JSX.Element {
       </ui-toolbar>
       <div class="PaletteStripEnd">
         <ui-input
-        class="PaletteStripSearch"
-        size="small"
-        aria-label={appTexts.text("paletteSearch")}
-        placeholder={appTexts.text("paletteSearch")}
-        onFocusIn={() => setDismissed(false)}
-        ref={(element: HTMLElement) => {
-          search = element
-          element.addEventListener("keydown", onSearchKey, { capture: true })
-          on<{ value: string }>("ui-typed", (event) => {
-            setFilter(event.detail.value)
-            setDismissed(false)
-          })(element)
-        }}
-      />
-      <ui-icon
-        name="close"
-        link=""
-        class={["IconAction", "PaletteClose"]}
-        label={appTexts.text("paletteUnpin")}
-        title={appTexts.text("paletteUnpin")}
-        onClick={() => Palette.togglePinned()}
-      />
+          class="PaletteStripSearch"
+          size="small"
+          aria-label={appTexts.text("paletteSearch")}
+          placeholder={appTexts.text("paletteSearch")}
+          onFocusIn={() => setDismissed(false)}
+          ref={(element: HTMLElement) => {
+            search = element
+            element.addEventListener("keydown", onSearchKey, { capture: true })
+            on<{ value: string }>("ui-typed", (event) => {
+              setFilter(event.detail.value)
+              setDismissed(false)
+            })(element)
+          }}
+        />
+        <ui-icon
+          name="close"
+          link=""
+          class={["IconAction", "PaletteClose"]}
+          label={appTexts.text("paletteUnpin")}
+          title={appTexts.text("paletteUnpin")}
+          onClick={() => Palette.togglePinned()}
+        />
       </div>
       <div
         popover="manual"
