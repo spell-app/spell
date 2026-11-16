@@ -79,6 +79,8 @@ export class BubblyPresentation {
       head: "action",
       inputs: ["method_keyword"],
       typedAfterLead: true,
+      // Spanish leads with two words, `después de`:  the pill starts at the action's words
+      typedFrom: "signature",
       params: METHOD_PARAMS
     },
 

@@ -214,6 +214,10 @@ describe("SP.BubblyLayout", () => {
       '\tpara "los puntos por (una carta) en (una pila)"',
       "\t\tdevolver 1",
       "\tpara jugar una carta",
+      "\t\tdevolver 1",
+      '\tpara "poner (una carta) en (una pila)"',
+      "\t\tdevolver 1",
+      "\tdespués de poner una carta en una pila",
       "\t\tdevolver 1"
     ].join("\n")
     expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
@@ -223,7 +227,15 @@ describe("SP.BubblyLayout", () => {
         "underline value:una carta",
         "underline value:una pila"
       ],
-      ["words:para ", "input:jugar una carta", "underline value:una carta"]
+      ["words:para ", "input:jugar una carta", "underline value:una carta"],
+      expect.anything(),
+      // `después de` both outside its pill (Owen, 2026-11-15)
+      [
+        "words:después de ",
+        "input:poner una carta en una pila",
+        "underline value:una carta",
+        "underline value:una pila"
+      ]
     ])
   })
 

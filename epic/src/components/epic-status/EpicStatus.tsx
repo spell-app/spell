@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell/element"
+import { E, UI } from "spell/ui/core"
 
 import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
@@ -29,6 +29,7 @@ import answerCSS from "spell/epic/components/epic-answer/EpicAnswer.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
 import statusCSS from "./EpicStatus.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
+import textPageCSS from "./EpicStatus.text.css?inline"
 
 /****************
  * ### `EpicStatus`
@@ -87,6 +88,22 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
 
   /** The item it's in:  its line, its place. */
   readonly link = new ItemLink(this.domElement)
+
+  /**
+   * The gaps between its text's paragraphs and list lines are the page sheet's (`EpicStatus.text.css`, I311):
+   * registered once per page, by the first card to connect.
+   */
+  @E.whileConnected
+  protected registerTextSheet() {
+    if (isServer) return undefined
+    // the runtime may still be loading as the first card connects
+    void UI.load()
+      .then((runtime) => {
+        if (!runtime.styles.has(TEXT_PAGE_SHEET)) runtime.styles.register(TEXT_PAGE_SHEET, textPageCSS, { page: true })
+      })
+      .catch((error: unknown) => console.error(error))
+    return undefined
+  }
 
   /** Follow the item it's in, while connected. */
   @E.whileConnected
@@ -350,6 +367,8 @@ const EARLIER = "earlier"
 /** Its `not on main yet` pill (`unmerged`, epic `epic-engine` I273). */
 const UNMERGED = "unmerged"
 const TEXT = "text"
+/** The page sheet's name (`EpicStatus.text.css`). */
+const TEXT_PAGE_SHEET = "epic-status-text"
 const READING = "reading"
 
 /** The line's mark:  finished (done or noted), or Claude still on it. */
