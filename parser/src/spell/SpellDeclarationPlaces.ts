@@ -200,7 +200,8 @@ function wordsOf(statement: P.Match): string {
 function abilitiesOn(statement: P.Match, type: SP.SpellDeclarationPlace): SP.SpellDeclarationPlace[] {
   const { ability } = statement.groups as { ability?: P.Match | P.Match[] }
   const said = ability === undefined ? [] : Array.isArray(ability) ? ability : [ability]
-  const words = said.flatMap((each) => each.inputText.trim().split(/\s+/)).filter(Boolean)
+  // `a viewable, droppable list of cards`:  the commas between them aren't words
+  const words = said.flatMap((each) => each.inputText.trim().split(/[\s,]+/)).filter(Boolean)
   return words.map((word) => ({
     kind: "ability" as const,
     name: word,

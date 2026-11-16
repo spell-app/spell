@@ -3,7 +3,7 @@
 // Cada pila es su propio elemento alrededor de los elementos de sus cartas, `<solitario-columna>` alrededor de `<solitario-carta>`s.
 // Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias reglas (`soltable`).
 
-una "pila" es una lista visible soltable de cartas
+una "pila" es una lista visible, soltable de cartas
 	su "disposición" es uno de apilada o vertical
 		// Cómo están sus cartas:  una sobre otra, o hacia abajo en una columna -- styles.css
 	su "color" es
