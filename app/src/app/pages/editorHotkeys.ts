@@ -42,6 +42,9 @@ export const EDITOR_HOTKEYS = {
   find: { shortcut: "mod+F", codeEditorCommand: "find" },
   goToDefinition: { shortcut: "F12", codeEditorCommand: "goToDefinition" },
   findReferences: { shortcut: "shift+F12", codeEditorCommand: "findReferences" },
+  // VS Code's keys:  its own ⇧F12 is Peek References, which Find All References has here, so it's ⇧⌥F12 (epic `codemirror` I5)
+  peekDefinition: { shortcut: "alt+F12", codeEditorCommand: "peekDefinition" },
+  peekReferences: { shortcut: "shift+alt+F12", codeEditorCommand: "peekReferences" },
   rename: { shortcut: "F2", codeEditorCommand: "rename" },
   cutParts: { shortcut: "mod+X", run: () => partsAction("cut"), outsideCode: true },
   copyParts: { shortcut: "mod+C", run: () => partsAction("copy"), outsideCode: true },

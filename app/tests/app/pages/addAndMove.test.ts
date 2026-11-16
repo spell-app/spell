@@ -544,7 +544,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         selector
       )
     // Solitaire's `<context-menu>`, then ours
-    const program = ["Auto Play", "Cheat", "Restart The Game", "-"]
+    const program = ["Auto Play", "Cheat", "Restart the Game", "-"]
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(600)
     const shown = await rows(".PartMenu")
@@ -768,7 +768,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           return element.matches(":state(disabled)") ? `${title} (off)` : title
         })
       )
-    const game = ["Auto Play", "Cheat", "Restart The Game", "---"]
+    const game = ["Auto Play", "Cheat", "Restart the Game", "---"]
 
     for (const at of [pile, card]) {
       await other.mouse.click(at.x, at.y, { button: "right" })

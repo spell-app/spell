@@ -331,11 +331,19 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     this.isOpen = true
   }
 
-  /** Its inline style:  the compact column's kept width, while it's open over the page, moving, or about to widen. */
+  /**
+   * Its inline style:
+   * - the compact column's kept width, while it's open over the page, moving, or about to widen
+   * - the menu's height, for the navigations in the drawer to line their first row up with it (`menuHeight`)
+   */
   get layoutStyle(): Record<string, string | undefined> {
     const isHeld = (this.isCompact && !this.isNarrow && (this.isOpen || this.isMoving)) || this.isWidening
     const width = isHeld ? this.compactWidth : undefined
-    return { [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px` }
+    const menuHeight = this.has("menu") ? this.menuHeight : undefined
+    return {
+      [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px`,
+      [NAV_BAR_HEIGHT]: menuHeight ? `${menuHeight}px` : undefined
+    }
   }
 
   ////////////////
@@ -346,9 +354,13 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   @E.whileConnected
   protected watchWidth() {
     if (isServer) return
-    const resized = new ResizeObserver(() => (this.isNarrow = this.isSlidOver()))
+    const resized = new ResizeObserver(() => {
+      this.isNarrow = this.isSlidOver()
+      this.measureMenu()
+    })
     resized.observe(this.domElement)
     if (this.drawerColumn) resized.observe(this.drawerColumn)
+    if (this.menuBox) resized.observe(this.menuBox)
     this.resized = resized
     return () => {
       resized.disconnect()
@@ -356,13 +368,39 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     }
   }
 
-  /** What watches its box and the drawer's column for a new size, while connected. */
+  /** What watches its box, the drawer's column and the menu for a new size, while connected. */
   private resized: ResizeObserver | undefined
 
   /** The drawer's column was drawn:  watch it too, as it's what goes narrow. */
   private drawerColumnDrawn(column: HTMLElement) {
     this.drawerColumn = column
     this.resized?.observe(column)
+  }
+
+  ////////////////
+  // ## The menu beside the drawer's top
+  ////////////////
+
+  /**
+   * The menu's height, in pixels, while it's drawn:  the navigations in the drawer line their first row up with it,
+   * its icon on the menu's middle, beside the drawer's button (epic `mockup` I35, `--ui-site-nav-bar-height`).
+   */
+  @E.state accessor menuHeight: number | undefined = undefined
+
+  /** The menu's box, while drawn. */
+  private menuBox: HTMLElement | undefined
+
+  /** The menu's box was drawn:  watch it for a new height. */
+  private menuDrawn(box: HTMLElement) {
+    this.menuBox = box
+    this.resized?.observe(box)
+    this.measureMenu()
+  }
+
+  /** Read the menu's height again:  none while it isn't on the page. */
+  private measureMenu() {
+    const box = this.menuBox
+    this.menuHeight = box?.isConnected ? box.getBoundingClientRect().height || undefined : undefined
   }
 
   /** Is the drawer slid over the page, rather than beside it?  Its style says (`UIPageLayout.css`). */
@@ -467,7 +505,11 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   private region(name: Exclude<Region, "drawer">): JSX.Element {
     return (
       <Show when={this.has(name)}>
-        <div class={name} part={this.partForName(name)}>
+        <div
+          class={name}
+          part={this.partForName(name)}
+          ref={(box: HTMLElement) => (name === MENU ? this.menuDrawn(box) : undefined)}
+        >
           <slot name={this.slotForName(name)} />
         </div>
       </Show>
@@ -499,6 +541,12 @@ const NAV_BUTTON = "ui-site-nav-button"
 
 /** The private custom property holding the compact column's kept width (`UIPageLayout.css`). */
 const COMPACT_WIDTH = "--_page-layout-compact-width"
+
+/** The menu's region, whose height the navigations in the drawer line their first row up with. */
+const MENU = "menu"
+
+/** `<ui-site-nav>`'s token for the height of the bar beside its top:  the menu's, set on the layout's box. */
+const NAV_BAR_HEIGHT = "--ui-site-nav-bar-height"
 
 /**
  * How long, in seconds, the pointer rests on the compact drawer before it opens:  long enough that passing over it

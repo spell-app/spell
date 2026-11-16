@@ -38325,7 +38325,7 @@
           "cssProperties": [
             {
               "name": "--ui-site-nav-padding",
-              "default": "0.5em 0"
+              "default": "var(--_site-nav-padding-top) 0 0.5em"
             },
             {
               "name": "--ui-site-nav-group-background",
@@ -38334,6 +38334,10 @@
             {
               "name": "--ui-site-nav-group-radius",
               "default": "var(--ui-radius-l)"
+            },
+            {
+              "name": "--ui-site-nav-bar-height",
+              "default": "calc(var(--_site-nav-row-height) + 1em)"
             }
           ]
         }

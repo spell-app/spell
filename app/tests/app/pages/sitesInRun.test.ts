@@ -17,26 +17,21 @@ const PROJECT = "@spell/examples/StarWarsSite"
 const FILE = "StarWarsSite.spell"
 
 /** A small site:  a home page with a button to the about page, and an about page with a link back. */
-const SITE = `<spell-page "home page">
-\t<draw>
-\t\t<h1>Home</h1>
-\t\t<ui-button class="go-about" onClick={go to the about page}>About</ui-button>
-\t</draw>
-</>
+const SITE = `home page is a page
+\tto draw it
+\t\t<header size="large">Home</header>
+\t\t<button class="go-about" onClick={go to the about page}>About</button>
 
-<spell-page "about page">
-\t<draw>
-\t\t<h1>About</h1>
-\t\t<a class="go-home" href="/">Home</a>
-\t</draw>
-</>
+about page is a page
+\tto draw it
+\t\t<header size="large">About</header>
+\t\t<link class="go-home" link="/">Home</link>
 
-<spell-site "galaxy guide">
-\t<page "home page" address="/"/>
-\t<page "about page" address="/about"/>
-\t<page "not found page"/>
-\t<page "error page"/>
-</>
+galaxy guide is a site
+\tit has a home page at "/"
+\tit has an about page at "/about"
+\tit has a not found page
+\tit has an error page
 `
 
 /**
@@ -115,7 +110,7 @@ describe.skipIf(!SERVING)("a site in Run", { timeout: 180_000 }, () => {
   })
 
   test("a link to one of its addresses goes there, and back goes back", async () => {
-    await page.locator(".spell-site a.go-home").click()
+    await page.locator(".spell-site .go-home").click()
     await page.waitForTimeout(SETTLE_MS)
     expect(await shown()).toContain("Home")
     await page.locator(".spell-site .go-about").click()
@@ -135,8 +130,8 @@ describe.skipIf(!SERVING)("a site in Run", { timeout: 180_000 }, () => {
     await page.locator(".spell-site-missing ui-button").click()
     await page.waitForTimeout(SETTLE_MS * 2)
     const after = await text()
-    expect(after).toContain('<spell-page "tatooine page"/>')
-    expect(after).toContain('<page "tatooine page" address="/tatooine"/>')
+    expect(after).toContain('a "tatooine page" is a page')
+    expect(after).toContain('it has a tatooine page at "/tatooine"')
     expect(await shown()).not.toContain("No such page")
     expect(address()).toBe("/tatooine")
     expect(await page.evaluate(siteThing, "read")).toBe(true)

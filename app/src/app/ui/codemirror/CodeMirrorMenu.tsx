@@ -6,6 +6,7 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { cutCopyOrPaste, EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { Action, MenuPopup } from "spell/app/app/solid"
 import type { CodeMirrorLocation } from "./LspToCodeMirror"
+import { CodeMirrorPeek } from "./CodeMirrorPeek"
 import type { SpellCodeMirror } from "./SpellCodeMirror"
 
 // the editor's menu look:  the top bar's and the part menu's
@@ -15,7 +16,7 @@ import "spell/app/app/solid/MenuBar.css"
  * ### `<CodeMirrorMenu>`
  * A CodeMirror editor's right-click menu (epic `editor` P30;  epic `codemirror` P5):  the app's one right-click menu,
  * the part menu's popup (`<MenuPopup>`), never the browser's.
- * - Go to Definition, Go to Type Definition, Find All References;  Rename Symbol, only where something can be renamed
+ * - Go to Definition, Peek Definition, Go to Type Definition, Find All References, Peek References;  Rename Symbol, only where something can be renamed
  *   (epic `editor` I147);  the language service's code actions for the selection ("Make it code" ...);
  *   Cut, Copy and Paste, as the Edit menu does them (`cutCopyOrPaste()`);  Find.
  * - Each row's shortcut is the editor's one list's (`EDITOR_HOTKEYS`);  each runs the editor's own command
@@ -46,7 +47,7 @@ export class CodeMirrorMenu {
             <Action
               menu
               icon="arrow right"
-              title={referenceWords(editor, location)}
+              title={CodeMirrorPeek.placeWords(editor.file.project, location)}
               onClick={() => editor.open(location)}
             />
           )}
@@ -98,6 +99,13 @@ function CodeRows(props: CodeRowsProps) {
         shortcut={EDITOR_HOTKEYS.goToDefinition.shortcut}
         onClick={run("goToDefinition")}
       />
+      <Action
+        menu
+        icon="eye"
+        title={appTexts.text("cmPeekDefinition")}
+        shortcut={EDITOR_HOTKEYS.peekDefinition.shortcut}
+        onClick={run("peekDefinition")}
+      />
       <Action menu icon="sitemap" title={appTexts.text("cmGoToTypeDefinition")} onClick={run("goToTypeDefinition")} />
       <Action
         menu
@@ -105,6 +113,13 @@ function CodeRows(props: CodeRowsProps) {
         title={appTexts.text("cmFindReferences")}
         shortcut={EDITOR_HOTKEYS.findReferences.shortcut}
         onClick={run("findReferences")}
+      />
+      <Action
+        menu
+        icon="list ul"
+        title={appTexts.text("cmPeekReferences")}
+        shortcut={EDITOR_HOTKEYS.peekReferences.shortcut}
+        onClick={run("peekReferences")}
       />
       <Show when={props.canRename}>
         <Action
@@ -175,14 +190,4 @@ type CodeRowsProps = {
   actions: CodeAction[]
   /** can the thing at the caret be renamed?  Rename Symbol shows only then */
   canRename: boolean
-}
-
-/** A use's row:  its file's name and line, then the line's words, `Card.spell:12  its value is 12`. */
-function referenceWords(editor: SpellCodeMirror, { path, range }: CodeMirrorLocation): string {
-  const file = editor.file.project.files.find((each) => each.path === path)
-  const name = path.slice(path.lastIndexOf("/") + 1)
-  const where = appTexts.text("cmReferenceAt", { file: name, line: range.start.line + 1 })
-  const lines = (file?.contents ?? "").split("\n")
-  const words = lines[range.start.line]?.trim() ?? ""
-  return words ? `${where}  ${words}` : where
 }
