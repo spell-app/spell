@@ -52,12 +52,18 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
   beforeAll(async () => {
     browser = await chromium.launch()
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
-    // saves answered here:  the example on disk never changes
-    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) =>
-      route.request().method() === "GET"
-        ? route.continue()
-        : route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
-    )
+    // saves answered here:  the example on disk never changes;  a read of a saved file gets what was saved,
+    // as the editor reads its open file again after a save
+    const saved = new Map<string, string>()
+    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
+      const request = route.request()
+      const tail = decodeURI(new URL(request.url()).pathname).split("/").slice(-3).join("/")
+      if (request.method() !== "GET") {
+        saved.set(tail, request.postData() ?? "")
+        return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
+      }
+      return saved.has(tail) ? route.fulfill({ contentType: "text/plain", body: saved.get(tail)! }) : route.continue()
+    })
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.editor.spell`, { timeout: 60_000 })
     await new CodeEditor(page).shown()

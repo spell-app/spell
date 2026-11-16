@@ -65,6 +65,8 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  *     it closes it.
  * - A page with no `icon`, beside pages with one, keeps an icon's room, so its title lines up with theirs.
  * - A group's `icon` shows before its label, and its pages are a step in from it (epic `mockup` I20).
+ * - Beside a bar (`--ui-site-nav-bar-height`, which `<ui-page-layout>` sets to its menu's height):  its first row's
+ *   middle on the bar's, so the first page's icon lines up with the drawer's button (epic `mockup` I35).
  * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`), all in one column, no step in;
  *   a page with no icon shows its title's first letter, as `<ui-menu>`'s icons-only look does,
  *   and a group with no icon is a thin line.

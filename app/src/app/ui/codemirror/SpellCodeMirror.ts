@@ -22,6 +22,7 @@ import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
 import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
 import type { CodeMirrorLanguage } from "./CodeMirrorLanguage"
 import { CodeMirrorLook } from "./CodeMirrorLook"
+import { CodeMirrorPeek } from "./CodeMirrorPeek"
 import { CodeMirrorRename } from "./CodeMirrorRename"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 import { CodeMirrorTokens } from "./CodeMirrorTokens"
@@ -162,6 +163,8 @@ export class SpellCodeMirror implements CodeEditorHandle {
       goToDefinition: () => this.goToDefinition(head),
       goToTypeDefinition: () => this.goToDefinition(head, "typeDefinition"),
       findReferences: () => this.findReferences(head),
+      peekDefinition: () => this.peek(head, "definition"),
+      peekReferences: () => this.peek(head, "references"),
       rename: () => this.rename()
     }
     void Promise.resolve(commands[command]()).catch((error: unknown) =>
@@ -218,6 +221,37 @@ export class SpellCodeMirror implements CodeEditorHandle {
     const locations = (await this.language?.referencesAt(this.view, pos)) ?? []
     const at = this.view.coordsAtPos(pos)
     if (at) this.options.onReferences?.(this, { x: at.left, y: at.bottom }, locations)
+  }
+
+  /**
+   * Peek Definition (⌥F12) or Peek References (⇧⌥F12) at `pos`:  a box under its line showing the place, or every
+   * use listed, without leaving the code (`CodeMirrorPeek`, epic `codemirror` I5).
+   * - A definition no project file holds (a Spell UI tag's help):  Go to Definition's, as there's no file to show.
+   */
+  async peek(pos: number, kind: "definition" | "references"): Promise<void> {
+    const { language, view } = this
+    if (!language) return
+    const { project } = this.file
+    if (kind === "definition") {
+      const location = await language.definitionAt(view, pos)
+      if (!location || !project.files.some((file) => file.path === location.path)) {
+        await this.goToDefinition(pos)
+        return
+      }
+      this.openPeek(project, [location], kind)
+    } else this.openPeek(project, await language.referencesAt(view, pos), kind)
+  }
+
+  /** Open a peek box of `locations` under the caret's line. */
+  private openPeek(project: SP.SpellProject, locations: CodeMirrorLocation[], kind: "definition" | "references") {
+    CodeMirrorPeek.open({
+      view: this.view,
+      states: SpellCodeMirror.states,
+      project,
+      locations,
+      kind,
+      go: (location) => void this.open(location)
+    })
   }
 
   /** Rename Symbol (F2) at the caret:  see `CodeMirrorRename`. */
@@ -307,6 +341,7 @@ export class SpellCodeMirror implements CodeEditorHandle {
         { key: "Mod-Shift-o", run: () => (void this.goToSymbol(), true), preventDefault: true }
       ]),
       CodeMirrorRename.extension(),
+      CodeMirrorPeek.extension(),
       this.options.highlights && this.language ? this.language.highlights() : [],
       EditorView.updateListener.of((update) => this.options.onUpdate?.(update)),
       EditorView.focusChangeEffect.of((_state, isFocused) => {

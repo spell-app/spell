@@ -1628,8 +1628,15 @@
     --cmb-indent: 8.44px;
     /* room before a line's words:  a top-level band's round end 12px in, clear of the fold arrows over the first 8px */
     --cmb-line-pad: calc(12px + var(--cmb-band-inset));
-    /* where a band starts from its line's indent:  its room before its words further out */
-    --cmb-band-left: calc(-1 * var(--cmb-band-inset));
+    /*
+     * how far every band, rail, foot and inside corner is drawn right of where its words put it, its words where they
+     * are:  so the caret at a line's start is in the middle of the rail it's on (Owen, epic `language` I140:  "slide
+     * *all* of the bubble band backgrounds + gutters to the right 2 pixels");  a band's room before and after its
+     * words gives and takes it, its next words where they were (`margin-right`)
+     */
+    --cmb-slide: 2px;
+    /* where a band starts from its line's indent:  its room before its words further out, less the slide */
+    --cmb-band-left: calc(var(--cmb-slide) - var(--cmb-band-inset));
     /*
      * where a block's rail starts from its band's line's indent:  at its band's left edge, the band's bottom-left
      * square into it (Owen, epic `language` I137:  "put the rails back where they were", as before I131)
@@ -1728,6 +1735,15 @@
      */
     .cm-line.cmb-group-line {
       padding-left: calc(var(--cmb-line-pad) + var(--cmb-indent));
+    }
+    /*
+     * a plain body line's indent (`CodeMirrorBubbly`):  a tab wider, so its words are where a band's on its level are,
+     * a tab in from its indent (Owen, epic `language` I142:  "I'd prefer if `it lives` lined up where `it's name` does")
+     * - room after its tabs, not before the line:  its column 0 stays on its rail (I140);  the caret before its first
+     *   word is drawn at the word (`CodeMirrorSelection.wordsSide`, I141)
+     */
+    .cmb-plain-indent {
+      padding-right: var(--cmb-indent);
     }
     /*
      * a band's words, a tag's, and those between a one-line element's tags:  a pixel up off their band's own line,
@@ -1840,8 +1856,9 @@
       margin-top: var(--cmb-band-margin);
       /* its round end left of its line's indent;  its words a tab in, over its body's lines */
       margin-left: var(--cmb-band-left);
-      padding: 0 var(--bubbly-pill-pad-right) calc(2 * var(--cmb-words-lift))
-        calc(var(--cmb-band-inset) + var(--cmb-indent));
+      margin-right: calc(-1 * var(--cmb-slide));
+      padding: 0 calc(var(--bubbly-pill-pad-right) + var(--cmb-slide)) calc(2 * var(--cmb-words-lift))
+        calc(var(--cmb-band-inset) + var(--cmb-indent) - var(--cmb-slide));
       border-radius: var(--bubbly-pill-radius);
       background: var(--bubbly-pill);
       white-space: pre;
@@ -1849,7 +1866,7 @@
     /* a group's:  a tab further out, on its parent's rail, its words where they'd be (`CodeMirrorBubbly`) */
     .cmb-band.cmb-band-hung {
       margin-left: calc(var(--cmb-band-left) - var(--cmb-indent));
-      padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
+      padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent) - var(--cmb-slide));
     }
     /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line, round its inside corner */
     .cmb-band-open {
@@ -1982,6 +1999,7 @@
           var(--cmb-band-left) - 16px
       );
       max-width: none;
+      margin-right: 0;
       padding-right: 14px;
     }
     .cmb-description {
@@ -1997,9 +2015,9 @@
      */
     .cm-line.cmb-head-description-below {
       padding-bottom: calc(var(--cmb-description-rows) * var(--cmb-line-height));
-      --cmb-description-left: calc(var(--cmb-band-inset) + var(--cmb-indent));
+      --cmb-description-left: calc(var(--cmb-band-inset) + var(--cmb-indent) - var(--cmb-slide));
       .cmb-band-hung {
-        --cmb-description-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
+        --cmb-description-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent) - var(--cmb-slide));
       }
       .cmb-description {
         position: absolute;
@@ -2019,7 +2037,7 @@
     --cmb-fold-more: 1.1em;
     --cmb-fold-end: calc(var(--bubbly-pill-pad-right) / 2);
     .cmb-band-folded {
-      padding-right: calc(var(--cmb-fold-end) + var(--cmb-fold-more));
+      padding-right: calc(var(--cmb-fold-end) + var(--cmb-fold-more) + var(--cmb-slide));
     }
     .cmb-band-described.cmb-band-folded {
       padding-right: calc(14px + var(--cmb-fold-more));
@@ -2089,10 +2107,12 @@
      * a start tag over several lines, its attributes on lines of their own, as Enter lays a long one out (epic
      * `language` I133):  ONE block of its colour round them all (I135;  Owen:  "show in a block pill"), a row on each
      * line (`.cmb-tag-block`, `CodeMirrorMarkup.tagOn()`)
-     * - each row from the block's left edge, its band's, to its right edge, its widest row's:  how far it reaches past
-     *   its words, `--cmb-reach-before` and `--cmb-reach-after`, measured once it's drawn (`CodeMirrorMarkup.tagBlocks`)
+     * - its first attribute on its name's line, the line break between them drawn as a space (`.cmb-tag-join`, I139)
+     * - each row from the block's left edge, its band's, to its right edge, past its widest row:  how far it reaches
+     *   past its words, `--cmb-reach-before` and `--cmb-reach-after`, measured once it's drawn
+     *   (`CodeMirrorMarkup.tagBlocks`);  its words moved in under the first attribute's by `--cmb-reach-in` (I139)
      * - the rows fill their lines, so the block is whole from its first line's band to its last's
-     * - its corners cut as a tag's ends are:  top left and right, bottom right, where its `>` is;  bottom left too, or
+     * - its corners cut as a tag's ends are:  top left and right, bottom right;  bottom left too, or
      *   square with its rail dropping from it when it has a body
      */
     .cmb-tag-block {
@@ -2113,7 +2133,9 @@
       margin-top: 0;
       margin-left: calc(-1 * var(--cmb-reach-before));
       padding-top: var(--cmb-band-margin);
-      padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale) + var(--cmb-reach-before));
+      padding-left: calc(
+        var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale) + var(--cmb-reach-before) + var(--cmb-reach-in)
+      );
     }
     .cmb-tag-row:not(.cmb-tag-block-last) {
       height: var(--cmb-line-height);
@@ -2123,18 +2145,14 @@
     .cmb-tag-row.cmb-tag-row-close {
       margin-left: calc(var(--cmb-band-left) - var(--cmb-reach-before));
     }
-    /*
-     * ... its last row:  its `>` at the block's right edge (`TagPointWidget`), a value's room in a band clear of the
-     * widest row's words, and as far in from the edge as its `⟨` is (`--cmb-reach-end`;  Owen, I135)
-     */
+    /* ... its last row:  its `>` on its line, its `⟩` 4px past the last attribute's ink (`--cmb-reach-point`;  I139) */
     .cmb-tag-block-last {
       position: relative;
-      padding-right: var(--cmb-reach-end);
       border-bottom-left-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
       border-bottom-right-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
     }
     .cmb-tag-point {
-      margin-left: calc(var(--cmb-tag-room) + var(--cmb-reach-after));
+      margin-left: var(--cmb-reach-point);
     }
     /* ... a block with a body:  square bottom-left, its rail dropping from it, as a block's band (below) */
     .cmb-tag-block-opens {
@@ -2163,13 +2181,17 @@
     .cmb-tag-band.cmb-band-open {
       position: relative;
       margin-left: var(--cmb-band-left);
-      padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale));
+      padding-left: calc(var(--bubbly-tag-pad-left) * var(--bubbly-editor-scale) - var(--cmb-slide));
       border-bottom-left-radius: 0;
     }
     /*
      * ... its rail dropping from it, its corner with its body cut, as Monaco's:  under the text, into the line below
      * (`z-index`), the rows' own rails carrying on from it
      */
+    .cmb-tag-band.cmb-band-open:not(.cmb-tag-block) {
+      margin-right: calc(-1 * var(--cmb-slide));
+      padding-right: calc(var(--bubbly-bracket-pad) + var(--cmb-slide));
+    }
     .cmb-tag-band.cmb-band-open::after {
       content: "";
       position: absolute;

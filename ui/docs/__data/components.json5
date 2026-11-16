@@ -62045,7 +62045,7 @@
       "tokens": [
         {
           "name": "--ui-site-nav-padding",
-          "default": "0.5em 0",
+          "default": "var(--_site-nav-padding-top) 0 0.5em",
           "type": "length"
         },
         {
@@ -62056,6 +62056,11 @@
         {
           "name": "--ui-site-nav-group-radius",
           "default": "var(--ui-radius-l)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-site-nav-bar-height",
+          "default": "calc(var(--_site-nav-row-height) + 1em)",
           "type": "length"
         }
       ]

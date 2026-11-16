@@ -128,9 +128,10 @@ describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 
     for (const _ of "its ") await page.keyboard.press("Backspace")
     await page.keyboard.type("x")
     await page.keyboard.press("Enter")
-    await page.keyboard.type("y")
+    // not `y`:  at a line's end it's Spanish "and", which Enter goes in a level after (`SpellTyping.ENTER_RULES`)
+    await page.keyboard.type("z")
     const lines = (await contents()).split("\n")
-    expect(lines.slice(6, 8)).toEqual([`\tx`, `\ty`])
+    expect(lines.slice(6, 8)).toEqual([`\tx`, `\tz`])
   })
   test('typed quickly on a new line, a `"` after the name steps over the closing one', async () => {
     await page.keyboard.press("End")

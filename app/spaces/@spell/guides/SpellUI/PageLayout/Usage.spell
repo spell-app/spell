@@ -1,0 +1,80 @@
+"page-layout usage" is a notebook page
+	<header level="1">
+		Page layout
+		<header>A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#in-a-spell-site">In a Spell site</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put the regions around a page in its slots, and the page itself in no slot.
+
+			- `menu`:  the app's top bar, a `<ui-app-menu>`, with a `<ui-site-nav-button>` and `<ui-site-breadcrumbs>` at its start.
+			- `page-menu`:  a row of its own under it, usually `<ui-site-tabs>`.
+			- `drawer`:  the side navigation, a `<ui-site-nav>`, a column the whole height at the start.
+			- `left`, `right`:  side bars either side of the page;  `footer`:  across the bottom.
+			- A region with nothing in it takes no room at all.
+			- `drawer="compact"` shows only the drawer's icons:  the layout sets `collapsed` on each `<ui-site-nav>` in it.
+			- `toggleDrawer()` is what a `<ui-site-nav-button>` calls:
+			  - narrow, it slides the drawer in or out
+			  - wide, it switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`;
+			    to `full` a frame later, so the column widens from where it was
+			- The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
+		</>
+		<markdown>
+			```js
+			const layout = document.querySelector("ui-page-layout")
+			layout.addEventListener("ui-toggle", (event) => {
+			  localStorage.setItem("drawer", event.detail.newState)
+			})
+			if (localStorage.getItem("drawer") === "compact") layout.setAttribute("drawer", "compact")
+			```
+		</>
+	</>
+
+	<section label="In a Spell site">
+		<markdown>
+			A Spell site draws its page layout once, and puts each page in it:
+			so going between pages redraws only the page, and the top bar, the drawer's open folders and the side bars
+			stay as they are.
+
+			- Its main layout is a page layout, in a file of its own;  each slot it fills is a drawing.
+			- The drawer holds the site's navigation, and the page menu its tabs, unless the layout draws them.
+			- A page picks another layout on its own line (`, in the bare layout`), or none (`, no layout`).
+			- The site remembers each person's choice of a compact drawer, per site and layout.
+
+			```spell
+			main layout is a page layout
+				to draw its app menu
+					<app-menu>
+						<site-nav-button slot="start" />
+						<site-breadcrumbs slot="start" />
+					</app-menu>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Escape closes the drawer open over the page.
+
+			- The keyboard's focus coming into a compact drawer opens it at once, and closes it as it leaves.
+			- Inside, the side navigation's own keys walk its pages.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			It adds no landmark of its own, as it's drawn inside another page (Run draws a site inside the editor):
+			the side navigation is a `nav`, and the page's own content brings the rest.
+			Its own menu button says `aria-expanded`, and so does a `<ui-site-nav-button>`.
+		</>
+	</>

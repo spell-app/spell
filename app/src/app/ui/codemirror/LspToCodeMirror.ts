@@ -86,6 +86,8 @@ export class LspToCodeMirror {
 
   /**
    * CodeMirror suggestion for LSP `item`, written as the service says.
+   * - Its row says what it is:  its description (`labelDetails.description`, "Whose turn it is"), as Monaco's did;
+   *   else its `detail` ("property of TicTacToe"), which then heads its info instead.
    * - Its own range, when it names one (`textEdit`), stretched to whatever's typed since;  else the word being typed.
    * - A snippet stays a snippet:  `move ${1:card} to ${2:pile}`, each field a stop for Tab.
    * - So does its command, run once it's written:
@@ -98,10 +100,14 @@ export class LspToCodeMirror {
     const listsNext = item.command?.command === LSP_SHOW_SUGGESTIONS
     const write =
       item.insertTextFormat === InsertTextFormat.Snippet ? snippet(LspToCodeMirror.snippet(text)) : undefined
+    const description = item.labelDetails?.description
+    const detail = description || item.detail
+    const words = item.documentation ? LspToCodeMirror.markdown(item.documentation) : undefined
+    const info = [description && item.detail, words].filter(Boolean).join("\n\n")
     return {
       label: item.label,
-      ...(item.detail ? { detail: item.detail } : {}),
-      ...(item.documentation ? { info: LspToCodeMirror.markdown(item.documentation) } : {}),
+      ...(detail ? { detail } : {}),
+      ...(info ? { info } : {}),
       apply: (view, completion, from, to) => {
         const [start, end] = range ? [range.from, Math.max(range.to, to)] : [from, to]
         if (write) write(view, completion, start, end)

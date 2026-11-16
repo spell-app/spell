@@ -144,6 +144,10 @@ and in the app's build folder, `app/` at the app folder's root.
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
       Find All References, code actions, accent fixes as you type;  hovers and signature help drawn by `<ui-markdown>`.
     - A Spell UI tag's help on Go to Definition;  Format Document, expand / shrink selection, Go to Symbol.
+    - Peek Definition (⌥F12) and Peek References (⇧⌥F12), as Monaco's peek view (epic `codemirror` I5):
+      a box under the caret's line showing the place's file read only, a slice of its state (`FileStates.showSlice()`),
+      the uses listed on its right;  Enter or a double-click goes there, Esc closes it
+      ([CodeMirrorPeek](ui/codemirror/CodeMirrorPeek.ts), plain DOM, so `<spell-editor>` has it too)
   - Spell in CodeMirror is [SpellCodeMirror](ui/codemirror/SpellCodeMirror.ts):  `edit()` makes an editor of a view,
     `codeExtensions()` shows another language's code (the compiled JavaScript, TypeScript and Python, read-only);
     the two sides of a diff are [CodeMirrorMerge](ui/codemirror/CodeMirrorMerge.ts), yours left, theirs right,
@@ -235,8 +239,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - Backspace at an attribute line's start joins it to the line above, a space between, its `>` with it;
         a `>` alone on the line under comes up too (`LSP.SpellTyping.tagLineJoined()`)
       - Format Document keeps such a tag as it is
-      - the bubbly look draws it as ONE block of the tag's colour, its `>` at the block's right edge, past the widest
-        attribute (`CodeMirrorMarkup.tagBlocks`)
+      - the bubbly look draws it as ONE block of the tag's colour (`CodeMirrorMarkup.tagBlocks`):  its first attribute
+        on its name's line, the others lined up under it, its `>` 4px past the last one's ink (I139);
+        only drawn so, the file keeps its lines
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step

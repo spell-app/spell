@@ -59,6 +59,7 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
   const query = new URLSearchParams(location.search)
   const [fileName, setFileName] = createSignal(
     FILE_QUERIES[query.get("file") ?? ""] ??
+      spellFileQuery(query.get("file")) ??
       (query.get("project") ? nameOf(props.project.spellFiles[0]!.path) : "Solitaire.spell")
   )
   const [look, setLook] = createSignal(codeLook.isBubbly ? "on" : "off")
@@ -349,6 +350,11 @@ const EDITOR_PAGE = "Card.editor.html"
 
 /** The file each `?file=` shows. */
 const FILE_QUERIES: Record<string, string> = { Card: "Card.spell", editor: EDITOR_PAGE, Solitaire: "Solitaire.spell" }
+
+/** A `?file=` naming one of the project's Spell files itself, `StarWars.api.spell` (epic `language` I141). */
+function spellFileQuery(file: string | null): string | undefined {
+  return file?.endsWith(".spell") ? file : undefined
+}
 
 /**
  * `project`'s property editor page for its cards, `Card.editor.html`:  a page as "New Property Editor..." makes one,

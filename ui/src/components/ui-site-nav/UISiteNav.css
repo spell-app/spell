@@ -2,6 +2,7 @@
  * `<ui-site-nav>` (`UISiteNav.tsx`):  a site's side navigation, its pages a `<ui-tree>`.
  * - Tokens:
  *   | `--ui-site-nav-padding` | the room around the tree |
+ *   | `--ui-site-nav-bar-height` | the height of a bar beside its top, whose middle its first row lines up with |
  *   | `--ui-site-nav-group-background` | the fill of an open group's well |
  *   | `--ui-site-nav-group-radius` | the corners of an open group's well |
  * - The rows' look is the tree's own (`--ui-tree-*`).
@@ -9,12 +10,21 @@
  *   its label on the bar's own fill, as a header;  the well's darker fill only under it, round its pages (I32).
  * - A group's pages are 8px in from its label (I20, I31);
  *   collapsed, none:  every icon centred in its row, the same room on both sides (I31).
+ * - Beside a bar (`--ui-site-nav-bar-height`, a `<ui-page-layout>`'s menu):  its first row's middle on the bar's,
+ *   so the first page's icon lines up with the drawer's button (epic `mockup` I35).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
  *   a page with no icon its first letter, a group with no icon a thin line.
  */
 @layer ui.components {
   :host {
-    --_ui-site-nav-padding: var(--ui-site-nav-padding, 0.5em 0);
+    /* a row's height, in the nav's own text:  the tree's, at its smaller text (2.25em of 0.875em, `appearance="nav"`) */
+    --_site-nav-row-height: calc(2.25em * 0.875);
+    /* beside a bar, the room above its first row that puts the row's middle on the bar's;  else half its text */
+    --_site-nav-padding-top: max(
+      0px,
+      (var(--ui-site-nav-bar-height, calc(var(--_site-nav-row-height) + 1em)) - var(--_site-nav-row-height)) / 2
+    );
+    --_ui-site-nav-padding: var(--ui-site-nav-padding, var(--_site-nav-padding-top) 0 0.5em);
     --_ui-site-nav-group-background: var(
       --ui-site-nav-group-background,
       light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.18))
@@ -110,9 +120,6 @@
   }
 
   /* ## `collapsed`:  the icons alone, each centred in its row, the titles their tooltips */
-  :host(:state(collapsed)) {
-    --_ui-site-nav-padding: var(--ui-site-nav-padding, 0.5em 0);
-  }
   :host(:state(collapsed)) .letter {
     visibility: visible;
   }

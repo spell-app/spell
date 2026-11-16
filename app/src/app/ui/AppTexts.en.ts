@@ -140,6 +140,8 @@ export const APP_TEXTS = {
   startTaskListLine: "Add tasks, check them off, make it yours.",
   startDice: "Roll a Six",
   startDiceLine: "A little game, a few lines long.",
+  startSite: "Site",
+  startSiteLine: "Pages at their own addresses, in one frame.",
   startSolitaire: "Solitaire",
   startSolitaireLine: "A whole game.  Change something and see.",
   startSolitaireInvite: "Click a card, then change its suit at the right.",
@@ -804,6 +806,12 @@ export const APP_TEXTS = {
   cmNoReferences: "No uses found",
   cmReferences: "Uses",
   cmFindMenu: "Find…",
+  // the peek box under the code (`CodeMirrorPeek`):  its menu rows, its head, its ✕;  `{count}`, how many uses
+  cmPeekDefinition: "Peek Definition",
+  cmPeekReferences: "Peek References",
+  cmPeekDefinitionHead: "Definition",
+  cmPeekUses: "{count} uses",
+  cmPeekClose: "Close (Esc)",
   // a web address in the code, its tip on a plain hover (`CodeEditorFeatures.linkTip()`)
   codeLinkTipMac: "⌘-click to open",
   codeLinkTip: "Ctrl-click to open"

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
-import { cursorCharRight } from "@codemirror/commands"
-import { EditorState } from "@codemirror/state"
+import { cursorCharLeft, cursorCharRight, cursorLineDown } from "@codemirror/commands"
+import { EditorSelection, EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
@@ -13,8 +13,9 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * each rail at its band's left edge, the band's bottom-left square into it (Owen, I137:  "put the rails back where
  * they were");  the lines it hangs on a tab and a band's room in from it.
  * - Spell's bodies and a drawing's tags' alike, at every level.
- * - A body's words under its head's (Owen, I136:  "Fix the gutters so all text and tags are inset as they were
- *   before"), a band's room right of the rail.
+ * - A body's words a band's room right of the rail (Owen, I136:  "Fix the gutters so all text and tags are inset as
+ *   they were before");  a plain line's where a band's on its level are (I142).
+ * - The caret before a line's first word drawn at the word, however it got there (I141).
  */
 describe("a body's rail under the caret", () => {
   let view: EditorView | undefined
@@ -120,17 +121,19 @@ describe("a body's rail under the caret", () => {
       const start = tag ? tag.getBoundingClientRect().left : await caretMiddle(view, line)
       atRails.push({ line, start, rail: railMiddle(view, line)! })
     }
-    // a plain line's words, a tag's pointed end:  a tab and a band's room right of the rail's left edge
-    for (const { line, start, rail } of atRails)
-      expect(Math.abs(start - (rail - railWidth / 2) - tab - bandRoom), view.state.doc.line(line).text).toBeLessThan(
-        0.1
-      )
+    // a tag's pointed end:  a tab and a band's room right of the rail's left edge;  Spell's words a tab further, where
+    // a band's words on their level are (I142)
+    for (const { line, start, rail } of atRails) {
+      const text = view.state.doc.line(line).text
+      const spellTab = text.trimStart().startsWith("<") ? 0 : tab
+      expect(Math.abs(start - (rail - railWidth / 2) - tab - bandRoom - spellTab), text).toBeLessThan(0.1)
+    }
     // four levels of rail, each a tab stop further in
     const rails = [...new Set(atRails.map(({ rail }) => rail.toFixed(1)))]
     expect(rails.length).toBe(4)
   })
 
-  test("each rail at its band's left edge, the band square there;  a body's words under its head's", async () => {
+  test("each rail at its band's left edge, the band square there;  a body's plain words a tab in from its head's", async () => {
     const view = await bubblyEditorOf(NESTED)
     const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
     for (const [head, body] of [
@@ -150,10 +153,11 @@ describe("a body's rail under the caret", () => {
       // the band's left edge is its rail's, its bottom-left square into it
       expect(Math.abs(left + rail / 2 - railMiddle(view, bodyLine!)!), head).toBeLessThan(0.1)
       expect(getComputedStyle(band).borderBottomLeftRadius, head).toMatch(/^0px/)
-      // a Spell body's words start where its head's do (a head in it:  a tab further in, on its band)
+      // a Spell body's plain words a tab in from its head's, where a band in it puts its words (I142)
       if (!head.startsWith("<") && !lineElement(view, bodyLine!).querySelector(".cmb-band")) {
         const words = left + Number.parseFloat(getComputedStyle(band).paddingLeft)
-        expect(Math.abs((await caretMiddle(view, bodyLine!)) - words), head).toBeLessThan(0.1)
+        const tab = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-indent"))
+        expect(Math.abs((await caretMiddle(view, bodyLine!)) - words - tab), head).toBeLessThan(0.1)
       }
     }
   })
@@ -210,6 +214,107 @@ describe("a body's rail under the caret", () => {
     expect(caret.left).toBeLessThan(outerBox.left + outerBox.width / 2)
   })
 
+  test("the caret at a body line's first column in the middle of its rail:  every band and rail slid 2px right (I140)", async () => {
+    const view = await bubblyEditorOf(NESTED)
+    // Owen:  "slide *all* of the bubble band backgrounds + gutters to the right 2 pixels"
+    expect(getComputedStyle(view.dom).getPropertyValue("--cmb-slide").trim()).toBe("2px")
+    const [member] = linesStarting(view, ['its "rank"'])
+    view.dispatch({ selection: { anchor: view.state.doc.line(member!).from } })
+    await frames()
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    expect(Math.abs(caret.left + caret.width / 2 - railMiddle(view, member!)!)).toBeLessThan(1)
+    // a band's words where they were:  a tab in from its line's indent, its room before them taking the slide
+    const band = getComputedStyle(view.dom.querySelector(".cmb-band-open:not(.cmb-tag-band, .cmb-band-hung)")!)
+    const tab = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-indent"))
+    expect(Math.abs(Number.parseFloat(band.marginLeft) + Number.parseFloat(band.paddingLeft) - tab)).toBeLessThan(0.01)
+    // ... and the words after it:  its end slid out, its room after them
+    expect(Number.parseFloat(band.marginRight)).toBe(-2)
+  })
+
+  /** StarWars' character (Owen's I141 and I142 screenshots):  a plain line among one-line bands, on one level. */
+  const CHARACTER = `a "character" is a thing
+\tit lives in star wars
+\tits "name" is text
+\tits "height" is a length in cm or "unknown"
+`
+
+  /** Where the caret is drawn, its middle, once drawn. */
+  async function caretX(view: EditorView): Promise<number> {
+    await frames()
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    return caret.left + caret.width / 2
+  }
+
+  test("Left, Left, Right from `its`'s `i`:  before `its`, column 0 on the rail, before `its` again, drawn in ONE place (I141)", async () => {
+    const view = await bubblyEditorOf(CHARACTER)
+    const [name] = linesStarting(view, ['its "name"'])
+    const line = view.state.doc.line(name!)
+    const words = lineElement(view, name!).querySelector<HTMLElement>(".cmb-band")!
+    const wordsLeft =
+      words.getBoundingClientRect().left +
+      Number.parseFloat(getComputedStyle(words).paddingLeft) +
+      Number.parseFloat(getComputedStyle(words).borderLeftWidth)
+    view.dispatch({ selection: { anchor: line.from + 2 } })
+    cursorCharLeft(view)
+    const left = await caretX(view)
+    expect(view.state.selection.main.head).toBe(line.from + 1)
+    cursorCharLeft(view)
+    const columnZero = await caretX(view)
+    expect(view.state.selection.main.head).toBe(line.from)
+    expect(Math.abs(columnZero - railMiddle(view, name!)!)).toBeLessThan(1)
+    cursorCharRight(view)
+    const right = await caretX(view)
+    expect(view.state.selection.main.head).toBe(line.from + 1)
+    // the same place drawn the same way, at `its`, whichever way the caret came (it stood a tab left, at the band's edge)
+    expect(Math.abs(right - left)).toBeLessThan(0.01)
+    expect(Math.abs(left - wordsLeft)).toBeLessThan(1)
+    // ... and coming down from the line above
+    view.dispatch({ selection: { anchor: line.from - 1 } })
+    cursorCharRight(view)
+    cursorCharRight(view)
+    expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
+    view.dispatch({ selection: { anchor: view.state.doc.line(name! - 1).from + 1 } })
+    cursorLineDown(view)
+    expect(view.state.selection.main.head).toBe(line.from + 1)
+    expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
+  })
+
+  test("a plain body line's first word where a band's words on its level are, at every level;  its column 0 on its rail (I142)", async () => {
+    for (const [text, plain, banded] of [
+      [CHARACTER, "it lives", 'its "name"'],
+      [NESTED, "// face down", 'its "rank"'],
+      [NESTED, "turn it face down", "if it is face up"]
+    ] as const) {
+      view?.dom.parentElement?.remove()
+      view?.destroy()
+      const editor = await bubblyEditorOf(text)
+      const [plainLine, bandLine] = linesStarting(editor, [plain, banded])
+      const indentEnd = (number: number) => {
+        const line = editor.state.doc.line(number)
+        return line.from + /^\t*/.exec(line.text)![0].length
+      }
+      const firstLetter = (number: number) => editor.coordsAtPos(indentEnd(number), 1)!.left
+      const indentOf = (number: number) => indentEnd(number) - editor.state.doc.line(number).from
+      // on one level, the same x;  `turn it face down`, a level in from `if it is face up`:  a tab further
+      const tab = Number.parseFloat(getComputedStyle(editor.dom).getPropertyValue("--cmb-indent"))
+      const levels = indentOf(plainLine!) - indentOf(bandLine!)
+      expect(Math.abs(firstLetter(plainLine!) - firstLetter(bandLine!) - levels * tab), plain).toBeLessThan(0.01)
+      // its column 0 where a band line's is, on the outermost rail (I140);  the caret before its word at the word, stuck
+      // to the indent or not
+      const columnZero = async (number: number) => {
+        editor.dispatch({ selection: { anchor: editor.state.doc.line(number).from } })
+        return caretX(editor)
+      }
+      expect(Math.abs((await columnZero(plainLine!)) - (await columnZero(bandLine!))), plain).toBeLessThan(0.01)
+      editor.dispatch({
+        selection: EditorSelection.single(indentEnd(plainLine!)).replaceRange(
+          EditorSelection.cursor(indentEnd(plainLine!), -1)
+        )
+      })
+      expect(Math.abs((await caretX(editor)) - firstLetter(plainLine!)), plain).toBeLessThan(1)
+    }
+  })
+
   /**
    * A drawing's start tag laid out as Enter lays a long one out (epic `language` I133):
    * each attribute on its own line, its `>` at the end of the last (I135).
@@ -232,11 +337,23 @@ describe("a body's rail under the caret", () => {
     return (node instanceof HTMLElement ? node : node.parentElement)!.closest<HTMLElement>(".cm-line")!
   }
 
-  test("a start tag over several lines:  ONE block, every row from its band's left edge to the widest row's right (I135)", async () => {
+  /** Where the ink of `element`'s last letter ends:  its box less the letter's bearing, as a canvas measures it. */
+  function inkRightOf(element: Element): number {
+    const text = element.firstChild as Text
+    const range = document.createRange()
+    range.setStart(text, text.length - 1)
+    range.setEnd(text, text.length)
+    const style = getComputedStyle(element)
+    const canvas = document.createElement("canvas").getContext("2d")!
+    canvas.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+    return range.getBoundingClientRect().left + canvas.measureText(text.data.at(-1)!).actualBoundingBoxRight
+  }
+
+  test("a start tag over several lines:  ONE block, every row from its band's left edge to past the widest row (I135)", async () => {
     const view = await bubblyEditorOf(LAID_OUT)
     await frames()
     const [head, wide, last, child] = linesStarting(view, ["<toolbar", "appearance=", "inverted", "<action"])
-    const rows = [head!, head! + 1, wide!, last!].map((number) => {
+    const rows = [head!, wide!, last!].map((number) => {
       const row = lineElement(view, number).querySelector<HTMLElement>(".cmb-tag-block")!
       expect(row, String(number)).toBeTruthy()
       return row.getBoundingClientRect()
@@ -248,20 +365,67 @@ describe("a body's rail under the caret", () => {
     }
     // whole:  each row down to the next one's top
     for (const [at, row] of rows.slice(1).entries()) expect(Math.abs(row.top - rows[at]!.bottom)).toBeLessThan(0.1)
-    // past the widest value's closing quote
-    const quotes = lineElement(view, wide!).querySelectorAll(".cmb-quote-close")
-    expect(quotes[quotes.length - 1]!.getBoundingClientRect().right).toBeLessThan(band.right)
-    // its `>` at the block's right edge, in its last row:  as far in from it as its `⟨` is from the left edge,
-    // a value's room clear of the widest row's closing quote (Owen, I135)
-    const point = lineElement(view, last!).querySelector(".cmb-tag-point")!.getBoundingClientRect()
-    const angle = lineElement(view, head!).querySelector(".bubbly-angle-open")!.getBoundingClientRect()
-    expect(Math.abs(band.right - point.right - (angle.left - band.left))).toBeLessThan(0.1)
-    expect(point.left - quotes[quotes.length - 1]!.getBoundingClientRect().right).toBeGreaterThan(2)
+    // past the widest value's closing quote, as far as its `⟨` is in from its left edge
+    const quotes = view.dom.querySelectorAll(".cmb-tag-block .cmb-quote-close")
+    const widest = Math.max(...[...quotes].map((quote) => quote.getBoundingClientRect().right))
+    expect(widest).toBeLessThan(band.right)
     // the tag's rail, its children's, at the block's left edge, the block's bottom-left square into it (I137)
     const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
     expect(Math.abs(band.left + rail / 2 - railMiddle(view, child!)!)).toBeLessThan(0.1)
     const lastRow = lineElement(view, last!).querySelector(".cmb-tag-block")!
     expect(getComputedStyle(lastRow).borderBottomLeftRadius).toMatch(/^0px/)
+  })
+
+  test("...its first attribute on its name's line, the others under it, its `>` 4px past the last (I139)", async () => {
+    const view = await bubblyEditorOf(LAID_OUT)
+    await frames()
+    const [head, first, wide, last] = linesStarting(view, ["<toolbar", "class=", "appearance=", "inverted"])
+    // `class` drawn on `toolbar`'s line (Owen:  "`class` should be on the same line as `toolbar`"), the file unchanged
+    expect(view.state.doc.line(head!).text.trim()).toBe("<toolbar")
+    expect(lineElement(view, first!)).toBe(lineElement(view, head!))
+    const nameOf = (number: number) =>
+      [...lineElement(view, number).querySelectorAll(".bubbly-attribute-name")].find((name) =>
+        view.state.doc.line(number).text.trim().startsWith(name.textContent!)
+      )!
+    const tagName = lineElement(view, head!).querySelector(".bubbly-tag-name")!.getBoundingClientRect()
+    const classLeft = nameOf(first!).getBoundingClientRect().left
+    expect(classLeft).toBeGreaterThan(tagName.right)
+    // every other attribute's left at `class`'s (Owen:  "indented as much as `class`")
+    for (const number of [wide!, last!])
+      expect(Math.abs(nameOf(number).getBoundingClientRect().left - classLeft), `line ${number}`).toBeLessThan(0.01)
+    // its `>` on the last attribute's line, its `⟩`'s ink 4px past the attribute's (Owen:  "4px to the right")
+    const point = lineElement(view, last!).querySelector<HTMLElement>(".cmb-tag-point")!
+    const angle = point.querySelector(".bubbly-angle-close")!
+    const angleInk =
+      angle.getBoundingClientRect().right - 0.348 * Number.parseFloat(getComputedStyle(angle, "::before").fontSize)
+    expect(Math.abs(angleInk - inkRightOf(nameOf(last!)) - 4)).toBeLessThan(0.1)
+    // the caret at `class`'s start, and a click on each attribute, where they are
+    view.dispatch({ selection: { anchor: view.state.doc.line(first!).to - 'class="GameBar"'.length } })
+    await frames()
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    expect(Math.abs(caret.left - classLeft)).toBeLessThan(1)
+    for (const number of [first!, wide!, last!]) {
+      const name = nameOf(number).getBoundingClientRect()
+      const at = view.posAtCoords({ x: name.left + name.width / 2, y: name.top + name.height / 2 })!
+      expect(view.state.doc.lineAt(at).number, `click on line ${number}`).toBe(number)
+    }
+  })
+
+  test('...one attribute, closing itself:  `⟨ divider title="x" |⟩` on one line, its `|⟩` 4px past the quote (I139)', async () => {
+    const view = await bubblyEditorOf(`a "game" is a view\n\tto draw it\n\t\t<divider\n\t\t\ttitle="x" />\n`)
+    await frames()
+    await frames()
+    const line = lineElement(view, 3)
+    expect(lineElement(view, 4)).toBe(line)
+    const row = line.querySelector<HTMLElement>(".cmb-tag-block")!
+    expect(row.classList.contains("cmb-tag-block-last")).toBe(true)
+    const slash = line.querySelector(".cmb-tag-point .bubbly-slash")!.getBoundingClientRect()
+    // its bar drawn at its slash's left edge
+    const quote = line.querySelector(".cmb-quote-close .cmb-quote-glyph")!
+    expect(Math.abs(slash.left - inkRightOf(quote) - 4)).toBeLessThan(0.1)
+    expect(row.getBoundingClientRect().right).toBeGreaterThan(
+      line.querySelector(".cmb-tag-point")!.getBoundingClientRect().right
+    )
   })
 
   test("...the caret before its `>` at the last attribute's end, after it past the point;  wider as it's typed", async () => {

@@ -1,0 +1,119 @@
+/*
+ * `CodeMirrorPeek`'s box (epic `codemirror` I5):  under the caret's line, the full width of the code,
+ * its head (the place, the kind, ✕), then the place's file, read only, and the uses listed on the right.
+ * - 268px tall in all, as `PEEK_HEIGHT` says:  a 28px head, a 240px body.
+ * - Light and dark from one set, `light-dark()`:  the page's `color-scheme` picks.
+ */
+.cm-peek {
+  --cm-peek-line: var(--ui-primary, #6e56cf);
+  --cm-peek-wash: light-dark(rgb(110 86 207 / 0.08), rgb(150 130 240 / 0.14));
+  box-sizing: border-box;
+  height: 268px;
+  /* as wide as the pane shows (`fitWidth()`), and kept in sight as the code scrolls sideways */
+  position: sticky;
+  left: 0;
+  margin: 4px 0 8px 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cm-peek-line);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--spell-code-paper, var(--ui-code-background, light-dark(white, #1c1b22)));
+  color: var(--ui-code-color, light-dark(#3a3a44, #dedde6));
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+  white-space: normal;
+  cursor: default;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--cm-peek-wash);
+  }
+}
+
+.cm-peek-head {
+  flex: 0 0 28px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 0 12px;
+  background: var(--cm-peek-wash);
+  border-bottom: 1px solid var(--cm-peek-line);
+}
+.cm-peek-title {
+  font-weight: 600;
+}
+.cm-peek-kind {
+  flex: 1;
+  opacity: 0.7;
+}
+.cm-peek-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--cm-peek-wash);
+  }
+}
+
+.cm-peek-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.cm-peek-code {
+  flex: 1;
+  min-width: 0;
+
+  > .cm-editor {
+    height: 100%;
+    font-size: 14px;
+  }
+  /* no fold arrows:  it's for looking */
+  .cm-gutters {
+    display: none;
+  }
+}
+.cm-peek-none {
+  padding: 12px;
+  opacity: 0.7;
+}
+
+/* the uses, on the right */
+.cm-peek-list {
+  flex: 0 0 280px;
+  overflow-y: auto;
+  border-left: 1px solid var(--cm-peek-line);
+  padding: 4px 0;
+}
+.cm-peek-row {
+  padding: 4px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    background: var(--cm-peek-wash);
+  }
+  &[aria-selected="true"] {
+    background: var(--cm-peek-line);
+    color: white;
+  }
+}
+
+/* the place peeked at, marked in the file */
+.cm-peek-marked {
+  background: light-dark(rgb(255 200 0 / 0.35), rgb(255 200 0 / 0.25));
+  border-radius: 2px;
+}
+.cm-peek-marked-line {
+  background: light-dark(rgb(255 200 0 / 0.18), rgb(255 200 0 / 0.12));
+}
