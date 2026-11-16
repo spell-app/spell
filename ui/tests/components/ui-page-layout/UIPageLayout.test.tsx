@@ -5,7 +5,10 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { ShadowTree } from "spell/ui/test-helpers/ShadowTree"
 import { UIPageLayout, type DOMPageLayoutElement } from "spell/ui/components/ui-page-layout"
 
+import "spell/ui/components/ui-app-menu"
+import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-site-nav"
+import "spell/ui/components/ui-site-nav-button"
 
 /** A navigation for the drawer. */
 const NAV = `<ui-site-nav slot="drawer" current="/a" pages='[{ "title": "A", "href": "/a", "icon": "home" }, { "title": "B", "href": "/b", "icon": "film" }]'></ui-site-nav>`
@@ -64,12 +67,97 @@ describe("<ui-page-layout>", () => {
     expect(getComputedStyle(underMenu).borderInlineStartWidth).toBe("0px")
     expect(getComputedStyle(underMenu).boxShadow).not.toBe("none")
     expect(parseFloat(getComputedStyle(underMenu).borderTopLeftRadius)).toBeGreaterThan(0)
-    expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-border").trim()).toBe("none")
+    expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-shadow").trim()).toBe("none")
     // a shadow in a theme whose own shadows are none and whose lines are ink, as Mockup's (Owen:  "even in mockup")
     layout.style.cssText += ";  --ui-shadow-raised: none;  --ui-shadow-floating: none;  --ui-border-color: black"
     expect(getComputedStyle(underMenu).boxShadow).not.toBe("none")
     expect(underMenu.getBoundingClientRect().top).toBeCloseTo(menu.getBoundingClientRect().bottom, 0)
     expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-background").trim()).not.toBe("")
+  })
+
+  // epic `mockup` I36 (Owen:  "Menus and other components should be multiples of 4.  Use shadows rather than bottom
+  // borders so we don't have to worry about borders taking up space.  Top bar should have a shadow matching the side
+  // border")
+  describe("on the 4px grid, its edges shadows (I36)", () => {
+    /** A site's frame:  an app menu with the drawer's button, breadcrumbs and a tertiary button, a drawer, a page. */
+    const SITE =
+      `<ui-app-menu slot="menu"><ui-site-nav-button slot="start"></ui-site-nav-button>` +
+      `<ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices"></ui-button></ui-app-menu>` +
+      `<ui-site-nav slot="drawer" appearance="nav" current="/a" pages='[{ "title": "A", "href": "/a", "icon": "house" },` +
+      ` { "title": "B", "href": "/b", "icon": "film" }, { "title": "C", "href": "/c", "icon": "star" }]'></ui-site-nav>` +
+      `<p>The page</p>`
+
+    /** Is `pixels` a multiple of 4, to a hundredth? */
+    const onGrid = (pixels: number) => Math.abs(pixels / 4 - Math.round(pixels / 4)) < 0.01
+
+    /** The layout's boxes that should land on the grid:  their tops (from the layout's) and heights, by name. */
+    async function measured(layout: DOMPageLayoutElement) {
+      const nav = layout.querySelector("ui-site-nav")!
+      const menuBar = layout.querySelector("ui-app-menu")!.shadowRoot!.querySelector<HTMLElement>(".ui.header.menu")!
+      const button = layout.querySelector('ui-button[slot="end"]')!.shadowRoot!.querySelector("button")!
+      await ShadowTree.settle(nav)
+      await expect.poll(() => nav.shadowRoot!.querySelectorAll("ui-tree-item").length).toBe(3)
+      // the menu's height reaches the navigation once the layout has measured it
+      await expect.poll(() => getComputedStyle(nav).getPropertyValue("--ui-site-nav-bar-height")).toBe("40px")
+      await ShadowTree.settle(nav)
+      const top = layout.getBoundingClientRect().top
+      const boxes: Record<string, Element> = { menu: box(layout, "menu")!, "menu bar": menuBar, "bar button": button }
+      for (const [index, item] of [...nav.shadowRoot!.querySelectorAll("ui-tree-item")].entries())
+        boxes[`row ${index + 1}`] = item.shadowRoot!.querySelector('[part~="row"]')!
+      boxes["under the menu"] = box(layout, "page")!.parentElement!.parentElement!
+      return Object.entries(boxes).map(([name, element]) => {
+        const rect = element.getBoundingClientRect()
+        return { name, top: +(rect.top - top).toFixed(2), height: +rect.height.toFixed(2) }
+      })
+    }
+
+    test.each([
+      ["the default font size", ""],
+      ["a 17px font size (Mockup's)", "--ui-font-size: 17px; font-size: 17px"],
+      ["a 15px font size", "--ui-font-size: 15px; font-size: 15px"]
+    ])(
+      "the menu 40px tall, its button 32px, the drawer's rows and the page side on the grid:  %s",
+      async (_, style) => {
+        const layout = await pageLayout(SITE)
+        layout.style.cssText += `; ${style}`
+        await ShadowTree.settle(layout)
+        const boxes = await measured(layout)
+        const named = Object.fromEntries(boxes.map((each) => [each.name, each]))
+        expect(named.menu!.height).toBe(40)
+        expect(named["menu bar"]!.height).toBe(40)
+        expect(named["bar button"]!.height).toBe(32)
+        expect(named["under the menu"]!.top).toBe(40)
+        // every row:  where it starts and how tall it is, both on the grid (the current page's highlight too)
+        for (const each of boxes.filter((one) => one.name.startsWith("row "))) {
+          expect(onGrid(each.top), `${each.name} starts at ${each.top}`).toBe(true)
+          expect(onGrid(each.height), `${each.name} is ${each.height} tall`).toBe(true)
+        }
+      }
+    )
+
+    test("the top bar casts the page side's own shadow down over the page, no line under it, in every arrangement", async () => {
+      for (const [inner, width] of [
+        [SITE, 900],
+        [`<ui-app-menu slot="menu"></ui-app-menu><p>The page</p>`, 900],
+        [SITE, 400]
+      ] as const) {
+        const layout = await pageLayout(inner, { width })
+        const menu = box(layout, "menu")!
+        const underMenu = box(layout, "page")!.parentElement!.parentElement!
+        const shadow = getComputedStyle(menu).boxShadow
+        expect(shadow).not.toBe("none")
+        // the same token as the page side's:  the same shadow
+        if (layout.querySelector("ui-site-nav") && width > 600)
+          expect(shadow).toBe(getComputedStyle(underMenu).boxShadow)
+        // drawn below it alone, over what's under it
+        expect(getComputedStyle(menu).clipPath).toMatch(/inset\(0px 0px -/)
+        expect(Number(getComputedStyle(menu).zIndex)).toBeGreaterThan(0)
+        const bar = layout.querySelector("ui-app-menu")!.shadowRoot!.querySelector<HTMLElement>(".ui.header.menu")!
+        expect(getComputedStyle(bar).borderBottomWidth).toBe("0px")
+        expect(getComputedStyle(bar).boxShadow).toBe("none")
+        layout.remove()
+      }
+    })
   })
 
   test('`drawer="compact"` sets `collapsed` on the navigation in it, and takes it off again', async () => {

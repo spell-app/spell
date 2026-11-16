@@ -78,7 +78,7 @@
 /* where the top bar draws:  its height while its Spell loads, so what's below stays where it'll be */
 .EditorBarPlace {
   flex: 0 0 auto;
-  min-height: var(--ui-menu-header-bar-height, 38px);
+  min-height: var(--ui-menu-header-bar-height, 40px);
 }
 
 /* `<SampleBar>`:  the app pane's header while a sample stands in for a data place (epic `editor` P26) */

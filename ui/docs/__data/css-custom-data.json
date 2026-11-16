@@ -6249,7 +6249,7 @@
       "name": "--ui-menu-header-bar-height",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `38px`"
+        "value": "`<ui-menu>`'s token.  Default:  `40px`"
       }
     },
     {
@@ -6267,10 +6267,10 @@
       }
     },
     {
-      "name": "--ui-menu-header-bar-border",
+      "name": "--ui-menu-header-bar-shadow",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `1px solid var(--ui-border-color)`"
+        "value": "`<ui-menu>`'s token.  Default:  `0 1px 0 var(--ui-border-color)`"
       }
     },
     {
@@ -6830,7 +6830,7 @@
       "name": "--ui-page-layout-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-page-layout>`'s token.  Default:  `var(--ui-font-size, 16px)`"
+        "value": "`<ui-page-layout>`'s token.  Default:  `var(--_page-layout-room)`"
       }
     },
     {
@@ -8895,7 +8895,7 @@
       "name": "--ui-site-nav-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-site-nav>`'s token.  Default:  `var(--_site-nav-padding-top) 0 0.5em`"
+        "value": "`<ui-site-nav>`'s token.  Default:  `var(--_site-nav-padding-top) 0 round(0.5em, var(--ui-grid, 4px))`"
       }
     },
     {

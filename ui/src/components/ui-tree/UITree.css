@@ -233,9 +233,10 @@
         translate 200ms var(--_ui-tree-nav-ease);
     }
   }
+  /* a row's height on the 4px grid (`--ui-grid`, epic `mockup` I36):  2.25em of its text, rounded to it */
   :host(:state(nav)) > .row {
     gap: 0.75em;
-    min-height: 2.25em;
+    min-height: round(2.25em, var(--ui-grid, 4px));
     /* 0.5em of the tree's text, from inside this smaller text */
     margin-inline: calc(0.5em / 0.875);
     padding-block: 0.25em;
@@ -256,20 +257,18 @@
   :host(:state(nav):state(selected)) > .row > ::slotted([slot="icon"]) {
     color: inherit;
   }
-  /* the rows under a band:  a little room above and below, as a list of links has, and a pixel between rows;
-     a subheading band goes edge to edge, as the first and last thing under its heading */
+  /* the rows under a band:  a little room above and below, as a list of links has, on the 4px grid;
+     a subheading band goes edge to edge, as the first and last thing under its heading
+     - no pixel between rows any more (I36):  it put every row after the first off the grid */
   :host(:state(nav):state(band)) > .rows > .folded > slot {
     display: block;
-    padding-block: 0.375em;
-  }
-  :host(:state(nav):not(:state(band))) {
-    margin-block-end: 1px;
+    padding-block: round(0.375em, var(--ui-grid, 4px));
   }
   :host(:state(nav)[band="subheading"]:first-child) {
-    margin-block-start: -0.375em;
+    margin-block-start: calc(-1 * round(0.375em, var(--ui-grid, 4px)));
   }
   :host(:state(nav)[band="subheading"]:last-child) {
-    margin-block-end: -0.375em;
+    margin-block-end: calc(-1 * round(0.375em, var(--ui-grid, 4px)));
   }
   :host(:state(nav)) .icon,
   :host(:state(nav)) ::slotted([slot="icon"]) {
@@ -360,8 +359,8 @@
   /* a label, `band="group"`:  a quiet word over its rows, no arrow, no fill;  its rows open by themselves (epic `mockup`
      T34), so it takes no room for a triangle, and lines up with the rows' icons */
   :host(:state(nav)) > .row.group {
-    min-height: 2em;
-    margin-block-start: 0.5em;
+    min-height: round(2em, var(--ui-grid, 4px));
+    margin-block-start: round(0.5em, var(--ui-grid, 4px));
     padding-block: 0.25em;
     padding-inline: calc(0.75em / 0.8125) 0.75em;
     color: var(--_ui-tree-nav-subheading-color);

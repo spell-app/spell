@@ -14,6 +14,10 @@
  *   and the menu by a soft shadow, its corner by the drawer rounded (epic `mockup` I32):
  *   - a shadow in every theme, Mockup's too:  never the theme's ink line (Owen:  "Make the black border a shadow")
  *   - made from the theme's shadow colour (`--ui-shadow-ink`), as a theme's own raised shadow may be none or a line
+ * - The menu casts the same soft shadow down over what's under it, in every arrangement:  beside the drawer, without
+ *   one, narrow (epic `mockup` I36, Owen:  "Top bar should have a shadow matching the side border");  so the menu's
+ *   edge and the page side's read as one, and no line takes room.
+ * - On the 4px grid (`--ui-grid`, I36):  the menu 40px tall, the room round the page a font size rounded to the grid.
  * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
  *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
@@ -35,7 +39,9 @@
  */
 @layer ui.components {
   :host {
-    --_ui-page-layout-gap: var(--ui-page-layout-gap, var(--ui-font-size, 16px));
+    --_ui-page-layout-gap: var(--ui-page-layout-gap, var(--_page-layout-room));
+    /* a font size, on the 4px grid:  the room between the menu, the page and the footer, and the page's inset */
+    --_page-layout-room: round(var(--ui-font-size, 16px), var(--ui-grid, 4px));
     --_ui-page-layout-duration: var(--ui-duration-normal, 200ms);
     --_page-layout-close-duration: 0.2s;
     --_page-layout-flyout-radius: var(--ui-panel-radius, var(--ui-radius-l, 14px));
@@ -90,7 +96,15 @@
   }
   /* the menu's room below it is inside what's under it:  so the drawer's line runs on from the menu's */
   .menu + .under-menu {
-    padding-block-start: 1em;
+    padding-block-start: var(--_page-layout-room);
+  }
+  /* the menu over what's under it, its shadow below it alone:  the page side's own edge (I36) */
+  .menu {
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--_ui-page-layout-shadow);
+    clip-path: inset(0 0 -2em 0);
+    --ui-menu-header-bar-shadow: none;
   }
   .under-menu {
     flex: 1 0 auto;
@@ -98,10 +112,10 @@
     flex-direction: column;
   }
   .page-menu {
-    margin-block-end: 1em;
+    margin-block-end: var(--_page-layout-room);
   }
   .footer {
-    margin-block-start: 1em;
+    margin-block-start: var(--_page-layout-room);
   }
   .row {
     flex: 1 0 auto;
@@ -122,14 +136,13 @@
     background: var(--ui-surface-muted, Canvas);
   }
   .layout:has(> .drawer) > .body > .under-menu {
-    padding-inline-start: var(--ui-font-size, 16px);
+    padding-inline-start: var(--_page-layout-room);
     border-start-start-radius: var(--_page-layout-flyout-radius);
     background: var(--ui-background, Canvas);
     box-shadow: var(--_ui-page-layout-shadow);
   }
   .layout:has(> .drawer) > .body > .menu {
     --ui-menu-header-bar-background: var(--ui-surface-muted, Canvas);
-    --ui-menu-header-bar-border: none;
   }
   /* its own menu button:  only at a narrow width */
   .menu-button {
@@ -195,10 +208,11 @@
     :host(:state(compact)) .drawer {
       position: absolute;
       inset-inline-start: 0;
-      inset-block-start: 2.75em;
+      /* under the menu:  its measured height (`--ui-site-nav-bar-height`, set on the layout) */
+      inset-block-start: var(--ui-site-nav-bar-height, 40px);
       z-index: var(--ui-z-popup, 1000);
       inline-size: min(16em, 85%);
-      max-block-size: calc(100% - 2.75em);
+      max-block-size: calc(100% - var(--ui-site-nav-bar-height, 40px));
       overflow: auto;
       background: linear-gradient(var(--ui-background, Canvas), var(--ui-background, Canvas)) Canvas;
       border-inline-end: none;
@@ -230,12 +244,14 @@
     }
     .layout:has(> .drawer) > .body > .menu {
       --ui-menu-header-bar-background: initial;
-      --ui-menu-header-bar-border: initial;
     }
+    /* its own menu button 32px tall, 8px above what's under it:  the page starts 40px down, as under a menu (I36) */
     .menu-button {
+      --ui-button-padding-block: 8px;
+      --ui-button-line-height: 16px;
       display: inline-flex;
       align-self: start;
-      margin-block-end: 0.5em;
+      margin-block-end: 8px;
     }
   }
 
