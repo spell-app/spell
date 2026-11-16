@@ -450,7 +450,7 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 - what a developer reads at run time:  assertions, thrown errors, type checks
 - the project-level compile errors (imports, exports, targets), and a few lines of the editor's Program Output
   (`Compiling`, `Started afresh`)
-- Monaco's own menus (`View Problem`), the project prompts, the property editor's field names
+- the project prompts, the property editor's field names
 - an English library's names, imported into a Spanish file
 
 **Where the parser is lenient:**

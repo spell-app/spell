@@ -13,7 +13,7 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  * - The colours come from the parser's own token pass, `SP.SpellHighlighter.spans()`, as `<spell-code>` colours
  *   a snippet:  no grammar of CodeMirror's own to keep in step with the parser.
  * - Each span's kind takes its role in the one table of code colours (`CodeRules.roleForScope()`),
- *   so a token is the same colour in either editor:  `var(--ui-code-<role>)`, light or dark as the page is.
+ *   so a token is the same colour as in the app's other code:  `var(--ui-code-<role>)`, light or dark as the page is.
  * - Read by the file's own language's parser (`Spanish.es.spell` by Spanish's),
  *   and with its project's parse when that's of this very text, so a name declared in another file colours as one.
  * - A page file (`SP.formOfText()`) by its page tokens alone (`pageSpans()`), read by a page parser of its language:

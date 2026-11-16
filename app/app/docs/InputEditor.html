@@ -47,8 +47,8 @@
           <p class="lede">
             Where you write spell in the editor: the open file, coloured as spell, top left, with a toolbar to pick
             another file, save, reload or make a new one. It's a
-            <a href="MonacoEditor.html" target="src-packages-app-docs-monacoeditor-html">Monaco editor</a> on the file,
-            so it has hovers, references and "go to definition" too.
+            <a href="CodeMirrorEditor.html" target="src-packages-app-docs-codemirroreditor-html">CodeMirror editor</a> on the
+            file, so it has hovers, references and "go to definition" too.
           </p>
           <ui-list class="spell-meta">
             <ui-item icon="user">Written for: anyone changing the spell app's editor, or reading its code</ui-item>
@@ -109,11 +109,12 @@
                 browser remembers that choice (<code>LineNumbers</code>).
               </li>
               <li>
-                <code>InputEditor</code> edits the editor's open file. Monaco loads the first time it's needed, so it
-                says "Loading editor…" till then, and a fresh editor is made for each file.
+                <code>InputEditor</code> edits the editor's open file. CodeMirror loads once the program has compiled
+                and run, so it says "Loading editor…" till then. One editor shows every file, each keeping its own undo,
+                folds and caret.
               </li>
               <li>
-                Once it's made, the editor gets it: for its save, reload and compile keys, and to follow the cursor and
+                Once it's made, the editor gets it: for its save, reload and compile keys, and to follow the caret and
                 scrolling. It selects where the file asked to open, such as a definition jumped to.
               </li>
               <li>
@@ -159,7 +160,7 @@
                 <a href="FileEditor.html" target="src-packages-app-docs-fileeditor-html">FileEditor</a>, a
                 <a href="CodeMirrorEditor.html" target="src-packages-app-docs-codemirroreditor-html">CodeMirrorEditor</a> on a file,
                 loaded by
-                <a href="../../src/app/solid/LazyCodeMirror.tsx" target="src-packages-app-src-solid-lazymonaco-tsx"
+                <a href="../../src/app/solid/LazyCodeMirror.tsx" target="src-app-src-app-solid-lazycodemirror-tsx"
                   ><code title="src/app/solid/LazyCodeMirror.tsx">LazyCodeMirror.tsx</code></a
                 >
               </li>
@@ -174,7 +175,7 @@
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-10-12 against branch <code>epic-workflow</code>.</p>
+            <p class="meta">Last checked 2026-11-16 against branch <code>codemirror</code>.</p>
           </footer>
         </article>
       </ui-container>

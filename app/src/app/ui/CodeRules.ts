@@ -3,9 +3,9 @@ import { type Tag, tags } from "@lezer/highlight"
 
 /****************
  * ### `CodeRules`
- * The ONE table of which code colour each kind of token takes, in every code editor (epic `debut` P22;
- * epic `codemirror` P3):  a ROLE, whose colour is the page theme's `--ui-code-<role>` token, light and dark
- * (Spell UI's `codeRoles`).
+ * The ONE table of which code colour each kind of token takes, in every code editor
+ * (epic `debut` P22;  epic `codemirror` P3):
+ * a ROLE, whose colour is the page theme's `--ui-code-<role>` token, light and dark (Spell UI's `codeRoles`).
  * - Its roles were Shades of Purple's, the code's colours under every theme until P22 (`ShadesOfPurple`, ported
  *   from Ahmad Awais's VS Code theme):  those colours are now the Spell theme's own, in its theme file.
  * - `codeMirrorStyle`:  another language's code (the compiled javascript, TypeScript, Python), by CodeMirror's

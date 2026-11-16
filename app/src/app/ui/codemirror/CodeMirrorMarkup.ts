@@ -175,8 +175,8 @@ function hueOf(partOfSpeech: string): string[] {
 
 /****************
  * ### `CodeMirrorDecorations`
- * One drawing's decorations being made, for the look's two kinds of text:  Spell (`CodeMirrorBubbly`) and HTML
- * (`CodeMirrorMarkup`), a Spell file's drawing's tags among its Spell.
+ * One drawing's decorations being made, for the look's two kinds of text:
+ * Spell (`CodeMirrorBubbly`) and HTML (`CodeMirrorMarkup`), a Spell file's drawing's tags among its Spell.
  * - ONE mark per stretch, its classes together:  CodeMirror nests two marks over the same stretch in no set order,
  *   so `bubbly-quoted` round `bubbly-input` came out either way round;  a longer mark always holds a shorter one.
  * - ONE decoration per line, its classes together, the rails of every block round it.

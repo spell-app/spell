@@ -9,8 +9,8 @@ import { CodeMirrorPopups } from "./CodeMirrorPopups"
  * ### `CodeMirrorHovers`
  * The hover's ⌥ rule in a CodeMirror editor, and an error's message on a plain hover over its squiggle
  * (epic `codemirror` P5):
- * - ⌥ (Alt) followed:  `isAltHeld(view)`, as of the mouse's last move or the last key;  the hover's info shows
- *   by `CodeEditorFeatures.showsHoverInfo()` with it (`CodeMirrorLanguage`)
+ * - ⌥ (Alt) followed:  `isAltHeld(view)`, as of the mouse's last move or the last key;
+ *   the hover's info shows by `CodeEditorFeatures.showsHoverInfo()` with it (`CodeMirrorLanguage`)
  * - ⌥ pressed while the mouse rests on a word:  the info hover comes up without moving the mouse
  *   (a mouse move replayed where it rests);  it waits `HOVER_DELAY` as any hover does
  * - errors, warnings and notes under the mouse:  each its own row, once the mouse rests `HOVER_DELAY`
@@ -121,8 +121,8 @@ const ALT = ViewPlugin.fromClass(
 /**
  * The errors, warnings and notes whose squiggle is under `pos`:  one row each, a section of the hover.
  * - Not hints, which draw no squiggle.
- * - `side`:  which side of `pos` the mouse is, as CodeMirror's hovers say:  a squiggle ending at `pos` counts only
- *   from its left.
+ * - `side`:  which side of `pos` the mouse is, as CodeMirror's hovers say:
+ *   a squiggle ending at `pos` counts only from its left.
  */
 function errorsAt(view: EditorView, pos: number, side: -1 | 1): Tooltip | null {
   const under: { diagnostic: Diagnostic; from: number; to: number }[] = []

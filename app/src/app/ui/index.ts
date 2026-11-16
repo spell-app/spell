@@ -1,7 +1,7 @@
 /**
  * Barrel for `spell/app/app/ui` (`UI`):  the types the app's UI shares.
- * - `ui.types.ts`:  editor selections, the explorers' saved state, the code editors' commands -- types, and one small
- *   error class, `RenameRefusedError`.
+ * - `ui.types.ts`:  editor selections, the explorers' saved state, the code editors' commands --
+ *   types, and one small error class, `RenameRefusedError`.
  * - NOT the app's own UI:  that's Solid, on `spell-ui`, in `spell/app/app/solid`.
  *   Spell PROGRAMS draw with Spell UI's `<ui-*>` elements
  *   (epic `output-targets` P11 retired the React kit that lived here).

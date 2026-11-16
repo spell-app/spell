@@ -62,11 +62,11 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   file once shown.  Showing a file of another project lets go of the last one's states, UNLESS something `use()`s
  *   it, e.g. a `<spell-editor>`.
  * - What it does that has nothing to do with CodeMirror (its waits, `use()`, `saveAfterEdit()`, `applyEdits()` and
- *   `EditWay`) is the old editor's, copied in (epic `codemirror` J4).
+ *   `EditWay`) is what the app's code editor did before CodeMirror, copied in (epic `codemirror` J4).
  * - Follows files with `observe()` (`spell/util`, on spell cells):  a plain function, re-run synchronously as the cells
  *   it read change, so it's fine wherever `stateFor()` is called from.
- * - Its position in the import graph:  CodeMirror, the parser, the language service, the CodeMirror folder's other
- *   files.
+ * - Its position in the import graph:
+ *   CodeMirror, the parser, the language service, the CodeMirror folder's other files.
  ****************/
 export class FileStates {
   constructor({ service, onEdit = () => {} }: FileStatesProps) {
@@ -574,8 +574,8 @@ export type FileStatesProps = {
 }
 
 /**
- * How an edit from outside the code joins its file's undo:  a step of its own, or part of a run of typing
- * -- see `FileStates.applyEdits()`.
+ * How an edit from outside the code joins its file's undo:
+ * a step of its own, or part of a run of typing -- see `FileStates.applyEdits()`.
  */
 export type EditWay = "step" | "typing"
 

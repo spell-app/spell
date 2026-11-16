@@ -23,8 +23,8 @@ import "./CodeSlice.css"
  * - Without a `column`, its lines show as if dedented (Owen:  "shouldn't show indent here, should be implicit"):
  *   their common indent is hidden.
  * - `focus`:  puts the caret at the end of its lines, once made, e.g. for a handler just added.
- * - Drawn as the file is, but only what's wholly in its lines bubbly:  a block it cuts draws no band or rail cut off
- *   at its edges.
+ * - Drawn as the file is, but only what's wholly in its lines bubbly:
+ *   a block it cuts draws no band or rail cut off at its edges.
  * - A new `file` or new lines:  shown in the same view.
  * - Made again while it's typed in, it keeps the caret where it was (`keepCaret()`, epic `editor` I141).
  ****************/

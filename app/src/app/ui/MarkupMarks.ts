@@ -19,7 +19,7 @@ import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
  * - From the same reading as the page's, `BubblyMarkup.treeOf()`, so both see the same elements:
  *   - an element with what's inside it on lines of its own:  a block, its start tag the band, an end tag that starts
  *     its line, named or `</>`, a TINY pill at the rail's turn, its letters tiny, its line only the pill's row tall
- *     (Owen, Q61;  `SpellBubbly` shortens its line)
+ *     (Owen, Q61)
  *   - an element alone on its line with no end tag (`<meta …>`), and a doctype:  a band by itself
  *   - an element with nothing between its tags:  ONE pill over both, drawn as if self-closed, `/⟩`, its end tag's
  *     `<` and name hidden (Owen, Q62)
@@ -27,8 +27,8 @@ import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
  *     line linking its two pills too, between them (`MarkupLinkShape`)
  *   - a start tag on lines of its own:  its shape's place spans them, drawn as ONE tall band
  * - Marks:
- *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
- *     attributes' names, as the page draws them
+ *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;
+ *     its `/`, name and attributes' names, as the page draws them
  *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it;
  *     a `{…}` one's (Spell, worked out as it runs) an inverted pill, its braces part of it, as a quoted one's marks
  *     are of its white (Owen, epic `editor` I144 C1);  a Spell drawing's `{…}` between its tags too
@@ -50,8 +50,8 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
    * - `isView`:  is a tag one of the project's own views, `<tableau "T1"/>`?  Then it draws a thing:  purple.
    * - `declaringTags`:  where each tag that declares a member starts (`SP.BubblyDrawing.declaringTags`):
    *   drawn round, `bubbly-tag-declares` (epic `editor` I84)
-   * - `codes`:  the lines' code, each `{…}` (`SP.BubblyLine.codes`):  one between tags an inverted pill, as a
-   *   `{…}` value's is
+   * - `codes`:  the lines' code, each `{…}` (`SP.BubblyLine.codes`):
+   *   one between tags an inverted pill, as a `{…}` value's is
    */
   static within<Mark>(
     text: string,
@@ -71,8 +71,8 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
   readonly tags: Array<{ start: number; end: number }> = []
 
   /**
-   * The room injected after each tag or code pill in a line, by where it ends:  a tag (or code) right after it starts
-   * past it too.
+   * The room injected after each tag or code pill in a line, by where it ends:
+   * a tag (or code) right after it starts past it too.
    */
   private readonly roomAfter = new Map<number, TagRoom>()
 
@@ -354,8 +354,9 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
   }
 
   /**
-   * An end tag's pieces;  `"block"`:  a block's, its name faint as its marks are, as the page draws it, every piece
-   * tiny (`bubbly-foot-tiny`, Q61).
+   * An end tag's pieces.
+   * - `"block"`:  a block's, its name faint as its marks are, as the page draws it,
+   *   every piece tiny (`bubbly-foot-tiny`, Q61).
    */
   private endTag(tag: MarkupEndTag, place: "block" | "inline") {
     const { start, end } = tag

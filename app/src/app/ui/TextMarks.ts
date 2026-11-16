@@ -4,8 +4,8 @@
  * `MarkupMarks` (HTML), which every editor reads.
  * - Which stretch of the text gets which classes of the look's one sheet, `bubbly.css`, and which spacers:
  *   worked out here, the same for every editor.
- * - Only the last step is the editor's:  its `MarkMaker` turns each stretch into the editor's own mark
- *   (CodeMirror's, `CodeMirrorMarkup`'s).
+ * - Only the last step is the editor's:
+ *   its `MarkMaker` turns each stretch into the editor's own mark (CodeMirror's, `CodeMirrorMarkup`'s).
  * - A shape names its place by an index into `marks`:  the editor moves that mark as the text is edited.
  * - Pure data:  no editor in it, so it's tested without one.
  *   NEVER imports an editor (epic `codemirror` P3).
@@ -99,8 +99,8 @@ export type Spacer = { content: string; inlineClassName: string; cursorStops?: 1
  * - `line`:  before an HTML line of text, so it sits in from the tags beside it, as on the page
  * - `tag`:  either side of an HTML tag in a line, room for its pill
  * - `touch`:  between an empty element's two tags, whose points touch
- * - `tag-head`:  before an HTML block's start tag, its `⟨` clear of its band's cut corner, in an HTML file or a
- *   Spell file's drawing
+ * - `tag-head`:  before an HTML block's start tag, its `⟨` clear of its band's cut corner,
+ *   in an HTML file or a Spell file's drawing
  * - `tag-foot`:  before an HTML block's end tag that starts its line, its `⟨` just past its rail
  * - `tag-foot-bare`:  ... a `</>`, its `⟨|⟩` at its tiny pill's right end (Owen)
  * - `attribute`, `equals`:  before an HTML attribute's name, and its `=`

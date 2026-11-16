@@ -12,8 +12,8 @@ import type { SP } from "spell/parser/spell"
  *   (drawn outside their pill, the file's own `"` kept transparent).
  * - `sections`:  each declaration wrapped in a `<ui-section class="bubbly-section" id="...">`, a block a docs
  *   page's comments anchor to (the drawn-bubbly page, `scripts/bubbly-page.ts`).
- * - Strings, not DOM:  `<ui-code>` takes its drawing as HTML, as it takes its coloured lines, and the page's script
- *   runs in node.
+ * - Strings, not DOM:  `<ui-code>` takes its drawing as HTML, as it takes its coloured lines,
+ *   and the page's script runs in node.
  * - STATIC and instance-free:  one drawing in, its HTML out.  NEVER imports the parser's code, only its types.
  ****************/
 export class BubblyHtml {

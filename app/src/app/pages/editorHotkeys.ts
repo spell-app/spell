@@ -8,21 +8,21 @@ import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spel
 /**
  * The editor page's keyboard shortcuts:  ONE list (`EDITOR_HOTKEYS`), which the page's keys, the code editor's
  * commands and the top bar's menus all read (epic `debut` P32).
- * - Each key, in Spell UI's words (`mod+S`:  ⌘S on a Mac, Ctrl+S elsewhere), is what a menu item shows
- *   (`<ui-action shortcut>`).
+ * - Each key, in Spell UI's words (`mod+S`:  ⌘S on a Mac, Ctrl+S elsewhere),
+ *   is what a menu item shows (`<ui-action shortcut>`).
  * - The page's keys go through Spell UI's one keyboard (`UI.keyboard`), registered while the page is up
  *   (`editorHotkeys()`).
  * - Inside the code editor its own keymap runs them (`SpellCodeMirror.keymapFor()`);
  *   the page leaves a key typed there, or into any field, alone, so one press never runs twice.
- * - The code editor's own keys (Find, Go to Definition, Rename Symbol ...) are its commands, by neutral names
- *   (`codeEditorCommand`, epic `codemirror` P5):  listed so the menus show them;  the code editor's keymap is made
- *   from this list.
+ * - The code editor's own keys (Find, Go to Definition, Rename Symbol ...) are its commands,
+ *   by neutral names (`codeEditorCommand`, epic `codemirror` P5):
+ *   listed so the menus show them;  the code editor's keymap is made from this list.
  * - Cut, Copy, Paste, Duplicate and Delete are on what's selected in the app:  never a key in the code or a field,
  *   where the page leaves them alone.
  * - Undo and Redo go by focus (`undoWay()`):
  *   - in the code:  the code editor's own undo
- *   - in the running app, or on nothing (the page's body), in Run or Edit:  the program's own first,
- *     a move in the game;  with none to undo, the key comes on to ours (epic `editor` I167)
+ *   - in the running app, or on nothing (the page's body), in Run or Edit:
+ *     the program's own first, a move in the game;  with none to undo, the key comes on to ours (epic `editor` I167)
  *     - the program's keys are registered after ours, so they're asked first (core's `listenForUndoKeys()`)
  *   - anywhere else in Edit, the Inspector's fields too:  the editor's history (`editor.history`);
  *     with nothing there, what was typed in the code, so a click on the app doesn't strand it (epic
@@ -71,7 +71,8 @@ export type Hotkey = {
 /**
  * Turn the editor page's shortcuts on while the page is up:  each of `EDITOR_HOTKEYS` that runs something,
  * on Spell UI's keyboard.
- * - Call in `<SpellEditor>`'s body.  `isRunning`:  is it showing Run?  Undo is then the program's.
+ * - Call in `<SpellEditor>`'s body.
+ * - `isRunning`:  is it showing Run?  Undo is then the program's.
  * - A running program's ⌘Z, in the app or on nothing, is asked before ours:  its keys are registered later.
  * - A Mod key works with Command or Control, on every system.
  * - A key typed into a field, or into the code editor, is left alone:  the code editor runs its own.

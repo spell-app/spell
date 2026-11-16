@@ -2,7 +2,7 @@
  * Readers OUTSIDE spell state:  how Solid, and plain code, follow cells -- see `cells.ts`.
  * - `bridgeSolid()` -- every Solid computation reads cells, installed ONCE per Solid by the HOST (the app, a
  *   runner, `<spell-viewer>`):  `util` and `core` never import Solid, so `spell-runtime.js` holds none.
- * - `observe()` -- a plain function re-run synchronously as what it read changes, e.g. `SpellModels`.
+ * - `observe()` -- a plain function re-run synchronously as what it read changes, e.g. `FileStates`.
  * - (React's was `view()`, gone with React:  epic `output-targets` P11.)
  */
 

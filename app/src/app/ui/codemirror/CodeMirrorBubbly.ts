@@ -8,8 +8,9 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 
 /****************
  * ### `CodeMirrorBubbly`
- * Spell drawn in the bubbly look in a CodeMirror editor (epic `editor` P30, the CodeMirror test;  epic `codemirror`
- * P3), from the parser's `SP.BubblyLayout`, the same data the page's `BubblyHtml` draws from.
+ * Spell drawn in the bubbly look in a CodeMirror editor,
+ * from the parser's `SP.BubblyLayout`, the same data the page's `BubblyHtml` draws from
+ * (epic `editor` P30, the CodeMirror test;  epic `codemirror` P3).
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
  *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
  *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen)

@@ -59,7 +59,7 @@ export class CompletionShapes {
    * The completion fields that write attribute `help.name` whole:  `color="|"`, its words listed at once if it has
    * any;  one that takes no value (`bare`) by its name alone.
    * - Only the name when an `=` already follows it.
-   * - `picksValues`:  the editor can pick its value (a colour, an icon;  epic `editor` T61),
+   * - `picksValues`:  the editor can pick its value, a colour or an icon (epic `editor` T61):
    *   so a picked one with no words lists too, for its Pick row.
    */
   static attribute(help: SP.ComponentAttributeHelp, after: string, picksValues = false): Partial<CompletionItem> {
@@ -110,8 +110,8 @@ export class CompletionShapes {
   }
 
   /**
-   * The shape tag `tag` is written in, as `scope`'s language reads it:  spell's own tag's (`SPELL_TAG_SHAPES`),
-   * else its component's, else `holds`.
+   * The shape tag `tag` is written in, as `scope`'s language reads it:
+   * spell's own tag's (`SPELL_TAG_SHAPES`), else its component's, else `holds`.
    */
   private static shapeOf(scope: P.Scope, tag: string): TagShape {
     const meaning = SP.spellTagsIn(scope).find((each) => each.tag === tag)?.meaning

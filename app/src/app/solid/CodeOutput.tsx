@@ -199,8 +199,8 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
  *   someone's typing in it.
  * - A part clicked (inspected in the app, a row of the tree) puts the code's caret where it's written too,
  *   on its tag (epic `editor` I158;  Owen:  "I'd expect it to select `<action "cheat" />` and put the cursor there").
- * - A line that draws or makes something selects it:  every card, for the line that makes them all;  a line inside
- *   a tag, what that tag draws.
+ * - A line that draws or makes something selects it:  every card, for the line that makes them all;
+ *   a line inside a tag, what that tag draws.
  * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was,
  *   and so does the cursor's line once an edit typed there is drawn (`from: "edit"`, I87).
  * - The code's cursor ON a word naming a thing the app has (`the stock`, `the deck`, `la reserva`) inspects that

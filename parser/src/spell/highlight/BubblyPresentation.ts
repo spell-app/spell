@@ -25,8 +25,9 @@ export class BubblyPresentation {
     // ## Declarations
     ////////////////
 
-    // the kind a type's head says it is, bold whole, ONE name:  `two sided view`, `viewable list of cards`
-    // (epic `language` I111, I112);  Spanish's `lista visible, soltable de cartas` starts with words of its syntax
+    // the kind a type's head says it is, bold whole, ONE name (epic `language` I111, I112):
+    // `two sided view`, `viewable list of cards`;
+    // Spanish's `lista visible, soltable de cartas` starts with words of its syntax
     create_type: { namesKind: "superType" },
     create_list_type: { namesKind: "instanceType" },
     create_viewable_list_type: { namesKind: "instanceType" },

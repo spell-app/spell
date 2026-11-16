@@ -14,8 +14,8 @@ import "./CodeMirrorEditor.css"
  *   - A file's editor switches states itself (`<FileEditor>`, `SpellCodeMirror.show()`), so it passes none.
  * - Without one, the editor makes its own, from `value` and `extensions` (default:  the base setup alone);
  *   or as its `language` says:  compiled code, read only;  a snippet of Spell.
- *   A new `value` is a new starting point, e.g. the compiled code made again:  undo can't go back past it,
- *   and it does NOT call `onChange`, which is only for edits typed.
+ *   - A new `value` is a new starting point, e.g. the compiled code made again:  undo can't go back past it.
+ *   - Nor does it call `onChange`, which is only for edits typed.
  * - `onMount` / `onUnmount` hand out the view itself, e.g. to show a file in it, or follow the caret.
  * - Works in a shadow root too:  the view's root is the element's.
  * - NOTE: the view is a plain variable, not a signal:  the effects below only follow PROPS, and making the view

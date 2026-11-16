@@ -580,8 +580,8 @@ export class EditorStore extends Observable {
   accessor restartNeededBecause: string | undefined
 
   /**
-   * Did the person close `<RestartNeeded>`'s message?  It stays closed until the next edit that needs a restart
-   * (`noteRestartNeeded()`).
+   * Did the person close `<RestartNeeded>`'s message?
+   * It stays closed until the next edit that needs a restart (`noteRestartNeeded()`).
    * - `restartNeededBecause` stays set meanwhile:  a run that can't take an edit still starts afresh (`RunSite`).
    */
   @prop()
@@ -1482,8 +1482,8 @@ export class EditorStore extends Observable {
 
   /**
    * The project's versions, newest first, to restore one:  it becomes your draft, and nothing is public until Publish.
-   * - Drawn by the editor's Spell, its `versions box` (`openVersions()`, epic `editor` I115):  how it looks is
-   *   `SpellEditor.spell`'s;  what's listed and what its buttons do is here.
+   * - Drawn by the editor's Spell, its `versions box` (`openVersions()`, epic `editor` I115):
+   *   how it looks is `SpellEditor.spell`'s;  what's listed and what its buttons do is here.
    * - The latest published version is chosen at first;  none yet, the box says so.
    * - With a draft, or edits not saved, "Save Current Changes" on the box's left keeps them as an entry of its own,
    *   never published (`ProjectFiles.keepDraft()`):  the list shows it at once, and the box stays open.
@@ -1810,8 +1810,8 @@ export class EditorStore extends Observable {
   }
   /**
    * Remember `inputEditor`, showing `editor.file`, in our `<InputEditor onMount />` event.
-   * - SIDE EFFECT:  follows its scrolling into `selection`, till it unmounts;  its caret comes through
-   *   `onInputUpdate()`, which `<InputEditor>` hands it.
+   * - SIDE EFFECT:  follows its scrolling into `selection`, till it unmounts;
+   *   its caret comes through `onInputUpdate()`, which `<InputEditor>` hands it.
    * - The page's keys (save, revert, compile) are `<InputEditor>`'s to give it (`EDITOR_HOTKEYS`).
    */
   onInputDidMount(inputEditor: SpellCodeMirror): void {
@@ -1866,8 +1866,9 @@ export class EditorStore extends Observable {
 
   /**
    * The code's cursor moved to line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell.
-   * - `from`:  `"code"`, the cursor moved;  `"edit"`, it rests there as an edit typed in the code is drawn
-   *   (`followOnceDrawn()`).
+   * - `from`:
+   *   - `"code"`:  the cursor moved
+   *   - `"edit"`:  it rests there as an edit typed in the code is drawn (`followOnceDrawn()`)
    */
   followCodeLine(lineNumber: number, from: "code" | "edit" = "code"): void {
     const { file } = editor

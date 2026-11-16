@@ -9,8 +9,9 @@ import { LSP } from "spell/app/lsp"
  * A drawing's attribute value switched between text and code as a person types, in a CodeMirror editor
  * (epic `codemirror` P4):
  * - `{` typed anywhere inside a quoted value turns its two quotes into braces:  `color="bl{ue"` => `color={blue}`
- * - `"` typed right after a code value's `{` turns its braces back into quotes:  `color={"its color}` =>
- *   `color="its color"`;  further in, a `"` starts a string in the code (`{say "hi"}`), so it's typed as itself
+ * - `"` typed right after a code value's `{` turns its braces back into quotes:
+ *   `color={"its color}` => `color="its color"`;
+ *   further in, a `"` starts a string in the code (`{say "hi"}`), so it's typed as itself
  * - The caret stays in the same words.
  * - Its own undo step:  one undo leaves the plain character typed, as if this help weren't there.
  * - Which values, and what they switch to:  `LSP.CodeOrText`, which the right-click menu's "Make it code" and

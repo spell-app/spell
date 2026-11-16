@@ -46,8 +46,8 @@ export function OutputToolbar() {
  * ### `<OutputEditor>`
  * Read-only code editor showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.
  * - With `target`:  the whole project's code for that target, written after each compile (`project.codeFor()`).
- * - Coloured as the compiled-code pane is (`CodeRules`' CodeMirror half);  it doesn't follow the cursor in
- *   `<InputEditor>`.
+ * - Coloured as the compiled-code pane is (`CodeRules`' CodeMirror half);
+ *   it doesn't follow the cursor in `<InputEditor>`.
  * - A target whose writer can't write the project shows why, as a comment, instead of its code.
  * - SEE:  its App UI components page, `app/docs/OutputEditor.html` (`/components/app/OutputEditor.html`).
  ****************/

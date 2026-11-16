@@ -1,6 +1,6 @@
 /**
- * Barrel for the app's CodeMirror editors, in Solid:  `<CodeMirrorEditor>`, `<FileEditor>`, `<CodeSlice>` and
- * `<DiffView>`.
+ * Barrel for the app's CodeMirror editors, in Solid:
+ * `<CodeMirrorEditor>`, `<FileEditor>`, `<CodeSlice>` and `<DiffView>`.
  * - NOTE: NOT in the `spell/app/app/solid` barrel, and NEVER imported statically outside this folder -- types aside:
  *   it loads on first use (`LazyCodeMirror`, `<spell-editor>`'s `loadCodeMirror()`), so CodeMirror stays out of
  *   the main bundle.

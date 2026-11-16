@@ -67,7 +67,7 @@ const PICTURES: Picture[] = [
     name: "TreeViewer",
     page: PROJECT,
     prepare: async (page) => {
-      await page.locator(".InputEditor .view-line").nth(1).click()
+      await page.locator(".InputEditor .cm-line").nth(1).click()
       await page.waitForTimeout(1500)
     },
     selector: ".TreeRoot"

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>FileEditor</title>
-    <meta name="description" content="A Monaco editor on one spell file, kept in step with it." />
+    <meta name="description" content="A CodeMirror editor on one Spell file at a time, kept in step with it." />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
       try {
@@ -37,7 +37,7 @@
           </ui-menu>
           <ui-header level="1" class="site-title">
             FileEditor
-            <ui-header>A Monaco editor on one spell file, kept in step with it.</ui-header>
+            <ui-header>A CodeMirror editor on one Spell file at a time, kept in step with it.</ui-header>
           </ui-header>
         </ui-container>
       </ui-segment>
@@ -62,7 +62,7 @@
             </p>
             <ui-image
               src="_images/InputEditor.png"
-              alt="The input pane: a File dropdown and actions above a Monaco editor showing Card.spell, coloured as spell"
+              alt="The input pane: a File dropdown and actions above a code editor showing Card.spell, coloured as spell"
               appearance="bordered rounded"
             >
             </ui-image>
@@ -76,18 +76,22 @@
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
-              The <a href="InputEditor.html" target="src-packages-app-docs-inputeditor-html">InputEditor</a> draws a new
-              one for each file, once Monaco has loaded:
+              The <a href="InputEditor.html" target="src-packages-app-docs-inputeditor-html">InputEditor</a> draws one, once
+              CodeMirror has loaded, and shows each file in it:
             </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>InputEditor.tsx · a fresh editor per file · 5 lines</ui-title>
+              <ui-title>InputEditor.tsx · the code pane's editor, shortened · 9 lines</ui-title>
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
-                    <Loading fallback={<LazyMonaco.Loading />}>
-                      <Show when={key()} keyed>
-                        {(_key) => <LazyMonaco.FileEditor file={file()} onMount={didMount} onUnmount={editor.onInputWillUnmount} />}
-                      </Show>
+                    <Loading fallback={<LazyCodeMirror.Loading />}>
+                      <LazyCodeMirror.FileEditor
+                        file={file()}
+                        hotkeys={EDITOR_HOTKEYS}
+                        onMount={didMount}
+                        onUpdate={editor.onInputUpdate}
+                        onUnmount={editor.onInputWillUnmount}
+                      />
                     </Loading>
                   </script></ui-code
                 >
@@ -95,17 +99,22 @@
             </ui-accordion>
             <ul>
               <li>
-                It shows the file's Monaco model, which the app's spell models keep in step with the file both ways.
+                It shows the file's CodeMirror state, which the app's <code>FileStates</code> keep in step with the file
+                both ways.
               </li>
-              <li>With no <code>file</code> yet, it says "Loading".</li>
-              <li>Draw a new one per file for a fresh editor each, as the <code>keyed</code> above does.</li>
+              <li>With no <code>file</code> yet, it says the editor's loading.</li>
               <li>
-                <code>onMount</code> hands out the editor once it's made, and Monaco itself, which loads late: the app
-                adds its keys and follows the cursor there.
+                A new <code>file</code> shows in the same view, and the last one's state is kept: its undo, folds,
+                selection and scroll, so switching back finds it as it was left. No remount per file.
               </li>
               <li>
-                Monaco is most of the app's code, so it's loaded on first use: draw it through
-                <code>LazyMonaco</code>, inside a <code>&lt;Loading&gt;</code>, never by importing it.
+                <code>onMount</code> hands out the editor, <code>SpellCodeMirror</code>, once it shows a file: the app
+                follows its scrolling there, and its caret through <code>onUpdate</code>. Its keys are the page's, passed in
+                as <code>hotkeys</code>.
+              </li>
+              <li>
+                Only the editor's pages need CodeMirror, so it's loaded after the program has compiled and run: draw it
+                through <code>LazyCodeMirror</code>, inside a <code>&lt;Loading&gt;</code>, never by importing it.
               </li>
             </ul>
           </ui-section>
@@ -126,19 +135,19 @@
               <li>
                 <a
                   href="../../src/app/solid/codemirror/FileEditor.tsx"
-                  target="src-packages-app-src-solid-monaco-fileeditor-tsx"
+                  target="src-app-src-app-solid-codemirror-fileeditor-tsx"
                   ><code title="src/app/solid/codemirror/FileEditor.tsx">FileEditor.tsx</code></a
                 >: the component, and its props
               </li>
               <li>
-                <a href="../../src/app/ui/codemirror/FileStates.ts" target="src-packages-app-src-ui-monaco-spellmodels-ts"
+                <a href="../../src/app/ui/codemirror/FileStates.ts" target="src-app-src-app-ui-codemirror-filestates-ts"
                   ><code title="src/app/ui/codemirror/FileStates.ts">FileStates.ts</code></a
-                >: a Monaco model per file, kept in step with it
+                >: a CodeMirror state per file, kept in step with it
               </li>
               <li>
-                <a href="../../src/app/solid/LazyCodeMirror.tsx" target="src-packages-app-src-solid-lazymonaco-tsx"
+                <a href="../../src/app/solid/LazyCodeMirror.tsx" target="src-app-src-app-solid-lazycodemirror-tsx"
                   ><code title="src/app/solid/LazyCodeMirror.tsx">LazyCodeMirror.tsx</code></a
-                >: loads it on first use
+                >: loads it once the program has run
               </li>
               <li>
                 <a
@@ -148,9 +157,9 @@
                 >: its tests, through the input editor
               </li>
               <li>
-                In the app's Monaco editors:
-                <a href="../../src/app/solid/codemirror/" target="src-packages-app-src-solid-monaco"
-                  ><code title="src/app/solid/codemirror/">app/app/solid/monaco</code></a
+                In the app's CodeMirror editors:
+                <a href="../../src/app/solid/codemirror/" target="src-app-src-app-solid-codemirror"
+                  ><code title="src/app/solid/codemirror/">solid/codemirror</code></a
                 >
               </li>
             </ul>
@@ -158,7 +167,7 @@
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-10-12 against branch <code>epic-workflow</code>.</p>
+            <p class="meta">Last checked 2026-11-16 against branch <code>codemirror</code>.</p>
           </footer>
         </article>
       </ui-container>

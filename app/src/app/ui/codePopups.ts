@@ -114,8 +114,8 @@ export type CodeMirrorPopupOptions = {
  * Where the suggestions show by themselves while "Where it helps" is chosen:  ONE list, easy to change.
  * - Each is the text before the caret, right as the list is due:  the moment its first letter can be typed.
  *   The list stays open, filtering, as the word is typed after it.
- * - `its`, `of` and the rest only after a word:  a line starting `its ` declares a property, its name quoted
- *   (`LSP.SpellTyping.opensQuotes()`).
+ * - `its`, `of` and the rest only after a word:
+ *   a line starting `its ` declares a property, its name quoted (`LSP.SpellTyping.opensQuotes()`).
  */
 export const SUGGEST_WHERE_IT_HELPS: readonly { place: string; before: RegExp }[] = [
   { place: "a tag, after <", before: /(?:^\s*|[>({])<$/u },

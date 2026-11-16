@@ -428,8 +428,9 @@ function afterPaint(done: () => void) {
 ////////////////
 
 /**
- * Answer every write the page would send to the server here, so nothing is saved:  a compile's build files,
- * preferences, a file saved.  Reads go through.
+ * Answer every write the page would send to the server here, so nothing is saved:
+ * a compile's build files, preferences, a file saved.
+ * - Reads go through.
  */
 function answerWrites() {
   const fetchBefore = window.fetch.bind(window)

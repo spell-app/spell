@@ -574,7 +574,6 @@ export const APP_TEXTS = {
   inspectorTestPassed: "Passed",
   inspectorTestFailed: "Failed",
   inspectorTestsNone: "No tests yet.",
-  // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
   // the project menu's Theme ›, at its foot:  each opens in a new window
@@ -585,6 +584,7 @@ export const APP_TEXTS = {
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",
+  // an event's heading over its code (Owen:  "make label `on click`")
   inspectorEventHeading: "on {event}",
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words
   inspectorActionOnlyWhen: "Only when {condition}",
@@ -777,7 +777,7 @@ export const APP_TEXTS = {
   cmNoReferences: "No uses found",
   cmReferences: "Uses",
   cmFindMenu: "Find…",
-  // a web address in the code, its tip on a plain hover, in either editor (`CodeEditorFeatures.linkTip()`)
+  // a web address in the code, its tip on a plain hover (`CodeEditorFeatures.linkTip()`)
   codeLinkTipMac: "⌘-click to open",
   codeLinkTip: "Ctrl-click to open"
 } as const

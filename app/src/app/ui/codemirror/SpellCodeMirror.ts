@@ -38,17 +38,19 @@ import "./codemirror.css"
  *   each change takeable, as Publish's clash dialog does.
  * - Every one of them starts from the one base setup, `CodeMirrorSetup`:  keys, undo, find, the gutter,
  *   CodeMirror's words in the app's language.
- * - An editor of project files is a code editor as the page's keys and menus reach one (`UIT.CodeEditorHandle`,
- *   `run()`):  its keys are the editor's one shortcut list's (`EDITOR_HOTKEYS`, passed in;  `keymapFor()`),
- *   and while it has the focus, the Edit menu's Undo, Cut, Copy and Paste are its own
- *   (`codeEditors.focused`;  epic `codemirror` P5).
- * - The app's code editor (epic `codemirror` P6):  the code pane, the Inspector's Code
- *   card, the compiled code, Publish's diff, a notebook's cells and `<spell-editor>`, each loading it lazily.
+ * - An editor of project files is a code editor as the page's keys and menus reach one
+ *   (`UIT.CodeEditorHandle`, `run()`):
+ *   - its keys are the editor's one shortcut list's (`EDITOR_HOTKEYS`, passed in;  `keymapFor()`)
+ *   - while it has the focus, the Edit menu's Undo, Cut, Copy and Paste are its own
+ *     (`codeEditors.focused`;  epic `codemirror` P5)
+ * - The app's code editor (epic `codemirror` P6), each place loading it lazily:
+ *   the code pane, the Inspector's Code card, the compiled code, Publish's diff, a notebook's cells,
+ *   and `<spell-editor>`.
  * - Its position in the import graph:  CodeMirror, the parser, the language service, `bubbly.css`.
- *   NEVER the editor page (`editorHotkeys.ts` but its types, `spell/app/app/solid`, `editor`):  `<spell-editor>`'s
- *   chunk is this, on a page with no app.
- *   The typing helps' rules and the files' addresses are the language service's (`LSP.SpellTyping`,
- *   `LSP.AppAddresses`), shared with VS Code.
+ *   - NEVER the editor page (`editorHotkeys.ts` but its types, `spell/app/app/solid`, `editor`):
+ *     `<spell-editor>`'s chunk is this, on a page with no app.
+ *   - The typing helps' rules and the files' addresses are the language service's
+ *     (`LSP.SpellTyping`, `LSP.AppAddresses`), shared with VS Code.
  ****************/
 export class SpellCodeMirror implements CodeEditorHandle {
   /** The page's one language service for CodeMirror's editors, made on first use. */
@@ -340,8 +342,8 @@ export class SpellCodeMirror implements CodeEditorHandle {
   ////////////////
 
   /**
-   * What a view of another language's code takes, read only:  the compiled javascript, TypeScript or Python,
-   * its lines numbered.
+   * What a view of another language's code takes, read only:
+   * the compiled javascript, TypeScript or Python, its lines numbered.
    * - Coloured through the ONE table of code colours (`CodeRules.codeMirrorStyle`):
    *   the page theme's `--ui-code-<role>` tokens, light or dark as the page is.
    */
@@ -356,8 +358,8 @@ export class SpellCodeMirror implements CodeEditorHandle {
 
   /**
    * What a view of a snippet of Spell takes, not a project file:  a notebook's example code (`<CellEditor>`).
-   * - Drawn bubbly while the look's on, as the code pane draws Spell;  coloured by its tokens while it's off
-   *   (`CodeMirrorLook`).
+   * - Drawn bubbly while the look's on, as the code pane draws Spell;
+   *   coloured by its tokens while it's off (`CodeMirrorLook`).
    * - Its long lines wrapped:  it's as tall as its text.
    * - Its own undo, a run of typing undone as one.
    */

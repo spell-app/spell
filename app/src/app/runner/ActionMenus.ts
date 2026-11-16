@@ -13,8 +13,9 @@ import type { ContextMenuElement, Core, MenuItem } from "spell/parser/core"
  *   thing or up its chain (`core.menuOf()`), drawn three ways:
  *   - as a toolbar or menu in a drawing, `<ui-toolbar menu="GameMenu" />`:  `fill()` puts its actions in
  *   - as a right click's menu, `context-menu="GameMenu"` on any element of a drawing:  `showContextMenu()`
- * - A right click's menu written IN a drawing, `<context-menu>` inside an element (epic `language`):  the core draws it
- *   as a hidden `<spell-context-menu>` holding its items (`core.drawContextMenu()`), which `showContextMenu()` finds.
+ * - A right click's menu written IN a drawing, `<context-menu>` inside an element (epic `language`):
+ *   the core draws it as a hidden `<spell-context-menu>` holding its items (`core.drawContextMenu()`),
+ *   which `showContextMenu()` finds.
  * - In the editor's Edit, a right click's menu shows first in the editor's own part menu (`contextMenuItemsOf()`,
  *   epic `editor` I76), drawn the same way (`itemsFor()`).
  *   - as the app's menu bar, `- its menu bar is "GameMenu"`:  `SpellElement` draws it with `itemsFor()`

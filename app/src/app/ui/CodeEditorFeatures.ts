@@ -8,16 +8,16 @@ import { RenameRefusedError } from "spell/app/app/ui/ui.types"
 
 /****************
  * ### `CodeEditorFeatures`
- * What the app's code editors decide alike about the language service's answers, whichever editor shows them:
- * the app's code editor (`CodeMirrorLanguage`;  epic `codemirror` P1).
+ * What the app's code editor decides about the language service's answers,
+ * apart from how CodeMirror shows them (`CodeMirrorLanguage`;  epic `codemirror` P1).
  * - Only what's the EDITOR's to decide, not the program's (that's the language service's):
  *   how much a hover says, which code actions a menu offers, what Rename Symbol says, when the hover's info shows,
  *   where a web address or a heading comment is in a line.
  *   - Its words are `AppTexts`':  this only picks which.
- * - Plain functions and values, no editor:  each editor turns them into its own shapes.
+ * - Plain functions and values, no editor:  the editor turns them into its own shapes.
  *   - A place in a line is a CHARACTER OFFSET, 0-based:  the editor adds its line's start.
- * - Lifted out of the editor's features (epic `codemirror` P5):
- *   `CodeMirrorLinks`, `CodeMirrorHovers` and `CodeMirrorHeadings` are each the editor's wiring of a group below.
+ * - The editor's wiring of each group below is its own file (epic `codemirror` P5):
+ *   `CodeMirrorLinks`, `CodeMirrorHovers` and `CodeMirrorHeadings`.
  * - Its position in the import graph:  the app's texts and code settings, the language service (its `RenameError`);
  *   NEVER an editor.
  ****************/
@@ -167,8 +167,8 @@ export class CodeEditorFeatures {
 
   /**
    * The heading comment in `line`, the text of one line, if it is one:  from its first `#` to the line's end.
-   * - `level`:  how many `#`s, at most `MAX_HEADING_LEVEL`;  each editor gives it classes
-   *   `spell-heading spell-heading-<level>`.
+   * - `level`:  how many `#`s, at most `MAX_HEADING_LEVEL`;
+   *   each editor gives it classes `spell-heading spell-heading-<level>`.
    */
   static headingIn(line: string): HeadingAt | undefined {
     const heading = CodeEditorFeatures.HEADING.exec(line)

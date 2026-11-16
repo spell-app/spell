@@ -11,11 +11,12 @@ import { CodeMirrorPinned } from "./CodeMirrorPinned"
 
 /****************
  * ### `CodeMirrorPopups`
- * The code editor's settings on a CodeMirror editor:  Settings…' choices (`codeChoices`), as `codeMirrorOptionsFor()`
- * says they're meant, in a compartment of each state's own, changed live (epic `codemirror` P5).
- * - Each feature reads the options where it decides, `CodeMirrorPopups.of(state)`:  the hover's ⌥ rule,
- *   where suggestions show by themselves, signature help;  what CodeMirror does itself (wrapping, the suggestions'
- *   details) is in the compartment too.
+ * The code editor's settings on a CodeMirror editor (epic `codemirror` P5):
+ * Settings…' choices (`codeChoices`), as `codeMirrorOptionsFor()` says they're meant,
+ * in a compartment of each state's own, changed live.
+ * - Each feature reads the options where it decides, `CodeMirrorPopups.of(state)`:
+ *   the hover's ⌥ rule, where suggestions show by themselves, signature help.
+ * - What CodeMirror does itself (wrapping, the suggestions' details) is in the compartment too.
  * - The view showing a state follows the choices as they change;  a state shown again takes the ones it missed,
  *   as `CodeMirrorLook` does with the look.
  * - Its position in the import graph:  CodeMirror, and the page's code settings.

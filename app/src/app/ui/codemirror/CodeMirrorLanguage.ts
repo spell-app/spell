@@ -46,8 +46,8 @@ import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
  *   (`CodeEditorFeatures`);  where suggestions show by themselves, when the hover's info shows and whether signature
  *   help shows as you type, Settings…' choices (`CodeMirrorPopups`).
  * - The service's shapes become CodeMirror's through ONE converter, `LspToCodeMirror`.
- * - Its position in the import graph:  the parser, the language service, the app's editor-neutral `ui` files,
- *   CodeMirror.
+ * - Its position in the import graph:
+ *   the parser, the language service, the app's editor-neutral `ui` files, CodeMirror.
  ****************/
 export class CodeMirrorLanguage {
   constructor({ service, file, parseNow }: CodeMirrorLanguageProps) {
@@ -121,9 +121,9 @@ export class CodeMirrorLanguage {
 
   /**
    * What a word is, and its docstring, on a hover that rests `HOVER_DELAY`, saying as much as the settings ask.
-   * - Only when Settings… says:  with ⌥ held (`CodeMirrorHovers.isAltHeld()`), always, or never
-   *   (`CodeEditorFeatures.showsHoverInfo()`);  an error's message shows on a plain hover all the same
-   *   (`CodeMirrorHovers`).
+   * - Only when Settings… says (`CodeEditorFeatures.showsHoverInfo()`):
+   *   with ⌥ held (`CodeMirrorHovers.isAltHeld()`), always, or never.
+   * - An error's message shows on a plain hover all the same (`CodeMirrorHovers`).
    * - Its markdown drawn by Spell UI's `<ui-markdown>`.
    */
   private hover(): Extension {
@@ -227,8 +227,8 @@ export class CodeMirrorLanguage {
 
   /**
    * The other uses of the word at the caret, marked as reads or writes, once the caret rests `HIGHLIGHT_WAIT`.
-   * - Not in an editor by default (Owen:  "distracting, turn it
-   *   off"):  an editor asks for it (`SpellCodeMirror`'s `highlights`).
+   * - Not in an editor by default (Owen:  "distracting, turn it off"):
+   *   an editor asks for it (`SpellCodeMirror`'s `highlights`).
    */
   highlights(): Extension {
     return [

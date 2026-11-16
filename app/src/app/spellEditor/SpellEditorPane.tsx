@@ -12,10 +12,11 @@ import "./SpellEditorPane.css"
  * What a `<spell-editor>` draws:  a tab per spell file, if it has more than one, the CodeMirror editor showing `file`,
  * and a status line.
  * - Holds NO state:  `SpellEditor` has it all, in signals it hands us as props.
- * - CodeMirror comes in `codeMirror` once it's loaded -- till then, a placeholder.  Its `<FileEditor>` is drawn
- *   straight from that module:  never imported here, so CodeMirror stays a lazy chunk.
- * - ONE editor for its life, whatever the file:  it shows each file's state in turn, its undo and selection kept
- *   -- see `FileStates`.
+ * - CodeMirror comes in `codeMirror` once it's loaded -- till then, a placeholder.
+ * - Its `<FileEditor>` is drawn straight from that module:
+ *   never imported here, so CodeMirror stays a lazy chunk.
+ * - ONE editor for its life, whatever the file:
+ *   it shows each file's state in turn, its undo and selection kept -- see `FileStates`.
  ****************/
 export function SpellEditorPane(props: SpellEditorPaneProps) {
   return (

@@ -627,8 +627,8 @@ function started(work: unknown) {
 }
 
 /**
- * A menu of the editor's Spell, drawn in place:  `view(app)`'s drawing, a Spell UI `<ui-menu>` of its rows
- * (`SpellEditor.spell`).
+ * A menu of the editor's Spell, drawn in place:
+ * `view(app)`'s drawing, a Spell UI `<ui-menu>` of its rows (`SpellEditor.spell`).
  * - Its titles in the page's language:  drawn again as that language's texts arrive (`appTexts.titles`).
  * - Nothing while `spell` is still loading, nor for a view it doesn't have.
  */

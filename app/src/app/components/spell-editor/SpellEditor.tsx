@@ -60,7 +60,8 @@ export class DOMSpellEditorElement extends E.DOMElement {
 
   /**
    * A `static` editor only:  forget the edits to its project, read its files as the site wrote them, and compile.
-   * Resolves once that's done.  See `SpellEditor.reset()`.
+   * - Resolves once that's done.
+   * - SEE:  `SpellEditor.reset()`.
    */
   reset(): Promise<void> {
     return this.editor?.reset() ?? Promise.resolve()
@@ -88,8 +89,8 @@ export interface DOMSpellEditorElement extends E.AttributeValues<typeof spellEdi
  *   - `compiled` holds what it made, a `SpellCompiled`
  *   - sends `spell-compiled` (`SPELL_COMPILED_EVENT`), bubbling out of the shadow root, with it as `detail`
  *   - hands it to each app `app` names:  `run(compiled)` (`pushToApps()`)
- * - Compiles WITHOUT CodeMirror, so apps run straight away.  CodeMirror and its language service load after,
- *   for the view.
+ * - Compiles WITHOUT CodeMirror, so apps run straight away.
+ *   CodeMirror and its language service load after, for the view.
  * - Several may edit several projects on a page (`FileStates.use()`).
  *   Two of ONE project share its files, so typing in one shows in the other.
  * - Draws `<SpellEditorPane>` (no `<ui-*>`):  plain tabs and status line.
@@ -546,10 +547,12 @@ function loadCodeMirror(): Promise<CodeMirrorModule> {
 }
 
 /**
- * Our editor's keys:  the editor page's (`EDITOR_HOTKEYS`) that a code editor runs by itself -- Undo, Find,
- * Go to Definition, Rename Symbol ... -- and its Save and Compile and Run, which our component runs as ours.
- * - A copy of theirs, the same keys:  `editorHotkeys.ts` brings the editor page with it (`editor`, the app's Solid
- *   parts), which no page with only `<spell-editor>` has.  Its test checks they match.
+ * Our editor's keys:  the editor page's (`EDITOR_HOTKEYS`) that a code editor runs by itself,
+ * and its Save and Compile and Run, which our component runs as ours.
+ * - A code editor's own:  Undo, Find, Go to Definition, Rename Symbol ...
+ * - A copy of theirs, the same keys:  `editorHotkeys.ts` brings the editor page with it
+ *   (`editor`, the app's Solid parts), which no page with only `<spell-editor>` has.
+ *   Its test checks they match.
  * - NOT the page's other keys (New File, Revert ...):  they work the app's own editor, which isn't on this page.
  * - NOR Find All References:  its list is the app's right-click menu (`CodeMirrorMenu`), which isn't either.
  */

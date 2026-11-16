@@ -785,8 +785,8 @@ export class SpellLanguageService {
   }
 
   /**
-   * The tag name or attribute name at `position`, in a drawing:  `stock-pile` in `<stock-pile "stock" />`,
-   * `suit` in `<foundation "clubs" suit=clubs />`.
+   * The tag name or attribute name at `position`, in a drawing:
+   * `stock-pile` in `<stock-pile "stock" />`, `suit` in `<foundation "clubs" suit=clubs />`.
    * - An attribute on a line of its own, under its tag's, too (epic `editor` I64):  see `openTagBefore()`.
    * - `undefined` anywhere else:  a quoted value, a `{...}`, text between tags, code.
    */
@@ -1993,8 +1993,8 @@ export class SpellLanguageService {
 
   /**
    * The words the attribute whose quoted value `position` is in takes:  `spacing="x|s"` => `spacing`, `none`, `xs` ...
-   * (epic `editor` T70, the app's choices shown beside a value the caret rests in);  `undefined` anywhere else,
-   * or for an attribute that takes any words.
+   * - For the app's choices shown beside a value the caret rests in (epic `editor` T70).
+   * - `undefined` anywhere else, or for an attribute that takes any words.
    * - Read from the file's text now, as `completion()` reads a typed tag, and its parse's scope for the component.
    */
   attributeValuesAt(file: SP.SpellFile, position: Position): LSP.AttributeValues | undefined {
@@ -3277,8 +3277,8 @@ type CommentStyle = {
 /**
  * A JSX tag being typed at the end of a line:  `<` right before a word, after a space, `>`, `(` or `{`, e.g. `<div><chi`.
  * - Accented letters too:  `<menú-con`.
- * - Or a `<` alone, starting its line or after `>`, `(` or `{`:  the moment it's typed, before its first letter
- *   (`x <` isn't one).
+ * - Or a `<` alone, starting its line or after `>`, `(` or `{` (`x <` isn't one):
+ *   the moment it's typed, before its first letter.
  */
 const JSX_TAG_TYPED = /(?:(?:^|[\s>({])<\p{Ll}[\p{L}\p{M}\d_-]*|(?:^\s*|[>({])<)$/u
 
@@ -3291,7 +3291,7 @@ const ATTRIBUTE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*?)?\s+[\p{L}-]*$/u
 /** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
 /**
  * The command a value's Pick row runs (epic `editor` T61):  the app's code editor opens the picker at the caret
- * (`ValuePicker`), handed the attribute's `SP.ComponentValuePicker` and its words.
+ * (`ValuePopups`), handed the attribute's `SP.ComponentValuePicker` and its words.
  */
 export const PICK_VALUE_COMMAND = "spell.pickValue"
 

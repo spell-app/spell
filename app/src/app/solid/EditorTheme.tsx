@@ -53,8 +53,8 @@ export class EditorTheme {
   }
 
   /**
-   * Open Spell UI's theme bench in a new window, in the theme chosen, its app page alone:  the project menu's
-   * Theme Bench, as the theme menu's own Theme bench row opened it.
+   * Open Spell UI's theme bench in a new window, in the theme chosen, its app page alone:
+   * the project menu's Theme Bench, as the theme menu's own Theme bench row opened it.
    * - No bench (`benchSite`):  nothing.
    */
   static openBench(): void {
@@ -113,8 +113,8 @@ export class EditorTheme {
   }
 
   /**
-   * Wear theme `name`, previewed by Spell UI's theme editor:  marked on `<html>` as a chosen one is, but never
-   * remembered (`ThemePreference.wear()`).
+   * Wear theme `name`, previewed by Spell UI's theme editor:
+   * marked on `<html>` as a chosen one is, but never remembered (`ThemePreference.wear()`).
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async wearForPreview(name: string): Promise<void> {
@@ -156,8 +156,8 @@ export class EditorTheme {
   }
 
   /**
-   * Theme `theme` is chosen:  mark `<html>` with its name, which the editor's chrome is keyed on;  one of My themes
-   * (`mine:<id>`), the theme it builds on.
+   * Theme `theme` is chosen:  mark `<html>` with its name, which the editor's chrome is keyed on;
+   * one of My themes (`mine:<id>`), the theme it builds on.
    * - My themes themselves are worn by `ThemePreference` (epic `debut` P25).
    */
   private static follow(theme: string | undefined): void {

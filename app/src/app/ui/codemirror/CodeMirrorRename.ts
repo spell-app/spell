@@ -14,8 +14,7 @@ import type { CodeMirrorLanguage } from "./CodeMirrorLanguage"
  * - What it renames and what it says are the app's:  an action as the Inspector's Code card renames
  *   it, its calls and buttons too, refused in the same words (`CodeEditorFeatures.rename()`).
  * - Where nothing can be renamed, F2 says what can, over the caret (`CodeEditorFeatures.renameNothingHere()`).
- * - A refusal shows over the name once the field has gone;  it goes at the next key,
- *   click or edit.
+ * - A refusal shows over the name once the field has gone;  it goes at the next key, click or edit.
  * - The edits go in through the editor's `apply`, file by file:  `FileStates.applyEdits()`, so each file's is ONE
  *   undo step, and each file touched saves.
  * - One per editor, in what its view adds (`SpellCodeMirror`'s host).
@@ -118,8 +117,8 @@ function removeListeners(view: EditorView, goes: () => void) {
 
 /**
  * The rename field:  `name` in it, selected, focused as it's drawn.
- * - Enter:  `done` with what's typed;  Esc, or the focus going elsewhere:  closed, nothing renamed, the focus back in
- *   the code.
+ * - Enter:  `done` with what's typed.
+ * - Esc, or the focus going elsewhere:  closed, nothing renamed, the focus back in the code.
  */
 function fieldDom(view: EditorView, name: string, done: (newName: string) => void): HTMLElement {
   const dom = document.createElement("div")

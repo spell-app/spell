@@ -24,7 +24,7 @@ import { BubblyHtml, braceHtml } from "./BubblyHtml"
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
- *   Both editors draw HTML from the same reading (`treeOf()`, `MarkupMarks`).
+ *   The app's code editor draws HTML from the same reading (`treeOf()`, `MarkupMarks`).
  * - Strings, not DOM, as `BubblyHtml`:  the page's script runs in node.
  * - STATIC and instance-free:  HTML source in, its drawing out.
  ****************/

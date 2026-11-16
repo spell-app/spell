@@ -69,8 +69,8 @@ export class Palette {
   }
 
   /**
-   * Close its menus, the popup and the pinned bar's:  what's added, or dragged, lands on a page you can see
-   * (epic `editor` I176).
+   * Close its menus, the popup and the pinned bar's:
+   * what's added, or dragged, lands on a page you can see (epic `editor` I176).
    */
   static closeMenus(): void {
     for (const menu of menus) {
@@ -116,8 +116,8 @@ export class Palette {
   }
 
   /**
-   * Add a new view of the open page's own, in plain Spell just above its head:  `a "new view" is a view:`,
-   * drawn later by its name (epic `language` P47).
+   * Add a new view of the open page's own, in plain Spell just above its head:
+   * `a "new view" is a view:`, drawn later by its name (epic `language` P47).
    */
   static addNewView(): void {
     const file = editor.file
@@ -970,12 +970,12 @@ export function PartMenu(): JSX.Element {
  * ### `<MenuPopup>`
  * A right click's menu at `at`:  the app's ONE look for one, the part menu's (`<PartMenu>`), and the code editor's
  * (CodeMirror's `CodeMirrorMenu`;  epic `codemirror` P5).
- * - A `<ui-popup>` at the click, holding a `<ui-menu>` of `children`:  it stays inside the window, with arrow keys,
- *   Enter and Esc.
+ * - A `<ui-popup>` at the click, holding a `<ui-menu>` of `children`:
+ *   it stays inside the window, with arrow keys, Enter and Esc.
  * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not what's under it.
  *   - A right click on it is ours too:  the browser's own menu never shows over it (Owen, 2026-11-12).
- * - A row chosen closes it, decided as the click starts, before the row runs:  a row may grey itself once it has
- *   run (Delete, Cut).
+ * - A row chosen closes it, decided as the click starts, before the row runs:
+ *   a row may grey itself once it has run (Delete, Cut).
  ****************/
 export function MenuPopup(props: MenuPopupProps): JSX.Element {
   // Decided as the click starts, before the row runs:  a row may grey itself once it has run (Delete, Cut)

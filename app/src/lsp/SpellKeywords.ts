@@ -184,8 +184,8 @@ export class SpellKeywords {
 
   /**
    * What a line says about itself after its words, P48's (epic `language` T105) -- longest first:
-   * - a phrase after a comma:  `, aka`, `, starting at`, `, with default`;  `, alias`, `, empezando en`, `, por defecto`
-   *   (any keyword the pack's syntax writes right after a `,`)
+   * - a phrase after a comma, any keyword the pack's syntax writes right after a `,`:
+   *   `, aka`, `, starting at`, `, with default`;  `, alias`, `, empezando en`, `, por defecto`
    * - an action's own details, after `with`:  `with title`, `icon`, `shortcut`, `undoable`;
    *   `con título`, `icono`, `atajo`, `deshacible` (`action_modifiers`, `action_modifier`)
    * - Mid-line words, so a statement's starts (`statementPhrases`) never see them.

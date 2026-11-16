@@ -39,8 +39,8 @@ export type InputRootProps = {
 /****************
  * ### `LineNumbers`
  * Does the code editor show line numbers?
- * - Off at first;  the top bar's View › Line Numbers turns them on, and the browser remembers
- *   (`spellEditor:lineNumbers`).
+ * - Off at first;
+ *   the top bar's View › Line Numbers turns them on, and the browser remembers (`spellEditor:lineNumbers`).
  ****************/
 export class LineNumbers {
   /** Are they showing (reactive)? */

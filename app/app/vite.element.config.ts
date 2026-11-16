@@ -108,9 +108,9 @@ const PACK_FILE = "spell.pack.js"
 const PACK = { name: "spell", prefix: "spell-" }
 
 /**
- * Write `spell.pack.js`:  the app's elements as a Spell UI COMPONENT PACK
- * (`<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>`:  every family in `src/app/components/`),
- * which a page with a `<ui-root>` loads through `<ui-components source>`, as the docs' pages load `epics.pack.js`:
+ * Write `spell.pack.js`:  the app's elements as a Spell UI COMPONENT PACK,
+ * every family in `src/app/components/`:  `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>`.
+ * A page with a `<ui-root>` loads it through `<ui-components source>`, as the docs' pages load `epics.pack.js`:
  *
  *     <script type="module" src="/element/spell-ui.js"></script>
  *     <ui-root>
@@ -132,8 +132,9 @@ const PACK = { name: "spell", prefix: "spell-" }
  *   one Solid per page either way (two fail silently).
  * - A family that won't load is a warning, and the others still define:  e.g. `spell-code.js` on a page whose own
  *   Spell UI shares no code family (`spell-ui-shared.js`), where `<spell-viewer>` still runs.
- * - A page with only `<spell-viewer>`s needs no pack:  `spell-viewer.js` by itself
- *   (`<spell-viewer>` is a root, which loads `spell-editor.js` only when an editor appears inside it).
+ * - A page with only `<spell-viewer>`s needs no pack:
+ *   `spell-viewer.js` by itself (`<spell-viewer>` is a root,
+ *   which loads `spell-editor.js` only when an editor appears inside it).
  */
 function componentPack(): Plugin {
   return {

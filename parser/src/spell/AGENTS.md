@@ -140,9 +140,9 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       A new control rule gets a row there.
     - Every example's and guide's drawing is a snapshot (the app folder's `tests/spell/test/bubbly.test.ts`):
       a change to the look shows there;  `spell content check --bless`, then read the diff.
-    - Read by the app's `BubblyHtml`, and by Monaco's and VS Code's drawings (P50, P51).
+    - Read by the app's `BubblyHtml`, and by the app's CodeMirror editor's and VS Code's drawings (P50, P51).
     - `BubblyStretches` cuts a drawing's lines into what an editor marks on its text (a quoted input's own `"`
-      apart, the name a head defines):  ONE cut for Monaco's `BubblyMarks` and the language server's `spell/bubbly`,
+      apart, the name a head defines):  ONE cut for the app's `CodeMirrorBubbly` and the language server's `spell/bubbly`,
       which VS Code draws from.
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
     ([SpellLanguage](../../../app/src/app/components/spell-code/SpellLanguage.ts)):

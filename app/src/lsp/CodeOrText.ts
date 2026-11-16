@@ -57,8 +57,8 @@ export class CodeOrText {
   }
 
   /**
-   * What a `typed` character does at `offset` of `text` (the text BEFORE it was typed):  the value it switches,
-   * and that value switched;  `undefined` when it's typed as any other character is.
+   * What a `typed` character does at `offset` of `text` (the text BEFORE it was typed):
+   * the value it switches, and that value switched;  `undefined` when it's typed as any other character is.
    * - `{` anywhere inside a quoted value:  it becomes code.
    * - `"` right after a code value's `{`, where its opening quote would go:  it becomes text.
    *   Not further in:  a `"` there starts a string in the code, `{say "hi"}`.
