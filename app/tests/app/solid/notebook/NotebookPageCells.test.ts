@@ -157,11 +157,10 @@ describe("NotebookPageCells", () => {
     expect(TAGGED.slice(several.block!.start, several.block!.end)).toMatch(/^<section[^]*<\/section>$/)
   })
 
-  test("a site page:  its tabs, its title and lead, its section headings, a section's cell its opening tag and the section whole", () => {
+  test("a site page:  its title and lead, its section headings, a section's cell its opening tag and the section whole", () => {
     const page = NotebookPageCells.of(SITE_PAGE, "/Detail/Examples.spell")!
-    // its family's tabs, which it draws itself (epic `mockup` T38)
-    expect(page.cells[0]).toMatchObject({ kind: "drawing", code: "<site-tabs/>" })
-    expect(page.cells[1]).toMatchObject({
+    // no tabs of its own:  its site's page layout draws them (epic `mockup` T39)
+    expect(page.cells[0]).toMatchObject({
       kind: "heading",
       title: "Detail",
       lead: "A detail is a label's dimmer second value, such as a count."
