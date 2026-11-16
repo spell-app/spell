@@ -108,6 +108,7 @@ export class Palette {
 
   /** Add `view`, one of the app's own, beside what's selected, else at the end of the drawing. */
   static addOwn(view: OwnView): void {
+    Palette.closeMenus()
     const place = PartEdits.placeForNew()
     Inspector.readyWordsNext()
     const snippet = withStartingValues(view.snippet, Inspector.startingValuesOf(view.classNames))
@@ -129,6 +130,7 @@ export class Palette {
     const file = editor.file
     const opening = file && NotebookPageCells.drawnPageIn(file.contents ?? "", file.path)
     if (!file || opening === undefined) return
+    Palette.closeMenus()
     const title = appTexts.text("partStepAdd", { part: appTexts.text("paletteNewView") })
     const whole = { start: opening, end: opening }
     PartEdits.add([NEW_VIEWS[languageOf(file)] ?? NEW_VIEWS.en!], title, { file, opening, where: "before", whole })
@@ -139,6 +141,7 @@ export class Palette {
    * - Never one example inside another:  an example selected, a new one goes after it (epic `notebook` P5).
    */
   static add(definition: ComponentDefinition): void {
+    Palette.closeMenus()
     const place = PartEdits.placeForNew()
     Inspector.readyWordsNext()
     const snippet = snippetFor(definition, place?.file)
