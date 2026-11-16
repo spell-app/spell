@@ -360,7 +360,7 @@ describe("outline style", () => {
   describe("names of several words (P26)", () => {
     test("a variable:  declared by `set start pile to ...`, read by its words, the same as `start-pile`", () => {
       const run = runSpell([
-        "a pile is a list of things",
+        "a pile is a list of numbers",
         "set start pile to a new pile",
         "set anything changed to no",
         "if anything changed is no",
