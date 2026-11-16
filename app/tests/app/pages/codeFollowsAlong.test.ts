@@ -153,7 +153,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
 
     // the top bar's button names it, pressed;  a click hides it
     const button = page.locator(".ModeTabs .CompiledCodeToggle").first()
-    expect(await button.getAttribute("title")).toBe("Compiled TypeScript")
+    expect(await button.getAttribute("data-tooltip")).toBe("Compiled TypeScript")
     expect(await button.getAttribute("aria-pressed")).toBe("true")
     await compiledCodeButton(page).click()
     await page.waitForTimeout(1000)

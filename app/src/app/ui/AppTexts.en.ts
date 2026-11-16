@@ -93,6 +93,7 @@ export const APP_TEXTS = {
   partNoDrawing: "This program has no drawing to add to:\nadd a <draw> to it first.",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
+  softWrap: "Soft Wrap",
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "About Spell…",
@@ -157,8 +158,10 @@ export const APP_TEXTS = {
   discardDraft: "Discard",
   publishDraft: "Publish",
   draft: "Draft",
-  draftTip:
-    "Your changes are a draft:  only you see them.\nPublish makes them everyone's, and keeps a version.\nDiscard throws them away.",
+  /** The top bar's pill (epic `editor` I217):  what a draft is, and what Publish and Discard each do. */
+  draftTip: "Your changes are a draft.\nOnly you see them.",
+  publishDraftTip: "Sends your changes out to everyone.\nKeeps a version.",
+  discardDraftTip: "Throws your changes away.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
   closeTab: "Close",
@@ -176,13 +179,18 @@ export const APP_TEXTS = {
   publishedFile: "Published {count} file:  kept as version {version}.",
   publishedFiles: "Published {count} files:  kept as version {version}.",
   nothingToPublish: "Nothing to publish:  no file has a draft.",
-  publishClashHeading: "Published since your draft began",
+  publishClashHeading: "Some files have been changed since your draft began.  Keep the changes?",
   publishClashMessage:
-    "Someone published these files after you started your draft.\nTo take one of their changes, click its arrow;  ⌘Z puts yours back.\nPublish sends out Your Changes as they are then.",
+    "Someone has updated these files since you started your draft.\nTo accept individual changes, click the arrow for that change in the center column.",
+  publishClashFiles: "Changed Files",
   publishClashTheirs: "Current Published Version",
   publishClashMine: "Your Changes",
-  publishStartAgain: "Start Again from Theirs",
-  publishMerged: "Publish",
+  publishClashTake: "Use their change",
+  publishClashPutBack: "Undo:  put your change back",
+  publishUseTheirs: "Use Their Changes",
+  publishUseTheirsHeading: "Use Their Changes?",
+  publishUseTheirsConfirm: "Are you sure?\nThis drops all your changes in these files,\nand uses theirs instead.",
+  publishMine: "Publish My Changes",
   noVersions: "No versions yet:  each Publish keeps one.",
   versionsMessage:
     "Each time you publish, Spell keeps a copy of your whole project.\nPick one to bring it back as your draft:\nit replaces changes you haven't published yet.\nWhat everyone sees stays the same until you click Publish, and it stays in this list.\nTo keep your changes first, click Save Current Changes:\nthey're added to the list as your draft, and only you see them.",

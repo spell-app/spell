@@ -6,6 +6,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
+import { barTooltip } from "./chrome"
 import { on } from "./on"
 import { tracked } from "./tracked"
 
@@ -171,7 +172,7 @@ export function ModeButtons(props: {
             appearance="circular"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
-            title={appTexts.text("menuCode")}
+            {...barTooltip(appTexts.text("menuCode"))}
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
           />
@@ -192,7 +193,7 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
     <ui-item
       icon={look().icon}
       selected={props.current === props.mode}
-      title={appTexts.text(look().text)}
+      {...barTooltip(appTexts.text(look().text))}
       onClick={() => EditorMode.show(props.mode)}
     >
       <span class="ModeText">{appTexts.text(look().text)}</span>
@@ -207,7 +208,8 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
  * "one unified thing with a slight inset border").
  * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Draft", as plain words
  *   (Owen, 2026-11-16, I192:  "Change text from 'Editing a Draft' to just 'Draft'").
- *   - Its tooltip says what a draft is:  only you see it;  Publish makes it everyone's, Discard throws it away.
+ *   - Its tooltip says what a draft is:  only you see it.
+ *   - Publish's and Discard's each say what they do (Owen, I217):  send your changes out, or throw them away.
  * - Then "Publish", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
  * - Right:  "Discard", a link with a trash can, in the theme's primary colour, so it doesn't read as part of the label:
  *   the project menu's Delete Draft, which asks first, its red "Throw It Away" (`editor.deleteDraft()`;
@@ -222,17 +224,24 @@ function PublishDraft(): JSX.Element {
   return (
     <Show when={hasDrafts()}>
       <span class="PublishDraft">
-        <span class="DraftState" title={appTexts.text("draftTip")}>
+        <span class="DraftState" {...barTooltip(appTexts.text("draftTip"))}>
           <ui-icon name={DRAFT_ICON} />
           {appTexts.text("draft")}
         </span>
-        <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
+        <ui-button
+          class="Publish"
+          color="primary"
+          icon={PUBLISH_ICON}
+          {...barTooltip(appTexts.text("publishDraftTip"))}
+          onClick={() => void editor.publish()}
+        >
           {appTexts.text("publishDraft")}
         </ui-button>
         <ui-button
           class="DiscardDraft"
           appearance="tertiary"
           icon={DISCARD_ICON}
+          {...barTooltip(appTexts.text("discardDraftTip"))}
           onClick={() => void editor.deleteDraft()}
         >
           {appTexts.text("discardDraft")}

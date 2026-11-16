@@ -140,6 +140,8 @@ class BubblyDecorations {
           break
         case "line":
           this.decorations.line(node.start, rails, isGroupBody ? ["cmb-group-line"] : [])
+          // a plain body line's words where a band's on its level are, a tab in (I142);  a group's are already
+          if (!isGroupBody) this.plainIndent(node)
           this.line(node)
           break
         case "block":
@@ -169,6 +171,17 @@ class BubblyDecorations {
     this.tags.push(...tags)
     for (const line of lines) this.line(line)
     return last
+  }
+
+  /**
+   * A plain line's indent, in a body:  a tab wider (`cmb-plain-indent`), so its first word is where a band's words on
+   * the same level are (Owen, epic `language` I142:  "I'd prefer if `it lives` lined up where `it's name` does").
+   * - Its words moved, not the line:  its column 0, the caret's place on the rail (I140), stays where it is.
+   * - A line in no block, or a slice's line shown with no indent, keeps its words where they were.
+   */
+  private plainIndent(line: SP.BubblyLine) {
+    const { from, to } = this.decorations.shownIndentBefore(line.start)
+    if (this.text.slice(from, to).includes("\t")) this.mark(from, to, ["cmb-plain-indent"])
   }
 
   /** A declaration, or a control line with steps under it:  its band, its body, its foot. */

@@ -16,6 +16,7 @@ import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { Action } from "./Actions"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
+import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
 import { PartEdits, type PartAction } from "./PartEdits"
@@ -367,7 +368,7 @@ export function AddPartButton(): JSX.Element {
         appearance="circular"
         class="AddPartButton"
         label={appTexts.text("addPart")}
-        title={appTexts.text("addPart")}
+        {...barTooltip(appTexts.text("addPart"))}
         aria-haspopup="menu"
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
@@ -533,7 +534,7 @@ export function PaletteStrip(): JSX.Element {
               link=""
               class={["IconAction", "PaletteStripClear"]}
               label={appTexts.text("paletteClearSearch")}
-              title={appTexts.text("paletteClearSearch")}
+              {...barTooltip(appTexts.text("paletteClearSearch"))}
               onClick={clearSearch}
             />
           </Show>
@@ -716,6 +717,7 @@ function PaletteGroupMenu(props: { id: string; name: string; icon: string; child
         icon={props.icon}
         aria-haspopup="menu"
         aria-label={props.name}
+        {...barTooltip(appTexts.text("paletteMoreTip", { topic: props.name }))}
       >
         {props.name}
       </ui-item>
@@ -743,7 +745,7 @@ function PinIcon(): JSX.Element {
       link=""
       class={["IconAction", "PalettePin", { pinned: Palette.isPinned }]}
       label={appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin")}
-      title={appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin")}
+      {...barTooltip(appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin"))}
       onClick={() => Palette.togglePinned()}
     />
   )

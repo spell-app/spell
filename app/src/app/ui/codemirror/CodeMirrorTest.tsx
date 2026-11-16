@@ -1,6 +1,5 @@
 import { For, Show, createSignal, onSettled, untrack } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
-import type { MergeView } from "@codemirror/merge"
 
 import { setDebugGlobal } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
@@ -12,6 +11,7 @@ import { CodeSettings, CodeSettingsPanel } from "spell/app/app/solid"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import {
   CodeMirrorEditor,
+  CodeMirrorMerge,
   CodeMirrorSetup,
   CodeSlice,
   FileEditor,
@@ -59,6 +59,7 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
   const query = new URLSearchParams(location.search)
   const [fileName, setFileName] = createSignal(
     FILE_QUERIES[query.get("file") ?? ""] ??
+      spellFileQuery(query.get("file")) ??
       (query.get("project") ? nameOf(props.project.spellFiles[0]!.path) : "Solitaire.spell")
   )
   const [look, setLook] = createSignal(codeLook.isBubbly ? "on" : "off")
@@ -292,10 +293,14 @@ type CodeMirrorSideProps = {
 
 /** Publish's two sides in CodeMirror's merge view. */
 function CodeMirrorDiff(props: { clash: Clash }) {
-  let merge: MergeView | undefined
+  let merge: CodeMirrorMerge | undefined
   let element!: HTMLDivElement
   onSettled(() => {
-    merge = SpellCodeMirror.merge(element, { theirs: props.clash.theirs, mine: props.clash.mine })
+    merge = new CodeMirrorMerge(element, {
+      theirs: props.clash.theirs,
+      mine: props.clash.mine,
+      words: { take: appTexts.text("publishClashTake"), putBack: appTexts.text("publishClashPutBack") }
+    })
     setDebugGlobal({ codemirrorMerge: merge })
     return () => merge?.destroy()
   })
@@ -345,6 +350,11 @@ const EDITOR_PAGE = "Card.editor.html"
 
 /** The file each `?file=` shows. */
 const FILE_QUERIES: Record<string, string> = { Card: "Card.spell", editor: EDITOR_PAGE, Solitaire: "Solitaire.spell" }
+
+/** A `?file=` naming one of the project's Spell files itself, `StarWars.api.spell` (epic `language` I141). */
+function spellFileQuery(file: string | null): string | undefined {
+  return file?.endsWith(".spell") ? file : undefined
+}
 
 /**
  * `project`'s property editor page for its cards, `Card.editor.html`:  a page as "New Property Editor..." makes one,

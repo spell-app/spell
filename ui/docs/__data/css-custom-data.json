@@ -6841,6 +6841,13 @@
       }
     },
     {
+      "name": "--ui-page-layout-end-room",
+      "description": {
+        "kind": "markdown",
+        "value": "the muted strip down the page's end side, beside its top-right corner (I219)\n\n`<ui-page-layout>`'s token.  Default:  `round(0.5em, var(--ui-grid, 4px))`"
+      }
+    },
+    {
       "name": "--ui-panel-background",
       "description": {
         "kind": "markdown",

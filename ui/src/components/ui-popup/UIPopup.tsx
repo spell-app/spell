@@ -26,6 +26,9 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *     `hoverable="false"` gives Fomantic's behaviour back:
  *     it hides as the pointer leaves the target, after `hide-delay`.
  *
+ * - Where it shows:  `position`;  one that doesn't fit flips to the other side.
+ *   A centred one (`bottom center`) slides along its side first, to stay inside the window (`SHIFTED_FALLBACKS`).
+ *
  * - `at`, a point in the window (`{ x, y }`), in place of a target:  a right click's menu.
  *   - It opens with its corner there, staying inside the window, and takes focus, which goes back when it closes:
  *     its `autofocus` element's, else its first tabbable's.
@@ -55,7 +58,7 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *
  * - SIDE EFFECTS on light DOM the popup doesn't own, undone when it unbinds:
  *   - the target's inline `anchor-name` (a per-instance name ADDED to its list) and its ARIA attributes
- *   - the DOM element's `popover`, `id`, and inline `position-anchor` / `position-area`.
+ *   - the DOM element's `popover`, `id`, and inline `position-anchor` / `position-area` / `position-try-fallbacks`.
  ****************/
 export class UIPopup extends E.UIComponent<Vocabulary> {
   @E.proto static vocabulary = popupVocabulary
@@ -437,11 +440,21 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     return this.isInteractive ? this.heading : undefined
   }
 
-  /** SIDE EFFECT:  the DOM element's `position-area` follows `position`. */
+  /**
+   * SIDE EFFECT:  the DOM element's `position-area` follows `position`, and so do the places it tries
+   * when that doesn't fit (`position-try-fallbacks`).
+   * - A centred one (`bottom center`) slides along its side to stay in the window, its arrow still at the target:
+   *   `SHIFTED_FALLBACKS`, and `UIPopup.anchored.css` for the arrow.
+   * - Every other position flips, by the sheet's own fallbacks.
+   */
   @E.onChange("position", "point", { writesDOMElement: true })
   protected onPositionChanged(position: string | undefined, point: UIT.PopupPoint | undefined) {
     const area = point ? AT_POINT_POSITION : (position ?? DEFAULT_POSITION)
-    this.domElement.style.setProperty("position-area", POSITION_AREAS[area])
+    const { style } = this.domElement
+    style.setProperty("position-area", POSITION_AREAS[area])
+    const shifted = SHIFTED_FALLBACKS[area]
+    if (shifted) style.setProperty("position-try-fallbacks", shifted)
+    else style.removeProperty("position-try-fallbacks")
   }
 
   /**
@@ -748,6 +761,18 @@ const POSITION_AREAS: Readonly<Record<string, string>> = {
   "left bottom": "left span-top",
   "right top": "right span-bottom",
   "right bottom": "right span-top"
+}
+
+/**
+ * Where a centred popup goes when it doesn't fit as it is, in turn:
+ * slid along its side to end at the target's right edge, then at its left, then the other side the same three ways.
+ * - Why:  a centred popup's flip across is its own position again, so near the window's edge it ran off it
+ *   (the editor's theme button, epic `editor` I217).
+ * - The arrow stays at the target for each:  `UIPopup.anchored.css`.
+ */
+const SHIFTED_FALLBACKS: Readonly<Record<string, string>> = {
+  "top center": "top span-left, top span-right, bottom center, bottom span-left, bottom span-right",
+  "bottom center": "bottom span-left, bottom span-right, top center, top span-left, top span-right"
 }
 
 /** The page's hover-delay preference, a token (`styles.en.ts`'s `hoverDelay`). */

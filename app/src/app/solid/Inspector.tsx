@@ -25,6 +25,7 @@ import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
+import { barTooltip } from "./chrome"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
 import { LazyCodeMirror } from "./LazyCodeMirror"
@@ -3907,7 +3908,7 @@ export function InspectAppButton(props: { id?: string }): JSX.Element {
       class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
       aria-pressed={pressed()}
-      title={title()}
+      {...barTooltip(title())}
       onClick={inspect}
     />
   )

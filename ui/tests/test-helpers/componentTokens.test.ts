@@ -60,9 +60,11 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   },
   "ui-page-layout/UIPageLayout.css": {
     "--ui-menu-header-bar-background":
-      "the menu beside the drawer's top takes the drawer's fill:  the two read as one surface (epic `mockup` I25)",
+      "the menu beside the drawer's top has no fill of its own, on the body's, the drawer's:  one surface (epic `mockup` I25, `editor` I219)",
+    "--ui-menu-header-bar-filter":
+      "the menu beside the drawer's top has no blur of its own:  over a see-through fill it read lighter than the drawer (epic `editor` I219)",
     "--ui-menu-header-bar-shadow":
-      "the menu's own hairline gives way to the layout's soft shadow, drawn by the menu's box (epic `mockup` I36)",
+      "the menu's own hairline gives way to the layout's soft shadow, drawn by the menu's box or the page side's (epic `mockup` I36)",
     "--ui-button-padding-block":
       "its own menu button 32px tall, on the 4px grid, so the page starts 40px down as under a menu (I36)",
     "--ui-button-line-height": "its own menu button 32px tall, on the 4px grid, so the page starts 40px down (I36)"

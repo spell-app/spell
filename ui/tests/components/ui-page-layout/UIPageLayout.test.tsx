@@ -135,7 +135,7 @@ describe("<ui-page-layout>", () => {
       }
     )
 
-    test("the top bar casts the page side's own shadow down over the page, no line under it, in every arrangement", async () => {
+    test("the top bar's edge is the page side's own shadow, no line under it, in every arrangement", async () => {
       for (const [inner, width] of [
         [SITE, 900],
         [`<ui-app-menu slot="menu"></ui-app-menu><p>The page</p>`, 900],
@@ -144,17 +144,21 @@ describe("<ui-page-layout>", () => {
         const layout = await pageLayout(inner, { width })
         const menu = box(layout, "menu")!
         const underMenu = box(layout, "page")!.parentElement!.parentElement!
-        const shadow = getComputedStyle(menu).boxShadow
-        expect(shadow).not.toBe("none")
-        // the same token as the page side's:  the same shadow
-        if (layout.querySelector("ui-site-nav") && width > 600)
-          expect(shadow).toBe(getComputedStyle(underMenu).boxShadow)
-        // drawn below it alone, over what's under it
-        expect(getComputedStyle(menu).clipPath).toMatch(/inset\(0px 0px -/)
-        expect(Number(getComputedStyle(menu).zIndex)).toBeGreaterThan(0)
         const bar = layout.querySelector("ui-app-menu")!.shadowRoot!.querySelector<HTMLElement>(".ui.header.menu")!
         expect(getComputedStyle(bar).borderBottomWidth).toBe("0px")
         expect(getComputedStyle(bar).boxShadow).toBe("none")
+        const besideDrawer = !!layout.querySelector("ui-site-nav") && width > 600
+        if (besideDrawer) {
+          // the page side drawn over the bar, its shadow round its top as down its side
+          expect(getComputedStyle(underMenu).position).toBe("relative")
+          expect(getComputedStyle(underMenu).boxShadow).not.toBe("none")
+          expect(getComputedStyle(menu).boxShadow).toBe("none")
+        } else {
+          // the menu's own, the same token, cast down over what's under it alone
+          expect(getComputedStyle(menu).boxShadow).not.toBe("none")
+          expect(getComputedStyle(menu).clipPath).toMatch(/inset\(0px 0px -/)
+          expect(Number(getComputedStyle(menu).zIndex)).toBeGreaterThan(0)
+        }
         layout.remove()
       }
     })

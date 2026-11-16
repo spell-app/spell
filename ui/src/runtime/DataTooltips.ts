@@ -12,6 +12,7 @@ import type { Browser } from "./Browser"
  *   - `data-variation="visible"` also stays CSS:  it's always showing, and there's one bubble.
  * - The bubble and a box over the target live at the end of `<body>`:
  *   an anchor name only reaches its own tree, and a target may be in a shadow root.
+ * - A target with no box of its own (`display: contents`, a `<ui-item>`) shows it at its drawn boxes (`boxOf()`).
  * - It takes the target's `--ui-tooltip-*` values as they resolve there, so a theme around the target still shows.
  * - When it shows:
  *   - the pointer on a target:  after `--ui-tooltip-delay` (by default `--ui-hover-delay`)
@@ -172,7 +173,7 @@ export class DataTooltips {
 
   /** Put the box over `target`:  the browser's own anchor positioning does the rest, flips included. */
   private place(target: Element) {
-    const { left, top, width, height } = target.getBoundingClientRect()
+    const { left, top, width, height } = boxOf(target)
     this.box!.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px`
   }
 
@@ -180,10 +181,12 @@ export class DataTooltips {
    * Say which side of the target the bubble ended up on, and where along it the arrow goes.
    * - Measured:  a flip is the browser's, and nothing else says it happened.
    * - The arrow points at the middle of what the bubble and the target share.
+   * - Measured on its layout box, so the scale it grows in from doesn't move the arrow.
    */
   private pointArrow(target: Element, bubble: HTMLElement) {
-    const tip = bubble.getBoundingClientRect()
-    const box = target.getBoundingClientRect()
+    // its layout box, not as drawn:  it grows in from 80% as it shows, which would put the arrow off the target
+    const tip = new DOMRect(bubble.offsetLeft, bubble.offsetTop, bubble.offsetWidth, bubble.offsetHeight)
+    const box = boxOf(target)
     const side =
       tip.bottom <= box.top + 1
         ? "top"
@@ -245,6 +248,28 @@ const SIDE_ATTRIBUTE = "data-side"
 const ARROW_TOKEN = "--ui-tooltip-arrow-at"
 /** The nearest an arrow comes to the bubble's corner, so it stays on the straight edge. */
 const ARROW_INSET = 12
+
+/**
+ * Where `target` is drawn, in the window.
+ * - A target with no box of its own (`display: contents`:  a `<ui-item>`) is where its shadow root's boxes are,
+ *   else its children's, all together.
+ */
+function boxOf(target: Element): DOMRect {
+  const own = target.getBoundingClientRect()
+  if (own.width || own.height || getComputedStyle(target).display !== CONTENTS) return own
+  const parts = [...(target.shadowRoot?.children ?? []), ...target.children]
+    .map((part) => part.getBoundingClientRect())
+    .filter((rect) => rect.width || rect.height)
+  if (!parts.length) return own
+  const left = Math.min(...parts.map((rect) => rect.left))
+  const top = Math.min(...parts.map((rect) => rect.top))
+  const right = Math.max(...parts.map((rect) => rect.right))
+  const bottom = Math.max(...parts.map((rect) => rect.bottom))
+  return new DOMRect(left, top, right - left, bottom - top)
+}
+
+/** `display` of a target with no box of its own. */
+const CONTENTS = "contents"
 
 /** A new element, by class. */
 function makeElement(className: string): HTMLElement {
