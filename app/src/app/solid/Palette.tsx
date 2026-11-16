@@ -394,7 +394,7 @@ const ADD_BUTTON_ID = "AddPartButton"
 
 /**
  * The palette kept open:  the top bar's second row, edge to edge, of its topics' names (epic `editor` T80).
- * - Its pin at its far left, pinned:  a click unpins it, closing the bar (epic `editor` T92;  a ✕ by the search before).
+ * - Its pin right before "Add View", pinned:  a click unpins it, closing the bar (epic `editor` T92, I212;  a ✕ by the search before).
  * - Add View, in bold, then each topic's icon and name (epic `editor` T86).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
  * - This app (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
@@ -484,10 +484,10 @@ export function PaletteStrip(): JSX.Element {
 
   return (
     <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
-      <div class="PaletteStripStart">
-        <PinIcon />
-      </div>
+      {/* the bar's start, kept empty so its groups stay centred;  the pin sits right before "Add View" (epic `editor` I212) */}
+      <div class="PaletteStripStart" />
       <div class="PaletteStripAdd">
+        <PinIcon />
         <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>
         <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
           <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
