@@ -1,4 +1,11 @@
-import { type EditorState, type Extension, StateEffect, StateField } from "@codemirror/state"
+import {
+  EditorSelection,
+  type EditorState,
+  type Extension,
+  type SelectionRange,
+  StateEffect,
+  StateField
+} from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { SP } from "spell/parser/spell"
@@ -475,8 +482,86 @@ class DescriptionRoom {
     }
   )
 
-  /** Measuring and drawing the rows under heads, for a bubbly editor. */
-  static readonly extension: Extension = [DescriptionRoom.rows, DescriptionRoom.measure]
+  /**
+   * A press in the rows under a head:  the caret on the description's letter under the pointer, and a drag from it
+   * selects as over any text (epic `codemirror` I19).
+   * - CodeMirror finds the place under the pointer from the boxes of the line's pieces, in their order.
+   *   The description is drawn out of the band's box, in the rows under it, so its box is in no piece's:
+   *   CodeMirror took the band for the nearest piece, and put the caret in the head's words above the press.
+   * - Two clicks pick a word, three the line, as CodeMirror's own;  four and more are `CodeMirrorSetup`'s.
+   * - A drag from anywhere else is CodeMirror's own, so one ending in a description's rows ends in the head's words.
+   */
+  private static readonly presses = EditorView.mouseSelectionStyle.of((view, event) => {
+    if (event.button !== 0 || event.detail > 3 || event.metaKey || event.ctrlKey || event.altKey) return null
+    const pressed = DescriptionRoom.posInRows(view, event.clientX, event.clientY)
+    if (pressed === undefined) return null
+    const { state } = view
+    let start: SelectionRange
+    if (event.detail === 1) start = EditorSelection.cursor(pressed)
+    else if (event.detail === 2) start = state.wordAt(pressed) ?? EditorSelection.cursor(pressed)
+    else {
+      const line = state.doc.lineAt(pressed)
+      start = EditorSelection.range(line.from, Math.min(line.to + 1, state.doc.length))
+    }
+    if (event.shiftKey) start = EditorSelection.range(state.selection.main.anchor, start.head)
+    return {
+      get(current) {
+        const head =
+          DescriptionRoom.posInRows(view, current.clientX, current.clientY) ??
+          view.posAtCoords({ x: current.clientX, y: current.clientY }, false)
+        if (event.detail === 1) return EditorSelection.single(start.anchor, head)
+        if (head >= start.from && head <= start.to) return EditorSelection.single(start.anchor, start.head)
+        // past the press's word or line:  from its far end to the place under the pointer, a whole word or line
+        const line = view.state.doc.lineAt(head)
+        const to =
+          event.detail === 2
+            ? (view.state.wordAt(head) ?? EditorSelection.cursor(head))
+            : EditorSelection.range(line.from, line.to)
+        return head < start.from ? EditorSelection.single(start.to, to.from) : EditorSelection.single(start.from, to.to)
+      },
+      update(update) {
+        if (update.docChanged) start = start.map(update.changes)
+      }
+    }
+  })
+
+  /**
+   * The place under `x`, `y` when it's in the rows under a head, in its description:  the letter it's over, or, beside
+   * its words, the nearest end of the row it's in;  `undefined` anywhere else.
+   */
+  private static posInRows(view: EditorView, x: number, y: number): number | undefined {
+    for (const line of view.contentDOM.querySelectorAll<HTMLElement>(`.cm-line.${DescriptionRoom.BELOW}`)) {
+      const box = line.getBoundingClientRect()
+      const band = line.querySelector<HTMLElement>(".cmb-band")
+      const description = line.querySelector<HTMLElement>(".cmb-description")
+      if (!band || !description || y < band.getBoundingClientRect().bottom || y > box.bottom) continue
+      return DescriptionRoom.posInText(view, description, x, y)
+    }
+    return undefined
+  }
+
+  /** The place in `element`'s text nearest `x`, `y`:  in the row nearest `y`, before or after the letter nearest `x`. */
+  private static posInText(view: EditorView, element: HTMLElement, x: number, y: number): number | undefined {
+    let best: { node: Text; offset: number; dy: number; dx: number } | undefined
+    const letter = document.createRange()
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+    for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+      for (let at = 0; at < node.length; at++) {
+        letter.setStart(node, at)
+        letter.setEnd(node, at + 1)
+        const rect = letter.getBoundingClientRect()
+        if (!rect.height) continue
+        const dy = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0
+        const dx = x < rect.left ? rect.left - x : x > rect.right ? x - rect.right : 0
+        if (best && (dy > best.dy || (dy === best.dy && dx >= best.dx))) continue
+        best = { node, offset: x > (rect.left + rect.right) / 2 ? at + 1 : at, dy, dx }
+      }
+    }
+    return best && view.posAtDOM(best.node, best.offset)
+  }
+
+  /** Measuring and drawing the rows under heads, and presses in them, for a bubbly editor. */
+  static readonly extension: Extension = [DescriptionRoom.rows, DescriptionRoom.measure, DescriptionRoom.presses]
 
   /**
    * Each line on screen's rows for its description:  0 for one with none, or whose description fits on its band.
