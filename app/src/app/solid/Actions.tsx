@@ -134,8 +134,6 @@ export type ActionProps = {
  *   and reads the accessor in JSX.
  *   (A plain `editor.x` read in JSX is reactive too, through the cells bridge:  `tracked()` names it.)
  * - Entries that only touch `editor` in `onClick` read nothing:  that runs after render.
- * - NOTE: `PROJECT_DROPDOWN_ACTIONS` / `FILE_DROPDOWN_ACTIONS` are COMPONENTS, not element arrays:
- *   Solid JSX makes DOM nodes at once, and one node can only be in one place.
  * - Same names and behaviour as the React app's `UI.Actions` had (its groups were element arrays).
  */
 export const Actions = {
@@ -177,11 +175,11 @@ export const Actions = {
       type="button"
       class="YouAvatar"
       aria-label={appTexts.text("you")}
-      {...barTooltip(appTexts.text("you"))}
+      {...barTooltip(appTexts.text("youTip"))}
       onClick={() => editor.showYou()}
     >
       <span class="YouLetter" aria-hidden="true">
-        {SPACES.LOCAL_PERSON.charAt(0).toUpperCase()}
+        {SPACES.localPerson.id.charAt(0).toUpperCase()}
       </span>
     </button>
   ),
@@ -422,20 +420,6 @@ export const Actions = {
   ),
   choose: (props: DialogActionProps<Modals.ChooserModalProps>) => (
     <DialogAction props={props} title={appTexts.text("choose")} icon="list" show={(modal) => editor.choose(modal)} />
-  ),
-
-  ////////////////
-  // ## Groups of actions
-  ////////////////
-
-  /** File dropdown items:  create, duplicate, rename, delete the file. */
-  FILE_DROPDOWN_ACTIONS: (): JSX.Element => (
-    <>
-      <Actions.createFile />
-      <Actions.duplicateFile />
-      <Actions.renameFile />
-      <Actions.deleteFile />
-    </>
   )
 }
 
@@ -444,8 +428,7 @@ export const Actions = {
  * - what needs a server, or a person:  making examples and guides, a project's settings, the You panel
  * - what does nothing yet:  Help
  * - the console's test buttons (the dialogs)
- * - The groups too, so a dropdown of them is empty:  `<FileDropdown>` leaves out its divider, and the "..." menus
- *   are hidden by the static build's CSS (`static.css`).
+ * - The "..." menus that hold them are hidden by the static build's CSS (`static.css`).
  */
 const HIDDEN_IN_STATIC_BUILD = [
   "showHelp",
@@ -458,8 +441,7 @@ const HIDDEN_IN_STATIC_BUILD = [
   "confirm",
   "prompt",
   "promptForNumber",
-  "choose",
-  "FILE_DROPDOWN_ACTIONS"
+  "choose"
 ] as const satisfies ReadonlyArray<keyof typeof Actions>
 
 if (isStaticBuild) for (const name of HIDDEN_IN_STATIC_BUILD) Object.assign(Actions, { [name]: () => null })

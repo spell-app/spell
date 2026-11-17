@@ -102,7 +102,7 @@ export const propertyVocabulary = {
         description: "One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share."
       },
       { name: "inline-check", description: "A yes or no in a compact editor:  the box, then its label, on one line." },
-      { name: "here", description: "Its value is set on this thing (its editor's `origins`):  a dot by its label." },
+      { name: "here", description: "Its value is set on this thing (its editor's `origins`);  draws nothing of its own." },
       {
         name: "inherited",
         description: "Its value comes from somewhere else (its editor's `origins`):  a quieter label."

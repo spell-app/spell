@@ -6,6 +6,7 @@ import { SP } from "spell/parser/spell"
 import { hasProjectFile } from "spell/parser/spell/node/projectFile"
 import { SPACES } from "spell/app/spaces"
 import { CLI } from "spell/app/cli"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 
 /**
  * `spell app create <name>` (`spell new` until epic `repo-split` P13):  make a spell project --
@@ -13,7 +14,7 @@ import { CLI } from "spell/app/cli"
  * `<name>.spell` which prints a hello, so `spell run` shows something straight away.
  * - `--site`:  a site instead (epic `mockup` T40), as the editor's Site card makes one (`SPACES.STARTER_PROGRAMS.site`):
  *   its routing in `<name>.site.spell`, its main page layout in `main.page-layout.spell`, its home page in `home.spell`
- * - In `--in <folder>`, or by default `owen@spell`'s folder, your space in spell-spaces (`@spell/owen@/`).
+ * - In `--in <folder>`, or by default this machine's person's folder, your space in spell-spaces (`@spell/owen@/`).
  * - Writes the files itself:  `projectUtils.createProject()` would go through `getIndex()`, which adds an
  *   `Untitled.spell`.
  * - Refuses a folder that's already there with anything in it.
@@ -22,7 +23,8 @@ import { CLI } from "spell/app/cli"
 export async function newCommand(session: CLI.CliSession, args: string[], options: CLI.NewOptions): Promise<number> {
   const [name = ""] = args
   CLI.checkProjectName(name)
-  const parent = options.in ? resolve(options.in) : environment.userFilesRoot
+  const { id, org } = thisMachinesPerson()
+  const parent = options.in ? resolve(options.in) : resolve(environment.spellSpacesDir, `@${org}`, `${id}@`)
   if (!existsSync(parent)) throw new CLI.CliError(`No such folder:  ${options.in ?? parent}`)
   const folder = resolve(parent, name)
   if (existsSync(folder) && readdirSync(folder).length) {

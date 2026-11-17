@@ -86,7 +86,7 @@ export class LspToCodeMirror {
 
   /**
    * CodeMirror suggestion for LSP `item`, written as the service says.
-   * - Its row says what it is:  its description (`labelDetails.description`, "Whose turn it is"), as Monaco's did;
+   * - Its row says what it is:  its description (`labelDetails.description`, "Whose turn it is");
    *   else its `detail` ("property of TicTacToe"), which then heads its info instead.
    * - Its own range, when it names one (`textEdit`), stretched to whatever's typed since;  else the word being typed.
    * - A snippet stays a snippet:  `move ${1:card} to ${2:pile}`, each field a stop for Tab.

@@ -22,7 +22,7 @@ import {
 } from "@codemirror/view"
 import type { CodeAction, CompletionItem, DocumentSymbol, SignatureHelp, WorkspaceEdit } from "vscode-languageserver"
 
-import { after, type CancelablePromise } from "spell/util/timing"
+import { after, waitUntil, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
@@ -82,6 +82,17 @@ export class CodeMirrorLanguage {
     this.parseNow()
     const { file } = this
     return file.match && file.contents === doc.toString() ? file : undefined
+  }
+
+  /**
+   * The file, parsed and holding `doc`'s text, waiting up to `PARSE_WAIT_SECONDS` for its parse:
+   * for what a person asked for by name (Go to Definition, Find All References, Peek), whose answer must be right.
+   * - A file with no parse yet (the page just loaded, a parse from scratch in flight) answered nothing at all,
+   *   so Peek References said "No uses found" of a name used everywhere (epic `codemirror` I5).
+   * - What shows by itself (a hover, a suggestion) asks `fileReady()`:  it never waits.
+   */
+  async fileParsed(doc: Text): Promise<SP.SpellFile | undefined> {
+    return (await this.fileReady(doc)) ?? waitUntil(() => this.fileReady(doc), { timeout: PARSE_WAIT_SECONDS })
   }
 
   ////////////////
@@ -193,7 +204,7 @@ export class CodeMirrorLanguage {
     method: "definition" | "typeDefinition" = "definition"
   ): Promise<CodeMirrorLocation | undefined> {
     const { doc } = view.state
-    const file = await this.fileReady(doc)
+    const file = await this.fileParsed(doc)
     const [location] = file ? this.service[method](file, LspToCodeMirror.lspPosition(doc, pos)) : []
     return location && LspToCodeMirror.location(location)
   }
@@ -201,7 +212,7 @@ export class CodeMirrorLanguage {
   /** Every use of the thing at `pos`, its declaration too:  each file's path and range. */
   async referencesAt(view: EditorView, pos: number): Promise<CodeMirrorLocation[]> {
     const { doc } = view.state
-    const file = await this.fileReady(doc)
+    const file = await this.fileParsed(doc)
     const locations = file ? this.service.references(file, LspToCodeMirror.lspPosition(doc, pos), true) : []
     return locations.flatMap((location) => LspToCodeMirror.location(location) ?? [])
   }
@@ -531,6 +542,9 @@ export type CodeMirrorLanguageProps = {
 ////////////////
 // ## Helpers
 ////////////////
+
+/** How long Go to Definition and Find All References wait for a file not parsed yet, in seconds. */
+const PARSE_WAIT_SECONDS = 10
 
 /** The class of a hover's words. */
 const HOVER_CLASS = "cmb-hover"

@@ -196,6 +196,19 @@
     font-weight: 600;
     color: var(--ui-text-muted);
   }
+  /* a section moved by its header among the page's (in dev, in Spell's own checkout):
+     the one moving faint, where it would land marked, as a card dragged among its row is (`TileCard.css`) */
+  &.grabbable > header {
+    cursor: grab;
+  }
+  &.dragging {
+    opacity: 0.4;
+  }
+  &.drop-here {
+    outline: var(--ui-focus-width, 2px) dashed var(--ui-primary-color, var(--ui-focus-color));
+    outline-offset: 8px;
+    border-radius: var(--Home-radius);
+  }
   &.small .cards {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }

@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process"
-import { createWriteStream, rmSync, writeFileSync } from "node:fs"
+import { createWriteStream, existsSync, rmSync, writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
@@ -7,6 +7,12 @@ import { stripVTControlCharacters } from "node:util"
 
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
+import {
+  PAGE_SERVER_PREFIXES,
+  SERVER_TOKEN_HEADER,
+  TOKEN_PREFIXES,
+  WEBSOCKET_PREFIXES
+} from "spell/app/spaces/server/node/routes/editorPaths"
 
 /**
  * The editor UI -- vite's dev server for the app's build folder, `app/` (what `yarn start:dev` runs), with hot reload -- as a child
@@ -21,6 +27,8 @@ import environment from "spell/app/spaces/server/node/environment"
  *   says it's ready.
  * - Runs vite's own script with this `node`, NOT `yarn start:dev`:  a page server launched by a `yarn` script
  *   inherits a PATH whose `yarn` is a temporary shim, gone once that script exits.
+ * - In an npm install of `spell` (no vite, no source):  the BUILT editor, `app/dist/`, served by a small server of its own
+ *   on the same port, passing the page server's paths on as vite would (`serveBuilt()`;  epic `repo-split` P26)
  * - `SPELL_NO_EDITOR=1`:  don't start it.
  * - NOTE: if the page server dies without stopping (kill -9), vite keeps running:  `yarn stop`, at spell-app's root.
  */
@@ -43,6 +51,9 @@ export class EditorServer {
 
   /** the running vite, in its own process group */
   private child?: ChildProcess
+
+  /** the built editor's server, in an npm install (`serveBuilt()`) */
+  private built?: SRV.WebServer
 
   /** `stop()` was called:  a start under way picks no more ports */
   private isStopped = false
@@ -68,7 +79,8 @@ export class EditorServer {
    *   leaving no editor (epic `epic-engine` I274, r68);  `portPicked` names the port it ends up on
    */
   async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
-    if (process.env.SPELL_NO_EDITOR || this.child) return this.pickedPort(this.port)
+    if (process.env.SPELL_NO_EDITOR || this.child || this.built) return this.pickedPort(this.port)
+    if (isBuiltEditor()) return this.pickedPort(await this.serveBuilt(pagePort, guard, { thisMachineOnly }))
     const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
     const taken: number[] = []
     for (let tries = 0; tries < PORT_TRIES && !this.isStopped; tries++) {
@@ -104,7 +116,7 @@ export class EditorServer {
       SPELL_SERVER_TOKEN: guard.token,
       ...(thisMachineOnly && { SPELL_EDITOR_THIS_MACHINE_ONLY: "1" })
     }
-    const child = spawn(process.execPath, [VP, "dev", "--port", String(port), "--strictPort"], {
+    const child = spawn(process.execPath, [vpScript(), "dev", "--port", String(port), "--strictPort"], {
       cwd: APP_DIR,
       env,
       detached: true,
@@ -139,6 +151,44 @@ export class EditorServer {
   }
 
   /**
+   * SIDE EFFECT:  the BUILT editor (`BUILT_EDITOR`) served on a port of its own, and recorded;  resolves to the port.
+   * - what an npm install of `spell` runs, which ships the editor built (`yarn build`) and no vite config
+   * - the page server's paths (`PAGE_SERVER_PREFIXES`) passed on to it, websockets too, its write token added where
+   *   vite's proxy adds it;  every other path a file of the build, else its `index.html`
+   * - `thisMachineOnly`:  as vite's, this machine alone;  else every address, as vite listens
+   */
+  private async serveBuilt(
+    pagePort: number,
+    guard: SRV.Guard,
+    { thisMachineOnly }: { thisMachineOnly: boolean }
+  ): Promise<number> {
+    const web = new SRV.WebServer({ mounts: [{ prefix: "/", dir: BUILT_EDITOR }], checkHost: false })
+    const pass = SRV.proxyTo(() => pagePort)
+    for (const prefix of PAGE_SERVER_PREFIXES) {
+      const withToken = TOKEN_PREFIXES.includes(prefix)
+      web.router.use(prefix, (request, reply) => {
+        if (withToken) request.headers[SERVER_TOKEN_HEADER] = guard.token
+        return pass(request, reply, () => {})
+      })
+    }
+    for (const prefix of WEBSOCKET_PREFIXES)
+      web.upgrade(prefix, (raw, socket, head) => SRV.proxyUpgrade(raw, socket, head, pagePort))
+    web.fallback.use((request, reply, next) =>
+      request.method === "GET" ? reply.sendFile(join(BUILT_EDITOR, "index.html")) : next()
+    )
+    const wanted = await editorPort({ thisMachineOnly })
+    const { port } = await web.listen({ port: wanted, host: thisMachineOnly ? "127.0.0.1" : "0.0.0.0" })
+    this.port = port
+    guard.allowOriginPort(port)
+    this.built = web
+    writeFileSync(
+      this.recordFile,
+      `${JSON.stringify({ url: `http://localhost:${port}/`, pid: process.pid }, null, 2)}\n`
+    )
+    return port
+  }
+
+  /**
    * Stop vite and everything it started, forget its record, and wait for it to END (epic `epic-engine` I274, r68).
    * - `SIGTERM` to its group;  `SIGKILL` if it's still there after `STOP_WAIT_MS`
    * - why wait:  the page server awaits its stop handlers before it exits, and a restart waits for that, so the next
@@ -148,6 +198,9 @@ export class EditorServer {
    */
   async stop(): Promise<void> {
     this.isStopped = true
+    const built = this.built
+    this.built = undefined
+    if (built) await built.close().catch(() => {})
     const pid = this.child?.pid
     this.child = undefined
     rmSync(this.recordFile, { force: true })
@@ -177,11 +230,25 @@ export const EDITOR_FILE = ".spell-server.editor.json"
 /** The app's build folder, `app/`, where vite runs (its `vite.config.ts`), and its builds are:  `dist/`, `dist-element/` ... */
 export const APP_DIR = join(environment.packagesDir, "app")
 
+/** The built editor, `yarn build`'s output (`app/dist/`):  what an npm install of `spell` serves (`serveBuilt()`). */
+const BUILT_EDITOR = join(APP_DIR, "dist")
+
+/**
+ * Is this the published `spell`, its editor built and no vite config beside it (epic `repo-split` P26)?
+ * - a checkout always runs vite, built or not:  its editor is the source, live
+ */
+function isBuiltEditor(): boolean {
+  return !existsSync(join(APP_DIR, "vite.config.ts")) && existsSync(join(BUILT_EDITOR, "index.html"))
+}
+
 /**
  * Vite+'s command-line script, as `app/` resolves it:  run as `vp dev`.
  * - NOT `vite/bin/vite.js`:  `vite` is aliased to `@voidzero-dev/vite-plus-core`, which ships no bin.
+ * - Looked up when vite starts, never as this file loads:  an npm install of `spell` may have no `vite-plus`.
  */
-const VP = join(dirname(createRequire(join(APP_DIR, "package.json")).resolve("vite-plus/package.json")), "bin/vp")
+function vpScript(): string {
+  return join(dirname(createRequire(join(APP_DIR, "package.json")).resolve("vite-plus/package.json")), "bin/vp")
+}
 
 /**
  * What vite prints once it listens:  `➜  Local:   http://localhost:3000/`.

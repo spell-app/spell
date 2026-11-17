@@ -100,6 +100,8 @@ const ROLE_FONTS: Partial<Record<CodeRole, Omit<CodeRoleStyle, "color">>> = {
  * - `params`:  a parameter;  `literal`:  a constant (one of a type's words);  `title.function`:  an action
  * - `operator`:  `punctuation`
  * - `section`, a `#` heading:  a heading
+ * - `name` and `attr`, a page file's markup and tags (`CodeMirrorTokens.pageSpans()`):
+ *   a tag's name a `tag`, an attribute's name a `member`, as `TAG_ROLES` colours another language's
  */
 const SCOPE_ROLES: Readonly<Record<string, CodeRole>> = {
   keyword: "keyword",
@@ -113,7 +115,9 @@ const SCOPE_ROLES: Readonly<Record<string, CodeRole>> = {
   number: "constant",
   string: "string",
   comment: "comment",
-  section: "heading"
+  section: "heading",
+  name: "tag",
+  attr: "member"
 }
 
 /**

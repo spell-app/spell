@@ -70,6 +70,20 @@ function codeOf(host: DOMCodeElement): HTMLElement {
   return host.shadowRoot!.querySelector<HTMLElement>("[part~=code]")!
 }
 
+/** How far `band`'s first letter is from its left edge, in pixels. */
+function wordsInset(band: HTMLElement): number {
+  const walker = document.createTreeWalker(band, NodeFilter.SHOW_TEXT)
+  for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+    const at = node.data.search(/\S/)
+    if (at < 0) continue
+    const letter = document.createRange()
+    letter.setStart(node, at)
+    letter.setEnd(node, at + 1)
+    return letter.getBoundingClientRect().left - band.getBoundingClientRect().left
+  }
+  throw new TypeError("wordsInset():  this band has no words")
+}
+
 describe("<spell-code>", () => {
   test("colours spell by default, with spell's own parser:  a heading, a type, a property", async () => {
     const host = await code(`<spell-code wrap>${PILES}</spell-code>`)
@@ -97,6 +111,17 @@ describe("<spell-code>", () => {
     expect(host.shadowRoot!.querySelector<HTMLElement>("[part~=pre]")!.hidden).toBe(true)
     // the copy button still copies the code as written
     expect(host.content.trim()).toBe(CARD.replace(/<\/?script[^>]*>/g, "").trim())
+  })
+
+  test("starts every band's words as far into it as the editor does:  a head with a body as one without (I150)", async () => {
+    const host = await code(`<spell-code>${CARD}</spell-code>`)
+    const drawing = drawingOf(host)!
+    const insets = [...drawing.querySelectorAll<HTMLElement>(".bubbly-head-pill, .bubbly-pill")].map(wordsInset)
+    // `a "card"` (a head with a body), `its "rank"` (none), `its "state"` and `if it is a queen` (bodies again)
+    expect(insets).toHaveLength(4)
+    // the editor's room before a head's words:  more than the band's bare padding (3px)
+    expect(insets[0]).toBeGreaterThan(8)
+    for (const inset of insets) expect(inset).toBeCloseTo(insets[1]!, 1)
   })
 
   test('draws a plain `<ui-code language="spell">` too, and Spanish with Spanish\'s parser', async () => {

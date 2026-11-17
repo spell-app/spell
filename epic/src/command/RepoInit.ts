@@ -95,7 +95,7 @@ import type { SyncReport } from "./SharedSync"
  *   - on when `--protected-base` says so, or the code host does (`protectionStep()`), in one line
  * - it starts with "Initializing Epic for repo <main>" and ends with "Epics initialized!", in colour;  the settings it
  *   wrote are in the file, not printed (Owen, 2026-10-29)
- * - `--local` (epic `epic-engine` P69:  a colleague "doesn't want any of it in the harbor repo"):  NOTHING in the repo
+ * - `--local` (epic `epic-engine` P69:  a colleague "doesn't want any of it in the work repo"):  NOTHING in the repo
  *   - no `.gitignore` lines and no commit, ever:  `.epic/` and the links go in `.git/info/exclude` (`excludeStep()`)
  *   - kept in the config (`localSetup`):  run again with no flag, it stays local
  *   - nothing made on the code host unless `--content-repo` says;  `--remote` with the team's plans clones them
@@ -312,7 +312,7 @@ export class RepoInit {
    * - `install` (`--install`):  that one
    * - else asked in a terminal (`CLI.ask()`), suggesting `EpicConfig.installSuggestionOf()`'s:  the repo's docs', else
    *   its lock file's;  no terminal (`ask` off), the suggestion
-   * - why:  harbor's `uv.lock` gave plain `uv sync`, which leaves out its development tools;  its README said
+   * - why:  a work repo's `uv.lock` gave plain `uv sync`, which leaves out its development tools;  its README said
    *   `uv sync --all-packages --all-extras`
    */
   static async installChoice({

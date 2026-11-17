@@ -5,6 +5,7 @@
  * - `state` / an error tint the title (`.error`, `.info` ... on the box).
  * - `:state(grid)`:  its content a grid of `--_property-editor-columns` columns (its own `columns`, else its
  *   editor's);  its properties say how much of a row they take (`UIProperty.css`).
+ * - `:state(empty)`:  nothing in it, so not drawn at all, `hide-empty` or not.
  * - `:state(compact)` (its editor's;  epic `debut` P31):  a tight band, 4px above and below its title, its look
  *   the theme's:  `--ui-property-editor-band-transform` (case), `-band-spacing` (between letters), `-band-weight`,
  *   `-band-size`, `-band-background`.
@@ -29,6 +30,11 @@
 }
 
 @layer ui.components.property-group.variations {
+  /* ## Nothing in it:  no header for no properties (epic `editor` I223) */
+  :host(:state(empty)) {
+    display: none;
+  }
+
   /* ## In its editor's grid, a whole row;  its own content a grid while `:state(grid)` */
   :host {
     grid-column: 1 / -1;

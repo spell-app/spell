@@ -32,6 +32,23 @@ export const APP_TEXTS = {
   modes: "Run, edit or debug",
   runMode: "Run",
   editMode: "Edit",
+  // the top bar's tooltips:  what a click does, in the state it's in (epic `editor` I230)
+  runTip: "Run the App",
+  stopEditingTip: "Stop Editing",
+  runningTip: "The app is running",
+  editTip: "Edit the App",
+  editingTip: "You're editing the app",
+  siteTip: "Show the Site's Pages",
+  siteShownTip: "You're looking at the site's pages",
+  showCodeTip: "Show Spell Code",
+  hideCodeTip: "Hide Spell Code",
+  showCompiledTip: "Show Compiled {language}",
+  hideCompiledTip: "Hide Compiled {language}",
+  inspectTip: "Inspect the App:  click a part to select it",
+  stopInspectingTip: "Stop Inspecting",
+  addViewTip: "Add a View",
+  restartTip: "Restart the app",
+  youTip: "Edit Your Name and Emails",
   menuCut: "Cut",
   menuCopy: "Copy",
   menuPaste: "Paste",
@@ -41,7 +58,10 @@ export const APP_TEXTS = {
   paletteSearch: "Search Views",
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
-  paletteMoreTip: "Show everything filed under {topic}",
+  paletteGroupTip: "Add {aTopic} view",
+  paletteAppViews: "App views",
+  paletteAppViewsTip: "Add one of your app's views",
+  palettePageViewsTip: "Add one of this page's views",
   palettePin: "Keep this open",
   paletteUnpin: "Unpin",
   paletteAddView: "Add View",
@@ -84,7 +104,8 @@ export const APP_TEXTS = {
   changeThisPicture: "A picture sent with it",
   changeThisRemovePicture: "Take this picture out",
   menuShowInCode: "Show in Code",
-  menuInspect: "Inspect",
+  menuInspect: "Inspect {type}",
+  menuInspectParts: "Pick one of the parts under the mouse",
   partIsApp: "That's the app itself:\nit can't be cut, duplicated or deleted.",
   partNothingCopied: "Nothing's been copied yet.",
   partNothingSelected: "Nothing's selected.",
@@ -381,7 +402,7 @@ export const APP_TEXTS = {
   noTests: "No tests -- write one as `to test <something>:`",
 
   ////////////////
-  // ## The project chooser (`ProjectChooser.tsx`, `ProjectDropdown.tsx`)
+  // ## The project chooser (`ProjectChooser.tsx`)
   ////////////////
 
   welcome: "Welcome to Spell!",
@@ -423,6 +444,7 @@ export const APP_TEXTS = {
   "category.web-data": "Data from the web",
   "category.sites": "Sites",
   homeProjectsLine: "What you've made, and where to start the next one.",
+  homeOrgLine: "Shared by everyone at @{org}.",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
   editorNameNeeded:
@@ -713,9 +735,9 @@ export const APP_TEXTS = {
 
   youHeader: "You:  {address}",
   fileProblems: "Your file has problems:  read anyway",
-  names: "Names",
+  names: "Name",
   nickname: "Nickname",
-  emails: "Emails, one a line",
+  emails: "Your email address(es), one per line",
   dates: "Dates",
   dateWhat: "What",
   dateDay: "Day",
@@ -724,6 +746,17 @@ export const APP_TEXTS = {
   addDate: "Add a date",
   yourOrgs: "Your orgs",
   noneYet: "None yet.",
+
+  ////////////////
+  // ## The name page (`NamePage.tsx`):  who's at this machine, asked on its first start
+  ////////////////
+
+  nameHeading: "Welcome to Spell",
+  nameLine: "Who's here?\nYour projects go in a space with your name,\nin {org}'s spaces on this machine.",
+  yourName: "Your name",
+  nameTaken: "{address} already has a space here:  that's you?",
+  nameNeeded: "Type a name with a letter in it.",
+  nameStart: "Start",
 
   ////////////////
   // ## A project's settings (`ProjectSettings.tsx`)

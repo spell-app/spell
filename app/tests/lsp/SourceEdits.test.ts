@@ -42,6 +42,30 @@ describe("SourceEdits", () => {
     )
   })
 
+  test("a bare word's value stays bare, in any language;  a new one is bare when asked (language I143)", () => {
+    const text = `<foundation "clubs" suit=clubs/>`
+    const tag = SourceEdits.tagAt(text, 0)!
+    expect(tag.attributes.map((each) => [each.name, each.quote])).toEqual([["suit", "bare"]])
+    expect(text.slice(tag.attributes[0]!.valueSpan!.start, tag.attributes[0]!.valueSpan!.end)).toBe("clubs")
+    expect(SourceEdits.applied(text, SourceEdits.settingAttribute(text, 0, "suit", "hearts"))).toBe(
+      `<foundation "clubs" suit=hearts/>`
+    )
+    // more than a word:  quoted
+    expect(SourceEdits.applied(text, SourceEdits.settingAttribute(text, 0, "suit", "two words"))).toBe(
+      `<foundation "clubs" suit="two words"/>`
+    )
+    // taken off, and put back as a choice's word
+    const reset = SourceEdits.applied(text, SourceEdits.settingAttribute(text, 0, "suit", undefined))
+    expect(reset).toBe(`<foundation "clubs"/>`)
+    expect(SourceEdits.applied(reset, SourceEdits.settingAttribute(reset, 0, "suit", "hearts", "bare"))).toBe(
+      `<foundation "clubs" suit=hearts/>`
+    )
+    const spanish = `<fundación "tréboles" palo=tréboles dirección=abajo />`
+    expect(SourceEdits.applied(spanish, SourceEdits.settingAttribute(spanish, 0, "palo", "corazones"))).toBe(
+      `<fundación "tréboles" palo=corazones dirección=abajo />`
+    )
+  })
+
   test("an expression is code:  it throws", () => {
     expect(() => SourceEdits.settingAttribute(TAG, opening, "onClick", "x")).toThrow(/expression/)
   })

@@ -1107,7 +1107,7 @@ export class EpicConfig {
    *   --all-extras`, for `uv sync`), its `$ ` prompt and a trailing `# comment` left off
    * - else the lock file's own (`installCommandOf()`), from that file;  `""` and no source with none
    * - never adds a flag:  `--all-extras` can pull in heavy packages, so it's only used when the docs say so
-   *   (harbor's README did:  plain `uv sync` left out its development tools)
+   *   (a work repo's README did:  plain `uv sync` left out its development tools)
    * - NEVER throws:  a doc that won't read is skipped
    */
   static installSuggestionOf(main: string): InstallSuggestion {
@@ -1301,7 +1301,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - the skills' finish reads it:  a pull request in place of a merge
  *   - NOT the epic repo, whose own branch every turn pushes to:  an org-wide rule must leave it out
  * - `localSetup`:  the repo was set up by `epic init --local` (epic `epic-engine` P69:  a colleague "doesn't want
- *   any of it in the harbor repo"):  nothing of epics is committed in it, and this file itself is on this machine only
+ *   any of it in the work repo"):  nothing of epics is committed in it, and this file itself is on this machine only
  *   (`false`, the default)
  *   - this file and the links are listed in the repo's private ignore list (`.git/info/exclude`), never `.gitignore`
  *   - `epic init` run again keeps it local:  no `.gitignore` change, no commit

@@ -252,14 +252,11 @@ const VIEWER_FOLDER = "element"
 /**
  * What `buildViewer({ withEditor })` leaves out of the element's build, by path in it:  what the page never loads.
  * - source maps
- * - `<spell-code>`:  code shown on a docs page
  * - Semantic UI's sources and scripts:  the viewer adopts only its one sheet, `semantic.min.css`, and its `themes/`
+ * - NOT `<spell-code>` (`spell-code.js`):  a site's page shows its own Spell with it, in the bubbly look
+ *   (spell.app's sample, epic `repo-split` P25);  its parser chunk loads only when one is on the page
  */
-const EDITOR_LEAVES_OUT = [
-  /\.map$/,
-  /^\/spell-code[-.]/,
-  /^\/semantic-ui-css\/(components\/|semantic\.(css|js|min\.js)$)/
-]
+const EDITOR_LEAVES_OUT = [/\.map$/, /^\/semantic-ui-css\/(components\/|semantic\.(css|js|min\.js)$)/]
 
 /**
  * What `buildViewer()` leaves out with no editor:  `EDITOR_LEAVES_OUT`, and `<spell-editor>`, CodeMirror among it --

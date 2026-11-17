@@ -39,6 +39,8 @@ type Picture = {
   name: string
   /** the editor's page, from its root */
   page: string
+  /** the editor's preferences to set before the page loads (`spellEditor:<key>`):  Debug's panel on a tab ... */
+  prefs?: Record<string, string>
   /** what to do first:  open a menu, show a notice ... */
   prepare?: (page: Page) => Promise<void>
   /** the element to picture (its first match) */
@@ -47,16 +49,30 @@ type Picture = {
   clip?: { x: number; y: number; width: number; height: number }
 }
 
+/**
+ * The editor as Owen shows it:  Debug, its Program panel open under the code, and the Inspector open.
+ * - Its help seen, so it shows the app's parts, not how to use it.
+ */
+const DEBUG = { programPanel: "true", inspector: "true", "inspector:helpSeen": "true" }
+
+/** Debug, its Program panel on `tab`:  where the console, the compiled code and the sentence tree are drawn. */
+const debugOn = (tab: "output" | "javascript" | "tree") => ({ ...DEBUG, programTab: tab })
+
 /** Every picture, by page. */
 const PICTURES: Picture[] = [
   { name: "SpellPage", page: "", selector: ".SpellPage" },
-  { name: "AppRoot", page: PROJECT, selector: ".AppRoot" },
-  { name: "AppContainer", page: PROJECT, selector: ".AppContainer" },
+  { name: "AppRoot", page: PROJECT, prefs: DEBUG, selector: ".AppRoot" },
+  { name: "AppContainer", page: PROJECT, prefs: DEBUG, selector: ".AppContainer" },
   { name: "chrome", page: PROJECT, selector: ".AppMenu" },
   { name: "InputEditor", page: PROJECT, selector: ".InputRoot" },
-  { name: "OutputEditor", page: PROJECT, selector: ".OutputRoot" },
-  { name: "CodeMirrorEditor", page: PROJECT, selector: ".OutputEditor .CodeMirrorEditor" },
-  { name: "ConsoleViewer", page: PROJECT, selector: ".ConsoleRoot" },
+  { name: "OutputEditor", page: PROJECT, prefs: debugOn("javascript"), selector: ".OutputRoot" },
+  {
+    name: "CodeMirrorEditor",
+    page: PROJECT,
+    prefs: debugOn("javascript"),
+    selector: ".OutputEditor .CodeMirrorEditor"
+  },
+  { name: "ConsoleViewer", page: PROJECT, prefs: debugOn("output"), selector: ".ConsoleRoot" },
   {
     name: "Actions",
     page: PROJECT,
@@ -66,30 +82,38 @@ const PICTURES: Picture[] = [
   {
     name: "TreeViewer",
     page: PROJECT,
+    prefs: debugOn("tree"),
     prepare: async (page) => {
-      await page.locator(".InputEditor .cm-line").nth(1).click()
+      // the first line, "a card is a draggable two sided view":  near its start, so the code doesn't scroll sideways
+      await page
+        .locator(".InputEditor .cm-line")
+        .first()
+        .click({ position: { x: 60, y: 8 } })
       await page.waitForTimeout(1500)
     },
     selector: ".TreeRoot"
   },
   {
-    name: "FileDropdown",
+    name: "FileTabs",
     page: PROJECT,
     prepare: async (page) => {
-      // the file tabs turn into the dropdown in a narrow code column (`FileTabs.css`)
+      // a narrow tab row puts most tabs away:  its all-files button, at its end, lists every file
       await page.locator(".FileTabs").evaluate((tabs: HTMLElement) => (tabs.style.width = "260px"))
-      await openDropdown(page, "ui-dropdown.FileDropdown")
+      await openDropdown(page, ".FileTabs button.all-items")
     },
     clip: { x: 0, y: 30, width: 720, height: 420 }
   },
   {
+    name: "MenuBar",
+    page: PROJECT,
+    // the Spell menu, the bar's first:  its home row, then every example, the one shown ticked
+    prepare: (page) => openDropdown(page, "#SpellBarMenu"),
+    clip: { x: 0, y: 0, width: 640, height: 340 }
+  },
+  {
     name: "Chooser",
     page: PROJECT,
-    prepare: async (page) => {
-      // the item host is `display: contents`:  click it directly
-      await page.locator('.ConsoleRoot .PanelMenu ui-item[appearance~="link"]').nth(4).dispatchEvent("click")
-      await page.waitForTimeout(1200)
-    },
+    prepare: (page) => showInEditor(page, "chooser"),
     clip: { x: 240, y: 150, width: 800, height: 500 }
   },
   {
@@ -112,6 +136,7 @@ try {
   for (const picture of PICTURES) {
     if (only.size && !only.has(picture.name)) continue
     const page = await browser.newPage({ viewport: WINDOW })
+    if (picture.prefs) await page.addInitScript(setPrefs, picture.prefs)
     await page.goto(new URL(picture.page, EDITOR).href, { waitUntil: "networkidle" })
     await page.waitForTimeout(3000)
     await picture.prepare?.(page)
@@ -150,21 +175,40 @@ async function boxOf(page: Page, selector: string): Promise<{ x: number; y: numb
   }, selector)
 }
 
+/**
+ * Set the editor's preferences, `spellEditor:<key>` in the browser's storage, as text.
+ * - Runs in the page, before it loads.
+ */
+function setPrefs(prefs: Record<string, string>): void {
+  for (const [key, value] of Object.entries(prefs)) localStorage.setItem(`spellEditor:${key}`, value)
+}
+
 /** Click `selector` (a `<ui-dropdown>`) open, and let its menu show. */
 async function openDropdown(page: Page, selector: string): Promise<void> {
   await page.locator(selector).first().click()
   await page.waitForTimeout(800)
 }
 
-/** Show a notice or an error over the page, through the editor's debug global (`src/debug.ts`). */
-async function showInEditor(page: Page, what: "notice" | "error"): Promise<void> {
+/** Show a notice, an error or the chooser over the page, through the editor's debug global (`src/debug.ts`). */
+async function showInEditor(page: Page, what: "notice" | "error" | "chooser"): Promise<void> {
   await page.evaluate((what) => {
     const editor = (globalThis as unknown as { editor: EditorMessages }).editor
     if (what === "notice") editor.showNotice("File saved.")
-    else editor.showError(new Error("Couldn't load Card.spell:  the server didn't answer."))
+    else if (what === "error") editor.showError(new Error("Couldn't load Card.spell:  the server didn't answer."))
+    // not awaited:  it answers once someone picks
+    else
+      /* if (what === "chooser") */ void editor.choose({
+        header: "Pick one",
+        message: "Message",
+        options: ["A", "B", "C"]
+      })
   }, what)
-  await page.waitForTimeout(800)
+  await page.waitForTimeout(1200)
 }
 
-/** The two calls of the editor's debug global these pictures make. */
-type EditorMessages = { showNotice(notice: string): void; showError(error: unknown): void }
+/** The calls of the editor's debug global these pictures make. */
+type EditorMessages = {
+  showNotice(notice: string): void
+  showError(error: unknown): void
+  choose(props: { header: string; message: string; options: string[] }): Promise<unknown>
+}

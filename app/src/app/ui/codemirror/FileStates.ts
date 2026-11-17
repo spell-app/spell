@@ -436,6 +436,9 @@ export class FileStates {
    * - Spell's before the setup's, so its keys (Enter) get the first go.
    * - Its look as the page's setting says (`CodeMirrorLook`):  a Spell file bubbly, else coloured by its tokens;
    *   an HTML file (a property editor page) bubbly, else plain (epic `codemirror` P3).
+   * - A property editors file, `Card.editor.spell`, is Spell to look at but never parsed (`SP.isPropertyEditorsName()`):
+   *   drawn from its text alone, as Spell is, bubbly or coloured;  its headings, and the help in its tags
+   *   (epic `codemirror` I18:  it had no look at all, plain black text).
    */
   private extensionsFor(file: SP.AnySpellFile, language: CodeMirrorLanguage | undefined): Extension {
     const spell = language
@@ -453,12 +456,20 @@ export class FileStates {
             isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
           )
         ]
-      : isMarkupFile(file)
+      : SP.isPropertyEditorsName(file.path)
         ? [
             CodeMirrorTyping.markupExtension(),
-            CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))
+            CodeMirrorHeadings.extension(),
+            CodeMirrorLook.extension((isBubbly) =>
+              isBubbly ? CodeMirrorBubbly.extension(() => undefined) : CodeMirrorTokens.extension(() => undefined)
+            )
           ]
-        : []
+        : isMarkupFile(file)
+          ? [
+              CodeMirrorTyping.markupExtension(),
+              CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))
+            ]
+          : []
     return [
       EditorView.updateListener.of((update) => {
         const entry = this.entries.get(file.path)

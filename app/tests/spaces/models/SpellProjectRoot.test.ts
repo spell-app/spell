@@ -8,7 +8,7 @@ import { SPACES } from "spell/app/spaces"
 const PICTURE = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff])
 
 /** The group the tests' projects are in:  this machine's person's. */
-const GROUP = `${SPACES.LOCAL_PERSON}@${SPACES.HOME_ORG}`
+const GROUP = SPACES.localPerson.address
 
 /** Files the editor lists as a project's own (the server's `isManifestFile()`, in short). */
 const LISTED = /\.(spell|css|js)$/

@@ -237,6 +237,14 @@ export class Inspector {
     if (area) PartSelector.listen(area)
   }
 
+  /**
+   * Ring `element` in the app, as Inspect app does on hover (`undefined`:  take the ring away):
+   * pointing at a part in the part menu's Inspect submenu (epic `editor` P31).
+   */
+  static ring(element: Element | undefined): void {
+    PartSelector.hover(element)
+  }
+
   /** Stop inspecting:  the app gets its clicks back. */
   static stopInspecting(): void {
     setInspecting(false)
@@ -777,6 +785,15 @@ export class Inspector {
     const thing = SpellElement.thingOf(element)
     if (!thing) return { title: Inspector.labelFor(element), which: "" }
     return Inspector.thingWordsOf(thing, element)
+  }
+
+  /**
+   * What kind of part `element` is, as a person would say it:  "Inspect {type}" in the part menu (epic `editor` P31).
+   * - A drawn thing:  its type in words, as its Views tree row shows it (`labelPartsFor()`):  `Card`, `Stock Pile`.
+   * - A Spell UI element:  its tag, `ui-button`.
+   */
+  static typeWordsOf(element: Element): string {
+    return SpellElement.thingOf(element) ? Inspector.labelPartsFor(element).title : element.localName
   }
 
   /**
@@ -2261,6 +2278,8 @@ function hasOwnHandler(element: Element): boolean {
 
 /** The mark that rings the part under the pointer, by its own `::after` (`Inspector.css`). */
 const HOVER_MARK = "data-inspect-hover"
+/** How long a press is held still before it opens the part menu, while inspecting (`PartSelector.startLongPress()`). */
+const LONG_PRESS_SECONDS = 0.5
 /** How far that ring is outside the part, in CSS px (`Inspector.css`). */
 const RING_OUT = 3
 /**
@@ -2351,6 +2370,7 @@ class PartSelector {
       "pointerdown",
       (event) => {
         PartSelector.bandJustEnded = false
+        PartSelector.startLongPress(event, area)
         const part = PartSelector.partAt(event, area)
         // the app itself is its own background:  a press there may be a band, and still a click on it if it never moves
         if (part) event.stopPropagation()
@@ -2379,6 +2399,57 @@ class PartSelector {
     Inspector.dismissHelp()
     // on a phone, the sheet comes up with what's selected
     setSheetUp(true)
+  }
+
+  /**
+   * A press held still for `LONG_PRESS_SECONDS`, mouse or touch:  the part menu opens there, as a right click's,
+   * for the top-most part under it, Inspect's submenu listing every part there (Owen, epic `editor` P31, C3).
+   * - A move past `DRAG_START_PX`, or letting go, before then:  no long press;  the drag or click goes on as ever.
+   * - Once open, the click the same press ends in is swallowed, on the window, before anyone hears it:
+   *   it would select the part, and the menu would take it for a click outside it, and close.
+   */
+  private static startLongPress(down: PointerEvent, area: HTMLElement): void {
+    if (down.button !== 0) return
+    const stop = new AbortController()
+    const options = { capture: true, signal: stop.signal }
+    // read now:  once the press has been dispatched, its path is empty
+    const part = PartSelector.partAt(down, area) ?? Inspector.partsIn(area)[0]?.element
+    const programMenu = SpellElement.programMenuAt(down.composedPath())
+    if (!part) return
+    const timer = setTimeout(() => {
+      stop.abort()
+      PartSelector.swallowNextClick()
+      PartSelector.hover(undefined)
+      const { clientX: x, clientY: y } = down
+      PartEdits.openMenu(part, { x, y, programMenu, partsUnder: PartEdits.partsAt(x, y, area) })
+    }, LONG_PRESS_SECONDS * 1000)
+    const cancel = () => {
+      clearTimeout(timer)
+      stop.abort()
+    }
+    window.addEventListener(
+      "pointermove",
+      (move) => Math.hypot(move.clientX - down.clientX, move.clientY - down.clientY) >= DRAG_START_PX && cancel(),
+      options
+    )
+    window.addEventListener("pointerup", cancel, options)
+    window.addEventListener("pointercancel", cancel, options)
+  }
+
+  /** Swallow the next click anywhere, before anyone hears it;  a press first means there's none to swallow. */
+  private static swallowNextClick(): void {
+    const stop = new AbortController()
+    const options = { capture: true, signal: stop.signal }
+    window.addEventListener(
+      "click",
+      (click) => {
+        click.preventDefault()
+        click.stopImmediatePropagation()
+        stop.abort()
+      },
+      options
+    )
+    window.addEventListener("pointerdown", () => stop.abort(), options)
   }
 
   /**
@@ -2694,6 +2765,7 @@ class PartSelector {
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
  *   - except the last open card, which reaches the column's bottom, its body scrolling when it's long (I165):
  *     the column reads as one, with no empty page under it
+ *   - whatever sizes were remembered:  a px the last open card kept becomes a share (`lastOpenCardGrows()`, I228)
  * - As the selection changes or a card folds, the cards glide to their new sizes (`CardGlide`, T69).
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
@@ -2759,7 +2831,7 @@ export function InspectorColumn(): JSX.Element {
         <style>{brandTokens()}</style>
         <InspectorSheetBar />
         <ui-split-panel
-          rows={cardSizes.sizes()}
+          rows={lastOpenCardGrows(cardSizes.sizes(), layout().lastOpen)}
           resizable
           class="InspectorSplit"
           ref={[
@@ -2918,8 +2990,12 @@ function hasCodeCard(): boolean {
  * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140);
  *   the last open card takes what's left, to the column's bottom (I165).
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
+ * - `lastOpen`:  the last open card's place among `shown`, `-1` when every card is folded (`lastOpenCardGrows()`).
  */
-function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {
+function cardsLayout(
+  shown: readonly InspectorCardId[],
+  isEmpty: boolean
+): { id: string; sizes: string; lastOpen: number } {
   const isFolded = (panel: InspectorCardId) => Inspector.isFolded(panel) || (isEmpty && panel === "code")
   const open = shown.filter((panel) => !isFolded(panel))
   const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
@@ -2930,9 +3006,29 @@ function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id:
       .map((panel) =>
         isFolded(panel) ? `${FOLDED_CARD_HEIGHT}px` : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
       )
-      .join(",")
+      .join(","),
+    lastOpen: shown.findLastIndex((panel) => !isFolded(panel))
   }
 }
+
+/**
+ * The column's sizes (`sizes`, as remembered), with the last open card's (`lastOpen`) a share of the column,
+ * so it always grows to the column's bottom (Owen, 2026-11-16, epic `editor` I228:
+ * "Views pane got shorter -- should always pin to the bottom of the window"):
+ * - a size remembered in px held that card at its height, and every other card at what it shows,
+ *   with empty page under the column (a drag an older editor kept:  every card in px)
+ * - so its px becomes a share of what's left (`*`);  the other cards keep their sizes, px too
+ * - `Inspector.css` lets that share grow past what it shows (I165)
+ */
+function lastOpenCardGrows(sizes: string, lastOpen: number): string {
+  const each = sizes.split(",")
+  if (lastOpen < 0 || lastOpen >= each.length || each[lastOpen].trim().endsWith("%")) return sizes
+  each[lastOpen] = SHARE_OF_THE_REST
+  return each.join(",")
+}
+
+/** A `<ui-split-panel>` size that shares what the other panes leave (`lastOpenCardGrows()`). */
+const SHARE_OF_THE_REST = "*"
 
 /**
  * Fold each card dragged too small to show anything
@@ -3211,8 +3307,13 @@ function PropertiesCard(): JSX.Element {
                         // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
                         open={Inspector.isGroupFolded(section.group) ? "false" : undefined}
                         ref={(group) => {
-                          on("ui-closing", () => Inspector.setGroupFolded(section.group, true))(group)
-                          on("ui-opening", () => Inspector.setGroupFolded(section.group, false))(group)
+                          // its own folding only:  a select's menu inside it sends these too (I222)
+                          on("ui-closing", (event) => {
+                            if (event.target === group) Inspector.setGroupFolded(section.group, true)
+                          })(group)
+                          on("ui-opening", (event) => {
+                            if (event.target === group) Inspector.setGroupFolded(section.group, false)
+                          })(group)
                         }}
                       >
                         <Show when={section.hasText}>
@@ -3613,8 +3714,9 @@ function ThingBands(props: {
               collapsible={band.isOwnType ? undefined : ""}
               open={isFolded() && !band.isOwnType ? "false" : undefined}
               ref={(group) => {
-                on("ui-closing", () => setFolded(true))(group)
-                on("ui-opening", () => setFolded(false))(group)
+                // its own folding only:  a select's menu inside it sends these too (I222)
+                on("ui-closing", (event) => event.target === group && setFolded(true))(group)
+                on("ui-opening", (event) => event.target === group && setFolded(false))(group)
               }}
             >
               <For each={band.members}>
@@ -3731,7 +3833,12 @@ function TypeChoicesField(props: { thing: object; member: ThingMember; values: s
  * A thing's computed property (`value`, `color`, `picture`):  its value, read only, as text with no box,
  * so it doesn't look like a field to type in.
  * - Read live:  it follows what the getter reads, as a stored property's field does.
- * - A yes or no is a read-only check;  a thing, a link to it (`<ThingLink>`);  a list, its count.
+ * - A yes or no is a read-only toggle, dimmed (Spell UI's disabled look), so it doesn't look like one to press
+ *   (Owen, 2026-11-16, epic `editor` I224:  "These should be read-only since they are getters");
+ *   a thing, a link to it (`<ThingLink>`);  a list, its count.
+ * - Short ones (a yes or no, a number, a few words) take half a row, two to a row:  a yes or no on its label's line,
+ *   as a stored one is (`as="toggle"`);  a longer value, a whole row (I224, I225:  "These should go 2 per line").
+ * - No "won't be saved" icon:  nothing here can be changed (Spell UI leaves it off a read-only property).
  * - One that throws shows its error, dimmed:  reading it ran the program's code.
  ****************/
 function ComputedField(props: { thing: object; member: ThingMember }): JSX.Element {
@@ -3755,13 +3862,21 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
           name={props.member.name}
           label={memberLabel(props.member)}
           readonly=""
+          as={typeof read().value === "boolean" ? "toggle" : undefined}
+          width={isShortComputed(read()) ? HALF_ROW : undefined}
           class={["InspectorComputed", { failed: "error" in read() }]}
         >
           <Show
             when={typeof read().value === "boolean"}
             fallback={<ui-input size="small" appearance="transparent" readonly="" value={computedText(read())} />}
           >
-            <ui-checkbox appearance="toggle" padding="none" readonly="" selected={read().value ? "" : undefined} />
+            <ui-checkbox
+              appearance="toggle"
+              padding="none"
+              readonly=""
+              disabled=""
+              selected={read().value ? "" : undefined}
+            />
           </Show>
         </ui-property>
       }
@@ -3775,6 +3890,20 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
     </Show>
   )
 }
+
+/**
+ * A computed value short enough for half a row:  a yes or no, a number,
+ * or text of 20 letters or fewer (`queen of diamonds`;  Owen, J191 C4:  "20 letters").
+ */
+function isShortComputed(read: { value?: unknown; error?: unknown }): boolean {
+  if ("error" in read) return false
+  const { value } = read
+  if (typeof value === "boolean" || typeof value === "number") return true
+  return typeof value === "string" && value.length <= SHORT_COMPUTED_LENGTH
+}
+
+/** The most letters a computed text value has to sit in half a row (`isShortComputed()`). */
+const SHORT_COMPUTED_LENGTH = 20
 
 /** What a computed property's field shows:  its value as text, a list's count, or its error's message. */
 function computedText(read: { value?: unknown; error?: unknown }): string {
@@ -3894,7 +4023,8 @@ const HALF_ROW = "1/2"
  ****************/
 export function InspectAppButton(props: { id?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
-  const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
+  const title = () =>
+    Inspector.isHelpShown ? undefined : appTexts.text(Inspector.isInspecting ? "stopInspectingTip" : "inspectTip")
   const inspect = () => {
     if (!Inspector.isOpen) Inspector.toggle()
     else if (Inspector.isInspecting) Inspector.stopInspecting()

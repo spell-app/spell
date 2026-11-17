@@ -11,6 +11,7 @@ import {
   numberToWord,
   slug,
   suggest,
+  withArticle,
   withoutAccents
 } from "spell/util/string"
 
@@ -204,5 +205,20 @@ describe("indented()", () => {
   test("indents each line by text or by spaces, blank lines left blank", () => {
     expect(indented("a\n\nb", "\t")).toBe("\ta\n\n\tb")
     expect(indented("a\n  \nb", 2)).toBe("  a\n  \n  b")
+  })
+})
+
+describe("withArticle()", () => {
+  test("a before a consonant, an before a vowel, either case", () => {
+    expect(withArticle("text")).toBe("a text")
+    expect(withArticle("animation")).toBe("an animation")
+    expect(withArticle("Editor")).toBe("an Editor")
+    expect(withArticle("data display")).toBe("a data display")
+  })
+
+  test("text that doesn't start with an English letter, as it is", () => {
+    expect(withArticle("")).toBe("")
+    expect(withArticle("3 cards")).toBe("3 cards")
+    expect(withArticle("árbol")).toBe("árbol")
   })
 })

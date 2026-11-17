@@ -183,14 +183,19 @@ const ROW_STEP = 0.8
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
 
 /**
- * Which ends of `row`, a box that scrolls sideways, can still scroll:  `start` while it's scrolled from its start,
+ * Which ends of `box` can still scroll:  `start` while it's scrolled from its start,
  * `end` while there's more past its end.
- * - What a row's `‹` / `›` keys show by:  Spell UI's `<ui-toolbar>`, the kit's site header.
- * - A pixel of slack each way:  fractional widths leave the end a hair short.
- * - NOTE: left-to-right only:  in a right-to-left row `scrollLeft` counts the other way.
+ * - `axis`:  `inline`, sideways (the default), or `block`, up and down.
+ * - Sideways:  what a row's `‹` / `›` keys show by (Spell UI's `<ui-toolbar>`, the kit's site header).
+ * - Up and down:  what a pane's scroll shades show by (Spell UI's `<ui-panel appearance="pane">`).
+ * - A pixel of slack each way:  fractional sizes leave the end a hair short.
+ * - NOTE: left-to-right only, sideways:  in a right-to-left row `scrollLeft` counts the other way.
  */
-export function scrollEnds(row: Element): ScrollEnds {
-  return { start: row.scrollLeft > 1, end: row.scrollLeft + row.clientWidth < row.scrollWidth - 1 }
+export function scrollEnds(box: Element, axis: ScrollAxis = "inline"): ScrollEnds {
+  if (axis === "block") {
+    return { start: box.scrollTop > 1, end: box.scrollTop + box.clientHeight < box.scrollHeight - 1 }
+  }
+  return { start: box.scrollLeft > 1, end: box.scrollLeft + box.clientWidth < box.scrollWidth - 1 }
 }
 
 /**
@@ -203,10 +208,13 @@ export function scrollByRow(row: Element, direction: -1 | 1): void {
   row.scrollBy({ left: direction * row.clientWidth * ROW_STEP, behavior: isReduced ? "instant" : "smooth" })
 }
 
-/** `scrollEnds()`'s answer:  which ends of a row can still scroll. */
+/** Which way `scrollEnds()` looks:  `inline`, sideways;  `block`, up and down. */
+export type ScrollAxis = "inline" | "block"
+
+/** `scrollEnds()`'s answer:  which ends of a box can still scroll. */
 export type ScrollEnds = {
-  /** it's scrolled away from its start:  a `‹` key shows */
+  /** it's scrolled away from its start:  a row's `‹` key shows, a pane's top shade */
   start: boolean
-  /** there's more past its end:  a `›` key shows */
+  /** there's more past its end:  a row's `›` key shows, a pane's bottom shade */
   end: boolean
 }

@@ -70,7 +70,8 @@
      there's room for the end beside them;  short of that the end keeps its column and the names move left, and only
      a window too narrow for all of them scrolls them (T86:  Owen's 1290px window scrolled them, as the names kept
      the end's room clear on BOTH sides)
-   - the bar's hairline above it, a thin grey line between the two bars (T86), and its own under it */
+   - a thin grey line between the two bars (T86, I232), a shadow inside its top edge taking no room, so both bars keep
+     their heights on the 4px grid (as a pane bar's line, I216);  and its own line under it */
 .PaletteStrip {
   flex: none;
   position: relative;
@@ -88,11 +89,13 @@
   padding-inline: 8px;
   min-width: 0;
   border-block-end: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
+  box-shadow: inset 0 1px 0 var(--ui-border-color);
 
   &::before {
     content: "";
     position: absolute;
-    inset: 0;
+    /* clear of the line above it:  over it, this layer hid it (I232) */
+    inset: 1px 0 0;
     z-index: -1;
     background: var(--spell-menu-bar-fill);
     -webkit-backdrop-filter: var(--spell-menu-bar-filter);
@@ -333,4 +336,19 @@ ui-popup.PaletteGroupPopup::part(popup) {
 /* a right click's menu (`<MenuPopup>`, the part menu's and the code's):  at once, as the system's own right-click menu, with no fade in */
 ui-popup.MenuPopup {
   --ui-popup-duration: 0s;
+}
+
+/*
+ * the part menu's Inspect row, with every part under the mouse at its side (`<InspectRow>`):
+ * each part indented under the one it's inside, 12px a level (`--InspectRow-depth`)
+ */
+ui-menu.BarMenuItems ui-submenu.InspectRow > ui-action::part(item) {
+  padding-inline-start: calc(12px + var(--InspectRow-depth, 0) * 12px);
+}
+/*
+ * its side menu, often long (a column of fanned cards):  on the side of its row with the most room up or down,
+ * rather than squeezed under a row low in the window, scrolled to the row pointed at
+ */
+ui-menu.BarMenuItems ui-submenu.InspectRow::part(flyout) {
+  position-try-order: most-height;
 }

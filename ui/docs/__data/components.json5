@@ -26049,6 +26049,14 @@
           "description": "With `source`:  the file couldn't be loaded or shown."
         },
         {
+          "name": "more-above",
+          "description": "A pane whose body is scrolled down from its top:  a shade shows under its bar."
+        },
+        {
+          "name": "more-below",
+          "description": "A pane whose body has more below:  a shade shows at its bottom."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -28610,7 +28618,7 @@
         },
         {
           "name": "here",
-          "description": "Its value is set on this thing (its editor's `origins`):  a dot by its label."
+          "description": "Its value is set on this thing (its editor's `origins`);  draws nothing of its own."
         },
         {
           "name": "inherited",
@@ -28794,7 +28802,7 @@
           "name": "origins",
           "kind": "json",
           "reflect": false,
-          "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did."
+          "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did."
         },
         {
           "name": "writer",
@@ -41455,6 +41463,21 @@
           "description": "Id of a `<ui-menu>` elsewhere on the page to show as the fly-out, in place of the items inside.  It stays where it is, shown beside the row while open;  write `popover` on it, so it's hidden until then."
         },
         {
+          "name": "flyout-label",
+          "kind": "string",
+          "description": "The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with `split` the chevron end's tooltip (\"Pick one of the parts under the mouse\").  Default:  its `label`."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`."
+        },
+        {
+          "name": "split",
+          "kind": "keyOnly",
+          "description": "Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it."
+        },
+        {
           "name": "disabled",
           "kind": "keyOnly",
           "description": "Can't be opened."
@@ -41640,7 +41663,7 @@
         },
         {
           "name": "chevron",
-          "description": "The chevron at the row's end, pointing to the fly-out."
+          "description": "The chevron at the row's end, pointing to the fly-out;  with `split`, what opens it."
         },
         {
           "name": "flyout",
@@ -41651,6 +41674,10 @@
         {
           "name": "open",
           "description": "Its fly-out is showing."
+        },
+        {
+          "name": "split",
+          "description": "Its title chooses;  its chevron end opens the fly-out (`split`)."
         },
         {
           "name": "disabled",
@@ -60075,6 +60102,24 @@
           "default": "var(--spell-shadow-sm, var(--ui-shadow-raised))",
           "description": "the box shadow",
           "type": "other"
+        },
+        {
+          "name": "--ui-panel-scroll-shade",
+          "default": "light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3))",
+          "description": "the shade's colour at its edge, fading to nothing: a dark tint, deeper on a dark page",
+          "type": "color"
+        },
+        {
+          "name": "--ui-panel-scroll-shade-size",
+          "default": "16px",
+          "description": "how tall each shade is",
+          "type": "length"
+        },
+        {
+          "name": "--ui-panel-scroll-shade-top",
+          "default": "0px",
+          "description": "how far under the bar the top shade starts: under a line of the body's that sticks at its top",
+          "type": "length"
         },
         {
           "name": "--ui-panel-pane-bar-height",

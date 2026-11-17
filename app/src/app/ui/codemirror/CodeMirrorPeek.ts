@@ -12,7 +12,7 @@ import "./CodeMirrorPeek.css"
 /****************
  * ### `CodeMirrorPeek`
  * Peek Definition (⌥F12) and Peek References (⇧⌥F12):  a box under the caret's line, showing where a thing is declared,
- * or each place it's used, without leaving the code (epic `codemirror` I5;  Monaco's peek view).
+ * or each place it's used, without leaving the code (epic `codemirror` I5).
  * - The box shows the place's file, scrolled to it, its words marked:
  *   a slice of that file's state (`FileStates.showSlice()`), so it's drawn as the code pane draws it, bubbly when the
  *   look is on, and follows its edits.  Read only:  it's for looking.
@@ -144,6 +144,7 @@ class PeekBox {
     const code = element("div", "cm-peek-code")
     body.append(code)
     if (!peek.locations.length) {
+      box.classList.add("cm-peek-empty")
       code.classList.add("cm-peek-none")
       code.textContent = appTexts.text("cmNoReferences")
     } else this.codeView = new EditorView({ parent: code, root: peek.view.root as Document | ShadowRoot })
@@ -232,7 +233,7 @@ class PeekBox {
       })
     const file = this.peek.project.files.find((each) => each.path === location.path)
     if (!file || !this.codeView) return
-    // the whole file, so there's more to scroll to round the place:  Monaco's peek showed the whole file too
+    // the whole file, so there's more to scroll to round the place, not just its own lines
     this.peek.states.showSlice(this.codeView, file, { first: 1, last: Number.MAX_SAFE_INTEGER }, this.sliceHost())
     const { from, to } = LspToCodeMirror.range(this.codeView.state.doc, location.range)
     this.codeView.dispatch({ effects: MARK.of({ from, to }) })
@@ -311,12 +312,15 @@ class PeekWidget extends WidgetType {
   }
 
   override get estimatedHeight(): number {
-    return PEEK_HEIGHT
+    return this.box.peek.locations.length ? PEEK_HEIGHT : PEEK_EMPTY_HEIGHT
   }
 }
 
 /** How tall the box is drawn, its head and slice, in px:  `CodeMirrorPeek.css` says the same. */
 const PEEK_HEIGHT = 268
+
+/** How tall the box is drawn with nothing to show, its head and one row of message, in px. */
+const PEEK_EMPTY_HEIGHT = 72
 
 /** The narrowest the box is drawn, in px:  room for some code and the uses. */
 const PEEK_MIN_WIDTH = 480

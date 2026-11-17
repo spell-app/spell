@@ -1,7 +1,7 @@
 import { For, Loading, Show, createEffect, createMemo, createSignal, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { flatParentFor, scrollIntoSight, scrollingBoxFor } from "spell/util"
+import { flatParentFor, scrollIntoSight, scrollingBoxFor, withArticle } from "spell/util"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -685,10 +685,16 @@ export function CodeCard(props: {
   /** The thing selected (or the trail leads to):  its actions. */
   thing?: object
 }): JSX.Element {
+  // the element itself, told only when it's another:  what's inspected is worked out again as each key is typed, a new
+  // object around the same element, and the rows read again then took a place from the last compile against the text
+  // as it is now (epic `editor` I220:  after an edit and ⌘Z, `on click`'s row read as its `if` line)
+  const shownElement = createMemo(() => props.element)
   const rows = createMemo((): EventRow[] => {
-    const element = props.element
-    // read again as a handler's added (`justAdded`), not on every key typed in one:  each row's editor follows its lines
+    const element = shownElement()
+    // read again as a handler's added (`justAdded`) and as each run ends, when where the compiler says each is matches
+    // the text;  not on every key typed in one:  each row's editor follows its lines
     void Inspector.justAdded
+    void editor.programRuns
     return untrack(() => {
       if (!Inspector.isDrawnThing(element)) {
         const handlers = Inspector.writtenHandlersOf(element)
@@ -1435,12 +1441,6 @@ function signaturePieces(action: InspectorAction, ownType: string): { text: stri
   const rest = action.words.slice(at).trim()
   if (rest) pieces.push({ text: rest, isType: false })
   return pieces
-}
-
-/** `card` => `a card`, `apple` => `an apple`;  a word in another language, as it is. */
-function withArticle(type: string): string {
-  if (!type || !/^[a-z]/i.test(type)) return type
-  return `${/^[aeiou]/i.test(type) ? "an" : "a"} ${type}`
 }
 
 /** The word an action's signature starts with, in the program's language:  `to`, `para`. */

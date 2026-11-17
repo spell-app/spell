@@ -100,7 +100,9 @@ export class PublishedPackage {
       private: true,
       type: "module",
       ...(shipped.length && { spell: Object.fromEntries(shipped) }),
-      ...(folder.manifest.pageServer ? { pageServer: mapStrings(folder.manifest.pageServer, fromFolder) } : {})
+      ...(folder.manifest.pageServer
+        ? { pageServer: shippedPageServer(folder.manifest.pageServer, fromFolder, folderStage) }
+        : {})
     }
     mkdirSync(folderStage, { recursive: true })
     writeFileSync(join(folderStage, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`)
@@ -456,6 +458,19 @@ export function builtPathOrNone(entry: string, folders: string[] = []): string[]
 /** `versions` without `names`. */
 function omit(versions: Record<string, string>, names: string[]): Record<string, string> {
   return Object.fromEntries(Object.entries(versions).filter(([name]) => !names.includes(name)))
+}
+
+/**
+ * A folder's `"pageServer"` settings as the published package runs them (epic `repo-split` P26):  its paths the built ones,
+ * and only what ships.
+ * - `routes`:  only the route modules packed:  Spell UI's `tools/` is left out, so its palette routes would fail to load
+ * - `bundles`:  none:  an install builds nothing, and a bundle's sources (`site/`) don't ship
+ * - `stage`:  the folder's staging folder, the paths' base
+ */
+function shippedPageServer(settings: unknown, map: (text: string) => string, stage: string): unknown {
+  const { routes, bundles: _bundles, ...rest } = mapStrings(settings, map) as Record<string, unknown>
+  const shipped = Array.isArray(routes) ? routes.filter((route) => existsSync(join(stage, String(route)))) : undefined
+  return { ...rest, ...(shipped?.length && { routes: shipped }) }
 }
 
 /** `value` with `map` applied to every string in it, however deep. */

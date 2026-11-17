@@ -42,6 +42,17 @@ export function initialCaps(text: string) {
   return text.replace(/(^|\s)(\p{Ll})/gu, (_, space: string, letter: string) => space + letter.toUpperCase())
 }
 
+/**
+ * `text` with its English article, `a` or `an`, for a message:  `card` => `a card`, `editor` => `an editor`.
+ * - Goes by the first letter only:  a vowel takes `an`, so `an user` and `a hour` slip through.
+ * - Text that doesn't start with an English letter (`""`, `3 cards`, `árbol`), as it is.
+ * - English only:  another language words its sentence its own way (WWOD §6 › "User-facing strings stay inline").
+ */
+export function withArticle(text: string): string {
+  if (!/^[a-z]/i.test(text)) return text
+  return `${/^[aeiou]/i.test(text) ? "an" : "a"} ${text}`
+}
+
 ////////////////
 // ## Number words
 ////////////////

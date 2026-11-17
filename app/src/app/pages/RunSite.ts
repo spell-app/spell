@@ -9,7 +9,7 @@ import { SiteWrites } from "./SiteWrites"
  * ### `RunSite`
  * Where a running SITE's address lives in the editor's Run (epic `mockup` P2):  the editor's own URL.
  * - A page alone in its own file is named by that FILE (epic `mockup` I15):
- *   `/run/owen@spell/harbor-new/home.spell` shows harbor-new's Home, at the site's `/`.
+ *   `/run/owen@spell/dashboard/home.spell` shows the dashboard's Home, at the site's `/`.
  * - Any other page by its ADDRESS, the part after the project:  `/run/@spell/examples/StarWarsSite/films/4` shows the
  *   site's `/films/4` (a page with a value to fill, or one declared in the site file;  `SP.SpellUrls.withoutPage()`).
  *   - An address whose page has a file of its own still works:  the URL turns to the file's, in place (`followUrl()`).
@@ -55,7 +55,7 @@ export class RunSite implements SiteHost {
 
   /**
    * The editor's Run URL of the running site's `address`:  its page's file when it's alone in one, else the address.
-   * - `/` => `/run/owen@spell/harbor-new/home.spell`;  `/films/4` => `/run/@spell/examples/StarWarsSite/films/4`.
+   * - `/` => `/run/owen@spell/dashboard/home.spell`;  `/films/4` => `/run/@spell/examples/StarWarsSite/films/4`.
    * - `undefined` with no project.
    */
   urlFor(address: string): string | undefined {
@@ -146,7 +146,7 @@ export class RunSite implements SiteHost {
 
   /**
    * The URL now names `address` (back, forward, typed in):  the running site shows it.
-   * - `file`:  the file the URL names instead, `/run/owen@spell/harbor-new/home.spell`:  the address of the page it
+   * - `file`:  the file the URL names instead, `/run/owen@spell/dashboard/home.spell`:  the address of the page it
    *   holds;  a file holding none (the site file) leaves the page shown as it is.
    *   - Before the project's site runs, it's looked up when the site asks (`address()`).
    * - The same address as now shows nothing new:  it's the URL following the site's own `go()`.

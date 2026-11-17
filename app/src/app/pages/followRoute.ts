@@ -15,7 +15,7 @@ import { RunSite, runSite } from "./RunSite"
  * - A bad address shows as `editor.showError()`, never a throw:  an effect that throws halts Solid for the whole page.
  * - A page of a running app, `/run/owen@spell/solitaire/rules`, runs its app, and a SITE shows its page `/rules`
  *   (`RunSite.heard()`, epic `mockup` P2;  `SP.SpellUrls.withoutPage()`).
- *   - A file of a site, `/run/owen@spell/harbor-new/home.spell`, shows the page it holds (epic `mockup` I15).
+ *   - A file of a site, `/run/owen@spell/dashboard/home.spell`, shows the page it holds (epic `mockup` I15).
  */
 export function followRoute(params: () => Partial<SpellRouteParams>, page: () => EditorPage): void {
   createEffect(

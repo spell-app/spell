@@ -1,10 +1,9 @@
 import { For, Show, createEffect, createSignal, flush, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { kebabCase, upperFirst } from "spell/util"
+import { kebabCase, upperFirst, withArticle } from "spell/util"
 import { beforeNextPaint } from "spell/util/timing"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
-import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
 import type { ScopeNode } from "spell/app/lsp/lsp.types"
@@ -17,9 +16,9 @@ import { Action } from "./Actions"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
 import { barTooltip } from "./chrome"
-import { Inspector } from "./Inspector"
+import { Inspector, type PartRow } from "./Inspector"
 import { on } from "./on"
-import { PartEdits, type PartAction } from "./PartEdits"
+import { PartEdits, type MenuOpening, type PartAction } from "./PartEdits"
 import { chooseRow, treeChoosesRows } from "./treeRows"
 
 import "./Palette.css"
@@ -31,7 +30,7 @@ import "./Palette.css"
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
  *   every vocabulary, which the page never needs otherwise.
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
- * - First, This app:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
+ * - First, App views:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
  *   - On a page that draws its body, a notebook among them, it's This page, with a row of its own first:
  *     a new view, in plain Spell above the page (`addNewView()`, epic `notebook` P5;  `language` P47).
  *   - What else a page adds (an example, a section, text) are the components' own rows.
@@ -92,7 +91,7 @@ export class Palette {
   }
 
   /**
-   * The app's own views, by name (reactive):  This app, first in the palette.
+   * The app's own views, by name (reactive):  App views, first in the palette.
    * - Its templates that are views, from the editor's scope tree (`editor.scopeTree`), but its app or page.
    * - Only in an English file for now:  what it writes is English.
    */
@@ -303,6 +302,12 @@ function groupName(group: PaletteGroup): string {
   return definitions?.groupNameIn(group, appTexts.lang) ?? group.title ?? group.topic ?? ""
 }
 
+/** A topic's tooltip in the pinned bar:  `Add a text view`, `Añadir una vista de texto` (I229). */
+function groupTip(group: PaletteGroup): string {
+  const topic = groupName(group).toLowerCase()
+  return appTexts.text("paletteGroupTip", { aTopic: withArticle(topic), topic })
+}
+
 /** A step's title for adding `definition`. */
 function stepTitle(definition: ComponentDefinition): string {
   return appTexts.text("partStepAdd", { part: definition.name })
@@ -343,7 +348,7 @@ function newViewMatches(words: string): boolean {
   return appTexts.text("paletteNewView").toLowerCase().includes(words)
 }
 
-/** Has This app (This page) a row matching `words`?  Shown at all, for none. */
+/** Has App views (This page) a row matching `words`?  Shown at all, for none. */
 function thisGroupMatches(words: string): boolean {
   const onPage = Palette.isPageShown && (newViewMatches(words) || pagePartsMatching(words).length > 0)
   return onPage || ownViewsMatching(words).length > 0
@@ -368,7 +373,7 @@ export function AddPartButton(): JSX.Element {
         appearance="circular"
         class="AddPartButton"
         label={appTexts.text("addPart")}
-        {...barTooltip(appTexts.text("addPart"))}
+        {...barTooltip(appTexts.text("addViewTip"))}
         aria-haspopup="menu"
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
@@ -398,7 +403,7 @@ const ADD_BUTTON_ID = "AddPartButton"
  * - Its pin right before "Add View", pinned:  a click unpins it, closing the bar (epic `editor` T92, I212;  a ✕ by the search before).
  * - Add View, in bold, then each topic's icon and name (epic `editor` T86).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
- * - This app (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
+ * - App views (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
  *   the window beside the search (`Palette.css`).
  * - Its search, at its end, looks as the popup's does (epic `editor` J140, revisited):
  *   every topic with a match opens its menu at once, each listing only its matches, side by side under its name.
@@ -410,7 +415,8 @@ export function PaletteStrip(): JSX.Element {
   const [filter, setFilter] = createSignal("")
   const [isDismissed, setDismissed] = createSignal(false)
   const words = () => filter().trim().toLowerCase()
-  const thisGroup = () => appTexts.text(Palette.isPageShown ? "thisPage" : "thisApp")
+  const thisGroup = () => appTexts.text(Palette.isPageShown ? "thisPage" : "paletteAppViews")
+  const thisGroupTip = () => appTexts.text(Palette.isPageShown ? "palettePageViewsTip" : "paletteAppViewsTip")
   const thisMatches = () => !!words() && thisGroupMatches(words())
   const groupMatches = () => (words() ? groupsMatching(words()) : [])
   const isShowingMatches = () => !isDismissed() && (thisMatches() || groupMatches().length > 0)
@@ -492,7 +498,7 @@ export function PaletteStrip(): JSX.Element {
         <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>
         <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
           <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
-            <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON}>
+            <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON} tip={thisGroupTip()}>
               <ThisGroupRows words={() => ""} />
             </PaletteGroupMenu>
           </Show>
@@ -502,6 +508,7 @@ export function PaletteStrip(): JSX.Element {
                 id={groupMenuId(group)}
                 name={upperFirst(groupName(group))}
                 icon={group.icon ?? GROUP_ICON}
+                tip={groupTip(group)}
               >
                 <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
               </PaletteGroupMenu>
@@ -573,7 +580,7 @@ export function PaletteStrip(): JSX.Element {
 /** The start of each pinned bar topic's id, which its menu points at. */
 const GROUP_MENU_ID = "PaletteGroup-"
 
-/** This app's (This page's) id in the pinned bar. */
+/** App views' (This page's) id in the pinned bar. */
 const THIS_GROUP_MENU_ID = `${GROUP_MENU_ID}this`
 
 /** `group`'s id in the pinned bar:  its name's button, which its menu and its search results point at. */
@@ -707,7 +714,14 @@ function matchPlaces(
  * One topic of the pinned bar:  its icon and name, a quiet button;  a click opens its rows under it.
  * - Choosing a row closes it, as a drag from it does (`Palette.closeMenus()`).
  */
-function PaletteGroupMenu(props: { id: string; name: string; icon: string; children: JSX.Element }): JSX.Element {
+function PaletteGroupMenu(props: {
+  id: string
+  name: string
+  icon: string
+  /** its tooltip:  what a row of it adds, `Add a text view` (I229) */
+  tip: string
+  children: JSX.Element
+}): JSX.Element {
   return (
     <>
       <ui-item
@@ -717,7 +731,7 @@ function PaletteGroupMenu(props: { id: string; name: string; icon: string; child
         icon={props.icon}
         aria-haspopup="menu"
         aria-label={props.name}
-        {...barTooltip(appTexts.text("paletteMoreTip", { topic: props.name }))}
+        {...barTooltip(props.tip)}
       >
         {props.name}
       </ui-item>
@@ -753,15 +767,15 @@ function PinIcon(): JSX.Element {
 
 /**
  * The palette as a menu, in columns:
- * what to do and its search, then This app, the app's own views, then every part, by topic.
+ * what to do and its search, then App views, the app's own views, then every part, by topic.
  * - Every group shows everything in it, as the palette's table orders it (`paletteGroups.json`;  epic `editor` I174, T81).
  * - A search looks through all of them, by name, other names and description.
  */
 function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
   const words = () => filter().trim().toLowerCase()
-  /** Its first group's name:  This page on a page that draws its body, else This app. */
-  const thisGroup = () => (Palette.isPageShown ? "thisPage" : "thisApp")
+  /** Its first group's name:  This page on a page that draws its body, else App views. */
+  const thisGroup = () => (Palette.isPageShown ? "thisPage" : "paletteAppViews")
   return (
     <div class="PaletteBody">
       <div class="PaletteHead">
@@ -802,7 +816,7 @@ function PaletteMenu(): JSX.Element {
 }
 
 /**
- * This app's rows, or This page's, that match `words`:  the popup's first group, and the pinned bar's.
+ * App views' rows, or This page's, that match `words`:  the popup's first group, and the pinned bar's.
  * - On a page that draws its body:  a new view of its own, then its examples and sections (`PAGE_PART_TAGS`),
  *   which still show under their own topics too (epic `notebook` P9).
  * - Then the app's own views.
@@ -954,6 +968,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 /**
  * The ONE right-click menu on the app's parts, in the app and the Views tree:
  * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
+ * - Inspect names what it inspects, "Inspect Card", and lists every part under the mouse at its side (`<InspectRow>`).
  * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
  *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a dashed line, then ours (epic `editor` I76, Owen's pick).
  * - Drawn as every right click's menu is, `<MenuPopup>`:  at once, inside the window, with arrow keys, Enter and Esc.
@@ -962,11 +977,12 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  */
 export function PartMenu(): JSX.Element {
   const [at, setAt] = createSignal<{ x: number; y: number }>()
-  const [programMenu, setProgramMenu] = createSignal<readonly MenuItem[]>()
+  const [opening, setOpening] = createSignal<MenuOpening>()
+  const programMenu = () => (opening()?.programMenu?.length ? opening()!.programMenu : undefined)
   onSettled(() => {
-    PartEdits.onMenu = (x, y, items) => {
-      setProgramMenu(items?.length ? items : undefined)
-      setAt({ x, y })
+    PartEdits.onMenu = (next) => {
+      setOpening(next)
+      setAt({ x: next.x, y: next.y })
     }
   })
   // the program's items, drawn afresh each time the menu opens somewhere new, then the dashed line
@@ -988,7 +1004,10 @@ export function PartMenu(): JSX.Element {
           at={where()}
           class={PART_MENU}
           label={appTexts.text("menuEdit")}
-          onClose={() => setAt(undefined)}
+          onClose={() => {
+            Inspector.ring(undefined)
+            setAt(undefined)
+          }}
           // the part right-clicked, if it's not selected yet:  the item acts on it
           onChoosing={() => PartEdits.selectMenuPart() && flush()}
         >
@@ -1003,12 +1022,7 @@ export function PartMenu(): JSX.Element {
             tip={whyNoCodeAt(where())}
             onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
           />
-          <Action
-            menu
-            icon="crosshairs"
-            title={appTexts.text("menuInspect")}
-            onClick={() => Inspector.showSelected()}
-          />
+          <InspectRow part={opening()?.part} partsUnder={opening()?.partsUnder} />
           <Show when={ChangeThis.isAvailable}>
             <ui-action kind="divider" />
             <Action
@@ -1025,6 +1039,67 @@ export function PartMenu(): JSX.Element {
       )}
     </Show>
   )
+}
+
+/****************
+ * ### `<InspectRow>`
+ * The part menu's Inspect row:  "Inspect Card", naming the type of the part the menu is for.
+ * - A click on it selects that part, the top-most under the mouse, and opens the properties card.
+ * - With more than one part under the mouse, its right end opens a submenu at its side listing every one of them,
+ *   outermost first, each indented under the one it's inside, the one the right click took ticked
+ *   (`<ui-submenu split>`;  Owen, epic `editor` P31, Q35 C1, C2).
+ *   - Pointing at one rings it in the app, as Inspect app does on hover.
+ *   - Choosing one selects it, as a click on it would (Shift or Command adds it), and opens the properties card.
+ * - Only one part, or no point to look under (a Views tree row, the Menu key):  a plain row.
+ ****************/
+function InspectRow(props: InspectRowProps): JSX.Element {
+  const title = () => appTexts.text("menuInspect", { type: props.part ? Inspector.typeWordsOf(props.part) : "" }).trim()
+  const hasChoice = () => (props.partsUnder?.length ?? 0) > 1
+  return (
+    <Show
+      when={hasChoice()}
+      fallback={<Action menu icon="crosshairs" title={title()} onClick={() => Inspector.showSelected()} />}
+    >
+      <ui-submenu
+        split=""
+        icon="crosshairs"
+        label={title()}
+        flyout-label={appTexts.text("menuInspectParts")}
+        class={INSPECT_ROW}
+        ref={on("click", (event) => isTitleClick(event) && Inspector.showSelected())}
+      >
+        <For each={props.partsUnder}>
+          {(row) => (
+            <Action
+              menu
+              icon={Inspector.iconFor(row.element)}
+              title={Inspector.labelFor(row.element)}
+              active={row.element === props.part}
+              style={{ "--InspectRow-depth": String(row.depth) }}
+              onClick={(event: MouseEvent) => inspectPart(row.element, event)}
+              onPointerEnter={() => Inspector.ring(row.element)}
+              onPointerLeave={() => Inspector.ring(undefined)}
+            />
+          )}
+        </For>
+      </ui-submenu>
+    </Show>
+  )
+}
+
+/** Props for `<InspectRow>`. */
+type InspectRowProps = {
+  /** the part the menu is for:  its type names the row */
+  part?: Element
+  /** every part under the mouse, outermost first (`PartEdits.partsAt()`):  its submenu, with more than one */
+  partsUnder?: readonly PartRow[]
+}
+
+/** Select `part`, chosen in Inspect's submenu, as a click on it would (`keys` held add it), and show it. */
+function inspectPart(part: Element, keys: MouseEvent): void {
+  Inspector.ring(undefined)
+  Inspector.clicked(part, Inspector.listAround(part), keys)
+  Inspector.showSelected()
 }
 
 /****************
@@ -1096,8 +1171,12 @@ export type MenuPopupProps = {
   children: JSX.Element
 }
 
-/** Is `event` on a row that does something:  not a divider, nor a greyed row? */
+/**
+ * Is `event` on a row that does something:  not a divider, nor a greyed row?
+ * - A split submenu's title is one too (`isTitleClick()`);  its chevron end only opens its side menu.
+ */
 function isAnItem(event: Event): boolean {
+  if (isTitleClick(event)) return true
   return event.composedPath().some((target) => {
     return (
       target instanceof Element &&
@@ -1107,6 +1186,30 @@ function isAnItem(event: Event): boolean {
     )
   })
 }
+
+/**
+ * Is `event` a click on a split submenu's title (`<ui-submenu split>`):  not on its chevron end, which opens its
+ * side menu, nor on a row of that side menu?
+ */
+function isTitleClick(event: Event): boolean {
+  const path = event.composedPath()
+  const at = path.findIndex((target) => target instanceof Element && target.localName === SUBMENU_TAG)
+  if (at < 0 || !(path[at] as Element).hasAttribute(SPLIT)) return false
+  // inside it:  the chevron end, the side menu's box, or one of its rows (its light children)
+  return !path
+    .slice(0, at)
+    .some((target) => target instanceof Element && (target.matches(SIDE_PARTS) || target.parentElement === path[at]))
+}
+
+/** Spell UI's submenu row, and its word for a row whose title chooses (`<ui-submenu split>`). */
+const SUBMENU_TAG = "ui-submenu"
+const SPLIT = "split"
+
+/** The parts of a split submenu that aren't its title:  its chevron end, and its side menu's box. */
+const SIDE_PARTS = "[part~=chevron], [part~=flyout]"
+
+/** The class of the part menu's Inspect row, while it has a side menu (`Palette.css`). */
+const INSPECT_ROW = "InspectRow"
 
 /** The class of every right click's menu:  shown at once (`Palette.css`). */
 const MENU_POPUP = "MenuPopup"

@@ -32,6 +32,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `waiting(text, work)`:  a gray line while something slow runs between questions, and what's typed meanwhile
       not shown (`stty -echo`, put back after, even on Ctrl+C);  never raw mode, which would stop Ctrl+C
   - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`, `runSpellEpic()` (`spell epic`)
+    - in an npm install of `spell` (no `src/`), `runTool()` runs a tool's BUILT `.js` under plain node (`builtTool()`;
+      epic `repo-split` P26):  `spell server` from a project depending on `spell`
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.

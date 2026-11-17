@@ -73,6 +73,7 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
     )
   )
   for (const repo of [kitRepo, ...folders]) buildDeclarations(kit, repo)
+  for (const repo of [kitRepo, ...folders]) buildFiles(repo, say)
 
   for (const pkg of packages) {
     const built = await pkg.stage()
@@ -176,6 +177,23 @@ function buildDeclarations(kit: string, repo: PublishedRepo): void {
   } catch (error) {
     const output = (error as { stdout?: Buffer }).stdout?.toString() ?? ""
     throw new CLI.CliError(`${repo.name}'s declarations failed (spell-types):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
+  }
+}
+
+/**
+ * Run `repo`'s own build of what it ships (`"spellPublish": { "build" }`, a yarn script) in its folder;
+ * nothing without one.  Throws `CliError` when it fails:  its files would ship stale, or not at all.
+ * - the app's `build`:  the editor, `app/dist/`, which an install serves (epic `repo-split` P26)
+ */
+function buildFiles(repo: PublishedRepo, say: (text: string) => void): void {
+  const script = repo.settings.build
+  if (!script) return
+  say(`${repo.name}:  yarn ${script}`)
+  try {
+    execFileSync("yarn", [script], { cwd: repo.root, stdio: "pipe" })
+  } catch (error) {
+    const output = (error as { stdout?: Buffer }).stdout?.toString() ?? ""
+    throw new CLI.CliError(`${repo.name}'s build failed (yarn ${script}):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
   }
 }
 

@@ -1,7 +1,7 @@
 import { SP } from "spell/parser/spell"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
-import { SourceEdits, type TextSpan } from "spell/app/lsp/SourceEdits"
+import { SourceEdits, type AttributeValue, type TextSpan } from "spell/app/lsp/SourceEdits"
 import {
   SourceHomes,
   type FileHome,
@@ -84,6 +84,8 @@ export class InspectorWrites {
     if (scope === "this") {
       if (!InspectorWrites.hasOwnLine(thing) || !made) return { reason: "playing" }
       if (SourceHomes.ofDefault(files, typeNamesOf(thing), name)) return { reason: "typeSets" }
+      const onTag = tagHomeOf(made, name)
+      if (onTag) return InspectorWrites.writeMadeByTag(made.file, onTag, thing, name, value)
       const home = SourceHomes.ofMaking(made.file, made.offset, name)
       if (!home) return { reason: "running" }
       if (home.kind === "expression") return { reason: "expression", file: home.file, span: home.span }
@@ -99,7 +101,11 @@ export class InspectorWrites {
     }
     // all of them:  what the type sets;  else what a line says is that line's
     const home = SourceHomes.ofDefault(files, typeNamesOf(thing), name)
-    const onLine = made && SourceHomes.ofMaking(made.file, made.offset, name)
+    const onTag = made && tagHomeOf(made, name)
+    if (!home && made && onTag && onTag.kind !== "notWritten") {
+      return { reason: "expression", file: made.file.path, span: onTag.anchor }
+    }
+    const onLine = made && !onTag && SourceHomes.ofMaking(made.file, made.offset, name)
     if (!home && onLine && onLine.kind !== "notWritten") {
       return { reason: "expression", file: onLine.file, span: lineSpan(onLine) }
     }
@@ -108,6 +114,27 @@ export class InspectorWrites {
     const file = files.find((each) => each.path === home.file)!.file
     const live = home.kind === "default" ? InspectorWrites.baseEdit(thing, name, file, home, value) : undefined
     InspectorWrites.apply(file, { anchor: home.anchor, edits: InspectorWrites.editsFor(file, home, value), live }, name)
+    return undefined
+  }
+
+  /**
+   * Property `name` of `thing`, made by a tag in a drawing (`<foundation "clubs" suit=clubs/>`), became `value`:
+   * the tag's attribute says it, as its own line would (epic `language` I143).
+   * - Keeps the attribute as written:  a bare word stays bare;  a new one is bare for a choice's word
+   *   (`suit=hearts`), else quoted.
+   */
+  private static writeMadeByTag(
+    made: HomeFile & { file: SP.AnySpellFile },
+    home: FieldHome,
+    thing: object,
+    name: string,
+    value: unknown
+  ): NotWritten | undefined {
+    if (home.kind === "expression") return { reason: "expression", file: made.path, span: home.span }
+    if (home.place !== "attribute") return { reason: "running" }
+    const quote = literalStyleOf(thing, name, value) === "word" ? "bare" : '"'
+    const edits = SourceEdits.settingAttribute(made.contents, home.opening, name, value as AttributeValue, quote)
+    InspectorWrites.apply(made.file, { anchor: home.anchor, edits }, name)
     return undefined
   }
 
@@ -197,13 +224,26 @@ export class InspectorWrites {
     InspectorWrites.apply(file, { anchor: home.anchor, edits, live, isReset: true }, name)
   }
 
-  /** Take property `name` off the line that made `thing`, and put it back to its type's default. */
+  /**
+   * Take property `name` off the line that made `thing`, or the tag that made it, and put it back to its type's default.
+   */
   private static resetProperty(thing: object, name: string): void {
     const files = homeFiles()
     const made = madeAt(thing, files)
-    const home = made && SourceHomes.ofMaking(made.file, made.offset, name)
-    if (!made || !home || home.kind === "notWritten" || !home.removal) return
+    if (!made) return
+    const onTag = tagHomeOf(made, name)
+    const home = !onTag && SourceHomes.ofMaking(made.file, made.offset, name)
     const file = made.file.file
+    const text = file.contents ?? ""
+    // made by a tag:  its attribute goes;  by a line:  what the line says of it
+    const edits =
+      onTag?.kind === "written" && onTag.place === "attribute"
+        ? SourceEdits.settingAttribute(text, onTag.opening, name, undefined)
+        : home && home.kind !== "notWritten" && home.removal
+          ? [SourceEdits.replacing(text, home.removal, "")]
+          : undefined
+    const anchor = onTag ? onTag.anchor : home ? home.anchor : undefined
+    if (!edits || !anchor) return
     const record = thing as Record<string, unknown>
     const old = record[name]
     const start = SourceHomes.ofDefault(files, typeNamesOf(thing), name)
@@ -215,8 +255,7 @@ export class InspectorWrites {
           }
         : undefined
     live?.("redo")
-    const edits = [SourceEdits.replacing(file.contents ?? "", home.removal, "")]
-    InspectorWrites.apply(file, { anchor: home.anchor, edits, live, isReset: true }, name)
+    InspectorWrites.apply(file, { anchor, edits, live, isReset: true }, name)
   }
 
   /**
@@ -379,6 +418,16 @@ function madeAt(thing: object, files: ReturnType<typeof homeFiles>) {
   return { file, offset: SourceEdits.offsetAt(file.contents, { line: place.line, character: place.column }) }
 }
 
+/**
+ * Where property `name` is on the tag that made a thing, as a drawing's tag makes the member it names
+ * (`<foundation "clubs" suit=clubs/>` ~== `"clubs" is a new foundation with suit = clubs`):
+ * `undefined` when a line made it, not a tag.
+ */
+function tagHomeOf(made: NonNullable<ReturnType<typeof madeAt>>, name: string): FieldHome | undefined {
+  const { contents } = made.file
+  return contents[made.offset] === "<" ? SourceHomes.ofAttribute(contents, made.offset, name) : undefined
+}
+
 /** What a home's value is written as:  its span, which `Inspector.showCode()` selects. */
 function lineSpan(home: FileHome): TextSpan {
   return "span" in home ? home.span : home.anchor
@@ -432,7 +481,9 @@ function defaultsFileOf(element: Element, name: string): string | undefined {
 function originOfProperty(thing: object, name: string, scope: InspectorScope): PropertyOrigin | undefined {
   const files = homeFiles()
   const made = madeAt(thing, files)
-  const onLine = made && SourceHomes.ofMaking(made.file, made.offset, name)
+  // what made it says:  its tag in a drawing, or its line
+  const onTag = made && tagHomeOf(made, name)
+  const onLine = made && !onTag ? SourceHomes.ofMaking(made.file, made.offset, name) : onTag
   const says = onLine && onLine.kind !== "notWritten"
   const start = SourceHomes.ofDefault(files, typeNamesOf(thing), name)
   if (scope === "all") {

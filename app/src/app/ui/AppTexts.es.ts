@@ -37,6 +37,22 @@ const APP_TEXTS_ES: AppTextPack = {
   modes: "Ejecutar, editar o depurar",
   runMode: "Ejecutar",
   editMode: "Editar",
+  runTip: "Ejecutar la app",
+  stopEditingTip: "Dejar de editar",
+  runningTip: "La app se está ejecutando",
+  editTip: "Editar la app",
+  editingTip: "Estás editando la app",
+  siteTip: "Ver las páginas del sitio",
+  siteShownTip: "Estás viendo las páginas del sitio",
+  showCodeTip: "Mostrar el código Spell",
+  hideCodeTip: "Ocultar el código Spell",
+  showCompiledTip: "Mostrar el {language} compilado",
+  hideCompiledTip: "Ocultar el {language} compilado",
+  inspectTip: "Inspeccionar la app:  haz clic en una parte para elegirla",
+  stopInspectingTip: "Dejar de inspeccionar",
+  addViewTip: "Añadir una vista",
+  restartTip: "Reiniciar la app",
+  youTip: "Editar tu nombre y tus correos",
   menuCut: "Cortar",
   menuCopy: "Copiar",
   menuPaste: "Pegar",
@@ -46,7 +62,10 @@ const APP_TEXTS_ES: AppTextPack = {
   paletteSearch: "Buscar vistas",
   paletteHint: "Haz clic o arrastra para añadir a la página",
   paletteMore: "{count} más",
-  paletteMoreTip: "Mostrar todo lo que hay en {topic}",
+  paletteGroupTip: "Añadir una vista de {topic}",
+  paletteAppViews: "Vistas de la app",
+  paletteAppViewsTip: "Añadir una de las vistas de tu app",
+  palettePageViewsTip: "Añadir una de las vistas de esta página",
   palettePin: "Mantener abierto",
   paletteUnpin: "Desanclar",
   paletteAddView: "Añadir vista",
@@ -89,7 +108,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisPicture: "Una imagen que va con el pedido",
   changeThisRemovePicture: "Quitar esta imagen",
   menuShowInCode: "Mostrar en el código",
-  menuInspect: "Inspeccionar",
+  menuInspect: "Inspeccionar {type}",
+  menuInspectParts: "Elige una de las partes bajo el ratón",
   partIsApp: "Es la aplicación misma:\nno se puede cortar, duplicar ni borrar.",
   partNothingCopied: "Aún no se ha copiado nada.",
   partNothingSelected: "No hay nada seleccionado.",
@@ -529,6 +549,7 @@ const APP_TEXTS_ES: AppTextPack = {
   "category.web-data": "Datos de la web",
   "category.sites": "Sitios",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
+  homeOrgLine: "Compartidos por todos en @{org}.",
   editorPieceBroken:
     "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.\nArréglala y publícala de nuevo:\n{problem}",
   editorNameNeeded:
@@ -690,9 +711,9 @@ const APP_TEXTS_ES: AppTextPack = {
 
   youHeader: "Tú:  {address}",
   fileProblems: "Tu archivo tiene problemas:  se leyó de todos modos",
-  names: "Nombres",
+  names: "Nombre",
   nickname: "Apodo",
-  emails: "Correos, uno por línea",
+  emails: "Tus direcciones de correo, una por línea",
   dates: "Fechas",
   dateWhat: "Qué",
   dateDay: "Día",
@@ -701,6 +722,18 @@ const APP_TEXTS_ES: AppTextPack = {
   addDate: "Añadir una fecha",
   yourOrgs: "Tus organizaciones",
   noneYet: "Ninguna todavía.",
+
+  ////////////////
+  // ## The name page (`NamePage.tsx`)
+  ////////////////
+
+  nameHeading: "Bienvenido a Encanto",
+  nameLine:
+    "¿Quién está aquí?\nTus proyectos van en un espacio con tu nombre,\nen los espacios de {org} en esta máquina.",
+  yourName: "Tu nombre",
+  nameTaken: "{address} ya tiene un espacio aquí:  ¿eres tú?",
+  nameNeeded: "Escribe un nombre con alguna letra.",
+  nameStart: "Empezar",
 
   ////////////////
   // ## A project's settings

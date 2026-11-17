@@ -60,6 +60,9 @@ export class CodeMirrorMerge {
       collapseUnchanged: { margin: 3, minSize: 6 }
     })
     this.view.dom.querySelector(".cm-mergeViewEditors")?.append(this.undoIcons)
+    // the merge view draws its arrows at a line's top:  each one new, centred on its line
+    const arrows = this.view.dom.querySelector(".cm-merge-revert")
+    if (arrows) new MutationObserver(() => this.centreArrows()).observe(arrows, { childList: true })
     rootOnceConnected(parent, [this.view.a, this.view.b])
   }
 
@@ -102,8 +105,27 @@ export class CodeMirrorMerge {
   }
 
   ////////////////
-  // ## The undo icons
+  // ## The arrows and the undo icons
   ////////////////
+
+  /**
+   * Centre each arrow on its change's first line (Owen, epic `editor` T101):
+   * the merge view puts it at the line's top, without the code's own padding, so a margin moves it.
+   */
+  private centreArrows() {
+    for (const arrow of this.view.dom.querySelectorAll<HTMLElement>(".cm-merge-revert > [data-chunk]")) {
+      const chunk = this.view.chunks[Number(arrow.dataset.chunk)]
+      if (chunk) arrow.style.marginTop = `${this.centredTop(chunk.fromA, arrow) - parseFloat(arrow.style.top || "0")}px`
+    }
+  }
+
+  /** Where `button`'s top goes, in the centre column, to be centred on `pos`'s line. */
+  private centredTop(pos: number, button: HTMLElement): number {
+    const column = this.view.dom.querySelector<HTMLElement>(".cm-merge-revert")
+    const line = this.mine.lineBlockAt(pos)
+    const lineMiddle = this.mine.documentTop + line.top + line.height / 2
+    return lineMiddle - (column?.getBoundingClientRect().top ?? 0) - (button.offsetHeight || BUTTON_HEIGHT) / 2
+  }
 
   /** Draw the undo icons at the next frame, once the merge view has measured. */
   private queueDraw() {
@@ -115,7 +137,7 @@ export class CodeMirrorMerge {
     })
   }
 
-  /** An undo icon for each take, where its arrow was:  in the centre column, at its first line. */
+  /** An undo icon for each take, where its arrow was:  in the centre column, centred on its first line. */
   private drawUndoIcons() {
     const column = this.view.dom.querySelector<HTMLElement>(".cm-merge-revert")
     if (!column) return
@@ -130,10 +152,12 @@ export class CodeMirrorMerge {
       const icon = old.get(take.takeId) ?? iconButton("undo", this.undoIconWords)
       old.delete(take.takeId)
       icon.dataset.take = String(take.takeId)
-      icon.style.top = `${this.mine.lineBlockAt(take.from).top}px`
       if (!icon.isConnected) this.undoIcons.append(icon)
+      icon.style.top = `${this.centredTop(take.from, icon)}px`
     }
     for (const gone of old.values()) gone.remove()
+    // a line's height can change without the merge view drawing its arrows again
+    this.centreArrows()
   }
 
   /** A press on an undo icon:  that take put back, the focus left where it is (as the arrows do). */
@@ -173,6 +197,9 @@ type Take = {
   /** your text it replaced */
   before: string
 }
+
+/** An arrow's and an undo icon's height, before it's drawn:  `codemirror.css`. */
+const BUTTON_HEIGHT = 24
 
 /** The user event of a put-back, kept apart from the merge view's own `revert`. */
 const PUT_BACK = "putBack"
