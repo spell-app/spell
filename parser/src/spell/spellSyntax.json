@@ -10297,7 +10297,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodInfixRule.ts",
-          "line": 16,
+          "line": 18,
           "purpose": "`card nerds out with thing`: calls a quoted method defined as an infix expression: e.g. `card.nerdsOutWithAnother(thing)`.",
           "syntaxes": [],
           "aliases": []
@@ -10307,7 +10307,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodPostfixRule.ts",
-          "line": 15,
+          "line": 17,
           "purpose": "`card is face up` -- reads a quoted method defined as a postfix expression, e.g. `card.isFaceUp`.",
           "syntaxes": [],
           "aliases": []
