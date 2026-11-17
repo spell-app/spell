@@ -23,7 +23,8 @@ function poller(
   looks: object[],
   printed: string[],
   onLook: (count: number) => void = () => {},
-  mode: "monitor" | "hook" = "monitor"
+  mode: "monitor" | "hook" = "monitor",
+  env: Record<string, string> = {}
 ) {
   let count = 0
   listeners ||= mkdtempSync(join(folder, "listeners-"))
@@ -37,7 +38,8 @@ function poller(
     print: (line: string) => void printed.push(line),
     pollMs: 5,
     settleMs: 5,
-    retryMs: 5
+    retryMs: 5,
+    env
   })
 }
 
@@ -50,6 +52,17 @@ test("run:  the line once per batch of work;  again after a look found nothing w
   const printed: string[] = []
   await poller([found(true), found(true), found(false), found(true)], printed).run()
   expect(printed).toEqual(["📬 x", "📬 x"])
+})
+
+test("run:  an unattended session (`claude -p`) ends at once, before any look or claim (I319)", async () => {
+  const printed: string[] = []
+  let looks = 0
+  const unattended = { CLAUDE_CODE_SESSION_ATTENDED: "0" }
+  for (const mode of ["hook", "monitor"] as const) {
+    const code = await poller([found(true, { pid: process.pid })], printed, () => looks++, mode, unattended).run()
+    expect(code).toBe(0)
+  }
+  expect({ looks, printed }).toEqual({ looks: 0, printed: [] })
 })
 
 test("run:  a failed look changes nothing, and is tried again", async () => {

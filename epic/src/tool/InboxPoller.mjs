@@ -31,6 +31,11 @@
  *     hook never wakes the session again for work it was already woken for and left
  * - Ends when the session's process does (the look's `pid`), when a newer poller takes over, when Claude Code stops
  *   it, or (`hook`) once it printed the line.
+ * - NEVER runs in an unattended session, a scripted `claude -p` (`ClaudeSession.isUnattended()`, epic `epic-engine`
+ *   I319):  it ends at once, before its first look.
+ *   - `claude -p` waits for every `SessionStart` hook to finish before its first answer, `asyncRewake` ones too:
+ *     with the poller running a day, the run never started
+ *   - nobody is there to Send to it anyway
  * - SMALL ON PURPOSE (P19):  plain JavaScript and node's own modules, so it runs in bare node, about 45MB.
  *   - The look needs the epic tool, about 150MB under `tsx`:  it runs for a fraction of a second, as its own process.
  *   - NEVER import TypeScript here, nor anything of ours:  node's TypeScript support alone adds about 28MB.
@@ -43,6 +48,7 @@ import { dirname, join } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 import { fileURLToPath } from "node:url"
 
+import { ClaudeSession } from "spell/epic/config/ClaudeSession.mjs"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 export class InboxPoller {
@@ -53,6 +59,7 @@ export class InboxPoller {
    * - `print`:  where the line goes;  default stdout for a `monitor`, stderr for a `hook` (Claude Code reads each)
    * - `listeners`:  the folder of the one-poller-per-session files (`claim()`);  default `listenersFolder()`
    * - `pollMs`, `settleMs`, `retryMs`:  tests make them short
+   * - `env`:  the environment Claude Code started it in (`ClaudeSession.isUnattended()`);  default `process.env`
    */
   constructor({
     look = lookWithEpic,
@@ -61,7 +68,8 @@ export class InboxPoller {
     listeners = listenersFolder(),
     pollMs = POLL_MS,
     settleMs = SETTLE_MS,
-    retryMs = RETRY_MS
+    retryMs = RETRY_MS,
+    env = process.env
   } = {}) {
     this.look = look
     this.mode = mode
@@ -70,6 +78,7 @@ export class InboxPoller {
     this.pollMs = pollMs
     this.settleMs = settleMs
     this.retryMs = retryMs
+    this.env = env
     /** whether this batch of work was announced already */
     this.announced = false
     /** the session's process this poller claimed (`claim()`), once a look found it */
@@ -81,8 +90,10 @@ export class InboxPoller {
   /**
    * Look, announce, wait for a change;  again, until the session ends or a newer poller takes over.
    * Resolves to the exit code:  0;  2 for a `hook` that printed the line, which wakes the session.
+   * - an unattended session (`claude -p`):  0 at once, nothing looked at or claimed
    */
   async run() {
+    if (ClaudeSession.isUnattended(this.env)) return 0
     for (;;) {
       const found = this.lookSafely()
       if (found?.ended) return 0
