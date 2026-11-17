@@ -3307,8 +3307,13 @@ function PropertiesCard(): JSX.Element {
                         // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
                         open={Inspector.isGroupFolded(section.group) ? "false" : undefined}
                         ref={(group) => {
-                          on("ui-closing", () => Inspector.setGroupFolded(section.group, true))(group)
-                          on("ui-opening", () => Inspector.setGroupFolded(section.group, false))(group)
+                          // its own folding only:  a select's menu inside it sends these too (I222)
+                          on("ui-closing", (event) => {
+                            if (event.target === group) Inspector.setGroupFolded(section.group, true)
+                          })(group)
+                          on("ui-opening", (event) => {
+                            if (event.target === group) Inspector.setGroupFolded(section.group, false)
+                          })(group)
                         }}
                       >
                         <Show when={section.hasText}>
@@ -3709,8 +3714,9 @@ function ThingBands(props: {
               collapsible={band.isOwnType ? undefined : ""}
               open={isFolded() && !band.isOwnType ? "false" : undefined}
               ref={(group) => {
-                on("ui-closing", () => setFolded(true))(group)
-                on("ui-opening", () => setFolded(false))(group)
+                // its own folding only:  a select's menu inside it sends these too (I222)
+                on("ui-closing", (event) => event.target === group && setFolded(true))(group)
+                on("ui-opening", (event) => event.target === group && setFolded(false))(group)
               }}
             >
               <For each={band.members}>
