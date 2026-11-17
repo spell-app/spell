@@ -2,6 +2,8 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { KindName } from "spell/parser/spell/rules/types"
+// Through the folder:  read only when called, once the folder has loaded
+import { AssignmentStatement, ReturnStatement } from "spell/parser/spell/rules/assignment"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { loopedList } from "./ListIteration"
@@ -73,6 +75,8 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
       if (!statement || statement.end !== EachInStatement.endOf(statementTokens)) continue
       // a statement that takes a body is a loop's or a method's head line, `para cada carta en sus cartas`:  not ours
       if ((statement.rule as SpellStatement).bodySpec) continue
+      // `set x to the last card of each column in the columns`:  one value, a list, never x set again for each
+      if (EachInStatement.isInOneValue(statement, item)) continue
       if (!this.takesStatement(match, statement)) continue
       match.addMatch(statement, "statement")
       // a second `each ... in` in the statement:  one loop a statement
@@ -89,6 +93,28 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
     const listTokens = [...lead, ...tokens.slice(listAt, end)]
     const list = listRule.parse(scope, listTokens)
     return list?.length === listTokens.length ? list : undefined
+  }
+
+  /**
+   * Is `item` in the one value `statement` gives (epic `language` T152):  `set x to the last card of each column in ...`,
+   * `return the shorthand of each card in ...`?
+   * - Then it's no loop:  each round would set it again, or give back the first.  The value says the list itself
+   *   (`item_of_each`, `property_expression`), or the line is refused as words it doesn't understand.
+   * - An item in what's set, `set the score of each card in the deck to 0`, is a loop's, one card at a time.
+   */
+  protected static isInOneValue(statement: P.Match, item: P.Match): boolean {
+    const value = statement.is(AssignmentStatement)
+      ? statement.groups.value
+      : statement.is(ReturnStatement)
+        ? statement.groups.expression
+        : undefined
+    if (!(value instanceof P.Match)) return false
+    const [first] = item.tokens
+    let found = false
+    P.Tokenizer.forEachToken(value.tokens, (token) => {
+      if (token === first) found = true
+    })
+    return found
   }
 
   /** Is `statement`, read with the item in it, one we run for each item?  Any statement is. */

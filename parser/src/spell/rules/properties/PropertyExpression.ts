@@ -94,6 +94,10 @@ export class PropertyExpression extends MemberReadExpression<"property|each|arg|
     if (!(match.data as EachItemData).eachItem) return datatype
     return datatype ? P.listOf(datatype) : "list"
   }
+  /** Each item's, `the shorthand of each card in the deck`:  items -- see `SpellExpression.saysItems`. */
+  saysItemsOf(match: P.Match): boolean {
+    return !!(match.data as EachItemData).eachItem
+  }
   /** What follows our `of`. */
   ofObject(match: P.Match) {
     return (match as P.MatchFor<this>).groups.expression

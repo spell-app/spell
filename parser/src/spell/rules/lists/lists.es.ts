@@ -61,6 +61,7 @@ import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
 import { RandomItemExpression } from "./RandomItemExpression"
 import { RandomItemWhere } from "./RandomItemWhere"
+import { ItemOfEach } from "./ItemOfEach"
 import { RandomItemsExpression } from "./RandomItemsExpression"
 import { RangeBetweenExpression } from "./RangeBetweenExpression"
 import { RangeCountExpression } from "./RangeCountExpression"
@@ -577,6 +578,34 @@ listsEs.addRule(RandomItemWhere, {
           "una carta al azar en las columnas donde su rango es 1",
           "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Columna)), (carta) => carta.rango === 1))",
           "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Columna)), (carta: Carta) => carta.rango === 1))"
+        ]
+      ]
+    }
+  ]
+})
+
+listsEs.addRule(ItemOfEach, {
+  syntax:
+    "((el|la)? {ordinal} {arg:singular_identifier}|(un|una) {arg:singular_identifier} (random:al azar|aleatorio|aleatoria)) (de|del) ((each:cada) {thing:singular_identifier} (en|de|del) {list:operand}|{things:each_thing})",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["una carta es una cosa", "una pila es una lista de cartas", "una columna es una pila"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [
+          "la última carta de cada columna",
+          "core.pickFromEach(core.everyThing(Columna), (columna) => columna.lastItem)",
+          "core.pickFromEach(core.everyThing(Columna), (columna: Columna) => columna.lastItem)"
+        ],
+        [
+          "una carta al azar de cada columna en las columnas",
+          "core.pickFromEach(core.everyThing(Columna), (columna) => columna.randomItem())",
+          "core.pickFromEach(core.everyThing(Columna), (columna: Columna) => columna.randomItem())"
         ]
       ]
     }

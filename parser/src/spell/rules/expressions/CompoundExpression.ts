@@ -140,6 +140,9 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
       // which makes `MatchFor<this>` an unhelpful distributed type at the `compileAST()` call below.
       const rule: InfixOperatorSuffix = ruleMatch.rule
       // `the stock and the discard pile`:  both, in a list -- `A and B and C` one list of three
+      // `cards in the stock and cards in the discard pile`:  their items, one flat list
+      const items = itemJoins.get(ruleMatch)
+      if (items) return itemsCollected(ruleMatch, compile(lhs), compile(rhs), items)
       if (valueJoins.has(ruleMatch) && rule instanceof And) return collected(ruleMatch, compile(lhs), compile(rhs))
       const args = {
         operator,
@@ -166,7 +169,7 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
     // See: https://en.wikipedia.org/wiki/Shunting-yard_algorithm
     // See: https://www.chris-j.co.uk/parsing.php
     const { lhs, rhsChain } = match.groups
-    const { valueJoins } = JoinedValues.of(match)
+    const { valueJoins, itemJoins } = JoinedValues.of(match)
     const output: unknown[] = [lhs]
     const opStack: Array<{ match: P.Match; operator: P.Match }> = []
     rhsChain.matched.forEach((rhsItem) => {
@@ -242,5 +245,35 @@ function collected(match: P.Match, lhs: unknown, rhs: unknown): P.ASTArrayLitera
   const items = lhs instanceof P.ASTArrayLiteral && COLLECTED.has(lhs) ? [...(lhs.items ?? [])] : [lhs]
   const list = new P.ASTArrayLiteral(match, { items: [...items, rhs] as P.ASTExpression[] })
   COLLECTED.add(list)
+  return list
+}
+
+/** Lists `and` made of items, so a second `and` adds to their parts:  see `itemsCollected()`. */
+const ITEMS_COLLECTED = new WeakSet<P.ASTCoreMethodInvocation>()
+
+/**
+ * `lhs` and `rhs`, their items in one flat list (epic `language` T152):
+ * `core.mergeLists([stock, [discardPile.lastItem]], List)` -- a side saying items as it is, one item in a list of its own.
+ * - `lhs` a list we made:  `rhs` joins its parts, `A and B and C` one merge of three.
+ */
+function itemsCollected(
+  match: P.Match,
+  lhs: unknown,
+  rhs: unknown,
+  sides: { lhs: "items" | "one"; rhs: "items" | "one" }
+): P.ASTCoreMethodInvocation {
+  const part = (side: unknown, as: "items" | "one") =>
+    (as === "one" ? new P.ASTArrayLiteral(match, { items: [side as P.ASTExpression] }) : side) as P.ASTExpression
+  const made = lhs instanceof P.ASTCoreMethodInvocation && ITEMS_COLLECTED.has(lhs)
+  const joinedSoFar = made ? (lhs.args.args?.[0] as P.ASTArrayLiteral | undefined) : undefined
+  const parts = joinedSoFar ? [...(joinedSoFar.items ?? [])] : [part(lhs, sides.lhs)]
+  const list = new P.ASTCoreMethodInvocation(match, {
+    methodName: "mergeLists",
+    args: [
+      new P.ASTArrayLiteral(match, { items: [...parts, part(rhs, sides.rhs)] }),
+      new P.ASTTypeExpression(match, { name: "List" })
+    ]
+  })
+  ITEMS_COLLECTED.add(list)
   return list
 }

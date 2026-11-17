@@ -26,6 +26,16 @@ export class SpellExpression<
   declare writtenAs: string | undefined
   @proto static writtenAs: string | undefined = undefined
 
+  /**
+   * Do its words say ITEMS, not one named thing (epic `language` T152)?
+   * - `cards in the discard pile`, `the last card of each column`:  yes;  `the stock`, `the last card of the stock`:  no.
+   * - So `and` joins them into one flat list:  `cards in the stock and cards in the discard pile` is both piles'
+   *   cards, where `the stock and the discard pile` is two piles -- see `JoinedValues`.
+   * - Per match, when it hangs on what was read:  `saysItemsOf()`.
+   */
+  declare saysItems: boolean
+  @proto static saysItems = false
+
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: SpellExpressionProps
 
@@ -37,6 +47,11 @@ export class SpellExpression<
    */
   ofObject(match: P.Match): P.Match | undefined {
     return undefined
+  }
+
+  /** Do `match`'s words say items, not one named thing?  Our `saysItems`, unless a rule says per match. */
+  saysItemsOf(match: P.Match): boolean {
+    return this.saysItems
   }
 }
 

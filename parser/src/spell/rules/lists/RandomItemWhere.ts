@@ -1,3 +1,4 @@
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { ListFilter } from "./ListFilter"
@@ -12,6 +13,9 @@ import { ListFilter } from "./ListFilter"
  *   a random COLUMN whose cards ... (`the columns where it is face down`), each column tested as a card.
  */
 export class RandomItemWhere extends ListFilter {
+  /** One item, not items. */
+  @proto static saysItems = false
+
   /** One of the items which pass. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return match.scope.getItemType(super.getDatatype(match))

@@ -1,3 +1,4 @@
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
@@ -11,6 +12,9 @@ import { SpellExpression } from "spell/parser/spell/rules/expressions"
  *   Both compile to `slice()`'s indexes, as above.
  */
 export class RangeBetweenExpression extends SpellExpression<"arg|start|end|list"> {
+  /** Items -- see `SpellExpression.saysItems`. */
+  @proto static saysItems = true
+
   /** Some of the list's items:  the list's type. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return match.groups.list.datatype

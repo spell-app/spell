@@ -282,6 +282,21 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     outside a condition, two kinds, `and` and `or` between values with no parentheses, `and <a word>` (`and red`), and in
     a `where` a question then a thing
   - `CompoundExpression` reads its datatype through `JoinedValues.of()`, the same shunting-yard as `getAST()`
+  - words that say ITEMS join as their items, into one flat list (epic `language` T152):
+    `cards in the stock and cards in the discard pile` => `core.mergeLists([stock, discardPile], List)`;
+    one item beside them joins as itself (`[stock.lastItem]`);  a named list beside them (`the stock and cards in ...`)
+    is refused, saying `cards in the stock`
+    - which words say items:  `SpellExpression.saysItems` (`list_filter`, `list_items_in`, `item_of_each`, the ranges,
+      `random_items_expression`) and `saysItemsOf()` per match (`the shorthand of each card`, `property_expression`)
+- One item of EACH thing, as one list (epic `language` T152;  [`ItemOfEach`](rules/lists/ItemOfEach.ts),
+  `item_of_each`):  `the last card of each column` => `core.pickFromEach(core.everyThing(Column), (column) => column.lastItem)`
+  - any pick of one list's item by its place:  `the first`, `the second`, `a random`;  `each column in <list>` too
+  - read by hand:  the pick, with the thing in place of `each column` (`the last card of column`), read by the rule that
+    picks one item of one list, in a scope where `column` is each thing;  a thing with nothing to pick adds nothing
+  - `where the card ...` / `where it ...` filters each thing's items before the pick;  `where the column ...` the things
+  - a pick that asks an action (`where it can play the card`) is refused:  it would play cards while making the list
+  - `set x to ... each column in the columns` and `return ...` are this list, never `each_in_statement`'s loop
+    (`EachInStatement.isInOneValue()`);  `add the last card of each column in the columns to the stock` is still the loop
 - `can <action>`, `can_do` ([CanDo.ts](rules/lists/CanDo.ts), T146, J228):  `where it can play the card`, `it` optional,
   RUNS the action and reads its yes or no;  `the first card in ... where` with one asks one item at a time and stops at the
   first yes (`core.itemWhere()`, `core.itemWhereInTurn()` when it waits).
@@ -821,6 +836,9 @@ A kind that says so is saved in a file of its own.
   - a line of just `and` / `or` joins the lines either side, each in parentheses of no width
   - a line under it starting with `or`:  what follows the `or` in parentheses of no width, one alternative, its `where`
     its own;  the first line's `where` ends at it (`SpellStatement.beforeAlternatives()`;  epic `language` T146, J227)
+  - a line under it starting with `and` then a VALUE ends the `where` above it the same way, one more item of the list
+    (`and the last card of each column`);  `and` then a condition goes on with it (`and it is red`)
+    (`SpellStatement.conditionBeforeAlternatives()`;  epic `language` T152)
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
 - Then it loops over the root `BlockToken`'s items:

@@ -953,6 +953,22 @@
     },
     {
       "kind": "method",
+      "name": "pickFromEach",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "pick"
+        }
+      ],
+      "section": "iteration",
+      "description": "What `pick` takes from each item of `collection`, in a new plain `List`, in the items' order, leaving out each item it takes nothing from (epic `language` T152)."
+    },
+    {
+      "kind": "method",
       "name": "filter",
       "of": "core",
       "module": "collection-other",

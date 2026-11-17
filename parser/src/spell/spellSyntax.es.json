@@ -3408,7 +3408,7 @@
           "ruleNames": ["random_item_where"],
           "internal": false,
           "file": "src/spell/rules/lists/RandomItemWhere.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "One item of a list that passes a test, at random (epic `language` I152) -- `a random card in the columns where it is face down`.",
           "syntaxes": [
             {
@@ -3430,11 +3430,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "ItemOfEach",
+          "ruleNames": ["item_of_each"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ItemOfEach.ts",
+          "line": 31,
+          "purpose": "One item of each thing, by its place, as ONE list -- `the last card of each column` (epic `language` T152).",
+          "syntaxes": [
+            {
+              "syntax": "((el|la)? {ordinal} {arg:singular_identifier}|(un|una) {arg:singular_identifier} (random:al azar|aleatorio|aleatoria)) (de|del) ((each:cada) {thing:singular_identifier} (en|de|del) {list:operand}|{things:each_thing})",
+              "example": "la última carta de cada columna",
+              "outputs": {
+                "js": {
+                  "code": "core.pickFromEach(core.everyThing(Columna), (columna) => columna.lastItem)"
+                },
+                "ts": {
+                  "code": "core.pickFromEach(core.everyThing(Columna), (columna: Columna) => columna.lastItem)"
+                },
+                "py": {
+                  "code": "core.pick_from_each(core.every_thing(Columna), lambda columna: columna.last_item)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "RandomItemsExpression",
           "ruleNames": ["random_items_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RandomItemsExpression.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Pick a unique set of random items from list, returning an array.",
           "syntaxes": [
             {
@@ -3460,7 +3486,7 @@
           "ruleNames": ["range_between_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeBetweenExpression.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "Range expression: e.g. `item 1 to 2 of my-list` => `core.rangeBetween(myList, 0, 2)`.",
           "syntaxes": [
             {
@@ -3486,7 +3512,7 @@
           "ruleNames": ["range_starting_with_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeStartingWithExpression.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "Range expression starting at some item in list, inclusive: e.g. `items in my-list starting with thing`.",
           "syntaxes": [
             {
@@ -3512,7 +3538,7 @@
           "ruleNames": ["range_count_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeCountExpression.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "Alternative form of range expression.",
           "syntaxes": [
             {
@@ -3564,7 +3590,7 @@
           "ruleNames": ["list_items_in"],
           "internal": false,
           "file": "src/spell/rules/lists/ListItemsIn.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A list's items, by their word -- `the cards in the discard pile`, `cards in the columns` (epic `language` I152).",
           "syntaxes": [
             {
@@ -4460,7 +4486,7 @@
           "ruleNames": ["each_in_statement"],
           "internal": false,
           "file": "src/spell/rules/lists/EachInStatement.ts",
-          "line": 33,
+          "line": 35,
           "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
           "syntaxes": [
             {

@@ -32,7 +32,7 @@ export class JoinedValues {
   /** What `match`, an expression and its operators (`lhs`, `rhsChain`), adds up to. */
   static of(match: P.Match): JoinedValuesRead {
     const { lhs, rhsChain } = match.groups as { lhs?: P.Match; rhsChain?: P.Match }
-    const read: JoinedValuesRead = { datatype: undefined, valueJoins: new Set() }
+    const read: JoinedValuesRead = { datatype: undefined, valueJoins: new Set(), itemJoins: new Map() }
     if (!lhs || !rhsChain) return read
     const { scope } = match
     read.isCondition = CONDITION_GROUPS.has(match.matchGroup ?? "") || isItemScope(scope)
@@ -106,6 +106,9 @@ export class JoinedValues {
     // two values
     const other = word === "and" ? "or" : "and"
     if (lhs.joined === other || rhs.joined === other) return refuse("joined-values-and-or")
+    // `cards in the stock and cards in the discard pile`:  their items, in one flat list
+    if (word === "and" && (saysItems(lhs) || saysItems(rhs)))
+      return JoinedValues.joinedItems(scope, operator, lhs, rhs, read, refuse)
     const lhsItem = word === "and" && lhs.joined === "and" ? scope.getItemType(lhs.datatype) : lhs.datatype
     const rhsItem = word === "and" && rhs.joined === "and" ? scope.getItemType(rhs.datatype) : rhs.datatype
     const common = JoinedValues.commonType(scope, lhsItem, rhsItem)
@@ -117,6 +120,67 @@ export class JoinedValues {
       joined: word,
       text: `${text(lhs)} ${operator.inputText.trim()}`
     }
+  }
+
+  /**
+   * `lhs` and `rhs`, one or both saying ITEMS, as one flat list of them (epic `language` T152):
+   * `cards in the stock and cards in the discard pile` is both piles' cards, `cards in the stock and the last card of
+   * the discard pile` the stock's cards and that one.
+   * - A side that says items joins as its items;  one that's an item, as that one.
+   * - A side that names a list (`the stock`) beside items is refused:  a thing stays a thing, so it can't be items too.
+   * - SIDE EFFECT:  notes how each side joins in `read.itemJoins`, or the first problem.
+   */
+  private static joinedItems(
+    scope: P.Scope,
+    operator: P.Match,
+    lhs: Side,
+    rhs: Side,
+    read: JoinedValuesRead,
+    refuse: (key: SP.ParserMessageKey, params?: Record<string, string>) => Side
+  ): Side {
+    const items = saysItems(lhs) ? lhs : rhs
+    const itemType = scope.getItemType(items.datatype)
+    const kindOf = (side: Side): P.Datatype | undefined =>
+      saysItems(side) ? scope.getItemType(side.datatype) : side.datatype
+    for (const side of [lhs, rhs]) {
+      if (saysItems(side)) continue
+      // `the stock`, a list of what the items are:  a named list beside items
+      const sideItems = scope.getItemType(side.datatype)
+      const isList = !!scope.getType(side.datatype)?.isA("list") || !!P.itemTypeOf(side.datatype)
+      if (
+        isList &&
+        JoinedValues.commonType(scope, sideItems, itemType) &&
+        !JoinedValues.commonType(scope, side.datatype, itemType)
+      ) {
+        return refuse("joined-list-and-items", {
+          list: textOf(side),
+          items: textOf(items),
+          things: JoinedValues.pluralWords(scope, itemType)
+        })
+      }
+    }
+    const common = JoinedValues.commonType(scope, kindOf(lhs), kindOf(rhs))
+    if (!common)
+      return refuse("joined-values-of-two-kinds", {
+        word: ((operator.groups.operator as P.Match | undefined) ?? operator).inputText.trim()
+      })
+    read.valueJoins.add(operator)
+    read.itemJoins.set(operator, { lhs: saysItems(lhs) ? "items" : "one", rhs: saysItems(rhs) ? "items" : "one" })
+    return {
+      datatype: P.listOf(common),
+      match: operator,
+      joined: "and",
+      items: true,
+      text: `${textOf(lhs)} ${operator.inputText.trim()}`
+    }
+  }
+
+  /** `datatype`'s words, plural, as the language says them:  `cards`, `cartas`. */
+  private static pluralWords(scope: P.Scope, datatype: P.Datatype | undefined): string {
+    const language = SP.Language.of(scope)
+    const type = scope.getType(datatype)
+    const words = type ? SP.SpellWarnings.exampleNoun(scope, type, "definite").split(/\s+/).slice(1).join(" ") : ""
+    return words ? language.inflector.pluralize(words) : `${datatype ?? ""}`
   }
 
   /**
@@ -151,6 +215,11 @@ export type JoinedValuesRead = {
   datatype: P.Datatype | undefined
   /** Each `and` / `or` suffix joining two values, not two questions */
   valueJoins: Set<P.Match>
+  /**
+   * Each `and` among them joining ITEMS into one flat list, and how each side joins:  as its items, or as one
+   * (epic `language` T152)
+   */
+  itemJoins: Map<P.Match, { lhs: "items" | "one"; rhs: "items" | "one" }>
   /** Why it's refused, in the scope's language -- `undefined` if it isn't */
   problem?: string
   /** It's a condition (`if ...`, a `where`):  a value there is a test of whether it's there */
@@ -170,6 +239,8 @@ type Side = {
   match: P.Match | undefined
   /** Made by `and` / `or` joining values, with no parentheses round it */
   joined?: "and" | "or"
+  /** A flat list of items, `and` made of sides saying items (epic `language` T152) */
+  items?: boolean
   /** Its words, when it's more than `match`'s:  `the stock and the discard pile` */
   text?: string
 }
@@ -177,6 +248,18 @@ type Side = {
 /** `side`'s words, as written. */
 function textOf(side: Side | undefined): string {
   return side?.text ?? side?.match?.inputText.trim() ?? ""
+}
+
+/**
+ * Does `side` say items:  words that say them (`cards in the deck`, `SpellExpression.saysItems`), or `and` joining
+ * such words?
+ */
+function saysItems(side: Side): boolean {
+  if (side.items) return true
+  const { match } = side
+  if (!match || side.joined) return false
+  const rule = match.rule as { saysItemsOf?: (match: P.Match) => boolean }
+  return !!rule.saysItemsOf?.(match)
 }
 
 /** A question (`choice`), a value, or not known. */

@@ -26,6 +26,8 @@ import {
  */
 export class ListFilter extends SpellExpression<"arg|list|where|body?", { across?: ItemsAcross }> {
   @proto static priority = Priority.specific
+  /** `cards in the deck where ...`:  items -- see `SpellExpression.saysItems`. */
+  @proto static saysItems = true
 
   /** Notes `across`, when its body didn't:  `the cards in the foundations where`, with no condition yet. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {

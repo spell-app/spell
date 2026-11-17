@@ -381,13 +381,48 @@ export class SpellStatement<
    */
   static beforeAlternatives(statement: P.Match, unparsed: P.Token[]): P.Token[] {
     if (!(statement.groups.where instanceof P.Match)) return unparsed
-    const { scope } = statement
+    return SpellStatement.conditionBeforeAlternatives(statement.scope, statement.nestedScope, unparsed)
+  }
+
+  /**
+   * `unparsed`, a `where`'s condition read in `nestedScope`, up to an alternative on a line of its own (`or ...`), or a
+   * line starting with `and` then a VALUE (epic `language` T152):
+   *
+   *   ```spell
+   *   set candidates to cards in the discard pile which are face up
+   *   	and the last card of each column
+   *   ```
+   *
+   * - So `and the last card of each column` is one more item of the list, not part of `which are face up`.
+   * - A line starting with `and` then a CONDITION goes on with it, as always:  `and it is red`.
+   *   - What isn't sure to be a value (a name not typed yet, a word alone) is a condition, as before.
+   * - The same split as the `or` lines' (`JoinedLines`), and as `and` between a question and a value (`JoinedValues`).
+   * - On one line, `where it is face up and the discard pile` is all the condition, and refused, as always.
+   */
+  static conditionBeforeAlternatives(scope: P.Scope, nestedScope: P.Scope, unparsed: P.Token[]): P.Token[] {
     const at = unparsed.findIndex(
       (token, index) =>
-        // the cheap test first:  most conditions have no `(` of no width at all
-        JoinedLines.isWidthlessOpen(unparsed[index + 1]) && Wording.lengthAt(scope, "and_or", [token], 0, "or") === 1
+        // the cheap tests first:  most conditions have no `(` of no width, nor a line of their own, at all
+        (JoinedLines.isWidthlessOpen(unparsed[index + 1]) &&
+          Wording.lengthAt(scope, "and_or", [token], 0, "or") === 1) ||
+        SpellStatement.startsAValueLine(scope, nestedScope, unparsed, index)
     )
     return at > 0 ? unparsed.slice(0, at) : unparsed
+  }
+
+  /** Does `tokens[index]` start a line of its own with `and`, then a value -- not a condition? */
+  private static startsAValueLine(scope: P.Scope, nestedScope: P.Scope, tokens: P.Token[], index: number): boolean {
+    const token = tokens[index]!
+    const before = tokens[index - 1]
+    if (!before || token.line === undefined || before.line === undefined || token.line <= before.line) return false
+    if (Wording.lengthAt(scope, "and_or", [token], 0, "and") !== 1) return false
+    // the line's own words:  the lines after it may start with `and` too
+    const line = tokens.slice(index + 1)
+    const end = line.findIndex((it) => it.line !== undefined && it.line !== token.line)
+    const words = end < 0 ? line : line.slice(0, end)
+    const value = nestedScope.parser?.parse(words, "expression", nestedScope)
+    const { datatype } = value?.length === words.length ? value : {}
+    return datatype !== undefined && datatype !== "choice"
   }
 
   /**
