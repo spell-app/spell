@@ -1,4 +1,9 @@
-import type { Completion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
+import {
+  autocompletion,
+  type Completion,
+  type CompletionContext,
+  type CompletionResult
+} from "@codemirror/autocomplete"
 import { foldService } from "@codemirror/language"
 import {
   type ChangeSet,
@@ -67,11 +72,19 @@ export class CodeMirrorLanguage {
 
   /**
    * Every extension:  hover, folding, signature help and accent fixes;  a Spell UI tag's help, Format Document and
-   * expand selection
+   * expand selection;  the suggestions' wait for a pause in the typing
    * (suggestions go through `completions`, problems through `FileStates`).
    */
   extensions(): Extension {
-    return [this.hover(), this.folding(), this.signatureHelp(), this.accentFixes(), this.helpShown(), this.moreKeys()]
+    return [
+      this.suggestionsWait(),
+      this.hover(),
+      this.folding(),
+      this.signatureHelp(),
+      this.accentFixes(),
+      this.helpShown(),
+      this.moreKeys()
+    ]
   }
 
   /**
@@ -124,6 +137,16 @@ export class CodeMirrorLanguage {
       })),
       validFor: /^[\p{L}\p{M}\d_-]*$/u
     }
+  }
+
+  /**
+   * The suggestion list, shown by itself, waits for the typing to pause `HOVER_DELAY` (epic `codemirror` I22):
+   * each key starts CodeMirror's wait again (`activateOnTypingDelay`), so it never shows between quick keys.
+   * - Ctrl+Space shows it at once all the same:  CodeMirror waits 50 msec for what's asked for.
+   * - Only the wait:  `FileStates` gives CodeMirror the rest of the list's settings, which it merges with this.
+   */
+  private suggestionsWait(): Extension {
+    return autocompletion({ activateOnTypingDelay: HOVER_DELAY * 1000 })
   }
 
   ////////////////
@@ -430,8 +453,9 @@ export class CodeMirrorLanguage {
   /**
    * The words of the call being typed, the argument at the caret in bold, over the line (`<ui-markdown>`):
    * VS Code's parameter hints.
-   * - As a space is typed, while Settings… › "Show parameter hints" is on (`CodeMirrorPopups`);
-   *   ⇧⌘Space (Ctrl+Shift+Space off a Mac) shows it in every mode.
+   * - Once a space is typed and the typing pauses `HOVER_DELAY`, while Settings… › "Show parameter hints" is on
+   *   (`CodeMirrorPopups`):  each key starts the wait again (epic `codemirror` I22);
+   *   ⇧⌘Space (Ctrl+Shift+Space off a Mac) shows it at once, in every mode.
    * - Asked again as the text or caret changes while it shows;  it goes where there's no call, or at Esc.
    */
   private signatureHelp(): Extension {
@@ -448,18 +472,31 @@ export class CodeMirrorLanguage {
           }
         }
       ]),
-      ViewPlugin.define((view) => ({
-        update: (update: ViewUpdate) => {
-          const isShowing = !!update.state.field(signatureShown)
-          const typedSpace = update.transactions.some(
-            (transaction) => transaction.isUserEvent("input.type") && typedText(transaction.changes) === " "
-          )
-          const asked = isShowing
-            ? update.docChanged || update.selectionSet
-            : typedSpace && CodeMirrorPopups.of(update.state).signatureHelp
-          if (asked) queueMicrotask(() => void this.showSignature(view))
+      ViewPlugin.define((view) => {
+        /** The wait for the typing to pause, once a space asked for it. */
+        let wait: CancelablePromise<unknown> | undefined
+        return {
+          update: (update: ViewUpdate) => {
+            // up already:  asked again at once, as the text or caret changes
+            if (update.state.field(signatureShown)) {
+              if (update.docChanged || update.selectionSet) queueMicrotask(() => void this.showSignature(view))
+              return
+            }
+            const typedSpace = update.transactions.some(
+              (transaction) => transaction.isUserEvent("input.type") && typedText(transaction.changes) === " "
+            )
+            const isWaiting = !!wait && (update.docChanged || update.selectionSet)
+            if (!isWaiting && !(typedSpace && CodeMirrorPopups.of(update.state).signatureHelp)) return
+            // each key starts the wait again
+            wait?.cancel()
+            wait = after(HOVER_DELAY, () => {
+              wait = undefined
+              void this.showSignature(view)
+            })
+          },
+          destroy: () => wait?.cancel()
         }
-      }))
+      })
     ]
   }
 

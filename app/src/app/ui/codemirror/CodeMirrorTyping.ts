@@ -14,9 +14,11 @@ import {
 } from "@codemirror/state"
 import { EditorView, keymap } from "@codemirror/view"
 
+import { after } from "spell/util/timing"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
 import { FileStates } from "./FileStates"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
@@ -34,7 +36,8 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  * - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;
  *   one undo leaves `group ` again, and a `"` typed after the name steps over the closing one.
  * - A space after a tag's name writes the rest of the tag, the caret where its next words go:
- *   `<action ` => `<action "|" />`, the program's actions listed at once (`LSP.CompletionShapes.spaceAfterTag()`);
+ *   `<action ` => `<action "|" />`, the program's actions listed once the typing pauses `HOVER_DELAY`
+ *   (`LSP.CompletionShapes.spaceAfterTag()`;  epic `codemirror` I22);
  *   one undo leaves `<action `.
  * - A paste takes the indent where it lands, ⌘V and the right-click menu's Paste alike (`paste()`);
  *   one undo takes it all back.  A whole line copied (nothing selected) pastes as copied.
@@ -271,7 +274,7 @@ export class CodeMirrorTyping {
         // what's typed in it next is a step of its own
         view.dispatch({ annotations: isolateHistory.of("after") })
       }
-      if (rest.command) queueMicrotask(() => startCompletion(view))
+      if (rest.command) suggestOncePaused(view)
       return true
     }
     if (!LSP.SpellTyping.opensQuotes(lines, index, lang)) return false
@@ -491,6 +494,17 @@ function indentSettingsOf(state: EditorState): LSP.IndentSettings {
 /** The scope a tag typed in `file` is read in:  its last parse's, else its language's. */
 function scopeOf(file: SP.SpellFile | undefined, lang: string): P.Scope {
   return file?.scope ?? file?.project.scope ?? SP.Language.for(lang).rootScope
+}
+
+/**
+ * Show the suggestion list in `view` once the typing pauses `HOVER_DELAY`, as the list shown by itself does
+ * (epic `codemirror` I22);  never if a key is typed before then:  that key's own wait takes over.
+ */
+function suggestOncePaused(view: EditorView): void {
+  const { doc } = view.state
+  void after(HOVER_DELAY, () => {
+    if (view.state.doc === doc && view.hasFocus) startCompletion(view)
+  }).catch((error) => console.error("CodeMirrorTyping:  the suggestion list didn't show", error))
 }
 
 /** A key being typed, and what the helps need to know. */

@@ -140,7 +140,7 @@ and in the app's build folder, `app/` at the app folder's root.
     ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts)).
     So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
-    - Suggestions, hover, folding, signature help (⇧⌘Space, or as a space is typed while Settings… says),
+    - Suggestions, hover, folding, signature help (⇧⌘Space, or once a space is typed and the typing pauses, while Settings… says),
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
       Find All References, code actions, accent fixes as you type;  hovers and signature help drawn by `<ui-markdown>`.
     - A Spell UI tag's help on Go to Definition;  Format Document, expand / shrink selection, Go to Symbol.
@@ -223,7 +223,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
     - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
-      `<action ` => `<action "|" />`, the program's actions listed at once;  `<divider ` => `<divider | />`;
+      `<action ` => `<action "|" />`, the program's actions listed once the typing pauses;  `<divider ` => `<divider | />`;
       any other, its closing tag written out, `<segment ` => `<segment |></segment>`;  one undo leaves `<action `
       - the shape choosing it from the suggestion list writes, from the same table (`LSP.CompletionShapes.spaceAfterTag()`)
       - only with nothing more of the tag written after the caret
@@ -280,6 +280,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
+    - What shows by itself as you type (the list, signature help) waits for the typing to pause, `HOVER_DELAY` (800 msec,
+      the page's `--ui-hover-delay`), each key starting the wait again (epic `codemirror` I22);
+      Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
     - Settings… drives the editors live:
       `codeMirrorOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following `codeChoices`, which `CodeSettings` sets.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them
