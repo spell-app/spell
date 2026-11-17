@@ -40,11 +40,9 @@ The page IS the record, and `epic` reads and writes it directly:  no database, n
 It's the same page you review in VS Code.
 When Claude runs `epic close readme#J16`, the item closes on your screen, with no reload.
 
-`epic` is the command line under spell-epic's skills:  `/epic`, `/isolate`, `/bg` and the rest run it for Claude,
-and you can type any of it yourself.
-It has 77 verbs, and 107 more inside the 18 of them that are groups (`epic window` alone has fifteen);
-this page has every one.
-You'll type about six.
+`epic` is the command line under the epic plugin's skills:  they run it for Claude, and you can type any of it yourself.
+It has 79 verbs, and 113 more inside the 19 of them that are groups (`epic window` alone has sixteen):
+this page has every one, and you'll type about six.
 
 **Claude Code only, for now:**
 the verbs that find sessions, move windows and wake a session are built on Claude Code
@@ -62,19 +60,19 @@ The skills run the rest.
 
 ```sh
 epic --version
-# epic 1cd9d8874 (main) ~/www/spell/epic
+# epic 8c93afa6e (main) ~/www/spell/epic
 epic list
 # in progress:  (not reviewed / items)
-#   epic-engine              263 / 639  (../spell.worktrees/epic-engine)
+#   epic-engine              306 / 801  (../spell.worktrees/epic-engine)
 #   ...
-#   language                  60 / 269  (../spell.worktrees/language)
+#   language                 235 / 635  (../spell.worktrees/language)
 #   ...
 # future:  (not reviewed / items)
 #   ...
 #   epic-linux                 3 / 3
 #   ...
 # done:  (not reviewed / items)
-#   data                     282 / 517  (../spell.worktrees/data)
+#   data                     260 / 546  (../spell.worktrees/data)
 #   ...
 epic summary readme             # one epic:  its phases, the next one, its loose ends (above)
 epic open readme                # its page, in VS Code's Review tab
@@ -161,9 +159,9 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
   - [window.mjs](src/window.mjs):  the windows
 - It never loads the kit's `spell` program either, and spell-epic adds no commands to it.
   Its tools are all `epic`'s, the docs tools included (`epic pages <verb>`).
-- `yarn epic` runs it too, in spell-epic's folder and in spell-app's.
-  - spell-app adds `yarn ask` (`epic ask`)
-  - and `yarn window` (`epic window`)
+- `yarn epic` runs it too, in the epic folder and in the app's.
+  - The app's folder adds `yarn ask`, for `epic ask`.
+  - And `yarn window`, for `epic window`.
 
 </details>
 
@@ -201,16 +199,20 @@ _One loop, driven by exit codes:  0 means work, 2 means arm it again._
   Each gives up after a time of its own, in its row below, and exits 2.
 - While it waits, `inbox wait` stamps a heartbeat every 30 seconds.
   Silent for 90, and the page says nobody is reviewing.
-- A session with no `wait` running still hears your Send.
-  The plugin's inbox poller starts with each session and at each turn's end, watches that session's epic page,
+- A session with no `wait` running still hears your Send:
+  the plugin's inbox poller starts with each session and at each turn's end, watches that session's epic page,
   prints nothing while idle, and wakes the session with one line when you Send ([the hooks' table](README-skills.md#hooks)).
-  A scripted `claude -p` has none:  nobody is there to Send, and it would wait on the poller before answering.
+- An unattended session (`claude -p`, the Agent SDK, a background session) has no poller:
+  nobody is there to Send, and `claude -p` waits for every session-start hook before its first answer.
+  - So the poller, and the restart hook's wake, end at once there.
+  - Claude Code says which is which:  `CLAUDE_CODE_SESSION_ATTENDED` is `"0"` when nobody's there;
+    unset counts as attended.
 - What you see on the page meanwhile:  [README-pages.md](README-pages.md), "A review round".
 
 | Exit | Means |
 | --- | --- |
 | 0 | done;  for a `wait`, there's work, and it's printed |
-| 1 | an unknown verb (the verbs are listed);  a check that failed:  `server status` or `hub status` with no server, `airplane check` not ready, `ask answer` with no answer, `ask draft` with nothing typed;  `agents add` for one already running;  a window verb with no extension to reach |
+| 1 | an unknown verb (the verbs are listed);  a check that failed:  `server status` or `hub status` with no server, `airplane check` not ready, `ask answer` with no answer, `ask draft` with nothing typed, `window hooks` with the session's hooks not running;  `agents add` for one already running, `agents claim` for a file another agent has, `agents last` with others still running;  a window verb with no extension to reach |
 | 2 | a usage error, such as an id written without its `#`, or a `--flag` the verb hasn't got (it names the nearest);  a `wait` that timed out:  run it again |
 | 3 | `park wait` with nothing by that name;  `agents wait` with no agent left running |
 
@@ -287,11 +289,14 @@ these are the verbs under it.
 | `epic send [<epic>] --text "..."` | writes a request into an epic, `epics/<epic>/requests/r3/`:  your words (`--text`, or `--file`), the newest `--images <n>` screenshots pasted into this session, `--context "..."` for what it was looking at;  then prints the request's id and the epic's running sessions to tell, or the command that opens its window;  no epic:  the tooling home |
 | `epic requests <epic>` | lists every request sent to an epic, and where each one went |
 | `epic file <epic>#P3 <rN>` | files a request into a phase:  its words, context and screenshots into the phase's Requests field, the request marked filed there |
-| `epic file <epic> <rN> "where it went"` | marks a request with no phase, saying where it went:  `"dropped:  done in P2"` |
+| `epic file <epic>#T5 <rN>` | files a request into a todo:  its words and context at the end of the todo's text, its screenshots as the todo's pictures, the todo marked requested (light orange once done) |
+| `epic file <epic> <rN> "same as T12"` | only for a duplicate:  marks the request, naming the todo or phase it duplicates;  every other request becomes a todo or a phase |
 | `epic home [<epic>]` | prints the tooling home, the epic that requests about the tooling itself go to;  with an epic, sets it |
-| `epic merge <epic> [--ditch]` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in;  run it in the main checkout.  A stray snapshot or generated file there is moved aside first;  `--ditch` moves up to 3 others too, once you agree.  A merge that changed a lockfile or a `package.json` installs the packages there, then restarts its page server and editor;  a failed install leaves the merge in, and says what to run.  Refuses, in one line, where `main` takes only pull requests |
+| `epic merge <epic> [--ditch] [--as <agent>]` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in, taking `main` into the branch first when it moved;  it works on the main checkout from anywhere.  A stray snapshot or generated file there is moved aside first;  `--ditch` moves up to 3 others too, once you agree;  `--as`:  the agent merging, whose own claimed files never block it.  A merge that changed a lockfile or a `package.json` installs the packages there, then restarts its page server and editor;  a failed install leaves the merge in, and says what to run.  One merge at a time on the machine (`epic turns`).  Refuses, in one line, where `main` takes only pull requests |
 
 - A request is written BEFORE anyone is told, so nothing is lost when the epic's own session is closed.
+- Every request ends up a todo or part of a phase, never a loose note:  the session taking it adds the todo
+  (`epic add <epic>#T ... --requested --start`), then files the request into it.
 
 ### Epic page:  making and reading
 
@@ -300,11 +305,11 @@ Every verb here only reads, but `create`, `stage` and `change`:  run them from a
 | Verb | What it does |
 | --- | --- |
 | `epic create <epic> --title "Title"` | makes an epic page from the template, and lists it on the docs' home page;  `--prompt "..."` or `--prompt-file <file>`:  the prompt that started it;  `--saga <id>`:  the saga it serves;  `--future`:  an idea for later, not planned yet;  `--stage <stage>`:  the stage it starts in (`overview`, unless you say);  on a future epic's page, plans it where it is |
-| `epic stage <epic> overview \| phases \| building` | sets the page's stage:  `overview` (phases titled as drafts), `phases` (phases agreed) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
+| `epic stage <epic> overview \| phases \| building` | sets the page's stage, which decides what it shows:  `overview` (the Overview, Questions and Todos), `phases` (the Phases and Issues too) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
 | `epic change <epic> [--for <item>]` | stamps the change marks written by hand (`<epic-change item="q13">words</epic-change>`) with their id, time, answer and the words they replaced, then lists them;  `--for`:  the item of the marks that name none;  any epic edit stamps them too |
 | `epic list [--json]` | lists every epic once:  in progress, future or done, where it runs, and how many of its items you haven't reviewed |
 | `epic summary <epic> [--json]` | prints an epic's phases, the next one, and its open questions, judgement calls, issues, todos, limits and manual tests |
-| `epic stale <epic> [--json]` | the facts for judging which open calls, issues and todos have gone stale:  age from when each was written, phase, whether the files and names it mentions still exist (in its worktree or on `main`;  only what git's history has can be gone), commits since, later mentions, the todo made to follow it up, the done phases it says it waits for, its status cards;  decides nothing (`/epic tidy`) |
+| `epic stale <epic> [--json]` | the facts for judging which open calls, issues and todos have gone stale:  age from when each was written, phase, whether the files and names it mentions still exist (in its worktree or on `main`;  only what git's history has can be gone), commits since, later mentions, the todo made to follow it up, the done phases it says it waits for, its status cards;  decides nothing (`/epic tidy`).  `--underway`:  the open items whose Underway card is older than `--hours` (3), and whether their work is on `main`;  `--apply`:  on `main`, fixed for your review, else a Stale card, once;  never closes anything |
 | `epic summaries <page.html> ...` | prints `summary --json` for each page, by path, worktrees' too:  what `/epics` reads |
 | `epic items <epic>` | prints what a review walks:  sections, counts, items, the queue;  `--section issues`, `--filter unreviewed \| open \| reviewed \| queued \| all`, `--json`;  `--spec <file>`:  a review's item picker, as a details page's questions |
 | `epic docs <epic> [--json]` | lists the docs an epic wrote besides its page (its guide, what its commits changed, docs that name it) and its changelog entry:  what `/docs-check` reads |
@@ -338,7 +343,7 @@ so links and comments stay on the phase they meant.
 | On | Flags |
 | --- | --- |
 | a phase, `seo#P3` | `--symptom`, `--changes`, `--goal`, `--files`, `--verify <html>`:  its body, `""` removes one;  `--plan <html>`:  Claude's build plan, waiting for your Accept (`--accepted`:  written accepted, your comments folded in);  `--choices <html>`:  its own option sets;  `--estimate 1-2h`:  the Overview's total follows;  `--title "New name" [--html]`:  renamed, and links that say the old name follow |
-| an item, `seo#J3` | `--title "New title" [--html]`;  `--calm` or `--loud`;  `--requested`:  an issue filed from your own words, light orange once Claude closes it, until you review it;  `--failed I12` / `--failed off`:  a manual test failed, filed as that issue, or not |
+| an item, `seo#J3` | `--title "New title" [--html]`, at most 30 plain words, as `add`'s;  `--calm` or `--loud`;  `--requested`:  an issue filed from your own words, light orange once Claude closes it, until you review it;  `--failed I12` / `--failed off`:  a manual test failed, filed as that issue, or not |
 | the page, `seo` | `--standing [on \| off]`, `--no-standing`:  a standing epic, open for good, each phase merging on its own, never done |
 | Claude's status card:  an item, an Overview sub-section (`seo#o3`), a phase or `seo#summary` | `underway "<reading>"`, `done ["<summary>"]`, `fixed ["<what changed>"]`, `noted "<what>"` or `promised "<what>"`:  a state word after the target, never with flags (the items' table, next);  `noted --quiet` leaves the item's change stamp alone |
 
@@ -352,7 +357,7 @@ and the text it had moves into a folded Original Discussion.
 
 | Verb | What it does |
 | --- | --- |
-| `epic add <epic>#J "Title"` | adds an item and prints its id;  the letter is its kind:  `J` judgement call, `Q` question, `I` issue, `T` todo (work still to do;  `--limit`:  a limit to know about), `M` manual test, `D` a question born answered (it gets a `Q` id);  `C` and `V`, older letters, are refused, naming the new ones (`C` is a comment's now);  `--details <html>`;  `--options "*Do it \| Don't"`:  a call's or question's option set, `*` on the one recommended;  `--requested`:  an issue filed from your own words, light orange once Claude closes it, until you review it;  `--calm`, last, for a call or issue that wouldn't surprise you |
+| `epic add <epic>#J "Title"` | adds an item and prints its id;  the letter is its kind:  `J` judgement call, `Q` question, `I` issue, `T` todo (work still to do;  `--limit`:  a limit to know about), `M` manual test, `D` a question born answered (it gets a `Q` id);  `C` and `V`, older letters, are refused, naming the new ones (`C` is a comment's now);  `--details <html>`;  `--options "*Do it \| Don't"`:  a call's or question's option set, `*` on the one recommended;  `--requested`:  an issue or todo filed from your own words, light orange once Claude closes it, until you review it;  `--start "<your words>"` (`--agent <name>`):  taken up at once, your words its body, an Underway card naming the agent, blue rather than red;  `--picture <file>` (repeat it) or `--pasted <n>`, the last n pictures you pasted into the session's chat:  shown after its words, deletable on the page;  `--calm`, last, for a call or issue that wouldn't surprise you.  The title is at most 30 plain words, read cold:  one longer, a `"; "` list or two sentences is refused, and the rest goes in `--details` |
 | `epic add <epic>#choices "Title"` | adds a standing option set to the page's Choices section;  `--multiple`:  pick any, not pick one;  `--note <html>`:  its lead |
 | `epic calm <epic>#J3 [J4 ...]` | marks calls or issues not urgent, yellow rather than red, as clicking the id chip does;  `--loud`:  red again |
 | `epic decide <epic>#Q3 "answer"` | answers a question, writing the answer INTO it, and prints its id;  `--option A` marks the chosen option card;  `--details <html>` |
@@ -417,7 +422,7 @@ inbox:  epic inbox wait seo  (the inbox's verb goes first)
 | `epic inbox apply <epic> [ids ...]` | applies the sent approvals, picks, new todos and test answers, printing each, and what it left to talk over;  `--all`:  unsent ones too |
 | `epic inbox status <epic> "<text>"` | sets the toolbar's line, what the session is doing (`"Responding"`);  `--items q3,c2`:  what it's answering;  `--clear`:  idle |
 | `epic inbox working <epic>#J3 on \| off` | turns the page's spinner on an item on or off;  on a comment (`seo#C3`), its "Claude:  thinking…" |
-| `epic inbox done <epic>#J3` | an agent finished the item:  its mark and spinner go, unless you changed the mark meanwhile |
+| `epic inbox done <epic>#J3` | an agent finished the item:  its mark and spinner go, unless you changed the mark meanwhile;  on a comment, `--file <reply.html>` is its answer (`--commit <sha>`:  where it was built) |
 | `epic inbox clear <epic>#J3` | drops an item's marks:  a revisit talked over |
 | `epic test <epic>[#M3]` | opens the page in the Review tab with Start testing pressed:  Claude prepares the open tests, then the first opens (or M3), and you answer each in the page's Manual tests section;  `--list [--json]`:  its open tests, prepared first, Not now ones last, opening nothing;  `--all`:  every epic's, in the sagas' order |
 
@@ -486,12 +491,12 @@ Lost track?  `epic status`.
 | `epic status [--json]` | takes stock:  worktrees, branches, sessions, parked work and plans, sorted into in process, hung or parked, and dead |
 | `epic worktree list [--json]` | lists every running session with the worktree, branch and folder it works in, then the idle worktrees |
 | `epic worktree status <name>` | prints, as JSON, where a worktree, branch, epic page or session of that name stands |
-| `epic worktree create <name>` | makes worktree `<name>` on branch `<name>`, as Claude Code's `EnterWorktree` does through the worktree hook, and prints its folder:  for Codex, or any agent with no worktree hook;  reused when it's there |
+| `epic worktree create <name>` | makes worktree `<name>` on branch `<name>`, from the local base branch, as Claude Code's `EnterWorktree` does through the worktree hook, and prints its folder:  for Codex, or any agent with no worktree hook;  reused when it's there |
 | `epic worktree path <name>` | prints a worktree's folder, or where a new one would go;  a session enters it by name, never by this path, or Claude Code would ask |
 | `epic pr <name>` | pushes branch `<name>` (`git push -u origin`, never forced) and opens its pull request against the base branch, a merge request on GitLab;  if one's open, says its address and that the push updated it;  `--title <title>`, `--body-file <file>`;  refuses a branch that's unknown or has nothing ahead of the base;  `gh` or `glab` missing or logged out:  the branch is pushed, and it prints what to run |
 | `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after, or `--branches`:  each repo's, when merged;  where `main` takes only pull requests, a merged pull request counts, a squash included);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
-| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  then installs the packages when it changed a lockfile or a `package.json` (the repo's install command), and renames Spell UI's old names the branch still writes (`spell ui rename`);  `--continue` after you resolve any other conflict (below);  `--json` |
+| `epic worktree merge-main [--as <agent>]` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  one merge at a time on the machine, and never moving aside a file another running agent claims (`--as`:  the agent merging);  then installs the packages when it changed a lockfile or a `package.json` (the repo's install command), and renames Spell UI's old names the branch still writes (`spell ui rename`);  `--continue` after you resolve any other conflict (below);  `--json` |
 | `epic worktree patch [--all]` | gives this checkout (`--all`:  `main` and every worktree) the fixes its repo lists in `.epic/config.json5`'s `checkoutPatches` that it doesn't have yet:  a file copied from `main` and git-excluded, or a command run once;  `--dry-run`, `--json`;  the session-start hook runs it by itself |
 | `epic worktree move <name> \| --idle` | moves a worktree from the old place inside the repo, `.claude/worktrees`, to beside it;  `--idle`:  every one no session works in;  `--dry-run` |
 | `epic session list [<words> ...]` | lists this repo's saved Claude Code sessions, newest first, matching every word;  `--limit <n>`, `--all` |
@@ -532,8 +537,8 @@ Lost track?  `epic status`.
 - A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
   through `checkoutPatches`, not when each branch merges `main`
   ([README-config.md](README-config.md#the-config-file)).
-  - Add the fix on `main`, list it there, then `epic worktree patch --all`;  new and reopened sessions catch up by
-    themselves.
+  - Add the fix on `main`, list it there, then `epic worktree patch --all`;
+    new and reopened sessions catch up by themselves.
   - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
     the tracked one;  from then on the patch does nothing there.
 
@@ -562,7 +567,9 @@ Codex, or any agent without the skills, works an epic from these;  `skills check
 
 | Verb | What it does |
 | --- | --- |
-| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
+| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics, `--path` the guide's file.  `superpowers` is the words that tell the superpowers plugin to stand aside in an epic ([With superpowers](README-config.md#with-superpowers));  `tidy`, closing what other work made obsolete.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
+| `epic turns run <kind> -- <command>` | runs a command in its turn:  one of each kind at a time on the machine, so five agents' full test runs queue rather than fight (`epic turns run test -- yarn test`);  it waits, saying who has the turn.  `epic merge` and `merge-main` take the `merge` turn by themselves |
+| `epic turns [list]` | the turns taken now:  each kind's holder, and since when |
 | `epic turn end` | ends an agent's turn:  the epic folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |
 | `epic skills check` | checks the plugin's skills hold for Claude Code and Codex alike:  each step naming a Claude-only tool (the question modal, background agents, the worktree tools ...) has an "In Codex:" line beside it, each Claude-only skill its `agents/openai.yaml`, and the descriptions fit Codex's list;  exits 1 on a problem;  `--json` |
 
@@ -589,6 +596,7 @@ an epic or saga page goes to Review, a details or choice page to Details, anythi
 | `epic window stay <name>` | a session staying in this window for worktree `<name>`:  titles and tints the window;  `--end` puts both back |
 | `epic window color [<look>]` | gives this window a look, Tomorrow Night Blue's in one of twelve hues:  `red`, `orange`, `amber`, `green`, `teal`, `cyan`, `blue`, `indigo`, `purple`, `pink`, `brown`, `grey`;  no look:  lists them |
 | `epic window which` | prints this session's window:  its process, workspace file and folders |
+| `epic window hooks [--again <command>]` | do this session's hooks run?  The skills ask before a worktree is made, since a session opened before the plugin was installed has none:  exits 1 with the fix (`/reload-plugins`, then the command again);  under Codex, nothing to check |
 | `epic window show <file>` | shows an `.html` page in the window's side bar, in the tab its kind picks;  `--review`:  the Review tab, for a page of no kind of its own;  `--hash <id>` |
 | `epic window reload` | rebuilds the side bar's view from scratch, at the page it shows;  `--review` |
 | `epic window add <path>` | adds a folder to the window (`--name <name>`);  never a worktree's:  a worktree has a window of its own |
@@ -644,7 +652,7 @@ Every key of the config file, and what `epic init` writes:  [README-config.md](R
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic settings [<key>] [--json]` | prints how the epic tooling behaves for you, each value and the file that set it:  three files named `epic_settings.json5`, merged key by key, the later winning:  the kit's own, the epic repo's root (your team's, optional), and `~/.spell/` (yours, optional);  a file that won't read, or a bad value, is said on stderr, and the layer below stands |
-| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](README-setup.md#on-gitlab)), `--protected-base` ([main takes only pull requests](README-setup.md#when-main-takes-only-pull-requests)), `--no-plugin`, `--no-commit`, `--no-server`;  `--dry-run` first;  safe to run again |
+| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](README-setup.md#on-gitlab)), `--protected-base` ([main takes only pull requests](README-setup.md#when-main-takes-only-pull-requests)), `--public`, `--install "<command>"`, `--local` ([nothing in your repo](README-setup.md#nothing-in-your-repo)), `--superpowers` (its stand-aside words in `AGENTS.md`, without asking), `--no-plugin`, `--no-commit`, `--no-server`, `--json`;  `--dry-run` first;  safe to run again |
 | `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
 | `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--kit <folder>` names another checkout;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer, coherence and plan-check reviewers as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
@@ -679,8 +687,11 @@ The same group keeps the comments you leave on any docs page, the background age
 | `epic comments answer <page>#C3 --file <reply.html>` | writes Claude's answer into the comment's thread;  `--commit <sha>`:  the commit it was built in |
 | `epic notes list \| answer \| done` | page notes, the kind from before comments:  lists them (`--all`), answers one (`<page>#n3 --file <reply.html>`), marks one done |
 | `epic agents [list]` | lists the background agents running now, oldest first:  this epic's, else this checkout's |
-| `epic agents add <name> "<task>"` | records an agent starting, and prints its full name (below);  exit 1 if it's running already;  `--status`, `--task-id` |
+| `epic agents add <name> "<task>"` | records an agent starting, and prints its full name (below);  exit 1 if it's running already;  `--status`, `--task-id`;  `--files <path,...>`:  claims them as it starts |
+| `epic agents claim <name> <path...>` | the files an agent is changing, from the checkout's root (a file, a folder or a glob):  no other agent claims them, and no merge moves them aside;  exit 1, naming the agent, if another has one |
+| `epic agents claims [--json]` | every running agent's claimed files, one line each |
 | `epic agents set <name>` | sets an agent's status (`active`, or `"blocked on <name>"`) or its task id |
+| `epic agents last <name>` | is this agent the last of its epic still running?  Exit 0 when no other is listed, so it runs the full test suite after merging;  exit 1 listing the others |
 | `epic agents done <name>` | takes an agent off the list:  it's back;  says how long it worked, and logs it on the epic page |
 | `epic agents wait` | waits until you send an agent a note from the epic page (exit 0, printing it) or none is left running (exit 3);  `--every 2`, `--max 3600` seconds |
 | `epic agents told <name>` | marks your notes to the agent as passed on:  the page shows them told |
@@ -705,7 +716,7 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   Where that stands:  [README.md](README.md#-coming).
 - **Fast to start, not always to finish.**
   `epic` starts in about a second, but a verb that reads every page reads every page:
-  `epic list` took about 9 s over 68 epics when this was written, and it grows with each epic.
+  `epic list` took about 11 s over 70 epics when this was written, and it grows with each epic.
 - **No undo verb.**
   Each verb writes at once.
   The undo is git:  the epic folder commits after every turn,
@@ -721,5 +732,5 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
 - [README-skills.md](README-skills.md):  the skills that run these verbs for you, and when to reach for which
 - [README-pages.md](README-pages.md):  what the verbs write, and a review round as you see it on the page
 - [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md):  `epic init` in a repo of your own, with a team;  every config key, the epic server
-- [The kit's README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#epic):  `epic` beside `spell`, and the rest of the command line
+- [The kit's command line page](https://github.com/spell-app/spell/blob/main/README/cli.md#epic):  `epic` beside `spell`, and the rest of the command line
 - [README.md](README.md):  what an epic is, its words and its life, if this page assumed too much
