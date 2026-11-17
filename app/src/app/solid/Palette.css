@@ -345,3 +345,10 @@ ui-popup.MenuPopup {
 ui-menu.BarMenuItems ui-submenu.InspectRow > ui-action::part(item) {
   padding-inline-start: calc(12px + var(--InspectRow-depth, 0) * 12px);
 }
+/*
+ * its side menu, often long (a column of fanned cards):  on the side of its row with the most room up or down,
+ * rather than squeezed under a row low in the window, scrolled to the row pointed at
+ */
+ui-menu.BarMenuItems ui-submenu.InspectRow::part(flyout) {
+  position-try-order: most-height;
+}
