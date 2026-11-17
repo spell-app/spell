@@ -2676,7 +2676,9 @@ sidebars any of them opens.
   - A file is kept when (`P.ParseDiff.keepPlan()`):
     - no key it looked up changed, no test of its passes a record that changed, no record it found changed
     - a rule that changed can't match it:  a sequence one of whose required words its text doesn't have
-      (`P.Sequence.requiredWords`), e.g. a new phrase `it "is zz ready"`
+      (`P.Sequence.requiredWords`), e.g. a new phrase
+      - NOT a new question or action:  it's a method added, so every file parses again (`changesMethods()`, above;
+        a question since it's read ahead, epic `language` I154)
     - none of its entries sets fields on a record a file that parsed again set too
     - nothing under its lines points at a record or match that's gone, with none in its place
   - Kept:  each field under its lines pointing at an old record points at its new one, then its entries are put back.
@@ -2697,8 +2699,10 @@ sidebars any of them opens.
   - comment, blank line or top-level statement, anywhere:  ~1-2ms
   - declaration edit near the END:  ~1ms
   - declaration edit near the START of the first file:  ~110ms (~= a full parse)
-  - a member added, a kind or a phrase, in Card.spell (epic `language` P59):  ~45-75ms, was ~250-410ms:
+  - a member or a kind added, in Card.spell (epic `language` P59):  ~45-75ms, was ~250-410ms:
     Card.spell parses again whole, the files after it kept
+    - a file reading a measure or a `pause for` looks through the types only for dimensions (`dimensionsIn()`):
+      a new kind with no units keeps it
     - a member renamed that no later file reads (`picture`):  the same;  one they read (`short name`, `rank`):
       those files parse again too
     - in Pile.spell or Deck.spell:  ~30-75ms, was ~160-570ms (a busy machine, best of 3)
