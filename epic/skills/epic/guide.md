@@ -54,8 +54,14 @@ epic pages link <page> --show     # the page's links, to give the person
 
 An agent that can start background agents keeps its own session free to answer the person, and has them do the work
 (the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
-<path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
-`epic turns run test -- yarn test`.  Else, the steps below, here.
+<path...>`) and merges with `epic worktree merge-main --as <name>`.  Else, the steps below, here.
+Tests come in three tiers, never a full run per commit (epic `epic-engine` T90;  the epic skill's same section):
+1. per change:  only the tests beside what changed (`yarn vp test run <test file>`, or `--project <name>`)
+2. before merging:  each touched folder's UNIT tests, no browser or integration projects, in its turn:
+   in Spell `cd <folder> && epic turns run test -- yarn test:unit` (the kit's own:  `yarn kit:test:unit`, at the root)
+3. after merging into `main`:  the full suite (`epic turns run test -- yarn test`, at the repo's root) only when
+   `epic agents last <name>` exits 0:  no other agent of the epic still runs;  what it finds becomes an issue
+- the parser's speed test only for a change on its hot path (`parser/src/parser/`, the spell rules' matching)
 Each piece of work goes into `main` the moment it's done and merges cleanly (`epic merge <epic>`), never held for the
 phase's end, so the person sees it at once (the same section;  a standing rule).  Never ask whether to merge:
 `epic worktree merge-main` first, always;  failures that aren't this work's don't hold it.  It can't:  say why on its

@@ -323,6 +323,17 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "last",
+      usage: "<name>",
+      description:
+        "is this agent the last one of its epic still running?  exit 0 when no other is listed (it runs the full " +
+        "test suite after merging), exit 1 listing the others",
+      example: "epic agents last docstrings",
+      flags: {
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
       name: "wait",
       usage: "[--every <s>] [--max <s>] [--json]",
       description:

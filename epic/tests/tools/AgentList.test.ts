@@ -105,6 +105,12 @@ describe("add, set, done", () => {
     expect(entry).toMatchObject({ status: "active", taskId: "t1" })
   })
 
+  test("othersThan:  the agents besides one, by short or full name (the last one standing, T90)", () => {
+    expect(list.othersThan("aaa").map((it) => it.name)).toEqual(["work-bbb"])
+    expect(list.othersThan("work-bbb").map((it) => it.name)).toEqual(["work-aaa"])
+    expect(list.othersThan("zzz")).toHaveLength(2)
+  })
+
   test("done takes it off;  an unknown name throws, naming the ones running", () => {
     expect(list.done("aaa").name).toBe("work-aaa")
     expect(() => list.done("aaa")).toThrow(/running:  work-bbb/)

@@ -15,6 +15,8 @@
  *   P41):  `skillz-aaa done:  took 21m`, and an epic's list logs it on the epic page;  best effort:  nothing found,
  *   nothing said
  * - `list [--json]` (default):  one line each, oldest first (`--json`:  the entries)
+ * - `last <name>`:  exit 0 when no OTHER agent of the list runs (`name` is the last one standing, and runs the full test
+ *   suite after it merges);  exit 1, listing them, when others do (epic `epic-engine` T90)
  * - `wait [--every <s>] [--max <s>] [--json]`:  run in the BACKGROUND (Bash `run_in_background`) while agents run;
  *   exits when Owen has sent one a note from the epic page's Agents box (`agentRoutes.ts`), which wakes the session:
  *   - 0:  untold redirects, printed `skillz-aaa:  <note>` (`--json`:  `[{ name, note, at }]`);  the session sends
@@ -70,6 +72,7 @@ async function run(
       return 0
     }
     if (!name || (verb === "add" && !task)) return usage()
+    if (verb === "last") return lastStanding(list, name)
     if (verb === "add") console.log(list.add(name, task!, { status, taskId, files }).name)
     else if (verb === "claim") {
       if (!task) return usage()
@@ -119,6 +122,22 @@ async function waitForRedirects(list: AgentList, flags: Record<string, string | 
 }
 
 /**
+ * `last <name>`:  is agent `name` the last one of its epic still running?  0 when it is, so it runs the full test suite
+ * after merging;  1 when others run, each listed, so it leaves the full suite to the last of them (epic `epic-engine`
+ * T90).
+ */
+function lastStanding(list: AgentList, name: string): number {
+  const others = list.othersThan(name)
+  if (!others.length) {
+    console.log(`${list.fullName(name)} is the last agent running (${list.prefix}):  run the full test suite`)
+    return 0
+  }
+  console.log(`${others.length} other agent(s) still running (${list.prefix}):  the last of them runs the full suite`)
+  for (const agent of others) console.log(`  ${agentLine(agent)}`)
+  return 1
+}
+
+/**
  * Say how long finished agent `agent` worked (its transcript, `WorkTime.ofAgent()`):  printed, and logged on its
  * epic's page when the list is an epic's (`Agent skillz-aaa done:  took 21m`).
  * - best effort, NEVER throws:  no transcript found, nothing said;  a page that won't take the line, a warning
@@ -160,7 +179,7 @@ function usage(): number {
   console.error(
     'usage:  epic agents add <name> "<task>" [--status ...] [--task-id <id>] [--files <path,...>] | ' +
       "set <name> [--status ...] [--task-id <id>] | claim <name> <path...> | claims [--json] | done <name> | " +
-      "list [--json] | wait [--every <s>] [--max <s>] [--json] | told <name>   " +
+      "list [--json] | last <name> | wait[--every <s>] [--max <s>] [--json] | told <name>   " +
       "(any verb:  [--epic <name>])"
   )
   return 2

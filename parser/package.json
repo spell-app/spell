@@ -10,6 +10,7 @@
     "/////// CHECKS": "",
     "ts": "spell-types && tsc -p tests",
     "test": "vp test run && uv run --directory src/py/core pytest -q",
+    "test:unit": "yarn test",
     "lint": "spell-types && vp lint --report-unused-disable-directives --max-warnings 0 src tests scripts && uv run --directory src/py/core ruff check . ../../../tests/py/core/tests",
     "lint:fix": "spell-types && vp lint --fix src tests scripts && uv run --directory src/py/core ruff check --fix . ../../../tests/py/core/tests",
     "format": "vp fmt && uv run --directory src/py/core ruff format . ../../../tests/py/core/tests",
