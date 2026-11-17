@@ -1,4 +1,7 @@
-import type { UserConfig } from "vite"
+import { mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import type { ProxyOptions, UserConfig } from "vite"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { pageServerProxy } from "../../app/vite.shared.ts"
@@ -33,9 +36,27 @@ describe("vite.config.ts:  the editor's dev server on the house network (epic `a
 describe("pageServerProxy():  the editor's dev server passing the page server's paths on (epic `language` T68)", () => {
   test("its write token goes on project data folders' requests (`/api/places`), and nowhere else", () => {
     const proxy = pageServerProxy({ target: TARGET, token: "t0k3n" })
-    expect(proxy["/api/places"]?.headers).toEqual({ "x-server-token": "t0k3n" })
+    expect(tokenSent(proxy["/api/places"])).toBe("t0k3n")
     for (const [path, options] of Object.entries(proxy)) {
-      if (path !== "/api/places") expect(options.headers, path).toBeUndefined()
+      if (path !== "/api/places") expect(tokenSent(options), path).toBeUndefined()
+    }
+  })
+
+  // epic `epic-engine` I329:  vite outlives a page server's restart, and the next page server has a new token
+  test("with the page server's token file:  the token in it NOW, read again once it changes", () => {
+    const folder = mkdtempSync(join(tmpdir(), "vite-token-"))
+    const tokenFile = join(folder, ".spell-server.token.json")
+    try {
+      const places = pageServerProxy({ target: TARGET, token: "started-with", tokenFile })["/api/places"]
+      expect(tokenSent(places), "no file yet:  the token it started with").toBe("started-with")
+      writeFileSync(tokenFile, JSON.stringify({ pid: 1, token: "first-run" }))
+      expect(tokenSent(places)).toBe("first-run")
+      writeFileSync(tokenFile, JSON.stringify({ pid: 2, token: "next-run" }))
+      // a write in the same millisecond as the last could keep its change time:  move it on
+      utimesSync(tokenFile, new Date(), new Date(Date.now() + 1000))
+      expect(tokenSent(places)).toBe("next-run")
+    } finally {
+      rmSync(folder, { recursive: true, force: true })
     }
   })
 
@@ -60,6 +81,18 @@ describe("pageServerProxy():  the editor's dev server passing the page server's 
   })
 
   test("no token, no header:  the page server then answers 403 there, as before", () => {
-    expect(pageServerProxy({ target: TARGET })["/api/places"]?.headers).toBeUndefined()
+    expect(tokenSent(pageServerProxy({ target: TARGET })["/api/places"])).toBeUndefined()
   })
 })
+
+/** The token `options`' proxy adds to a request as it sends it on (its `configure()`), or `undefined` for none. */
+function tokenSent(options: ProxyOptions | undefined): string | undefined {
+  let sent: string | undefined
+  const proxy = {
+    on: (event: string, handler: (request: { setHeader: (name: string, value: string) => void }) => void) => {
+      if (event === "proxyReq") handler({ setHeader: (name, value) => name === "x-server-token" && (sent = value) })
+    }
+  }
+  options?.configure?.(proxy as never, options)
+  return sent
+}

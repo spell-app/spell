@@ -41,7 +41,8 @@ export default defineConfig({
     // pages;  its write token added for the project data folders (`pageServerProxy()`)
     proxy: pageServerProxy({
       target: `http://${environment.api_server}:${environment.expressPort}`,
-      ...(environment.serverToken !== undefined && { token: environment.serverToken })
+      ...(environment.serverToken !== undefined && { token: environment.serverToken }),
+      ...(environment.serverTokenFile !== undefined && { tokenFile: environment.serverTokenFile })
     })
   },
   build: {
