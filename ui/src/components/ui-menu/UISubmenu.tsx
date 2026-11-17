@@ -92,6 +92,10 @@ const FLYOUT_SHEET = `@layer ui.components.submenu.types { .flyout:popover-open 
  *     (`FLYOUT_STYLE`), turned to the other side at the window's edge.
  *   - Its anchor is the implicit one its row sets as it shows it (`showPopover({ source })`), as `<ui-popup>`'s is:
  *     a menu elsewhere on the page can't name an anchor inside this element's shadow root.
+ * - `split`:  its row is two things at once (Owen, epic `editor` P31, Q35 C2):
+ *   - its title, a plain item:  a click, Enter or Space chooses it (its menu's `ui-choosing`), and closes the menu
+ *   - its chevron end, set off by a faint line:  the pointer over it, a click on it, or the arrow key opens the fly-out
+ *   - a screen reader still hears a row with a menu (`aria-haspopup`), which Enter chooses
  * - Opening:
  *   - the pointer over its row;  `SubMenuAim` keeps it open while the pointer heads for it, across other rows
  *   - a click, Enter or Space
@@ -116,17 +120,30 @@ export class UISubmenu extends UIItem {
     // so it's a menu of its own, not a sub-menu of the row's menu
     isAPart: false,
     // the item's own, restated:  its setup is typed as its literal
-    disabled: "its own"
+    disabled: "its own",
+    // `:state(split)`, as its attribute says
+    cssStates: ["split"]
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
   // ## The row
   ////////////////
 
-  /** A click on its row opens its fly-out, never chooses it (`UIMenu`'s `ui-choosing`). */
-  get opensAMenu(): boolean {
-    return true
+  /**
+   * A click that opens its fly-out chooses nothing (`UIMenu`'s `ui-choosing`):  anywhere on its row;
+   * `split`, only on its chevron end, so a click on its title is a choice, as a plain item's.
+   */
+  opensAMenuOn(event: Event): boolean {
+    return !this.split || this.isOnChevron(event)
   }
+
+  /** `event` went through its chevron end:  with `split`, what opens its fly-out. */
+  private isOnChevron(event: Event): boolean {
+    return !!this.chevron && event.composedPath().includes(this.chevron)
+  }
+
+  /** Its chevron end, once drawn. */
+  private chevron: HTMLElement | undefined
 
   /** Always a button:  something to press, in any menu. */
   get rootTag(): "a" | "button" | "div" {
@@ -141,6 +158,11 @@ export class UISubmenu extends UIItem {
   /** Its title:  its `label`;  what's written inside it is the fly-out's. */
   get titleText(): string {
     return this.label?.trim() ?? ""
+  }
+
+  /** What its menu's `ui-choosing` reports when its title is chosen (`split`):  its `value`, else its label. */
+  get value(): string {
+    return this.attributes.value ?? this.titleText
   }
 
   /** It draws its label and chevron beside its icon, always. */
@@ -389,10 +411,14 @@ export class UISubmenu extends UIItem {
     onGiveUp: (path) => this.giveUpTo(path)
   })
 
-  /** The pointer over its row:  its fly-out opens, unless the one open beside it is being aimed at. */
+  /**
+   * The pointer over its row:  its fly-out opens, unless the one open beside it is being aimed at.
+   * - `split`:  only over its chevron end, so a click on its title isn't beaten by a fly-out sliding open.
+   */
   @E.on("pointerover")
   protected onPointerOver(event: PointerEvent) {
     if (event.pointerType !== MOUSE || this.isInFlyout(event) || this.isOpen) return
+    if (this.split && !this.isOnChevron(event)) return
     const owner = this.ownerElement
     const other = owner && UISubmenu.openByOwner.get(owner)
     if (other && other !== this && !other.aim.wantsToSwitch(event)) return
@@ -476,10 +502,13 @@ export class UISubmenu extends UIItem {
     return this.isRightToLeft ? UIT.Key.arrowRight : UIT.Key.arrowLeft
   }
 
-  /** A click on its row (Enter and Space click it too):  its fly-out opens;  by keyboard, focus goes in. */
+  /**
+   * A click on its row (Enter and Space click it too):  its fly-out opens;  by keyboard, focus goes in.
+   * - `split`:  only a click on its chevron end;  one on its title is its menu's choice (`opensAMenuOn()`).
+   */
   @E.on("click")
   protected onRowClick(event: MouseEvent) {
-    if (this.isInFlyout(event)) return
+    if (this.isInFlyout(event) || !this.opensAMenuOn(event)) return
     this.open({ byKeyboard: event.detail === 0 })
   }
 
@@ -552,7 +581,12 @@ export class UISubmenu extends UIItem {
         <span class={TITLE} part={this.partForName("title")}>
           {this.label}
         </span>
-        <span class={CHEVRON} part={this.submenuPart(CHEVRON)} aria-hidden="true">
+        <span
+          ref={(element: HTMLElement) => (this.chevron = element)}
+          class={CHEVRON}
+          part={this.submenuPart(CHEVRON)}
+          aria-hidden="true"
+        >
           {this.chevronGlyph.svg}
         </span>
       </>
@@ -634,8 +668,12 @@ export class UISubmenu extends UIItem {
     }
   }
 }
-/** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
-export interface UISubmenu extends E.AttributeValues<typeof itemVocabulary> {}
+/**
+ * The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`):
+ * the item's it shares, and its own `split`.
+ */
+export interface UISubmenu
+  extends E.AttributeValues<typeof itemVocabulary>, Pick<E.AttributeValues<typeof submenuVocabulary>, "split"> {}
 
 /** How a fly-out was opened. */
 type OpenedBy = {

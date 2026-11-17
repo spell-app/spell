@@ -7,6 +7,8 @@
  *   `label` (its words), `icon`, `disabled`, the `icon` slot, the `item`, `icon` and `title` parts.
  * - Its own:
  *   - `menu`, the id of a menu elsewhere on the page to show as its fly-out
+ *   - `split`:  its title chooses, as a plain item's does;  only its chevron end opens the fly-out
+ *     (`value`, what the choice reports;  its `label` by default)
  *   - the `chevron` and `flyout` parts
  *   - the `open` state
  */
@@ -53,6 +55,22 @@ export const submenuVocabulary = {
         "Id of a `<ui-menu>` elsewhere on the page to show as the fly-out, in place of the items inside.  It stays " +
         "where it is, shown beside the row while open;  write `popover` on it, so it's hidden until then."
     },
+    {
+      name: "value",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`."
+    },
+    {
+      name: "split",
+      group: "behaviour",
+      kind: "keyOnly",
+      description:
+        "Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's " +
+        "`ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the " +
+        "pointer, a click or the arrow key toward it."
+    },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be opened." }
   ],
   events: [],
@@ -68,7 +86,10 @@ export const submenuVocabulary = {
     { name: "item", description: "The row:  a `<button>`, `aria-haspopup=menu`." },
     { name: "icon", description: "The row's icon box." },
     { name: "title", description: "The row's label." },
-    { name: "chevron", description: "The chevron at the row's end, pointing to the fly-out." },
+    {
+      name: "chevron",
+      description: "The chevron at the row's end, pointing to the fly-out;  with `split`, what opens it."
+    },
     {
       name: "flyout",
       description: "The fly-out's box, beside the row in the top layer, around the menu of the items inside."
@@ -76,6 +97,7 @@ export const submenuVocabulary = {
   ],
   states: [
     { name: "open", description: "Its fly-out is showing." },
+    { name: "split", description: "Its title chooses;  its chevron end opens the fly-out (`split`)." },
     { name: "disabled", description: "Can't be opened." }
   ],
   texts: []
