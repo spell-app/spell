@@ -1,3 +1,4 @@
+import { existsSync, mkdirSync } from "fs"
 import { cp, readFile, readdir, stat } from "fs/promises"
 import { basename, dirname, join } from "path"
 
@@ -151,7 +152,8 @@ const CONNECTED_MS = 2 * 60_000
  *   - the kit's `CsvPlace`:  each save changes only the lines it changes, so the file reads well in a diff, and in a sheet
  *   - a program's own data only:  a space's own folder is written by its members, which a CSV file can't say
  *   - anyone who runs the program changes any row:  a CSV file has no owner column, nor a takedown log, nor a ceiling
- *   - its first line names its columns:  ship the file with them, or the first row's fields become them
+ *   - its first line names its columns:  the first row's fields, and any field the program saves later, added at
+ *     the end of that line (`addsColumns`;  epic `mockup` P21), so it starts with no file at all
  * - A PROGRAM'S OWN JSON FILE (`a json file at "recipes.json"`, epic `mockup` P21):  a file too, the same way
  *   - the kit's `FilePlace`:  written whole, plain JSON with each collection's rows, `{ "recipes": [...] }`,
  *     a thing's lists inside its row
@@ -562,16 +564,33 @@ export class SpaceFolders {
   /**
    * A program's own CSV file at `address`, `<project>/__data/tasks.csv`, made once:  see the class.
    * - `undefined` for one in a space's own folder, or with no folder on disk:  the route answers 404.
+   * - SIDE EFFECT:  makes its project's `__data/`, for a project that has none yet (`ownFileAt()`)
    */
   private csvFileAt(address: string): CsvPlace | undefined {
     const known = this.csvFiles.get(address)
     if (known) return known
+    const file = this.ownFileAt(address)
+    if (!file) return undefined
+    const place = new CsvPlace({ file, idColumn: CSV_ID_COLUMN, addsColumns: true })
+    this.csvFiles.set(address, place)
+    return place
+  }
+
+  /**
+   * Where a program's own file at `address` is on disk, `<project>/__data/<name>`, its `__data/` made if it's missing:
+   * a fresh checkout has none, as Spell's examples' are git-ignored (epic `mockup` P21, C1).
+   * - `undefined` for one in a space's own folder, or a project not on disk:  nothing made
+   */
+  private ownFileAt(address: string): string | undefined {
     if (whoWritesFolderAt(address) !== "only the owner") return undefined
     const file = this.diskFolderFor(address)
     if (!file) return undefined
-    const place = new CsvPlace({ file, idColumn: CSV_ID_COLUMN })
-    this.csvFiles.set(address, place)
-    return place
+    const dataFolder = dirname(file)
+    if (!existsSync(dataFolder)) {
+      if (!existsSync(dirname(dataFolder))) return undefined
+      mkdirSync(dataFolder)
+    }
+    return file
   }
 
   /**
@@ -581,8 +600,7 @@ export class SpaceFolders {
   private jsonFileAt(address: string): FilePlace | undefined {
     const known = this.jsonFiles.get(address)
     if (known) return known
-    if (whoWritesFolderAt(address) !== "only the owner") return undefined
-    const file = this.diskFolderFor(address)
+    const file = this.ownFileAt(address)
     if (!file) return undefined
     const place = new FilePlace({ storage: new DiskStorage(dirname(file)), path: basename(file) })
     this.jsonFiles.set(address, place)

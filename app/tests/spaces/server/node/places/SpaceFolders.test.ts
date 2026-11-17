@@ -391,6 +391,16 @@ describe('SpaceFolders, a program\'s own CSV file:  `a sheet at "tasks.csv"` (ep
     expect(rows.map(({ title }) => title)).toEqual(["Milk", "Eggs"])
   })
 
+  test("a project with no __data yet gets one on its first save:  Spell's examples' are git-ignored (epic `mockup` P21)", async () => {
+    mkdirSync(join(spaces, "@spell", "fresh-app"), { recursive: true })
+    const sheet = folderAt("@spell/fresh-app/__data/shopping.csv")
+    await sheet.apply([{ kind: "insert", collection: "items", id: "i-1", fields: { name: "milk" } }], {})
+    expect(readFileSync(join(spaces, "@spell", "fresh-app", "__data", "shopping.csv"), "utf8")).toContain("i-1,milk")
+    await expect(folderAt("@spell/no-such-app/__data/shopping.csv").list("items", {}, {})).rejects.toMatchObject({
+      kind: "not found"
+    })
+  })
+
   test("its id column is the program's line's;  a space's own folder holds none", async () => {
     mkdirSync(join(spaces, "@spell", "csv-app", "__data"), { recursive: true })
     writeFileSync(join(spaces, "@spell", "csv-app", "__data", "keys.csv"), "key,title\nk-1,Kept\n")
