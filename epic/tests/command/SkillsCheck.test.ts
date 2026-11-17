@@ -34,9 +34,9 @@ const filler = (count: number) => Array.from({ length: count }, (_, at) => `- st
 describe("the real skills", () => {
   const report = new SkillsCheck().check()
 
-  test("all 20 pass:  15 for both agents, the 5 Claude-only ones each with its Codex settings file", () => {
+  test("all 22 pass:  17 for both agents, the 5 Claude-only ones each with its Codex settings file", () => {
     expect(report.problems).toEqual([])
-    expect(report.skills).toHaveLength(20)
+    expect(report.skills).toHaveLength(22)
     expect(report.skills.filter((each) => each.agents === "claude").map((each) => each.name)).toEqual(CLAUDE_ONLY)
     expect(report.budget.used).toBeLessThanOrEqual(LIST_BUDGET)
   })
@@ -56,7 +56,7 @@ describe("the real skills", () => {
     try {
       expect(await new SkillsCheck().run(["check"])).toBe(0)
       expect(out.mock.calls.map(([text]) => String(text)).join("")).toMatch(
-        /^skills check:  20 skills, 15 for Claude Code and Codex, 5 Claude Code only \(bedtime, bg, comment, session, title\);.*all good\n$/
+        /^skills check:  22 skills, 17 for Claude Code and Codex, 5 Claude Code only \(bedtime, bg, comment, session, title\);.*all good\n$/
       )
     } finally {
       out.mockRestore()
