@@ -416,7 +416,12 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   protected onThumbChanged(hasThumb: boolean) {
     const bar = this.bar
     if (!hasThumb || !bar) return
-    const thumb = new SegmentedThumb({ track: bar, chosenBox: () => this.buttons()[this.selectedIndex] })
+    const thumb = new SegmentedThumb({
+      track: bar,
+      chosenBox: () => this.buttons()[this.selectedIndex],
+      // the thumb is in what the tab list scrolls:  its keys measured again once it moved (epic `mockup` I39)
+      onPlaced: () => this.scrolling.measure()
+    })
     this.thumb = thumb
     const stop = thumb.start()
     return () => {
