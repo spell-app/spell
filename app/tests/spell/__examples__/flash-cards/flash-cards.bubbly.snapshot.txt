@@ -48,7 +48,7 @@
 |   ⟦// The cards to learn⟧
 
 ==== /FlashCards.spell
-# Fl**ash C**ards
+⟪# Flash Cards⟫
 ⟦// A deck of cards to learn from:  a Spanish word on the front, what it means on the back.⟧
 ⟦// Click the card, or Show the answer, to turn it over, then say whether you knew it:⟧
 ⟦// the score keeps count, and the next card comes up at random.⟧

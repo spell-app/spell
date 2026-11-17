@@ -176,11 +176,25 @@ export class BubblyLayout {
       // a tag that declares the member it draws (`<number "score"/>`), not one said on a line of its own
       const { declares } = each.data as { declares?: DrawnDeclaration }
       if (declares && !declares.drawnOnly && each.start !== undefined) this.declaringTags.add(each.start)
-      for (const child of childrenOf(each)) walk(child)
+      for (const child of childrenOf(each)) if (each.matched.includes(child) || this.isOfText(child)) walk(child)
     }
     walk(match)
     this.overlays.sort((a, b) => a.order - b.order)
     this.underlines.sort((a, b) => a.start - b.start)
+  }
+
+  /**
+   * Is `match`, kept in its parent's `data`, of this text:  every word of it there, where it says it is?
+   * - Not words a rule parsed on their own, counted from their own start:  a text's fill-in
+   *   (`"Your score:  [solitaire's score]"`), a markdown hole, `<ui-markdown>`'s attributes.
+   *   Read as the text's, its `'s` made `solitaire is an app`'s `is` half bold (epic `codemirror` I27).
+   */
+  private isOfText(match: P.Match): boolean {
+    let isOfText = true
+    P.Tokenizer.forEachToken(match.tokens ?? [], (token) => {
+      if (isOfText && isWordlike(token)) isOfText = SP.SpellHighlighter.isTokenOf(this.text, token)
+    })
+    return isOfText
   }
 
   /** The overlays `match`'s roles ask for:  a value written in, a name, Spell's own words. */
@@ -1217,6 +1231,16 @@ function childrenOf(match: P.Match): P.Match[] {
     for (const item of [value].flat()) if (item instanceof P.Match && item !== match) children.add(item)
   }
   return [...children]
+}
+
+/** Is `token` a word, symbol, number or text:  one with words of its own, not a line or block around others? */
+function isWordlike(token: P.Token): boolean {
+  return (
+    token instanceof P.WordToken ||
+    token instanceof P.SymbolToken ||
+    token instanceof P.NumberToken ||
+    token instanceof P.TextToken
+  )
 }
 
 /**

@@ -561,7 +561,7 @@
 |   | its «"address"» is **text**  ⟦// the pokemon's own, at PokéAPI⟧
 
 ==== /Pokemon.spell
-# A **Pokémo**n:  its card, its own page, and its family
+⟪# A Pokémon:  its card, its own page, and its family⟫
 ⟦// Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at PokéAPI again never touches a line of this.⟧
 
 [thing reopen_type L0]

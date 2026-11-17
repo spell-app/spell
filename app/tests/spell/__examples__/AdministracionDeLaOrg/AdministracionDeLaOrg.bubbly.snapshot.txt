@@ -130,7 +130,7 @@
 
 ==== /AdministracionDeLaOrg.es.spell
 ⟪# Administración de la org⟫
-⟦// La página de adminis⟧_tración de una org:  _⟦quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué⟧
+⟦// La página de administración de una org:  quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué⟧
 ⟦// aplicaciones pueden instalar sus espacios, las etapas de sus eventos y el registro de cada cambio.⟧
 ⟦// Una barra con quién ha iniciado sesión, las secciones a un lado, y una sección cada vez junto a ellas.⟧
 ⟦// Dónde se guardan está en AdministracionDeLaOrg.api.es.spell, y solo su primera línea lo sabe.⟧
