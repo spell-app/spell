@@ -37,6 +37,16 @@ const BY_ID = `
     </ui-menu>
   </div>`
 
+/** A vertical menu whose row is `split`:  its title chooses, its chevron end opens the fly-out. */
+const SPLIT = `
+  <ui-menu direction="vertical" aria-label="Part" style="width: 220px">
+    <ui-item appearance="link">Copy</ui-item>
+    <ui-submenu label="Inspect Card" value="inspect" flyout-label="Parts here" split>
+      <ui-item value="pile">Pile</ui-item>
+      <ui-item value="card">Card</ui-item>
+    </ui-submenu>
+  </ui-menu>`
+
 /** What `A11y.format()` says of no violations. */
 const CLEAN = "no accessibility violations"
 
@@ -69,6 +79,11 @@ function rowOf(element: Element): HTMLElement {
 /** The box a `<ui-submenu>` draws round the items inside it. */
 function flyoutOf(submenu: Element): HTMLElement {
   return submenu.shadowRoot!.querySelector<HTMLElement>("[part~=flyout]")!
+}
+
+/** A `<ui-submenu>`'s chevron end:  with `split`, what opens its fly-out. */
+function chevronOf(submenu: Element): HTMLElement {
+  return submenu.shadowRoot!.querySelector<HTMLElement>("[part~=chevron]")!
 }
 
 /** The fly-out's box is showing, in the top layer. */
@@ -560,6 +575,77 @@ describe("<ui-submenu> fly-out ticks", () => {
   test("a menu with ticks still ticks every fly-out", async () => {
     const { submenus } = await render(BOXES.replace('aria-label="Menu"', 'aria-label="Menu" ticks'))
     expect(innerMenuOf(submenus[3]!).hasAttribute("ticks")).toBe(true)
+  })
+})
+
+////////////////
+// ## Split
+////////////////
+
+describe("<ui-submenu split>", () => {
+  /** Render `SPLIT`;  returns its menu, its row, and the values its menu chose. */
+  async function renderSplit() {
+    const { menu, submenus } = await render(SPLIT)
+    const choices: string[] = []
+    menu.addEventListener("ui-choosing", (event) => choices.push((event as CustomEvent).detail.value))
+    return { menu, split: submenus[0]!, choices }
+  }
+
+  test("a click on its title CHOOSES it, as a plain item's, and opens nothing", async () => {
+    const { split, choices } = await renderSplit()
+    expect(split.matches(":state(split)")).toBe(true)
+    const title = split.shadowRoot!.querySelector<HTMLElement>("[part~=title]")!
+    await userEvent.click(title)
+    await ElementFixture.settle()
+    expect(choices).toEqual(["inspect"])
+    expect(isShowing(flyoutOf(split))).toBe(false)
+  })
+
+  test("the pointer over its title opens nothing;  over its chevron end, the fly-out", async () => {
+    const { split } = await renderSplit()
+    pointer("pointerover", split.shadowRoot!.querySelector("[part~=title]")!)
+    await ElementFixture.settle()
+    expect(isShowing(flyoutOf(split))).toBe(false)
+    await userEvent.hover(chevronOf(split))
+    await ElementFixture.settle()
+    expect(isShowing(flyoutOf(split))).toBe(true)
+  })
+
+  test("a click on its chevron end opens the fly-out and chooses nothing;  an item inside is chosen as ever", async () => {
+    const { split, choices } = await renderSplit()
+    chevronOf(split).click()
+    await ElementFixture.settle()
+    expect(isShowing(flyoutOf(split))).toBe(true)
+    expect(choices).toEqual([])
+    await userEvent.click(rowOf(split.querySelectorAll("ui-item")[1]!))
+    await ElementFixture.settle()
+    expect(choices).toEqual(["card"])
+    expect(isShowing(flyoutOf(split))).toBe(false)
+  })
+
+  test("Enter chooses it;  → opens the fly-out, focus on its first item", async () => {
+    const { split, choices } = await renderSplit()
+    rowOf(split).focus()
+    await userEvent.keyboard("{Enter}")
+    await ElementFixture.settle()
+    expect(choices).toEqual(["inspect"])
+    expect(isShowing(flyoutOf(split))).toBe(false)
+    rowOf(split).focus()
+    await userEvent.keyboard("{ArrowRight}")
+    await ElementFixture.settle()
+    expect(isShowing(flyoutOf(split))).toBe(true)
+    expect(deepActive()).toBe(rowOf(split.querySelector("ui-item")!))
+  })
+
+  test("its row still says it has a menu;  its chevron end is wider, after a line, its tooltip the fly-out's name", async () => {
+    const { split } = await renderSplit()
+    expect(rowOf(split).getAttribute("aria-haspopup")).toBe("menu")
+    expect(chevronOf(split).title).toBe("Parts here")
+    expect(flyoutOf(split).querySelector("ui-menu")!.getAttribute("aria-label")).toBe("Parts here")
+    const chevron = getComputedStyle(chevronOf(split))
+    expect(parseFloat(chevron.borderInlineStartWidth)).toBeGreaterThan(0)
+    expect(chevronOf(split).getBoundingClientRect().width).toBeGreaterThan(16)
+    expect(A11y.format((await A11y.check(split.parentElement!)).violations)).toBe(CLEAN)
   })
 })
 

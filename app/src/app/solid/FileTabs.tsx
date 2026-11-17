@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { Dragging } from "spell/util/Dragging"
 import type { E } from "spell/element"
+import { SP } from "spell/parser/spell"
 import type { UIToolbar } from "spell/ui/components/ui-toolbar"
 
 import { editor } from "spell/app/app/editor"
@@ -13,7 +14,6 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorSpellWithActions } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { CodeShown } from "./EditorMode"
-import { trackProjectFiles } from "./FileDropdown"
 import { tracked } from "./tracked"
 
 import "./FileTabs.css"
@@ -45,8 +45,9 @@ import "./FileTabs.css"
  *     the toolbar's `closeItem()` takes it out of the row, and the list still has it.
  *     Closing the chosen tab shows its neighbour's file.
  *   - No key closes one:  ⌘W is the browser's, closing the page's own tab.
- *   - A site's own file (`HarborNew.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
+ *   - A site's own file (`Dashboard.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
  *     showing (epic `editor` I188:  "have the `.site.spell` file open and the 'more files' button on the right").
+ * - SEE:  its App UI components page, `app/docs/FileTabs.html` (`/components/app/FileTabs.html`).
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
@@ -290,3 +291,63 @@ const CLOSE_TAB = "CloseTab"
 const DRAGGED = "dragged"
 /** On the tab a dragged one would land beside:  `before` or `after` it. */
 const DROP_MARK = "drop"
+
+/** What `<FileTabs>` shows of `editor`'s project:  its files, and the one shown. */
+export type ProjectFilesState = {
+  /** The project's loaded, and a file of it is shown. */
+  ready: boolean
+  /** The path of the file shown;  `""` before there's one. */
+  path: string
+  /** Every file, in the project's order. */
+  files: ProjectFileRow[]
+}
+
+/** One file of `ProjectFilesState`. */
+export type ProjectFileRow = {
+  /** its address, as `editor.file.path` */
+  path: string
+  /** what a list of the whole project calls it:  `Card.spell`;  in a folder, `Button/Usage` */
+  name: string
+  /** the folder it's in, inside the project:  `Button`;  `""` for one at its top */
+  folder: string
+  /** what its folder's list calls it:  `Usage`;  at the project's top, its `name` */
+  nameInFolder: string
+  /** Has changes not saved. */
+  isDirty: boolean
+}
+
+/**
+ * `editor`'s project's files and the one shown, read in one go through `tracked()`.
+ * - A file the project doesn't import (an extra file beside its imports) is listed after its imports, by its name.
+ * - Call in a component body:  `tracked()` goes with the component.
+ */
+export function trackProjectFiles(): () => ProjectFilesState {
+  return tracked(() => {
+    const { project, file } = editor
+    const ready = !!project?.isLoaded && !!file
+    const files = ready
+      ? project.imports.map(({ path, location, file: each }) => fileRowFor(path, location, each.isDirty))
+      : []
+    if (ready && !files.some((each) => each.path === file.path))
+      files.push(fileRowFor(file.path, file.location, file.isDirty))
+    return { ready, path: file?.path ?? "", files }
+  })
+}
+
+/**
+ * The row for the file at `path`, `location` its place.
+ * - A file in a folder drops its spell ending, so its folder can name it:  `Button/Usage`, for `Button/Usage.spell`.
+ *   Any other ending stays:  `Button/styles.css`.
+ * - At the project's top it keeps its whole name, as `Card.spell`;  another project's import, its address.
+ */
+function fileRowFor(
+  path: string,
+  location: Pick<SP.SpellLocation, "file" | "folder">,
+  isDirty: boolean
+): ProjectFileRow {
+  const name = location.file ?? path
+  const folder = location.folder?.replace(/^\/|\/$/g, "") ?? ""
+  if (!folder) return { path, name, folder, nameInFolder: name, isDirty }
+  const nameInFolder = name.endsWith(SP.SPELL_SUFFIX) ? name.slice(0, -SP.SPELL_SUFFIX.length) : name
+  return { path, name: `${folder}/${nameInFolder}`, folder, nameInFolder, isDirty }
+}

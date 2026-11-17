@@ -18,6 +18,19 @@ describe("testing spell module JSX", () => {
     ])
   })
 
+  test("an attribute with its quote left open:  its error that attribute alone, the tag and what it holds read (I145)", () => {
+    const scope = spellParser.getScope("jsx-open-quote")
+    const text =
+      'print <segment>\n\t<toolbar\n\t\tclass="GameBar"\n\t\tsize="small\n\t\tshrinkable\n\t>\n\t\t<text>hi</>\n\t</>\n</>'
+    const block = scope.parse(text, "block")!
+    const errors = (block.data as { errors?: P.Match[] }).errors ?? []
+    expect(errors.map((error) => error.message)).toEqual([
+      `Can't read "size="small" in <toolbar>:  check its name and its quotes`
+    ])
+    // Owen:  "a quoted expression should only break its line"
+    expect(text.slice(errors[0]!.start, errors[0]!.end)).toBe('size="small')
+  })
+
   test("a markdown hole that doesn't read is reported with the block's parse errors;  a real one isn't", () => {
     const scope = spellParser.getScope("jsx-markdown-hole")
     const block = scope.parse("set foo to 1\nprint <markdown>\n\t{foo} and {foo bar baz}\n</markdown>", "block")!

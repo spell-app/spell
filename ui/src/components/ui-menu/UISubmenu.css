@@ -6,6 +6,7 @@
  *     `<span class="title" part="title">` and `<span class="chevron" part="chevron">`
  *   - then, for the items inside, `<div class="flyout" part="flyout" popover="manual">`
  *     round the `<ui-menu>` it draws them in
+ * - `split` (`:state(split)`):  the chevron end, wider, after a faint line, is what opens the fly-out.
  * - The row is a flex row, so the chevron sits at its end,
  *   after the icon where a vertical menu's icons float to the end.
  *   - It sets the menu's own switches on its box (`--_ui-menu-item-display`, `--_ui-menu-icon-float`),
@@ -54,6 +55,16 @@
   }
   :host(:state(open)) > .item > .chevron {
     opacity: 1;
+  }
+  /*
+   * `split`:  the chevron end is a target of its own, what opens the fly-out:
+   * wider, reaching into the row's end padding, set off from the title by a faint line
+   */
+  :host(:state(split)) > .item > .chevron {
+    align-self: stretch;
+    margin-inline: 0.75em -0.5em;
+    padding-inline: 0.75em 0.5em;
+    border-inline-start: var(--ui-border-width, 1px) solid var(--ui-border-color);
   }
   .flyout > ui-menu::part(menu) {
     box-sizing: border-box;

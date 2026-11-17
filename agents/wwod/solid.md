@@ -93,7 +93,7 @@ export type InputRootProps = {
     are `Observable`s, their props spell cells (WWOD §13)
   - read them plainly in JSX (`editor.file`):  the bridge makes the read reactive;  `tracked()` shares ONE read
     among several readers (`solid-2.md` "Spell's decisions")
-  - read NARROW:  one `tracked()` returning just what the component shows (`state` in `FileDropdown.tsx`), never
+  - read NARROW:  one `tracked()` returning just what the component shows (`trackProjectFiles()` in `FileTabs.tsx`), never
     `tracked(() => editor)`
   - write by plain assignment (`editor.file = file`) or the object's own methods;  NEVER copy spell state into a
     `createSignal` or a store to "make it reactive" -- it already is, and the copy goes stale
@@ -126,7 +126,7 @@ function update(changed: TypeExplorerState) {
   - native events:  `onClick` / `onInput` ...;  `ui-*` events:  `ref={on<Detail>("ui-change", handler)}`, with
     our `on()` (`spell/app/app/solid`, `on.ts`), not Solid 1's removed `on()` -- never a hand-rolled listener ref.  Why:
     `solid-2.md` "DOM and `spell-ui` elements"
-  - a handler that does more than one call is a named `function` at the bottom (`choose()` in `FileDropdown.tsx`)
+  - a handler that does more than one call is a named `function` at the bottom (`choose()` in `chrome.tsx`, for `<MoreMenu>`)
   - NOT:  `use:` directives (`use:activate`) -- gone in Solid 2;  a ref directive factory (`on()`) instead
   - TODO:  review the event semantics we landed on (`ui-*` event names, `detail` shapes, `on()`)
 
@@ -161,7 +161,7 @@ function update(changed: TypeExplorerState) {
     the content (`InputEditor.tsx`).  `<Loading>` shows its fallback on the FIRST load only;  a refresh after that
     keeps the old content -- show it's on the way with `isPending()`
   - state kept in signals:  `<Switch>` with the error `<Match>` first;  a `ui-*` control's own `loading`
-    attribute when it has one (`<ui-dropdown loading={!state().ready}>`, `FileDropdown.tsx`)
+    attribute when it has one (`<ui-button loading={isRunning() ? "" : undefined}>`, a running action's button in `InspectorParts.tsx`)
   - a value that arrives later:  `<Show when={loaded()} keyed>`, so the child gets the loaded value
     (`SpellAppRunner.tsx`)
 

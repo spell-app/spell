@@ -1235,6 +1235,41 @@
       "href": "Actions.html"
     },
     {
+      "tag": "AppBarMenus",
+      "name": "AppBarMenus",
+      "folder": "MenuBar",
+      "mainTag": "SpellBarMenu",
+      "main": false,
+      "page": false,
+      "topics": [
+        "menus and dialogs"
+      ],
+      "aka": [],
+      "description": "The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name.",
+      "noun": "AppBarMenus",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "props": [
+        {
+          "name": "mode",
+          "type": "Mode",
+          "required": true,
+          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
+        }
+      ],
+      "usedIn": [
+        {
+          "name": "EditorToolbar",
+          "file": "src/app/pages/SpellEditor.tsx"
+        }
+      ],
+      "href": "MenuBar.html#AppBarMenus"
+    },
+    {
       "tag": "AppContainer",
       "name": "AppContainer",
       "folder": "AppContainer",
@@ -1423,6 +1458,85 @@
         }
       ],
       "href": "Notice.html#BackToSite"
+    },
+    {
+      "tag": "BarMenu",
+      "name": "BarMenu",
+      "folder": "MenuBar",
+      "mainTag": "SpellBarMenu",
+      "main": false,
+      "page": false,
+      "topics": [
+        "menus and dialogs"
+      ],
+      "aka": [],
+      "description": "One menu of the top bar:  its name, a button;  a click opens its items under it, a Spell UI popup.",
+      "noun": "BarMenu",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "props": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Id of its button, unique on the page:  the popup's target."
+        },
+        {
+          "name": "label",
+          "type": "JSX.Element",
+          "required": true,
+          "description": "Its name in the bar:  text, or text and an icon."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Its name for screen readers, and the popup's."
+        },
+        {
+          "name": "class",
+          "type": "string",
+          "description": "Class of its button."
+        },
+        {
+          "name": "ticks",
+          "type": "boolean",
+          "description": "Its rows are on or off:  a tick for what is on (`<ui-menu ticks>`)."
+        },
+        {
+          "name": "children",
+          "type": "JSX.Element",
+          "description": "Its items."
+        },
+        {
+          "name": "panel",
+          "type": "() => JSX.Element",
+          "description": "What it opens, drawn whole in place of its items' menu (`children`):  menus of its own, as the Spell menu's."
+        }
+      ],
+      "usedIn": [
+        {
+          "name": "AppBarMenus",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "FoldedBarMenus",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "ProjectBarMenu",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "SpellBarMenu",
+          "file": "src/app/solid/MenuBar.tsx"
+        }
+      ],
+      "href": "MenuBar.html#BarMenu"
     },
     {
       "tag": "Chooser",
@@ -2052,39 +2166,6 @@
       "href": "ErrorNotice.html"
     },
     {
-      "tag": "FileDropdown",
-      "name": "FileDropdown",
-      "folder": "FileDropdown",
-      "mainTag": "FileDropdown",
-      "main": true,
-      "page": true,
-      "topics": [
-        "menus and dialogs"
-      ],
-      "aka": [],
-      "description": "Menu of all available files for the selected project (`editor.project`): a `<ui-dropdown>` of `<ui-item>`s, showing `editor.file`. Same props as React's `UI.FileDropdown` had.",
-      "noun": "FileDropdown",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "useRunner",
-          "type": "boolean",
-          "description": "Open the file in Run, not Edit, when an item is clicked."
-        },
-        {
-          "name": "showActions",
-          "type": "boolean",
-          "description": "Append `Actions.FILE_DROPDOWN_ACTIONS` after a divider -- never in the static build, which has none."
-        }
-      ],
-      "href": "FileDropdown.html"
-    },
-    {
       "tag": "FileEditor",
       "name": "FileEditor",
       "folder": "FileEditor",
@@ -2137,6 +2218,33 @@
         }
       ],
       "href": "FileEditor.html"
+    },
+    {
+      "tag": "FileTabs",
+      "name": "FileTabs",
+      "folder": "FileTabs",
+      "mainTag": "FileTabs",
+      "main": true,
+      "page": true,
+      "topics": [
+        "menus and dialogs"
+      ],
+      "aka": [],
+      "description": "Every file of the project as a tab over the code:  the tabs themselves are Spell, the `file tab bar` of `SpellEditor.spell` (epic `editor` P29). This is the editor's side of them, which Spell can't reach yet (epic `editor`'s Backing In Spell):",
+      "noun": "FileTabs",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "InputRoot",
+          "file": "src/app/solid/InputEditor.tsx"
+        }
+      ],
+      "href": "FileTabs.html"
     },
     {
       "tag": "InputEditor",
@@ -2551,75 +2659,31 @@
       "href": "chrome.html#PanelMenu"
     },
     {
-      "tag": "ProjectDropdown",
-      "name": "ProjectDropdown",
-      "folder": "ProjectDropdown",
-      "mainTag": "ProjectDropdown",
-      "main": true,
-      "page": true,
-      "topics": [
-        "menus and dialogs"
-      ],
-      "aka": [],
-      "description": "Every project of `projectRoot` (default:  `editor.projectRoot`) as a `<ui-dropdown>` showing `editor.project`; choosing one shows it in `<SpellEditor>`, or in Run with `useRunner`. Built as `<FileDropdown>` is.",
-      "noun": "ProjectDropdown",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "projectRoot",
-          "type": "SPACES.SpellProjectRoot",
-          "description": "Root whose projects to list.  Default:  `editor.projectRoot`."
-        },
-        {
-          "name": "useRunner",
-          "type": "boolean",
-          "description": "Open it in Run, not Edit."
-        }
-      ],
-      "href": "ProjectDropdown.html"
-    },
-    {
-      "tag": "ProjectMenu",
-      "name": "ProjectMenu",
-      "folder": "ProjectDropdown",
-      "mainTag": "ProjectDropdown",
+      "tag": "ProjectBarMenu",
+      "name": "ProjectBarMenu",
+      "folder": "MenuBar",
+      "mainTag": "SpellBarMenu",
       "main": false,
       "page": false,
       "topics": [
         "menus and dialogs"
       ],
       "aka": [],
-      "description": "Every project of `projectRoot` (default:  `editor.projectRoot`) as a `<ui-menu>` of links; choosing one shows it in `<SpellEditor>`, or in Run with `useRunner`.",
-      "noun": "ProjectMenu",
+      "description": "The top bar's second menu, the PROJECT's, after Spell's (`<SpellBarMenu>`): the project's name, bold, a caret after it.",
+      "noun": "ProjectBarMenu",
       "attributes": [],
       "slots": [],
       "events": [],
       "parts": [],
       "states": [],
       "texts": [],
-      "props": [
+      "usedIn": [
         {
-          "name": "...UIMenuJSXAttributes",
-          "type": "UIMenuJSXAttributes",
-          "description": "Every prop of this type too."
-        },
-        {
-          "name": "projectRoot",
-          "type": "SPACES.SpellProjectRoot",
-          "description": "Root whose projects to list.  Default:  `editor.projectRoot`."
-        },
-        {
-          "name": "useRunner",
-          "type": "boolean",
-          "description": "Open it in Run, not Edit."
+          "name": "EditorToolbar",
+          "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "ProjectDropdown.html#ProjectMenu"
+      "href": "MenuBar.html#ProjectBarMenu"
     },
     {
       "tag": "RestartNeeded",
@@ -2896,6 +2960,40 @@
         }
       ],
       "href": "ScopeDetailsPane.html#SectionMarker"
+    },
+    {
+      "tag": "SpellBarMenu",
+      "name": "SpellBarMenu",
+      "folder": "MenuBar",
+      "mainTag": "SpellBarMenu",
+      "main": true,
+      "page": true,
+      "topics": [
+        "menus and dialogs"
+      ],
+      "aka": [],
+      "description": "The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them (Owen, 2026-11-06:  \"Change the Spell menu in the editor to show the Examples menu\").",
+      "noun": "SpellBarMenu",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "props": [
+        {
+          "name": "useRunner",
+          "type": "boolean",
+          "description": "### `<SpellBarMenu>` The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them (Owen, 2026-11-06:  \"Change the Spell menu in the editor to show the Examples menu\"). - Opens the project's group's projects (`<ProjectsMenu>`): the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more. - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before, and About Spell, which shows its `about box` (epic `editor` I94, I114). - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to (Owen, 2026-11-14:  \"Put <pen> New Example at the end of the list of examples\"). - `useRunner`:  the one chosen opens in Run. - The Spell UI site's:  \"Spell Notebooks\". - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`). - SEE:  its App UI components page, with the bar's other menus, `app/docs/MenuBar.html` (`/components/app/MenuBar.html`)."
+        }
+      ],
+      "usedIn": [
+        {
+          "name": "EditorToolbar",
+          "file": "src/app/pages/SpellEditor.tsx"
+        }
+      ],
+      "href": "MenuBar.html"
     },
     {
       "tag": "spell-element",
@@ -3222,6 +3320,10 @@
         }
       ],
       "usedIn": [
+        {
+          "name": "NamePage",
+          "file": "src/app/solid/NamePage.tsx"
+        },
         {
           "name": "ProjectChooser",
           "file": "src/app/pages/ProjectChooser.tsx"
@@ -3843,28 +3945,30 @@
       ],
       "tokens": []
     },
-    "FileDropdown": {
-      "folder": "FileDropdown",
-      "mainTag": "FileDropdown",
-      "title": "FileDropdown",
-      "summary": "The open project's files, as a dropdown showing the open one.",
+    "FileTabs": {
+      "folder": "FileTabs",
+      "mainTag": "FileTabs",
+      "title": "FileTabs",
+      "summary": "The open project's files, as tabs over the code, and a button at their end listing them all.",
       "status": "done",
       "docs": false,
       "tags": [
-        "FileDropdown"
+        "FileTabs"
       ],
       "tokens": []
     },
-    "ProjectDropdown": {
-      "folder": "ProjectDropdown",
-      "mainTag": "ProjectDropdown",
-      "title": "ProjectDropdown",
-      "summary": "Every project, as a dropdown or a menu of links.",
+    "MenuBar": {
+      "folder": "MenuBar",
+      "mainTag": "SpellBarMenu",
+      "title": "MenuBar",
+      "summary": "The top bar's menus:  Spell's, listing the group's projects, then the project's, File, Edit, View, Run and Help.",
       "status": "done",
       "docs": false,
       "tags": [
-        "ProjectDropdown",
-        "ProjectMenu"
+        "SpellBarMenu",
+        "BarMenu",
+        "ProjectBarMenu",
+        "AppBarMenus"
       ],
       "tokens": []
     },

@@ -393,9 +393,15 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     }
   }
 
-  /** A click on the label focuses the first control, as a `<label for>` would. */
+  /**
+   * A click on the label focuses the first control shown, as a `<label for>` would.
+   * - Shown:  a property heading a run of pills hides its own checkbox, and draws the pills' select after it;
+   *   focusing the hidden box left the focus nowhere (epic `editor` I222).
+   */
   private readonly onLabelClick = () => {
-    const control = this.controlSlot?.assignedElements().find((element) => element.localName !== "label")
+    const control = this.controlSlot
+      ?.assignedElements()
+      .find((element) => element.localName !== "label" && element.checkVisibility())
     ;(control as HTMLElement | undefined)?.focus()
   }
 }

@@ -82,31 +82,46 @@
     white-space: nowrap;
   }
 
-  /* ## The not-saved icon:  a save icon, a line through it */
+  /* ## The not-saved icon:  a save icon under a red "no" sign (a circle and its slash)
+     - Shown only while the field is hovered or holds the focus, fading in;  its room is always kept, so nothing moves
+       (Owen, epic `editor` I226:  "'Can't save' icon only visible on hover over field";
+       "The `/` doesn't read in over the floppy, make it a red circle-slash instead") */
   .field > .row > .unsaved {
     position: relative;
     display: inline-flex;
     width: 1em;
     height: 1em;
-    opacity: 0.5;
+    opacity: 0;
     cursor: help;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease);
+  }
+  :host(:is(:hover, :focus-within)) .field > .row > .unsaved,
+  .field > .row > .unsaved:focus {
+    opacity: 1;
   }
   .field > .row > .unsaved > svg {
     width: 100%;
     height: 100%;
     fill: currentColor;
+    opacity: 0.5;
   }
   .field > .row > .unsaved::after {
+    --_field-unsaved-sign: var(--ui-negative, #db2828);
+    --_field-unsaved-stroke: 0.07em;
     content: "";
     position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: -10%;
-    width: 120%;
-    height: 0.15em;
-    border-radius: 0.1em;
-    background: currentColor;
-    box-shadow: 0 0 0 0.06em var(--ui-panel-background, transparent);
-    transform: rotate(-45deg);
+    inset: -0.1em;
+    box-sizing: border-box;
+    border: calc(var(--_field-unsaved-stroke) * 2) solid var(--_field-unsaved-sign);
+    border-radius: 50%;
+    /* the slash, top left to bottom right */
+    background: linear-gradient(
+      45deg,
+      transparent calc(50% - var(--_field-unsaved-stroke)),
+      var(--_field-unsaved-sign) calc(50% - var(--_field-unsaved-stroke)),
+      var(--_field-unsaved-sign) calc(50% + var(--_field-unsaved-stroke)),
+      transparent calc(50% + var(--_field-unsaved-stroke))
+    );
   }
 
   /* ## The info icon and its tip;  the not-saved icon says why in the same bubble */

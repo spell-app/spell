@@ -162,10 +162,12 @@ export class SpellViewer extends UIRoot<typeof vocabulary> {
   /**
    * A spell tag inside us (`<spell-editor>`) loads from its own script beside ours (`spell-editor.js`),
    * the first time one appears.
-   * - Every `spell-*` tag:  `<tag>.js`, as `vite.element.config.ts` names each family's script.
+   * - Each of our element families (`SPELL_FAMILIES`):  `<tag>.js`, as `vite.element.config.ts` names its script.
+   * - NEVER another `spell-*` tag:  the core draws its own as plain markers (`<spell-more-below>`,
+   *   `<spell-context-menu>` ...), which no script defines;  loading one was a 404 on every page.
    */
   protected ownTagLoader(tag: string): (() => Promise<void>) | undefined {
-    if (!tag.startsWith(SPELL_TAG_PREFIX)) return undefined
+    if (!SPELL_FAMILIES.has(tag)) return undefined
     return () => import(/* @vite-ignore */ new URL(`${tag}.js`, BUNDLE).href).then(() => undefined)
   }
 
@@ -348,8 +350,11 @@ export interface SpellViewer extends Omit<E.AttributeValues<typeof spellViewerVo
  */
 const BUNDLE = import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)
 
-/** Prefix of spell's own tags, which a `<spell-viewer>` loads from beside its script (`ownTagLoader()`). */
-const SPELL_TAG_PREFIX = "spell-"
+/**
+ * Our element families a `<spell-viewer>` loads from beside its script (`ownTagLoader()`):
+ * every folder of `src/app/components/` but its own, each built as `<tag>.js` (`vite.element.config.ts`).
+ */
+const SPELL_FAMILIES: ReadonlySet<string> = new Set(["spell-editor", "spell-code", "spell-markdown"])
 
 /**
  * What to run for `project="<projectId>"`:  from the spell server (the page's own), sources and all.

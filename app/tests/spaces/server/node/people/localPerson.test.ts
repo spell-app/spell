@@ -45,35 +45,35 @@ describe("localPerson", () => {
   })
 
   test("mePerson():  the app's me file, its comments allowed;  none, or one that won't read:  nobody", () => {
-    const named = folderWith("named", { [ME_FILE]: '// who\n{ person: "kim-lee" }\n' })
+    const named = folderWith("named", { [ME_FILE]: '// who\n{ person: "alice" }\n' })
     const broken = folderWith("broken", { [ME_FILE]: "{ person: " })
-    expect(mePerson(named)).toBe("kim-lee")
+    expect(mePerson(named)).toBe("alice")
     expect(mePerson(folderWith("nobody"))).toBeUndefined()
     expect(mePerson(broken)).toBeUndefined()
   })
 
   test("orgGroupsIn():  an org's folders of projects, never a project, a person's space or one of spaces' own", () => {
     const spaces = folderWith("spaces", {
-      "@acme/harbor/harbor-new/__project.json5": "{}",
-      "@acme/harbor/harbor-current/__project.json5": "{}",
+      "@acme/tools/dashboard/__project.json5": "{}",
+      "@acme/tools/inventory/__project.json5": "{}",
       "@acme/OrgAdmin/__project.json5": "{}",
       "@acme/notes/readme.txt": "not a project",
-      "@acme/kim-lee@/mine/__project.json5": "{}",
+      "@acme/alice@/mine/__project.json5": "{}",
       "@acme/__admin/x/__project.json5": "{}"
     })
-    expect(orgGroupsIn(spaces, "acme")).toEqual(["@acme/harbor"])
+    expect(orgGroupsIn(spaces, "acme")).toEqual(["@acme/tools"])
     expect(orgGroupsIn(spaces, "nobody")).toEqual([])
-    expect(peopleIn(spaces, "acme")).toEqual(["kim-lee"])
+    expect(peopleIn(spaces, "acme")).toEqual(["alice"])
   })
 
-  test("addOrgGroups():  `@acme/harbor/harbor-new` is a project of the group, listed", () => {
-    SPACES.addOrgGroups(["@acme/harbor"])
-    expect(SPACES.orgGroups).toContain("@acme/harbor")
-    const location = new SP.SpellLocation("@acme/harbor/harbor-new")
-    expect(location.projectRoot).toBe("@acme/harbor")
-    expect(SP.SpellUrls.folderFor("@acme/harbor/harbor-new")).toEqual({
+  test("addOrgGroups():  `@acme/tools/dashboard` is a project of the group, listed", () => {
+    SPACES.addOrgGroups(["@acme/tools"])
+    expect(SPACES.orgGroups).toContain("@acme/tools")
+    const location = new SP.SpellLocation("@acme/tools/dashboard")
+    expect(location.projectRoot).toBe("@acme/tools")
+    expect(SP.SpellUrls.folderFor("@acme/tools/dashboard")).toEqual({
       base: "spaces",
-      path: "@acme/harbor/harbor-new"
+      path: "@acme/tools/dashboard"
     })
     expect(() => SPACES.addOrgGroups(["acme"])).toThrow(TypeError)
   })

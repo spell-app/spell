@@ -46,7 +46,7 @@ describe("spell's project groups", () => {
 describe("a person's space in another org (repo-split P26)", () => {
   test("is a group found by its address:  its projects open, unlisted", async () => {
     const { SpellSetup } = await import("spell/parser/spell/SpellSetup")
-    expect(SpellSetup.groupFor("owen@acme/harbor-new")?.path).toBe("owen@acme")
+    expect(SpellSetup.groupFor("owen@acme/dashboard")?.path).toBe("owen@acme")
     expect(SpellSetup.projectRootPaths).not.toContain("owen@acme")
   })
   test("never its own folders, nor this machine's person's space", async () => {
@@ -67,8 +67,8 @@ describe("spaces' own names", () => {
 
 describe("this machine's person (repo-split P27)", () => {
   test("personIdFor():  a name or an email made an id", () => {
-    expect(SPACES.personIdFor("kim.lee@acme.com")).toBe("kim-lee")
-    expect(SPACES.personIdFor("Kim Lee")).toBe("kim-lee")
+    expect(SPACES.personIdFor("alice.smith@acme.com")).toBe("alice-smith")
+    expect(SPACES.personIdFor("Alice Smith")).toBe("alice-smith")
     expect(SPACES.personIdFor("  Zoë  ")).toBe("zoe")
     expect(SPACES.personIdFor("42 owls")).toBe("owls")
     expect(SPACES.personIdFor("!!!")).toBe("")
@@ -78,9 +78,9 @@ describe("this machine's person (repo-split P27)", () => {
     const SpellSetup = spacesSetup
     const was = { id: SPACES.localPerson.id, org: SPACES.localPerson.org }
     try {
-      SPACES.setLocalPerson({ id: "kim-lee", org: "acme" })
-      expect(SPACES.PROJECT_GROUPS[0]!.path).toBe("kim-lee@acme")
-      expect(SpellSetup.groupFor("kim-lee@acme/mine")?.description).toBe("Your own projects")
+      SPACES.setLocalPerson({ id: "alice", org: "acme" })
+      expect(SPACES.PROJECT_GROUPS[0]!.path).toBe("alice@acme")
+      expect(SpellSetup.groupFor("alice@acme/mine")?.description).toBe("Your own projects")
       expect(SpellSetup.projectRootPaths).not.toContain("owen@spell")
     } finally {
       SPACES.setLocalPerson(was)

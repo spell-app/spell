@@ -54,8 +54,8 @@ const THIS_MACHINE = /^(localhost|127\.0\.0\.1|\[::1\])$/
 /****************
  * ### `<NamePage>`
  * The editor's first page on a machine nobody's named yet:  "Your name", their org on its right (`@acme`).
- * - Started from git's email (`kim.lee@acme.com` => `kim-lee`), and theirs to change.
- * - Says when that name already has a space here:  "kim@acme already has a space here:  that's you?"
+ * - Started from git's email (`alice@acme.com` => `alice`), and theirs to change.
+ * - Says when that name already has a space here:  "alice@acme already has a space here:  that's you?"
  * - Start (or Enter) names them on the server (`POST /api/people/local`):  the app's me file and their `__me.json5`;
  *   then `onNamed`, and the editor draws.
  ****************/

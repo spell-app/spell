@@ -21534,6 +21534,30 @@
               "fieldName": "menu"
             },
             {
+              "name": "flyout-label",
+              "description": "The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with `split` the chevron end's tooltip (\"Pick one of the parts under the mouse\").  Default:  its `label`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "flyoutLabel"
+            },
+            {
+              "name": "value",
+              "description": "With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
+              "name": "split",
+              "description": "Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "split"
+            },
+            {
               "name": "disabled",
               "description": "Can't be opened.",
               "type": {
@@ -21673,7 +21697,7 @@
             },
             {
               "name": "chevron",
-              "description": "The chevron at the row's end, pointing to the fly-out."
+              "description": "The chevron at the row's end, pointing to the fly-out;  with `split`, what opens it."
             },
             {
               "name": "flyout",
@@ -21684,6 +21708,10 @@
             {
               "name": "open",
               "description": "Its fly-out is showing."
+            },
+            {
+              "name": "split",
+              "description": "Its title chooses;  its chevron end opens the fly-out (`split`)."
             },
             {
               "name": "disabled",
@@ -24395,6 +24423,14 @@
               "description": "With `source`:  the file couldn't be loaded or shown."
             },
             {
+              "name": "more-above",
+              "description": "A pane whose body is scrolled down from its top:  a shade shows under its bar."
+            },
+            {
+              "name": "more-below",
+              "description": "A pane whose body has more below:  a shade shows at its bottom."
+            },
+            {
               "name": "busy",
               "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
             },
@@ -24478,6 +24514,21 @@
               "name": "--ui-panel-shadow",
               "default": "var(--spell-shadow-sm, var(--ui-shadow-raised))",
               "description": "the box shadow"
+            },
+            {
+              "name": "--ui-panel-scroll-shade",
+              "default": "light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3))",
+              "description": "the shade's colour at its edge, fading to nothing: a dark tint, deeper on a dark page"
+            },
+            {
+              "name": "--ui-panel-scroll-shade-size",
+              "default": "16px",
+              "description": "how tall each shade is"
+            },
+            {
+              "name": "--ui-panel-scroll-shade-top",
+              "default": "0px",
+              "description": "how far under the bar the top shade starts: under a line of the body's that sticks at its top"
             },
             {
               "name": "--ui-panel-pane-bar-height",
@@ -30147,7 +30198,7 @@
             },
             {
               "name": "here",
-              "description": "Its value is set on this thing (its editor's `origins`):  a dot by its label."
+              "description": "Its value is set on this thing (its editor's `origins`);  draws nothing of its own."
             },
             {
               "name": "inherited",
@@ -30726,7 +30777,7 @@
             {
               "kind": "field",
               "name": "origins",
-              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
+              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }

@@ -135,6 +135,23 @@ describe("<ui-property-editor> schema", () => {
     expect((family.querySelector("ui-input") as HTMLElement & { value: unknown }).value).toBe("Lora")
   })
 
+  it("draws no group with nothing in it, header and all (epic `editor` I223)", async () => {
+    const host = await editor(
+      `<ui-property-group label="Content"></ui-property-group>
+       <ui-property-group label="Look"><ui-property name="size"></ui-property></ui-property-group>`,
+      { size: "lg" }
+    )
+    const [empty, look] = [...host.querySelectorAll("ui-property-group")] as HTMLElement[]
+    expect(empty!.matches(":state(empty)")).toBe(true)
+    expect(empty!.getBoundingClientRect().height).toBe(0)
+    expect(look!.matches(":state(empty)")).toBe(false)
+    expect(look!.getBoundingClientRect().height).toBeGreaterThan(0)
+    // a property put in later draws it
+    empty!.append(document.createElement("ui-property"))
+    await expect.poll(() => empty!.matches(":state(empty)")).toBe(false)
+    await expect.poll(() => empty!.getBoundingClientRect().height).toBeGreaterThan(0)
+  })
+
   it("shows each value by its words, `valueLabels`, and writes the value itself (epic `language` T73)", async () => {
     const thing = { direction: "down" }
     const host = await ElementFixture.render<Editor>(
@@ -345,5 +362,22 @@ describe("<ui-property-editor source>", () => {
     host.value = { size: "lg" }
     await expect.poll(() => host.querySelectorAll("ui-property").length, { timeout: 5000 }).toBe(1)
     expect(host.querySelector("ui-property")!.getAttribute("name")).toBe("size")
+  })
+})
+
+describe("<ui-property unsaved>", () => {
+  it("shows its editor's unsaved icon, but never while it's read only (epic `editor` I224)", async () => {
+    const host = await ElementFixture.render<Editor>(
+      `<ui-property-editor unsaved="Not saved:  this one is made as the program runs">
+         <ui-property name="title" label="Title"></ui-property>
+         <ui-property name="worked" label="Worked out" readonly><span>7</span></ui-property>
+       </ui-property-editor>`
+    )
+    host.schema = { name: "Card", attributes: [{ name: "title", kind: "string", type: "text", description: "" }] }
+    host.value = { title: "seven" }
+    const unsavedIcon = (name: string) =>
+      host.querySelector(`ui-property[name="${name}"]`)!.shadowRoot!.querySelector('[part~="unsaved"]')
+    await expect.poll(() => !!unsavedIcon("title"), { timeout: 5000 }).toBe(true)
+    expect(unsavedIcon("worked")).toBeNull()
   })
 })
