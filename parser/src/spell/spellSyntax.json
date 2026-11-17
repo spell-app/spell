@@ -2175,11 +2175,11 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 35,
+          "line": 40,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
-              "syntax": "the {property:member_words} of {expression:operand}",
+              "syntax": "the {property:member_words} of ((each:each) ({expression:each_item_where}|{arg:singular_identifier} in {expression:operand})|{expression:operand})",
               "example": "the short rank of the card",
               "outputs": {
                 "js": {

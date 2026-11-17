@@ -474,8 +474,19 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `the first of its authors` is an item too, not a property named `first`:
       [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
       (never a property the owner declares, nor `the top of its card`).
+  - EACH ITEM'S, of a list of things (epic `language` I155):  a list, `core.mapToList(deck, (card) => card.shorthand)`.
+    - `the shorthand of each card in the deck`, and with a condition, `... in the deck where it is face up`
+      (its `each_item_where`, as a loop's).
+    - `the shorthand of the cards in the deck`:  its words name the items, so the items' member comes first,
+      before the deck's own `shorthand`.
+    - `the names of the people`:  the list has no `names`, its items have a `name`;  a plural word reads the singular.
+    - An enumeration's twin is each item's value here:  `the suit of each card` is no `Card.Suits`.
+    - As a statement's `each`, `add the shorthand of each card in the deck to names` is still the loop's
+      (`each_in_statement`):  one add per card.
+    - Into text, the list reads as any list does:  `deck: A♣↓, 2♣↓, ...`, joined by `", "`.
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
-    - its syntax:  `the {property:member_words} of {expression:operand}`
+    - its syntax:
+      `the {property:member_words} of ((each:each) ({expression:each_item_where}|{arg:singular_identifier} in {expression:operand})|{expression:operand})`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`
     - but NOT `the position of` / `the number of` (`Priority.mostSpecific`)
   - `its X` is two rules:

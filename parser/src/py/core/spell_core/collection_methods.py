@@ -475,6 +475,20 @@ class CollectionMethods:
             self.set_item_at(results, position, call(value, position, coll))
         return results
 
+    def map_to_list(self, collection: object = None, method: Callback | None = None) -> Any:
+        """What `method` answers for each item, in a new plain `List`, in the items' order (epic `language` I155).
+
+        - From `the shorthand of the cards in the deck`;  not `map()`, which makes a list of the collection's own kind.
+        - A scratch list:  it owns nothing (`new_scratch()`).
+        """
+        results = self.new_scratch(List)
+        if not self._is_defined(collection, "map_to_list") or method is None:
+            return results
+        call = _callback(method)
+        for value, position, coll in list(self.get_iterator_for(collection)):
+            results.append(call(value, position, coll))
+        return results
+
     def filter(self, collection: object = None, condition: Callback | None = None) -> Any:
         """The items `condition` says yes to, in a new collection of the same kind.
 

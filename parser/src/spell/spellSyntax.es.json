@@ -2222,11 +2222,11 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 35,
+          "line": 40,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
-              "syntax": "(el|la|los|las)? {property:member_words} (de|del) {expression:operand}",
+              "syntax": "(el|la|los|las)? {property:member_words} (de|del) ((each:cada) ({expression:each_item_where}|{arg:singular_identifier} (en|de|del) {expression:operand})|{expression:operand})",
               "example": "el short rank de la carta",
               "outputs": {
                 "js": {

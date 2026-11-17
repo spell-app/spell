@@ -423,6 +423,21 @@ export const collectionOtherMethods = defineCoreModule({
   },
 
   /**
+   * What `method` answers for each item of `collection`, in a new plain `List`, in the items' order
+   * (epic `language` I155).
+   * - Compiles from `the shorthand of the cards in the deck`:  `core.mapToList(this, (card) => card.shorthand)`
+   *   -- see `rules/properties/PropertyExpression.ts`.
+   * - Not `core.map()`, which makes a list of `collection`'s own kind:  a deck of shorthands.
+   * - A scratch list:  it owns nothing -- see `core.newScratch()`.
+   */
+  mapToList<T = unknown>(collection?: CollectionOf<T>, method?: CollectionIterationCallback<NoInfer<T>>): List {
+    const results = core.newScratch(List) as List
+    if (!assert.isDefined(collection, "core.mapToList(collection)") || !method) return results
+    core.forEach(collection, (value, position, coll) => results.append(method(value, position, coll)))
+    return results
+  },
+
+  /**
    * Return new `collection` of only things which match `condition` filter.
    * - For array: returns a compacted collection of same type.
    * - For object: returns new type of collection with just specified keys.
