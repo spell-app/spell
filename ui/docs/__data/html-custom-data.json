@@ -411,6 +411,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -920,6 +927,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -1246,6 +1260,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -1670,6 +1691,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -2432,6 +2460,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -2794,6 +2829,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -3120,6 +3162,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -3455,6 +3504,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -3788,6 +3844,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -4169,6 +4232,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -4827,6 +4897,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -5438,6 +5515,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -6077,6 +6161,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -6657,6 +6748,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -7267,6 +7365,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -7646,6 +7751,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -8176,6 +8288,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -8563,6 +8682,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -8914,6 +9040,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -9729,6 +9862,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -10062,6 +10202,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -10456,6 +10603,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -10789,6 +10943,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -11326,6 +11487,13 @@
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -11706,6 +11874,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -12040,6 +12215,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -12367,6 +12549,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -12693,6 +12882,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -13042,6 +13238,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -13375,6 +13578,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -13730,6 +13940,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -14156,6 +14373,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -14656,6 +14880,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -15395,6 +15626,13 @@
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -15807,6 +16045,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -16173,6 +16418,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -16587,6 +16839,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -16963,6 +17222,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -17296,6 +17562,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -17756,6 +18029,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -18225,6 +18505,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -18644,6 +18931,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -19004,6 +19298,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -19469,6 +19770,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -19947,6 +20255,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -20542,6 +20857,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -21085,6 +21407,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -21609,6 +21938,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -22018,6 +22354,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -22411,6 +22754,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -23017,6 +23367,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -23439,6 +23796,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -23804,6 +24168,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -24513,6 +24884,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -25008,6 +25386,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -25431,6 +25816,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -25783,6 +26175,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -26134,6 +26533,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -26760,6 +27166,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -27250,6 +27663,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -27676,6 +28096,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -28170,6 +28597,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -28659,6 +29093,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -29083,6 +29524,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -29845,6 +30293,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -30379,6 +30834,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -30705,6 +31167,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -31159,6 +31628,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -31707,6 +32183,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -32033,6 +32516,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -32506,6 +32996,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -32844,6 +33341,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -33526,6 +34030,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -33867,6 +34378,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -34200,6 +34718,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -34541,6 +35066,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -34896,6 +35428,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -35222,6 +35761,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -35788,6 +36334,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -36373,6 +36926,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -36868,6 +37428,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -37707,6 +38274,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -38442,6 +39016,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -38769,6 +39350,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -39095,6 +39683,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -39436,6 +40031,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -39952,6 +40554,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -40364,6 +40973,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -40841,6 +41457,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -41174,6 +41797,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -41618,6 +42248,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -42090,6 +42727,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -42687,6 +43331,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -43258,6 +43909,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -43937,6 +44595,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -44270,6 +44935,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -44841,6 +45513,13 @@
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -45276,6 +45955,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -45733,6 +46419,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -46130,6 +46823,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -46456,6 +47156,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -46921,6 +47628,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -47316,6 +48030,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -47649,6 +48370,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -48009,6 +48737,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -48505,6 +49240,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -48838,6 +49580,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -49413,6 +50162,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -49775,6 +50531,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -50129,6 +50892,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -50567,6 +51337,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -51027,6 +51804,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -51535,6 +52319,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -51975,6 +52766,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -52539,6 +53337,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -52886,6 +53691,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -53249,6 +54061,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -53575,6 +54394,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -53981,6 +54807,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -54757,6 +55590,13 @@
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -55331,6 +56171,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -55664,6 +56511,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -56024,6 +56878,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -56592,6 +57453,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -57090,6 +57958,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -57423,6 +58298,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -57833,6 +58715,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -58160,6 +59049,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -58486,6 +59382,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -59010,6 +59913,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -59397,6 +60307,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -60204,6 +61121,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -60640,6 +61564,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -61018,6 +61949,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -61373,6 +62311,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -61781,6 +62726,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -62204,6 +63156,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -62537,6 +63496,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -62921,6 +63887,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -63288,6 +64261,13 @@
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
           }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
         }
       ]
     },
@@ -63649,6 +64629,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "only-on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]

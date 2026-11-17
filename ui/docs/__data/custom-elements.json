@@ -215,6 +215,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -343,6 +351,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -676,6 +688,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -777,6 +797,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -956,6 +980,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -1008,6 +1040,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -1408,6 +1444,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -1538,6 +1582,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -1701,6 +1749,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -1761,6 +1817,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -1924,6 +1984,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -1980,6 +2048,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -2345,6 +2417,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -2440,6 +2520,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -2905,6 +2989,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -2961,6 +3053,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -3092,6 +3188,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -3143,6 +3247,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -3556,6 +3664,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -3709,6 +3825,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -4097,6 +4217,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -4177,6 +4305,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -4541,6 +4673,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -4597,6 +4737,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -4888,6 +5032,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -4968,6 +5120,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -5389,6 +5545,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -5465,6 +5629,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -5694,6 +5862,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -5827,6 +6003,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -6027,6 +6207,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -6095,6 +6283,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -6311,6 +6503,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -6379,6 +6579,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -6558,6 +6762,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -6600,6 +6812,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -6843,6 +7059,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -6899,6 +7123,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -7160,6 +7388,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -7244,6 +7480,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -7408,6 +7648,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -7460,6 +7708,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -7663,6 +7915,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -7710,6 +7970,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -7930,6 +8194,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -8027,6 +8299,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -8303,6 +8579,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -8359,6 +8643,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -8836,6 +9124,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -8992,6 +9288,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -9431,6 +9731,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -9527,6 +9835,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -9743,6 +10055,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -9790,6 +10110,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -10037,6 +10361,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -10156,6 +10488,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -10425,6 +10761,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -10497,6 +10841,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -10684,6 +11032,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -10736,6 +11092,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -10980,6 +11340,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -11027,6 +11395,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -11294,6 +11666,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -11401,6 +11781,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -11734,6 +12118,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -11883,6 +12275,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -12070,6 +12466,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -12138,6 +12542,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -12368,6 +12776,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -12522,6 +12938,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -12722,6 +13142,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -12778,6 +13206,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -13077,6 +13509,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -13129,6 +13569,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -13388,6 +13832,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -13444,6 +13896,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -13768,6 +14224,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -13832,6 +14296,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -14091,6 +14559,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -14142,6 +14618,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -14415,6 +14895,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -14467,6 +14955,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -14702,6 +15194,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -14814,6 +15314,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -15247,6 +15751,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -15315,6 +15827,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -15589,6 +16105,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -15641,6 +16165,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -15845,6 +16373,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -15960,6 +16496,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -16332,6 +16872,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -16436,6 +16984,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -16893,6 +17445,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -16983,6 +17543,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -17243,6 +17807,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -17327,6 +17899,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -17555,6 +18131,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -17611,6 +18195,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -17844,6 +18432,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -17934,6 +18530,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -18106,6 +18706,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -18157,6 +18765,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -18493,6 +19105,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -18577,6 +19197,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -19015,6 +19639,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -19067,6 +19699,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -19350,6 +19986,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -19414,6 +20058,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -19922,6 +20570,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -19974,6 +20630,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -20272,6 +20932,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -20410,6 +21078,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -20919,6 +21591,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -21029,6 +21709,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -21668,6 +22352,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -21748,6 +22440,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -22015,6 +22711,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -22106,6 +22810,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -22465,6 +23173,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -22572,6 +23288,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -22968,6 +23688,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -23050,6 +23778,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -23368,6 +24100,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -23516,6 +24256,10 @@
             {
               "name": "pending",
               "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -23704,6 +24448,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -23836,6 +24588,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -24207,6 +24963,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -24457,6 +25221,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -24695,6 +25463,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -24763,6 +25539,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -24894,6 +25674,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -24954,6 +25742,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -25093,6 +25885,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -25161,6 +25961,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -25324,6 +26128,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -25432,6 +26244,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -25571,6 +26387,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -25627,6 +26451,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -25758,6 +26586,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -25842,6 +26678,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -25973,6 +26813,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -26029,6 +26877,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -26168,6 +27020,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -26232,6 +27092,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -26459,6 +27323,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -26555,6 +27427,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -26859,6 +27735,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -26927,6 +27811,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -27058,6 +27946,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -27114,6 +28010,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -27245,6 +28145,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -27309,6 +28217,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -27448,6 +28360,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -27508,6 +28428,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -27871,6 +28795,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -27927,6 +28859,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -28159,6 +29095,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -28211,6 +29155,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -28358,6 +29306,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -28405,6 +29361,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -28544,6 +29504,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -28591,6 +29559,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -28722,6 +29694,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -28774,6 +29754,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -29110,6 +30094,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -29206,6 +30198,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -29580,6 +30576,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -29671,6 +30675,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -30056,6 +31064,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -30283,6 +31299,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -30755,6 +31775,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -31179,6 +32207,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -31589,6 +32621,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -31862,6 +32902,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -32065,6 +33109,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -32121,6 +33173,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -32333,6 +33389,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -32385,6 +33449,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -32647,6 +33715,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -32714,6 +33790,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -32970,6 +34050,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -33042,6 +34130,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -33316,6 +34408,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -33420,6 +34520,10 @@
             {
               "name": "pending",
               "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -33782,6 +34886,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -33934,6 +35046,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -34421,6 +35537,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -34663,6 +35787,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -35033,6 +36161,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -35093,6 +36229,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -35344,6 +36484,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -35404,6 +36552,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -35749,6 +36901,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -35805,6 +36965,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -36072,6 +37236,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -36173,6 +37345,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -36529,6 +37705,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -36597,6 +37781,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -36754,6 +37942,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -36830,6 +38026,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -37001,6 +38201,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -37057,6 +38265,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -37188,6 +38400,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -37244,6 +38464,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -37425,6 +38649,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -37510,6 +38742,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -37775,6 +39011,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -37855,6 +39099,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -38031,6 +39279,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -38091,6 +39347,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -38283,6 +39543,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -38376,6 +39644,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -38637,6 +39909,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -38721,6 +40001,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -38884,6 +40168,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -38952,6 +40244,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -39278,6 +40574,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -39377,6 +40681,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -39673,6 +40981,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -39715,6 +41031,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -39902,6 +41222,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -39978,6 +41306,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -40204,6 +41536,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -40259,6 +41599,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -40470,6 +41814,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -40538,6 +41890,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -40762,6 +42118,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -40822,6 +42186,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -41057,6 +42425,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -41141,6 +42517,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -41524,6 +42904,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -41588,6 +42976,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -41785,6 +43177,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -41860,6 +43260,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -42096,6 +43500,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -42168,6 +43580,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -42433,6 +43849,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -42543,6 +43967,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -42746,6 +44174,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -42801,6 +44237,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -43148,6 +44588,14 @@
                 "text": "string"
               },
               "fieldName": "movable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -43260,6 +44708,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -43674,6 +45126,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -43742,6 +45202,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -43891,6 +45355,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -43942,6 +45414,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -44154,6 +45630,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -44210,6 +45694,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -44509,6 +45997,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -44565,6 +46061,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -44808,6 +46308,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -44855,6 +46363,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -44994,6 +46506,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -45116,6 +46636,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -45256,6 +46780,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -45339,6 +46871,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -45575,6 +47111,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -45695,6 +47239,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -45996,6 +47544,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -46132,6 +47688,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -46438,6 +47998,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -46545,6 +48113,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -47008,6 +48580,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -47174,6 +48754,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -47426,6 +49010,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -47504,6 +49096,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -47704,6 +49300,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -47795,6 +49399,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -48091,6 +49699,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -48214,6 +49830,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -48410,6 +50030,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [
@@ -48506,6 +50134,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -48742,6 +50374,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -48794,6 +50434,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -49005,6 +50649,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -49078,6 +50730,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -49274,6 +50930,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -49343,6 +51007,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [
@@ -49562,6 +51230,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -49675,6 +51351,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": []
@@ -49871,6 +51551,14 @@
                 "text": "string"
               },
               "fieldName": "resizable"
+            },
+            {
+              "name": "only-on-platform",
+              "description": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onlyOnPlatform"
             }
           ],
           "members": [],
@@ -49947,6 +51635,10 @@
             {
               "name": "ready",
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "only-on-platform",
+              "description": "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
           "cssProperties": [

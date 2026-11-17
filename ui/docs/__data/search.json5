@@ -28,9 +28,10 @@
         {"id":"general-usage","title":"General Usage"},
         {"id":"general-usage-descriptive-attributes","title":"Descriptive Attributes","parent":0},
         {"id":"general-usage-attribute-order","title":"Attribute Order","parent":0},
+        {"id":"general-usage-only-on-platform","title":"Only on Some Devices","parent":0},
         {"id":"installation","title":"Installation"},
         {"id":"the-contract","title":"The Contract"},
-        {"id":"the-contract-plain-html","title":"Plain HTML","parent":4},
+        {"id":"the-contract-plain-html","title":"Plain HTML","parent":5},
         {"id":"frameworks","title":"Frameworks"},
         {"id":"styling","title":"Styling"},
         {"id":"updating","title":"Updating"}
