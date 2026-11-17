@@ -37,6 +37,24 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   /** The box of part `name`'s card. */
   const cardOf = (name: string) => page.locator(`.SiteCard[data-part="${name}"]`).locator("[part~=card]")
 
+  /** Room between the cards' frame (the board's scroll box) and the block of its cards and group lines, each side. */
+  const boardGaps = () =>
+    page.evaluate(() => {
+      const frame = document.querySelector(".SiteEditorPage .cards")!.getBoundingClientRect()
+      const boxes = [
+        ...[...document.querySelectorAll(".SiteBoard .SiteCard")].map((card) =>
+          card.shadowRoot!.querySelector("[part~=card]")!.getBoundingClientRect()
+        ),
+        ...[...document.querySelectorAll(".SiteGroupHeader")].map((line) => line.getBoundingClientRect())
+      ]
+      return {
+        left: Math.min(...boxes.map((box) => box.left)) - frame.left,
+        right: frame.right - Math.max(...boxes.map((box) => box.right)),
+        top: Math.min(...boxes.map((box) => box.top)) - frame.top,
+        padding: getComputedStyle(document.querySelector(".SiteBoard")!).padding
+      }
+    })
+
   /** Press on `from`'s middle and move to `x`, `y`;  the press stays down, for the caller to end. */
   const dragTo = async (from: Locator, to: () => Promise<{ x: number; y: number }>) => {
     const box = (await from.boundingBox())!
@@ -122,6 +140,26 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     // a dialog has no icon, and says what it is
     const settings = page.locator('.SiteCard[data-part="settings dialog"]')
     expect(await settings.locator(".heading ui-icon").count()).toBe(0)
+  })
+
+  test("the cards sit in the middle of their frame, 20px in from its edges (I37)", async () => {
+    const gaps = await boardGaps()
+    expect(gaps.padding).toBe("20px")
+    expect(gaps.top).toBeCloseTo(20, 0)
+    expect(gaps.left).toBeGreaterThan(20)
+    expect(Math.abs(gaps.left - gaps.right)).toBeLessThanOrEqual(1)
+    // too narrow for them:  20px in from the left, scrolling to 20px past the right
+    await page.setViewportSize({ width: 900, height: 860 })
+    await expect.poll(async () => (await boardGaps()).left).toBeCloseTo(20, 0)
+    const frame = page.locator(".SiteEditorPage .cards")
+    await frame.evaluate((pane) => {
+      pane.scrollLeft = pane.scrollWidth
+    })
+    expect((await boardGaps()).right).toBeCloseTo(20, 0)
+    await frame.evaluate((pane) => {
+      pane.scrollLeft = 0
+    })
+    await page.setViewportSize({ width: 1400, height: 860 })
   })
 
   test("the bar's Run | Edit | Site:  Site chosen here, and only for a site", async () => {
@@ -327,6 +365,15 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
         return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
       })
       expect(await page.locator('.SiteCard[data-drop="into"]').count()).toBe(0)
+      await page.keyboard.press("Escape")
+      await page.mouse.up()
+    })
+
+    test("a card moving shifts nothing:  the one more column takes no room in the centred board (I37)", async () => {
+      const before = await boardGaps()
+      await dragTo(cardOf("film page"), () => spotCentre("films page", 1, 3))
+      expect(await page.locator(".SiteBoard[data-moving]").count()).toBe(1)
+      expect((await boardGaps()).left).toBeCloseTo(before.left, 0)
       await page.keyboard.press("Escape")
       await page.mouse.up()
     })

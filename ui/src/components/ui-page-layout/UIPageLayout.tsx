@@ -55,8 +55,11 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *   - so the drawer and the menu read as one surface, the bar beside the drawer's top with no line between them
  *   - the drawer's line starts under the menu, the menu's own line turning into it (epic `mockup` I25)
  * - `drawer="compact"`:  the drawer shows only its icons, as the layout sets `collapsed` on each `<ui-site-nav>` in it.
- *   - The pointer resting on it a moment (0.1s), or the keyboard's focus coming into it, opens it over the page,
- *     all of it, without pushing the page:  its column keeps its width.  Leaving it closes it, a moment later.
+ *   - The pointer resting on it half a second, or the keyboard's focus coming into it, opens it over the page,
+ *     all of it, the whole height of its column, without pushing the page:  its column keeps its width.
+ *     Leaving it closes it, a moment later (0.15s).
+ *   - Its icons stay where they are as it opens and closes:  the navigation keeps their room at the start the same
+ *     either way (`UISiteNav.css`, epic `mockup` C1 on J161).
  *   - It grows out from the column's edge and shrinks back into it;  switched to all of it and back, the column
  *     widens and narrows (`UIPageLayout.css`, "Motion").
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the start
@@ -292,9 +295,10 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   private cancelWidening: (() => void) | undefined
 
   /**
-   * The pointer came onto the compact drawer:  open it after a moment (`OPEN_DELAY`), or stay open.
+   * The pointer came onto the compact drawer:  open it after half a second (`OPEN_DELAY`), or stay open.
    * - Not the page's hover delay (`--ui-hover-delay`, 800ms) for pop-ups:  the drawer is where the pointer goes on
    *   purpose, and waiting that long for it read as broken (epic `mockup` I26).
+   * - Nor at once (0.1s, J161):  passing over it on the way to the page opened it (Owen, C1:  "a 1/2 second hover").
    */
   private onDrawerEnter(event: PointerEvent) {
     if (!this.isCompact || this.isNarrow || event.pointerType === "touch") return
@@ -550,9 +554,10 @@ const NAV_BAR_HEIGHT = "--ui-site-nav-bar-height"
 
 /**
  * How long, in seconds, the pointer rests on the compact drawer before it opens:  long enough that passing over it
- * on the way somewhere else doesn't open it, short enough to feel at once.
+ * on the way somewhere else doesn't open it (Owen, epic `mockup` C1 on J161:  "Change to a 1/2 second hover").
+ * - The keyboard's focus opens it at once (`onDrawerFocusIn()`).
  */
-const OPEN_DELAY = 0.1
+const OPEN_DELAY = 0.5
 
 /** How long, in seconds, the pointer is off the open compact drawer before it closes:  a slip off its edge doesn't. */
 const CLOSE_DELAY = 0.15

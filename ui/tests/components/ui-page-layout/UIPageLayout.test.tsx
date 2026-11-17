@@ -195,17 +195,20 @@ describe("<ui-page-layout>", () => {
     expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({ newState: "full", oldState: "compact" })
   })
 
-  // epic `mockup` I26 (Owen:  "Delay in hover animation on sidebar slide out takes too long, feels like an error")
-  test("compact, the pointer resting on the drawer a moment opens it over the page, not the page's hover delay;  the page staying put", async () => {
+  // epic `mockup` I26 (Owen:  "Delay in hover animation on sidebar slide out takes too long, feels like an error"),
+  // then C1 on J161 (Owen:  "Change to a 1/2 second hover to open.  Close timing is fine.")
+  test("compact, the pointer resting on the drawer half a second opens it over the page, not the page's hover delay;  the page staying put", async () => {
     const layout = await pageLayout(`${NAV}<p>The page</p>`, { drawer: "compact" })
     layout.style.setProperty("--ui-hover-delay", "5s")
     const page = box(layout, "page")!
     const before = page.getBoundingClientRect().left
     const drawer = box(layout, "drawer")!
+    const rested = performance.now()
     drawer.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
-    await ElementFixture.tick()
+    await new Promise((done) => setTimeout(done, 350))
     expect(layout.matches(":state(open)")).toBe(false)
-    await expect.poll(() => layout.matches(":state(open)"), { timeout: 400 }).toBe(true)
+    await expect.poll(() => layout.matches(":state(open)"), { timeout: 1000, interval: 10 }).toBe(true)
+    expect(performance.now() - rested).toBeGreaterThanOrEqual(490)
     await ShadowTree.settle(layout)
     expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(false)
     expect(page.getBoundingClientRect().left).toBeCloseTo(before, 0)
@@ -223,6 +226,34 @@ describe("<ui-page-layout>", () => {
     await expect.poll(() => layout.matches(":state(open)")).toBe(false)
     await ShadowTree.settle(layout)
     expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
+  })
+
+  // epic `mockup` J144:  the keyboard's focus opens it at once
+  test("compact, the keyboard's focus coming into the drawer opens it at once", async () => {
+    const layout = await pageLayout(`${NAV}<p>The page</p>`, { drawer: "compact" })
+    box(layout, "drawer")!.dispatchEvent(new FocusEvent("focusin", { bubbles: true, composed: true }))
+    await ShadowTree.settle(layout)
+    expect(layout.matches(":state(open)")).toBe(true)
+  })
+
+  // epic `mockup` C1 on J161 (Owen:  "The fixed icons (home, person, etc) should not move when the drawer opens")
+  test("compact, its icons stay where they are as it opens over the page", async () => {
+    const layout = await pageLayout(`${NAV}<p>The page</p>`, { drawer: "compact" })
+    const nav = layout.querySelector("ui-site-nav")!
+    /** Each row's icon's middle, as drawn:  `<ui-icon>`'s own box takes no room. */
+    const middles = () =>
+      [...nav.shadowRoot!.querySelectorAll("ui-tree-item")].map((item) => {
+        const host = item.querySelector('[slot="icon"]') ?? item.shadowRoot!.querySelector(".icon")!
+        const icon = (host.shadowRoot?.querySelector(".icon") ?? host).getBoundingClientRect()
+        return +(icon.left + icon.width / 2).toFixed(1)
+      })
+    const closed = middles()
+    expect(closed.length).toBe(2)
+    box(layout, "drawer")!.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
+    await expect.poll(() => layout.matches(":state(open)"), { timeout: 1500 }).toBe(true)
+    await expect.poll(() => layout.matches(":state(moving)")).toBe(false)
+    expect(nav.hasAttribute("collapsed")).toBe(false)
+    middles().forEach((middle, index) => expect(middle).toBeCloseTo(closed[index]!, 0))
   })
 
   test("narrow (below 40em of its own box), one column:  `toggleDrawer()` slides the drawer in, Escape closes it", async () => {

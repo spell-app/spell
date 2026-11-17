@@ -77,6 +77,14 @@
     gap: 0.5em;
     min-width: 0;
   }
+  /*
+   * A preview holding a child that measures its own width (`:state(wide-preview)`:  a page layout, form, table ...):
+   * its children take the whole line, as that child can't size itself by its contents (epic `mockup` I34).
+   * - A width, not a flex basis:  a resizable box's dragged width (its inline style) still wins.
+   */
+  :host(:state(wide-preview)) ::slotted(*) {
+    inline-size: 100%;
+  }
   [part~="reset"] {
     flex: none;
     margin-inline-start: auto;
