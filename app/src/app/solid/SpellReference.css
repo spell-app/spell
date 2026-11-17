@@ -31,18 +31,3 @@
 .ReferenceDetails ui-button {
   margin-top: 12px;
 }
-
-/* `stacked`, the Inspector's Views card:  too narrow for two columns, so what's picked is under the tree */
-.SpellReference.stacked {
-  /* the card body's whole height, a column (`.InspectorSection`):  the tree scrolls, what's picked stays in sight */
-  flex: 1 1 auto;
-  height: auto;
-  grid-template-columns: none;
-  grid-template-rows: minmax(0, 1fr) auto;
-}
-.SpellReference.stacked > .ReferenceDetails {
-  max-height: 240px;
-  padding: 8px 12px;
-  border-inline-start: none;
-  border-top: 1px solid var(--ui-border-color, #8884);
-}

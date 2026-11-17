@@ -2735,7 +2735,7 @@ class PartSelector {
  *     while nothing is, its bar alone, folded for good (`<NoCodeCard>`, T69)
  *   - All Cards' type's events, actions and tests, cards of their own (`TYPE_PANES`);
  *     a one of a kind's (the app) are its Code card, its Tests card only while it has tests (I186)
- *   - the app's views, or the Reference, its tabs (`<InspectorViews>`)
+ *   - the app's views, things or templates (`<InspectorViews>`)
  * - Every card shows while the column does (epic `editor` T78:  no card hidden on its own);
  *   View › Inspector opens and closes the column, and the Inspector card's ✕ closes it (epic `editor` T83, I186).
  * - Each card folds to its header (`<InspectorCard>`):

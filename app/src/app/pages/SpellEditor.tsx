@@ -439,8 +439,8 @@ export function ProgramPanel(props: { onClose: () => void }) {
               class="ReferenceSearch"
               size="mini"
               icon="search"
-              aria-label={appTexts.text("paletteSearch")}
-              placeholder={appTexts.text("paletteSearch")}
+              aria-label={appTexts.text("referenceSearch")}
+              placeholder={appTexts.text("referenceSearch")}
               ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
             />
           </Show>
