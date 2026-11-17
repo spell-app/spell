@@ -599,7 +599,8 @@ export type SharedDictionary = {
         | "tooltip"
         | "label"
         | "movable"
-        | "resizable",
+        | "resizable"
+        | "only-on-platform",
         string
       >
     >
