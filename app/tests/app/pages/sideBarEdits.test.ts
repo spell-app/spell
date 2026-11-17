@@ -508,7 +508,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await select(page, "solitaire-foundation")
       const suit = page.locator("ui-property[name=suit]")
 
-      // set here, on its tag (language I143):  a dot and a reset, and its tooltip says so
+      // set here, on its tag (language I143):  a reset, and its tooltip says so
       expect(await suit.evaluate((field) => field.matches(":state(here)"))).toBe(true)
       expect(await suit.locator(".label").getAttribute("title")).toBe("Set here")
 

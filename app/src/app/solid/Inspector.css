@@ -87,9 +87,6 @@ ui-panel.InspectorCard > .InspectorSection {
   /* its bar the top bar's colour (Owen, epic `mockup` I18:  "Make these headers the same bg as the spell appMenu"):
      drawn under the bar, the top bar's fill and blur over the page (`EditorTheme.css`, epic `editor` I194) */
   --ui-panel-pane-bar-background: transparent;
-  /* its body's scroll shades (`.InspectorSection::before`, I201):  a dark tint, deeper on a dark page */
-  --spell-scroll-shade: light-dark(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.6));
-  --spell-scroll-shade-size: 16px;
   /* the room between its header and its body's first row, in every card (Owen, 2026-11-16, epic `editor` I210:
      "Too much space above Solitare and the rest of the panel views") */
   --spell-card-body-top: 8px;
@@ -289,65 +286,17 @@ ui-panel.InspectorCard > .InspectorSection {
   padding: var(--spell-card-body-top) 12px 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* its scroll, which its edges' shades follow (below) */
-  scroll-timeline: --inspector-scroll block;
 }
-/*
- * A card body's SCROLL SHADES:  a soft dark shadow at each edge with more beyond it, so a row cut off there reads
- * as "more this way", not sliced off (Owen, 2026-11-16, epic `editor` I201:  "white shading is not visible enough
- * ... Make it darken instead, but hide when scrolled to bottom or top";  a white fade since I11).
- * - None at the very top, none at the very bottom, and none at all on a body that doesn't scroll.
- * - Each a strip stuck to its edge, the body's whole width, taking no room, never in a click's way.
- * - It shows by the scroll itself, no script:  a scroll-driven animation fades it over its first (or last) 16px
- *   of scroll;  a body with nothing to scroll has no timeline, so its shades keep their resting `opacity: 0`.
- */
-.InspectorSection::before,
-.InspectorSection::after {
-  content: "";
-  position: sticky;
-  z-index: 3;
-  flex: none;
-  height: var(--spell-scroll-shade-size);
-  margin-inline: -12px;
-  pointer-events: none;
-  opacity: 0;
-  animation: auto linear both;
-  animation-timeline: --inspector-scroll;
+/* a property editor that starts with a section's header:  the header right under the card's, no room above it
+   (Owen, epic `editor` I223:  "Don't add space before the top section header");  an untitled band (a thing's own
+   type's fields) or a note first keeps the room, as any first row does (I210) */
+.InspectorSection:has(> ui-property-editor:first-child > ui-property-group:first-child:not(.InspectorUntitled)) {
+  padding-block-start: 0;
 }
-.InspectorSection::before {
-  top: calc(-1 * var(--spell-card-body-top));
-  margin-block: calc(-1 * var(--spell-card-body-top)) calc(var(--spell-card-body-top) - var(--spell-scroll-shade-size));
-  background: linear-gradient(to bottom, var(--spell-scroll-shade), transparent);
-  animation-name: InspectorShadeShows;
-  animation-range: 0 16px;
-}
-.InspectorSection::after {
-  bottom: -12px;
-  margin-block: calc(12px - var(--spell-scroll-shade-size)) -12px;
-  background: linear-gradient(to top, var(--spell-scroll-shade), transparent);
-  animation-name: InspectorShadeHides;
-  animation-range: calc(100% - 16px) 100%;
-}
-/* Views:  its path line sticks at the top while it's scrolled, so the top shade starts under it, as its rows do */
-.InspectorSection.InspectorViews::before {
-  top: var(--ui-tree-row-height, 22px);
-  margin-block: 0 calc(-1 * var(--spell-scroll-shade-size));
-}
-@keyframes InspectorShadeShows {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes InspectorShadeHides {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+/* A card body's scroll shades are its panel's (`<ui-panel appearance="pane">`, I201, I227):  shown only while there's
+   more that way.  Views:  its path line sticks at the top while it's scrolled, so the top shade starts under it */
+.InspectorCard[data-panel="views"] {
+  --ui-panel-scroll-shade-top: var(--ui-tree-row-height, 22px);
 }
 /* Views:  the tree's path line sticks right under the card's header, not under the section's padding,
    so the room above the first row is the first row's own (Owen, 2026-11-13, I56) */

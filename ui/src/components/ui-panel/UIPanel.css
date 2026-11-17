@@ -19,6 +19,8 @@
  *   floating by default.
  * - `--ui-panel-pane-background`, `-border-color`, `-filter`, `-header-background`:  a theme's glass for a window's pane.
  *   An app's own panes read them, and so Glass and Fruity need nothing in the app (the editor's `EditorTheme.css`).
+ * - A pane's SCROLL SHADES (below):  `--ui-panel-scroll-shade` (colour), `--ui-panel-scroll-shade-size` (height),
+ *   `--ui-panel-scroll-shade-top` (how far under the bar the top one starts).
  * - Layers:  `ui.components.panel.*` are declared after the section's, so these rules win without
  *   `!important`.
  * - Public tokens (`--ui-panel-*`) are never declared here:  read through private aliases, so a value set on
@@ -371,6 +373,8 @@
     min-width: 0;
   }
   .ui.pane.section.panel > .content {
+    /* its scroll shades are drawn over it, from its edges (below) */
+    position: relative;
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
@@ -383,6 +387,46 @@
   :host(:state(pane):state(collapsed)) > .ui.pane.section.panel:not(.sub) > .title {
     box-shadow: none;
     border-radius: 0;
+  }
+}
+
+/*
+ * ## A pane's scroll shades
+ * A soft shadow at each edge of the body with more beyond it, so a row cut off there reads as "more this way",
+ * not sliced off (Owen, 2026-11-16, epic `editor` I201, I227).
+ * - None at the very top, none at the very bottom, and none at all on a body that doesn't scroll:
+ *   `:state(more-above)` and `:state(more-below)`, which the panel sets as its body scrolls (`ScrollShades`).
+ * - Each a strip over the body's whole width at its edge, taking no room, never in a click's way.
+ */
+@layer ui.components.panel.content {
+  .ui.pane.section.panel {
+    /* the shade's colour at its edge, fading to nothing:  a dark tint, deeper on a dark page */
+    --_ui-panel-scroll-shade: var(--ui-panel-scroll-shade, light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3)));
+    /* how tall each shade is */
+    --_ui-panel-scroll-shade-size: var(--ui-panel-scroll-shade-size, 16px);
+    /* how far under the bar the top shade starts:  under a line of the body's that sticks at its top */
+    --_ui-panel-scroll-shade-top: var(--ui-panel-scroll-shade-top, 0px);
+  }
+  .ui.pane.section.panel > .content > .scroll.shade {
+    position: absolute;
+    inset-inline: 0;
+    z-index: 3;
+    height: var(--_ui-panel-scroll-shade-size);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--ui-duration-fast, 150ms) var(--ui-ease, ease);
+  }
+  .ui.pane.section.panel > .content > .top.scroll.shade {
+    top: var(--_ui-panel-scroll-shade-top);
+    background: linear-gradient(to bottom, var(--_ui-panel-scroll-shade), transparent);
+  }
+  .ui.pane.section.panel > .content > .bottom.scroll.shade {
+    bottom: 0;
+    background: linear-gradient(to top, var(--_ui-panel-scroll-shade), transparent);
+  }
+  :host(:state(more-above)) > .ui.pane.section.panel > .content > .top.scroll.shade,
+  :host(:state(more-below)) > .ui.pane.section.panel > .content > .bottom.scroll.shade {
+    opacity: 1;
   }
 }
 

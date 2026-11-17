@@ -81,13 +81,18 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
 
   test("Publish makes it public, keeps a version, and the draft goes", async () => {
     await edit('"words"', '"text"')
-    // while there's a draft:  Draft | Discard | Publish beside the modes, and a pen on its tab
+    // while there's a draft:  Draft | Publish | Discard left of the modes (T102), and a pen on its tab
     // (I44, I90, I93, T67, I192);  the label says what a draft is, on hover (its bar tooltip, I217)
     await page.waitForSelector(".PublishDraft", { timeout: 5000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(1)
     expect(await page.locator(".PublishDraft ui-button.DiscardDraft").count()).toBe(1)
     expect((await page.locator(".PublishDraft .DraftState").textContent())?.trim()).toBe("Draft")
     expect(await page.locator(".PublishDraft .DraftState").getAttribute("data-tooltip")).toMatch(/only you see them/i)
+    // just left of Run | Edit (T102):  its right edge the bar's icon gap before Run's tab
+    const pill = (await page.locator(".PublishDraft").boundingBox())!
+    const run = (await page.locator(".ModeTabs > ui-item [part~=item]").first().boundingBox())!
+    expect(run.x - (pill.x + pill.width)).toBeGreaterThanOrEqual(8)
+    expect(run.x - (pill.x + pill.width)).toBeLessThanOrEqual(16)
     await page.locator(".PublishDraft ui-button.Publish").click()
     await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)

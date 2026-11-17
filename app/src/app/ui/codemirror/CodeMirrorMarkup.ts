@@ -610,22 +610,29 @@ type FootAlone = { start: number; end: number; rails: Rail[] }
 /** How far in a line's words start:  its tabs, then its spaces. */
 export type Indent = { tabs: number; spaces: number }
 
-/** One enclosing block, as a body line draws its rail:  where its band starts, and its colour. */
-export type Rail = Indent & { partOfSpeech: string }
+/**
+ * One enclosing block, as a body line draws its rail:  where its band starts, and its colour.
+ * - `groupOf`:  a group's rail, in its band's colour, the hue of the block it's in (`--cmb-group-<hue>`;
+ *   epic `language` I147)
+ */
+export type Rail = Indent & { partOfSpeech: string; groupOf?: string | undefined }
 
 /**
  * `rails` as a CSS background:  one stripe per enclosing block, at its band's left edge, in its band's colour
  *   (epic `language` I137, as before I131).
+ * - The innermost on top:  a group's rail hangs on its parent's, at the same place, and shows its own colour over it
+ *   (Owen, I147:  "This bar and curly should be colored by group, not app").
  * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`), a rail (`--cmb-rail`) and where a rail
  *   starts from its band's line's indent (`--cmb-rail-left`):  only the columns are written here.
  */
 function railsOf(rails: Rail[]): string {
   return rails
-    .map(({ tabs, spaces, partOfSpeech }) => {
+    .map(({ tabs, spaces, partOfSpeech, groupOf }) => {
       const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) + var(--cmb-rail-left))`
-      const colour = `var(--cmb-band-${partOfSpeech})`
+      const colour = groupOf ? `var(--cmb-group-${groupOf})` : `var(--cmb-band-${partOfSpeech})`
       return `linear-gradient(to right, transparent ${x}, ${colour} ${x}, ${colour} calc(${x} + var(--cmb-rail)), transparent calc(${x} + var(--cmb-rail)))`
     })
+    .reverse()
     .join(", ")
 }
 
@@ -642,7 +649,8 @@ export function railsStyle(
   const style = `--cmb-rails: ${railsOf(rails)}`
   if (![...stopped, ...ended].some((rail) => rail < rails.length)) return style
   const sizes = rails.map((_, rail) => (ended.has(rail) ? "0 0" : stopped.has(rail) ? STOPPED_RAIL : "100% 100%"))
-  return `${style}; --cmb-rail-sizes: ${sizes.join(", ")}`
+  // in the stripes' order, innermost first
+  return `${style}; --cmb-rail-sizes: ${sizes.reverse().join(", ")}`
 }
 
 /** A rail's size in a row it stops short in:  the row's width, its height less the corner's reach into it. */

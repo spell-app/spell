@@ -301,6 +301,19 @@ describe("<ui-property-group> yes-or-no runs", () => {
     expect(thing.barrier).toBe(true)
   })
 
+  it("focuses the pills' select on a click on its label, the menu open or not (epic `editor` I222)", async () => {
+    const host = await editor("compact")
+    const select = property(host, "controlled").querySelector("ui-dropdown") as HTMLElement
+    await userEvent.click(select)
+    await settle(host)
+    expect(select.matches(":state(open)")).toBe(true)
+    await userEvent.click(field(host, "controlled").querySelector(".label")!)
+    await settle(host)
+    // the menu closes, and the focus is the select's:  not its own checkbox, hidden while it heads the run
+    expect(select.matches(":state(open)")).toBe(false)
+    expect(select.matches(":focus-within")).toBe(true)
+  })
+
   it("takes a group's `flags`:  `checkboxes` never, `pills` any run", async () => {
     const never = await editor("compact", VALUE(), `flags="checkboxes"`)
     expect(has(never, "controlled", "flags")).toBe(false)

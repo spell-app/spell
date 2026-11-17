@@ -52919,6 +52919,27 @@
           }
         },
         {
+          "name": "flyout-label",
+          "description": {
+            "kind": "markdown",
+            "value": "The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with `split` the chevron end's tooltip (\"Pick one of the parts under the mouse\").  Default:  its `label`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "value",
+          "description": {
+            "kind": "markdown",
+            "value": "With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "split",
+          "description": {
+            "kind": "markdown",
+            "value": "Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

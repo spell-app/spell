@@ -1,7 +1,7 @@
 import { For, Loading, Show, createEffect, createMemo, createSignal, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { flatParentFor, scrollIntoSight, scrollingBoxFor } from "spell/util"
+import { flatParentFor, scrollIntoSight, scrollingBoxFor, withArticle } from "spell/util"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -1441,12 +1441,6 @@ function signaturePieces(action: InspectorAction, ownType: string): { text: stri
   const rest = action.words.slice(at).trim()
   if (rest) pieces.push({ text: rest, isType: false })
   return pieces
-}
-
-/** `card` => `a card`, `apple` => `an apple`;  a word in another language, as it is. */
-function withArticle(type: string): string {
-  if (!type || !/^[a-z]/i.test(type)) return type
-  return `${/^[aeiou]/i.test(type) ? "an" : "a"} ${type}`
 }
 
 /** The word an action's signature starts with, in the program's language:  `to`, `para`. */
