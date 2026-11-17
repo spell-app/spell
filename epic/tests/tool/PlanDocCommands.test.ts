@@ -520,47 +520,42 @@ describe("PlanDocCommands add --details:  a name and its path", () => {
   })
 })
 
-// epic `epic-engine` I321:  a title is a few plain words;  everything else goes in its details
+// epic `epic-engine` I321, I322:  a title is at most 30 plain words, one sentence, read cold
 describe("PlanDocCommands:  short titles", () => {
   const LONG =
-    "I318:  epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on;  " +
-    "otherwise it asks nothing, and a flag writes them without asking"
+    "epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on, and " +
+    "otherwise it asks nothing at all, and a flag writes them in without asking anyone first"
 
-  test("add refuses a long or run-on title, naming the first clause;  writing nothing", async () => {
+  test("add refuses a title over 30 words, a ';' list or two sentences, asking for it rewritten;  writing nothing", async () => {
     const skeleton = readFileSync(file, "utf8")
     expect(await commands().run(["add", "x", "judgement", LONG, "--calm"])).toBe(1)
     expect(await commands().run(["add", "x", "todo", "Retry it;  then tell them"])).toBe(1)
-    expect(warned[0]).toMatch(/^epic:  a title is a few words;  put the rest in --details\./)
-    expect(warned[0]).toContain("this one:  it's 168 characters (the most is 100)")
-    expect(warned[0]).toContain(
-      `its first clause, as a title:  "epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on"`
-    )
-    expect(warned[1]).toContain('it runs on into a second clause, after ";"')
+    expect(await commands().run(["add", "x", "issue", "The turn was stuck. It hung for a minute"])).toBe(1)
+    expect(warned[0]).toMatch(/^epic:  rewrite this title:  it's 33 words \(the most is 30\)\./)
+    expect(warned[0]).toContain("read it as the person will, hours later and cold")
+    expect(warned[0]).toContain("the rest goes in --details")
+    expect(warned[1]).toContain('it runs on, a list after ";"')
+    expect(warned[2]).toContain("it's more than one sentence")
     expect(readFileSync(file, "utf8")).toBe(skeleton)
   })
 
-  test("rename refuses a long title too, and moves a long old title into the body, first", async () => {
-    // an item written before the rule, its title the whole story
+  test("add takes 30 words, a dash, and an e.g.", async () => {
+    const thirty = Array.from({ length: 30 }, (_, n) => `word${n}`).join(" ")
+    expect(await commands().run(["add", "x", "todo", thirty])).toBe(0)
+    expect(await commands().run(["add", "x", "todo", "Titles -- up to 30 words, e.g. Owen's own"])).toBe(0)
+  })
+
+  test("rename refuses a long title too, and leaves the body as it was", async () => {
     await FILES.edit(file, (plan) => plan.addItem("judgement", LONG, { details: "<p>Why:  it was asked.</p>" }))
     expect(await commands().run(["rename", "x", "J1", LONG])).toBe(1)
-    expect(warned.at(-1)).toMatch(/a title is a few words;  put the rest in its details/)
+    expect(warned.at(-1)).toMatch(/rewrite this title/)
 
     printed = []
-    expect(await commands().run(["rename", "x", "J1", "Superpowers words:  only when it's on"])).toBe(0)
-    const item = FILES.read(file).item("j1")
-    expect(PlanItem.titleOf(item)).toBe("Superpowers words: only when it's on")
-    const words = Array.from(item.children)
-      .filter((child) => !child.hasAttribute("slot"))
-      .map((child) => child.textContent!.replace(/\s+/g, " ").trim())
-    expect(words.slice(0, 3)).toEqual([
-      "I318: epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on",
-      "otherwise it asks nothing, and a flag writes them without asking",
-      "Why: it was asked."
-    ])
-
-    // a short old title stays a title:  nothing goes into the body
     expect(await commands().run(["rename", "x", "J1", "Superpowers words in AGENTS.md"])).toBe(0)
-    expect(FILES.read(file).item("j1").textContent).not.toContain("only when it's on")
+    const item = FILES.read(file).item("j1")
+    expect(PlanItem.titleOf(item)).toBe("Superpowers words in AGENTS.md")
+    expect(item.textContent).not.toContain("only when it finds superpowers")
+    expect(item.textContent).toContain("it was asked")
   })
 })
 

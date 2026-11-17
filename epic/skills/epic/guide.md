@@ -76,8 +76,8 @@ After a restart, agents it started are gone:  start each again from its task, as
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
 3. Do the work.  Record as you go
-   (a title is 3-10 plain words saying what it is;  everything else goes in --details;
-   `epic add` refuses one over 100 characters, or run on with `;` or `  --`):
+   (a title is at most 30 plain words saying what it is, read cold, hours later:
+   nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
@@ -90,7 +90,7 @@ After a restart, agents it started are gone:  start each again from its task, as
        `epic file <epic>#T<n> <rN>`:  its words, Context and screenshots go into the todo, the request filed there
      - bigger, or about a to-do phase:  that phase, or a new one, then `epic file <epic>#P<n> <rN>`
      - a true duplicate only:  `epic file <epic> <rN> "same as T12"`, naming the todo or phase it repeats
-   - a choice made without the person:  `epic add <epic>#J "<a few words>" --calm --details "<p>...</p>"`
+   - a choice made without the person:  `epic add <epic>#J "<title>" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
    - something only the person can check:  `epic add <epic>#M "title" --step "..." --should "..."`
