@@ -12,17 +12,9 @@
   min-height: 0;
   overflow: hidden;
 }
-/* the Reference tab:  its search, then the reference, filling the rest */
-.CodeOutputReference {
-  display: flex;
-  flex-direction: column;
-  & > .ReferenceSearch {
-    margin: 8px 12px 4px;
-  }
-  & > .SpellReference {
-    flex: 1 1 0;
-    height: auto;
-  }
+/* the Reference tab:  the reference, filling the pane;  its search is in its right column (`<SpellReference search>`) */
+.CodeOutputReference > .SpellReference {
+  height: 100%;
 }
 /* the Reference tab shows instead of the code:  the code stays, its place kept, while it's hidden */
 .CodeOutputCode[hidden] {

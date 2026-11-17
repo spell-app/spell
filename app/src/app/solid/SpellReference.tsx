@@ -31,6 +31,8 @@ import "./SpellReference.css"
 export function SpellReference(props: {
   /** Only the rows holding these words. */
   filter?: string
+  /** A search field, at the top of the right column, over what's picked:  the tree starts at the top on the left. */
+  search?: JSX.Element
 }): JSX.Element {
   const [selected, setSelected] = createSignal<ScopeNode>()
   const groups = createMemo(() => groupsOf(editor.scopeTree))
@@ -52,6 +54,7 @@ export function SpellReference(props: {
           </For>
         </ui-tree>
         <div class="ReferenceDetails">
+          {props.search}
           <Show when={selected()} keyed fallback={<p class="InspectorTip">{appTexts.text("referenceNothing")}</p>}>
             {(node) => <ReferenceDetails node={node} types={types()} />}
           </Show>
@@ -202,7 +205,7 @@ type ReferenceGroup = { title: string; nodes: ScopeNode[] }
  * - This app:  what the project's files declare, in program order (its files' order, then each one's own),
  *   its files left out;  its tests, then its constants, at the end
  *   (Owen, 2026-11-16, epic `editor` T105:  "Move the tests to the bottom, above `Blue`")
- * - Spell:  the built-ins, the root's own
+ * - Spell:  the built-ins, the root's own, in `SPELL_ORDER`
  * - each project it imports, by its name, in its program order too
  * - The project is the root's last child (`LSP.ScopeExplorer`).
  */
@@ -214,7 +217,10 @@ function groupsOf(tree: ScopeNode | undefined): ReferenceGroup[] {
     project.children.flatMap((child) => (child.kind === "file" ? child.children : [child]))
   return [
     ...(app ? [{ title: appTexts.text("thisApp"), nodes: lastTestsThenConstants(declaredIn(app)) }] : []),
-    { title: appTexts.text("referenceSpell"), nodes: tree.children.filter((child) => child.kind !== "project") },
+    {
+      title: appTexts.text("referenceSpell"),
+      nodes: inSpellOrder(tree.children.filter((child) => child.kind !== "project"))
+    },
     ...projects
       .slice(0, -1)
       .map((project) => ({ title: project.name, nodes: lastTestsThenConstants(declaredIn(project)) }))
@@ -230,4 +236,36 @@ function lastTestsThenConstants(nodes: ScopeNode[]): ScopeNode[] {
 /** Is `node` a test:  a method or function named `test ...`. */
 function isTest(node: ScopeNode): boolean {
   return TEST.test(node.name) && (node.kind === "method" || node.kind === "function")
+}
+
+/**
+ * Spell's own types, in the order the reference lists them (Owen, 2026-11-16, epic `editor` T109:
+ * "Order for spell:  Thing, List, View, TwoSidedView, ViewableList, Text, Date, Number ?, Site, Page, PageLayout, Place").
+ * - App right after View, which it is one of:  his list left it out.
+ * - No `Number` type in the reference yet:  listed, so it takes its place when there is one.
+ * - A type not named here goes after them all, in the order the language server gives.
+ */
+const SPELL_ORDER = [
+  "Thing",
+  "List",
+  "View",
+  "App",
+  "TwoSidedView",
+  "ViewableList",
+  "Text",
+  "Date",
+  "Number",
+  "Site",
+  "Page",
+  "PageLayout",
+  "Place"
+]
+
+/** Spell's built-ins in `SPELL_ORDER`, any it doesn't name after them, as they came. */
+function inSpellOrder(nodes: ScopeNode[]): ScopeNode[] {
+  const rank = (node: ScopeNode) => {
+    const at = SPELL_ORDER.indexOf(node.name)
+    return at === -1 ? SPELL_ORDER.length : at
+  }
+  return [...nodes].sort((a, b) => rank(a) - rank(b))
 }

@@ -141,7 +141,7 @@ export function CompiledCodeButton(): JSX.Element {
  * The compiled code beside the code, read only:  a bar choosing its language, as every header, then the code.
  * - The bar's last tab, Reference, shows what you can use instead, the tree and what's picked side by side
  *   (`<SpellReference>`;  Owen, 2026-11-16, epic `editor` T105:  "it's too wide for that column ... maybe put it in
- *   the `Compiled Code` Panel?"), its search over it, not in the bar, where the tabs need the room;  which one shows is remembered (`spellEditor:codeOutputShows`).
+ *   the `Compiled Code` Panel?"), its search at the top of its right column, not in the bar, where the tabs need the room (T109);  which one shows is remembered (`spellEditor:codeOutputShows`).
  * - The project as `target` writes it, afresh after each compile, with its source map (`project.codeWithMapFor()`).
  * - A click on a line says where in the program it came from (`editor.followed`), and its line follows a click elsewhere.
  * - A target whose writer can't write the project shows why, as a comment, and follows nothing.
@@ -221,15 +221,19 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
       </ui-toolbar>
       <Show when={isReference()}>
         <div class="CodeOutputReference">
-          <ui-input
-            class="ReferenceSearch"
-            size="small"
-            icon="search"
-            aria-label={appTexts.text("referenceSearch")}
-            placeholder={appTexts.text("referenceSearch")}
-            ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
+          <SpellReference
+            filter={filter()}
+            search={
+              <ui-input
+                class="ReferenceSearch"
+                size="small"
+                icon="search"
+                aria-label={appTexts.text("referenceSearch")}
+                placeholder={appTexts.text("referenceSearch")}
+                ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
+              />
+            }
           />
-          <SpellReference filter={filter()} />
         </div>
       </Show>
       <div class="CodeOutputCode" hidden={isReference()}>

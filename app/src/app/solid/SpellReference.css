@@ -14,6 +14,14 @@
   padding: 8px 16px;
   border-inline-start: 1px solid var(--ui-border-color, #8884);
 }
+/* the search, at the top of the right column, staying there as what's picked scrolls */
+.ReferenceDetails > .ReferenceSearch {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  margin-bottom: 12px;
+}
 .ReferenceDetails h4 {
   margin: 0 0 8px;
 }

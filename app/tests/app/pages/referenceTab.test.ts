@@ -87,6 +87,42 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
     expect(counts.every((which) => !which)).toBe(true)
   })
 
+  test("lists Spell's own types in Owen's order", async () => {
+    const spell = (await rowsUnder(page, "Spell")).map((row) => row.label)
+    const named = [
+      "Thing",
+      "List",
+      "View",
+      "App",
+      "TwoSidedView",
+      "ViewableList",
+      "Text",
+      "Date",
+      "Site",
+      "Page",
+      "PageLayout",
+      "Place"
+    ]
+    expect(spell.slice(0, named.length)).toEqual(named)
+  })
+
+  test("puts the search at the top of the right column, the tree at the top of the left", async () => {
+    const boxes = await page.evaluate(() => {
+      const box = (selector: string) => {
+        const { left, top } = document.querySelector(selector)!.getBoundingClientRect()
+        return { left, top }
+      }
+      return {
+        search: box(".CodeOutputPane .ReferenceDetails > .ReferenceSearch"),
+        details: box(".CodeOutputPane .ReferenceDetails"),
+        tree: box(".CodeOutputPane .SpellReference > ui-tree")
+      }
+    })
+    expect(boxes.search.left).toBeGreaterThan(boxes.tree.left + 100)
+    expect(boxes.search.top - boxes.details.top).toBeLessThan(20)
+    expect(Math.abs(boxes.tree.top - boxes.details.top)).toBeLessThan(2)
+  })
+
   test("names a thing a property holds by its type, then its name, with a thing's icon", async () => {
     const members = await rowsUnder(page, "Solitaire")
     expect(members).toContainEqual({ icon: "cube", label: "Deck", which: '"deck"' })
