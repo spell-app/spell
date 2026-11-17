@@ -3685,7 +3685,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 40,
+          "line": 43,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3726,7 +3726,7 @@
           "ruleNames": ["list_iteration_where"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 117,
+          "line": 135,
           "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
           "syntaxes": [
             {
@@ -3752,7 +3752,7 @@
           "ruleNames": ["list_iteration_named_for_list"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 130,
+          "line": 148,
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
@@ -5753,7 +5753,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 68,
+          "line": 69,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
