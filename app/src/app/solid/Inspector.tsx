@@ -1959,12 +1959,8 @@ export function itemsOf(value: object): unknown[] | undefined {
 /** How a list's item is named in the trail:  `#3`. */
 export const ITEM_STEP = "#"
 
-/**
- * Where the running app draws, as `<AppPane>` last handed it over.
- * - Kept through a hot reload of this file:  the pane hands it over only as it's drawn, so without it the reloaded
- *   Inspector had no app (Views empty, the crosshairs inspecting nothing) until the page was reloaded.
- */
-let appArea = import.meta.hot?.data.appArea as HTMLElement | undefined
+/** Where the running app draws, as `<AppPane>` last handed it over. */
+let appArea: HTMLElement | undefined
 /**
  * Counts the area's moves, for its reactive readers (`Inspector.area`).
  * - The area itself is a plain variable:  a signal reads its old value until the next flush,
@@ -1992,7 +1988,6 @@ function clipToArea(box: { left: number; top: number; width: number; height: num
 
 function setArea(area: HTMLElement | undefined): void {
   appArea = area
-  if (import.meta.hot) import.meta.hot.data.appArea = area
   setAreaMoved((count) => count + 1)
 }
 
@@ -3360,6 +3355,12 @@ function PropertiesCard(): JSX.Element {
 
 // DEBUG:  `Inspector` at the devtools console
 setDebugGlobal({ Inspector })
+
+// A change to the Inspector's code reloads the page, rather than swapping this file in (epic `editor` I236):
+// it and `InspectorParts` import each other, so a hot swap of either made a second Inspector,
+// its own selection, area and runtime, beside the first:  the Views tree chose parts in the new one,
+// the cards still showed the old one's, so a click on a row inspected nothing until the page was reloaded.
+import.meta.hot?.accept(() => location.reload())
 
 /** Bumped as a thing's scope is chosen:  `Inspector.scopeOf()` reads it. */
 const [scopeChoices, setScopeChoices] = createSignal(0)
