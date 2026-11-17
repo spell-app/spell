@@ -20,7 +20,7 @@ leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The whole plugin works like that.
 It gives Claude Code twenty skills, workflows you start by typing a name,
-and eleven hooks, scripts Claude Code runs by itself when something happens.
+and thirteen hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
@@ -53,7 +53,7 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node e
 
 </details>
 
-## Twenty you type, eleven that run by themselves
+## Twenty you type, thirteen that run by themselves
 
 In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
 A skill here is a procedure.
@@ -122,7 +122,7 @@ The other nine here are for the moments in between.
 | an idea for later, not planned yet | `/epic future <name> [idea]` | a stub epic page, and a page of its big open questions to answer in the side bar's Details tab;  no worktree |
 | some items should become a phase | `/epic phase [ids] [name]` | adds a phase to this session's epic:  `/epic phase J1 J5, t3` makes one from those three items |
 | one phase, or a handful of items, now | `/epic start <P1 \| ids>` | works it:  `/epic start J3 J4 T6` is one block, with one commit |
-| a request arrived from `/send` | `/epic request <epic> [<rN>]` | files it into a phase still to do about the same thing, else into a new one |
+| a request arrived from `/send` | `/epic request <epic> [<rN>]` | makes it a todo, its words, context and screenshots inside, with an agent on it at once;  a bigger one joins a phase still to do about the same thing, else becomes a new phase;  only a true duplicate files with neither, naming the todo or phase it repeats |
 | other work has made items obsolete | `/epic tidy [<epic>]` | closes the open calls, issues and todos that no longer apply, leaving a reason on each;  only when you ask;  never ones you asked for lately, fixes waiting for your review, or your picks;  no epic:  this session's |
 | this window should look different | `/epic color <look>` | recolours it, in one of 12 looks;  no look:  it lists them |
 | the work is finished | `/epic done` | the same as `/isolate done`, below |
@@ -134,7 +134,44 @@ The other nine here are for the moments in between.
 
 `/epic` writes a build plan for every phase up front, and once you've accepted them it goes straight through.
 It stops to ask only for a phase with no accepted plan, something urgent such as a check it can't fix, or the last phase.
+Every phase ends with proof:  its Done list's last bullet names each check run and what it printed,
+and a plan-check agent compares what was built with the accepted plan, both ways.
 For a night away from the keyboard, `/bedtime` asks everything first, then asks nothing until morning.
+
+### The session answers;  agents build
+
+In an epic, the session you type to answers within seconds, and does almost no work itself.
+Anything longer than a minute (a phase, a fix, a check run) goes to a named background agent.
+
+Ask for a fix mid-phase, and the page shows it at once:
+an issue, your words as its body, blue, its spinner on, and an Underway card naming the agent.
+- A picture you pasted with the ask goes onto the item, not into a description of it (`epic add ... --pasted <n>`).
+- Each agent is listed by name (`epic agents`), and counted in the page's header while any runs, `2 🤖`:
+  a click lists them, each with a note box whose words reach that agent mid-task.
+- Several agents share the epic's ONE worktree, so each one:
+  - claims the files it will change (`epic agents claim`);  a claim another agent holds is refused, naming the holder
+  - commits only its own files, by path, and merges `main` in with `epic worktree merge-main --as <name>`,
+    which never moves aside a file another running agent claims
+  - merges its own work into `main` the moment it's done and merges cleanly, so you see it without waiting for the
+    phase's end
+- Merges and full test runs take turns on the machine (`epic turns list` shows the holder and the line):
+  three full runs at once once drove the load to about 50, and tests failed on their timeouts.
+- Tests run in three tiers, never a full run per commit:
+  1. per change, only the tests beside the changed files
+  2. before merging, each touched folder's unit tests, `yarn test:unit`:  no browser or integration projects
+  3. after merging, the full suite, by the last agent standing only:  `epic agents last <name>` exits 0 when no
+     other agent of the epic is listed, and what it finds becomes an issue, since the work is on `main` already
+- A VS Code restart ends every background agent with its session.
+  The session is woken at once ([the restart hook](#hooks)), resumes each agent from its saved transcript, and says so.
+- At the end of a turn, at most hourly per epic, items left Underway more than 3 hours with nobody on them are tidied:
+  - work found on `main` turns the item fixed for your review, the commit as its evidence
+  - otherwise it gets one `Stale:` card, and is back on your list
+  - nothing is closed this way
+
+The catch:  Codex has no background agents, so there the session does the work itself, a step at a time,
+reading the page's inbox between steps.
+With superpowers installed, `/epic` tells it where to stand aside:  the epic page is the design and the plan,
+and `/epic done` the only finish ([README-config.md](README-config.md#with-superpowers)).
 
 ## Worktrees and sessions:  leaving work, and finding it again
 
@@ -223,8 +260,7 @@ and it stages its changes without committing them, unless the task says to.
 - `/bg ?` lists what's running (name, status, age, task);  `/bg stop <name>` stops one, its staged changes left.
 - Two agents never share files:  a second task that names a running one's files waits, listed as blocked,
   and starts when the first comes back.
-- In an epic, each agent shows in the page's "Agents running" panel, with a note box:
-  what you type there reaches the agent mid-task.
+- In an epic, it's listed on the page's toolbar, with a note box ([above](#the-session-answers--agents-build)).
 - A session with no forks (the VS Code panel's, at last check) gets an ordinary agent instead,
   which sees none of the conversation:  the skill writes what the task leans on into its prompt.
 
@@ -258,11 +294,13 @@ Each of those is a row here, by when it happens.
 | a session starts, and each turn ends | [listen.mjs](monitors/listen.mjs) `--hook`, the inbox poller;  `SessionStart` and `Stop`, `asyncRewake`, a day | waits in the background beside the session and watches its epic page's inbox;  prints nothing while idle, and when you Send, wakes the session with one `📬` line (exit 2);  one per session, the next turn's end starts it again;  in a scripted `claude -p`, nobody there, it ends at once, so the run never waits on it |
 | a session leaves a worktree | [left-worktree.mjs](hooks/left-worktree.mjs);  `PostToolUse` on `ExitWorktree`, 10 seconds | reminds the reply to end with its closing line, "*You can close this tab*", only when nothing is left:  no unmerged work, no agent running, no question waiting |
 | you send a prompt | [prompt-gate.mjs](hooks/prompt-gate.mjs);  `UserPromptSubmit`, Claude Code's default | titles the session for an `/epic`, `/isolate` or `/unpark`, or refuses one that would go wrong (below);  every other prompt passes untouched;  marks the session as one whose hooks run, and says a window move promised last turn that never happened;  a long message sent while the session is busy gets an `On it:  ...` line back, so you know it was seen (`promptAck` in the config turns it off) |
+| a session starts, after VS Code restarted | [restarted.mjs](hooks/restarted.mjs);  `SessionStart`, `asyncRewake`, 30 seconds | wakes the session with a `📬` line when the restart cut off its epic's background agents, naming each one, so it resumes them itself;  several tabs starting together share one wake;  silent when none was cut off, and in a scripted `claude -p` |
+| a session a Send started opens | [woken.mjs](hooks/woken.mjs);  `SessionStart`, 10 seconds | titles it `🚧 <epic>`, when the page server opened it for an epic nobody was running;  a fresh start only, never a resume |
 | a turn ends | [handoff.mjs](hooks/handoff.mjs);  `Stop`, Claude Code's default | moves the session to another window, when a move was armed (`epic window handoff <name>`, which refuses when this hook won't run) |
 | a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | runs `epic turn end`:  commits the epic folder, one commit per group of files, `auto: epic seo`, then syncs it;  detached, so the turn never waits for git |
 
 - They all come from the plugin's [hooks.json](hooks/hooks.json);  no repo's own Claude settings add one.
-- Ten scripts make those eleven rows:  `worktree.mjs` answers both worktree events.
+- Twelve scripts make those thirteen rows:  `worktree.mjs` answers both worktree events.
 - In a terminal session, the inbox poller also runs as the plugin's monitor ([monitors.json](monitors/monitors.json)).
   VS Code's panel never starts monitors, which is why the hook starts it too.
 - Codex gets three of them, from its own file, [codex-hooks.json](hooks/codex-hooks.json):

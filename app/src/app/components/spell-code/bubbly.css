@@ -1774,6 +1774,8 @@
      * a tab in from its indent (Owen, epic `language` I142:  "I'd prefer if `it lives` lined up where `it's name` does")
      * - room after its tabs, not before the line:  its column 0 stays on its rail (I140);  the caret before its first
      *   word is drawn at the word (`CodeMirrorSelection.wordsSide`, I141)
+     * - a blank line's too, its tabs alone:  the caret at its end is drawn past this room, where its words will go,
+     *   against an empty span after it (`.cmb-words-place`, no style of its own;  `WordsPlace`, I157)
      */
     .cmb-plain-indent {
       padding-right: var(--cmb-indent);

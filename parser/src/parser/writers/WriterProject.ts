@@ -134,6 +134,14 @@ export class WriterProject {
    *   `when creating it` dealing the cards, `core.holdWhile(() => this.restartTheGame())`.
    */
   readonly heldSteps = new WeakSet<P.ASTNode>()
+  /**
+   * The `return`s that END their function:  nothing in it runs after them -- see `noteEndingReturns()`.
+   * - So one the person wrote (`explicit`) returning a call that gives nothing needs no `return` of its own:
+   *   the call alone, as at a body's last line (epic `language` I47).
+   * - Any other keeps it, after the call:  `return auto play` inside a loop leaves the loop (I156).
+   * - An empty project (`JSWriter.instance` writing one node) knows none:  every one keeps it.
+   */
+  readonly endingReturns = new WeakSet<P.ASTReturnStatement>()
   /** The calls written `await`:  each in a function that waits, of something that waits. */
   readonly awaited = new WeakSet<P.ASTNode>()
   /** Names of the getters that wait, or read one that does, by spell's name:  each read of one is an answer to wait for. */
@@ -277,6 +285,43 @@ export class WriterProject {
       for (const each of (statement as P.ASTStatementGroup).statements ?? []) this.noteHeldSteps(each, callWaits)
     } else if (!isCoreCall(statement) && callWaits(statement)) this.heldSteps.add(statement)
     else if (this.togetherWaits(statement, (run) => run.isAsync)) this.heldSteps.add(statement)
+  }
+
+  /**
+   * SIDE EFFECT:  notes the `return`s in `statements`, a function's body, that end it (`endingReturns`):
+   * - its last line of code, through the groups it's in
+   * - when that's an `if` (and its `otherwise`s), each branch's last line, the same way:
+   *   after any of them, the function ends
+   * - nothing inside a loop or a `try`
+   */
+  protected noteEndingReturns(statements: P.ASTNode[] | undefined): void {
+    const code = linesOf(statements).filter((it) => !(it instanceof P.ASTBlankLine || it instanceof P.ASTComment))
+    const last = code.at(-1)
+    if (last instanceof P.ASTReturnStatement) this.endingReturns.add(last)
+    if (!isBranch(last)) return
+    // back from the last branch to its `if`
+    for (let index = code.length - 1; index >= 0; index--) {
+      const branch = code[index]
+      if (!isBranch(branch)) return
+      this.noteEndingReturns(branch.statements.statements)
+      if (branch instanceof P.ASTIfStatement) return
+    }
+
+    /** `nodes`, each plain group (a line with a comment at its end ...) taken apart into its statements. */
+    function linesOf(nodes: P.ASTNode[] | undefined): P.ASTNode[] {
+      return (nodes ?? []).flatMap((node) =>
+        node.constructor === P.ASTStatementGroup ? linesOf((node as P.ASTStatementGroup).statements) : [node]
+      )
+    }
+
+    /** Is `node` a branch of an `if`:  the `if`, an `otherwise if`, or the last `otherwise`? */
+    function isBranch(
+      node: P.ASTNode | undefined
+    ): node is P.ASTIfStatement | P.ASTElseIfStatement | P.ASTElseStatement {
+      return (
+        node instanceof P.ASTIfStatement || node instanceof P.ASTElseIfStatement || node instanceof P.ASTElseStatement
+      )
+    }
   }
 
   /** Is `node` a read of a value that waits, by name?  Not a type's own value, `Card.Suits`. */
@@ -487,9 +532,17 @@ export class WriterProject {
       else if (layer instanceof P.RootScope) project.noteBuiltInTypes(layer)
     }
     const classes = new Map<string, P.ASTClassDeclaration>()
+    // a loop's function:  its body runs again for the next item, so its end isn't where anything ends
+    const loopFunctions = new WeakSet<P.ASTNode>()
     for (const statements of files) {
       for (const statement of statements) {
         forEachNode(statement, (node) => {
+          if (isCoreCall(node) && P.CORE_LOOPS.has((node as P.ASTScopedMethodInvocation).methodName)) {
+            const callback = (node as P.ASTScopedMethodInvocation).args.args?.[1]
+            if (callback) loopFunctions.add(unwrapped(callback))
+          } else if (node instanceof P.ASTMethodDefinition && !loopFunctions.has(node)) {
+            project.noteEndingReturns(node.body.statements)
+          }
           if (node instanceof P.ASTClassDeclaration) classes.set(node.type.name, node)
           else if (node instanceof P.ASTAssignmentStatement && !node.isNewVariable) {
             if (node.thing instanceof P.ASTVariableExpression) project.reassigned.add(node.thing.name)

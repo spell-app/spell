@@ -830,6 +830,18 @@ export abstract class ProgramWriter extends Writer {
   /** The methods `givesNothing()` is working out:  one that calls itself can't be told. */
   private nothingBeingTold = new Set<P.ASTMethodDefinition>()
 
+  /**
+   * What goes after the call a `return` gives, when that call gives nothing (`givesNothing()`) and so is written alone:
+   * - a `return` on the next line, when the person wrote `return` and more runs after it,
+   *   e.g. `return auto play` inside a loop (epic `language` I156)
+   *   - `return`, never a loop's `continue`:  what the person wrote leaves the whole function
+   * - else nothing:  a body's last line, or a `return` nothing runs after (`P.WriterProject.endingReturns`)
+   * - Every language we write says a bare `return` the same way.
+   */
+  protected returnAfter(node: P.ASTReturnStatement): string {
+    return node.explicit && !this.project.endingReturns.has(node) ? "\nreturn" : ""
+  }
+
   /** What returning `value` gives, as `returnedKinds()` counts it:  `kindOf()`, one kind -- see `PyBaseWriter`. */
   protected returnKindsOf(value: P.ASTExpression): Array<string | undefined> {
     return [this.kindOf(value)]

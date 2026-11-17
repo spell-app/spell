@@ -1,7 +1,17 @@
 # Epics with a team, and with other agents
 
-Everyone runs their own agent and their own worktrees, and shares the plans.
-This page is how joining, syncing and two people on one page work, and how Codex works on the same epic as Claude Code.
+```text
+Renumbered as the plans synced:  T22 → T23 (the same ids came from someone else first)
+```
+
+_A line from an epic page's log:  Ana and Ben each made a T22 between syncs, and Ben's sync renumbered his._
+
+An issue tracker keeps one copy of the plans, on a server everyone writes to.
+Here everyone keeps their own copy, in git, and every turn's end syncs it with the others'.
+- So an epic page works offline.
+- And two people can make the same id, which the sync then settles.
+Everyone also runs their own agent, Claude Code or Codex, on their own worktrees,
+from the same skills.
 
 ## <a id="working-with-others"></a>Working with others
 
@@ -53,7 +63,7 @@ Your SHORT NAME is who you are on the epics:  what's stamped on your replies, co
   else your GitHub login, else git's `user.name`.
 - Your full name is git's `user.name`;  the GitHub login is looked up once with `gh` and kept,
   so no page or hook waits on the network.
-- `epic whoami --rename Ana Lima --dry-run` says what a new name would change:
+- `epic whoami Ana --rename --dry-run` says what a new name would change:
   `--rename` writes it over your old one everywhere it says who wrote something, on every page.
 - `epic whois Ben` lists what the pages say about Ben:  his replies and comments, by page, and when last.
 - The AGENT under you is the one running `epic`:  what its words are stamped with, so Bob's Codex reads "Codex (Bob)".
@@ -91,7 +101,7 @@ Most of it merges by itself, because a page is many small files:
 - **Ids made twice are renumbered.**
   - A new id is the highest plus one, so Ana and Ben can both make T22.
   - The sync gives THIS machine's one the next free number, T23, its file and every link to it following.
-  - A log line says so:  "Renumbered as the plans synced: T22 → T23 (the same ids came from someone else first)".
+  - A log line says so, the one at the top of this page.
   - An id you said in chat before the sync can change:  the log is where to look.
 - **The log keeps both people's lines**, in time order:  git's `union` merge keeps both, and the sync re-sorts them.
 - **Two items added at the same place**, or two "updated" dates, are settled by the sync:  both items, the later date.
@@ -161,7 +171,8 @@ Type `$` and the skill's name, as `/` in Claude Code:
 - where a step needs something only Claude Code has, the skill says what Codex does instead, in a line beginning
   "In Codex:":
   - the question modal:  a numbered question in the chat (a details page works the same for both)
-  - background agents:  Codex sub-agents, which it waits for, so the chat isn't free meanwhile
+  - background agents:  in an epic, none:  the session does the work itself, a step at a time, reading
+    `epic inbox <epic>` between steps;  elsewhere, Codex sub-agents it waits for, so the chat isn't free meanwhile
   - a worktree:  `epic worktree create seo`, then the agent works from the folder it prints
   - windows and messages to other sessions:  printed, for you to run or paste
 - five skills stay Claude Code's:  `bg`, `bedtime`, `comment`, `session` and `title`
@@ -183,6 +194,8 @@ Type `$` and the skill's name, as `/` in Claude Code:
 - the five skills above, and what the others do with Claude Code's own tools:
   `epic guide claude-only-tools` lists the plain way to do each
 - waking a session from the page, session titles, window moves, and the worktree hooks
+- a picture pasted into the chat going onto an item (`epic add ... --pasted`):  it's read from Claude Code's own
+  transcript;  in Codex, save it and pass `--picture <file>`
 - the time a phase took counts only Claude's sessions
 
 Untried so far with a real Codex:  the steps above are tested against stand-ins for Codex's files, hooks, skills and

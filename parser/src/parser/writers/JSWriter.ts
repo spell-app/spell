@@ -1277,7 +1277,8 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * Bare `return` when it has no `value` (in a loop's body, `continue`), else `return value`.
-   * - A call of the program's own method that gives nothing is the call alone -- see `givesNothing()`.
+   * - A call of the program's own method that gives nothing is the call alone -- see `givesNothing()`:
+   *   then a `return` of its own, when the person wrote one with more to run after it (`returnAfter()`).
    */
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     if (!node.value) return this.returnContinues ? "continue" : "return"
@@ -1286,10 +1287,10 @@ export class JSWriter extends ProgramWriter {
       this.statements.add(node.value)
       return `core.holdWhile(() => ${this.bare(node.value)})`
     }
-    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
+    // calling a method that gives nothing:  just the call, as at a body's last line (I47)
     if (this.givesNothing(node.value)) {
       this.statements.add(node.value)
-      return this.bare(node.value)
+      return `${this.bare(node.value)}${this.returnAfter(node)}`
     }
     return `return ${this.bare(node.value)}`
   }

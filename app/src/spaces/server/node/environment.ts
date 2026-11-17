@@ -171,6 +171,11 @@ const environment = {
    */
   serverToken: process.env.SPELL_SERVER_TOKEN || undefined,
   /**
+   * The page server's token file, read again as each request goes on (`pageServerProxy()`):
+   * vite outlives a page server's restart, and the next one has a new token (epic `epic-engine` I329).
+   */
+  serverTokenFile: process.env.SPELL_SERVER_TOKEN_FILE || undefined,
+  /**
    * Whether the editor's dev server listens on this machine alone (epic `atmosphere` P39):
    * `EditorServer` sets it when the house site gives the editor an address, so Caddy is the one way in.
    */

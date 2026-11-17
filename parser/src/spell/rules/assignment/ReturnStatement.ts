@@ -62,6 +62,6 @@ export class ReturnStatement extends SpellStatement<"expression?|body?"> {
     const body = this.getBody(match)
     if (body?.is(SP.Block)) return body.AST as P.ASTStatementGroup
     const result = match.groups.expression || body
-    return new P.ASTReturnStatement(match, { value: result?.AST as P.ASTExpression | undefined })
+    return new P.ASTReturnStatement(match, { value: result?.AST as P.ASTExpression | undefined, explicit: true })
   }
 }

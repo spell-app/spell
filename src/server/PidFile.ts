@@ -21,6 +21,8 @@ export { endProcess, isProcessAlive } from "./Heartbeat"
  * - `ensure()` starts one detached if none runs, or restarts one older than its code (`isOlderThanCode()`):
  *   the files it loaded (`LoadedCode`), else its `sources`
  * - `stop()` sends it `SIGTERM`, and waits for its process to end (`SIGKILL` after 10s)
+ * - `stop({ restart: true })`, as `ensure()` does for one older than its code:  the server is told it's a restart
+ *   (`isRestarting()`), so what can carry over to the next one stays up:  the editor's vite (epic `epic-engine` I329)
  * - From the goals tools' `launch.js` (`ensureServer`, `serverStatus`, `stopServer`).
  */
 export class PidFile {
@@ -76,6 +78,27 @@ export class PidFile {
     }
   }
 
+  /**
+   * `<file>` with `.restart.json` for `.json`:  `{ pid }` of a server being stopped to start again (`stop({ restart })`).
+   * - read by the stopping server itself (`isRestarting()`), as it stops;  a stale one names a pid that's gone
+   */
+  get restartFile(): string {
+    return this.file.replace(/\.json$/, ".restart.json")
+  }
+
+  /**
+   * Is this process's server (`pid`) being stopped only to start again (`stop({ restart: true })`)?
+   * - then a route module may leave up what the next server takes over:  the editor's vite (`EditorServer.stop()`)
+   * - NEVER throws
+   */
+  isRestarting(pid = process.pid): boolean {
+    try {
+      return (JSON.parse(readFileSync(this.restartFile, "utf8")) as { pid?: number }).pid === pid
+    } catch {
+      return false
+    }
+  }
+
   /** remove the file if it's `pid`'s (default:  this process's) -- a newer server may own it by now;  its token's too */
   removeIfOurs(pid = process.pid): void {
     if (this.read()?.pid === pid) rmSync(this.file, { force: true })
@@ -112,7 +135,7 @@ export class PidFile {
     const running = await this.status()
     if (running && !this.isOlderThanCode(running, sources)) return { ...running, launched: false }
     // older than its code (a merge changed it since):  a fresh one, so pages get the new routes (I5 of `skillz`)
-    if (running) await this.stop()
+    if (running) await this.stop({ restart: true })
     else await this.stopUnanswering()
     const out = openSync(log ?? join(this.root, ".spell-server.log"), "a")
     const [program, ...args] = command
@@ -147,11 +170,18 @@ export class PidFile {
    *   `ensure()` started the new one while the old one still held the port,
    *   so the new one took ANOTHER port, and every open page on the usual one found the server down
    *   (epic `airplane`, 2026-10-10:  the log shows a start on port 54516)
+   * - `restart`:  another server starts right after (`ensure()`, `epic merge`):  it says so first (`restartFile`), so
+   *   the editor's vite stays up for the next one, and the editor's pages don't reload (epic `epic-engine` I329)
    */
-  async stop({ wait = STOP_WAIT_MS }: { wait?: number } = {}): Promise<boolean> {
+  async stop({ wait = STOP_WAIT_MS, restart = false }: { wait?: number; restart?: boolean } = {}): Promise<boolean> {
     const running = await this.status()
     if (!running) return false
-    await endProcess(running.pid, wait)
+    if (restart) writeFileSync(this.restartFile, `${JSON.stringify({ pid: running.pid })}\n`)
+    try {
+      await endProcess(running.pid, wait)
+    } finally {
+      if (restart) rmSync(this.restartFile, { force: true })
+    }
     return true
   }
 

@@ -669,9 +669,10 @@ export class Requests {
    * so:  the merge's packages were just installed (`installReport()`, epic `epic-engine` T89).
    * - Owen, 2026-11-04:  "So why aren't you restarting the page server when you merge to main?" -- a merge of a new
    *   review mark (`hold`) left the running server refusing it, till a restart by hand
-   * - the editor (Vite) is the page server's child:  it restarts with it, and drops the imports it couldn't resolve
-   *   before the install;  what `spell server stop all` / `start all` did by hand, less the house site, which only
-   *   forwards to it
+   * - the editor (Vite) is the page server's child, but outlives a restart (epic `epic-engine` I329):  the next page
+   *   server takes it over, so the editor's pages don't reload
+   *   - unless the packages changed (an install):  then it restarts too, and drops the imports it couldn't resolve
+   *     before the install (`EditorServer`'s `packagesStamp()`)
    * - one that isn't running stays stopped;  says so in one line when it restarted
    * - `server`:  how it's asked, stopped and started (default the main checkout's own);  tests pass their own
    * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
@@ -842,7 +843,8 @@ export type PageServerControl = {
 /** The main checkout's own page server, through its pid file. */
 const PAGE_SERVER: PageServerControl = {
   isRunning: async (main) => Boolean(await new SRV.PidFile(main).status()),
-  stop: (main) => new SRV.PidFile(main).stop(),
+  // a restart:  the editor's vite stays up unless the install changed what it runs on (`EditorServer`, I329)
+  stop: (main) => new SRV.PidFile(main).stop({ restart: true }),
   ensure: (main) => PageServer.ensure(main)
 }
 

@@ -22,6 +22,7 @@ _A real session, as text:  the epic that planned these READMEs, its first questi
 You just watched a decision get made, and kept.
 It didn't scroll away in a chat, and nobody copied it into a ticket afterwards:
 it was asked on a page, answered on the page, and it's still there, with eleven more.
+
 The 👍 is advice, not a default:  three of that page's first five answers went the other way.
 
 That page isn't a wiki somebody remembers to update.
@@ -32,7 +33,7 @@ and a hook commits it to git after every turn.
 You ask for an EPIC;  the agent plans it on its page, builds it phase by phase in a worktree of its own,
 and you review it on the page itself, in VS Code, while it works.
 
-- **Real today:**  Spell is built this way.  Its pages hold 68 epics, 45 of them done.
+- **Real today:**  Spell is built this way.  Its pages hold 70 epics, 48 of them done.
 - **Not yet:**  all of it in any agent but Claude Code.
   It's a Claude Code plugin first;  Codex runs fifteen of its twenty skills and its end-of-turn hooks from the same
   files, not yet tried with a real Codex (below, "Coming").
@@ -79,31 +80,34 @@ flowchart TD
 2. A hook reads the prompt before Claude does:  it titles the session `🚧 <name>`,
    and refuses one that would go wrong (in plan mode, or inside another worktree), saving your text first.
 3. The session asks where to run, a new window or this one, and which saga the epic serves.
-   Then it makes its worktree and installs it:  `../<repo>.worktrees/<name>`, on branch `<name>`.
-   It writes a stub epic page, so your prompt survives a lost session,
-   and moves itself into its window, `⎇ <name>`, when its turn ends.
+   - It makes its worktree and installs it:  `../<repo>.worktrees/<name>`, on branch `<name>`.
+   - It writes a stub epic page, so your prompt survives a lost session,
+     and moves itself into its window, `⎇ <name>`, when its turn ends.
 4. It explores, read-only, and writes the Overview and its open questions on the page, no plan mode.
-   The page shows in VS Code's Review tab, the Overview alone at first.
-   Each answer you give rewrites the Overview, the changed words marked for you to accept.
-5. You press Accept Overview:  a background agent writes the phases, named `P1 · Short Name` with estimates, the last
-   always "Doc Review".  You mark each Looks good or Defer, then press Accept Phases.
-6. Each phase:  Claude's own build plan first, on the phase, for you to accept;  then built, every finding recorded as
-   an item as it goes, committed (`P1:  Name -- summary`, in each repo it touched), and marked done with what was built.
-   The agent stops after each phase and asks whether to go on.
+   - The page shows in VS Code's Review tab, the Overview alone at first.
+   - Each answer you give rewrites the Overview, the changed words marked for you to accept.
+5. You press Accept Overview:  the phases are written, named `P1 · Short Name` with estimates, the last always
+   "Doc Review", each with Claude's build plan under it.
+   One press of Accept Phases agrees the phases and their plans;  Accept Phase or Defer Phase works on one.
+6. Each phase is built by named background agents, every finding recorded as an item as it goes.
+   - It's checked against its accepted plan by a `plan-check` agent, committed (`P1:  Name -- summary`),
+     and marked done with what was built.
+   - Then straight on to the next accepted phase.
+     It stops to ask only when the next has no accepted plan, something urgent comes up, or the last is done.
 7. At any time you mark the page, and a `/epic review <name>` session takes the marks
    ([README-pages.md](README-pages.md) walks a review round).
 8. The last phase, Doc Review:  open items pruned, the Manual tests list complete, a text pass,
    the epic's GUIDE written, a changelog entry.
-9. `/isolate done` offers to merge the branch into `main`, and to open a pull request.
-   Then `epic worktree remove <name>` takes the worktree away, its servers stopped first.
-   The epic page stays, as the record.
+9. `/epic done` offers to merge the branch into `main`, and to open a pull request.
+   - Then `epic worktree remove <name>` takes the worktree away, its servers stopped first.
+   - The epic page stays, as the record.
 
 </details>
 
 <details>
 <summary>Four other ways an epic runs:  standing, future, bedtime, airplane</summary>
 
-- **Standing**:  a long-lived epic whose phases each go onto `main` at once, never through `/isolate done`.
+- **Standing**:  a long-lived epic whose phases each go onto `main` at once, never through `/epic done`.
   - Each phase merges with `epic merge <name>`.
   - The feedback epic, where comments with no other home go, is one.
 - **Future**:  `/epic future <name> [idea]` writes an idea down, with no worktree:
@@ -141,8 +145,8 @@ In a chat, the agent asks and then waits for you, or guesses.
 Here a question goes on the page, its options laid out with what each would cost and the one the agent recommends,
 so you can decide from the page alone, when you have time.
 
-- Your marks wait on the page, dashed, until you press Send, and one command applies them.
-  Nobody listening?  Send types `/epic review <name>` into the epic's session for you, and you press Enter.
+- Your marks wait on the page, dashed, until you press Send, and one command applies them:
+  with nobody listening, Send types `/epic review <name>` into the epic's session for you, and you press Enter.
 - What the agent decided without you is listed too, as judgement calls you approve or revisit.
   They're calm (yellow) by default, and red only when one would surprise you.
 - A revisit's answer is written INTO its item, by a background agent the page lists while it runs,
@@ -156,12 +160,16 @@ each reply carries its writer's name, and the plans sync through an epic repo ev
 
 An agent working in your only checkout shares it with you, and with every other agent you start.
 An epic is one name:  one branch, one worktree, one VS Code window, one session, one page.
+
 So three can run at once without touching each other, and your main checkout isn't touched until you merge.
 
 - Each phase is committed on its own, in every repo it touched, under one subject (`P1:  Name -- summary`).
-  Then the agent stops, and asks before it starts the next.
+  Then the next agreed phase starts, with no stop, unless something needs you.
+- The session you typed into answers, and named background agents build:
+  a question you ask mid-phase gets its answer in seconds, not when the phase ends.
+  - Several agents share the worktree:  each claims the files it changes, and merges take turns.
 - In Spell, an epic's worktree is one worktree of the whole kit, every folder on the epic's branch:
-  [the kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md) follows a change across its folders.
+  [the kit's development guide](https://github.com/spell-app/spell/blob/main/README/development.md) follows a change across its folders.
 - And when it merges, it leaves a GUIDE behind for the next reader, and a changelog entry.
 
 Every worktree is another checkout, with an install of its own:  that's the price of three at once.
@@ -172,7 +180,7 @@ You need, once:
 - a Spell checkout ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page)
 - the plugin, and `epic` on your terminal's `PATH`:  one command from the kit's checkout,
   `node epic/bin/epic plugin install`
-  ([the kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says
+  ([the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says
   what it does)
   - in a repo of your own:  `epic init` does this too ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md))
 - Spell Epic, the VS Code extension, for the Review tab ([README-vscode.md](README-vscode.md))
@@ -196,9 +204,8 @@ Then open the kit's folder in VS Code, start a Claude Code session, and give it 
 5. The page opens in the Review tab, and fills while the agent explores, read-only, and drafts its plan.
 
 - `/epics` lists every open epic;  `/wtf` says where this one stands.
-- Done with it?  `/isolate done` offers to merge it into `main`, or to leave it unmerged;
-  then `epic worktree remove hello-epic` takes the worktree away.
-  The page stays, as the record.
+- Done with it?  `/epic done` offers to merge it into `main`, or to leave it unmerged;
+  then `epic worktree remove hello-epic` takes the worktree away, and the page stays, as the record.
 - **Not yet:**  these steps walked end to end on a machine that's never had the plugin.
 
 ---
@@ -233,10 +240,10 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 ## A page is something you act on
 
 A wiki page is read;  this one has buttons.
-Open an item and three sit at its right, one group:  Make Todo, Revisit, which opens a box for your note,
-and Approve (the check).
-A question's option cards each have Choose, and a todo that's work has three of its own:
-the plane, do it in the next phase;  Revisit;  and the x, drop it.
+- Open an item and three sit at its right, one group:  Make Todo, Revisit, which opens a box for your note,
+  and Approve (the check).
+- A question's option cards each have Choose.
+- A todo that's work has three of its own:  the plane, do it in the next phase;  Revisit;  and the x, drop it.
 
 ![A judgement call unfolded on an epic page:  its yellow J9 chip and title;  at the right one group of three buttons, Do this (the thumbs up), Revisit and Approve (the check);  its text and net effect;  and the note box open under it](docs/images/epic-item.png)
 
@@ -252,7 +259,8 @@ Two more things you'll do on a page, and one you can do from any session:
 - check the work by hand:  each manual test is answered where it is, with the same buttons as any item,
   and a failure becomes an issue
 - ask another epic for something:  `/send <epic> <text>` puts your words and screenshots into that epic,
-  and wakes it ([README-skills.md](README-skills.md))
+  and wakes it;
+  there it becomes a todo, or part of a phase, your screenshots shown on it ([README-skills.md](README-skills.md))
 
 Every mark and what applying it does, the colours, the comments and the manual tests:  [README-pages.md](README-pages.md).
 
@@ -266,15 +274,15 @@ through spell-epic's own extension, Spell Epic.
 - **Epic Docs**:  any guide or docs page, reloading itself as the agent edits it.
 - Each epic's window has a look of its own (one of twelve tints) and is titled `⎇ <name>`;
   its Claude session is titled `🚧 <name>`, so the panel's list reads like your epics.
-- A session reaches its own window through the extension:  to show you a page, or to move itself into a worktree's
-  window.
+- A session reaches its own window through the extension:
+  to show you a page, or to move itself into a worktree's window.
 - **Not yet:**  on the Marketplace.
   You build it from your checkout and install it by hand:  [README-vscode.md](README-vscode.md).
 
 ## Built from Spell UI and Epic UI:  the page holds only data
 
-An epic page is a plain HTML file that holds data and prose, and nothing else.
-Custom elements draw the rest:  the chips, the buttons, the folds, the 👍.
+An epic page is a plain HTML file that holds data and prose, and nothing else:
+custom elements draw the rest, the chips, the buttons, the folds, the 👍.
 Here's the question from the top of this page, as its files hold it:
 
 ```html
@@ -298,11 +306,11 @@ Here's the question from the top of this page, as its files hold it:
 
 _Trimmed from the real files:  data in attributes, prose in children, and the body in a part file of its own._
 
-The frame (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s `<ui-*>` elements.
-What's particular to epics is Epic UI, spell-epic's own `<epic-*>` set:
-`<epic-page>`, `<epic-item>`, `<epic-question>`, the review buttons, the comment threads.
-And the `epic` command writes its markup from the same element definitions the elements are drawn from,
-so the tool and the page can't disagree about what a tag holds.
+- The frame (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s `<ui-*>` elements.
+- What's particular to epics is Epic UI, spell-epic's own `<epic-*>` set:
+  `<epic-page>`, `<epic-item>`, `<epic-question>`, the review buttons, the comment threads.
+- The `epic` command writes its markup from the same element definitions the elements are drawn from,
+  so the tool and the page can't disagree about what a tag holds.
 
 The cost:  nothing draws without a server, the epic server or a checkout's page server.
 How a page loads its elements, what it looks like from disk, and every element:
@@ -310,8 +318,7 @@ How a page loads its elements, what it looks like from disk, and every element:
 
 ## The commands:  `epic`, and the skills you type
 
-`epic` is the command line under all of it.
-The agent runs it;  so can you, from any folder of the repo.
+`epic` is the command line under all of it:  the agent runs it, and so can you, from any folder of the repo.
 It edits the one shared epic page from any checkout, runs the review inbox,
 and drives the worktrees, windows and servers an epic works in.
 
@@ -345,20 +352,19 @@ _On Spell's own pages:  the plan for writing Spell in Spanish, its Solitario don
 Every verb, by group, and how to name what one acts on:  [README-cli.md](README-cli.md).
 
 The skills are what you type:  `/epic`, `/isolate`, `/details`, `/bg` and sixteen more,
-plus eleven hooks that run without being asked.
+plus thirteen hooks that run without being asked.
 When to reach for which:  [README-skills.md](README-skills.md).
 
 ## Beyond Spell:  what it takes
 
 Nothing about the method is Spell's.
-Another project needs the plugin and `epic`, the VS Code extension,
-and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, and an epic folder beside it
-for the pages.
+Another project needs the plugin and `epic`, the VS Code extension, and what `epic init` makes:
+one config file in the repo, `.epic/config.json5`, and an epic folder beside it for the pages.
 
-It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
 One command sets a project up:  `npx spell@next epic init` installs the plugin and the extension,
 asks your name and colour, and starts the epic server.
-The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
+- It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
+- The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
 ## Working on it
 
@@ -370,10 +376,13 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | Folder | What's in it |
 | --- | --- |
 | [.claude-plugin/](.claude-plugin/) | the plugin's manifest, `epic`;  its marketplace, `spell`, is the repo's root `.claude-plugin/marketplace.json`.  Claude Code installs a copy of this folder, which `epic plugin install` links back to it |
+| [.codex-plugin/](.codex-plugin/) | the same plugin's manifest for Codex, naming this same folder:  `epic plugin install --codex` |
 | [skills/](skills/) | the twenty skills, a `SKILL.md` each |
 | [coherence/](coherence/) | the coherence review's rules ([procedures](coherence/procedures.md)) and the `coherence` agent that reads them:  ONE way of doing each thing;  each repo's own catalog and word list are its `agents/coherence/` |
 | [designer/](designer/) | the design review's rules:  [the house taste](designer/designer.md), with the asks behind it quoted;  [craft](designer/craft.md), interfaces.dev's and jakub.kr's rules;  [procedures](designer/procedures.md);  and the `designer` agent that reads them |
-| [hooks/](hooks/) | `hooks.json` and the ten scripts it runs |
+| [plan-check/](plan-check/) | the `plan-check` agent, which holds a phase's diff up against its accepted build plan before the phase closes:  what wasn't built, and what was built unasked |
+| [voices/](voices/) | how each kind of people-facing page is written:  `readme` (these pages), and three for pages that aren't developers':  for newcomers, essays, product pages;  `epic voice` lists them |
+| [hooks/](hooks/) | `hooks.json` and the eleven scripts it runs, plus `patch-checkout.mjs`, which one of them starts;  `codex-hooks.json`, three of the same scripts for Codex |
 | [monitors/](monitors/) | `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page:  a small poller that runs `epic session listen` for a moment as the page's inbox changes.  The `Stop` hook starts it at each turn's end in every session (`--hook`, `asyncRewake`:  its exit wakes the session);  `monitors.json` runs it as a monitor too, which Claude Code starts only in a terminal session, never in VS Code's panel |
 | [bin/epic](bin/epic) | the `epic` command:  its program in [src/cli/](src/cli/), the work its verbs do in [src/command/](src/command/) |
 | [src/](src/) | the code:  the `<epic-*>` elements, the epic tool, the epic server, the docs tools, Epic UI's pages |
@@ -381,17 +390,17 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | [templates/](templates/) | the pages' starting points, and the epic-page writing rules ([plan-doc.md](templates/epics/plan-doc.md)) |
 | [vscode/](vscode/) | the VS Code extension, a yarn project of its own |
 | [scripts/](scripts/) | dev-only scripts:  Epic UI's data |
+| [epic_settings.json5](epic_settings.json5) | how the tooling behaves, every key with its default;  yours and your team's override it ([Your settings](README-config.md#your-settings)) |
 | [docs/images/](docs/images/) | the pictures on these pages |
 
 There's ONE copy per machine, and every repo and every window runs it, so your edit is everyone's at once:
 `epic` and the hooks on their next run, a skill's new text after `/reload-plugins`.
 
-It's a folder of the kit, cloned with it,
-and the kit's one `yarn install` installs it, never an install in here.
-It stands on the kit (`spell`:  the page server, the element framework, the toolchain) and on Spell UI,
-by their package names.
-Nothing stands on it:  it declares its own part of the kit's page server's settings, in its `package.json`
-(its route modules, its folders, Epic UI), and the server runs them by their paths, importing none of it.
+It's a folder of the kit, cloned with it, and the kit's one `yarn install` installs it, never an install in here.
+- It stands on the kit (`spell`:  the page server, the element framework, the toolchain) and on Spell UI,
+  by their package names.
+- Nothing stands on it:  it declares its own part of the kit's page server's settings, in its `package.json`
+  (its route modules, its folders, Epic UI), and the server runs them by their paths, importing none of it.
 
 Its git history, kept when it was merged into the kit, starts on 2026-10-17, when it was lifted out of spell-app:
 the first commit names the spell-app commit the files came from, so anything older is there
@@ -400,9 +409,11 @@ the first commit names the spell-app commit the files came from, so anything old
 ```sh
 # from the plugin's folder, ~/www/spell/epic
 yarn ts                 # src/ and tests/
-yarn test               # node and browser (chromium) projects, then the window script's and the extension's tests
+yarn test:unit          # the node project, then the window script's and the extension's tests:  before a merge
+yarn test               # node, browser (chromium) and motion projects, then the same scripts' tests
+yarn test:integration   # the slow ones
 yarn lint
-yarn review             # ts, lint and test:  the finishing pass
+yarn review             # ts, lint, test and test:integration:  the finishing pass
 yarn pack:build         # after changing an <epic-*> element:  the pack, which a test checks is current
 yarn plugin:validate    # claude plugin validate .
 yarn vscode:check       # the extension's type check (after yarn install in vscode/)
@@ -418,7 +429,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
     lint fails it, and its message names the package-name import to write.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, `vscode/`) import `src/` the same way.
 - Plain `node` (the hooks, the window script, the docs tools' `.js` scripts) imports a file with its extension:
-  `spell/epic/config/EpicConfig.ts`.
+  `import { EpicConfig } from "spell/epic/config/EpicConfig.ts"`.
 - More:  [the folder's AGENTS.md](AGENTS.md), "Imports";
   the names a page's packs share one Solid and one Spell UI by:  [README-pages.md](README-pages.md#how-a-page-draws-them).
 
@@ -428,10 +439,10 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 - **Other agents:**  the same workflow driven from Codex and other coding agents:
   planning on the page, worktrees, the review loop.
-  The pages, the `epic` command and the epic folder are plain files and programs any agent can use.
-  Where it stands:  any agent follows `epic guide` and ends its turns with `epic turn end`;  Codex has the
-  end-of-turn hooks and fifteen of the skills, from the same files;  Send doesn't wake it yet
-  ([README-teams.md](README-teams.md#with-codex)), untried with a real Codex yet.
+  - The pages, the `epic` command and the epic folder are plain files and programs any agent can use.
+  - Where it stands:  any agent follows `epic guide` and ends its turns with `epic turn end`;
+    Codex has the end-of-turn hooks and fifteen of the skills, from the same files.
+  - Send doesn't wake it yet ([README-teams.md](README-teams.md#with-codex)), and it's untried with a real Codex.
 - **Installing from npm:**  a repo that isn't Spell installs the plugin alone, from npm.
   Where it stands:  `spell-epic`, `spell-ui` and `spell` are published, under the `next` tag until Spell's first release
   (planned for December 1, 2026);  and a repo that isn't Spell sets up with `npx spell@next epic init`
@@ -443,7 +454,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | --- | --- |
 | [README.md](README.md) | <ul><li>this page:  a decision made and kept, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
 | [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
-| [README-skills.md](README-skills.md) | <ul><li>twenty skills you type, eleven hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
+| [README-skills.md](README-skills.md) | <ul><li>twenty skills you type, thirteen hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>three views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
 | [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>what an epic is, why you'd want one, how you'll use it</li><li>try it, in one command</li></ul> |
@@ -456,9 +467,9 @@ Every other folder's pages:  [the kit's index](https://github.com/spell-app/spel
 ## See also
 
 - [README-pages.md](README-pages.md):  the next step, an epic page section by section and a review round on it
-- [The kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin):  installing the plugin,
+- [The kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin):  installing the plugin,
   and what every session reads before your first prompt
-- [The kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md):  one epic's worktree of the whole kit,
+- [The kit's development guide](https://github.com/spell-app/spell/blob/main/README/development.md):  one epic's worktree of the whole kit,
   and merging `main` into it
-- [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how `<ui-root>` loads a pack like Epic UI
+- [The kit's element page](https://github.com/spell-app/spell/blob/main/README/element.md):  how `<ui-root>` loads a pack like Epic UI
 - [One repo, five parts](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where the `epic/` folder sits, and what it needs

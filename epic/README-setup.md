@@ -88,28 +88,29 @@ npx spell@next epic init
 ```
 
 - That fetches Spell's package and runs the epic tool inside it.
-  It's a small install, about 100 MB:  the language, the editor and their packages are left out until you ask for them.
-  Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
+  - It's a small install:  `spell publish` refuses one over 40 packages or 120 MB,
+    because the language, the editor and their packages are left out until you ask for them.
+  - Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
 - `epic` and the plugin then run from npm's cache (`~/.npm/_npx`):
   after `npm cache clean`, run this line again.
 - Your project doesn't need yarn:  an npm repo works, and yarn, pnpm and bun repos are found by their lock files.
 
-In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow, then sums up the
-answers (`> Your name  :  Ana`, the values bold) before it does anything.
-A pick-one question is a numbered list:  the arrow keys and Enter, or a number key, pick.
-In a list longer than 9, digits move the mark (`1` then `3` lands on 13) and Enter takes it.
-Once you pick, the list folds into one line:  the question and your answer.
-Keys pressed while nothing is asking (a gray line says what it's waiting on, `checking GitLab…`) aren't shown, and
-are thrown away:  a stray arrow can't move the next pick, nor a stray Enter answer it.
+In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow,
+then sums up the answers (`> Your name  :  Ana`, the values bold) before it does anything.
+- A pick-one question is a numbered list:  the arrow keys and Enter, or a number key, pick.
+  In a list longer than 9, digits move the mark (`1` then `3` lands on 13) and Enter takes it.
+- Once you pick, the list folds into one line:  the question and your answer.
+- Keys pressed while nothing is asking (a gray line says what it's waiting on, `checking GitLab…`) aren't shown,
+  and are thrown away:  a stray arrow can't move the next pick, nor a stray Enter answer it.
 A teammate joining has the team's plans cloned before the colour question, so the list leaves out the colours taken.
 - **What do you want to be called?**  Your short name on the pages, suggesting the one you keep already,
   else your GitHub login;  asked every time, Enter keeps it.
   `--name Ana` answers it.
-- **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page.
-  A list of Spell UI's colour names nobody on the team has yet, the first marked.
+- **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page:
+  a list of Spell UI's colour names nobody on the team has yet, the first marked.
   `--color green` answers it;  any CSS colour works too.
-- **What should the epic repo be called?**  Only when it's about to make one on GitHub.  Suggesting `<repo>.epics`, here `my-app.epics`.
-  `--content-repo <name>` answers it.
+- **What should the epic repo be called?**  Asked only when it's about to make one on GitHub or GitLab,
+  suggesting `<repo>.epics`, here `my-app.epics`;  `--content-repo <name>` answers it.
 - **Private or public?**  A list of the two, private marked, each saying who can read the plans, naming your server:
 
   ```text
@@ -123,20 +124,25 @@ A teammate joining has the team's plans cloned before the colour question, so th
   - `--public` answers it and asks nothing;  with no terminal to ask in, it's private unless you say `--public`.
   - A public repo gets a line of its own at the end, saying so.
 - **Which command gets a new worktree ready?**  What every new worktree runs before you work in it.
-  It suggests the command your `README.md`, `AGENTS.md` or `CONTRIBUTING` names for your lock file's tool, whole
-  (`uv sync --all-packages --all-extras`), else the lock file's own (`uv sync`):  [below](#the-install-command).
-  `--install "<command>"` answers it;  a config that names one already keeps it, and isn't asked.
-- **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files;  suggesting yes,
-  and with no terminal to ask in, yes.  It pushes to the branch's upstream, else `origin`.
-  `--no-commit` leaves them for you.
+  - It suggests the command your docs name for your lock file's tool, whole
+    (`uv sync --all-packages --all-extras`), else the lock file's own (`uv sync`):  [below](#the-install-command).
+  - `--install "<command>"` answers it;  a config that names one already keeps it, and isn't asked.
+- **superpowers is on here:  put its stand-aside words in AGENTS.md, for every session?**
+  Asked only when the superpowers plugin is turned on for this repo, in any of your settings.
+  - It suggests yes, and with no terminal to ask in, takes yes;  `--superpowers` answers it;  `--local` never asks.
+  - What the words say:  [With superpowers](README-config.md#with-superpowers).
+- **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files.
+  - It suggests yes, and with no terminal to ask in, takes yes;  `--no-commit` leaves them for you.
+  - It pushes to the branch's upstream, else `origin`.
+  - `AGENTS.md` joins the list when this run changed it.
 
 Then, in order, each step under a bold heading, the files in a gray table, a gray line before each slow step:
 1. Installs the epic plugin for Claude Code, when it isn't there yet:  once per machine.
-   - A Claude Code session open already doesn't have it yet, nor a newer copy:  type `/reload-plugins` there before
-     `/epic`.  A new session has it.
+   - A Claude Code session open already doesn't have it yet, nor a newer copy:
+     type `/reload-plugins` there before `/epic`;  a new session has it.
    - `/epic` in a session that hasn't reloaded stops before it makes anything, and says the same.
    - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
-     ([README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says what each step does).
+     ([the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says what each step does).
    - Installed for the machine, its hooks run in every repo, not just yours:
      in one `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
    - `--no-plugin` skips it;  `epic plugin install` does it by itself.
@@ -151,12 +157,15 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
 5. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
 6. Lists the links in a block of your `.gitignore`.
    The block starts `# shared:start` and ends `# shared:end`.
-7. Keeps your name, in `~/.spell-epic/person.json5`.
-8. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the epic repo, and pushes it:
+7. With superpowers on and your yes, writes its stand-aside words into `AGENTS.md`, in a marked block of their own;
+   a block there already is kept current with `epic guide superpowers`.
+8. Keeps your name, in `~/.spell-epic/person.json5`.
+9. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the epic repo, and pushes it:
    your teammates see it, and nobody commits anything in the code repo for it.
-9. Commits `.epic/config.json5` and `.gitignore` on the base branch, only those two files, and pushes them:
-   every new worktree branches from there.  On another branch it commits nothing, and says so.
-10. Starts the epic server, serving your repo, and ends with where to see the epics:  its address, a link in a
+10. Commits the config and the `.gitignore` on the base branch, and `AGENTS.md` when step 7 changed it,
+    nothing else, and pushes them:  every new worktree branches from there.
+    On another branch it commits nothing, and says so.
+11. Starts the epic server, serving your repo, and ends with where to see the epics:  its address, a link in a
     terminal ([one epic server](README-config.md#one-epic-server-for-the-machine)), and how to open them in VS Code (or Cursor).
     `--no-server` skips the server.
 
@@ -272,8 +281,8 @@ epic ... (...) .../epic
 
 The Review tab, where you mark up a page, and the moves between windows need Spell's VS Code extension:
 the same one in VS Code or Cursor, which runs VS Code's extensions.
-`epic init` installs it, from the package:  reload your windows when it says so (**Developer:  Reload Window**).
-From a clone of Spell instead:  [the extension's README](README-vscode.md#install-it--three-commands-and-a-reload).
+- `epic init` installs it, from the package:  reload your windows when it says so (**Developer:  Reload Window**).
+- From a clone of Spell instead:  [the extension's README](README-vscode.md#install-it--three-commands-and-a-reload).
 
 In Cursor, the epic tools use `cursor` where VS Code's take `code`:  they tell from the window they run in.
 - Say it outright with `editor` in `.epic/config.json5` ([the config file](README-config.md#the-config-file)), or for one machine `SPELL_EPIC_EDITOR=cursor`.
@@ -316,12 +325,12 @@ epic init --local
 
 ## <a id="on-gitlab"></a>On GitLab
 
-`epic init` works on GitLab, self-hosted too, as it does on GitHub:  the shared epic repo made, and a setup merge request
-where `main` is protected.
-It has met one real GitLab so far, a company's own:  what it found is in [The first push](#gitlab-first-push) below.
-The rest has run against a stand-in `glab`:  a script that answers as GitLab's API documents,
-with real `git` pushes to local repos whose hooks refuse as GitLab does.
-Expect rough edges, and tell us.
+`epic init` works on GitLab, self-hosted too, as it does on GitHub:
+the shared epic repo made, and a setup merge request where `main` is protected.
+- It has met one real GitLab so far, a company's own:  what it found is in [The first push](#gitlab-first-push) below.
+- The rest has run against a stand-in `glab`:  a script that answers as GitLab's API documents,
+  with real `git` pushes to local repos whose hooks refuse as GitLab does.
+- Expect rough edges, and tell us.
 
 You need GitLab's command, `glab`, logged in:
 
@@ -332,21 +341,21 @@ glab auth login --hostname git.acme.com  # your own GitLab
 ```
 
 - **Which host:**  `codeHost` in `.epic/config.json5`, `"github"` or `"gitlab"`.
-  Left out, it's read off the `origin` address each time:  a host with `gitlab` in it is GitLab, `github.com` GitHub,
-  anything else GitHub.
+  Left out, it's read off the `origin` address each time:
+  a host with `gitlab` in it is GitLab, `github.com` GitHub, anything else GitHub.
 - **A self-hosted GitLab whose address doesn't say so** (`git.acme.com`):  `epic init --host gitlab`.
   In a terminal it asks;  with no terminal it stays on GitHub and says so in one line.
 - **Groups and subgroups:**  the epic repo goes under the group your code is in (`group/sub/my-app.epics`),
   else your own namespace.
 - **The epic repo must take pushes from teammates, every turn.**
-  GitLab protects a new project's default branch, so Developers can't push.
+  GitLab protects a new project's default branch, so Developers can't push:
   `epic init` unprotects it right after the first push.
-  If it can't (no right to), it says so in one line:  unprotect it in the project's
-  Settings › Repository › Protected branches, or nobody else can sync.
-  An epic repo you made yourself (`--remote`) is yours to open up.
+  - If it can't (no right to), it says so in one line:
+    unprotect it in the project's Settings › Repository › Protected branches, or nobody else can sync.
+  - An epic repo you made yourself (`--remote`) is yours to open up.
 - <a id="gitlab-first-push"></a>**The first push, refused.**  Where your role can't push a new project's first commit,
-  GitLab refuses it:  "You cannot push the initial commit because the default branch is protected and your role does
-  not allow it."
+  GitLab refuses it:
+  "You cannot push the initial commit because the default branch is protected and your role does not allow it."
   - `epic init` says so, and that a Maintainer has to push the first commit and let everyone push to `main`;
     it gives the project's members page, to find one.
   - It prints exactly what the Maintainer runs, filled in for your repo:
@@ -360,8 +369,9 @@ glab auth login --hostname git.acme.com  # your own GitLab
     ```
 
   - The first commit is empty:  the Maintainer hasn't your plans.  Yours go on top of it.
-  - The last line lifts `main`'s protection.  To keep it protected instead:  Settings › Repository ›
-    Protected branches, "Allowed to push and merge" set to Developers and Maintainers.
+  - The last line lifts `main`'s protection.
+    To keep it protected instead:  Settings › Repository › Protected branches,
+    "Allowed to push and merge" set to Developers and Maintainers.
   - Every teammate needs push rights to `main` too:  the plans sync by pushing to it at the end of every turn.
   - Once they're done, `epic init` again pushes your plans on top, and says they're shared;  or the next turn's sync
     does it by itself.
@@ -371,9 +381,9 @@ glab auth login --hostname git.acme.com  # your own GitLab
 
 ## <a id="when-main-takes-only-pull-requests"></a>When main takes only pull requests
 
-Plenty of GitHub orgs and GitLab groups refuse direct pushes to `main`.
+Plenty of GitHub orgs and GitLab groups refuse direct pushes to `main`:
+tell the repo so with one setting, and nothing `epic` does tries to land there.
 Below, "pull request" means a GitLab merge request too;  on GitLab, `epic` says "merge request".
-Tell the repo so with one setting, and nothing `epic` does tries to land there:
 
 ```sh
 epic init --protected-base
@@ -383,12 +393,12 @@ epic init --protected-base
 and work reaches it only through a pull request.
 
 **You usually don't have to say so.**
-With `gh` or `glab` logged in, `epic init` asks the host whether the branch takes only requests
-(GitHub:  a ruleset's `pull_request` rule and, if you're allowed to read it, classic branch protection;
-GitLab:  the project's protected branches:  nobody allowed to push, or a push level above yours),
+With `gh` or `glab` logged in, `epic init` asks the host whether the branch takes only requests,
 turns the setting on, and says so in one line.
-If it can't find out, it carries on without it.
-A config that already says `false` stays `false`, and `epic init` tells you how to change it.
+- What it asks:  on GitHub, a ruleset's `pull_request` rule and, if you're allowed to read it, classic branch
+  protection;  on GitLab, the project's protected branches (nobody allowed to push, or a push level above yours).
+- If it can't find out, it carries on without it.
+- A config that already says `false` stays `false`, and `epic init` tells you how to change it.
 
 **Setting up the repo goes through a pull request too.**
 `epic init` never commits on `main`:
@@ -403,8 +413,8 @@ It left a commit on your local `main`, and it says what to do:
 `epic init --protected-base` takes that commit back and moves it onto `epic-setup`.
 
 **The epic repo is the exception, and it has to stay one.**
-Your plans live in `<repo>.epics`, and every turn pushes straight to its main branch.
-An org-wide rule requiring pull requests must leave that repo out, or the plans stop syncing.
+Your plans live in `<repo>.epics`, and every turn pushes straight to its main branch:
+an org-wide rule requiring pull requests must leave that repo out, or the plans stop syncing.
 The setting changes nothing about it.
 
 **What changes with the setting on:**
@@ -418,8 +428,8 @@ The setting changes nothing about it.
 | `epic worktree remove --branches` | a branch whose pull request the code host merged counts as merged, a squash included |
 
 Local `main` only moves when you pull, so those fast-forwards keep it from going stale.
-They happen only when it's safe:  fast-forward only, nothing uncommitted.
-Offline, or with `main` diverged, they carry on from what you have, and say so.
+- They happen only when it's safe:  fast-forward only, nothing uncommitted.
+- Offline, or with `main` diverged, they carry on from what you have, and say so.
 
 A branch is deleted only if all its commits are in `main`,
 or a merged pull request holds its last commit:  a commit made after the merge keeps the branch.
@@ -445,7 +455,10 @@ For an agent without the skills (Codex reads `AGENTS.md` by itself), one more li
 "Working an epic:  run `epic guide`, and end every turn with `epic turn end`."
 
 What they look for:
-- the checks to run before a phase is done
+- the checks to run before a phase is done, in three tiers when your suite is slow:
+  - the tests beside a change, as it's made
+  - a quick unit run before an agent merges:  Spell's is `yarn test:unit`, so say what yours is
+  - the full run after the merge, by the last agent of the epic still running (`epic agents last <name>` says which)
 - its changelog, if it keeps one:
   `epic docs` looks for an epic's entry in the epic folder's guides, in `changelog.html`
 - its house style, and a skill that rewrites text to it, if it has one

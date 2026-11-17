@@ -20,9 +20,9 @@ const PROJECT = (lines: string) => `a card is a thing:
 ${lines}
 `
 
-/** `spell` compiled whole for `target`. */
-function compiled(spell: string, target = "js/solid"): string {
-  const { files } = parseSpellProject([{ path: "/Test.spell", contents: spell }])
+/** `spell` compiled whole for `target`, as a file at `path` (`/Test.es.spell` for Spanish). */
+function compiled(spell: string, target = "js/solid", path = "/Test.spell"): string {
+  const { files } = parseSpellProject([{ path, contents: spell }])
   const errors = files.flatMap((file) => file.errors)
   if (errors.length) throw new Error(errors.join("\n"))
   const parts = files.map(({ match }) => match?.AST as P.ASTStatementGroup)
@@ -51,6 +51,73 @@ describe("what waits", () => {
     const py = compiled(PROJECT(`	- to go it:\n		bump it`), "py")
     expect(py).toContain("async def go(self) -> None:")
     expect(py).not.toContain("return await self.bump()")
+  })
+
+  // epic `language` I156:  Owen's `auto play`, `return auto play` inside its loop
+  const AUTO_PLAY = `solitaire is an app
+	its score is a number
+	to "rest"
+		pause for 10 msec
+	to "auto play"
+		set candidates to a new list
+		for each card in candidates
+			rest
+			return auto play
+		rest
+	to "check"
+		if the score is 1
+			return rest
+		set the score to 2
+	to "finish"
+		if the score is 1
+			return rest
+		otherwise
+			set the score to 2
+			return rest
+`
+
+  test("a `return` calling what gives nothing, with more after it, keeps its `return` after the call, in every target", () => {
+    const js = compiled(AUTO_PLAY)
+    // in a loop:  it leaves the action, not just the loop's turn
+    expect(js).toMatch(
+      /for \(const card of candidates\) \{\s+await this\.rest\(\)\s+await this\.autoPlay\(\)\s+return\s+\}/
+    )
+    // in an `if`, with a line after it
+    expect(js).toMatch(/if \(this\.score === 1\) \{\s+await this\.rest\(\)\s+return\s+\}\s+this\.score = 2/)
+    expect(compiled(AUTO_PLAY, "ts/solid")).toMatch(/await this\.autoPlay\(\)\s+return\s+\}/)
+    const py = compiled(AUTO_PLAY, "py")
+    expect(py).toMatch(/for card in candidates:\s+await self\.rest\(\)\s+await self\.auto_play\(\)\s+return\n/)
+    expect(py).toMatch(/if self\.score == 1:\s+await self\.rest\(\)\s+return\n/)
+    // it still gives nothing
+    expect(py).toContain("async def auto_play(self) -> None:")
+  })
+
+  test("a `return` calling what gives nothing at the end of the action is the call alone, each branch's too", () => {
+    const js = compiled(AUTO_PLAY)
+    const finish = js.slice(js.indexOf("async finish()"))
+    expect(finish).toMatch(
+      /if \(this\.score === 1\) await this\.rest\(\)\s+else \{\s+this\.score = 2\s+await this\.rest\(\)\s+\}/
+    )
+    const py = compiled(AUTO_PLAY, "py")
+    expect(py.slice(py.indexOf("def finish"))).not.toMatch(/self\.rest\(\)\s+return/)
+  })
+
+  test("in Spanish, `devolver jugar solo` in a loop keeps its `return`", () => {
+    const spell = `solitario es una aplicación
+	para "descansar"
+		pausar 10 mseg
+	para "jugar solo"
+		poner candidatas a una nueva lista
+		para carta en candidatas
+			descansar
+			devolver jugar solo
+		descansar
+`
+    const js = compiled(spell, "js/solid", "/Test.es.spell")
+    expect(js).toMatch(
+      /for \(const carta of candidatas\) \{\s+await this\.descansar\(\)\s+await this\.jugarSolo\(\)\s+return\s+\}/
+    )
+    expect(compiled(spell, "py", "/Test.es.spell")).toMatch(/await self\.jugar_solo\(\)\s+return\n/)
   })
 
   test("what doesn't wait stays plain", () => {

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import solid from "@solidjs/vite-plugin"
 import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
@@ -94,6 +94,9 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
  * the component sets' and epics' pages (`vite.config.ts`'s `server.proxy`).
  * - `target`:  the page server, by IP:  `localhost` may be ::1 first, where it doesn't listen (`EditorServer`)
  * - `token`:  the page server's write token, which `EditorServer` hands vite as `SPELL_SERVER_TOKEN`
+ *   - `tokenFile`:  the page server's token file (`SPELL_SERVER_TOKEN_FILE`), read again as each request goes on
+ *     (`currentToken()`):  a page server started after vite has a new token, and vite outlives a restart
+ *     (epic `epic-engine` I329);  `token` is the fallback while the file has none
  *   - added to every request to a project data folder (`/api/places/...`) as the proxy sends it on,
  *     so a program run in the editor reads and writes its places as a page the page server served does
  *     (epic `language` T68:  without it, every request there answered 403, "bad token")
@@ -104,8 +107,22 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
  * - The live channel's websocket too (`/api`'s `ws`):  it tells the editor the person's theme changed.
  * - Which paths:  `PAGE_SERVER_PREFIXES`, the list the built editor's own server passes on too (`EditorServer`).
  */
-export function pageServerProxy({ target, token }: { target: string; token?: string }): Record<string, ProxyOptions> {
+export function pageServerProxy({
+  target,
+  token,
+  tokenFile
+}: {
+  target: string
+  token?: string
+  tokenFile?: string
+}): Record<string, ProxyOptions> {
   const passed = { target, changeOrigin: true }
+  const tokenNow = () => (tokenFile && currentToken(tokenFile)) || token
+  const addToken: ProxyOptions["configure"] = (proxy) =>
+    proxy.on("proxyReq", (request) => {
+      const now = tokenNow()
+      if (now) request.setHeader(SERVER_TOKEN_HEADER, now)
+    })
   // in order:  vite takes the first entry a path starts with (`/api/places` before `/api`)
   return Object.fromEntries(
     PAGE_SERVER_PREFIXES.map((prefix) => [
@@ -113,11 +130,32 @@ export function pageServerProxy({ target, token }: { target: string; token?: str
       {
         ...passed,
         ...(WEBSOCKET_PREFIXES.includes(prefix) && { ws: true }),
-        ...(token && TOKEN_PREFIXES.includes(prefix) && { headers: { [SERVER_TOKEN_HEADER]: token } })
+        ...((token || tokenFile) && TOKEN_PREFIXES.includes(prefix) && { configure: addToken })
       }
     ])
   )
 }
+
+/**
+ * The write token in the page server's token file (`PidFile.tokenFile`:  `{ pid, token }`), read again only when the
+ * file changed;  `undefined` while there's none.
+ * - NEVER throws
+ */
+function currentToken(tokenFile: string): string | undefined {
+  try {
+    const changed = statSync(tokenFile).mtimeMs
+    if (changed !== tokenRead.changed) {
+      tokenRead.token = (JSON.parse(readFileSync(tokenFile, "utf8")) as { token?: string }).token
+      tokenRead.changed = changed
+    }
+    return tokenRead.token
+  } catch {
+    return undefined
+  }
+}
+
+/** What `currentToken()` read last, and the file's change time then. */
+const tokenRead: { token?: string; changed?: number } = {}
 
 ////////////////
 // ## One Solid per page

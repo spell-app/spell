@@ -520,6 +520,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A creation hook run while no action runs (the program's opening, a one of a kind's `when creating it`) is no
       step, as `core.holdWhile()`'s opening steps aren't (`runCreate()`, epic `language` I88):
       Undo at once does nothing.
+      - Nor is one run inside an action that can't be undone, the opening included, however long it waits:
+        Recipe Box's reads its place, then saves its recipes after the opening's over (epic `epic-engine` I325).
     - What another action calls joins that one's step, as above.
     - The program's whole opening can't be undone (epic `language` J180):  every runner imports it through
       `core.runOpening()` (`runCompiled()`, `runProject.ts`;  Python's `run_program()`, `core.run_opening()`),

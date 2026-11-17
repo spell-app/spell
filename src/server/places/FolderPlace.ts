@@ -45,6 +45,13 @@ const WHOLE_FOLDER = "this space"
 /** A million bytes, for saying a size in words. */
 const MB = 1024 * 1024
 
+/**
+ * How long a count of the folder's bytes (`bytesInUse()`) is trusted, with what this place added since:  10s.
+ * - Counting walks every file, so counting for every write made a busy thread's writes slower the more it held
+ *   (epic `epic-engine` I326:  200 messages, one after another, each a file).
+ */
+const COUNT_KEPT_MS = 10_000
+
 /****************
  * ### `FolderPlace`
  * A folder as a place:  a list file, and one file per thing, fetched when needed (epic `data` P5, J6).
@@ -132,6 +139,8 @@ export class FolderPlace extends ChunkedPlace {
   private readonly limits: FolderLimits
   /** How many bytes the whole folder holds now. */
   private readonly bytesInUse: (() => Promise<number>) | undefined
+  /** The folder's bytes at its last count, plus what's been let in since;  `at`:  when it was counted. */
+  private counted: { bytes: number; at: number } | undefined
   /** Told of each write that went through. */
   private readonly onWritten: FolderPlaceProps["onWritten"]
   /** Writes one at a time, each checked and made before the next is checked:  apart from the list's own turn. */
@@ -450,17 +459,27 @@ export class FolderPlace extends ChunkedPlace {
    * Is there room in the folder for `growth` more bytes, within `limits.space`?
    * - Public for what keeps more than things in the folder:  a space's files' bytes count against the same limit
    *   (`FolderFiles`, epic `atmosphere` P15), not a second count.
+   * - Counts the folder (`bytesInUse()`) at most every `COUNT_KEPT_MS`, adding what it lets in meanwhile;
+   *   always afresh before it refuses, so a refusal is never from an old count
+   *   - so a file changed on the disk by someone else shows within that time
+   *   - what's deleted meanwhile is still counted until then:  more, never less
+   * - SIDE EFFECT:  `growth` let in is added to the count, before the caller writes it
    * - throws `PlaceError` `"over the ceiling"`, saying how full it is
    */
   async roomForOrDie(growth: number): Promise<void> {
     const mostForSpace = this.limits.space
     if (mostForSpace === undefined || growth <= 0 || !this.bytesInUse) return
-    const inUse = await this.bytesInUse()
+    const isFresh = this.counted && Date.now() - this.counted.at < COUNT_KEPT_MS
+    if (!isFresh || this.counted!.bytes + growth > mostForSpace) {
+      this.counted = { bytes: await this.bytesInUse(), at: Date.now() }
+    }
+    const inUse = this.counted!.bytes
     if (inUse + growth > mostForSpace) {
       throw overTheCeiling(
         `This space holds ${inWords(inUse)} of the ${inWords(mostForSpace)} it may, too full for this`
       )
     }
+    this.counted!.bytes += growth
   }
 
   /**
@@ -780,7 +799,10 @@ export type FolderPlaceProps = {
   takenDown?: (identity: string | undefined) => Promise<TakenDown>
   /** The most a thing's file, and the whole folder, may hold, in bytes (epic `atmosphere` P7).  Left out:  no limit. */
   limits?: FolderLimits
-  /** How many bytes the whole folder holds now, for `limits.space`:  asked once per `apply()` that grows it. */
+  /**
+   * How many bytes the whole folder holds now, for `limits.space`.
+   * - Asked by an `apply()` that grows it, at most every 10s (`roomForOrDie()`), and before any refusal.
+   */
   bytesInUse?: () => Promise<number>
   /** The least time between two asks of what changed, in seconds, that it will take:  `describe()` says it. */
   checkedAtMostEvery?: number

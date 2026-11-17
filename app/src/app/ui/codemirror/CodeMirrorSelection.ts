@@ -18,6 +18,8 @@ const PIECE = "cm-selectionBackground"
  *   the same pieces, in the same class, each moved onto the bands of the lines it's on;  a piece over several lines
  *   still meets the ones above and below it.
  * - Its colour, see-through black, is the sheet's (`bubbly.css`).
+ * - One ending at a blank line's end reaches the caret there, drawn where the line's words will go
+ *   (`reachingCaret()`;  epic `language` I157).
  * - And the caret at a line's first word always drawn AT that word (`wordsSide`;  epic `language` I141).
  * - And a click on something drawn as one step for the caret, a comment's `--` drawn as one dash,
  *   puts the caret at its nearer end, as seen (`atomicPresses`;  epic `codemirror` I25).
@@ -94,6 +96,7 @@ export class CodeMirrorSelection {
 
   /**
    * The selection's pieces in `view`:  CodeMirror's, each moved onto its lines' bands.
+   * - One ending at a blank line's end reaches the caret there (`reachingCaret()`).
    * - SIDE EFFECT:  reads the layout;  CodeMirror calls it when that's fine.
    */
   static markersIn(view: EditorView): RectangleMarker[] {
@@ -101,8 +104,34 @@ export class CodeMirrorSelection {
     // a caret alone, as while typing:  nothing to draw, and no probe laying the pane out again (epic `codemirror` I21)
     if (!ranges.length) return []
     const bands = new LineBands(view)
-    return ranges.flatMap((range) => RectangleMarker.forRange(view, PIECE, range)).map((piece) => bands.onBands(piece))
+    return ranges
+      .flatMap((range) => reachingCaret(view, range, RectangleMarker.forRange(view, PIECE, range)))
+      .map((piece) => bands.onBands(piece))
   }
+}
+
+/**
+ * `pieces`, the selection of `range`, its last reaching the caret when `range` ends at a blank line's end.
+ * - The caret there is drawn past the room after the line's tabs, where its words will go
+ *   (`CodeMirrorBubbly`'s `WordsPlace`;  epic `language` I157).
+ * - CodeMirror ends the selection at the tabs, as they're all it holds:  it stopped a tab short of the caret.
+ */
+function reachingCaret(
+  view: EditorView,
+  range: SelectionRange,
+  pieces: readonly RectangleMarker[]
+): readonly RectangleMarker[] {
+  const last = pieces.at(-1)
+  const line = view.state.doc.lineAt(range.to)
+  // no width:  it reaches the editor's right edge already
+  if (!last || last.width === null || range.to !== line.to || line.text.trim()) return pieces
+  const caret = view.coordsAtPos(range.to, -1)
+  if (!caret) return pieces
+  // where CodeMirror's pieces are measured from, across:  the scroller's left, scrolled (its `getBase()`)
+  const base = view.scrollDOM.getBoundingClientRect().left - view.scrollDOM.scrollLeft * view.scaleX
+  const right = caret.left - base
+  if (right <= last.left + last.width) return pieces
+  return [...pieces.slice(0, -1), new RectangleMarker(PIECE, last.left, last.top, right - last.left, last.height)]
 }
 
 /**

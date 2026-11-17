@@ -192,6 +192,10 @@ and in the app's build folder, `app/` at the app folder's root.
     - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
       letter in its own colour under it ([CodeMirrorSelection](ui/codemirror/CodeMirrorSelection.ts), epic `language`
       I124):  drawn in place of CodeMirror's own, which the sheet hides.
+    - The caret on a blank body line, its tabs alone, is drawn where its words will go:
+      a tab past its tabs, as a plain line's words are (`CodeMirrorBubbly`'s `WordsPlace`, epic `language` I157).
+      - Not between a drawing's tags or right above them, where a typed tag starts at its indent;
+        nor a group's own lines, already drawn where its members' words are.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
       [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
