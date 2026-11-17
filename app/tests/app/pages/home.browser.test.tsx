@@ -111,6 +111,24 @@ describe("the home page's rows", () => {
     expect(rowIds(host)).toEqual(["projects", "start", "examples", "guides", "spanish"])
   })
 
+  test("an org's group:  its own section under your projects, saying its apps are for everyone at the org (T65)", async () => {
+    const was = { id: SPACES.localPerson.id, org: SPACES.localPerson.org }
+    SPACES.setLocalPerson({ id: was.id, org: "acme" })
+    SPACES.addOrgGroups(["@acme/tools"])
+    LISTS["@acme/tools"] = [{ path: "@acme/tools/dashboard", title: "Dashboard" }]
+    cleanups.push(() => {
+      SPACES.setLocalPerson(was)
+      SPACES.orgGroups.splice(SPACES.orgGroups.indexOf("@acme/tools" as never), 1)
+      delete LISTS["@acme/tools"]
+    })
+    ownProjects = [{ path: `${SPACES.localPerson.address}/my-app`, title: "My App" }]
+    const host = await mountHome()
+    expect(rowIds(host)).toEqual(["projects", "org-tools", "start", "examples", "guides", "spanish"])
+    expect(cardsIn(host, "org-tools")).toEqual(["Dashboard"])
+    expect(host.querySelector("#org-tools h2 .line")?.textContent?.trim()).toBe("For everyone at @acme.")
+    expect(host.querySelector("#org-tools h2 .line ui-icon")?.getAttribute("name")).toBe("users")
+  })
+
   test("the examples:  ONE set in Spell's order, no line over a kind of them (I48);  each card its description's first phrase", async () => {
     const host = await mountHome()
     expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])

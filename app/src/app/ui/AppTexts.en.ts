@@ -472,7 +472,7 @@ export const APP_TEXTS = {
   homeLibraryLine:
     "Apps for an org:\nits Admin page, chat, feed, inbox and events.\nOpen one, change it, give it to your own org.",
   homeProjectsLine: "What you've made, and where to start the next one.",
-  homeOrgLine: "Shared by everyone at @{org}.",
+  homeOrgLine: "For everyone at @{org}.",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
   editorNameNeeded:

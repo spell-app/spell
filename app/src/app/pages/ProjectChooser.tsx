@@ -177,6 +177,8 @@ export function ProjectChooser() {
  * spell.spaces (`SPACES.orgGroups`).
  * - None in Spell's own org.
  * - Each group's cards by folder name:  Spell's own order never names an org's projects.
+ * - Its line says plainly whose its apps are, "For everyone at @acme.", after a people icon
+ *   (Owen, epic `repo-split` T65:  "apps should say that they are for everyone in the org").
  ****************/
 function OrgGroups(props: { drag?: TileCardDrag }) {
   const org = SPACES.localPerson.org
@@ -191,6 +193,7 @@ function OrgGroups(props: { drag?: TileCardDrag }) {
             projectRoot={group}
             heading={group.title}
             line={appTexts.text("homeOrgLine", { org })}
+            lineIcon="users"
             sectionDrag={props.drag}
           />
         )
@@ -343,6 +346,8 @@ function HomeSection(props: {
   id: string
   heading: string
   line?: string
+  /** An icon before its quiet line:  an org's group, `users`. */
+  lineIcon?: string
   actions?: JSX.Element
   small?: boolean
   drag?: TileCardDrag
@@ -365,7 +370,13 @@ function HomeSection(props: {
           when={HomeArrangement.isRearranging}
           fallback={
             <h2>
-              {heading()}. <span class="line">{line()}</span>
+              {heading()}.{" "}
+              <span class="line">
+                <Show when={props.lineIcon}>
+                  <ui-icon name={props.lineIcon} />{" "}
+                </Show>
+                {line()}
+              </span>
             </h2>
           }
         >
@@ -418,6 +429,7 @@ export function ProjectCards(props: ProjectCardsProps) {
         id={props.id}
         heading={props.heading ?? root().words.title}
         line={props.line}
+        lineIcon={props.lineIcon}
         actions={props.create}
         small={props.small}
         drag={props.sectionDrag}
@@ -935,6 +947,8 @@ export type ProjectCardsProps = {
   heading?: string
   /** The quiet line after its title, if any. */
   line?: string
+  /** An icon before that line:  an org's group, `users`. */
+  lineIcon?: string
   /** Its "create" button, in its header. */
   create?: JSX.Element
   /** What its one card says while it's empty;  default "No examples yet!". */

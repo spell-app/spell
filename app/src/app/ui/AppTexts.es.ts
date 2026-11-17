@@ -579,7 +579,7 @@ const APP_TEXTS_ES: AppTextPack = {
   homeLibraryLine:
     "Aplicaciones para una org:\nsu página de administración, chat, novedades, bandeja de entrada y eventos.\nAbre una, cámbiala, dásela a tu propia org.",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
-  homeOrgLine: "Compartidos por todos en @{org}.",
+  homeOrgLine: "Para todos en @{org}.",
   editorPieceBroken:
     "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.\nArréglala y publícala de nuevo:\n{problem}",
   editorNameNeeded:
