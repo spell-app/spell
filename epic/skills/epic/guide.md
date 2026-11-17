@@ -25,6 +25,9 @@ The epic workflow in plain steps, for any agent:  Codex, Claude Code, or another
 5. End EVERY turn with `epic turn end` (`epic guide turn`).
 6. Finish:  the Doc Review phase, then the merge (`epic guide done`).
 
+Replies in the chat with more than one topic:  a `##` header per topic, never `#`.
+Anything waiting on the person comes first, under `## Waiting on you`, with its page's links.
+
 ## find -- Find the epic and its page
 
 ```sh
