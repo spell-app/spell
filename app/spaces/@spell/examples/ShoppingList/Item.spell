@@ -1,0 +1,32 @@
+# An item on the list
+// A row of its own:  a box to tick, how much, its name, the recipe it's for, and a button to take it off.
+// Ticking the box changes the item, which saves itself:  the CSV file's line changes at once.
+
+an item
+	its "how much" is
+		// Its amount and unit as people write them:  "2", "200 g", "1 1/2 cups";  nothing with no amount
+		if its amount is nothing or its amount is 0 return ""
+		return its amount && its unit
+
+	to "remove" with title "Remove", icon "close"
+		// Off the list, and out of the file
+		remove it from the items
+
+	to draw it
+		<form value={it}>
+			<stack direction="horizontal" spacing="sm" class="item">
+				<checkbox name="got" aria-label="Got it" />
+				<text bold class="how-much">{its how much}</text>
+				<text class="name">{its name}</text>
+				<if its recipe is not "">
+					<text color="grey" size="small" class="for">for {its recipe}</text>
+				</if>
+				<action "remove" icon-only appearance="tertiary" />
+			</stack>
+		</form>
+
+	to test how much reads
+		set the item to a new item with name "flour", amount = 200, unit = "g"
+		the item's how much should be "200 g"
+		set the item to a new item with name "lemons"
+		the item's how much should be ""

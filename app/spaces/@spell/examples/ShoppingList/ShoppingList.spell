@@ -1,0 +1,66 @@
+# Shopping List
+// What to buy, by aisle:  add an item, tick it off as you shop, clear what you got, and print what's left.
+// Its items are in a CSV file Numbers or Excel opens:  ShoppingList.api.spell says where.
+// An item draws itself in Item.spell, and the list by aisle is AisleList.spell;  this file holds the app.
+
+shopping list is an app
+	"aisle list" is a new aisle list
+	its "new item" is a new item
+		// The next item, as the form above the list holds it
+
+	when creating it
+		// The first time, with an empty file, a few to start with
+		if there are no items
+			add (a new item with name "milk", aisle "Dairy", amount = 2, unit = "litres") to the items
+			add (a new item with name "eggs", aisle "Dairy", amount = 12) to the items
+			add (a new item with name "bananas", aisle "Fruit and veg", amount = 6) to the items
+			add (a new item with name "spinach", aisle "Fruit and veg", amount = 200, unit = "g") to the items
+			add (a new item with name "bread", aisle "Bakery", amount = 1, unit = "loaf") to the items
+			add (a new item with name "coffee", aisle "Drinks", amount = 250, unit = "g", got = yes) to the items
+
+	to "add the new item" with title "Add", icon "plus"
+		// The form's item, onto the list and into the file;  the form empties, keeping its aisle
+		if the new item's name is "" return
+		add the new item to the items
+		set its new item to a new item with aisle = the new item's aisle
+
+	to "clear what I got" with title "Clear what I got", icon "check"
+		// Every ticked item off the list, in one step to undo
+		remove items from the items where its got is yes
+
+	to "print the list" with title "Print", icon "print"
+		// Only what's still to get, by aisle:  styles.css says what's on paper
+		open printing
+
+	to draw it
+		<container text>
+			<stack>
+				<toolbar>
+					<text size="large" heavy slot="title">Shopping List</text>
+					<action "clear what I got" />
+					<action "print the list" />
+					<spacer />
+					<action "undo" icon-only />
+					<action "redo" icon-only />
+				</toolbar>
+				<form value={its new item} class="new-item">
+					<fields unstackable>
+						<field width="3">
+							<input name="amount" type="number" min="0" placeholder="How many" aria-label="Amount" />
+						</field>
+						<field width="3">
+							<input name="unit" placeholder="Unit" aria-label="Unit" />
+						</field>
+						<field width="6">
+							<input name="name" placeholder="Something to buy" aria-label="Item" />
+						</field>
+						<field width="4">
+							<input name="aisle" placeholder="Aisle" aria-label="Aisle" action>
+								<action "add the new item" slot="action" color="primary" icon-only />
+							</input>
+						</field>
+					</fields>
+				</form>
+				{draw the aisle list}
+			</stack>
+		</container>
