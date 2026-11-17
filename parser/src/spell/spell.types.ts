@@ -338,7 +338,7 @@ export type ProjectList = ProjectListEntry[]
  * - `title` only when its project file has one (decision Q45):  else `SpellProject.title` makes it from the name.
  * - `description` only when its project file has one:  what it shows, for the editor's landing page cards.
  * - `language` only when its files are all written in another language than English, by their names:
- *   `es` for Solitario (`Carta.es.spell` ...), so the landing page lists it under "En Español".
+ *   `es` for Solitario (`Carta.es.spell` ...), so the landing page lists it in its section "En español".
  * - `isSite` only when one of its files declares a site:  the page of a group's sites lists those.
  */
 export type ProjectListEntry = {

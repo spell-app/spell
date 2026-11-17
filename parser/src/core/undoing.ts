@@ -404,17 +404,19 @@ function thenEach(value: unknown, next: readonly (() => unknown)[]): unknown {
 
 /**
  * Run `thing`'s creation hook, `create(props)`:  what `Thing`'s and `List`'s constructors call.
- * - Made inside an action:  what it changes joins that action's step.
- * - Made while no action runs (the program's opening, a one of a kind's `when creating it`):  no undo step, as
- *   `core.holdWhile()`'s opening steps aren't -- however long it waits (epic `language` I88).
+ * - Made inside an undoable action:  what it changes joins that action's step.
+ * - Made anywhere else (the program's opening, a one of a kind's `when creating it`, an action that can't be undone):
+ *   no undo step, as `core.holdWhile()`'s opening steps aren't -- however long it waits (epic `language` I88).
  *   - e.g. Recipe Box's three recipes to start from:  Undo at once took the last one away.
+ *   - Inside a can't-be-undone run too, as the opening is (`core.runOpening()`):  that run ends once the program
+ *     has loaded, while a `create()` that waits (Recipe Box's, reading its place) saves after it (epic `epic-engine` I325).
  */
 export function runCreate(
   thing: { create(props?: Record<string, unknown>): unknown },
   props?: Record<string, unknown>
 ): void {
   const history = core.RUNTIME?.history
-  if (!history || history.isActing || history.isApplying) {
+  if (!history || history.isInTransaction || history.isApplying) {
     thing.create(props)
     return
   }

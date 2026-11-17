@@ -419,12 +419,11 @@ export const APP_TEXTS = {
   notebooksAppName: "Spell Notebooks",
   tabTitle: "{project} • Spell",
   notebookTabTitle: "{project} • Spell Notebook",
-  homeInSpanish: "En Español",
   homeEyebrow: "Spell, in preview",
-  homeTitle: "Write an app in a sentence.",
+  homeTitle: "Programs you can read out loud.",
   homeTagline: "Plain words in.  A working app out.",
   homeIntro:
-    "Spell is a programming language you can read aloud.\nOpen an example, change a sentence, and watch the app change beside it.",
+    "With Spell, an app is written in plain sentences.\nOpen an example, change a sentence, and watch the app change beside it.",
   tryAnExample: "Try an example",
   readFirstSpell: "Read your first spell",
   homeQuoteTitle: "From the Task List",
@@ -456,6 +455,11 @@ export const APP_TEXTS = {
   editorZonesCancel: "Cancel",
   homeEditorLine: "The editor's own pieces, in Spell:\nchange one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",
+  // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
+  homeSpanishTitle: "En español",
+  homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeSpanishExamples: "Ejemplos",
+  homeSpanishGuides: "Guías",
 
   ////////////////
   // ## Project groups:  each group's words, by its `type` (spaces' `PROJECT_GROUPS`)

@@ -465,6 +465,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - LIMITS (epic `atmosphere` P7, `limits`, `bytesInUse()`):
         a thing's file and the whole folder, each at most so many bytes
         - a save past either is refused, `"over the ceiling"` (413), saying how big, and the page keeps it
+        - the folder is counted (`bytesInUse()`, a walk of every file) at most every 10s, adding what it let in since,
+          and afresh before any refusal (epic `epic-engine` I326:  a count per write slowed a busy thread the more it held)
       - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
       - told of each write once it's on the disk (`onWritten`, epic `atmosphere` P14):  the app copies a space's writes
         into its real AT Protocol Space this way

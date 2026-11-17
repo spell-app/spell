@@ -14,6 +14,7 @@ import { ProjectChooser } from "spell/app/app/pages/ProjectChooser"
  * - what Spell's own order hides (`SPACES.HOME_HIDDEN_KEY`) isn't there:
  *   the library, the editor's pieces, FizzBuzz and the sign-in examples, the guide of a hidden one
  * - the ways to start:  Blank, Counter and Task List
+ * - the examples and guides written in Spanish:  a section of their own, "En español", after the English ones (I46)
  *
  * - Each group's list is made up here:  `load()` sets it, as the API server would answer.
  */
@@ -23,6 +24,9 @@ const LISTS: Record<string, SPACES.ProjectListEntryWithHome[]> = {
   "@spell/examples": [
     { path: "@spell/examples/fizzbuzz", title: "FizzBuzz", category: "first-steps" },
     { path: "@spell/examples/calculator", title: "Calculator", category: "first-steps" },
+    { path: "@spell/examples/Calculadora", title: "Calculadora", category: "first-steps", language: "es" },
+    { path: "@spell/examples/ListaDeTareas", title: "Lista de tareas", category: "everyday", language: "es" },
+    { path: "@spell/examples/Solitario", title: "Solitario", category: "games", language: "es" },
     { path: "@spell/examples/TaskList", title: "Task List", category: "everyday" },
     { path: "@spell/examples/FamilyCookbook", title: "Family Cookbook", category: "everyday" },
     { path: "@spell/examples/Statusphere", title: "Statusphere", category: "web-data" }
@@ -33,7 +37,8 @@ const LISTS: Record<string, SPACES.ProjectListEntryWithHome[]> = {
   ],
   "@spell/guides": [
     { path: "@spell/guides/how-fizzbuzz-works", title: "How FizzBuzz works" },
-    { path: "@spell/guides/how-calculator-works", title: "How the Calculator works" }
+    { path: "@spell/guides/how-calculator-works", title: "How the Calculator works" },
+    { path: "@spell/guides/como-funciona-solitario", title: "Cómo funciona Solitario", language: "es" }
   ]
 }
 
@@ -63,7 +68,7 @@ describe("the home page's rows", () => {
   test("no projects of your own:  no row for them, header, empty card or button;  the Start row first", async () => {
     const host = await mountHome()
     expect(host.querySelector("#projects")).toBeNull()
-    expect(rowIds(host)).toEqual(["start", "examples", "guides"])
+    expect(rowIds(host)).toEqual(["start", "examples", "guides", "spanish"])
     // where a first app is made:  Blank last (epic `mockup` T44)
     expect(cardsIn(host, "start")).toEqual(["To-do list", "Counter", "Converter", "Blank"])
   })
@@ -71,7 +76,7 @@ describe("the home page's rows", () => {
   test("projects of your own:  their row first under the hero", async () => {
     ownProjects = [{ path: `${SPACES.localPerson.address}/my-app`, title: "My App" }]
     const host = await mountHome()
-    expect(rowIds(host)).toEqual(["projects", "start", "examples", "guides"])
+    expect(rowIds(host)).toEqual(["projects", "start", "examples", "guides", "spanish"])
     expect(cardsIn(host, "projects")).toEqual(["My App"])
   })
 
@@ -92,7 +97,18 @@ describe("the home page's rows", () => {
     const host = await mountHome()
     const above = [...host.querySelectorAll(".Home > section.ProjectCards:not(.Hero ~ *)")].map((each) => each.id)
     expect(above).toEqual(["projects"])
-    expect(rowIds(host)).toEqual(["start", "examples", "guides"])
+    expect(rowIds(host)).toEqual(["start", "examples", "guides", "spanish"])
+  })
+
+  test('the Spanish examples and guides:  their own section, "En español", out of the English ones (I46)', async () => {
+    const host = await mountHome()
+    expect(cardsIn(host, "examples")).toEqual(["Calculator"])
+    expect(cardsIn(host, "guides")).toEqual(["How the Calculator works"])
+    expect(host.querySelector("#spanish h2")?.textContent).toMatch(/^En español\./)
+    // the examples, then the guides, each under its line;  Lista de tareas hidden, as Task List is
+    expect(cardsIn(host, "spanish")).toEqual(["Calculadora", "Solitario", "Cómo funciona Solitario"])
+    const lines = [...host.querySelectorAll("#spanish .subhead")].map((line) => line.textContent)
+    expect(lines).toEqual(["Ejemplos", "Guías"])
   })
 })
 

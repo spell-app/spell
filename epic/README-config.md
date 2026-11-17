@@ -68,8 +68,8 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
   a branch's change to it counts once it's merged.
 - `epic config [<key>] [--json]` prints what's in force, folders made absolute.
 - The hooks act only in a repo that has the file.
-  In any other repo, the worktree hook makes the worktree Claude Code would make by itself:
-  `.claude/worktrees/<name>`, on a new branch `worktree-<name>`, with nothing linked or installed.
+  In any other repo, the worktree hook makes the worktree Claude Code would make by itself,
+  on a new branch `worktree-<name>`, with nothing linked or installed.
 
 | Key | `epic init` writes | What it sets |
 | --- | --- | --- |
@@ -104,6 +104,10 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `voices` | not written | the repo's own voices, a name to a file from the main checkout (`"code": "agents/wwod/writing.md"`), over the engine's `voices/<name>.md` (`epic voice`) |
 | `pageVoices` | not written | the voice each kind of page is written in, over the defaults:  `readme` for READMEs and guides, `code` for code and epic pages |
 | `promptAck` | not written | whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy;  on unless `false` |
+| `localSetup` | `true` with `--local`, else not written | the repo was set up on this machine only ([`--local`](README-setup.md#nothing-in-your-repo)):  `epic init` run again stays local |
+| `top` | not written | a PEER repo's kit, its main checkout (`{ top: "../spell" }`):  the peer takes the kit's epic folder, windows, shared folders, engine and voices for each key it leaves out, and keeps its own worktrees, install, base branch and app.  A multi-repo child finds its top as the folder above instead;  `epic config top` prints either |
+| `renamedRepos` | not written | the repo's old GitHub addresses, each to the one it was renamed to, so an epic page that recorded the old address is still this repo's |
+| `oldLayout` | not written | for a repo that absorbed its child repos:  how it meets an epic worktree cut before (`carryOn`, `commitMaps`, `oldClones`);  Spell's own, after its repos became one |
 
 - Files your build generates (bundles, data) can be listed in `.epic/generators.json5`:
   `epic worktree merge-main` reruns them on the merged source, instead of line-merging what they wrote.
@@ -173,12 +177,13 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 ```
 
 - In a repo `epic init` set up, `epic server` IS this server:  such a repo has no page server of its own.
-  `epic hub` names it from anywhere, with the same verbs (`start`, `ensure`, `stop`, `status`, `url`).
-  Spell's own repo has a page server of its own, which runs beside it, never instead of it.
+  - `epic hub` names it from anywhere, with the same verbs.
+  - Spell's own repo has a page server of its own, which runs beside it, never instead of it.
 - Port 4848;  `SPELL_EPIC_PORT` changes it.
   Only ever that port:  when something else holds it, `start` fails and says so,
   rather than start elsewhere, so an open page keeps its address.
-- `start` restarts it when its code or the repo list changed since it started.
+- `ensure` restarts it when its code or the repo list changed since it started, and so does `url`, which runs it.
+  `start` leaves a running one alone.
 - Its files are in `~/.spell-epic/`, a folder `SPELL_EPIC_HOME` moves:
   - `repos.json5`:  the repos
   - `server.json`:  its process
@@ -228,8 +233,7 @@ What epic tells it, in an epic's worktree only:
 The words are the `superpowers` topic of `epic guide`, said in up to three places:
 - in the epic skill
 - by the session-start hook, on every start, `/clear` and compaction, however superpowers was turned on:
-  your settings, the project's `.claude/settings.json` or `.claude/settings.local.json`, the managed settings,
-  or `claude --plugin-dir`
+  your settings, the project's shared or local settings, the managed settings, or `claude --plugin-dir`
 - in your repo's AGENTS.md, which every session reads:  `epic init` offers to put them there (below)
 Outside an epic, superpowers runs as it always does.
 
@@ -240,8 +244,8 @@ Two ideas from it are now epic's own, superpowers or not:
 
 The catch:  superpowers has no setting to turn a skill off, and obeys only YOUR instructions, by its own rule
 (CLAUDE.md, AGENTS.md, what you type).
-A live trial obeyed the words wherever they were read:  the hook's, the skill's and AGENTS.md's alike.
-AGENTS.md reaches every session, a teammate's too, so `epic init` offers to put them there when superpowers is on:
+- A live trial obeyed the words wherever they were read:  the hook's, the skill's and AGENTS.md's alike.
+- AGENTS.md reaches every session, a teammate's too, so `epic init` offers to put them there when superpowers is on:
 
 ```sh
 epic init --superpowers     # put them in AGENTS.md without asking
@@ -268,7 +272,7 @@ What you'd trip on today, roughly in the order you'd meet it.
 2. **Sharing needs GitHub or GitLab.**
    `epic init` makes the epic repo through `gh` or `glab`;
    anywhere else, make it by hand and pass `--remote <address>`.
-   GitLab has run only against a stand-in `glab`, not a real server ([On GitLab](README-setup.md#on-gitlab)).
+   GitLab has met one real server, a company's own, and otherwise a stand-in `glab` ([On GitLab](README-setup.md#on-gitlab)).
 3. **The review controls reach the DEFAULT repo only.**
    A second repo's pages draw, but their buttons, comments and details pages talk to the default repo's inbox.
    `epic repos default <name>` picks which repo that is.
@@ -276,6 +280,8 @@ What you'd trip on today, roughly in the order you'd meet it.
    They load Spell's theme, and the top bar's tabs are Spell's own areas, not yours.
 5. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
+   - The epic skill's three test tiers name Spell's folders and scripts, `yarn test:unit` among them:
+     your `AGENTS.md` says what yours are ([Your AGENTS.md](README-setup.md#your-agentsmd-fills-in-the-rest)).
    - Saved prompts go to `~/.spell/prompts/`.
 6. **Claude Code first.**
    The skills run in Codex too, but five stay Claude Code's, and so do waking a session from the page, session
@@ -292,8 +298,8 @@ What you'd trip on today, roughly in the order you'd meet it.
    - `epic` is `epic.cmd` there, in `%USERPROFILE%\.local\bin`:  put that folder on your `PATH`.
    - The window bridge finds a session's window through its parent processes;
      `vscode://` links are avoided because macOS hands them to whichever window is focused.
-   - `epic plugin install` (and so `epic init`) installs the extension from `epic/vscode/spell-epic.vsix`;  in a
-     clone of Spell, build it first:  `yarn vscode:package` in `epic/`.
+   - `epic plugin install` (and so `epic init`) installs the extension from `epic/vscode/spell-epic.vsix`;
+     in a clone of Spell, build it first:  `yarn vscode:package` in `epic/`.
 8. **Spell's own page server knows your project only by a file you write.**
    You need it only to see your own component set or bundles on Spell's pages, not for epics:
    the epic server above serves your plans.
@@ -313,13 +319,14 @@ What you'd trip on today, roughly in the order you'd meet it.
      - `spell publish` publishes only the kit's folders that have a `"spellPublish"`
 
 **Real today:**  a repo that isn't Spell, set up with one command, its plans shared by a team through GitHub
-(GitLab is built, and tried only against a stand-in `glab`),
+(GitLab is built, and has met one real, self-hosted server),
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
 - Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
-- a real GitLab, gitlab.com or self-hosted:  `glab`'s flags are from its documentation, not a run against a server
+- gitlab.com, and the whole of GitLab tried on a real server:  the one self-hosted run reached the first push, and the
+  rest of `glab`'s flags are from its documentation
 - a host other than GitHub or GitLab, without making the epic repo by hand
 - two repos reviewed from one server
 - the keys added since the first outside run, tried anywhere but Spell's own repos:

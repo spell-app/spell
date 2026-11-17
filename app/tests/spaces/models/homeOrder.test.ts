@@ -55,14 +55,22 @@ describe("the home page's sections", () => {
     )
   })
 
-  test("today's page (I40):  your projects first under the hero, starting, examples, guides, the org's;  no library or editor", () => {
-    expect(SPACES.homeSections(false)).toEqual(["projects", "start", "examples", "guides", "org"])
+  test("today's page (I40, I46):  your projects first under the hero, starting, examples, guides, Spanish, the org's;  no library or editor", () => {
+    expect(SPACES.homeSections(false)).toEqual(["projects", "start", "examples", "guides", "spanish", "org"])
   })
 
   test("an org's app:  your projects and the org's groups first, in the saved order;  no library", () => {
     const order = { sections: ["examples", "org", "guides", "projects", "start", "library", "editor"] }
-    expect(SPACES.homeSections(true, order)).toEqual(["org", "projects", "examples", "guides", "start", "editor"])
-    expect(SPACES.homeSections(true)).toEqual(["projects", "org", "start", "examples", "guides"])
+    expect(SPACES.homeSections(true, order)).toEqual([
+      "org",
+      "projects",
+      "examples",
+      "guides",
+      "start",
+      "editor",
+      "spanish"
+    ])
+    expect(SPACES.homeSections(true)).toEqual(["projects", "org", "start", "examples", "guides", "spanish"])
   })
 
   test("an old list with no sections, or one naming what isn't one:  the rest in their first order", () => {
@@ -73,6 +81,7 @@ describe("the home page's sections", () => {
       "projects",
       "start",
       "library",
+      "spanish",
       "org",
       "editor"
     ])

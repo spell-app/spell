@@ -1,5 +1,5 @@
 {
-  "sections": ["projects", "start", "examples", "library", "guides", "org", "editor"],
+  "sections": ["projects", "start", "examples", "library", "guides", "spanish", "org", "editor"],
   "hidden": [
     "library",
     "editor",
@@ -32,14 +32,14 @@
     "tic-tac-toe",
     "bill-splitter",
     "flash-cards",
+    "CajaDeRecetas",
     "TarjetasDeEstudio",
     "habit-tracker",
-    "Weather",
     "TaskList",
     "ListaDeTareas",
+    "Weather",
     "Solitaire",
     "Solitario",
-    "CajaDeRecetas",
     "FamilyCookbook",
     "PicnicLetter",
     "PokeSpell",

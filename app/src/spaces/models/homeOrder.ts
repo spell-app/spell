@@ -39,12 +39,13 @@ export const HOME_SECTIONS_KEY = "sections"
  * - `projects`:  this machine's person's own, first (Owen, epic `mockup` I40:  "my apps should be at the top");
  *   not shown while they have none
  * - `start`:  the ways to start something new
- * - `examples`, `library`, `guides`:  Spell's own groups
+ * - `examples`, `library`, `guides`:  Spell's own groups, their projects in English
+ * - `spanish`:  the examples and guides written in Spanish, "En español" (Owen, epic `mockup` I46)
  * - `org`:  each of their org's own groups (`orgGroups`), one section each;  none in Spell's own org
  * - `editor`:  the editor's own pieces, in dev only
  * - Any of them may be left off the page, in the saved list's `HOME_HIDDEN_KEY` (`library` and `editor`, for now).
  */
-export const HOME_SECTIONS = ["projects", "start", "examples", "library", "guides", "org", "editor"] as const
+export const HOME_SECTIONS = ["projects", "start", "examples", "library", "guides", "spanish", "org", "editor"] as const
 
 /** One of `HOME_SECTIONS`. */
 export type HomeSection = (typeof HOME_SECTIONS)[number]
