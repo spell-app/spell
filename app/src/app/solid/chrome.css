@@ -338,7 +338,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
 }
 
 /*
- * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
+ * `<PublishDraft>`:  ONE pill just left of the modes' group (T102:  "Move `draft` panel to the left of run"), the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
  * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside the pill
@@ -357,7 +357,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   gap: var(--spell-bar-icon-gap, 12px);
   box-sizing: border-box;
   block-size: var(--spell-draft-height);
-  margin-inline-start: var(--spell-bar-icon-gap, 12px);
+  margin-inline-end: var(--spell-bar-icon-gap, 12px);
   padding: var(--spell-draft-inset) 12px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);
