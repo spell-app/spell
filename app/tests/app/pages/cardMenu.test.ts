@@ -19,9 +19,12 @@ import { createTestProject, type TestProject } from "./testProject"
  * - Headless Playwright, never a real browser window.
  */
 
-/** Its one file:  an app that draws a line. */
-const FILE = "/Card.spell"
-const CONTENTS = `## Card\nthe card app is an app:\n  to draw it:\n    <text>Hello from the card menu</>\n`
+/** Its one file:  the Calculator example's, so its app draws something to picture. */
+const FILE = "/Calculator.spell"
+const CONTENTS = readFileSync(
+  path.join(import.meta.dirname, "../../../spaces/@spell/examples/calculator/Calculator.spell"),
+  "utf8"
+)
 
 /** Whose space the test projects are in:  `createTestProject()`'s. */
 const OWNER = "owen@spell"
@@ -134,7 +137,8 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
     await choose(title(), "Update App Snapshot…")
     await page.waitForSelector(".AppSnapshot iframe", { timeout: 15_000 })
     expect(await page.locator(".AppSnapshotScreen").evaluate((screen) => (screen as HTMLElement).offsetWidth)).toBe(390)
-    await page.waitForTimeout(6000)
+    // its app drawn:  a cold editor compiles it first
+    await page.frameLocator(".AppSnapshot iframe").locator("#spell-app-root > *").first().waitFor({ timeout: 90_000 })
     await page.locator(".AppSnapshotGo").click()
     await page.waitForSelector(".AppSnapshotFrame", { timeout: 20_000 })
     // the frame moves with the arrow keys
