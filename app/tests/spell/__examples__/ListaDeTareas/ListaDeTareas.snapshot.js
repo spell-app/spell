@@ -1,4 +1,4 @@
-import { core, Thing, List, App, View, ViewableList, Place, h, withSpellPositions } from "@spell/core"
+import { core, App, View, ViewableList, Place, h, withSpellPositions } from "@spell/core"
 
 core.heading("Una tarea")
 ///////////////
@@ -14,44 +14,46 @@ export class Tarea extends View {
 
   /** Lo que hay que hacer */
   // su "título" es texto
-  static { this.declareProp("título", { type: "text" }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/Tarea.es.spell", start: 399, end: 445 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   /** Cualquier otra cosa sobre ella */
   // su "nota" es texto
-  static { this.declareProp("nota", { type: "text" }) }
+  static { this.declareProp("nota", { type: "text", declaredAt: { path: "/Tarea.es.spell", start: 447, end: 501 } }) }
   get nota() { return this.getProp("nota") }
   set nota(value) { this.setProp("nota", value) }
 
   // su "prioridad" es uno de baja, normal o alta
   static Prioridades = ["baja", "normal", "alta"]
-  static { this.declareProp("prioridad", { oneOf: Tarea.Prioridades }) }
+  static { this.declareProp("prioridad", { oneOf: Tarea.Prioridades, declaredAt: { path: "/Tarea.es.spell", start: 503, end: 547 } }) }
   get prioridad() { return this.getProp("prioridad") }
   set prioridad(value) { this.setProp("prioridad", value) }
 
   // su "hecha" es sí o no
-  static { this.declareProp("hecha", { type: "choice" }) }
+  static { this.declareProp("hecha", { type: "choice", declaredAt: { path: "/Tarea.es.spell", start: 549, end: 570 } }) }
   get hecha() { return this.getProp("hecha") }
   set hecha(value) { this.setProp("hecha", value) }
 
   /** Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve */
   // su "orden" es número
-  static { this.declareProp("orden", { type: "number" }) }
+  static { this.declareProp("orden", { type: "number", declaredAt: { path: "/Tarea.es.spell", start: 572, end: 712 } }) }
   get orden() { return this.getProp("orden") }
   set orden(value) { this.setProp("orden", value) }
 
+  static { this.declareProp("estáHecha", { declaredAt: { path: "/Tarea.es.spell", start: 714, end: 744 }, readsFrom: ["mis_tareas"] }) }
   get estáHecha() {
     return this.hecha
   }
 
+  static { this.declareProp("estáPendiente", { declaredAt: { path: "/Tarea.es.spell", start: 746, end: 780 }, readsFrom: ["mis_tareas"] }) }
   get estáPendiente() {
     return !this.hecha
   }
 
-  /** Fuera de donde se guarda:  una tarea que no se guarda en ningún lugar no tiene nada que hacer;  cada clase de tarea guardada dice cómo, en el archivo de su guardián */
+  /** Fuera de donde se guarda, y también de la lista */
   tirar() {
-    return
+    core.removeSaved(this)
   }
 
   draw() {
@@ -74,11 +76,29 @@ export class Tarea extends View {
 
   static draggable = true
 
+  static savedIn = {
+    place: "mis_tareas",
+    collection: "tareas",
+    times: ["created", "modified"]
+  }
+
+  // una tarea vive en mis tareas
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.api.es.spell", start: 456, end: 484 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // una tarea vive en mis tareas
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.api.es.spell", start: 456, end: 484 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
+
   /** una tarea está en una sola agenda a la vez */
+  static { this.declareProp("agenda", { declaredAt: { path: "/ListaDeTareas.es.spell", start: 2354, end: 2386 } }) }
   get agenda() {
     return Agenda.ownerOf(this)
   }
 
+  static { this.declareProp("últimaAgenda", { declaredAt: { path: "/ListaDeTareas.es.spell", start: 2354, end: 2386 } }) }
   get últimaAgenda() {
     return Agenda.lastOwnerOf(this)
   }
@@ -101,277 +121,17 @@ core.heading("Lista de tareas:  dónde se guardan las tareas")
 ///////////////////////////////////////////////////
 // ## Lista de tareas:  dónde se guardan las tareas
 ///////////////////////////////////////////////////
-// La aplicación le pide sus tareas a un GUARDIÁN, y nunca dice dónde están:
-// cada clase de guardián está en un archivo propio, y lo dice a su manera.
-//   ListaDeTareas.navegador.api.es.spell:  en este navegador, con el que empieza
-//   ListaDeTareas.servidor.api.es.spell:  en un archivo JSON en el servidor
-//   ListaDeTareas.csv.api.es.spell:  en un archivo CSV en el servidor
-//   ListaDeTareas.atmosphere.api.es.spell:  en tu propia cuenta de atmosphere, el AT Protocol de Bluesky
-// Todo guardián hace las mismas tres cosas:
-// - sus tareas guardadas:  las tareas que tiene, leídas cuando la aplicación lo elige
-// - guardar una tarea nueva titulada ...:  una tarea nueva, guardada desde ahora
-// - tirarla:  una acción de la propia tarea, que dice su clase de tarea
-// Una tarea guardada en cualquier lugar se guarda sola al cambiar:  marcarla, o escribir su título, queda guardado, sin paso de guardar.
-// Su lugar en la lista se guarda igual, como su orden:  así las tareas vuelven en el orden en que la gente las arrastró.
-
-export class GuardiánDeTareas extends Thing {
-  /** las tareas que tiene, en cualquier orden:  la aplicación las pone en su propio orden */
-  // sus "tareas guardadas" es una lista de tareas
-  static { this.declareProp("tareasGuardadas", { itemType: "Tarea", init: () => new List({ instanceType: "Tarea" }) }) }
-  get tareasGuardadas() { return this.getProp("tareasGuardadas") }
-  set tareasGuardadas(value) { this.setProp("tareasGuardadas", value) }
-
-  /** una tarea nueva, guardada desde ahora, que devuelve */
-  guardarUnaTareaNuevaTituladaTítulo(título) {
-    return new Tarea({ título: título })
-  }
-}
-core.describeAction(GuardiánDeTareas, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar una Tarea Nueva Titulada Título", undoneAs: "Guardar una Tarea Nueva Titulada Título" })
-// -----------
-core.heading("Guardadas en este navegador")
-/////////////////////////////////
-// ## Guardadas en este navegador
-/////////////////////////////////
-
-export class TareaDelNavegador extends Tarea {
-  static elementTag = core.defineElement(this, "test-project")
-
-  tirar() {
-    core.removeSaved(this)
-  }
-
-  static savedIn = {
-    place: "almacén_del_navegador",
-    collection: "tareas_del_navegador",
-    times: ["created", "modified"]
-  }
-
-  // vive en almacén del navegador
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 357, end: 386 } }) }
-  get creado() { return this.getProp("creado") }
-  set creado(value) { this.setProp("creado", value) }
-
-  // vive en almacén del navegador
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 357, end: 386 } }) }
-  get modificado() { return this.getProp("modificado") }
-  set modificado(value) { this.setProp("modificado", value) }
-}
-
-export class GuardiánDelNavegador extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 497, end: 547 }, readsFrom: ["almacén_del_navegador"] }) }
-  get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
-    return await core.savedThings(TareaDelNavegador)
-  }) }
-
-  guardarUnaTareaNuevaTituladaTítulo(título) {
-    const tarea = new TareaDelNavegador({ título: título })
-    core.saveThing(tarea)
-    return tarea
-  }
-}
-
 /**
- * Las tareas se quedan en este dispositivo, en el almacenamiento propio de este navegador:  nadie más las ve, y no se le pregunta a ningún servidor.
- * La aplicación empieza aquí, así que funciona sin servidor y sin iniciar sesión.
+ * En este dispositivo, en el almacenamiento propio de este navegador:  nadie más las ve, no se le pregunta a ningún servidor, y no hay que iniciar sesión.
+ * Una tarea se guarda sola al cambiar:  marcarla, escribir su título, o arrastrarla a su lugar queda guardado, sin paso de guardar.
+ * Cambia la primera línea para guardarlas en otro lugar, y nada más cambia.
  */
-export class AlmacénDelNavegador extends Place {}
-export const almacénDelNavegador = core.place(new AlmacénDelNavegador(), {
-  name: "almacén_del_navegador",
+export class MisTareas extends Place {}
+export const misTareas = core.place(new MisTareas(), {
+  name: "mis_tareas",
   kind: "database on this device",
   unclearNumbers: ","
 })
-
-core.describeAction(TareaDelNavegador, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
-
-core.describeAction(GuardiánDelNavegador, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar una Tarea Nueva Titulada Título", undoneAs: "Guardar una Tarea Nueva Titulada Título" })
-// -----------
-core.heading("Guardadas en un archivo JSON en el servidor")
-/////////////////////////////////////////////////
-// ## Guardadas en un archivo JSON en el servidor
-/////////////////////////////////////////////////
-
-export class TareaDelServidor extends Tarea {
-  static elementTag = core.defineElement(this, "test-project")
-
-  tirar() {
-    core.removeSaved(this)
-  }
-
-  static savedIn = {
-    place: "archivos_de_tareas",
-    collection: "tareas_del_servidor",
-    times: ["created", "modified"]
-  }
-
-  // vive en archivos de tareas
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 501, end: 527 } }) }
-  get creado() { return this.getProp("creado") }
-  set creado(value) { this.setProp("creado", value) }
-
-  // vive en archivos de tareas
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 501, end: 527 } }) }
-  get modificado() { return this.getProp("modificado") }
-  set modificado(value) { this.setProp("modificado", value) }
-}
-
-export class GuardiánDelServidor extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 636, end: 685 }, readsFrom: ["archivos_de_tareas"] }) }
-  get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
-    return await core.savedThings(TareaDelServidor)
-  }) }
-
-  guardarUnaTareaNuevaTituladaTítulo(título) {
-    const tarea = new TareaDelServidor({ título: título })
-    core.saveThing(tarea)
-    return tarea
-  }
-}
-
-/**
- * Las tareas son una carpeta de datos del proyecto en el servidor de Spell:  cada tarea un archivo JSON, en `__data/tareas` de este proyecto.
- * Todos los que usan la aplicación las comparten, y cada persona cambia solo las tareas que hizo.
- * Abre una en un editor y cámbiala:  la aplicación lo muestra en su siguiente revisión.
- */
-export class ArchivoDeTareas extends Place {}
-export const archivosDeTareas = core.place(new ArchivoDeTareas(), {
-  name: "archivos_de_tareas",
-  kind: "data folder",
-  at: "/api/places/spaces/@spell/examples/ListaDeTareas/__data/tareas",
-  checkedEvery: 30,
-  unclearNumbers: ","
-})
-
-core.describeAction(TareaDelServidor, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
-
-core.describeAction(GuardiánDelServidor, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar una Tarea Nueva Titulada Título", undoneAs: "Guardar una Tarea Nueva Titulada Título" })
-// -----------
-core.heading("Guardadas en un archivo CSV en el servidor")
-////////////////////////////////////////////////
-// ## Guardadas en un archivo CSV en el servidor
-////////////////////////////////////////////////
-
-export class TareaDeLaHoja extends Tarea {
-  static elementTag = core.defineElement(this, "test-project")
-
-  tirar() {
-    core.removeSaved(this)
-  }
-
-  static savedIn = {
-    place: "hoja_de_tareas",
-    collection: "tareas_de_la_hoja",
-    times: ["created", "modified"]
-  }
-
-  // vive en hoja de tareas
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 689, end: 711 } }) }
-  get creado() { return this.getProp("creado") }
-  set creado(value) { this.setProp("creado", value) }
-
-  // vive en hoja de tareas
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 689, end: 711 } }) }
-  get modificado() { return this.getProp("modificado") }
-  set modificado(value) { this.setProp("modificado", value) }
-}
-
-export class GuardiánDeLaHoja extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 816, end: 863 }, readsFrom: ["hoja_de_tareas"] }) }
-  get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
-    return await core.savedThings(TareaDeLaHoja)
-  }) }
-
-  guardarUnaTareaNuevaTituladaTítulo(título) {
-    const tarea = new TareaDeLaHoja({ título: título })
-    core.saveThing(tarea)
-    return tarea
-  }
-}
-
-/**
- * Las tareas son un archivo CSV en el servidor de Spell, `__data/tareas.csv` de este proyecto:  una fila cada una, bajo las columnas que nombra su primera línea.
- * Todos los que usan la aplicación lo comparten, y cualquiera cambia cualquier fila:  un archivo CSV no tiene columna que diga de quién es una fila.
- * Cada cambio reescribe solo su propia línea, así que el archivo se lee bien en un diff;  ábrelo en una hoja o un editor y cámbialo,
- * y la aplicación lo muestra en su siguiente revisión.
- */
-export class HojaDeTareas extends Place {}
-export const hojaDeTareas = core.place(new HojaDeTareas(), {
-  name: "hoja_de_tareas",
-  kind: "sheet",
-  at: "/api/places/spaces/@spell/examples/ListaDeTareas/__data/tareas.csv",
-  idColumn: "id",
-  checkedEvery: 30,
-  unclearNumbers: ","
-})
-
-core.describeAction(TareaDeLaHoja, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
-
-core.describeAction(GuardiánDeLaHoja, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar una Tarea Nueva Titulada Título", undoneAs: "Guardar una Tarea Nueva Titulada Título" })
-// -----------
-core.heading("Guardadas en tu cuenta de atmosphere")
-//////////////////////////////////////////
-// ## Guardadas en tu cuenta de atmosphere
-//////////////////////////////////////////
-
-export class TareaDelCielo extends Tarea {
-  static elementTag = core.defineElement(this, "test-project")
-
-  tirar() {
-    core.removeSaved(this)
-  }
-
-  /** de quién es:  la cuenta en la que está, que un registro no puede decir */
-  // una tarea del cielo tiene un dueño como texto
-  static { this.declareProp("dueño", { type: "text", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 581, end: 701 } }) }
-  get dueño() { return this.getProp("dueño") }
-  set dueño(value) { this.setProp("dueño", value) }
-
-  static savedIn = {
-    place: "cielo_de_tareas",
-    collection: "tareas_del_cielo",
-    times: ["created", "modified"]
-  }
-
-  // vive en cielo de tareas
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 505, end: 528 } }) }
-  get creado() { return this.getProp("creado") }
-  set creado(value) { this.setProp("creado", value) }
-
-  // vive en cielo de tareas
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 505, end: 528 } }) }
-  get modificado() { return this.getProp("modificado") }
-  set modificado(value) { this.setProp("modificado", value) }
-}
-
-export class GuardiánDelCielo extends GuardiánDeTareas {
-  /** solo las tuyas:  las tareas de cada uno están en su propia cuenta */
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 753, end: 838 }, readsFrom: ["cielo_de_tareas"] }) }
-  get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
-    return await core.savedThings(TareaDelCielo, { filter: { dueño: core.currentPerson().id } })
-  }) }
-
-  guardarUnaTareaNuevaTituladaTítulo(título) {
-    const tarea = new TareaDelCielo({ título: título })
-    core.saveThing(tarea)
-    return tarea
-  }
-}
-
-/**
- * Las tareas son registros en tu propia cuenta de atmosphere, el AT Protocol de Bluesky, como los estados de Statusphere:
- * inicia sesión, y van contigo a cualquier aplicación que las lea.
- * Allí los registros son públicos:  cualquiera puede leerlos, así que no guardes nada privado en una tarea.
- */
-export class CieloDeTareas extends Place {}
-export const cieloDeTareas = core.place(new CieloDeTareas(), {
-  name: "cielo_de_tareas",
-  kind: "personal atmosphere account",
-  collections: { tareasDelCielo: { at: "spaces.spell.examples.listadetareas.tarea" } },
-  unclearNumbers: ","
-})
-
-core.describeAction(TareaDelCielo, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
-
-core.describeAction(GuardiánDelCielo, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar una Tarea Nueva Titulada Título", undoneAs: "Guardar una Tarea Nueva Titulada Título" })
 // -----------
 core.heading("Lista de tareas")
 /////////////////////
@@ -379,8 +139,7 @@ core.heading("Lista de tareas")
 /////////////////////
 // Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.
 // Sus tareas son la `tarea` de este proyecto, en Tarea.es.spell;  este archivo tiene su lista, y la aplicación.
-// Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,
-// ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.
+// Se guardan en este dispositivo, así que siguen ahí la próxima vez:  ListaDeTareas.api.es.spell dice dónde.
 
 core.heading("La agenda")
 ///////////////
@@ -451,21 +210,21 @@ export function testElFiltro() {
 export function testUnOrdenArrastradoSeGuarda() {
   return core.test("test un orden arrastrado se guarda", function testUnOrdenArrastradoSeGuarda() {
     const it = new Agenda()
-    core.echoTestAction(`poner las tareas a una nueva agenda`)
-    const tareas = new Agenda()
+    core.echoTestAction(`poner la lista a una nueva agenda`)
+    const lista = new Agenda()
     core.echoTestAction(`poner la primera a una nueva tarea con título "primera"`)
     const primera = new Tarea({ título: "primera" })
     core.echoTestAction(`poner la segunda a una nueva tarea con título "segunda"`)
     const segunda = new Tarea({ título: "segunda" })
-    core.echoTestAction(`agregar la segunda a las tareas`)
-    tareas.append(segunda)
-    core.echoTestAction(`agregar la primera a las tareas`)
-    tareas.append(primera)
-    core.echoTestAction(`guardar el orden de las tareas`)
-    tareas.guardarElOrden()
+    core.echoTestAction(`agregar la segunda a la lista`)
+    lista.append(segunda)
+    core.echoTestAction(`agregar la primera a la lista`)
+    lista.append(primera)
+    core.echoTestAction(`guardar el orden de la lista`)
+    lista.guardarElOrden()
     core.expect(segunda.orden, `el orden de la segunda`, 1, `1`)
     core.expect(primera.orden, `el orden de la primera`, 2, `2`)
-    core.expect(core.getItemAt(core.sortedBy(tareas, (item) => item.orden), 0)?.título, `el título de la primera tarea en (las tareas ordenadas por su orden)`, "segunda", `"segunda"`)
+    core.expect(core.getItemAt(core.sortedBy(lista, (item) => item.orden), 0)?.título, `el título de la primera tarea en (la lista ordenada por su orden)`, "segunda", `"segunda"`)
   })
 }
 
@@ -478,10 +237,10 @@ core.heading("La aplicación")
 export class ListaDeTareas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // "tareas" es una nueva agenda
-  static { this.declareProp("tareas", { init: () => new Agenda({ id: "tareas" }), early: true }) }
-  get tareas() { return this.getProp("tareas") }
-  set tareas(value) { this.setProp("tareas", value) }
+  // "agenda" es una nueva agenda
+  static { this.declareProp("agenda", { init: () => new Agenda({ id: "agenda" }), early: true }) }
+  get agenda() { return this.getProp("agenda") }
+  set agenda(value) { this.setProp("agenda", value) }
 
   /** El título de la siguiente tarea, como lo tiene el campo de la nueva tarea */
   // su "borrador" es texto
@@ -489,93 +248,71 @@ export class ListaDeTareas extends App {
   get borrador() { return this.getProp("borrador") }
   set borrador(value) { this.setProp("borrador", value) }
 
+  static { this.declareProp("cuentaPendiente", { declaredAt: { path: "/ListaDeTareas.es.spell", start: 2727, end: 2806 }, readsFrom: ["mis_tareas"] }) }
   get cuentaPendiente() {
-    return this.tareas.filter((tarea) => tarea.estáPendiente).length
+    return this.agenda.filter((tarea) => tarea.estáPendiente).length
   }
 
-  /** Dónde se guardan las tareas:  este navegador, un archivo JSON en el servidor, un archivo CSV en el servidor, o tu cuenta de atmosphere */
-  // su "almacén" es uno de navegador, servidor, csv o atmosphere
-  static Almacenes = ["navegador", "servidor", "csv", "atmosphere"]
-  static { this.declareProp("almacén", { oneOf: ListaDeTareas.Almacenes }) }
-  get almacén() { return this.getProp("almacén") }
-  set almacén(value) { this.setProp("almacén", value) }
-
-  /** Quién las guarda, según dónde se guardan:  uno de los guardianes de los archivos de API */
-  // su "guardián" es un guardián de tareas
-  static { this.declareProp("guardián", { type: "GuardiánDeTareas" }) }
-  get guardián() { return this.getProp("guardián") }
-  set guardián(value) { this.setProp("guardián", value) }
-
-  /** Las tareas del guardián, en la lista;  un guardián sin ninguna empieza con unas cuantas */
+  /** Las tareas guardadas en este dispositivo, en su orden;  la primera vez, sin ninguna guardada, unas cuantas para empezar */
   async llenarLaAgenda() {
-    core.clear(this.tareas)
-    core.map(core.sortedBy(await core.answerOf(this.guardián, "tareasGuardadas"), (item) => item.orden), (tarea) => this.tareas.append(tarea))
-    if (!this.tareas.isEmpty) return
+    core.clear(this.agenda)
+    core.map(core.sortedBy(await core.savedThings(Tarea), (item) => item.orden), (tarea) => this.agenda.append(tarea))
+    if (!this.agenda.isEmpty) return
     this.agregarLaTareaInicialTítuloConPrioridadNivel("Escribir el ejemplo Lista de tareas", "alta")
     this.agregarLaTareaInicialTítuloConPrioridadNivel("Enseñarle a dibujar", "normal")
     this.agregarLaTareaInicialTítuloConPrioridadNivel("Seleccionar unas tareas, y editarlas juntas", "normal")
     this.agregarLaTareaInicialTítuloConPrioridadNivel("Arrastrar tareas para reordenarlas", "baja")
-    this.tareas.firstItem.hecha = true
+    this.agenda.firstItem.hecha = true
   }
 
-  async onAlmacénChange(event) {
-    if (this.almacén === "servidor") this.guardián = new GuardiánDelServidor()
-    else if (this.almacén === "csv") this.guardián = new GuardiánDeLaHoja()
-    else if (this.almacén === "atmosphere") this.guardián = new GuardiánDelCielo()
-    else this.guardián = new GuardiánDelNavegador()
-    await this.llenarLaAgenda()
-  }
-
-  /** Una lista de tareas nueva guarda sus tareas en este navegador, y las muestra todas */
+  /** Una lista de tareas nueva muestra todas sus tareas */
   create() {
-    this.tareas.mostrando = "todas"
-    this.almacén = "navegador"
-    this.guardián = new GuardiánDelNavegador()
+    this.agenda.mostrando = "todas"
     core.holdWhile(() => this.llenarLaAgenda())
   }
 
   agregarLaTareaInicialTítuloConPrioridadNivel(título, nivel) {
-    const tarea = this.guardián?.guardarUnaTareaNuevaTituladaTítulo(título)
-    tarea.prioridad = nivel
-    this.tareas.append(tarea)
-    tarea.orden = this.tareas.length
+    const tarea = new Tarea({ título: título, prioridad: nivel })
+    core.saveThing(tarea)
+    this.agenda.append(tarea)
+    tarea.orden = this.agenda.length
   }
 
   /** El borrador, como una nueva tarea al final de la lista;  el campo se vacía */
   agregarElBorrador() {
     if (this.borrador === "") return
-    const tarea = this.guardián?.guardarUnaTareaNuevaTituladaTítulo(this.borrador)
-    tarea.prioridad = "normal"
-    this.tareas.append(tarea)
-    tarea.orden = this.tareas.length
+    const tarea = new Tarea({ título: this.borrador, prioridad: "normal" })
+    core.saveThing(tarea)
+    this.agenda.append(tarea)
+    tarea.orden = this.agenda.length
     this.borrador = ""
   }
 
   mostrarTodas() {
-    this.tareas.mostrando = "todas"
+    this.agenda.mostrando = "todas"
   }
   get mostrarTodasIsSelected() {
-    return this.tareas.estáMostrandoMostrando("todas")
+    return this.agenda.estáMostrandoMostrando("todas")
   }
 
   mostrarPendientes() {
-    this.tareas.mostrando = "pendientes"
+    this.agenda.mostrando = "pendientes"
   }
   get mostrarPendientesIsSelected() {
-    return this.tareas.estáMostrandoMostrando("pendientes")
+    return this.agenda.estáMostrandoMostrando("pendientes")
   }
 
   mostrarHechas() {
-    this.tareas.mostrando = "hechas"
+    this.agenda.mostrando = "hechas"
   }
   get mostrarHechasIsSelected() {
-    return this.tareas.estáMostrandoMostrando("hechas")
+    return this.agenda.estáMostrandoMostrando("hechas")
   }
 
   quitarLasTareasHechas() {
-    this.tareas.filter((tarea) => tarea.estáHecha).forEach((tarea) => {
+    this.agenda.filter((tarea) => tarea.estáHecha).forEach((tarea) => {
       tarea.tirar()
-      this.tareas.remove(tarea)
+      this.agenda.remove(tarea)
     })
   }
 
@@ -594,38 +331,28 @@ export class ListaDeTareas extends App {
           )
         ),
         h("es-formulario", { "prop:value": this },
-          h("es-pila",
-            h("es-campo", { etiqueta: "Guardarlas en", "en-linea": true },
-              h("es-selector", { name: "almacén" },
-                h("es-elemento", { value: "navegador", icono: "desktop" }, "Este navegador"),
-                h("es-elemento", { value: "servidor", icono: "server" }, "Un archivo JSON en el servidor"),
-                h("es-elemento", { value: "csv", icono: "table" }, "Un archivo CSV en el servidor"),
-                h("es-elemento", { value: "atmosphere", icono: "cloud" }, "Tu cuenta de atmosphere")
-              )
-            ),
-            h("es-entrada", {
-              name: "borrador",
-              marcador: "Algo por hacer",
-              "aria-label": "Nueva tarea",
-              fluido: true,
-              accion: true
-            },
-              h("es-boton", {
-                slot: "accion",
-                color: "primario",
-                disabled: () => this.borrador === "",
-                onClick: core.pressed(this, () => this.agregarElBorrador()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Agregar")
-            )
+          h("es-entrada", {
+            name: "borrador",
+            marcador: "Algo por hacer",
+            "aria-label": "Nueva tarea",
+            fluido: true,
+            accion: true
+          },
+            h("es-boton", {
+              slot: "accion",
+              color: "primario",
+              disabled: () => this.borrador === "",
+              onClick: core.pressed(this, () => this.agregarElBorrador()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Agregar")
           )
         ),
         h("es-cuadricula", { columnas: "2", apilable: true, "context-menu": "menú de la lista" },
-          () => core.drawThing(this.tareas),
+          () => core.drawThing(this.agenda),
           h("es-editor-propiedades", {
             etiqueta: "Tareas seleccionadas",
             esquema: "lista-de-tareas-tarea",
-            "prop:value": () => this.tareas.selection
+            "prop:value": () => this.agenda.selection
           },
             h("es-propiedad", { name: "título" }),
             h("es-propiedad", { name: "prioridad" }),
@@ -646,8 +373,6 @@ core.describeAction(ListaDeTareas, "mostrarPendientes", { title: "Pendientes", i
 core.describeAction(ListaDeTareas, "mostrarHechas", { title: "Hechas", icon: "check square outline", selectedWhen: "mostrarHechasIsSelected", undoneAs: "Hechas" })
 core.describeAction(ListaDeTareas, "quitarLasTareasHechas", { title: "Quitar las tareas hechas", icon: "trash alternate outline", undoneAs: "Quitar las tareas hechas" })
 
-// Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián
-
 // Qué tareas muestra la lista:  la barra de herramientas marca la que muestra
 
 // Los botones de la barra de herramientas, y el clic derecho en la lista:  las mismas acciones
@@ -659,7 +384,7 @@ core.describeMenu(ListaDeTareas, "menúMostrar", { items: ["mostrarTodas", "most
 core.describeMenu(ListaDeTareas, "menúDeLaLista", { items: ["menúMostrar", "-", "quitarLasTareasHechas"] })
 // Un clic derecho en la lista:  qué tareas muestra, como un menú propio, y luego ordenar
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet.¬   - Each task is an element of its own inside the list, <lista-de-tareas-agenda>:¬     <lista-de-tareas-tarea-del-navegador>, ...-del-servidor or ...-del-cielo, for where it's kept.¬   - Its title's field fills the row by itself:  it's \`fluid\`, in a row of a \`<stack>\`. */¬¬/* done:  it fades */¬lista-de-tareas-agenda > [hecha] {¬  opacity: 0.6;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet.¬   - Each task is an element of its own inside the list, <lista-de-tareas-agenda>:  <lista-de-tareas-tarea>.¬   - Its title's field fills the row by itself:  it's \`fluid\`, in a row of a \`<stack>\`. */¬¬/* done:  it fades */¬lista-de-tareas-agenda > [hecha] {¬  opacity: 0.6;¬}¬`)
 // -----------
 if (!core.isCarryingOver) listaDeTareas.start()
 // -----------

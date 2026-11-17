@@ -1,8 +1,7 @@
 # Lista de tareas
 // Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.
 // Sus tareas son la `tarea` de este proyecto, en Tarea.es.spell;  este archivo tiene su lista, y la aplicación.
-// Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,
-// ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.
+// Se guardan en este dispositivo, así que siguen ahí la próxima vez:  ListaDeTareas.api.es.spell dice dónde.
 
 ## La agenda
 // Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agenda>`, alrededor de sus `<lista-de-tareas-tarea>`.
@@ -41,15 +40,15 @@ una "agenda" es una lista visible de tareas
 		agregar (una nueva tarea con título "b") a la lista
 		el largo de (tareas en la lista donde está pendiente) debería ser 1
 	para probar un orden arrastrado se guarda
-		poner las tareas a una nueva agenda
+		poner la lista a una nueva agenda
 		poner la primera a una nueva tarea con título "primera"
 		poner la segunda a una nueva tarea con título "segunda"
-		agregar la segunda a las tareas
-		agregar la primera a las tareas
-		guardar el orden de las tareas
+		agregar la segunda a la lista
+		agregar la primera a la lista
+		guardar el orden de la lista
 		el orden de la segunda debería ser 1
 		el orden de la primera debería ser 2
-		el título de la primera tarea en (las tareas ordenadas por su orden) debería ser "segunda"
+		el título de la primera tarea en (la lista ordenada por su orden) debería ser "segunda"
 una tarea pertenece a una agenda
 	// una tarea está en una sola agenda a la vez
 
@@ -57,78 +56,58 @@ una tarea pertenece a una agenda
 // Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al editor de propiedades.
 
 lista de tareas es una aplicación
-	"tareas" es una nueva agenda
+	"agenda" es una nueva agenda
 	su "borrador" es texto
 		// El título de la siguiente tarea, como lo tiene el campo de la nueva tarea
-	su "cuenta pendiente" es el largo de (tareas en las tareas donde está pendiente)
-
-	grupo "Guardado"
-		// Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián
-	su "almacén" es uno de navegador, servidor, csv o atmosphere
-		// Dónde se guardan las tareas:  este navegador, un archivo JSON en el servidor, un archivo CSV en el servidor, o tu cuenta de atmosphere
-	su "guardián" es un guardián de tareas
-		// Quién las guarda, según dónde se guardan:  uno de los guardianes de los archivos de API
+	su "cuenta pendiente" es el largo de (tareas en la agenda donde está pendiente)
 
 	para llenar la agenda
-		// Las tareas del guardián, en la lista;  un guardián sin ninguna empieza con unas cuantas
-		limpiar las tareas
-		para tarea en (las tareas guardadas de su guardián) ordenadas por su orden
-			agregar la tarea a las tareas
-		si las tareas no están vacías devolver
+		// Las tareas guardadas en este dispositivo, en su orden;  la primera vez, sin ninguna guardada, unas cuantas para empezar
+		limpiar la agenda
+		para tarea en (cada tarea) ordenadas por su orden
+			agregar la tarea a la agenda
+		si la agenda no está vacía devolver
 		agregar la tarea inicial "Escribir el ejemplo Lista de tareas" con prioridad alta
 		agregar la tarea inicial "Enseñarle a dibujar" con prioridad normal
 		agregar la tarea inicial "Seleccionar unas tareas, y editarlas juntas" con prioridad normal
 		agregar la tarea inicial "Arrastrar tareas para reordenarlas" con prioridad baja
-		poner la hecha de la primera tarea en las tareas a sí
-
-	cuando su almacén cambia
-		si el almacén es servidor
-			poner el guardián a un nuevo guardián del servidor
-		de lo contrario si el almacén es csv
-			poner el guardián a un nuevo guardián de la hoja
-		de lo contrario si el almacén es atmosphere
-			poner el guardián a un nuevo guardián del cielo
-		de lo contrario
-			poner el guardián a un nuevo guardián del navegador
-		llenar la agenda
+		poner la hecha de la primera tarea en la agenda a sí
 
 	al crearla
-		// Una lista de tareas nueva guarda sus tareas en este navegador, y las muestra todas
-		poner el mostrando de las tareas a todas
-		poner el almacén a navegador
-		poner el guardián a un nuevo guardián del navegador
+		// Una lista de tareas nueva muestra todas sus tareas
+		poner el mostrando de la agenda a todas
 		llenar la agenda
 
 	para agregar la tarea inicial (título como texto) con prioridad (nivel como texto)
-		poner tarea a guardar una tarea nueva titulada título de su guardián
-		poner la prioridad de tarea a nivel
+		poner tarea a una nueva tarea con título = título, prioridad = nivel
 		agregar tarea a las tareas
-		poner el orden de tarea al largo de las tareas
+		agregar tarea a la agenda
+		poner el orden de tarea al largo de la agenda
 
 	para agregar el borrador
 		// El borrador, como una nueva tarea al final de la lista;  el campo se vacía
 		si el borrador es "" devolver
-		poner tarea a guardar una tarea nueva titulada (el borrador) de su guardián
-		poner la prioridad de tarea a normal
+		poner tarea a una nueva tarea con título = el borrador, prioridad = normal
 		agregar tarea a las tareas
-		poner el orden de tarea al largo de las tareas
+		agregar tarea a la agenda
+		poner el orden de tarea al largo de la agenda
 		limpiar el borrador
 
 	grupo "Filtro"
 		// Qué tareas muestra la lista:  la barra de herramientas marca la que muestra
 	para "mostrar todas" con título "Todas", icono "list"
-		seleccionada cuando las tareas están mostrando todas
-		poner el mostrando de las tareas a todas
+		seleccionada cuando la agenda está mostrando todas
+		poner el mostrando de la agenda a todas
 	para "mostrar pendientes" con título "Pendientes", icono "square outline"
-		seleccionada cuando las tareas están mostrando pendientes
-		poner el mostrando de las tareas a pendientes
+		seleccionada cuando la agenda está mostrando pendientes
+		poner el mostrando de la agenda a pendientes
 	para "mostrar hechas" con título "Hechas", icono "check square outline"
-		seleccionada cuando las tareas están mostrando hechas
-		poner el mostrando de las tareas a hechas
+		seleccionada cuando la agenda está mostrando hechas
+		poner el mostrando de la agenda a hechas
 	para "quitar las tareas hechas" con título "Quitar las tareas hechas", icono "trash alternate outline"
-		para tarea en (tareas en las tareas donde está hecha)
+		para tarea en (tareas en la agenda donde está hecha)
 			tirar la tarea
-			quitar la tarea de las tareas
+			quitar la tarea de la agenda
 
 	grupo "Menús"
 		// Los botones de la barra de herramientas, y el clic derecho en la lista:  las mismas acciones
@@ -148,23 +127,13 @@ lista de tareas es una aplicación
 					</texto>
 				</barra-herramientas>
 				<formulario value={eso}>
-					<pila>
-						<campo etiqueta="Guardarlas en" en-linea>
-							<selector name="almacén">
-								<elemento value="navegador" icono="desktop">Este navegador</elemento>
-								<elemento value="servidor" icono="server">Un archivo JSON en el servidor</elemento>
-								<elemento value="csv" icono="table">Un archivo CSV en el servidor</elemento>
-								<elemento value="atmosphere" icono="cloud">Tu cuenta de atmosphere</elemento>
-							</selector>
-						</campo>
-						<entrada name="borrador" marcador="Algo por hacer" aria-label="Nueva tarea" fluido accion>
-							<botón slot="accion" color="primario" disabled={el borrador es ""} onClick={agregar el borrador}>Agregar</botón>
-						</entrada>
-					</pila>
+					<entrada name="borrador" marcador="Algo por hacer" aria-label="Nueva tarea" fluido accion>
+						<botón slot="accion" color="primario" disabled={el borrador es ""} onClick={agregar el borrador}>Agregar</botón>
+					</entrada>
 				</formulario>
 				<cuadricula columnas="2" apilable context-menu="menú de la lista">
-					{dibujar las tareas}
-					<es-editor-propiedades etiqueta="Tareas seleccionadas" esquema="lista-de-tareas-tarea" value={la selección de las tareas}>
+					{dibujar la agenda}
+					<es-editor-propiedades etiqueta="Tareas seleccionadas" esquema="lista-de-tareas-tarea" value={la selección de la agenda}>
 						<es-propiedad name="título"/>
 						<es-propiedad name="prioridad"/>
 						<es-propiedad name="hecha"/>

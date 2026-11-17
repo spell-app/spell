@@ -180,8 +180,11 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   `${EXAMPLES_GROUP}/Solitaire`,
   // a list of things each drawn with a form of its own;  Task List was this one until its tasks moved into places (epic `language` P30)
   `${EXAMPLES_GROUP}/habit-tracker`,
-  // the tasks in all four kinds of place:  this browser's storage, a data folder, a CSV file, the Atmosphere (epic `data` P46)
+  // the tasks on this device (epic `mockup` T43)
   `${EXAMPLES_GROUP}/TaskList`,
+  // the tasks in all four kinds of place:  this browser's storage, a data folder, a CSV file, the Atmosphere (epic `data` P46);
+  // Task List as it was, before it kept them only on this device
+  "tasks-in-four-places",
   "thing-references"
 ])
 

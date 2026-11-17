@@ -42,8 +42,8 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Bill Splitter | [`@spell/examples/bill-splitter`](spaces/@spell/examples/bill-splitter/) | Who owes what after a meal:  a row of Spell UI's fields per person and what each ordered, a tip shared out the same way, and sums that follow every keystroke | <a href="docs/images/examples/bill-splitter.png"><img src="docs/images/examples/bill-splitter.png" width="360" alt="Bill Splitter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Flash Cards | [`@spell/examples/flash-cards`](spaces/@spell/examples/flash-cards/) | A deck of Spanish words to quiz yourself on:  each card a two sided view that turns over on a click, you say whether you knew it, and a toolbar keeps the score | <a href="docs/images/examples/flash-cards.png"><img src="docs/images/examples/flash-cards.png" width="360" alt="Flash Cards open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Habit Tracker | [`@spell/examples/habit-tracker`](spaces/@spell/examples/habit-tracker/) | A week of checkboxes per habit:  each habit its own element with a form of its own, its days done and its longest streak worked out as you tick | <a href="docs/images/examples/habit-tracker.png"><img src="docs/images/examples/habit-tracker.png" width="360" alt="Habit Tracker open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Task List | [`@spell/examples/TaskList`](spaces/@spell/examples/TaskList/) | A to-do list:  each task its own element, with Spell UI's controls;  a toolbar of actions filters it, ticking the one it shows, and a click selects tasks (shift and command for more) for a property editor that changes them all at once;  the tasks are kept in this browser, a JSON file on the server, a CSV file on the server or your atmosphere account, each a keeper in an API file of its own, picked in the app | <a href="docs/images/examples/TaskList.png"><img src="docs/images/examples/TaskList.png" width="360" alt="Task List open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Lista de tareas | [`@spell/examples/ListaDeTareas`](spaces/@spell/examples/ListaDeTareas/) | Task List's Spanish twin:  a to-do list in Spanish, each task its own element with Spell UI's controls, a click selecting tasks for a property editor that changes them all at once;  the tasks kept in this browser, a JSON file on the server, a CSV file on the server or your atmosphere account, each a keeper in an API file of its own, picked in the app | <a href="docs/images/examples/ListaDeTareas.png"><img src="docs/images/examples/ListaDeTareas.png" width="360" alt="Lista de tareas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Task List | [`@spell/examples/TaskList`](spaces/@spell/examples/TaskList/) | A to-do list:  type a task and add it, tick it off, delete it, and drag the tasks into order;  each task its own element with Spell UI's controls, and the tasks kept on this device, so they're still there next time, with no server and no sign-in | <a href="docs/images/examples/TaskList.png"><img src="docs/images/examples/TaskList.png" width="360" alt="Task List open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Lista de tareas | [`@spell/examples/ListaDeTareas`](spaces/@spell/examples/ListaDeTareas/) | A to-do list in Spanish, an earlier, fuller Task List:  each task its own element with Spell UI's controls, a toolbar that filters it, and a click selecting tasks for a property editor that changes them all at once;  the tasks kept on this device, so they're still there next time, with no server and no sign-in | <a href="docs/images/examples/ListaDeTareas.png"><img src="docs/images/examples/ListaDeTareas.png" width="360" alt="Lista de tareas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Solitaire | [`@spell/examples/Solitaire`](spaces/@spell/examples/Solitaire/) | Klondike solitaire:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, each with its title and key, drawn as its toolbar and its right-click menu;  `pause for` animates the deal | <a href="docs/images/examples/Solitaire.png"><img src="docs/images/examples/Solitaire.png" width="360" alt="Solitaire open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has;  the card a reversible view, the game's moves its actions, drawn as its toolbar and its right-click menu | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
@@ -326,209 +326,141 @@ _From Tic-Tac-Toe:  a phrase with three blanks, which the game says eight times,
 - Tic-Tac-Toe, Bill Splitter and Habit Tracker draw their rows as things of their own,
   as Task List does (below):  `<tic-tac-toe-square>`, `<bill-splitter-diner>`, `<habit-tracker-habit>`.
 
-## Task List:  things that draw themselves, a list, and a property editor
+## Task List:  things that draw themselves, kept on this device
 
 Every framework has its to-do list, and this is Spell's:
-[Task List](spaces/@spell/examples/TaskList/), in two files of Spell, an API file for each place it can keep its tasks,
-and two lines of style.
-- [Task.spell](spaces/@spell/examples/TaskList/Task.spell):  what a task is, and how it draws.
-- [TaskList.spell](spaces/@spell/examples/TaskList/TaskList.spell):  the list of tasks, then the app around it.
-- [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell) and the four beside it:  where the tasks are kept (below).
+[Task List](spaces/@spell/examples/TaskList/), the one Make something on the home page starts from.
+Type a task and add it, tick it off, delete it, drag the tasks into another order:
+they're kept on this device, so they're still there next time, with no server and no sign-in.
+It's two files of Spell, an API file saying where it keeps its tasks, and two lines of style.
+- [Task.spell](spaces/@spell/examples/TaskList/Task.spell):  what a task is, the checklist that holds it, and how a task draws.
+- [TaskList.spell](spaces/@spell/examples/TaskList/TaskList.spell):  the app around them.
+- [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell):  where the tasks are kept, on this device (below).
 
 It's written in plain Spell:  a line for each template, and under it a line for each property, alias and drawing,
 with `//` comments for a person to read.
 First, what a task IS:
 
 ```spell
-a "task" is a draggable selectable view
+a "task" is a draggable view
 	its "title" is text
 		// What to do
-	its "notes" is text
-		// Anything else about it
-	its "priority" is one of low, normal or high
 	its "done" is yes or no
 	its "order" is number
-		// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
+		// Where it sits in its checklist, from 1:  kept with it, so the order you drag the tasks into comes back
 	it "is done" if its done is yes
 	it "is active" if it is not done
 ```
 
-- `a "task" is a view` declares a new template;  the lines under it say what people may do to a task on the page:
-  - `it is selectable`:  a click selects a task, and shift or command (ctrl) selects more.
-  - `it is draggable`:  by its grip, to another place in its list (below).
-- Each `its "..." is` line gives it a property, with its kind;  the comment above it says what it's for.
-- `one of low, normal or high` is a choice of three values.
+- `a "task" is a view` declares a new template;  `draggable` lets people drag a task to another place in its list.
+- Each `its "..." is` line gives it a property, with its kind;  the comment under it says what it's for.
 - The aliases are new ways to talk about a task:  later lines can say `where it is active`.
 - A view makes each task an element of its own on the page, `<task-list-task>`.
 
-Then how a task draws, with [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s elements:
-a form of its own, bound to the task.
-
-```spell
-	// A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal
-	to draw it
-		<form value={it}>
-			<stack direction="horizontal" spacing="sm">
-				<icon name="grip vertical" color="grey" aria-label="Drag"/>
-				<checkbox name="done" aria-label="Done"/>
-				<input part="title" name="title" aria-label="Task" appearance="transparent" fluid/>
-				<if the priority is not normal>
-					<label size="tiny" color={"red" if the priority is high otherwise "grey"}>{the priority}</label>
-				</>
-			</stack>
-		</form>
-```
-
-- Every tag is Spell UI's, by its bare name:  `<stack>` is `<ui-stack>`, `<checkbox>` is `<ui-checkbox>`.
-  Spell goes inside the braces, `{the priority}`.
-- There's no change handler anywhere.
-  The form is bound to the task (`value={it}`):
-  each named field shows its task's property, and writes it back as you type or tick.
-- `<if its priority is not normal>` inside the row keeps the label on the page, hidden while the task's priority is
-  normal:  changing it shows or hides the same label, never makes a new one.
-- The style sheet's two rules:  the title fills the row, and a task that's done fades.
-- A press in the title field or on the checkbox is theirs:  a drag starts from the grip, or the task's bare row.
-
-Then the list, which decides which tasks to show:
+Then the list that holds the tasks, and lets them be dragged into order:
 
 ```spell
 a "checklist" is a viewable list of tasks
-	its "showing" is one of all, active or done
-		// What it shows:  every task, the ones still to do, or the ones done
-		it "is showing (showing)"
-
 	its items can be reordered immediately
 		// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 	when a task is dropped on it
 		// a drop has moved its tasks:  each keeps its new place
 		keep the order
-	to draw each item
-		// each task, unless the filter hides it
-		if it is showing active and the task is done return nothing
-		if it is showing done and the task is active return nothing
-		return draw the task
 	to draw it
 		// Its tasks one under the other;  while it's empty, a line saying so
 		<stack spacing="xs">
 			<if it is empty>
 				<text color="grey">Nothing to do</text>
 			</if>
-			<children/>
+			<children />
 		</stack>
 	to keep the order
-		// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time
+		// Each task keeps its place in the list, from 1:  so the order you drag them into comes back next time
 		for task, place in it
 			set the order of task to place
+a task belongs to one checklist
 ```
 
-- A viewable list is an element too, `<task-list-checklist>`, around its tasks' elements.
-- Each task draws itself;  the list only says which to leave out, and lays them out:  `<children/>` is where they go.
-- `it "is showing (showing)"`, under its property, lets a line ask `it is showing active`, one alias for each of its three values.
-- `its items can be reordered immediately`:  drag a task, and it moves as the pointer goes, dimmed, each task gliding
+- A viewable list is an element too, `<task-list-checklist>`, around its tasks' elements:
+  each task draws itself, and `<children />` is where they go.
+- `its items can be reordered immediately`:  drag a task, and it moves as the pointer goes, each task gliding
   to its new place.
   - Without `immediately`, it stays put while a blue line shows where it would go:
     rest the pointer there 2 seconds (or `after 1 second`), and it moves;  let go, and it moves at once.
-  - Drag a selected task, and every selected one goes with it.
-  - The page's `move-delay="0.5"` on the list sets the wait for that one list.
-- `when a task is dropped on it` runs once the dragged tasks are in their new places:
+- `when a task is dropped on it` runs once the dragged task is in its new place:
   `keep the order` sets each task's `order` to its place, from 1, and each task saves itself (below).
+- `a task belongs to one checklist`:  a task is in one checklist at a time, and knows which, `its checklist`.
 
-<details>
-<summary>What the checklist compiles to</summary>
-
-```js
-export class Checklist extends ViewableList {
-  static instanceType = Task
-  static elementTag = core.defineElement(this, "TaskList")
-
-  // ... its showing:  all, active or done
-  isShowingShowing(showing) {
-    return this.showing === showing
-  }
-
-  // each task, unless the filter hides it
-  drawEachItem(item) {
-    if (this.isShowingShowing("active") && item.isDone) return undefined
-    if (this.isShowingShowing("done") && item.isActive) return undefined
-    return core.drawThing(item)
-  }
-
-  // Its tasks one under the other;  while it's empty, a line saying so
-  draw() {
-    return h("ui-stack", { spacing: "xs" },
-      h("ui-text", { color: "grey", hidden: () => this.isEmpty ? undefined : true }, "Nothing to do"),
-      h("slot")
-    )
-  }
-
-  static reorderItemsAfter = 0
-
-  static exclusive = true
-}
-```
-
-- Trimmed from `spell compile @spell/examples/TaskList --stdout`.
-- The two aliases became getters on the task, `isDone` and `isActive`:  `the task is done` reads `item.isDone`.
-- `is showing (showing)` became one method with the blank as its argument, `isShowingShowing("active")`.
-- `static reorderItemsAfter = 0` is `immediately`:  no wait before a dragged task moves.
-- `static exclusive` is the line `a task belongs to one checklist`:  a task is in one checklist at a time.
-
-</details>
-
-And last, the app:  `task list is an app`, with its checklist, the new task's field, and its actions.
+Then how a task draws, with [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s elements:
+a form of its own, bound to the task, and a button to delete it.
 
 ```spell
-	// The draft, as a new task at the end of the list;  the field empties
-	to add the draft
-		if the draft is "" return
-		set title to the draft
-		set task to keep a new task titled title of the keeper
-		set the priority of task to normal
-		add task to the checklist
-		set the order of task to the length of the checklist
-		clear the draft
+a task
+	to "delete" with title "Delete", icon "trash alternate outline"
+		// Gone from its checklist, and from this device
+		remove it from its checklist
+		remove it from the tasks
 
-	// Which tasks the list shows:  the toolbar ticks the one it's showing
-	group "Filter"
-	to "show all" with title "All", icon "list"
-		selected when the checklist is showing all
-		set the showing of the checklist to all
+	to draw it
+		// A form of its own, bound to it:  ticking the box, or typing a title, changes the task
+		<form value={it}>
+			<stack direction="horizontal" spacing="sm">
+				<icon name="grip vertical" color="grey" aria-label="Drag" />
+				<checkbox name="done" aria-label="Done" />
+				<input name="title" aria-label="Task" appearance="transparent" fluid />
+				<action "delete" icon-only appearance="tertiary" />
+			</stack>
+		</form>
 ```
 
-- An action's body is its steps, one a line;  `the draft` is the app's own.
-- `titled`, `icon` and `selected when`, its first lines, are how a toolbar shows it:  a button with that icon and title,
-  ticked while the line is true.
-- A menu can hold a menu:  a right click on the list shows `Show`, a sub-menu of the three, then Remove the done tasks.
+- `a task` alone, on its line, adds to the task template:  after `belongs to`, so `its checklist` is known.
+- Every tag is Spell UI's, by its bare name:  `<stack>` is `<ui-stack>`, `<checkbox>` is `<ui-checkbox>`.
+- There's no change handler anywhere.
+  The form is bound to the task (`value={it}`):
+  each named field shows its task's property, and writes it back as you type or tick.
+- `<action "delete" />` is the action's button:  its title and icon are the action's, shown as the icon alone.
+- The style sheet's two rules:  the title fills the row, and a task that's done fades.
+- A press in the title field or on the checkbox is theirs:  a drag starts from the grip, or the task's bare row.
 
-How it draws:
-- a toolbar across the top:  its title, how many tasks are left to do,
-  then the tasks menu's actions as buttons, the filter it's showing ticked
-- "Keep them in", a `<select>` of the places it can keep its tasks (below)
-- the new task's field, and its Add button, which stays disabled while the field is empty
-- the list, and beside it a property editor, `<ui-property-editor>`, bound to `the selection of the checklist`
+And last, the app:  `task list is an app`, with its checklist, the new task's field, and how many are left.
 
-The property editor edits every selected task at once.
-Select three tasks, set the priority to high, and all three change;
-a property they disagree on shows "Mixed".
+```spell
+	// The draft, as a new task;  the field empties
+	to add the draft
+		if the draft is "" return
+		add the task the draft
+		clear the draft
+
+	// A new task at the end of the list, kept on this device
+	to add the task (title as text)
+		set task to a new task with title = title
+		add task to the tasks
+		add task to the checklist
+		set the order of task to the length of the checklist
+```
+
+- An action's body is its steps, one a line;  `the draft` is the app's own, what the new task's field holds.
+- `add task to the tasks` keeps it on this device;  `add task to the checklist` shows it in the list.
+- `its "active count" is the length of (tasks in the checklist where it is active)`:
+  the tasks picked out with `where`, counted, which the header shows as "3 to do", or "All done".
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
-  app["the task list app"] -->|has| list["a checklist:  all, active or done"]
+  app["the task list app"] -->|has| list["a checklist, dragged into order"]
   app -->|has| draft["the new task's field"]
   draft -->|Add| task
-  list -->|holds| task["a task:  title, notes, priority, done"]
-  task -->|draws itself as| form["its own form:  a checkbox, its title"]
+  list -->|holds| task["a task:  title, done, order"]
+  task -->|draws itself as| form["its own form:  a checkbox, its title, Delete"]
   form -.->|a tick writes back| task
-  list -->|its selection| editor["the property editor"]
-  editor -.->|edits every selected task| task
+  task -.->|kept on| device["this device"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
 
-_The app keeps a checklist of tasks;  each task draws its own form, and the property editor changes the selected ones._
+_The app keeps a checklist of tasks;  each task draws its own form, and is kept on this device._
 
-Its tests are written in Spell, a `<test>` inside the template each one tests:
+Its tests are written in Spell, a `to test ...` inside the template each one tests:
 
 ```sh
 spell test @spell/examples/TaskList
@@ -538,62 +470,46 @@ spell test @spell/examples/TaskList
 <summary>Output</summary>
 
 ```text
-✓ Compiling @spell/examples/TaskList  3 warnings
-...
-✓ test checking one off  (2 checks)
-✓ test the filter  (1 check)
+✓ Compiling @spell/examples/TaskList
 ✓ test a dragged order is kept  (3 checks)
+✓ test checking one off  (2 checks)
 
-3 passed
+2 passed
 ```
 
 </details>
 
 ### Where it keeps its tasks
 
-The person picks, from "Keep them in":  this browser (where it starts, so it needs no server and no sign-in),
-a JSON file on the server, a CSV file on the server, or their own atmosphere account, Bluesky's AT Protocol,
-as Statusphere does.
-Each place is an API file of its own, and the app never names one:  it asks its KEEPER.
+On this device, in the browser's own storage:  it needs no server and no sign-in,
+and the tasks are still there when you come back.
+Two lines say so:
 
 ```spell
-browser storage is stored on this device
-
-a "browser task" is a task
-	it lives in browser storage
-	to throw it away
-		remove it from the browser tasks
-
-a "browser keeper" is a task keeper
-	its "kept tasks" is every browser task
-	to keep a new task titled (title as text)
-		set task to a new browser task with title = title
-		add task to the browser tasks
-		return task
+my tasks is stored on this device
+a task lives in my tasks
 ```
 
-_TaskList.browser.api.spell, its comments left out:  a place, its kind of task, and its keeper._
+_TaskList.api.spell, its comments left out:  a place, and the tasks that live in it._
 
-- Every keeper does the three things [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell) says:
-  its kept tasks, keeping a new one, and (its kind of task's own) throwing one away.
-- The server's is a project data folder, `task files is a data folder at "tasks"`, a JSON file a task;
-  the CSV file's, `task sheet is a sheet at "tasks.csv"`, a row a task, in the project's `__data/tasks.csv`
-  (a file's name alone is the program's own, and the server writes it, changing only the lines that change);
-  the atmosphere's, `task sky is a personal atmosphere account`, reading only your own.
-- Picking another place changes the app's `storage`;  `when its storage changes`, it takes that place's keeper,
-  and fills the list from it.  A keeper with no tasks starts with the four starting ones.
-- A task saves itself as it changes:  there's no save step.
+- After them, the words you already know reach the device:
+  `every task` reads them, `add task to the tasks` keeps a new one, `remove it from the tasks` throws one away.
+- The first time, with none kept yet, the app starts with four tasks saying what to try.
+- A task saves itself as it changes:  ticking it or typing its title is kept, with no save step.
 - The order you drag the tasks into is kept too:  each task keeps its own `order`, which the drop sets,
-  and the app fills the list `sorted by its order`, so it comes back from every place the same way.
+  and the app fills the list `sorted by its order`, so it comes back the same way.
+- To keep them somewhere else, change the first line:  `my tasks is a data folder at "tasks"`,
+  a JSON file a task on the server, and nothing else changes.
 
-<img src="docs/images/examples/TaskList.png" width="640" alt="Task List open in the Spell editor:  its Spell on the left;  on the right, the menu with 3 to do and four icon buttons, the new task's field, four tasks, the first ticked and marked high, and the property editor below">
+<img src="docs/images/examples/TaskList.png" width="640" alt="Task List open in the Spell editor:  its Spell on the left;  on the right, the header with 3 to do, the new task's field, four tasks, the first ticked, each with its grip and a trash button">
 
-_Task List in the editor:  the first task is ticked, because the program makes it with `done = yes`._
+_Task List in the editor:  the first task is ticked, because the program ticks it as it starts._
 
 ### Lista de tareas:  the same list, in Spanish
 
-[Lista de tareas](spaces/@spell/examples/ListaDeTareas/) is Task List written in Spanish:
-its own `tarea`, in `Tarea.es.spell`, and the same four places, each a `guardián`.
+[Lista de tareas](spaces/@spell/examples/ListaDeTareas/) is an earlier, fuller Task List, written in Spanish:
+a toolbar that filters it, and a property editor for the selected tasks, kept on this device the same way:
+`mis tareas se guarda en este dispositivo`.
 
 ```spell
 una "tarea" es una vista seleccionable arrastrable
@@ -609,14 +525,14 @@ una "tarea" es una vista seleccionable arrastrable
 	"está pendiente" si su hecha es no
 ```
 
-_A task, in Spanish:  Task List's task, in Spanish's own words._
+_A task, in Spanish:  with a note and a priority besides._
 
-- Its tests are the same three, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
+- Its tests are three, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
 - It draws with Spell UI's Spanish names (`<formulario>`, `<casilla>`, `<pila>`), and its toolbar says "3 pendientes".
 
 <img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spell on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
 
-_Lista de tareas in the editor:  the same list, its words in Spanish._
+_Lista de tareas in the editor:  a task list, its words in Spanish._
 
 ## Star Wars:  two servers other people run, in one program
 
@@ -908,7 +824,7 @@ The last column says where to borrow from;  where a part isn't in the language y
 | Dice games (Yahtzee, Pig) | a die that draws itself, rolled with an animation, scored by aliases | Solitaire's card:  `a "die" is a view`, Solitaire's piles' `layout` and styles.css, `pause for`;  Task List's aliases:  `a roll "is a full house" if ...` |
 | Memory | cards face up and face down in a grid | Solitaire's `Card`, `Deck` and `Pile`, copied in or imported from it;  a grid that's a view |
 | A collection catalogue | movies, baseball cards:  items with categories, and filter buttons | `one of ...` kinds and Task List's filter;  `it is saved in its own file`, as the people library's person is |
-| A sign-up sheet | people and a list of slots, in a form | `@spell/library/people` and Task List's forms and property editor;  🌱 a natural first program to share, once editing together arrives |
+| A sign-up sheet | people and a list of slots, in a form | `@spell/library/people` and Task List's forms, and Lista de tareas' property editor;  🌱 a natural first program to share, once editing together arrives |
 | A text adventure | rooms as things, and each way out a button | Task List's clicks, and `print`;  **not yet** typed commands (below) |
 
 **Not yet:  reading what someone types.**

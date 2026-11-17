@@ -1,33 +1,68 @@
-# A task
-// Something to do:  its title, its priority, and whether it's done.
-// Each task is its own element on the page, `<task-list-task>`.
-// A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
-// a drag moves it, the selected ones with it (`draggable`).
+# A task, and the checklist that holds it
+// Something to do:  its title, and whether it's done.
+// Each task is its own element on the page, `<task-list-task>`:
+// a handle to drag it by, a box to tick, its title, and a button to delete it.
+// Its checklist is one too, `<task-list-checklist>`, the tasks one under the other.
 
-a "task" is a draggable selectable view
+a "task" is a draggable view
 	its "title" is text
 		// What to do
-	its "notes" is text
-		// Anything else about it
-	its "priority" is one of low, normal or high
 	its "done" is yes or no
 	its "order" is number
-		// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
+		// Where it sits in its checklist, from 1:  kept with it, so the order you drag the tasks into comes back
 	it "is done" if its done is yes
 	it "is active" if it is not done
-	to throw it away: return
-		// Gone from where it's kept:  a task kept nowhere has nothing to do;  each kind of kept task says how, in its keeper's file
+
+## The checklist
+
+a "checklist" is a viewable list of tasks
+	its items can be reordered immediately
+		// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
+	when a task is dropped on it
+		// a drop has moved its tasks:  each keeps its new place
+		keep the order
+	to draw it
+		// Its tasks one under the other;  while it's empty, a line saying so
+		<stack spacing="xs">
+			<if it is empty>
+				<text color="grey">Nothing to do</text>
+			</if>
+			<children />
+		</stack>
+	to keep the order
+		// Each task keeps its place in the list, from 1:  so the order you drag them into comes back next time
+		for task, place in it
+			set the order of task to place
+
+	to test a dragged order is kept
+		set the list to a new checklist
+		set the first to a new task with title "first"
+		set the second to a new task with title "second"
+		add the second to the list
+		add the first to the list
+		keep the order of the list
+		the order of the second should be 1
+		the order of the first should be 2
+		the title of the first task in (the list sorted by its order) should be "second"
+a task belongs to one checklist
+	// a task is in one checklist at a time
+
+## How a task draws
+
+a task
+	to "delete" with title "Delete", icon "trash alternate outline"
+		// Gone from its checklist, and from this device
+		remove it from its checklist
+		remove it from the tasks
 
 	to draw it
-		// A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal
+		// A form of its own, bound to it:  ticking the box, or typing a title, changes the task
 		<form value={it}>
 			<stack direction="horizontal" spacing="sm">
-				<icon name="grip vertical" color="grey" aria-label="Drag"/>
-				<checkbox name="done" aria-label="Done"/>
-				<input part="title" name="title" aria-label="Task" appearance="transparent" fluid/>
-				<if the priority is not normal>
-					<label size="tiny" color={"red" if the priority is high otherwise "grey"}>{the priority}</label>
-				</>
+				<icon name="grip vertical" color="grey" aria-label="Drag" />
+				<checkbox name="done" aria-label="Done" />
+				<input name="title" aria-label="Task" appearance="transparent" fluid />
+				<action "delete" icon-only appearance="tertiary" />
 			</stack>
 		</form>
 

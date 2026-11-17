@@ -1,0 +1,14 @@
+{
+  "title": "Tasks In Four Places",
+  "description": "Task List as it was until it kept its tasks only on this device (epic mockup T43):  the tasks kept in this browser, a JSON file on the server, a CSV file on the server or your atmosphere account, each a keeper in an API file of its own, picked in the app;  Python's test of all four kinds of place runs it (epic data P46)",
+  "imports": [
+    { "path": "/Task.spell", "active": true },
+    { "path": "/TaskList.api.spell", "active": true },
+    { "path": "/TaskList.browser.api.spell", "active": true },
+    { "path": "/TaskList.server.api.spell", "active": true },
+    { "path": "/TaskList.csv.api.spell", "active": true },
+    { "path": "/TaskList.atmosphere.api.spell", "active": true },
+    { "path": "/TaskList.spell", "active": true },
+    { "path": "/styles.css", "active": true }
+  ]
+}

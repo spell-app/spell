@@ -154,6 +154,8 @@ export class MethodDefinition<
     // in the words a signature names a type with, `stock-pile`, as `(a stock pile)` gives
     const typeWords = kebabCase(subject.name).replace(/^-/, "")
     signature.instanceType = typeWords
+    // its class is the type's own name:  its words, cased again, would singularize a plural, `lista de tareas` => `ListaDeTarea`
+    signature.instanceTypeName = subject.name
     const isSubjectWord = (bit: string) =>
       !/^[{(]/.test(bit) && SubjectRule.reads(scope, "subject_it", scope.parser?.tokenize(bit)?.[0])
     MethodDefinition.splitFusedIt(signature, scope)

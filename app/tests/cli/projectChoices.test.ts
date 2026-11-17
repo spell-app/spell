@@ -37,6 +37,7 @@ describe("projectChoices()", () => {
       "@spell/test/recipe-box/",
       "@spell/test/sala-en-vivo/",
       "@spell/test/sending-events/",
+      "@spell/test/tasks-in-four-places/",
       "@spell/test/thing-references/",
       "@spell/test/todos-form-based/"
     ])

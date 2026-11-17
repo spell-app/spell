@@ -13,50 +13,15 @@ export const words = {
       tirar: "tirarla",
       agenda: "agenda"
     },
-    GuardiánDeTareas: {
-      tareasGuardadas: "tareas guardadas",
-      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
-    },
-    TareaDelNavegador: {
-      tirar: "tirarla"
-    },
-    GuardiánDelNavegador: {
-      tareasGuardadas: "tareas guardadas",
-      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
-    },
-    TareaDelServidor: {
-      tirar: "tirarla"
-    },
-    GuardiánDelServidor: {
-      tareasGuardadas: "tareas guardadas",
-      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
-    },
-    TareaDeLaHoja: {
-      tirar: "tirarla"
-    },
-    GuardiánDeLaHoja: {
-      tareasGuardadas: "tareas guardadas",
-      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
-    },
-    TareaDelCielo: {
-      tirar: "tirarla",
-      dueño: "dueño"
-    },
-    GuardiánDelCielo: {
-      tareasGuardadas: "tareas guardadas",
-      guardarUnaTareaNuevaTituladaTítulo: "guardar una tarea nueva titulada (título como texto)"
-    },
     Agenda: {
       mostrando: "mostrando",
       estáMostrandoMostrando: "está mostrando (mostrando)",
       guardarElOrden: "guardar el orden"
     },
     ListaDeTareas: {
-      tareas: "tareas",
+      agenda: "agenda",
       borrador: "borrador",
       cuentaPendiente: "cuenta pendiente",
-      almacén: "almacén",
-      guardián: "guardián",
       llenarLaAgenda: "llenar la agenda",
       agregarLaTareaInicialTítuloConPrioridadNivel: "agregar la tarea inicial (título como texto) con prioridad (nivel como texto)",
       agregarElBorrador: "agregar el borrador",
@@ -157,11 +122,7 @@ export const words = {
     Tarea: [
       { name: "La agenda", members: ["agenda"] }
     ],
-    TareaDelCielo: [
-      { name: "Guardadas en tu cuenta de atmosphere", members: ["dueño"] }
-    ],
     ListaDeTareas: [
-      { name: "Guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },
       { name: "Filtro", description: "Qué tareas muestra la lista:  la barra de herramientas marca la que muestra", members: ["mostrarTodas", "mostrarPendientes", "mostrarHechas", "quitarLasTareasHechas"] }
     ]
   }
