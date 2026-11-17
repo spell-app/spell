@@ -1705,6 +1705,19 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - Several words are joined by dashes, each as written (epic `language` T147):  `"discard pile" is a new discard pile`
       is `{ id: "discard-pile" }`, and `<discard-pile "discard pile"/>` draws `id="discard-pile"`;  `discard pile` still
       finds it (`core.thingNamed()`).
+- WHAT COMES AND GOES IS NAMED BY ITS QUOTED WORD (epic `language` P61;  Owen, 2026-11-17):  `<modal "you won">` ~==
+  `<modal id="you-won" heading="you won">`, so `show "you won"` shows it and `hide "you won"` hides it.
+  - A modal, a menu and a popup only (`NAMED_TAGS`, [SpellJSX.ts](rules/JSX/SpellJSX.ts);  Owen:  "Don't need it on
+    everything"):  `<menu "game menu">` is `id="game-menu"`;  `<popup "a hint">` is its id and its heading too.
+  - Its id is its words joined by dashes, as a view's;  a heading the word as written, unless the tag says its own.
+  - Only on a tag that's none of the project's views, in any language:  Spanish's `<modal "ganaste">` is
+    `<es-modal id="ganaste" encabezado="ganaste">`, the heading's name the pack's (`SP.ComponentPacks.attributeNameFor()`).
+  - On any other tag a quoted word is still unreadable.
+  - `show "you won"`, `hide "you won"` (`show_drawn`, [ShowDrawn.ts](rules/UI/ShowDrawn.ts)):  a quoted name, nothing
+    else;  Spanish's `mostrar "ganaste"`, `ocultar "ganaste"`.
+    - Compiled to `core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page or
+      inside a view's shadow root, its `visible` set.  Python's `core.show_drawn()` asks its page to (`page.ts`).
+    - A program's own `to show (word as text)` still wins:  its method's rule reads `show "fizz"` first.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:

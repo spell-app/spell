@@ -1673,6 +1673,32 @@
     },
     {
       "kind": "method",
+      "name": "showDrawn",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "section": "Drawn things, by name",
+      "description": "Show what the program drew and named `name`:  what `show \"you won\"` compiles to (epic `language` P61)."
+    },
+    {
+      "kind": "method",
+      "name": "hideDrawn",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "section": "Drawn things, by name",
+      "description": "Hide what the program drew and named `name`:  what `hide \"you won\"` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "installStyles",
       "of": "core",
       "module": "ui",

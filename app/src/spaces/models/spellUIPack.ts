@@ -27,6 +27,7 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   canonicalTagFor: (tag, language) => SpellUIDefaults.canonicalTagFor(tag, language),
   readDefault: (sample, language) => SpellUIDefaults.read(sample, language),
   readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language),
+  attributeNameFor: (tag, attribute, language) => SpellUIDefaults.attributeNameFor(tag, attribute, language),
   help(language) {
     if (!helpTable) {
       loadHelp()

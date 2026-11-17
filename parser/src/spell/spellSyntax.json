@@ -9182,7 +9182,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 90,
+          "line": 100,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -10003,6 +10003,32 @@
                 },
                 "py": {
                   "code": "core.scroll_to_top()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDrawn",
+          "ruleNames": ["show_drawn"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 15,
+          "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
+          "syntaxes": [
+            {
+              "syntax": "(show|(hide:hide)) {name:text}",
+              "example": "show \"you won\"",
+              "outputs": {
+                "js": {
+                  "code": "core.showDrawn(\"you won\")"
+                },
+                "ts": {
+                  "code": "core.showDrawn(\"you won\")"
+                },
+                "py": {
+                  "code": "core.show_drawn(\"you won\")"
                 }
               }
             }

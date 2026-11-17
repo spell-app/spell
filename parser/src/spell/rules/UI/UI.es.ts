@@ -18,6 +18,7 @@ import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } f
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
 import { ShowDatesAs } from "./ShowDatesAs"
+import { ShowDrawn } from "./ShowDrawn"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
@@ -126,6 +127,19 @@ UIEs.addRule(ShowDatesAs, {
 UIEs.addRule(ScrollToTop, {
   syntax: "desplazarse hasta arriba",
   tests: [{ compileAs: "statement", tests: [["desplazarse hasta arriba", "core.scrollToTop()"]] }]
+})
+
+UIEs.addRule(ShowDrawn, {
+  syntax: "(mostrar|(hide:ocultar)) {name:text}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`mostrar "ganaste"`, `core.showDrawn("ganaste")`],
+        [`ocultar "ganaste"`, `core.hideDrawn("ganaste")`]
+      ]
+    }
+  ]
 })
 
 UIEs.addRule(PlaySound, {

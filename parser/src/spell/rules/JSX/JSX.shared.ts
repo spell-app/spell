@@ -188,6 +188,12 @@ export type JSXMatchData = {
    * - See `SpellJSX.declaredBy()`;  `DrawnMarkup` declares it, the drawing compiles it (`DrawnMarkup.membersDeclared()`).
    */
   declares?: DrawnDeclaration
+  /**
+   * (`jsxElement`) A tag its quoted word names, `<modal "you won">` (epic `language` P61):
+   * its id and its title (`SpellJSX.attributesOf()`), which `show "you won"` finds it by.
+   * - The attribute the word also fills, in the drawing's language (`heading`, `encabezado`);  `""` for none.
+   */
+  named?: string
   /** (`jsxElement`) A chain branch's kind, `<if ...>` ... -- see `SpellJSX`, "An if-chain inside markup". */
   chain?: P.JSXChainKind
   /** (`jsxElement`) A chain branch's condition, its phrase parsed as `{...}` (`jsxChild`);  none for `<otherwise>`. */

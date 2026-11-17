@@ -104,6 +104,26 @@ export class ComponentPacks {
   }
 
   /**
+   * The name `language` writes the pack's own (English) attribute `attribute` by, on `tag` (a page's tag, `es-modal`,
+   * or the pack's own), from the first of `packNames` that knows it:  `("es-modal", "heading", "es")` => `"encabezado"`.
+   * - What a tag's quoted word fills, in a drawing in another language than English (epic `language` P61):
+   *   `<modal "ganaste">` is `<es-modal encabezado="ganaste">`.
+   * - `undefined` when no pack registered knows it:  the English name is then written.
+   */
+  static attributeNameFor(
+    tag: string,
+    attribute: string,
+    language: string,
+    packNames: readonly string[] = this.DEFAULT
+  ): string | undefined {
+    for (const name of packNames) {
+      const local = this.packs.get(name)?.attributeNameFor?.(tag, attribute, language)
+      if (local) return local
+    }
+    return undefined
+  }
+
+  /**
    * What the components of the first of `packNames` that can say are, written in `language`:
    * for an editor's completions and hovers on a drawing's tags (epic `editor` P28).
    * - `undefined` while none can say yet:  a pack may load its help as it's first asked (`ComponentPack.help()`).
@@ -157,6 +177,13 @@ export type ComponentPack = {
    * - Left out:  the pack can't read attributes, and each is taken as written.
    */
   readAttribute?(sample: DefaultSample, language: string): AttributeReading | undefined
+  /**
+   * The name `language` writes the pack's own (English) attribute `attribute` by, on its tag `tag`
+   * (`ComponentPacks.attributeNameFor()`):  `("ui-modal", "heading", "es")` => `"encabezado"`;
+   * `undefined` for a tag or attribute it doesn't know.
+   * - Left out:  the pack can't say, and the English name is written.
+   */
+  attributeNameFor?(tag: string, attribute: string, language: string): string | undefined
   /**
    * What its components are, as `language` writes them in a drawing (`ComponentPacks.help()`).
    * - `undefined` until it has them:  the first call may start loading them, for a later one.

@@ -37,6 +37,16 @@ const MENU_DIVIDER = "divider"
 const DRAWN_BASE_TYPES = ["View", "ViewableList"]
 /** What a view's quoted word is, `<tableau "T1"/>`:  the id of the thing it draws -- see `attributesOf()`. */
 const VIEW_ID_ATTRIBUTE = "id"
+/**
+ * The tags a quoted word NAMES (epic `language` P61):  `<modal "you won">` is the modal `show "you won"` shows.
+ * - Its words joined by `-` are its id, `you-won`, as a view's are;  `title`, the attribute it also fills, as written.
+ * - Only what comes and goes (Owen, 2026-11-17:  "Don't need it on everything"):  a modal, a menu, a popup.
+ */
+const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
+  "ui-modal": { title: "heading" },
+  "ui-menu": {},
+  "ui-popup": { title: "heading" }
+}
 
 /**
  * `jsxElement` rule:  match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.
@@ -192,6 +202,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
     // a Spell UI menu or toolbar, in any language:  its actions and dividers are its rows (epic `editor` P29)
     if (SpellJSX.isMenu(scope, match.data.tagName)) SpellJSX.markMenuRows(scope, match)
+    // a modal, menu or popup its quoted word names, `<modal "you won">` (P61):  never one of the project's own views
+    if (element.quotedWord && !match.data.view && !match.data.laterView) {
+      match.data.named = SpellJSX.namedTagTitle(scope, match.data.tagName)
+    }
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
@@ -221,6 +235,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    *   `<discard-pile id="discard-pile"/>` (`QuotedMember.idOf()`, language T147).
    * - Any language's tags alike:  it's the tag being a view that counts, not its word.
    * - After its other attributes, so each of those keeps its place (`warnAboutListedValues()`).
+   * - On a tag a quoted word names (`NAMED_TAGS`, epic `language` P61), its id too, and its title:
+   *   `<modal "you won">` ~== `<modal id="you-won" heading="you won">`, unless it says its own `heading`.
    * - On any other tag the word means nothing:  `noteUnreadable()` says so.
    */
   private static attributesOf(
@@ -228,12 +244,17 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     element: P.JSXElementToken
   ): P.JSXAttributeToken[] | undefined {
     const { quotedWord } = element
-    if (!quotedWord || !(match.data.view || match.data.laterView)) return element.attributes
+    const { view, laterView, named } = match.data
+    if (!quotedWord || !(view || laterView || named !== undefined)) return element.attributes
     const { start, value, raw } = quotedWord.record
     // one word, as the member it names takes it:  `"discard pile"` => `"discard-pile"` (`QuotedMember.idOf()`)
     const word = value instanceof P.TextToken ? oneWordText(value) : value
     const id = new P.JSXAttributeToken({ name: VIEW_ID_ATTRIBUTE, start, value: word, raw })
-    return [...(element.attributes ?? []), id]
+    // a named tag's title, `heading`:  unless it says its own
+    if (!named || element.attributes?.some((attribute) => attribute.name === named)) {
+      return [...(element.attributes ?? []), id]
+    }
+    return [...(element.attributes ?? []), id, new P.JSXAttributeToken({ name: named, start, value, raw })]
   }
 
   ////////////////
@@ -333,12 +354,13 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * SIDE EFFECT:  an element whose tag holds something it couldn't read says so -- see `parseErrorsIn()`.
-   * - A quoted word on a tag that isn't one of the project's views too:  only a view takes one, as its `id`.
+   * - A quoted word on a tag that isn't one of the project's views too:  only a view takes one, as its `id`;
+   *   and a tag it names, `<modal "you won">` (`NAMED_TAGS`).
    */
   static noteUnreadable(scope: P.Scope, match: P.Match, element: P.JSXElementToken): void {
-    const { view, laterView } = match.data as JSXMatchData
+    const { view, laterView, named } = match.data as JSXMatchData
     const word = element.quotedWord?.value
-    const text = element.unreadable ?? (view || !word ? undefined : textOf(word))
+    const text = element.unreadable ?? (view || named !== undefined || !word ? undefined : textOf(word))
     if (!text) return
     const message = SP.Language.of(scope).parserMessage("unreadable-attribute", {
       text,
@@ -538,6 +560,21 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
     if (!isBareComponentName(word) && !word.includes("-")) return undefined
     return SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+  }
+
+  /**
+   * The attribute a quoted word also fills on `tag`, if it's a tag a quoted word names (`NAMED_TAGS`, epic `language`
+   * P61), in the drawing's language:  `heading` on `<ui-modal>`, `encabezado` on Spanish's `<es-modal>`;
+   * `""` for a named tag with no title;  `undefined` for any other tag.
+   */
+  private static namedTagTitle(scope: P.Scope, tag: string | undefined): string | undefined {
+    if (!tag) return undefined
+    const { lang } = SP.Language.of(scope)
+    const packs = SpellJSX.packsFor(scope)
+    const named = NAMED_TAGS[tag] ?? NAMED_TAGS[SP.ComponentPacks.canonicalTagFor(tag, lang, packs) ?? ""]
+    if (!named) return undefined
+    if (!named.title) return ""
+    return SP.ComponentPacks.attributeNameFor(tag, named.title, lang, packs) ?? named.title
   }
 
   /**
