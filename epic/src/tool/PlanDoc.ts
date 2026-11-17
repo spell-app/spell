@@ -92,7 +92,7 @@ import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
-import { Migrations } from "./migrations"
+import { HandedOnFixes, Migrations } from "./migrations"
 import { OptionSets } from "./OptionSets"
 import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick } from "./ReviewInbox"
 
@@ -2294,6 +2294,7 @@ export class PlanDoc extends PlanReader {
       return { title, closed: false }
     this.setItem(host.id, "done")
     this.log(`${host.id.toUpperCase()} closed:  ${title}`)
+    this.fixHandedOn()
     return { title, closed: true }
   }
 
@@ -2325,6 +2326,19 @@ export class PlanDoc extends PlanReader {
     this.stamp(item)
     this.markUpdate(item, "fixed")
     this.log(`${item.id.toUpperCase()} fixed, for review:  ${title}`)
+    this.fixHandedOn()
+  }
+
+  /**
+   * A fix Owen sent back, whose note was handed on to items now fixed or done, is fixed again (`HandedOnFixes`;  epic
+   * `epic-engine` I317):  orange, `FIXED`, its last button Accept the fix;  each stamped and logged.
+   * - language's I147:  its Revisit's note became I148, and I147 stayed `REOPENED`, with the x, once I148 was fixed
+   */
+  private fixHandedOn(): void {
+    for (const { id, handedTo } of HandedOnFixes.fixAll(this.document, this.now)) {
+      this.stamp(this.item(id.toLowerCase()))
+      this.log(`${id} fixed, for review:  what was sent back was fixed as ${handedTo.join(", ")}`)
+    }
   }
 
   /**

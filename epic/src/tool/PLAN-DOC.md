@@ -691,6 +691,8 @@ As `plan-doc.md`, "Ids":
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
   - Fixed:  `epic update <epic>#I3 fixed ["<what changed>"]` (also what `done` means on one):  still open, `fixed`,
     ORANGE, on their list to review again.
+  - Sent back, and its note handed on to another item (a Noted card naming it:  "Your C2 is being fixed as I148"):
+    fixed again by itself once that one is fixed or done (`HandedOnFixes`, epic `epic-engine` I317)
   - Their Approve closes it;  their Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
   - A mark already sent with `todo` applies the same way.
   - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
@@ -1272,6 +1274,16 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - the history handed in by the runner (`MigrationContext.history`, `PlanDocFiles.epicHistory()`):  git, so never
       on an edit
     - idempotent:  a commit already in the Log is skipped
+  - `handed-on-fixes` (2026-11-16, every edit;  epic `epic-engine` I317):  a fix sent back, whose note was handed on
+    to another item, is fixed again once that one is (`HandedOnFixes`):  orange, `FIXED`, Accept the fix (the check)
+    - the case:  language's I147, sent back with "see my comments in its text:  C2";  its Noted card "Your C2 ... is
+      being fixed as I148";  I148 fixed, and I147 still `REOPENED`, its last button the x
+    - which:  an open issue or call sent back (`urgent`, or labelled `REOPENED`), not `fixed`, its LATEST card Noted
+      with a Done card before it, the Noted card naming other items of the page (`I148`), every one fixed or done
+    - fixed as `fixedForReview()` does, with a Done card naming them (`What you sent back was fixed as I148:  ...`),
+      at the time they were fixed;  `PlanDoc` runs it after every fix or close, logging each, so it turns in the
+      same write
+    - idempotent:  a fixed item is left
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,
