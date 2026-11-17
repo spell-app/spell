@@ -3761,7 +3761,7 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
           label={memberLabel(props.member)}
           readonly=""
           as={typeof read().value === "boolean" ? "toggle" : undefined}
-          width={isShortComputed(read()) ? "1/2" : undefined}
+          width={isShortComputed(read()) ? HALF_ROW : undefined}
           class={["InspectorComputed", { failed: "error" in read() }]}
         >
           <Show
