@@ -18,7 +18,7 @@
 		</>
 		<html>
 			<ui-docs-tokens family="ui-page-layout" playground>
-				<ui-page-layout style="width: 100%; min-height: 18em">
+				<ui-page-layout style="min-height: 18em">
 					<ui-app-menu slot="menu">
 						<ui-site-nav-button slot="start" />
 						<ui-site-breadcrumbs slot="start" />

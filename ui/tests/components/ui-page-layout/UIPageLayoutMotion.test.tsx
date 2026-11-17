@@ -34,10 +34,10 @@ async function movesAs(layout: DOMPageLayoutElement, change: () => void | Promis
   )
 }
 
-/** Rest the pointer on its compact drawer, and wait for it to open. */
+/** Rest the pointer on its compact drawer, and wait for it to open (half a second). */
 async function peek(layout: DOMPageLayoutElement) {
   box(layout, "drawer").dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
-  await expect.poll(() => layout.matches(":state(open)")).toBe(true)
+  await expect.poll(() => layout.matches(":state(open)"), { timeout: 1500 }).toBe(true)
 }
 
 // epic `mockup` I25 (Owen:  "Menu should animate when flying out")
@@ -53,6 +53,28 @@ describe("<ui-page-layout>:  motion", () => {
     expect(closing).toContain("drawer-box width")
     // ... the page beside it not moving
     expect(box(layout, "drawer").getBoundingClientRect().width).toBeCloseTo(column, 0)
+  })
+
+  // epic `mockup` C1 on J161 (Owen:  "Expanded menu should be the entire height of the page to match the collapsed
+  // sidebar"):  it dropped to its rows' height the moment it started closing
+  test("compact, its box is the column's whole height open, and while it shrinks back", async () => {
+    const layout = await compactLayout()
+    const height = () => box(layout, "drawer-box").getBoundingClientRect().height
+    const column = box(layout, "drawer").getBoundingClientRect().height
+    expect(column).toBeCloseTo(400, 0)
+    expect(height()).toBeLessThan(column)
+    await peek(layout)
+    await ShadowTree.settle(layout)
+    expect(height()).toBeCloseTo(column, 0)
+    box(layout, "drawer").dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }))
+    await expect.poll(() => layout.matches(":state(open)")).toBe(false)
+    await new Promise(requestAnimationFrame)
+    expect(box(layout, "drawer-box").getBoundingClientRect().width).toBeGreaterThan(
+      box(layout, "drawer").getBoundingClientRect().width
+    )
+    expect(height()).toBeCloseTo(column, 0)
+    // ... its rows' height once it's back
+    await expect.poll(height).toBeLessThan(column)
   })
 
   test("`toggleDrawer()` widens the column from its icons to all of it, and narrows it back", async () => {

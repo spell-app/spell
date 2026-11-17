@@ -6,7 +6,7 @@ exports[`Solitaire project > compiled output + errors 1`] = `
     "compiled": "/** A card says what its rank, suit and color are:  a deck, a pile or the game only reads them. */
 /*! SPELL: DECLARES {
   type: "Card", superType: "TwoSidedView",
-  defined: "/Card.spell:0-2163",
+  defined: "/Card.spell:0-2195",
 } */
 // A playing card
 export class Card extends TwoSidedView {
@@ -16,7 +16,7 @@ export class Card extends TwoSidedView {
     property: "rank", classVariable: "Ranks", of: "Card", group: "Card Rank & Suit",
     groupDescription: "Ace is low:  ace = 1 ... king = 13",
     enumeration: ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"],
-    defined: "/Card.spell:467-520",
+    defined: "/Card.spell:469-522",
   } */
   // - its "rank" is one of ace, 2 ... 10, jack, queen, king
   static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
@@ -27,7 +27,7 @@ export class Card extends TwoSidedView {
   /*! SPELL: DECLARES {
     property: "suit", classVariable: "Suits", of: "Card", group: "Card Rank & Suit",
     enumeration: ["clubs", "diamonds", "hearts", "spades"],
-    defined: "/Card.spell:522-576",
+    defined: "/Card.spell:524-578",
   } */
   // - its "suit" is one of clubs, diamonds, hearts or spades
   static Suits = ["clubs", "diamonds", "hearts", "spades"]
@@ -38,7 +38,7 @@ export class Card extends TwoSidedView {
   /*! SPELL: DECLARES {
     property: "color", classVariable: "Colors", of: "Card", group: "Card Rank & Suit",
     enumeration: ["red", "black"],
-    defined: "/Card.spell:578-670",
+    defined: "/Card.spell:580-672",
   } */
   // - its "color" is one of red, black
   //   red if it is a diamond or it is a heart
@@ -49,11 +49,12 @@ export class Card extends TwoSidedView {
     return "black"
   }
 
+  /** e.g. "the card is a face card" */
   /*! SPELL: DECLARES {
     syntax: "{operator:is_or_is_not_a} face card", output: "is_a_face_card", rule: "method_postfix",
     of: "Card", group: "Aliases", groupDescription: "Spell for identifying cards", kind: "method",
     name: '"is a face card"', returns: "choice",
-    defined: "/Card.spell:729-783",
+    defined: "/Card.spell:725-779",
   } */
   get isAFaceCard() {
     return core.includes(["jack", "queen", "king"], this.rank)
@@ -63,7 +64,7 @@ export class Card extends TwoSidedView {
     syntax: "{operator:is_or_is_not_a} number card", output: "is_a_number_card",
     rule: "method_postfix", of: "Card", group: "Aliases", kind: "method", name: '"is a number card"',
     returns: "choice",
-    defined: "/Card.spell:785-831",
+    defined: "/Card.spell:816-862",
   } */
   get isANumberCard() {
     return !this.isAFaceCard
@@ -75,7 +76,7 @@ export class Card extends TwoSidedView {
     output: "is_the_$rank_of_$suit", rule: "quoted_property", of: "Card", group: "Aliases",
     kind: "method", name: '"is the (rank) of (suit)"',
     values: { rank: ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"], suit: ["clubs", "diamonds", "hearts", "spades"] },
-    defined: "/Card.spell:833-861",
+    defined: "/Card.spell:864-892",
   } */
   isTheRankOfSuit(rank, suit) {
     return this.rank === rank && this.suit === suit
@@ -84,7 +85,7 @@ export class Card extends TwoSidedView {
   /*! SPELL: DECLARES {
     property: "name", of: "Card", group: "Names", groupDescription: "identifying a card",
     datatype: "text",
-    defined: "/Card.spell:948-990",
+    defined: "/Card.spell:980-1022",
   } */
   get name() {
     return core.joined(core.joined(this.rank, "of", " "), this.suit, " ")
@@ -92,7 +93,7 @@ export class Card extends TwoSidedView {
 
   /*! SPELL: DECLARES {
     property: "value", of: "Card", group: "Names", datatype: "number",
-    defined: "/Card.spell:992-1031",
+    defined: "/Card.spell:1024-1063",
   } */
   get value() {
     return spellPosition(positionOf(Card.Ranks, this.rank))
@@ -100,7 +101,7 @@ export class Card extends TwoSidedView {
 
   /*! SPELL: DECLARES {
     property: "symbol", of: "Card", group: "Names", datatype: "text",
-    defined: "/Card.spell:1033-1134",
+    defined: "/Card.spell:1065-1166",
   } */
   get symbol() {
     if (this.suit === "clubs") return "♣"
@@ -112,7 +113,7 @@ export class Card extends TwoSidedView {
   /** Its short name:  Q♠↓ is the queen of spades, face down */
   /*! SPELL: DECLARES {
     property: "short_name", asWritten: "short name", of: "Card", group: "Names", datatype: "text",
-    defined: "/Card.spell:1136-1384",
+    defined: "/Card.spell:1168-1416",
   } */
   get shortName() {
     const letter = this.value === 10 ? 10 : \`\${core.getItemAt(this.rank, 0) ?? ""}\`.toLocaleUpperCase()
@@ -141,7 +142,7 @@ export class Card extends TwoSidedView {
 /** Give it a card to draw, or a rank and a suit:  \`<card-image card={the card} />\`, \`<card-image rank=ace suit={its suit} />\`. */
 /*! SPELL: DECLARES {
   type: "CardImage", superType: "View",
-  defined: "/Card.spell:2165-4746",
+  defined: "/Card.spell:2197-4778",
 } */
 // A card's picture:  the one place a card's look lives
 export class CardImage extends View {
@@ -154,7 +155,7 @@ export class CardImage extends View {
    */
   /*! SPELL: DECLARES {
     property: "card", of: "CardImage", datatype: "Card",
-    defined: "/Card.spell:2688-2708",
+    defined: "/Card.spell:2720-2740",
   } */
   // the card it draws
   // - its "card" is a card
@@ -164,7 +165,7 @@ export class CardImage extends View {
 
   /*! SPELL: DECLARES {
     property: "rank", of: "CardImage", datatype: "CardRank",
-    defined: "/Card.spell:2733-2758",
+    defined: "/Card.spell:2765-2790",
   } */
   // - its "rank" is a card rank
   static { this.declareProp("rank", { oneOf: () => Card.Ranks }) }
@@ -173,7 +174,7 @@ export class CardImage extends View {
 
   /*! SPELL: DECLARES {
     property: "suit", of: "CardImage", datatype: "CardSuit",
-    defined: "/Card.spell:2760-2785",
+    defined: "/Card.spell:2792-2817",
   } */
   // - its "suit" is a card suit
   static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
@@ -182,7 +183,7 @@ export class CardImage extends View {
 
   /*! SPELL: DECLARES {
     property: "direction", classVariable: "Directions", of: "CardImage", enumeration: ["up", "down"],
-    defined: "/Card.spell:2787-2816",
+    defined: "/Card.spell:2819-2848",
   } */
   // - its "direction" is up or down
   static Directions = ["up", "down"]
@@ -194,7 +195,7 @@ export class CardImage extends View {
     syntax: "{operator:is_or_is_not} face (expression:up|ups|down|downs)",
     output: "is_face_$direction", rule: "quoted_property", of: "CardImage", kind: "method",
     name: '"is face (direction)"', values: { direction: ["up", "down"] },
-    defined: "/Card.spell:2818-2842",
+    defined: "/Card.spell:2850-2874",
   } */
   isFaceDirection(direction) {
     return this.direction === direction
@@ -203,7 +204,7 @@ export class CardImage extends View {
   /** given a card:  its rank and suit are the card's;  given a rank and a suit:  its card is a new one of them (its back needs none) */
   /*! SPELL: DECLARES {
     kind: "method", name: "creating a card image", returns: "nothing",
-    defined: "/Card.spell:2844-3213",
+    defined: "/Card.spell:2876-3245",
   } */
   create() {
     if (this.card !== undefined) {
@@ -214,12 +215,12 @@ export class CardImage extends View {
 
   /*! SPELL: DECLARES {
     property: "color", of: "CardImage",
-    defined: "/Card.spell:3215-3289",
+    defined: "/Card.spell:3247-3321",
   } */
   get color() {
     /*! SPELL: DECLARES {
       constants: ["blue"],
-      defined: "/Card.spell:3232-3255",
+      defined: "/Card.spell:3264-3287",
     } */
     if (this.isFaceDirection("down")) return "blue"
     return this.card?.color
@@ -228,7 +229,7 @@ export class CardImage extends View {
   /** draw the unicode character for card images */
   /*! SPELL: DECLARES {
     property: "picture", of: "CardImage", datatype: "text",
-    defined: "/Card.spell:3291-3978",
+    defined: "/Card.spell:3323-4010",
   } */
   get picture() {
     // see https://www.compart.com/en/unicode/block/U+1F0A0
@@ -243,7 +244,7 @@ export class CardImage extends View {
   /*! SPELL: DECLARES {
     syntax: "draw {thisArg:expression}", output: "draw", rule: "method_call", of: "CardImage",
     alias: ["statement", "expression"], kind: "method", name: "draw it",
-    defined: "/Card.spell:3980-4037",
+    defined: "/Card.spell:4012-4069",
   } */
   draw() {
     return h("ui-text", { color: () => this.color }, () => this.picture)
@@ -253,7 +254,7 @@ export class CardImage extends View {
 /*! SPELL: DECLARES {
   syntax: "test card setup", output: "test_card_setup", rule: "method_call", alias: "statement",
   kind: "function", name: "card setup",
-  defined: "/Card.spell:1501-2163",
+  defined: "/Card.spell:1533-2195",
 } */
 export function testCardSetup() {
   return core.test("test card setup", function testCardSetup() {
@@ -291,7 +292,7 @@ export function testCardSetup() {
 /*! SPELL: DECLARES {
   syntax: "test card images", output: "test_card_images", rule: "method_call", alias: "statement",
   kind: "function", name: "card images",
-  defined: "/Card.spell:4040-4746",
+  defined: "/Card.spell:4072-4778",
 } */
 export function testCardImages() {
   return core.test("test card images", function testCardImages() {
@@ -328,26 +329,20 @@ export function testCardImages() {
     "warnings": [],
   },
   {
-    "compiled": "core.heading("A pile of cards")
-/////////////////////
-// ## A pile of cards
-/////////////////////
-// A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, \`<solitaire-column>\` around \`<solitaire-card>\`s.
-// A card dragged over it glows when it would take the card, by its own rules (\`droppable\`).
-
+    "compiled": "/** A pile of cards, e.g. in a game like solitaire */
 /*! SPELL: DECLARES {
   type: "Pile", superType: "ViewableList", itemType: "Card",
-  defined: "/Pile.spell:335-2026",
+  defined: "/Pile.spell:0-1097",
 } */
 export class Pile extends ViewableList {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
+  // A card can only be in one pile at a time
   /** How its cards lie:  on top of each other, or down a column -- styles.css */
   /*! SPELL: DECLARES {
     property: "layout", classVariable: "Layouts", of: "Pile", enumeration: ["stacked", "vertical"],
-    defined: "/Pile.spell:383-503",
+    defined: "/Pile.spell:145-265",
   } */
   // - its "layout" is one of stacked or vertical
   static Layouts = ["stacked", "vertical"]
@@ -357,7 +352,7 @@ export class Pile extends ViewableList {
 
   /*! SPELL: DECLARES {
     property: "color", of: "Pile",
-    defined: "/Pile.spell:505-582",
+    defined: "/Pile.spell:267-344",
   } */
   get color() {
     if (this.isEmpty) return "none"
@@ -366,7 +361,7 @@ export class Pile extends ViewableList {
 
   /*! SPELL: DECLARES {
     property: "value", of: "Pile", datatype: "number",
-    defined: "/Pile.spell:584-656",
+    defined: "/Pile.spell:346-418",
   } */
   get value() {
     if (this.isEmpty) return 0
@@ -376,7 +371,7 @@ export class Pile extends ViewableList {
   /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
   /*! SPELL: DECLARES {
     property: "short_name", asWritten: "short name", of: "Pile", datatype: "text",
-    defined: "/Pile.spell:658-866",
+    defined: "/Pile.spell:420-628",
   } */
   get shortName() {
     let summary = \`\${this.id}:\`
@@ -398,7 +393,7 @@ export class Pile extends ViewableList {
   syntax: "move {thisArg:expression} to {callArgs:expression}", output: "move_to_$pile",
   rule: "method_call", of: "Card", alias: ["statement", "expression"], kind: "method",
   name: "move a card to a pile", params: [{ name: "pile", datatype: "Pile" }], returns: "choice",
-  defined: "/Pile.spell:922-1335",
+  defined: "/Pile.spell:684-1097",
 } */
 Card.prototype.moveToPile = function (pile) {
   // - refused, nothing moves, and there's nothing to undo
@@ -408,50 +403,10 @@ Card.prototype.moveToPile = function (pile) {
 }
 core.describeAction(Card, "moveToPile", { title: "Move Card to Pile", cancels: true, undoneAs: "Move Card to Pile" })
 
-/*! SPELL: DECLARES {
-  syntax: "test piles", output: "test_piles", rule: "method_call", alias: "statement",
-  kind: "function", name: "piles",
-  defined: "/Pile.spell:1338-2026",
-} */
-export function testPiles() {
-  return core.test("test piles", function testPiles() {
-    const it = new Pile()
-    core.echoTestAction(\`set the stock to a new pile with id "stock"\`)
-    const stock = new Pile({ id: "stock" })
-    core.expect(stock.color, \`stock's color\`, "none", \`"none"\`)
-    core.expect(stock.value, \`stock's value\`, 0, \`0\`)
-    core.echoTestAction(\`add (a new card whose rank is queen, suit is spades and direction is up) to the stock\`)
-    stock.append(new Card({
-      rank: "queen",
-      suit: "spades",
-      direction: "up"
-    }))
-    core.echoTestAction(\`add (a new card whose rank is 7, suit is hearts and direction is down) to the stock\`)
-    stock.append(new Card({
-      rank: 7,
-      suit: "hearts",
-      direction: "down"
-    }))
-    core.expect(stock.color, \`stock's color\`, "red", \`red\`)
-    core.expect(stock.value, \`stock's value\`, 7, \`7\`)
-    core.expect(stock.shortName, \`stock's short name\`, "stock: Q♠↑ 7♥↓", \`"stock: Q♠↑ 7♥↓"\`)
-
-    /** a card is in one pile at a time */
-    const discards = new Pile({ id: "discards" })
-    core.echoTestAction(\`get the top card of the stock\`)
-    const it2 = stock.lastItem
-    core.echoTestAction(\`add it to the discards\`)
-    discards.append(it2)
-    core.expect(it2?.pile === discards, \`its pile is the discards\`, true, \`yes\`)
-    core.expect(stock.length, \`the number of cards in the stock\`, 1, \`1\`)
-    core.expect(discards.shortName, \`the discards' short name\`, "discards: 7♥↓", \`"discards: 7♥↓"\`)
-  })
-}
-
 /** a card is in one pile at a time:  moving it to another pile takes it off this one */
 /*! SPELL: DECLARES {
   property: "pile", of: "Card", datatype: "Pile", exclusive: true,
-  defined: "/Pile.spell:2122-2141",
+  defined: "/Pile.spell:1193-1212",
 } */
 Object.defineProperty(Card.prototype, "pile", {
   get() {
@@ -470,14 +425,53 @@ Object.defineProperty(Card.prototype, "lastPile", {
   syntax: "{operator:is_or_is_not} on top of its pile", output: "is_on_top_of_its_pile",
   rule: "method_postfix", of: "Card", kind: "method", name: '"is on top of its pile"',
   returns: "choice",
-  defined: "/Pile.spell:2143-2203",
+  defined: "/Pile.spell:1214-1274",
 } */
 Object.defineProperty(Card.prototype, "isOnTopOfItsPile", {
   get() {
     return this === this.pile.lastItem
   },
   configurable: true
-})",
+})
+
+/*! SPELL: DECLARES {
+  syntax: "test piles", output: "test_piles", rule: "method_call", alias: "statement",
+  kind: "function", name: "piles",
+  defined: "/Pile.spell:1310-1959",
+} */
+export function testPiles() {
+  return core.test("test piles", function testPiles() {
+    core.echoTestAction(\`set the stock to a new pile with id "stock"\`)
+    const stock = new Pile({ id: "stock" })
+    core.expect(stock.color, \`stock's color\`, "none", \`"none"\`)
+    core.expect(stock.value, \`stock's value\`, 0, \`0\`)
+    core.echoTestAction(\`add a new card with rank queen, suit spades and direction up to the stock\`)
+    stock.append(new Card({
+      rank: "queen",
+      suit: "spades",
+      direction: "up"
+    }))
+    core.echoTestAction(\`add a new card with rank 7, suit hearts and direction down to the stock\`)
+    stock.append(new Card({
+      rank: 7,
+      suit: "hearts",
+      direction: "down"
+    }))
+    core.expect(stock.color, \`stock's color\`, "red", \`red\`)
+    core.expect(stock.value, \`stock's value\`, 7, \`7\`)
+    core.expect(stock.shortName, \`stock's short name\`, "stock: Q♠↑ 7♥↓", \`"stock: Q♠↑ 7♥↓"\`)
+
+    /** a card is in one pile at a time */
+    const discards = new Pile({ id: "discards" })
+    core.echoTestAction(\`get the top card of the stock\`)
+    const it = stock.lastItem
+    core.echoTestAction(\`add it to the discards\`)
+    discards.append(it)
+    core.expect(it?.pile === discards, \`its pile is the discards\`, true, \`yes\`)
+    core.expect(stock.length, \`the number of cards in the stock\`, 1, \`1\`)
+    core.expect(discards.shortName, \`the discards' short name\`, "discards: 7♥↓", \`"discards: 7♥↓"\`)
+  })
+}",
     "errors": [],
     "path": "/Pile.spell",
     "warnings": [],
@@ -540,13 +534,13 @@ export function testANewDeck() {
     "compiled": "/** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 /*! SPELL: DECLARES {
   type: "StockPile", superType: "Pile",
-  defined: "/Solitaire.spell:5509-5809",
+  defined: "/Solitaire.spell:5532-5832",
 } */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "StockPile", datatype: "text",
-    defined: "/Solitaire.spell:5539-5555",
+    defined: "/Solitaire.spell:5562-5578",
   } */
   get layout() {
     return "stacked"
@@ -572,13 +566,13 @@ export class StockPile extends Pile {
 /** Where the stock's cards go as they're turned over */
 /*! SPELL: DECLARES {
   type: "DiscardPile", superType: "Pile",
-  defined: "/Solitaire.spell:5811-5995",
+  defined: "/Solitaire.spell:5834-6018",
 } */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "DiscardPile", datatype: "text",
-    defined: "/Solitaire.spell:5843-5859",
+    defined: "/Solitaire.spell:5866-5882",
   } */
   get layout() {
     return "stacked"
@@ -598,13 +592,13 @@ export class DiscardPile extends Pile {
 /** Where a suit is built up, ace to king, one card at a time */
 /*! SPELL: DECLARES {
   type: "Foundation", superType: "Pile",
-  defined: "/Solitaire.spell:5997-6421",
+  defined: "/Solitaire.spell:6020-6444",
 } */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "Foundation", datatype: "text",
-    defined: "/Solitaire.spell:6027-6043",
+    defined: "/Solitaire.spell:6050-6066",
   } */
   get layout() {
     return "stacked"
@@ -612,7 +606,7 @@ export class Foundation extends Pile {
 
   /*! SPELL: DECLARES {
     property: "suit", of: "Foundation", datatype: "CardSuit",
-    defined: "/Solitaire.spell:6107-6132",
+    defined: "/Solitaire.spell:6130-6155",
   } */
   // - its "suit" is a card suit
   static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
@@ -638,13 +632,13 @@ export class Foundation extends Pile {
 /** A column, built down from king to ace, red and black in turn */
 /*! SPELL: DECLARES {
   type: "Column", superType: "Pile",
-  defined: "/Solitaire.spell:6423-6737",
+  defined: "/Solitaire.spell:6446-6760",
 } */
 export class Column extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "Column", datatype: "text",
-    defined: "/Solitaire.spell:6449-6466",
+    defined: "/Solitaire.spell:6472-6489",
   } */
   get layout() {
     return "vertical"
@@ -666,7 +660,7 @@ export class Column extends Pile {
 /** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
 /*! SPELL: DECLARES {
   type: "Solitaire", superType: "App",
-  defined: "/Solitaire.spell:0-5221",
+  defined: "/Solitaire.spell:0-5244",
 } */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -679,13 +673,13 @@ export class Solitaire extends App {
   /*! SPELL: DECLARES {
     syntax: "draw {thisArg:expression}?", output: "draw", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], kind: "method", name: "draw solitaire",
-    defined: "/Solitaire.spell:182-1235",
+    defined: "/Solitaire.spell:182-1258",
   } */
   draw() {
     return [
       h("ui-segment", { inverted: true, "attach-to": "top" },
         h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
-          h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
+          h("ui-text", { size: "big", slot: "title", heavy: true }, "Spell Solitaire"),
           core.drawAction(this, "autoPlay", { "in-menu": true }),
           core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
@@ -703,9 +697,9 @@ export class Solitaire extends App {
         h("test-project-foundation", { id: "diamonds" }),
         h("test-project-foundation", { id: "hearts" }),
         h("test-project-foundation", { id: "spades" }),
-        h("test-project-column", { id: "C1" }),
         h("test-project-column", { id: "C2" }),
         h("test-project-column", { id: "C3" }),
+        h("test-project-column", { id: "C1" }),
         h("test-project-column", { id: "C4" }),
         h("test-project-column", { id: "C5" }),
         h("test-project-column", { id: "C6" }),
@@ -724,7 +718,7 @@ export class Solitaire extends App {
   set deck(value) { this.setProp("deck", value) }
   /*! SPELL: DECLARES {
     property: "score", of: "Solitaire", datatype: "number",
-    defined: "/Solitaire.spell:608-626",
+    defined: "/Solitaire.spell:631-649",
   } */
   // <number "score" />
   static { this.declareProp("score", { type: "number" }) }
@@ -732,7 +726,7 @@ export class Solitaire extends App {
   set score(value) { this.setProp("score", value) }
   /*! SPELL: DECLARES {
     property: "stock", of: "Solitaire", datatype: "StockPile",
-    defined: "/Solitaire.spell:701-722",
+    defined: "/Solitaire.spell:724-745",
   } */
   // <stock-pile "stock"/>
   static { this.declareProp("stock", { init: () => new StockPile({ id: "stock" }), early: true }) }
@@ -740,7 +734,7 @@ export class Solitaire extends App {
   set stock(value) { this.setProp("stock", value) }
   /*! SPELL: DECLARES {
     property: "discard_pile", asWritten: "discard pile", of: "Solitaire", datatype: "DiscardPile",
-    defined: "/Solitaire.spell:726-756",
+    defined: "/Solitaire.spell:749-779",
   } */
   // <discard-pile "discard pile"/>
   static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
@@ -748,7 +742,7 @@ export class Solitaire extends App {
   set discardPile(value) { this.setProp("discardPile", value) }
   /*! SPELL: DECLARES {
     property: "clubs", of: "Solitaire", datatype: "Foundation",
-    defined: "/Solitaire.spell:773-805",
+    defined: "/Solitaire.spell:796-828",
   } */
   // <foundation "clubs" suit=clubs/>
   static { this.declareProp("clubs", { init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true }) }
@@ -756,7 +750,7 @@ export class Solitaire extends App {
   set clubs(value) { this.setProp("clubs", value) }
   /*! SPELL: DECLARES {
     property: "diamonds", of: "Solitaire", datatype: "Foundation",
-    defined: "/Solitaire.spell:809-847",
+    defined: "/Solitaire.spell:832-870",
   } */
   // <foundation "diamonds" suit=diamonds/>
   static { this.declareProp("diamonds", { init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true }) }
@@ -764,7 +758,7 @@ export class Solitaire extends App {
   set diamonds(value) { this.setProp("diamonds", value) }
   /*! SPELL: DECLARES {
     property: "hearts", of: "Solitaire", datatype: "Foundation",
-    defined: "/Solitaire.spell:851-885",
+    defined: "/Solitaire.spell:874-908",
   } */
   // <foundation "hearts" suit=hearts/>
   static { this.declareProp("hearts", { init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true }) }
@@ -772,23 +766,15 @@ export class Solitaire extends App {
   set hearts(value) { this.setProp("hearts", value) }
   /*! SPELL: DECLARES {
     property: "spades", of: "Solitaire", datatype: "Foundation",
-    defined: "/Solitaire.spell:889-923",
+    defined: "/Solitaire.spell:912-946",
   } */
   // <foundation "spades" suit=spades/>
   static { this.declareProp("spades", { init: () => new Foundation({ id: "spades", suit: "spades" }), early: true }) }
   get spades() { return this.getProp("spades") }
   set spades(value) { this.setProp("spades", value) }
   /*! SPELL: DECLARES {
-    property: "C1", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:927-941",
-  } */
-  // <column "C1"/>
-  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
-  get C1() { return this.getProp("C1") }
-  set C1(value) { this.setProp("C1", value) }
-  /*! SPELL: DECLARES {
     property: "C2", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:945-959",
+    defined: "/Solitaire.spell:950-964",
   } */
   // <column "C2"/>
   static { this.declareProp("C2", { init: () => new Column({ id: "C2" }), early: true }) }
@@ -796,15 +782,23 @@ export class Solitaire extends App {
   set C2(value) { this.setProp("C2", value) }
   /*! SPELL: DECLARES {
     property: "C3", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:963-977",
+    defined: "/Solitaire.spell:968-982",
   } */
   // <column "C3"/>
   static { this.declareProp("C3", { init: () => new Column({ id: "C3" }), early: true }) }
   get C3() { return this.getProp("C3") }
   set C3(value) { this.setProp("C3", value) }
   /*! SPELL: DECLARES {
+    property: "C1", of: "Solitaire", datatype: "Column",
+    defined: "/Solitaire.spell:986-1000",
+  } */
+  // <column "C1"/>
+  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
+  get C1() { return this.getProp("C1") }
+  set C1(value) { this.setProp("C1", value) }
+  /*! SPELL: DECLARES {
     property: "C4", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:981-995",
+    defined: "/Solitaire.spell:1004-1018",
   } */
   // <column "C4"/>
   static { this.declareProp("C4", { init: () => new Column({ id: "C4" }), early: true }) }
@@ -812,7 +806,7 @@ export class Solitaire extends App {
   set C4(value) { this.setProp("C4", value) }
   /*! SPELL: DECLARES {
     property: "C5", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:999-1013",
+    defined: "/Solitaire.spell:1022-1036",
   } */
   // <column "C5"/>
   static { this.declareProp("C5", { init: () => new Column({ id: "C5" }), early: true }) }
@@ -820,7 +814,7 @@ export class Solitaire extends App {
   set C5(value) { this.setProp("C5", value) }
   /*! SPELL: DECLARES {
     property: "C6", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:1017-1031",
+    defined: "/Solitaire.spell:1040-1054",
   } */
   // <column "C6"/>
   static { this.declareProp("C6", { init: () => new Column({ id: "C6" }), early: true }) }
@@ -828,7 +822,7 @@ export class Solitaire extends App {
   set C6(value) { this.setProp("C6", value) }
   /*! SPELL: DECLARES {
     property: "C7", of: "Solitaire", datatype: "Column",
-    defined: "/Solitaire.spell:1035-1049",
+    defined: "/Solitaire.spell:1058-1072",
   } */
   // <column "C7"/>
   static { this.declareProp("C7", { init: () => new Column({ id: "C7" }), early: true }) }
@@ -839,7 +833,7 @@ export class Solitaire extends App {
     syntax: "restart the game (of {thisArg:expression})?", output: "restart_the_game",
     rule: "method_call", of: "Solitaire", alias: ["statement", "expression"],
     group: "Dealing & the Stock Pile", kind: "method", name: "restart the game", waits: true,
-    defined: "/Solitaire.spell:1272-1898",
+    defined: "/Solitaire.spell:1295-1921",
   } */
   async restartTheGame() {
     this.score = 0
@@ -866,7 +860,7 @@ export class Solitaire extends App {
     rule: "method_call", of: "Solitaire", alias: ["statement", "expression"],
     group: "Dealing & the Stock Pile", kind: "method", name: "turn over the next card",
     returns: "nothing", waits: true,
-    defined: "/Solitaire.spell:1902-2426",
+    defined: "/Solitaire.spell:1925-2449",
   } */
   async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
@@ -883,7 +877,7 @@ export class Solitaire extends App {
     syntax: "reset the stock (of {thisArg:expression})?", output: "reset_the_stock",
     rule: "method_call", of: "Solitaire", alias: ["statement", "expression"],
     group: "Dealing & the Stock Pile", kind: "method", name: "reset the stock", returns: "nothing",
-    defined: "/Solitaire.spell:2430-2667",
+    defined: "/Solitaire.spell:2453-2690",
   } */
   resetTheStock() {
     const cards = this.discardPile.clone()
@@ -897,7 +891,7 @@ export class Solitaire extends App {
     syntax: "auto play (of {thisArg:expression})?", output: "auto_play", rule: "method_call",
     of: "Solitaire", alias: ["statement", "expression"], group: "Game Play", kind: "method",
     name: "auto play", returns: "nothing", waits: true,
-    defined: "/Solitaire.spell:3188-4286",
+    defined: "/Solitaire.spell:3211-4309",
   } */
   async autoPlay() {
     let anythingChanged = false
@@ -938,7 +932,7 @@ export class Solitaire extends App {
     syntax: "cheat {thisArg:expression}?", output: "cheat", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], group: "Game Play", kind: "method", name: "cheat",
     returns: "nothing",
-    defined: "/Solitaire.spell:4290-4853",
+    defined: "/Solitaire.spell:4313-4876",
   } */
   cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
@@ -968,7 +962,7 @@ core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon
   syntax: "play {thisArg:expression}", output: "play", rule: "method_call", of: "Card",
   alias: ["statement", "expression"], group: "Game Play", kind: "method", name: "play a card",
   returns: "choice", waits: true,
-  defined: "/Solitaire.spell:2691-2928",
+  defined: "/Solitaire.spell:2714-2951",
 } */
 Card.prototype.play = async function () {
   if (this.pile === solitaire.stock) await solitaire.turnOverTheNextCard()
@@ -983,7 +977,7 @@ Card.prototype.play = async function () {
 /*! SPELL: DECLARES {
   kind: "method", name: "moving a card to a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "nothing",
-  defined: "/Solitaire.spell:2931-3185",
+  defined: "/Solitaire.spell:2954-3208",
 } */
 Card.prototype.afterMoveToPile = function (pile) {
   solitaire.score = solitaire.score + this.thePointsForCardOnPile(pile)
@@ -999,7 +993,7 @@ core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })
   alias: ["statement", "expression"], group: "Game Play", kind: "method",
   name: "the points for (a card) on (a pile)", params: [{ name: "pile", datatype: "Pile" }],
   returns: "number",
-  defined: "/Solitaire.spell:4856-5089",
+  defined: "/Solitaire.spell:4879-5112",
 } */
 Card.prototype.thePointsForCardOnPile = function (pile) {
   if (pile instanceof Foundation) return 10
@@ -1023,7 +1017,7 @@ core.heading("The piles")
 /*! SPELL: DECLARES {
   syntax: "test the moves", output: "test_the_moves", rule: "method_call", alias: "statement",
   kind: "function", name: "the moves",
-  defined: "/Solitaire.spell:6739-8194",
+  defined: "/Solitaire.spell:6762-8217",
 } */
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

@@ -406,6 +406,52 @@ describe("<ui-docs-tokens playground>", () => {
     expect(document.documentElement.style.getPropertyValue("--x-button-radius")).toBe("")
   })
 
+  describe("a child that measures its own width (epic `mockup` I34)", () => {
+    /** A 600px-wide playground over `x-button`, with `children` as the preview. */
+    async function widthPlayground(children: string) {
+      const host = await render(
+        `<div style="width: 600px"><ui-docs-tokens family="x-button" playground>${children}</ui-docs-tokens></div>`
+      )
+      const preview = host.shadowRoot!.querySelector<HTMLElement>("[part~=preview]")!
+      return { host, previewWidth: preview.getBoundingClientRect().width }
+    }
+
+    it("gets the preview's whole line, not 0 wide", async () => {
+      const { host, previewWidth } = await widthPlayground(
+        `<div class="sample" style="container-type: inline-size"><p>The page goes here.</p></div>`
+      )
+      const sample = host.querySelector(".sample")!
+      await expect.poll(() => sample.getBoundingClientRect().width).toBe(previewWidth)
+      expect(previewWidth).toBeGreaterThan(300)
+      expect(host.matches(":state(wide-preview)")).toBe(true)
+    })
+
+    it("one level down too:  a resizable box around it fills the line, and its dragged width still wins", async () => {
+      const { host, previewWidth } = await widthPlayground(
+        `<div class="sample" style="resize: both; overflow: auto"><div style="container-type: inline-size">Page</div></div>`
+      )
+      const sample = host.querySelector<HTMLElement>(".sample")!
+      await expect.poll(() => sample.getBoundingClientRect().width).toBe(previewWidth)
+      sample.style.width = "200px"
+      expect(sample.getBoundingClientRect().width).toBe(200)
+    })
+
+    it("follows a child added later", async () => {
+      const { host, previewWidth } = await widthPlayground(`<span>Sample</span>`)
+      expect(host.matches(":state(wide-preview)")).toBe(false)
+      host.insertAdjacentHTML("beforeend", `<div class="sample" style="container-type: inline-size">Page</div>`)
+      const sample = host.querySelector(".sample")!
+      await expect.poll(() => sample.getBoundingClientRect().width).toBe(previewWidth)
+    })
+
+    it("leaves a row of plain children at their own widths", async () => {
+      const { host, previewWidth } = await widthPlayground(`<span class="sample">Go</span><span>Stop</span>`)
+      await ElementFixture.tick()
+      expect(host.matches(":state(wide-preview)")).toBe(false)
+      expect(host.querySelector(".sample")!.getBoundingClientRect().width).toBeLessThan(previewWidth / 4)
+    })
+  })
+
   it("restyles a real component through its public token", async () => {
     const host = await render(
       `<ui-docs-tokens family="ui-button" playground tokens="--ui-button-radius"><ui-button>Go</ui-button></ui-docs-tokens>`,

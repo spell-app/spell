@@ -1295,7 +1295,12 @@
     .bubbly-body > ui-section.bubbly-section:has(> .bubbly-group) {
       margin-left: calc(-1 * var(--bubbly-gutter));
     }
-    :is(.bubbly-head-pill, .bubbly-pill) {
+    /*
+     * a head's words a spacer into its band, with a body or not, as the editor's (I150)
+     * - `.bubbly-block >`:  as strong as every band's padding above, whose `:is()` counts as two classes;
+     *   without it a head with a body kept 3px, its words at its round end (`a "card"`, `its "color"`)
+     */
+    :is(.bubbly-block > .bubbly-head-pill, .bubbly-pill) {
       padding-left: var(--bubbly-head-words);
     }
     .bubbly-group > .bubbly-head-pill {

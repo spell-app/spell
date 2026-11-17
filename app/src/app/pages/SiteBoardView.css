@@ -5,6 +5,9 @@
  *   at its `--SiteCard-row` and `--SiteCard-column`.
  * - A section is its group's line, if it has one, over a grid of its cards, `.SiteGrid`:
  *   a group's cards are drawn a column to the left (`--SiteGrid-shift`), as its line takes the place of its card.
+ * - The board sits in the middle of its frame, 20px in from every edge (Owen, epic `mockup` I37);
+ *   a section narrower than the widest starts at the same left edge, not centred on its own.
+ *   - Wider than its frame:  from its left edge, scrolling, as `margin-inline: auto` never goes below 0.
  * - On a board with any thumbnail, every card is the same size, and a thumbnail shows only as much of itself as fits,
  *   from its top:  a tall sidebar is cut off.
  */
@@ -16,8 +19,9 @@
   flex-direction: column;
   gap: 26px;
   width: max-content;
-  /* room for a card's shadow and its rise on hover (`<ui-card>`'s link look), so the scroll box never cuts them */
-  padding: 12px 14px 20px 14px;
+  margin-inline: auto;
+  /* Owen's 20px, off the 4px grid on purpose (I37);  room too for a card's shadow and its rise on hover */
+  padding: 20px;
 }
 
 .SiteBoard:has(.SiteCard[image]) .SiteGrid {
@@ -96,6 +100,14 @@
       display: none;
     }
   }
+}
+
+/*
+ * while a card moves, each grid's one more column (a card and a gap) takes no room in the board:
+ * so the board, centred, doesn't shift under the pointer as the column shows
+ */
+.SiteBoard[data-moving] .SiteGrid {
+  margin-inline-end: calc(-1 * (var(--SiteBoard-card-width) + var(--SiteBoard-gap)));
 }
 
 .SiteBoard[data-moving] .spot {

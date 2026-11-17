@@ -5,7 +5,8 @@
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - Class words:  `global`, `playground` (`ui global playground tokens`).
- *   The data's progress is `:state(loading)` / `:state(error)`;  a changed token, `:state(modified)`.
+ *   The data's progress is `:state(loading)` / `:state(error)`;  a changed token, `:state(modified)`;
+ *   a preview whose children take the whole line, `:state(wide-preview)`.
  * - Texts:  every column header, label and message it shows;  the data's own descriptions are English.
  */
 
@@ -131,7 +132,13 @@ export const docsTokensVocabulary = {
   states: [
     { name: "loading", description: "The site data is on its way." },
     { name: "error", description: "The site data failed to load, or names no such family." },
-    { name: "modified", description: "The playground has set at least one token." }
+    { name: "modified", description: "The playground has set at least one token." },
+    {
+      name: "wide-preview",
+      description:
+        "The preview holds a child that sizes itself by its own width (a page layout, form, table ...):  " +
+        "its children take the whole line."
+    }
   ],
   texts: [
     { key: "token", text: "Token", description: "Column header:  the custom property's name." },
