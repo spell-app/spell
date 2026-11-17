@@ -45776,6 +45776,36 @@ export interface UISubmenuAttributes {
    */
   "prop:menu"?: string
   /**
+   * The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with `split` the chevron end's tooltip ("Pick one of the parts under the mouse").  Default:  its `label`.
+   * - takes:  text
+   */
+  "flyout-label"?: string
+  /**
+   * `flyout-label`, as the DOM element's property.
+   * @deprecated write `flyout-label` -- `prop:` stays only for compiled spell
+   */
+  "prop:flyoutLabel"?: string
+  /**
+   * With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
+  /**
+   * Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it.
+   * - takes:  flag (present / absent)
+   */
+  split?: boolean | ""
+  /**
+   * `split`, as the DOM element's property.
+   * @deprecated write `split` -- `prop:` stays only for compiled spell
+   */
+  "prop:split"?: boolean | ""
+  /**
    * Can't be opened.
    * - takes:  flag (present / absent)
    */

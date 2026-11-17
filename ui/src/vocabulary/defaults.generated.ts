@@ -1632,6 +1632,9 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "label", kind: "string", group: "name" },
     { name: "icon", kind: "icon", group: "content" },
     { name: "menu", kind: "string", group: "content" },
+    { name: "flyout-label", kind: "string", group: "name" },
+    { name: "value", kind: "string", group: "behaviour" },
+    { name: "split", kind: "keyOnly", group: "behaviour" },
     { name: "disabled", kind: "keyOnly", group: "states" }
   ],
   "ui-summary": [],

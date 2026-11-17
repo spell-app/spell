@@ -41463,6 +41463,21 @@
           "description": "Id of a `<ui-menu>` elsewhere on the page to show as the fly-out, in place of the items inside.  It stays where it is, shown beside the row while open;  write `popover` on it, so it's hidden until then."
         },
         {
+          "name": "flyout-label",
+          "kind": "string",
+          "description": "The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with `split` the chevron end's tooltip (\"Pick one of the parts under the mouse\").  Default:  its `label`."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`."
+        },
+        {
+          "name": "split",
+          "kind": "keyOnly",
+          "description": "Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it."
+        },
+        {
           "name": "disabled",
           "kind": "keyOnly",
           "description": "Can't be opened."
@@ -41648,7 +41663,7 @@
         },
         {
           "name": "chevron",
-          "description": "The chevron at the row's end, pointing to the fly-out."
+          "description": "The chevron at the row's end, pointing to the fly-out;  with `split`, what opens it."
         },
         {
           "name": "flyout",
@@ -41659,6 +41674,10 @@
         {
           "name": "open",
           "description": "Its fly-out is showing."
+        },
+        {
+          "name": "split",
+          "description": "Its title chooses;  its chevron end opens the fly-out (`split`)."
         },
         {
           "name": "disabled",

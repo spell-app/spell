@@ -10857,7 +10857,7 @@
       "name": "::part(chevron)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-submenu>`:  The chevron at the row's end, pointing to the fly-out."
+        "value": "Part of:\n\n- `<ui-submenu>`:  The chevron at the row's end, pointing to the fly-out;  with `split`, what opens it."
       }
     },
     {
@@ -13170,6 +13170,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-statistics>`:  Set unless `horizontal` or `widths`:  the group keeps Fomantic's 1em top margin, which the HOST carries (so it collapses with the content above)."
+      }
+    },
+    {
+      "name": ":state(split)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-submenu>`:  Its title chooses;  its chevron end opens the fly-out (`split`)."
       }
     },
     {
