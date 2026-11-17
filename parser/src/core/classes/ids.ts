@@ -43,8 +43,24 @@ export const ID_PROP: PropInfo = {
 }
 
 /**
+ * How `App` declares its `id`:  its own name, lower kebab case, e.g. `solitaire` for `solitaire is an app`
+ * (Spanish `solitario`), rather than a made-up one (language T147).
+ * - A program has one app, so its name is enough to tell it apart:  the same id every run.
+ * - So it counts as chosen (`hasChosenId()`):  `Solitaire#solitaire` finds it.
+ * - Still made only when read, and settable:  a set id, or a loaded one, wins.
+ */
+export const APP_ID_PROP: PropInfo = {
+  type: "text",
+  init(this: object) {
+    return _.kebabCase(this.constructor.name) || "app"
+  }
+}
+
+/**
  * Did the program choose `thing`'s id, or load it, rather than one being made up for it (`newThingId()`)?
  * - e.g. `new Settings({ id: "main" })`, or a thing read back from a saved file:  the same id every run.
+ * - A member's thing, named by its member (`"stock" is a new stock pile` => `{ id: "stock" }`), and an app
+ *   (`APP_ID_PROP`) are chosen too.
  * - A made-up id is new each run, so nothing kept under it would be found again:
  *   what's remembered for a thing is kept under its chosen id (`Thing.rememberedKeyFor()`).
  * - Reads no id:  a thing whose id is never read still has none.

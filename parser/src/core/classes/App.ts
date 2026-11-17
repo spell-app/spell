@@ -6,6 +6,7 @@ import { describedMethods } from "spell/parser/core/described"
 import type { ShownHistory } from "spell/parser/core/undoing"
 // Import directly to avoid circular import
 import { View } from "./View"
+import { APP_ID_PROP } from "./ids"
 
 /**
  * `App`:  a `View` that draws a whole application -- what `a game is an app` extends.
@@ -13,6 +14,7 @@ import { View } from "./View"
  *   `<solitaire-app>`, which `<spell-viewer>` places inside itself when the app starts.
  * - Its element shows its drawing as its CHILDREN, not in its shadow root (`drawsInItsChildren`):
  *   so the project's `.css` files, installed where the app mounts (`core.domRoot()`), still reach its board.
+ * - Its `id` is its name, lower kebab case:  `solitaire` (`APP_ID_PROP`, language T147).
  * - Set the `draw` method (e.g. via a spell-compiled `to draw`) and start things with `start the game`.
  * - Everything else as a `View`.
  */
@@ -23,6 +25,10 @@ export class App extends View {
    * - Read by `core.drawThing()` and the page's element (app's `SpellElement`).
    */
   static drawsInItsChildren = true
+
+  static {
+    this.declareProp("id", APP_ID_PROP)
+  }
 
   /**
    * SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:
@@ -36,6 +42,7 @@ export class App extends View {
   /**
    * An app's remembered props are kept by name alone, e.g. `theme` at `@owen/solitaire:theme`:
    * a program has one app, so it needs no id -- see `Thing.rememberedKeyFor()`.
+   * - Not `solitaire.theme`, now its id is its name (`APP_ID_PROP`):  what's kept stays where it was.
    */
   protected rememberedKeyFor(property: string): string {
     return property

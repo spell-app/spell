@@ -418,6 +418,42 @@ describe("SpellTyping.commentIndent() (I161)", () => {
   })
 })
 
+describe("SpellTyping.commentSplitAt() (epic `codemirror` I24)", () => {
+  /** Each head kind, its comment after it across a gap of a space and tabs, as Solitaire's card writes them. */
+  const HEADS = [
+    `\tgroup "Names" \t\t\t-- identifying a card`,
+    `a "card" is a draggable two sided view \t-- one of the deck's`,
+    `\tto "flip it" with title "Flip"\t\t-- face up or down`,
+    `\ton click\t\t-- turn it over`,
+    `\tits "face" is\t\t\t// the card it draws`
+  ]
+
+  test.each(HEADS)(
+    "every caret spot in the gap, and inside the `--`:  the code's end and the comment's start",
+    (line) => {
+      const commentStart = line.search(/--|\/\//)
+      const codeEnd = line.slice(0, commentStart).trimEnd().length
+      const isDashes = line.startsWith("--", commentStart)
+      for (let column = codeEnd; column <= commentStart + (isDashes ? 1 : 0); column++)
+        expect(SpellTyping.commentSplitAt(line, column), `column ${column}`).toEqual({ codeEnd, commentStart })
+    }
+  )
+
+  test("not inside the comment's `//`, nor past its mark, nor before the code ends, nor with no code", () => {
+    const line = `\tits "face" is\t\t// the card`
+    expect(SpellTyping.commentSplitAt(line, line.indexOf("//") + 1)).toBeUndefined()
+    expect(SpellTyping.commentSplitAt(`\ton click -- turn`, 13)).toBeUndefined()
+    expect(SpellTyping.commentSplitAt(`\ton click -- turn`, 4)).toBeUndefined()
+    expect(SpellTyping.commentSplitAt(`\t-- a note`, 2)).toBeUndefined()
+    expect(SpellTyping.commentSplitAt(`\t-- a note`, 1)).toBeUndefined()
+  })
+
+  test("the comment then goes a level in from a group's head:  the group's first line, its description", () => {
+    const lines = [`\tgroup "Names" \t\t-- identifying a card`, `\tits "name" is its rank && "of" && its suit`]
+    expect(SpellTyping.commentIndent(lines, 0, { insertSpaces: false, tabSize: 4 })).toBe("\t\t")
+  })
+})
+
 describe("SpellTyping.spaceAtEnd() (I160)", () => {
   test("the tabs and spaces at a line's end, and only those", () => {
     expect(SpellTyping.spaceAtEnd(`\tits "face" is\t\t\t`)).toBe(3)

@@ -10,6 +10,7 @@ import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 import { lists } from "./lists.parser"
 import { BracketedList } from "./BracketedList"
 import { CanGiveUp } from "./CanGiveUp"
+import { CanDo } from "./CanDo"
 import { CanTake } from "./CanTake"
 import { CopyList } from "./CopyList"
 import { EndsWith } from "./EndsWith"
@@ -1108,6 +1109,26 @@ lists.addRule(ListMove, {
       tests: [
         ["move card to tableau", "core.move(card, tableau)"],
         ["if move card to tableau then print 1", "if (core.move(card, tableau)) core.console.log(1)"]
+      ]
+    }
+  ]
+})
+
+// does an action say yes, asked of each item (epic `language` T146):  `where it can play the card`
+lists.addRule(CanDo, {
+  roles: { match: "question" },
+  syntax: "it? {operator:can_or_cannot} {call:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", '\tto "play it"', "\t\treturn yes"].join("\n"), "block")
+        scope.variables?.add({ name: "card", datatype: "Card" })
+      },
+      tests: [
+        ["it can play the card", "card.play()"],
+        ["can play the card", "card.play()"],
+        ["it cannot play the card", "!card.play()"]
       ]
     }
   ]

@@ -286,6 +286,24 @@ export class SpellTyping {
   }
 
   /**
+   * Where Enter before a comment after code splits `text`, the caret at `column` (0-based), if it's there
+   * (epic `editor` I155;  epic `codemirror` I24):  the code before it stays, the comment goes on its own line.
+   * - The caret anywhere in the gap between the code and the comment, or between the comment's two dashes:
+   *   the bubbly look draws `--` as ONE dash, `—`, so a click on it can put the caret inside it.
+   * - `codeEnd`:  the column just after the code, its tabs and spaces off;  `commentStart`:  the comment's `--` or `//`
+   * - `undefined`:  no code before the caret, or no comment after it.
+   * - Any head:  a group's, a type's, an action's, an event's, a property's.
+   */
+  static commentSplitAt(text: string, column: number): CommentSplit | undefined {
+    const isInDashes = column > 0 && text.startsWith("--", column - 1) && text[column - 2] !== "-"
+    const at = isInDashes ? column - 1 : column
+    const before = text.slice(0, at)
+    const after = text.slice(at)
+    if (!SpellKeywords.CODE_BEFORE.test(before) || !SpellKeywords.COMMENT_AFTER.test(after)) return undefined
+    return { codeEnd: before.trimEnd().length, commentStart: at + SpellTyping.indentOf(after).length }
+  }
+
+  /**
    * The indent a comment after the code on `lines[index]` takes on its own line (I161):  the level of the body under
    * that line, so the body still reads as its body.
    * - The next non-blank line's indent, when it's further in than the line's:  its body's first line.
@@ -434,6 +452,14 @@ export type EnterRule = {
    * - `indentOutdent`:  the caret on a line a level in, what was after it on a line of its own at the line's level
    */
   indent: "indent" | "indentOutdent"
+}
+
+/** Where Enter before a comment after code splits its line:  `SpellTyping.commentSplitAt()`'s. */
+export type CommentSplit = {
+  /** column just after the code, the tabs and spaces after it left off */
+  codeEnd: number
+  /** column of the comment's `--` or `//` */
+  commentStart: number
 }
 
 /** A language's words whose next slot is a quoted name, by where the line is -- see `SpellTyping.opensQuotes()`. */

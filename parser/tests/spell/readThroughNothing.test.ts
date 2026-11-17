@@ -43,7 +43,7 @@ const ES = [
 
 /**
  * A read a check just before it found there, read off with `.` (epic `data`, T121, J182):  `noteChecked()`.
- * - `both`:  an `and`'s right side;  `greet`:  an `if`'s statements, then the read after it, unchecked;
+ * - `both`:  an `and`'s right side (`its owner exists and ...`:  a value `and` a value is both, in a list, T146);  `greet`:  an `if`'s statements, then the read after it, unchecked;
  *   `wave`:  an `otherwise` after `is nothing`;  `forget`:  set in between, so still `?.`.
  */
 const CHECKED = [
@@ -51,7 +51,7 @@ const CHECKED = [
   '\t- its "name" is text',
   'a "pet" is a thing:',
   '\t- its "owner" is an owner',
-  '\t- its "both" is its owner and the name of its owner',
+  '\t- its "both" is its owner exists and the name of its owner is "Ana"',
   "to greet (a pet):",
   "\tif its owner",
   "\t\treturn the name of its owner",
@@ -134,7 +134,7 @@ describe("the X of nothing is nothing", () => {
     for (const writer of [P.JSWriter.instance, P.TSWriter.instance]) {
       test(writer.constructor.name, () => {
         const code = compiled("/Pets.spell", CHECKED, writer)
-        expect(code).toContain("return this.owner && this.owner.name")
+        expect(code).toContain('return this.owner !== undefined && this.owner.name === "Ana"')
         expect(code).toContain("if (this.owner) return this.owner.name\n    return this.owner?.name")
         expect(code).toContain('if (this.owner === undefined) return ""\n    else return this.owner.name')
         // set in between:  it may be nothing again
@@ -145,7 +145,7 @@ describe("the X of nothing is nothing", () => {
 
     test("Python:  a plain attribute, not getattr(..., None)", () => {
       const code = compiled("/Pets.spell", CHECKED, PY.PyWriter.instance)
-      expect(code).toContain("return self.owner and self.owner.name")
+      expect(code).toContain('return (self.owner is not None) and self.owner.name == "Ana"')
       expect(code).toMatch(
         /if self\.owner:\n\s*return self\.owner\.name\n\s*return getattr\(self\.owner, "name", None\)/
       )

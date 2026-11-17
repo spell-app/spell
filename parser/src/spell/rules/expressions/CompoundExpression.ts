@@ -1,6 +1,10 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { And } from "./And"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
+import { JoinedValues } from "./JoinedValues"
+import { Or } from "./Or"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { SpellExpression } from "./SpellExpression"
 import { Precedence, SuffixLeft } from "./expressions.shared"
@@ -61,7 +65,30 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
       .slice(0, tokens.length - rest.length)
       .join("")
       .trim()
-    return new P.Match({ rule: this, matched: [lhs, rhsChain], value, tokens: [...lhs.tokens, ...suffixTokens], scope })
+    const match = new P.Match({
+      rule: this,
+      matched: [lhs, rhsChain],
+      value,
+      tokens: [...lhs.tokens, ...suffixTokens],
+      scope
+    })
+    CompoundExpression.refuseIfJoinedWrong(match, suffixes)
+    return match
+  }
+
+  /**
+   * SIDE EFFECT:  `match` is refused when an `and` / `or` in it joins what it can't (epic `language` T146):
+   * a question and a value, two values of different kinds, `and` and `or` between values with no parentheses ...
+   * - Asked when the errors are gathered, as `JoinedValues.of()` reads what each side is:  a type a line uses may be
+   *   declared below it.
+   */
+  private static refuseIfJoinedWrong(match: P.Match, suffixes: P.Match[]): void {
+    if (!suffixes.some((suffix) => suffix.rule instanceof And || suffix.rule instanceof Or)) return
+    SP.SpellWarnings.refuseIf(
+      match,
+      () => JoinedValues.of(match).problem ?? "",
+      () => !!JoinedValues.of(match).problem
+    )
   }
 
   /**
@@ -70,35 +97,10 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
    * - e.g. `the rank of the card + 1 is 2` => `+` makes `number`, then `is` makes `choice`.
    * - A match only partway there (the editor asking what comes next, `expectedAfter()`) may have neither side yet:
    *   `undefined`, never a throw (a plural call asked its list's, `if the number of cards in the foundations is 52`).
+   * - `and` / `or` between values are values:  a list of both, the first that's there -- see `JoinedValues`.
    */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    const { lhs, rhsChain } = match.groups
-    if (!lhs || !rhsChain) return undefined
-    const output: Array<P.Datatype | undefined> = [lhs.datatype]
-    const opStack: P.Match[] = []
-    for (const suffix of rhsChain.matched) {
-      if (!(suffix instanceof P.Match)) continue
-      reduceWhile(CompoundExpression.precedenceOf(suffix))
-      const rule: InfixOperatorSuffix = suffix.rule as InfixOperatorSuffix
-      if (suffix.rule instanceof PostfixOperatorSuffix) {
-        output.push(rule.getResultDatatype(suffix, output.pop(), undefined))
-      } else {
-        opStack.push(suffix)
-        output.push((suffix.groups.expression as P.Match | undefined)?.datatype)
-      }
-    }
-    reduceWhile(-Infinity)
-    return output[0]
-
-    /** Apply every stacked operator binding at least as tightly as `power` -- as `getAST()`'s namesake. */
-    function reduceWhile(power: number) {
-      for (let top = opStack.at(-1); top && CompoundExpression.precedenceOf(top) >= power; top = opStack.at(-1)) {
-        const operator = opStack.pop()!
-        const rhs = output.pop()
-        const lhs = output.pop()
-        output.push((operator.rule as InfixOperatorSuffix).getResultDatatype(operator, lhs, rhs))
-      }
-    }
+    return JoinedValues.of(match).datatype
   }
 
   /**
@@ -137,6 +139,8 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
       // a bare `instanceof` against a generic class narrows to `InfixOperatorSuffix<any, any>`,
       // which makes `MatchFor<this>` an unhelpful distributed type at the `compileAST()` call below.
       const rule: InfixOperatorSuffix = ruleMatch.rule
+      // `the stock and the discard pile`:  both, in a list -- `A and B and C` one list of three
+      if (valueJoins.has(ruleMatch) && rule instanceof And) return collected(ruleMatch, compile(lhs), compile(rhs))
       const args = {
         operator,
         // `compile()` turns matches and arrays into `ASTNode`s at run time:
@@ -162,6 +166,7 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
     // See: https://en.wikipedia.org/wiki/Shunting-yard_algorithm
     // See: https://www.chris-j.co.uk/parsing.php
     const { lhs, rhsChain } = match.groups
+    const { valueJoins } = JoinedValues.of(match)
     const output: unknown[] = [lhs]
     const opStack: Array<{ match: P.Match; operator: P.Match }> = []
     rhsChain.matched.forEach((rhsItem) => {
@@ -227,4 +232,15 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
   private static precedenceOf(suffix: P.Match): number {
     return (suffix.rule as InfixOperatorSuffix).precedence
   }
+}
+
+/** Lists `and` made of values, so a second `and` adds to it:  see `collected()`. */
+const COLLECTED = new WeakSet<P.ASTArrayLiteral>()
+
+/** `lhs` and `rhs` in one list, `[stock, discardPile]`:  `lhs` a list `and` made, `rhs` added to its items. */
+function collected(match: P.Match, lhs: unknown, rhs: unknown): P.ASTArrayLiteral {
+  const items = lhs instanceof P.ASTArrayLiteral && COLLECTED.has(lhs) ? [...(lhs.items ?? [])] : [lhs]
+  const list = new P.ASTArrayLiteral(match, { items: [...items, rhs] as P.ASTExpression[] })
+  COLLECTED.add(list)
+  return list
 }

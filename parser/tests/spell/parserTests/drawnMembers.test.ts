@@ -40,7 +40,7 @@ describe("members declared in a drawing", () => {
     expect(code).toContain("this.stock.randomize()")
   })
 
-  test("a quoted word of several words is the member's name as code names it;  its id stays as written", () => {
+  test("a quoted word of several words is the member's name as code names it;  its id, its words joined by `-`", () => {
     const { errors, code } = compiled([
       ...piles,
       "solitaire is an app",
@@ -52,11 +52,29 @@ describe("members declared in a drawing", () => {
     expect(errors).toEqual([])
     // never `declareProp("discard pile")` with `this.discardPile` read:  the game's discard pile was undefined
     expect(code).toContain(
-      'static { this.declareProp("discardPile", { init: () => new Column({ id: "discard pile" }), early: true }) }'
+      'static { this.declareProp("discardPile", { init: () => new Column({ id: "discard-pile" }), early: true }) }'
     )
+    // the tag draws it by that id:  an element's `id` is one word (language T147)
+    expect(code).toContain('h("test-project-column", { id: "discard-pile" })')
     expect(code).toContain("this.discardPile.randomize()")
     expect(code).toContain('static { this.declareProp("highScore", { type: "number" }) }')
     expect(code).toContain("() => this.highScore")
+  })
+
+  test("a member on a line of its own and the tag drawing it agree on its id, its words joined by `-` (T147)", () => {
+    const { errors, code } = compiled([
+      ...piles,
+      "solitaire is an app",
+      '\t"discard pile" is a new column',
+      '\t"C1" is a new column with id "first"',
+      "\tto draw it",
+      '\t\t<column "discard pile"/> <column "C1"/>'
+    ])
+    expect(errors).toEqual([])
+    expect(code).toContain('new Column({ id: "discard-pile" })')
+    expect(code).toContain('h("test-project-column", { id: "discard-pile" })')
+    // a set id wins, as written
+    expect(code).toContain('new Column({ id: "first" })')
   })
 
   test("a value's type as a tag declares it and draws it;  a `set` above it doesn't declare it again", () => {

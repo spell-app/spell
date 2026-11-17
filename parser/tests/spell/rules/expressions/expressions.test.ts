@@ -48,6 +48,7 @@ describe("priority and precedence", () => {
         "backwards_if:  Precedence.ternary",
         "belongs_to_one:  Priority.declaration",
         "can_belong_to_many:  Priority.declaration",
+        "can_do:  Priority.preferred",
         "can_give_up:  Precedence.comparison",
         "can_take:  Precedence.comparison",
         "cancel_action:  Priority.preferred",

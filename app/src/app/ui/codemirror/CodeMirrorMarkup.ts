@@ -2,6 +2,7 @@ import { foldedRanges } from "@codemirror/language"
 import { type EditorState, type Extension, type Range } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, WidgetType } from "@codemirror/view"
 
+import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
@@ -602,7 +603,10 @@ export class CodeMirrorDecorations {
       const inclusiveStart = quoteStarts.has(start)
       // ... and a laid-out tag's `>` drawn at its end (`TagPointWidget`), its first row its last (I139)
       const inclusiveEnd = quoteEnds.has(end) || this.points.some((point) => point.end === end)
-      const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd })
+      // a comment's `--`, drawn as ONE dash:  one step for the caret, so no click, arrow or letter lands inside it
+      // and splits it (epic `codemirror` I25;  `CodeMirrorRelayout` reads `atomic`)
+      const atomic = classes.has(DASH)
+      const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd, atomic })
       ranges.push(mark.range(start, end))
     }
     for (const [from, { classes, rails, stopped, ended, feet }] of this.lines) {
@@ -677,6 +681,9 @@ const STOPPED_RAIL = "100% max(0px, 100% - var(--cmb-foot-lift))"
 
 /** The class the shared marks give a quoted value's own `"` (`MarkupMarks`, `CodeMirrorBubbly`). */
 const QUOTE_MARK = "bubbly-quote-mark"
+
+/** A comment's `--`, drawn as one dash over the two (`BubblyHtml.DASH`). */
+const DASH = BubblyHtml.DASH
 
 /** The quote classes renamed for the editor's own:  `bubbly-quote-open` => `cmb-quote-open` ... */
 const QUOTE_CLASS = /^bubbly-(?=quote-|tag-quote|tag-word-quote)/
