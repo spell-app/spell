@@ -4,7 +4,14 @@ import { SP } from "spell/parser/spell"
 // Through the folder:  read only when parsing, once the folder has loaded
 import { DefineMenu } from "spell/parser/spell/rules/classes"
 import { Priority } from "spell/parser/spell/rules/rules.types"
-import { ACTION_TAG_MEANING, IN_MENU_ATTRIBUTE, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import {
+  ACTION_TAG_MEANING,
+  IN_DIALOG_ATTRIBUTE,
+  IN_MENU_ATTRIBUTE,
+  SPELL_TAG_WORDS,
+  webWordFor,
+  type JSXMatchData
+} from "./JSX.shared"
 // Read only when compiling:  SpellJSX imports this file's neighbours
 import { SpellJSX } from "./SpellJSX"
 
@@ -47,6 +54,10 @@ import { SpellJSX } from "./SpellJSX"
  *   - `icon-only` there is Spell UI's `<ui-action icon-only>`:  its icon alone, at every width.
  *   - `SpellJSX` marks it as the menu parses (`markMenuRows()`);  it compiles with the core's own `in-menu`,
  *     `core.drawAction(this, "save", { "in-menu": true })`.
+ * - In a modal's ACTIONS, its row of buttons (`<actions>` in a `<modal>`), its click runs the action, then closes the
+ *   modal, as a dialog's buttons do (epic `language` T155):  `SpellJSX` marks it as the modal parses (`markDialog()`);
+ *   it compiles with the core's own `in-dialog`.  `keep-open` (Spanish's `mantener-abierto`) leaves it open.
+ *   Anywhere else in a modal, its click runs the action alone.
  * - Without a quoted word, `<action>` is Spell UI's `<ui-action>`, a menu's item, as before.
  */
 export class ActionButton extends P.TokenType<never, ActionButtonData> {
@@ -68,6 +79,7 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
     )
     match.data.attributes = element.attributes?.map((attribute) => parser?.parse(attribute, "jsxAttribute", scope))
     match.data.readings = ActionButton.readingsOf(scope, element)
+    match.data.keepOpenAt = ActionButton.keepOpenAt(scope, element)
     const { value } = element.quotedWord
     const words = (value instanceof P.TextToken ? value.innerText : `${value?.raw ?? ""}`).trim()
     // only a type with the action matters (`P.Outline`)
@@ -85,9 +97,11 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
 
   /** `core.drawAction(this, "autoPlay", props, ...children)`:  a `ui-button`'s element, marked with its action. */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
-    const { readings } = match.data
+    const { readings, keepOpenAt } = match.data
     const attrs = match.data.attributes
       ?.map((attr, index) => {
+        // `keep-open` is the compiler's:  it leaves the action unmarked, and goes no further
+        if (index === keepOpenAt) return undefined
         const reading = readings?.[index]
         if (!attr || !reading) return P.asAST<P.ASTJSXAttribute>(attr?.AST)
         const { attribute: name, value } = reading
@@ -97,14 +111,17 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
             : new P.ASTStringLiteral(attr, { value: `${value}`, quote: '"', raw: JSON.stringify(`${value}`) })
         return new P.ASTJSXAttribute(attr, { name, value: valueAST })
       })
-      .filter(Boolean)
+      .filter((attr): attr is P.ASTJSXAttribute => !!attr)
     const children = match.data.children?.flatMap((child) => SpellJSX.childAST(child) ?? []) ?? []
-    // a menu's row:  the core's own mark, last, so the tag's attributes keep their places
-    const inMenu = new P.ASTJSXAttribute(match, {
-      name: IN_MENU_ATTRIBUTE,
-      value: new P.ASTBooleanLiteral(match, { value: true })
-    })
-    const marked = match.data.inMenu ? [...(attrs ?? []), inMenu] : attrs
+    // a menu's row, or a modal's button:  the core's own mark, last, so the tag's attributes keep their places
+    const mark = (name: string) =>
+      new P.ASTJSXAttribute(match, { name, value: new P.ASTBooleanLiteral(match, { value: true }) })
+    const { inMenu, inDialog } = match.data
+    const marked = inMenu
+      ? [...(attrs ?? []), mark(IN_MENU_ATTRIBUTE)]
+      : inDialog
+        ? [...(attrs ?? []), mark(IN_DIALOG_ATTRIBUTE)]
+        : attrs
     return new P.ASTJSXElement(match, { tagName: BUTTON_TAG, attrs: marked, children, action: match.data.action })
   }
 
@@ -180,6 +197,18 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
     return readings.some(Boolean) ? readings : undefined
   }
 
+  /**
+   * Where `element` says `keep-open` (Spanish's `mantener-abierto`, bare, accents or not;  English's in every language):
+   * in a modal's actions, its click leaves the modal open (epic `language` T155) -- `undefined` if it doesn't.
+   */
+  private static keepOpenAt(scope: P.Scope, element: P.JSXElementToken): number | undefined {
+    const words = [KEEP_OPEN, withoutAccents(SP.Language.of(scope).words.keepOpenAttribute)]
+    const index = element.attributes?.findIndex(
+      (attribute) => attribute.value === undefined && words.includes(withoutAccents(attribute.name))
+    )
+    return index === undefined || index < 0 ? undefined : index
+  }
+
   /** The type whose drawing `scope` is in:  its method's thing's (`a solitaire` / `to draw it`), else the nearest type. */
   private static ownTypeOf(scope: P.Scope): P.TypeScope | undefined {
     const thing = P.MethodScope.thingTypeOf(scope)
@@ -220,6 +249,13 @@ type ActionButtonData = JSXMatchData & {
   readings?: Array<SP.AttributeReading | undefined>
   /** A `<menu>` holds it:  it draws a menu's row, not a button (`SpellJSX.markMenuRows()`, epic `editor` P29). */
   inMenu?: boolean
+  /**
+   * A modal's actions hold it:  its click closes the modal too, after running the action
+   * (`SpellJSX.markDialog()`, epic `language` T155).
+   */
+  inDialog?: boolean
+  /** Which of its attributes is `keep-open`:  in a modal's actions, it leaves the modal open (T155). */
+  keepOpenAt?: number
 }
 
 /** One action `<action "...">` may name, as the editor offers it -- see `ActionButton.actionsIn()`. */
@@ -240,3 +276,6 @@ const NOT_ACTIONS = /^(draw|create|test)(_|$)/
 
 /** What an action's button is:  Spell UI's, which the core draws (`core.drawAction()`). */
 const BUTTON_TAG = "ui-button"
+
+/** `<action>`'s own attribute in a modal's actions, English's word:  its click leaves the modal open (T155). */
+const KEEP_OPEN = "keep-open"

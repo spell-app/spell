@@ -152,6 +152,8 @@ export const spanishWords: SP.LanguageWords = {
   appActions: { deshacer: "undo", rehacer: "redo" },
   // el atributo propio de `<acción>`:  un botón que solo muestra su icono (`action_button`, épica `language` P53)
   iconOnlyAttribute: "solo-icono",
+  // el atributo propio de `<acción>` en las acciones de un modal:  su clic deja el modal abierto (épica `language` T155)
+  keepOpenAttribute: "mantener-abierto",
   // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
   quotedNameTags: { panel: "etiqueta" },

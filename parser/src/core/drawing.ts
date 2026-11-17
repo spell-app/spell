@@ -187,6 +187,9 @@ export const drawingMethods = defineCoreModule({
    *     (`<action "restart the game" title="Restart"/>`;  Owen, 2026-11-14)
    *   - `icon-only`:  no text, its title its name for a screen reader and its tooltip (`aria-label`)
    *   - `in-menu`:  a Spell UI menu holds it, so it's a menu's ROW (epic `editor` P29), not a button:  see below
+   *   - `in-dialog`:  a modal's actions hold it (epic `language` T155), so its click closes the modal after running the action,
+   *     as a dialog's own buttons do:  the button gets Spell UI's `approve` class, which the modal closes on
+   *     (Python's page draws the same)
    * - An action nobody up the chain has:  a disabled button (or row) of its name, and a warning;
    *   the compiler said so already.
    * - Knows nothing of Spell UI but its tags:  the page draws them.
@@ -199,7 +202,7 @@ export const drawingMethods = defineCoreModule({
    *   still folded into a `shrinkable` toolbar's `…` menu with the rest.
    */
   drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
-    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, title, ...given } = props
+    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, [IN_DIALOG]: inDialog, title, ...given } = props
     const found = core.actionOf(thing as object | undefined, name)
     // a `title` the tag gives is what it shows, over the action's own:  `<action "restart the game" title="Restart"/>`
     const action =
@@ -228,6 +231,8 @@ export const drawingMethods = defineCoreModule({
       onClick: () => action.run("click")
     }
     if (iconOnly) own["aria-label"] = () => action.title
+    // a modal's button:  the modal closes once its click has run the action, as for its own OK
+    if (inDialog) given.class = [given.class, DIALOG_CLOSER_CLASS].filter(Boolean).join(" ")
     const text = iconOnly || children.length ? children : [() => action.title]
     return h(BUTTON_TAG, { ...own, ...given }, ...text) as unknown as Drawing
   },
@@ -795,6 +800,10 @@ const ICON_ONLY = "icon-only"
 
 /** `<action>`'s own attribute, which the compiler sets on one a Spell UI menu holds:  it draws a menu's row. */
 const IN_MENU = "in-menu"
+/** The core's own mark on an action in a modal's actions, `in-dialog`:  see `drawAction()`. */
+const IN_DIALOG = "in-dialog"
+/** What a modal closes on, once a click's handlers ran:  Fomantic's `approve`, which Spell UI's modal reads. */
+const DIALOG_CLOSER_CLASS = "approve"
 
 /** What a menu's row is:  Spell UI's action, which the page defines. */
 const MENU_ROW_TAG = "ui-action"

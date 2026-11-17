@@ -313,3 +313,16 @@ def test_a_thing_given_as_an_attribute_prints_as_javascript_writes_it() -> None:
         title = prop(type="text")
 
     assert element_html(h("ui-form", {"value": Note(title="a")})) == '<ui-form value="[object Object]"></ui-form>'
+
+
+class Dealer(Thing):
+    def deal(self) -> None:
+        """Deal again."""
+
+
+def test_an_action_in_a_modal_closes_it_by_the_approve_class(core: Core) -> None:
+    # language T155:  `<modal><action "deal"/></modal>`, as the page draws it
+    core.describe_action(Dealer, "deal", {"title": "Deal"})
+    button = str(core.draw_action(Dealer(), "deal", {"class": "Big", "in-dialog": True}))
+    assert 'class="Big approve"' in button
+    assert "in-dialog" not in button
