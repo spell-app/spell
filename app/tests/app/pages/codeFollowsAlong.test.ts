@@ -51,6 +51,14 @@ async function chooseOutput(page: Page, words: string): Promise<void> {
   await page.waitForTimeout(1500)
 }
 
+/**
+ * Room for Solitaire's whole toolbar beside the code and the Inspector (epic `editor` I245):
+ * at 1440px its app is 514px wide, and the toolbar puts Cheat, Restart, Undo and Redo away in its menu.
+ */
+async function roomForTheToolbar(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 1920, height: 900 })
+}
+
 /** The page's debug globals, what's used of them. */
 type DebugGlobals = {
   editor: {
@@ -232,6 +240,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
     { timeout: 150_000 },
     async () => {
       const page = await context.newPage()
+      await roomForTheToolbar(page)
       await open(page, "Solitaire")
       await showFile(page, "Solitaire.spell")
       await page.waitForTimeout(1500)
@@ -268,6 +277,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
     { timeout: 150_000 },
     async () => {
       const page = await context.newPage()
+      await roomForTheToolbar(page)
       await open(page, "Solitaire")
       await showFile(page, "Solitaire.spell")
       await page.waitForTimeout(1500)
@@ -309,6 +319,37 @@ describe.skipIf(!SERVING)("code follows along", () => {
       expect(state.followed).toMatchObject({ line: gap.line, from: "parts" })
       const caret = await caretAndLine(page)
       expect(caret).toEqual({ line: gap.line, column: gap.column, text: "<spacer/>" })
+    }
+  )
+
+  test(
+    "inspect, then a click on a card:  the code shows its type, in Card.spell, not the line making all 52",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire")
+      await showFile(page, "Solitaire.spell")
+      await page.waitForTimeout(1500)
+      if (!(await page.locator(".InspectAppButton.inspecting").count())) {
+        await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
+        await page.waitForTimeout(1000)
+      }
+      await page.evaluate(() => (window as unknown as DebugGlobals).Inspector.dismissHelp())
+      await page.waitForTimeout(300)
+      // the last card of a column:  face up, nothing over it
+      const at = await page.evaluate(() => {
+        const box = [...document.querySelectorAll(".AppPaneBody solitaire-card")].at(-1)!.getBoundingClientRect()
+        return { x: box.x + box.width / 2, y: box.y + 10 }
+      })
+      await page.mouse.click(at.x, at.y)
+      await page.waitForTimeout(1500)
+      const state = await following(page)
+      expect(state.selected).toEqual(["solitaire-card"])
+      expect(state.followed).toMatchObject({ path: "Card.spell", from: "parts" })
+      expect(state.file).toBe("Card.spell")
+      const caret = await caretAndLine(page)
+      expect(caret.text).toMatch(/^a "card" is /)
+      expect(state.codeHasFocus, "following never takes the keyboard").toBe(false)
     }
   )
 

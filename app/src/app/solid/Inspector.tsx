@@ -305,8 +305,26 @@ export class Inspector {
     const { pivot } = clicks
     Inspector.selectAll(next)
     clicks.pivot = pivot
-    const place = Inspector.writtenPlaceOf(element)?.place
+    const place = Inspector.followedPlaceOf(element)
     if (place) editor.followed = { path: place.path, line: place.line, column: place.column, from: "parts" }
+  }
+
+  /**
+   * Where the code follows to when `element` is clicked (epic `editor` P17, Code Follows Along):
+   * where it's written (`writtenPlaceOf()`), except for a drawn thing made in a loop with others.
+   * - Those go to their type's declaration:  a card clicked shows `a "card" is a ...` in Card.spell,
+   *   not the `a new card` in Deck.spell that makes all 52 (Owen, 2026-11-17, I253:
+   *   "I inspected a card and `Deck.spell` opened").
+   * - A thing made on its own (the stock) still shows the line that makes it, its own place.
+   * - `undefined`:  written nowhere.
+   */
+  static followedPlaceOf(element: Element): P.SourcePlace | undefined {
+    const written = Inspector.writtenPlaceOf(element)
+    const thing = SpellElement.thingOf(element)
+    if (!written || written.sharedBy < 2 || !thing) return written?.place
+    const names = classNamesOf(thing)
+    const declared = declarationPlaces().find((place) => place.kind === "type" && place.name === names[0])
+    return declared ? { path: declared.path, line: declared.line, column: declared.column } : written.place
   }
 
   /**
