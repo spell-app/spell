@@ -69,6 +69,20 @@ export function personIdFor(text: string): string {
 export const SPELL_UI_SITE_PROJECT = "@spell/guides/SpellUI"
 
 /**
+ * The groups whose projects people open AS EXAMPLES (epic `mockup` T52):  the examples and the guides,
+ * the Spanish ones among them.
+ * - Opened as they are, never copied;  a person's edits are their draft of it, never its files,
+ *   so it stays the same for everyone else.
+ * - Leaving one with a draft asks what to keep:  their own copy, nothing, or (`@spell`'s managers) the example itself.
+ */
+export const EXAMPLE_GROUPS = ["@spell/examples", "@spell/guides"] as const
+
+/** Is project `projectPath` one people open as an example (`EXAMPLE_GROUPS`):  `@spell/examples/Solitaire`? */
+export function isExampleProject(projectPath: string): boolean {
+  return EXAMPLE_GROUPS.some((group) => projectPath.startsWith(`${group}/`))
+}
+
+/**
  * A project of a group's list, as the home page reads it:  `SP.ProjectListEntry`, and what only the home page needs.
  */
 export type ProjectListEntryWithHome = SP.ProjectListEntry & {
