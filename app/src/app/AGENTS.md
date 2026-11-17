@@ -144,7 +144,7 @@ and in the app's build folder, `app/` at the app folder's root.
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
       Find All References, code actions, accent fixes as you type;  hovers and signature help drawn by `<ui-markdown>`.
     - A Spell UI tag's help on Go to Definition;  Format Document, expand / shrink selection, Go to Symbol.
-    - Peek Definition (⌥F12) and Peek References (⇧⌥F12), as Monaco's peek view (epic `codemirror` I5):
+    - Peek Definition (⌥F12) and Peek References (⇧⌥F12) (epic `codemirror` I5):
       a box under the caret's line showing the place's file read only, a slice of its state (`FileStates.showSlice()`),
       the uses listed on its right;  Enter or a double-click goes there, Esc closes it
       ([CodeMirrorPeek](ui/codemirror/CodeMirrorPeek.ts), plain DOM, so `<spell-editor>` has it too)

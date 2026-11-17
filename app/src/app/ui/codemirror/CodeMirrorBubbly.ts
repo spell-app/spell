@@ -192,8 +192,7 @@ class BubblyDecorations {
     const isFolded = isShown && this.decorations.isFoldedAt(head.start)
     const hasBody = !isFolded && block.body.some((node) => node.kind !== "gap")
     this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
-    // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it,
-    // as Monaco drew them (I113)
+    // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it (I113)
     const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
     const indent = hung(this.decorations.indentAt(head.start), isHung)
     const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? ["bubbly-group"] : [])]
@@ -220,7 +219,7 @@ class BubblyDecorations {
    * `block`'s foot, under its last line, its rail at `indent` inside `rails`.
    * - Blocks in it ending on the same line have theirs first, and this one goes under them,
    *   as far below the one right above it as its rail is left of that one's:  the feet as far apart down as the rails
-   *   across (Owen, 2026-11-11), as Monaco and the drawn-bubbly page stack them (epic `language` I125).
+   *   across (Owen, 2026-11-11), as the drawn-bubbly page stacks them (epic `language` I125).
    * - A group in it ending there too, hung on its rail, ends in the SAME foot, the group's drawn:
    *   stacked under it, they were one foot twice as thick, in two colours (Owen, 2026-11-13;  I125).
    */
@@ -521,7 +520,7 @@ function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
 
 /****************
  * ### `FootWidget`
- * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner, as Monaco's did (I113),
+ * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner (I113),
  * on a line of its own under its last line.
  * - The rails of the blocks around it run on beside it;
  *   one whose own foot is in the row under it stops short there, for that foot's corner (`stopped`).
