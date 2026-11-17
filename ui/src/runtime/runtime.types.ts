@@ -96,6 +96,11 @@ export type BrowserSupports = {
   anchoredQueries: boolean
   /** `field-sizing: content` -- a textarea that grows with its text by itself (`<ui-textarea grow>`;  else it measures) */
   fieldSizing: boolean
+  /**
+   * `navigator.mediaDevices.getDisplayMedia()` -- a picture of a screen, a window or a tab, the person picking it.
+   * Desktop browsers only:  no iOS or Android browser has it.
+   */
+  screenCapture: boolean
 }
 
 ////////////////

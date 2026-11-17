@@ -1,5 +1,6 @@
 // Import directly:  the one dark-mode query, with no pref store
 import { DARK_QUERY } from "spell/util/persist/persist.types"
+import { currentPlatform, type Platform } from "spell/util/platform"
 import { isBrowser, lazy } from "spell/ui/util"
 
 import type { BrowserSupports } from "./runtime.types"
@@ -66,6 +67,15 @@ export class Browser {
     return this.matches("(pointer: coarse)") || (this.navigator?.maxTouchPoints ?? 0) > 0
   }
 
+  /**
+   * The kind of device:  `phone`, `tablet` or `desktop` (`spell/util/platform`, the one place that decides it).
+   * - Live, as the window is resized or the device turned.
+   * - What the shared `only-on-platform` hides elements by.
+   */
+  get platform(): Platform {
+    return currentPlatform()
+  }
+
   ////////////////
   // ## Preferences (live)
   ////////////////
@@ -121,7 +131,8 @@ export class Browser {
       temporal: "Temporal" in globalThis,
       interpolateSize: css && probe(() => CSS.supports("interpolate-size: allow-keywords")),
       anchoredQueries: css && probe(() => CSS.supports("container-type: anchored")),
-      fieldSizing: css && probe(() => CSS.supports("field-sizing: content"))
+      fieldSizing: css && probe(() => CSS.supports("field-sizing: content")),
+      screenCapture: typeof globalThis.navigator?.mediaDevices?.getDisplayMedia === "function"
     }
 
     /** Run a feature probe;  `false` if it throws. */
