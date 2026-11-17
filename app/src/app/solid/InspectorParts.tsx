@@ -1492,3 +1492,6 @@ const DEFAULT_EVENTS = [
   "keydown",
   "keyup"
 ] as const
+
+// A change here reloads the page, as one to `Inspector` does:  the two import each other (epic `editor` I236)
+import.meta.hot?.accept(() => location.reload())
