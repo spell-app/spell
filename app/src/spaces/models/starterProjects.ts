@@ -97,7 +97,7 @@ my app is an app:
   },
   /**
    * A site (epic `mockup` T40):  its routing alone in its site file, each page a file of its own,
-   * and the main page layout every page is drawn in, as Star Wars' and harbor-new's.
+   * and the main page layout every page is drawn in, as Star Wars' is.
    * - The layout's file is what makes it a site's main layout (T39, J149):  nothing in the site file names it.
    */
   site: {

@@ -130,6 +130,8 @@ api.get("/compile/file", projectUtils.request_compileFile)
 // this machine's person, and their orgs -- see `peopleRoutes.ts`.
 api.get("/people/me", peopleRoutes.request_getMe)
 api.post("/people/me", peopleRoutes.request_saveMe)
+api.get("/people/local", peopleRoutes.request_getLocal)
+api.post("/people/local", peopleRoutes.request_saveLocal)
 
 // A change asked for on what's selected, for a Claude session on this machine -- see `changesRoutes.ts` (epic `editor` P18)
 api.post("/changes", changesRoutes.request_askForChange)

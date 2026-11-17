@@ -1,6 +1,7 @@
 import { CLI } from "spell/cli"
 import { SP } from "spell/parser/spell"
-import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import { SPELL_ORG } from "spell/app/spaces/models/projectGroups"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore, personFile } from "spell/app/spaces/server/node/people/PeopleStore"
 import {
@@ -83,9 +84,9 @@ function targetFor(target: string, record: string | undefined): TakedownTarget {
  * - throws `CliError` if they aren't, saying `doing` is for Spell admins only
  */
 export async function spellAdminOrDie(people: PeopleStore, doing = "takes things down"): Promise<string> {
-  const me = `${LOCAL_PERSON}@${HOME_ORG}`
-  if (!(await people.isSpellAdmin(LOCAL_PERSON, HOME_ORG))) {
-    throw new CLI.CliError(`only a Spell admin ${doing}:  ${me} isn't spell-admin in @${HOME_ORG}`)
+  const { id, org, address: me } = thisMachinesPerson()
+  if (!(await people.isSpellAdmin(id, org))) {
+    throw new CLI.CliError(`only a Spell admin ${doing}:  ${me} isn't spell-admin in @${SPELL_ORG}`)
   }
   return me
 }

@@ -193,7 +193,7 @@ export class EditorStore extends Observable {
     } catch {
       console.warn(`editor.selectPath('${path}'): invalid path`)
       // default to user projects if `new SP.SpellLocation()` throws
-      location = new SP.SpellLocation("owen@spell")
+      location = new SP.SpellLocation(SPACES.localPerson.address)
     }
     console.info("editor.selectPath", { path, location })
 
@@ -654,7 +654,7 @@ export class EditorStore extends Observable {
 
   /**
    * Run's URL showing file `path` in the running site (`RunSite.urlFor()`, epic `mockup` I15):
-   * - the file's own, when it holds one of the site's pages:  `/run/owen@spell/harbor-new/home.spell`
+   * - the file's own, when it holds one of the site's pages:  `/run/owen@spell/dashboard/home.spell`
    * - else the page the site shows now, e.g. for the site file:  Run shows the site, never a file of it
    * - `undefined` when it's not the current file, or no site of the project runs
    */

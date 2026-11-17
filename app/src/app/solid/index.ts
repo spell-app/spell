@@ -66,6 +66,7 @@ export * from "./CodeSettings"
 export * from "./OutputEditor"
 
 export * from "./SpellPage"
+export * from "./NamePage"
 export * from "./rememberedSizes"
 export * from "./AppContainer"
 export * from "./AppRoot"

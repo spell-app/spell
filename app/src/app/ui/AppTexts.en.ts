@@ -746,6 +746,17 @@ export const APP_TEXTS = {
   noneYet: "None yet.",
 
   ////////////////
+  // ## The name page (`NamePage.tsx`):  who's at this machine, asked on its first start
+  ////////////////
+
+  nameHeading: "Welcome to Spell",
+  nameLine: "Who's here?\nYour projects go in a space with your name,\nin {org}'s spaces on this machine.",
+  yourName: "Your name",
+  nameTaken: "{address} already has a space here:  that's you?",
+  nameNeeded: "Type a name with a letter in it.",
+  nameStart: "Start",
+
+  ////////////////
   // ## A project's settings (`ProjectSettings.tsx`)
   ////////////////
 

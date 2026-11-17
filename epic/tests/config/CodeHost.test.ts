@@ -232,7 +232,7 @@ describe("GitLab:  talking to glab, self-hosted", () => {
 // ## The first push, refused;  who can read a repo (epic-engine P69)
 ////////////////
 
-/** GitLab's words for a refused first push, as git printed them from the harbor run (epic `epic-engine` P69). */
+/** GitLab's words for a refused first push, as git printed them from a work repo's run (epic `epic-engine` P69). */
 const REFUSED = `remote: GitLab:
 remote: You cannot push the initial commit because the default branch is
 remote: protected and your role does not allow it.
