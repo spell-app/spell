@@ -1,0 +1,73 @@
+# Weather
+// The weather in the city you pick:  now, big, then the next 12 hours.
+// It comes from Open-Meteo, a server other people run:  Weather.api.spell, as `spell place ingest` wrote it.
+// What each weather code looks like, in words and as an emoji, is in Sky.spell.
+
+## The app:  a city to pick, and its forecast
+
+weather is an app
+	its "cities" is a list of cities
+	its "place" is text
+		// The city picked, by its name:  what the picker holds
+	when creating it
+		add a new city with name "Berlin", latitude = 52.52, longitude = 13.41 to its cities
+		add a new city with name "New York", latitude = 40.71, longitude = -74.01 to its cities
+		add a new city with name "Tokyo", latitude = 35.68, longitude = 139.69 to its cities
+		add a new city with name "Buenos Aires", latitude = -34.6, longitude = -58.38 to its cities
+		set its place to "Berlin"
+	its "city" is the first city in its cities where its name is the place
+	its "forecasts" is every forecast where its latitude is the latitude of the city and its longitude is the longitude of the city
+		// The city's, from Open-Meteo:  asked for by where it is;  it answers with one
+
+	to draw it
+		<container text>
+			<stack spacing="lg">
+				<form value={it}>
+					<select name="place" aria-label="City">
+						<for city in its cities>
+							<item value={its name}>{its name}</item>
+						</for>
+					</select>
+				</form>
+				<for its forecasts loading="Asking Open-Meteo" failed="Open-Meteo can't be reached just now." />
+				<text size="small" color="grey">From <link link="https://open-meteo.com">Open-Meteo</link>, in your own units.</text>
+			</stack>
+		</container>
+
+## A city:  where it is on Earth
+
+a "city" is a thing
+	its "name" is text
+	its "latitude" is a number
+	its "longitude" is a number
+
+## A forecast:  the weather now, big, then the next 12 hours in a row
+
+a forecast
+	to draw it
+		<stack spacing="lg">
+			<segment padded="very">
+				<stack align="center" spacing="xs">
+					<emoji name={picture the weather (its current's weather code)} size="large" />
+					<statistic size="huge">
+						<value>{its current's temperature}</value>
+					</statistic>
+					<text size="large">{name the weather (its current's weather code)}</text>
+				</stack>
+			</segment>
+			<segment>
+				<stack direction="horizontal" spacing="lg" class="hours">
+					{draw each hour in its hours}
+				</stack>
+			</segment>
+		</stack>
+
+## An hour:  its time, its weather and its temperature
+
+an hour
+	to draw it
+		<stack align="center" spacing="xs">
+			<text size="small" color="grey">{its time as a short time}</text>
+			<emoji name={picture the weather (its weather code)} size="small" />
+			<text>{its temperature}</text>
+		</stack>

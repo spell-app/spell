@@ -1,0 +1,181 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "open meteo",
+    "kind": "web server",
+    "address": "https://api.open-meteo.com",
+    "lookedAt": "2026-11-17T07:01:04.441Z",
+    "fingerprint": "8f6c46d490de775a",
+    "readBy": "nobody:  worked out from what came back",
+    "collectionsAsked": [
+      "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto"
+    ]
+  },
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "It says it takes GET, POST, OPTIONS.  Never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It allows 600.0 requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  x-ratelimit-cost:  1.0;  x-ratelimit-limit:  600.0;  x-ratelimit-remaining:  598.0;  x-ratelimit-reset:  1794898864;  x-ratelimit-window:  60",
+    "browsers": "Yes:  it says any page may read it."
+  },
+  "collections": {
+    "forecasts": {
+      "type": "forecast",
+      "at": "/v1/forecast?current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto",
+      "rowsSeen": 1,
+      "paging": "none",
+      "askedBy": {
+        "latitude": "52.52",
+        "longitude": "13.41"
+      },
+      "fields": {
+        "latitude": {
+          "words": "latitude",
+          "type": "number",
+          "example": 52.512604
+        },
+        "longitude": {
+          "words": "longitude",
+          "type": "number",
+          "example": 13.419517
+        },
+        "generationtime_ms": {
+          "words": "generationtime ms",
+          "type": "number",
+          "example": 0.09119510650634766
+        },
+        "utc_offset_seconds": {
+          "words": "utc offset seconds",
+          "type": "number",
+          "example": 3600
+        },
+        "timezone": {
+          "words": "timezone",
+          "type": "text",
+          "example": "Europe/Berlin"
+        },
+        "timezone_abbreviation": {
+          "words": "timezone abbreviation",
+          "type": "text",
+          "example": "GMT+1"
+        },
+        "elevation": {
+          "words": "elevation",
+          "type": "number",
+          "example": 38
+        },
+        "current_units": {
+          "words": "current units",
+          "type": "inside",
+          "example": "{\"time\":\"iso8601\",\"interval\":\"seconds\",\"temperature_2m\":\"°C\",\"weather_code\":\"wmo",
+          "unitsOf": "current",
+          "leftOut": "Its units are each on the field it names, in \"current\":  `its \"temperature\" is a temperature in °C`."
+        },
+        "current": {
+          "words": "current",
+          "type": "inside",
+          "example": "{\"time\":\"2026-11-17T08:00\",\"interval\":900,\"temperature_2m\":5,\"weather_code\":2}",
+          "inside": {
+            "time": {
+              "words": "time",
+              "type": "date",
+              "example": "2026-11-17T08:00"
+            },
+            "interval": {
+              "words": "interval",
+              "type": "number",
+              "example": 900,
+              "unit": "seconds"
+            },
+            "temperature_2m": {
+              "words": "temperature",
+              "type": "number",
+              "example": 5,
+              "unit": "°C"
+            },
+            "weather_code": {
+              "words": "weather code",
+              "type": "number",
+              "example": 2,
+              "unit": "wmo code"
+            }
+          }
+        },
+        "hourly_units": {
+          "words": "hourly units",
+          "type": "inside",
+          "example": "{\"time\":\"iso8601\",\"temperature_2m\":\"°C\",\"weather_code\":\"wmo code\"}",
+          "unitsOf": "hourly",
+          "leftOut": "Its units are each on the field it names, in \"hourly\":  `its \"temperature\" is a temperature in °C`."
+        },
+        "hourly": {
+          "words": "hours",
+          "type": "inside",
+          "example": "{\"time\":[\"2026-11-17T08:00\",\"2026-11-17T09:00\",\"2026-11-17T10:00\",\"2026-11-17T11",
+          "inside": {
+            "time": {
+              "words": "time",
+              "type": "date",
+              "example": "2026-11-17T08:00"
+            },
+            "temperature_2m": {
+              "words": "temperature",
+              "type": "number",
+              "example": 5,
+              "unit": "°C"
+            },
+            "weather_code": {
+              "words": "weather code",
+              "type": "number",
+              "example": 2,
+              "unit": "wmo code"
+            }
+          },
+          "isListInside": true,
+          "isSideBySide": true
+        }
+      },
+      "readThrough": {
+        "rows": 1
+      }
+    }
+  },
+  "notes": [],
+  "agentNotes": [],
+  "spellCantSay": [
+    "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `it filters by cuisine` or `it sorts by title`."
+  ],
+  "checkEverySeconds": 30,
+  "spell": [
+    "open meteo is a web server at \"https://api.open-meteo.com\"",
+    "\tcheck it every 30 seconds",
+    "\tit writes names like \"generationtime_ms\"",
+    "\tforecasts live at \"/v1/forecast?current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto\"",
+    "\tforecasts are asked for by their latitude and longitude",
+    "",
+    "a \"forecast\" is a thing",
+    "\tit lives in open meteo",
+    "\tits \"latitude\" is a number",
+    "\tits \"longitude\" is a number",
+    "\tits \"generationtime ms\" is a number",
+    "\tits \"utc offset seconds\" is a number",
+    "\tits \"timezone\" is text",
+    "\tits \"timezone abbreviation\" is text",
+    "\tits \"elevation\" is a number",
+    "\tits \"current\" is a current",
+    "\tits \"hours\" is a list of hours, stored as \"hourly\"",
+    "",
+    "a \"current\" is a thing",
+    "\tits \"time\" is a date",
+    "\tits \"interval\" is a duration in seconds",
+    "\tits \"temperature\" is a temperature in °C, stored as \"temperature_2m\"",
+    "\tits \"weather code\" is a number  // in wmo code",
+    "",
+    "an \"hour\" is a thing",
+    "\tits \"time\" is a date",
+    "\tits \"temperature\" is a temperature in °C, stored as \"temperature_2m\"",
+    "\tits \"weather code\" is a number  // in wmo code"
+  ]
+}

@@ -1,0 +1,39 @@
+## Open-Meteo:  the weather now, and hour by hour, for anywhere on Earth
+// A server other people run, and what it holds.  What's drawn from it is in Weather.spell.
+// `open meteo` is what this wrote, from looking at the server:
+//   spell place ingest https://api.open-meteo.com --into Weather.api.spell --name "open meteo" --no-ai
+//     --collections "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto"
+// `spell place update Weather.api.spell` looks again, and changes only this file and Weather.api.json5.
+// It has no list of forecasts:  each is asked for by where it's for, `every forecast where its latitude is ... and its longitude is ...`.
+// Its hours, the next 12, come as lists side by side, one of times and one of each measure:  each hour is read as one of each.
+// Each temperature is in °C, and shows in the reader's own units:  °F in the US.
+// Its weather is a WMO code, a number:  Sky.spell says what each one looks like.
+
+open meteo is a web server at "https://api.open-meteo.com"
+	check it every 30 seconds
+	it writes names like "generationtime_ms"
+	forecasts live at "/v1/forecast?current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto"
+	forecasts are asked for by their latitude and longitude
+
+a "forecast" is a thing
+	it lives in open meteo
+	its "latitude" is a number
+	its "longitude" is a number
+	its "generationtime ms" is a number
+	its "utc offset seconds" is a number
+	its "timezone" is text
+	its "timezone abbreviation" is text
+	its "elevation" is a number
+	its "current" is a current
+	its "hours" is a list of hours, stored as "hourly"
+
+a "current" is a thing
+	its "time" is a date
+	its "interval" is a duration in seconds
+	its "temperature" is a temperature in °C, stored as "temperature_2m"
+	its "weather code" is a number  // in wmo code
+
+an "hour" is a thing
+	its "time" is a date
+	its "temperature" is a temperature in °C, stored as "temperature_2m"
+	its "weather code" is a number  // in wmo code

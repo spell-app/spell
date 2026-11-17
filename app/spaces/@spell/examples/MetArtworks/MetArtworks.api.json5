@@ -1,0 +1,546 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "met museum",
+    "kind": "web server",
+    "address": "https://collectionapi.metmuseum.org/public/collection",
+    "lookedAt": "2026-11-05T03:23:04.139Z",
+    "fingerprint": "1c35fde961003b3d",
+    "readBy": "nobody:  worked out from what came back",
+    "docsAt": "https://metmuseum.github.io",
+    "collectionsAsked": [
+      "artworks=/v1/objects",
+      "artworks=/v1.1/search?q=sunflowers"
+    ]
+  },
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Nothing says:  never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "Its docs ask for at most 80 requests a second, and a program keeps to that;  its answers name none.",
+    "browsers": "Yes:  it says any page may read it."
+  },
+  "collections": {
+    "artworks": {
+      "type": "artwork",
+      "at": "/v1/objects",
+      "rowsSeen": 6,
+      "rowsItSays": 503102,
+      "idField": "objectID",
+      "paging": "none",
+      "rowsAt": "objectIDs",
+      "listsGive": [],
+      "searchedBy": {
+        "param": "q",
+        "field": "",
+        "searchesEverything": true,
+        "at": "/v1.1/search"
+      },
+      "searchedFor": "sunflowers",
+      "fields": {
+        "objectID": {
+          "words": "object id",
+          "type": "number",
+          "example": 1
+        },
+        "isHighlight": {
+          "words": "highlight",
+          "type": "yes or no",
+          "example": false
+        },
+        "accessionNumber": {
+          "words": "accession number",
+          "type": "text",
+          "example": "1979.486.1"
+        },
+        "accessionYear": {
+          "words": "accession year",
+          "type": "number",
+          "writtenAsText": true,
+          "example": "1979"
+        },
+        "isPublicDomain": {
+          "words": "public domain",
+          "type": "yes or no",
+          "example": false
+        },
+        "primaryImage": {
+          "words": "primary image",
+          "type": "link",
+          "example": "https://images.metmuseum.org/CRDImages/ep/original/DP-41223-001.jpg"
+        },
+        "primaryImageSmall": {
+          "words": "primary image small",
+          "type": "link",
+          "example": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-41223-001.jpg"
+        },
+        "additionalImages": {
+          "words": "additional images",
+          "type": "list of text"
+        },
+        "constituents": {
+          "words": "constituents",
+          "type": "inside",
+          "example": [
+            {
+              "constituentID": 164292,
+              "role": "Maker",
+              "name": "James Barton Longacre",
+              "constituentULAN_URL": "http://vocab.getty.edu/page/ulan/500011409",
+              "constituentWikidata_URL": "https://www.wikidata.org/wiki/Q3806459",
+              "gender": ""
+            }
+          ],
+          "inside": {
+            "constituentID": {
+              "words": "constituent id",
+              "type": "number",
+              "example": 164292
+            },
+            "role": {
+              "words": "role",
+              "type": "text",
+              "example": "Maker"
+            },
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "James Barton Longacre"
+            },
+            "constituentULAN_URL": {
+              "words": "constituent ulan url",
+              "type": "link",
+              "example": "http://vocab.getty.edu/page/ulan/500011409"
+            },
+            "constituentWikidata_URL": {
+              "words": "constituent wikidata url",
+              "type": "link",
+              "example": "https://www.wikidata.org/wiki/Q3806459"
+            },
+            "gender": {
+              "words": "gender",
+              "type": "text"
+            }
+          },
+          "isListInside": true
+        },
+        "department": {
+          "words": "department",
+          "type": "text",
+          "example": "The American Wing"
+        },
+        "objectName": {
+          "words": "object name",
+          "type": "text",
+          "example": "Coin"
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "One-dollar Liberty Head Coin"
+        },
+        "culture": {
+          "words": "culture",
+          "type": "text"
+        },
+        "period": {
+          "words": "period",
+          "type": "text"
+        },
+        "dynasty": {
+          "words": "dynasty",
+          "type": "text"
+        },
+        "reign": {
+          "words": "reign",
+          "type": "text"
+        },
+        "portfolio": {
+          "words": "portfolio",
+          "type": "text"
+        },
+        "artistRole": {
+          "words": "artist role",
+          "type": "text",
+          "example": "Maker"
+        },
+        "artistPrefix": {
+          "words": "artist prefix",
+          "type": "text"
+        },
+        "artistDisplayName": {
+          "words": "artist display name",
+          "type": "text",
+          "example": "James Barton Longacre"
+        },
+        "artistDisplayBio": {
+          "words": "artist display bio",
+          "type": "text",
+          "example": "American, Delaware County, Pennsylvania 1794–1869 Philadelphia, Pennsylvania"
+        },
+        "artistSuffix": {
+          "words": "artist suffix",
+          "type": "text"
+        },
+        "artistAlphaSort": {
+          "words": "artist alpha sort",
+          "type": "text",
+          "example": "Longacre, James Barton"
+        },
+        "artistNationality": {
+          "words": "artist nationality",
+          "type": "text",
+          "example": "American"
+        },
+        "artistBeginDate": {
+          "words": "artist begin date",
+          "type": "number",
+          "writtenAsText": true,
+          "example": "1794"
+        },
+        "artistEndDate": {
+          "words": "artist end date",
+          "type": "number",
+          "writtenAsText": true,
+          "example": "1869"
+        },
+        "artistGender": {
+          "words": "artist gender",
+          "type": "text"
+        },
+        "artistWikidata_URL": {
+          "words": "artist wikidata url",
+          "type": "link",
+          "example": "https://www.wikidata.org/wiki/Q3806459"
+        },
+        "artistULAN_URL": {
+          "words": "artist ulan url",
+          "type": "link",
+          "example": "http://vocab.getty.edu/page/ulan/500011409"
+        },
+        "objectDate": {
+          "words": "object date",
+          "type": "text",
+          "example": "1853"
+        },
+        "objectBeginDate": {
+          "words": "object begin date",
+          "type": "number",
+          "example": 1853
+        },
+        "objectEndDate": {
+          "words": "object end date",
+          "type": "number",
+          "example": 1853
+        },
+        "medium": {
+          "words": "medium",
+          "type": "text",
+          "example": "Gold"
+        },
+        "dimensions": {
+          "words": "dimensions",
+          "type": "text",
+          "example": "Dimensions unavailable"
+        },
+        "measurements": {
+          "words": "measurements",
+          "type": "inside",
+          "example": [
+            {
+              "elementName": "Other",
+              "elementDescription": "Object diameter",
+              "elementMeasurements": {
+                "Diameter": 1.7463
+              }
+            }
+          ],
+          "inside": {
+            "elementName": {
+              "words": "element name",
+              "type": "text",
+              "example": "Other"
+            },
+            "elementDescription": {
+              "words": "element description",
+              "type": "text",
+              "example": "Object diameter"
+            },
+            "elementMeasurements": {
+              "words": "element measurements",
+              "type": "inside",
+              "example": "{\"Diameter\":1.7463}",
+              "inside": {
+                "Diameter": {
+                  "words": "diameter",
+                  "type": "number",
+                  "example": 1.7463
+                },
+                "Height": {
+                  "words": "height",
+                  "type": "number",
+                  "example": 43.2
+                },
+                "Width": {
+                  "words": "width",
+                  "type": "number",
+                  "example": 61
+                },
+                "Depth": {
+                  "words": "depth",
+                  "type": "number",
+                  "example": 6.35
+                },
+                "Depth (frame+backboard)": {
+                  "words": "depth (frame+backboard)",
+                  "type": "number",
+                  "example": 6.032512,
+                  "leftOut": "Spell couldn't read its line:  - its \"depth (frame+backboard)\" is a number, stored as \"Depth (frame+backboard)\" -- Don't understand \"its \"depth (frame+backboard)\" is a number, stored as \"Depth (frame+backboard)\"\""
+                }
+              }
+            }
+          },
+          "isListInside": true
+        },
+        "creditLine": {
+          "words": "credit line",
+          "type": "text",
+          "example": "Gift of Heinz L. Stoppelmann, 1979"
+        },
+        "geographyType": {
+          "words": "geography type",
+          "type": "text"
+        },
+        "city": {
+          "words": "city",
+          "type": "text"
+        },
+        "state": {
+          "words": "state",
+          "type": "text"
+        },
+        "county": {
+          "words": "county",
+          "type": "text"
+        },
+        "country": {
+          "words": "country",
+          "type": "text"
+        },
+        "region": {
+          "words": "region",
+          "type": "text"
+        },
+        "subregion": {
+          "words": "subregion",
+          "type": "text"
+        },
+        "locale": {
+          "words": "locale",
+          "type": "text"
+        },
+        "locus": {
+          "words": "locus",
+          "type": "text"
+        },
+        "excavation": {
+          "words": "excavation",
+          "type": "text"
+        },
+        "river": {
+          "words": "river",
+          "type": "text"
+        },
+        "classification": {
+          "words": "classification",
+          "type": "text",
+          "example": "Paintings"
+        },
+        "rightsAndReproduction": {
+          "words": "rights and reproduction",
+          "type": "text"
+        },
+        "linkResource": {
+          "words": "link resource",
+          "type": "text"
+        },
+        "metadataDate": {
+          "words": "metadata date",
+          "type": "date",
+          "example": "2024-08-14T04:52:51.407Z"
+        },
+        "repository": {
+          "words": "repository",
+          "type": "text",
+          "example": "Metropolitan Museum of Art, New York, NY"
+        },
+        "objectURL": {
+          "words": "object url",
+          "type": "link",
+          "example": "https://www.metmuseum.org/art/collection/search/1"
+        },
+        "tags": {
+          "words": "tags",
+          "type": "inside",
+          "example": [
+            {
+              "term": "Sunflowers",
+              "AAT_URL": "http://vocab.getty.edu/page/aat/300404749",
+              "Wikidata_URL": "https://www.wikidata.org/wiki/Q171497"
+            },
+            {
+              "term": "Still Life",
+              "AAT_URL": "http://vocab.getty.edu/page/aat/300015638",
+              "Wikidata_URL": "https://www.wikidata.org/wiki/Q170571"
+            }
+          ],
+          "inside": {
+            "term": {
+              "words": "term",
+              "type": "text",
+              "example": "Sunflowers"
+            },
+            "AAT_URL": {
+              "words": "aat url",
+              "type": "link",
+              "example": "http://vocab.getty.edu/page/aat/300404749"
+            },
+            "Wikidata_URL": {
+              "words": "wikidata url",
+              "type": "link",
+              "example": "https://www.wikidata.org/wiki/Q171497"
+            }
+          },
+          "isListInside": true
+        },
+        "objectWikidata_URL": {
+          "words": "object wikidata url",
+          "type": "link",
+          "example": "https://www.wikidata.org/wiki/Q9213165"
+        },
+        "isTimelineWork": {
+          "words": "timeline work",
+          "type": "yes or no",
+          "example": false
+        },
+        "GalleryNumber": {
+          "words": "gallery number",
+          "type": "number",
+          "writtenAsText": true,
+          "example": "825"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    }
+  },
+  "notes": [
+    "\"artworks\" is a list of 503102 ids, too long to read whole:  a few it read were read by id, each at its own address.",
+    "\"artworks\" is searched at /v1.1/search, with \"q\":  its search, not a collection of its own.",
+    "Left out element measurement's \"Depth (frame+backboard)\":  Spell couldn't read its line:  - its \"depth (frame+backboard)\" is a number, stored as \"Depth (frame+backboard)\" -- Don't understand \"its \"depth (frame+backboard)\" is a number, stored as \"Depth (frame+backboard)\"\"",
+    "No row read filled artwork's \"additionalImages\"."
+  ],
+  "agentNotes": [],
+  "spellCantSay": [
+    "A link to somewhere else:  artworks.primaryImage, artworks.primaryImageSmall, artworks.artistWikidata_URL, artworks.artistULAN_URL, artworks.objectURL, artworks.objectWikidata_URL hold addresses of nothing described here, so they read as text.",
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+  "checkEverySeconds": 30,
+  "mostPerSecond": 80,
+  "spell": [
+    "met museum is a web server at \"https://collectionapi.metmuseum.org/public/collection\":",
+    "\t- its id is its \"objectID\"",
+    "\t- its rows are its \"objectIDs\"",
+    "\t- its lists give only each one's \"objectID\"",
+    "\t- check it every 30 seconds",
+    "\t- it takes up to 80 requests a second",
+    "\t- it searches everything with \"q\" at \"/v1.1/search\"",
+    "\t- artworks live at \"/v1/objects\"",
+    "",
+    "an \"artwork\" is a thing:",
+    "\t- it lives in met museum",
+    "\t- its \"highlight\" is yes or no, stored as \"isHighlight\"",
+    "\t- its \"accession number\" is text",
+    "\t- its \"accession year\" is a number",
+    "\t- its \"public domain\" is yes or no, stored as \"isPublicDomain\"",
+    "\t- its \"primary image\" is text  // an address",
+    "\t- its \"primary image small\" is text  // an address",
+    "\t- its \"additional images\" is a list of text",
+    "\t- its \"constituents\" is a list of constituents",
+    "\t- its \"department\" is text",
+    "\t- its \"object name\" is text",
+    "\t- its \"title\" is text",
+    "\t- its \"culture\" is text",
+    "\t- its \"period\" is text",
+    "\t- its \"dynasty\" is text",
+    "\t- its \"reign\" is text",
+    "\t- its \"portfolio\" is text",
+    "\t- its \"artist role\" is text",
+    "\t- its \"artist prefix\" is text",
+    "\t- its \"artist display name\" is text",
+    "\t- its \"artist display bio\" is text",
+    "\t- its \"artist suffix\" is text",
+    "\t- its \"artist alpha sort\" is text",
+    "\t- its \"artist nationality\" is text",
+    "\t- its \"artist begin date\" is a number",
+    "\t- its \"artist end date\" is a number",
+    "\t- its \"artist gender\" is text",
+    "\t- its \"artist wikidata url\" is text  // an address",
+    "\t- its \"artist ulan url\" is text  // an address",
+    "\t- its \"object date\" is text",
+    "\t- its \"object begin date\" is a number",
+    "\t- its \"object end date\" is a number",
+    "\t- its \"medium\" is text",
+    "\t- its \"dimensions\" is text",
+    "\t- its \"measurements\" is a list of measurements",
+    "\t- its \"credit line\" is text",
+    "\t- its \"geography type\" is text",
+    "\t- its \"city\" is text",
+    "\t- its \"state\" is text",
+    "\t- its \"county\" is text",
+    "\t- its \"country\" is text",
+    "\t- its \"region\" is text",
+    "\t- its \"subregion\" is text",
+    "\t- its \"locale\" is text",
+    "\t- its \"locus\" is text",
+    "\t- its \"excavation\" is text",
+    "\t- its \"river\" is text",
+    "\t- its \"classification\" is text",
+    "\t- its \"rights and reproduction\" is text",
+    "\t- its \"link resource\" is text",
+    "\t- its \"metadata date\" is a date",
+    "\t- its \"repository\" is text",
+    "\t- its \"object url\" is text, stored as \"objectURL\"  // an address",
+    "\t- its \"tags\" is a list of tags",
+    "\t- its \"object wikidata url\" is text  // an address",
+    "\t- its \"timeline work\" is yes or no, stored as \"isTimelineWork\"",
+    "\t- its \"gallery number\" is a number",
+    "",
+    "a \"constituent\" is a thing:",
+    "\t- its \"constituent id\" is a number, stored as \"constituentID\"",
+    "\t- its \"role\" is text",
+    "\t- its \"name\" is text",
+    "\t- its \"constituent ulan url\" is text  // an address",
+    "\t- its \"constituent wikidata url\" is text  // an address",
+    "\t- its \"gender\" is text",
+    "",
+    "a \"measurement\" is a thing:",
+    "\t- its \"element name\" is text",
+    "\t- its \"element description\" is text",
+    "\t- its \"element measurements\" is an element measurement",
+    "",
+    "an \"element measurement\" is a thing:",
+    "\t- its \"diameter\" is a number",
+    "\t- its \"height\" is a number",
+    "\t- its \"width\" is a number",
+    "\t- its \"depth\" is a number",
+    "",
+    "a \"tag\" is a thing:",
+    "\t- its \"term\" is text",
+    "\t- its \"aat url\" is text  // an address",
+    "\t- its \"wikidata url\" is text  // an address"
+  ]
+}

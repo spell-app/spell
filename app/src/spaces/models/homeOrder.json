@@ -18,7 +18,11 @@
     "@spell/library/Inbox",
     "@spell/library/OrgEvents",
     "@spell/library/AdministracionDeLaOrg",
-    "@spell/guides/how-fizzbuzz-works"
+    "@spell/guides/how-fizzbuzz-works",
+    "@spell/examples/TaskList",
+    "@spell/examples/ListaDeTareas",
+    "@spell/guides/how-task-list-works",
+    "@spell/guides/como-funciona-lista-de-tareas"
   ],
   "@spell/examples": [
     "fizzbuzz",
@@ -28,6 +32,7 @@
     "bill-splitter",
     "flash-cards",
     "habit-tracker",
+    "Weather",
     "TaskList",
     "ListaDeTareas",
     "Solitaire",
@@ -36,6 +41,7 @@
     "FamilyCookbook",
     "PicnicLetter",
     "PokeSpell",
+    "MetArtworks",
     "PublicServers",
     "RecipeBox",
     "SignUpSheet",
