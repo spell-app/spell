@@ -428,15 +428,13 @@ export class BubblyLayout {
       const statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
       // a head that didn't parse, for a name declared elsewhere:  its shape from its first word (`shapeOf()`)
       const shape = statement?.rule.name === PARSE_ERROR_RULE ? this.shapeOf(line) : undefined
-      if (shape && line.children.length) {
-        if (shape.isControl) {
-          nodes.push(this.control(line, shape.rule, level, inSteps))
-          continue
-        }
-        if (shape.band && !inSteps) {
-          nodes.push(this.block(line, statement!, shape.band, line.children, level, shape.rule))
-          continue
-        }
+      if (shape?.isControl && line.children.length) {
+        nodes.push(this.control(line, shape.rule, level, inSteps))
+        continue
+      }
+      if (shape?.band && !inSteps) {
+        nodes.push(this.block(line, statement!, shape.band, line.children, level, shape.rule))
+        continue
       }
       const row = statement && BubblyPresentation.for(statement.rule)
       const band = statement && BubblyRoles.of(statement.rule).band
@@ -537,9 +535,10 @@ export class BubblyLayout {
    *   - one of them a control line (`if`, `for`, `repeat`), and none a declaration:  a control line
    *   - all of them declarations with one part of speech (`after`, `when`):  that declaration
    *   - else, a word that starts steps too (`to`, `a`, `the`):  `undefined`, a step
-   *   - EXCEPT a type's name alone, `a card`, `a two sided view` (its article `reopen_type`'s first word):
-   *     reopening a type declared elsewhere, a thing's head
-   * - Used only for a line with lines under it:  a line alone stays a step.
+   *   - EXCEPT a type's name alone, `a card`, `a two sided view` (its article `reopen_type`'s first word),
+   *     with lines under it:  reopening a type declared elsewhere, a thing's head
+   *   - and a pronoun before a quoted name, `it "can go up" if ...`:  a property's head, the name it declares
+   * - A control line only with lines under it:  alone, it's a step (`if the pile is empty return`).
    */
   private shapeOf(line: SourceLine): LineShape | undefined {
     const words = this.text.slice(line.start, this.commentStart(line))
@@ -547,6 +546,9 @@ export class BubblyLayout {
     if (!word) return undefined
     const shape = BubblyLayout.shapesFor(this.parser).get(word)
     if (shape) return shape
+    if (this.pronouns.has(word.toLowerCase()) && QUOTED_NAME_AFTER.test(words.slice(word.length)))
+      return { rule: QUOTED_PROPERTY_RULE, band: "property" }
+    if (!line.children.length) return undefined
     const reopen = this.parser.rules[REOPEN_TYPE_RULE]
     const articles = reopen instanceof P.Group ? reopen.rules : reopen ? [reopen] : []
     const isArticle = articles.some((rule) => rule instanceof P.Sequence && rule.firstWords?.includes(word))
@@ -1048,6 +1050,12 @@ const PARSE_ERROR_RULE = "parse_error"
 
 /** The rule that reopens a type declared elsewhere, `a card`. */
 const REOPEN_TYPE_RULE = "reopen_type"
+
+/** The rule that declares a property by a quoted name, `it "can go up" if ...`. */
+const QUOTED_PROPERTY_RULE = "quoted_type_expression"
+
+/** A quoted name after a line's first word:  ` "can go up" if ...`. */
+const QUOTED_NAME_AFTER = /^\s+"[^"]+"/
 
 /** An article and a name, nothing else:  `a card`, `a two sided view`. */
 const TYPE_NAME_ALONE = /^[\p{L}]+( +[\p{L}]+)+$/u
