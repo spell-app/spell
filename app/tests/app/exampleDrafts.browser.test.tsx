@@ -160,7 +160,9 @@ describe("Save (⌘S) in an example (`editor.saveDraft()`)", () => {
       project.mockRestore()
       saveAll.mockRestore()
     })
-    const reload = vi.spyOn(editor as never, "reloadFiles").mockResolvedValue(undefined as never)
+    // the example's files read again once its draft is gone:  the stand-in has none
+    const reloads = editor as unknown as { reloadFiles: (filePaths: string[]) => Promise<void> }
+    const reload = vi.spyOn(reloads, "reloadFiles").mockResolvedValue(undefined)
     cleanups.push(() => reload.mockRestore())
     choose("mine")
     await editor.saveDraft()
