@@ -34,79 +34,50 @@ PlanDocError.prototype.name = "PlanDocError"
 
 /****************
  * ### `ShortTitle`
- * The rule for a phase's or an item's title:  3-10 plain words saying what it is;  everything else goes in its details.
- * - Owen, 2026-11-17 (epic `epic-engine` I321), on a 900-character title:  "Stop putting crap like this in titles.
- *   That is completely incomprehensible and waaaay too long"
- * - `epic add` and `epic update --title` refuse one that isn't (`check()`), naming its first clause to use instead
- * - a retitle moves a long old title into the item's body, first (`asBody()`;  `PlanDoc.renameEntry()`)
- * - pure:  plain words in, plain words or HTML out
+ * The rule for a phase's or an item's title:  at most 30 plain words saying what it is, which read cold.
+ * - Owen, 2026-11-17 (epic `epic-engine` I322):  "Titles can be up to 30 words ... I'm looking at these things often
+ *   hours after the issue came up, so sentences referring to some weird condition or issue that only obtained for a
+ *   little while will be meaningless to me."
+ *   - I321 had 100 characters, and moved a retitled item's old title into its body:  no help either
+ * - `epic add` and `epic update --title` refuse one that's too long or runs on (`check()`):
+ *   the writer rewrites it, nothing is moved anywhere
+ * - the writer's own check, reading it cold, is the rest of the rule:  plan-doc.md, "Rules"
+ * - pure
  ****************/
 export class ShortTitle {
-  /** The most characters a title may have:  a few words, with room for a name or two in them (J, I321). */
-  static readonly MOST = 100
+  /** The most words a title may have (I322). */
+  static readonly MOST_WORDS = 30
 
-  /** A title that runs on:  a `;` or a `  --` joining a second clause. */
-  static readonly RUN_ON = /;\s|\s\s--/
+  /** A `; ` list:  clauses run together. */
+  static readonly LIST = /;\s/
 
-  /** Why `title` isn't a short title, or `undefined` when it is. */
+  /** A sentence's end with another after it:  `.`, `!` or `?`, a space, a capital;  never after `e.g.`, `vs.` ... */
+  static readonly SECOND_SENTENCE = /(?<!\b(?:e\.g|i\.e|vs|etc|cf))[.!?]\s+(?=[A-Z])/
+
+  /** Why `title` isn't a title, or `undefined` when it is. */
   static problemOf(title: string): string | undefined {
-    const words = squeezed(title)
-    if (words.length > ShortTitle.MOST) return `it's ${words.length} characters (the most is ${ShortTitle.MOST})`
-    const runOn = ShortTitle.RUN_ON.exec(title.trim())
-    if (runOn) return `it runs on into a second clause, after "${runOn[0].trim()}"`
+    const words = title.trim().split(/\s+/).filter(Boolean).length
+    if (words > ShortTitle.MOST_WORDS) return `it's ${words} words (the most is ${ShortTitle.MOST_WORDS})`
+    if (ShortTitle.LIST.test(title)) return `it runs on, a list after ";"`
+    if (ShortTitle.SECOND_SENTENCE.test(title.trim())) return "it's more than one sentence"
     return undefined
   }
 
   /**
-   * Throw when `title` isn't short (`problemOf()`), saying where the rest goes (`rest`:  `--details`) and its first
-   * clause, to use instead.
+   * Throw when `title` isn't a title (`problemOf()`), asking for it rewritten to read cold.
    * - throws `PlanDocError`
    */
-  static check(title: string, { rest = "--details" }: { rest?: string } = {}): void {
+  static check(title: string): void {
     const problem = ShortTitle.problemOf(title)
     if (!problem) return
     throw new PlanDocError(
-      `a title is a few words;  put the rest in ${rest}.\n` +
-        `- this one:  ${problem}\n` +
-        `- its first clause, as a title:  "${ShortTitle.firstClause(title)}"`
+      `rewrite this title:  ${problem}.\n` +
+        `- a title is at most ${ShortTitle.MOST_WORDS} plain words saying what the item is, in one sentence\n` +
+        `- read it as the person will, hours later and cold:  nothing about a passing condition ` +
+        `(a pid, "after the 4-line fix", "the turn was stuck")\n` +
+        `- the rest goes in --details`
     )
   }
-
-  /**
-   * The first clause of `title`, as a title would say it:  up to its first `;`, `--`, `:  ` or sentence end, an id
-   * before it (`I318:  `) left out, cut at a word under `MOST`.
-   */
-  static firstClause(title: string): string {
-    const words = title.trim().replace(/^[A-Z]\d+:\s*/, "")
-    const first = squeezed(words.split(/;\s|\s--\s|\s\s--|:\s\s|\.\s(?=[A-Z])/)[0]).replace(/[.:,]$/, "")
-    if (first.length <= ShortTitle.MOST) return first
-    return first.slice(0, ShortTitle.MOST).replace(/\s+\S*$/, "")
-  }
-
-  /**
-   * `title`'s words as a body to put first in its item:  a paragraph, or its first clause as a paragraph and the
-   * rest as bullets, one per clause or sentence.
-   * - escaped;  a `` `name` `` becomes `<code>name</code>`
-   */
-  static asBody(title: string): string {
-    const parts = squeezed(title)
-      .split(/;\s+|(?<=\.)\s+(?=[A-Z])/)
-      .map((part) => part.trim())
-      .filter(Boolean)
-    const [lead, ...rest] = parts.map(asHtml)
-    if (!rest.length) return `<p>${lead}</p>`
-    return `<p>${lead}</p><ul>${rest.map((part) => `<li>${part}</li>`).join("")}</ul>`
-
-    function asHtml(text: string): string {
-      const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      return escaped.replace(/`([^`]+)`/g, "<code>$1</code>")
-    }
-  }
-}
-
-/** `text` with its runs of white space one space each, trimmed. */
-function squeezed(text: string): string {
-  return text.replace(/\s+/g, " ").trim()
 }
 
 ////////////////

@@ -323,10 +323,8 @@ export class PlanDocCommands {
       case "rename": {
         const target = need(rest[0], "a phase (P6) or an item id")
         const title = need(rest[1], "the new title")
-        // a few plain words (epic `epic-engine` I321)
-        ShortTitle.check(flags.html ? title.replace(/<[^>]*>/g, "") : title, {
-          rest: `its details (epic details <epic>#<id> --file <html>)`
-        })
+        // at most 30 plain words, read cold (epic `epic-engine` I321, I322)
+        ShortTitle.check(flags.html ? title.replace(/<[^>]*>/g, "") : title)
         const renamed = await this.edit(file, (plan) => plan.renameEntry(target, title, { html: !!flags.html }))
         const links = renamed.links ? `;  ${renamed.links} link${renamed.links === 1 ? "" : "s"} rewritten` : ""
         this.print(`${renamed.label} · ${renamed.title} (was "${renamed.was}"${links})`)
@@ -342,7 +340,7 @@ export class PlanDocCommands {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
         // a standing option set, in the Choices section (epic `epic-engine` P50)
         if (kind === "choices") return this.options.addStanding(file, title, flags)
-        // a few plain words, the rest in its details (epic `epic-engine` I321)
+        // at most 30 plain words, read cold;  the rest in its details (epic `epic-engine` I321, I322)
         ShortTitle.check(title)
         const words = stringFlag(flags.start)
         if (flags.start === true) throw new PlanDocError(`--start needs the person's words:  --start "<his words>"`)

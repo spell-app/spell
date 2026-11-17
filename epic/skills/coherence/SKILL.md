@@ -55,7 +55,8 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
      takes it up.
    - **no epic, or done:**  a calm issue on the coherence epic's page,
      `epic add coherence#I "<title> (coherence)" --calm --details "..."`;  the person marks which become its phases.
-   - Each item's title is 3-10 plain words saying what it is;  everything else goes in --details.
+   - Each item's title is at most 30 plain words saying what it is, read cold, hours later:
+     nothing about a passing condition;  the rest goes in --details (plan-doc.md's "Rules").
    - Each item's details:  the finding in procedures.md's shape, its **Net effect** right after "The one" and
      BEFORE "Saves" (2026-10-25), its places and evidence in a folded `<epic-code>`.
 6. **Reply:**  one line per finding, where it landed, with its link (`epic pages link ... --hash <id>`);  the

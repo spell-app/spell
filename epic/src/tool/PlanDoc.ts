@@ -39,7 +39,6 @@ import {
   PlanDocError,
   QUESTION_ID,
   REVIEW_AS,
-  ShortTitle,
   NEW_PHASE,
   START_IN_PHASE,
   START_NOW_CARD,
@@ -374,7 +373,6 @@ export class PlanDoc extends PlanReader {
    *   `New`;  any other words stay (`P6`, "the next phase"), and so does a link in an Original Discussion (history)
    * - a phase:  also each item's queued `work` that names it (`P6 · Old`, what a todo's `next` writes)
    * - an item is stamped and flagged UPDATE, as any change to it;  a phase isn't
-   * - an item's old title that wasn't short (`ShortTitle`) goes first in its body, so none of its words are lost
    * - SIDE EFFECT:  logs it
    * - throws for no such phase or item, an empty title, or the title it has already
    */
@@ -393,27 +391,11 @@ export class PlanDoc extends PlanReader {
       for (const item of this.allItems.filter((each) => each.getAttribute("work") === `${label} · ${was}`))
         Markup.set<"epic-item">(item, { work: `${label} · ${shown}` })
     } else {
-      // a long old title isn't lost:  its words go first in the body (epic `epic-engine` I321)
-      if (ShortTitle.problemOf(was)) this.titleIntoBody(element, was)
       this.stamp(element)
       this.markUpdate(element)
     }
     this.log(`${label} renamed:  "${was}" -> "${shown}"${links ? ` (${links} link${links === 1 ? "" : "s"})` : ""}`)
     return { id: element.id, label, was, title: shown, links }
-  }
-
-  /**
-   * Put `was`, an item's old title too long to lose, first in its body (`ShortTitle.asBody()`):  before its text, after
-   * the question as asked;  the body it was given for having only a title (`dropTitleBody()`) goes.
-   */
-  private titleIntoBody(item: Element, was: string): void {
-    PlanItem.dropTitleBody(item)
-    const nodes = this.incoming(ShortTitle.asBody(was))
-    const first = Array.from(item.children).find(
-      (child) => !child.hasAttribute("slot") && child.localName !== "epic-question"
-    )
-    if (first) for (const node of nodes) item.insertBefore(node, first)
-    else for (const node of nodes) Markup.place(item, node)
   }
 
   /**

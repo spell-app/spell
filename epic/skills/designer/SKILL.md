@@ -78,8 +78,8 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
          shot (the change tried in the page, shot, then undone), the rule it answers;  options "Do it" / "Leave it" /
          Other.
        - Each one also an issue on the epic page, calm unless it breaks one of the person's own asks:
-         `epic add <epic>#I "<what> (designer)" --details "..." --calm`;  its title 3-10 plain words, the rest in
-         `--details`.
+         `epic add <epic>#I "<what> (designer)" --details "..." --calm`;  its title at most 30 plain words, read
+         cold, the rest in `--details` (plan-doc.md's "Rules").
    - **The agent type**:  returns the ranked list to the session that asked;  it changes nothing itself.
 6. Learn (designer.md says so in its header):
    - The person gives design feedback, in any session:
