@@ -105,8 +105,9 @@ The task, word for word:
   `<content>/<path>` (`<content>`:  what `epic config contentFolder` prints), never git-added;  in a worktree, plain separate shell commands
   (no `$(...)`, no `&&` chains, no `cd`).
 - You can't ask the person anything:  no AskUserQuestion.  A choice they might make differently:  take the default the code
-  and plan best support, and record it:  in an epic, `epic add <epic>#J "<the call>" --details
-  "<p>chose X over Y because Z</p>" --calm` (`--calm` unless it would surprise them:  the epic skill's "5. Each
+  and plan best support, and record it:  in an epic, `epic add <epic>#J "<a few words>" --details
+  "<p>chose X over Y because Z</p>" --calm` (its title 3-10 plain words saying what it is;  everything else in
+  `--details`) (`--calm` unless it would surprise them:  the epic skill's "5. Each
   phase", step 2);  else in your report.  A choice you can't make safely (it would delete or
   overwrite work, publish anything, or change what the task means):  stop there, and make it your report's question.
 - Other running agents:  `epic agents list`.  Claim the files you'll change first, `epic agents claim <full name>

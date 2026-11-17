@@ -29,6 +29,87 @@ export class PlanDocError extends Error {}
 PlanDocError.prototype.name = "PlanDocError"
 
 ////////////////
+// ## Titles
+////////////////
+
+/****************
+ * ### `ShortTitle`
+ * The rule for a phase's or an item's title:  3-10 plain words saying what it is;  everything else goes in its details.
+ * - Owen, 2026-11-17 (epic `epic-engine` I321), on a 900-character title:  "Stop putting crap like this in titles.
+ *   That is completely incomprehensible and waaaay too long"
+ * - `epic add` and `epic update --title` refuse one that isn't (`check()`), naming its first clause to use instead
+ * - a retitle moves a long old title into the item's body, first (`asBody()`;  `PlanDoc.renameEntry()`)
+ * - pure:  plain words in, plain words or HTML out
+ ****************/
+export class ShortTitle {
+  /** The most characters a title may have:  a few words, with room for a name or two in them (J, I321). */
+  static readonly MOST = 100
+
+  /** A title that runs on:  a `;` or a `  --` joining a second clause. */
+  static readonly RUN_ON = /;\s|\s\s--/
+
+  /** Why `title` isn't a short title, or `undefined` when it is. */
+  static problemOf(title: string): string | undefined {
+    const words = squeezed(title)
+    if (words.length > ShortTitle.MOST) return `it's ${words.length} characters (the most is ${ShortTitle.MOST})`
+    const runOn = ShortTitle.RUN_ON.exec(title.trim())
+    if (runOn) return `it runs on into a second clause, after "${runOn[0].trim()}"`
+    return undefined
+  }
+
+  /**
+   * Throw when `title` isn't short (`problemOf()`), saying where the rest goes (`rest`:  `--details`) and its first
+   * clause, to use instead.
+   * - throws `PlanDocError`
+   */
+  static check(title: string, { rest = "--details" }: { rest?: string } = {}): void {
+    const problem = ShortTitle.problemOf(title)
+    if (!problem) return
+    throw new PlanDocError(
+      `a title is a few words;  put the rest in ${rest}.\n` +
+        `- this one:  ${problem}\n` +
+        `- its first clause, as a title:  "${ShortTitle.firstClause(title)}"`
+    )
+  }
+
+  /**
+   * The first clause of `title`, as a title would say it:  up to its first `;`, `--`, `:  ` or sentence end, an id
+   * before it (`I318:  `) left out, cut at a word under `MOST`.
+   */
+  static firstClause(title: string): string {
+    const words = title.trim().replace(/^[A-Z]\d+:\s*/, "")
+    const first = squeezed(words.split(/;\s|\s--\s|\s\s--|:\s\s|\.\s(?=[A-Z])/)[0]).replace(/[.:,]$/, "")
+    if (first.length <= ShortTitle.MOST) return first
+    return first.slice(0, ShortTitle.MOST).replace(/\s+\S*$/, "")
+  }
+
+  /**
+   * `title`'s words as a body to put first in its item:  a paragraph, or its first clause as a paragraph and the
+   * rest as bullets, one per clause or sentence.
+   * - escaped;  a `` `name` `` becomes `<code>name</code>`
+   */
+  static asBody(title: string): string {
+    const parts = squeezed(title)
+      .split(/;\s+|(?<=\.)\s+(?=[A-Z])/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+    const [lead, ...rest] = parts.map(asHtml)
+    if (!rest.length) return `<p>${lead}</p>`
+    return `<p>${lead}</p><ul>${rest.map((part) => `<li>${part}</li>`).join("")}</ul>`
+
+    function asHtml(text: string): string {
+      const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      return escaped.replace(/`([^`]+)`/g, "<code>$1</code>")
+    }
+  }
+}
+
+/** `text` with its runs of white space one space each, trimmed. */
+function squeezed(text: string): string {
+  return text.replace(/\s+/g, " ").trim()
+}
+
+////////////////
 // ## Page
 ////////////////
 
