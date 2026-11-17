@@ -161,34 +161,39 @@ export const uiMethods = defineCoreModule({
     }
   },
 
-  /** Show `message` in a dialog, and wait until it's closed -- compiled from `alert "Yo!"` (`await`ed). */
-  async alert(message: unknown, okText?: string): Promise<void> {
+  /**
+   * Show `message` in a dialog, and wait until it's closed -- compiled from `alert "Yo!"` (`await`ed).
+   * - `options`:  its button's words, `alert "You won!" with "New game"`;  or, once a title or a size is written,
+   *   `DialogOptions`:  `alert "You won!" titled "Solitaire" in big text` => `{ title: "Solitaire", size: "big" }`
+   */
+  async alert(message: unknown, options?: string | DialogOptions): Promise<void> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
-    await (await ui.load()).modals.alert({ message: String(message), okText })
+    await (await ui.load()).modals.alert(dialogFor(message, options))
   },
 
   /**
    * Warn the person in a dialog, and wait until it's closed -- compiled from `warn "Careful!"` (`await`ed).
    * - No Spell UI:  printed as a warning on the console.
    */
-  async warn(message: unknown, okText?: string): Promise<void> {
+  async warn(message: unknown, options?: string | DialogOptions): Promise<void> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return core.console.warn(String(message))
-    await (await ui.load()).modals.alert({ message: String(message), okText })
+    await (await ui.load()).modals.alert(dialogFor(message, options))
   },
 
   /**
    * Ask a yes / no question in a dialog:  `true` for ok -- compiled from `confirm "Delete?"` (`await`ed).
+   * - `options`:  the ok button's words, then `cancelText`;  or `DialogOptions`, as `alert`'s
    * - No Spell UI:  `true`, printed with the question.
    */
-  async confirm(message: unknown, okText?: string, cancelText?: string): Promise<boolean> {
+  async confirm(message: unknown, options?: string | DialogOptions, cancelText?: string): Promise<boolean> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return (core.console.info(core.message("confirm-default", { question: String(message) })), true)
-    return (await ui.load()).modals.confirm({ message: String(message), okText, cancelText })
+    return (await ui.load()).modals.confirm(dialogFor(message, options, cancelText))
   },
 
   /**
@@ -584,8 +589,8 @@ type PageUI = {
   toasts: { ready(): Promise<void> }
   /** dialogs that answer with a promise:  `UI.modals` */
   modals: {
-    alert(options: { message: string; okText?: string }): Promise<void>
-    confirm(options: { message: string; okText?: string; cancelText?: string }): Promise<boolean>
+    alert(options: PageDialog): Promise<void>
+    confirm(options: PageDialog): Promise<boolean>
     prompt(options: { message: string; value?: string }): Promise<string | undefined>
   }
   /** the page's keyboard shortcuts:  `UI.keyboard`;  `register()` answers how to stop */
@@ -597,6 +602,34 @@ type PageUI = {
       layered?: boolean
     }): () => void
   }
+}
+
+/**
+ * What `alert`, `warn` and `confirm` take after their message, once a title or a size is written
+ * (spell's `dialogArguments()`;  epic `language` T143, T144).
+ * - Older compiled code passes the buttons' words one by one instead, and still works.
+ */
+export type DialogOptions = {
+  /** `titled "Solitaire"`:  its heading */
+  title?: string
+  /** `in big text`:  its message's size, Spell UI's size word (`small`, `big`, `huge`) */
+  size?: string
+  /** `with "New game"`:  the ok button's words */
+  okText?: string
+  /** `confirm`'s cancel button's words */
+  cancelText?: string
+}
+
+/** A dialog as the page's Spell UI takes it:  `UI.modals`' `ModalOptions`, the part core uses. */
+type PageDialog = { message: string; title?: string; size?: string; okText?: string; cancelText?: string }
+
+/**
+ * The dialog `alert`, `warn` and `confirm` ask the page for:  `message` as text, and their buttons' words,
+ * passed one by one (`okText`, `cancelText`) or as `DialogOptions`.
+ */
+function dialogFor(message: unknown, options: string | DialogOptions = {}, cancelText?: string): PageDialog {
+  const words = typeof options === "string" ? { okText: options, cancelText } : options
+  return { ...words, message: String(message) }
 }
 
 /**
