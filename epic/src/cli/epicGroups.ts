@@ -1490,7 +1490,14 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   loc: { "--print": "the by-repo table only;  the page is left as it is", "--json": "the numbers, as JSON" },
   config: { "--json": "print it as JSON" },
   settings: { "--json": "print it as JSON" },
-  voice: { "--for <kind>": "the voice that kind of page is written in", "--json": "print it as JSON" },
+  voice: {
+    "--for <kind>": "the voice that kind of page is written in",
+    "--json": "print it as JSON",
+    "--voice <name>": "check:  the voice to check against (default novice)",
+    "--text <text>": "check:  the text itself, in place of a file or -",
+    "--about <what>": "check:  what the text is, for the reader",
+    "--model <name>": "check:  the reader's model (default sonnet)"
+  },
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",
     "--color <colour>": "the colour of your words:  a free Spell UI colour name (else asked), or a CSS colour",

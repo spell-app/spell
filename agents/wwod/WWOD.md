@@ -579,6 +579,17 @@ Their long before / afters are in `agents/wwod/writing.md`.
     each language words it its own way.
   - NOT:  a `MSG.ts` of every string in a package that speaks only English -- one more file to keep in step, for no
     localization.  (Owen, 2026-10-22, epic `spanish` J61.)
+- **Significant text people see is in the novice voice, and checked cold before it ships:**
+  - Significant:  dialogs, notices, errors, empty states, onboarding and help.
+    Not every label or button on its own.
+  - The novice voice:  `epic voice novice` prints its file.
+  - Checked by a reader with no context, who finds the words a newcomer would stop at:
+    `epic voice check <file>`, or `--text "..."`, with `--about "a dialog shown when ..."`.
+    - It fails on jargon, ids, insider words, run-on sentences and stacked conditions ("agent speak"),
+      and quotes each with a rewrite.
+    - Check a dialog whole (heading, message and buttons in one text):  a heading alone often fails for want of
+      the message under it.
+  - Fix what it finds, or say in the report why a finding is wrong.  (Owen, 2026-11-17, epic `epic-engine` T92.)
 
 ## 7. Anti-patterns (Claude habits to drop)
 
