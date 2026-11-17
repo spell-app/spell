@@ -1,5 +1,15 @@
 import { spawn, type ChildProcess } from "node:child_process"
-import { createWriteStream, existsSync, rmSync, writeFileSync } from "node:fs"
+import {
+  closeSync,
+  existsSync,
+  fstatSync,
+  openSync,
+  readFileSync,
+  readSync,
+  rmSync,
+  statSync,
+  writeFileSync
+} from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
@@ -23,8 +33,17 @@ import {
  *   and `spell app serve` find it.
  * - It reaches the page server's `/api` through vite's proxy, by IP:  `localhost` may be ::1 first, where the page
  *   server doesn't listen.
- * - Its output goes to `<root>/.spell-server.editor.log`, through a pipe:  the record is written when vite itself
- *   says it's ready.
+ * - Its output goes to `<root>/.spell-server.editor.log`, straight from vite:  the record is written when vite itself
+ *   says it's ready there.
+ * - It OUTLIVES a page server's restart (`PidFile.stop({ restart })`;  epic `epic-engine` I329):
+ *   the next page server takes it over (`adopt()`), so the editor's pages keep running, with no reload.
+ *   - Not when what it runs on changed since it started:  the packages (`packagesStamp()`), the page server's port,
+ *     or whether it listens on this machine alone.  Then it's stopped, and a new one starts:  an install's new
+ *     package resolves (`epic merge codemirror`'s `@codemirror/lang-css`, epic `epic-engine` T89).
+ *   - Its write token, the page server's, it reads from the page server's token file as each request goes on
+ *     (`pageServerProxy()`):  the next page server's is new.
+ *   - Why (Owen, 2026-11-17, I329):  every merge into `main` that changed the page server's code reloaded the editor
+ *     under him, at test.spell.app.
  * - Runs vite's own script with this `node`, NOT `yarn start:dev`:  a page server launched by a `yarn` script
  *   inherits a PATH whose `yarn` is a temporary shim, gone once that script exits.
  * - In an npm install of `spell` (no vite, no source):  the BUILT editor, `app/dist/`, served by a small server of its own
@@ -51,6 +70,9 @@ export class EditorServer {
 
   /** the running vite, in its own process group */
   private child?: ChildProcess
+
+  /** the pid of a vite the last page server started, taken over (`adopt()`):  not our child, stopped by its pid */
+  private adoptedPid?: number
 
   /** the built editor's server, in an npm install (`serveBuilt()`) */
   private built?: SRV.WebServer
@@ -81,7 +103,9 @@ export class EditorServer {
   async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
     if (process.env.SPELL_NO_EDITOR || this.child || this.built) return this.pickedPort(this.port)
     if (isBuiltEditor()) return this.pickedPort(await this.serveBuilt(pagePort, guard, { thisMachineOnly }))
-    const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
+    const kept = await this.adopt(pagePort, guard, { thisMachineOnly })
+    if (kept) return this.pickedPort(kept)
+    const log = join(this.root, EDITOR_LOG)
     const taken: number[] = []
     for (let tries = 0; tries < PORT_TRIES && !this.isStopped; tries++) {
       const port = await editorPort({ thisMachineOnly, taken })
@@ -106,7 +130,7 @@ export class EditorServer {
     port: number,
     pagePort: number,
     guard: SRV.Guard,
-    { thisMachineOnly, log }: { thisMachineOnly: boolean; log: NodeJS.WritableStream }
+    { thisMachineOnly, log }: { thisMachineOnly: boolean; log: string }
   ): Promise<"ready" | "port taken" | "ended"> {
     const env = {
       ...process.env,
@@ -114,40 +138,75 @@ export class EditorServer {
       PORT: String(pagePort),
       API_SERVER: "127.0.0.1",
       SPELL_SERVER_TOKEN: guard.token,
+      SPELL_SERVER_TOKEN_FILE: new SRV.PidFile(this.root).tokenFile,
       ...(thisMachineOnly && { SPELL_EDITOR_THIS_MACHINE_ONLY: "1" })
     }
+    // its output straight to the log, not through a pipe to us:  it outlives a restart of ours (`adopt()`)
+    const from = existsSync(log) ? statSync(log).size : 0
+    const out = openSync(log, "a")
     const child = spawn(process.execPath, [vpScript(), "dev", "--port", String(port), "--strictPort"], {
       cwd: APP_DIR,
       env,
       detached: true,
-      stdio: ["ignore", "pipe", "pipe"]
+      stdio: ["ignore", out, out]
     })
+    closeSync(out)
     this.child = child
+    const stamp = packagesStamp(this.root)
     return new Promise((settle) => {
-      // its output to the log -- and the record once IT says it's ready:  a fetch could be answered by another
-      // checkout's editor holding the port, before ours fails with "already in use" (`--strictPort`)
-      let output = ""
+      // the record once IT says it's ready, in the log:  a fetch could be answered by another checkout's editor
+      // holding the port, before ours fails with "already in use" (`--strictPort`)
       let ready = false
-      const watch = (data: Buffer) => {
-        log.write(data)
-        if (ready) return
-        output += data
-        if (!READY.test(stripVTControlCharacters(output))) return
+      const output = () => stripVTControlCharacters(readFrom(log, from))
+      const looking = setInterval(() => {
+        if (ready || !READY.test(output())) return
         ready = true
+        clearInterval(looking)
         if (this.child !== child) return
-        this.record(`http://localhost:${port}/`, child)
+        this.record({ url: `http://localhost:${port}/`, pid: child.pid!, pagePort, thisMachineOnly, packages: stamp })
         settle("ready")
-      }
-      child.stdout!.on("data", watch)
-      child.stderr!.on("data", watch)
+      }, READY_LOOK_MS)
       child.on("exit", () => {
+        clearInterval(looking)
         if (this.child === child) {
           this.child = undefined
           rmSync(this.recordFile, { force: true })
         }
-        settle(!ready && PORT_IN_USE.test(stripVTControlCharacters(output)) ? "port taken" : "ended")
+        settle(!ready && PORT_IN_USE.test(output()) ? "port taken" : "ended")
       })
     })
+  }
+
+  /**
+   * Take over the vite the last page server left running for us (`stop()` in a restart), when it still fits:
+   * resolves to its port, or `undefined` to start a new one.
+   * - fits:  alive, answering its address, for the same page server port and address, on the same packages
+   *   (`packagesStamp()`)
+   * - one that doesn't fit is stopped first, so its port is free for the new one
+   * - NEVER throws
+   */
+  private async adopt(
+    pagePort: number,
+    guard: SRV.Guard,
+    { thisMachineOnly }: { thisMachineOnly: boolean }
+  ): Promise<number | undefined> {
+    const kept = this.readRecord()
+    if (!kept?.pid || !SRV.isProcessAlive(kept.pid)) return undefined
+    const fits =
+      kept.pagePort === pagePort &&
+      kept.thisMachineOnly === thisMachineOnly &&
+      kept.packages === packagesStamp(this.root)
+    if (fits && kept.url && (await answers(kept.url))) {
+      this.adoptedPid = kept.pid
+      this.port = Number(new URL(kept.url).port)
+      guard.allowOriginPort(this.port)
+      console.warn(`editor:  kept vite (pid ${kept.pid}) at ${kept.url}, from the last page server`)
+      return this.port
+    }
+    console.warn(`editor:  stopping vite (pid ${kept.pid}):  ${fits ? "it doesn't answer" : "what it runs on changed"}`)
+    await endGroup(kept.pid)
+    rmSync(this.recordFile, { force: true })
+    return undefined
   }
 
   /**
@@ -201,31 +260,127 @@ export class EditorServer {
     const built = this.built
     this.built = undefined
     if (built) await built.close().catch(() => {})
-    const pid = this.child?.pid
-    this.child = undefined
-    rmSync(this.recordFile, { force: true })
-    if (!pid) return
-    const signal = (name: NodeJS.Signals) => {
-      try {
-        process.kill(-pid, name)
-      } catch {
-        // already gone
-      }
+    const pid = this.child?.pid ?? this.adoptedPid
+    // a restart:  vite stays up, and its record, for the next page server to take over (`adopt()`)
+    if (pid && new SRV.PidFile(this.root).isRestarting()) {
+      this.child?.unref()
+      this.child = undefined
+      return
     }
-    signal("SIGTERM")
-    for (let waited = 0; waited < STOP_WAIT_MS && SRV.isProcessAlive(pid); waited += STOP_LOOK_MS)
-      await sleep(STOP_LOOK_MS)
-    if (SRV.isProcessAlive(pid)) signal("SIGKILL")
+    this.child = undefined
+    this.adoptedPid = undefined
+    rmSync(this.recordFile, { force: true })
+    if (pid) await endGroup(pid)
   }
 
-  /** Write the record:  `url` is `child`'s, which said it's ready. */
-  private record(url: string, child: ChildProcess): void {
-    writeFileSync(this.recordFile, `${JSON.stringify({ url, pid: child.pid }, null, 2)}\n`)
+  /** Write the record of the vite that said it's ready. */
+  private record(record: EditorRecord): void {
+    writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
   }
+
+  /** The record, or `undefined` with none.  NEVER throws. */
+  private readRecord(): Partial<EditorRecord> | undefined {
+    try {
+      return JSON.parse(readFileSync(this.recordFile, "utf8")) as Partial<EditorRecord>
+    } catch {
+      return undefined
+    }
+  }
+}
+
+/**
+ * `<root>/.spell-server.editor.json`, while the editor runs:  read by `/editor` and `spell app serve` (`url`), and by
+ * the next page server (`EditorServer.adopt()`).
+ */
+type EditorRecord = {
+  /** where it answers:  `http://localhost:3001/` */
+  url: string
+  /** vite's pid, its process group's too;  the built editor's:  the page server's */
+  pid: number
+  /** the page server's port vite passes requests on to */
+  pagePort?: number
+  /** listens on this machine alone */
+  thisMachineOnly?: boolean
+  /** the packages it started on:  `packagesStamp()` */
+  packages?: string
+}
+
+/**
+ * The packages of kit `kit` (the page server's root), as files that change when an install does:
+ * their sizes and change times, one string.
+ * - the lockfile, the kit's and the app folder's manifests, and yarn's own record of what's installed
+ * - a vite started on other packages is never taken over (`EditorServer.adopt()`):  it would keep the imports it
+ *   couldn't resolve before
+ */
+function packagesStamp(kit: string): string {
+  return [join(kit, "yarn.lock"), join(kit, "package.json"), join(APP_DIR, "..", "package.json"), YARN_STATE(kit)]
+    .map((file) => {
+      try {
+        const { size, mtimeMs } = statSync(file)
+        return `${size}:${mtimeMs}`
+      } catch {
+        return "-"
+      }
+    })
+    .join(",")
+}
+
+/** yarn's record of what it installed, rewritten by every install. */
+const YARN_STATE = (kit: string) => join(kit, "node_modules", ".yarn-state.yml")
+
+/** `file` from byte `from` on, as text;  `""` with none.  NEVER throws. */
+function readFrom(file: string, from: number): string {
+  let fd: number | undefined
+  try {
+    fd = openSync(file, "r")
+    const text = Buffer.alloc(Math.max(0, fstatSync(fd).size - from))
+    readSync(fd, text, 0, text.length, from)
+    return text.toString()
+  } catch {
+    return ""
+  } finally {
+    if (fd !== undefined) closeSync(fd)
+  }
+}
+
+/** Does something answer at `url` within a second?  NEVER throws. */
+async function answers(url: string | undefined): Promise<boolean> {
+  if (!url) return false
+  try {
+    await fetch(url, { signal: AbortSignal.timeout(1000), redirect: "manual" })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * End process group `pid` (vite and everything it started), and wait for it to END (epic `epic-engine` I274, r68).
+ * - `SIGTERM`;  `SIGKILL` if it's still there after `STOP_WAIT_MS`
+ * - NEVER throws
+ */
+async function endGroup(pid: number): Promise<void> {
+  const signal = (name: NodeJS.Signals) => {
+    try {
+      process.kill(-pid, name)
+    } catch {
+      // already gone
+    }
+  }
+  signal("SIGTERM")
+  for (let waited = 0; waited < STOP_WAIT_MS && SRV.isProcessAlive(pid); waited += STOP_LOOK_MS)
+    await sleep(STOP_LOOK_MS)
+  if (SRV.isProcessAlive(pid)) signal("SIGKILL")
 }
 
 /** Where the editor is recorded, relative to the checkout:  read by `appRoutes.ts`'s `/editor` and `spell app serve`. */
 export const EDITOR_FILE = ".spell-server.editor.json"
+
+/** vite's output, relative to the checkout. */
+const EDITOR_LOG = ".spell-server.editor.log"
+
+/** How often `launch()` looks in the log for vite saying it's ready. */
+const READY_LOOK_MS = 100
 
 /** The app's build folder, `app/`, where vite runs (its `vite.config.ts`), and its builds are:  `dist/`, `dist-element/` ... */
 export const APP_DIR = join(environment.packagesDir, "app")

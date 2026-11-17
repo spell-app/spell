@@ -165,6 +165,21 @@ describe("PidFile.stop():  waits for the PROCESS, not just for it to stop answer
   it("nothing running:  false", async () => {
     expect(await new SRV.PidFile(root).stop()).toBe(false)
   })
+
+  // epic `epic-engine` I329:  the editor's vite stays up through a restart, for the next server to take over
+  it("a restart:  the server is told so as it stops (`isRestarting()`), and the note is gone after", async () => {
+    const pidFile = await start(serverAnswering(root, { onTerm: "note restart, then exit" }))
+    const pid = server!.pid!
+    expect(await pidFile.stop({ restart: true })).toBe(true)
+    expect(JSON.parse(readFileSync(join(root, "seen-on-term.json"), "utf8"))).toEqual({ pid })
+    expect(pidFile.isRestarting(pid)).toBe(false)
+  })
+
+  it("a plain stop:  no note, so the server stops everything it started", async () => {
+    const pidFile = await start(serverAnswering(root, { onTerm: "note restart, then exit" }))
+    expect(await pidFile.stop()).toBe(true)
+    expect(readFileSync(join(root, "seen-on-term.json"), "utf8")).toBe("none")
+  })
 })
 
 /** Is `pid` still there?  (`stop()` returns only once node has reaped its child, so no zombie counts.) */
@@ -195,18 +210,22 @@ function serverAnswering(root: string, { onTerm = "exit" }: { onTerm?: TermBehav
     `else { r.statusCode = 404; r.end() } });` +
     `s.listen(0, '127.0.0.1', () => fs.writeFileSync(${JSON.stringify(join(root, ".spell-server.json"))},` +
     `JSON.stringify({ pid: process.pid, port: s.address().port, root: ${JSON.stringify(root)}, started: new Date().toISOString() })));` +
-    `process.on('SIGTERM', () => { ${ON_TERM[onTerm]} })`
+    `const ROOT = ${JSON.stringify(root)}; process.on('SIGTERM', () => { ${ON_TERM[onTerm]} })`
   )
 }
 
 /** What `serverAnswering()`'s server does on `SIGTERM`. */
-type TermBehaviour = "exit" | "close, then exit after 800ms" | "ignore"
+type TermBehaviour = "exit" | "close, then exit after 800ms" | "ignore" | "note restart, then exit"
 
 /** Each `TermBehaviour`, as code. */
 const ON_TERM: Record<TermBehaviour, string> = {
   exit: "process.exit(0)",
   "close, then exit after 800ms": "s.close(); s.closeAllConnections(); setTimeout(() => process.exit(0), 800)",
-  ignore: ""
+  ignore: "",
+  // copies the restart note (`PidFile.restartFile`) as it stood, to `seen-on-term.json`
+  "note restart, then exit":
+    "let note = 'none'; try { note = fs.readFileSync(ROOT + '/.spell-server.restart.json', 'utf8') } catch {}" +
+    "fs.writeFileSync(ROOT + '/seen-on-term.json', note); process.exit(0)"
 }
 
 describe("PidFile.isOlderThanCode():  restart only for code the server LOADED (epic `epic-engine` I309)", () => {
