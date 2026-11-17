@@ -810,6 +810,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
     - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
       it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
+      - Its spec is `CLOUD_BROWSER_BUNDLE` ([browserBundle.ts](server/node/routes/browserBundle.ts)), apart from the
+        cloud so a test run's global setup can load it:  every Vitest run builds it again first when it's stale
+        (epic `language` I163).
       - `spell space cloud build` builds it and starts nothing:  the house-network site's update, while the old cloud serves.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it

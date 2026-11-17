@@ -87,6 +87,11 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       - It lists each org, person and project by name, so editing a file never trips it.
       - Another session's running test project isn't counted;  a project you make by hand during a run fails it once.
       - Python's tests run after Vitest, so it doesn't see them.
+    - Every Vitest run here first builds the browser bundle again (`yarn build:element`) when it's there but stale:
+      [browserBundleCheck.ts](tests/browserBundleCheck.ts), beside it in `globalSetup` (epic `language` I163).
+      - The tests that run a program in a browser load it (Recipe Box's ...):  they ran on whatever build was there,
+        and a build older than a fix to the core failed them.
+      - Not built at all (CI):  left alone, and they skip themselves.
   - [The tests' tsconfig](tests/tsconfig.json) checks them with node's settings;
     [the app's tests' one](tests/app/tsconfig.json), with the app's (Solid's JSX).
   - Spell's frozen test projects (`@spell/test`) are HERE, beside the other `@spell` groups:

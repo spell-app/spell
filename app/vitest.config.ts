@@ -55,8 +55,9 @@ const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits|test
 export default defineConfig({
   plugins: [standardDecorators(), packageVersion(import.meta.dirname)],
   test: {
-    // fails a run that adds a folder to your real space, naming it
-    globalSetup: ["tests/realSpaceCheck.ts"],
+    // fails a run that adds a folder to your real space, naming it;
+    // builds the browser bundle again first when it's stale, for the tests that run a program in a browser
+    globalSetup: ["tests/realSpaceCheck.ts", "tests/browserBundleCheck.ts"],
     projects: [
       { extends: true, test: { name: "spaces", dir: "tests/spaces", environment: "node" } },
       { extends: true, test: { name: "lsp", dir: "tests/lsp" } },

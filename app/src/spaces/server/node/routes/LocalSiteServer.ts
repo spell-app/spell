@@ -24,7 +24,8 @@ import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { EDITOR_FILE } from "./EditorServer"
-import { CLOUD_BROWSER_BUNDLE, CLOUD_PORT } from "./SpellCloud"
+import { CLOUD_BROWSER_BUNDLE } from "./browserBundle"
+import { CLOUD_PORT } from "./SpellCloud"
 
 /** Where the site's addresses are unless `--address` says otherwise. */
 export const DEFAULT_ADDRESSES = ["https://test.spell.app", "https://test.spell.space"]

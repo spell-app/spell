@@ -5,7 +5,8 @@ import { CLI } from "spell/cli"
 import { SRV } from "spell/server"
 import { MailCatcher } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
-import { CLOUD_BROWSER_BUNDLE, CLOUD_PORT, SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
+import { CLOUD_BROWSER_BUNDLE } from "spell/app/spaces/server/node/routes/browserBundle"
+import { CLOUD_PORT, SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
 
 /** What `spell space cloud service` names the service it writes. */
 const SERVICE_NAME = "spell.cloud"
