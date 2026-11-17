@@ -21,6 +21,7 @@ import type { TestResult } from "spell/parser/core"
 import { InspectorActions, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
 import { PartEdits } from "./PartEdits"
+import { SpellReference } from "./SpellReference"
 import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
 
@@ -142,10 +143,13 @@ export function appParts(): () => PartRow[] {
 
 /****************
  * ### `<InspectorViews>`
- * The Inspector's bottom card:  the running app as ONE tree (`<ui-tree>`), with what it draws and what it doesn't.
- * - It's an `<InspectorCard>`:  the chevron, its name, then its actions.
- * - The header's magnifying glass opens a filter in that same row:  no new row until you ask for it.
- *   Esc or the glass again closes it, and the tree is as it was (`filter`).
+ * The Inspector's bottom card, two tabs in its header, the one shown remembered (`ViewsTab`):
+ * - Views:  the running app as ONE tree (`<ui-tree>`), with what it draws and what it doesn't.
+ * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), what's picked under the tree
+ *   (Owen, 2026-11-16, epic `editor` T104:  "Add it as another tab in the same panel as `Views`").
+ * - It's an `<InspectorCard>`:  the chevron, its tabs, then its actions;  the sort and the double chevron are Views' alone.
+ * - The header's magnifying glass opens a filter in that same row, over the tabs:  no new row until you ask for it.
+ *   Esc or the glass again closes it, and the tree is as it was (`filter`).  The shown tab's tree is filtered.
  * - The header's double chevron closes every row, or opens them all.
  * - The header's sort puts each row's parts in document order, by name or by type, remembered (`ViewsOrder`).
  * - A new selection unfolds it, and its row comes into view (`<PartsTree>`;  Owen, 2026-11-16, epic `editor` I206:
@@ -166,13 +170,31 @@ export function InspectorViews(props: {
   }
   const isAllFolded = () => parents().length > 0 && parents().every((node) => !isRowOpen(node))
   const toggleFilter = () => setFilter((text) => (text === undefined ? "" : undefined))
+  const isViews = () => viewsTab() === "views"
   return (
     <InspectorCard
       panel="views"
       label={appTexts.text("inspectorParts")}
       class="InspectorViews"
       bar={
-        <Show when={filter() !== undefined} fallback={<span slot="title">{appTexts.text("inspectorParts")}</span>}>
+        <Show
+          when={filter() !== undefined}
+          fallback={
+            <For each={VIEWS_TABS}>
+              {(it) => (
+                <ui-item
+                  class="ViewsTab"
+                  data-tab={it.id}
+                  icon={it.icon}
+                  selected={viewsTab() === it.id}
+                  onClick={() => setViewsTab(it.id)}
+                >
+                  {appTexts.text(it.text)}
+                </ui-item>
+              )}
+            </For>
+          }
+        >
           <ui-input
             slot="title"
             class="InspectorFilter"
@@ -191,7 +213,9 @@ export function InspectorViews(props: {
       }
       actions={
         <>
-          <ViewsSort />
+          <Show when={isViews()}>
+            <ViewsSort />
+          </Show>
           <ui-icon
             slot="right"
             name="search"
@@ -200,7 +224,7 @@ export function InspectorViews(props: {
             title={appTexts.text("inspectorFilter")}
             onClick={toggleFilter}
           />
-          <Show when={parents().length}>
+          <Show when={isViews() && parents().length}>
             <ui-icon
               slot="right"
               name={isAllFolded() ? "angle double down" : "angle double up"}
@@ -213,7 +237,9 @@ export function InspectorViews(props: {
         </>
       }
     >
-      <PartsTree rows={props.rows} nodes={nodes()} filter={filter()} />
+      <Show when={isViews()} fallback={<SpellReference filter={filter()} stacked />}>
+        <PartsTree rows={props.rows} nodes={nodes()} filter={filter()} />
+      </Show>
     </InspectorCard>
   )
 }
@@ -522,6 +548,27 @@ const VIEWS_ORDERS: Array<{ id: ViewsOrder; icon: string; text: AppTextKey }> = 
   { id: "name", icon: "sort alphabet down", text: "inspectorSortName" },
   { id: "type", icon: "cubes", text: "inspectorSortType" }
 ]
+
+/** The Views card's tabs:  the app's views, or the reference (`<InspectorViews>`). */
+type ViewsTab = "views" | "reference"
+
+/** Each tab of the Views card, in order:  its icon (Fomantic's), and its words' key. */
+const VIEWS_TABS: Array<{ id: ViewsTab; icon: string; text: AppTextKey }> = [
+  { id: "views", icon: "sitemap", text: "inspectorParts" },
+  { id: "reference", icon: "book", text: "referenceTab" }
+]
+
+/** The pref remembering the Views card's tab, the same for every project. */
+const TAB_PREF = "inspector:viewsTab"
+editorPrefs.declare(TAB_PREF, { oneOf: VIEWS_TABS.map((it) => it.id) })
+
+const [viewsTab, setTab] = createSignal<ViewsTab>((editorPrefs.get(TAB_PREF) as ViewsTab) ?? "views")
+
+/** Show the Views card's tab `tab`;  remembered. */
+function setViewsTab(tab: ViewsTab): void {
+  setTab(tab)
+  editorPrefs.set(TAB_PREF, tab)
+}
 
 /** The pref remembering the order, the same for every project. */
 const ORDER_PREF = "inspector:order"

@@ -1672,7 +1672,7 @@ function ownTitleOf(element: Element, words: "as said" | "as written" = "as said
  * - Read from its declaration's line (`declarationPlaces()`), so a Spanish type keeps its accents (`Fundación`).
  * - Declared nowhere this program says (a built-in type, a program not compiled here):  its class name, split.
  */
-function typeWordsOf(className: string): string {
+export function typeWordsOf(className: string): string {
   const declared = declarationPlaces().find((place) => place.kind === "type" && place.name === className)
   const line =
     declared &&
@@ -2270,7 +2270,7 @@ const ANTS_OUT = 8
 const INSPECTING_MARK = "data-inspecting"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
-const THING_ICON = "cube"
+export const THING_ICON = "cube"
 /** Where Spell UI's docs pages are:  the page server's, which the editor's dev server passes `/components/` on to. */
 const SPELL_UI_DOCS = "/components/ui/"
 /** The browser tab every Spell UI docs page opens in (`Inspector.openSpellUIDocs()`). */
@@ -2735,7 +2735,7 @@ class PartSelector {
  *     while nothing is, its bar alone, folded for good (`<NoCodeCard>`, T69)
  *   - All Cards' type's events, actions and tests, cards of their own (`TYPE_PANES`);
  *     a one of a kind's (the app) are its Code card, its Tests card only while it has tests (I186)
- *   - the app's views, things or templates (`<InspectorViews>`)
+ *   - the app's views, or the Reference, its tabs (`<InspectorViews>`)
  * - Every card shows while the column does (epic `editor` T78:  no card hidden on its own);
  *   View › Inspector opens and closes the column, and the Inspector card's ✕ closes it (epic `editor` T83, I186).
  * - Each card folds to its header (`<InspectorCard>`):
