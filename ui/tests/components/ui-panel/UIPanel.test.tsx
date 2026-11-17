@@ -427,13 +427,16 @@ describe('<ui-panel appearance="pane"> scroll shades', () => {
     expect(await shade(host, "top")).toBe("0")
   })
 
-  it("starts the top shade `--ui-panel-scroll-shade-top` under the bar, and takes no clicks", async () => {
+  it("starts the top shade `--ui-panel-scroll-shade-top` under the bar, over the body's whole width, taking no clicks", async () => {
     const { host, body } = await scrollingPane(20)
     host.style.setProperty("--ui-panel-scroll-shade-top", "22px")
     body.scrollTop = 100
     await ends(host)
     const top = host.shadowRoot!.querySelector<HTMLElement>(".top.scroll.shade")!
     expect(top.getBoundingClientRect().top - body.getBoundingClientRect().top).toBe(22)
+    // its scrollbar's column too (Owen, I201:  "Shadow should extend over the scrollbar row"):  the body's border box
+    expect(top.getBoundingClientRect().left).toBe(body.getBoundingClientRect().left)
+    expect(top.getBoundingClientRect().right).toBe(body.getBoundingClientRect().right)
     expect(getComputedStyle(top).pointerEvents).toBe("none")
   })
 
