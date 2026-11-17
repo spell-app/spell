@@ -41,7 +41,8 @@ export class CodeMirrorTokens {
   static extension(fileOf: () => SP.SpellFile | undefined): Extension {
     return CodeMirrorRelayout.extension(
       (state) => CodeMirrorTokens.decorationsOf(state, fileOf()),
-      CodeMirrorTokens.RELAYOUT_MSEC
+      CodeMirrorTokens.RELAYOUT_MSEC,
+      { isAwaitingParse: () => CodeMirrorRelayout.isUnparsed(fileOf()) }
     )
   }
 
