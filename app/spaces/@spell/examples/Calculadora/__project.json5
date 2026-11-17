@@ -4,6 +4,8 @@
   "category": "first-steps",
   // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
   "thumbnail": { "steps": [{ "click": "2" }, { "click": "×" }, { "click": "2" }] },
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "2" }, { "click": "×" }, { "click": "2" }] },
   "imports": [
     {
       "path": "/Calculadora.es.spell",

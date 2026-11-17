@@ -4,6 +4,8 @@
   "category": "games",
   // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
   "thumbnail": { "steps": [{ "click": "Mostrar la respuesta", "wait": 800 }, { "click": "La sabía", "wait": 800 }, { "click": "Mostrar la respuesta", "wait": 1200 }] },
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "Mostrar la respuesta", "wait": 800 }, { "click": "La sabía", "wait": 800 }, { "click": "Mostrar la respuesta", "wait": 2500 }, { "scrollToOn": "tarjetas-de-estudio-tarjeta" }] },
   "imports": [{
     "path": "/Tarjeta.es.spell",
     "active": true
