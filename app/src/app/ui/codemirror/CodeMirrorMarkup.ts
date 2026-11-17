@@ -201,10 +201,10 @@ class MarkupShapes {
     const foot = block.foot === undefined ? undefined : this.marks[block.foot]
     if (foot) {
       this.on(block.foot!, ["cmb-tag-foot", ...hue])
-      // alone on its line:  a foot, on one row with the end tags alone on the lines round it (I132)
+      // alone on its line, or with other end tags only (`</></>`, I146):  a foot, on one row with the end tags on
+      // the lines round it (I132)
       const line = doc.lineAt(foot.start)
-      if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end))
-        this.decorations.footAlone(foot, inside)
+      if (END_TAGS_ONLY.test(doc.sliceString(line.from, line.to))) this.decorations.footAlone(foot, inside)
     }
 
     this.draw(block.inside, inside)
@@ -306,6 +306,9 @@ class MarkupShapes {
     if (stretch) this.decorations.mark(stretch.start, stretch.end, classes)
   }
 }
+
+/** A line of end tags only, `</>` or `</></>`:  each one a foot (`CodeMirrorDecorations.footAlone()`). */
+const END_TAGS_ONLY = /^\s*(?:<\/[^<>\s]*>\s*)+$/
 
 /** A part of speech's colour on a mark:  `bubbly.css`'s hue, and the band's own shades of it (`cmb-hue`). */
 function hueOf(partOfSpeech: string): string[] {
@@ -467,7 +470,8 @@ export class CodeMirrorDecorations {
     const lineOf = (foot: FootAlone) => doc.lineAt(foot.start).number
     for (let first = 0; first < feet.length;) {
       let last = first
-      while (feet[last + 1] && lineOf(feet[last + 1]!) === lineOf(feet[last]!) + 1) last++
+      // on the next line, or on the same one (`</></>`, I146)
+      while (feet[last + 1] && lineOf(feet[last + 1]!) - lineOf(feet[last]!) <= 1) last++
       this.feetRow(feet.slice(first, last + 1))
       first = last + 1
     }
@@ -496,7 +500,7 @@ export class CodeMirrorDecorations {
     for (const [level, foot] of run.entries()) {
       // a line joined to the row:  its own decoration not drawn, a rail stopping short in it (a Spell foot's under it) the row's
       const line = doc.lineAt(foot.start).from
-      if (level) {
+      if (level && line !== row.from) {
         for (const rail of this.lines.get(line)?.stopped ?? []) rowDecoration.stopped.add(rail)
         this.lines.delete(line)
       }
@@ -508,7 +512,7 @@ export class CodeMirrorDecorations {
       })
       const next = run[level + 1]
       // the line break to the next one hidden, one step for the caret
-      if (next) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
+      if (next && next.start > foot.end) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
     }
   }
 

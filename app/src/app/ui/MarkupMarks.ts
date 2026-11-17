@@ -161,7 +161,8 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
         into.splice(first, 0, { kind: "tag-link", place: this.place(open.start, close.end), partOfSpeech, start, end })
       return
     }
-    const footStartsLine = this.startsLine(close.start)
+    // only end tags before it on its line count too:  `</></>`, two blocks' feet (epic `language` I146)
+    const footStartsLine = this.startsLine(close.start, "after end tags")
     const block: MarkupBlockShape = {
       kind: "markup-block",
       place: this.place(open.start, close.end),
@@ -457,10 +458,11 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
     return this.text.slice(start, end)
   }
 
-  /** Is only space before `offset` on its line? */
-  private startsLine(offset: number): boolean {
+  /** Is only space before `offset` on its line -- or, `"after end tags"`, only space and end tags (`</></>`)? */
+  private startsLine(offset: number, allowing?: "after end tags"): boolean {
     const lineStart = this.text.lastIndexOf("\n", offset - 1) + 1
-    return !this.text.slice(lineStart, offset).trim()
+    const before = this.text.slice(lineStart, offset)
+    return allowing ? /^\s*(?:<\/[^<>\s]*>\s*)*$/.test(before) : !before.trim()
   }
 
   /** Is only space after `offset` on its line? */

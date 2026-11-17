@@ -162,6 +162,39 @@ describe("a body's rail under the caret", () => {
     }
   })
 
+  test("end tags on ONE line, `</></>`:  the same row of feet as on lines of their own, every foot alike (I146)", async () => {
+    // Owen:  "Wonky feet" -- one a tiny foot, the other an inline end tag on a rail stub
+    const feetOf = async (ends: string) => {
+      const view = await bubblyEditorOf(
+        `a "game" is a view\n\tto draw it\n\t\t<segment inverted>\n\t\t\t<toolbar class="x">\n\t\t\t\t<text "" />\n${ends}\t\t<container>\n\t\t\t<column "C1"/>\n\t\t</container>\n`
+      )
+      await frames()
+      const first = view.contentDOM.querySelector(".cmb-feet-row")!
+      const feet = [...first.querySelectorAll<HTMLElement>(".cmb-tag-foot")].map((foot) => {
+        const box = foot.getBoundingClientRect()
+        return { left: box.left, top: box.top, width: box.width, height: box.height }
+      })
+      const row = first.getBoundingClientRect().height
+      view.dom.parentElement?.remove()
+      view.destroy()
+      return { feet, row }
+    }
+    const apart = await feetOf("\t\t\t</>\n\t\t</>\n")
+    expect(apart.feet).toHaveLength(2)
+    for (const ends of ["\t\t\t</></>\n", " \t\t\t</></>\n"]) {
+      const together = await feetOf(ends)
+      expect(together.row).toBe(apart.row)
+      expect(together.feet).toHaveLength(2)
+      for (const [at, foot] of together.feet.entries()) {
+        const other = apart.feet[at]!
+        expect(Math.abs(foot.left - other.left), `foot ${at} left`).toBeLessThan(0.1)
+        expect(Math.abs(foot.top - other.top), `foot ${at} top`).toBeLessThan(0.1)
+        expect(Math.abs(foot.width - other.width), `foot ${at} width`).toBeLessThan(0.1)
+        expect(Math.abs(foot.height - other.height), `foot ${at} height`).toBeLessThan(0.1)
+      }
+    }
+  })
+
   test("a run of end tags alone on their lines:  ONE row of feet, each end tag reached by a click and the caret (I132)", async () => {
     const view = await bubblyEditorOf(NESTED)
     const [end, outerEnd] = linesStarting(view, ["</>", "</container>"])
