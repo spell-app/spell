@@ -1,0 +1,299 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Item",
+    "Aisle",
+    "AisleList",
+    "ShoppingList",
+    "ShoppingSheet",
+    "test_how_much_reads"
+  ],
+  "statements": [
+    {
+      "type": "Item",
+      "superType": "View",
+      "savedIn": {
+        "place": "shopping_sheet",
+        "placeType": "ShoppingSheet",
+        "collection": "items"
+      },
+      "defined": "/ShoppingList.api.spell:469-945"
+    },
+    {
+      "property": "name",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/ShoppingList.api.spell:518-536"
+    },
+    {
+      "property": "amount",
+      "of": "Item",
+      "datatype": "number",
+      "defined": "/ShoppingList.api.spell:538-622"
+    },
+    {
+      "property": "unit",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/ShoppingList.api.spell:624-701"
+    },
+    {
+      "property": "aisle",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/ShoppingList.api.spell:703-775"
+    },
+    {
+      "property": "got",
+      "of": "Item",
+      "datatype": "choice",
+      "defined": "/ShoppingList.api.spell:777-837"
+    },
+    {
+      "property": "recipe",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/ShoppingList.api.spell:839-912"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} needed",
+      "output": "is_needed",
+      "rule": "method_postfix",
+      "of": "Item",
+      "kind": "method",
+      "name": "\"is needed\"",
+      "returns": "choice",
+      "defined": "/ShoppingList.api.spell:914-945"
+    },
+    {
+      "property": "how_much",
+      "asWritten": "how much",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/Item.spell:234-439"
+    },
+    {
+      "syntax": "remove {thisArg:expression}?",
+      "output": "remove",
+      "rule": "method_call",
+      "of": "Item",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "remove",
+      "returns": "nothing",
+      "title": "Remove",
+      "defined": "/Item.spell:442-553"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Item",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Item.spell:556-995"
+    },
+    {
+      "type": "ShoppingSheet",
+      "superType": "Place",
+      "place": {
+        "name": "shopping_sheet",
+        "kind": "sheet",
+        "at": "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv"
+      },
+      "defined": "/ShoppingList.api.spell:424-467"
+    },
+    {
+      "syntax": "test how much reads",
+      "output": "test_how_much_reads",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "how much reads",
+      "defined": "/Item.spell:998-1216"
+    },
+    {
+      "type": "Aisle",
+      "superType": "View",
+      "defined": "/AisleList.spell:223-478"
+    },
+    {
+      "property": "name",
+      "of": "Aisle",
+      "datatype": "text",
+      "defined": "/AisleList.spell:245-263"
+    },
+    {
+      "property": "items",
+      "of": "Aisle",
+      "datatype": "list of items",
+      "defined": "/AisleList.spell:265-326"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Aisle",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/AisleList.spell:329-478"
+    },
+    {
+      "type": "AisleList",
+      "superType": "View",
+      "defined": "/AisleList.spell:480-1249"
+    },
+    {
+      "property": "aisles",
+      "of": "AisleList",
+      "datatype": "list of aisles",
+      "defined": "/AisleList.spell:507-942"
+    },
+    {
+      "property": "got",
+      "of": "AisleList",
+      "datatype": "list of items",
+      "defined": "/AisleList.spell:944-988"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "AisleList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/AisleList.spell:1019-1249"
+    },
+    {
+      "type": "ShoppingList",
+      "superType": "App",
+      "defined": "/ShoppingList.spell:323-2740"
+    },
+    {
+      "property": "aisle_list",
+      "asWritten": "aisle list",
+      "of": "ShoppingList",
+      "datatype": "AisleList",
+      "defined": "/ShoppingList.spell:348-380"
+    },
+    {
+      "property": "new_item",
+      "asWritten": "new item",
+      "of": "ShoppingList",
+      "datatype": "Item",
+      "defined": "/ShoppingList.spell:382-466"
+    },
+    {
+      "kind": "method",
+      "name": "creating it",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/ShoppingList.spell:469-1131"
+    },
+    {
+      "syntax": "add the new item (of {thisArg:expression})?",
+      "output": "add_the_new_item",
+      "rule": "method_call",
+      "of": "ShoppingList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the new item",
+      "returns": "nothing",
+      "title": "Add",
+      "defined": "/ShoppingList.spell:1134-1414"
+    },
+    {
+      "syntax": "clear what I got (of {thisArg:expression})?",
+      "output": "clear_what_I_got",
+      "rule": "method_call",
+      "of": "ShoppingList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "clear what I got",
+      "returns": "nothing",
+      "waits": true,
+      "title": "Clear what I got",
+      "defined": "/ShoppingList.spell:1417-1590"
+    },
+    {
+      "syntax": "print the list (of {thisArg:expression})?",
+      "output": "print_the_list",
+      "rule": "method_call",
+      "of": "ShoppingList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "print the list",
+      "returns": "nothing",
+      "title": "Print",
+      "defined": "/ShoppingList.spell:1593-1735"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "ShoppingList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/ShoppingList.spell:1738-2740"
+    }
+  ],
+  "codeLines": [
+    7,
+    10,
+    16,
+    22,
+    28,
+    34,
+    40,
+    45,
+    51,
+    58,
+    62,
+    102,
+    116,
+    139,
+    142,
+    148,
+    153,
+    161,
+    165,
+    180,
+    185,
+    203,
+    206,
+    212,
+    218,
+    259,
+    266,
+    271,
+    275
+  ]
+}

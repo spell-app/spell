@@ -2,22 +2,26 @@ import { UI as SpellUI, type ModalOptions } from "spell/ui"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import type {
   AlertModalProps,
+  ChoicesModalProps,
   ChooserModalProps,
   ConfirmModalProps,
   PromptModalProps
 } from "spell/app/app/solid/modals"
 
+import { openChoices } from "./Choices"
 import { openChooser } from "./Chooser"
 
 /**
- * The app's dialogs, behind `editor.alert()` / `confirm()` / `prompt()` / `promptForNumber()` / `choose()`:
- * `spell-ui`'s `UI.modals` for the first four, `<Chooser>` for `choose()`.
+ * The app's dialogs, behind `editor.alert()` / `confirm()` / `prompt()` / `promptForNumber()` / `choose()` /
+ * `askWithChoices()`:  `spell-ui`'s `UI.modals` for the first four, `<Chooser>` for `choose()`,
+ * `<Choices>` for `askWithChoices()`.
  * - Each builds its own `<ui-modal>` in `<body>` and removes it once hidden:  no `editor.modals` stack, no root
  *   component to mount.  Several at once stack in the top layer, newest on top.
  * - Each waits for `uiReady` first:  `UI.modals` throws until `<ui-modal>` has registered its provider.
  * - `editor` reaches these through a DYNAMIC `import()`, so `editor.ts` stays free of Solid and `spell-ui`.
  * - Props map onto `UI.modals`' options:  `header` => `title`, `ok` / `cancel` => `okText` / `cancelText`, `danger` => `okColor: "negative"`,
  *   `defaultValue` => `value`.
+ * - Every dialog has a close ✕ in its corner, which cancels (`closable`, on unless a caller says `false`).
  */
 
 ////////////////
@@ -68,6 +72,11 @@ export function choose(props: ChooserModalProps): Promise<unknown> {
   return openChooser(props)
 }
 
+/** Resolves the chosen answer's `value`, or `undefined` on Escape -- see `<Choices>`. */
+export function askWithChoices<Value extends string>(props: ChoicesModalProps<Value>): Promise<Value | undefined> {
+  return openChoices(props)
+}
+
 ////////////////
 // ## Helpers
 ////////////////
@@ -79,8 +88,15 @@ function asProps<P extends AlertModalProps>(props: string | P): P {
 
 /** Our props as `UI.modals`' options. */
 function modalOptions(props: string | ConfirmModalProps): ModalOptions {
-  const { message, header, ok, cancel, danger } = asProps<ConfirmModalProps>(props)
-  return { message, title: header, okText: ok, cancelText: cancel, okColor: danger ? "negative" : undefined }
+  const { message, header, ok, cancel, danger, closable } = asProps<ConfirmModalProps>(props)
+  return {
+    message,
+    title: header,
+    okText: ok,
+    cancelText: cancel,
+    okColor: danger ? "negative" : undefined,
+    closable
+  }
 }
 
 /**

@@ -1,0 +1,38 @@
+# The list, by aisle
+// What's still to get, an aisle at a time, A to Z;  then what you've got, faded, at the bottom.
+// Shopping List draws it, and so does Recipe Cards:  it imports this file, so both show the same list.
+
+an "aisle" is a view
+	its "name" is text
+	its "items" is a list of items
+		// What's still to get in it
+
+	to draw it
+		<stack spacing="xs" class="aisle">
+			<header size="tiny" class="aisle-name">{its name}</header>
+			<for item in its items />
+		</stack>
+
+an "aisle list" is a view
+	its "aisles" is
+		// Each aisle with something still to get in it, once, in the order of their names
+		set found to a new list of aisles
+		for item in (every item where its got is no) sorted by its aisle
+			set aisle to the first aisle in found where its name is the item's aisle
+			if aisle does not exist
+				set aisle to a new aisle with name = the item's aisle
+				add aisle to found
+			add item to the aisle's items
+		return found
+	its "got" is every item where its got is yes
+		// In the trolley already
+
+	to draw it
+		<stack class="aisle-list">
+			<for aisle in its aisles>
+				<empty><text color="grey">Nothing left to get</text></empty>
+			</for>
+			<stack spacing="xs" class="got">
+				<for item in its got />
+			</stack>
+		</stack>

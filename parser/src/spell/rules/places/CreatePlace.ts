@@ -43,6 +43,9 @@ const FOLDER_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u
 /** A CSV file's name alone, `"tasks.csv"`:  the program's own, in its project data folder (epic `language` T65). */
 const CSV_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.csv$/iu
 
+/** A JSON file's name alone, `"recipes.json"`:  the program's own, in its project data folder (epic `mockup` P21). */
+const JSON_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.json$/iu
+
 /**
  * `create_place` rule:  a program's data lives here (epic `data` P11, Q2).
  * - e.g. `family cookbook is a web server at "https://api.example.com/v1"`:  the ONE line a different back-end changes.
@@ -72,6 +75,9 @@ const CSV_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.csv$/iu
  *   `task sheet is a sheet at "tasks.csv"`, a file's name alone, is `<project>/__data/tasks.csv`, written through the page
  *   server, so it takes writes as a sheet at a place server does.
  *   - Any other sheet's address is a file at that address, read only (`"./tasks.csv"`, `"https://..."`).
+ * - A PROGRAM'S OWN JSON FILE, the same way (epic `mockup` P21, `jsonAddressFor()`):
+ *   `recipe file is a json file at "recipes.json"` is `<project>/__data/recipes.json`, plain JSON the page server
+ *   writes whole, `{ "recipes": [...] }`.
  *   - `check it every` below what its server takes (`SPACE_FOLDER_CHECKS_AT_MOST_EVERY`) is raised to it,
  *     and the line says so.
  * - What it can't do is said here, at this line:
@@ -171,12 +177,14 @@ export class CreatePlace extends TypeDeclaration<
   /**
    * Where a data folder keeps its things, as the page server serves them:  `folderAddressFor()`;  a room at a space,
    * `roomAddressFor()`;
-   * a sheet that's the program's own CSV file, `csvAddressFor()`;  any other kind, none.
+   * a sheet that's the program's own CSV file, `csvAddressFor()`;  a json file that's its own JSON file,
+   * `jsonAddressFor()`;  any other kind, none.
    */
   protected folderAddressOf(match: P.MatchFor<this>): string | undefined {
     const { placeKind } = match.data
     if (placeKind === "data folder") return CreatePlace.folderAddressFor(match)
     if (placeKind === "room") return CreatePlace.roomAddressFor(match)
+    if (placeKind === "file") return CreatePlace.jsonAddressFor(match)
     return placeKind === "sheet" ? CreatePlace.csvAddressFor(match) : undefined
   }
 
@@ -316,8 +324,23 @@ export class CreatePlace extends TypeDeclaration<
    * - A lookup of the scope:  call it WHILE PARSING.
    */
   static csvAddressFor(match: P.MatchFor<CreatePlace>): string | undefined {
+    return CreatePlace.ownFileAddressFor(match, CSV_FILE_NAME)
+  }
+
+  /**
+   * Where a json file's line keeps its things, when it's the program's own JSON file, `"recipes.json"`:
+   * `<project>/__data/recipes.json`, as the page server serves it (epic `mockup` P21).
+   * - `undefined` for any other address, and for a project with no address (a test's).
+   * - A lookup of the scope:  call it WHILE PARSING.
+   */
+  static jsonAddressFor(match: P.MatchFor<CreatePlace>): string | undefined {
+    return CreatePlace.ownFileAddressFor(match, JSON_FILE_NAME)
+  }
+
+  /** The program's own file in its project data folder, when the line's address is a file's name alone `named` so. */
+  private static ownFileAddressFor(match: P.MatchFor<CreatePlace>, named: RegExp): string | undefined {
     const at = textIn(match.groups.address)
-    if (!CSV_FILE_NAME.test(at)) return undefined
+    if (!named.test(at)) return undefined
     const project = projectAddressOf(match.scope)
     const { encodeAddress, encodePart } = SP.SpellUrls
     return project && `${SPACE_FOLDERS_PREFIX}/${encodeAddress(project)}/${DATA_FOLDER}/${encodePart(at)}`

@@ -1,0 +1,197 @@
+==== /ShoppingList.api.spell
+⟪## Shopping List:  where the list is kept⟫
+⟦// In a CSV file, in this example's own folder:  __data/shopping.csv.⟧
+⟦// Open it in Numbers or Excel:  a row for each item, a column for each of its fields.⟧
+⟦// The page server writes it, changing only the lines that change;  everyone using that page server shares one list.⟧
+⟦// Recipe Cards keeps the ingredients you pick here too:  it imports this file, so both name this one list.⟧
+[thing create_place L0]
+| «shopping sheet» is a sheet at «"shopping.csv"»
+
+[thing create_type L0]
+| an «"item"» is a **view**
+|   it lives in **shopping sheet**    ‾value(shopping sheet)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"amount"» is a **number**
+|   |   ⟦// How many, in its unit:  nothing when it doesn't matter⟧
+|   [property define_property_has L1]
+|   | its «"unit"» is **text**
+|   |   ⟦// "g", "cups", "tins" ...;  nothing for a count, 2 eggs⟧
+|   [property define_property_has L1]
+|   | its «"aisle"» is **text**
+|   |   ⟦// Where it is in the shop:  the list groups by it⟧
+|   [property define_property_has L1]
+|   | its «"got"» is yes or no
+|   |   ⟦// Ticked off:  it's in the trolley⟧
+|   [property define_property_has L1]
+|   | its «"recipe"» is **text**
+|   |   ⟦// The recipe it's for, when Recipe Cards added it⟧
+|   [property quoted_type_expression L1]
+|   | it «"is needed"» if its **got** is _no_    ‾value(its got)
+
+==== /Item.spell
+⟪# An item on the list⟫
+⟦// A row of its own:  a box to tick, how much, its name, the recipe it's for, and a button to take it off.⟧
+⟦// Ticking the box changes the item, which saves itself:  the CSV file's line changes at once.⟧
+
+[thing reopen_type L0]
+| an **item**
+|   [property property_value_getter L1]
+|   | its «"how much"» is
+|   |   ⟦// Its amount and unit as people write them:  "2", "200 g", "1 1/2 cups";  nothing with no amount⟧
+|   |   if its **amount** is nothing or its **amount** is _0_ return _""_    ‾value(its amount) ‾value(nothing) ‾value(its amount)
+|   |   return its **amount** && its **unit**    ‾value(its amount) ‾value(its unit)
+
+|   [action to_do_something L1]
+|   | to «"remove"» with title «"Remove"», icon «"close"»
+|   |   ⟦// Off the list, and out of the file⟧
+|   |   remove it from the **items**    ‾value(it) ‾value(the items)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨form⟩ value={it}>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» class=«"item"»>
+|   |       <⟨checkbox⟩ name=«"got"» aria-label=«"Got it"» />
+|   |       <⟨text⟩ bold class=«"how-much"»>{its **how much**}</⟨text⟩>    code({its how much})
+|   |       <⟨text⟩ class=«"name"»>{its **name**}</⟨text⟩>    code({its name})
+|   |       <⟨if⟩ its recipe is not «""»>
+|   |         <⟨text⟩ color=«"grey"» size=«"small"» class=«"for"»>for {its **recipe**}</⟨text⟩>    code({its recipe})
+|   |       </⟨if⟩>
+|   |       <⟨action⟩ «"remove"» icon-only appearance=«"tertiary"» />
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+|   [action to_do_something L1]
+|   | to «test how much reads»
+|   |   set the **item** to **a new item** with **name** _"flour"_, **amount** = _200_, **unit** = _"g"_    ‾value(the item) ‾value(a new item with name "flour", amount = 200, unit = "g")
+|   |   the **item's how much** should be _"200 g"_    ‾value(the item's how much)
+|   |   set the **item** to **a new item** with **name** _"lemons"_    ‾value(the item) ‾value(a new item with name "lemons")
+|   |   the **item's how much** should be _""_    ‾value(the item's how much)
+
+==== /AisleList.spell
+⟪# The list, by aisle⟫
+⟦// What's still to get, an aisle at a time, A to Z;  then what you've got, faded, at the bottom.⟧
+⟦// Shopping List draws it, and so does Recipe Cards:  it imports this file, so both show the same list.⟧
+
+[thing create_type L0]
+| an «"aisle"» is a **view**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"items"» is a list of **items**
+|   |   ⟦// What's still to get in it⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xs"» class=«"aisle"»>
+|   |     <⟨header⟩ size=«"tiny"» class=«"aisle-name"»>{its **name**}</⟨header⟩>    code({its name})
+|   |     <⟨for⟩ item in its items />
+|   |   </⟨stack⟩>
+
+[thing create_type L0]
+| an «"aisle list"» is a **view**
+|   [property property_value_getter L1]
+|   | its «"aisles"» is
+|   |   ⟦// Each aisle with something still to get in it, once, in the order of their names⟧
+|   |   set **found** to a new list of **aisles**    ‾value(found) ‾value(a new list of aisles)
+|   |   [control list_iteration L2]
+|   |   | for **item** in (every **item** where its **got** is _no_) sorted by its **aisle**    ‾value((every item where its got is no) sorted by its aisle)
+|   |   |   set **aisle** to the first **aisle** in **found** where its **name** is the **item's aisle**    ‾value(aisle) ‾value(the first aisle in found where its name is the item's aisle)
+|   |   |   [control if L3]
+|   |   |   | if **aisle** does not exist    ‾question(aisle does not exist)
+|   |   |   |   set **aisle** to **a new aisle** with **name** = the **item's aisle**    ‾value(aisle) ‾value(a new aisle with name = the item's aisle)
+|   |   |   |   add **aisle** to **found**    ‾value(aisle) ‾value(found)
+|   |   |   add **item** to the **aisle's items**    ‾value(item) ‾value(the aisle's items)
+|   |   return **found**    ‾value(found)
+|   [property property_value_getter L1]
+|   | its «"got"» is every **item** where its **got** is _yes_
+|   |   ⟦// In the trolley already⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"aisle-list"»>
+|   |     <⟨for⟩ aisle in its aisles>
+|   |       <⟨empty⟩><⟨text⟩ color=«"grey"»>Nothing left to get</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |     <⟨stack⟩ spacing=«"xs"» class=«"got"»>
+|   |       <⟨for⟩ item in its got />
+|   |     </⟨stack⟩>
+|   |   </⟨stack⟩>
+
+==== /ShoppingList.spell
+⟪# Shopping List⟫
+⟦// What to buy, by aisle:  add an item, tick it off as you shop, clear what you got, and print what's left.⟧
+⟦// Its items are in a CSV file Numbers or Excel opens:  ShoppingList.api.spell says where.⟧
+⟦// An item draws itself in Item.spell, and the list by aisle is AisleList.spell;  this file holds the app.⟧
+
+[thing create_one_of_a_kind L0]
+| «shopping list» is an **app**
+|   [property define_property_has L1]
+|   | «"aisle list"» is **a new aisle list**
+|   [property define_property_has L1]
+|   | its «"new item"» is **a new item**
+|   |   ⟦// The next item, as the form above the list holds it⟧
+
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   ⟦// The first time, with an empty file, a few to start with⟧
+|   |   [control if L2]
+|   |   | if there are no **items**    ‾value(there are no items)
+|   |   |   add (**a new item** with **name** _"milk"_, **aisle** _"Dairy"_, **amount** = _2_, **unit** = _"litres"_) to the **items**    ‾value(a new item with name "milk", aisle "Dairy", amount = 2, unit = "litres") ‾value(the items)
+|   |   |   add (**a new item** with **name** _"eggs"_, **aisle** _"Dairy"_, **amount** = _12_) to the **items**    ‾value(a new item with name "eggs", aisle "Dairy", amount = 12) ‾value(the items)
+|   |   |   add (**a new item** with **name** _"bananas"_, **aisle** _"Fruit and veg"_, **amount** = _6_) to the **items**    ‾value(a new item with name "bananas", aisle "Fruit and veg", amount = 6) ‾value(the items)
+|   |   |   add (**a new item** with **name** _"spinach"_, **aisle** _"Fruit and veg"_, **amount** = _200_, **unit** = _"g"_) to the **items**    ‾value(a new item with name "spinach", aisle "Fruit and veg", amount = 200, unit = "g") ‾value(the items)
+|   |   |   add (**a new item** with **name** _"bread"_, **aisle** _"Bakery"_, **amount** = _1_, **unit** = _"loaf"_) to the **items**    ‾value(a new item with name "bread", aisle "Bakery", amount = 1, unit = "loaf") ‾value(the items)
+|   |   |   add (**a new item** with **name** _"coffee"_, **aisle** _"Drinks"_, **amount** = _250_, **unit** = _"g"_, **got** = _yes_) to the **items**    ‾value(a new item with name "coffee", aisle "Drinks", amount = 250, unit = "g", got = yes) ‾value(the items)
+
+|   [action to_do_something L1]
+|   | to «"add the new item"» with title «"Add"», icon «"plus"»
+|   |   ⟦// The form's item, onto the list and into the file;  the form empties, keeping its aisle⟧
+|   |   if the **new item's name** is _""_ return    ‾value(the new item's name)
+|   |   add the **new item** to the **items**    ‾value(the new item) ‾value(the items)
+|   |   set its **new item** to **a new item** with **aisle** = the **new item's aisle**    ‾value(its new item) ‾value(a new item with aisle = the new item's aisle)
+
+|   [action to_do_something L1]
+|   | to «"clear what I got"» with title «"Clear what I got"», icon «"check"»
+|   |   ⟦// Every ticked item off the list, in one step to undo⟧
+|   |   remove **items** from the **items** where its **got** is _yes_    ‾value(the items) ‾value(its got)
+
+|   [action to_do_something L1]
+|   | to «"print the list"» with title «"Print"», icon «"print"»
+|   |   ⟦// Only what's still to get, by aisle:  styles.css says what's on paper⟧
+|   |   open printing
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩>
+|   |       <⟨toolbar⟩>
+|   |         <⟨text⟩ size=«"large"» heavy slot=«"title"»>Shopping List</⟨text⟩>
+|   |         <⟨action⟩ «"clear what I got"» />
+|   |         <⟨action⟩ «"print the list"» />
+|   |         <⟨spacer⟩ />
+|   |         <⟨action⟩ «"undo"» icon-only />
+|   |         <⟨action⟩ «"redo"» icon-only />
+|   |       </⟨toolbar⟩>
+|   |       <⟨form⟩ value={its **new item**} class=«"new-item"»>    code({its new item})
+|   |         <⟨fields⟩ unstackable>
+|   |           <⟨field⟩ width=«"3"»>
+|   |             <⟨input⟩ name=«"amount"» type=«"number"» min=«"0"» placeholder=«"How many"» aria-label=«"Amount"» />
+|   |           </⟨field⟩>
+|   |           <⟨field⟩ width=«"3"»>
+|   |             <⟨input⟩ name=«"unit"» placeholder=«"Unit"» aria-label=«"Unit"» />
+|   |           </⟨field⟩>
+|   |           <⟨field⟩ width=«"6"»>
+|   |             <⟨input⟩ name=«"name"» placeholder=«"Something to buy"» aria-label=«"Item"» />
+|   |           </⟨field⟩>
+|   |           <⟨field⟩ width=«"4"»>
+|   |             <⟨input⟩ name=«"aisle"» placeholder=«"Aisle"» aria-label=«"Aisle"» action>
+|   |               <⟨action⟩ «"add the new item"» slot=«"action"» color=«"primary"» icon-only />
+|   |             </⟨input⟩>
+|   |           </⟨field⟩>
+|   |         </⟨fields⟩>
+|   |       </⟨form⟩>
+|   |       {draw the **aisle list**}
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>

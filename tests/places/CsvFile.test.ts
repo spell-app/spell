@@ -216,6 +216,28 @@ describe("CsvFile.saved():  only the lines that changed", () => {
     expect(() => withIds(AWKWARD).saved([{ id: "r-1", rating: 5 }])).toThrow(/no column "rating"/)
   })
 
+  test("addsColumns:  a new field becomes a column at the end of the first line, the other rows left as they are (epic `mockup` P21)", () => {
+    const grows = (text: string) => new CsvFile(text, { name: "items", idColumn: "id", addsColumns: true })
+    const text = "id,name\ni-1,milk\n"
+    const save = grows(text).saved([
+      { id: "i-1", name: "milk", got: "yes" },
+      { id: "i-2", name: "eggs", recipe: "Pancakes" }
+    ])
+    expect(save.text).toBe("id,name,got,recipe\ni-1,milk,yes\ni-2,eggs,,Pancakes\n")
+    expect(
+      grows("id,name\ni-1,milk\n").saved([
+        { id: "i-1", name: "milk" },
+        { id: "i-2", got: "no" }
+      ]).text
+    ).toBe("id,name,got\ni-1,milk\ni-2,,no\n")
+    expect(
+      grows("").saved([
+        { id: "i-1", name: "milk" },
+        { id: "i-2", got: "no" }
+      ]).text
+    ).toBe("id,name,got\ni-1,milk,\ni-2,,no\n")
+  })
+
   test("a row with a blank or repeated id is unclear, and refuses", () => {
     for (const text of ["id,title\nr-1,A\nr-1,B\n", "id,title\n,A\n"]) {
       expect(withIds(text).whyUnclear).toMatch(/blank or repeated id/)

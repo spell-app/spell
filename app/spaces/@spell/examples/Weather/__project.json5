@@ -1,7 +1,6 @@
 {
   "title": "Weather",
-  "description": "The weather in the city you pick, from Open-Meteo, a server other people run:  now, big, with its emoji, then the next 12 hours in a row;  its API in a file of its own, as `spell place ingest` wrote it",
-  "category": "first-steps",
+  "description": "The weather in the city you pick:  now, big, with its emoji, then the next 12 hours in a row, from Open-Meteo, a server other people run;  its API in a file of its own, as `spell place ingest` wrote it",
   // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
   "thumbnail": { "steps": [{ "scrollToOn": "ui-segment" }] },
   "imports": [

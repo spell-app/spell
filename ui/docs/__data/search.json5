@@ -28,9 +28,10 @@
         {"id":"general-usage","title":"General Usage"},
         {"id":"general-usage-descriptive-attributes","title":"Descriptive Attributes","parent":0},
         {"id":"general-usage-attribute-order","title":"Attribute Order","parent":0},
+        {"id":"general-usage-on-platform","title":"Only on Some Devices","parent":0},
         {"id":"installation","title":"Installation"},
         {"id":"the-contract","title":"The Contract"},
-        {"id":"the-contract-plain-html","title":"Plain HTML","parent":4},
+        {"id":"the-contract-plain-html","title":"Plain HTML","parent":5},
         {"id":"frameworks","title":"Frameworks"},
         {"id":"styling","title":"Styling"},
         {"id":"updating","title":"Updating"}
@@ -145,6 +146,7 @@
         {"id":"spell-ui-s-own","title":"Spell UI's own"},
         {"id":"spell-ui-s-own-app-menu","title":"App menu","parent":64},
         {"id":"spell-ui-s-own-code","title":"Code","parent":64},
+        {"id":"spell-ui-s-own-device","title":"Device","parent":64},
         {"id":"spell-ui-s-own-dimension","title":"Dimension","parent":64},
         {"id":"spell-ui-s-own-example","title":"Example","parent":64},
         {"id":"spell-ui-s-own-icon-picker","title":"Icon Picker","parent":64},
@@ -1013,6 +1015,36 @@
         {"id":"api-slots","title":"Slots","tab":"api"},
         {"id":"api-parts","title":"Parts","tab":"api"},
         {"id":"api-states","title":"States","tab":"api"}
+      ]
+    },
+    {
+      "path": "ui-device.html",
+      "title": "Device",
+      "summary": "A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.",
+      "tag": "ui-device",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-a-phone","title":"A phone","parent":0},
+        {"id":"examples-types-a-tablet","title":"A tablet","parent":0},
+        {"id":"examples-types-a-desktop","title":"A desktop","parent":0},
+        {"id":"examples-variations","title":"Variations","tab":"examples"},
+        {"id":"examples-variations-on-its-side","title":"On its side","parent":4},
+        {"id":"examples-variations-its-own-buttons","title":"Its own buttons","parent":4},
+        {"id":"examples-modal","title":"Modal","tab":"examples"},
+        {"id":"examples-modal-a-device-as-a-modal","title":"A device as a modal","parent":7},
+        {"id":"examples-modal-in-a-basic-modal","title":"In a basic modal","parent":7},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-slots","title":"Slots","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
       ]
     },
     {

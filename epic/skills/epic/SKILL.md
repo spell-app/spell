@@ -78,6 +78,11 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - a **Net effect** list (`<epic-net-effect>`) closing every question, issue, judgement call and decision
   - NOT caveman (2026-10-04).
   - Replies:  short, the same plain words.
+  - Replies with more than one topic:  a `##` header per topic, never `#` (Owen, 2026-11-17, r75 from epic `language`).
+    - Anything waiting on the person comes FIRST, under `## Waiting on you`:  a page to answer, a modal's question,
+      a pick, with its link pair.
+      - In Codex:  the question goes in the chat, under that header.
+    - Why:  a page waiting for him, named mid-reply, got missed.
 - Naming a doc in a reply (the epic page, a guide, any docs page):
   paste what `epic pages link` prints, run in the checkout the doc is in.
   - In full:  `epic pages link <ABSOLUTE path> --hash <id> [--text "..."]`.
@@ -648,6 +653,13 @@ cut-off agents, "it should have restarted automatically").
      "4b. Build plans" says, `--plan ... --accepted`, answer each comment, and go on.  NO stop.
    - No plan at all only when the person said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
+   - TEXT PEOPLE SEE (dialogs, notices, errors, empty states, onboarding, help;  not every label):  written in the
+     novice voice (`epic voice novice`), and checked COLD before it ships (Owen, 2026-11-17, epic `epic-engine` T92):
+     `epic voice check <file> --about "<what it is>"`, or `--text "..."`.
+     - A fresh reader with no context reads it, and fails jargon, ids, insider words and run-on sentences, each quoted
+       with a rewrite.  Check a dialog whole:  heading, message and buttons in one text.
+     - Fix what it finds, or say in the item why a finding is wrong;  its verdict goes in the item's details.
+     - In Codex:  the same command;  it runs `claude -p` itself.
    Record as you go, not at the end:
    - Every item's title is at most 30 plain words saying what it is, read cold, hours later:
      nothing about a passing condition;  the rest goes in --details (the full rule:  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").

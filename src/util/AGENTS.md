@@ -55,6 +55,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
     `copyText()` (the clipboard, with the fallback VS Code's side bar needs)
   - `util.types.ts` -- `Constructor`, `AbstractClass`, `Prettify`
+  - `platform.ts` -- which device the page is on, `phone`, `tablet` or `desktop` (epic `mockup` T53):
+    `PLATFORM_QUERIES`, the ONE place that decides it, three media queries;  `currentPlatform()`, `isOnPlatform()`,
+    `onPlatformChange()`, `platformsIn()` (the shared `on-platform`'s list), and `canCaptureScreen()`.  Taken by file, in no barrel:
+    `spell/element`'s `UIComponent` and Spell UI's `UI.browser.platform` use it, and `reset.css` repeats its queries
 - It sits UNDER every other package, and imports NONE of them.
   - `spell-ui` is published, and bundles what it imports from here (its `.d.ts` files inline it).
   - So nothing spell-specific may land here.

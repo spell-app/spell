@@ -116,6 +116,8 @@ export class CsvPlace implements Place {
   private readonly ceiling: PlaceCeiling
   /** Each column a program's lines name, by the field it is. */
   private readonly fields: Readonly<Record<string, string>>
+  /** A field the file has no column for becomes one:  a program's own file. */
+  private readonly addsColumns: boolean | undefined
   /** The names of the file's columns, as it last read:  what its answers are named by. */
   private names = new FieldNames()
   /** The rows it last read whole:  what a half-saved file answers with. */
@@ -125,7 +127,16 @@ export class CsvPlace implements Place {
   /** The same file with another id column, as a program's lines name it, made once each (`withLines()`). */
   private readonly withThoseLines = new Map<string, CsvPlace>()
 
-  constructor({ file, collection, idColumn, numbers, positionField, fields = {}, ceiling }: CsvPlaceProps) {
+  constructor({
+    file,
+    collection,
+    idColumn,
+    numbers,
+    positionField,
+    fields = {},
+    ceiling,
+    addsColumns
+  }: CsvPlaceProps) {
     this.ceiling = { ...DEFAULT_CEILING, ...ceiling }
     this.file = file
     this.collection = collection
@@ -133,6 +144,7 @@ export class CsvPlace implements Place {
     this.numbers = numbers
     this.positionField = positionField
     this.fields = fields
+    this.addsColumns = addsColumns
   }
 
   /** What it can do:  all at once.  With no id column it can only add:  nothing says which row a change means. */
@@ -170,10 +182,11 @@ export class CsvPlace implements Place {
     const name = JSON.stringify([id, fields])
     let place = this.withThoseLines.get(name)
     if (!place) {
-      const { file, collection, numbers, positionField } = this
+      const { file, collection, numbers, positionField, addsColumns } = this
       place = new CsvPlace({
         file,
         fields,
+        ...(addsColumns && { addsColumns }),
         ...(collection !== undefined && { collection }),
         ...(id !== undefined && { idColumn: id }),
         ...(numbers && { numbers }),
@@ -254,8 +267,8 @@ export class CsvPlace implements Place {
 
   /** `text` parsed. */
   private csvIn(text: string): CsvFile {
-    const { idColumn, numbers } = this
-    const csv = new CsvFile(text, { name: this.collection ?? this.name, idColumn, numbers })
+    const { idColumn, numbers, addsColumns } = this
+    const csv = new CsvFile(text, { name: this.collection ?? this.name, idColumn, numbers, addsColumns })
     if (csv.rows.length > this.ceiling.rows) this.overTheCeiling(`${csv.rows.length} rows`)
     return csv
   }
@@ -505,6 +518,8 @@ export type CsvPlaceProps = {
   ceiling?: Partial<PlaceCeiling>
   /** Each column a program's lines name, by the field it is:  `{ title: "Dish Name" }`. */
   fields?: Readonly<Record<string, string>>
+  /** A field the file has no column for becomes one, at the end of its first line:  `CsvFileProps.addsColumns`. */
+  addsColumns?: boolean
 }
 
 /** Row `at`'s place in the file, for a reader:  it isn't in any list but the one. */

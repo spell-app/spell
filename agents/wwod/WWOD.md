@@ -133,6 +133,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
     `void editor.compileApp().catch((error) => editor.showError(error))`, plus a comment when the why isn't
     obvious.
 - **No unnecessary case normalization** (`.toLowerCase()`) for values with a defined format (env var names).
+- **Comma-separated lists, in attributes, settings and text people type, are split with `commaList()`
+  (`spell/util/string`):**  a space after a comma is ignored, empties dropped.  (Owen, 2026-11-17, epic `mockup` T53.)
 - **Formatting is oxfmt's** (through `vp fmt`):  120-char width, 2-space indent, no semicolons, double quotes, no
   trailing commas.
   - never hand-format against it;  `yarn format` settles it
@@ -577,6 +579,17 @@ Their long before / afters are in `agents/wwod/writing.md`.
     each language words it its own way.
   - NOT:  a `MSG.ts` of every string in a package that speaks only English -- one more file to keep in step, for no
     localization.  (Owen, 2026-10-22, epic `spanish` J61.)
+- **Significant text people see is in the novice voice, and checked cold before it ships:**
+  - Significant:  dialogs, notices, errors, empty states, onboarding and help.
+    Not every label or button on its own.
+  - The novice voice:  `epic voice novice` prints its file.
+  - Checked by a reader with no context, who finds the words a newcomer would stop at:
+    `epic voice check <file>`, or `--text "..."`, with `--about "a dialog shown when ..."`.
+    - It fails on jargon, ids, insider words, run-on sentences and stacked conditions ("agent speak"),
+      and quotes each with a rewrite.
+    - Check a dialog whole (heading, message and buttons in one text):  a heading alone often fails for want of
+      the message under it.
+  - Fix what it finds, or say in the report why a finding is wrong.  (Owen, 2026-11-17, epic `epic-engine` T92.)
 
 ## 7. Anti-patterns (Claude habits to drop)
 

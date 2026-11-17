@@ -1,7 +1,6 @@
 {
   "title": "Flash Cards",
   "description": "A deck of Spanish words to quiz yourself on:  each card a two sided view that turns over on a click, you say whether you knew it, and a toolbar keeps the score",
-  "category": "games",
   // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
   "thumbnail": { "steps": [{ "click": "Show the answer", "wait": 800 }, { "click": "I knew it", "wait": 800 }, { "click": "Show the answer", "wait": 2500 }, { "scrollToOn": "flash-cards-flash-card" }] },
   "imports": [{

@@ -1,7 +1,6 @@
 {
   "title": "FizzBuzz",
   "description": "Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and an event for each number, which the console prints and Explainer.spell's page draws, explaining it beside the results",
-  "category": "first-steps",
   "imports": [
     {
       "path": "/FizzBuzz.spell",

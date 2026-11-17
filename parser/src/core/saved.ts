@@ -1244,8 +1244,10 @@ class SavedRead {
    */
   private takes(fields: PlaceRow, { isKnown = false }: { isKnown?: boolean } = {}): boolean {
     if (this.query.under !== undefined && !isKnown) return false
+    // as the place's own filter does:  a sheet's "true" is yes, its empty cell no (`holdsFilterValue()`)
+    const holds = this.program.folderNow?.holdsFilterValue ?? ((held: unknown, value: unknown) => held === value)
     return Object.entries(this.query.filter ?? {}).every(
-      ([field, value]) => fields[field] === value || (isKnown && !(field in fields))
+      ([field, value]) => holds(fields[field], value) || (isKnown && !(field in fields))
     )
   }
 

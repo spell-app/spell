@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { DARK_QUERY } from "spell/util/persist"
+import { currentPlatform } from "spell/util/platform"
 import { Browser } from "spell/ui/runtime/Browser"
 
 ////////////////
@@ -20,6 +21,10 @@ describe("Browser.supports", () => {
     // `yarn review` runs chromium;  `yarn test:all` adds firefox / webkit, where these still hold
     expect(browser.supports).toMatchObject({ popover: true, customStates: true, startingStyle: true })
   })
+
+  it("knows screen capture by getDisplayMedia()", () => {
+    expect(browser.supports.screenCapture).toBe(typeof navigator.mediaDevices?.getDisplayMedia === "function")
+  })
 })
 
 describe("Browser.isChromium / isFirefox / isSafari", () => {
@@ -27,6 +32,12 @@ describe("Browser.isChromium / isFirefox / isSafari", () => {
     const browser = new Browser()
     const engines = [browser.isChromium, browser.isFirefox, browser.isSafari].filter(Boolean)
     expect(engines).toHaveLength(1)
+  })
+})
+
+describe("Browser.platform", () => {
+  it("is the page's platform, by spell/util/platform", () => {
+    expect(new Browser().platform).toBe(currentPlatform())
   })
 })
 

@@ -1,0 +1,167 @@
+# Checkers
+// Play against the computer, against yourself on two boards side by side, or against someone in another tab.
+// The rules are in Board.spell, the computer's moves in Computer.spell, and the room a table is kept in, in Checkers.api.spell:
+// this file holds the game you see, and what happens after each move.
+
+checkers is an app
+	its "opponent" is one of computer, yourself or someone
+		-- Who black plays:  the computer, yourself on a second board turned round, or someone in another tab
+	"board" is a new board
+	"turned board" is a new board with turned = yes
+		-- The same game, turned round:  red's view of it
+	its "seat" is text
+		-- This tab's own name at a table, made up as it opens:  so the table knows which seat it took
+	its "table" is a table
+		-- The table this tab sits at, against someone in another tab
+
+	when creating it
+		set its seat to "tab " && a random number between 1 and 999999
+		start a new game on its board
+		copy its board onto its turned board
+
+	its "side" is
+		-- Which side this tab plays against someone:  the side whose seat it took, else it watches
+		"black" if its table exists and the black seat of its table is its seat
+		"red" if its table exists and the red seat of its table is its seat
+		"nobody" otherwise
+
+	its "message" is
+		-- The line above the board:  who's won, or whose move it is
+		set game to its board
+		set turn to the turn of game as title case
+		if game is over and its opponent is computer
+			return "You win!" if the winner of game is black otherwise "The computer wins"
+		if game is over
+			return the winner of game as title case && "wins!"
+		if its opponent is computer and the turn of game is red
+			return "The computer is thinking…"
+		if its opponent is someone and its side is "nobody"
+			return "Two other tabs are playing:  New game starts your own"
+		if its opponent is someone
+			return "Your move" if the turn of game is its side otherwise "Their move"
+		if the jumper of game exists
+			return turn && "jumps again"
+		return turn && "to play"
+
+	group "Who You Play"
+	to "play the computer" with title "Computer", icon "desktop"
+		-- You play black, the computer red
+		selected when its opponent is computer
+		set its opponent to computer
+		set its table to nothing
+		start a new game
+
+	to "play yourself" with title "Yourself", icon "columns"
+		-- Black on the first board, red on the second, turned round:  each side moves on its own
+		selected when its opponent is yourself
+		set its opponent to yourself
+		set its table to nothing
+		start a new game
+
+	to "play someone" with title "Another tab", icon "users", can't be undone
+		-- The table in the room:  the first tab to join plays black, the second red, and any more watch
+		selected when its opponent is someone
+		set its opponent to someone
+		set found to the first table in every table
+		if found does not exist
+			set found to a new table
+			share its board in found
+			add found to the tables
+		if the black seat of found is ""
+			set the black seat of found to its seat
+		otherwise if the red seat of found is "" and the black seat of found is not its seat
+			set the red seat of found to its seat
+		set its table to found
+		show found on its board
+
+	group "Game Play"
+	to "start a new game" with title "New game", icon "sync alternate", shortcut "N"
+		-- Every piece back where it starts, black to move
+		start a new game on its board
+		copy its board onto its turned board
+		if its table exists
+			-- a tab that was watching takes black, and red is free for the next tab to join
+			if its side is "nobody"
+				set the black seat of its table to its seat
+				set the red seat of its table to ""
+			share its board in its table
+
+	group "Against Someone"
+	to "share (a board) in (a table)"
+		-- The table takes the board's game, so the other tab sees it
+		set the diagram of the table to the diagram of the board
+		set the turn of the table to the turn of the board
+		set the winner of the table to the winner of the board
+		set the jump square of the table to the jump square of the board
+
+	to "show (a table) on (a board)"
+		-- The board takes the table's game:  both of this tab's boards show it
+		set up the board from the diagram of the table
+		set the turn of the board to the turn of the table
+		set the winner of the board to the winner of the table
+		if the jump square of the table > 0
+			set the jumper of the board to the piece of (item (the jump square of the table) of the board)
+		copy the board onto the turned board of checkers
+
+	to draw it
+		<container>
+			<stack>
+				<toolbar class="Bar" appearance="pills" shrinkable>
+					<text size="big" slot="title" heavy>Checkers</>
+					<spacer />
+					<action "start a new game" />
+					<action "undo" icon-only />
+					<action "redo" icon-only />
+				</>
+				<toolbar class="Opponents" appearance="pills" size="small" aria-label="Who you play">
+					<action "play the computer" />
+					<action "play yourself" />
+					<action "play someone" />
+				</>
+				<header level="3" class="Message">{its message}</>
+				{draw its boards}
+			</stack>
+		</container>
+
+	to draw its boards
+		-- one board against the computer;  against yourself both, side by side;  against someone, your side nearest you
+		if its opponent is yourself
+			<stack class="Boards" direction="horizontal" wrap>
+				<board "board" />
+				<board "turned board" />
+			</stack>
+		otherwise if its opponent is someone and its side is "red"
+			<board "turned board" />
+		otherwise
+			<board "board" />
+
+after moving a piece to a square
+	-- Both boards show the move;  then the computer plays, or the other tab hears it
+	set board to the board of the square
+	if board is the turned board of checkers
+		copy board onto the board of checkers
+	otherwise
+		copy board onto the turned board of checkers
+	if the table of checkers exists
+		share board in the table of checkers
+	if the opponent of checkers is computer and the turn of board is red and board is not over
+		pause for 600 msec
+		play for the computer on board
+
+a table
+	when someone else changes it
+		-- the other tab moved:  this tab's boards show it
+		if it is the table of checkers
+			show it on the board of checkers
+
+a piece
+	it "is yours" if
+		-- Whether you move it here:  black against the computer;  each board's own side against yourself;  your side against someone
+		set board to the board of its square
+		if the opponent of checkers is computer
+			return its side is black
+		if the opponent of checkers is someone
+			return its side is the side of checkers
+		if the turned of board is yes
+			return its side is red
+		return its side is black

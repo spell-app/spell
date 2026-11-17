@@ -9,25 +9,23 @@ import HOME_ORDER_LIST from "./homeOrder.json"
  *     no group's address is a bare word, so a reader of a group's list never meets it.
  *   - And what the page leaves out, under `HOME_HIDDEN_KEY`, `"hidden"` (epic `mockup` I40).
  * - A project not on its group's list comes after the listed ones, by name:  a new example goes to the end by itself.
- * - Changed by dragging a card, or a section by its header, on the home page:
- *   in dev, in Spell's own checkout (`POST /api/home/order`, which writes the file).
- *   - Never in an app that installs Spell:  the file is in its `node_modules` there, so nothing drags.
+ * - Changed by dragging a card, or a section by its header, on the home page, while it's being rearranged
+ *   (epic `mockup` T51, `homeLayout.ts`):  by `@spell`'s people, in Spell's own checkout, it's this file;
+ *   by anyone else, their own order, laid over it.
  * - The README's table of examples reads it too (`yarn examples:readme`).
  * - Browser-safe:  the editor imports it.
  */
 export const HOME_ORDER: Readonly<Record<string, readonly string[]>> = HOME_ORDER_LIST
 
-/** Where the home page's order is saved, and asked whether it may be:  `GET` / `POST`. */
-export const HOME_ORDER_URL = "/api/home/order"
+// The page already shows a change the moment it's made (`HomeArrangement`):  so a save into the file, in dev,
+// mustn't reload the page, which would end the rearranging (epic `mockup` T51)
+import.meta.hot?.accept("./homeOrder.json", () => undefined)
 
-/** `GET HOME_ORDER_URL`'s answer:  may this page reorder its cards and sections?  Only in Spell's own checkout. */
-export type HomeOrderAnswer = { mayReorder: boolean }
-
-/** `POST HOME_ORDER_URL`'s body:  one group's new order, or the sections'. */
+/** One group's new order, or the sections', or the start cards':  part of a `HomeLayoutChange`. */
 export type HomeOrderChange = {
-  /** the group's address, `@spell/examples`;  or `HOME_SECTIONS_KEY`, for the sections' order */
+  /** the group's address, `@spell/examples`;  or `HOME_SECTIONS_KEY`, `HOME_START_KEY` */
   group: string
-  /** its projects' folder names, in their new order;  or the sections' ids (`HomeSection`) */
+  /** its projects' folder names, in their new order;  or the sections' ids (`HomeSection`), the start cards' */
   names: string[]
 }
 

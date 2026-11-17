@@ -17,6 +17,7 @@ import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
+import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
 import { ShowDrawn } from "./ShowDrawn"
 import { PlaySound } from "./PlaySound"
@@ -140,6 +141,11 @@ UIEs.addRule(ShowDrawn, {
       ]
     }
   ]
+})
+
+UIEs.addRule(OpenPrinting, {
+  syntax: "abrir impresión",
+  tests: [{ compileAs: "statement", tests: [["abrir impresión", "core.openPrinting()"]] }]
 })
 
 UIEs.addRule(PlaySound, {

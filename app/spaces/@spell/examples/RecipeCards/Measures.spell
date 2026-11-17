@@ -1,0 +1,49 @@
+# Measures:  an amount in the cook's units
+// Metric (grams and millilitres), or cups and spoons:  the same amount, shown either way.
+// The units' sizes are Spell's own measures, e.g. "1 cup in ml" is 236.6.
+// Grams and counts show whole;  cups and spoons to the nearest quarter, "1 1/2".
+
+a "measure" is a thing
+	// How much, and in what:  what an ingredient shows, and what goes on the shopping list
+	its "number" is a number
+	its "unit" is text
+	its "written" is
+		// As a cook writes it:  "200 g", "1 1/2 cups", "2"
+		if its number is nothing or its number is 0 return ""
+		if its unit is "" return write its number for a cook
+		if its unit is "cups" and its number <= 1 return (write its number for a cook) && "cup"
+		return (write its number for a cook) && its unit
+
+to measure (amount as a number) in (unit as text)
+	// Whole:  grams, millilitres, counts
+	return a new measure with number = round amount, unit = unit
+
+to measure (amount as a number) in quarters of (unit as text)
+	// To the nearest quarter:  cups and spoons
+	return a new measure with number = (round (amount * 4)) / 4, unit = unit
+
+to measure (millilitres as a number) in spoons or cups
+	// The spoon or cup a cook would reach for
+	if millilitres < (1 tbsp in ml) return measure (millilitres / (1 tsp in ml)) in quarters of "tsp"
+	if millilitres < (1/4 cup in ml) return measure (millilitres / (1 tbsp in ml)) in quarters of "tbsp"
+	return measure (millilitres / (1 cup in ml)) in quarters of "cups"
+
+to write (amount as a number) for a cook
+	// A whole number, then a quarter, a half or three quarters:  1.5 is "1 1/2"
+	set quarters to round (amount * 4)
+	set whole to (quarters / 4) as an integer
+	set left over to quarters - whole * 4
+	set part to ""
+	if left over is 1 set part to "1/4"
+	if left over is 2 set part to "1/2"
+	if left over is 3 set part to "3/4"
+	if part is "" return "" + whole
+	if whole is 0 return part
+	return whole && part
+
+to test fractions
+	write 1.5 for a cook should be "1 1/2"
+	write 0.25 for a cook should be "1/4"
+	write 200 for a cook should be "200"
+	the written of (measure 250 in spoons or cups) should be "1 cup"
+	the written of (measure 15 in spoons or cups) should be "1 tbsp"

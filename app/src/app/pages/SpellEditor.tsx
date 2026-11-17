@@ -631,6 +631,7 @@ export function ProjectPageRoute(props: RouteSectionProps) {
   const page = (): EditorPage => (props.params.page === RUN_PAGE ? "runner" : "editor")
   followRoute(() => props.params, page)
   useBeforeLeave(letGoForRun)
+  useBeforeLeave(askBeforeLeavingExample)
   return <SpellEditor mode={page() === "runner" ? "run" : "edit"} />
 }
 
@@ -645,6 +646,21 @@ function letGoForRun(leave: BeforeLeaveEventArgs): void {
   const to = typeof leave.to === "string" ? leave.to : location.pathname
   const leavesForRun = pageIn(to) === RUN_PAGE && pageIn(leave.from.pathname) !== RUN_PAGE
   if (leavesForRun && untrack(() => Inspector.allSelected.length)) Inspector.letGo()
+}
+
+/**
+ * Leaving an example or a guide with your draft of it:  hold the address where it is, and ask what to keep
+ * (`editor.askAboutExample()`, epic `mockup` T52);  go on once it's answered, or stay, the address as it was.
+ * - Any way the address leaves:  Home, another project, Back, a typed address within the app.
+ * - Back and forward hand over a step count:  the router puts the address back while it's held.
+ */
+function askBeforeLeavingExample(leave: BeforeLeaveEventArgs): void {
+  if (leave.defaultPrevented) return
+  const to = typeof leave.to === "string" ? leave.to : location.pathname
+  const project = untrack(() => editor.project)
+  if (!project || !untrack(() => editor.asksBeforeLeaving(to))) return
+  leave.preventDefault()
+  void editor.askAboutExample(project, "leaving").then((goOn) => goOn && leave.retry(true))
 }
 
 /** The page word an address starts with:  `run` for `/run/<project>/...`. */

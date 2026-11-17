@@ -12,6 +12,7 @@ import { join } from "node:path"
 import { parseArgs } from "node:util"
 import type { Page } from "playwright"
 
+import { commaList } from "spell/util/string"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { DevServer } from "spell/element-tools/DevServer"
 import { Terminal } from "spell/element-tools/Terminal"
@@ -105,7 +106,7 @@ const CONSOLE = "console "
 const MAX_PROBLEMS = 30
 
 const { positionals } = parseArgs({ allowPositionals: true, options: {} })
-const families = (positionals[0] ?? DEFAULT_FAMILIES).split(",").map((family) => family.trim().replace(/^ui-/, ""))
+const families = commaList(positionals[0] ?? DEFAULT_FAMILIES).map((family) => family.replace(/^ui-/, ""))
 const server = await DevServer.start({ root: SPELL_UI_ROOT, port: PORT, logLevel: "error" })
 try {
   await BrowserPage.with(async (browser) => {

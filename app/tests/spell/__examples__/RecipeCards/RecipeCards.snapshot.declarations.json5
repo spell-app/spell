@@ -1,0 +1,743 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Recipe",
+    "Ingredient",
+    "Step",
+    "Measure",
+    "RecipeCard",
+    "RecipeEditor",
+    "IngredientRow",
+    "StepRow",
+    "RecipeFile",
+    "measure_$amount_in_$unit",
+    "measure_$amount_in_quarters_of_$unit",
+    "measure_$millilitres_in_spoons_or_cups",
+    "write_$amount_for_a_cook",
+    "test_fractions",
+    "add_the_tomato_soup",
+    "add_the_red_lentil_dal",
+    "add_the_pancakes"
+  ],
+  "statements": [
+    {
+      "type": "Recipe",
+      "superType": "View",
+      "savedIn": {
+        "place": "recipe_file",
+        "placeType": "RecipeFile",
+        "collection": "recipes"
+      },
+      "defined": "/RecipeCards.api.spell:531-980"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeCards.api.spell:578-597"
+    },
+    {
+      "property": "serves",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/RecipeCards.api.spell:599-693"
+    },
+    {
+      "property": "picture",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeCards.api.spell:695-800"
+    },
+    {
+      "property": "ingredients",
+      "of": "Recipe",
+      "datatype": "list of ingredients",
+      "defined": "/RecipeCards.api.spell:802-897"
+    },
+    {
+      "property": "steps",
+      "of": "Recipe",
+      "datatype": "list of steps",
+      "defined": "/RecipeCards.api.spell:899-980"
+    },
+    {
+      "property": "picked_count",
+      "asWritten": "picked count",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/RecipeCard.spell:210-302"
+    },
+    {
+      "syntax": "pick {thisArg:expression}",
+      "output": "pick",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "pick it",
+      "returns": "nothing",
+      "defined": "/RecipeCard.spell:305-447"
+    },
+    {
+      "syntax": "edit {thisArg:expression}?",
+      "output": "edit",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "edit",
+      "returns": "nothing",
+      "defined": "/RecipeCard.spell:450-539"
+    },
+    {
+      "syntax": "add the picked to the shopping list (of {thisArg:expression})?",
+      "output": "add_the_picked_to_the_shopping_list",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the picked to the shopping list",
+      "returns": "nothing",
+      "waits": true,
+      "title": "Add to shopping list",
+      "defined": "/RecipeCard.spell:542-1329"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeCard.spell:1332-2223"
+    },
+    {
+      "type": "Ingredient",
+      "superType": "View",
+      "defined": "/RecipeCards.api.spell:982-1571"
+    },
+    {
+      "property": "amount",
+      "of": "Ingredient",
+      "datatype": "number",
+      "defined": "/RecipeCards.api.spell:1083-1188"
+    },
+    {
+      "property": "unit",
+      "of": "Ingredient",
+      "datatype": "text",
+      "defined": "/RecipeCards.api.spell:1190-1273"
+    },
+    {
+      "property": "name",
+      "of": "Ingredient",
+      "datatype": "text",
+      "defined": "/RecipeCards.api.spell:1275-1293"
+    },
+    {
+      "property": "aisle",
+      "of": "Ingredient",
+      "datatype": "text",
+      "defined": "/RecipeCards.api.spell:1295-1366"
+    },
+    {
+      "property": "grams_per_cup",
+      "asWritten": "grams per cup",
+      "of": "Ingredient",
+      "datatype": "number",
+      "defined": "/RecipeCards.api.spell:1368-1504"
+    },
+    {
+      "property": "picked",
+      "of": "Ingredient",
+      "datatype": "choice",
+      "defined": "/RecipeCards.api.spell:1506-1571"
+    },
+    {
+      "property": "scaled_amount",
+      "asWritten": "scaled amount",
+      "of": "Ingredient",
+      "datatype": "number",
+      "defined": "/Ingredient.spell:236-297"
+    },
+    {
+      "property": "shown",
+      "of": "Ingredient",
+      "datatype": "Measure",
+      "defined": "/Ingredient.spell:368-1365"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Ingredient",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Ingredient.spell:1368-1693"
+    },
+    {
+      "type": "Step",
+      "superType": "View",
+      "defined": "/RecipeCards.api.spell:1573-1638"
+    },
+    {
+      "property": "instruction",
+      "of": "Step",
+      "datatype": "text",
+      "defined": "/RecipeCards.api.spell:1613-1638"
+    },
+    {
+      "type": "RecipeFile",
+      "superType": "Place",
+      "place": {
+        "name": "recipe_file",
+        "kind": "file",
+        "at": "/api/places/spaces/@spell/examples/RecipeCards/__data/recipes.json",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
+      "defined": "/RecipeCards.api.spell:458-529"
+    },
+    {
+      "type": "Measure",
+      "superType": "Thing",
+      "defined": "/Measures.spell:292-773"
+    },
+    {
+      "property": "number",
+      "of": "Measure",
+      "datatype": "number",
+      "defined": "/Measures.spell:405-429"
+    },
+    {
+      "property": "unit",
+      "of": "Measure",
+      "datatype": "text",
+      "defined": "/Measures.spell:431-449"
+    },
+    {
+      "property": "written",
+      "of": "Measure",
+      "defined": "/Measures.spell:451-773"
+    },
+    {
+      "syntax": "measure {callArgs:expression} in {callArgs:expression}",
+      "output": "measure_$amount_in_$unit",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "measure (amount as a number) in (unit as text)",
+      "params": [
+        {
+          "name": "amount",
+          "datatype": "number"
+        },
+        {
+          "name": "unit",
+          "datatype": "text"
+        }
+      ],
+      "returns": "Measure",
+      "defined": "/Measures.spell:775-925"
+    },
+    {
+      "syntax": "measure {callArgs:expression} in quarters of {callArgs:expression}",
+      "output": "measure_$amount_in_quarters_of_$unit",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "measure (amount as a number) in quarters of (unit as text)",
+      "params": [
+        {
+          "name": "amount",
+          "datatype": "number"
+        },
+        {
+          "name": "unit",
+          "datatype": "text"
+        }
+      ],
+      "returns": "Measure",
+      "defined": "/Measures.spell:927-1107"
+    },
+    {
+      "syntax": "measure {callArgs:expression} in spoons or cups",
+      "output": "measure_$millilitres_in_spoons_or_cups",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "measure (millilitres as a number) in spoons or cups",
+      "params": [
+        {
+          "name": "millilitres",
+          "datatype": "number"
+        }
+      ],
+      "returns": "Measure",
+      "defined": "/Measures.spell:1109-1476"
+    },
+    {
+      "syntax": "write {callArgs:expression} for a cook",
+      "output": "write_$amount_for_a_cook",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "write (amount as a number) for a cook",
+      "params": [
+        {
+          "name": "amount",
+          "datatype": "number"
+        }
+      ],
+      "returns": "text",
+      "defined": "/Measures.spell:1478-1923"
+    },
+    {
+      "syntax": "test fractions",
+      "output": "test_fractions",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "fractions",
+      "defined": "/Measures.spell:1925-2191"
+    },
+    {
+      "syntax": "add the tomato soup",
+      "output": "add_the_tomato_soup",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/Samples.spell:229-1983"
+    },
+    {
+      "syntax": "add the red lentil dal",
+      "output": "add_the_red_lentil_dal",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/Samples.spell:1985-3997"
+    },
+    {
+      "syntax": "add the pancakes",
+      "output": "add_the_pancakes",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/Samples.spell:3999-5693"
+    },
+    {
+      "type": "RecipeCard",
+      "superType": "App",
+      "defined": "/RecipeCards.spell:313-2600"
+    },
+    {
+      "property": "chosen",
+      "of": "RecipeCard",
+      "datatype": "Recipe",
+      "defined": "/RecipeCards.spell:337-385"
+    },
+    {
+      "property": "editing",
+      "of": "RecipeCard",
+      "datatype": "Recipe",
+      "defined": "/RecipeCards.spell:387-461"
+    },
+    {
+      "property": "diners",
+      "of": "RecipeCard",
+      "datatype": "number",
+      "defined": "/RecipeCards.spell:463-526"
+    },
+    {
+      "property": "units",
+      "classVariable": "Units",
+      "of": "RecipeCard",
+      "enumeration": [
+        "metric",
+        "cups"
+      ],
+      "defined": "/RecipeCards.spell:528-611"
+    },
+    {
+      "property": "scale",
+      "of": "RecipeCard",
+      "datatype": "number",
+      "defined": "/RecipeCards.spell:613-797"
+    },
+    {
+      "property": "aisle_list",
+      "asWritten": "aisle list",
+      "of": "RecipeCard",
+      "datatype": "AisleList",
+      "defined": "/RecipeCards.spell:799-906"
+    },
+    {
+      "kind": "method",
+      "name": "creating it",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/RecipeCards.spell:909-1137"
+    },
+    {
+      "syntax": "show metric (of {thisArg:expression})?",
+      "output": "show_metric",
+      "rule": "method_call",
+      "of": "RecipeCard",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Units",
+      "kind": "method",
+      "name": "show metric",
+      "returns": "nothing",
+      "title": "Metric",
+      "defined": "/RecipeCards.spell:1155-1253"
+    },
+    {
+      "syntax": "show cups and spoons (of {thisArg:expression})?",
+      "output": "show_cups_and_spoons",
+      "rule": "method_call",
+      "of": "RecipeCard",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Units",
+      "kind": "method",
+      "name": "show cups and spoons",
+      "returns": "nothing",
+      "title": "Cups and spoons",
+      "defined": "/RecipeCards.spell:1256-1368"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeCard",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Units",
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeCards.spell:1371-2321"
+    },
+    {
+      "type": "RecipeEditor",
+      "superType": "View",
+      "defined": "/RecipeEditor.spell:223-1758"
+    },
+    {
+      "property": "recipe",
+      "of": "RecipeEditor",
+      "datatype": "Recipe",
+      "defined": "/RecipeEditor.spell:252-306"
+    },
+    {
+      "property": "draft",
+      "of": "RecipeEditor",
+      "datatype": "PlaceDraft",
+      "defined": "/RecipeEditor.spell:308-344"
+    },
+    {
+      "syntax": "save {thisArg:expression}?",
+      "output": "save",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "save",
+      "returns": "nothing",
+      "defined": "/RecipeEditor.spell:409-542"
+    },
+    {
+      "syntax": "cancel {thisArg:expression}?",
+      "output": "cancel",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "cancel",
+      "returns": "nothing",
+      "defined": "/RecipeEditor.spell:545-669"
+    },
+    {
+      "syntax": "add ingredient (of {thisArg:expression})?",
+      "output": "add_ingredient",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add ingredient",
+      "returns": "nothing",
+      "title": "Add an ingredient",
+      "defined": "/RecipeEditor.spell:672-787"
+    },
+    {
+      "syntax": "add step (of {thisArg:expression})?",
+      "output": "add_step",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add step",
+      "returns": "nothing",
+      "title": "Add a step",
+      "defined": "/RecipeEditor.spell:790-880"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeEditor.spell:883-1758"
+    },
+    {
+      "type": "IngredientRow",
+      "superType": "View",
+      "defined": "/RecipeEditor.spell:1760-3000"
+    },
+    {
+      "property": "ingredient",
+      "of": "IngredientRow",
+      "datatype": "Ingredient",
+      "defined": "/RecipeEditor.spell:1879-1912"
+    },
+    {
+      "property": "editor",
+      "of": "IngredientRow",
+      "datatype": "RecipeEditor",
+      "defined": "/RecipeEditor.spell:1914-1945"
+    },
+    {
+      "syntax": "move up (of {thisArg:expression})?",
+      "output": "move_up",
+      "rule": "method_call",
+      "of": "IngredientRow",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "move up",
+      "returns": "nothing",
+      "defined": "/RecipeEditor.spell:1948-2207"
+    },
+    {
+      "syntax": "remove {thisArg:expression}?",
+      "output": "remove",
+      "rule": "method_call",
+      "of": "IngredientRow",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "remove",
+      "returns": "nothing",
+      "defined": "/RecipeEditor.spell:2210-2319"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "IngredientRow",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeEditor.spell:2322-3000"
+    },
+    {
+      "type": "StepRow",
+      "superType": "View",
+      "defined": "/RecipeEditor.spell:3002-3800"
+    },
+    {
+      "property": "step",
+      "of": "StepRow",
+      "datatype": "Step",
+      "defined": "/RecipeEditor.spell:3107-3127"
+    },
+    {
+      "property": "editor",
+      "of": "StepRow",
+      "datatype": "RecipeEditor",
+      "defined": "/RecipeEditor.spell:3129-3160"
+    },
+    {
+      "syntax": "move up (of {thisArg:expression})?",
+      "output": "move_up",
+      "rule": "method_call",
+      "of": "StepRow",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "move up",
+      "returns": "nothing",
+      "defined": "/RecipeEditor.spell:3163-3410"
+    },
+    {
+      "syntax": "remove {thisArg:expression}?",
+      "output": "remove",
+      "rule": "method_call",
+      "of": "StepRow",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "remove",
+      "returns": "nothing",
+      "defined": "/RecipeEditor.spell:3413-3510"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "StepRow",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeEditor.spell:3513-3800"
+    }
+  ],
+  "codeLines": [
+    8,
+    11,
+    17,
+    23,
+    29,
+    35,
+    40,
+    46,
+    52,
+    57,
+    78,
+    152,
+    156,
+    162,
+    167,
+    173,
+    179,
+    185,
+    191,
+    197,
+    252,
+    264,
+    267,
+    279,
+    297,
+    298,
+    303,
+    309,
+    318,
+    323,
+    328,
+    366,
+    381,
+    398,
+    461,
+    536,
+    602,
+    606,
+    612,
+    618,
+    624,
+    631,
+    638,
+    644,
+    653,
+    660,
+    667,
+    738,
+    742,
+    748,
+    753,
+    759,
+    764,
+    768,
+    772,
+    815,
+    818,
+    823,
+    828,
+    837,
+    841,
+    868,
+    871,
+    876,
+    881,
+    890,
+    894
+  ]
+}

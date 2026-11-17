@@ -76,6 +76,21 @@ describe("a quoted word on Spell UI's tags", () => {
     }
   })
 
+  test.each([
+    ["device", 'device="phone" modal', '"phone" modal', "en"],
+    ["dispositivo", 'aparato="teléfono" modal', '"teléfono" modal', "es"]
+  ] as const)("<%s> takes which device it is as its word (epic `mockup` P25)", (tag, long, short, language) => {
+    for (const target of TARGETS) {
+      expect(compiled(`<${tag} ${short}></${tag}>`, target, language)).toBe(
+        compiled(`<${tag} ${long}></${tag}>`, target, language)
+      )
+    }
+    // Spell UI's `<ui-device>`, in the file's language
+    expect(compiled(`<${tag} ${short}></${tag}>`, "js/solid", language)).toContain(
+      language === "es" ? "es-dispositivo" : "ui-device"
+    )
+  })
+
   test("attributes after the word, on every target", () => {
     for (const target of TARGETS) {
       expect(compiled('<header "Hardware" size="large"/>', target, "en")).toBe(

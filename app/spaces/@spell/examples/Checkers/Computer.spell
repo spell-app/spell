@@ -1,0 +1,97 @@
+# The computer
+// How the computer picks its move, when you play against it:  every move it can make, each given points.
+// - a jump scores most:  the rules make it jump when it can, so this picks between jumps
+// - then a move that crowns a king
+// - a move onto a square where no piece of yours can jump it scores, and one where you can loses
+// It looks one move ahead, no more:  it never sets a trap, and you can beat it.
+
+a "move" is a thing
+	-- One move the side to play could make:  a piece, the square it would go to, and its points
+	its "piece" is a piece
+	its "square" is a square
+	its "points" is a number
+
+a square
+	it "is next to (a square)" if
+		-- Whether it touches the square at a corner:  one row and one column away
+		return the absolute value of (its row - the row of the square) is 1 and the absolute value of (its column - the column of the square) is 1
+
+a piece
+	it "would be safe on (a square)" if
+		-- Whether no enemy piece could jump it there:  one next to the square, with the square beyond it free
+		-- inside the loop `its` is the square beside:  so its side and where it stands are named first
+		set board to the board of its square
+		set own side to its side
+		set left to its square
+		set threats to 0
+		for beside in board where it is next to the square
+			set enemy to the piece of beside
+			set landing to the square at the row of the square * 2 - the row of beside and the column of the square * 2 - the column of beside on board
+			if enemy exists and landing exists and the side of enemy is not own side
+				-- it lands where this piece left, or on an empty square;  a man jumps only forward
+				set heading to (the row of landing - the row of beside) * the forward of enemy
+				if (landing is left or landing is empty) and (enemy is a king or heading > 0)
+					set threats to threats + 1
+		return threats is 0
+
+to "the points for (a move)"
+	-- What a move is worth to the computer
+	set mover to the piece of the move
+	set target to the square of the move
+	set score to 0
+	if mover can jump to target
+		set score to score + 10
+	if mover is not a king and the row of target is the far row of mover
+		set score to score + 5
+	if mover would be safe on target
+		set score to score + 2
+	otherwise
+		set score to score - 4
+	return score
+
+a board
+	its "moves" is
+		-- Every move the side whose turn it is can make, with its points
+		set found to a new list of moves
+		for start in it where its piece exists and the side of its piece is the turn of the board
+			set mover to the piece of start
+			for target in the board where mover can go to it
+				set move to a new move with piece = mover, square = target
+				set the points of move to the points for move
+				add move to found
+		return found
+
+to "play for the computer on (a board)"
+	-- The computer's move:  the most points, picked at random among the best
+	set choices to the moves of the board
+	if choices is empty
+		return
+	set best to the last move in (choices sorted by its points)
+	set chosen to a random move in choices where its points is the points of best
+	move the piece of chosen to the square of chosen
+
+to test the computer jumps
+	set board to a new board
+	reset board
+	set the turn of board to red
+	put a "red" "man" at 3 and 4 on board
+	put a "black" "man" at 4 and 5 on board
+	put a "black" "man" at 7 and 2 on board
+	play for the computer on board
+	the square at 4 and 5 on board is empty should be yes
+	the piece of (the square at 5 and 6 on board) exists should be yes
+
+to test the computer keeps its pieces safe
+	set board to a new board
+	reset board
+	set the turn of board to red
+	put a "red" "man" at 3 and 4 on board
+	put a "black" "man" at 6 and 7 on board
+	-- going to 4 and 5 walks into a jump from 5 and 6 later;  4 and 3 is safe now
+	set man to the piece of (the square at 3 and 4 on board)
+	man would be safe on (the square at 4 and 5 on board) should be yes
+	put a "black" "man" at 5 and 6 on board
+	man would be safe on (the square at 4 and 5 on board) should be no
+	man would be safe on (the square at 4 and 3 on board) should be yes
+	play for the computer on board
+	the piece of (the square at 4 and 3 on board) exists should be yes

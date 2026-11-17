@@ -1731,6 +1731,7 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   | `tab`, `panel` | its `label` |
   | `example` | its `name` |
   | `tree-node` | its `label` |
+  | `device` | which device it is, its `device` (`<device "phone" modal>`;  Spanish `<dispositivo "tableta">`, its `aparato`) |
   | `cell` | its column (`data-column`) |
 
   | Left out | Why |

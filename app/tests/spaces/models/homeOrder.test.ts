@@ -1,6 +1,6 @@
-import { readdirSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { resolve } from "node:path"
-
+import JSON5 from "json5"
 import { describe, expect, test } from "vite-plus/test"
 
 import { SPACES } from "spell/app/spaces"
@@ -165,6 +165,26 @@ describe("the home page's hidden list", () => {
       if (SPACES.isHomeSection(name)) continue
       const group = name.slice(0, name.lastIndexOf("/"))
       expect(readdirSync(resolve(spaces, group)), name).toContain(SPACES.folderNameOf(name))
+    }
+  })
+})
+
+/** Each example's line on its home page card (epic `mockup` I48):  `SPACES.cardLineOf()`, whole in two lines. */
+describe("an example's card line", () => {
+  test("its description's first phrase, up to a `:`, `;` or sentence's end", () => {
+    expect(SPACES.cardLineOf("A to-do list:  type a task and add it;  tick it off")).toBe("A to-do list")
+    expect(SPACES.cardLineOf("The picnic's letter.  Then more")).toBe("The picnic's letter")
+    expect(SPACES.cardLineOf(undefined)).toBeUndefined()
+  })
+
+  test("every example's is short enough to fit its card at its narrowest", () => {
+    const examples = resolve(import.meta.dirname, "../../../spaces/@spell/examples")
+    for (const name of readdirSync(examples)) {
+      const file = resolve(examples, name, "__project.json5")
+      if (!existsSync(file)) continue
+      const line =
+        SPACES.cardLineOf((JSON5.parse(readFileSync(file, "utf8")) as { description?: string }).description) ?? ""
+      expect(line.length, `${name}'s card line, "${line}"`).toBeLessThanOrEqual(SPACES.CARD_LINE_LENGTH)
     }
   })
 })

@@ -36,6 +36,7 @@ export function Chooser(props: ChooserProps) {
       class="Chooser"
       size="tiny"
       closedby="closerequest"
+      closable={props.closable === false ? undefined : ""}
       heading={props.header}
       aria-label={props.header ? undefined : props.message}
       visible=""

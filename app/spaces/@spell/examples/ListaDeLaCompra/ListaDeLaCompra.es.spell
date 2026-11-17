@@ -1,0 +1,66 @@
+# Lista de la compra
+// Qué comprar, por pasillo:  agrega un artículo, márcalo mientras compras, quita lo comprado e imprime lo que falta.
+// Sus artículos están en un archivo CSV que abren Numbers o Excel:  ListaDeLaCompra.api.es.spell dice dónde.
+// Un artículo se dibuja en Artículo.es.spell, y la lista por pasillo es Recorrido.es.spell;  este archivo tiene la aplicación.
+
+lista de la compra es una aplicación
+	"recorrido" es un nuevo recorrido
+	su "nuevo artículo" es un nuevo artículo
+		// El próximo artículo, tal como lo tiene el formulario sobre la lista
+
+	al crearla
+		// La primera vez, con el archivo vacío, unos cuantos para empezar
+		si no hay artículos
+			agregar (un nuevo artículo con nombre "leche", pasillo "Lácteos", cantidad = 2, unidad = "litros") a los artículos
+			agregar (un nuevo artículo con nombre "huevos", pasillo "Lácteos", cantidad = 12) a los artículos
+			agregar (un nuevo artículo con nombre "plátanos", pasillo "Frutas y verduras", cantidad = 6) a los artículos
+			agregar (un nuevo artículo con nombre "espinacas", pasillo "Frutas y verduras", cantidad = 200, unidad = "g") a los artículos
+			agregar (un nuevo artículo con nombre "pan", pasillo "Panadería", cantidad = 1, unidad = "barra") a los artículos
+			agregar (un nuevo artículo con nombre "café", pasillo "Bebidas", cantidad = 250, unidad = "g", comprado = sí) a los artículos
+
+	para "agregar el artículo nuevo" con título "Agregar", icono "plus"
+		// El artículo del formulario, a la lista y al archivo;  el formulario se vacía, conservando su pasillo
+		si el nombre de su nuevo artículo es "" devolver
+		agregar el nuevo artículo a los artículos
+		poner su nuevo artículo a un nuevo artículo con pasillo = el pasillo de su nuevo artículo
+
+	para "quitar lo comprado" con título "Quitar lo que ya tengo", icono "check"
+		// Cada artículo marcado fuera de la lista, en un solo paso para deshacer
+		quitar artículos en los artículos donde su comprado es sí
+
+	para "imprimir la lista" con título "Imprimir", icono "print"
+		// Solo lo que falta comprar, por pasillo:  styles.css dice qué sale en papel
+		abrir impresión
+
+	para dibujarla
+		<contenedor texto>
+			<pila>
+				<barra-herramientas>
+					<texto tamano="grande" extranegrita slot="titulo">Lista de la compra</texto>
+					<action "quitar lo comprado" />
+					<action "imprimir la lista" />
+					<spacer />
+					<action "deshacer" solo-icono />
+					<action "rehacer" solo-icono />
+				</barra-herramientas>
+				<formulario value={su nuevo artículo} class="new-item">
+					<campos no-apilable>
+						<campo ancho="3">
+							<entrada name="cantidad" type="number" min="0" marcador="Cuántos" aria-label="Cantidad" />
+						</campo>
+						<campo ancho="3">
+							<entrada name="unidad" marcador="Unidad" aria-label="Unidad" />
+						</campo>
+						<campo ancho="6">
+							<entrada name="nombre" marcador="Algo que comprar" aria-label="Elemento" />
+						</campo>
+						<campo ancho="4">
+							<entrada name="pasillo" marcador="Pasillo" aria-label="Pasillo" accion>
+								<action "agregar el artículo nuevo" slot="accion" color="primario" solo-icono />
+							</entrada>
+						</campo>
+					</campos>
+				</formulario>
+				{dibujar el recorrido}
+			</pila>
+		</contenedor>

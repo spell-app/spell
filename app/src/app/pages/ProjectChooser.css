@@ -196,7 +196,7 @@
     font-weight: 600;
     color: var(--ui-text-muted);
   }
-  /* a section moved by its header among the page's (in dev, in Spell's own checkout):
+  /* a section moved by its header among the page's, while the page is rearranged (epic `mockup` T51):
      the one moving faint, where it would land marked, as a card dragged among its row is (`TileCard.css`) */
   &.grabbable > header {
     cursor: grab;
@@ -234,4 +234,41 @@
 /* The ways to start share one row on a wide window */
 .Home #start .cards {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+/*
+ * Rearranging the home page (epic `mockup` T51):  a bar stuck along its top while it's on, saying how and whose,
+ * Done on its right;  "Rearrange Home Screen" quiet at its foot while it's off.
+ * - Each card that moves is outlined, dashed, so the page looks movable.
+ */
+.Home .RearrangeBar {
+  position: sticky;
+  top: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--Home-radius);
+  background: var(--spell-pane-background);
+  border: 1px solid var(--ui-primary-color, var(--spell-pane-border-color));
+  box-shadow: var(--ui-shadow-floating, var(--spell-pane-shadow));
+  -webkit-backdrop-filter: var(--Home-box-filter);
+  backdrop-filter: var(--Home-box-filter);
+
+  .how {
+    flex: 1 1 auto;
+    white-space: pre-line;
+    color: var(--ui-text-muted);
+  }
+}
+.Home .RearrangeFoot {
+  display: flex;
+  justify-content: center;
+  opacity: 0.8;
+}
+.Home.rearranging .TileCard[draggable="true"] {
+  cursor: grab;
+  outline: 1px dashed var(--ui-border-color);
+  outline-offset: 3px;
 }

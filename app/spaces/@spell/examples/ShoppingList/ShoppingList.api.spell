@@ -1,0 +1,21 @@
+## Shopping List:  where the list is kept
+// In a CSV file, in this example's own folder:  __data/shopping.csv.
+// Open it in Numbers or Excel:  a row for each item, a column for each of its fields.
+// The page server writes it, changing only the lines that change;  everyone using that page server shares one list.
+// Recipe Cards keeps the ingredients you pick here too:  it imports this file, so both name this one list.
+shopping sheet is a sheet at "shopping.csv"
+
+an "item" is a view
+	it lives in shopping sheet
+	its "name" is text
+	its "amount" is a number
+		// How many, in its unit:  nothing when it doesn't matter
+	its "unit" is text
+		// "g", "cups", "tins" ...;  nothing for a count, 2 eggs
+	its "aisle" is text
+		// Where it is in the shop:  the list groups by it
+	its "got" is yes or no
+		// Ticked off:  it's in the trolley
+	its "recipe" is text
+		// The recipe it's for, when Recipe Cards added it
+	it "is needed" if its got is no

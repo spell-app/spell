@@ -96,6 +96,11 @@ export type BrowserSupports = {
   anchoredQueries: boolean
   /** `field-sizing: content` -- a textarea that grows with its text by itself (`<ui-textarea grow>`;  else it measures) */
   fieldSizing: boolean
+  /**
+   * `navigator.mediaDevices.getDisplayMedia()` -- a picture of a screen, a window or a tab, the person picking it.
+   * Desktop browsers only:  no iOS or Android browser has it.
+   */
+  screenCapture: boolean
 }
 
 ////////////////
@@ -497,6 +502,11 @@ export type ModalOptions = {
   okColor?: string
   /** `prompt()` only:  initial input value */
   value?: string
+  /**
+   * a close ✕ in its corner, which answers as Cancel and Escape do;  default on (Owen, epic `mockup` P24:
+   * "by default ALL dialogs should have the close x");  `false` for a dialog that must be answered
+   */
+  closable?: boolean
 }
 
 /** What the modal component registers as `Modals.provider`. */

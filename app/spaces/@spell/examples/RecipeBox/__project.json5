@@ -1,7 +1,6 @@
 {
   "title": "Recipe Box",
   "description": "Your recipes on cards:  find, add, change as you type, remove and undo.  Where they're kept is one line of its API file, RecipeBox.api.spell",
-  "category": "everyday",
   "imports": [
     {
       "path": "/RecipeBox.api.spell",

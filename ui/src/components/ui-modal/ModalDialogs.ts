@@ -7,7 +7,7 @@ import { type Vocabulary } from "./UIModal.types"
  * The dialogs behind `UI.modals.confirm()` / `alert()` / `prompt()` (Fomantic's `$.modal('confirm', …)`):
  * a `<ui-modal>` built for the call, appended to `<body>`, shown (`visible`), and removed once hidden.
  *
- * - Markup:  `<ui-modal size="tiny" closedby="closerequest" heading="title">` holding
+ * - Markup:  `<ui-modal size="tiny" closedby="closerequest" closable heading="title">` holding
  *   - a `<ui-content>`:  the message as a `<p>`, or for `prompt()` a `<label>` around it and an `<input>`
  *     - `size`:  the message's text size (`ui-font-size-big`), the title and buttons keeping theirs
  *     - `markdown`, and the message has Markdown in it (`hasMarkdown()`):
@@ -16,6 +16,7 @@ import { type Vocabulary } from "./UIModal.types"
  *   - `<ui-actions>`:  a deny button (`cancel`, first:  it takes the initial focus, the least destructive choice)
  *     and a primary approve button.
  * - Escape denies (`closedby="closerequest"`:  no dimmer clicks, so a stray click can't answer).
+ * - So does its close ✕ (`closable`), on unless `options.closable` is `false`.
  * - The promise settles once the modal is HIDDEN (`ui-closed`), so a caller can open the next dialog straight away.
  * - Button texts:  `okText` / `cancelText`, else the translated `ok` / `cancel` texts (`UI.i18n`).
  * - Everything is light DOM built with `createElement` / `textContent`:  never `innerHTML` with caller text.
@@ -76,6 +77,7 @@ export class ModalDialogs implements E.ModalProvider {
     const modal = this.document.createElement(modalVocabulary.tag) as HTMLElement & { visible: boolean }
     modal.setAttribute(SIZE, TINY)
     modal.setAttribute("closedby", "closerequest")
+    if (options.closable !== false) modal.setAttribute(CLOSABLE, "")
     if (options.title) modal.setAttribute(UIT.HEADING, options.title)
     else modal.setAttribute("aria-label", options.message)
     const content = this.document.createElement(ModalDialogs.tagFor(UIT.CONTENT))
@@ -232,6 +234,9 @@ const HIDE_EVENT: E.EventName<Vocabulary> = "ui-closed"
 
 /** `<ui-modal>` width attribute (canonical name). */
 const SIZE = "size"
+
+/** `<ui-modal>`'s close ✕ attribute (canonical name). */
+const CLOSABLE = "closable"
 
 /** The dialogs' width. */
 const TINY = "tiny"

@@ -2,6 +2,8 @@
 import { onSettled } from "solid-js"
 import { isServer } from "@solidjs/web"
 
+import { isOnPlatform, onPlatformChange } from "spell/util/platform"
+
 import { E, UIT } from "spell/ui/core"
 import { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
 
@@ -24,6 +26,9 @@ import { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
  *   - NOTE: that writes a `slot` attribute onto the author's element.
  *   - Text for search / labels is its text content.
  * - Option objects are cached per element and reused while unchanged, so keyed `<For>` keeps their rows.
+ * - An item whose shared `on-platform` leaves out this device is no option at all (epic `mockup` T53):
+ *   its row is drawn here, not by the item, so the item's own hiding wouldn't reach it.
+ *   Read again as the device changes (`onPlatformChange()`).
  ****************/
 export class SlottedItems {
   /** Entries in document order;  tracked. */
@@ -49,8 +54,12 @@ export class SlottedItems {
       // oxlint-disable-next-line spell-ui/no-mutation-observer -- a helper class:  `@E.watches` is for components
       const observer = new MutationObserver(() => (this.entries = this.read()))
       observer.observe(domElement, { childList: true, subtree: true, attributes: true, characterData: true })
+      const stopPlatform = onPlatformChange(() => (this.entries = this.read()))
       this.entries = this.read()
-      return () => observer.disconnect()
+      return () => {
+        observer.disconnect()
+        stopPlatform()
+      }
     })
   }
 
@@ -59,9 +68,21 @@ export class SlottedItems {
     return SlottedItems.selectedValueIn(this.entries, isMultiple)
   }
 
-  /** Every item child, read now. */
+  /** Every item child on this device (`on-platform`), read now. */
   private read(): E.MenuEntry[] {
-    return SlottedItems.itemsOf(this.domElement).map((element) => this.cachedEntryOf(element))
+    return SlottedItems.itemsOf(this.domElement)
+      .filter((element) => SlottedItems.isOnThisPlatform(element))
+      .map((element) => this.cachedEntryOf(element))
+  }
+
+  /**
+   * Is item `element` for this device, by its shared `on-platform` (its own language's name for it)?
+   * - Always on a server:  the static render shows every item.
+   */
+  private static isOnThisPlatform(element: Element): boolean {
+    if (isServer) return true
+    const attribute = SlottedItems.definitionOf(element)?.localAttribute(ON_PLATFORM) ?? ON_PLATFORM
+    return isOnPlatform(element.getAttribute(attribute) ?? undefined)
   }
 
   /** Entry for one `<ui-item>`, reusing the cached object when nothing changed. */
@@ -186,3 +207,5 @@ export class SlottedItems {
 
 /** Prefix of generated slot names for rich items. */
 const SLOT_PREFIX = "ui-item-"
+/** The shared attribute naming the devices an item is for. */
+const ON_PLATFORM = "on-platform"

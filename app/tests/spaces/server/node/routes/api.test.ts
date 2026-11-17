@@ -504,12 +504,12 @@ describe("drafts, Publish and versions", () => {
   })
 
   it("a built-in's file, in a checkout, saves to the file itself, dropping your old draft;  through the house site, a draft", async () => {
-    const example = path.join(tempDir, "builtins/@spell/examples/Ex")
+    const example = path.join(tempDir, "builtins/@spell/library/Ex")
     fs.mkdirSync(example, { recursive: true })
     fs.writeFileSync(path.join(example, "project.json"), JSON.stringify({ imports: [] }))
     fs.writeFileSync(path.join(example, "Ex.spell"), "one")
-    const save = "/api/projects/file/@spell/examples/Ex/Ex.spell"
-    const read = "/spaces/@spell/examples/Ex/Ex.spell"
+    const save = "/api/projects/file/@spell/library/Ex/Ex.spell"
+    const read = "/spaces/@spell/library/Ex/Ex.spell"
     // through the house-network site:  your draft, the file as it was
     expect((await request("POST", save, "drafted", "text/plain", { "x-spell-house-site": "1" })).status).toBe(200)
     expect(fs.readFileSync(path.join(example, "Ex.spell"), "utf8")).toBe("one")
@@ -1022,18 +1022,27 @@ describe("/api/prefs:  each person's preferences, in their space", () => {
 })
 
 describe("the home page's order (epic `mockup` P19, `repo-split` P28)", () => {
-  it("GET /api/home/order:  Spell's own checkout may reorder (an install's server says no)", async () => {
+  it("GET /api/home/order:  both layers;  this machine's person is `@spell`'s, in Spell's own checkout, so a change is everyone's (T51)", async () => {
     const reply = await request("GET", "/api/home/order")
     expect(reply.status).toBe(200)
-    expect(reply.json()).toEqual({ mayReorder: true })
+    const answer = reply.json() as { setsDefaults: boolean; defaults: { order: Record<string, string[]> }; mine: object }
+    expect(answer.setsDefaults).toBe(true)
+    expect(answer.defaults.order.sections).toContain("examples")
+    expect(answer.mine).toEqual({ order: {}, texts: {} })
+  })
+
+  it("a change that says nothing, or words on nothing, is 400 (T51)", async () => {
+    const json = "application/json"
+    expect((await request("POST", "/api/home/order", '{"group":"sections","names":["start"]}', json)).status).toBe(400)
+    expect((await request("POST", "/api/home/order", '{"text":{"title":"x"}}', json)).status).toBe(400)
   })
 
   it("a sections' order naming something that isn't a section, or a group that isn't Spell's, is 400:  nothing written", async () => {
     const json = "application/json"
-    const notASection = await request("POST", "/api/home/order", '{"group":"sections","names":["sidebar"]}', json)
+    const notASection = await request("POST", "/api/home/order", '{"order":{"group":"sections","names":["sidebar"]}}', json)
     expect(notASection.status).toBe(400)
     expect(notASection.json().errors[0].message).toContain("the sections are projects, start, examples")
-    const notAGroup = await request("POST", "/api/home/order", '{"group":"@acme/tools","names":["a"]}', json)
+    const notAGroup = await request("POST", "/api/home/order", '{"order":{"group":"@acme/tools","names":["a"]}}', json)
     expect(notAGroup.status).toBe(400)
   })
 })
@@ -1139,5 +1148,62 @@ describe("a project made from a start card, not one of your apps until it change
       JSON_TYPE
     )
     expect(reply.status).toBe(400)
+  })
+})
+
+////////////////
+// ## An example opened as it is (epic `mockup` T52)
+////////////////
+
+describe("an example opened as it is:  your edits are your draft of it (epic `mockup` T52)", () => {
+  const JSON_TYPE = "application/json"
+  const json = (body: object) => JSON.stringify(body)
+  /** Make example `name` in the built-ins, its one file `<name>.spell` saying `text`;  answers its folder. */
+  function example(name: string, text: string): string {
+    const folder = path.join(tempDir, `builtins/@spell/examples/${name}`)
+    fs.mkdirSync(folder, { recursive: true })
+    fs.writeFileSync(path.join(folder, "project.json"), JSON.stringify({ imports: [{ path: `/${name}.spell` }] }))
+    fs.writeFileSync(path.join(folder, `${name}.spell`), text)
+    return folder
+  }
+
+  it("a save, even in a checkout, is your draft:  the example's file stays as it was", async () => {
+    const folder = example("Ex2", "published")
+    expect(
+      (await request("POST", "/api/projects/file/@spell/examples/Ex2/Ex2.spell", "mine", "text/plain")).status
+    ).toBe(200)
+    expect(fs.readFileSync(path.join(folder, "Ex2.spell"), "utf8")).toBe("published")
+    expect((await request("GET", "/spaces/@spell/examples/Ex2/Ex2.spell")).text).toBe("mine")
+    const { drafts, mayPublish } = (await request("GET", "/api/projects/drafts/@spell/examples/Ex2")).json()
+    expect(drafts.map((draft: { filePath: string }) => draft.filePath)).toEqual(["/Ex2.spell"])
+    expect(mayPublish).toBe(true)
+  })
+
+  it("Save as My App:  a copy in your space with your draft in its files, no drafts or versions;  the example's draft gone", async () => {
+    const folder = example("Ex3", "published")
+    fs.mkdirSync(path.join(folder, "versions"), { recursive: true })
+    fs.writeFileSync(path.join(folder, "versions/Ex3.2026-01-01-000000.zip"), "zip")
+    await request("POST", "/api/projects/file/@spell/examples/Ex3/Ex3.spell", "my change", "text/plain")
+    const copied = await request(
+      "POST",
+      "/api/projects/duplicate/project",
+      json({ projectId: "@spell/examples/Ex3", newProjectId: "owen@spell/Ex3", withDraft: true }),
+      JSON_TYPE
+    )
+    expect(copied.status).toBe(200)
+    expect(readFixture("user/Ex3/Ex3.spell")).toBe("my change")
+    expect(fs.existsSync(fixturePath("user/Ex3/__draft"))).toBe(false)
+    expect(fs.existsSync(fixturePath("user/Ex3/versions"))).toBe(false)
+    expect(fs.readFileSync(path.join(folder, "Ex3.spell"), "utf8")).toBe("published")
+    expect((await request("GET", "/spaces/@spell/examples/Ex3/Ex3.spell")).text).toBe("published")
+    expect((await request("GET", "/api/projects/drafts/@spell/examples/Ex3")).json().drafts).toEqual([])
+  })
+
+  it("Update the Example:  Publish writes your draft into the example's own files", async () => {
+    const folder = example("Ex4", "published")
+    await request("POST", "/api/projects/file/@spell/examples/Ex4/Ex4.spell", "for everyone", "text/plain")
+    const reply = await request("POST", "/api/projects/publish", json({ projectId: "@spell/examples/Ex4" }), JSON_TYPE)
+    expect(reply.status).toBe(200)
+    expect(fs.readFileSync(path.join(folder, "Ex4.spell"), "utf8")).toBe("for everyone")
   })
 })

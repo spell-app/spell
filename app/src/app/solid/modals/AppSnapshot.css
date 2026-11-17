@@ -1,0 +1,118 @@
+/*
+ * `<AppSnapshot>` (`AppSnapshot.tsx`):  a phone floating over the dimmed page, Spell UI's `<ui-device modal>`.
+ * - The phone itself (its body, camera island, Rotate, thick bottom edge) is the device's:  only what's on its screen,
+ *   and the buttons in its edge, are styled here.
+ */
+
+/* while the snapshot's taken:  the screen's corners square, so no corner of the phone is in it */
+.AppSnapshot.capturing::part(screen) {
+  border-radius: 0;
+}
+
+/* the app's box:  the device's whole screen, the app or its snapshot */
+.AppSnapshot .AppSnapshotScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ui-background, Canvas);
+
+  > iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  > iframe[hidden] {
+    display: none;
+  }
+}
+
+/* the bottom edge:  Cancel apart on the left, this step's buttons on the right */
+.AppSnapshot > .AppSnapshotGap {
+  flex: 1;
+}
+
+.AppSnapshot .AppSnapshotThemeTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* the messages:  over the top of the screen, in the middle */
+.AppSnapshot .AppSnapshotMessages {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(340px, calc(100% - 64px));
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  > ui-message {
+    margin: 0;
+    white-space: pre-line;
+    pointer-events: auto;
+  }
+}
+
+.AppSnapshot .AppSnapshotCrop {
+  position: absolute;
+  inset: 0;
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* the frame:  the card's shape, the rest of the snapshot dimmed round it */
+.AppSnapshot .AppSnapshotFrame {
+  position: absolute;
+  box-shadow: 0 0 0 4000px #000a;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  cursor: grab;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+  &:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+  }
+}
+
+/* its corners:  white squares a finger can take, each resizing it from there */
+.AppSnapshot .AppSnapshotCorner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  background: #fff;
+
+  &.top-left {
+    top: 0;
+    left: 0;
+    cursor: nwse-resize;
+  }
+  &.top-right {
+    top: 0;
+    right: 0;
+    cursor: nesw-resize;
+  }
+  &.bottom-left {
+    bottom: 0;
+    left: 0;
+    cursor: nesw-resize;
+  }
+  &.bottom-right {
+    right: 0;
+    bottom: 0;
+    cursor: nwse-resize;
+  }
+}

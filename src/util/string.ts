@@ -199,6 +199,24 @@ export function withoutAccents(text: string, { keep = "" }: AccentOptions = {}):
 }
 
 ////////////////
+// ## Lists
+////////////////
+
+/**
+ * The entries of a comma-separated list people wrote:  `"desktop, tablet"` => `["desktop", "tablet"]`.
+ * - Each entry trimmed:  a space after a comma is ignored.
+ * - Empty entries dropped:  `"a,,b,"` => `["a", "b"]`;  `""`, `undefined` and `null` => `[]`.
+ * - The ONE way to split one, in attributes, settings and text people type (WWOD §2).
+ */
+export function commaList(text: string | null | undefined): string[] {
+  if (!text) return []
+  return text
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+}
+
+////////////////
 // ## Escaping
 ////////////////
 

@@ -2,6 +2,7 @@ import { describe, expect, it, test } from "vite-plus/test"
 
 import {
   camelCase,
+  commaList,
   dedent,
   escapeHTML,
   escapeRegExp,
@@ -46,6 +47,22 @@ describe("kebabCase() / camelCase()", () => {
   it("passes already-converted text through", () => {
     expect(kebabCase("active-index")).toBe("active-index")
     expect(camelCase("activeIndex")).toBe("activeIndex")
+  })
+})
+
+describe("commaList()", () => {
+  it("splits on commas, trims each entry, and drops empties", () => {
+    expect(commaList("desktop,tablet")).toEqual(["desktop", "tablet"])
+    expect(commaList("desktop, tablet")).toEqual(["desktop", "tablet"])
+    expect(commaList(" a , ,b,")).toEqual(["a", "b"])
+    expect(commaList("one entry with spaces")).toEqual(["one entry with spaces"])
+  })
+
+  it("is empty for no text", () => {
+    expect(commaList("")).toEqual([])
+    expect(commaList(undefined)).toEqual([])
+    expect(commaList(null)).toEqual([])
+    expect(commaList(" , ")).toEqual([])
   })
 })
 

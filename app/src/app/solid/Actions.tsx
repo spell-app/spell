@@ -326,7 +326,7 @@ export const Actions = {
       {...props}
     />
   ),
-  /** "Save":  every file of the project with edits not saved (⌘S);  lit while there are any. */
+  /** "Save":  every file of the project with edits not saved (⌘S);  lit while there are any.  In an example, then what to keep (`editor.saveDraft()`). */
   saveAll: (props: ActionProps) => {
     const hasUnsavedEdits = tracked(() => editor.hasUnsavedEdits)
     return (
@@ -336,7 +336,7 @@ export const Actions = {
         color="green"
         icon="cloud upload"
         shortcut={EDITOR_HOTKEYS.saveAll.shortcut}
-        onClick={() => editor.saveAll()}
+        onClick={() => editor.saveDraft()}
         {...props}
       />
     )

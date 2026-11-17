@@ -1,0 +1,81 @@
+# Recipe Cards
+// Your recipes:  pick one, set how many are eating, and every amount scales;
+// show it in metric or in cups and spoons;  tick ingredients and add them to the shopping list.
+// The recipes are in a JSON file, RecipeCards.api.spell says where;  the shopping list is Shopping List's own, imported.
+
+recipe cards is an app
+	its "chosen" is a recipe
+		// The recipe on show
+	its "editing" is a recipe
+		// The recipe on its Edit screen, while one is
+	its "diners" is a number starting at 4
+		// How many are eating
+	its "units" is one of metric or cups
+		// Grams and millilitres, or cups and spoons
+	its "scale" is
+		// How much more, or less, than the recipe says
+		if its chosen does not exist or the serves of its chosen is 0 return 1
+		return its diners / the serves of its chosen
+	"aisle list" is a new aisle list
+		// Shopping List's own list, by aisle:  the same list, from its CSV file
+
+	when creating it
+		// The first time, with an empty file, three recipes to start with
+		if there are no recipes
+			add the tomato soup
+			add the red lentil dal
+			add the pancakes
+		set its chosen to the first of (every recipe)
+
+	group "Units"
+	to "show metric" with title "Metric"
+		selected when its units is metric
+		set its units to metric
+
+	to "show cups and spoons" with title "Cups and spoons"
+		selected when its units is cups
+		set its units to cups
+
+	to draw it
+		<container>
+			<stack>
+				<toolbar>
+					<text size="large" heavy slot="title">Recipe Cards</text>
+					<action "show metric" />
+					<action "show cups and spoons" />
+					<spacer />
+					<action "undo" icon-only />
+					<action "redo" icon-only />
+				</toolbar>
+				<grid stackable>
+					<column width="5">
+						<stack>
+							<buttons direction="vertical" fluid basic>
+								<for recipe in every recipe>
+									<button active={recipe is its chosen} onClick={pick recipe}>{recipe's title}</button>
+								</for>
+							</buttons>
+							<form value={it}>
+								<field label="Cooking for">
+									<input name="diners" type="number" min="1" labeled="right" label="people" />
+								</field>
+							</form>
+							<header size="small">Shopping list</header>
+							{draw the aisle list}
+						</stack>
+					</column>
+					<column width="11">
+						{draw the screen of it}
+					</column>
+				</grid>
+			</stack>
+		</container>
+
+	to draw its screen
+		// The Edit screen while a recipe is being changed;  else the chosen recipe's card
+		if its editing
+			draw (a new recipe editor with recipe = its editing)
+		otherwise if its chosen
+			draw its chosen
+		otherwise
+			<text color="grey">Pick a recipe</text>

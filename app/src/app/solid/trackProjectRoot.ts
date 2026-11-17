@@ -23,7 +23,7 @@ export type ProjectRootState = {
   /**
    * Its projects, in order:  `path`, the name to show, its description, if its project file has one, its language,
    * when it's all written in another than English (`SP.ProjectListEntry`), and `onHome: false` when it says so;
-   * its category and whether it has a thumbnail, for the home page's cards (`SPACES.ProjectListEntryWithHome`).
+   * whether it has a thumbnail, for the home page's cards (`SPACES.ProjectListEntryWithHome`).
    */
   projects: {
     path: string
@@ -32,7 +32,6 @@ export type ProjectRootState = {
     language?: string
     isSite?: boolean
     onHome?: false
-    category?: string
     hasThumbnail?: true
   }[]
   /** Its icon name. */
@@ -100,7 +99,6 @@ function readProjectRoot(projectRoot: SPACES.SpellProjectRoot | undefined): Omit
               language: entry?.language,
               isSite: entry?.isSite,
               onHome: entry?.onHome,
-              category: entry?.category,
               hasThumbnail: entry?.hasThumbnail
             }
           })

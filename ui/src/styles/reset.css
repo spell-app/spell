@@ -265,6 +265,29 @@
 }
 
 /*
+ * The shared `on-platform` (`UIComponent`, "Only on some platforms"):  hidden on every device it doesn't name.
+ * - One media query per platform:  `PLATFORM_QUERIES` (`spell/util/platform`), word for word;
+ *   `platform.test.ts` checks they match.
+ * - Live:  a resize or a turn of the device shows or hides it at once.
+ * - Unlayered, as the hiding above.
+ */
+@media (pointer: coarse) and ((width < 600px) or (height < 600px)) {
+  :host(:state(on-platform):not(:state(on-phone))) {
+    display: none;
+  }
+}
+@media (pointer: coarse) and (width >= 600px) and (height >= 600px) {
+  :host(:state(on-platform):not(:state(on-tablet))) {
+    display: none;
+  }
+}
+@media not (pointer: coarse) {
+  :host(:state(on-platform):not(:state(on-desktop))) {
+    display: none;
+  }
+}
+
+/*
  * The shared `width`, `min-width` and `max-width` (`UIComponent`, "Shared words"):  its box's own width where it sits.
  * - `UIComponent` writes each as a custom property on the element (`--_ui-width` ...), and a state saying it's set.
  * - On the element itself, where it draws a box (`<ui-form>`, `<ui-progress>`, `<ui-stack>`);

@@ -232,16 +232,35 @@ function textIn(value: unknown): string {
   return typeof value === "string" || typeof value === "number" ? String(value) : ""
 }
 
+/** Yes, as a sheet's cell says it. */
+const YES_TEXT = /^\s*(?:true|yes|1)\s*$/i
+
+/** No, as a sheet's cell says it:  an empty one too. */
+const NO_TEXT = /^\s*(?:false|no|0)?\s*$/i
+
 /**
  * The `rows` whose field holds this value, for every field in `filter`.
  * - A field the row doesn't have holds `""`, as an unset text reads in Spell:  so `where its thread is ""` finds the
  *   messages that never named a thread (epic `atmosphere` P37).
+ * - Yes or no matches a sheet's text for it too, as a read takes it (`valueAsDeclared()` in the parser's core):
+ *   `true` finds `"yes"`, `"true"`, `"1"`;  `false` finds `"no"`, `"false"`, `"0"`, an empty cell or none
+ *   (epic `mockup` P21:  `every item where its got is no`, on a CSV file)
  */
 export function rowsMatching(rows: PlaceRow[], filter: Record<string, unknown>): PlaceRow[] {
   const wanted = Object.entries(filter)
-  return rows.filter((row) =>
-    wanted.every(([field, value]) => (value === "" ? (row[field] ?? "") : row[field]) === value)
-  )
+  return rows.filter((row) => wanted.every(([field, value]) => holdsFilterValue(row[field], value)))
+}
+
+/**
+ * Does a row's `held` value match a filter's `value`:  see `rowsMatching()`.
+ * - Also how a read in the parser's core tells whether a changed row still fits its filter.
+ */
+export function holdsFilterValue(held: unknown, value: unknown): boolean {
+  if (value === "") return (held ?? "") === ""
+  if (held === value) return true
+  if (value === true) return typeof held === "string" && YES_TEXT.test(held)
+  if (value === false) return held === undefined || held === null || (typeof held === "string" && NO_TEXT.test(held))
+  return false
 }
 
 /** A copy of `rows`, in the order `sort` says:  the first field first. */

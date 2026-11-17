@@ -111,6 +111,7 @@ export const COMPONENTS = [
   "ui-site-breadcrumbs",
   "ui-site-nav-button",
   "ui-page-layout",
+  "ui-device",
   "ui-toolbar",
   "ui-app-menu",
   "ui-action",

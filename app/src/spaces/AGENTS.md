@@ -150,6 +150,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
       - Except a built-in's, in a checkout (`environment.editsBuiltins`, epic `mockup` P20):  written in place, so git
         sees it, your old draft of it dropped;  through the house-network site it stays a draft (`savesInPlace()`).
+        - Never an example's or a guide's (`SPACES.isExampleProject()`, epic `mockup` T52):  opened as it is, your
+          edits your draft;  leaving it asks to keep them as your own app (`duplicate/project`'s `withDraft`),
+          drop them, or, a manager of `@spell`, publish them into the example.
       - While you have drafts, what the editor compiles is YOUR build, `__draft/__build.<you>/`, served to you alone.
     - `POST /api/projects/keep-draft`:  your draft kept as a version of its own, never published (`keepDraft()`).
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.

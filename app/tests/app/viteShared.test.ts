@@ -34,11 +34,11 @@ describe("vite.config.ts:  the editor's dev server on the house network (epic `a
 })
 
 describe("pageServerProxy():  the editor's dev server passing the page server's paths on (epic `language` T68)", () => {
-  test("its write token goes on project data folders' requests (`/api/places`), and nowhere else", () => {
+  test("its write token goes on project data folders' requests (`/api/places`) and live rooms' (`/api/rooms`), and nowhere else", () => {
     const proxy = pageServerProxy({ target: TARGET, token: "t0k3n" })
     expect(tokenSent(proxy["/api/places"])).toBe("t0k3n")
     for (const [path, options] of Object.entries(proxy)) {
-      if (path !== "/api/places") expect(tokenSent(options), path).toBeUndefined()
+      if (path !== "/api/places" && path !== "/api/rooms") expect(tokenSent(options), path).toBeUndefined()
     }
   })
 
@@ -69,6 +69,7 @@ describe("pageServerProxy():  the editor's dev server passing the page server's 
     const proxy = pageServerProxy({ target: TARGET, token: "t0k3n" })
     expect(Object.keys(proxy)).toEqual([
       "/api/places",
+      "/api/rooms",
       "/api",
       "/spaces",
       "/element",
@@ -78,6 +79,13 @@ describe("pageServerProxy():  the editor's dev server passing the page server's 
     ])
     for (const options of Object.values(proxy)) expect(options).toMatchObject({ target: TARGET, changeOrigin: true })
     expect(proxy["/api"]?.ws).toBe(true)
+    expect(proxy["/api/rooms"]?.ws).toBe(true)
+  })
+
+  test("a live room's websocket carries the token too:  the editor joins a space's room as this machine's person", () => {
+    const rooms = pageServerProxy({ target: TARGET, token: "t0k3n" })["/api/rooms"]
+    expect(tokenSent(rooms, "proxyReqWs")).toBe("t0k3n")
+    expect(tokenSent(pageServerProxy({ target: TARGET, token: "t0k3n" })["/api"], "proxyReqWs")).toBeUndefined()
   })
 
   test("no token, no header:  the page server then answers 403 there, as before", () => {
@@ -85,12 +93,15 @@ describe("pageServerProxy():  the editor's dev server passing the page server's 
   })
 })
 
-/** The token `options`' proxy adds to a request as it sends it on (its `configure()`), or `undefined` for none. */
-function tokenSent(options: ProxyOptions | undefined): string | undefined {
+/**
+ * The token `options`' proxy adds to a request as it sends it on (its `configure()`), or `undefined` for none.
+ * - `event`:  `proxyReq` for a request, `proxyReqWs` for a websocket's opening request
+ */
+function tokenSent(options: ProxyOptions | undefined, event = "proxyReq"): string | undefined {
   let sent: string | undefined
   const proxy = {
-    on: (event: string, handler: (request: { setHeader: (name: string, value: string) => void }) => void) => {
-      if (event === "proxyReq") handler({ setHeader: (name, value) => name === "x-server-token" && (sent = value) })
+    on: (heard: string, handler: (request: { setHeader: (name: string, value: string) => void }) => void) => {
+      if (heard === event) handler({ setHeader: (name, value) => name === "x-server-token" && (sent = value) })
     }
   }
   options?.configure?.(proxy as never, options)

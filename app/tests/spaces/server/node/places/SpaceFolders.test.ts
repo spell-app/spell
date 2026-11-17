@@ -391,6 +391,16 @@ describe('SpaceFolders, a program\'s own CSV file:  `a sheet at "tasks.csv"` (ep
     expect(rows.map(({ title }) => title)).toEqual(["Milk", "Eggs"])
   })
 
+  test("a project with no __data yet gets one on its first save:  Spell's examples' are git-ignored (epic `mockup` P21)", async () => {
+    mkdirSync(join(spaces, "@spell", "fresh-app"), { recursive: true })
+    const sheet = folderAt("@spell/fresh-app/__data/shopping.csv")
+    await sheet.apply([{ kind: "insert", collection: "items", id: "i-1", fields: { name: "milk" } }], {})
+    expect(readFileSync(join(spaces, "@spell", "fresh-app", "__data", "shopping.csv"), "utf8")).toContain("i-1,milk")
+    await expect(folderAt("@spell/no-such-app/__data/shopping.csv").list("items", {}, {})).rejects.toMatchObject({
+      kind: "not found"
+    })
+  })
+
   test("its id column is the program's line's;  a space's own folder holds none", async () => {
     mkdirSync(join(spaces, "@spell", "csv-app", "__data"), { recursive: true })
     writeFileSync(join(spaces, "@spell", "csv-app", "__data", "keys.csv"), "key,title\nk-1,Kept\n")
@@ -404,6 +414,34 @@ describe('SpaceFolders, a program\'s own CSV file:  `a sheet at "tasks.csv"` (ep
       "key,title\nk-1,Changed\n"
     )
     await expect(folderAt("@spell/owen@/tasks.csv").list("tasks", {}, {})).rejects.toMatchObject({ kind: "not found" })
+  })
+})
+
+describe('SpaceFolders, a program\'s own JSON file:  `a json file at "recipes.json"` (epic `mockup` P21)', () => {
+  const ADDRESS = "@spell/json-app/__data/recipes.json"
+  const FILE = join(spaces, "@spell", "json-app", "__data", "recipes.json")
+
+  test("written whole as plain JSON, a thing's lists inside its row, and read back through the same route", async () => {
+    mkdirSync(join(spaces, "@spell", "json-app"), { recursive: true })
+    const file = folderAt(ADDRESS)
+    const ingredients = [{ amount: 2, unit: "", name: "eggs" }]
+    await file.apply(
+      [{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Pancakes", ingredients } }],
+      {}
+    )
+    await file.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { servings: 4 } }], {})
+    expect(JSON.parse(readFileSync(FILE, "utf8"))).toEqual({
+      recipes: [{ title: "Pancakes", ingredients, id: "r-1", servings: 4 }]
+    })
+    folders.close()
+    const { rows } = await folderAt(ADDRESS, "matt@spell").list("recipes", {}, {})
+    expect(rows).toMatchObject([{ id: "r-1", title: "Pancakes", ingredients }])
+  })
+
+  test("a space's own folder holds none", async () => {
+    await expect(folderAt("@spell/owen@/recipes.json").list("recipes", {}, {})).rejects.toMatchObject({
+      kind: "not found"
+    })
   })
 })
 

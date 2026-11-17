@@ -46,6 +46,8 @@ export class CsvFile {
   readonly whyUnclear: string | undefined
   /** The column holding each row's id. */
   private readonly idColumn: string | undefined
+  /** A field it has no column for becomes one, at the end:  `CsvFileProps.addsColumns`. */
+  private readonly addsColumns: boolean
   /** The byte order mark it starts with. */
   private readonly byteOrderMark: string
   /** Every line. */
@@ -58,12 +60,13 @@ export class CsvFile {
   private readonly text: string
 
   /** - throws `SyntaxError` for a file half saved;  `PlaceError` `"not found"` for an `idColumn` it hasn't got */
-  constructor(text: string, { name, idColumn, numbers }: CsvFileProps) {
+  constructor(text: string, { name, idColumn, numbers, addsColumns = false }: CsvFileProps) {
     const { byteOrderMark, lines } = csvLinesIn(text)
     this.text = text
     this.byteOrderMark = byteOrderMark
     this.lines = lines
     this.idColumn = idColumn
+    this.addsColumns = addsColumns
     this.headerAt = lines.findIndex(isCsvRow)
     this.rowLines = lines.slice(this.headerAt + 1).filter((line) => isCsvRow(line) && !isBlankRow(line))
     const header = lines[this.headerAt]
@@ -90,13 +93,17 @@ export class CsvFile {
    * The file with `rows` in it, in that order, and only the lines that differ changed.
    * - A field left out of a row it already holds stays as it is;  left out of a new row, it's blank.
    * - A file with no columns yet takes them from the first row's fields.
+   * - `addsColumns`:  a field it has no column for becomes one, at the end of the first line;
+   *   the rows already there stay as they are, a cell short, which reads as blank
    * - throws `PlaceError` `"refused"`:  `whyUnclear`, or a field it has no column for, since adding one would change every line
    */
   saved(rows: readonly PlaceRow[]): CsvSave {
     if (this.whyUnclear) throw new PlaceError(this.whyUnclear, { cause: { kind: "refused", whyNot: "place" } })
     if (!this.columns.length && !rows.length) return { text: this.text, added: [], moved: [], edited: [], removed: [] }
-    const columns = this.columns.length ? this.columns : Object.keys(rows[0] ?? {})
-    for (const row of rows) this.refuseUnknownFields(row, columns)
+    let columns = this.columns.length ? this.columns : Object.keys(rows[0] ?? {})
+    if (this.addsColumns) columns = withEveryField(columns, rows)
+    else for (const row of rows) this.refuseUnknownFields(row, columns)
+    const grown = this.headerAt >= 0 && columns.length > this.columns.length
 
     const oldKeys = this.rows.map((row) => this.keyOf(row, columns))
     const newKeys = rows.map((row) => this.keyOf(row, columns))
@@ -137,7 +144,8 @@ export class CsvFile {
     this.lines.forEach((line, at) => {
       if (this.headerAt < 0) return
       const rowAt = rowAtLine.get(line)
-      if (rowAt === undefined) written.push(line)
+      if (at === this.headerAt && grown) written.push(this.headerGrown(line, columns))
+      else if (rowAt === undefined) written.push(line)
       else if (stayed.has(rowAt)) written.push(lineOf(next++))
       else return
       if (at >= this.headerAt) writeRowsUpToOneThatStays()
@@ -216,6 +224,12 @@ export class CsvFile {
     return { cells: columns.map((value) => ({ value, raw: csvCellFor(value) })), ending: "" }
   }
 
+  /** The first `line`, naming `columns`:  the new ones added after its own cells. */
+  private headerGrown(line: CsvLine, columns: readonly string[]): CsvLine {
+    const added = columns.slice(this.columns.length).map((value) => ({ value, raw: csvCellFor(value) }))
+    return { cells: [...line.cells, ...added], ending: line.ending }
+  }
+
   /** Which columns have quotes on every cell that holds anything:  a file written that way stays that way. */
   private columnsAlwaysQuoted(columns: readonly string[]): ReadonlySet<number> {
     const quoted = new Set<number>()
@@ -252,6 +266,18 @@ export type CsvFileProps = {
   idColumn?: string | undefined
   /** The columns that hold numbers. */
   numbers?: readonly string[] | undefined
+  /**
+   * A field it has no column for becomes one, rather than being refused:  a program's own file, which its program
+   * grows as it gains fields (epic `mockup` P21).
+   */
+  addsColumns?: boolean
+}
+
+/** `columns`, then every field of `rows` they don't name, in the order first met. */
+function withEveryField(columns: readonly string[], rows: readonly PlaceRow[]): readonly string[] {
+  const every = new Set(columns)
+  for (const row of rows) for (const field of Object.keys(row)) every.add(field)
+  return every.size === columns.length ? columns : [...every]
 }
 
 /** A value as a CSV file holds it. */

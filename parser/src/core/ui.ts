@@ -4,6 +4,7 @@ import { schemaOf, type Schema } from "spell/util/reactive"
 import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import type { MenuItem } from "./acting"
+import { printAlone } from "./printing"
 
 /** The program said `scroll to the top`, this moment. */
 let wentToTheTop = false
@@ -22,6 +23,7 @@ export function isGoingToTheTop(): boolean {
  * - talking to the person running the program, on Spell UI's toasts and dialogs:
  *   `notify`, `alert`, `confirm`, `prompt` (spell's `rules/UI/`)
  * - stylesheet installation (`installStyles`)
+ * - printing the app alone (`openPrinting`, `printing.ts`)
  * - Drawing (`h()`, `drawThing()` ...) is `drawing.ts`.
  */
 export const uiMethods = defineCoreModule({
@@ -35,6 +37,18 @@ export const uiMethods = defineCoreModule({
       wentToTheTop = false
     })
     ;(core as { appRoot?: Element }).appRoot?.scrollIntoView?.({ block: "start" })
+  },
+
+  /**
+   * Open the browser's Print dialog for the app alone, not the page around it:  what `open printing` compiles to.
+   * - What prints is the app's drawing, as the program's own CSS styles it for print (`@media print`).
+   * - In the editor, or a new tab:  the runner's toolbars and side bars are left out (`printAlone()`).
+   * - Under node:  nothing.
+   * - NEVER throws.
+   */
+  openPrinting(): void {
+    if (typeof document === "undefined") return
+    printAlone((core as { appElement?: () => Element | null }).appElement?.() ?? undefined)
   },
 
   ////////////////

@@ -68,8 +68,12 @@ afterAll(() => rmSync(repo, { recursive: true, force: true }))
 describe("savesInPlace():  a built-in's file saved to the file itself (epic `mockup` P20)", () => {
   const inCheckout = { editsBuiltins: true, viaHouseSite: false }
   test("a built-in project's file, in a checkout:  yes", () => {
-    expect(projectUtils.savesInPlace("@spell/examples/Solitaire", inCheckout)).toBe(true)
     expect(projectUtils.savesInPlace("@spell/library/OrgChat", inCheckout)).toBe(true)
+    expect(projectUtils.savesInPlace("@spell/sites/spell-app", inCheckout)).toBe(true)
+  })
+  test("an example's or a guide's:  never, your draft (epic `mockup` T52)", () => {
+    expect(projectUtils.savesInPlace("@spell/examples/Solitaire", inCheckout)).toBe(false)
+    expect(projectUtils.savesInPlace("@spell/guides/how-solitaire-works", inCheckout)).toBe(false)
   })
   test("a frozen test project, anyone's own, an org's:  never", () => {
     expect(projectUtils.savesInPlace("@spell/test/fizzbuzz", inCheckout)).toBe(false)
@@ -77,8 +81,8 @@ describe("savesInPlace():  a built-in's file saved to the file itself (epic `moc
     expect(projectUtils.savesInPlace("@rs/minutes/Agenda", inCheckout)).toBe(false)
   })
   test("the setting off, or through the house-network site:  a draft", () => {
-    expect(projectUtils.savesInPlace("@spell/examples/Solitaire", { ...inCheckout, editsBuiltins: false })).toBe(false)
-    expect(projectUtils.savesInPlace("@spell/examples/Solitaire", { ...inCheckout, viaHouseSite: true })).toBe(false)
+    expect(projectUtils.savesInPlace("@spell/library/OrgChat", { ...inCheckout, editsBuiltins: false })).toBe(false)
+    expect(projectUtils.savesInPlace("@spell/library/OrgChat", { ...inCheckout, viaHouseSite: true })).toBe(false)
   })
 })
 

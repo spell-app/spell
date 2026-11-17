@@ -53,7 +53,8 @@ a folder of the kit `spell`.
 - Voices:  how a kind of people-facing page is written, one file each in [the voices folder](voices/)
   (epic `readme` P12).
   - `readme` ([readme.md](voices/readme.md)):  READMEs, an epic's guide, reference pages.
-  - `novice` ([novice.md](voices/novice.md)):  pages for people who don't program (yet).
+  - `novice` ([novice.md](voices/novice.md)):  pages for people who don't program (yet), and the significant text a
+    product shows them (dialogs, notices, errors, empty states, onboarding, help:  WWOD §6).
   - `blog` ([blog.md](voices/blog.md)):  essays and posts, an argument a reader finishes.
   - `brand` ([brand.md](voices/brand.md)):  product pages:  a home page, a feature page, a launch page.
   - The last three are named by no kind of page yet (`"pageVoices"`):  ask for one by name, `epic voice blog`
@@ -64,6 +65,10 @@ a folder of the kit `spell`.
     file) and which voice each kind of page takes (`"pageVoices"`);  a repo whose settings name a top
     (spell-brand's name the kit) takes the top's.
     The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
+  - `epic voice check [--voice <name>] <file | - | --text "...">` (`VoiceCheck`, epic `epic-engine` T92):  a FRESH
+    reader, `claude -p` with Sonnet and nothing of the repo, checks a text against a voice (novice by default):
+    comprehensible, concise, clear, no agent speak;  each problem quoted with a rewrite;  exit 0 on a pass, 1 on a fail.
+    - Its instructions:  [voices/check/prompt.md](voices/check/prompt.md), a folder so it isn't taken for a voice.
   - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
   - A repo's own house style adds its specifics on top, and wins where they disagree.
 - Working an epic WITHOUT the skills (Codex, or any agent but Claude Code):  run `epic guide` and follow it

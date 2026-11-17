@@ -2713,6 +2713,23 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-device" label="Device" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A device draws a phone, tablet or desktop round what it holds, at that device&#39;s screen size, with buttons in its thick bottom edge.
+                  <a href="ui-device.html">Device page</a>
+                </p>
+                <ui-device device="phone">
+                  <ui-segment appearance="basic">
+                    <ui-header size="large">Hello</ui-header>
+                    <p>An app on a phone's screen, 390 by 844.</p>
+                    <ui-button color="primary">Start</ui-button>
+                  </ui-segment>
+                  <ui-button slot="buttons" size="small" color="primary">Done</ui-button>
+                </ui-device>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-dimension" label="Dimension" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -2851,7 +2868,7 @@
                     current="#api"
                     pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
                   ></ui-site-nav>
-                  <p>The page goes here.  Going to another page redraws only this part.</p>
+                  <p>The page goes here. Going to another page redraws only this part.</p>
                   <ui-text slot="footer" color="grey">Made with Spell</ui-text>
                 </ui-page-layout>
               </ui-example>
@@ -3015,7 +3032,7 @@
                     current="#home"
                     pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Films", "href": "#films", "icon": "film" }]'
                   ></ui-site-nav>
-                  <p>Press the button:  the drawer shows only its icons, or all of it again.</p>
+                  <p>Press the button: the drawer shows only its icons, or all of it again.</p>
                 </ui-page-layout>
               </ui-example>
             </ui-section>

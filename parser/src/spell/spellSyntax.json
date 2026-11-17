@@ -4590,6 +4590,425 @@
       ]
     },
     {
+      "module": "UI",
+      "rules": [
+        {
+          "className": "OpenPrinting",
+          "ruleNames": ["open_printing"],
+          "internal": false,
+          "file": "src/spell/rules/UI/OpenPrinting.ts",
+          "line": 15,
+          "purpose": "Open the browser's Print dialog for the running app alone, HyperTalk's words (epic `mockup` P21).",
+          "syntaxes": [
+            {
+              "syntax": "open printing",
+              "example": "open printing",
+              "outputs": {
+                "js": {
+                  "code": "core.openPrinting()"
+                },
+                "ts": {
+                  "code": "core.openPrinting()"
+                },
+                "py": {
+                  "code": "core.open_printing()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "Print",
+          "ruleNames": ["print"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Print.ts",
+          "line": 14,
+          "purpose": "Print an expression (to the console currently).",
+          "syntaxes": [
+            {
+              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
+              "example": "print \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "core.console.log(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "core.console.log(\"Yo!\")"
+                },
+                "py": {
+                  "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDatesAs",
+          "ruleNames": ["show_dates_as"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDatesAs.ts",
+          "line": 14,
+          "purpose": "How the program shows every date it draws or joins to text, from then on.",
+          "syntaxes": [
+            {
+              "syntax": "dates are shown as {style:shown_dates}",
+              "example": "dates are shown as short dates",
+              "outputs": {
+                "js": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "ts": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "py": {
+                  "code": "core.show_dates_as(\"short\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ScrollToTop",
+          "ruleNames": ["scroll_to_top"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ScrollToTop.ts",
+          "line": 11,
+          "purpose": "Bring the top of the app back into view, as a new page of it opens (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "scroll to the top",
+              "example": "scroll to the top",
+              "outputs": {
+                "js": {
+                  "code": "core.scrollToTop()"
+                },
+                "ts": {
+                  "code": "core.scrollToTop()"
+                },
+                "py": {
+                  "code": "core.scroll_to_top()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDrawn",
+          "ruleNames": ["show_drawn"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 15,
+          "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
+          "syntaxes": [
+            {
+              "syntax": "(show|(hide:hide)) {name:text}",
+              "example": "show \"you won\"",
+              "outputs": {
+                "js": {
+                  "code": "core.showDrawn(\"you won\")"
+                },
+                "ts": {
+                  "code": "core.showDrawn(\"you won\")"
+                },
+                "py": {
+                  "code": "core.show_drawn(\"you won\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PlaySound",
+          "ruleNames": ["play_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/PlaySound.ts",
+          "line": 14,
+          "purpose": "Play a sound file, from its start, as a click or a key asks (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "play {sound:expression}",
+              "example": "play \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.play(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopSound",
+          "ruleNames": ["stop_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopSound.ts",
+          "line": 13,
+          "purpose": "Stop a sound `play` started (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "stop {sound:expression}",
+              "example": "stop \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.stop(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "LoadSound",
+          "ruleNames": ["load_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/LoadSound.ts",
+          "line": 14,
+          "purpose": "Start loading a sound now, so a later `play` starts it at once (epic `data` J215).",
+          "syntaxes": [
+            {
+              "syntax": "(load|preload) {sound:expression}",
+              "example": "load \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.load_sound(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EndPrintGroup",
+          "ruleNames": ["end_print_group"],
+          "internal": false,
+          "file": "src/spell/rules/UI/EndPrintGroup.ts",
+          "line": 10,
+          "purpose": "Stop a previous `print group...`",
+          "syntaxes": [
+            {
+              "syntax": "end print group",
+              "example": "end print group\"",
+              "outputs": {
+                "js": {
+                  "code": "core.console.groupEnd()"
+                },
+                "ts": {
+                  "code": "core.console.groupEnd()"
+                },
+                "py": {
+                  "code": "core.console.group_end()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Notify",
+          "ruleNames": ["notify"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Notify.ts",
+          "line": 30,
+          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
+          "syntaxes": [
+            {
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for ({time:measure_literal}|{time:expression} {unit:unit_words}))|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
+              "example": "notify \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "core.notify(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "core.notify(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.notify(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Alert",
+          "ruleNames": ["alert"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Alert.ts",
+          "line": 17,
+          "purpose": "Show user a `message` in a modal alert.",
+          "syntaxes": [
+            {
+              "syntax": "alert {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
+              "example": "alert \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.alert(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.alert(\"Yo!\")"
+                },
+                "py": {
+                  "code": "await core.alert(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Warn",
+          "ruleNames": ["warn"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Warn.ts",
+          "line": 13,
+          "purpose": "Warning message -- like alert but more dire.",
+          "syntaxes": [
+            {
+              "syntax": "warn {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
+              "example": "warn \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.warn(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.warn(\"Yo!\")"
+                },
+                "py": {
+                  "code": "await core.warn(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Confirm",
+          "ruleNames": ["confirm"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Confirm.ts",
+          "line": 15,
+          "purpose": "Confirm message -- present a question with two answers.",
+          "syntaxes": [
+            {
+              "syntax": "confirm {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text} ((and|or) {cancelButton:text})?)?",
+              "example": "confirm \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.confirm(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.confirm(\"Yo!\")"
+                },
+                "py": {
+                  "code": "await core.confirm(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Prompt",
+          "ruleNames": ["prompt"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Prompt.ts",
+          "line": 14,
+          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "syntaxes": [
+            {
+              "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
+              "example": "prompt \"Name for the new baby?\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                },
+                "ts": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                },
+                "py": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CSSStyles",
+          "ruleNames": ["css"],
+          "internal": false,
+          "file": "src/spell/rules/UI/CSSStyles.ts",
+          "line": 12,
+          "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
+          "syntaxes": [
+            {
+              "example": "\"\"",
+              "outputs": {
+                "js": {
+                  "code": "core.installStyles(undefined, `\"\"`)"
+                },
+                "ts": {
+                  "code": "core.installStyles(undefined, `\"\"`)"
+                },
+                "py": {
+                  "code": "core.install_styles(None, f\"{\"\"}\")"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "UIDefaults",
+          "ruleNames": ["ui_defaults"],
+          "internal": false,
+          "file": "src/spell/rules/UI/UIDefaults.ts",
+          "line": 32,
+          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
+          "syntaxes": [
+            {
+              "example": "<ui-defaults>\n\t<ui-button appearance=\"pill\"/>\n\t<ui-segment appearance=\"raised\" padded/>\n</ui-defaults>",
+              "outputs": {
+                "js": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "ts": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "py": {
+                  "code": "core.use_defaults(\n    \"\",\n    {\n        \"ui-button\": {\"appearance\": \"pill\"},\n        \"ui-segment\": {\"appearance\": \"raised\", \"padded\": True},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        }
+      ]
+    },
+    {
       "module": "classes",
       "rules": [
         {
@@ -7587,7 +8006,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 84,
+          "line": 90,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9920,399 +10339,6 @@
                 },
                 "py": {
                   "code": "@core.as_action({\"undone_as\": \"Count the Points\"})\ndef count_the_points() -> float:\n    if bar:\n        return 10\n    if bar == 2:\n        return 5\n    return 0"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        }
-      ]
-    },
-    {
-      "module": "UI",
-      "rules": [
-        {
-          "className": "Print",
-          "ruleNames": ["print"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Print.ts",
-          "line": 14,
-          "purpose": "Print an expression (to the console currently).",
-          "syntaxes": [
-            {
-              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
-              "example": "print \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "core.console.log(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "core.console.log(\"Yo!\")"
-                },
-                "py": {
-                  "code": "print(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "ShowDatesAs",
-          "ruleNames": ["show_dates_as"],
-          "internal": false,
-          "file": "src/spell/rules/UI/ShowDatesAs.ts",
-          "line": 14,
-          "purpose": "How the program shows every date it draws or joins to text, from then on.",
-          "syntaxes": [
-            {
-              "syntax": "dates are shown as {style:shown_dates}",
-              "example": "dates are shown as short dates",
-              "outputs": {
-                "js": {
-                  "code": "core.showDatesAs(\"short\")"
-                },
-                "ts": {
-                  "code": "core.showDatesAs(\"short\")"
-                },
-                "py": {
-                  "code": "core.show_dates_as(\"short\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "ScrollToTop",
-          "ruleNames": ["scroll_to_top"],
-          "internal": false,
-          "file": "src/spell/rules/UI/ScrollToTop.ts",
-          "line": 11,
-          "purpose": "Bring the top of the app back into view, as a new page of it opens (epic `data` P19).",
-          "syntaxes": [
-            {
-              "syntax": "scroll to the top",
-              "example": "scroll to the top",
-              "outputs": {
-                "js": {
-                  "code": "core.scrollToTop()"
-                },
-                "ts": {
-                  "code": "core.scrollToTop()"
-                },
-                "py": {
-                  "code": "core.scroll_to_top()"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "ShowDrawn",
-          "ruleNames": ["show_drawn"],
-          "internal": false,
-          "file": "src/spell/rules/UI/ShowDrawn.ts",
-          "line": 15,
-          "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
-          "syntaxes": [
-            {
-              "syntax": "(show|(hide:hide)) {name:text}",
-              "example": "show \"you won\"",
-              "outputs": {
-                "js": {
-                  "code": "core.showDrawn(\"you won\")"
-                },
-                "ts": {
-                  "code": "core.showDrawn(\"you won\")"
-                },
-                "py": {
-                  "code": "core.show_drawn(\"you won\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "PlaySound",
-          "ruleNames": ["play_sound"],
-          "internal": false,
-          "file": "src/spell/rules/UI/PlaySound.ts",
-          "line": 14,
-          "purpose": "Play a sound file, from its start, as a click or a key asks (epic `data` Q40, T145).",
-          "syntaxes": [
-            {
-              "syntax": "play {sound:expression}",
-              "example": "play \"cry.ogg\"",
-              "outputs": {
-                "js": {
-                  "code": "core.play(\"cry.ogg\")"
-                },
-                "ts": {
-                  "code": "core.play(\"cry.ogg\")"
-                },
-                "py": {
-                  "code": "core.play(\"cry.ogg\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "StopSound",
-          "ruleNames": ["stop_sound"],
-          "internal": false,
-          "file": "src/spell/rules/UI/StopSound.ts",
-          "line": 13,
-          "purpose": "Stop a sound `play` started (epic `data` Q40, T145).",
-          "syntaxes": [
-            {
-              "syntax": "stop {sound:expression}",
-              "example": "stop \"cry.ogg\"",
-              "outputs": {
-                "js": {
-                  "code": "core.stop(\"cry.ogg\")"
-                },
-                "ts": {
-                  "code": "core.stop(\"cry.ogg\")"
-                },
-                "py": {
-                  "code": "core.stop(\"cry.ogg\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "LoadSound",
-          "ruleNames": ["load_sound"],
-          "internal": false,
-          "file": "src/spell/rules/UI/LoadSound.ts",
-          "line": 14,
-          "purpose": "Start loading a sound now, so a later `play` starts it at once (epic `data` J215).",
-          "syntaxes": [
-            {
-              "syntax": "(load|preload) {sound:expression}",
-              "example": "load \"cry.ogg\"",
-              "outputs": {
-                "js": {
-                  "code": "core.loadSound(\"cry.ogg\")"
-                },
-                "ts": {
-                  "code": "core.loadSound(\"cry.ogg\")"
-                },
-                "py": {
-                  "code": "core.load_sound(\"cry.ogg\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "EndPrintGroup",
-          "ruleNames": ["end_print_group"],
-          "internal": false,
-          "file": "src/spell/rules/UI/EndPrintGroup.ts",
-          "line": 10,
-          "purpose": "Stop a previous `print group...`",
-          "syntaxes": [
-            {
-              "syntax": "end print group",
-              "example": "end print group\"",
-              "outputs": {
-                "js": {
-                  "code": "core.console.groupEnd()"
-                },
-                "ts": {
-                  "code": "core.console.groupEnd()"
-                },
-                "py": {
-                  "code": "core.console.group_end()"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Notify",
-          "ruleNames": ["notify"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Notify.ts",
-          "line": 30,
-          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
-          "syntaxes": [
-            {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for ({time:measure_literal}|{time:expression} {unit:unit_words}))|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
-              "example": "notify \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "core.notify(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "core.notify(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.notify(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement", "async"]
-        },
-        {
-          "className": "Alert",
-          "ruleNames": ["alert"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Alert.ts",
-          "line": 17,
-          "purpose": "Show user a `message` in a modal alert.",
-          "syntaxes": [
-            {
-              "syntax": "alert {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
-              "example": "alert \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.alert(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.alert(\"Yo!\")"
-                },
-                "py": {
-                  "code": "await core.alert(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement", "async"]
-        },
-        {
-          "className": "Warn",
-          "ruleNames": ["warn"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Warn.ts",
-          "line": 13,
-          "purpose": "Warning message -- like alert but more dire.",
-          "syntaxes": [
-            {
-              "syntax": "warn {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
-              "example": "warn \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.warn(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.warn(\"Yo!\")"
-                },
-                "py": {
-                  "code": "await core.warn(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Confirm",
-          "ruleNames": ["confirm"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Confirm.ts",
-          "line": 15,
-          "purpose": "Confirm message -- present a question with two answers.",
-          "syntaxes": [
-            {
-              "syntax": "confirm {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text} ((and|or) {cancelButton:text})?)?",
-              "example": "confirm \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.confirm(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.confirm(\"Yo!\")"
-                },
-                "py": {
-                  "code": "await core.confirm(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Prompt",
-          "ruleNames": ["prompt"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
-          "syntaxes": [
-            {
-              "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
-              "example": "prompt \"Name for the new baby?\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                },
-                "ts": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                },
-                "py": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "CSSStyles",
-          "ruleNames": ["css"],
-          "internal": false,
-          "file": "src/spell/rules/UI/CSSStyles.ts",
-          "line": 12,
-          "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
-          "syntaxes": [
-            {
-              "example": "\"\"",
-              "outputs": {
-                "js": {
-                  "code": "core.installStyles(undefined, `\"\"`)"
-                },
-                "ts": {
-                  "code": "core.installStyles(undefined, `\"\"`)"
-                },
-                "py": {
-                  "code": "core.install_styles(None, f\"{\"\"}\")"
-                }
-              }
-            }
-          ],
-          "aliases": []
-        },
-        {
-          "className": "UIDefaults",
-          "ruleNames": ["ui_defaults"],
-          "internal": false,
-          "file": "src/spell/rules/UI/UIDefaults.ts",
-          "line": 32,
-          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
-          "syntaxes": [
-            {
-              "example": "<ui-defaults>\n\t<ui-button appearance=\"pill\"/>\n\t<ui-segment appearance=\"raised\" padded/>\n</ui-defaults>",
-              "outputs": {
-                "js": {
-                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
-                },
-                "ts": {
-                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
-                },
-                "py": {
-                  "code": "core.use_defaults(\n    \"\",\n    {\n        \"ui-button\": {\"appearance\": \"pill\"},\n        \"ui-segment\": {\"appearance\": \"raised\", \"padded\": True},\n    },\n)"
                 }
               }
             }

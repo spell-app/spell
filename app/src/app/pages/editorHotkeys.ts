@@ -29,7 +29,7 @@ import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spel
  *     `elemental-spell` J116)
  */
 export const EDITOR_HOTKEYS = {
-  saveAll: { shortcut: "mod+S", run: () => editor.saveAll() },
+  saveAll: { shortcut: "mod+S", run: () => editor.saveDraft() },
   revertChanges: { shortcut: "shift+mod+R", run: () => void editor.revertChanges() },
   compileApp: { shortcut: "mod+Enter", run: () => editor.compileApp() },
   // ⌘N is the browser's own New Window, which a page never gets:  ⌥⌘N, which neither Chrome nor Safari takes

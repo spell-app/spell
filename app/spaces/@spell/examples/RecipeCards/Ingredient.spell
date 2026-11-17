@@ -1,0 +1,34 @@
+# An ingredient, scaled and in the cook's units
+// Its amount is for the recipe's own number of people:  shown for how many are eating, in metric or in cups and spoons.
+// A box beside it picks it for the shopping list.
+
+an ingredient
+	its "scaled amount" is its amount * the scale of recipe cards
+		// For how many are eating:  its amount times diners over servings
+	its "shown" is
+		// Its scaled amount in the cook's units
+		set scaled to its scaled amount
+		if the units of recipe cards is cups
+			if its unit is "g" and its grams per cup > 0 return measure (scaled / its grams per cup) in quarters of "cups"
+			if its unit is "g" return measure (scaled / (1 oz in g)) in "oz"
+			if its unit is "kg" return measure (scaled * 1000 / (1 oz in g)) in "oz"
+			if its unit is "ml" return measure scaled in spoons or cups
+			if its unit is "l" return measure (scaled * 1000) in spoons or cups
+		otherwise
+			if its unit is "cups" and its grams per cup > 0 return measure (scaled * its grams per cup) in "g"
+			if its unit is "cups" return measure (scaled * (1 cup in ml)) in "ml"
+			if its unit is "oz" return measure (scaled * (1 oz in g)) in "g"
+			if its unit is "lb" return measure (scaled * (1 lb in g)) in "g"
+		if its unit is "cups" or its unit is "tbsp" or its unit is "tsp"
+			return measure scaled in quarters of its unit
+		return measure scaled in its unit
+
+	to draw it
+		// A box to pick it, how much, and what
+		<form value={it}>
+			<stack direction="horizontal" spacing="sm" class="ingredient">
+				<checkbox name="picked" aria-label="Pick for the shopping list" />
+				<text bold class="how-much">{the written of its shown}</text>
+				<text>{its name}</text>
+			</stack>
+		</form>

@@ -69,6 +69,20 @@ export function personIdFor(text: string): string {
 export const SPELL_UI_SITE_PROJECT = "@spell/guides/SpellUI"
 
 /**
+ * The groups whose projects people open AS EXAMPLES (epic `mockup` T52):  the examples and the guides,
+ * the Spanish ones among them.
+ * - Opened as they are, never copied;  a person's edits are their draft of it, never its files,
+ *   so it stays the same for everyone else.
+ * - Leaving one with a draft asks what to keep:  their own copy, nothing, or (`@spell`'s managers) the example itself.
+ */
+export const EXAMPLE_GROUPS = ["@spell/examples", "@spell/guides"] as const
+
+/** Is project `projectPath` one people open as an example (`EXAMPLE_GROUPS`):  `@spell/examples/Solitaire`? */
+export function isExampleProject(projectPath: string): boolean {
+  return EXAMPLE_GROUPS.some((group) => projectPath.startsWith(`${group}/`))
+}
+
+/**
  * A project of a group's list, as the home page reads it:  `SP.ProjectListEntry`, and what only the home page needs.
  */
 export type ProjectListEntryWithHome = SP.ProjectListEntry & {
@@ -77,8 +91,6 @@ export type ProjectListEntryWithHome = SP.ProjectListEntry & {
    * the home page's rows and the Hero's first-guide button skip it.
    */
   onHome?: false
-  /** Its project file's `category`, which row of the examples it's in (epic `mockup` P18). */
-  category?: string
   /** It has a picture of its app running, `PROJECT_THUMBNAIL` in its folder, for its card (epic `mockup` P18). */
   hasThumbnail?: true
   /** Made from a start card and not kept yet:  its project file's `unsaved` (`UnsavedApp`, epic `mockup` I42). */
@@ -108,15 +120,22 @@ export type UnsavedApp = "untouched" | "changed"
 export const PROJECT_THUMBNAIL = "__thumbnail.png"
 
 /**
- * The home page's rows of examples, in order, by each project file's `category` (epic `mockup` P18).
- * - Their titles are the editor's texts, `category.<id>`:  "First steps", "Games" ...
- * - A project with none, or one not here, comes after them.
- * - The org apps have no category:  they're the library's, its own row.
+ * A project's line on its home page card:  its description's first phrase,
+ * up to its first `:`, `;` or sentence's end.
+ * - `"A to-do list:  type a task and add it ..."` => `"A to-do list"`.
+ * - Kept to `CARD_LINE_LENGTH` for every example, so it's whole in two lines at the card's narrowest
+ *   (epic `mockup` I48);  the card cuts a longer one off after two lines, with an ellipsis.
  */
-export const EXAMPLE_CATEGORIES = ["first-steps", "games", "everyday", "web-data", "sites"] as const
+export function cardLineOf(description: string | undefined): string | undefined {
+  return description?.split(/[:;]\s|\.\s/)[0]?.trim() || undefined
+}
 
-/** One of `EXAMPLE_CATEGORIES`. */
-export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number]
+/**
+ * The longest an example's card line may be:  56 characters.
+ * - Measured (epic `mockup` I48):  the narrowest card's line is 230px wide, at a 560px window;
+ *   the longest example's, 55 characters, takes two lines there.
+ */
+export const CARD_LINE_LENGTH = 56
 
 /**
  * Spell's project GROUPS:  where projects live, each a list the editor shows (`SpellProjectRoot`).

@@ -1,0 +1,966 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Piece",
+    "Square",
+    "Board",
+    "Move",
+    "Table",
+    "Checker",
+    "CheckersRoom",
+    "test_the_opening",
+    "test_a_jump_must_be_taken",
+    "test_jumping_on",
+    "test_crowning_a_king",
+    "test_the_diagram",
+    "test_the_computer_jumps",
+    "test_the_computer_keeps_its_pieces_safe"
+  ],
+  "statements": [
+    {
+      "type": "Piece",
+      "superType": "View",
+      "defined": "/Board.spell:536-952"
+    },
+    {
+      "property": "side",
+      "classVariable": "Sides",
+      "of": "Piece",
+      "enumeration": [
+        "black",
+        "red"
+      ],
+      "defined": "/Board.spell:642-675"
+    },
+    {
+      "property": "rank",
+      "classVariable": "Ranks",
+      "of": "Piece",
+      "enumeration": [
+        "man",
+        "king"
+      ],
+      "defined": "/Board.spell:677-709"
+    },
+    {
+      "syntax": "{operator:is_or_is_not_a} king",
+      "output": "is_a_king",
+      "rule": "method_postfix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"is a king\"",
+      "returns": "choice",
+      "defined": "/Board.spell:711-745"
+    },
+    {
+      "property": "forward",
+      "of": "Piece",
+      "datatype": "number",
+      "defined": "/Board.spell:747-895"
+    },
+    {
+      "property": "far_row",
+      "asWritten": "far row",
+      "of": "Piece",
+      "datatype": "number",
+      "defined": "/Board.spell:897-952"
+    },
+    {
+      "syntax": "{operator:can_or_cannot} jump to {expression:operand}",
+      "output": "can_jump_to_$square",
+      "rule": "method_infix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"can jump to (a square)\"",
+      "params": [
+        {
+          "name": "square",
+          "datatype": "Square"
+        }
+      ],
+      "returns": "choice",
+      "defined": "/Board.spell:2495-3252"
+    },
+    {
+      "syntax": "{operator:has_or_has_not} a jump",
+      "output": "has_a_jump",
+      "rule": "method_postfix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"has a jump\"",
+      "returns": "choice",
+      "defined": "/Board.spell:3255-3394"
+    },
+    {
+      "syntax": "{operator:can_or_cannot} go to {expression:operand}",
+      "output": "can_go_to_$square",
+      "rule": "method_infix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"can go to (a square)\"",
+      "params": [
+        {
+          "name": "square",
+          "datatype": "Square"
+        }
+      ],
+      "returns": "choice",
+      "defined": "/Board.spell:3646-4505"
+    },
+    {
+      "syntax": "{operator:can_or_cannot} move",
+      "output": "can_move",
+      "rule": "method_postfix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"can move\"",
+      "returns": "choice",
+      "defined": "/Board.spell:4508-4641"
+    },
+    {
+      "property": "letter",
+      "of": "Piece",
+      "datatype": "text",
+      "defined": "/Board.spell:4644-4860"
+    },
+    {
+      "syntax": "move {thisArg:expression} to {callArgs:expression}",
+      "output": "move_to_$square",
+      "rule": "method_call",
+      "of": "Piece",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "move (a piece) to (a square)",
+      "params": [
+        {
+          "name": "square",
+          "datatype": "Square"
+        }
+      ],
+      "returns": "choice",
+      "defined": "/Board.spell:7120-8044"
+    },
+    {
+      "syntax": "would be safe on {expression:operand}",
+      "output": "would_be_safe_on_$square",
+      "rule": "method_infix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"would be safe on (a square)\"",
+      "params": [
+        {
+          "name": "square",
+          "datatype": "Square"
+        }
+      ],
+      "returns": "choice",
+      "defined": "/Computer.spell:886-1849"
+    },
+    {
+      "kind": "method",
+      "name": "moving a piece to a square",
+      "params": [
+        {
+          "name": "square",
+          "datatype": "Square"
+        }
+      ],
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/Checkers.spell:5466-5977"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} yours",
+      "output": "is_yours",
+      "rule": "method_postfix",
+      "of": "Piece",
+      "kind": "method",
+      "name": "\"is yours\"",
+      "returns": "choice",
+      "defined": "/Checkers.spell:6149-6571"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Piece",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Drawing.spell:324-403"
+    },
+    {
+      "property": "square",
+      "of": "Piece",
+      "group": "The board and its rules",
+      "datatype": "Square",
+      "exclusive": true,
+      "defined": "/Board.spell:1380-1409"
+    },
+    {
+      "type": "Square",
+      "superType": "ViewableList",
+      "itemType": "Piece",
+      "defined": "/Board.spell:954-1378"
+    },
+    {
+      "property": "row",
+      "of": "Square",
+      "datatype": "number",
+      "defined": "/Board.spell:1170-1191"
+    },
+    {
+      "property": "column",
+      "of": "Square",
+      "datatype": "number",
+      "defined": "/Board.spell:1193-1217"
+    },
+    {
+      "property": "shade",
+      "classVariable": "Shades",
+      "of": "Square",
+      "enumeration": [
+        "light",
+        "dark"
+      ],
+      "defined": "/Board.spell:1219-1340"
+    },
+    {
+      "property": "piece",
+      "of": "Square",
+      "datatype": "Piece",
+      "defined": "/Board.spell:1342-1378"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} next to {expression:operand}",
+      "output": "is_next_to_$square",
+      "rule": "method_infix",
+      "of": "Square",
+      "kind": "method",
+      "name": "\"is next to (a square)\"",
+      "params": [
+        {
+          "name": "square",
+          "datatype": "Square"
+        }
+      ],
+      "returns": "choice",
+      "defined": "/Computer.spell:628-875"
+    },
+    {
+      "property": "lit",
+      "of": "Square",
+      "datatype": "choice",
+      "defined": "/Drawing.spell:699-890"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Square",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Drawing.spell:893-1050"
+    },
+    {
+      "property": "board",
+      "of": "Square",
+      "group": "The board and its rules",
+      "datatype": "Board",
+      "exclusive": true,
+      "defined": "/Board.spell:2152-2181"
+    },
+    {
+      "type": "Board",
+      "superType": "ViewableList",
+      "itemType": "Square",
+      "defined": "/Board.spell:1411-2150"
+    },
+    {
+      "property": "turn",
+      "classVariable": "Turns",
+      "of": "Board",
+      "enumeration": [
+        "black",
+        "red"
+      ],
+      "defined": "/Board.spell:1509-1542"
+    },
+    {
+      "property": "winner",
+      "classVariable": "Winners",
+      "of": "Board",
+      "enumeration": [
+        "nobody",
+        "black",
+        "red"
+      ],
+      "defined": "/Board.spell:1544-1587"
+    },
+    {
+      "property": "turned",
+      "of": "Board",
+      "datatype": "choice",
+      "defined": "/Board.spell:1589-1701"
+    },
+    {
+      "property": "picked_piece",
+      "asWritten": "picked piece",
+      "of": "Board",
+      "datatype": "Piece",
+      "defined": "/Board.spell:1703-1784"
+    },
+    {
+      "property": "jumper",
+      "of": "Board",
+      "datatype": "Piece",
+      "defined": "/Board.spell:1786-1890"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} over",
+      "output": "is_over",
+      "rule": "method_postfix",
+      "of": "Board",
+      "kind": "method",
+      "name": "\"is over\"",
+      "returns": "choice",
+      "defined": "/Board.spell:1892-1932"
+    },
+    {
+      "kind": "method",
+      "name": "creating a board",
+      "returns": "nothing",
+      "defined": "/Board.spell:1935-2150"
+    },
+    {
+      "syntax": "the square at {callArgs:expression} and {callArgs:expression} on {thisArg:expression}",
+      "output": "the_square_at_$row_and_$column_on_board",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Finding Squares",
+      "kind": "method",
+      "name": "the square at (row as a number) and (column as a number) on (a board)",
+      "params": [
+        {
+          "name": "row",
+          "datatype": "number"
+        },
+        {
+          "name": "column",
+          "datatype": "number"
+        }
+      ],
+      "defined": "/Board.spell:2208-2468"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} forced to jump",
+      "output": "is_forced_to_jump",
+      "rule": "method_postfix",
+      "of": "Board",
+      "kind": "method",
+      "name": "\"is forced to jump\"",
+      "returns": "choice",
+      "defined": "/Board.spell:3405-3635"
+    },
+    {
+      "syntax": "{operator:has_or_has_not} a move",
+      "output": "has_a_move",
+      "rule": "method_postfix",
+      "of": "Board",
+      "kind": "method",
+      "name": "\"has a move\"",
+      "returns": "choice",
+      "defined": "/Board.spell:4871-5039"
+    },
+    {
+      "property": "diagram",
+      "of": "Board",
+      "datatype": "list of texts",
+      "defined": "/Board.spell:5042-5320"
+    },
+    {
+      "syntax": "reset {thisArg:expression}",
+      "output": "reset",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "reset (a board)",
+      "returns": "nothing",
+      "defined": "/Board.spell:5339-5617"
+    },
+    {
+      "syntax": "start a new game on {thisArg:expression}",
+      "output": "start_a_new_game_on_board",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "start a new game on (a board)",
+      "returns": "nothing",
+      "defined": "/Board.spell:5619-5985"
+    },
+    {
+      "syntax": "set up {thisArg:expression} from {callArgs:expression}",
+      "output": "set_up_from_$diagram",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "set up (a board) from (diagram as a list)",
+      "params": [
+        {
+          "name": "diagram",
+          "datatype": "list"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Board.spell:5987-6470"
+    },
+    {
+      "property": "jump_square",
+      "asWritten": "jump square",
+      "of": "Board",
+      "datatype": "number",
+      "defined": "/Board.spell:6481-6693"
+    },
+    {
+      "syntax": "copy {thisArg:expression} onto {callArgs:expression}",
+      "output": "copy_onto_$other",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "copy (a board) onto (other as a board)",
+      "params": [
+        {
+          "name": "other",
+          "datatype": "Board"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Board.spell:6695-7118"
+    },
+    {
+      "syntax": "end the turn on {thisArg:expression}",
+      "output": "end_the_turn_on_board",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "end the turn on (a board)",
+      "returns": "nothing",
+      "defined": "/Board.spell:8046-8391"
+    },
+    {
+      "syntax": "put a {callArgs:expression} {callArgs:expression} at {callArgs:expression} and {callArgs:expression} on {thisArg:expression}",
+      "output": "put_a_$side_$rank_at_$row_and_$column_on_board",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Tests",
+      "kind": "method",
+      "name": "put a (side as text) (rank as text) at (row as a number) and (column as a number) on (a board)",
+      "params": [
+        {
+          "name": "side",
+          "datatype": "text"
+        },
+        {
+          "name": "rank",
+          "datatype": "text"
+        },
+        {
+          "name": "row",
+          "datatype": "number"
+        },
+        {
+          "name": "column",
+          "datatype": "number"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Board.spell:8408-8658"
+    },
+    {
+      "property": "moves",
+      "of": "Board",
+      "datatype": "list of moves",
+      "defined": "/Computer.spell:2280-2726"
+    },
+    {
+      "syntax": "play for the computer on {thisArg:expression}",
+      "output": "play_for_the_computer_on_board",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "The computer",
+      "kind": "method",
+      "name": "play for the computer on (a board)",
+      "defined": "/Computer.spell:2728-3101"
+    },
+    {
+      "syntax": "share {thisArg:expression} in {callArgs:expression}",
+      "output": "share_in_$table",
+      "rule": "method_call",
+      "of": "Board",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Against Someone",
+      "kind": "method",
+      "name": "share (a board) in (a table)",
+      "params": [
+        {
+          "name": "table",
+          "datatype": "Table"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Checkers.spell:3698-4031"
+    },
+    {
+      "syntax": "test the opening",
+      "output": "test_the_opening",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the opening",
+      "defined": "/Board.spell:8660-9278"
+    },
+    {
+      "syntax": "test a jump must be taken",
+      "output": "test_a_jump_must_be_taken",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "a jump must be taken",
+      "defined": "/Board.spell:9280-10033"
+    },
+    {
+      "syntax": "test jumping on",
+      "output": "test_jumping_on",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "jumping on",
+      "defined": "/Board.spell:10035-10667"
+    },
+    {
+      "syntax": "test crowning a king",
+      "output": "test_crowning_a_king",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "crowning a king",
+      "defined": "/Board.spell:10669-11160"
+    },
+    {
+      "syntax": "test the diagram",
+      "output": "test_the_diagram",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the diagram",
+      "defined": "/Board.spell:11162-11647"
+    },
+    {
+      "type": "Move",
+      "superType": "Thing",
+      "defined": "/Computer.spell:427-616"
+    },
+    {
+      "property": "piece",
+      "of": "Move",
+      "datatype": "Piece",
+      "defined": "/Computer.spell:542-564"
+    },
+    {
+      "property": "square",
+      "of": "Move",
+      "datatype": "Square",
+      "defined": "/Computer.spell:566-590"
+    },
+    {
+      "property": "points",
+      "of": "Move",
+      "datatype": "number",
+      "defined": "/Computer.spell:592-616"
+    },
+    {
+      "syntax": "the points for {thisArg:expression}",
+      "output": "the_points_for_move",
+      "rule": "method_call",
+      "of": "Move",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "The computer",
+      "kind": "method",
+      "name": "the points for (a move)",
+      "returns": "number",
+      "defined": "/Computer.spell:1851-2269"
+    },
+    {
+      "syntax": "test the computer jumps",
+      "output": "test_the_computer_jumps",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the computer jumps",
+      "defined": "/Computer.spell:3103-3474"
+    },
+    {
+      "syntax": "test the computer keeps its pieces safe",
+      "output": "test_the_computer_keeps_its_pieces_safe",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the computer keeps its pieces safe",
+      "defined": "/Computer.spell:3476-4152"
+    },
+    {
+      "type": "Table",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "checkers_room",
+        "placeType": "CheckersRoom",
+        "collection": "tables"
+      },
+      "defined": "/Checkers.api.spell:538-1085"
+    },
+    {
+      "property": "diagram",
+      "of": "Table",
+      "datatype": "list of texts",
+      "defined": "/Checkers.api.spell:702-816"
+    },
+    {
+      "property": "turn",
+      "of": "Table",
+      "datatype": "text",
+      "defined": "/Checkers.api.spell:818-836"
+    },
+    {
+      "property": "winner",
+      "of": "Table",
+      "datatype": "text",
+      "defined": "/Checkers.api.spell:838-858"
+    },
+    {
+      "property": "jump_square",
+      "asWritten": "jump square",
+      "of": "Table",
+      "datatype": "number",
+      "defined": "/Checkers.api.spell:860-972"
+    },
+    {
+      "property": "black_seat",
+      "asWritten": "black seat",
+      "of": "Table",
+      "datatype": "text",
+      "defined": "/Checkers.api.spell:974-1036"
+    },
+    {
+      "property": "red_seat",
+      "asWritten": "red seat",
+      "of": "Table",
+      "datatype": "text",
+      "defined": "/Checkers.api.spell:1038-1085"
+    },
+    {
+      "syntax": "show {thisArg:expression} on {callArgs:expression}",
+      "output": "show_on_$board",
+      "rule": "method_call",
+      "of": "Table",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Against Someone",
+      "kind": "method",
+      "name": "show (a table) on (a board)",
+      "params": [
+        {
+          "name": "board",
+          "datatype": "Board"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Checkers.spell:4034-4486"
+    },
+    {
+      "type": "CheckersRoom",
+      "superType": "Place",
+      "place": {
+        "name": "checkers_room",
+        "kind": "room",
+        "at": "/api/rooms/spaces/owen@spell/tables"
+      },
+      "defined": "/Checkers.api.spell:490-536"
+    },
+    {
+      "type": "Checker",
+      "superType": "App",
+      "defined": "/Checkers.spell:322-5464"
+    },
+    {
+      "property": "opponent",
+      "classVariable": "Opponents",
+      "of": "Checker",
+      "enumeration": [
+        "computer",
+        "yourself",
+        "someone"
+      ],
+      "defined": "/Checkers.spell:342-500"
+    },
+    {
+      "property": "board",
+      "of": "Checker",
+      "datatype": "Board",
+      "defined": "/Checkers.spell:502-524"
+    },
+    {
+      "property": "turned_board",
+      "asWritten": "turned board",
+      "of": "Checker",
+      "datatype": "Board",
+      "defined": "/Checkers.spell:526-625"
+    },
+    {
+      "property": "seat",
+      "of": "Checker",
+      "datatype": "text",
+      "defined": "/Checkers.spell:627-742"
+    },
+    {
+      "property": "table",
+      "of": "Checker",
+      "datatype": "Table",
+      "defined": "/Checkers.spell:744-830"
+    },
+    {
+      "kind": "method",
+      "name": "creating it",
+      "returns": "nothing",
+      "defined": "/Checkers.spell:833-985"
+    },
+    {
+      "property": "side",
+      "of": "Checker",
+      "datatype": "text",
+      "defined": "/Checkers.spell:988-1260"
+    },
+    {
+      "property": "message",
+      "of": "Checker",
+      "datatype": "text",
+      "defined": "/Checkers.spell:1263-2024"
+    },
+    {
+      "syntax": "play the computer (of {thisArg:expression})?",
+      "output": "play_the_computer",
+      "rule": "method_call",
+      "of": "Checker",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Who You Play",
+      "kind": "method",
+      "name": "play the computer",
+      "title": "Computer",
+      "defined": "/Checkers.spell:2049-2265"
+    },
+    {
+      "syntax": "play yourself (of {thisArg:expression})?",
+      "output": "play_yourself",
+      "rule": "method_call",
+      "of": "Checker",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Who You Play",
+      "kind": "method",
+      "name": "play yourself",
+      "title": "Yourself",
+      "defined": "/Checkers.spell:2268-2534"
+    },
+    {
+      "syntax": "play someone (of {thisArg:expression})?",
+      "output": "play_someone",
+      "rule": "method_call",
+      "of": "Checker",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Who You Play",
+      "kind": "method",
+      "name": "play someone",
+      "waits": true,
+      "title": "Another tab",
+      "defined": "/Checkers.spell:2537-3191"
+    },
+    {
+      "syntax": "start a new game (of {thisArg:expression})?",
+      "output": "start_a_new_game",
+      "rule": "method_call",
+      "of": "Checker",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Game Play",
+      "kind": "method",
+      "name": "start a new game",
+      "returns": "nothing",
+      "title": "New game",
+      "defined": "/Checkers.spell:3213-3670"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Checker",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Against Someone",
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Checkers.spell:4489-5059"
+    }
+  ],
+  "codeLines": [
+    14,
+    17,
+    23,
+    29,
+    34,
+    40,
+    47,
+    60,
+    66,
+    80,
+    86,
+    95,
+    115,
+    134,
+    146,
+    156,
+    169,
+    180,
+    185,
+    190,
+    196,
+    203,
+    208,
+    213,
+    220,
+    240,
+    262,
+    266,
+    272,
+    279,
+    286,
+    293,
+    299,
+    303,
+    319,
+    327,
+    333,
+    339,
+    351,
+    360,
+    369,
+    380,
+    386,
+    394,
+    405,
+    415,
+    430,
+    439,
+    469,
+    491,
+    533,
+    582,
+    615,
+    647,
+    648,
+    653,
+    658,
+    664,
+    677,
+    713,
+    759,
+    761,
+    767,
+    772,
+    778,
+    785,
+    792,
+    799,
+    837,
+    853,
+    857,
+    864,
+    870,
+    877,
+    884,
+    890,
+    897,
+    905,
+    919,
+    929,
+    939,
+    957,
+    970
+  ]
+}

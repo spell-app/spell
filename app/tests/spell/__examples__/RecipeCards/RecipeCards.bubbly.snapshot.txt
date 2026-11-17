@@ -1,0 +1,552 @@
+==== /RecipeCards.api.spell
+⟪## Recipe Cards:  where the recipes are kept⟫
+⟦// In a JSON file, in this example's own folder:  __data/recipes.json.⟧
+⟦// Plain JSON any editor opens, { "recipes": [...] }:  each recipe whole, its ingredients and steps inside it.⟧
+⟦// The page server writes it, the whole file at each save;  everyone using that page server shares the recipes.⟧
+⟦// The shopping list isn't here:  it's Shopping List's, in its CSV file, which this project imports (__project.json5).⟧
+[thing create_place L0]
+| «recipe file» is a json file at «"recipes.json"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"recipe"» is a **view**
+|   it lives in **recipe file**    ‾value(recipe file)
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"serves"» is a **number**
+|   |   ⟦// How many people it's written for:  the amounts are for that many⟧
+|   [property define_property_has L1]
+|   | its «"picture"» is **text**
+|   |   ⟦// A picture's address:  one in this example's pictures folder, or any on the web⟧
+|   [property define_property_has L1]
+|   | its «"ingredients"» is a list of **ingredients**
+|   |   ⟦// What goes in, in order:  kept inside the recipe⟧
+|   [property define_property_has L1]
+|   | its «"steps"» is a list of **steps**
+|   |   ⟦// What to do, in order:  kept inside the recipe⟧
+
+[thing create_type L0]
+| an «"ingredient"» is a **view**
+|   ⟦// One line of a recipe:  how much, of what, and where it is in the shop⟧
+|   [property define_property_has L1]
+|   | its «"amount"» is a **number**
+|   |   ⟦// For the recipe's own number of people;  nothing for "a pinch" or "to taste"⟧
+|   [property define_property_has L1]
+|   | its «"unit"» is **text**
+|   |   ⟦// "g", "ml", "tbsp", "cups" ...;  nothing for a count, 2 eggs⟧
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"aisle"» is **text**
+|   |   ⟦// Where it is in the shop, for the shopping list⟧
+|   [property define_property_has L1]
+|   | its «"grams per cup"» is a **number**
+|   |   ⟦// How much a cup of it weighs, so grams show as cups:  flour 125, sugar 200;  nothing for most things⟧
+|   [property define_property_has L1]
+|   | its «"picked"» is yes or no
+|   |   ⟦// Ticked, to go on the shopping list⟧
+
+[thing create_type L0]
+| a «"step"» is a **view**
+|   ⟦// One thing to do⟧
+|   [property define_property_has L1]
+|   | its «"instruction"» is **text**
+
+==== /Measures.spell
+⟪# Measures:  an amount in the cook's units⟫
+⟦// Metric (grams and millilitres), or cups and spoons:  the same amount, shown either way.⟧
+⟦// The units' sizes are Spell's own measures, e.g. "1 cup in ml" is 236.6.⟧
+⟦// Grams and counts show whole;  cups and spoons to the nearest quarter, "1 1/2".⟧
+
+[thing create_type L0]
+| a «"measure"» is a **thing**
+|   ⟦// How much, and in what:  what an ingredient shows, and what goes on the shopping list⟧
+|   [property define_property_has L1]
+|   | its «"number"» is a **number**
+|   [property define_property_has L1]
+|   | its «"unit"» is **text**
+|   [property property_value_getter L1]
+|   | its «"written"» is
+|   |   ⟦// As a cook writes it:  "200 g", "1 1/2 cups", "2"⟧
+|   |   if its **number** is nothing or its **number** is _0_ return _""_    ‾value(its number) ‾value(nothing) ‾value(its number)
+|   |   if its **unit** is _""_ return write its **number** for a cook    ‾value(its unit) ‾call(write its number for a cook)
+|   |   if its **unit** is _"cups"_ and its **number** <= _1_ return (write its **number** for a cook) && _"cup"_    ‾value(its unit) ‾value(its number) ‾call(write its number for a cook)
+|   |   return (write its **number** for a cook) && its **unit**    ‾call(write its number for a cook) ‾value(its unit)
+
+[action to_do_something L0]
+| to «measure (amount as a number) in (unit as text)»    ‾value(amount as a number) ‾value(unit as text) bold(amount) bold(number) bold(unit) bold(text)
+|   ⟦// Whole:  grams, millilitres, counts⟧
+|   return **a new measure** with **number** = round **amount**, **unit** = **unit**    ‾value(a new measure with number = round amount, unit = unit)
+
+[action to_do_something L0]
+| to «measure (amount as a number) in quarters of (unit as text)»    ‾value(amount as a number) ‾value(unit as text) bold(amount) bold(number) bold(unit) bold(text)
+|   ⟦// To the nearest quarter:  cups and spoons⟧
+|   return **a new measure** with **number** = (round (**amount** * _4_)) / _4_, **unit** = **unit**    ‾value(a new measure with number = (round (amount * 4)) / 4, unit = unit)
+
+[action to_do_something L0]
+| to «measure (millilitres as a number) in spoons or cups»    ‾value(millilitres as a number) bold(millilitres) bold(number)
+|   ⟦// The spoon or cup a cook would reach for⟧
+|   if **millilitres** < (_1_ tbsp in ml) return measure (**millilitres** / (_1_ tsp in ml)) in quarters of _"tsp"_    ‾value(millilitres) ‾value(1 tbsp in ml) ‾call(measure (millilitres / (1 tsp in ml)) in quarters of "tsp")
+|   if **millilitres** < (_1/4_ cup in ml) return measure (**millilitres** / (_1_ tbsp in ml)) in quarters of _"tbsp"_    ‾value(millilitres) ‾value(1/4 cup in ml) ‾call(measure (millilitres / (1 tbsp in ml)) in quarters of "tbsp")
+|   return measure (**millilitres** / (_1_ cup in ml)) in quarters of _"cups"_    ‾call(measure (millilitres / (1 cup in ml)) in quarters of "cups")
+
+[action to_do_something L0]
+| to «write (amount as a number) for a cook»    ‾value(amount as a number) bold(amount) bold(number)
+|   ⟦// A whole number, then a quarter, a half or three quarters:  1.5 is "1 1/2"⟧
+|   set **quarters** to round (**amount** * _4_)    ‾value(quarters) ‾value(round (amount * 4))
+|   set **whole** to (**quarters** / _4_) as an integer    ‾value(whole) ‾value((quarters / 4) as an integer)
+|   set **left over** to **quarters** - **whole** * _4_    ‾value(left over) ‾value(quarters) ‾value(whole)
+|   set **part** to _""_    ‾value(part)
+|   if **left over** is _1_ set **part** to _"1/4"_    ‾value(left over) ‾value(part)
+|   if **left over** is _2_ set **part** to _"1/2"_    ‾value(left over) ‾value(part)
+|   if **left over** is _3_ set **part** to _"3/4"_    ‾value(left over) ‾value(part)
+|   if **part** is _""_ return _""_ + **whole**    ‾value(part) ‾value(whole)
+|   if **whole** is _0_ return **part**    ‾value(whole) ‾value(part)
+|   return **whole** && **part**    ‾value(whole) ‾value(part)
+
+[action to_do_something L0]
+| to «test fractions»
+|   write _1.5_ for a cook should be _"1 1/2"_    ‾call(write 1.5 for a cook)
+|   write _0.25_ for a cook should be _"1/4"_    ‾call(write 0.25 for a cook)
+|   write _200_ for a cook should be _"200"_    ‾call(write 200 for a cook)
+|   the **written** of (measure _250_ in spoons or cups) should be _"1 cup"_    ‾value(the written of (measure 250 in spoons or cups))
+|   the **written** of (measure _15_ in spoons or cups) should be _"1 tbsp"_    ‾value(the written of (measure 15 in spoons or cups))
+
+==== /Samples.spell
+⟪# Three recipes to start with⟫
+⟦// Added the first time Recipe Cards runs, while its file has none:  change them, or add your own.⟧
+⟦// The pictures were drawn for this example, and are free to use:  they're in its pictures folder.⟧
+
+[action to_do_something L0]
+| to «add the tomato soup»
+|   set **soup** to **a new recipe** with **title** _"Tomato Soup"_, **serves** = _4_, **picture** = _"/spaces/@spell/examples/RecipeCards/pictures/tomato-soup.svg"_    ‾value(soup) ‾value(a new recipe with title "Tomato Soup", serves = 4, picture = "/spaces/@spell/examples/RecipeCards/pictures/tomato-soup.svg")
+|   add (**a new ingredient** with **amount** = _1_, **unit** = _"kg"_, **name** _"ripe tomatoes"_, **aisle** _"Fruit and veg"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 1, unit = "kg", name "ripe tomatoes", aisle "Fruit and veg") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **name** _"onion"_, **aisle** _"Fruit and veg"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 1, name "onion", aisle "Fruit and veg") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _2_, **unit** = _"cloves"_, **name** _"garlic"_, **aisle** _"Fruit and veg"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 2, unit = "cloves", name "garlic", aisle "Fruit and veg") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _2_, **unit** = _"tbsp"_, **name** _"olive oil"_, **aisle** _"Oils and spices"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 2, unit = "tbsp", name "olive oil", aisle "Oils and spices") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _500_, **unit** = _"ml"_, **name** _"vegetable stock"_, **aisle** _"Tins and jars"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 500, unit = "ml", name "vegetable stock", aisle "Tins and jars") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **unit** = _"tsp"_, **name** _"sugar"_, **aisle** _"Baking"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 1, unit = "tsp", name "sugar", aisle "Baking") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _15_, **unit** = _"g"_, **name** _"fresh basil"_, **aisle** _"Fruit and veg"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 15, unit = "g", name "fresh basil", aisle "Fruit and veg") ‾value(soup's ingredients)
+|   add (**a new ingredient** with **amount** = _100_, **unit** = _"ml"_, **name** _"single cream"_, **aisle** _"Dairy"_) to **soup's ingredients**    ‾value(a new ingredient with amount = 100, unit = "ml", name "single cream", aisle "Dairy") ‾value(soup's ingredients)
+|   add (**a new step** with **instruction** _"Heat the oven to 200 °C.  Halve the tomatoes, and roast them for 30 minutes with the onion, quartered, and the garlic."_) to **soup's steps**    ‾value(a new step with instruction "Heat the oven to 200 °C.  Halve the tomatoes, and roast them for 30 minutes with the onion, quartered, and the garlic.") ‾value(soup's steps)
+|   add (**a new step** with **instruction** _"Warm the oil in a big pan, and tip in everything from the roasting tin."_) to **soup's steps**    ‾value(a new step with instruction "Warm the oil in a big pan, and tip in everything from the roasting tin.") ‾value(soup's steps)
+|   add (**a new step** with **instruction** _"Pour in the stock, add the sugar, and simmer for 10 minutes."_) to **soup's steps**    ‾value(a new step with instruction "Pour in the stock, add the sugar, and simmer for 10 minutes.") ‾value(soup's steps)
+|   add (**a new step** with **instruction** _"Blend until smooth, with most of the basil.  Season with salt and pepper."_) to **soup's steps**    ‾value(a new step with instruction "Blend until smooth, with most of the basil.  Season with salt and pepper.") ‾value(soup's steps)
+|   add (**a new step** with **instruction** _"Serve with a swirl of cream and the last of the basil on top."_) to **soup's steps**    ‾value(a new step with instruction "Serve with a swirl of cream and the last of the basil on top.") ‾value(soup's steps)
+|   add **soup** to the **recipes**    ‾value(soup) ‾value(the recipes)
+
+[action to_do_something L0]
+| to «add the red lentil dal»
+|   set **dal** to **a new recipe** with **title** _"Red Lentil Dal"_, **serves** = _4_, **picture** = _"/spaces/@spell/examples/RecipeCards/pictures/red-lentil-dal.svg"_    ‾value(dal) ‾value(a new recipe with title "Red Lentil Dal", serves = 4, picture = "/spaces/@spell/examples/RecipeCards/pictures/red-lentil-dal.svg")
+|   add (**a new ingredient** with **amount** = _250_, **unit** = _"g"_, **name** _"red lentils"_, **aisle** _"Rice and pulses"_, **grams per cup** = _190_) to **dal's ingredients**    ‾value(a new ingredient with amount = 250, unit = "g", name "red lentils", aisle "Rice and pulses", grams per cup = 190) ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **name** _"onion"_, **aisle** _"Fruit and veg"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 1, name "onion", aisle "Fruit and veg") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _3_, **unit** = _"cloves"_, **name** _"garlic"_, **aisle** _"Fruit and veg"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 3, unit = "cloves", name "garlic", aisle "Fruit and veg") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _20_, **unit** = _"g"_, **name** _"fresh ginger"_, **aisle** _"Fruit and veg"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 20, unit = "g", name "fresh ginger", aisle "Fruit and veg") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **unit** = _"tbsp"_, **name** _"vegetable oil"_, **aisle** _"Oils and spices"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 1, unit = "tbsp", name "vegetable oil", aisle "Oils and spices") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _2_, **unit** = _"tsp"_, **name** _"cumin seeds"_, **aisle** _"Oils and spices"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 2, unit = "tsp", name "cumin seeds", aisle "Oils and spices") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **unit** = _"tsp"_, **name** _"ground turmeric"_, **aisle** _"Oils and spices"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 1, unit = "tsp", name "ground turmeric", aisle "Oils and spices") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _400_, **unit** = _"g"_, **name** _"chopped tomatoes"_, **aisle** _"Tins and jars"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 400, unit = "g", name "chopped tomatoes", aisle "Tins and jars") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _400_, **unit** = _"ml"_, **name** _"coconut milk"_, **aisle** _"Tins and jars"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 400, unit = "ml", name "coconut milk", aisle "Tins and jars") ‾value(dal's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **name** _"lime"_, **aisle** _"Fruit and veg"_) to **dal's ingredients**    ‾value(a new ingredient with amount = 1, name "lime", aisle "Fruit and veg") ‾value(dal's ingredients)
+|   add (**a new step** with **instruction** _"Rinse the lentils until the water runs clear."_) to **dal's steps**    ‾value(a new step with instruction "Rinse the lentils until the water runs clear.") ‾value(dal's steps)
+|   add (**a new step** with **instruction** _"Fry the cumin seeds in the oil until they crackle, then the onion, chopped, until soft."_) to **dal's steps**    ‾value(a new step with instruction "Fry the cumin seeds in the oil until they crackle, then the onion, chopped, until soft.") ‾value(dal's steps)
+|   add (**a new step** with **instruction** _"Stir in the garlic and ginger, grated, and the turmeric, for a minute."_) to **dal's steps**    ‾value(a new step with instruction "Stir in the garlic and ginger, grated, and the turmeric, for a minute.") ‾value(dal's steps)
+|   add (**a new step** with **instruction** _"Add the lentils, the tomatoes, the coconut milk and 500 ml of water.  Simmer for 25 minutes, stirring now and then."_) to **dal's steps**    ‾value(a new step with instruction "Add the lentils, the tomatoes, the coconut milk and 500 ml of water.  Simmer for 25 minutes, stirring now and then.") ‾value(dal's steps)
+|   add (**a new step** with **instruction** _"Squeeze in the lime, season with salt, and serve with rice."_) to **dal's steps**    ‾value(a new step with instruction "Squeeze in the lime, season with salt, and serve with rice.") ‾value(dal's steps)
+|   add **dal** to the **recipes**    ‾value(dal) ‾value(the recipes)
+
+[action to_do_something L0]
+| to «add the pancakes»
+|   set **pancakes** to **a new recipe** with **title** _"Blueberry Pancakes"_, **serves** = _4_, **picture** = _"/spaces/@spell/examples/RecipeCards/pictures/pancakes.svg"_    ‾value(pancakes) ‾value(a new recipe with title "Blueberry Pancakes", serves = 4, picture = "/spaces/@spell/examples/RecipeCards/pictures/pancakes.svg")
+|   add (**a new ingredient** with **amount** = _200_, **unit** = _"g"_, **name** _"plain flour"_, **aisle** _"Baking"_, **grams per cup** = _125_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 200, unit = "g", name "plain flour", aisle "Baking", grams per cup = 125) ‾value(pancakes's ingredients)
+|   add (**a new ingredient** with **amount** = _2_, **unit** = _"tsp"_, **name** _"baking powder"_, **aisle** _"Baking"_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 2, unit = "tsp", name "baking powder", aisle "Baking") ‾value(pancakes's ingredients)
+|   add (**a new ingredient** with **amount** = _1_, **unit** = _"tbsp"_, **name** _"sugar"_, **aisle** _"Baking"_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 1, unit = "tbsp", name "sugar", aisle "Baking") ‾value(pancakes's ingredients)
+|   add (**a new ingredient** with **amount** = _2_, **name** _"eggs"_, **aisle** _"Dairy"_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 2, name "eggs", aisle "Dairy") ‾value(pancakes's ingredients)
+|   add (**a new ingredient** with **amount** = _300_, **unit** = _"ml"_, **name** _"milk"_, **aisle** _"Dairy"_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 300, unit = "ml", name "milk", aisle "Dairy") ‾value(pancakes's ingredients)
+|   add (**a new ingredient** with **amount** = _30_, **unit** = _"g"_, **name** _"butter"_, **aisle** _"Dairy"_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 30, unit = "g", name "butter", aisle "Dairy") ‾value(pancakes's ingredients)
+|   add (**a new ingredient** with **amount** = _150_, **unit** = _"g"_, **name** _"blueberries"_, **aisle** _"Fruit and veg"_) to **pancakes's ingredients**    ‾value(a new ingredient with amount = 150, unit = "g", name "blueberries", aisle "Fruit and veg") ‾value(pancakes's ingredients)
+|   add (**a new step** with **instruction** _"Whisk the flour, baking powder, sugar and a pinch of salt in a bowl."_) to **pancakes's steps**    ‾value(a new step with instruction "Whisk the flour, baking powder, sugar and a pinch of salt in a bowl.") ‾value(pancakes's steps)
+|   add (**a new step** with **instruction** _"Melt the butter.  Beat it with the eggs and milk, then whisk into the flour until just smooth."_) to **pancakes's steps**    ‾value(a new step with instruction "Melt the butter.  Beat it with the eggs and milk, then whisk into the flour until just smooth.") ‾value(pancakes's steps)
+|   add (**a new step** with **instruction** _"Heat a frying pan over a medium heat, with a little butter."_) to **pancakes's steps**    ‾value(a new step with instruction "Heat a frying pan over a medium heat, with a little butter.") ‾value(pancakes's steps)
+|   add (**a new step** with **instruction** _"Pour in a small ladle of batter, scatter on a few blueberries, and cook until bubbles show.  Flip, and cook a minute more."_) to **pancakes's steps**    ‾value(a new step with instruction "Pour in a small ladle of batter, scatter on a few blueberries, and cook until bubbles show.  Flip, and cook a minute more.") ‾value(pancakes's steps)
+|   add (**a new step** with **instruction** _"Keep them warm while you cook the rest, and serve with maple syrup."_) to **pancakes's steps**    ‾value(a new step with instruction "Keep them warm while you cook the rest, and serve with maple syrup.") ‾value(pancakes's steps)
+|   add **pancakes** to the **recipes**    ‾value(pancakes) ‾value(the recipes)
+
+==== /RecipeCards.spell
+⟪# Recipe Cards⟫
+⟦// Your recipes:  pick one, set how many are eating, and every amount scales;⟧
+⟦// show it in metric or in cups and spoons;  tick ingredients and add them to the shopping list.⟧
+⟦// The recipes are in a JSON file, RecipeCards.api.spell says where;  the shopping list is Shopping List's own, imported.⟧
+
+[thing create_one_of_a_kind L0]
+| «recipe cards» is an **app**
+|   [property define_property_has L1]
+|   | its «"chosen"» is a **recipe**
+|   |   ⟦// The recipe on show⟧
+|   [property define_property_has L1]
+|   | its «"editing"» is a **recipe**
+|   |   ⟦// The recipe on its Edit screen, while one is⟧
+|   [property define_property_has L1]
+|   | its «"diners"» is a **number** starting at «4»
+|   |   ⟦// How many are eating⟧
+|   [property define_property_has L1]
+|   | its «"units"» is one of ‹metric› or ‹cups›
+|   |   ⟦// Grams and millilitres, or cups and spoons⟧
+|   [property property_value_getter L1]
+|   | its «"scale"» is
+|   |   ⟦// How much more, or less, than the recipe says⟧
+|   |   if its **chosen** does not exist or the **serves** of its **chosen** is _0_ return _1_    ‾question(its chosen does not exist) ‾value(the serves of its chosen)
+|   |   return its **diners** / the **serves** of its **chosen**    ‾value(its diners) ‾value(the serves of its chosen)
+|   [property define_property_has L1]
+|   | «"aisle list"» is **a new aisle list**
+|   |   ⟦// Shopping List's own list, by aisle:  the same list, from its CSV file⟧
+
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   ⟦// The first time, with an empty file, three recipes to start with⟧
+|   |   [control if L2]
+|   |   | if there are no **recipes**    ‾value(there are no recipes)
+|   |   |   add the tomato soup    ‾call(add the tomato soup)
+|   |   |   add the red lentil dal    ‾call(add the red lentil dal)
+|   |   |   add the pancakes    ‾call(add the pancakes)
+|   |   set its **chosen** to the first of (every **recipe**)    ‾value(its chosen) ‾value(the first of (every recipe))
+
+|   [plain group define_group L1]
+|   | group «"Units"»
+|   |   [action to_do_something L2]
+|   |   | to «"show metric"» with title «"Metric"»
+|   |   |   selected when its **units** is _metric_    ‾value(its units)
+|   |   |   set its **units** to _metric_    ‾value(its units)
+
+|   |   [action to_do_something L2]
+|   |   | to «"show cups and spoons"» with title «"Cups and spoons"»
+|   |   |   selected when its **units** is _cups_    ‾value(its units)
+|   |   |   set its **units** to _cups_    ‾value(its units)
+
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   <⟨container⟩>
+|   |   |     <⟨stack⟩>
+|   |   |       <⟨toolbar⟩>
+|   |   |         <⟨text⟩ size=«"large"» heavy slot=«"title"»>Recipe Cards</⟨text⟩>
+|   |   |         <⟨action⟩ «"show metric"» />
+|   |   |         <⟨action⟩ «"show cups and spoons"» />
+|   |   |         <⟨spacer⟩ />
+|   |   |         <⟨action⟩ «"undo"» icon-only />
+|   |   |         <⟨action⟩ «"redo"» icon-only />
+|   |   |       </⟨toolbar⟩>
+|   |   |       <⟨grid⟩ stackable>
+|   |   |         <⟨column⟩ width=«"5"»>
+|   |   |           <⟨stack⟩>
+|   |   |             <⟨buttons⟩ direction=«"vertical"» fluid basic>
+|   |   |               <⟨for⟩ recipe in every recipe>
+|   |   |                 <⟨button⟩ active={**recipe** is its **chosen**} onClick={pick **recipe**}>{**recipe's title**}</⟨button⟩>    code({recipe is its chosen}) code({pick recipe}) code({recipe's title})
+|   |   |               </⟨for⟩>
+|   |   |             </⟨buttons⟩>
+|   |   |             <⟨form⟩ value={it}>    code({it})
+|   |   |               <⟨field⟩ label=«"Cooking for"»>
+|   |   |                 <⟨input⟩ name=«"diners"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"» />
+|   |   |               </⟨field⟩>
+|   |   |             </⟨form⟩>
+|   |   |             <⟨header⟩ size=«"small"»>Shopping list</⟨header⟩>
+|   |   |             {draw the **aisle list**}
+|   |   |           </⟨stack⟩>
+|   |   |         </⟨column⟩>
+|   |   |         <⟨column⟩ width=«"11"»>
+|   |   |           {draw the **screen** of it}
+|   |   |         </⟨column⟩>
+|   |   |       </⟨grid⟩>
+|   |   |     </⟨stack⟩>
+|   |   |   </⟨container⟩>
+
+|   |   [action draw_it L2]
+|   |   | to **draw** its **screen**
+|   |   |   ⟦// The Edit screen while a recipe is being changed;  else the chosen recipe's card⟧
+|   |   |   [control if L3]
+|   |   |   | if its **editing**    ‾value(its editing)
+|   |   |   |   draw (**a new recipe editor** with **recipe** = its **editing**)    ‾value(a new recipe editor with recipe = its editing)
+|   |   |   [control else_if L3]
+|   |   |   | otherwise if its **chosen**    ‾value(its chosen)
+|   |   |   |   draw its **chosen**    ‾value(its chosen)
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   <⟨text⟩ color=«"grey"»>Pick a recipe</⟨text⟩>
+
+==== /Ingredient.spell
+⟪# An ingredient, scaled and in the cook's units⟫
+⟦// Its amount is for the recipe's own number of people:  shown for how many are eating, in metric or in cups and spoons.⟧
+⟦// A box beside it picks it for the shopping list.⟧
+
+[thing reopen_type L0]
+| an **ingredient**
+|   [property property_value_getter L1]
+|   | its «"scaled amount"» is its **amount** * the **scale** of **recipe cards**
+|   |   ⟦// For how many are eating:  its amount times diners over servings⟧
+|   [property property_value_getter L1]
+|   | its «"shown"» is
+|   |   ⟦// Its scaled amount in the cook's units⟧
+|   |   set **scaled** to its **scaled amount**    ‾value(scaled) ‾value(its scaled amount)
+|   |   [control if L2]
+|   |   | if the **units** of **recipe cards** is _cups_    ‾value(the units of recipe cards)
+|   |   |   if its **unit** is _"g"_ and its **grams per cup** > _0_ return measure (**scaled** / its **grams per cup**) in quarters of _"cups"_    ‾value(its unit) ‾value(its grams per cup) ‾call(measure (scaled / its grams per cup) in quarters of "cups")
+|   |   |   if its **unit** is _"g"_ return measure (**scaled** / (_1_ oz in g)) in _"oz"_    ‾value(its unit) ‾call(measure (scaled / (1 oz in g)) in "oz")
+|   |   |   if its **unit** is _"kg"_ return measure (**scaled** * _1000_ / (_1_ oz in g)) in _"oz"_    ‾value(its unit) ‾call(measure (scaled * 1000 / (1 oz in g)) in "oz")
+|   |   |   if its **unit** is _"ml"_ return measure **scaled** in spoons or cups    ‾value(its unit) ‾call(measure scaled in spoons or cups)
+|   |   |   if its **unit** is _"l"_ return measure (**scaled** * _1000_) in spoons or cups    ‾value(its unit) ‾call(measure (scaled * 1000) in spoons or cups)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   if its **unit** is _"cups"_ and its **grams per cup** > _0_ return measure (**scaled** * its **grams per cup**) in _"g"_    ‾value(its unit) ‾value(its grams per cup) ‾call(measure (scaled * its grams per cup) in "g")
+|   |   |   if its **unit** is _"cups"_ return measure (**scaled** * (_1_ cup in ml)) in _"ml"_    ‾value(its unit) ‾call(measure (scaled * (1 cup in ml)) in "ml")
+|   |   |   if its **unit** is _"oz"_ return measure (**scaled** * (_1_ oz in g)) in _"g"_    ‾value(its unit) ‾call(measure (scaled * (1 oz in g)) in "g")
+|   |   |   if its **unit** is _"lb"_ return measure (**scaled** * (_1_ lb in g)) in _"g"_    ‾value(its unit) ‾call(measure (scaled * (1 lb in g)) in "g")
+|   |   [control if L2]
+|   |   | if its **unit** is _"cups"_ or its **unit** is _"tbsp"_ or its **unit** is _"tsp"_    ‾value(its unit) ‾value(its unit) ‾value(its unit)
+|   |   |   return measure **scaled** in quarters of its **unit**    ‾call(measure scaled in quarters of its unit)
+|   |   return measure **scaled** in its **unit**    ‾call(measure scaled in its unit)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// A box to pick it, how much, and what⟧
+|   |   <⟨form⟩ value={it}>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» class=«"ingredient"»>
+|   |       <⟨checkbox⟩ name=«"picked"» aria-label=«"Pick for the shopping list"» />
+|   |       <⟨text⟩ bold class=«"how-much"»>{the **written** of its **shown**}</⟨text⟩>    code({the written of its shown})
+|   |       <⟨text⟩>{its **name**}</⟨text⟩>    code({its name})
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+==== /RecipeCard.spell
+⟪# A recipe's card, and its Edit screen⟫
+⟦// The card:  its picture, how many it's for, its ingredients to pick, and its numbered steps.⟧
+⟦// The Edit screen changes a draft:  nothing changes until Save.⟧
+
+[thing reopen_type L0]
+| a **recipe**
+|   [property property_value_getter L1]
+|   | its «"picked count"» is the **length** of (**ingredients** in its **ingredients** where its **picked** is _yes_)
+
+|   [action to_do_something L1]
+|   | to «pick it»
+|   |   ⟦// Its card, in place of whatever was showing⟧
+|   |   set the **chosen** of **recipe cards** to it    ‾value(the chosen of recipe cards) ‾value(it)
+|   |   set the **editing** of **recipe cards** to nothing    ‾value(the editing of recipe cards) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to «"edit"» with icon «"pencil"»
+|   |   ⟦// Its Edit screen⟧
+|   |   set the **editing** of **recipe cards** to it    ‾value(the editing of recipe cards) ‾value(it)
+
+|   [action to_do_something L1]
+|   | to «"add the picked to the shopping list"» with title «"Add to shopping list"», icon «"cart plus"»
+|   |   ⟦// Each picked ingredient, for how many are eating, onto Shopping List's list;  the same thing in the same unit adds up⟧
+|   |   set **dish** to its **title**    ‾value(dish) ‾value(its title)
+|   |   [control list_iteration L2]
+|   |   | for **ingredient** in its **ingredients**    ‾value(its ingredients)
+|   |   |   [control if L3]
+|   |   |   | if the **ingredient's picked** is _yes_    ‾value(the ingredient's picked)
+|   |   |   |   set **measure** to the **ingredient's shown**    ‾value(measure) ‾value(the ingredient's shown)
+|   |   |   |   set **same** to the first **item** in (every **item** where its **got** is _no_) where its **name** is the **ingredient's name** and its **unit** is **measure's unit**    ‾value(same) ‾value(the first item in (every item where its got is no) where its name is the ingredient's name and its unit is measure's unit)
+|   |   |   |   [control if L4]
+|   |   |   |   | if **same** exists    ‾question(same exists)
+|   |   |   |   |   set **same's amount** to **same's amount** + **measure's number**    ‾value(same's amount) ‾value(same's amount) ‾value(measure's number)
+|   |   |   |   [control else L4]
+|   |   |   |   | otherwise
+|   |   |   |   |   add (**a new item** with **name** = the **ingredient's name**, **amount** = **measure's number**, **unit** = **measure's unit**, **aisle** = the **ingredient's aisle**, **recipe** = **dish**) to the **items**    ‾value(a new item with name = the ingredient's name, amount = measure's number, unit = measure's unit, aisle = the ingredient's aisle, recipe = dish) ‾value(the items)
+|   |   |   |   set the **ingredient's picked** to _no_    ‾value(the ingredient's picked)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨card⟩ fluid class=«"recipe"»>
+|   |     <⟨if⟩ its picture is not «""»>
+|   |       <⟨image⟩ src={its **picture**} alt={its **title**} aspect-ratio=«"21:9"» crop />    code({its picture}) code({its title})
+|   |     </⟨if⟩>
+|   |     <⟨content⟩>
+|   |       <⟨stack⟩>
+|   |         <⟨stack⟩ direction=«"horizontal"» justify=«"between"»>
+|   |           <⟨header⟩ size=«"large"»>{its **title**}</⟨header⟩>    code({its title})
+|   |           <⟨action⟩ «"edit"» />
+|   |         </⟨stack⟩>
+|   |         <⟨text⟩ color=«"grey"»>Written for {its **serves**};  shown for {the **diners** of **recipe cards**}</⟨text⟩>    code({its serves}) code({the diners of recipe cards})
+|   |         <⟨header⟩ size=«"small"»>Ingredients</⟨header⟩>
+|   |         <⟨stack⟩ spacing=«"xs"»>
+|   |           <⟨for⟩ ingredient in its ingredients />
+|   |         </⟨stack⟩>
+|   |         <⟨stack⟩ direction=«"horizontal"»>
+|   |           <⟨button⟩ color=«"primary"» icon=«"cart plus"» disabled={its **picked count** is _0_} onClick={add the picked to the shopping list}>    code({its picked count is 0}) code({add the picked to the shopping list})
+|   |             Add {its **picked count**} to shopping list
+|   |           </⟨button⟩>
+|   |         </⟨stack⟩>
+|   |         <⟨header⟩ size=«"small"»>Steps</⟨header⟩>
+|   |         {draw the **steps** of it}
+|   |       </⟨stack⟩>
+|   |     </⟨content⟩>
+|   |   </⟨card⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **steps**
+|   |   ⟦// Each step with its number⟧
+|   |   <⟨stack⟩ spacing=«"sm"»>
+|   |     {draw the **numbered steps** of it}
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **numbered steps**
+|   |   [control list_iteration L2]
+|   |   | for **step**, **place** in its **steps**    ‾value(its steps)
+|   |   |   <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» align=«"start"» class=«"step"»>
+|   |   |     <⟨label⟩ circular size=«"small"»>{**place**}</⟨label⟩>    code({place})
+|   |   |     <⟨text⟩>{the **step's instruction**}</⟨text⟩>    code({the step's instruction})
+|   |   |   </⟨stack⟩>
+
+==== /RecipeEditor.spell
+⟪# A recipe's Edit screen⟫
+⟦// A form over a draft of the recipe:  change its title, how many it serves and its picture;⟧
+⟦// add, remove and move its ingredients and steps.  Nothing changes until Save;  Cancel forgets it all.⟧
+
+[thing create_type L0]
+| a «"recipe editor"» is a **view**
+|   [property define_property_has L1]
+|   | its «"recipe"» is a **recipe**
+|   |   ⟦// The recipe being changed⟧
+|   [property property_value_getter L1]
+|   | its «"draft"» is a draft of its **recipe**
+|   |   ⟦// A copy to change:  the recipe stays as it was until Save⟧
+
+|   [action to_do_something L1]
+|   | to «"save"» with icon «"check"»
+|   |   ⟦// Every change at once, one step to undo⟧
+|   |   save its **draft**    ‾value(its draft)
+|   |   set the **editing** of **recipe cards** to nothing    ‾value(the editing of recipe cards) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to «"cancel"» with icon «"close"»
+|   |   ⟦// The recipe never changed⟧
+|   |   discard its **draft**    ‾value(its draft)
+|   |   set the **editing** of **recipe cards** to nothing    ‾value(the editing of recipe cards) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to «"add ingredient"» with title «"Add an ingredient"», icon «"plus"»
+|   |   add (**a new ingredient**) to its **draft's ingredients**    ‾value(a new ingredient) ‾value(its draft's ingredients)
+
+|   [action to_do_something L1]
+|   | to «"add step"» with title «"Add a step"», icon «"plus"»
+|   |   add (**a new step**) to its **draft's steps**    ‾value(a new step) ‾value(its draft's steps)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨card⟩ fluid class=«"editor"»>
+|   |     <⟨content⟩>
+|   |       <⟨form⟩ value={its **draft**}>    code({its draft})
+|   |         <⟨header⟩ size=«"medium"»>Edit {its **recipe's title**}</⟨header⟩>    code({its recipe's title})
+|   |         <⟨fields⟩>
+|   |           <⟨field⟩ label=«"Recipe"» width=«"10"»>
+|   |             <⟨input⟩ name=«"title"» />
+|   |           </⟨field⟩>
+|   |           <⟨field⟩ label=«"Serves"» width=«"6"»>
+|   |             <⟨input⟩ name=«"serves"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"» />
+|   |           </⟨field⟩>
+|   |         </⟨fields⟩>
+|   |         <⟨field⟩ label=«"Picture"»>
+|   |           <⟨input⟩ name=«"picture"» placeholder=«"A picture's address"» />
+|   |         </⟨field⟩>
+|   |       </⟨form⟩>
+|   |       <⟨header⟩ size=«"small"»>Ingredients</⟨header⟩>
+|   |       {draw the **ingredient rows** of it}
+|   |       <⟨action⟩ «"add ingredient"» appearance=«"basic"» />
+|   |       <⟨header⟩ size=«"small"»>Steps</⟨header⟩>
+|   |       {draw the **step rows** of it}
+|   |       <⟨action⟩ «"add step"» appearance=«"basic"» />
+|   |     </⟨content⟩>
+|   |     <⟨extra⟩>
+|   |       <⟨action⟩ «"save"» color=«"primary"» />
+|   |       <⟨action⟩ «"cancel"» />
+|   |     </⟨extra⟩>
+|   |   </⟨card⟩>
+
+[thing create_type L0]
+| an «"ingredient row"» is a **view**
+|   ⟦// One ingredient's fields on the Edit screen, with buttons to move it and take it out⟧
+|   [property define_property_has L1]
+|   | its «"ingredient"» is an **ingredient**
+|   [property define_property_has L1]
+|   | its «"editor"» is a **recipe editor**
+
+|   [action to_do_something L1]
+|   | to «"move up"» with icon «"arrow up"»
+|   |   set **list** to its **editor's draft's ingredients**    ‾value(list) ‾value(its editor's draft's ingredients)
+|   |   set **moving** to its **ingredient**    ‾value(moving) ‾value(its ingredient)
+|   |   set **place** to the position of **moving** in **list**    ‾value(place) ‾value(the position of moving in list)
+|   |   if **place** is _1_ return    ‾value(place)
+|   |   remove **moving** from **list**    ‾value(moving) ‾value(list)
+|   |   add **moving** to **list** before item (**place** - _1_) of **list**    ‾value(moving) ‾value(list) ‾value(item (place - 1) of list)
+
+|   [action to_do_something L1]
+|   | to «"remove"» with icon «"trash alternate outline"»
+|   |   remove its **ingredient** from its **editor's draft's ingredients**    ‾value(its ingredient) ‾value(its editor's draft's ingredients)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨form⟩ value={its **ingredient**}>    code({its ingredient})
+|   |     <⟨fields⟩ unstackable>
+|   |       <⟨field⟩ width=«"2"»><⟨input⟩ name=«"amount"» type=«"number"» min=«"0"» aria-label=«"Amount"» /></⟨field⟩>
+|   |       <⟨field⟩ width=«"2"»><⟨input⟩ name=«"unit"» placeholder=«"Unit"» aria-label=«"Unit"» /></⟨field⟩>
+|   |       <⟨field⟩ width=«"6"»><⟨input⟩ name=«"name"» placeholder=«"Ingredient"» aria-label=«"Ingredient"» /></⟨field⟩>
+|   |       <⟨field⟩ width=«"3"»><⟨input⟩ name=«"aisle"» placeholder=«"Aisle"» aria-label=«"Aisle"» /></⟨field⟩>
+|   |       <⟨field⟩ width=«"3"»>
+|   |         <⟨stack⟩ direction=«"horizontal"» spacing=«"xs"»>
+|   |           <⟨action⟩ «"move up"» icon-only appearance=«"tertiary"» />
+|   |           <⟨action⟩ «"remove"» icon-only appearance=«"tertiary"» />
+|   |         </⟨stack⟩>
+|   |       </⟨field⟩>
+|   |     </⟨fields⟩>
+|   |   </⟨form⟩>
+
+[thing create_type L0]
+| a «"step row"» is a **view**
+|   ⟦// One step's words on the Edit screen, with buttons to move it and take it out⟧
+|   [property define_property_has L1]
+|   | its «"step"» is a **step**
+|   [property define_property_has L1]
+|   | its «"editor"» is a **recipe editor**
+
+|   [action to_do_something L1]
+|   | to «"move up"» with icon «"arrow up"»
+|   |   set **list** to its **editor's draft's steps**    ‾value(list) ‾value(its editor's draft's steps)
+|   |   set **moving** to its **step**    ‾value(moving) ‾value(its step)
+|   |   set **place** to the position of **moving** in **list**    ‾value(place) ‾value(the position of moving in list)
+|   |   if **place** is _1_ return    ‾value(place)
+|   |   remove **moving** from **list**    ‾value(moving) ‾value(list)
+|   |   add **moving** to **list** before item (**place** - _1_) of **list**    ‾value(moving) ‾value(list) ‾value(item (place - 1) of list)
+
+|   [action to_do_something L1]
+|   | to «"remove"» with icon «"trash alternate outline"»
+|   |   remove its **step** from its **editor's draft's steps**    ‾value(its step) ‾value(its editor's draft's steps)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨form⟩ value={its **step**}>    code({its step})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"xs"»>
+|   |       <⟨textarea⟩ name=«"instruction"» rows=«"2"» aria-label=«"Step"» fluid />
+|   |       <⟨action⟩ «"move up"» icon-only appearance=«"tertiary"» />
+|   |       <⟨action⟩ «"remove"» icon-only appearance=«"tertiary"» />
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+[thing reopen_type L0]
+| a **recipe editor**
+|   [action draw_it L1]
+|   | to **draw** its **ingredient rows**
+|   |   ⟦// A row of fields for each ingredient on the draft⟧
+|   |   set **this editor** to it    ‾value(this editor) ‾value(it)
+|   |   [control list_iteration L2]
+|   |   | for **one** in its **draft's ingredients**    ‾value(its draft's ingredients)
+|   |   |   draw (**a new ingredient row** with **editor** = **this editor**, **ingredient** = **one**)    ‾value(a new ingredient row with editor = this editor, ingredient = one)
+
+|   [action draw_it L1]
+|   | to **draw** its **step rows**
+|   |   ⟦// A box for each step on the draft⟧
+|   |   set **this editor** to it    ‾value(this editor) ‾value(it)
+|   |   [control list_iteration L2]
+|   |   | for **one** in its **draft's steps**    ‾value(its draft's steps)
+|   |   |   draw (**a new step row** with **editor** = **this editor**, **step** = **one**)    ‾value(a new step row with editor = this editor, step = one)

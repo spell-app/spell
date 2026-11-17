@@ -1,0 +1,790 @@
+==== /Board.spell
+⟪# The board and its rules⟫
+⟦// American checkers:  8 by 8, each side's 12 pieces on the dark squares of its first three rows.⟧
+⟦// A piece moves one square on a diagonal, forward only, until it reaches the far row and is crowned a king:⟧
+⟦// a king moves forward and back.⟧
+⟦// A piece jumps an enemy piece next to it, onto the empty square beyond, and takes it;⟧
+⟦// a jump must be taken when there is one, and a piece that jumps carries on jumping while it can.⟧
+⟦// Black moves first.  A side with no pieces left, or no move to make, has lost.⟧
+
+[thing create_type L0]
+| a «"piece"» is a **draggable view**
+|   ⟦-- A checker:  a man, until it reaches the far row and is crowned a king.⟧
+|   [property define_property_has L1]
+|   | its «"side"» is one of ‹black› or ‹red›
+|   [property define_property_has L1]
+|   | its «"rank"» is one of ‹man› or ‹king›
+|   [property quoted_type_expression L1]
+|   | it «"is a king"» if its **rank** is _king_    ‾value(its rank)
+|   [property property_value_getter L1]
+|   | its «"forward"» is
+|   |   ⟦-- Which way down the board it moves:  black up, from the bottom;  red down, from the top⟧
+|   |   _-1_ if its **side** is _black_    ‾value(its side)
+|   |   _1_ otherwise
+|   [property property_value_getter L1]
+|   | its «"far row"» is
+|   |   _1_ if its **side** is _black_    ‾value(its side)
+|   |   _8_ otherwise
+
+[thing create_viewable_list_type L0]
+| a «"square"» is a **viewable**, **droppable list of pieces**
+|   ⟦-- One of the board's 64, by its row and column:  row 1 at the top, column 1 on the left.⟧
+|   ⟦-- Only the 32 dark ones are played on;  each holds one piece, or none.⟧
+|   [property define_property_has L1]
+|   | its «"row"» is a **number**
+|   [property define_property_has L1]
+|   | its «"column"» is a **number**
+|   [property define_property_has L1]
+|   | its «"shade"» is one of ‹light› or ‹dark›
+|   |   ⟦-- set as the board is made:  dark where its row and column add up to an odd number⟧
+|   [property property_value_getter L1]
+|   | its «"piece"» is the first **piece** in it
+
+[property belongs_to_one L0]
+| a **piece** belongs to one **square**
+
+[thing create_viewable_list_type L0]
+| a «"board"» is a **viewable list of squares**
+|   ⟦-- The 64 squares, a game on them, and whose turn it is⟧
+|   [property define_property_has L1]
+|   | its «"turn"» is one of ‹black› or ‹red›
+|   [property define_property_has L1]
+|   | its «"winner"» is one of ‹nobody›, ‹black› or ‹red›
+|   [property define_property_has L1]
+|   | its «"turned"» is yes or no
+|   |   ⟦-- Drawn turned round, red's side nearest:  the other player's view of the same game⟧
+|   [property define_property_has L1]
+|   | its «"picked piece"» is a **piece**
+|   |   ⟦-- The piece clicked, to move with the next click⟧
+|   [property define_property_has L1]
+|   | its «"jumper"» is a **piece**
+|   |   ⟦-- The piece in the middle of jumps:  only it may move, and only to jump again⟧
+|   [property quoted_type_expression L1]
+|   | it «"is over"» if its **winner** is not _nobody_    ‾value(its winner)
+
+|   [action create_hook L1]
+|   | when «creating a board»    ‾value(a board) bold(board)
+|   |   [control list_range_iteration L2]
+|   |   | for **row** from _1_ to _8_
+|   |   |   [control list_range_iteration L3]
+|   |   |   | for **column** from _1_ to _8_
+|   |   |   |   set **shade** to _dark_ if **row** + **column** is in [_3_, _5_, _7_, _9_, _11_, _13_, _15_] otherwise _light_    ‾value(shade) ‾value(row) ‾value(column) ‾value([3, 5, 7, 9, 11, 13, 15])
+|   |   |   |   add **a new square** with **row**, **column** and **shade** to the **board**    ‾value(a new square with row, column and shade) ‾value(the board)
+
+[property belongs_to_one L0]
+| a **square** belongs to one **board**
+
+[plain group define_group L0]
+| group «"Finding Squares"»
+
+|   [action to_do_something L1]
+|   | to «"the square at (row as a number) and (column as a number) on (a board)"»    ‾value(row as a number) ‾value(column as a number) ‾value(a board) bold(row) bold(number) bold(column) bold(number) bold(board)
+|   |   ⟦-- nothing off the board's edge⟧
+|   |   [control if L2]
+|   |   | if **row** < _1_ or **row** > _8_    ‾value(row) ‾value(row)
+|   |   |   return nothing    ‾value(nothing)
+|   |   [control if L2]
+|   |   | if **column** < _1_ or **column** > _8_    ‾value(column) ‾value(column)
+|   |   |   return nothing    ‾value(nothing)
+|   |   set **index** to **row** * _8_ - _8_ + **column**    ‾value(index) ‾value(row) ‾value(column)
+|   |   return item **index** of the **board**    ‾value(item index of the board)
+
+
+[plain group define_group L0]
+| group «"Moves"»
+
+|   [thing reopen_type L1]
+|   | a **piece**
+|   |   [property quoted_type_expression L2]
+|   |   | it «"can jump to (a square)"» if    ‾value(a square)
+|   |   |   ⟦-- Two squares on along a diagonal, forward unless it's a king, over an enemy piece onto an empty square⟧
+|   |   |   set **rows** to the **row** of the **square** - the **row** of its **square**    ‾value(rows) ‾value(the row of the square) ‾value(the row of its square)
+|   |   |   set **columns** to the **column** of the **square** - the **column** of its **square**    ‾value(columns) ‾value(the column of the square) ‾value(the column of its square)
+|   |   |   [control if L3]
+|   |   |   | if the absolute value of **rows** is not _2_ or the absolute value of **columns** is not _2_ or the **square** is not empty    ‾value(the absolute value of rows) ‾value(the absolute value of columns) ‾question(the square is not empty)
+|   |   |   |   return _no_
+|   |   |   [control if L3]
+|   |   |   | if it is not a king and **rows** * its **forward** < _0_    ‾question(it is not a king) ‾value(rows) ‾value(its forward)
+|   |   |   |   return _no_
+|   |   |   set **row** to (the **row** of its **square** + the **row** of the **square**) / _2_    ‾value(row) ‾value(the row of its square) ‾value(the row of the square)
+|   |   |   set **column** to (the **column** of its **square** + the **column** of the **square**) / _2_    ‾value(column) ‾value(the column of its square) ‾value(the column of the square)
+|   |   |   set **middle** to the square at **row** and **column** on the **board** of its **square**    ‾value(middle) ‾call(the square at row and column on the board of its square)
+|   |   |   set **enemy** to the **piece** of **middle**    ‾value(enemy) ‾value(the piece of middle)
+|   |   |   return **enemy** exists and the **side** of **enemy** is not its **side**    ‾question(enemy exists) ‾value(the side of enemy) ‾value(its side)
+
+|   |   [property quoted_type_expression L2]
+|   |   | it «"has a jump"» if
+|   |   |   ⟦-- Whether there's a square it can jump to⟧
+|   |   |   return the **board** of its **square** has **squares** where the **piece** can jump to it    ‾value(the board of its square) ‾question(the piece can jump to it)
+
+|   [thing reopen_type L1]
+|   | a **board**
+|   |   [property quoted_type_expression L2]
+|   |   | it «"is forced to jump"» if
+|   |   |   ⟦-- Whether the side whose turn it is has a jump to make:  then it must make one⟧
+|   |   |   return it has **squares** where its **piece** exists and the **side** of its **piece** is the **turn** of the **board** and its **piece** has a jump    ‾value(it) ‾question(its piece exists) ‾value(the side of its piece) ‾value(the turn of the board) ‾question(its piece has a jump)
+
+|   [thing reopen_type L1]
+|   | a **piece**
+|   |   [property quoted_type_expression L2]
+|   |   | it «"can go to (a square)"» if    ‾value(a square)
+|   |   |   ⟦-- Whether it's a move the rules allow:  a step, or a jump when it must⟧
+|   |   |   [control if L3]
+|   |   |   | if the **shade** of the **square** is _light_ or the **square** is not empty    ‾value(the shade of the square) ‾question(the square is not empty)
+|   |   |   |   return _no_
+|   |   |   set **board** to the **board** of its **square**    ‾value(board) ‾value(the board of its square)
+|   |   |   [control if L3]
+|   |   |   | if the **board** is over or its **side** is not the **turn** of the **board**    ‾question(the board is over) ‾value(its side) ‾value(the turn of the board)
+|   |   |   |   return _no_
+|   |   |   [control if L3]
+|   |   |   | if the **jumper** of the **board** exists and it is not the **jumper** of the **board**    ‾question(the jumper of the board exists) ‾value(it) ‾value(the jumper of the board)
+|   |   |   |   return _no_
+|   |   |   set **rows** to the **row** of the **square** - the **row** of its **square**    ‾value(rows) ‾value(the row of the square) ‾value(the row of its square)
+|   |   |   set **columns** to the **column** of the **square** - the **column** of its **square**    ‾value(columns) ‾value(the column of the square) ‾value(the column of its square)
+|   |   |   [control if L3]
+|   |   |   | if it is not a king and **rows** * its **forward** < _0_    ‾question(it is not a king) ‾value(rows) ‾value(its forward)
+|   |   |   |   return _no_
+|   |   |   [control if L3]
+|   |   |   | if the absolute value of **rows** is _2_ and the absolute value of **columns** is _2_    ‾value(the absolute value of rows) ‾value(the absolute value of columns)
+|   |   |   |   return it can jump to the **square**    ‾question(it can jump to the square)
+|   |   |   [control if L3]
+|   |   |   | if the absolute value of **rows** is _1_ and the absolute value of **columns** is _1_    ‾value(the absolute value of rows) ‾value(the absolute value of columns)
+|   |   |   |   return the **jumper** of the **board** does not exist and the **board** is not forced to jump    ‾question(the jumper of the board does not exist) ‾question(the board is not forced to jump)
+|   |   |   return _no_
+
+|   |   [property quoted_type_expression L2]
+|   |   | it «"can move"» if
+|   |   |   ⟦-- Whether there's a square it can go to⟧
+|   |   |   return the **board** of its **square** has **squares** where the **piece** can go to it    ‾value(the board of its square) ‾question(the piece can go to it)
+
+|   |   [property property_value_getter L2]
+|   |   | its «"letter"» is
+|   |   |   ⟦-- How the board's diagram writes it:  b and r for each side's men, B and R for its kings⟧
+|   |   |   _"B"_ if its **side** is _black_ and it is a king    ‾value(its side) ‾question(it is a king)
+|   |   |   _"b"_ if its **side** is _black_    ‾value(its side)
+|   |   |   _"R"_ if it is a king    ‾question(it is a king)
+|   |   |   _"r"_ otherwise
+
+|   [thing reopen_type L1]
+|   | a **board**
+|   |   [property quoted_type_expression L2]
+|   |   | it «"has a move"» if
+|   |   |   ⟦-- Whether the side whose turn it is can move at all:  with none, it has lost⟧
+|   |   |   return it has **squares** where its **piece** exists and its **piece** can move    ‾value(it) ‾question(its piece exists) ‾question(its piece can move)
+
+|   |   [property property_value_getter L2]
+|   |   | its «"diagram"» is
+|   |   |   ⟦-- Each square's piece as a letter, top left to bottom right:  "" for an empty one⟧
+|   |   |   set **letters** to a new list of **text**    ‾value(letters) ‾value(a new list of text)
+|   |   |   [control list_iteration L3]
+|   |   |   | for **square** in the **board**    ‾value(the board)
+|   |   |   |   add (the **letter** of the **piece** of the **square** if the **square** is not empty otherwise _""_) to **letters**    ‾value(the letter of the piece of the square) ‾question(the square is not empty) ‾value(letters)
+|   |   |   return **letters**    ‾value(letters)
+
+[plain group define_group L0]
+| group «"Playing"»
+
+|   [action to_do_something L1]
+|   | to «"reset (a board)"»    ‾value(a board) bold(board)
+|   |   ⟦-- No pieces on it, black to move, and nobody's won⟧
+|   |   [control list_iteration L2]
+|   |   | for **square** in the **board**    ‾value(the board)
+|   |   |   empty the **square**    ‾value(the square)
+|   |   set the **turn** of the **board** to _black_    ‾value(the turn of the board)
+|   |   set the **winner** of the **board** to _nobody_    ‾value(the winner of the board)
+|   |   set the **jumper** of the **board** to nothing    ‾value(the jumper of the board) ‾value(nothing)
+|   |   set the **picked piece** of the **board** to nothing    ‾value(the picked piece of the board) ‾value(nothing)
+
+|   [action to_do_something L1]
+|   | to «"start a new game on (a board)"»    ‾value(a board) bold(board)
+|   |   ⟦-- Each side's 12 men on the dark squares of its first three rows, black to move⟧
+|   |   reset the **board**    ‾call(reset the board)
+|   |   for **square** in the **board** where its **shade** is _dark_    ‾value(the board) ‾value(its shade)
+|   |   [control if L2]
+|   |   | if the **row** of the **square** < _4_    ‾value(the row of the square)
+|   |   |   add **a new piece** with **side** _red_ and **rank** _man_ to the **square**    ‾value(a new piece with side red and rank man) ‾value(the square)
+|   |   [control if L2]
+|   |   | if the **row** of the **square** > _5_    ‾value(the row of the square)
+|   |   |   add **a new piece** with **side** _black_ and **rank** _man_ to the **square**    ‾value(a new piece with side black and rank man) ‾value(the square)
+
+|   [action to_do_something L1]
+|   | to «"set up (a board) from (diagram as a list)"»    ‾value(a board) ‾value(diagram as a list) bold(board) bold(diagram) bold(list)
+|   |   ⟦-- Every square's piece as the diagram says (`its diagram`):  black to move, and nobody's won⟧
+|   |   reset the **board**    ‾call(reset the board)
+|   |   [control list_iteration L2]
+|   |   | for **square**, **index** in the **board**    ‾value(the board)
+|   |   |   set **letter** to item **index** of **diagram**    ‾value(letter) ‾value(item index of diagram)
+|   |   |   [control if L3]
+|   |   |   | if **letter** is _"b"_ or **letter** is _"B"_    ‾value(letter) ‾value(letter)
+|   |   |   |   add **a new piece** with **side** _black_ to the **square**    ‾value(a new piece with side black) ‾value(the square)
+|   |   |   [control if L3]
+|   |   |   | if **letter** is _"r"_ or **letter** is _"R"_    ‾value(letter) ‾value(letter)
+|   |   |   |   add **a new piece** with **side** _red_ to the **square**    ‾value(a new piece with side red) ‾value(the square)
+|   |   |   [control if L3]
+|   |   |   | if **letter** is _"B"_ or **letter** is _"R"_    ‾value(letter) ‾value(letter)
+|   |   |   |   set the **rank** of the **piece** of the **square** to _king_    ‾value(the rank of the piece of the square)
+
+|   [thing reopen_type L1]
+|   | a **board**
+|   |   [property property_value_getter L2]
+|   |   | its «"jump square"» is
+|   |   |   ⟦-- Where its jumper is, by the square's place on the board, 1 to 64:  0 while no piece is jumping⟧
+|   |   |   _0_ if its **jumper** does not exist    ‾question(its jumper does not exist)
+|   |   |   the position of the **square** of its **jumper** in it otherwise    ‾value(the position of the square of its jumper in it)
+
+|   [action to_do_something L1]
+|   | to «"copy (a board) onto (other as a board)"»    ‾value(a board) ‾value(other as a board) bold(board) bold(other) bold(board)
+|   |   ⟦-- The other board shows the same game:  its pieces, whose turn it is, who's won, and which piece is jumping⟧
+|   |   set up **other** from the **diagram** of the **board**    ‾call(set up other from the diagram of the board)
+|   |   set the **turn** of **other** to the **turn** of the **board**    ‾value(the turn of other) ‾value(the turn of the board)
+|   |   set the **winner** of **other** to the **winner** of the **board**    ‾value(the winner of other) ‾value(the winner of the board)
+|   |   [control if L2]
+|   |   | if the **jump square** of the **board** > _0_    ‾value(the jump square of the board)
+|   |   |   set the **jumper** of **other** to the **piece** of (item (the **jump square** of the **board**) of **other**)    ‾value(the jumper of other) ‾value(the piece of (item (the jump square of the board) of other))
+
+|   [action to_do_something L1]
+|   | to «move (a piece) to (a square)»    ‾value(a piece) ‾value(a square) bold(piece) bold(square)
+|   |   ⟦-- The piece onto the square, if the rules let it:  a jump takes the piece it jumps⟧
+|   |   ⟦-- - then it's crowned on the far row, or jumps again while it can, or the other side's turn comes⟧
+|   |   cancel if the **piece** cannot go to the **square**    ‾question(the piece cannot go to the square)
+|   |   set **board** to the **board** of the **square**    ‾value(board) ‾value(the board of the square)
+|   |   set **start** to the **square** of the **piece**    ‾value(start) ‾value(the square of the piece)
+|   |   set **jumped** to the absolute value of (the **row** of the **square** - the **row** of **start**) is _2_    ‾value(jumped) ‾value(the absolute value of (the row of the square - the row of start))
+|   |   [control if L2]
+|   |   | if **jumped**    ‾value(jumped)
+|   |   |   set **middle** to the square at (the **row** of **start** + the **row** of the **square**) / _2_ and (the **column** of **start** + the **column** of the **square**) / _2_ on **board**    ‾value(middle) ‾call(the square at (the row of start + the row of the square) / 2 and (the column of start + the column of the square) / 2 on board)
+|   |   |   empty **middle**    ‾value(middle)
+|   |   add the **piece** to the **square**    ‾value(the piece) ‾value(the square)
+|   |   set the **picked piece** of **board** to nothing    ‾value(the picked piece of board) ‾value(nothing)
+|   |   [control if L2]
+|   |   | if the **piece** is not a king and the **row** of the **square** is the **far row** of the **piece**    ‾question(the piece is not a king) ‾value(the row of the square) ‾value(the far row of the piece)
+|   |   |   set the **rank** of the **piece** to _king_    ‾value(the rank of the piece)
+|   |   |   end the turn on **board**    ‾call(end the turn on board)
+|   |   [control else_if L2]
+|   |   | otherwise if **jumped** and the **piece** has a jump    ‾value(jumped) ‾question(the piece has a jump)
+|   |   |   set the **jumper** of **board** to the **piece**    ‾value(the jumper of board) ‾value(the piece)
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   end the turn on **board**    ‾call(end the turn on board)
+
+|   [action to_do_something L1]
+|   | to «"end the turn on (a board)"»    ‾value(a board) bold(board)
+|   |   ⟦-- The other side's turn:  with no piece that can move, it has lost⟧
+|   |   set the **jumper** of the **board** to nothing    ‾value(the jumper of the board) ‾value(nothing)
+|   |   set the **turn** of the **board** to _red_ if the **turn** of the **board** is _black_ otherwise _black_    ‾value(the turn of the board) ‾value(the turn of the board)
+|   |   [control if L2]
+|   |   | if the **board** does not have a move    ‾question(the board does not have a move)
+|   |   |   set the **winner** of the **board** to _red_ if the **turn** of the **board** is _black_ otherwise _black_    ‾value(the winner of the board) ‾value(the turn of the board)
+
+[plain group define_group L0]
+| group «"Tests"»
+
+|   [action to_do_something L1]
+|   | to «"put a (side as text) (rank as text) at (row as a number) and (column as a number) on (a board)"»    ‾value(side as text) ‾value(rank as text) ‾value(row as a number) ‾value(column as a number) ‾value(a board) bold(side) bold(text) bold(rank) bold(text) bold(row) bold(number) bold(column) bold(number) bold(board)
+|   |   ⟦-- One piece on a square, for a test to set up the position it wants⟧
+|   |   add **a new piece** with **side** and **rank** to the square at **row** and **column** on the **board**    ‾value(a new piece with side and rank) ‾call(the square at row and column on the board)
+
+|   [action to_do_something L1]
+|   | to «test the opening»
+|   |   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   |   start a new game on **board**    ‾call(start a new game on board)
+|   |   the number of **squares** in **board** where it is not empty should be _24_    ‾value(the number of squares in board where it is not empty)
+|   |   the **turn** of **board** should be _black_    ‾value(the turn of board)
+|   |   set **man** to the **piece** of (the square at _6_ and _1_ on **board**)    ‾value(man) ‾value(the piece of (the square at 6 and 1 on board))
+|   |   the **side** of **man** should be _black_    ‾value(the side of man)
+|   |   **man** can go to (the square at _5_ and _2_ on **board**) should be _yes_    ‾question(man can go to (the square at 5 and 2 on board))
+|   |   **man** can go to (the square at _7_ and _2_ on **board**) should be _no_    ‾question(man can go to (the square at 7 and 2 on board))
+|   |   **man** can go to (the square at _4_ and _3_ on **board**) should be _no_    ‾question(man can go to (the square at 4 and 3 on board))
+|   |   ⟦-- red waits its turn⟧
+|   |   the **piece** of (the square at _3_ and _2_ on **board**) can move should be _no_    ‾question(the piece of (the square at 3 and 2 on board) can move)
+|   |   move **man** to the square at _5_ and _2_ on **board**    ‾call(move man to the square at 5 and 2 on board)
+|   |   the **turn** of **board** should be _red_    ‾value(the turn of board)
+
+|   [action to_do_something L1]
+|   | to «test a jump must be taken»
+|   |   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   |   reset **board**    ‾call(reset board)
+|   |   put a _"black"_ _"man"_ at _6_ and _3_ on **board**    ‾call(put a "black" "man" at 6 and 3 on board)
+|   |   put a _"red"_ _"man"_ at _5_ and _4_ on **board**    ‾call(put a "red" "man" at 5 and 4 on board)
+|   |   put a _"black"_ _"man"_ at _6_ and _7_ on **board**    ‾call(put a "black" "man" at 6 and 7 on board)
+|   |   **board** is forced to jump should be _yes_    ‾question(board is forced to jump)
+|   |   ⟦-- a step isn't allowed while there's a jump to make⟧
+|   |   the **piece** of (the square at _6_ and _7_ on **board**) can go to (the square at _5_ and _6_ on **board**) should be _no_    ‾question(the piece of (the square at 6 and 7 on board) can go to (the square at 5 and 6 on board))
+|   |   set **jumper** to the **piece** of (the square at _6_ and _3_ on **board**)    ‾value(jumper) ‾value(the piece of (the square at 6 and 3 on board))
+|   |   **jumper** can go to (the square at _5_ and _2_ on **board**) should be _no_    ‾question(jumper can go to (the square at 5 and 2 on board))
+|   |   **jumper** can go to (the square at _4_ and _5_ on **board**) should be _yes_    ‾question(jumper can go to (the square at 4 and 5 on board))
+|   |   move **jumper** to the square at _4_ and _5_ on **board**    ‾call(move jumper to the square at 4 and 5 on board)
+|   |   the square at _5_ and _4_ on **board** is empty should be _yes_    ‾question(the square at 5 and 4 on board is empty)
+|   |   ⟦-- red has no pieces left:  black wins⟧
+|   |   the **winner** of **board** should be _black_    ‾value(the winner of board)
+
+|   [action to_do_something L1]
+|   | to «test jumping on»
+|   |   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   |   reset **board**    ‾call(reset board)
+|   |   put a _"black"_ _"man"_ at _7_ and _2_ on **board**    ‾call(put a "black" "man" at 7 and 2 on board)
+|   |   put a _"red"_ _"man"_ at _6_ and _3_ on **board**    ‾call(put a "red" "man" at 6 and 3 on board)
+|   |   put a _"red"_ _"man"_ at _4_ and _5_ on **board**    ‾call(put a "red" "man" at 4 and 5 on board)
+|   |   put a _"red"_ _"man"_ at _1_ and _8_ on **board**    ‾call(put a "red" "man" at 1 and 8 on board)
+|   |   set **jumper** to the **piece** of (the square at _7_ and _2_ on **board**)    ‾value(jumper) ‾value(the piece of (the square at 7 and 2 on board))
+|   |   move **jumper** to the square at _5_ and _4_ on **board**    ‾call(move jumper to the square at 5 and 4 on board)
+|   |   ⟦-- still black's turn:  the same piece jumps again⟧
+|   |   the **turn** of **board** should be _black_    ‾value(the turn of board)
+|   |   the **jumper** of **board** should be **jumper**    ‾value(the jumper of board) ‾value(jumper)
+|   |   move **jumper** to the square at _3_ and _6_ on **board**    ‾call(move jumper to the square at 3 and 6 on board)
+|   |   the number of **squares** in **board** where it is not empty should be _2_    ‾value(the number of squares in board where it is not empty)
+|   |   the **turn** of **board** should be _red_    ‾value(the turn of board)
+|   |   the **winner** of **board** should be _nobody_    ‾value(the winner of board)
+
+|   [action to_do_something L1]
+|   | to «test crowning a king»
+|   |   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   |   reset **board**    ‾call(reset board)
+|   |   put a _"black"_ _"man"_ at _2_ and _3_ on **board**    ‾call(put a "black" "man" at 2 and 3 on board)
+|   |   put a _"red"_ _"man"_ at _5_ and _8_ on **board**    ‾call(put a "red" "man" at 5 and 8 on board)
+|   |   set **man** to the **piece** of (the square at _2_ and _3_ on **board**)    ‾value(man) ‾value(the piece of (the square at 2 and 3 on board))
+|   |   move **man** to the square at _1_ and _2_ on **board**    ‾call(move man to the square at 1 and 2 on board)
+|   |   **man** is a king should be _yes_    ‾question(man is a king)
+|   |   the **turn** of **board** should be _red_    ‾value(the turn of board)
+|   |   move the **piece** of (the square at _5_ and _8_ on **board**) to the square at _6_ and _7_ on **board**    ‾call(move the piece of (the square at 5 and 8 on board) to the square at 6 and 7 on board)
+|   |   ⟦-- a king moves back down the board⟧
+|   |   **man** can go to (the square at _2_ and _3_ on **board**) should be _yes_    ‾question(man can go to (the square at 2 and 3 on board))
+
+|   [action to_do_something L1]
+|   | to «test the diagram»
+|   |   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   |   start a new game on **board**    ‾call(start a new game on board)
+|   |   set **other** to **a new board**    ‾value(other) ‾value(a new board)
+|   |   set up **other** from the **diagram** of **board**    ‾call(set up other from the diagram of board)
+|   |   the **diagram** of **other** as text should be the **diagram** of **board** as text    ‾value(the diagram of other as text) ‾value(the diagram of board as text)
+|   |   the number of **squares** in **other** where it is not empty should be _24_    ‾value(the number of squares in other where it is not empty)
+|   |   move the **piece** of (the square at _6_ and _1_ on **board**) to the square at _5_ and _2_ on **board**    ‾call(move the piece of (the square at 6 and 1 on board) to the square at 5 and 2 on board)
+|   |   copy **board** onto **other**    ‾call(copy board onto other)
+|   |   the **diagram** of **other** as text should be the **diagram** of **board** as text    ‾value(the diagram of other as text) ‾value(the diagram of board as text)
+|   |   the **turn** of **other** should be _red_    ‾value(the turn of other)
+
+==== /Computer.spell
+⟪# The computer⟫
+⟦// How the computer picks its move, when you play against it:  every move it can make, each given points.⟧
+⟦// - a jump scores most:  the rules make it jump when it can, so this picks between jumps⟧
+⟦// - then a move that crowns a king⟧
+⟦// - a move onto a square where no piece of yours can jump it scores, and one where you can loses⟧
+⟦// It looks one move ahead, no more:  it never sets a trap, and you can beat it.⟧
+
+[thing create_type L0]
+| a «"move"» is a **thing**
+|   ⟦-- One move the side to play could make:  a piece, the square it would go to, and its points⟧
+|   [property define_property_has L1]
+|   | its «"piece"» is a **piece**
+|   [property define_property_has L1]
+|   | its «"square"» is a **square**
+|   [property define_property_has L1]
+|   | its «"points"» is a **number**
+
+[thing reopen_type L0]
+| a **square**
+|   [property quoted_type_expression L1]
+|   | it «"is next to (a square)"» if    ‾value(a square)
+|   |   ⟦-- Whether it touches the square at a corner:  one row and one column away⟧
+|   |   return the absolute value of (its **row** - the **row** of the **square**) is _1_ and the absolute value of (its **column** - the **column** of the **square**) is _1_    ‾value(the absolute value of (its row - the row of the square)) ‾value(the absolute value of (its column - the column of the square))
+
+[thing reopen_type L0]
+| a **piece**
+|   [property quoted_type_expression L1]
+|   | it «"would be safe on (a square)"» if    ‾value(a square)
+|   |   ⟦-- Whether no enemy piece could jump it there:  one next to the square, with the square beyond it free⟧
+|   |   ⟦-- inside the loop `its` is the square beside:  so its side and where it stands are named first⟧
+|   |   set **board** to the **board** of its **square**    ‾value(board) ‾value(the board of its square)
+|   |   set **own side** to its **side**    ‾value(own side) ‾value(its side)
+|   |   set **left** to its **square**    ‾value(left) ‾value(its square)
+|   |   set **threats** to _0_    ‾value(threats)
+|   |   for **beside** in **board** where it is next to the **square**    ‾value(board) ‾question(it is next to the square)
+|   |     set **enemy** to the **piece** of **beside**    ‾value(enemy) ‾value(the piece of beside)
+|   |     set **landing** to the square at the **row** of the **square** * _2_ - the **row** of **beside** and the **column** of the **square** * _2_ - the **column** of **beside** on **board**    ‾value(landing) ‾call(the square at the row of the square * 2 - the row of beside and the column of the square * 2 - the column of beside on board)
+|   |   [control if L2]
+|   |   | if **enemy** exists and **landing** exists and the **side** of **enemy** is not **own side**    ‾question(enemy exists) ‾question(landing exists) ‾value(the side of enemy) ‾value(own side)
+|   |   |   ⟦-- it lands where this piece left, or on an empty square;  a man jumps only forward⟧
+|   |   |   set **heading** to (the **row** of **landing** - the **row** of **beside**) * the **forward** of **enemy**    ‾value(heading) ‾value(the row of landing) ‾value(the row of beside) ‾value(the forward of enemy)
+|   |   |   [control if L3]
+|   |   |   | if (**landing** is **left** or **landing** is empty) and (**enemy** is a king or **heading** > _0_)    ‾value(landing) ‾value(left) ‾question(landing is empty) ‾question(enemy is a king) ‾value(heading)
+|   |   |   |   set **threats** to **threats** + _1_    ‾value(threats) ‾value(threats)
+|   |   return **threats** is _0_    ‾value(threats)
+
+[action to_do_something L0]
+| to «"the points for (a move)"»    ‾value(a move) bold(move)
+|   ⟦-- What a move is worth to the computer⟧
+|   set **mover** to the **piece** of the **move**    ‾value(mover) ‾value(the piece of the move)
+|   set **target** to the **square** of the **move**    ‾value(target) ‾value(the square of the move)
+|   set **score** to _0_    ‾value(score)
+|   [control if L1]
+|   | if **mover** can jump to **target**    ‾question(mover can jump to target)
+|   |   set **score** to **score** + _10_    ‾value(score) ‾value(score)
+|   [control if L1]
+|   | if **mover** is not a king and the **row** of **target** is the **far row** of **mover**    ‾question(mover is not a king) ‾value(the row of target) ‾value(the far row of mover)
+|   |   set **score** to **score** + _5_    ‾value(score) ‾value(score)
+|   [control if L1]
+|   | if **mover** would be safe on **target**    ‾question(mover would be safe on target)
+|   |   set **score** to **score** + _2_    ‾value(score) ‾value(score)
+|   [control else L1]
+|   | otherwise
+|   |   set **score** to **score** - _4_    ‾value(score) ‾value(score)
+|   return **score**    ‾value(score)
+
+[thing reopen_type L0]
+| a **board**
+|   [property property_value_getter L1]
+|   | its «"moves"» is
+|   |   ⟦-- Every move the side whose turn it is can make, with its points⟧
+|   |   set **found** to a new list of **moves**    ‾value(found) ‾value(a new list of moves)
+|   |   for **start** in it where its **piece** exists and the **side** of its **piece** is the **turn** of the **board**    ‾value(it) ‾question(its piece exists) ‾value(the side of its piece) ‾value(the turn of the board)
+|   |     set **mover** to the **piece** of **start**    ‾value(mover) ‾value(the piece of start)
+|   |     for **target** in the **board** where **mover** can go to it    ‾value(the board) ‾question(mover can go to it)
+|   |       set **move** to **a new move** with **piece** = **mover**, **square** = **target**    ‾value(move) ‾value(a new move with piece = mover, square = target)
+|   |       set the **points** of **move** to the points for **move**    ‾value(the points of move) ‾call(the points for move)
+|   |       add **move** to **found**    ‾value(move) ‾value(found)
+|   |   return **found**    ‾value(found)
+
+[action to_do_something L0]
+| to «"play for the computer on (a board)"»    ‾value(a board) bold(board)
+|   ⟦-- The computer's move:  the most points, picked at random among the best⟧
+|   set **choices** to the **moves** of the **board**    ‾value(choices) ‾value(the moves of the board)
+|   [control if L1]
+|   | if **choices** is empty    ‾question(choices is empty)
+|   |   return
+|   set **best** to the last **move** in (**choices** sorted by its **points**)    ‾value(best) ‾value(the last move in (choices sorted by its points))
+|   set **chosen** to a random **move** in **choices** where its **points** is the **points** of **best**    ‾value(chosen) ‾value(a random move in choices where its points is the points of best)
+|   move the **piece** of **chosen** to the **square** of **chosen**    ‾call(move the piece of chosen to the square of chosen)
+
+[action to_do_something L0]
+| to «test the computer jumps»
+|   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   reset **board**    ‾call(reset board)
+|   set the **turn** of **board** to _red_    ‾value(the turn of board)
+|   put a _"red"_ _"man"_ at _3_ and _4_ on **board**    ‾call(put a "red" "man" at 3 and 4 on board)
+|   put a _"black"_ _"man"_ at _4_ and _5_ on **board**    ‾call(put a "black" "man" at 4 and 5 on board)
+|   put a _"black"_ _"man"_ at _7_ and _2_ on **board**    ‾call(put a "black" "man" at 7 and 2 on board)
+|   play for the computer on **board**    ‾call(play for the computer on board)
+|   the square at _4_ and _5_ on **board** is empty should be _yes_    ‾question(the square at 4 and 5 on board is empty)
+|   the **piece** of (the square at _5_ and _6_ on **board**) exists should be _yes_    ‾question(the piece of (the square at 5 and 6 on board) exists)
+
+[action to_do_something L0]
+| to «test the computer keeps its pieces safe»
+|   set **board** to **a new board**    ‾value(board) ‾value(a new board)
+|   reset **board**    ‾call(reset board)
+|   set the **turn** of **board** to _red_    ‾value(the turn of board)
+|   put a _"red"_ _"man"_ at _3_ and _4_ on **board**    ‾call(put a "red" "man" at 3 and 4 on board)
+|   put a _"black"_ _"man"_ at _6_ and _7_ on **board**    ‾call(put a "black" "man" at 6 and 7 on board)
+|   ⟦-- going to 4 and 5 walks into a jump from 5 and 6 later;  4 and 3 is safe now⟧
+|   set **man** to the **piece** of (the square at _3_ and _4_ on **board**)    ‾value(man) ‾value(the piece of (the square at 3 and 4 on board))
+|   **man** would be safe on (the square at _4_ and _5_ on **board**) should be _yes_    ‾question(man would be safe on (the square at 4 and 5 on board))
+|   put a _"black"_ _"man"_ at _5_ and _6_ on **board**    ‾call(put a "black" "man" at 5 and 6 on board)
+|   **man** would be safe on (the square at _4_ and _5_ on **board**) should be _no_    ‾question(man would be safe on (the square at 4 and 5 on board))
+|   **man** would be safe on (the square at _4_ and _3_ on **board**) should be _yes_    ‾question(man would be safe on (the square at 4 and 3 on board))
+|   play for the computer on **board**    ‾call(play for the computer on board)
+|   the **piece** of (the square at _4_ and _3_ on **board**) exists should be _yes_    ‾question(the piece of (the square at 4 and 3 on board) exists)
+
+==== /Checkers.api.spell
+⟪## Checkers:  where a game against someone in another tab is kept⟫
+⟦// A live room on the page server:  each tab in it hears every move the other makes, as it's made.⟧
+⟦// A game is kept at a table, two tabs sitting at it:  the room is the tables of Owen's space.⟧
+⟦// Joining it is reading that space, so only its members join.⟧
+⟦// In the editor on Owen's machine that's him, with no sign-in;  anyone else signs in with a Spell account.⟧
+⟦// Name your own space to play in it:  "ana@spell/tables".⟧
+[thing create_place L0]
+| «checkers room» is a room at «"owen@spell/tables"»
+
+[thing create_type L0]
+| a «"table"» is a **thing**
+|   ⟦-- Where two tabs play one game:  the board as its diagram, whose turn it is, and which tab sits on each side⟧
+|   it lives in the **checkers room**    ‾value(the checkers room)
+|   [property define_property_has L1]
+|   | its «"diagram"» is a list of **text**
+|   |   ⟦-- Each square's piece as a letter, top left to bottom right (a board's diagram)⟧
+|   [property define_property_has L1]
+|   | its «"turn"» is **text**
+|   [property define_property_has L1]
+|   | its «"winner"» is **text**
+|   [property define_property_has L1]
+|   | its «"jump square"» is a **number**
+|   |   ⟦-- Where the piece in the middle of jumps is, by its square's place:  0 for none⟧
+|   [property define_property_has L1]
+|   | its «"black seat"» is **text**
+|   |   ⟦-- The tab playing black:  its seat⟧
+|   [property define_property_has L1]
+|   | its «"red seat"» is **text**
+|   |   ⟦-- The tab playing red⟧
+
+==== /Checkers.spell
+⟪# Checkers⟫
+⟦// Play against the computer, against yourself on two boards side by side, or against someone in another tab.⟧
+⟦// The rules are in Board.spell, the computer's moves in Computer.spell, and the room a table is kept in, in Checkers.api.spell:⟧
+⟦// this file holds the game you see, and what happens after each move.⟧
+
+[thing create_one_of_a_kind L0]
+| «checkers» is an **app**
+|   [property define_property_has L1]
+|   | its «"opponent"» is one of ‹computer›, ‹yourself› or ‹someone›
+|   |   ⟦-- Who black plays:  the computer, yourself on a second board turned round, or someone in another tab⟧
+|   [property define_property_has L1]
+|   | «"board"» is **a new board**
+|   [property define_property_has L1]
+|   | «"turned board"» is **a new board** with **turned** = _yes_
+|   |   ⟦-- The same game, turned round:  red's view of it⟧
+|   [property define_property_has L1]
+|   | its «"seat"» is **text**
+|   |   ⟦-- This tab's own name at a table, made up as it opens:  so the table knows which seat it took⟧
+|   [property define_property_has L1]
+|   | its «"table"» is a **table**
+|   |   ⟦-- The table this tab sits at, against someone in another tab⟧
+
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   set its **seat** to _"tab "_ && a random number between _1_ and _999999_    ‾value(its seat) ‾value(a random number between 1 and 999999)
+|   |   start a new game on its **board**    ‾call(start a new game on its board)
+|   |   copy its **board** onto its **turned board**    ‾call(copy its board onto its turned board)
+
+|   [property property_value_getter L1]
+|   | its «"side"» is
+|   |   ⟦-- Which side this tab plays against someone:  the side whose seat it took, else it watches⟧
+|   |   _"black"_ if its **table** exists and the **black seat** of its **table** is its **seat**    ‾question(its table exists) ‾value(the black seat of its table) ‾value(its seat)
+|   |   _"red"_ if its **table** exists and the **red seat** of its **table** is its **seat**    ‾question(its table exists) ‾value(the red seat of its table) ‾value(its seat)
+|   |   _"nobody"_ otherwise
+
+|   [property property_value_getter L1]
+|   | its «"message"» is
+|   |   ⟦-- The line above the board:  who's won, or whose move it is⟧
+|   |   set **game** to its **board**    ‾value(game) ‾value(its board)
+|   |   set **turn** to the **turn** of **game** as title case    ‾value(turn) ‾value(the turn of game as title case)
+|   |   [control if L2]
+|   |   | if **game** is over and its **opponent** is _computer_    ‾question(game is over) ‾value(its opponent)
+|   |   |   return _"You win!"_ if the **winner** of **game** is _black_ otherwise _"The computer wins"_    ‾value(the winner of game)
+|   |   [control if L2]
+|   |   | if **game** is over    ‾question(game is over)
+|   |   |   return the **winner** of **game** as title case && _"wins!"_    ‾value(the winner of game as title case)
+|   |   [control if L2]
+|   |   | if its **opponent** is _computer_ and the **turn** of **game** is _red_    ‾value(its opponent) ‾value(the turn of game)
+|   |   |   return _"The computer is thinking…"_
+|   |   [control if L2]
+|   |   | if its **opponent** is _someone_ and its **side** is _"nobody"_    ‾value(its opponent) ‾value(its side)
+|   |   |   return _"Two other tabs are playing:  New game starts your own"_
+|   |   [control if L2]
+|   |   | if its **opponent** is _someone_    ‾value(its opponent)
+|   |   |   return _"Your move"_ if the **turn** of **game** is its **side** otherwise _"Their move"_    ‾value(the turn of game) ‾value(its side)
+|   |   [control if L2]
+|   |   | if the **jumper** of **game** exists    ‾question(the jumper of game exists)
+|   |   |   return **turn** && _"jumps again"_    ‾value(turn)
+|   |   return **turn** && _"to play"_    ‾value(turn)
+
+|   [plain group define_group L1]
+|   | group «"Who You Play"»
+|   |   [action to_do_something L2]
+|   |   | to «"play the computer"» with title «"Computer"», icon «"desktop"»
+|   |   |   ⟦-- You play black, the computer red⟧
+|   |   |   selected when its **opponent** is _computer_    ‾value(its opponent)
+|   |   |   set its **opponent** to _computer_    ‾value(its opponent)
+|   |   |   set its **table** to nothing    ‾value(its table) ‾value(nothing)
+|   |   |   start a new game    ‾call(start a new game)
+
+|   |   [action to_do_something L2]
+|   |   | to «"play yourself"» with title «"Yourself"», icon «"columns"»
+|   |   |   ⟦-- Black on the first board, red on the second, turned round:  each side moves on its own⟧
+|   |   |   selected when its **opponent** is _yourself_    ‾value(its opponent)
+|   |   |   set its **opponent** to _yourself_    ‾value(its opponent)
+|   |   |   set its **table** to nothing    ‾value(its table) ‾value(nothing)
+|   |   |   start a new game    ‾call(start a new game)
+
+|   |   [action to_do_something L2]
+|   |   | to «"play someone"» with title «"Another tab"», icon «"users"», can't be undone
+|   |   |   ⟦-- The table in the room:  the first tab to join plays black, the second red, and any more watch⟧
+|   |   |   selected when its **opponent** is _someone_    ‾value(its opponent)
+|   |   |   set its **opponent** to _someone_    ‾value(its opponent)
+|   |   |   set **found** to the first **table** in every **table**    ‾value(found) ‾value(the first table in every table)
+|   |   |   [control if L3]
+|   |   |   | if **found** does not exist    ‾question(found does not exist)
+|   |   |   |   set **found** to **a new table**    ‾value(found) ‾value(a new table)
+|   |   |   |   share its **board** in **found**    ‾call(share its board in found)
+|   |   |   |   add **found** to the **tables**    ‾value(found) ‾value(the tables)
+|   |   |   [control if L3]
+|   |   |   | if the **black seat** of **found** is _""_    ‾value(the black seat of found)
+|   |   |   |   set the **black seat** of **found** to its **seat**    ‾value(the black seat of found) ‾value(its seat)
+|   |   |   [control else_if L3]
+|   |   |   | otherwise if the **red seat** of **found** is _""_ and the **black seat** of **found** is not its **seat**    ‾value(the red seat of found) ‾value(the black seat of found) ‾value(its seat)
+|   |   |   |   set the **red seat** of **found** to its **seat**    ‾value(the red seat of found) ‾value(its seat)
+|   |   |   set its **table** to **found**    ‾value(its table) ‾value(found)
+|   |   |   show **found** on its **board**    ‾call(show found on its board)
+
+|   [plain group define_group L1]
+|   | group «"Game Play"»
+|   |   [action to_do_something L2]
+|   |   | to «"start a new game"» with title «"New game"», icon «"sync alternate"», shortcut «"N"»
+|   |   |   ⟦-- Every piece back where it starts, black to move⟧
+|   |   |   start a new game on its **board**    ‾call(start a new game on its board)
+|   |   |   copy its **board** onto its **turned board**    ‾call(copy its board onto its turned board)
+|   |   |   [control if L3]
+|   |   |   | if its **table** exists    ‾question(its table exists)
+|   |   |   |   ⟦-- a tab that was watching takes black, and red is free for the next tab to join⟧
+|   |   |   |   [control if L4]
+|   |   |   |   | if its **side** is _"nobody"_    ‾value(its side)
+|   |   |   |   |   set the **black seat** of its **table** to its **seat**    ‾value(the black seat of its table) ‾value(its seat)
+|   |   |   |   |   set the **red seat** of its **table** to _""_    ‾value(the red seat of its table)
+|   |   |   |   share its **board** in its **table**    ‾call(share its board in its table)
+
+|   [plain group define_group L1]
+|   | group «"Against Someone"»
+|   |   [action to_do_something L2]
+|   |   | to «"share (a board) in (a table)"»    ‾value(a board) ‾value(a table) bold(board) bold(table)
+|   |   |   ⟦-- The table takes the board's game, so the other tab sees it⟧
+|   |   |   set the **diagram** of the **table** to the **diagram** of the **board**    ‾value(the diagram of the table) ‾value(the diagram of the board)
+|   |   |   set the **turn** of the **table** to the **turn** of the **board**    ‾value(the turn of the table) ‾value(the turn of the board)
+|   |   |   set the **winner** of the **table** to the **winner** of the **board**    ‾value(the winner of the table) ‾value(the winner of the board)
+|   |   |   set the **jump square** of the **table** to the **jump square** of the **board**    ‾value(the jump square of the table) ‾value(the jump square of the board)
+
+|   |   [action to_do_something L2]
+|   |   | to «"show (a table) on (a board)"»    ‾value(a table) ‾value(a board) bold(table) bold(board)
+|   |   |   ⟦-- The board takes the table's game:  both of this tab's boards show it⟧
+|   |   |   set up the **board** from the **diagram** of the **table**    ‾call(set up the board from the diagram of the table)
+|   |   |   set the **turn** of the **board** to the **turn** of the **table**    ‾value(the turn of the board) ‾value(the turn of the table)
+|   |   |   set the **winner** of the **board** to the **winner** of the **table**    ‾value(the winner of the board) ‾value(the winner of the table)
+|   |   |   [control if L3]
+|   |   |   | if the **jump square** of the **table** > _0_    ‾value(the jump square of the table)
+|   |   |   |   set the **jumper** of the **board** to the **piece** of (item (the **jump square** of the **table**) of the **board**)    ‾value(the jumper of the board) ‾value(the piece of (item (the jump square of the table) of the board))
+|   |   |   copy the **board** onto the **turned board** of **checkers**    ‾call(copy the board onto the turned board of checkers)
+
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   <⟨container⟩>
+|   |   |     <⟨stack⟩>
+|   |   |       <⟨toolbar⟩ class=«"Bar"» appearance=«"pills"» shrinkable>
+|   |   |         <⟨text⟩ size=«"big"» slot=«"title"» heavy>Checkers</>
+|   |   |         <⟨spacer⟩ />
+|   |   |         <⟨action⟩ «"start a new game"» />
+|   |   |         <⟨action⟩ «"undo"» icon-only />
+|   |   |         <⟨action⟩ «"redo"» icon-only />
+|   |   |       </>
+|   |   |       <⟨toolbar⟩ class=«"Opponents"» appearance=«"pills"» size=«"small"» aria-label=«"Who you play"»>
+|   |   |         <⟨action⟩ «"play the computer"» />
+|   |   |         <⟨action⟩ «"play yourself"» />
+|   |   |         <⟨action⟩ «"play someone"» />
+|   |   |       </>
+|   |   |       <⟨header⟩ level=«"3"» class=«"Message"»>{its **message**}</>    code({its message})
+|   |   |       {draw its **boards**}
+|   |   |     </⟨stack⟩>
+|   |   |   </⟨container⟩>
+
+|   |   [action draw_it L2]
+|   |   | to **draw** its **boards**
+|   |   |   ⟦-- one board against the computer;  against yourself both, side by side;  against someone, your side nearest you⟧
+|   |   |   [control if L3]
+|   |   |   | if its **opponent** is _yourself_    ‾value(its opponent)
+|   |   |   |   <⟨stack⟩ class=«"Boards"» direction=«"horizontal"» wrap>
+|   |   |   |     <⟨board⟩ «"board"» />
+|   |   |   |     <⟨board⟩ «"turned board"» />
+|   |   |   |   </⟨stack⟩>
+|   |   |   [control else_if L3]
+|   |   |   | otherwise if its **opponent** is _someone_ and its **side** is _"red"_    ‾value(its opponent) ‾value(its side)
+|   |   |   |   <⟨board⟩ «"turned board"» />
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   <⟨board⟩ «"board"» />
+
+[action after_hook L0]
+| after «moving a piece to a square»    ‾value(a piece) ‾value(a square) bold(piece) bold(square)
+|   ⟦-- Both boards show the move;  then the computer plays, or the other tab hears it⟧
+|   set **board** to the **board** of the **square**    ‾value(board) ‾value(the board of the square)
+|   [control if L1]
+|   | if **board** is the **turned board** of **checkers**    ‾value(board) ‾value(the turned board of checkers)
+|   |   copy **board** onto the **board** of **checkers**    ‾call(copy board onto the board of checkers)
+|   [control else L1]
+|   | otherwise
+|   |   copy **board** onto the **turned board** of **checkers**    ‾call(copy board onto the turned board of checkers)
+|   [control if L1]
+|   | if the **table** of **checkers** exists    ‾question(the table of checkers exists)
+|   |   share **board** in the **table** of **checkers**    ‾call(share board in the table of checkers)
+|   [control if L1]
+|   | if the **opponent** of **checkers** is _computer_ and the **turn** of **board** is _red_ and **board** is not over    ‾value(the opponent of checkers) ‾value(the turn of board) ‾question(board is not over)
+|   |   pause for _600_ msec    ‾quantity(600 msec)
+|   |   play for the computer on **board**    ‾call(play for the computer on board)
+
+[thing reopen_type L0]
+| a **table**
+|   [action when_someone_else_changes L1]
+|   | when someone else changes it
+|   |   ⟦-- the other tab moved:  this tab's boards show it⟧
+|   |   [control if L2]
+|   |   | if it is the **table** of **checkers**    ‾value(it) ‾value(the table of checkers)
+|   |   |   show it on the **board** of **checkers**    ‾call(show it on the board of checkers)
+
+[thing reopen_type L0]
+| a **piece**
+|   [property quoted_type_expression L1]
+|   | it «"is yours"» if
+|   |   ⟦-- Whether you move it here:  black against the computer;  each board's own side against yourself;  your side against someone⟧
+|   |   set **board** to the **board** of its **square**    ‾value(board) ‾value(the board of its square)
+|   |   [control if L2]
+|   |   | if the **opponent** of **checkers** is _computer_    ‾value(the opponent of checkers)
+|   |   |   return its **side** is _black_    ‾value(its side)
+|   |   [control if L2]
+|   |   | if the **opponent** of **checkers** is _someone_    ‾value(the opponent of checkers)
+|   |   |   return its **side** is the **side** of **checkers**    ‾value(its side) ‾value(the side of checkers)
+|   |   [control if L2]
+|   |   | if the **turned** of **board** is _yes_    ‾value(the turned of board)
+|   |   |   return its **side** is _red_    ‾value(its side)
+|   |   return its **side** is _black_    ‾value(its side)
+
+==== /Drawing.spell
+⟪# How the board draws, and how you move⟫
+⟦// The board is a grid of its squares, each square shows its piece:  styles.css colors them.⟧
+⟦// Drag a piece onto a square the rules allow:  the square lights up as you hold it there.⟧
+⟦// Or click a piece, then click where it should go:  every square it can go to lights up.⟧
+
+[thing reopen_type L0]
+| a **piece**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦-- a king wears a crown⟧
+|   |   [control if L2]
+|   |   | if it is a king    ‾question(it is a king)
+|   |   |   <⟨icon⟩ name=«"crown"» />
+
+|   [action on L1]
+|   | on click
+|   |   ⟦-- picked, to move with the next click;  a second click puts it down⟧
+|   |   set **board** to the **board** of its **square**    ‾value(board) ‾value(the board of its square)
+|   |   [control if L2]
+|   |   | if the **picked piece** of **board** is it    ‾value(the picked piece of board) ‾value(it)
+|   |   |   set the **picked piece** of **board** to nothing    ‾value(the picked piece of board) ‾value(nothing)
+|   |   [control else_if L2]
+|   |   | otherwise if it can move and it is yours    ‾question(it can move) ‾question(it is yours)
+|   |   |   set the **picked piece** of **board** to it    ‾value(the picked piece of board) ‾value(it)
+
+[thing reopen_type L0]
+| a **square**
+|   [property property_value_getter L1]
+|   | its «"lit"» is
+|   |   ⟦-- Whether the picked piece can go there:  it lights up (styles.css)⟧
+|   |   _yes_ if the **picked piece** of its **board** exists and the **picked piece** of its **board** can go to it    ‾question(the picked piece of its board exists) ‾question(the picked piece of its board can go to it)
+|   |   _no_ otherwise
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦-- its piece, and a dot where the picked piece can go⟧
+|   |   <⟨children⟩ />
+|   |   [control if L2]
+|   |   | if its **lit** is _yes_    ‾value(its lit)
+|   |   |   <⟨icon⟩ name=«"circle"» class=«"Target"» color=«"yellow"» />
+
+|   [property list_guard L1]
+|   | its **pieces** are **draggable** when the **piece** can move and the **piece** is yours    ‾question(the piece can move) ‾question(the piece is yours)
+|   [property list_guard L1]
+|   | it is **droppable** when the **piece** can go to it    ‾question(the piece can go to it)
+
+|   [action drag_handler L1]
+|   | when «a piece is dropped»    ‾value(a piece) bold(piece)
+|   |   move the **piece** to the **square**    ‾call(move the piece to the square)
+
+|   [action on L1]
+|   | on click
+|   |   ⟦-- a click where the picked piece can go moves it there⟧
+|   |   [control if L2]
+|   |   | if its **lit** is _yes_    ‾value(its lit)
+|   |   |   move the **picked piece** of its **board** to it    ‾call(move the picked piece of its board to it)

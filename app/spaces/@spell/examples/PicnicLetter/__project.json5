@@ -1,7 +1,6 @@
 {
   "title": "Picnic Letter",
   "description": "The picnic's letter to each attendee:  the day's details the same for everyone, then your own shifts from the published sheet, and how many invitations you've used, from your inbox.",
-  "category": "everyday",
   "imports": [
     {
       "path": "/PicnicLetter.api.spell",

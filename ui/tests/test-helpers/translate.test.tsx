@@ -81,6 +81,7 @@ describe("UIComponent.define(tag, dictionary)", () => {
       "ayuda",
       "movible",
       "redimensionable",
+      "en-plataforma",
       "hidden"
     ])
   })

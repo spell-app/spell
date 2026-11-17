@@ -1,0 +1,41 @@
+# How the board draws, and how you move
+// The board is a grid of its squares, each square shows its piece:  styles.css colors them.
+// Drag a piece onto a square the rules allow:  the square lights up as you hold it there.
+// Or click a piece, then click where it should go:  every square it can go to lights up.
+
+a piece
+	to draw it
+		-- a king wears a crown
+		if it is a king
+			<icon name="crown" />
+
+	on click
+		-- picked, to move with the next click;  a second click puts it down
+		set board to the board of its square
+		if the picked piece of board is it
+			set the picked piece of board to nothing
+		otherwise if it can move and it is yours
+			set the picked piece of board to it
+
+a square
+	its "lit" is
+		-- Whether the picked piece can go there:  it lights up (styles.css)
+		yes if the picked piece of its board exists and the picked piece of its board can go to it
+		no otherwise
+
+	to draw it
+		-- its piece, and a dot where the picked piece can go
+		<children />
+		if its lit is yes
+			<icon name="circle" class="Target" color="yellow" />
+
+	its pieces are draggable when the piece can move and the piece is yours
+	it is droppable when the piece can go to it
+
+	when a piece is dropped
+		move the piece to the square
+
+	on click
+		-- a click where the picked piece can go moves it there
+		if its lit is yes
+			move the picked piece of its board to it

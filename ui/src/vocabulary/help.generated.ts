@@ -428,6 +428,21 @@ export const HELP_TABLE: Readonly<
     description: "A label's dimmer second value, e.g.",
     attributes: { link: 'Renders a link (`<a class="detail" href>`).' }
   },
+  "ui-device": {
+    description:
+      "A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.",
+    attributes: {
+      device:
+        "Which device: a `phone` (390 by 844), a `tablet` (820 by 1180) or a `desktop`, a laptop's screen (1280 by 800).",
+      orientation: "Held upright (`portrait`) or on its side (`landscape`).",
+      controls:
+        "Its own buttons in its bottom edge: `all` -- Rotate and the phone / tablet / desktop switch; `rotate` or `device` -- only that one; `none` -- neither.",
+      modal:
+        'Shown as a modal: the device alone, floating over the dimmed page, no box round it (a `<ui-modal appearance="basic">`).',
+      closedby:
+        "With `modal`: what dismisses it, as `<ui-modal closedby>`: `any` -- Escape or a click on the dimmer; `closerequest` -- Escape only; `none` -- only its own buttons."
+    }
+  },
   "ui-diagram": {
     description:
       "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.",
@@ -2408,5 +2423,6 @@ export const SHARED_HELP: Readonly<Record<string, string>> = {
   label: "Its name for screen readers (`aria-label`), where it has no words of its own.",
   movable:
     "People can drag it to a new place inside its container: bare or `both`, `horizontally` or `vertically` for one way only.",
-  resizable: "People can drag its corner to resize it: bare or `both`, `horizontally` or `vertically`."
+  resizable: "People can drag its corner to resize it: bare or `both`, `horizontally` or `vertically`.",
+  "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.'
 }

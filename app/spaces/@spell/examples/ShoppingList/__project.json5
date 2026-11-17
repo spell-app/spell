@@ -1,0 +1,11 @@
+{
+  "title": "Shopping List",
+  "description": "What to buy, by aisle, kept in a CSV file:  add an item, tick it off as you shop, clear what you got, and print what's left;  its rows are a real CSV file Numbers or Excel opens, in the example's own folder",
+  "imports": [
+    { "path": "/ShoppingList.api.spell", "active": true },
+    { "path": "/Item.spell", "active": true },
+    { "path": "/AisleList.spell", "active": true },
+    { "path": "/ShoppingList.spell", "active": true },
+    { "path": "/styles.css", "active": true }
+  ]
+}

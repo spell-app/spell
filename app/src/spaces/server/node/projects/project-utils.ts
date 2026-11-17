@@ -27,7 +27,7 @@ import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
 import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
-import { ProjectDrafts } from "./ProjectDrafts"
+import { DRAFT_FOLDER, ProjectDrafts, VERSIONS_FOLDER } from "./ProjectDrafts"
 import { ProjectRoles, type ProjectFileChange } from "./ProjectRoles"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
 
@@ -266,7 +266,7 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   return Promise.all(
     projectNames.map(async (projectName) => {
       const path = `${domain.projectRoot}/${projectName}`
-      const { title, description, onHome, category, imports, unsaved } = await loadProjectFile(path)
+      const { title, description, onHome, imports, unsaved } = await loadProjectFile(path)
         .then((file) => file as ProjectFileWithMark)
         .catch((): ProjectFileWithMark => ({ imports: [] }))
       const files = imports.map((each) => each.path)
@@ -280,7 +280,6 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
         ...(language && { language }),
         ...(isSite && { isSite }),
         ...(onHome === false && { onHome }),
-        ...(category && { category }),
         ...(hasThumbnail && { hasThumbnail }),
         ...(unsaved && { unsaved })
       }
@@ -746,8 +745,10 @@ export const request_saveFile = respondWithJSON(async (request) => {
 
 /**
  * Does a save to project `projectId`'s own file write the file itself, not your draft (epic `mockup` P20, r3)?
- * - Only a built-in project's (`@spell/examples/...`, `@spell/library/...`), never a frozen test project's
+ * - Only a built-in project's (`@spell/library/...`, `@spell/sites/...`), never a frozen test project's
  *   (`@spell/test/...`)
+ * - Never an example's or a guide's (`SPACES.isExampleProject()`, epic `mockup` T52):  an edit to one is your draft,
+ *   which leaving it offers to keep as your own app, or (a manager of `@spell`) to publish into the example
  * - only where `editsBuiltins` (`environment.editsBuiltins`:  the built-ins are this checkout's own source)
  * - never `viaHouseSite`:  a save from elsewhere on the house network stays a draft (`isViaHouseSite()`)
  */
@@ -755,7 +756,7 @@ export function savesInPlace(
   projectId: string,
   { editsBuiltins, viaHouseSite }: { editsBuiltins: boolean; viaHouseSite: boolean }
 ): boolean {
-  if (!editsBuiltins || viaHouseSite) return false
+  if (!editsBuiltins || viaHouseSite || SPACES.isExampleProject(projectId)) return false
   return projectId.startsWith(BUILT_IN_SPACE) && !projectId.startsWith(FROZEN_TEST_PROJECTS)
 }
 
@@ -825,14 +826,34 @@ export const duplicateApp = async (projectId: string, newProjectId: string) => {
 }
 
 /**
+ * Copy project `projectId` as `newProjectId` with `drafts`' edits in it (epic `mockup` T52):
+ * an example a person changed, saved as an app of their own.
+ * - The copy's files are what they saw:  each drafted file's text is their draft's.
+ * - Nobody's drafts or versions come along (`__draft/`, `versions/`):  the copy starts with none, other people's
+ *   drafts of the example among them.
+ * - Then their drafts of `projectId` go:  the example is back to what everyone sees, for them too.
+ */
+export async function duplicateWithDraft(projectId: string, newProjectId: string, drafts: ProjectDrafts) {
+  await duplicateApp(projectId, newProjectId)
+  const newFolder = SP.SpellLocation.getProjectLocation(newProjectId).serverPath
+  for (const folder of [DRAFT_FOLDER, VERSIONS_FOLDER]) await fileUtils.deletePath(resolve(newFolder, folder))
+  const mine = await drafts.drafts()
+  for (const { filePath, mine: text } of mine) await saveFile(newProjectId, filePath, text)
+  for (const { filePath } of mine) await drafts.discard(filePath)
+}
+
+/**
  * `POST /api/projects/duplicate/project` -- duplicate an existing project.
- * - Client sends body: `{ projectId, newProjectId, title? }`:  `title` the copy's, see `setProjectTitle()`.
+ * - Client sends body: `{ projectId, newProjectId, title?, withDraft? }`:  `title` the copy's, see `setProjectTitle()`.
+ *   - `withDraft`:  the copy takes whoever's asking's drafts of `projectId`, which then go (`duplicateWithDraft()`,
+ *     epic `mockup` T52)
  * - Returns: updated project list for `projectId`'s `projectRoot`.
  * - Failure: 500 if either id is invalid, or if `fse.copy()` rejects (e.g. `newProjectId` already exists).
  */
 export const request_duplicateApp = respondWithJSON(async (request) => {
-  const { projectId, newProjectId, title } = request.body
-  await duplicateApp(projectId, newProjectId)
+  const { projectId, newProjectId, title, withDraft } = request.body
+  if (withDraft) await duplicateWithDraft(projectId, newProjectId, await draftsFor(request, projectId))
+  else await duplicateApp(projectId, newProjectId)
   // a copy is kept for good, whatever its original was (epic `mockup` I42):  a start card's is marked after
   await markUnsaved(newProjectId, null)
   await setProjectTitle(newProjectId, title)
