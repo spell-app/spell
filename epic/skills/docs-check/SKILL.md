@@ -122,7 +122,7 @@ From `decisions --json`, later beats earlier:
    ONE judgement call per question, in the epic's epic page, never one per fix:
 
    ```sh
-   epic add <epic>#J "Docs:  <the question, short>" --details "<p>what the docs say, where;
+   epic add <epic>#J "Docs:  <the question, in a few words>" --details "<p>what the docs say, where;
    what the decisions say</p><epic-net-effect><ul><li>what this run did meanwhile</li></ul></epic-net-effect>"
    ```
 

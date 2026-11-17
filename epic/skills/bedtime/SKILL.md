@@ -181,6 +181,7 @@ Everything else stands:
    epic add <name>#J "<the call>" --details "<p>chose ... over ... because ...</p><epic-choices>...</epic-choices><epic-net-effect>...</epic-net-effect>"
    ```
 
+   - Its title is 3-10 plain words saying what it is;  everything else goes in --details.
    - It prints the id (`J4`).
      The epic page's "Judgement calls" section is where the person finds them, open until they review each.
    - Its details ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Prose"):

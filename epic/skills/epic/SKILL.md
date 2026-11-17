@@ -580,7 +580,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       (epic `epic-engine` I313)
     - waiters go first come, first served, and wait while the line moves;  `epic turns list` shows the holder, how
       long, and the line
-  - record its choices as items (`epic add <epic>#J ... --calm`), and come back with any question for the person,
+  - record its choices as items (`epic add <epic>#J "<a few words>" --details "..." --calm`;  a title is 3-10 plain
+    words saying what it is, everything else goes in --details), and come back with any question for the person,
     rather than ask it:  an agent has no question modal
     - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
   - MERGE ITS OWN WORK INTO `main` THE MOMENT IT'S DONE, whenever it merges cleanly, so the person sees it at once
@@ -648,6 +649,8 @@ cut-off agents, "it should have restarted automatically").
    - No plan at all only when the person said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
    Record as you go, not at the end:
+   - Every item's title is 3-10 plain words saying what it is;  everything else goes in --details
+     (epic `epic-engine` I321:  `epic add` refuses one over 100 characters, or run on with `;` or `  --`).
    - Found a problem:  `add <name>#I`.
    - A limit we accept:  `add <name>#T ... --limit`.
    - A choice:  `add <name>#D` (a question born answered).

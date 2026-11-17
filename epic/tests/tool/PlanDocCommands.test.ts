@@ -14,6 +14,7 @@ import { PhaseIds } from "spell/epic/phases"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands, movedDown } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { PlanItem } from "spell/epic/tool/PlanItem"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
@@ -516,6 +517,50 @@ describe("PlanDocCommands add --details:  a name and its path", () => {
     expect(readFileSync(join(parts, part), "utf8")).toMatch(
       /<a href="\/packages\/x\/src\/buildTsx\.ts" target="src-packages-x-src-buildtsx-ts"\s*>\s*<code title="packages\/x\/src\/buildTsx\.ts:4">buildTsx\(\)<\/code\s*>\s*<\/a\s*>/
     )
+  })
+})
+
+// epic `epic-engine` I321:  a title is a few plain words;  everything else goes in its details
+describe("PlanDocCommands:  short titles", () => {
+  const LONG =
+    "I318:  epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on;  " +
+    "otherwise it asks nothing, and a flag writes them without asking"
+
+  test("add refuses a long or run-on title, naming the first clause;  writing nothing", async () => {
+    const skeleton = readFileSync(file, "utf8")
+    expect(await commands().run(["add", "x", "judgement", LONG, "--calm"])).toBe(1)
+    expect(await commands().run(["add", "x", "todo", "Retry it;  then tell them"])).toBe(1)
+    expect(warned[0]).toMatch(/^epic:  a title is a few words;  put the rest in --details\./)
+    expect(warned[0]).toContain("this one:  it's 168 characters (the most is 100)")
+    expect(warned[0]).toContain(
+      `its first clause, as a title:  "epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on"`
+    )
+    expect(warned[1]).toContain('it runs on into a second clause, after ";"')
+    expect(readFileSync(file, "utf8")).toBe(skeleton)
+  })
+
+  test("rename refuses a long title too, and moves a long old title into the body, first", async () => {
+    // an item written before the rule, its title the whole story
+    await FILES.edit(file, (plan) => plan.addItem("judgement", LONG, { details: "<p>Why:  it was asked.</p>" }))
+    expect(await commands().run(["rename", "x", "J1", LONG])).toBe(1)
+    expect(warned.at(-1)).toMatch(/a title is a few words;  put the rest in its details/)
+
+    printed = []
+    expect(await commands().run(["rename", "x", "J1", "Superpowers words:  only when it's on"])).toBe(0)
+    const item = FILES.read(file).item("j1")
+    expect(PlanItem.titleOf(item)).toBe("Superpowers words: only when it's on")
+    const words = Array.from(item.children)
+      .filter((child) => !child.hasAttribute("slot"))
+      .map((child) => child.textContent!.replace(/\s+/g, " ").trim())
+    expect(words.slice(0, 3)).toEqual([
+      "I318: epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on",
+      "otherwise it asks nothing, and a flag writes them without asking",
+      "Why: it was asked."
+    ])
+
+    // a short old title stays a title:  nothing goes into the body
+    expect(await commands().run(["rename", "x", "J1", "Superpowers words in AGENTS.md"])).toBe(0)
+    expect(FILES.read(file).item("j1").textContent).not.toContain("only when it's on")
   })
 })
 
