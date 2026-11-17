@@ -30,14 +30,13 @@ import { respondWithJSON } from "spell/app/spaces/server/node/projects/response-
  */
 
 /** `GET /api/home/order`:  see the file's docs. */
-export const request_homeLayout = respondWithJSON(
-  async (request): Promise<SPACES.HomeLayoutAnswer> => homeLayouts().answerFor(prefsPersonFor(request))
+export const request_homeLayout = respondWithJSON(async (request): Promise<SPACES.HomeLayoutAnswer> =>
+  homeLayouts().answerFor(prefsPersonFor(request))
 )
 
 /** `POST /api/home/order`:  see the file's docs. */
-export const request_changeHomeLayout = respondWithJSON(
-  async (request): Promise<SPACES.HomeLayoutAnswer> =>
-    homeLayouts().change(prefsPersonFor(request), request.body as SPACES.HomeLayoutChange)
+export const request_changeHomeLayout = respondWithJSON(async (request): Promise<SPACES.HomeLayoutAnswer> =>
+  homeLayouts().change(prefsPersonFor(request), request.body as SPACES.HomeLayoutChange)
 )
 
 /** The ONE store of layouts, over this checkout's models folder:  made on the first call. */
@@ -97,14 +96,16 @@ export class HomeLayouts {
 
   /** `person`'s own changes;  none kept:  nothing. */
   async mine(person: PrefPerson): Promise<SPACES.HomeLayout> {
-    const kept = (await this.options.prefs.load(person, PREFS_STORE, PREFS_KEY)) as Partial<SPACES.HomeLayout> | undefined
+    const kept = (await this.options.prefs.load(person, PREFS_STORE, PREFS_KEY)) as
+      | Partial<SPACES.HomeLayout>
+      | undefined
     return { order: kept?.order ?? {}, texts: kept?.texts ?? {} }
   }
 
-  /** Write everyone's layout into its two files, two spaces in, as `homeOrder.json` always was. */
+  /** Write everyone's layout into its two files, as the formatter leaves them (`jsonText()`). */
   private writeDefaults(layout: SPACES.HomeLayout): void {
-    writeFileSync(join(this.options.defaultsFolder, ORDER_FILE), `${JSON.stringify(layout.order, null, 2)}\n`)
-    writeFileSync(join(this.options.defaultsFolder, TEXTS_FILE), `${JSON.stringify(layout.texts, null, 2)}\n`)
+    writeFileSync(join(this.options.defaultsFolder, ORDER_FILE), jsonText(layout.order))
+    writeFileSync(join(this.options.defaultsFolder, TEXTS_FILE), jsonText(layout.texts))
   }
 
   /** One of everyone's files, as JSON;  none yet:  `{}`. */
@@ -139,6 +140,22 @@ const PREFS_KEY = "layout"
 /** A project's folder name:  no slash, no dot first, nothing empty. */
 const FOLDER_NAME = /^[^/.][^/]*$/
 
+/**
+ * `value` as JSON, as the formatter leaves it:  two spaces in, and a list of words on one line when it fits in 120
+ * characters, so a save changes only the lines it changes.
+ */
+export function jsonText(value: unknown): string {
+  return `${JSON.stringify(value, null, 2).replace(
+    /\[\n(\s*"[^\n]*",?\n)*\s*\]/g,
+    (list, _last, at: number, all: string) => {
+      const words = (JSON.parse(list) as string[]).map((word) => JSON.stringify(word))
+      const lineStart = all.lastIndexOf("\n", at) + 1
+      const oneLine = `[${words.join(", ")}]`
+      return at - lineStart + oneLine.length + 1 <= 120 ? oneLine : list
+    }
+  )}\n`
+}
+
 /** `person`'s address, their own apps' group:  `owen@spell`. */
 function addressOf(person: PrefPerson): string {
   return `${person.id}@${person.org}`
@@ -153,8 +170,7 @@ function checkChange(change: SPACES.HomeLayoutChange | undefined, person: PrefPe
     const isSections = group === SPACES.HOME_SECTIONS_KEY
     const isStart = group === SPACES.HOME_START_KEY
     const isKnown = group === addressOf(person) || SPACES.PROJECT_GROUPS.some((each) => each.path === group)
-    if (!isSections && !isStart && !isKnown)
-      throw new SRV.HttpError(400, `home order:  no group called \`${group}\``)
+    if (!isSections && !isStart && !isKnown) throw new SRV.HttpError(400, `home order:  no group called \`${group}\``)
     if (!Array.isArray(names) || !names.every((name) => typeof name === "string" && FOLDER_NAME.test(name)))
       throw new SRV.HttpError(400, "home order:  `names` must be the group's projects' folder names")
     if (isSections && !names.every(SPACES.isHomeSection))

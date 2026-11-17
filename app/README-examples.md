@@ -110,8 +110,11 @@ A new example is tested as soon as its folder is there:  no list to add it to.
    - A `"title"` names it, when its folder's name can't (`ListaDeTareas` is "Lista de tareas").
    - Its place, in the table and on the home page:  the editor's order, [homeOrder.json](src/spaces/models/homeOrder.json);
      a new one goes after the listed ones, by name.
-     Drag its card on the home page to move it, in dev:  that saves the list.
+     On the home page, "Rearrange Home Screen" (at its foot) lets you drag its card to move it:
+     as one of `@spell`'s people, in Spell's own checkout, that saves the list.
      The same list keeps the order of the home page's sections, under `"sections"`:  drag a section by its header.
+     A card's title and tagline changed there are kept beside it, in [homeTexts.json](src/spaces/models/homeTexts.json),
+     never in the example's own files.
 3. Start the editor, `yarn start` in spell-app, and leave it running.
 4. In spell-app's folder, `yarn examples:readme`:
    it opens each example in the editor, headless, in a window 1280 by 800,

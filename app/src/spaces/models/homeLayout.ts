@@ -33,6 +33,10 @@ export type HomeText = {
 /** The words changed on the home page, everyone's:  `homeTexts.json`, by `homeTextKey()`. */
 export const HOME_TEXTS: Readonly<Record<string, HomeText>> = HOME_TEXTS_LIST
 
+// The page already shows a change the moment it's made (`HomeArrangement`):  so a save into the file, in dev,
+// mustn't reload the page, which would end the rearranging (epic `mockup` T51)
+import.meta.hot?.accept("./homeTexts.json", () => undefined)
+
 /** Everyone's layout:  Spell's order and words, as this build has them. */
 export const HOME_DEFAULTS: HomeLayout = { order: HOME_ORDER, texts: HOME_TEXTS }
 
@@ -57,7 +61,9 @@ export type HomeStartCard = (typeof HOME_START_CARDS)[number]
  * - a section's header and line:  `section:examples:en`, per language, as the editor's own words are
  * - a start card:  `start:counter:en`, likewise
  */
-export function homeTextKey(on: { project: string } | { section: string; lang: string } | { start: string; lang: string }) {
+export function homeTextKey(
+  on: { project: string } | { section: string; lang: string } | { start: string; lang: string }
+) {
   if ("project" in on) return on.project
   if ("section" in on) return `section:${on.section}:${on.lang}`
   return `start:${on.start}:${on.lang}`

@@ -63,7 +63,9 @@ describe("HomeLayouts", () => {
 
   test("a change that can't be one is refused, 400", async () => {
     await expect(layouts.change(ANA, {})).rejects.toMatchObject({ status: 400 })
-    await expect(layouts.change(ANA, { order: { group: "@acme/x", names: ["a"] } })).rejects.toMatchObject({ status: 400 })
+    await expect(layouts.change(ANA, { order: { group: "@acme/x", names: ["a"] } })).rejects.toMatchObject({
+      status: 400
+    })
     await expect(layouts.change(ANA, { text: { key: "", title: "x" } })).rejects.toMatchObject({ status: 400 })
   })
 })
@@ -81,12 +83,25 @@ describe("HomeLayouts:  your own apps", () => {
     const folder = mkdtempSync(join(tmpdir(), "home-layouts-"))
     try {
       const layouts = new HomeLayouts({ defaultsFolder: folder, prefs, editsDefaults: true })
-      const answer = await layouts.change({ id: "owen", org: "spell" }, { order: { group: "owen@spell", names: ["b", "a"] } })
+      const answer = await layouts.change(
+        { id: "owen", org: "spell" },
+        { order: { group: "owen@spell", names: ["b", "a"] } }
+      )
       expect(answer.setsDefaults).toBe(true)
       expect(answer.mine.order).toEqual({ "owen@spell": ["b", "a"] })
       expect(answer.defaults.order).toEqual({})
     } finally {
       rmSync(folder, { recursive: true, force: true })
     }
+  })
+})
+
+describe("jsonText()", () => {
+  test("as the formatter leaves it:  a short list of words on one line, a long one a word a line", async () => {
+    const { jsonText } = await import("spell/app/spaces/server/node/projects/homeOrderRoutes")
+    const long = Array.from({ length: 20 }, (_, index) => `example-${index}`)
+    expect(jsonText({ sections: ["start", "examples"], long })).toBe(
+      `{\n  "sections": ["start", "examples"],\n  "long": [\n${long.map((word) => `    "${word}"`).join(",\n")}\n  ]\n}\n`
+    )
   })
 })

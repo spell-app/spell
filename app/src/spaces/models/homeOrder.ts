@@ -17,6 +17,10 @@ import HOME_ORDER_LIST from "./homeOrder.json"
  */
 export const HOME_ORDER: Readonly<Record<string, readonly string[]>> = HOME_ORDER_LIST
 
+// The page already shows a change the moment it's made (`HomeArrangement`):  so a save into the file, in dev,
+// mustn't reload the page, which would end the rearranging (epic `mockup` T51)
+import.meta.hot?.accept("./homeOrder.json", () => undefined)
+
 /** One group's new order, or the sections', or the start cards':  part of a `HomeLayoutChange`. */
 export type HomeOrderChange = {
   /** the group's address, `@spell/examples`;  or `HOME_SECTIONS_KEY`, `HOME_START_KEY` */
