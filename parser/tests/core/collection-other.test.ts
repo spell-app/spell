@@ -1067,3 +1067,51 @@ describe("core.pickFromEach()", () => {
     expect(assert.failed).toHaveBeenCalled()
   })
 })
+
+describe("nothing in a list (epic `language` T153)", () => {
+  test("adding nothing adds nothing, every way spell adds", () => {
+    const pile = new Pile()
+    pile.append("a")
+    core.append(pile, undefined)
+    core.prepend(pile, null)
+    core.addAtPosition(pile, 0, undefined, "b", null)
+    core.addBefore(pile, "a", undefined)
+    core.addAfter(pile, "a", null)
+    pile.add(undefined as never)
+    pile.prepend(undefined as never)
+    core.mergeListsInto(pile, [undefined, "c"])
+    expect(pile.items).toEqual(["b", "a", "c"])
+    const array: unknown[] = []
+    core.append(array, undefined)
+    expect(array).toEqual([])
+  })
+
+  test("moving nothing moves nothing:  no", () => {
+    const pile = new Pile()
+    expect(core.move(undefined, pile)).toBe(false)
+    expect(core.move(null, [])).toBe(false)
+    expect(pile.moveHere(undefined as never)).toBe(false)
+    expect(pile.items).toEqual([])
+  })
+
+  test("a loop skips an empty item, each keeping its own position", () => {
+    const items = ["a", undefined, "b", null]
+    const seen: unknown[] = []
+    core.forEach(items, (item, position) => seen.push([item, position]))
+    expect(seen).toEqual([
+      ["a", 0],
+      ["b", 2]
+    ])
+    expect(core.filter(items, () => true)).toEqual(["a", "b"])
+    expect([...core.mapToList(items, (item) => `${item}!`)]).toEqual(["a!", "b!"])
+    expect([...core.pickFromEach(items, (item) => item)]).toEqual(["a", "b"])
+    expect(core.all(items, (item) => typeof item === "string")).toBe(true)
+    expect(core.itemWhere(items, () => true, -1)).toBe("b")
+  })
+
+  test("a loop that waits skips one too", async () => {
+    const seen: unknown[] = []
+    await core.forEachSequential([undefined, "a"], async (item) => seen.push(item))
+    expect(seen).toEqual(["a"])
+  })
+})

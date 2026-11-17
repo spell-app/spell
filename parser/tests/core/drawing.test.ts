@@ -5,7 +5,8 @@ import { describe, test, expect, vi, beforeAll, beforeEach, afterEach } from "vi
 
 import { bridgeSolid } from "spell/util"
 import { core, App, Thing, List, ViewableList, prop, drawn, h } from "spell/parser/core"
-import { isElementThunk, type Drawing } from "spell/parser/core/drawing"
+import type { MenuItem } from "spell/parser/core/acting"
+import { isElementThunk, type ContextMenuElement, type Drawing } from "spell/parser/core/drawing"
 
 // counts each error boundary drawn:  `drawing.ts` makes one with `createComponent(Errored, ...)`
 vi.mock("solid-js", async (importOriginal) => {
@@ -190,6 +191,36 @@ describe("@drawn", () => {
     const game = new Game()
     draw(() => core.drawAction(game, "restartTheGame", { "icon-only": true, "in-menu": true }))
     expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
+  })
+
+  test('<context-menu "game menu" />, context-menu="game menu":  a menu drawn with that name, reused (language T156)', () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+      cheat(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    core.describeAction(Game, "cheat", { title: "Cheat" })
+    const game = new Game()
+    // as `<menu "game menu">` draws:  its id, each action's row holding its action
+    draw(
+      () =>
+        h(
+          "ui-menu",
+          { id: "game-menu" },
+          core.drawAction(game, "restartTheGame", { "in-menu": true }),
+          h("ui-action", { kind: "divider" }),
+          core.drawAction(game, "cheat", { "in-menu": true }),
+          core.drawContextMenu(game, ["cheat", "-", { menu: "game menu" }])
+        ) as unknown as Drawing
+    )
+    const titles = (items: MenuItem[] | undefined) =>
+      items?.map((item) => (item.kind === "action" ? item.title : item.kind))
+    const reused = element.querySelector("spell-context-menu") as (Element & ContextMenuElement) | null
+    // its own items first, then the menu's
+    expect(titles(reused?.menuItems?.())).toEqual(["Cheat", "separator", "Restart The Game", "separator", "Cheat"])
+    // no template's menu by that name:  the drawn one
+    expect(titles(core.menuOf(game, "game menu"))).toEqual(["Restart The Game", "separator", "Cheat"])
+    expect(core.menuOf(game, "no such menu")).toBeUndefined()
   })
 
   test('<context-menu><action "undo" icon-only/></context-menu>:  its item keeps its attributes (I102)', () => {

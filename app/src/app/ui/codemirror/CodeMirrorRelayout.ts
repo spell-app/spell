@@ -7,7 +7,8 @@ import {
   type RangeSet,
   RangeSetBuilder,
   StateEffect,
-  StateField
+  StateField,
+  type Transaction
 } from "@codemirror/state"
 import { type Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view"
 
@@ -19,6 +20,8 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  * Decorations worked out from the whole text, which follow the text as it's typed,
  * and are worked out again once the typing pauses.
  * - Typing never waits:  CodeMirror moves the marks with each change at once (`decorations.map()`).
+ *   - What a moved mark can't show, a line the edit just wrote, is added at once by `drawnAtOnce()`, if given:
+ *     a blank body line's room, so the caret on it never moves as the layout comes (epic `language` I158).
  * - Worked out again after an edit once nothing has changed for `msec`,
  *   and as a view takes the state, which a parse may have reached while it was shown nowhere.
  * - And at once, in the same update, when a new parse comes (`CodeMirrorSetup.PARSED`):  it came after the typing
@@ -64,7 +67,7 @@ export class CodeMirrorRelayout {
   static extension(
     decorationsOf: (state: EditorState) => DecorationSet,
     msec: number,
-    { isAwaitingParse = () => false, isParseOnItsWay = () => false }: RelayoutOptions = {}
+    { isAwaitingParse = () => false, isParseOnItsWay = () => false, drawnAtOnce }: RelayoutOptions = {}
   ): Extension {
     /** each view on this extension, so a transaction can find its own and keep its caret's line still */
     const views = new Set<EditorView>()
@@ -80,7 +83,9 @@ export class CodeMirrorRelayout {
         ) {
           return decorationsOf(transaction.state)
         }
-        return transaction.docChanged ? decorations.map(transaction.changes) : decorations
+        if (!transaction.docChanged) return decorations
+        const moved = decorations.map(transaction.changes)
+        return drawnAtOnce ? drawnAtOnce(moved, transaction) : moved
       },
       provide: (it) => [
         Prec.lowest(EditorView.decorations.from(it)),
@@ -200,6 +205,12 @@ export type RelayoutOptions = {
    * - MUST NOT throw.
    */
   isParseOnItsWay?: (state: EditorState) => boolean
+  /**
+   * `decorations`, moved with `transaction`'s edit, and what the lines it wrote need drawn at once,
+   * before the text is laid out again (`CodeMirrorBubbly`'s blank body lines;  epic `language` I158).
+   * - MUST NOT throw.
+   */
+  drawnAtOnce?: (decorations: DecorationSet, transaction: Transaction) => DecorationSet
 }
 
 /** The editor's class while its lines wait for their parse:  `codemirror.css` hides them. */

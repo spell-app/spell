@@ -203,11 +203,11 @@ eventsEs.addRule(On, {
 eventsEs.addRule(
   Wording.specialize({
     ruleName: "passive_event",
-    meanings: ["click", "double_click", "right_click", "drag", "drag_cancelled"]
+    meanings: ["click", "double_click", "right_click", "long_press", "drag", "drag_cancelled"]
   }),
   {
     syntax:
-      "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
+      "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(long_press:se mantiene pulsado|se mantiene pulsada)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
   }
 )
 eventsEs.addRule(On, {
@@ -247,6 +247,43 @@ eventsEs.addRule(On, {
             "",
             "  onDoubleClick(event: DoubleClickEvent) {",
             "    return this.currentThing?.onDoubleClick(event)",
+            "  }",
+            "}",
+            "core.useElement(Carta, CartaElement)"
+          ]
+        },
+        {
+          title: "un dedo quieto sobre una vista, `on long press` en inglés (épica `language` T154)",
+          input: ["una carta es una vista donde:", "\t- cuando se mantiene pulsada imprimir 1"],
+          js: [
+            "export class Carta extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onLongPress(event) {",
+            "    return core.console.log(1)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Carta extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onLongPress(event: LongPressEvent) {",
+            "    return core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-events-carta>`:  a carta, drawn in its own element, e.g. by `draw the carta`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its carta's properties;  its methods call its carta's.",
+            " * - What every view's element does, e.g. drawing its carta, is `SpellElement`'s.",
+            " */",
+            "export class CartaElement extends SpellElement<Carta> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-events-carta", "carta", [])',
+            "",
+            "  onLongPress(event: LongPressEvent) {",
+            "    return this.currentThing?.onLongPress(event)",
             "  }",
             "}",
             "core.useElement(Carta, CartaElement)"

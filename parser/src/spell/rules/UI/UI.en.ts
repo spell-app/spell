@@ -17,6 +17,7 @@ import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
 import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
+import { ShowDrawn } from "./ShowDrawn"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
@@ -118,6 +119,19 @@ UI.addRule(ShowDatesAs, {
 UI.addRule(ScrollToTop, {
   syntax: "scroll to the top",
   tests: [{ compileAs: "statement", tests: [["scroll to the top", "core.scrollToTop()"]] }]
+})
+
+UI.addRule(ShowDrawn, {
+  syntax: "(show|(hide:hide)) {name:text}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`show "you won"`, `core.showDrawn("you won")`],
+        [`hide "you won"`, `core.hideDrawn("you won")`]
+      ]
+    }
+  ]
 })
 
 UI.addRule(OpenPrinting, {

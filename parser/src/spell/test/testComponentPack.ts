@@ -13,7 +13,9 @@ export function registerTestComponentPack(): void {
     name: "spell-ui",
     tagFor: (word, language) => TEST_TAGS[language]?.[withoutAccents(word)],
     canonicalTagFor: (tag, language) => CANONICAL[TEST_TAGS[language]?.[withoutAccents(tag)] ?? tag],
-    readDefault: readTestDefault
+    readDefault: readTestDefault,
+    attributeNameFor: (tag, attribute, language) =>
+      ["ui-modal", "ui-popup"].includes(CANONICAL[tag] ?? tag) ? MODAL_NAMES[language]?.[attribute] : undefined
   })
 }
 
@@ -43,7 +45,19 @@ function readTestDefault(sample: SP.DefaultSample, language: string): SP.Default
 }
 
 /** The test pack's Spanish tags, by their canonical one. */
-const CANONICAL: Record<string, string> = { "es-boton": "ui-button", "es-barra-herramientas": "ui-toolbar" }
+const CANONICAL: Record<string, string> = {
+  "es-boton": "ui-button",
+  "es-barra-herramientas": "ui-toolbar",
+  "es-modal": "ui-modal",
+  "es-menu": "ui-menu",
+  "es-emergente": "ui-popup"
+}
+
+/** `<ui-modal>`'s and `<ui-popup>`'s attributes in the test pack, by language:  its own name => as written (epic `language` P61). */
+const MODAL_NAMES: Record<string, Record<string, string>> = {
+  en: { heading: "heading" },
+  es: { heading: "encabezado" }
+}
 
 /** `<ui-button>`'s attributes in the test pack, by language:  as written => its own name. */
 const BUTTON_NAMES: Record<string, Record<string, string>> = {
@@ -71,7 +85,11 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     list: "ui-list",
     table: "ui-table",
     row: "ui-row",
-    cell: "ui-cell"
+    cell: "ui-cell",
+    modal: "ui-modal",
+    menu: "ui-menu",
+    popup: "ui-popup",
+    divider: "ui-divider"
   },
   es: {
     texto: "es-texto",
@@ -83,6 +101,10 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     seccion: "es-seccion",
     tabla: "es-tabla",
     fila: "es-fila",
-    celda: "es-celda"
+    celda: "es-celda",
+    modal: "es-modal",
+    menu: "es-menu",
+    emergente: "es-emergente",
+    divisor: "es-divisor"
   }
 }

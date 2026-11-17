@@ -267,7 +267,8 @@ class DrawingMethods:
         - The twin of the JavaScript core's `drawContextMenu()`:  the page draws the menu with its drawing half,
           each action run here;  printed, it's the hidden element alone, as the JavaScript run's page prints it.
         - `names`:  each an action's method, `-` a line, or an action and its tag's attributes,
-          `["undo", {"icon-only": True}]`.
+          `["undo", {"icon-only": True}]`;  or every item of another menu, by its name, `{"menu": "game menu"}`, as it
+          shows on the page (`<context-menu "game menu">`, epic `language` T156).
         """
         return h(CONTEXT_MENU_TAG, {"hidden": True})
 

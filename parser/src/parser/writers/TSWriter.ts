@@ -1142,6 +1142,7 @@ export class TSWriter extends JSWriter {
     "onThingClick",
     "onThingDoubleClick",
     "onThingDrawn",
+    "onThingLongPress",
     "onThingMouseDown",
     "onThingMouseEnter",
     "onThingMouseLeave",

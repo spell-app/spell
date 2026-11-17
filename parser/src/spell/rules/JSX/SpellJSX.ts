@@ -14,7 +14,11 @@ import {
   MENU_TAGS,
   SPELL_JSX_MEANINGS,
   SPELL_TAG_WORDS,
+  spellTagsIn,
+  CONTEXT_MENU_TAG_MEANING,
   HIDDEN_ATTRIBUTE,
+  hasMenuNamed,
+  noteMenuName,
   webWordFor,
   type DrawnDeclaration,
   type JSXMatchData
@@ -37,6 +41,18 @@ const MENU_DIVIDER = "divider"
 const DRAWN_BASE_TYPES = ["View", "ViewableList"]
 /** What a view's quoted word is, `<tableau "T1"/>`:  the id of the thing it draws -- see `attributesOf()`. */
 const VIEW_ID_ATTRIBUTE = "id"
+/**
+ * The tags a quoted word NAMES (epic `language` P61):  `<modal "you won">` is the modal `show "you won"` shows.
+ * - Its words joined by `-` are its id, `you-won`, as a view's are;  `title`, the attribute it also fills, as written.
+ * - Only what comes and goes (Owen, 2026-11-17:  "Don't need it on everything"):  a modal, a menu, a popup.
+ */
+/** The attribute naming the menu a right click on an element shows, as the page reads it:  `context-menu="game menu"`. */
+const CONTEXT_MENU_ATTRIBUTE = "context-menu"
+const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
+  "ui-modal": { title: "heading" },
+  "ui-menu": {},
+  "ui-popup": { title: "heading" }
+}
 
 /**
  * `jsxElement` rule:  match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.
@@ -152,7 +168,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const webTag = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     // the web's tag for spell's word (`<children/>`);  spell's own tags keep their word where their rules didn't take
     // them:  `<action>` with no quoted word, a `<divider/>` outside a context menu
-    match.data.tagName = SPELL_JSX_MEANINGS.includes(webTag) ? webTag : element.tagName
+    // `<separator/>` is `<divider/>` anywhere (T156):  named by the language's own word, `divider`, `divisor`
+    const word = webTag === DIVIDER_TAG_MEANING ? SpellJSX.dividerWordFor(scope, element.tagName) : element.tagName
+    match.data.tagName = SPELL_JSX_MEANINGS.includes(webTag) ? webTag : word
     // a drawing names components by their bare names:  `<button>` => `<ui-button>`
     if (takesShortcuts && !element.attributes?.length && !element.children?.length && !element.quotedWord) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
@@ -166,11 +184,11 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         return match
       }
     }
-    if (takesShortcuts && match.data.tagName === element.tagName) {
+    if (takesShortcuts && match.data.tagName === word) {
       // a quoted word names a thing, so a type declared further down wins over a pack's component of that name:
       // `<columna "C1"/>` is Solitario's column, `<columna/>` the grid's
       const later = element.quotedWord ? SpellJSX.laterViewFor(scope, element.tagName) : undefined
-      const tag = later ? undefined : SpellJSX.componentTagFor(scope, element.tagName)
+      const tag = later ? undefined : SpellJSX.componentTagFor(scope, word)
       const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
       // one of the project's own views:  its children may fill its slots (`withSlotNames()`)
       if (view && SpellJSX.isDrawnType(view)) match.data.view = view
@@ -192,6 +210,15 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
     // a Spell UI menu or toolbar, in any language:  its actions and dividers are its rows (epic `editor` P29)
     if (SpellJSX.isMenu(scope, match.data.tagName)) SpellJSX.markMenuRows(scope, match)
+    // a modal, menu or popup its quoted word names, `<modal "you won">` (P61):  never one of the project's own views
+    if (element.quotedWord && !match.data.view && !match.data.laterView) {
+      match.data.named = SpellJSX.namedTagTitle(scope, match.data.tagName)
+      // a menu by its name:  a right-click menu may reuse it (T156)
+      if (match.data.named !== undefined && SpellJSX.isMenu(scope, match.data.tagName)) {
+        noteMenuName(scope, textOf(element.quotedWord.value))
+      }
+    }
+    SpellJSX.reuseNamedMenu(scope, match, element)
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
@@ -221,6 +248,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    *   `<discard-pile id="discard-pile"/>` (`QuotedMember.idOf()`, language T147).
    * - Any language's tags alike:  it's the tag being a view that counts, not its word.
    * - After its other attributes, so each of those keeps its place (`warnAboutListedValues()`).
+   * - On a tag a quoted word names (`NAMED_TAGS`, epic `language` P61), its id too, and its title:
+   *   `<modal "you won">` ~== `<modal id="you-won" heading="you won">`, unless it says its own `heading`.
    * - On any other tag the word means nothing:  `noteUnreadable()` says so.
    */
   private static attributesOf(
@@ -228,12 +257,23 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     element: P.JSXElementToken
   ): P.JSXAttributeToken[] | undefined {
     const { quotedWord } = element
-    if (!quotedWord || !(match.data.view || match.data.laterView)) return element.attributes
+    const { view, laterView, named, contextMenuAttribute } = match.data
+    // the language's word for the right-click menu's attribute, the web's `context-menu` (T156)
+    const attributes = element.attributes?.map((attribute) =>
+      attribute === contextMenuAttribute
+        ? new P.JSXAttributeToken({ ...attribute.record, name: CONTEXT_MENU_ATTRIBUTE })
+        : attribute
+    )
+    if (!quotedWord || !(view || laterView || named !== undefined)) return attributes
     const { start, value, raw } = quotedWord.record
     // one word, as the member it names takes it:  `"discard pile"` => `"discard-pile"` (`QuotedMember.idOf()`)
     const word = value instanceof P.TextToken ? oneWordText(value) : value
     const id = new P.JSXAttributeToken({ name: VIEW_ID_ATTRIBUTE, start, value: word, raw })
-    return [...(element.attributes ?? []), id]
+    // a named tag's title, `heading`:  unless it says its own
+    if (!named || element.attributes?.some((attribute) => attribute.name === named)) {
+      return [...(attributes ?? []), id]
+    }
+    return [...(attributes ?? []), id, new P.JSXAttributeToken({ name: named, start, value, raw })]
   }
 
   ////////////////
@@ -333,12 +373,13 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * SIDE EFFECT:  an element whose tag holds something it couldn't read says so -- see `parseErrorsIn()`.
-   * - A quoted word on a tag that isn't one of the project's views too:  only a view takes one, as its `id`.
+   * - A quoted word on a tag that isn't one of the project's views too:  only a view takes one, as its `id`;
+   *   and a tag it names, `<modal "you won">` (`NAMED_TAGS`).
    */
   static noteUnreadable(scope: P.Scope, match: P.Match, element: P.JSXElementToken): void {
-    const { view, laterView } = match.data as JSXMatchData
+    const { view, laterView, named } = match.data as JSXMatchData
     const word = element.quotedWord?.value
-    const text = element.unreadable ?? (view || !word ? undefined : textOf(word))
+    const text = element.unreadable ?? (view || named !== undefined || !word ? undefined : textOf(word))
     if (!text) return
     const message = SP.Language.of(scope).parserMessage("unreadable-attribute", {
       text,
@@ -541,6 +582,21 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
+   * The attribute a quoted word also fills on `tag`, if it's a tag a quoted word names (`NAMED_TAGS`, epic `language`
+   * P61), in the drawing's language:  `heading` on `<ui-modal>`, `encabezado` on Spanish's `<es-modal>`;
+   * `""` for a named tag with no title;  `undefined` for any other tag.
+   */
+  private static namedTagTitle(scope: P.Scope, tag: string | undefined): string | undefined {
+    if (!tag) return undefined
+    const { lang } = SP.Language.of(scope)
+    const packs = SpellJSX.packsFor(scope)
+    const named = NAMED_TAGS[tag] ?? NAMED_TAGS[SP.ComponentPacks.canonicalTagFor(tag, lang, packs) ?? ""]
+    if (!named) return undefined
+    if (!named.title) return ""
+    return SP.ComponentPacks.attributeNameFor(tag, named.title, lang, packs) ?? named.title
+  }
+
+  /**
    * Is `type` one of the project's own views, drawn as an element of its own (`<solitaire-card>`)?
    * - A view, or a viewable list:  a pile is drawn as `<solitaire-tableau>`, around its cards' elements.
    */
@@ -691,6 +747,38 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (MENU_TAGS.includes(tag)) return true
     const canonical = SP.ComponentPacks.canonicalTagFor(tag, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
     return !!canonical && MENU_TAGS.includes(canonical)
+  }
+
+  /**
+   * `context-menu="game menu"` on an element (Spanish's `menú-contextual="..."`):  a right click on it shows the menu of
+   * that name, a template's (`its "game menu" is a menu of ...`) or one the program drew, `<menu "game menu">`
+   * (epic `language` T156;  Owen, 2026-11-17).
+   * - The page finds either by its name as the right click comes (`core.menuOf()`):  the attribute is written as it is,
+   *   the web's `context-menu` in every language.
+   * - SIDE EFFECT:  refused, once the whole program has parsed, when no menu has that name (`unknown-menu-attribute`).
+   * - A name worked out (`context-menu={...}`):  left to the page, unchecked.
+   */
+  private static reuseNamedMenu(scope: P.Scope, match: P.MatchFor<SpellJSX>, element: P.JSXElementToken) {
+    const attribute = element.attributes?.find(
+      (it) =>
+        it.name === CONTEXT_MENU_ATTRIBUTE || webWordFor(scope, SPELL_TAG_WORDS, it.name) === CONTEXT_MENU_TAG_MEANING
+    )
+    if (!attribute) return
+    if (attribute.name !== CONTEXT_MENU_ATTRIBUTE) match.data.contextMenuAttribute = attribute
+    if (!(attribute.value instanceof P.TextToken)) return
+    const menu = attribute.value.innerText.trim()
+    const message = SP.Language.of(scope).parserMessage("unknown-menu-attribute", { attribute: attribute.name, menu })
+    SP.SpellWarnings.refuseIf(match, message, () => !hasMenuNamed(scope, menu))
+  }
+
+  /**
+   * The word `written`, one of the language's words for a divider (`separator`, `separador`), names the component by:
+   * the language's first, `divider`, `divisor` (epic `language` T156;  Owen:  "make `<separator/>` an alias").
+   * - A project's own type of that name keeps it:  its view is drawn, as before.
+   */
+  private static dividerWordFor(scope: P.Scope, written: string): string {
+    if (scope.getType(SP.typeName(written))) return written
+    return spellTagsIn(scope).find((tag) => tag.meaning === DIVIDER_TAG_MEANING)?.tag ?? written
   }
 
   /** Is `match` a `<divider/>`, its word the language's (`<divisor/>`)? */

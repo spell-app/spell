@@ -9,7 +9,8 @@ if await core.confirm("Deal again?"): ...          # yes or no
 name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` if cancelled
 ```
 
-- What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`;  and `open_printing`.
+- What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`;  and `open_printing`;
+  and `show_drawn`, `hide_drawn` (`show "you won"`), which the page carries out.
   - Each takes what the JavaScript core's takes, in the same order, and answers as it does.
   - `alert`, `warn`, `confirm` and `prompt` are `async`:  the Python writer awaits them, as javascript's are.
   - `notify` isn't:  a toast is an aside, so the program carries on.
@@ -47,12 +48,15 @@ SNAKE_WORD = re.compile(r"_([a-z])")
 
 # What a frame asking the page names its method by, `{"ui": "alert", ...}`;  its number by;  the page's answer by
 UI_KEY = "ui"
+
+# What `_ask_page_soon()` asked and nobody waits for, kept until it's done
+_ASKED_SOON: set["asyncio.Future[None]"] = set()
 ASKS_KEY = "asks"
 ANSWER_KEY = "answer"
 
 
 class UIMethods:
-    """`core.notify()`, `core.alert()`, `core.warn()`, `core.confirm()`, `core.prompt()` and `core.open_printing()`:  see the module's docs."""
+    """`core.notify()`, `alert()`, `confirm()`, `open_printing()`, `show_drawn()` and the rest:  see the module docs."""
 
     # where they print with no page:  `Core` sets it
     console: "SpellConsole"
@@ -90,9 +94,7 @@ class UIMethods:
         - No page:  nothing, as the JavaScript core does under node.
         - NEVER throws.
         """
-        if self.ask_page is None or not _is_loop_running():
-            return
-        asyncio.ensure_future(self._ask_or_say("openPrinting", []))
+        self._ask_page_soon("openPrinting", [])
 
     async def alert(self, message: object, ok_text: "str | DialogOptions | None" = None) -> None:
         """Show `message` in a dialog, and wait until it's closed:  compiled from `alert "Yo!"`.
@@ -148,6 +150,30 @@ class UIMethods:
             return typed.rstrip("\n") or value
         answer = await self.ask_page("prompt", _args(message, value))
         return None if answer is None else str(answer)
+
+    def show_drawn(self, name: str) -> None:
+        """Show what the program drew and named `name`:  compiled from `show "you won"` (epic `language` P61).
+
+        - Named by the quoted word on its tag, `<modal "you won">`:  the PAGE draws it, so the page shows it,
+          as the JavaScript core's `showDrawn()` does.
+        - Not waited for:  the program carries on, as javascript's.
+        - No page:  nothing.
+        - NEVER throws:  one the page can't show is said on the console.
+        """
+        self._ask_page_soon("showDrawn", [str(name)])
+
+    def hide_drawn(self, name: str) -> None:
+        """Hide what the program drew and named `name`:  compiled from `hide "you won"`.  As `show_drawn()`."""
+        self._ask_page_soon("hideDrawn", [str(name)])
+
+    def _ask_page_soon(self, method: str, args: list[Any]) -> None:
+        """Ask the page to run `method` with `args`, not waiting for it:  nothing with no page."""
+        if self.ask_page is None or not _is_loop_running():
+            return
+        asked = asyncio.ensure_future(self._ask_or_say(method, args))
+        # kept until it's done:  the event loop holds only a weak reference to a task
+        _ASKED_SOON.add(asked)
+        asked.add_done_callback(_ASKED_SOON.discard)
 
     async def _ask_or_say(self, method: str, args: list[Any]) -> None:
         """Ask the page to show `method` with `args`;  a failure said on the console.  NEVER throws."""

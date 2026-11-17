@@ -2095,9 +2095,11 @@ export type ASTJSXElementProps = Prettify<{
 
 /**
  * One item of a right-click menu (`ASTJSXElement.contextMenu`):  an action's name as spell names it, `-` a divider;
- * or an action whose tag gave attributes, each a literal (`icon-only`, `title="Restart"`, `icon="refresh"`).
+ * or an action whose tag gave attributes, each a literal (`icon-only`, `title="Restart"`, `icon="refresh"`);
+ * or every item of the menu of that name, drawn or a template's, `{ menu: "game menu" }`, as written
+ * (`<context-menu "game menu">`, epic `language` T156).
  */
-export type ASTContextMenuItem = string | { action: string; props: Record<string, string | boolean> }
+export type ASTContextMenuItem = string | { action: string; props: Record<string, string | boolean> } | { menu: string }
 
 export class ASTJSXElement extends ASTExpression {
   declare tagName: string

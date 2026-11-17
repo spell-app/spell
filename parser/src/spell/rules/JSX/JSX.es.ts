@@ -35,7 +35,7 @@ export const JSXEs = new SpellParser({ module: "JSX" })
 // - the web's own `slot` too:  a word rule needs two forms
 // - and spell's own action tag, `<acción "jugar solo"/>` (`action_button`), its `<menú-contextual>` and the `<divisor/>` in it (`context_menu_block`)
 JSXEs.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_TAG_MEANINGS }), {
-  syntax: "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
+  syntax: "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor|separador))"
 })
 
 // spell's own attribute words, each meaning the web's attribute:  `<h3 en="header">` => `<h3 slot="header">`;

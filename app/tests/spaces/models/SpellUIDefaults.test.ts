@@ -55,3 +55,16 @@ describe("SpellUIDefaults.read()", () => {
     })
   })
 })
+
+describe("SpellUIDefaults.attributeNameFor():  a quoted word's title, in the drawing's language (epic `language` P61)", () => {
+  test("a modal's heading:  English's own, Spanish's from the dictionary", () => {
+    expect(SpellUIDefaults.attributeNameFor("ui-modal", "heading", "en")).toBe("heading")
+    expect(SpellUIDefaults.attributeNameFor("es-modal", "heading", "es")).toBe("encabezado")
+    expect(SpellUIDefaults.attributeNameFor("modal", "heading", "es")).toBe("encabezado")
+  })
+
+  test("a tag or an attribute Spell UI doesn't have:  nothing", () => {
+    expect(SpellUIDefaults.attributeNameFor("ui-nothing", "heading", "en")).toBeUndefined()
+    expect(SpellUIDefaults.attributeNameFor("ui-modal", "nothing", "es")).toBeUndefined()
+  })
+})

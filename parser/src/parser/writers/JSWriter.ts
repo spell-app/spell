@@ -1757,11 +1757,14 @@ export class JSWriter extends ProgramWriter {
   /**
    * A context menu's items, by the names this target gives them:  `["autoPlay", "-", "undo"]`.
    * - An item with attributes is its name and them:  `["undo", { "icon-only": true }]`.
+   * - Another menu's items, by its name:  `{ menu: "game menu" }` (epic `language` T156).
    * - On one line when it fits, else one a line.
    */
   protected menuItemNames(items: readonly P.ASTContextMenuItem[]): string {
     const written = items.map((item) => {
       if (typeof item === "string") return this.quoted(item === "-" ? item : this.nameOf(item, "method"))
+      // a menu's items, by its name as written:  the page finds it, drawn or a template's
+      if ("menu" in item) return `{ menu: ${this.quoted(item.menu)} }`
       const props = Object.entries(item.props).map(
         ([key, value]) => `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${JSON.stringify(value)}`
       )

@@ -187,7 +187,7 @@ describe("an action's button, <action>", () => {
     )
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('core.drawContextMenu(this, ["autoPlay", "-", "undo"])')
-    expect(file.compiled).toContain('h("divider")')
+    expect(file.compiled).toContain('h("ui-divider")')
     const ts = String(P.TSWriter.instance.writeMatch(file.match!))
     expect(ts).toContain('{core.drawContextMenu(this, ["autoPlay", "-", "undo"])}')
     const python = String(PY.PyWriter.instance.writeMatch(file.match!))

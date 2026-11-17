@@ -1,4 +1,5 @@
 import { describe, test, expect, afterEach, onTestFinished, vi } from "vite-plus/test"
+import { parseHTML } from "linkedom"
 
 import { core } from "spell/parser/core"
 
@@ -130,5 +131,55 @@ describe("core.alert() / warn() / confirm():  the dialog the page's Spell UI is 
         options: { title: "Solitaire", okText: "Deal", cancelText: "Not now", message: "Deal?", markdown: true }
       }
     ])
+  })
+})
+
+describe('core.showDrawn() / hideDrawn():  `show "you won"`, by its name (epic `language` P61)', () => {
+  /** A page holding `markup`, as `document`;  a view's shadow root holding `inView`, if given. */
+  function pageWith(markup: string, inView?: string) {
+    const page = parseHTML(`<!doctype html><html><body>${markup}</body></html>`)
+    vi.stubGlobal("document", page.document)
+    if (inView !== undefined) {
+      const view = page.document.createElement("solitaire-card")
+      view.attachShadow({ mode: "open" }).innerHTML = inView
+      page.document.body.appendChild(view)
+    }
+    return page.document
+  }
+
+  /** The element with `id`, in `document` or a view's shadow root, as a modal:  its `visible`. */
+  function modalIn(document: Document, id: string): { visible?: boolean } {
+    const found =
+      document.getElementById(id) ??
+      [...document.querySelectorAll("*")].map((element) => element.shadowRoot?.getElementById(id)).find(Boolean)
+    const modal = found as unknown as { visible?: boolean }
+    modal.visible ??= false
+    return modal
+  }
+
+  test("finds it by its words joined by -, and shows and hides it by its `visible`", () => {
+    const document = pageWith('<ui-modal id="you-won"></ui-modal>')
+    const modal = modalIn(document, "you-won")
+    core.showDrawn("you won")
+    expect(modal.visible).toBe(true)
+    core.hideDrawn("you won")
+    expect(modal.visible).toBe(false)
+  })
+
+  test("drawn inside a view's own shadow root too", () => {
+    const document = pageWith("", '<ui-modal id="you-won"></ui-modal>')
+    const modal = modalIn(document, "you-won")
+    core.showDrawn("you won")
+    expect(modal.visible).toBe(true)
+  })
+
+  test("nothing by that name:  a TypeError saying how to name one", () => {
+    pageWith("<ui-text></ui-text>")
+    expect(() => core.showDrawn("you lost")).toThrow(/nothing drawn is named "you lost";  name it on its tag/)
+  })
+
+  test("no page, as under node:  nothing", () => {
+    vi.stubGlobal("document", undefined)
+    expect(() => core.showDrawn("you won")).not.toThrow()
   })
 })

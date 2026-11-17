@@ -1718,7 +1718,7 @@
               "syntax": "((up:hacia arriba|para arriba)|(down:hacia abajo|para abajo))"
             },
             {
-              "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
+              "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(long_press:se mantiene pulsado|se mantiene pulsada)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
             },
             {
               "syntax": "((start:principio|comienzo|inicio|frente|abajo)|(end:final|fin|fondo|arriba))"
@@ -1829,7 +1829,7 @@
               "syntax": "(página de error|pagina de error)"
             },
             {
-              "syntax": "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
+              "syntax": "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor|separador))"
             },
             {
               "syntax": "((slot:en)|slot|(hidden:oculto|oculta)|hidden)"
@@ -4697,6 +4697,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ShowDrawn",
+          "ruleNames": ["show_drawn"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 15,
+          "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
+          "syntaxes": [
+            {
+              "syntax": "(mostrar|(hide:ocultar)) {name:text}",
+              "example": "mostrar \"ganaste\"",
+              "outputs": {
+                "js": {
+                  "code": "core.showDrawn(\"ganaste\")"
+                },
+                "ts": {
+                  "code": "core.showDrawn(\"ganaste\")"
+                },
+                "py": {
+                  "code": "core.show_drawn(\"ganaste\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "PlaySound",
           "ruleNames": ["play_sound"],
           "internal": false,
@@ -6687,7 +6713,7 @@
           "ruleNames": ["define_menu"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineMenu.ts",
-          "line": 33,
+          "line": 35,
           "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
           "syntaxes": [
             {
@@ -7943,7 +7969,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 84,
+          "line": 90,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9513,7 +9539,7 @@
           "ruleNames": ["context_menu_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ContextMenuBlock.ts",
-          "line": 45,
+          "line": 53,
           "purpose": "The right-click menu of the element it's in, written inside it, in a drawing.",
           "syntaxes": [
             {
@@ -9538,7 +9564,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 90,
+          "line": 106,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

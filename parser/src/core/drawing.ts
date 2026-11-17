@@ -240,6 +240,8 @@ export const drawingMethods = defineCoreModule({
    * - The page's right click on the element around it finds it, and shows its items (the app's `ActionMenus`):
    *   its `menuItems()` gives them, each found from `thing` up its chain as the menu shows (`core.menuItemsOf()`),
    *   so they read their titles and enabled live, and run through the core.
+   * - An item `{ menu: "game menu" }`:  every item of the menu of that name, the program's drawn `<menu "game menu">` or a
+   *   template's, as it shows when the menu shows (`<context-menu "game menu">`, epic `language` T156).
    */
   drawContextMenu(thing: unknown, items: readonly ContextMenuItem[]): Drawing {
     const remember = (element: HTMLElement & ContextMenuElement) => {

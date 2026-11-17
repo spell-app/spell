@@ -2,9 +2,13 @@ import {
   EditorSelection,
   type EditorState,
   type Extension,
+  type Line,
+  type Range,
   type SelectionRange,
   StateEffect,
-  StateField
+  StateField,
+  type Text as Doc,
+  type Transaction
 } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
 
@@ -36,6 +40,7 @@ import { CodeMirrorSelection } from "./CodeMirrorSelection"
  *   and the caret still lands on its letters, as CodeMirror measures the lines as they're drawn.
  * - Typing never waits for the layout:  CodeMirror moves the marks with the text,
  *   and the layout is worked out again once the typing pauses (`RELAYOUT_MSEC`, `CodeMirrorRelayout`).
+ *   - A blank body line the edit wrote is drawn at once, so the caret on it never moves (`blankLinesDrawn()`, I158).
  * - The editor's box is a `.bubbly` too (`EDITOR_CLASSES`), so the sheet's settings and rules reach it:
  *   its CodeMirror section draws the bands, rails, feet and tags.
  * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks.
@@ -61,7 +66,9 @@ export class CodeMirrorBubbly {
           isParseOnItsWay: (state) => {
             const file = fileOf()
             return !!file?.match && !SP.BubblyLayout.isParseOf(file, state.doc.toString())
-          }
+          },
+          drawnAtOnce: (decorations, transaction) =>
+            blankLinesDrawn(decorations, transaction, sliceOf(transaction.state)?.hiddenIndent)
         }
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
@@ -151,17 +158,18 @@ class BubblyDecorations {
       }
       switch (node.kind) {
         case "gap":
-          this.decorations.line(node.start, rails)
+          // a group's:  so a blank line written there is drawn as the group's own lines are, at once (I158)
+          this.decorations.line(node.start, rails, isGroupBody ? [IN_GROUP] : [])
           break
         case "line":
-          this.decorations.line(node.start, rails, isGroupBody ? ["cmb-group-line"] : [])
+          this.decorations.line(node.start, rails, isGroupBody ? [GROUP_LINE, IN_GROUP] : [])
           // a plain body line's words where a band's on its level are, a tab in (I142);  a group's are already;
           // a blank one right above a drawing's tags is the drawing's:  a tag typed there starts at its indent (I157)
           if (!isGroupBody && !this.isAboveTags(nodes, index)) this.plainIndent(node)
           this.line(node)
           break
         case "block":
-          this.block(node, rails)
+          this.block(node, rails, isGroupBody)
           break
       }
     }
@@ -200,7 +208,7 @@ class BubblyDecorations {
   private plainIndent(line: SP.BubblyLine) {
     const { from, to } = this.decorations.shownIndentBefore(line.start)
     if (!this.text.slice(from, to).includes("\t")) return
-    this.mark(from, to, ["cmb-plain-indent"])
+    this.mark(from, to, [PLAIN_INDENT])
     if (isBlank(line)) this.decorations.add(WordsPlace.decoration.range(to))
   }
 
@@ -221,18 +229,21 @@ class BubblyDecorations {
     return node.kind === "line" && this.text[node.start] === "<"
   }
 
-  /** A declaration, or a control line with steps under it:  its band, its body, its foot. */
-  private block(block: SP.BubblyBlock, rails: Rail[]) {
+  /**
+   * A declaration, or a control line with steps under it:  its band, its body, its foot.
+   * - `isInGroup`:  it's a group's member, in its body (`IN_GROUP`)
+   */
+  private block(block: SP.BubblyBlock, rails: Rail[], isInGroup = false) {
     const { head, partOfSpeech } = block
     const isShown = this.isWhollyShown(block)
     // folded:  its head alone, a pill with the fold's `…` in its end;  nothing of its hidden body (I116)
     const isFolded = isShown && this.decorations.isFoldedAt(head.start)
     const hasBody = !isFolded && block.body.some((node) => node.kind !== "gap")
-    this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
+    this.decorations.line(head.start, rails, [...(isShown ? [HEAD] : []), ...(isInGroup ? [IN_GROUP] : [])])
     // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it (I113)
     const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
     const indent = hung(this.decorations.indentAt(head.start), isHung)
-    const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? ["bubbly-group"] : [])]
+    const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? [GROUP_BAND] : [])]
     const hasDescription = this.line(head, partOfSpeech)
     if (isShown) {
       const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
@@ -435,6 +446,198 @@ function lastLineEnd(block: SP.BubblyBlock): number {
   if (!last) return block.head.end
   return last.kind === "block" ? lastLineEnd(last) : (last as SP.BubblyLine).end
 }
+
+////////////////
+// ## A blank line drawn at once
+////////////////
+
+/**
+ * `decorations`, moved with `transaction`'s edit, and each blank body line it wrote drawn as the layout will draw it,
+ * at once (epic `language` I158):  so the caret on it is drawn where its words will go as it lands, and never moves.
+ * - A blank line the caret snaps onto (`CodeMirrorTyping`), or Enter makes:  moved marks have nothing on it,
+ *   so the caret stood at the end of its tabs till the typing paused and the text was laid out again,
+ *   then stepped a tab right (about 200ms after a click).
+ * - And a blank line's first letter, typed with its indent (`LSP.SpellTyping.indentToAdd()`):
+ *   the room before it, so it lands where its words will be.
+ * - Its look, from the lines round it, as the layout decides it (`BubblyDecorations.nodes()`):
+ *   - between a drawing's tags, or a blank line right above them:  nothing, a typed `<` starts at its indent
+ *   - a group's own line (`cmb-group-line`):  where its members' words are, as the line beside it in the group
+ *   - else, in a body:  the room after its tabs (`cmb-plain-indent`), and a blank one's caret past it (`WordsPlace`)
+ * - Only lines with nothing drawn on them yet;  the next layout replaces it all.
+ * - `hiddenIndent`:  a slice's, shown dedented (`Slice`)
+ * - NEVER throws:  a look it can't work out is left to the layout.
+ */
+function blankLinesDrawn(decorations: DecorationSet, transaction: Transaction, hiddenIndent = 0): DecorationSet {
+  try {
+    const { doc } = transaction.state
+    const written: Line[] = []
+    transaction.changes.iterChangedRanges((fromA, _toA, fromB, toB) => {
+      // a letter typed on a blank line:  its line was blank before the edit
+      const typedOn = transaction.startState.doc.lineAt(fromA).text.trim() ? 0 : doc.lineAt(fromB).number
+      for (let number = doc.lineAt(fromB).number; number <= doc.lineAt(toB).number; number++) {
+        const line = doc.line(number)
+        if (written.at(-1)?.number !== number && (!line.text.trim() || number === typedOn)) written.push(line)
+      }
+    })
+    if (!written.length) return decorations
+    const clipped = clippedAbove(decorations, written)
+    const add = written.flatMap((line) => blankLineLook(clipped, doc, line, hiddenIndent))
+    return add.length ? clipped.update({ add, sort: true }) : clipped
+  } catch (error) {
+    console.error("CodeMirrorBubbly:  couldn't draw a blank line at once", error)
+    return decorations
+  }
+}
+
+/**
+ * `decorations`, with what moved onto each of `lines` from the line above put back on it.
+ * - Enter at the end of a line puts the new line between that line and what was drawn at its end:
+ *   - a mark holding its end, a quoted name's (`to "reset the stock"`), grew with the line break, so the new line was
+ *     drawn inside the name's pill:  it ends at the line's end again
+ *   - what's drawn after its end (a tag's foot, a block's feet) moved down onto the new line, its caret pushed right:
+ *     back at the line's end
+ * - A words' place left anywhere but a blank line's end goes (`WordsPlace`), as a line left blank again keeps one at
+ *   its start:  `blankLineLook()` places its own.
+ */
+function clippedAbove(decorations: DecorationSet, lines: readonly Line[]): DecorationSet {
+  const blanks = lines.filter((line) => !line.text.trim() && line.number > 1)
+  const lineCrossedInto = (from: number, to: number, value: Decoration) =>
+    value.point ? undefined : lines.find((line) => from < line.from && to >= line.from)
+  // a words' place at a blank line's end is its own
+  const blankHolding = (from: number, value: Decoration) =>
+    value.spec.widget
+      ? blanks.find(
+          (line) =>
+            line.from <= from && from <= line.to && !(value.spec.widget instanceof WordsPlace && from === line.to)
+        )
+      : undefined
+  const putBack: Range<Decoration>[] = []
+  let isAny = false
+  decorations.between(lines[0]!.from - 1, lines.at(-1)!.to, (from, to, value) => {
+    const crossed = lineCrossedInto(from, to, value)
+    const blank = blankHolding(from, value)
+    if (!crossed && !blank) return
+    isAny = true
+    if (crossed && crossed.from - 1 > from) putBack.push(value.range(from, crossed.from - 1))
+    if (blank && !(value.spec.widget instanceof WordsPlace) && from === to) putBack.push(value.range(blank.from - 1))
+  })
+  if (!isAny) return decorations
+  return decorations.update({
+    filter: (from, to, value) => !lineCrossedInto(from, to, value) && !blankHolding(from, value),
+    add: putBack,
+    sort: true
+  })
+}
+
+/**
+ * What body line `line`, blank or with its first words just typed, needs drawn, by the lines round it
+ * (`blankLinesDrawn()`);  none when it's drawn already.
+ */
+function blankLineLook(decorations: DecorationSet, doc: Doc, line: Line, hiddenIndent: number): Range<Decoration>[] {
+  const indent = indentOf(line)
+  const isBlankLine = indent.length === line.length
+  const shownFrom = Math.min(line.from + hiddenIndent, line.from + indent.length)
+  const shownTo = line.from + indent.length
+  if (!doc.sliceString(shownFrom, shownTo).includes("\t") || isTagText(line.text) || isDrawn(decorations, line))
+    return []
+  const next = nonBlankLine(doc, line.number, 1)
+  const previous = nonBlankLine(doc, line.number, -1)
+  // a typed `<` starts at its indent:  on a blank line right above a drawing's tags, or among them
+  if (isBlankLine && next && isTagText(next.text)) return []
+  if (isInDrawing(decorations, doc, line, indent)) return []
+  // in a group's body:  as its own empty line was, else as the line beside it on its level, or right under its head
+  const sibling = [next, previous].find((it) => it && indentOf(it) === indent)
+  const isGroupLine =
+    hasClassAt(decorations, line.from, line.from, IN_GROUP) ||
+    (!!sibling && hasClassAt(decorations, sibling.from, sibling.from, IN_GROUP)) ||
+    (!!previous && indentOf(previous) === indent && hasClassAt(decorations, previous.from, previous.to, GROUP_BAND))
+  if (isGroupLine) return [Decoration.line({ class: GROUP_LINE }).range(line.from)]
+  const room = Decoration.mark({ class: PLAIN_INDENT }).range(shownFrom, shownTo)
+  return isBlankLine ? [room, WordsPlace.decoration.range(line.to)] : [room]
+}
+
+/**
+ * Is `line`, at `indent`, among a drawing's lines, as the layout draws them from a drawing's first tag to the next
+ * block (`BubblyDecorations.markup()`):  after a tag on its own level, or under a tag (its children, a laid-out tag's
+ * attributes)?
+ * - Up through the lines above, out from its level:  those further in are inside something, and skipped;
+ *   a tag says yes, a head (`cmb-head`) no;  any other line (a tag's attribute, a step among the tags) goes on up,
+ *   from its own level.
+ */
+function isInDrawing(decorations: DecorationSet, doc: Doc, line: Line, indent: string): boolean {
+  let level = indent.length
+  for (let above = nonBlankLine(doc, line.number, -1); above; above = nonBlankLine(doc, above.number, -1)) {
+    const its = indentOf(above).length
+    if (its > level) continue
+    if (isTagText(above.text)) return true
+    if (hasClassAt(decorations, above.from, above.from, HEAD)) return false
+    level = its
+  }
+  return false
+}
+
+/** `line`'s indent:  its leading tabs and spaces. */
+function indentOf(line: Line): string {
+  return /^[ \t]*/.exec(line.text)![0]
+}
+
+/**
+ * Is `line` drawn already:  the room after its indent, a blank one's words' place at its end, or a group's line?
+ * - Only at those places:  a line left blank again keeps a moved words' place at its start, which says nothing.
+ */
+function isDrawn(decorations: DecorationSet, line: Line): boolean {
+  const indentEnd = line.from + indentOf(line).length
+  let isDrawn = false
+  decorations.between(line.from, line.to, (from, to, value) => {
+    const classes = ((value.spec.class as string | undefined) ?? "").split(" ")
+    isDrawn ||=
+      (value.spec.widget instanceof WordsPlace && from === line.to) ||
+      (classes.includes(PLAIN_INDENT) && to === indentEnd) ||
+      (from === line.from && classes.includes(GROUP_LINE))
+  })
+  return isDrawn
+}
+
+/** Does a decoration from `from` to `to` (a line's, or a mark in it) have `className`? */
+function hasClassAt(decorations: DecorationSet, from: number, to: number, className: string): boolean {
+  let has = false
+  decorations.between(from, to, (_from, _to, value) => {
+    has ||= ((value.spec.class as string | undefined) ?? "").split(" ").includes(className)
+  })
+  return has
+}
+
+/** The nearest line with words on it, after line `number` (`way` 1) or before it (-1). */
+function nonBlankLine(doc: Doc, number: number, way: 1 | -1): Line | undefined {
+  for (let at = number + way; at >= 1 && at <= doc.lines; at += way) {
+    const line = doc.line(at)
+    if (line.text.trim()) return line
+  }
+  return undefined
+}
+
+/** Does `text` start with a tag, a drawing's line (`<deck "deck" />`, `</container>`)? */
+function isTagText(text: string): boolean {
+  return text.trimStart().startsWith("<")
+}
+
+/** A head's line:  a declaration's or a control line's, a band on it. */
+const HEAD = "cmb-head"
+
+/** A plain body line's room after its tabs (`BubblyDecorations.plainIndent()`). */
+const PLAIN_INDENT = "cmb-plain-indent"
+
+/** A group's own line, where its members' words are (`BubblyDecorations.nodes()`). */
+const GROUP_LINE = "cmb-group-line"
+
+/**
+ * A line in a group's body, the group's own:  a member's head, a note, an empty line.
+ * - No look of its own:  it says where a blank line written beside it goes (`blankLineLook()`).
+ */
+const IN_GROUP = "cmb-in-group"
+
+/** A group's band, on its head. */
+const GROUP_BAND = "bubbly-group"
 
 /****************
  * ### `DescriptionRoom`

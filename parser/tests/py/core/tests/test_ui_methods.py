@@ -154,6 +154,25 @@ def test_a_toast_the_page_cant_show_is_said_on_the_console() -> None:
     assert "notify:  the page can't show it" in out.getvalue()
 
 
+def test_show_and_hide_by_name_ask_the_page_not_waiting() -> None:
+    a_core, asked = asking({})
+
+    async def run() -> None:
+        a_core.show_drawn("you won")
+        a_core.hide_drawn("you won")
+        await asyncio.sleep(0)
+
+    asyncio.run(run())
+    assert asked == [("showDrawn", ["you won"]), ("hideDrawn", ["you won"])]
+
+
+def test_show_by_name_with_no_page_does_nothing() -> None:
+    a_core, out = printing()
+    a_core.show_drawn("you won")
+    a_core.hide_drawn("you won")
+    assert out.getvalue() == ""
+
+
 ################
 # ## The frames:  a question by number, the page's answer
 ################
@@ -191,7 +210,7 @@ async def _sent(sent: list[dict[str, Any]], frame: dict[str, Any]) -> None:
     sent.append(frame)
 
 
-@pytest.mark.parametrize("method", ["notify", "alert", "warn", "confirm", "prompt"])
+@pytest.mark.parametrize("method", ["notify", "alert", "warn", "confirm", "prompt", "show_drawn", "hide_drawn"])
 def test_compiled_python_finds_each_on_core(method: str) -> None:
     from spell_core import core
 

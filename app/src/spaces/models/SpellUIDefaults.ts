@@ -83,6 +83,19 @@ export class SpellUIDefaults {
   }
 
   /**
+   * The name `language` writes Spell UI's attribute `attribute` by on `tag` (the pack's `attributeNameFor()`,
+   * epic `language` P61):  `("es-modal", "heading", "es")` => `"encabezado"`.
+   * - `tag` as `canonicalTagFor()` takes it;  `undefined` for a tag Spell UI doesn't have, or an attribute it doesn't name.
+   */
+  static attributeNameFor(tag: string, attribute: string, language: string): string | undefined {
+    const canonical = SpellUIDefaults.canonicalTagFor(tag, language)
+    if (!canonical) return undefined
+    const english = SpellUIDefaults.registry.localizedFor(canonical)!
+    if (!english.attributes.has(attribute)) return undefined
+    return SpellUIDefaults.localizedFor(canonical, language).names.attributes.get(attribute) ?? attribute
+  }
+
+  /**
    * The attributes of Spell UI's tag `tag`, as `language` writes them on it (the pack's `help()`, epic `editor` P28):
    * each attribute's name, the words it takes and whether it takes none (`bare`), the shared ones too (`disabled`),
    * with what `describe()` says of it.

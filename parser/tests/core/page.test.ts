@@ -255,6 +255,29 @@ describe("startPage():  the program's dialogs and toasts", () => {
     }
   })
 
+  test("show / hide by name:  the page shows what it drew, then answers (epic `language` P61)", async () => {
+    const sent: PageMessage[] = []
+    core.resetRuntime()
+    const page = startPage({ modules: [], state: {}, send: (message) => sent.push(message) })
+    const show = vi.spyOn(core, "showDrawn").mockImplementation(() => {})
+    const hide = vi.spyOn(core, "hideDrawn").mockImplementation(() => {})
+    try {
+      page.receive({ ui: "showDrawn", args: ["you won"], asks: 1 })
+      page.receive({ ui: "hideDrawn", args: ["you won"], asks: 2 })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(show).toHaveBeenCalledWith("you won")
+      expect(hide).toHaveBeenCalledWith("you won")
+      expect(sent).toEqual([
+        { answer: 1, value: null },
+        { answer: 2, value: null }
+      ])
+    } finally {
+      show.mockRestore()
+      hide.mockRestore()
+      core.remote = undefined
+    }
+  })
+
   test("their frames, in the console:  the question, by its words and number;  the answer", () => {
     expect(frameSummary({ ui: "confirm", args: ["Deal again?"], asks: 3 })).toBe('confirm "Deal again?" (#3)')
     expect(frameSummary({ answer: 3, value: true })).toBe("answer #3:  true")
