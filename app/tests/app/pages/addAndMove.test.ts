@@ -999,7 +999,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           withIcons: names.every((name) => !!name.getAttribute("icon")),
           closes: strip.querySelectorAll(".PaletteClose").length,
           searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width,
-          // centred, its content's width and 16px either side, the search right after the last name (T106)
+          // centred, its content's width, 16px at its start and 4px past the search (T106, I252), the search right after the last name
           ...(() => {
             const box = strip.getBoundingClientRect()
             const add = strip.querySelector(".PaletteStripAdd")!.getBoundingClientRect()
@@ -1019,7 +1019,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       bold: true,
       withIcons: true,
       closes: 0,
-      room: [16, 16],
+      room: [16, 4],
       centred: true,
       searchAfterNames: 16
     })

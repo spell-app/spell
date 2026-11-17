@@ -66,7 +66,7 @@
      the page shows beside it (T106, Owen:  "keep it centered but make it only 32px wider than the content it needs,
      with rounded bottom corners, and show the page background in the unused space")
    - a window too narrow for all of it:  the whole window's width, and its names scroll (T86)
-   - the bar's own fill and blur, a step lighter (I248), over the page as the bar's is
+   - the top bar's own colour and blur (I251;  a step lighter in I248, undone), over the page as the bar's is
      (on its `::before`, so a menu inside it isn't held in its box)
    - its pin, Add a View in bold, then its topics' icons and names (T86, T92), quiet, as the bar's menus are;
      its search right after the last one (T106;  at the window's far right before)
@@ -85,14 +85,18 @@
   max-width: 100%;
   height: 32px;
   margin-inline: auto;
-  /* 16px to its outer edge, its 1px line included */
-  padding-inline: 15px;
+  /* 16px to its outer edge at its start, its 1px line included;  4px past the search at its end
+     (I252, Owen:  "Make padding to the right of the search bar 4px") */
+  padding-inline: 15px 3px;
   min-width: 0;
   border: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
   border-block-start: 0;
-  border-end-start-radius: var(--spell-pane-radius);
-  border-end-end-radius: var(--spell-pane-radius);
-  box-shadow: inset 0 1px 0 var(--ui-border-color);
+  /* 20px round (I252, Owen:  "Make this border-radius 20px";  the theme's pane radius before) */
+  border-end-start-radius: 20px;
+  border-end-end-radius: 20px;
+  /* the line under the top bar half as strong as a border (I251, Owen:  "I just wanted the border between the top menu
+     and the add bar to be lighter, not the bar itself") */
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ui-border-color) 50%, transparent);
 
   &::before {
     content: "";
@@ -101,10 +105,10 @@
     inset: 1px 0 0;
     z-index: -1;
     border-radius: inherit;
-    /* a step lighter than the top bar, a white wash over its fill:  half in light, a touch in dark
-       (epic `editor` I248, Owen:  "make this bar lighter") */
-    --PaletteStrip-wash: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.05));
-    background: linear-gradient(var(--PaletteStrip-wash), var(--PaletteStrip-wash)), var(--spell-menu-bar-fill);
+    /* the top bar's own fill, over the page as the top bar's is, so the two bars are one colour (epic `editor` I251,
+       Owen:  "The visible parts of this should have the same background as the menubar";  I248's lighter wash undone:
+       he meant the line between them) */
+    background: var(--spell-menu-bar-fill);
     -webkit-backdrop-filter: var(--spell-menu-bar-filter);
     backdrop-filter: var(--spell-menu-bar-filter);
     pointer-events: none;
