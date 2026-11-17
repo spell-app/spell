@@ -6925,6 +6925,27 @@
       }
     },
     {
+      "name": "--ui-panel-scroll-shade",
+      "description": {
+        "kind": "markdown",
+        "value": "the shade's colour at its edge, fading to nothing: a dark tint, deeper on a dark page\n\n`<ui-panel>`'s token.  Default:  `light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3))`"
+      }
+    },
+    {
+      "name": "--ui-panel-scroll-shade-size",
+      "description": {
+        "kind": "markdown",
+        "value": "how tall each shade is\n\n`<ui-panel>`'s token.  Default:  `16px`"
+      }
+    },
+    {
+      "name": "--ui-panel-scroll-shade-top",
+      "description": {
+        "kind": "markdown",
+        "value": "how far under the bar the top shade starts: under a line of the body's that sticks at its top\n\n`<ui-panel>`'s token.  Default:  `0px`"
+      }
+    },
+    {
       "name": "--ui-panel-pane-bar-height",
       "description": {
         "kind": "markdown",
@@ -12890,6 +12911,20 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-field>`:  The things being edited disagree on this value (`mixed`).\n- `<ui-property>`:  The things being edited disagree on this value (`mixed`)."
+      }
+    },
+    {
+      "name": ":state(more-above)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  A pane whose body is scrolled down from its top:  a shade shows under its bar."
+      }
+    },
+    {
+      "name": ":state(more-below)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  A pane whose body has more below:  a shade shows at its bottom."
       }
     },
     {

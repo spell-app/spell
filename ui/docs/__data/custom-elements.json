@@ -24395,6 +24395,14 @@
               "description": "With `source`:  the file couldn't be loaded or shown."
             },
             {
+              "name": "more-above",
+              "description": "A pane whose body is scrolled down from its top:  a shade shows under its bar."
+            },
+            {
+              "name": "more-below",
+              "description": "A pane whose body has more below:  a shade shows at its bottom."
+            },
+            {
               "name": "busy",
               "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
             },
@@ -24478,6 +24486,21 @@
               "name": "--ui-panel-shadow",
               "default": "var(--spell-shadow-sm, var(--ui-shadow-raised))",
               "description": "the box shadow"
+            },
+            {
+              "name": "--ui-panel-scroll-shade",
+              "default": "light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3))",
+              "description": "the shade's colour at its edge, fading to nothing: a dark tint, deeper on a dark page"
+            },
+            {
+              "name": "--ui-panel-scroll-shade-size",
+              "default": "16px",
+              "description": "how tall each shade is"
+            },
+            {
+              "name": "--ui-panel-scroll-shade-top",
+              "default": "0px",
+              "description": "how far under the bar the top shade starts: under a line of the body's that sticks at its top"
             },
             {
               "name": "--ui-panel-pane-bar-height",
