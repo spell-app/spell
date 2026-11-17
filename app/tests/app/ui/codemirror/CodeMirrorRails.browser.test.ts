@@ -665,6 +665,52 @@ describe("a body's rail under the caret", () => {
     document.documentElement.style.colorScheme = ""
   })
 
+  test("a quoted value's marks beside its words, a tag's as a Spell line's:  the opening at their caps, the closing low (I149)", async () => {
+    // Owen:  "quotes are too high, lower both" -- a tag's `columns="7"`:  its opening mark above the letters, 6.5px over
+    // their caps, its closing one over their middle;  now each where a Spell line's is
+    const view = await bubblyEditorOf('a "card" is a view\n\tto draw it\n\t\t<container columns="seven" />\n')
+    /** The baseline of `element`'s text, on the page:  a box of no height sits on it. */
+    const baselineOf = (element: Element) => {
+      const probe = element.appendChild(document.createElement("span"))
+      probe.style.cssText = "display: inline-block; width: 0; height: 0"
+      const baseline = probe.getBoundingClientRect().bottom
+      probe.remove()
+      return baseline
+    }
+    const context = document.createElement("canvas").getContext("2d")!
+    /** How far `text`'s ink reaches above and below its baseline, in `element`'s font. */
+    const inkOf = (element: Element, text: string) => {
+      const style = getComputedStyle(element)
+      context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+      const metrics = context.measureText(text)
+      return { above: metrics.actualBoundingBoxAscent, below: metrics.actualBoundingBoxDescent }
+    }
+    /** Each mark's ink, from its words' caps' top and from their baseline (down is more);  its lean left out. */
+    const marksOf = (input: Element, glyphs: Element[]) => {
+      const baseline = baselineOf(input)
+      const capTop = baseline - inkOf(input, "H").above
+      return glyphs.map((glyph) => {
+        const glyphBaseline = baselineOf(glyph)
+        const ink = inkOf(glyph, glyph.textContent!)
+        return { top: glyphBaseline - ink.above - capTop, bottom: glyphBaseline + ink.below - baseline }
+      })
+    }
+    const spellInput = view.dom.querySelector(".cmb-band .bubbly-input")!
+    const spell = marksOf(spellInput, [...spellInput.querySelectorAll(".cmb-quote-glyph")])
+    const tagGlyphs = [...view.dom.querySelectorAll(".cmb-tag-quote .cmb-quote-glyph")]
+    const tag = marksOf(lineElement(view, 3).querySelector(".bubbly-input")!, tagGlyphs)
+    expect(tag).toHaveLength(2)
+    // the opening mark's top at the caps' (Spell's 1px under them), its bottom well above the baseline
+    expect(spell[0]!.top).toBeGreaterThan(-1)
+    expect(spell[0]!.top).toBeLessThan(2.5)
+    // the closing one low, a little past the baseline
+    expect(spell[1]!.bottom).toBeGreaterThan(0)
+    for (const [at, mark] of tag.entries()) {
+      expect(Math.abs(mark.top - spell[at]!.top), `tag mark ${at}'s top`).toBeLessThan(1)
+      expect(Math.abs(mark.bottom - spell[at]!.bottom), `tag mark ${at}'s bottom`).toBeLessThan(1)
+    }
+  })
+
   test("an attribute's opening quote mark a space's room after its `=`, as after a space", async () => {
     const view = await bubblyEditorOf(LAID_OUT)
     const equalsMark = view.dom.querySelector(".bubbly-equals")!

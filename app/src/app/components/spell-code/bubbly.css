@@ -2516,6 +2516,9 @@
     /*
      * a tag's quoted value's marks:  each mark's box as wide as the `"` it shows (0.4625em, the editor's `"`),
      * as tall as the letters, its top at theirs (I10, above), its curly mark over its middle, leaning more
+     * - each mark as high as a Spell line's (Owen, epic `language` I149:  "quotes are too high, lower both"):
+     *   the opening one's top at the letters' caps, the closing one low, just past their baseline;
+     *   they stood 7.5px and 4.5px higher, the opening one over the letters
      */
     .cm-line .cmb-tag-quote {
       --bubbly-quote-rotation: 30deg;
@@ -2541,10 +2544,10 @@
       translate: -50% 0;
     }
     .cm-line .cmb-tag-quote.cmb-quote-open > .cmb-quote-glyph {
-      translate: -75% -0.3em;
+      translate: -75% 0.145em;
     }
     .cm-line .cmb-tag-quote.cmb-quote-close > .cmb-quote-glyph {
-      top: 0.25em;
+      top: 0.5em;
       translate: -85% 0;
     }
     /*
