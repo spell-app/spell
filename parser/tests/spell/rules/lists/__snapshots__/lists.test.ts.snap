@@ -11,6 +11,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
   "each_in_statement": "statement|item|list",
   "each_item_where": "arg|list|where|body?",
   "ends_with": "operator|exactly?|expression",
+  "item_of_each": "ordinal?|random?|arg|each?|thing?|list?|things?",
   "list_add": "thing|method?|list",
   "list_add_relative": "thing|list|operator|item",
   "list_append": "thing|list",

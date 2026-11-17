@@ -1054,3 +1054,16 @@ describe("core.mapToList()", () => {
     expect(assert.failed).toHaveBeenCalled()
   })
 })
+
+describe("core.pickFromEach()", () => {
+  test("what it picks from each, in a new plain list, in order;  nothing picked adds nothing", () => {
+    const columns = [["a", "b"], [], ["c"]]
+    const lasts = core.pickFromEach(columns, (column) => (column as string[]).at(-1))
+    expect(lasts).toBeInstanceOf(List)
+    expect([...lasts]).toEqual(["b", "c"])
+  })
+  test("assertion fails if not defined:  an empty list", () => {
+    expect([...core.pickFromEach(undefined, (item) => item)]).toEqual([])
+    expect(assert.failed).toHaveBeenCalled()
+  })
+})

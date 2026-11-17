@@ -489,6 +489,22 @@ class CollectionMethods:
             results.append(call(value, position, coll))
         return results
 
+    def pick_from_each(self, collection: object = None, pick: Callback | None = None) -> Any:
+        """What `pick` takes from each item, in a new plain `List`, in the items' order (epic `language` T152).
+
+        - From `the last card of each column`;  an item it takes nothing from (an empty column) adds nothing.
+        - A scratch list:  it owns nothing (`new_scratch()`).
+        """
+        results = self.new_scratch(List)
+        if not self._is_defined(collection, "pick_from_each") or pick is None:
+            return results
+        call = _callback(pick)
+        for value, position, coll in list(self.get_iterator_for(collection)):
+            picked = call(value, position, coll)
+            if picked is not None:
+                results.append(picked)
+        return results
+
     def filter(self, collection: object = None, condition: Callback | None = None) -> Any:
         """The items `condition` says yes to, in a new collection of the same kind.
 

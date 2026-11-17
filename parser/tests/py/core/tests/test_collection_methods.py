@@ -315,3 +315,10 @@ def test_descending_turns_a_sort_round_as_the_javascript_core_does(core: Core) -
         {"n": 1},
         {"n": None},
     ]
+
+
+def test_pick_from_each_leaves_out_what_picks_nothing(core: Core) -> None:
+    columns = [["a", "b"], [], ["c"]]
+    lasts = core.pick_from_each(columns, lambda column: column[-1] if column else None)
+    assert isinstance(lasts, List)
+    assert list(lasts) == ["b", "c"]

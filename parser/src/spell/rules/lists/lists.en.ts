@@ -55,6 +55,7 @@ import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
 import { RandomItemExpression } from "./RandomItemExpression"
 import { RandomItemWhere } from "./RandomItemWhere"
+import { ItemOfEach } from "./ItemOfEach"
 import { RandomItemsExpression } from "./RandomItemsExpression"
 import { RangeBetweenExpression } from "./RangeBetweenExpression"
 import { RangeCountExpression } from "./RangeCountExpression"
@@ -563,6 +564,50 @@ lists.addRule(RandomItemWhere, {
           "a random column in the columns where it is empty",
           "core.filter(core.everyThing(Column), (column) => column.isEmpty).randomItem()",
           "core.filter(core.everyThing(Column), (column: Column) => column.isEmpty).randomItem()"
+        ]
+      ]
+    }
+  ]
+})
+
+// one item of each thing, by its place, as one list (epic `language` T152)
+lists.addRule(ItemOfEach, {
+  syntax:
+    "(the {ordinal}|a (random:random)) {arg:singular_identifier} (of|in|from) ((each:each) {thing:singular_identifier} (in|of) {list:operand}|{things:each_thing})",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a rank as a number",
+            "a pile is a list of cards",
+            "a column is a pile"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [
+          "the last card of each column",
+          "core.pickFromEach(core.everyThing(Column), (column) => column.lastItem)",
+          "core.pickFromEach(core.everyThing(Column), (column: Column) => column.lastItem)"
+        ],
+        [
+          "a random card of each column in the columns",
+          "core.pickFromEach(core.everyThing(Column), (column) => column.randomItem())",
+          "core.pickFromEach(core.everyThing(Column), (column: Column) => column.randomItem())"
+        ],
+        [
+          "the first card of each column where its rank is 1",
+          "core.pickFromEach(core.everyThing(Column), (column) => column.filter((card) => card.rank === 1).firstItem)",
+          "core.pickFromEach(core.everyThing(Column), (column: Column) => column.filter((card) => card.rank === 1).firstItem)"
+        ],
+        [
+          "the last card of each column where the column is not empty",
+          "core.pickFromEach(core.filter(core.everyThing(Column), (column) => !column.isEmpty), (column) => column.lastItem)",
+          "core.pickFromEach(core.filter(core.everyThing(Column), (column: Column) => !column.isEmpty), (column: Column) => column.lastItem)"
         ]
       ]
     }

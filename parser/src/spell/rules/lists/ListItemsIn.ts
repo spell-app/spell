@@ -1,3 +1,4 @@
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
@@ -22,6 +23,9 @@ import {
  * - With a `where`, it's `list_filter`'s:  `cards in the columns where it is face up`.
  */
 export class ListItemsIn extends SpellExpression<"arg|list", { across?: ItemsAcross }> {
+  /** `cards in the deck`:  items -- see `SpellExpression.saysItems`. */
+  @proto static saysItems = true
+
   /** Notes what its lists hold, while it can look:  read again when compiling, see `isAcross()`. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined

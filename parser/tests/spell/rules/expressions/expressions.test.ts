@@ -116,6 +116,7 @@ describe("priority and precedence", () => {
         "is_read_only:  Priority.declaration",
         "is_same_type_as:  Precedence.comparison",
         "it_is_value:  Priority.aboveDeclaration",
+        "item_of_each:  Priority.mostSpecific",
         "items_reordered:  Priority.declaration",
         "its_known_property:  Priority.preferred",
         "joined:  Precedence.join",

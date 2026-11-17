@@ -286,8 +286,12 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "not-items-in": '{list} guarda {items}, no {named}:  di "{items} en {list}"',
   "can-do-yes-or-no":
     '"{call}" no responde sí o no, así que "puede" no puede preguntarlo:  termina la acción con "devolver sí" o "devolver no"',
+  "item-of-each-asks-an-action":
+    '"{words}" pide una acción de una carta a la vez, así que no puede tomar una de cada:  toma de una lista, o pídela en un bucle, "para cada ..."',
   "and-in-where-joins-conditions":
     'En un "donde", "y" une condiciones, y "{rhs}" no es una:  para juntarlo con lo que encuentra el "donde", pon la lista y su "donde" entre paréntesis, "(... donde ...) y {rhs}"',
+  "joined-list-and-items":
+    '"{list}" es una cosa y "{items}" son {things}, así que "y" no puede unirlos en una lista:  para sus {things}, di "{things} en {list}"',
   "and-plain-value": '"y {rhs}" no pregunta nada:  di qué es {rhs}, p. ej. "y es {rhs}"',
   "joined-question-and-value":
     '"{lhs}" es una pregunta y "{rhs}" no, así que "{word}" no puede unirlas:  une dos preguntas, o dos valores de un mismo tipo',

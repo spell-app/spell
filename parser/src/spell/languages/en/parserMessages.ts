@@ -439,8 +439,14 @@ export const PARSER_MESSAGES = {
    * `and` / `or` between values (epic `language` T146):  `{lhs}` and `{rhs}` are the two sides as written,
    * `{word}` the joining word.
    */
+  /** `the first card of each column where it can play the card`:  an action asked of each (epic `language` T152). */
+  "item-of-each-asks-an-action":
+    '"{words}" asks an action of one card at a time, so it can\'t pick one of each:  pick from one list, or ask it in a loop, "for each ..."',
   "and-in-where-joins-conditions":
     'In a "where", "and" joins conditions, and "{rhs}" isn\'t one:  to put it with what the "where" finds, put the list and its "where" in parentheses, "(... where ...) and {rhs}"',
+  /** `the stock and cards in the discard pile`:  a list named beside items (epic `language` T152). */
+  "joined-list-and-items":
+    '"{list}" is one thing and "{items}" are {things}, so "and" can\'t join them into one list:  for its {things}, say "{things} in {list}"',
   "and-plain-value": '"and {rhs}" asks nothing:  say what is {rhs}, e.g. "and it is {rhs}"',
   "joined-question-and-value":
     '"{lhs}" is a question and "{rhs}" isn\'t, so "{word}" can\'t join them:  join two questions, or two values of one kind',

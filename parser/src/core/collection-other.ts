@@ -438,6 +438,24 @@ export const collectionOtherMethods = defineCoreModule({
   },
 
   /**
+   * What `pick` takes from each item of `collection`, in a new plain `List`, in the items' order,
+   * leaving out each item it takes nothing from (epic `language` T152).
+   * - Compiles from `the last card of each column`:  `core.pickFromEach(core.everyThing(Column), (column) => column.lastItem)`
+   *   -- see `rules/lists/ItemOfEach.ts`.
+   * - An empty column has no last card:  it adds nothing, never an empty place.
+   * - A scratch list:  it owns nothing -- see `core.newScratch()`.
+   */
+  pickFromEach<T = unknown>(collection?: CollectionOf<T>, pick?: CollectionIterationCallback<NoInfer<T>>): List {
+    const results = core.newScratch(List) as List
+    if (!assert.isDefined(collection, "core.pickFromEach(collection)") || !pick) return results
+    core.forEach(collection, (value, position, coll) => {
+      const picked = pick(value, position, coll)
+      if (picked !== undefined && picked !== null) results.append(picked)
+    })
+    return results
+  },
+
+  /**
    * Return new `collection` of only things which match `condition` filter.
    * - For array: returns a compacted collection of same type.
    * - For object: returns new type of collection with just specified keys.
