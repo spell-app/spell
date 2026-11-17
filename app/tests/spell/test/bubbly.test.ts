@@ -36,6 +36,38 @@ describe("every example and guide draws as its snapshot", () => {
   }
 })
 
+/**
+ * Laid out from its TEXT alone (as the editor draws a file before its project's parse, or with none), Solitaire's
+ * files have the SAME blocks as in the project's parse:  each control block and declaration, where its head and its
+ * foot are, how deep it sits (epic `codemirror` I23).
+ * - Its lines naming what another file declares (`if the stock is empty`) don't parse alone:  their shape comes from
+ *   their first words (`BubblyLayout.shapeOf()`).
+ * - Not which rule a head is, nor its colour:  a head that parses alone may read as another rule.
+ * - Not Pile.spell:  `belongs to one pile` is a property's band only to a parse that knows `pile`.
+ */
+test("Solitaire's files have the same blocks laid out from their text as from their project's parse", () => {
+  const name = "@spell/examples/Solitaire"
+  const { files } = parseSpellProject(loadFixtureProject(name), {
+    parentScope: fixtureImportScope(name),
+    projectPath: fixtureProjectId(name)
+  })
+  for (const { path, contents, scope, match } of files.filter((file) => !file.path.endsWith("Pile.spell"))) {
+    const parser = scope.parser as SP.SpellParser
+    const within = { match, inputLines: contents.split("\n") } as unknown as SP.SpellFile
+    const fromParse = blocksOf(SP.BubblyLayout.of(contents, parser, { within }))
+    expect(blocksOf(SP.BubblyLayout.of(contents, parser)), path).toEqual(fromParse)
+  }
+})
+
+/** `drawing`'s shape, one entry a node:  a line's or gap's start, a block's head and level, then its body's. */
+function blocksOf(drawing: SP.BubblyDrawing): string[] {
+  return drawing.nodes.flatMap(function shape(node): string[] {
+    if (node.kind !== "block") return [`${node.kind}@${node.start}`]
+    const { head, level, isGroup } = node
+    return [`block@${head.start}-${head.end} L${level}${isGroup ? " group" : ""}`, ...node.body.flatMap(shape), "foot"]
+  })
+}
+
 /** What each project's drawing snapshot ends in. */
 const BUBBLY_SNAPSHOT_SUFFIX = ".bubbly.snapshot.txt"
 
