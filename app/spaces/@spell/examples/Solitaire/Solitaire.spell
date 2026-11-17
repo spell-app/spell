@@ -1,9 +1,3 @@
-a card		-- What auto play asks of a card
-	it "can go up" if it is on top of its pile and (the first pile in every pile where it can take the card) is a foundation
-		-- onto its foundation:  a column's top card
-	it "can move its run" if (it is not a king or it is not the first card of its pile) and it is the first card in its pile which is face up
-		-- it and the face-up cards on it, all together, onto another column:  a king already at the bottom stays put
-
 solitaire is an app 
 	-- See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules
 	when creating solitaire
@@ -108,10 +102,10 @@ solitaire is an app
 			turn its last card face up
 
 	to "auto play" with shortcut "A", icon "play"
-		-- Play one card that can go somewhere, then the next, until none can
+		-- Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column
 		set played to the last card in the discard pile where it can play the card
-			or the first card in the columns where it can go up and can play the card
-			or the first card in the columns where it can move its run and can play the card
+			or the first card in the columns where it is the top card of its pile and (the first pile in every pile where it can take the card) is a foundation and can play the card
+			or the first card in the columns where (it is not a king or it is not the first card of its pile) and it is (the first card in its pile which is face up) and can play the card
 		if played exists
 			pause for 300 msec
 			auto play

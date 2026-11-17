@@ -534,13 +534,13 @@ export function testANewDeck() {
     "compiled": "/** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 /*! SPELL: DECLARES {
   type: "StockPile", superType: "Pile",
-  defined: "/Solitaire.spell:5532-5832",
+  defined: "/Solitaire.spell:5154-5454",
 } */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "StockPile", datatype: "text",
-    defined: "/Solitaire.spell:5562-5578",
+    defined: "/Solitaire.spell:5184-5200",
   } */
   get layout() {
     return "stacked"
@@ -566,13 +566,13 @@ export class StockPile extends Pile {
 /** Where the stock's cards go as they're turned over */
 /*! SPELL: DECLARES {
   type: "DiscardPile", superType: "Pile",
-  defined: "/Solitaire.spell:5834-6018",
+  defined: "/Solitaire.spell:5456-5640",
 } */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "DiscardPile", datatype: "text",
-    defined: "/Solitaire.spell:5866-5882",
+    defined: "/Solitaire.spell:5488-5504",
   } */
   get layout() {
     return "stacked"
@@ -592,13 +592,13 @@ export class DiscardPile extends Pile {
 /** Where a suit is built up, ace to king, one card at a time */
 /*! SPELL: DECLARES {
   type: "Foundation", superType: "Pile",
-  defined: "/Solitaire.spell:6020-6444",
+  defined: "/Solitaire.spell:5642-6066",
 } */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "Foundation", datatype: "text",
-    defined: "/Solitaire.spell:6050-6066",
+    defined: "/Solitaire.spell:5672-5688",
   } */
   get layout() {
     return "stacked"
@@ -606,7 +606,7 @@ export class Foundation extends Pile {
 
   /*! SPELL: DECLARES {
     property: "suit", of: "Foundation", datatype: "CardSuit",
-    defined: "/Solitaire.spell:6130-6155",
+    defined: "/Solitaire.spell:5752-5777",
   } */
   // - its "suit" is a card suit
   static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
@@ -632,13 +632,13 @@ export class Foundation extends Pile {
 /** A column, built down from king to ace, red and black in turn */
 /*! SPELL: DECLARES {
   type: "Column", superType: "Pile",
-  defined: "/Solitaire.spell:6446-6760",
+  defined: "/Solitaire.spell:6068-6382",
 } */
 export class Column extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "Column", datatype: "text",
-    defined: "/Solitaire.spell:6472-6489",
+    defined: "/Solitaire.spell:6094-6111",
   } */
   get layout() {
     return "vertical"
@@ -660,7 +660,7 @@ export class Column extends Pile {
 /** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
 /*! SPELL: DECLARES {
   type: "Solitaire", superType: "App",
-  defined: "/Solitaire.spell:0-5244",
+  defined: "/Solitaire.spell:0-4866",
 } */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -886,45 +886,19 @@ export class Solitaire extends App {
     this.stock.forEach((card) => card.turnFaceDown())
   }
 
-  /** Play every card that can go somewhere, until none can */
+  /** Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column */
   /*! SPELL: DECLARES {
     syntax: "auto play (of {thisArg:expression})?", output: "auto_play", rule: "method_call",
     of: "Solitaire", alias: ["statement", "expression"], group: "Game Play", kind: "method",
     name: "auto play", returns: "nothing", waits: true,
-    defined: "/Solitaire.spell:3211-4309",
+    defined: "/Solitaire.spell:3211-3931",
   } */
   async autoPlay() {
-    let anythingChanged = false
-    if (!this.discardPile.isEmpty) {
-      const testCard = this.discardPile.lastItem
-      if (await testCard?.play()) {
-        anythingChanged = true
-        await core.pauseFor(500, "msec")
-      }
+    const played = await core.itemWhereInTurn(this.discardPile, async (card) => await card.play(), -1) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => card === card.pile.lastItem && core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, card)).firstItem instanceof Foundation && (await card.play()), 0) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => (card.rank !== "king" || card !== card.pile.firstItem) && card === card.pile.filter((card) => card.isFaceDirection("up")).firstItem && (await card.play()), 0)
+    if (played !== undefined) {
+      await core.pauseFor(300, "msec")
+      await this.autoPlay()
     }
-    // each column's last card onto its foundation
-    await core.forEachSequential(core.everyThing(Column), async (pile) => {
-      if (pile.isEmpty) return
-      const testCard = pile.lastItem
-      const foundation = core.filter(core.everyThing(Foundation), (pile) => pile.suit === testCard.suit).firstItem
-      if (core.canTake(foundation, testCard)) {
-        anythingChanged = true
-        await testCard.play()
-        await core.pauseFor(100, "msec")
-      }
-    })
-    // each column's face-up cards, all together, onto another column
-    await core.forEachSequential(core.everyThing(Column), async (pile) => {
-      const faceUpCards = pile.filter((card) => card.isFaceDirection("up"))
-      if (faceUpCards.isEmpty) return
-      const testCard = faceUpCards.firstItem
-      if (testCard.rank === "king" && testCard === pile.firstItem) return
-      if (await testCard.play()) {
-        anythingChanged = true
-        await core.pauseFor(500, "msec")
-      }
-    })
-    if (anythingChanged) await this.autoPlay()
   }
 
   /** Turn up a face-down card from a column, at random, onto the discard pile */
@@ -932,7 +906,7 @@ export class Solitaire extends App {
     syntax: "cheat {thisArg:expression}?", output: "cheat", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], group: "Game Play", kind: "method", name: "cheat",
     returns: "nothing",
-    defined: "/Solitaire.spell:4313-4876",
+    defined: "/Solitaire.spell:3935-4498",
   } */
   cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
@@ -993,7 +967,7 @@ core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })
   alias: ["statement", "expression"], group: "Game Play", kind: "method",
   name: "the points for (a card) on (a pile)", params: [{ name: "pile", datatype: "Pile" }],
   returns: "number",
-  defined: "/Solitaire.spell:4879-5112",
+  defined: "/Solitaire.spell:4501-4734",
 } */
 Card.prototype.thePointsForCardOnPile = function (pile) {
   if (pile instanceof Foundation) return 10
@@ -1017,7 +991,7 @@ core.heading("The piles")
 /*! SPELL: DECLARES {
   syntax: "test the moves", output: "test_the_moves", rule: "method_call", alias: "statement",
   kind: "function", name: "the moves",
-  defined: "/Solitaire.spell:6762-8217",
+  defined: "/Solitaire.spell:6384-7839",
 } */
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

@@ -33,13 +33,13 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(renamed.match(/<action "peek"\/>/g)?.length).toBe(text.match(/<action "cheat"\/>/g)?.length)
   })
 
-  test("renames its calls too:  `if anything changed auto play`", async () => {
+  test("renames its calls too:  `auto play` inside it, calling itself again", async () => {
     await workspace.update(uri, text)
     const file = workspace.fileFor(uri)!
     const edit = service.renameActionAt(file, positionOf(text, 'to "auto play"', "auto play"), "play all")
     const renamed = applied(text, edit.changes![uri]!)
     expect(renamed).toContain('to "play all" with shortcut "A"')
-    expect(renamed).toContain("if anything changed play all")
+    expect(renamed).toContain("\t\tif played exists\n\t\t\tpause for 300 msec\n\t\t\tplay all")
     expect(renamed).not.toContain('<action "auto play"/>')
     // the renamed project still parses, with no new error
     const errors = async (text: string) => {

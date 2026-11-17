@@ -15,8 +15,6 @@ export const words = {
       shortName: "short name",
       moveToPile: "move a card to a pile",
       isOnTopOfItsPile: "is on top of its pile",
-      canGoUp: "can go up",
-      canMoveItsRun: "can move its run",
       play: "play a card",
       thePointsForCardOnPile: "the points for (a card) on (a pile)",
       pile: "pile"

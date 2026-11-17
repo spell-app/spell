@@ -86,7 +86,10 @@ describe("grammar probes", () => {
   })
 
   test("P2b  unset precedence on `ends with`", () => {
-    expect(probe("print x ends with y and 1")).toMatchInlineSnapshot(`"core.console.log(core.endsWith(x, y) && 1)"`)
+    expect(probe("print x ends with y and 1")).toMatchInlineSnapshot(`
+      "core.console.log(core.endsWith(x, y) && 1)
+      ERROR 8:6 "and 1" asks nothing:  say what is 1, e.g. "and it is 1""
+    `)
   })
 
   test("P2c  prefix function vs arithmetic", () => {

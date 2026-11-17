@@ -246,15 +246,6 @@
 |   |   the number of **cards** in the **deck** should be _52_    ‾value(the number of cards in the deck)
 
 ==== /Solitaire.spell
-[thing reopen_type L0]
-| a **card**		⟦-- What auto play asks of a card⟧
-|   [property quoted_type_expression L1]
-|   | it «"can go up"» if it is on top of its pile and (the first **pile** in every **pile** where it can take the **card**) is a **foundation**    ‾question(it is on top of its pile) ‾question((the first pile in every pile where it can take the card) is a foundation)
-|   |   ⟦-- onto its foundation:  a column's top card⟧
-|   [property quoted_type_expression L1]
-|   | it «"can move its run"» if (it is not a _king_ or it is not the first **card** of its **pile**) and it is the first **card** in its **pile** which is face up    ‾question(it is not a king) ‾value(it) ‾value(the first card of its pile) ‾value(it) ‾value(the first card in its pile which is face up)
-|   |   ⟦-- it and the face-up cards on it, all together, onto another column:  a king already at the bottom stays put⟧
-
 [thing create_one_of_a_kind L0]
 | «solitaire» is an **app**
 |   ⟦-- See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules⟧
@@ -379,10 +370,10 @@
 
 |   |   [action to_do_something L2]
 |   |   | to «"auto play"» with shortcut «"A"», icon «"play"»
-|   |   |   ⟦-- Play one card that can go somewhere, then the next, until none can⟧
+|   |   |   ⟦-- Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column⟧
 |   |   |   set **played** to the last **card** in the **discard pile** where it can play the **card**    ‾value(played) ‾value(the last card in the discard pile where it can play the card)
-|   |   |     or the first **card** in the **columns** where it can go up and can play the **card**    ‾value(the first card in the columns where it can go up and can play the card)
-|   |   |     or the first **card** in the **columns** where it can move its run and can play the **card**    ‾value(the first card in the columns where it can move its run and can play the card)
+|   |   |     or the first **card** in the **columns** where it is the top **card** of its **pile** and (the first **pile** in every **pile** where it can take the **card**) is a **foundation** and can play the **card**    ‾value(the first card in the columns where it is the top card of its pile and (the first pile in every pile where it can take the card) is a foundation and can play the card)
+|   |   |     or the first **card** in the **columns** where (it is not a _king_ or it is not the first **card** of its **pile**) and it is (the first **card** in its **pile** which is face up) and can play the **card**    ‾value(the first card in the columns where (it is not a king or it is not the first card of its pile) and it is (the first card in its pile which is face up) and can play the card)
 |   |   |   [control if L3]
 |   |   |   | if **played** exists    ‾question(played exists)
 |   |   |   |   pause for _300_ msec    ‾quantity(300 msec)
