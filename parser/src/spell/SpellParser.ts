@@ -111,6 +111,11 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
     panel: "label",
     "ui-panel": "label",
     "es-panel": "etiqueta",
+    // which device a device frame is (epic `mockup` P25):  `<device "phone" modal>`, `<dispositivo "tableta">`
+    device: "device",
+    "ui-device": "device",
+    dispositivo: "aparato",
+    "es-dispositivo": "aparato",
     ...Object.fromEntries(QUOTED_CONTENTS_TAGS.map((tag) => [tag, P.QUOTED_CONTENTS]))
   },
   // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
