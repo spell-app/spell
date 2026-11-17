@@ -365,6 +365,8 @@ ui-app-menu.AppMenu .PublishDraft {
   --spell-draft-after-help: 32px;
   display: inline-flex;
   align-items: center;
+  /* centred on the bar, as the menus' words:  a section's items stretch to its height, so it sat at the top (I247) */
+  align-self: center;
   gap: var(--spell-bar-icon-gap, 12px);
   box-sizing: border-box;
   block-size: var(--spell-draft-height);

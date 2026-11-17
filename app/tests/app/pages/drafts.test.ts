@@ -105,6 +105,9 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
       return right
     })
     expect(Math.round(pill.x - helpWordRight)).toBe(32)
+    // ... centred on the bar, as the menus' words are (I247:  it sat 6px high, at the bar's top)
+    const bar = (await page.locator(".EditorBarPlace").boundingBox())!
+    expect(Math.abs(pill.y + pill.height / 2 - (bar.y + bar.height / 2))).toBeLessThanOrEqual(0.5)
     await page.locator(".PublishDraft ui-button.Publish").click()
     await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)
