@@ -54,10 +54,13 @@ export function AppSnapshot(props: AppSnapshotProps) {
   const [isCapturing, setCapturing] = createSignal(false)
   const [problem, setProblem] = createSignal<string>()
 
-  void startingLook().then(({ look, themes }) => {
-    setLook(look)
-    setThemes(themes)
-  })
+  // un-awaited:  Change theme waits for it, disabled until then
+  void startingLook()
+    .then(({ look, themes }) => {
+      setLook(look)
+      setThemes(themes)
+    })
+    .catch((error) => console.error("AppSnapshot:  couldn't read the editor's theme", error))
 
   ////////////////
   // ## Playing
