@@ -983,6 +983,9 @@ Then the page loads the viewer and names a project:
 
 - It builds `<spell-viewer>` (`yarn build:element`) and copies it into `element/`:
   about 2,400 files, 17 MB, without the editor, CodeMirror or source maps, which a viewer never loads.
+- `<spell-code>` comes too (10 files, 1.8 MB, 0.5 MB gzipped), for Spell shown on the page in the bubbly look:
+  load `/element/spell-code.js`, and put the Spell in a `<script type="text/plain">` inside it.
+  - Its parser loads only when a `<spell-code>` is on the page.
 - Each project, compiled where it's out of date, goes into `spaces/<project>/`, with the projects it imports:
   the paths the page server answers, so the viewer reads them as plain files.
 - It replaces those two folders, and leaves the rest of the site alone.
