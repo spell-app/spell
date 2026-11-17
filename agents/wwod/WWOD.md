@@ -584,7 +584,8 @@ Their long before / afters are in `agents/wwod/writing.md`.
     Not every label or button on its own.
   - The novice voice:  `epic voice novice` prints its file.
   - Checked by a reader with no context, who finds the words a newcomer would stop at:
-    `epic voice check <file>`, or `--text "..."`, with `--about "a dialog shown when ..."`.
+    `spell voice check <file>` (or `epic voice check`, the same command), or `--text "..."`,
+    with `--about "a dialog shown when ..."`.
     - It fails on jargon, ids, insider words, run-on sentences and stacked conditions ("agent speak"),
       and quotes each with a rewrite.
     - Check a dialog whole (heading, message and buttons in one text):  a heading alone often fails for want of

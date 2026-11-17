@@ -445,6 +445,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `cli/` -- the `epic` COMMAND LINE (epic `repo-split` J114:  every repo's command-line tools in its `cli/`).
     - `EpicProgram`:  the commander tree, every verb on it under its heading, `epic --help`
     - `epicGroups.ts`:  each group's verbs, for their help (`epic ask create --help`)
+    - `commands.ts`:  the folder's ONE `spell` command, `spell voice check` (`VoiceCheck`, the same as `epic voice check`;
+      epic `epic-engine` J256), named in the folder manifest's `"spell": { "commands" }`;  every other tool stays an `epic` verb
     - its entry is [epicMain.ts](cli/epicMain.ts), run by [bin/epic](../bin/epic)
       - its base is the kit's `spell/cli` (`runCommand()`, `rawArgsAfter()`, `EXIT`, `CliError`;  epic `coherence` P20),
         NEVER the kit's program (`spell/cli/main`), and it loads no spell
