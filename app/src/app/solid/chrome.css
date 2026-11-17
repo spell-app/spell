@@ -260,8 +260,9 @@ ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
 /*
- * ... its round icons stand twice `--spell-bar-icon-gap` after the tabs, 24px pill edge to circle edge (epic `editor` I202,
- * Owen:  "Add space between Edit and code button";  doubled in T107:  "Double space between these sections"):
+ * ... its round icons stand `--spell-bar-icon-gap` after the tabs, 12px pill edge to circle edge (epic `editor` I202,
+ * Owen:  "Add space between Edit and code button";  doubled in T107, then back to 12px in I250:
+ * "Remove 12px between edit and code buttons"):
  * the tabs' track keeps its options 1px apart,
  * which left the chosen tab's pill touching the code's pressed circle
  * - the tabs and the icons are two sections of one group:  the icons keep their own 1px apart,
@@ -270,7 +271,15 @@ ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
  */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"]) + ui-item[appearance~="circular"]::part(item) {
   /* less the 1px the header tabs' track already keeps between its options (Spell UI's `UIMenu.css`) */
-  margin-inline-start: calc(2 * var(--spell-bar-icon-gap) - 1px);
+  margin-inline-start: calc(var(--spell-bar-icon-gap) - 1px);
+}
+/*
+ * ... and the code's two icons (</>, compiled) stand apart from the inspecting ones (crosshairs, +):
+ * Inspect app another `--spell-bar-icon-gap` on (Owen, 2026-11-16, epic `editor` I250:
+ * "Add same amount of space between compiled and inspect buttons")
+ */
+ui-menu.ModeTabs ui-item.InspectAppButton::part(item) {
+  margin-inline-start: var(--spell-bar-icon-gap);
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
