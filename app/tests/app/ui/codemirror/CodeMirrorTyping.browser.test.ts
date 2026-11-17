@@ -268,6 +268,29 @@ describe("typing Spell in a real CodeMirror editor", () => {
     })
   })
 
+  describe("Enter after a head goes in a level, so its body stays its body (epic `language` I160)", () => {
+    test("before the body under it:  the new line at the body's level", () => {
+      for (const [head, body] of [
+        ["\twhen creating solitaire", "\t\tadd each card in the deck to the stock"],
+        ["\tto draw solitaire", '\t\t<deck "deck" hidden />'],
+        ['\tto "reset the stock"', "\t\treverse the cards"],
+        ["\t\tfor each card in the deck", "\t\t\tturn the card face down"],
+        ["\t\tif the stock is empty", "\t\t\treset the stock"]
+      ]) {
+        const code = editorOf([`solitaire is an app`, head, body], 2, head.length + 1)
+        press("Enter")
+        expect(withCaret().split("\n").slice(1), head).toEqual([head, `${/^\t*/.exec(body)![0]}|`, body])
+        code.destroy()
+      }
+    })
+
+    test("not after a step:  the line's own indent", () => {
+      const code = editorOf([`a "card" is a view`, `\tto flip it`, `\t\tturn it over`], 3, 15)
+      press("Enter")
+      expect(withCaret().split("\n")[3]).toBe(`\t\t|`)
+    })
+  })
+
   describe("Enter after an opening tag (I65)", () => {
     test("goes in a level", () => {
       const code = editorOf([`\t<content>`], 1, 11)

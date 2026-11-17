@@ -268,6 +268,26 @@ export class SpellKeywords {
   static CONTINUES_LINE = /(?<![\p{L}\p{M}\d_-])(?:and|or|y|e|o|u)\s*$/u
 
   /**
+   * A HEAD before the caret:  a line with a body under it, so Enter at its end goes in a level (epic `language` I160).
+   * Heads have no colon at their end since plain Spell (epic `language` P46, P48).
+   * - A handler's, an action's or a control line's, by its first word, in every language spell reads:
+   *   `when creating solitaire`, `on click`, `after moving a card`, `to draw solitaire`, `for each card in the deck`,
+   *   `if the stock is empty`, `otherwise`;  `cuando`, `al`, `después de`, `para`, `por`, `si`, `sino`,
+   *   `de lo contrario`, `repetir`, `mientras`
+   * - A type's line, at the top:  `a "card" is a view`, `un "mazo" ...`, `solitaire is an app`
+   * - Not a group's line (`group "Moves"`):  its members are written at its own level.
+   * - A one-line `if` with its step after it (`if x return no`) goes in a level too:  the words can't tell.
+   * - Only with nothing after the caret (`AT_LINE_END`):  Enter in a head's middle leaves its end at the head's level.
+   * - The code editor's (`LSP.SpellTyping`) and VS Code's (`language-configuration.json`, by hand):
+   *   a test checks they match, and that it knows every pack's words.
+   */
+  static OPENS_BODY =
+    /^(?:[ \t]*(?:when|on|after|to|for|if|otherwise|else|repeat|while|meanwhile|cuando|al|después\s+de|despues\s+de|para|por|si|sino|de\s+lo\s+contrario|repetir|mientras)(?![\p{L}\p{M}\d_-])|(?:an?|una?)\s|\S.*\s(?:is\s+an?|es\s+una?)\s+(?:app|aplicación)(?![\p{L}\p{M}\d_-]))/u
+
+  /** Nothing after the caret but tabs and spaces:  at the line's end (`OPENS_BODY`). */
+  static AT_LINE_END = /^\s*$/
+
+  /**
    * Text before the caret that holds code, not only a comment:  with `COMMENT_AFTER` after the caret,
    * Enter puts the comment on its own line, a level in (epic `editor` I155):
    * `a "discard pile" is a pile |-- Where the stock's cards go` => its description, the first line inside it.

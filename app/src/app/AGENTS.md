@@ -256,6 +256,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - with the caret anywhere in the gap before the comment, or between its `--`'s dashes, which the bubbly look
         draws as one, `—` (epic `codemirror` I24)
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
+  - Enter at the end of a head (`when creating solitaire`, `to draw solitaire`, `for each ...`, `if ...`) goes in a
+    level, so its body stays its body (`LSP.SpellKeywords.OPENS_BODY`, epic `language` I160)
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;
     between `<x>` and `</x>`, the caret a level in and the closing tag on its own line (epic `editor` I65):
     Spell's Enter rules, ONE table, `LSP.SpellTyping.ENTER_RULES`, which `CodeMirrorTyping` follows,
