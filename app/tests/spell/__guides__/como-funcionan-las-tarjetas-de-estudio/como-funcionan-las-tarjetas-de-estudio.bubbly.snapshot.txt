@@ -1,0 +1,107 @@
+==== /ComoFuncionanLasTarjetasDeEstudio.es.spell
+⟪# Cómo funcionan las Tarjetas de estudio⟫
+⟦// El ejemplo Tarjetas de estudio es un mazo de palabras en inglés para aprender:⟧
+⟦// la palabra por delante, lo que significa por detrás.  Haz clic en la tarjeta para voltearla.⟧
+⟦// Está escrito en español:  cada línea de código también.⟧
+⟦// Dos ideas hacen el trabajo:⟧
+⟦// - una tarjeta es una VISTA REVERSIBLE:  sabe hacia qué lado está, y se voltea en 3D para mostrar ese lado⟧
+⟦// - el juego reparte la siguiente tarjeta al azar del mazo⟧
+
+⟦// Esta guía tiene esas dos, y deja fuera la puntuación.  Abre Tarjetas de estudio, en los Ejemplos, para el juego entero.⟧
+⟦// Flash Cards es el mismo juego, en inglés, para aprender palabras en español.⟧
+
+⟪## Una tarjeta:  una palabra por delante, lo que significa por detrás⟫
+⟦// `una vista reversible` hace de la tarjeta una de las vistas de dos caras que trae Spell, como las cartas de Solitario.⟧
+⟦// Trae, sin código propio:⟧
+⟦// - hacia qué lado mira, arriba o abajo, y `está boca arriba`, `está boca abajo`⟧
+⟦// - `voltear eso boca arriba`, `voltear eso boca abajo`, `voltear eso`⟧
+⟦// - un dibujo de sus dos caras, espalda con espalda, que muestra su frente boca arriba y su dorso boca abajo, y se voltea en 3D⟧
+
+⟦// Así que la tarjeta solo dice cómo se ve cada cara:  su `para dibujar su frente` y su `para dibujar su dorso`.⟧
+⟦// - `pulsable` muestra una mano sobre ella, y `al clic` dice qué hace un clic.⟧
+⟦// - Cada cara es un `<segmento>` de Spell UI:  un panel elevado, azul para la palabra y verde para lo que significa.⟧
+
+[thing create_type L0]
+| una «"tarjeta"» es una **vista reversible pulsable**
+|   [property define_property_has L1]
+|   | su «"palabra"» es **texto**
+|   [property define_property_has L1]
+|   | su «"significado"» es **texto**
+
+|   [action on L1]
+|   | al clic
+|   |   voltear eso    ‾value(eso)
+
+|   [action draw_it L1]
+|   | para **dibujar** su **frente**
+|   |   <⟨segmento⟩ apariencia=«"elevado"» color=«"azul"» alinear=«"centro"» relleno=«"lg"»>
+|   |     <⟨texto⟩ tamano=«"enorme"» negrita>{su **palabra**}</⟨texto⟩>    code({su palabra})
+|   |   </⟨segmento⟩>
+|   [action draw_it L1]
+|   | para **dibujar** su **dorso**
+|   |   <⟨segmento⟩ apariencia=«"elevado"» color=«"verde"» alinear=«"centro"» relleno=«"lg"»>
+|   |     <⟨texto⟩ tamano=«"enorme"» negrita>{su **significado**}</⟨texto⟩>    code({su significado})
+|   |   </⟨segmento⟩>
+
+[thing create_list_type L0]
+| un «"mazo"» es una **lista de tarjetas**
+|   ⟦// Las tarjetas para aprender⟧
+
+⟪## El juego:  el mazo, y la tarjeta que se ve⟫
+⟦// `sacar otra` elige una tarjeta al azar, nunca la que se ve ahora, y la pone con la palabra arriba.⟧
+
+[thing create_one_of_a_kind L0]
+| «juego» es una **aplicación**
+|   [property define_property_has L1]
+|   | «"mazo"» es **un nuevo mazo**
+|   [property define_property_has L1]
+|   | su «"tarjeta"» es una **tarjeta**
+
+|   [action to_do_something L1]
+|   | para «sacar otra»
+|   |   poner **otras** a **tarjetas** en el **mazo** donde no es la **tarjeta** de **juego**    ‾value(otras) ‾value(tarjetas en el mazo donde no es la tarjeta de juego)
+|   |   poner la **tarjeta** a una **tarjeta** al azar de **otras**    ‾value(la tarjeta) ‾value(una tarjeta al azar de otras)
+|   |   voltear la **tarjeta** boca arriba    ‾value(la tarjeta)
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   <⟨contenedor⟩ texto>
+|   |     <⟨pila⟩>
+|   |       {dibujar la **tarjeta**}
+|   |       <⟨pila⟩ direccion=«"horizontal"» repartir=«"centro"»>
+|   |         <⟨bot⟩ón color=«"primario"» onClick={sacar otra}>Otra tarjeta</⟨bot⟩ón>    code({sacar otra})
+|   |       </⟨pila⟩>
+|   |     </⟨pila⟩>
+|   |   </⟨contenedor⟩>
+
+⟪## El mazo:  cuatro palabras para empezar -- agrega las tuyas⟫
+
+[action to_do_something L0]
+| para «agregar (palabra como texto) significado (significado como texto)»    ‾value(palabra como texto) ‾value(significado como texto) bold(palabra) bold(texto) bold(significado) bold(texto)
+|   agregar (**una nueva tarjeta** con **palabra** = la **palabra**, **significado** = el **significado**) al **mazo** de **juego**    ‾value(una nueva tarjeta con palabra = la palabra, significado = el significado) ‾value(mazo de juego)
+
+agregar _"the cat"_ significado _"el gato"_    ‾call(agregar "the cat" significado "el gato")
+agregar _"the dog"_ significado _"el perro"_    ‾call(agregar "the dog" significado "el perro")
+agregar _"the house"_ significado _"la casa"_    ‾call(agregar "the house" significado "la casa")
+agregar _"the book"_ significado _"el libro"_    ‾call(agregar "the book" significado "el libro")
+
+sacar otra    ‾call(sacar otra)
+
+⟪## Una prueba⟫
+⟦// Una tarjeta nueva empieza boca abajo, como toda vista reversible.⟧
+
+[action to_do_something L0]
+| para «probar darle la vuelta»
+|   poner la **tarjeta** a **una nueva tarjeta** con **palabra** _"the cat"_, **significado** = _"el gato"_    ‾value(la tarjeta) ‾value(una nueva tarjeta con palabra "the cat", significado = "el gato")
+|   la **tarjeta** está boca abajo debería ser _sí_    ‾question(la tarjeta está boca abajo)
+|   voltear la **tarjeta**    ‾value(la tarjeta)
+|   la **tarjeta** está boca arriba debería ser _sí_    ‾question(la tarjeta está boca arriba)
+
+⟪## Pruébalo⟫
+⟦// - Haz clic en la tarjeta de la derecha para voltearla, y en "Otra tarjeta" para otra.⟧
+⟦// - Agrega una palabra:  copia una de las líneas "agregar" de arriba, y cambia sus dos palabras.⟧
+⟦//   Haz clic en "Otra tarjeta" hasta que salga.⟧
+⟦// - Haz tu propio mazo:  cambia las cuatro líneas por algo que quieras aprender, en cualquier idioma.⟧
+
+⟦// Y después:  Tarjetas de estudio, en los Ejemplos, que lleva la puntuación:  botones "La sabía" y "No la sabía",⟧
+⟦// una barra de herramientas, y doce palabras.⟧

@@ -1,0 +1,9 @@
+✅ test sumar
+  ▶️ Ejecutando   `pulsar "1"`
+  ▶️ Ejecutando   `pulsar "2"`
+  ▶️ Ejecutando   `sumar eso`
+  ▶️ Ejecutando   `pulsar "5"`
+  ▶️ Ejecutando   `sumar eso`
+  ✅ Como se esperaba, `el total` es `17`
+
+<div id="spell-app-root"><test-project-app><es-pila alinear="centro"><es-tarjeta><es-segmento alinear="derecha" apariencia="secundario"><es-texto tamano="enorme">0</es-texto></es-segmento><es-contenido><es-cuadricula columnas="5" separacion="compact"><es-columna><es-boton fluido="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">1</es-boton></es-columna><es-columna><es-boton fluido="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">2</es-boton></es-columna><es-columna><es-boton fluido="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">5</es-boton></es-columna><es-columna><es-boton color="primario" fluido="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">+</es-boton></es-columna><es-columna><es-boton color="negativo" fluido="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">C</es-boton></es-columna></es-cuadricula></es-contenido></es-tarjeta></es-pila></test-project-app></div>

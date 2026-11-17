@@ -1,0 +1,115 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Tarjeta",
+    "Mazo",
+    "Juego",
+    "agregar_$palabra_significado_$significado",
+    "test_darle_la_vuelta"
+  ],
+  "statements": [
+    {
+      "type": "Tarjeta",
+      "superType": "TwoSidedView",
+      "gender": "feminine",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:1499-1964"
+    },
+    {
+      "property": "palabra",
+      "of": "Tarjeta",
+      "datatype": "text",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:1547-1568"
+    },
+    {
+      "property": "significado",
+      "of": "Tarjeta",
+      "datatype": "text",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:1570-1595"
+    },
+    {
+      "type": "Mazo",
+      "superType": "List",
+      "gender": "masculine",
+      "itemType": "Tarjeta",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:1966-2031"
+    },
+    {
+      "type": "Juego",
+      "superType": "App",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:2182-2663"
+    },
+    {
+      "property": "mazo",
+      "of": "Juego",
+      "datatype": "Mazo",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:2207-2230"
+    },
+    {
+      "property": "tarjeta",
+      "of": "Juego",
+      "datatype": "Tarjeta",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:2232-2259"
+    },
+    {
+      "syntax": "sacar otra ((de|del) {thisArg:expression})?",
+      "output": "sacar_otra",
+      "rule": "method_call",
+      "of": "Juego",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "sacar otra",
+      "returns": "nothing",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:2262-2428"
+    },
+    {
+      "syntax": "agregar {callArgs:expression} significado {callArgs:expression}",
+      "output": "agregar_$palabra_significado_$significado",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "agregar (palabra como texto) significado (significado como texto)",
+      "params": [
+        {
+          "name": "palabra",
+          "datatype": "text"
+        },
+        {
+          "name": "significado",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:2728-2899"
+    },
+    {
+      "syntax": "probar darle la vuelta",
+      "output": "test_darle_la_vuelta",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "darle la vuelta",
+      "defined": "/ComoFuncionanLasTarjetasDeEstudio.es.spell:3163-3382"
+    }
+  ],
+  "codeLines": [
+    30,
+    33,
+    38,
+    63,
+    73,
+    76,
+    81,
+    86,
+    113,
+    132
+  ]
+}

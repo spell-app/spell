@@ -1,0 +1,95 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Sumadora",
+    "test_sumar"
+  ],
+  "statements": [
+    {
+      "type": "Sumadora",
+      "superType": "App",
+      "defined": "/ComoFuncionaCalculadora.es.spell:1693-3151"
+    },
+    {
+      "property": "total",
+      "of": "Sumadora",
+      "datatype": "number",
+      "defined": "/ComoFuncionaCalculadora.es.spell:1721-1744"
+    },
+    {
+      "property": "entrada",
+      "of": "Sumadora",
+      "datatype": "text",
+      "defined": "/ComoFuncionaCalculadora.es.spell:1746-1797"
+    },
+    {
+      "syntax": "pulsar {callArgs:expression} ((de|del) {thisArg:expression})?",
+      "output": "pulsar_$dígito",
+      "rule": "method_call",
+      "of": "Sumadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "pulsar (dígito como texto)",
+      "params": [
+        {
+          "name": "dígito",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/ComoFuncionaCalculadora.es.spell:1800-1949"
+    },
+    {
+      "syntax": "sumar {thisArg:expression}?",
+      "output": "sumar",
+      "rule": "method_call",
+      "of": "Sumadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "sumarlo",
+      "returns": "nothing",
+      "defined": "/ComoFuncionaCalculadora.es.spell:1951-2199"
+    },
+    {
+      "syntax": "borrar {thisArg:expression}?",
+      "output": "borrar",
+      "rule": "method_call",
+      "of": "Sumadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "borrarla",
+      "returns": "nothing",
+      "defined": "/ComoFuncionaCalculadora.es.spell:2201-2286"
+    },
+    {
+      "syntax": "probar sumar",
+      "output": "test_sumar",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "sumar",
+      "defined": "/ComoFuncionaCalculadora.es.spell:3026-3151"
+    }
+  ],
+  "codeLines": [
+    42,
+    45,
+    51,
+    57,
+    62,
+    70,
+    132
+  ]
+}

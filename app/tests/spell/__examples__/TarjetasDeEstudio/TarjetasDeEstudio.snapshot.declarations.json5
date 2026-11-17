@@ -1,0 +1,203 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Tarjeta",
+    "Mazo",
+    "Juego",
+    "test_darle_la_vuelta",
+    "agregar_$palabra_significado_$significado"
+  ],
+  "statements": [
+    {
+      "type": "Tarjeta",
+      "superType": "TwoSidedView",
+      "gender": "feminine",
+      "defined": "/Tarjeta.es.spell:229-1286"
+    },
+    {
+      "property": "palabra",
+      "of": "Tarjeta",
+      "datatype": "text",
+      "defined": "/Tarjeta.es.spell:277-338"
+    },
+    {
+      "property": "significado",
+      "of": "Tarjeta",
+      "datatype": "text",
+      "defined": "/Tarjeta.es.spell:340-400"
+    },
+    {
+      "type": "Mazo",
+      "superType": "List",
+      "gender": "masculine",
+      "itemType": "Tarjeta",
+      "defined": "/Tarjeta.es.spell:1288-1353"
+    },
+    {
+      "syntax": "probar darle la vuelta",
+      "output": "test_darle_la_vuelta",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "darle la vuelta",
+      "defined": "/Tarjeta.es.spell:964-1286"
+    },
+    {
+      "type": "Juego",
+      "superType": "App",
+      "defined": "/TarjetasDeEstudio.es.spell:396-2500"
+    },
+    {
+      "property": "mazo",
+      "of": "Juego",
+      "datatype": "Mazo",
+      "defined": "/TarjetasDeEstudio.es.spell:421-444"
+    },
+    {
+      "property": "tarjeta",
+      "of": "Juego",
+      "datatype": "Tarjeta",
+      "defined": "/TarjetasDeEstudio.es.spell:446-499"
+    },
+    {
+      "property": "acertadas",
+      "of": "Juego",
+      "datatype": "number",
+      "defined": "/TarjetasDeEstudio.es.spell:501-548"
+    },
+    {
+      "property": "intentadas",
+      "of": "Juego",
+      "datatype": "number",
+      "defined": "/TarjetasDeEstudio.es.spell:550-605"
+    },
+    {
+      "property": "puntuación",
+      "of": "Juego",
+      "datatype": "text",
+      "defined": "/TarjetasDeEstudio.es.spell:607-776"
+    },
+    {
+      "syntax": "sacar otra ((de|del) {thisArg:expression})?",
+      "output": "sacar_otra",
+      "rule": "method_call",
+      "of": "Juego",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar",
+      "kind": "method",
+      "name": "sacar otra",
+      "returns": "nothing",
+      "defined": "/TarjetasDeEstudio.es.spell:794-1048"
+    },
+    {
+      "syntax": "mostrar la respuesta ((de|del) {thisArg:expression})?",
+      "output": "mostrar_la_respuesta",
+      "rule": "method_call",
+      "of": "Juego",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar",
+      "kind": "method",
+      "name": "mostrar la respuesta",
+      "returns": "nothing",
+      "defined": "/TarjetasDeEstudio.es.spell:1050-1112"
+    },
+    {
+      "syntax": "decir que la sabía ((de|del) {thisArg:expression})?",
+      "output": "decir_que_la_sabía",
+      "rule": "method_call",
+      "of": "Juego",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar",
+      "kind": "method",
+      "name": "decir que la sabía",
+      "returns": "nothing",
+      "title": "La sabía",
+      "defined": "/TarjetasDeEstudio.es.spell:1114-1330"
+    },
+    {
+      "syntax": "decir que no la sabía ((de|del) {thisArg:expression})?",
+      "output": "decir_que_no_la_sabía",
+      "rule": "method_call",
+      "of": "Juego",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar",
+      "kind": "method",
+      "name": "decir que no la sabía",
+      "returns": "nothing",
+      "title": "No la sabía",
+      "defined": "/TarjetasDeEstudio.es.spell:1332-1467"
+    },
+    {
+      "syntax": "empezar de nuevo ((de|del) {thisArg:expression})?",
+      "output": "empezar_de_nuevo",
+      "rule": "method_call",
+      "of": "Juego",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar",
+      "kind": "method",
+      "name": "empezar de nuevo",
+      "returns": "nothing",
+      "defined": "/TarjetasDeEstudio.es.spell:1469-1571"
+    },
+    {
+      "syntax": "agregar {callArgs:expression} significado {callArgs:expression}",
+      "output": "agregar_$palabra_significado_$significado",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "agregar (palabra como texto) significado (significado como texto)",
+      "params": [
+        {
+          "name": "palabra",
+          "datatype": "text"
+        },
+        {
+          "name": "significado",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/TarjetasDeEstudio.es.spell:2560-2731"
+    }
+  ],
+  "codeLines": [
+    10,
+    14,
+    20,
+    50,
+    54,
+    80,
+    83,
+    89,
+    95,
+    101,
+    107,
+    113,
+    119,
+    124,
+    130,
+    135,
+    190
+  ]
+}

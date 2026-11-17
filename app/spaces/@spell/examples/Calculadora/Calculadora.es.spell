@@ -1,0 +1,113 @@
+# Calculadora
+// Una calculadora de bolsillo:  un número, un operador, otro número, y el total mientras escribes.
+// Sus teclas son botones de Spell UI, cuatro por fila, y cada una ejecuta una de las acciones de la calculadora.
+
+calculadora es una aplicación
+	grupo "Lo que guarda"
+		// La cuenta que se escribe:  su número izquierdo, su operador y su número derecho
+	su "entrada" es texto
+		// El número que se escribe, como texto, para que cada tecla pueda añadir un dígito al final
+	su "izquierdo" es texto
+	su "operador" es texto
+	su "derecho" es texto
+	su "total" es
+		// La cuenta hasta ahora, calculada cada vez que se lee
+		fijar número izquierdo en el izquierdo como un número
+		fijar número derecho en el derecho como un número
+		si el operador es "+" devolver número izquierdo + número derecho
+		si el operador es "–" devolver número izquierdo - número derecho
+		si el operador es "×" devolver número izquierdo por número derecho
+		devolver número izquierdo dividido por número derecho
+	su "cuenta" es
+		// Lo que muestra la línea de arriba de la pantalla:  0 hasta que se pulsa una tecla
+		poner mostrado a "0" si el izquierdo es vacío de lo contrario el izquierdo
+		devolver mostrado + " " + el operador + " " + el derecho
+	su "resultado" es
+		// La segunda línea de la pantalla:  el total, una vez que hay un número derecho
+		"" si el derecho es vacío
+		de lo contrario "= " + el total
+
+	grupo "Lo Que Hacen Sus Teclas"
+	para borrarla
+		limpiar la entrada
+		limpiar el izquierdo
+		limpiar el operador
+		limpiar el derecho
+	para terminarla
+		// Igual:  el total pasa a ser el número izquierdo, listo para el siguiente operador
+		si el derecho es vacío devolver
+		fijar el izquierdo en el total como texto
+		limpiar el operador
+		limpiar el derecho
+		limpiar la entrada
+	para pulsar (dígito como texto)
+		// Un dígito, o el punto decimal:  al final del número que se escribe, el izquierdo hasta que haya un operador
+		si el dígito es "."
+			si la entrada es vacía
+				poner la entrada a "0."
+			de lo contrario si la entrada no incluye "."
+				poner la entrada a la entrada + "."
+		de lo contrario
+			poner la entrada a la entrada + el dígito
+		si el operador es vacío
+			poner el izquierdo a la entrada
+		de lo contrario
+			poner el derecho a la entrada
+	para aplicar (tecla como texto)
+		// Un operador:  tras una cuenta completa, el total pasa a ser el número izquierdo de la siguiente cuenta
+		si el derecho no es vacío
+			terminar eso
+		poner el operador a la tecla
+		limpiar la entrada
+
+	grupo "Dibujo"
+	para dibujarla
+		// La pantalla, luego el teclado, cuatro teclas por fila:  C y 0 ocupan dos teclas de ancho
+		<contenedor ancho="20em">
+			<tarjeta fluido>
+				<segmento apariencia="secundario" alinear="derecha">
+					<texto tamano="enorme">{la cuenta}</texto>
+					<espacio />
+					<texto tamano="grande" color="gris">{el resultado}</texto>
+				</segmento>
+				<contenido>
+					<cuadricula columnas="4" separacion="compact">
+						<columna ancho="8"><botón fluido color="negativo" onClick={borrar eso}>C</botón></columna>
+						<columna><botón fluido color="secundario" onClick={terminar eso}>=</botón></columna>
+						<columna><botón fluido color="primario" onClick={aplicar "÷"}>÷</botón></columna>
+
+						<columna><botón fluido onClick={pulsar "7"}>7</botón></columna>
+						<columna><botón fluido onClick={pulsar "8"}>8</botón></columna>
+						<columna><botón fluido onClick={pulsar "9"}>9</botón></columna>
+						<columna><botón fluido color="primario" onClick={aplicar "×"}>×</botón></columna>
+
+						<columna><botón fluido onClick={pulsar "4"}>4</botón></columna>
+						<columna><botón fluido onClick={pulsar "5"}>5</botón></columna>
+						<columna><botón fluido onClick={pulsar "6"}>6</botón></columna>
+						<columna><botón fluido color="primario" onClick={aplicar "–"}>–</botón></columna>
+
+						<columna><botón fluido onClick={pulsar "1"}>1</botón></columna>
+						<columna><botón fluido onClick={pulsar "2"}>2</botón></columna>
+						<columna><botón fluido onClick={pulsar "3"}>3</botón></columna>
+						<columna><botón fluido color="primario" onClick={aplicar "+"}>+</botón></columna>
+
+						<columna ancho="8"><botón fluido onClick={pulsar "0"}>0</botón></columna>
+						<columna><botón fluido onClick={pulsar "."}>.</botón></columna>
+					</cuadricula>
+				</contenido>
+			</tarjeta>
+		</contenedor>
+
+	para probar dos cuentas seguidas
+		// 12 + 5, luego por 2:  el total pasa a ser el número izquierdo de la siguiente cuenta
+		pulsar "1"
+		pulsar "2"
+		aplicar "+"
+		pulsar "5"
+		el resultado debería ser "= 17"
+		aplicar "×"
+		pulsar "2"
+		el resultado debería ser "= 34"
+		terminar eso
+		el izquierdo debería ser "34"
+		el resultado debería ser ""

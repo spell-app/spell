@@ -1,0 +1,13 @@
+{
+  "title": "Calculadora",
+  "description": "Calculator's Spanish twin:  a pocket calculator on Spell UI, written in Spanish;  an app whose total is worked out as it's read, actions like `borrarla` and `pulsar (dígito)`, and a keypad of buttons in a grid, whose clicks are Spell",
+  "category": "first-steps",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "2" }, { "click": "×" }, { "click": "2" }] },
+  "imports": [
+    {
+      "path": "/Calculadora.es.spell",
+      "active": true
+    }
+  ]
+}

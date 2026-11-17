@@ -1,0 +1,10 @@
+✅ test darle la vuelta
+  ▶️ Ejecutando   `poner la tarjeta a una nueva tarjeta con palabra "the cat", significado = "el gato"`
+  ▶️ Ejecutando   `voltear la tarjeta boca arriba`
+  ✅ Como se esperaba, `la tarjeta está boca arriba` es `sí`
+  ▶️ Ejecutando   `voltear la tarjeta`
+  ✅ Como se esperaba, `la tarjeta está boca abajo` es `sí`
+  ▶️ Ejecutando   `voltear la tarjeta`
+  ✅ Como se esperaba, `la tarjeta está boca arriba` es `sí`
+
+<div id="spell-app-root"><test-project-app><es-contenedor texto=""><es-pila><es-barra-herramientas aria-label="Juego" encogible="" menu="menú del juego"><es-texto slot="titulo" tamano="grande">Tarjetas de estudio</es-texto><es-texto slot="derecha">Aún no has intentado ninguna</es-texto></es-barra-herramientas><test-project-tarjeta><es-segmento alinear="centro" apariencia="elevado" color="azul" part="front" relleno="lg"><es-texto color="gris" mayusculas="" tamano="pequeño">Inglés</es-texto><es-espacio></es-espacio><es-texto negrita="" tamano="enorme">the cat</es-texto></es-segmento><es-segmento alinear="centro" apariencia="elevado" color="verde" part="back" relleno="lg"><es-texto color="gris" mayusculas="" tamano="pequeño">Qué significa</es-texto><es-espacio></es-espacio><es-texto negrita="" tamano="enorme">el gato</es-texto></es-segmento></test-project-tarjeta><es-pila direccion="horizontal" repartir="centro"><es-boton color="primario" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Mostrar la respuesta</es-boton><es-boton color="positivo" hidden icono="check" style="cursor:var(--ui-control-cursor,pointer);user-select:none">La sabía</es-boton><es-boton apariencia="básico" color="negativo" hidden icono="close" style="cursor:var(--ui-control-cursor,pointer);user-select:none">No la sabía</es-boton></es-pila></es-pila></es-contenedor></test-project-app></div>

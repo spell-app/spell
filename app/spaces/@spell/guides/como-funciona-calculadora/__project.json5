@@ -1,0 +1,10 @@
+{
+  "title": "Cómo funciona Calculadora",
+  "description": "How Calculadora works, in Spanish:  the heart of the example, rebuilt as an adding machine;  keys that run actions, and a display drawn from what it keeps",
+  "imports": [
+    {
+      "path": "/ComoFuncionaCalculadora.es.spell",
+      "active": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+✅ test darle la vuelta
+  ▶️ Ejecutando   `poner la tarjeta a una nueva tarjeta con palabra "the cat", significado = "el gato"`
+  ✅ Como se esperaba, `la tarjeta está boca abajo` es `sí`
+  ▶️ Ejecutando   `voltear la tarjeta`
+  ✅ Como se esperaba, `la tarjeta está boca arriba` es `sí`
+
+<div id="spell-app-root"><test-project-app><es-contenedor texto=""><es-pila><test-project-tarjeta><es-segmento alinear="centro" apariencia="elevado" color="azul" part="front" relleno="lg"><es-texto negrita="" tamano="enorme">the cat</es-texto></es-segmento><es-segmento alinear="centro" apariencia="elevado" color="verde" part="back" relleno="lg"><es-texto negrita="" tamano="enorme">el gato</es-texto></es-segmento></test-project-tarjeta><es-pila direccion="horizontal" repartir="centro"><es-boton color="primario" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Otra tarjeta</es-boton></es-pila></es-pila></es-contenedor></test-project-app></div>
