@@ -1540,7 +1540,7 @@
           "name": "message"
         },
         {
-          "name": "okText"
+          "name": "options"
         }
       ],
       "section": "Talking to the person",
@@ -1557,7 +1557,7 @@
           "name": "message"
         },
         {
-          "name": "okText"
+          "name": "options"
         }
       ],
       "section": "Talking to the person",
@@ -1574,7 +1574,7 @@
           "name": "message"
         },
         {
-          "name": "okText"
+          "name": "options"
         },
         {
           "name": "cancelText"
