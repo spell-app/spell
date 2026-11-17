@@ -397,7 +397,7 @@ export class Solitaire extends App {
       ),
       h("ui-container", { columns: "7", padding: "small", spacing: "xs" },
         h("test-project-stock-pile", { id: "stock" }),
-        h("test-project-discard-pile", { id: "discard pile" }),
+        h("test-project-discard-pile", { id: "discard-pile" }),
         h("spacer"),
         h("test-project-foundation", { id: "clubs" }),
         h("test-project-foundation", { id: "diamonds" }),
@@ -427,7 +427,7 @@ export class Solitaire extends App {
   get stock() { return this.getProp("stock") }
   set stock(value) { this.setProp("stock", value) }
   // <discard-pile "discard pile"/>
-  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
+  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard-pile" }), early: true }) }
   get discardPile() { return this.getProp("discardPile") }
   set discardPile(value) { this.setProp("discardPile", value) }
   // <foundation "clubs" suit=clubs/>

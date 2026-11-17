@@ -592,7 +592,7 @@ class Solitaire(App):
                 "ui-container",
                 {"columns": "7", "padding": "small", "spacing": "xs"},
                 h("test-project-stock-pile", {"id": "stock"}),
-                h("test-project-discard-pile", {"id": "discard pile"}),
+                h("test-project-discard-pile", {"id": "discard-pile"}),
                 h("spacer"),
                 h("test-project-foundation", {"id": "clubs"}),
                 h("test-project-foundation", {"id": "diamonds"}),
@@ -619,7 +619,7 @@ class Solitaire(App):
     # <stock-pile "stock"/>
     stock = prop(init=lambda: StockPile(id="stock"), early=True)
     # <discard-pile "discard pile"/>
-    discard_pile = prop(init=lambda: DiscardPile(id="discard pile"), early=True)
+    discard_pile = prop(init=lambda: DiscardPile(id="discard-pile"), early=True)
     # <foundation "clubs" suit=clubs/>
     clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
     # <foundation "diamonds" suit=diamonds/>

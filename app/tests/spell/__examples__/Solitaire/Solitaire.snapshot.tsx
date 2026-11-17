@@ -695,7 +695,7 @@ export class Solitaire extends App {
         </ui-segment>
         <ui-container columns="7" padding="small" spacing="xs">
           <test-project-stock-pile id="stock" />
-          <test-project-discard-pile id="discard pile" />
+          <test-project-discard-pile id="discard-pile" />
           <spacer />
           <test-project-foundation id="clubs" />
           <test-project-foundation id="diamonds" />
@@ -723,7 +723,7 @@ export class Solitaire extends App {
   @prop({ init: () => new StockPile({ id: "stock" }), early: true })
   accessor stock!: StockPile
   // <discard-pile "discard pile"/>
-  @prop({ init: () => new DiscardPile({ id: "discard pile" }), early: true })
+  @prop({ init: () => new DiscardPile({ id: "discard-pile" }), early: true })
   accessor discardPile!: DiscardPile
   // <foundation "clubs" suit=clubs/>
   @prop({ init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true })
