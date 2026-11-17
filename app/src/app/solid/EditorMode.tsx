@@ -172,7 +172,7 @@ export function ModeButtons(props: {
             appearance="circular"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
-            {...barTooltip(appTexts.text("menuCode"))}
+            {...barTooltip(appTexts.text(CodeShown.isClosed(editor.project?.path) ? "showCodeTip" : "hideCodeTip"))}
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
           />
@@ -193,12 +193,30 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
     <ui-item
       icon={look().icon}
       selected={props.current === props.mode}
-      {...barTooltip(appTexts.text(look().text))}
+      {...barTooltip(appTexts.text(modeTipFor(props.mode, props.current)))}
       onClick={() => EditorMode.show(props.mode)}
     >
       <span class="ModeText">{appTexts.text(look().text)}</span>
     </ui-item>
   )
+}
+
+/**
+ * A mode tab's tooltip:  what a click on it does, from the mode the page is in (epic `editor` I230).
+ * - The tab chosen says what's happening:  "You're editing the app".
+ * - Run, from Edit, is "Stop Editing";  from Site, "Run the App".
+ */
+function modeTipFor(mode: Mode, current: Mode): AppTextKey {
+  if (mode === current) return MODE_TIPS[mode].chosen
+  if (mode === "run" && current === "edit") return "stopEditingTip"
+  return MODE_TIPS[mode].other
+}
+
+/** Each mode tab's tooltips:  `chosen`, while the page is in it;  `other`, what a click on it does. */
+const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
+  run: { chosen: "runningTip", other: "runTip" },
+  edit: { chosen: "editingTip", other: "editTip" },
+  site: { chosen: "siteShownTip", other: "siteTip" }
 }
 
 /****************

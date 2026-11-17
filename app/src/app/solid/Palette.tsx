@@ -374,7 +374,7 @@ export function AddPartButton(): JSX.Element {
         appearance="circular"
         class="AddPartButton"
         label={appTexts.text("addPart")}
-        {...barTooltip(appTexts.text("addPart"))}
+        {...barTooltip(appTexts.text("addViewTip"))}
         aria-haspopup="menu"
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
