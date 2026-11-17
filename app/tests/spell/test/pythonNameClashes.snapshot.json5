@@ -15,6 +15,24 @@
     "spell": "list",
     "python": "list_",
     "kind": "variable",
+    "where": "@spell/examples/RecipeCards"
+  },
+  {
+    "spell": "list",
+    "python": "list_",
+    "kind": "variable",
+    "where": "@spell/examples/TaskList"
+  },
+  {
+    "spell": "list",
+    "python": "list_",
+    "kind": "variable",
+    "where": "@spell/guides/how-shopping-list-works"
+  },
+  {
+    "spell": "list",
+    "python": "list_",
+    "kind": "variable",
     "where": "@spell/guides/how-task-list-works"
   },
   {
