@@ -3,6 +3,8 @@
   "description": "A Pokédex for kids, playful and bright:  every Pokémon from PokéAPI, its API in a file of its own as `spell place ingest` wrote it;  favourites kept on this device beside them, in a second place;  browse by kind, search, Surprise me!, a page with its artwork, its cry and how strong it is, and Who's that Pokémon?",
   "category": "web-data",
 
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "type": "Pikachu", "into": "Pikachu" }, { "press": "Enter", "wait": 3000 }, { "click": "Number 25", "wait": 3000 }, { "scrollTo": "Back" }] },
   "imports": [{
     "path": "/PokeSpell.api.spell",
     "active": true

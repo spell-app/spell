@@ -2,6 +2,8 @@
   "title": "Artworks from the Met",
   "description": "A wall of the Metropolitan Museum of Art's pictures, found by what you type, that goes on as you scroll:  each artwork read from its own address as it's drawn, one with no picture left out, and a picture turned over for what the Met knows of it;  its API in a file of its own, as `spell place ingest` wrote it",
   "category": "web-data",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "scrollTo": "Try", "wait": 3000 }] },
   "imports": [
     { "path": "/MetArtworks.api.spell", "active": true },
     { "path": "/MetArtworks.spell", "active": true }

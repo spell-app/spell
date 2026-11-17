@@ -99,6 +99,55 @@ export type ProjectFileJSON = {
   imports: ImportEntryJSON[]
   /** What's there for working on it, not for running it:  see `ProjectDevelopmentJSON`. */
   development?: ProjectDevelopmentJSON
+  /** How its card's picture is taken:  see `ProjectThumbnailJSON`. */
+  thumbnail?: ProjectThumbnailJSON
+}
+
+/**
+ * A project file's `thumbnail`:  how the picture on its home page card is taken
+ * (its `__thumbnail.png`, by the app folder's `yarn examples:readme --thumbnails`;  epic `mockup` I41).
+ * - e.g. `{ steps: [{ click: "2" }, { click: "×" }, { click: "2" }] }`:  the Calculator showing `2 × 2 = 4`
+ * - Read only by that script;  the editor never runs it.
+ */
+export type ProjectThumbnailJSON = {
+  /**
+   * What to do in the running app before its picture is taken, in order, so the picture shows the app in use:
+   * a game mid-way, a sum worked out, a list with things in it.
+   * - None:  its picture is the app as it opens.
+   */
+  steps?: ThumbnailStepJSON[]
+}
+
+/**
+ * One step before a thumbnail is taken:  a click, some typing, a key, or a scroll.
+ * - Each step does ONE of `click`, `clickOn`, `type`, `press`, `scrollTo` or `scrollToOn`;  then waits.
+ * - Everything is looked for inside the app only, never the runner's menu bar round it.
+ */
+export type ThumbnailStepJSON = {
+  /** click the thing whose text is exactly this, e.g. `"New game"` */
+  click?: string
+  /**
+   * click the thing this CSS selector finds, e.g. `"ui-button"`, or `'button[aria-label="More"]'` for a button with no text;
+   * Spell UI's shadow roots are looked into
+   */
+  clickOn?: string
+  /** which match `click`, `clickOn`, `scrollTo` or `scrollToOn` means, from 0, among those showing:  default the first */
+  nth?: number
+  /** type this text, into what has the focus, or into `into` */
+  type?: string
+  /** the field `type` types into, by its placeholder or its label, e.g. `"A habit to keep, e.g. Read"` */
+  into?: string
+  /** press this key, by Playwright's name for it, e.g. `"Enter"` */
+  press?: string
+  /** scroll the app so the thing with this text is at the top of the picture, e.g. a list's first item */
+  scrollTo?: string
+  /**
+   * scroll the app so the thing this CSS selector finds is at the top of the picture, e.g. `"habit-tracker-habit"`;
+   * one that draws no box itself (`display: contents`) goes by the first thing inside it that does
+   */
+  scrollToOn?: string
+  /** how long to wait after the step, in milliseconds:  default 300 */
+  wait?: number
 }
 
 /**

@@ -2,6 +2,8 @@
   "title": "Weather",
   "description": "The weather in the city you pick, from Open-Meteo, a server other people run:  now, big, with its emoji, then the next 12 hours in a row;  its API in a file of its own, as `spell place ingest` wrote it",
   "category": "first-steps",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "scrollToOn": "ui-segment" }] },
   "imports": [
     { "path": "/Weather.api.spell", "active": true },
     { "path": "/Sky.spell", "active": true },
