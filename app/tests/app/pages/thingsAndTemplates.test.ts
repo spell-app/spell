@@ -6,7 +6,7 @@ import { EDITOR, SERVING } from "./runningEditor"
 /**
  * What took over from the Things and Templates tabs, on Solitaire (epic `editor`, Rethink Things Templates):
  * - the Views card's sort, and its group of what isn't drawn
- * - This app, the app's own views, first in the add menu
+ * - App views, the app's own views, first in the add menu
  * - the Program panel's Reference tab
  * - NOTHING reaches the disk:  every save is answered here, so the built-in examples can't change.
  * - Needs this checkout's editor running:  `spell server start all`.
@@ -175,7 +175,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect(await scrollTop()).toBeLessThanOrEqual(before)
   })
 
-  test("This app comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
+  test("App views comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
     await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(1500)
     const own = await page

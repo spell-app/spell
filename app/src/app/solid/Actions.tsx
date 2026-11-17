@@ -177,7 +177,7 @@ export const Actions = {
       type="button"
       class="YouAvatar"
       aria-label={appTexts.text("you")}
-      {...barTooltip(appTexts.text("you"))}
+      {...barTooltip(appTexts.text("youTip"))}
       onClick={() => editor.showYou()}
     >
       <span class="YouLetter" aria-hidden="true">

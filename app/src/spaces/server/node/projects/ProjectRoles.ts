@@ -18,6 +18,7 @@
  *   ("New File", `mayCreate`).
  * - Node only;  the routes (`project-utils.ts`) are its one caller.
  */
+import { withArticle } from "spell/util/string"
 import { SRV } from "spell/server"
 import { SPACES } from "spell/app/spaces"
 import {
@@ -31,7 +32,7 @@ import {
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
-import { SpaceMembers, withArticle } from "spell/app/spaces/server/node/places/SpaceMembers"
+import { SpaceMembers } from "spell/app/spaces/server/node/places/SpaceMembers"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 /** What's done to a project's own file, and the right each takes (`SpaceRoleRights`). */

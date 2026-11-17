@@ -1471,7 +1471,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-submenu": {
     folder: "ui-menu",
     skeleton: { display: "inline", width: "8em", height: "2.5em" },
-    attributes: ["label", "icon", "menu", "disabled"]
+    attributes: ["label", "icon", "menu", "flyout-label", "value", "split", "disabled"]
   },
   "ui-summary": { folder: "ui-parts", attributes: [] },
   "ui-tab": {

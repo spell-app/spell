@@ -151,9 +151,9 @@ describe.skipIf(!SERVING)("code follows along", () => {
       .poll(() => page.locator(".CodeOutputPane ui-item[selected]").textContent(), { timeout: 8000 })
       .toContain("TypeScript")
 
-    // the top bar's button names it, pressed;  a click hides it
+    // the top bar's button says a click hides it (I230), pressed;  a click hides it
     const button = page.locator(".ModeTabs .CompiledCodeToggle").first()
-    expect(await button.getAttribute("data-tooltip")).toBe("Compiled TypeScript")
+    expect(await button.getAttribute("data-tooltip")).toBe("Hide Compiled TypeScript")
     expect(await button.getAttribute("aria-pressed")).toBe("true")
     await compiledCodeButton(page).click()
     await page.waitForTimeout(1000)

@@ -346,15 +346,17 @@ a "file tab bar" is a view
 		/* the ✕ that hides the code, at the bar's far right:  every panel's ✕, the editor's tokens (`PanelClose`, T95) */
 		.HideCode {
 			display: inline-flex;
-			/* its box the glyph's own, no room after it for a label:  the bar's 8px ends at the drawn ✕ (I213) */
+			/* its box the glyph's own, no room after it for a label:  so the bar's room ends at the drawn ✕ (I213) */
 			--ui-icon-width: auto;
 			--ui-icon-distance: 0;
 			flex: none;
-			margin-inline: var(--spell-panel-close-gap) 0;
+			/* 12px from the bar's edge:  its 8px, then this (I233) */
+			margin-inline: var(--spell-panel-close-gap) var(--spell-panel-close-end);
 			color: var(--spell-panel-close-color);
+			transition: color var(--spell-panel-close-fade);
 			cursor: pointer;
 		}
-		.HideCode:hover {
+		.HideCode:is(:hover, :focus-visible, :focus-within) {
 			color: var(--spell-panel-close-hover-color);
 		}
 		.NotSaved[hidden],

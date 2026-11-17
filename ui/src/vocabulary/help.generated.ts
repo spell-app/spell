@@ -1982,6 +1982,11 @@ export const HELP_TABLE: Readonly<
       label: "The row's words, its title.",
       icon: "Icon name: where the menu's items show theirs (its icon column, or after the words in a vertical menu).",
       menu: "Id of a `<ui-menu>` elsewhere on the page to show as the fly-out, in place of the items inside.",
+      "flyout-label":
+        "The fly-out's own name, when it isn't the row's `label`: its menu's name for a screen reader, and with `split` the chevron end's tooltip (\"Pick one of the parts under the mouse\").",
+      value: "With `split`: what its menu's `ui-choosing` reports when its title is chosen.",
+      split:
+        "Two things in one row: its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's); its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it.",
       disabled: "Can't be opened."
     }
   },
