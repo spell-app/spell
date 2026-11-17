@@ -220,6 +220,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '<{tag} "{action}"> no nombra ninguna acción de aquí:  escribe el nombre de una acción tal como se declara, p. ej. "para {action}"',
   "context-menu-item":
     '<{tag}> solo tiene sus elementos:  <acción "nombre"/> para una acción, <divisor/> para una línea entre grupos',
+  "unknown-menu":
+    '<{tag} "{menu}"> no nombra ningún menú de aquí:  dibuja uno con ese nombre, p. ej. <menú "{menu}">, y pon en él sus acciones',
+  "unknown-menu-attribute":
+    '{attribute}="{menu}" no nombra ningún menú de aquí:  dibuja uno con ese nombre, p. ej. <menú "{menu}">, o declara uno, su "{menu}" es un menú de ...',
   "context-menu-code":
     '<{tag}> en un menú toma palabras, no código:  escribe su atributo con palabras, p. ej. title="Reiniciar", o solo, p. ej. solo-icono',
   "markdown-hole":

@@ -326,6 +326,12 @@ export const PARSER_MESSAGES = {
   /** Something in a `<context-menu>` that isn't one of its items (epic `language`). */
   "context-menu-item":
     '<{tag}> holds only its items:  <action "name"/> for an action, <divider/> for a line between groups',
+  /** A right-click menu reusing a menu by its name, naming none the program draws or declares (epic `language` T156). */
+  "unknown-menu":
+    '<{tag} "{menu}"> names no menu here:  draw one with that name, e.g. <menu "{menu}">, and put its actions in it',
+  /** `context-menu="game menu"` on an element, naming no menu the program draws or declares (epic `language` T156). */
+  "unknown-menu-attribute":
+    '{attribute}="{menu}" names no menu here:  draw one with that name, e.g. <menu "{menu}">, or declare one, its "{menu}" is a menu of ...',
   /** An item of a `<context-menu>` given an attribute as code, `{...}`:  a menu's row takes only words. */
   "context-menu-code":
     '<{tag}> in a menu takes words, not code:  write its attribute as words, e.g. title="Restart", or leave it bare, e.g. icon-only',

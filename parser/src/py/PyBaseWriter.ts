@@ -1137,6 +1137,8 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (node.contextMenu) {
       const items = node.contextMenu.map((item) => {
         if (typeof item === "string") return this.quoted(item === "-" ? item : this.nameOf(item, "method"))
+        // a menu's items, by its name as written (epic `language` T156):  the page finds it
+        if ("menu" in item) return pyText.call("", [`${this.quoted("menu")}: ${this.quoted(item.menu)}`], ["{", "}"])
         // an item with attributes:  its name and them, `["undo", {"icon-only": True}]`
         const props = Object.entries(item.props).map(
           ([key, value]) =>

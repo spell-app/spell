@@ -42,7 +42,9 @@ describe("a named modal, menu or popup, and show / hide by its name", () => {
   })
 
   test("a menu and a popup are named the same way:  a menu by its id alone, a popup with its heading", () => {
-    const file = parsed(game('<menu "game menu">', "\t<text>Deal</>", "</>", '<popup "you won">', "\t<text>Yes</>", "</>"))
+    const file = parsed(
+      game('<menu "game menu">', "\t<text>Deal</>", "</>", '<popup "you won">', "\t<text>Yes</>", "</>")
+    )
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('h("ui-menu", { id: "game-menu" },')
     expect(file.compiled).toContain('h("ui-popup", { id: "you-won", heading: "you won" },')

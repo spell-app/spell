@@ -3,6 +3,7 @@ import { schemaOf, type Schema } from "spell/util/reactive"
 
 import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
+import type { MenuItem } from "./acting"
 
 /** The program said `scroll to the top`, this moment. */
 let wentToTheTop = false
@@ -363,6 +364,28 @@ function setDrawnVisible(method: string, name: string, visible: boolean): void {
   }
   ;(element as { visible?: boolean }).visible = visible
 }
+
+/**
+ * The items of the menu the program drew and named `name`, `<menu "game menu">`, as its rows show them now:
+ * for a right-click menu that reuses it, `<context-menu "game menu" />` or `context-menu="game menu"`
+ * (epic `language` T156) -- `undefined` when nothing drawn has that name.
+ * - Each action's row holds its action (`core.drawAction()`'s `in-menu`), read live;  a divider is a line between groups.
+ * - Under node, with no page:  `undefined`.
+ */
+export function drawnMenuItemsOf(name: string): MenuItem[] | undefined {
+  if (typeof document === "undefined") return undefined
+  const menu = drawnNamed(name)
+  if (!menu) return undefined
+  return [...menu.querySelectorAll(MENU_ROW_TAG)].flatMap((row): MenuItem[] => {
+    if (row.getAttribute("kind") === MENU_DIVIDER) return [{ kind: "separator" }]
+    const action = (row as { action?: MenuItem }).action
+    return action ? [action] : []
+  })
+}
+
+/** A drawn menu's rows, and the kind of one that's a line between groups:  Spell UI's `<ui-action kind="divider">`. */
+const MENU_ROW_TAG = "ui-action"
+const MENU_DIVIDER = "divider"
 
 /**
  * What the program drew and named `name`:  the element whose id is its words joined by `-`, `you-won` for

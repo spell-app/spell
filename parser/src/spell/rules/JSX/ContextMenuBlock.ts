@@ -6,6 +6,7 @@ import {
   CONTEXT_MENU_TAG_MEANING,
   DIVIDER_TAG_MEANING,
   SPELL_TAG_WORDS,
+  hasMenuNamed,
   webWordFor,
   type JSXMatchData
 } from "./JSX.shared"
@@ -26,7 +27,7 @@ import {
  *
  * - Its word is the language's, in the tag words (`spell_jsx_tag`, meaning `context_menu`):
  *   `<context-menu>`, Spanish's `<menú-contextual>`;  so is its divider's, `<divider/>`, Spanish's `<divisor/>`.
- * - Inside it, ONLY:
+ * - Its items need no `<menu>` around them.  Inside it, ONLY:
  *   - `<action "name"/>`:  an item for that action, named as an action's button names it (`action_button`):
  *     its title, icon, key and enabled read live, run through the core
  *     - its attributes go to its row, as a button's go to it:  `<action "undo" icon-only />` shows only its icon,
@@ -41,6 +42,13 @@ import {
  *   - Each action found from the drawing's thing up its chain, when the menu shows (`core.menuItemsOf()`).
  * - Python:  `core.draw_context_menu(self, [...])`, the same hidden element;  its page draws it with its
  *   drawing half's javascript, each action run in Python.
+ * - With a quoted word, `<context-menu "game menu" />`, it REUSES the menu of that name (epic `language` T156;
+ *   Owen, 2026-11-17):  the menu the program drew, `<menu "game menu">`, or a template's.
+ *   - `core.drawContextMenu(this, [{ menu: "game menu" }])`:  its items as they show when the right click comes
+ *     (`core.menuOf()`).
+ *   - It may hold its own items too:  they come FIRST, then the menu's, with no line between unless it writes one
+ *     (`<divider/>`, or `<separator/>`).
+ *   - No menu by that name in the program, once it has all parsed:  refused, naming it (`unknown-menu`).
  */
 export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
   @proto static alias = ["jsxChild", "expression"]
@@ -51,7 +59,7 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
   /** An element named by our language's context-menu word:  its actions and dividers, as menu items. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const [element] = tokens
-    if (!(element instanceof P.JSXElementToken) || element.chain || element.quotedWord) return undefined
+    if (!(element instanceof P.JSXElementToken) || element.chain) return undefined
     if (webWordFor(scope, SPELL_TAG_WORDS, element.tagName) !== CONTEXT_MENU_TAG_MEANING) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
@@ -80,9 +88,23 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
       const message = SP.Language.of(scope).parserMessage(key, { tag })
       children.push(SP.spellParser.createParseError(scope, [child], message))
     }
+    // the menu of that name's items, after its own (epic `language` T156)
+    if (element.quotedWord) items.push({ menu: ContextMenuBlock.reusedMenu(scope, match, element) })
     match.data.items = items
     match.data.children = children
     return match
+  }
+
+  /**
+   * The menu `<context-menu "game menu">` reuses, by its quoted word -- see the class's docs.
+   * - SIDE EFFECT:  refused, once the whole program has parsed, when no menu has that name.
+   */
+  private static reusedMenu(scope: P.Scope, match: P.MatchFor<ContextMenuBlock>, element: P.JSXElementToken) {
+    const word = element.quotedWord!.value
+    const menu = (word instanceof P.TextToken ? word.innerText : `${word?.raw ?? ""}`).trim()
+    const message = SP.Language.of(scope).parserMessage("unknown-menu", { tag: element.tagName, menu })
+    SP.SpellWarnings.refuseIf(match, message, () => !hasMenuNamed(scope, menu))
+    return menu
   }
 
   /** `core.drawContextMenu(this, [...])`:  an element that draws nothing, marked with its menu's items. */
@@ -118,7 +140,7 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
 type ContextMenuData = JSXMatchData & {
   /**
    * Its items, each an action's method as spell names it (`auto_play`), or `-` for a divider;
-   * an action whose tag gave attributes, with them (`P.ASTContextMenuItem`).
+   * an action whose tag gave attributes, with them;  last, the menu its quoted word reuses (`P.ASTContextMenuItem`).
    */
   items?: P.ASTContextMenuItem[]
 }

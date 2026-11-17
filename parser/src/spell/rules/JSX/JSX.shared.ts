@@ -194,6 +194,8 @@ export type JSXMatchData = {
    * - The attribute the word also fills, in the drawing's language (`heading`, `encabezado`);  `""` for none.
    */
   named?: string
+  /** (`jsxElement`) Its right-click menu's attribute in the language's own word, `menú-contextual`:  written as `context-menu` (T156). */
+  contextMenuAttribute?: P.JSXAttributeToken
   /** (`jsxElement`) A chain branch's kind, `<if ...>` ... -- see `SpellJSX`, "An if-chain inside markup". */
   chain?: P.JSXChainKind
   /** (`jsxElement`) A chain branch's condition, its phrase parsed as `{...}` (`jsxChild`);  none for `<otherwise>`. */
@@ -291,4 +293,44 @@ export type DrawnDeclaration = {
    *   out of wherever else they're drawn, and nothing hides a view's element by `hidden`.
    */
   hidden?: boolean
+}
+
+////////////////
+// ## Menus by name (epic `language` T156)
+////////////////
+
+/**
+ * SIDE EFFECT:  `name` is a menu of `scope`'s project:  drawn with that name, `<menu "game menu">`, or a template's,
+ * `its "game menu" is a menu of ...`.
+ * - So a right-click menu that reuses one by name (`<context-menu "game menu" />`, `context-menu="game menu"`) is refused
+ *   once the whole project has parsed, when nothing has that name (`hasMenuNamed()`).
+ * - Names only ever join:  a menu renamed in an editor still counts by its old name until the project parses afresh.
+ */
+export function noteMenuName(scope: P.Scope, name: string): void {
+  const project = projectOf(scope)
+  if (!project) return
+  let names = MENU_NAMES.get(project)
+  if (!names) MENU_NAMES.set(project, (names = new Set()))
+  names.add(menuKeyOf(name))
+}
+
+/** Has `scope`'s project a menu named `name`, drawn or a template's (`noteMenuName()`)?  Any case or spacing. */
+export function hasMenuNamed(scope: P.Scope, name: string): boolean {
+  const project = projectOf(scope)
+  return !!project && !!MENU_NAMES.get(project)?.has(menuKeyOf(name))
+}
+
+/** Each project's menu names, as `menuKeyOf()` writes them. */
+const MENU_NAMES = new WeakMap<P.Scope, Set<string>>()
+
+/** A menu's name as the core finds it, any case or spacing:  `Game Menu`, `game-menu`, `gameMenu` => `gamemenu`. */
+function menuKeyOf(name: string): string {
+  return name.replace(/[\s_-]+/g, "").toLowerCase()
+}
+
+/** The project `scope` is in;  `scope` itself when it's in none (a rule's own test). */
+function projectOf(scope: P.Scope): P.Scope | undefined {
+  let at: P.Scope | undefined = scope
+  while (at && !(at instanceof P.ProjectScope)) at = at.parentScope
+  return at ?? scope
 }

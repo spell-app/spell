@@ -30,6 +30,7 @@ import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
 import { chainOf, waitOf } from "./sending"
 import { ActionCanceled, runActing, type ActionInfo } from "./undoing"
+import { drawnMenuItemsOf } from "./ui"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
@@ -367,6 +368,8 @@ export const actingMethods = defineCoreModule({
    *   so a menu bar is a menu of menus.
    * - A menu filled from a list gives an item per thing in it, its title the thing's (Q21).
    * - An item naming no method or menu of that thing is left out, with a warning.
+   * - None of a template's by that name:  a menu the program DREW with that name, `<menu "game menu">`, as its rows show
+   *   now, so `context-menu="game menu"` reuses it as a right-click menu (epic `language` T156).
    */
   menuOf(thing: object | undefined, name: string): MenuItem[] | undefined {
     const key = menuKey(name)
@@ -374,7 +377,8 @@ export const actingMethods = defineCoreModule({
       const description = menusOf(holder.constructor).get(key)
       if (description) return menuItems(holder, description, new Set([key]))
     }
-    return undefined
+    // none of a template's:  a menu the program drew with that name, `<menu "game menu">` (epic `language` T156)
+    return drawnMenuItemsOf(name)
   },
 
   /**
@@ -398,9 +402,13 @@ export const actingMethods = defineCoreModule({
    * - An item with its tag's attributes, `["undo", { "icon-only": true }]`:  they go to its row (`attributes`);
    *   its `title` is its text, over the action's own (`title="Restart"`), as on a button.
    * - An action nothing up the chain has is left out, with a warning:  the compiler said so already.
+   * - `{ menu: "game menu" }`:  that menu's items, in its place (`menuOf()`:  a template's, else a drawn one;
+   *   `<context-menu "game menu">`, epic `language` T156).
    */
   menuItemsOf(thing: object | undefined, items: readonly ContextMenuItem[]): MenuItem[] {
     return items.flatMap((entry): MenuItem[] => {
+      // another menu's items, by its name:  `<context-menu "game menu">` (epic `language` T156)
+      if (typeof entry === "object" && "menu" in entry) return actingMethods.menuOf(thing, entry.menu) ?? []
       const [name, given] = typeof entry === "string" ? [entry, undefined] : entry
       if (name === "-") return [{ kind: "separator" }]
       const item = actingMethods.actionOf(thing, name)
@@ -430,7 +438,11 @@ Object.assign(core, actingMethods)
  * an action's method (`autoPlay`), `-` a line between groups, or an action with its tag's attributes,
  * `["undo", { "icon-only": true }]`.
  */
-export type ContextMenuItem = string | readonly [name: string, attributes: Readonly<Record<string, string | boolean>>]
+export type ContextMenuItem =
+  | string
+  | readonly [name: string, attributes: Readonly<Record<string, string | boolean>>]
+  /** every item of the menu of that name, drawn or a template's, as it shows now (epic `language` T156) */
+  | { readonly menu: string }
 
 /** A pressed key, as a keyboard event has it:  its name and the modifiers down with it. */
 export type ShortcutKey = {

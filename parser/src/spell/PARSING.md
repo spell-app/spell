@@ -1782,6 +1782,23 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Compiles to `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`:  a hidden `<spell-context-menu>`, which
     the app's `ActionMenus.showContextMenu()` finds on the right click's path, before a `context-menu="name"`.
   - A `<divider/>` anywhere else keeps its word:  Spell UI's divider;  in a `<menu>`, a menu's line (above).
+  - REUSING A MENU BY ITS NAME (epic `language` T156;  Owen, 2026-11-17), either shape:
+    - `<context-menu "game menu" />` inside the element:  the menu of that name's items, drawn (`<menu "game menu">`)
+      or a template's, as they show when the right click comes;  compiled as one more item,
+      `core.drawContextMenu(this, [{ menu: "game menu" }])` (`P.ASTContextMenuItem`, `core.menuItemsOf()`).
+      - It may hold its own items too, no `<menu>` around them:  they come FIRST, then the menu's, with no line
+        between unless it writes one.
+    - `context-menu="game menu"` on the element (Spanish's `menú-contextual="..."`, written as the web's
+      `context-menu`):  as before, the page finds it by name (`core.menuOf()`):  a template's menu, else, new, the
+      drawn one (`drawnMenuItemsOf()`, core's `ui.ts`).
+    - Either refused, once the whole program has parsed, when no menu, drawn or a template's, has that name
+      (`unknown-menu`, `unknown-menu-attribute`).  The names are kept per project as they parse (`noteMenuName()`,
+      `hasMenuNamed()`, `JSX.shared.ts`), so a menu renamed in an editor counts by its old name until a fresh parse;
+      and a template's menu in an imported project isn't known there, so naming one is refused.
+  - `<separator/>` is `<divider/>` (T156;  Owen:  "make `<separator/>` an alias"), wherever it's written:  a word of
+    `spell_jsx_tag` meaning `divider` (Spanish's `<separador/>`), so a menu's, a toolbar's and a context menu's line;
+    anywhere else Spell UI's divider, named by the language's first word for it (`SpellJSX.dividerWordFor()`), unless the
+    project has a type of that name.
 - COMMENTS INSIDE MARKUP (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to

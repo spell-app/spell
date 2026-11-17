@@ -1829,7 +1829,7 @@
               "syntax": "(página de error|pagina de error)"
             },
             {
-              "syntax": "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
+              "syntax": "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor|separador))"
             },
             {
               "syntax": "((slot:en)|slot|(hidden:oculto|oculta)|hidden)"
@@ -6294,7 +6294,7 @@
           "ruleNames": ["define_menu"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineMenu.ts",
-          "line": 33,
+          "line": 35,
           "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
           "syntaxes": [
             {
@@ -9120,7 +9120,7 @@
           "ruleNames": ["context_menu_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ContextMenuBlock.ts",
-          "line": 45,
+          "line": 53,
           "purpose": "The right-click menu of the element it's in, written inside it, in a drawing.",
           "syntaxes": [
             {
@@ -9145,7 +9145,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 100,
+          "line": 106,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

@@ -88,7 +88,8 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     cell: "ui-cell",
     modal: "ui-modal",
     menu: "ui-menu",
-    popup: "ui-popup"
+    popup: "ui-popup",
+    divider: "ui-divider"
   },
   es: {
     texto: "es-texto",
@@ -103,6 +104,7 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     celda: "es-celda",
     modal: "es-modal",
     menu: "es-menu",
-    emergente: "es-emergente"
+    emergente: "es-emergente",
+    divisor: "es-divisor"
   }
 }

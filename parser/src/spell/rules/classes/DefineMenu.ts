@@ -3,6 +3,8 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { getKnownType } from "spell/parser/spell/rules/types"
+// Read only when parsing:  the JSX module's right-click menus look a menu up by its name (epic `language` T156)
+import { noteMenuName } from "spell/parser/spell/rules/JSX/JSX.shared"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
@@ -102,6 +104,7 @@ export class DefineMenu extends SpellStatement<
     )
     const { action } = match.groups
     if (action) match.data.action = methodNamed(type, unquoted(`${action.raw}`))
+    noteMenuName(scope, DefineMenu.menuNamed(match, unquoted(`${match.groups.menu.raw}`).trim()))
     return match
   }
 
