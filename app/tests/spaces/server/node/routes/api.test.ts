@@ -1020,3 +1020,20 @@ describe("/api/prefs:  each person's preferences, in their space", () => {
     expect(readFixture("user/__prefs/@owen/solitaire.json5")).toContain('"theme": "dark"')
   })
 })
+
+describe("the home page's order (epic `mockup` P19, `repo-split` P28)", () => {
+  it("GET /api/home/order:  Spell's own checkout may reorder (an install's server says no)", async () => {
+    const reply = await request("GET", "/api/home/order")
+    expect(reply.status).toBe(200)
+    expect(reply.json()).toEqual({ mayReorder: true })
+  })
+
+  it("a sections' order naming something that isn't a section, or a group that isn't Spell's, is 400:  nothing written", async () => {
+    const json = "application/json"
+    const notASection = await request("POST", "/api/home/order", '{"group":"sections","names":["sidebar"]}', json)
+    expect(notASection.status).toBe(400)
+    expect(notASection.json().errors[0].message).toContain("the sections are start, examples")
+    const notAGroup = await request("POST", "/api/home/order", '{"group":"@acme/tools","names":["a"]}', json)
+    expect(notAGroup.status).toBe(400)
+  })
+})

@@ -54139,6 +54139,10 @@
           "description": "The playground has set at least one token."
         },
         {
+          "name": "wide-preview",
+          "description": "The preview holds a child that sizes itself by its own width (a page layout, form, table ...):  its children take the whole line."
+        },
+        {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
         },

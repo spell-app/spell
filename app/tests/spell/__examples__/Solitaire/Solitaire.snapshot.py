@@ -37,6 +37,7 @@ class Card(TwoSidedView):
 
     @property
     def is_a_face_card(self) -> bool:
+        """e.g. "the card is a face card\""""
         return self.rank in ["jack", "queen", "king"]
 
     @property
@@ -563,7 +564,7 @@ class Solitaire(App):
                         "size": "small",
                         "shrinkable": True,
                     },
-                    h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Spell Solitaire"),
+                    h("ui-text", {"size": "big", "slot": "title", "heavy": True}, "Spell Solitaire"),
                     core.draw_action(self, "auto_play", {"in-menu": True}),
                     core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
@@ -583,9 +584,9 @@ class Solitaire(App):
                 h("test-project-foundation", {"id": "diamonds"}),
                 h("test-project-foundation", {"id": "hearts"}),
                 h("test-project-foundation", {"id": "spades"}),
-                h("test-project-column", {"id": "C1"}),
                 h("test-project-column", {"id": "C2"}),
                 h("test-project-column", {"id": "C3"}),
+                h("test-project-column", {"id": "C1"}),
                 h("test-project-column", {"id": "C4"}),
                 h("test-project-column", {"id": "C5"}),
                 h("test-project-column", {"id": "C6"}),
@@ -613,12 +614,12 @@ class Solitaire(App):
     hearts = prop(init=lambda: Foundation(id="hearts", suit="hearts"), early=True)
     # <foundation "spades" suit=spades/>
     spades = prop(init=lambda: Foundation(id="spades", suit="spades"), early=True)
-    # <column "C1"/>
-    c1 = prop(init=lambda: Column(id="C1"), early=True)
     # <column "C2"/>
     c2 = prop(init=lambda: Column(id="C2"), early=True)
     # <column "C3"/>
     c3 = prop(init=lambda: Column(id="C3"), early=True)
+    # <column "C1"/>
+    c1 = prop(init=lambda: Column(id="C1"), early=True)
     # <column "C4"/>
     c4 = prop(init=lambda: Column(id="C4"), early=True)
     # <column "C5"/>

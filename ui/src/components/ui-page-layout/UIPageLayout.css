@@ -22,7 +22,8 @@
  * - On the 4px grid (`--ui-grid`, I36):  the menu 40px tall, the room round the page a font size rounded to the grid.
  * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
- *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
+ *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`);
+ *   the box the column's whole height (up to the window's), opening, open and closing (epic `mockup` C1).
  * - The open box wears the column's own fill, not one of its own (epic `mockup` I31):
  *   a theme's see-through fill blurs what's under it, so over the page it looks as the column does;
  *   its end side rounded, as the panel round the page is (`--ui-panel-radius`);
@@ -178,9 +179,12 @@
   :host(:state(compact):state(open):not(:state(narrow))) .drawer {
     transition: none;
   }
-  /* closed:  the box as wide as its column;  closing, its fill and place over the page wait until it's back */
+  /* closed:  the box as wide as its column;  closing, its height, fill and place over the page wait until it's back
+     - no least height a length, not `auto`:  a change to `auto` can't wait, so the box dropped to its rows' height
+       the moment it started closing, a short box shrinking (Owen, epic `mockup` C1:  "the entire height of the page") */
   :host(:state(compact):not(:state(narrow))) .drawer-box {
     inline-size: 100%;
+    min-block-size: 0px;
     border-start-end-radius: var(--_page-layout-flyout-radius);
     border-end-end-radius: var(--_page-layout-flyout-radius);
     box-shadow: 0 0 0 transparent;

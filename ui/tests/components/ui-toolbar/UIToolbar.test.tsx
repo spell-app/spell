@@ -227,6 +227,26 @@ describe("<ui-toolbar> bar slots", () => {
       expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual(["F0", "F1", "F2", "F3", "F4"])
     })
 
+    it("an item put away goes at once, never animated out;  back in the row, it moves as any (epic `mockup` I38)", async () => {
+      const { host } = await toolbar(900, items(5), `${LOOK} max-visible="2"`)
+      await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+      await ElementFixture.settle()
+      const away = [...host.querySelectorAll<HTMLElement>("ui-item")].filter((each) => each.hidden)
+      expect(away).toHaveLength(4)
+      for (const item of away) {
+        // still taking its room while it faded, it threw the row's measures off:  the thumb, the titles, the scroll
+        expect(item.style.getPropertyValue("--ui-motion")).toBe("none")
+        expect(item.matches(":state(hiding)")).toBe(false)
+      }
+      listButton(host)!.click()
+      await ElementFixture.settle()
+      rows(host)[3]!.click()
+      await ElementFixture.settle()
+      const back = host.querySelectorAll<HTMLElement>("ui-item")[3]!
+      await expect.poll(() => back.hidden).toBe(false)
+      expect(back.style.getPropertyValue("--ui-motion")).toBe("")
+    })
+
     it("a pick joins the row, in the page's order, and the one chosen longest ago leaves", async () => {
       const { host } = await toolbar(900, items(5), `${LOOK} max-visible="2"`)
       await expect.poll(() => host.matches(":state(limited)")).toBe(true)
