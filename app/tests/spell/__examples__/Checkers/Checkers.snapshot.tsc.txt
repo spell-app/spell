@@ -1,0 +1,73 @@
+65:35 TS7006 Parameter 'square' implicitly has an 'any' type.
+84:16 TS7023 'canMove' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
+85:35 TS7006 Parameter 'square' implicitly has an 'any' type.
+109:5 TS2322 Type 'undefined' is not assignable to type 'Piece'.
+124:19 TS7006 Parameter 'beside' implicitly has an 'any' type.
+124:70 TS7006 Parameter 'beside' implicitly has an 'any' type.
+172:7 TS7023 'square' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
+288:3 TS7023 'canGiveUp' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
+298:10 TS2300 Duplicate identifier 'droppable'.
+416:63 TS18048 'square.piece' is possibly 'undefined'.
+429:5 TS2322 Type 'undefined' is not assignable to type 'Piece'.
+430:5 TS2322 Type 'undefined' is not assignable to type 'Piece'.
+449:45 TS18048 'square.piece' is possibly 'undefined'.
+464:9 TS2532 Object is possibly 'undefined'.
+464:30 TS2322 Type 'Piece | undefined' is not assignable to type 'Piece'.
+464:59 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+469:5 TS2322 Type 'undefined' is not assignable to type 'Piece'.
+489:31 TS18048 'mover' is possibly 'undefined'.
+512:5 TS2322 Type 'number | undefined' is not assignable to type 'number'.
+604:17 TS2532 Object is possibly 'undefined'.
+605:17 TS18048 'man' is possibly 'undefined'.
+606:17 TS18048 'man' is possibly 'undefined'.
+606:35 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+607:17 TS18048 'man' is possibly 'undefined'.
+607:35 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+608:17 TS18048 'man' is possibly 'undefined'.
+608:35 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+610:17 TS2532 Object is possibly 'undefined'.
+610:17 TS2532 Object is possibly 'undefined'.
+612:5 TS18048 'man' is possibly 'undefined'.
+612:22 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+631:17 TS2532 Object is possibly 'undefined'.
+631:17 TS2532 Object is possibly 'undefined'.
+631:80 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+633:20 TS2532 Object is possibly 'undefined'.
+634:17 TS18048 'jumper' is possibly 'undefined'.
+634:38 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+635:17 TS18048 'jumper' is possibly 'undefined'.
+635:38 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+637:5 TS18048 'jumper' is possibly 'undefined'.
+637:25 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+659:20 TS2532 Object is possibly 'undefined'.
+661:5 TS18048 'jumper' is possibly 'undefined'.
+661:25 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+666:5 TS18048 'jumper' is possibly 'undefined'.
+666:25 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+684:17 TS2532 Object is possibly 'undefined'.
+686:5 TS18048 'man' is possibly 'undefined'.
+686:22 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+687:17 TS18048 'man' is possibly 'undefined'.
+690:5 TS2532 Object is possibly 'undefined'.
+690:5 TS2532 Object is possibly 'undefined'.
+690:67 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+692:17 TS18048 'man' is possibly 'undefined'.
+692:35 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+709:5 TS2532 Object is possibly 'undefined'.
+709:5 TS2532 Object is possibly 'undefined'.
+709:67 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+772:17 TS2532 Object is possibly 'undefined'.
+789:17 TS2532 Object is possibly 'undefined'.
+790:17 TS18048 'man' is possibly 'undefined'.
+790:41 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+793:17 TS18048 'man' is possibly 'undefined'.
+793:41 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+794:17 TS18048 'man' is possibly 'undefined'.
+794:41 TS2345 Argument of type 'Square | undefined' is not assignable to parameter of type 'Square'.
+797:17 TS2532 Object is possibly 'undefined'.
+843:5 TS2322 Type 'string' is not assignable to type '"red" | "black"'.
+844:5 TS2322 Type 'string' is not assignable to type '"red" | "black" | "nobody"'.
+845:30 TS2322 Type 'Piece | undefined' is not assignable to type 'Piece'.
+959:5 TS2322 Type 'undefined' is not assignable to type 'Table'.
+969:5 TS2322 Type 'undefined' is not assignable to type 'Table'.
+1014:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.

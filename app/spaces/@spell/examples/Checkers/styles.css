@@ -1,0 +1,57 @@
+/* File styles.css:  what no attribute draws -- the board's grid, its squares' colors and the pieces.
+   - Each square is <checkers-square shade="dark">, each piece <checkers-piece side="red" rank="king">:
+     their properties, as the elements' attributes (Board.spell). */
+
+/* The board:  eight rows of eight squares, as wide as there's room for, at most 30rem */
+checkers-board {
+  display: grid;
+  grid-template: repeat(8, 1fr) / repeat(8, 1fr);
+  width: min(100%, 30rem);
+  aspect-ratio: 1;
+  border: 0.5rem solid #6b4226;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+}
+/* the second board, turned round:  red's side nearest */
+checkers-board[turned] {
+  rotate: 180deg;
+}
+
+/* A square:  its piece in the middle */
+checkers-square {
+  display: grid;
+  place-items: center;
+  background: #f0d9b5;
+}
+checkers-square[shade="dark"] {
+  background: #9a6b46;
+}
+/* where a dragged piece would land */
+checkers-square:state(accepting-drop) {
+  box-shadow: inset 0 0 0 0.25rem #ffd54f;
+}
+/* the dot where the picked piece can go */
+checkers-square .Target {
+  grid-area: 1 / 1;
+}
+
+/* A piece:  a round checker, black or red;  a king wears a gold crown */
+checkers-piece {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  width: 80%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #222;
+  box-shadow: inset 0 -0.2rem 0 rgb(0 0 0 / 0.35);
+  color: #ffd54f;
+  cursor: grab;
+}
+checkers-piece[side="red"] {
+  background: #c62828;
+}
+/* on the turned board, its crown turned back the right way up */
+checkers-board[turned] checkers-piece {
+  rotate: 180deg;
+}

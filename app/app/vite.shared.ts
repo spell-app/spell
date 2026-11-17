@@ -118,11 +118,15 @@ export function pageServerProxy({
 }): Record<string, ProxyOptions> {
   const passed = { target, changeOrigin: true }
   const tokenNow = () => (tokenFile && currentToken(tokenFile)) || token
-  const addToken: ProxyOptions["configure"] = (proxy) =>
-    proxy.on("proxyReq", (request) => {
+  const addToken: ProxyOptions["configure"] = (proxy) => {
+    const withToken = (request: { setHeader(name: string, value: string): void }) => {
       const now = tokenNow()
       if (now) request.setHeader(SERVER_TOKEN_HEADER, now)
-    })
+    }
+    // a request, and a websocket's opening request:  a live room's (`/api/rooms`)
+    proxy.on("proxyReq", withToken)
+    proxy.on("proxyReqWs", withToken)
+  }
   // in order:  vite takes the first entry a path starts with (`/api/places` before `/api`)
   return Object.fromEntries(
     PAGE_SERVER_PREFIXES.map((prefix) => [

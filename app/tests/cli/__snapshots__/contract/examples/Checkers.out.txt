@@ -1,0 +1,88 @@
+✅ test the opening
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `start a new game on board`
+  ✅ As expected `the number of squares in board where` is `24`
+  ✅ As expected `the turn of board` is `black`
+  ▶️ Executing   `set man to the piece of (the square at 6 and 1 on board)`
+  ✅ As expected `the side of man` is `black`
+  ✅ As expected `man can go to (the square at 5 and 2 on board)` is `yes`
+  ✅ As expected `man can go to (the square at 7 and 2 on board)` is `no`
+  ✅ As expected `man can go to (the square at 4 and 3 on board)` is `no`
+  ✅ As expected `the piece of (the square at 3 and 2 on board) can move` is `no`
+  ▶️ Executing   `move man to the square at 5 and 2 on board`
+  ✅ As expected `the turn of board` is `red`
+✅ test a jump must be taken
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `reset board`
+  ▶️ Executing   `put a "black" "man" at 6 and 3 on board`
+  ▶️ Executing   `put a "red" "man" at 5 and 4 on board`
+  ▶️ Executing   `put a "black" "man" at 6 and 7 on board`
+  ✅ As expected `board is forced to jump` is `yes`
+  ✅ As expected `the piece of (the square at 6 and 7 on board) can go to (the square at 5 and 6 on board)` is `no`
+  ▶️ Executing   `set jumper to the piece of (the square at 6 and 3 on board)`
+  ✅ As expected `jumper can go to (the square at 5 and 2 on board)` is `no`
+  ✅ As expected `jumper can go to (the square at 4 and 5 on board)` is `yes`
+  ▶️ Executing   `move jumper to the square at 4 and 5 on board`
+  ✅ As expected `the square at 5 and 4 on board is empty` is `yes`
+  ✅ As expected `the winner of board` is `black`
+✅ test jumping on
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `reset board`
+  ▶️ Executing   `put a "black" "man" at 7 and 2 on board`
+  ▶️ Executing   `put a "red" "man" at 6 and 3 on board`
+  ▶️ Executing   `put a "red" "man" at 4 and 5 on board`
+  ▶️ Executing   `put a "red" "man" at 1 and 8 on board`
+  ▶️ Executing   `set jumper to the piece of (the square at 7 and 2 on board)`
+  ▶️ Executing   `move jumper to the square at 5 and 4 on board`
+  ✅ As expected `the turn of board` is `black`
+  ✅ As expected `the jumper of board` is `jumper`
+  ▶️ Executing   `move jumper to the square at 3 and 6 on board`
+  ✅ As expected `the number of squares in board where` is `2`
+  ✅ As expected `the turn of board` is `red`
+  ✅ As expected `the winner of board` is `nobody`
+✅ test crowning a king
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `reset board`
+  ▶️ Executing   `put a "black" "man" at 2 and 3 on board`
+  ▶️ Executing   `put a "red" "man" at 5 and 8 on board`
+  ▶️ Executing   `set man to the piece of (the square at 2 and 3 on board)`
+  ▶️ Executing   `move man to the square at 1 and 2 on board`
+  ✅ As expected `man is a king` is `yes`
+  ✅ As expected `the turn of board` is `red`
+  ▶️ Executing   `move the piece of (the square at 5 and 8 on board) to the square at 6 and 7 on board`
+  ✅ As expected `man can go to (the square at 2 and 3 on board)` is `yes`
+✅ test the diagram
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `start a new game on board`
+  ▶️ Executing   `set other to a new board`
+  ▶️ Executing   `set up other from the diagram of board`
+  ✅ As expected `the diagram of other as text` is `the diagram of board as text`
+  ✅ As expected `the number of squares in other where` is `24`
+  ▶️ Executing   `move the piece of (the square at 6 and 1 on board) to the square at 5 and 2 on board`
+  ▶️ Executing   `copy board onto other`
+  ✅ As expected `the diagram of other as text` is `the diagram of board as text`
+  ✅ As expected `the turn of other` is `red`
+✅ test the computer jumps
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `reset board`
+  ▶️ Executing   `set the turn of board to red`
+  ▶️ Executing   `put a "red" "man" at 3 and 4 on board`
+  ▶️ Executing   `put a "black" "man" at 4 and 5 on board`
+  ▶️ Executing   `put a "black" "man" at 7 and 2 on board`
+  ▶️ Executing   `play for the computer on board`
+  ✅ As expected `the square at 4 and 5 on board is empty` is `yes`
+  ✅ As expected `the piece of (the square at 5 and 6 on board) exists` is `yes`
+✅ test the computer keeps its pieces safe
+  ▶️ Executing   `set board to a new board`
+  ▶️ Executing   `reset board`
+  ▶️ Executing   `set the turn of board to red`
+  ▶️ Executing   `put a "red" "man" at 3 and 4 on board`
+  ▶️ Executing   `put a "black" "man" at 6 and 7 on board`
+  ✅ As expected `man would be safe on (the square at 4 and 5 on board)` is `yes`
+  ▶️ Executing   `put a "black" "man" at 5 and 6 on board`
+  ✅ As expected `man would be safe on (the square at 4 and 5 on board)` is `no`
+  ✅ As expected `man would be safe on (the square at 4 and 3 on board)` is `yes`
+  ▶️ Executing   `play for the computer on board`
+  ✅ As expected `the piece of (the square at 4 and 3 on board) exists` is `yes`
+
+<div id="spell-app-root"><test-project-app><ui-container><ui-stack><ui-toolbar appearance="pills" class="Bar" shrinkable=""><ui-text heavy="" size="big" slot="title">Checkers</ui-text><spacer></spacer><ui-action shortcut="N"></ui-action><ui-action icon-only="" shortcut="mod+Z"></ui-action><ui-action icon-only="" shortcut="mod+shift+Z"></ui-action></ui-toolbar><ui-toolbar appearance="pills" aria-label="Who you play" class="Opponents" size="small"><ui-action></ui-action><ui-action></ui-action><ui-action></ui-action></ui-toolbar><ui-header class="Message" level="3">Black to play</ui-header><test-project-board id="board" part="boards"><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square><test-project-square><test-project-piece></test-project-piece></test-project-square><test-project-square></test-project-square></test-project-board></ui-stack></ui-container></test-project-app></div>

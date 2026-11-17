@@ -230,8 +230,14 @@ export class EditorServer {
         return pass(request, reply, () => {})
       })
     }
-    for (const prefix of WEBSOCKET_PREFIXES)
-      web.upgrade(prefix, (raw, socket, head) => SRV.proxyUpgrade(raw, socket, head, pagePort))
+    for (const prefix of WEBSOCKET_PREFIXES) {
+      const withToken = TOKEN_PREFIXES.includes(prefix)
+      web.upgrade(prefix, (raw, socket, head) => {
+        // a live room's opening request carries the token, as a data folder's requests do
+        if (withToken) raw.headers[SERVER_TOKEN_HEADER] = guard.token
+        SRV.proxyUpgrade(raw, socket, head, pagePort)
+      })
+    }
     web.fallback.use((request, reply, next) =>
       request.method === "GET" ? reply.sendFile(join(BUILT_EDITOR, "index.html")) : next()
     )

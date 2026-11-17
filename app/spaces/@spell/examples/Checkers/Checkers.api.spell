@@ -1,0 +1,21 @@
+## Checkers:  where a game against someone in another tab is kept
+// A live room on the page server:  each tab in it hears every move the other makes, as it's made.
+// A game is kept at a table, two tabs sitting at it:  the room is the tables of Owen's space.
+// Joining it is reading that space, so only its members join.
+// In the editor on Owen's machine that's him, with no sign-in;  anyone else signs in with a Spell account.
+// Name your own space to play in it:  "ana@spell/tables".
+checkers room is a room at "owen@spell/tables"
+
+a "table" is a thing
+	-- Where two tabs play one game:  the board as its diagram, whose turn it is, and which tab sits on each side
+	it lives in the checkers room
+	its "diagram" is a list of text
+		-- Each square's piece as a letter, top left to bottom right (a board's diagram)
+	its "turn" is text
+	its "winner" is text
+	its "jump square" is a number
+		-- Where the piece in the middle of jumps is, by its square's place:  0 for none
+	its "black seat" is text
+		-- The tab playing black:  its seat
+	its "red seat" is text
+		-- The tab playing red

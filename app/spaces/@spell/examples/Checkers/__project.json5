@@ -1,0 +1,23 @@
+{
+  "title": "Checkers",
+  "description": "Checkers against the computer, yourself or another tab:  the pieces draggable views, each move checked by the rules written as sentences, two boards side by side, and a live room for a game between two tabs",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`):  two moves against the computer, then a piece picked, its squares lit, the board's middle showing
+  "thumbnail": {
+    "steps": [
+      { "clickOn": "checkers-square[row=\"6\"][column=\"3\"] checkers-piece" },
+      { "clickOn": "checkers-square[row=\"5\"][column=\"4\"]", "wait": 1500 },
+      { "clickOn": "checkers-square[row=\"6\"][column=\"7\"] checkers-piece" },
+      { "clickOn": "checkers-square[row=\"5\"][column=\"8\"]", "wait": 1500 },
+      { "clickOn": "checkers-square[row=\"7\"][column=\"6\"] checkers-piece" },
+      { "scrollToOn": "checkers-square[row=\"3\"][column=\"1\"]" }
+    ]
+  },
+  "imports": [
+    { "path": "/Board.spell", "active": true },
+    { "path": "/Computer.spell", "active": true },
+    { "path": "/Checkers.api.spell", "active": true },
+    { "path": "/Checkers.spell", "active": true },
+    { "path": "/Drawing.spell", "active": true },
+    { "path": "/styles.css", "active": true }
+  ]
+}
