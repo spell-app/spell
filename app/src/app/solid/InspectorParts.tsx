@@ -1208,6 +1208,9 @@ function TypeBlank(props: { text: string }): JSX.Element {
  * An action's name, which a click renames (epic `editor` I111;  Owen:  "I should be able to rename the function (and
  * refactor its callers) by clicking on the name"):  a field holding it, which renames it everywhere it's named
  * (`Inspector.renameAction()`) when it's left -- Enter, Tab or a click away.
+ * - A click away is any press outside the field, as Enter (I234):
+ *   even one on a spot that keeps the focus where it is, so the field never stays open behind it.
+ *   - Unchanged, it just closes;  a press on its own Restore link restores.
  * - Esc leaves it as it was.
  * - Renamed:  the new name shows at once, a spinner right after it, until the program's compiled again and the row
  *   drawn from it (I168);  never the old name in between.
@@ -1240,6 +1243,19 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
   }
   // a Tab on its way out of the field:  set by its key, read by the `focusout` it causes
   let isTabbing = false
+  // the field while it shows, and what's around it (its message, the Restore link)
+  let field: HTMLElement | undefined
+  let fieldAndMessage: HTMLElement | undefined
+  // a press anywhere outside the field leaves it (I234):
+  // not every press moves the focus (one the page keeps from it), so its `focusout` alone isn't enough
+  createEffect(isEditing, (editing) => {
+    if (!editing) return
+    const pressedElsewhere = (event: PointerEvent) => {
+      if (fieldAndMessage && !event.composedPath().includes(fieldAndMessage) && field) void rename(field, "leaving")
+    }
+    document.addEventListener("pointerdown", pressedElsewhere, { capture: true })
+    return () => document.removeEventListener("pointerdown", pressedElsewhere, { capture: true })
+  })
   // `by`, when the name's refused:
   // - Enter keeps the focus in the field
   // - Tab brings it back, unless it went to the Restore link:  never the row's run button, ringed (I139)
@@ -1286,7 +1302,11 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
         </>
       }
     >
-      <span class="InspectorActionNameEdit" onClick={(event: MouseEvent) => event.stopPropagation()}>
+      <span
+        class="InspectorActionNameEdit"
+        ref={(span: HTMLElement) => (fieldAndMessage = span)}
+        onClick={(event: MouseEvent) => event.stopPropagation()}
+      >
         <ui-input
           size="small"
           class="InspectorActionNameField"
@@ -1296,7 +1316,10 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
           aria-invalid={refusal() ? "true" : undefined}
           autofocus=""
           // its words chosen, to type over:  once it has drawn its input
-          ref={(field: HTMLElement) => requestAnimationFrame(() => focusField(field))}
+          ref={(input: HTMLElement) => {
+            field = input
+            requestAnimationFrame(() => focusField(input))
+          }}
           onInput={() => setRefusal(undefined)}
           onKeyDown={(event: KeyboardEvent) => {
             // the row's own keys never see them:  Space and Enter would fold it

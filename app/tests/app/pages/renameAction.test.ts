@@ -241,4 +241,40 @@ describe.skipIf(!SERVING)("Renaming an action in the Inspector", { timeout: 180_
     await page.keyboard.press("ControlOrMeta+z")
     await expect.poll(allFiles, { timeout: 10_000 }).toBe(before)
   })
+
+  test("a press away that keeps the focus in the field still renames, as Enter does;  Esc still cancels (I234)", async () => {
+    const before = await allFiles()
+    // somewhere the page keeps the focus from, as a Spell UI menu's items do:  the field's `focusout` never comes
+    await page.evaluate(() => {
+      const spot = document.createElement("div")
+      spot.className = "keepsFocus"
+      spot.style.cssText = "position: fixed; left: 0; bottom: 0; width: 40px; height: 40px; z-index: 99999"
+      spot.addEventListener("mousedown", (event) => event.preventDefault())
+      document.body.append(spot)
+    })
+    const away = page.locator(".keepsFocus")
+    // Esc first:  typed, then Esc, then a press away writes nothing
+    await openField("cheat")
+    await page.keyboard.type("nope")
+    await page.keyboard.press("Escape")
+    await away.click()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await allFiles()).toBe(before)
+    // unchanged:  it just closes, nothing written
+    const field = await openField("cheat")
+    await away.click()
+    await expect.poll(() => field.count()).toBe(0)
+    expect(await allFiles()).toBe(before)
+    // a new name, and a press away:  renamed
+    await openField("cheat")
+    await page.keyboard.type("take a peek")
+    await away.click()
+    await expect.poll(allFiles, { timeout: 10_000 }).toContain('to "take a peek" with shortcut "C", icon "eye"')
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await page.locator(".InspectorActionNameField").count()).toBe(0)
+    await page.evaluate(() => document.querySelector(".keepsFocus")?.remove())
+    await page.keyboard.press("ControlOrMeta+z")
+    await expect.poll(allFiles, { timeout: 10_000 }).toBe(before)
+    await page.waitForTimeout(SETTLE_MS)
+  })
 })
