@@ -4,16 +4,19 @@ core.heading("How Recipe Cards work")
 ///////////////////////////
 // ## How Recipe Cards work
 ///////////////////////////
-// The Recipe Cards example keeps recipes in a JSON file:  pick one, set how many are eating,
-// show it in metric or in cups and spoons, and send the ingredients you pick to the shopping list.
-// Four ideas do the work:
-// - a recipe holds its ingredients and steps INSIDE it:  lists of things saved nowhere else
-// - every amount is worked out from how many are eating:  its amount, times diners over servings
-// - Spell's own measures say how big a cup is:  "1 cup in ml" is 236.6
-// - the shopping list is Shopping List's own, imported:  one file, one list
+// Recipe Cards is a small app for cooking.
+// You pick a recipe, say how many people are eating, and every amount changes to match.
+// You can see the amounts in grams and ml, or in cups and spoons,
+// and send the ingredients you tick to the Shopping List example's list.
+// It keeps the recipes in a JSON file:  a plain text file any editor opens.
 //
-// This guide keeps the first three, with one recipe in memory.
-// Open Recipe Cards, from Examples on the home page, for all of it.
+// Three ideas do the work, and this guide shows each one:
+// - a recipe holds its own list of ingredients, saved with it
+// - each amount is worked out from how many people are eating
+// - Spell knows how big a cup is, so it can turn millilitres into cups
+//
+// Here the recipe is kept in memory, so it starts again each time you run it.
+// For the whole example, open Recipe Cards from Examples on the home page.
 
 core.heading("An ingredient, and a recipe that holds them")
 /** An ingredient, and a recipe that holds them */

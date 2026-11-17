@@ -4,16 +4,17 @@ core.heading("How the Shopping List works")
 /////////////////////////////////
 // ## How the Shopping List works
 /////////////////////////////////
-// The Shopping List example keeps what to buy in a CSV file, and shows it by aisle:
-// add an item, tick it off as you shop, clear what you got, and print what's left.
-// Four ideas do the work:
-// - one line says where the items are kept:  a CSV file in the example's own folder
-// - an item draws itself as a row:  a box to tick bound to its "got"
-// - the list is worked out from the items:  each aisle with what's still to get in it
-// - "open printing" prints the app alone, and its CSS says what goes on paper
+// The Shopping List example is a small app for what you need to buy.
+// You add an item, tick it off as you shop, clear what you got, and print what's left.
+// It keeps the list in a CSV file:  a plain spreadsheet file that Numbers or Excel opens.
 //
-// This guide keeps the first three, with the items in memory:  they start afresh each run.
-// Open Shopping List, from Examples on the home page, for all of it.
+// Three ideas do the work, and this guide shows each one:
+// - an item draws itself as a row, with a box you tick
+// - the list works out its aisles from the items, so each aisle shows what's still to get
+// - one line in the example says where the items are kept
+//
+// Here the items are kept in memory, so they start again each time you run it.
+// For the whole example, open Shopping List from Examples on the home page.
 
 core.heading("An item")
 /** An item */
