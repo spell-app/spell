@@ -204,6 +204,7 @@ _One loop, driven by exit codes:  0 means work, 2 means arm it again._
 - A session with no `wait` running still hears your Send.
   The plugin's inbox poller starts with each session and at each turn's end, watches that session's epic page,
   prints nothing while idle, and wakes the session with one line when you Send ([the hooks' table](README-skills.md#hooks)).
+  A scripted `claude -p` has none:  nobody is there to Send, and it would wait on the poller before answering.
 - What you see on the page meanwhile:  [README-pages.md](README-pages.md), "A review round".
 
 | Exit | Means |

@@ -182,6 +182,13 @@ Inside a phase, DO use these:
 - systematic-debugging, for any issue found;  file it on the page too (`epic add <epic>#I`)
 - verification-before-completion, before a phase closes:  its Done list names the checks run and what they printed
 
+These words reach a session two ways:
+- the session-start hook says them in an epic's worktree whenever superpowers is turned on:
+  in the person's settings, the project's `.claude/settings.json` or `.claude/settings.local.json`,
+  the managed settings, or `claude --plugin-dir`
+- the repo's `AGENTS.md`, which every session reads:  `epic init` offers to put them there when superpowers is on
+  (`epic init --superpowers` without asking), and keeps them current once they are
+
 ## tidy -- Close what other work made obsolete
 
 Only when the person asks (the skill's word:  `$epic tidy`).

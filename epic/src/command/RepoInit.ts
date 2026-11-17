@@ -19,12 +19,13 @@ import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.typ
 import { Hub } from "./Hub"
 import { PluginInstall } from "./PluginInstall"
 import { Shared } from "./Shared"
+import { Superpowers, type AgentsReport } from "./Superpowers"
 import type { SyncReport } from "./SharedSync"
 
 /****************
  * ### `RepoInit`
  * `epic init [--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote]
- * [--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-server] [--dry-run] [--json]`:
+ * [--public] [--host github|gitlab] [--protected-base] [--superpowers] [--no-plugin] [--no-server] [--dry-run] [--json]`:
  * set a repo up for epics (epic `epic-eject` P9), from any folder of its main checkout or a worktree of it;  the ONE
  * command a new repo, and each teammate joining it, runs (epic `epic-friend` P13:  `npx spell@next epic init`).
  *
@@ -69,6 +70,11 @@ import type { SyncReport } from "./SharedSync"
  * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:  the links
  *    - not the window files (`epic window`:  each machine's own):
  *      they're in the epic folder since epic `epic-eject` P13, whose `.gitignore` takes them (`Shared.init()`)
+ * 4b. puts superpowers' stand-aside words in the repo's `AGENTS.md` (`superpowersChoice()`, `Superpowers.agentsStep()`;
+ *    epic `epic-engine` I318), a marked block written from the guide's `superpowers` topic:
+ *    - asked in a terminal when superpowers is turned on for this repo, in any settings layer;  `--superpowers` without
+ *      asking;  a block there already is kept current with the guide;  never `--local`
+ *    - committed with the other two files, only when init changed it
  * 5. keeps the name this machine's person goes by on the epics (`EpicHome.keepPerson()`;  epic `epic-friend` P1)
  *    - `--name <name>`;  else, with no name kept yet, asks "What do you want to be called?" in a terminal,
  *      suggesting their GitHub login, else git's `user.name` (`CLI.ask()`, `EpicHome.refreshGithub()`);
@@ -135,7 +141,8 @@ export class RepoInit {
       "noServer",
       "noCommit",
       "protectedBase",
-      "local"
+      "local",
+      "superpowers"
     ])
     const dryRun = flags.dryRun === true
     const local = flags.local === true
@@ -175,6 +182,7 @@ export class RepoInit {
       name: stringFlag(flags.name),
       color,
       install: stringFlag(flags.install),
+      superpowers: flags.superpowers === true,
       remote,
       contentRepo,
       visibility: flags.public === true ? "public" : undefined,
@@ -197,6 +205,7 @@ export class RepoInit {
       noRemote,
       color: answers.color,
       install: answers.install,
+      superpowers: answers.superpowers,
       cloned: answers.cloned,
       codeHost: answers.codeHost,
       protectedBase: flags.protectedBase === true,
@@ -248,6 +257,7 @@ export class RepoInit {
     name,
     color,
     install,
+    superpowers,
     remote,
     contentRepo,
     visibility,
@@ -291,6 +301,7 @@ export class RepoInit {
       answers.visibility ??= ask ? await RepoInit.askVisibility(codeHost.words) : "private"
     }
     answers.install = await RepoInit.installChoice({ main, install, ask })
+    answers.superpowers = await RepoInit.superpowersChoice({ main, flag: superpowers, local: isLocal, ask })
     const stays = noRemote || (isLocal && !contentRepo && !remote && !settings.contentRemote && !repoPlan)
     answers.plan = {
       name: person,
@@ -301,6 +312,7 @@ export class RepoInit {
           ? "none:  the plans stay on this machine"
           : remote || address || undefined,
       install: answers.install,
+      ...(answers.superpowers && { superpowers: true }),
       ...(isLocal && { local: true })
     }
     return answers
@@ -331,6 +343,35 @@ export class RepoInit {
     if (!ask) return suggestion
     const answer = (await CLI.ask(INSTALL_QUESTION, { suggestion: suggestion.command })).trim()
     return answer === suggestion.command ? suggestion : { command: answer, source: "your answer" }
+  }
+
+  /**
+   * Whether `epic init` puts superpowers' stand-aside words in the repo's `AGENTS.md` (epic `epic-engine` I318).
+   * - never in local mode:  nothing goes in the repo
+   * - `flag` (`--superpowers`):  yes, asking nothing
+   * - the block there already:  yes, so it's kept current with the guide
+   * - superpowers turned on for this repo, in any settings layer (`Superpowers.isOn()`):  asked in a terminal, `y`
+   *   suggested;  no terminal, yes
+   * - else no:  `epic guide superpowers` says how to add them later
+   * - why:  the session-start hook says them only in a session that can see superpowers is on;  `AGENTS.md` reaches
+   *   every session, however it was turned on, a teammate's too
+   */
+  static async superpowersChoice({
+    main,
+    flag = false,
+    local = false,
+    ask
+  }: {
+    main: string
+    flag?: boolean
+    local?: boolean
+    ask: boolean
+  }): Promise<boolean> {
+    if (local) return false
+    if (flag || Superpowers.hasAgentsBlock(main)) return true
+    if (!Superpowers.isOn({ project: main })) return false
+    const answer = ask ? await CLI.ask(SUPERPOWERS_QUESTION, { suggestion: "y" }) : "y"
+    return !/^n/i.test(answer.trim())
   }
 
   /** The install command the config at `main` writes out, or `undefined` when it has no config or leaves it out. */
@@ -403,6 +444,7 @@ export class RepoInit {
     ask = false,
     color,
     install,
+    superpowers = false,
     plugin = false,
     server = false,
     commit = false,
@@ -541,6 +583,8 @@ export class RepoInit {
       const after = RepoInit.withIgnoreBlock(before, ignored, relative(main, content))
       report.gitignore.action = after === before ? "ok" : before ? "updated" : "written"
       if (!dryRun && after !== before) writeFileSync(ignoreFile, after)
+      // superpowers' stand-aside words, for every session (epic `epic-engine` I318)
+      if (superpowers) report.agents = Superpowers.agentsStep({ main, dryRun })
     }
     // the files it wrote in the repo, committed on the base branch;  never in local mode
     if (commit && !local) report.commit = await RepoInit.commitStep({ report, ask, say })
@@ -899,15 +943,21 @@ export class RepoInit {
   }
 
   /**
-   * The files `epic init` changed in the repo, still to commit:  the config, `.gitignore`.
+   * The files `epic init` changed in the repo, still to commit:  the config, `.gitignore`, and `AGENTS.md` when it
+   * wrote superpowers' words there.
    * - a dry run wrote nothing:  the ones it would have count too
+   * - `AGENTS.md` only when it changed it now:  someone's own edits to it are never swept into the commit
    */
-  static changedFiles({ main, dryRun, config, gitignore }: ChangedFilesInput): string[] {
+  static changedFiles({ main, dryRun, config, gitignore, agents }: ChangedFilesInput): string[] {
     const wouldWrite = (file: string) =>
       dryRun && (file === EpicConfig.FILE ? config?.action === "written" : gitignore?.action !== "ok")
-    return [EpicConfig.FILE, ".gitignore"].filter(
+    const files = [EpicConfig.FILE, ".gitignore"].filter(
       (file) => wouldWrite(file) || Git.out(["status", "--porcelain", "--", file], main)
     )
+    const agentsFile = agents && relative(main, agents.file)
+    if (agentsFile && agents.action !== "ok" && (dryRun || Git.out(["status", "--porcelain", "--", agentsFile], main)))
+      files.push(agentsFile)
+    return files
   }
 
   /** Where `branch` of checkout `main` pushes:  its upstream (`git push`), else `origin`;  none:  `undefined`. */
@@ -1502,6 +1552,7 @@ export class RepoInit {
             ? "none:  the plans stay on this machine"
             : remote.address,
       install: report.install,
+      ...(report.agents && { superpowers: true }),
       ...(report.local && { local: true })
     }
   }
@@ -1510,7 +1561,7 @@ export class RepoInit {
    * The summary under the questions:  `> Your name  :  owenoak`, the values bold, the colour in its colour;  local mode
    * says so first.
    */
-  static summaryLines({ name, color, sharedRepo, install, local }: Plan): string[] {
+  static summaryLines({ name, color, sharedRepo, install, superpowers, local }: Plan): string[] {
     return [
       ...(local ? [`> Setup:  ${chalk.bold(LOCAL_SETUP)}`] : []),
       ...(name ? [`> Your name  :  ${chalk.bold(name)}`] : []),
@@ -1518,7 +1569,8 @@ export class RepoInit {
       ...(sharedRepo ? [`> Epic repo:  ${chalk.bold(sharedRepo)}`] : []),
       ...(install && (install.command || install.source)
         ? [`> Install command:  ${RepoInit.installWords(install)}`]
-        : [])
+        : []),
+      ...(superpowers ? [`> superpowers:  ${chalk.bold("its stand-aside words in AGENTS.md")}`] : [])
     ]
   }
 
@@ -1607,6 +1659,16 @@ export class RepoInit {
           : would(gitignore.action === "written" ? "wrote" : "updated", "would update"),
         gitignore.file
       ])
+    if (report.agents) {
+      const { action, file } = report.agents
+      const done =
+        action === "ok"
+          ? "already present"
+          : action === "written"
+            ? would("wrote", "would write")
+            : would(action, "would update")
+      rows.push([done, `${file}  (superpowers' stand-aside words)`])
+    }
     if (person.action === "kept" || person.action === "would keep")
       rows.push([would("kept", "would keep"), `${EpicHome.personFile()}  (your name)`])
     if ((color?.action === "kept" || color?.action === "would keep") && color.file) {
@@ -1978,6 +2040,8 @@ export type InitReport = {
   gitignore: { file: string; action: "ok" | "updated" | "written" }
   /** local mode:  the repo's private ignore list, in place of its `.gitignore` (`excludeStep()`) */
   exclude?: ExcludeReport
+  /** superpowers' stand-aside words in the repo's `AGENTS.md` (`Superpowers.agentsStep()`);  none when not asked */
+  agents?: AgentsReport
   /** local mode:  a setup pull or merge request an earlier run left open (`openSetupRequest()`) */
   setupRequest?: SetupRequestReport
   /** whether the base branch takes only pull requests, and how that's known (`protectionStep()`) */
@@ -2048,12 +2112,13 @@ export type CodeHostReport = {
 }
 
 /** What `RepoInit.changedFiles()` reads off the report. */
-export type ChangedFilesInput = Pick<InitReport, "main"> & Partial<Pick<InitReport, "dryRun" | "config" | "gitignore">>
+export type ChangedFilesInput = Pick<InitReport, "main"> &
+  Partial<Pick<InitReport, "dryRun" | "config" | "gitignore" | "agents">>
 
 /** What `epic init`'s questions came to (`RepoInit.questions()`):  `init()`'s answers, and the summary. */
 export type Answers = Pick<
   InitOptions,
-  "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost" | "install"
+  "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost" | "install" | "superpowers"
 > & {
   /** what the summary under the questions says */
   plan: Plan
@@ -2069,6 +2134,8 @@ export type Plan = {
   sharedRepo?: string
   /** the command a new worktree runs, and where it came from */
   install?: InstallChoice
+  /** superpowers' stand-aside words go in the repo's `AGENTS.md` */
+  superpowers?: boolean
   /** set up locally:  nothing in the repo */
   local?: boolean
 }
@@ -2087,6 +2154,8 @@ export type QuestionOptions = Pick<
 > & {
   /** the install command (`--install`):  none, asked */
   install?: string
+  /** put superpowers' stand-aside words in `AGENTS.md` without asking (`--superpowers`) */
+  superpowers?: boolean
   /** ask in a terminal:  off for `--json` and `--dry-run` */
   ask: boolean
   /** only say what it would do:  nothing cloned */
@@ -2252,6 +2321,11 @@ export type InitOptions = {
   color?: string
   /** the install command a new worktree runs (`questions()`);  none:  the config's, else the suggestion */
   install?: InstallChoice
+  /**
+   * put superpowers' stand-aside words in the repo's `AGENTS.md`, or keep them current (`superpowersChoice()`);
+   * never in local mode;  default `false`
+   */
+  superpowers?: boolean
   /** install the epic plugin when Claude Code doesn't have it (`--no-plugin` turns it off);  default `false` */
   plugin?: boolean
   /** start the epic server, serving the repo, last (`--no-server` turns it off);  default `false` */
@@ -2304,6 +2378,10 @@ const REPO_QUESTION = "What should the shared epics repo be called?"
 
 /** What `epic init` asks, in a terminal, before it makes the epic repo on the code host:  who can see it. */
 const VISIBILITY_QUESTION = "Private or public?"
+
+/** Asked when superpowers is turned on for the repo (`superpowersChoice()`). */
+const SUPERPOWERS_QUESTION =
+  "superpowers is on here:  put its stand-aside words (epic guide superpowers) in AGENTS.md, for every session?"
 
 /** A repo name on the code host:  letters, digits, `.`, `-` and `_`, at most 100. */
 const REPO_NAME = /^[\w.-]{1,100}$/

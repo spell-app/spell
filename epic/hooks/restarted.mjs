@@ -9,12 +9,16 @@
  * - Every start:  a resume, a fresh start, a `/clear` alike;  `RestartWake` decides by the agents' times.
  * - Plain `node`:  `RestartWake.ts` loads with its types stripped.
  * - Exits 0 on any error:  never breaks a session's start.
+ * - Exits 0 at once in an unattended session, a scripted `claude -p` (`ClaudeSession.isUnattended()`, epic
+ *   `epic-engine` I319):  it waits for every `SessionStart` hook before its first answer, and nobody's agents to resume.
  */
 import { readFileSync } from "node:fs"
 
+import { ClaudeSession } from "spell/epic/config/ClaudeSession.mjs"
+
 let code = 0
 try {
-  const input = JSON.parse(readFileSync(0, "utf8") || "{}")
+  const input = ClaudeSession.isUnattended() ? {} : JSON.parse(readFileSync(0, "utf8") || "{}")
   if (input.cwd) {
     // loaded in here, so a reader that won't load never fails the hook
     const { RestartWake } = await import("spell/epic/tool/RestartWake.ts")

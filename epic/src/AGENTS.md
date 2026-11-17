@@ -573,10 +573,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
-    - `Superpowers` (epic `epic-engine` P72):  with the superpowers plugin on in Claude Code's settings
-      (`ClaudeHome.isPluginEnabled()`), what the same hook adds in an EPIC's worktree:  the guide's `superpowers` topic,
+    - `Superpowers` (epic `epic-engine` P72):  with the superpowers plugin on for the session
+      (`ClaudeHome.isPluginEnabled()`:  every settings layer, the person's, the project's, its local file, `--settings`,
+      the managed file, and `claude --plugin-dir` read off the session's process;  epic `epic-engine` I318), what the
+      same hook adds in an EPIC's worktree:  the guide's `superpowers` topic,
       where superpowers stands aside (no design, plan, worktree or finish of its own;  no `npm install`), joined to the
       guard's answer (`WorktreeGuard.withNotice()`);  plain `node` loads it by path
+      - and the same words in the repo's `AGENTS.md`, a marked block `epic init` writes and keeps current
+        (`agentsStep()`, `RepoInit.superpowersChoice()`:  asked when superpowers is on, `--superpowers`;  I318)
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
@@ -720,6 +724,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           interactive terminal session;  VS Code's panel runs `claude` as a stream, where none ever ran (checked
           2026-10-26, Claude Code 2.1.310, with a probe plugin:  no monitor;  its `asyncRewake` `Stop` hook woke it)
         - in a terminal session the monitor runs it too
+        - NOT in an unattended session (epic `epic-engine` I319):  the poller and the restart wake stand down
+          (`ClaudeSession.isUnattended()`, read from `CLAUDE_CODE_SESSION_ATTENDED`, which is "0" in `claude -p`), so a
+          scripted `claude -p` with the epic plugin starts in seconds instead of hanging
       - ONE per session, the newest:  `~/.spell-epic/listeners/<session pid>.pid` names it (and the batch it last
         announced, so the next turn's hook never announces it again);  an older one sees it gone and ends
       - the page server reads that file (`listenerOf()`):  a session with a poller is asked through its inbox, never
