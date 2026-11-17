@@ -9,6 +9,7 @@ import {
   hasPick,
   isImmediate,
   isSent,
+  type InboxDoing,
   type InboxDraft,
   type InboxMark,
   type NewItem,
@@ -67,6 +68,12 @@ export class ReviewState {
 
   /** The page is being reviewed:  the controls show.  The page's, so read with or without an id. */
   readonly reviewing = (): boolean => this.readPage((client) => client.reviewing) ?? false
+
+  /**
+   * What the listening session is doing now (`epic inbox status`, epic `epic-engine` P35);  `null` for nothing.
+   * The page's, so read with or without an id.
+   */
+  readonly doing = (): InboxDoing | null => this.readPage((client) => client.doing) ?? null
 
   /**
    * The new items Owen asked for from the page, waiting to be made (epic `airplane` P2);  `kind`:  only those.

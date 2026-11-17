@@ -303,10 +303,20 @@ As `plan-doc.md`, "Ids":
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
     phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
 - Requests (epic `epic-workflow`):  what the person sent the phase from other sessions, one labelled block per request.
+  - Every request becomes a phase or a todo (epic `epic-engine` T88;  the person:  "When an epic gets requests from
+    other epics, it should make them a Todo or a phase").
   - Written by `epic file <epic>#P<N> <rN>` (the tool's `request <name> <N> <rN> --from "..." --file f`).
   - The block:  their words quoted, what the sender was looking at, when, a link to `requests/<rN>/request.md`, and
     each screenshot.
   - Filing a request again replaces its block.
+  - Into a TODO instead, `epic file <epic>#T<n> <rN>` (the tool's `request <name> T<n> <rN> --file f [--picture p]...`):
+    - the same words, context and link at the end of its text;  the quote `add --start` gave it goes when the
+      request's words hold it, so they're said once
+    - each screenshot copied in as one of its pictures (`<epic-picture>`, deletable on the page:  `ItemPictures`)
+    - the todo marked `requested`:  light orange once done, until the person reviews it
+    - filed again:  nothing changes
+  - `epic file <epic> <rN> "<where>"`, with neither, only for a duplicate:  `where` names the todo or phase it
+    duplicates (`same as T12`), else it's refused;  an issue or todo it names is marked `requested`.
 - Plan changes:  `<epic-update at summary>` blocks, one per change to the phase's plan, oldest first (see "Updates").
   - Written by `updated <name>#<N> "<html>" [--summary "..."] [--for <item ids>]`.
   - Only for a change NO ITEM caused (a plan adjusted while building, a file moved):  an answer's change is its
@@ -413,7 +423,7 @@ As `plan-doc.md`, "Ids":
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), in the last day (a phase:  3 days);  older, grey                 |
-    | `requested` | light orange | an issue filed from the person's own words (`requested`), closed done, not reviewed:  their turn to see it (epic `epic-engine` P63) |
+    | `requested` | light orange | an issue or todo filed from the person's own words (`requested`;  a todo since epic `epic-engine` T88), closed done, not reviewed:  their turn to see it (P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
     | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
@@ -587,7 +597,10 @@ As `plan-doc.md`, "Ids":
       (`PlanItem.choiceSets()`).
     - No `choices` (an older mark):  the item's own.
   - `inbox apply` sets THAT set's `chosen`.
-  - A question is answered with the option:  no other set stays chosen.
+  - A question is answered with the option:  a set asked INSTEAD of it (a reply's new options over the question's
+    own) is chosen no more.
+    - Sets asked BESIDE it, in the same place (its text, one reply), each keep their own pick (I88):
+      the answer names each one's, in order, `Unfold it;  Inline` (`PlanItem.setsBeside()`).
   - Any other item is APPROVED with it:  an open judgement call closed, accepted;  reviewed.
   - Either way:
     - the set records the pick, drawn inside its folded Choices (I153):
@@ -678,6 +691,8 @@ As `plan-doc.md`, "Ids":
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
   - Fixed:  `epic update <epic>#I3 fixed ["<what changed>"]` (also what `done` means on one):  still open, `fixed`,
     ORANGE, on their list to review again.
+  - Sent back, and its note handed on to another item (a Noted card naming it:  "Your C2 is being fixed as I148"):
+    fixed again by itself once that one is fixed or done (`HandedOnFixes`, epic `epic-engine` I317)
   - Their Approve closes it;  their Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
   - A mark already sent with `todo` applies the same way.
   - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
@@ -1259,6 +1274,16 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - the history handed in by the runner (`MigrationContext.history`, `PlanDocFiles.epicHistory()`):  git, so never
       on an edit
     - idempotent:  a commit already in the Log is skipped
+  - `handed-on-fixes` (2026-11-16, every edit;  epic `epic-engine` I317):  a fix sent back, whose note was handed on
+    to another item, is fixed again once that one is (`HandedOnFixes`):  orange, `FIXED`, Accept the fix (the check)
+    - the case:  language's I147, sent back with "see my comments in its text:  C2";  its Noted card "Your C2 ... is
+      being fixed as I148";  I148 fixed, and I147 still `REOPENED`, its last button the x
+    - which:  an open issue or call sent back (`urgent`, or labelled `REOPENED`), not `fixed`, its LATEST card Noted
+      with a Done card before it, the Noted card naming other items of the page (`I148`), every one fixed or done
+    - fixed as `fixedForReview()` does, with a Done card naming them (`What you sent back was fixed as I148:  ...`),
+      at the time they were fixed;  `PlanDoc` runs it after every fix or close, logging each, so it turns in the
+      same write
+    - idempotent:  a fixed item is left
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,

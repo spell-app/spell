@@ -13,6 +13,7 @@ import { E } from "spell/ui/core"
  * - What it does:
  *   - follows the row's scroll, and the sizes of the row and its items (`ResizeObserver`), once `follow()`ed
  *   - `canScrollStart` / `canScrollEnd`:  which key shows;  `isOverflowing`:  either does
+ *   - `fitsWithRoomBack`:  whether the items would fit, given back the room something beside the row takes
  *   - `scrollByPage()`:  a key's press, by most of the row's width (the kit's `scrollByRow()`)
  *   - `bringIntoView()`:  scrolls the row, and only the row, so one item shows whole
  *   - `key()`:  draws a key
@@ -32,18 +33,30 @@ export class ScrollingRow {
     return this.canScrollStart || this.canScrollEnd
   }
 
+  /**
+   * The items would all fit, given back the room its owner takes beside the row (`roomBeside`):
+   * a toolbar's list button, which shows only while they don't (epic `editor` I235).
+   * - Measured with the row:  the room beside it is read in the same moment as the row's width,
+   *   so a row that only overflows because of the button says it fits, and once the button's gone it does.
+   */
+  @E.state accessor fitsWithRoomBack = true
+
   /** The component drawing the row. */
   private readonly owner: ScrollingRowOwner
 
   /** Whether the keys may show:  a shrinkable toolbar fits its titles instead;  untracked when it's asked. */
   private readonly canScroll: () => boolean
 
+  /** The room its owner takes beside the row now, which the row would get back:  px, `0` for none. */
+  private readonly roomBeside: () => number
+
   /** The row's box, while followed. */
   private row: HTMLElement | undefined
 
-  constructor({ owner, canScroll = () => true }: ScrollingRowProps) {
+  constructor({ owner, canScroll = () => true, roomBeside = () => 0 }: ScrollingRowProps) {
     this.owner = owner
     this.canScroll = canScroll
+    this.roomBeside = roomBeside
   }
 
   /**
@@ -55,11 +68,13 @@ export class ScrollingRow {
     this.row = row
     const stop = new AbortController()
     row.addEventListener("scroll", () => this.measure(), { passive: true, signal: stop.signal })
+    // a segmented row's thumb slides to its tab:  till it's there, it may stretch what the row scrolls (epic `mockup` I39)
+    row.addEventListener("transitionend", () => this.measure(), { signal: stop.signal })
     const resizes = new ResizeObserver(() => this.measure())
     resizes.observe(row)
     const slot = row.querySelector("slot")
     const watchItems = () => {
-      for (const item of this.items()) resizes.observe(item)
+      for (const item of this.items()) for (const box of ScrollingRow.boxesOf(item)) resizes.observe(box)
     }
     watchItems()
     slot?.addEventListener("slotchange", watchItems, { signal: stop.signal })
@@ -76,6 +91,7 @@ export class ScrollingRow {
       // no longer a row (a tab set turned vertical):  no keys
       this.row = undefined
       this.canScrollStart = this.canScrollEnd = false
+      this.fitsWithRoomBack = true
     }
   }
 
@@ -87,6 +103,8 @@ export class ScrollingRow {
     const { start, end } = E.scrollEnds(row)
     this.canScrollStart = canScroll && start
     this.canScrollEnd = canScroll && end
+    // within a pixel, as `scrollEnds()` rounds
+    this.fitsWithRoomBack = !canScroll || row.scrollWidth - row.clientWidth - this.roomBeside() <= 1
   }
 
   /** Scroll by most of the row's width:  `-1` back, `1` on;  smoothly, unless the person asked for less motion. */
@@ -121,6 +139,18 @@ export class ScrollingRow {
     if (!by) return
     const isReduced = !!row.ownerDocument.defaultView?.matchMedia(REDUCED_MOTION).matches
     row.scrollBy({ left: by, behavior: smoothly && !isReduced ? "smooth" : "instant" })
+  }
+
+  /**
+   * The boxes `item` draws, whose sizes the row follows:  its own, else, for an element that draws no box of its
+   * own (`display: contents`, as `<ui-item>` is), its shadow root's top boxes.
+   * - A `ResizeObserver` never hears of an element with no box:  a tab renamed, or a title cut to fit, went unseen.
+   */
+  private static boxesOf(item: Element): Element[] {
+    if (getComputedStyle(item).display !== "contents") return [item]
+    return [...(item.shadowRoot?.children ?? [])].filter(
+      (each) => each.localName !== "style" && each.localName !== "slot"
+    )
   }
 
   /** The row's items:  what its `<slot>` holds (a toolbar's), else its own children (a tab set's buttons). */
@@ -167,6 +197,8 @@ export type ScrollingRowProps = {
   owner: ScrollingRowOwner
   /** whether the keys may show (default:  always, while the items don't fit) */
   canScroll?: () => boolean
+  /** the room its owner takes beside the row now, px, which the row would get back (default:  none) */
+  roomBeside?: () => number
 }
 
 /** An end of the row:  where a key sits. */

@@ -409,7 +409,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   protected onThumbChanged(hasThumb: boolean) {
     const box = this.box
     if (!hasThumb || !box) return
-    const thumb = new SegmentedThumb({ track: box, chosenBox: () => this.chosenBox() })
+    const thumb = new SegmentedThumb({
+      track: box,
+      chosenBox: () => this.chosenBox(),
+      onPlaced: () => this.onThumbPlaced()
+    })
     this.thumb = thumb
     const stop = thumb.start()
     return () => {
@@ -417,6 +421,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       this.thumb = undefined
     }
   }
+
+  /** The thumb just moved:  for a subclass whose box scrolls, as the thumb is in what it scrolls (`<ui-toolbar>`). */
+  protected onThumbPlaced() {}
 
   /**
    * An item's `selected` (or `active`) changed, items came and went, showed or hid, or their words changed:

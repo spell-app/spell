@@ -8,6 +8,7 @@ import { kindNamed, PlanDocError } from "./planDoc.types"
 import { EpicTests, type EpicTestCount, type OpenTest, type TestFieldValues } from "./EpicTests"
 import type { PlanDoc } from "./PlanDoc"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
+import { ItemPictures, type GivenPicture, type NamedPicture } from "./ItemPictures"
 import { TEST_SHOTS } from "./TestShots"
 import { PlanMarkup } from "./PlanMarkup"
 
@@ -153,20 +154,31 @@ export class TestCommands {
   }
 
   /**
-   * `add <name> <kind> "title" [--details html]`, under the doc's lock:  the new item's id, and a test's example
-   * screenshot to copy once the doc is written (`saveExample()`).
+   * `add <name> <kind> "title" [--details html]`, under the doc's lock:  the new item's id, a test's example
+   * screenshot to copy once the doc is written (`saveExample()`), and the person's pictures, named, to save then too
+   * (`ItemPictures.save()`).
    * - a test may be given its fields (`fieldsOf()`), before `--details`'s HTML;  any other kind may not
    * - its id is worked out first (`PlanDoc.nextId()`), so the Example's image is named for it
    */
-  addItem(plan: PlanDoc, kind: string, title: string, flags: Flags): { id: string; example: TestFields["example"] } {
+  addItem(
+    plan: PlanDoc,
+    kind: string,
+    title: string,
+    flags: Flags,
+    { file, pictures = [] }: { file?: string; pictures?: readonly GivenPicture[] } = {}
+  ): { id: string; example: TestFields["example"]; pictures: NamedPicture[] } {
     // `#T` is work still to do;  `--limit`, a limit to know about (epic `epic-engine` P44)
     kind = kindNamed(kind)
     if (flags.limit && kind === "todo") kind = "limit"
     else if (flags.limit && kind !== "limit") throw new PlanDocError(`--limit is a todo's (T), not a ${kind}'s`)
-    const { html, example } = this.fieldsOf(plan.nextId(kind), flags)
-    const details = `${html}${stringFlag(flags.details) ?? ""}${itemOptions(kind, flags)}`
+    const nextId = plan.nextId(kind)
+    const { html, example } = this.fieldsOf(nextId, flags)
+    // the person's pictures, after the words (epic `epic-engine` T87):  named for the item, saved once it's written
+    const named = file && pictures.length ? ItemPictures.named(file, nextId, pictures) : []
+    const given = stringFlag(flags.details) ?? ""
+    const details = `${html}${given}${ItemPictures.html(named)}${itemOptions(kind, flags)}`
     const id = plan.addItem(kind, title, { ...flags, details })
-    return { id, example }
+    return { id, example, pictures: named }
   }
 }
 

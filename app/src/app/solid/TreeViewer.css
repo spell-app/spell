@@ -1,4 +1,4 @@
-/* `<TreeRoot>` / `<TreeViewer>` (`TreeViewer.tsx`):  laid out as `<OutputRoot>` (`OutputEditor.css`). */
+/* `<TreeRoot>` / `<TreeViewer>` (`TreeViewer.tsx`):  laid out as `<InputRoot>` (`InputEditor.css`). */
 
 .TreeRoot {
   position: relative;

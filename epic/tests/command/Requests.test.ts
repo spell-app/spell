@@ -5,6 +5,7 @@ import { fileURLToPath } from "url"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { type SendRequestProps } from "spell/epic/command/command.types"
+import { EpicTools } from "spell/epic/command/EpicTools"
 import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
@@ -125,6 +126,20 @@ describe("epicRequests() and fileRequest()", () => {
       text: 'the "comment" box covers the text'
     })
     expect(requestsIn(ROOT).list("tooling")[0]).toEqual(filed)
+  })
+
+  // epic `epic-engine` T88:  every request becomes a todo or a phase
+  test("filed with no phase or todo:  only as a duplicate, naming the todo or phase it duplicates", async () => {
+    const requests = requestsIn(ROOT)
+    for (const where of ["fixed as I282", "dropped", "already done"])
+      await expect(requests.run(["file", "tooling", "r2", where])).rejects.toThrow(/a todo or a phase/)
+    expect(requests.list("tooling")[1]!.status).toBe("new")
+    vi.spyOn(EpicTools, "runPlanDoc").mockResolvedValue(0)
+    expect(await requests.run(["file", "tooling", "r2", "same as T12"])).toBe(0)
+    expect(requests.list("tooling")[1]).toMatchObject({ status: "filed", filed: "same as T12" })
+    // the todo it duplicates:  marked requested, light orange once done
+    expect(EpicTools.runPlanDoc).toHaveBeenCalledWith(["requested", "tooling", "t12"])
+    vi.restoreAllMocks()
   })
 
   test("an epic with no requests has none;  filing a missing one throws", () => {

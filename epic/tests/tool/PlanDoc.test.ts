@@ -1273,6 +1273,22 @@ describe("PlanDoc states", () => {
       expect(problems(plan)).toEqual([])
     })
 
+    // epic `epic-engine` T88:  a request from another epic becomes a todo, light orange once done too
+    test("a todo filed from his own words, done:  light orange until he reviews it;  any other todo green;  a limit never", () => {
+      const plan = freshPlan()
+      plan.addItem("todo", "he asked", { requested: true })
+      plan.addItem("todo", "Claude's own")
+      plan.addItem("limit", "a limit")
+      expect(plan.setRequested("t2")).toBe("requested")
+      for (const id of ["t1", "t2"]) plan.setItem(id, "done")
+      expect(stateOf(plan, "t1", "t2")).toEqual(["requested", "requested"])
+      plan.review("t1")
+      expect(stateOf(plan, "t1")).toEqual(["recent"])
+      expect(() => plan.setRequested("t3")).toThrow(PlanDocError)
+      expect(() => plan.addItem("limit", "no", { requested: true })).toThrow(PlanDocError)
+      expect(problems(plan)).toEqual([])
+    })
+
     test("a manual test:  orange until its phase is done, then yellow;  no phase, yellow", () => {
       const plan = freshPlan()
       plan.addItem("test", "no phase")
@@ -2422,6 +2438,25 @@ describe("PlanDoc review inbox", () => {
     other.addItem("judgement", "two calls", { details: `<p>first</p>${OPTIONS}<p>second</p>${second}` })
     expect(other.applyMark({ id: "j1", action: "pick", pick: "A" }).did).toMatch(/^Owen picked A:  Keep folds;/)
     expect(chosen(other, "j1")).toEqual(["A", null])
+  })
+
+  test("a question asking two card sets:  a pick in one never wipes the other's;  the answer names both (I88)", () => {
+    const plan = freshPlan()
+    const second = OPTIONS.replace("Keep folds", "Inline").replace("Unfold it", "Linked")
+    plan.addItem("question", "reorder, and marks?", { details: `<p>reorder</p>${OPTIONS}<p>marks</p>${second}` })
+    plan.applyMark({ id: "q1", action: "pick", pick: "B", choices: 0 })
+    expect(plan.applyMark({ id: "q1", action: "pick", pick: "A", choices: 1 }).did).toBe("Owen picked A:  Inline")
+    expect(chosen(plan, "q1")).toEqual(["B", "A"])
+    const answer = () => el(plan, "q1").querySelector(":scope > epic-answer")!.getAttribute("title")
+    expect(answer()).toBe("Unfold it;  Inline")
+    // picked again in the first set:  the second's pick stays
+    plan.applyMark({ id: "q1", action: "pick", pick: "A", choices: 0 })
+    expect(chosen(plan, "q1")).toEqual(["A", "A"])
+    expect(answer()).toBe("Keep folds;  Inline")
+    // `epic decide --option` too
+    plan.decide("q1", "Linked", { option: "B", choices: 1 })
+    expect(chosen(plan, "q1")).toEqual(["A", "B"])
+    expect(problems(plan)).toEqual([])
   })
 
   test("a pick names a set or an option the item hasn't:  left, nothing changed;  an Original's cards never count", () => {

@@ -192,15 +192,21 @@ describe("MainMerge.run()", () => {
     change(repo, "main", { "yarn.lock": "v2\n" })
     expect(new MainMerge({ root: repo, ...OPTIONS, install }).run()).toMatchObject({
       result: "fast-forward",
-      installed: { command: install.join(" "), lockfiles: ["yarn.lock"], ok: true }
+      installed: { command: install.join(" "), root: repo, changed: ["yarn.lock"], ok: true }
     })
     change(repo, "wip", { "src/b.txt": "B2\n" })
     change(repo, "main", { "yarn.lock": "v3\n" })
     expect(new MainMerge({ root: repo, ...OPTIONS, install }).run()).toMatchObject({
       result: "merged",
-      installed: { lockfiles: ["yarn.lock"], ok: true }
+      installed: { changed: ["yarn.lock"], ok: true }
     })
     expect(read(TEMP, "lockfile-installed")).toBe("xx")
+    // a package.json, anywhere:  installed too (T89)
+    change(repo, "main", { "app/package.json": "{}\n" })
+    expect(new MainMerge({ root: repo, ...OPTIONS, install }).run().installed).toMatchObject({
+      changed: ["app/package.json"],
+      ok: true
+    })
 
     change(repo, "main", { "yarn.lock": "v4\n" })
     const failing = new MainMerge({ root: repo, ...OPTIONS, install: ["node", "-e", "process.exit(1)"] }).run()

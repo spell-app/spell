@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
 import { EditorState } from "@codemirror/state"
-import { EditorView } from "@codemirror/view"
+import { Decoration, EditorView, WidgetType } from "@codemirror/view"
 
 import { SP } from "spell/parser/spell"
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
@@ -113,5 +113,132 @@ describe("the first drawing of a file whose project's parse is on its way", () =
     expect(view.dom.classList).not.toContain("cm-awaiting-parse")
     await frames()
     expect(drawn(view)).toEqual({ isShown: true, feet: 2 })
+  })
+})
+
+/**
+ * Typing keeps the caret's line where it is on screen (epic `codemirror` I21).
+ * - Owen:  "Every time I type a letter, the scroll moves":  in Solitaire.spell the layout at each pause was drawn from
+ *   the file's text alone, its block ends' feet 13-25px shorter, then from the project's parse 50ms later, taller
+ *   again:  the line typed in moved up to 101px, twice a key, when keys came slower than the pause.
+ */
+describe("typing keeps the caret's line still", () => {
+  let view: EditorView | undefined
+
+  afterEach(() => {
+    view?.dom.parentElement?.remove()
+    view?.destroy()
+    view = undefined
+  })
+
+  /** 60 lines;  the caret's at line 40, the text this test types at. */
+  const TEXT = Array.from({ length: 60 }, (_, at) => `line ${at + 1}`).join("\n")
+
+  /** A block widget `height` px tall, before line 2:  as a foot is, under a block's last line. */
+  class Room extends WidgetType {
+    constructor(readonly height: number) {
+      super()
+    }
+    eq(other: Room) {
+      return other.height === this.height
+    }
+    toDOM() {
+      const room = document.createElement("div")
+      room.style.height = `${this.height}px`
+      return room
+    }
+    get estimatedHeight() {
+      return this.height
+    }
+  }
+
+  /** An editor laid out by `layout`, 400px tall, the keyboard in it, its caret on line 40 in the middle. */
+  async function editorOf(layout: { roomAbove: number; calls: number; isParseOnItsWay: boolean }) {
+    const host = document.body.appendChild(document.createElement("div"))
+    host.style.cssText = "width: 600px; height: 400px; display: flex"
+    const state = EditorState.create({
+      doc: TEXT,
+      extensions: [
+        EditorView.theme({ "&": { height: "100%", width: "100%" } }),
+        CodeMirrorRelayout.extension(
+          (state) => {
+            layout.calls++
+            return Decoration.set([
+              Decoration.widget({ widget: new Room(layout.roomAbove), block: true, side: -1 }).range(
+                state.doc.line(2).from
+              )
+            ])
+          },
+          20,
+          { isParseOnItsWay: () => layout.isParseOnItsWay }
+        )
+      ]
+    })
+    const made = new EditorView({ parent: host, state })
+    const caret = made.state.doc.line(40).to
+    made.dispatch({ selection: { anchor: caret }, effects: EditorView.scrollIntoView(caret, { y: "center" }) })
+    made.focus()
+    await frames()
+    return made
+  }
+
+  /** Two frames:  CodeMirror measures, then draws. */
+  function frames(): Promise<void> {
+    return new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done())))
+  }
+
+  /** The caret's top on screen, from the scroller's top. */
+  function caretTop(view: EditorView): number {
+    return view.coordsAtPos(view.state.selection.main.head)!.top - view.scrollDOM.getBoundingClientRect().top
+  }
+
+  test("a new layout making the lines above taller or shorter leaves the caret's line where it was", async () => {
+    const layout = { roomAbove: 10, calls: 0, isParseOnItsWay: false }
+    view = await editorOf(layout)
+    expect(view.hasFocus).toBe(true)
+    const before = caretTop(view)
+    expect(before).toBeGreaterThan(100)
+
+    // the parse comes, its layout 150px taller above the caret
+    layout.roomAbove = 160
+    view.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
+    await frames()
+    expect(Math.abs(caretTop(view) - before)).toBeLessThan(1)
+
+    // and a letter, then the pause's layout, 150px shorter again
+    layout.roomAbove = 10
+    view.dispatch(view.state.replaceSelection("x"))
+    await new Promise((done) => setTimeout(done, 60))
+    await frames()
+    expect(Math.abs(caretTop(view) - before)).toBeLessThan(1)
+  })
+
+  test("the pause waits for a parse on its way, rather than laying the text out alone;  the parse lays it out", async () => {
+    const layout = { roomAbove: 10, calls: 0, isParseOnItsWay: false }
+    view = await editorOf(layout)
+    layout.isParseOnItsWay = true
+    view.dispatch(view.state.replaceSelection("x"))
+    const calls = layout.calls
+    await new Promise((done) => setTimeout(done, 80))
+    expect(layout.calls).toBe(calls)
+
+    layout.isParseOnItsWay = false
+    view.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
+    expect(layout.calls).toBe(calls + 1)
+  })
+
+  test("a parse that never comes:  laid out alone after `AWAIT_PARSE_MSEC`", async () => {
+    const was = CodeMirrorRelayout.AWAIT_PARSE_MSEC
+    CodeMirrorRelayout.AWAIT_PARSE_MSEC = 50
+    try {
+      const layout = { roomAbove: 10, calls: 0, isParseOnItsWay: true }
+      view = await editorOf(layout)
+      const calls = layout.calls
+      view.dispatch(view.state.replaceSelection("x"))
+      await new Promise((done) => setTimeout(done, 150))
+      expect(layout.calls).toBe(calls + 1)
+    } finally {
+      CodeMirrorRelayout.AWAIT_PARSE_MSEC = was
+    }
   })
 })

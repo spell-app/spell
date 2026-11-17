@@ -13,6 +13,9 @@ import { E } from "spell/ui/core"
  * - `moving`, from the frame after the first place:  the thumb slides between choices, never in from nowhere.
  * - Follows sizes while started:  a `ResizeObserver` on the track and the chosen box (fonts loading, a wrap).
  * - No chosen option:  no thumb (`thumbed` off), and the options draw as before.
+ * - Each move is told to `onPlaced()`:  the thumb is in the track's scrolling content, so a track that scrolls
+ *   (`ScrollingRow`) measures again once it moved (epic `mockup` I39:  a closed tab's thumb, still past the
+ *   row's new end as the row measured itself, left its `›` showing with every tab in view).
  ****************/
 export class SegmentedThumb {
   /** the menu's box the options sit in, which the thumb is drawn in */
@@ -21,9 +24,13 @@ export class SegmentedThumb {
   /** the chosen option's box now, if any */
   private readonly chosenBox: () => HTMLElement | undefined
 
-  constructor({ track, chosenBox }: SegmentedThumbProps) {
+  /** told after each move, or once the thumb is gone */
+  private readonly onPlaced: () => void
+
+  constructor({ track, chosenBox, onPlaced = () => {} }: SegmentedThumbProps) {
     this.track = track
     this.chosenBox = chosenBox
+    this.onPlaced = onPlaced
   }
 
   /** Watches the track's size while started. */
@@ -66,6 +73,7 @@ export class SegmentedThumb {
     const box = this.chosenBox()
     if (!box || !box.isConnected || box.offsetWidth === 0) {
       this.track.classList.remove(THUMBED, MOVING)
+      this.onPlaced()
       return
     }
     this.watch(box)
@@ -82,10 +90,12 @@ export class SegmentedThumb {
     style.setProperty("--_menu-thumb-width", `${boxRect.width / scaleX}px`)
     style.setProperty("--_menu-thumb-height", `${boxRect.height / scaleY}px`)
     style.setProperty("--_menu-thumb-radius", getComputedStyle(box).borderRadius)
-    if (this.track.classList.contains(THUMBED)) return
-    // the first place:  drawn there at once, sliding only from the next one on
-    this.track.classList.add(THUMBED)
-    E.beforeNextPaint(() => E.beforeNextPaint(() => this.track.classList.add(MOVING)))
+    if (!this.track.classList.contains(THUMBED)) {
+      // the first place:  drawn there at once, sliding only from the next one on
+      this.track.classList.add(THUMBED)
+      E.beforeNextPaint(() => E.beforeNextPaint(() => this.track.classList.add(MOVING)))
+    }
+    this.onPlaced()
   }
 
   /** Follow `box`'s size too (its text may change width);  the last one chosen is let go. */
@@ -103,6 +113,8 @@ export type SegmentedThumbProps = {
   track: HTMLElement
   /** the chosen option's box now, if any;  read on every move */
   chosenBox: () => HTMLElement | undefined
+  /** told after each move, or once the thumb is gone:  a track that scrolls measures again (default:  nothing) */
+  onPlaced?: () => void
 }
 
 /** Class on the track while the thumb is drawn. */

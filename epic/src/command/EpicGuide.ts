@@ -3,7 +3,8 @@ import { dirname } from "node:path"
 
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
-import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
+// By package path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (`Superpowers`)
+import { EXIT, EpicCommandError, parseVerbArgs } from "spell/epic/command/command.types.ts"
 
 /****************
  * ### `EpicGuide`
@@ -17,6 +18,8 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `claude-only-tools`:  what each Claude Code tool the skills lean on is for, and the plain way any agent does it
  *   instead (Q15:  the next phase's skills point at it).
  * - `--root`:  the plugin's folder, for a skill's `${CLAUDE_PLUGIN_ROOT}` read by an agent that doesn't fill it in (Codex)
+ * - `superpowers`:  where the superpowers plugin stands aside in an epic;  the session-start hook says it too
+ *   (`Superpowers`, epic `epic-engine` P72), so plain `node` loads this file
  * - Throws `EpicCommandError` for a topic the guide hasn't got, listing those it has.
  ****************/
 export class EpicGuide {

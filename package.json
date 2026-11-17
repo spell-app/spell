@@ -1001,6 +1001,11 @@
       "types": "./epic/dist-types/src/components/epic-original/index.d.ts",
       "default": "./epic/src/components/epic-original/index.ts"
     },
+    "./epic/components/epic-picture": {
+      "spell-source": "./epic/src/components/epic-picture/index.ts",
+      "types": "./epic/dist-types/src/components/epic-picture/index.d.ts",
+      "default": "./epic/src/components/epic-picture/index.ts"
+    },
     "./epic/components/epic-overview": {
       "spell-source": "./epic/src/components/epic-overview/index.ts",
       "types": "./epic/dist-types/src/components/epic-overview/index.d.ts",
@@ -1304,6 +1309,7 @@
     "@atproto/oauth-client-node": "0.5.13",
     "@codemirror/autocomplete": "^6.20.4",
     "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.13.1",
@@ -1423,6 +1429,7 @@
       "@atproto/oauth-client-node",
       "@codemirror/autocomplete",
       "@codemirror/commands",
+      "@codemirror/lang-css",
       "@codemirror/lang-javascript",
       "@codemirror/lang-python",
       "@codemirror/language",

@@ -44,15 +44,25 @@ export class CodeMirrorMarkup {
    * The editor's tab stop and space, as its font draws them, for the sheet:  `--cmb-indent`, `--cmb-space`.
    * - A tab is CodeMirror's 2 spaces (its own `tab-size`, `TAB_SIZE`):  the rails and feet, placed by these, stand
    *   at their bands' ends, at any level (measured:  a guessed 24px left them 7px off a level, epic `codemirror` P3).
-   * - Measured once the editor's drawn, and again whenever its font may have changed (a new theme, a zoom).
+   * - Measured once the editor's drawn, and again whenever its font may have changed (a new theme, a zoom):
+   *   only when its font, tab size or the zoom (`fontKey()`) did, not at each change of the lines' heights.
+   *   - Each probe lays the whole pane out again:  measured at every key, two probes cost a key ~20ms on
+   *     Solitaire.spell (epic `codemirror` I21)
    */
   static tabStops = ViewPlugin.define((view) => {
+    /** what the stops were last measured for */
+    let measuredFor = ""
     const measure = () =>
       view.requestMeasure({
-        read: () => [
-          CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
-          CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
-        ],
+        read: () => {
+          const key = fontKey(view)
+          if (key === measuredFor) return [0, 0]
+          measuredFor = key
+          return [
+            CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
+            CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
+          ]
+        },
         write: ([space, tab]) => {
           if (!space || !tab) return
           view.dom.style.setProperty("--cmb-space", `${space}px`)
@@ -145,6 +155,15 @@ export class CodeMirrorMarkup {
 
 /** `CodeMirrorMarkup.tagBlocks`' measure, one at a time. */
 const TAG_BLOCKS_KEY = {}
+
+/**
+ * What `view`'s tab stops depend on:  its text's font, its tab size and the zoom.
+ * - Reads styles, never the layout:  cheap at every update.
+ */
+function fontKey(view: EditorView): string {
+  const { font, letterSpacing } = getComputedStyle(view.contentDOM)
+  return `${font}|${letterSpacing}|${view.state.tabSize}|${devicePixelRatio}`
+}
 
 /** An HTML file's editor's classes:  a `.bubbly` and a `.bubbly-html`, so `bubbly.css` reaches it, and ours. */
 const EDITOR_CLASSES = "bubbly bubbly-html cmb-editor"

@@ -29,7 +29,7 @@ import {
   type VerbArgs
 } from "./command.types"
 import { EpicCheckout } from "./EpicCheckout"
-import { parseTarget, phaseLabel, phaseOf } from "./epicArgs"
+import { parseTarget, phaseLabel, phaseOf, TODO_REF } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
@@ -54,10 +54,15 @@ import { Worktrees } from "./Worktrees"
  *     - no `<epic>`:  the tooling home's
  *   - `requests <epic> [--json]`:  every request sent to `<epic>`, and where each went
  *     - one filed into a phase:  that phase's number TODAY (`shown()`), so a phase inserted ahead of it moves it along
+ *   - EVERY request becomes a todo or a phase (epic `epic-engine` T88;  Owen:  "When an epic gets requests from other
+ *     epics, it should make them a Todo or a phase")
  *   - `file <epic>#P7 <id>`:  file a request into phase P7:
  *     his words and screenshots in its Requests field (the `epic` tool's `request`), the request marked filed,
  *     `P7 · Its Title`, and the phase's stable id kept (`phase:  p-its-title`;  epic `epic-engine` I4)
- *     - `file <epic> <id> "<where>"`, no phase:  only marked filed, saying where it went (`"dropped:  done in P3"`)
+ *   - `file <epic>#T5 <id>`:  file it into todo T5 (T88):  his words, the context and a link to `request.md` at the end
+ *     of its text, his screenshots copied in as its pictures, the todo marked `requested`, the request filed `T5`
+ *     - `file <epic> <id> "<where>"`, no phase or todo:  only for a DUPLICATE of a todo or phase the epic has, which
+ *       `where` names (`"same as T12"`, `"done in P3"`);  only marked filed, saying where it went
  *     - `--from` and `--file` (the request as html):  taken as given rather than read from the epic's `requests/`
  *   - `home [<epic>]`:  the TOOLING HOME, the epic dev-tooling requests go to;  with `<epic>`, set it
  *   - `merge <epic> [--ditch] [--as <agent>]`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in
@@ -121,8 +126,11 @@ export class Requests {
           for (const commit of commits) CLI.out(`  ${commit}`)
         }
       }
+      const installs = Requests.installReport(merged)
+      for (const line of installs.lines) CLI.out(line)
       await Requests.recordMerged(named, merged)
-      if (merged.some(({ commits }) => commits.length)) await Requests.refreshPageServer()
+      if (merged.some(({ commits }) => commits.length))
+        await Requests.refreshPageServer(process.cwd(), { restart: installs.restart })
       return EXIT.OK
     }
     if (verb === "home") {
@@ -188,7 +196,9 @@ export class Requests {
   /**
    * `epic file <epic>#P7 <id>`:  request `id` into the phase's Requests field, by the `epic` tool,
    * then marked filed there.
-   * - `epic file <epic> <id> "<where>"`:  only marked filed, saying where it went
+   * - `epic file <epic>#T5 <id>`:  into todo T5 instead (`fileIntoTodo()`, epic `epic-engine` T88)
+   * - `epic file <epic> <id> "<where>"`:  only marked filed, saying where it went;  `where` MUST name the todo or
+   *   phase it duplicates (`T12`, `P3`):  every request becomes one or the other (T88)
    * - `--from` and `--file`:  the request as given;  marked filed only if `requests/` has it
    * - the old order, the phase a word of its own (`file seo r3 7`):  refused, spelled right
    */
@@ -199,11 +209,17 @@ export class Requests {
       const phase = phaseOf(where)
       if (phase !== undefined)
         throw new EpicCommandError(`file:  epic file ${epic}#${phaseLabel(phase)} ${id}  (the phase goes after a #)`)
+      if (!DUPLICATE_OF.test(where))
+        throw new EpicCommandError(
+          `file:  "${where}"?  a request becomes a todo or a phase:  epic file ${epic}#T<n> ${id}, ` +
+            `epic file ${epic}#P<n> ${id};  "<where>" only for a duplicate, naming its todo or phase ("same as T12")`
+        )
       CLI.out(requestLine(this.file(epic, id, where)))
-      await this.markIssuesRequested(epic, where)
+      await this.markItemsRequested(epic, where)
       return EXIT.OK
     }
     if (!id || where !== undefined) throw new EpicCommandError(`file:  ${FILE_USAGE}`)
+    if (TODO_REF.test(ref)) return this.fileIntoTodo(epic, ref.toUpperCase(), id)
     const request = this.list(epic).find((it) => it.id === id)
     let html = stringFlag(flags.file)
     let from = stringFlag(flags.from)
@@ -222,14 +238,33 @@ export class Requests {
   }
 
   /**
-   * Each issue `where` names (`I234`, `filed as I12 and I13`) marked as filed from the person's own words:
-   * closed by Claude, it turns light orange (`epic requested`, epic `epic-engine` P63).
+   * `epic file <epic>#T5 <id>`:  request `id` into todo `todo` (epic `epic-engine` T88), by the `epic` tool:
+   * their words, the context and a link to `request.md` (`Requests.html()`, no screenshots) at the end of its text,
+   * each screenshot copied in as one of its pictures (`--picture`, deletable on the page), the todo marked
+   * `requested`;  then the request marked filed, `T5`.
+   * - throws for a request the epic doesn't have;  the tool refuses an item that isn't a todo
+   */
+  private async fileIntoTodo(epic: string, todo: string, id: string): Promise<number> {
+    const request = this.list(epic).find((it) => it.id === id)
+    if (!request) throw new EpicCommandError(`no request '${id}' in epic '${epic}'`)
+    const html = join(mkdtempSync(join(tmpdir(), "epic-request-")), `${id}.html`)
+    writeFileSync(html, Requests.html({ ...request, images: [] }))
+    const folder = join(this.epics, epic, "requests", id)
+    const pictures = request.images.flatMap((name) => ["--picture", join(folder, name)])
+    const exitCode = await EpicTools.runPlanDoc(["file", `${epic}#${todo}`, id, "--file", html, ...pictures])
+    if (exitCode !== EXIT.OK) return exitCode
+    CLI.out(requestLine(this.file(epic, id, todo)))
+    return EXIT.OK
+  }
+
+  /**
+   * Each issue or todo `where` names (`I234`, `same as T12`) marked as filed from the person's own words:
+   * closed by Claude, it turns light orange (`epic requested`, epic `epic-engine` P63;  a todo since T88).
    * - best effort:  `where` is free text, so an id the epic doesn't have is ignored
    */
-  private async markIssuesRequested(epic: string, where: string): Promise<void> {
-    const issues = where.match(ISSUE_IN_WHERE) ?? []
-    for (const issue of issues)
-      await EpicTools.runPlanDoc(["requested", epic, issue.toLowerCase()]).catch(() => undefined)
+  private async markItemsRequested(epic: string, where: string): Promise<void> {
+    const items = where.match(REQUESTED_IN_WHERE) ?? []
+    for (const item of items) await EpicTools.runPlanDoc(["requested", epic, item.toLowerCase()]).catch(() => undefined)
   }
 
   /**
@@ -266,7 +301,7 @@ export class Requests {
     const folder = join(epicDir, "requests", id)
     mkdirSync(folder, { recursive: true })
     const files = pictures.map((picture, at) => {
-      const name = `image-${at + 1}.${EXTENSIONS[picture.mediaType] ?? "png"}`
+      const name = `image-${at + 1}.${PICTURE_EXTENSIONS[picture.mediaType] ?? "png"}`
       writeFileSync(join(folder, name), Buffer.from(picture.data, "base64"))
       return name
     })
@@ -460,6 +495,10 @@ export class Requests {
    *   - branch `<epic>` holds all of `main`:  else `main` moved, and the branch merges it first
    *     (`epic worktree merge-main`, in its worktree);  the verb does that itself first (`mergeTakingMain()`)
    * - Refused in one line where `main` takes only pull requests (`baseBranchProtected`).
+   * - Then the packages installed in the main checkout, when the merge changed a lockfile or a `package.json`
+   *   (`MainMerge.installAfter()`, as `epic worktree merge-main` does;  epic `epic-engine` T89):  `installed`
+   *   - why:  `epic merge codemirror` brought `@codemirror/lang-css` onto `main`, and main's editor couldn't load it
+   *   - a failed install never undoes the merge:  `installed.ok` is false, for the verb to say loudly
    * - Returns the commits it brought onto `main`, oldest first (`[]`:  nothing to merge), and what it moved aside.
    * - throws an `EpicCommandError` saying what to do, for any check that fails:  then nothing moved, nothing merged
    * - static:  about the repo `cwd` is in, not the epics folder
@@ -467,7 +506,7 @@ export class Requests {
   static merge(
     epic: string,
     cwd = process.cwd(),
-    { ditch = false, ditched = StrayFiles.folderFor(), label = "the main checkout" }: MergeOptions = {}
+    { ditch = false, ditched = StrayFiles.folderFor(), label = "the main checkout", install = {} }: MergeOptions = {}
   ): MergeResult {
     const main = Git.mainRoot(cwd)
     const base = new EpicConfig(main).baseBranch
@@ -477,9 +516,11 @@ export class Requests {
       .out.split("\n")
       .filter(Boolean)
     if (!commits.length) return result
+    const before = Git.out(["rev-parse", "HEAD"], main) ?? ""
     const merged = Git.run(["merge", "--ff-only", epic], main)
     if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${epic} failed:\n${merged.err}`)
-    return { ...result, commits }
+    const installed = MainMerge.installAfter(main, before, install.command, install.run)
+    return { ...result, commits, ...(installed ? { installed } : {}) }
   }
 
   /**
@@ -582,12 +623,12 @@ export class Requests {
    *   with no branch `<epic>`, is skipped
    * - EVERY repo checked before any moves (on its base branch, no stray file it may not move aside, the branch
    *   holding all of it):  one failing check throws, naming the repo, and nothing is moved aside or merged
-   * - `ditch`:  `merge()`'s;  one folder of moved files for the whole run, a folder per repo in it
+   * - `ditch`, `install`:  `merge()`'s;  one folder of moved files for the whole run, a folder per repo in it
    */
-  static mergeEach(epic: string, cwd = process.cwd(), { ditch = false }: MergeOptions = {}): MergeResult[] {
+  static mergeEach(epic: string, cwd = process.cwd(), { ditch = false, install }: MergeOptions = {}): MergeResult[] {
     const main = Git.mainRoot(cwd)
     const top = new EpicConfig(main).top
-    if (!top) return [Requests.merge(epic, cwd, { ditch })]
+    if (!top) return [Requests.merge(epic, cwd, { ditch, install })]
     // an old-layout child checkout found inside (`found`):  `mergeCheck()` refuses it until it crosses over
     const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout, found }) => {
       if (found) return []
@@ -600,26 +641,55 @@ export class Requests {
     const folder = StrayFiles.folderFor()
     return repos.map(({ repo, checkout, label }) => ({
       repo,
-      ...Requests.merge(epic, checkout, { ditch, ditched: join(folder, repo), label })
+      ...Requests.merge(epic, checkout, { ditch, ditched: join(folder, repo), label, install })
     }))
   }
 
   /**
+   * What `epic merge` says of the installs it ran in the main checkouts (`merge()`'s `installed`), a line each, and
+   * whether the page server restarts for them (epic `epic-engine` T89).
+   * - `restart`:  an install WORKED:  the editor's Vite remembers the imports it couldn't resolve before it, till
+   *   it restarts (`epic merge codemirror`:  `Failed to resolve import "@codemirror/lang-css"` after a by-hand install)
+   * - a failed one says FAILED, that the merge stands, and what to run by hand, there
+   * - static:  pure
+   */
+  static installReport(merged: MergeResult[]): { lines: string[]; restart: boolean } {
+    const lines = merged.flatMap(({ repo, installed }) => {
+      if (!installed) return []
+      const fix =
+        `the merge stands;  run it by hand:  cd ${installed.root} && ${installed.command}, ` + `then ${RESTART_BY_HAND}`
+      return [`${repo ? `${repo}'s ` : ""}main checkout:  ${MainMerge.installedLine(installed, fix)}`]
+    })
+    return { lines, restart: merged.some(({ installed }) => installed?.ok) }
+  }
+
+  /**
    * After `epic merge` moved `main`:  the main checkout's page server, when it runs, RESTARTED if the merge changed its
-   * code (`PageServer.ensure()`, which restarts one older than its code;  epic `epic-engine` I219).
+   * code (`PageServer.ensure()`, which restarts one older than its code;  epic `epic-engine` I219), or `restart` says
+   * so:  the merge's packages were just installed (`installReport()`, epic `epic-engine` T89).
    * - Owen, 2026-11-04:  "So why aren't you restarting the page server when you merge to main?" -- a merge of a new
    *   review mark (`hold`) left the running server refusing it, till a restart by hand
+   * - the editor (Vite) is the page server's child:  it restarts with it, and drops the imports it couldn't resolve
+   *   before the install;  what `spell server stop all` / `start all` did by hand, less the house site, which only
+   *   forwards to it
    * - one that isn't running stays stopped;  says so in one line when it restarted
+   * - `server`:  how it's asked, stopped and started (default the main checkout's own);  tests pass their own
    * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
    */
-  static async refreshPageServer(cwd = process.cwd()): Promise<void> {
+  static async refreshPageServer(
+    cwd = process.cwd(),
+    { restart = false, server = PAGE_SERVER }: { restart?: boolean; server?: PageServerControl } = {}
+  ): Promise<void> {
     try {
       const main = Git.mainRoot(cwd)
-      if (!(await new SRV.PidFile(main).status())) return
-      const server = await PageServer.ensure(main)
-      if (server.launched) CLI.out(`page server restarted with the merged code:  ${server.base}`)
+      if (!(await server.isRunning(main))) return
+      if (restart) await server.stop(main)
+      const started = await server.ensure(main)
+      if (restart) CLI.out(`page server restarted after the install, its editor with it:  ${started.base}`)
+      else if (started.launched) CLI.out(`page server restarted with the merged code:  ${started.base}`)
     } catch (error) {
-      CLI.out(`page server:  not restarted (${error instanceof Error ? error.message : String(error)})`)
+      const why = error instanceof Error ? error.message : String(error)
+      CLI.out(`page server:  not restarted (${why})${restart ? `;  by hand:  ${RESTART_BY_HAND}` : ""}`)
     }
   }
 
@@ -762,17 +832,41 @@ export type RequestsProps = { root?: string; sessions?: Sessions }
 /** `Requests.recordMerged()`'s options:  see it. */
 export type RecordMergedOptions = { cwd?: string; record?: (argv: string[], root: string) => Promise<number> }
 
+/** How `epic merge` asks, stops and starts the main checkout's page server (`Requests.refreshPageServer()`). */
+export type PageServerControl = {
+  isRunning: (main: string) => Promise<boolean>
+  stop: (main: string) => Promise<unknown>
+  ensure: (main: string) => Promise<{ base: string; launched: boolean }>
+}
+
+/** The main checkout's own page server, through its pid file. */
+const PAGE_SERVER: PageServerControl = {
+  isRunning: async (main) => Boolean(await new SRV.PidFile(main).status()),
+  stop: (main) => new SRV.PidFile(main).stop(),
+  ensure: (main) => PageServer.ensure(main)
+}
+
+/** Restarting the main checkout's page server and its editor by hand, run there. */
+const RESTART_BY_HAND = "epic server stop && epic server start --all"
+
 /** The verbs, for errors. */
 const VERBS = "send, requests, file, home or merge"
 
 /** What `Requests.takeMainIn()` did:  the base branch taken in, and how the merge went (`merged`, `fast-forward`). */
 type TookMain = { base: string; result: string }
 
-/** How `file` is called, for its errors. */
-/** An issue's id in `epic file`'s "where it went":  `I234`. */
-const ISSUE_IN_WHERE = /\bI\d+\b/g
+/** An issue's or todo's id in `epic file`'s "where it went":  `I234`, `T12`:  marked requested. */
+const REQUESTED_IN_WHERE = /\b[IT]\d+\b/g
 
-const FILE_USAGE = 'epic file <epic>#P3 <request id>  |  epic file <epic> <request id> "where it went"'
+/**
+ * What `epic file <epic> <id> "<where>"` must name:  the todo or phase the request duplicates (`same as T12`,
+ * `done in P3`), so every request is a todo or a phase (epic `epic-engine` T88).
+ */
+const DUPLICATE_OF = /\b[TP]\d+\b/
+
+/** How `file` is called, for its errors. */
+const FILE_USAGE =
+  'epic file <epic>#P3 <request id>  |  epic file <epic>#T5 <request id>  |  epic file <epic> <request id> "same as T12"'
 
 /** A content block of a prompt, as a transcript holds it:  text, an image ... */
 type PromptBlock = {
@@ -781,7 +875,7 @@ type PromptBlock = {
 }
 
 /** File extensions for the image types a transcript holds. */
-const EXTENSIONS: Record<string, string> = {
+export const PICTURE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/gif": "gif",

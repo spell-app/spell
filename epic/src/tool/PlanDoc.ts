@@ -25,11 +25,12 @@ import { NightSummary, OLD_TODO, type AwayPart, type NeedPart, type SummaryOptio
 
 import {
   CALM_ID,
-  ISSUE_ID,
   JUDGEMENT_ID,
   CLOSED,
   ITEM_STATUSES,
   KINDS,
+  REQUESTED_ID,
+  TODO_ID,
   OBSOLETE_ID,
   PROMISED_CARD,
   OLD_DECISION,
@@ -91,7 +92,7 @@ import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
-import { Migrations } from "./migrations"
+import { HandedOnFixes, Migrations } from "./migrations"
 import { OptionSets } from "./OptionSets"
 import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick } from "./ReviewInbox"
 
@@ -796,6 +797,43 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Request `requestId` (`r3`) filed into todo `id` (`epic file <epic>#T5 r3`, epic `epic-engine` T88):  `html`, the
+   * request as `Requests.html()` writes it, less its screenshots (their words quoted, the context, a link to its
+   * `request.md`), then its pictures, goes at the end of the todo's text, and the todo is marked `requested`;
+   * returns its title.
+   * - the quote `add --start` gave it (`Owen:  “...”`) goes, when the request's words hold it:  said once, in full
+   * - `undefined` when the todo has the request already (its `request.md` linked):  nothing changes
+   * - stamped (`changed`) and flagged UPDATE, as `setDetails()` is;  logged
+   * - throws for an item that isn't a todo (a limit included):  a request becomes a todo or a phase
+   */
+  addItemRequest(id: string, requestId: string, html: string): string | undefined {
+    const item = this.item(id)
+    if (!TODO_ID.test(item.id) || item.hasAttribute("limit"))
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't a todo:  a request is filed into a todo or a phase`)
+    // its link, as given or as the writer roots it (`/epics/<epic>/requests/r3/request.md`)
+    const link = `requests/${requestId}/request.md`
+    if (item.querySelector(`a[href="${link}"], a[href$="/${link}"]`)) return undefined
+    const said = squeeze(
+      this.incoming(html)
+        .map((node) => node.textContent ?? "")
+        .join(" ")
+    )
+    for (const quote of item.querySelectorAll(":scope > p")) {
+      const quoted = STARTED_QUOTE.exec(quote.textContent ?? "")?.[1]
+      if (quoted !== undefined && said.includes(squeeze(quoted))) quote.remove()
+    }
+    const title = this.setDetails(item.id, html, { append: true })
+    Markup.set<"epic-item">(item, { requested: true })
+    this.log(`${requestId} filed into ${item.id.toUpperCase()}`)
+    return title
+
+    /** `text` with its runs of white space one space, trimmed:  for comparing words however they wrapped. */
+    function squeeze(text: string): string {
+      return text.replace(/\s+/g, " ").trim()
+    }
+  }
+
+  /**
    * Bring the UPDATE blocks up to date, as every edit does (`updateStates()`;  epic `epic-engine` I168);  returns how
    * many things changed.
    * - each block (`<epic-update at>` or `summary`;  never a bare label) is given its id, the next free `up<N>`, after
@@ -986,7 +1024,8 @@ export class PlanDoc extends PlanReader {
     const id = this.nextId(kind)
     const spec = KINDS[kind as ItemKind]
     if (calm && !CALM_ID.test(id)) throw new PlanDocError(`--calm is for a judgement call or an issue, not a ${kind}`)
-    if (requested && kind !== "issue") throw new PlanDocError(`--requested is for an issue, not a ${kind}`)
+    if (requested && kind !== "issue" && kind !== "todo")
+      throw new PlanDocError(`--requested is for an issue or a todo, not a ${kind}`)
     const section = this.section(spec.section)
     const heading = titleHTML ? this.titleFromHTML(title) : { title }
     const data: EpicData<"epic-item"> = {
@@ -1034,7 +1073,8 @@ export class PlanDoc extends PlanReader {
    * - answering again replaces the answer in place:  the old one goes into the question's Original Discussion
    *   (`keepOriginal()`), never dropped;  an old decision's id (`d7`) stays on the new answer
    * - `option` (`A`):  that option is the chosen one (`chooseOption()`), of the question's own options or (`choices`,
-   *   I8) of the card set at that position, a reply's say;  a question has ONE answer, so no other set stays chosen
+   *   I8) of the card set at that position, a reply's say;  a question has ONE answer, so a set asked instead of it
+   *   (another place's) is chosen no more, but one asked beside it keeps its pick (`dropOtherAnswers()`, I88)
    * - `option` as people see it in a later set (`B2`:  `B` of the 2nd set, epic `epic-engine` I227) names that set,
    *   unless `choices` does
    * - moves among the answered questions, in id order:  open ones stay on top
@@ -1058,8 +1098,7 @@ export class PlanDoc extends PlanReader {
       Markup.set(card, { id })
     } else Markup.place(question, card)
     if (option) {
-      const set = this.chooseOption(question, option, choices)
-      for (const other of PlanItem.choiceSets(question)) if (other !== set) Markup.set(other, { chosen: undefined })
+      this.dropOtherAnswers(question, this.chooseOption(question, option, choices))
     }
     Markup.set<"epic-item">(question, { status: "decided", answered: true })
     this.placeQuestion(question)
@@ -1233,15 +1272,15 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Issue `id` was filed from Owen's own words (`<epic-item requested>`, epic `epic-engine` P63):  closed by Claude,
-   * it turns light orange until he's seen it, never the grey of a thing Claude tripped over.
+   * Issue or todo `id` was filed from Owen's own words (`<epic-item requested>`, epic `epic-engine` P63;  a todo since
+   * T88):  closed by Claude, it turns light orange until he's seen it, never the grey or green of a thing nobody asked for.
    * - `undefined` when it's marked already
-   * - throws for an item that isn't an issue
+   * - throws for an item that isn't an issue or a todo (a limit is nobody's work:  never requested)
    */
   setRequested(id: string): string | undefined {
     const item = this.item(id)
-    if (!ISSUE_ID.test(item.id))
-      throw new PlanDocError(`${item.id.toUpperCase()} isn't an issue:  only an issue is marked requested`)
+    if (!REQUESTED_ID.test(item.id) || item.hasAttribute("limit"))
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't an issue or a todo:  only those are marked requested`)
     if (item.hasAttribute("requested")) return undefined
     Markup.set<"epic-item">(item, { requested: true })
     return "requested"
@@ -1724,8 +1763,34 @@ export class PlanDoc extends PlanReader {
    * `choices`, by position:  none, the question's own);  reviewed.
    */
   answerWith(item: Element, option: OptionCard, choices?: number): void {
-    this.decide(item.id, option.title, { option: option.letter, choices })
+    const set = PlanItem.choiceSet(item, choices)
+    const answer = set ? this.answerOfSets(item, set, option.title) : option.title
+    this.decide(item.id, answer, { option: option.letter, choices })
     this.review(item.id)
+  }
+
+  /**
+   * Question `item`'s answer once `set` is picked (`picked`, its option's title):  each set asked beside it, in order,
+   * its pick's titles, joined `;  ` (epic `epic-engine` I88:  two sets, two picks, both in the answer).
+   * - a set beside it not picked yet:  left out;  one set alone:  `picked`
+   */
+  answerOfSets(item: Element, set: Element, picked: string): string {
+    const answers = PlanItem.setsBeside(item, set).map((each) => {
+      if (each === set) return picked
+      const letters = (each.getAttribute("chosen") ?? "").split(/\s+/).filter(Boolean)
+      const options = PlanItem.optionsIn(each).filter((option) => letters.includes(option.letter))
+      return options.map((option) => option.title).join(", ")
+    })
+    return answers.filter(Boolean).join(";  ")
+  }
+
+  /**
+   * Question `item` answered from card set `set`:  every set asked INSTEAD of it (in another place:  the question's
+   * own when a reply offers new options) is chosen no more;  a set asked beside it keeps its pick (I88).
+   */
+  dropOtherAnswers(item: Element, set: Element): void {
+    const beside = PlanItem.setsBeside(item, set)
+    for (const other of PlanItem.choiceSets(item)) if (!beside.includes(other)) Markup.set(other, { chosen: undefined })
   }
 
   /**
@@ -2229,6 +2294,7 @@ export class PlanDoc extends PlanReader {
       return { title, closed: false }
     this.setItem(host.id, "done")
     this.log(`${host.id.toUpperCase()} closed:  ${title}`)
+    this.fixHandedOn()
     return { title, closed: true }
   }
 
@@ -2260,6 +2326,19 @@ export class PlanDoc extends PlanReader {
     this.stamp(item)
     this.markUpdate(item, "fixed")
     this.log(`${item.id.toUpperCase()} fixed, for review:  ${title}`)
+    this.fixHandedOn()
+  }
+
+  /**
+   * A fix Owen sent back, whose note was handed on to items now fixed or done, is fixed again (`HandedOnFixes`;  epic
+   * `epic-engine` I317):  orange, `FIXED`, its last button Accept the fix;  each stamped and logged.
+   * - language's I147:  its Revisit's note became I148, and I147 stayed `REOPENED`, with the x, once I148 was fixed
+   */
+  private fixHandedOn(): void {
+    for (const { id, handedTo } of HandedOnFixes.fixAll(this.document, this.now)) {
+      this.stamp(this.item(id.toLowerCase()))
+      this.log(`${id} fixed, for review:  what was sent back was fixed as ${handedTo.join(", ")}`)
+    }
   }
 
   /**
@@ -3708,6 +3787,9 @@ const NOTES_SLOT = "notes"
 
 /** A phase by its number:  `p3`, `3`. */
 const OLD_PHASE_REF = /^p?\d+$/
+
+/** The quote `add --start` gives an item, `Owen:  “<their words>”` (`startedBody()`):  the words. */
+const STARTED_QUOTE = /^[^:“]+:\s+“([\s\S]*)”\s*$/
 
 /**
  * What takes review notes as an item does, but isn't one (`PlanDoc.reviewPart()`):

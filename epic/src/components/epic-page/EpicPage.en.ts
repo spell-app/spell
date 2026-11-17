@@ -217,7 +217,8 @@ export const epicPageVocabulary = {
       name: "spinner",
       description:
         "What the session is doing, beside Send (`<epic-agents draws=spinner>`, T53):  a turning spinner, its words " +
-        "(`Building P53`) its tooltip;  nothing while it's idle."
+        "(`Building P53`) beside it;  nothing while it's idle.  Its words alone (`draws=words`) while the step label " +
+        "turns for it (I316)."
     },
     {
       name: "status",
@@ -255,6 +256,12 @@ export const epicPageVocabulary = {
     {
       name: "step-pill",
       description: "One pill (epic `epic-engine` I108):  the step label, then the agents running (`agents-pill`)."
+    },
+    {
+      name: "step-spinner",
+      description:
+        "The step label's icon while the phase it names is building (epic `epic-engine` I316):  its circle turns, " +
+        "Spell UI's loading icon;  the session's line beside Send keeps only its words then."
     },
     {
       name: "agents-pill",

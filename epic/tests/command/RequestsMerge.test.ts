@@ -2,7 +2,7 @@ import { execFileSync } from "child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { dirname, join } from "path"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Requests } from "spell/epic/command/Requests"
 import { StrayFiles } from "spell/epic/command/StrayFiles"
@@ -124,6 +124,129 @@ describe("mergeTakingMain() (T83)", () => {
     git("-C", WORKTREE, "merge", "--abort")
   })
 })
+
+describe("the packages, installed in the main checkout after the merge (T89)", () => {
+  /** A repo of its own, on `main`, with branch `deps`, checked out in a worktree */
+  const repo = realpathSync(mkdtempSync(join(tmpdir(), "merge-install-")))
+  const worktree = join(repo, ".claude", "worktrees", "deps")
+  afterAll(() => rmSync(repo, { recursive: true, force: true }))
+  execFileSync("git", ["init", "-q", "-b", "main"], { cwd: repo })
+  commit(".gitignore", ".claude/\n", "ignore worktrees", repo)
+  commit("yarn.lock", "v1\n", "first", repo)
+  execFileSync("git", ["worktree", "add", "-q", "-b", "deps", worktree], { cwd: repo })
+
+  /** A fake install runner:  each call's command and checkout, answering `ok` */
+  const runner = (ok = true) => {
+    const calls: { install: string[]; root: string }[] = []
+    return { calls, run: (install: string[], root: string) => (calls.push({ install, root }), ok) }
+  }
+  const command = ["yarn", "install"]
+
+  test("no lockfile or package.json changed:  nothing installed", () => {
+    commit("src/a.txt", "a", "P1:  code only", worktree)
+    const { calls, run } = runner()
+    const [merged] = Requests.mergeEach("deps", repo, { install: { command, run } })
+    expect(merged!.commits).toHaveLength(1)
+    expect(merged!.installed).toBeUndefined()
+    expect(calls).toEqual([])
+    expect(Requests.installReport([merged!])).toEqual({ lines: [], restart: false })
+  })
+
+  test("the lockfile changed:  installed in the MAIN checkout, said, and the page server restarts", () => {
+    commit("yarn.lock", "v2\n", "P2:  a dependency", worktree)
+    const { calls, run } = runner()
+    const [merged] = Requests.mergeEach("deps", worktree, { install: { command, run } })
+    expect(calls).toEqual([{ install: command, root: repo }])
+    expect(merged!.installed).toEqual({ command: "yarn install", root: repo, changed: ["yarn.lock"], ok: true })
+    expect(Requests.installReport([merged!])).toEqual({
+      lines: ["main checkout:  installed the packages:  `yarn install` (yarn.lock changed)"],
+      restart: true
+    })
+  })
+
+  test("a package.json changed, anywhere:  installed too", () => {
+    commit("app/package.json", "{}\n", "P3:  a workspace's dependency", worktree)
+    const { calls, run } = runner()
+    const [merged] = Requests.mergeEach("deps", repo, { install: { command, run } })
+    expect(calls).toHaveLength(1)
+    expect(merged!.installed?.changed).toEqual(["app/package.json"])
+  })
+
+  test("a failed install:  the merge stands, said loudly, with what to run by hand;  no restart", () => {
+    commit("yarn.lock", "v3\n", "P4:  another", worktree)
+    const [merged] = Requests.mergeEach("deps", repo, { install: { command, run: runner(false).run } })
+    expect(execFileSync("git", ["log", "-1", "--format=%s", "main"], { cwd: repo, encoding: "utf8" }).trim()).toBe(
+      "P4:  another"
+    )
+    expect(merged!.installed?.ok).toBe(false)
+    const { lines, restart } = Requests.installReport([merged!])
+    expect(lines).toEqual([
+      "main checkout:  `yarn install` FAILED (yarn.lock changed):  the merge stands;  run it by hand:  " +
+        `cd ${repo} && yarn install, then epic server stop && epic server start --all`
+    ])
+    expect(restart).toBe(false)
+  })
+
+  test("a runner that throws:  failed, the same", () => {
+    commit("yarn.lock", "v4\n", "P5:  one more", worktree)
+    const run = () => {
+      throw new Error("no yarn")
+    }
+    const [merged] = Requests.mergeEach("deps", repo, { install: { command, run } })
+    expect(merged!.installed?.ok).toBe(false)
+  })
+})
+
+describe("refreshPageServer() (T89)", () => {
+  /** A fake page server:  what was done to it, in order */
+  const fakeServer = (running: boolean, launched = false) => {
+    const done: string[] = []
+    const server = {
+      isRunning: async () => (done.push("asked"), running),
+      stop: async () => done.push("stopped"),
+      ensure: async () => (done.push("started"), { base: "http://127.0.0.1:4747", launched })
+    }
+    return { done, server }
+  }
+
+  test("after an install:  a running one is stopped and started again, its editor with it", async () => {
+    const { done, server } = fakeServer(true)
+    const out = await captured(() => Requests.refreshPageServer(REPO, { restart: true, server }))
+    expect(done).toEqual(["asked", "stopped", "started"])
+    expect(out).toBe("page server restarted after the install, its editor with it:  http://127.0.0.1:4747\n")
+  })
+
+  test("no install:  only restarted when its code changed (ensure), as before", async () => {
+    const { done, server } = fakeServer(true)
+    expect(await captured(() => Requests.refreshPageServer(REPO, { server }))).toBe("")
+    expect(done).toEqual(["asked", "started"])
+  })
+
+  test("not running:  left stopped, install or not", async () => {
+    const { done, server } = fakeServer(false)
+    await Requests.refreshPageServer(REPO, { restart: true, server })
+    expect(done).toEqual(["asked"])
+  })
+
+  test("a restart that fails:  one line, with what to run by hand;  never throws", async () => {
+    const server = { ...fakeServer(true).server, ensure: () => Promise.reject(new Error("port taken")) }
+    const out = await captured(() => Requests.refreshPageServer(REPO, { restart: true, server }))
+    expect(out).toBe(
+      "page server:  not restarted (port taken);  by hand:  epic server stop && epic server start --all\n"
+    )
+  })
+})
+
+/** What `run` writes to stdout, while it runs. */
+async function captured(run: () => Promise<void>): Promise<string> {
+  const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
+  try {
+    await run()
+    return spy.mock.calls.map(([chunk]) => String(chunk)).join("")
+  } finally {
+    spy.mockRestore()
+  }
+}
 
 /** Write `file`, from the repo's root, holding `text`. */
 function put(file: string, text: string): void {
