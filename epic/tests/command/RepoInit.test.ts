@@ -374,6 +374,56 @@ describe("epic init:  its words and its commit (Owen, 2026-10-29)", () => {
   })
 })
 
+describe("epic init:  superpowers' words in AGENTS.md (epic-engine I318)", () => {
+  test("--superpowers:  the block in AGENTS.md, said, and committed with the other two files", async () => {
+    const app = codeRepo("sp-flag")
+    writeFileSync(join(app, "AGENTS.md"), "# Our rules\n")
+    git(app, "add", "AGENTS.md")
+    git(app, "-c", "commit.gpgsign=false", "commit", "-q", "-m", "rules")
+    const said = await printed(() => offline(app).run(["--name", "Bo", "--no-remote", "--no-server", "--superpowers"]))
+    expect(said).toContain("> superpowers:  its stand-aside words in AGENTS.md")
+    expect(said.some((line) => /added +.*AGENTS\.md {2}\(superpowers' stand-aside words\)$/.test(line))).toBe(true)
+    const agents = readFileSync(join(app, "AGENTS.md"), "utf8")
+    expect(agents).toMatch(/^# Our rules\n\n<!-- epic:superpowers:start/)
+    expect(agents).toMatch("never `npm install`")
+    expect(git(app, "show", "--name-only", "--format=", "HEAD").trim().split("\n").sort()).toEqual([
+      ".epic/config.json5",
+      ".gitignore",
+      "AGENTS.md"
+    ])
+    expect(git(app, "status", "--porcelain")).toBe("")
+    // run again, no flag:  the block is there, so it's kept current;  nothing changed, nothing to commit
+    const again = await printed(() => offline(app).run(["--no-remote", "--no-server"]))
+    expect(again.some((line) => /already present +.*AGENTS\.md/.test(line))).toBe(true)
+    expect(git(app, "status", "--porcelain")).toBe("")
+  })
+
+  test("superpowersChoice():  local never;  the flag or a block there, yes;  on for the repo, asked;  off, no", async () => {
+    const app = codeRepo("sp-choice")
+    expect(await RepoInit.superpowersChoice({ main: app, ask: false })).toBe(false)
+    expect(await RepoInit.superpowersChoice({ main: app, flag: true, ask: false })).toBe(true)
+    expect(await RepoInit.superpowersChoice({ main: app, flag: true, local: true, ask: false })).toBe(false)
+    // turned on in the project's own settings:  yes with no terminal to ask in
+    mkdirSync(join(app, ".claude"))
+    writeFileSync(join(app, ".claude", "settings.json"), JSON.stringify({ enabledPlugins: { "superpowers@x": true } }))
+    expect(await RepoInit.superpowersChoice({ main: app, ask: false })).toBe(true)
+    rmSync(join(app, ".claude"), { recursive: true })
+    writeFileSync(join(app, "AGENTS.md"), "<!-- epic:superpowers:start -->\nold\n<!-- epic:superpowers:end -->\n")
+    expect(await RepoInit.superpowersChoice({ main: app, ask: false })).toBe(true)
+  })
+
+  test("without it, and superpowers off:  AGENTS.md untouched, nothing said;  --local:  never", async () => {
+    const app = codeRepo("sp-none")
+    const report = await offline(app).init({ name: "Bo", noRemote: true })
+    expect(report.agents).toBeUndefined()
+    expect(existsSync(join(app, "AGENTS.md"))).toBe(false)
+    const local = codeRepo("sp-local")
+    const localReport = await offline(local).init({ name: "Bo", noRemote: true, local: true, superpowers: true })
+    expect(localReport.agents).toBeUndefined()
+    expect(existsSync(join(local, "AGENTS.md"))).toBe(false)
+  })
+})
+
 describe("epic init:  its sections (Owen, 2026-10-29:  colour for fields and values)", () => {
   test("the summary:  a label, then the value;  only what there's something to say for", () => {
     expect(RepoInit.summaryLines({ name: "Bo", color: "teal", sharedRepo: "ana/x.epics, private" }).map(plain)).toEqual(
@@ -773,9 +823,9 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
     expect(log).toContain("The epic repo:  empty")
     const colorFile = relative(join(TEMP, "acme-app", "acme-app.epics"), report.color!.file!)
     expect(git(TEMP, "--git-dir", bare, "show", `${branch}:${colorFile}`)).toMatch(/green/)
-    expect(said(again).some((line) => /^ {2}pushed to +git@lab\.acme\.test:team\/acme-app\.epics\.git$/.test(line))).toBe(
-      true
-    )
+    expect(
+      said(again).some((line) => /^ {2}pushed to +git@lab\.acme\.test:team\/acme-app\.epics\.git$/.test(line))
+    ).toBe(true)
     expect(said(again).some((line) => /Sharing isn't working/.test(line))).toBe(false)
     expect(said(again)).toContain("Your plans are shared now:  pushed to git@lab.acme.test:team/acme-app.epics.git")
     expect(readFileSync(lab.log, "utf8")).toMatch(

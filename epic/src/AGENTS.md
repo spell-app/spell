@@ -573,10 +573,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
-    - `Superpowers` (epic `epic-engine` P72):  with the superpowers plugin on in Claude Code's settings
-      (`ClaudeHome.isPluginEnabled()`), what the same hook adds in an EPIC's worktree:  the guide's `superpowers` topic,
+    - `Superpowers` (epic `epic-engine` P72):  with the superpowers plugin on for the session
+      (`ClaudeHome.isPluginEnabled()`:  every settings layer, the person's, the project's, its local file, `--settings`,
+      the managed file, and `claude --plugin-dir` read off the session's process;  epic `epic-engine` I318), what the
+      same hook adds in an EPIC's worktree:  the guide's `superpowers` topic,
       where superpowers stands aside (no design, plan, worktree or finish of its own;  no `npm install`), joined to the
       guard's answer (`WorktreeGuard.withNotice()`);  plain `node` loads it by path
+      - and the same words in the repo's `AGENTS.md`, a marked block `epic init` writes and keeps current
+        (`agentsStep()`, `RepoInit.superpowersChoice()`:  asked when superpowers is on, `--superpowers`;  I318)
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
