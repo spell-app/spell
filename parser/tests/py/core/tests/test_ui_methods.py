@@ -103,6 +103,26 @@ def test_a_page_is_asked_each_with_its_words_and_buttons() -> None:
     ]
 
 
+def test_a_dialogs_title_and_size_go_to_the_page_as_options_by_javascripts_names() -> None:
+    a_core, asked = asking({"confirm": True})
+
+    async def run() -> bool:
+        await a_core.alert("You won!", {"title": "Solitaire", "size": "big", "ok_text": "New game"})
+        return await a_core.confirm("Deal again?", {"title": "Solitaire", "ok_text": "Deal", "cancel_text": "Not now"})
+
+    assert asyncio.run(run()) is True
+    assert asked == [
+        ("alert", ["You won!", {"title": "Solitaire", "size": "big", "okText": "New game"}]),
+        ("confirm", ["Deal again?", {"title": "Solitaire", "okText": "Deal", "cancelText": "Not now"}]),
+    ]
+
+
+def test_a_dialog_with_options_and_no_page_prints_its_message() -> None:
+    a_core, out = printing()
+    asyncio.run(a_core.alert("You won!", {"title": "Solitaire", "size": "big"}))
+    assert out.getvalue() == "You won!\n"
+
+
 def test_a_prompt_cancelled_on_the_page_answers_none() -> None:
     a_core, _ = asking({"prompt": None})
     assert asyncio.run(a_core.prompt("Your name?")) is None

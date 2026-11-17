@@ -4,6 +4,7 @@
 core.notify("Saved!")                              # a toast, not waited for
 await core.notify("Saved!", {"time": 2})           # `notify "Saved!" for 2 seconds and wait`
 await core.alert("You won!", "New game")           # a dialog, until it's closed
+await core.alert("You won!", {"title": "Solitaire", "size": "big"})  # `alert ... titled "Solitaire" in big text`
 if await core.confirm("Deal again?"): ...          # yes or no
 name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` if cancelled
 ```
@@ -24,6 +25,7 @@ name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` i
 """
 
 import asyncio
+import re
 import sys
 from collections.abc import Awaitable, Callable, Generator
 from typing import TYPE_CHECKING, Any
@@ -36,6 +38,12 @@ AskPage = Callable[[str, list[Any]], Awaitable[Any]]
 
 # Yes, typed at a terminal for `confirm`:  anything else is no
 YES_TYPED = ("y", "yes", "")
+
+# A dialog's options, by the JavaScript core's names (`DialogOptions`):  `title`, `size`, `okText`, `cancelText`
+DialogOptions = dict[str, Any]
+
+# A Python name's `_x`, which javascript writes `X`:  `ok_text` is `okText`
+SNAKE_WORD = re.compile(r"_([a-z])")
 
 # What a frame asking the page names its method by, `{"ui": "alert", ...}`;  its number by;  the page's answer by
 UI_KEY = "ui"
@@ -75,18 +83,21 @@ class UIMethods:
             return ToastShown(None)
         return ToastShown(asyncio.ensure_future(self._ask_or_say("notify", args)))
 
-    async def alert(self, message: object, ok_text: str | None = None) -> None:
+    async def alert(self, message: object, ok_text: "str | DialogOptions | None" = None) -> None:
         """Show `message` in a dialog, and wait until it's closed:  compiled from `alert "Yo!"`.
 
         - `ok_text`:  its button's words, `alert "You won!" with "New game"`;  none, Spell UI's own.
+          Once a title or a size is written, the dialog's options instead, by the JavaScript core's names
+          (`DialogOptions`):  `{"title": "Solitaire", "size": "big", "ok_text": "New game"}`,
+          handed to the page by javascript's names (`okText`:  `_page_options()`).
         - No page:  printed on the console.
         """
         if self.ask_page is None:
             self.console.info(str(message))
             return
-        await self.ask_page("alert", _args(message, ok_text))
+        await self.ask_page("alert", _args(message, _page_options(ok_text)))
 
-    async def warn(self, message: object, ok_text: str | None = None) -> None:
+    async def warn(self, message: object, ok_text: "str | DialogOptions | None" = None) -> None:
         """Warn the person in a dialog, and wait until it's closed:  compiled from `warn "Careful!"`.
 
         - No page:  printed as a warning on the console.
@@ -94,12 +105,14 @@ class UIMethods:
         if self.ask_page is None:
             self.console.warn(str(message))
             return
-        await self.ask_page("warn", _args(message, ok_text))
+        await self.ask_page("warn", _args(message, _page_options(ok_text)))
 
-    async def confirm(self, message: object, ok_text: str | None = None, cancel_text: str | None = None) -> bool:
+    async def confirm(
+        self, message: object, ok_text: "str | DialogOptions | None" = None, cancel_text: str | None = None
+    ) -> bool:
         """Ask a yes / no question in a dialog:  `True` for ok -- compiled from `confirm "Delete?"`.
 
-        - `ok_text`, `cancel_text`:  its buttons' words.
+        - `ok_text`, `cancel_text`:  its buttons' words;  or `ok_text` the dialog's options, as `alert`'s.
         - No page:  `True`, printed with the question;  in a terminal, yes unless `n` is typed.
         """
         if self.ask_page is None:
@@ -108,7 +121,7 @@ class UIMethods:
                 self.console.info(self.message("confirm-default", question=str(message)))
                 return True
             return typed.strip().lower() in YES_TYPED
-        return bool(await self.ask_page("confirm", _args(message, ok_text, cancel_text)))
+        return bool(await self.ask_page("confirm", _args(message, _page_options(ok_text), cancel_text)))
 
     async def prompt(self, message: object, value: str | None = None) -> str | None:
         """Ask for some text in a dialog:  what was typed, or `None` if cancelled.
@@ -209,6 +222,17 @@ class ToastShown:
         """Wait until the toast has gone."""
         if self.shown is not None:
             yield from self.shown.__await__()
+
+
+def _page_options(options: "str | DialogOptions | None") -> "str | DialogOptions | None":
+    """A dialog's options as the page's core names them:  `ok_text` is `okText`;  a button's words as they are.
+
+    - The Python writer writes an options object's keys as Python names them, and the page is javascript.
+    - SEE:  `place_kinds.javascript_name()`, the same rule for a place's settings.
+    """
+    if not isinstance(options, dict):
+        return options
+    return {SNAKE_WORD.sub(lambda match: match.group(1).upper(), key): value for key, value in options.items()}
 
 
 def _args(*values: object) -> list[Any]:

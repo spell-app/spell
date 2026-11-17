@@ -315,7 +315,7 @@ export class SpellStatement<
     // NOTE: `Scope.parse()` is typed for string input only;
     // call `parser.parse()` directly (exactly what `Scope.parse()` would do internally) so we can pass tokens instead.
     const { nestedScope } = statement
-    const tokens = SpellStatement.withWhichSubject(statement, unparsed)
+    const tokens = SpellStatement.withVerbCarried(statement, SpellStatement.withWhichSubject(statement, unparsed))
     const inlineStatement = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
     if (inlineStatement) {
       statement.addMatch(inlineStatement, "body")
@@ -360,6 +360,54 @@ export class SpellStatement<
     // the words we changed, known to every rule's quick test of the line's words
     P.Sequence.addLineWords(tokens, unparsed)
     return tokens
+  }
+
+  /**
+   * `tokens`, a condition after a list (`where`, `which`), with its verb carried to a bare word after `and` / `or`
+   * (epic `language` I152):  `which are face up and red` reads as `... and it is red`, as `where it is face up and it
+   * is red` does.
+   * - Only when the condition starts with the item and its verb:  `it is`, `it isn't`, Spanish's `es` (its subject
+   *   left out);  `where its rank is king or queen` is the rank's, as it was.
+   * - Only a clause of ONE word, after `and` / `or` (the `and_or` word rule), that's no name in scope:
+   *   `where it is face up and done`, `done` a variable, is a question of its own.
+   * - The verb as written, `not` and all, after `and`:  `it is not red and black`.
+   *   Not after `or`, which would always be true:  `it isn't red or black` is left as it was.
+   * - Without it, `red` was a text, always true:  `card.isFaceDirection("up") && "red"`, every face-up card.
+   * - The copies take no room on the line, as `withWhichSubject()`'s subject doesn't.
+   */
+  static withVerbCarried(statement: P.Match, tokens: P.Token[]): P.Token[] {
+    if (!(statement.groups.where instanceof P.Match)) return tokens
+    const { scope } = statement
+    const subject = SP.Language.of(scope).words.whichClause?.subject
+    const startsWithSubject = !!subject && tokens[0] instanceof P.WordToken && tokens[0].value === subject
+    if (subject && !startsWithSubject) return tokens
+    const start = startsWithSubject ? 1 : 0
+    const verbLength = Wording.lengthAt(scope, "is_or_is_not", tokens, start)
+    if (!verbLength) return tokens
+    const verb = tokens.slice(0, start + verbLength)
+    const negated = Wording.lengthAt(scope, "is_or_is_not", tokens, start, "negated") > 0
+    const joins = (token: P.Token | undefined) => !!token && Wording.lengthAt(scope, "and_or", [token]) === 1
+    const nested = statement.nestedScope
+    let carried: P.Token[] | undefined
+    const out = [...tokens]
+    for (let index = start + verbLength; index < out.length - 1; index++) {
+      const word = out[index + 1]
+      if (!joins(out[index]) || !(word instanceof P.WordToken)) continue
+      // `isn't red or black` is neither:  not carried, as `it isn't red or it isn't black` is always true
+      if (negated && Wording.lengthAt(scope, "and_or", [out[index]!], 0, "or")) continue
+      if (out[index + 2] && !joins(out[index + 2])) continue
+      if (nested.variables?.get(String(word.value))) continue
+      const copies = verb.map((token) => {
+        const Token = token.constructor as new (record: P.TokenProps) => P.Token
+        return new Token({ ...token.record, raw: "", whitespace: token.whitespace ? " " : "", start: word.start })
+      })
+      out.splice(index + 1, 0, ...copies)
+      index += copies.length
+      carried = out
+    }
+    if (!carried) return tokens
+    P.Sequence.addLineWords(carried, tokens)
+    return carried
   }
 
   /**

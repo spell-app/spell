@@ -22,6 +22,7 @@ import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
 import { Prompt } from "./Prompt"
+import { TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
 /** Spanish's `UI` rules. */
@@ -73,6 +74,11 @@ UIEs.addRule(Wording.specialize({ ruleName: "toast_progress", meanings: TOAST_PR
 ////////////////
 // ## Statements
 ////////////////
+
+// El tamaño del texto de un diálogo, para `avisar ... en texto grande`
+UIEs.addRule(Wording.specialize({ ruleName: "text_size", meanings: TEXT_SIZES }), {
+  syntax: "((small:pequeño|chico)|(big:grande)|(huge:enorme))"
+})
 
 UIEs.addRule(Print, {
   syntax: "imprimir {operator:print_kind}? [expressions:{expression} ,]",
@@ -195,33 +201,57 @@ UIEs.addRule(Notify, {
 })
 
 UIEs.addRule(Alert, {
-  syntax: "avisar {message:expression} (con {okButton:text})?",
+  syntax:
+    "avisar {message:expression} ((titulado|titulada) {title:expression})? (en texto {size:text_size})?" +
+    " (con {okButton:text})?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`avisar "Yo!"`, `await core.alert("Yo!")`],
-        [`avisar "Yo!" con "vale"`, `await core.alert("Yo!", "vale")`]
+        [`avisar "Yo!" con "vale"`, `await core.alert("Yo!", "vale")`],
+        [`avisar "¡Ganaste!" titulado "Solitario"`, `await core.alert("¡Ganaste!", { title: "Solitario" })`],
+        [`avisar "¡Ganaste!" en texto grande`, `await core.alert("¡Ganaste!", { size: "big" })`],
+        [`avisar "Pequeñito" en texto pequeño`, `await core.alert("Pequeñito", { size: "small" })`],
+        {
+          input: `avisar "¡Ganaste!" titulado "Solitario" en texto enorme con "Otra partida"`,
+          js: [
+            `await core.alert("¡Ganaste!", {`,
+            `  title: "Solitario",`,
+            `  size: "huge",`,
+            `  okText: "Otra partida"`,
+            `})`
+          ]
+        }
       ]
     }
   ]
 })
 
 UIEs.addRule(Warn, {
-  syntax: "advertir {message:expression} (con {okButton:text})?",
+  syntax:
+    "advertir {message:expression} ((titulado|titulada) {title:expression})? (en texto {size:text_size})?" +
+    " (con {okButton:text})?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`advertir "Yo!"`, 'await core.warn("Yo!")'],
-        [`advertir "Yo!" con "vale"`, 'await core.warn("Yo!", "vale")']
+        [`advertir "Yo!" con "vale"`, 'await core.warn("Yo!", "vale")'],
+        [`advertir "¡Cuidado!" titulado "Borrando"`, 'await core.warn("¡Cuidado!", { title: "Borrando" })'],
+        [
+          `advertir "¡Cuidado!" en texto grande con "Vale"`,
+          'await core.warn("¡Cuidado!", { size: "big", okText: "Vale" })'
+        ]
       ]
     }
   ]
 })
 
 UIEs.addRule(Confirm, {
-  syntax: "confirmar {message:expression} (con {okButton:text} ((y|e|o|u) {cancelButton:text})?)?",
+  syntax:
+    "confirmar {message:expression} ((titulado|titulada) {title:expression})? (en texto {size:text_size})?" +
+    " (con {okButton:text} ((y|e|o|u) {cancelButton:text})?)?",
   tests: [
     {
       compileAs: "statement",
@@ -229,7 +259,22 @@ UIEs.addRule(Confirm, {
         [`confirmar "Yo!"`, `await core.confirm("Yo!")`],
         [`confirmar "Yo!" con "Sí"`, `await core.confirm("Yo!", "Sí")`],
         [`confirmar "Yo!" con "Sí" y "No"`, `await core.confirm("Yo!", "Sí", "No")`],
-        [`confirmar "Yo!" con "Sí" o "No"`, `await core.confirm("Yo!", "Sí", "No")`]
+        [`confirmar "Yo!" con "Sí" o "No"`, `await core.confirm("Yo!", "Sí", "No")`],
+        [
+          `confirmar "¿Repartir otra vez?" titulado "Solitario"`,
+          `await core.confirm("¿Repartir otra vez?", { title: "Solitario" })`
+        ],
+        {
+          input: `confirmar "¿Repartir otra vez?" titulado "Solitario" en texto grande con "Repartir" o "Ahora no"`,
+          js: [
+            `await core.confirm("¿Repartir otra vez?", {`,
+            `  title: "Solitario",`,
+            `  size: "big",`,
+            `  okText: "Repartir",`,
+            `  cancelText: "Ahora no"`,
+            `})`
+          ]
+        }
       ]
     }
   ]

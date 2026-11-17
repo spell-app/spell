@@ -430,6 +430,23 @@ export const PARSER_MESSAGES = {
     'it is {what} here, which isn\'t {aItem}, and {list} holds {items}:  say which {item}, or "get" it first',
   /** `add the stock to the discard pile`:  a thing the list can't hold, `{thing}` as written. */
   "not-an-item": '"{thing}" is {what}, which isn\'t {aItem}:  {list} holds {items}',
+  /** `the columns in the deck`:  a word naming none of the list's items, nor its lists' (epic `language` I152). */
+  "not-items-in": '{list} holds {items}, not {named}:  say "{items} in {list}"',
+  /** `where it can play the card`, an action that gives back something else (epic `language` T146). */
+  "can-do-yes-or-no":
+    '"{call}" doesn\'t answer yes or no, so "can" can\'t ask it:  end the action with "return yes" or "return no"',
+  /**
+   * `and` / `or` between values (epic `language` T146):  `{lhs}` and `{rhs}` are the two sides as written,
+   * `{word}` the joining word.
+   */
+  "and-in-where-joins-conditions":
+    'In a "where", "and" joins conditions, and "{rhs}" isn\'t one:  to put it with what the "where" finds, put the list and its "where" in parentheses, "(... where ...) and {rhs}"',
+  "and-plain-value": '"and {rhs}" asks nothing:  say what is {rhs}, e.g. "and it is {rhs}"',
+  "joined-question-and-value":
+    '"{lhs}" is a question and "{rhs}" isn\'t, so "{word}" can\'t join them:  join two questions, or two values of one kind',
+  "joined-values-and-or":
+    '"and" and "or" between values:  say which goes first with parentheses, "(A or B) and C" or "A or (B and C)"',
+  "joined-values-of-two-kinds": '"{lhs}" and "{rhs}" aren\'t the same kind of thing, so "{word}" can\'t join them',
   /** A built-in type published:  `a thing is published as "..."` (epic `atmosphere` P10). */
   "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",
   /** `- it is published as "x"`, a name that isn't an NSID (epic `atmosphere` P10). */
