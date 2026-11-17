@@ -478,6 +478,17 @@ export type ModalOptions = {
   title?: string
   /** body text */
   message: string
+  /**
+   * the message's text size, Spell UI's size words:  `small`, `big`, `huge` ...;  default `medium`
+   * - the message only:  the title and the buttons keep theirs
+   */
+  size?: string
+  /**
+   * read the message as Markdown (headings, bold, lists, links), sanitized:  `<ui-markdown sanitized>`
+   * - only a message with Markdown in it:  plain text is drawn exactly as without it
+   * - `alert()` and `confirm()`;  `prompt()`'s message stays plain, as its input's label
+   */
+  markdown?: boolean
   /** approve button text;  default `I18n` `ok` */
   okText?: string
   /** deny button text;  default `I18n` `cancel` */

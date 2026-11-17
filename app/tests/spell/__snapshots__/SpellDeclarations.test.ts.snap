@@ -95,7 +95,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
   "spellVersion": "0.8.0",
   "statements": [
     {
-      "defined": "/Card.spell:0-2195",
+      "defined": "/Card.spell:0-2194",
       "superType": "TwoSidedView",
       "type": "Card",
     },
@@ -204,7 +204,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     },
     {
       "datatype": "text",
-      "defined": "/Card.spell:980-1022",
+      "defined": "/Card.spell:979-1021",
       "group": "Names",
       "groupDescription": "identifying a card",
       "of": "Card",
@@ -212,14 +212,14 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     },
     {
       "datatype": "number",
-      "defined": "/Card.spell:1024-1063",
+      "defined": "/Card.spell:1023-1062",
       "group": "Names",
       "of": "Card",
       "property": "value",
     },
     {
       "datatype": "text",
-      "defined": "/Card.spell:1065-1166",
+      "defined": "/Card.spell:1064-1165",
       "group": "Names",
       "of": "Card",
       "property": "symbol",
@@ -227,7 +227,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     {
       "asWritten": "short name",
       "datatype": "text",
-      "defined": "/Card.spell:1168-1416",
+      "defined": "/Card.spell:1167-1415",
       "group": "Names",
       "of": "Card",
       "property": "short_name",
@@ -319,31 +319,31 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "property": "pile",
     },
     {
-      "defined": "/Card.spell:2197-4778",
+      "defined": "/Card.spell:2196-4777",
       "superType": "View",
       "type": "CardImage",
     },
     {
       "datatype": "Card",
-      "defined": "/Card.spell:2720-2740",
+      "defined": "/Card.spell:2719-2739",
       "of": "CardImage",
       "property": "card",
     },
     {
       "datatype": "CardRank",
-      "defined": "/Card.spell:2765-2790",
+      "defined": "/Card.spell:2764-2789",
       "of": "CardImage",
       "property": "rank",
     },
     {
       "datatype": "CardSuit",
-      "defined": "/Card.spell:2792-2817",
+      "defined": "/Card.spell:2791-2816",
       "of": "CardImage",
       "property": "suit",
     },
     {
       "classVariable": "Directions",
-      "defined": "/Card.spell:2819-2848",
+      "defined": "/Card.spell:2818-2847",
       "enumeration": [
         "up",
         "down",
@@ -352,7 +352,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "property": "direction",
     },
     {
-      "defined": "/Card.spell:2850-2874",
+      "defined": "/Card.spell:2849-2873",
       "kind": "method",
       "name": ""is face (direction)"",
       "of": "CardImage",
@@ -367,13 +367,13 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       },
     },
     {
-      "defined": "/Card.spell:2876-3245",
+      "defined": "/Card.spell:2875-3244",
       "kind": "method",
       "name": "creating a card image",
       "returns": "nothing",
     },
     {
-      "defined": "/Card.spell:3247-3321",
+      "defined": "/Card.spell:3246-3320",
       "of": "CardImage",
       "property": "color",
     },
@@ -381,11 +381,11 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "constants": [
         "blue",
       ],
-      "defined": "/Card.spell:3264-3287",
+      "defined": "/Card.spell:3263-3286",
     },
     {
       "datatype": "text",
-      "defined": "/Card.spell:3323-4010",
+      "defined": "/Card.spell:3322-4009",
       "of": "CardImage",
       "property": "picture",
     },
@@ -394,7 +394,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
         "statement",
         "expression",
       ],
-      "defined": "/Card.spell:4012-4069",
+      "defined": "/Card.spell:4011-4068",
       "kind": "method",
       "name": "draw it",
       "of": "CardImage",
@@ -404,7 +404,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     },
     {
       "alias": "statement",
-      "defined": "/Card.spell:1533-2195",
+      "defined": "/Card.spell:1532-2194",
       "kind": "function",
       "name": "card setup",
       "output": "test_card_setup",
@@ -413,7 +413,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     },
     {
       "alias": "statement",
-      "defined": "/Card.spell:4072-4778",
+      "defined": "/Card.spell:4071-4777",
       "kind": "function",
       "name": "card images",
       "output": "test_card_images",

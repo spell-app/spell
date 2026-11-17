@@ -72,6 +72,9 @@ export class BubblyLayout {
   /** Where each line starts. */
   private readonly lineStarts: number[] = []
 
+  /** Each line inside a start tag laid out over lines (`class="GameBar"` under `<toolbar`), by index:  markup too. */
+  private readonly linesInTags = new Set<number>()
+
   /** Stretches every line takes from the parse, whatever it is:  yes and no, `'s`, `item`;  `order` low first. */
   private readonly overlays: Overlay[] = []
 
@@ -108,6 +111,7 @@ export class BubblyLayout {
       this.lineStarts.push(at)
       at += line.length + 1
     }
+    this.findTagsOverLines()
     this.readParse(parser, parsed)
     this.drawing = {
       text,
@@ -514,7 +518,38 @@ export class BubblyLayout {
 
   /** Is `line` a drawing's markup, `<text color={its color}>`? */
   private isMarkup(line: SourceLine): boolean {
-    return this.text[line.start] === "<"
+    return this.text[line.start] === "<" || this.linesInTags.has(line.index)
+  }
+
+  /**
+   * Each line a start tag runs on to (`linesInTags`):  its attributes laid out a line each, under `<toolbar`,
+   * read just as they'd be on the tag's own line (epic `language` I151).
+   * - A tag runs on past its line's end while its `>` hasn't come;  a line starting with a tag, or a blank one,
+   *   ends it, as the tokenizer reads it (I145).
+   * - A quoted value ends on its line, as `paintMarkup()` reads it.
+   */
+  private findTagsOverLines() {
+    const lines = this.text.split("\n")
+    let inTag = false
+    lines.forEach((raw, index) => {
+      const words = raw.trim()
+      if (inTag && (!words || words.startsWith("<"))) inTag = false
+      else if (inTag) this.linesInTags.add(index)
+      else if (!words.startsWith("<")) return
+      for (let at = 0; at < raw.length; at++) {
+        const char = raw[at]!
+        if (!inTag) {
+          if (char === "<" && /[a-z]/i.test(raw[at + 1] ?? "")) inTag = true
+        } else if (char === ">") inTag = false
+        else if (char === '"' && !WORD_CHARACTER.test(raw[at - 1] ?? "")) {
+          const close = raw.indexOf('"', at + 1)
+          at = close < 0 ? raw.length : close
+        } else if (char === "{") {
+          const close = raw.indexOf("}", at + 1)
+          at = close < 0 ? raw.length : close
+        }
+      }
+    })
   }
 
   ////////////////
@@ -530,7 +565,7 @@ export class BubblyLayout {
     if (head) this.paintHead(head)
     for (const choice of this.choices)
       if (choice.start >= start && choice.end <= end) this.paintChoice(choice.start, choice.end)
-    const codes = this.isMarkup(line) ? this.paintMarkup(start, end) : []
+    const codes = this.isMarkup(line) ? this.paintMarkup(start, end, this.linesInTags.has(line.index)) : []
     const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
     const pieces = this.piecesOf(start, end, [...underlines, ...codes])
     const { pillNames } = this
@@ -756,11 +791,12 @@ export class BubblyLayout {
    *     so the tag's other attributes still draw as they're written (epic `editor` I144).
    * - In a tag, a `"` right after a word (`small"`) is drawn plain:  never a value's start, which would pair the
    *   tag's quotes off by one, every pill after it over the wrong words (I144).
+   * - `inTag`:  the line is inside a start tag begun on a line above (`linesInTags`), so it starts among its
+   *   attributes (epic `language` I151).
    */
-  private paintMarkup(start: number, end: number): BubblyCode[] {
+  private paintMarkup(start: number, end: number, inTag = false): BubblyCode[] {
     const { text } = this
     const codes: BubblyCode[] = []
-    let inTag = false
     for (let at = start; at < end; at++) {
       const char = text[at]!
       if (char === "{") {

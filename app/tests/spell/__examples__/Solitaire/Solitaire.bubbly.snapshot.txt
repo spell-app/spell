@@ -25,7 +25,7 @@
 |   |   | it «"is a number card"» if it is not a face card    ‾question(it is not a face card)
 |   |   [property quoted_property_formula L2]
 |   |   | it «"is the (rank) of (suit)"»  ⟦-- e.g. the card is the two of spades⟧
-|   |   
+
 |   [plain group define_group L1]
 |   | group «"Names"» 								⟦-- identifying a card⟧
 |   |   [property property_value_getter L2]
@@ -259,10 +259,10 @@
 |   |   <⟨deck⟩ «"deck"»hidden />    declares@0
 |   |   <⟨segment⟩ inverted attach-to=«"top"»>
 |   |     <⟨toolbar⟩
-|   |       class=_"GameBar"_
-|   |       appearance=_"pills"_
+|   |       class=«"GameBar"»
+|   |       appearance=«"pills"»
 |   |       inverted
-|   |       size=_"small"_
+|   |       size=«"small"»
 |   |       shrinkable
 |   |     >
 |   |       <⟨text⟩ size=«"big"» slot=«"title"» heavy>Spell Solitaire</>

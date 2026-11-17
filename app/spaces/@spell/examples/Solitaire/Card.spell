@@ -15,7 +15,7 @@ a "card" is a draggable two sided view 			-- A playing card
 	it "is a face card" if its rank is jack, queen or king  -- e.g. "the card is a face card"
 	it "is a number card" if it is not a face card
 	it "is the (rank) of (suit)"  -- e.g. the card is the two of spades
-	
+
 	group "Names" 								-- identifying a card
 	its "name" is its rank && "of" && its suit
 	its "value" is the position of its rank
