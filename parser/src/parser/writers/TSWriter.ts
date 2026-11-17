@@ -469,7 +469,7 @@ export class TSWriter extends JSWriter {
    */
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     if (!node.value) return this.returnContinues ? "continue" : "return"
-    // a body's last line calling a method that gives nothing:  just the call -- see `givesNothing()`
+    // calling a method that gives nothing:  just the call, and a `return` when more runs after it -- see `JSWriter`'s
     if (this.givesNothing(node.value)) return super.ASTReturnStatement(node)
     const fallback = this.getterDefault
     if (fallback && this.mayBeNothing(node.value)) return `return ${this.tight(node.value)} ?? ${this.bare(fallback)}`

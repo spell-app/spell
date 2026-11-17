@@ -1535,14 +1535,24 @@ export class ASTDestructuredAssignment extends ASTStatement {
 
 /** ReturnStatement -- return a value.
  *  - `value` (optional) is an Expression to be returned.
+ *  - `explicit`:  `true` when the person wrote the `return`, e.g. `return auto play` -- see `ASTReturnStatement`.
  */
-export type ASTReturnStatementProps = Prettify<{ value?: ASTExpression }>
+export type ASTReturnStatementProps = Prettify<{ value?: ASTExpression; explicit?: boolean }>
 
 export class ASTReturnStatement extends ASTStatement {
   declare value: ASTExpression | undefined
+  /**
+   * `true` when the person wrote the `return` (`return auto play`):
+   * it leaves its action right there, even from inside a loop.
+   * - Not one a body's last line or an inline body is made into:  that one is already at its function's end.
+   * - So a call that gives nothing keeps a `return` after it, unless nothing runs after it anyway
+   *   (`P.WriterProject.endingReturns`;  epic `language` I156).
+   */
+  declare explicit: boolean | undefined
   constructor(match: P.AnyMatch, props?: ASTReturnStatementProps) {
     super(match, props)
     this.assertType("value", ASTExpression, OPTIONAL)
+    this.assertType("explicit", "boolean", OPTIONAL)
   }
 }
 
