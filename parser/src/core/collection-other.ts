@@ -13,7 +13,7 @@ import { core } from "./core"
 import { assert } from "./assert"
 import { List } from "./classes/List"
 import { defineCoreModule } from "./core.types"
-import type { CollectionOf } from "./collection-core"
+import { isSomething, type CollectionOf } from "./collection-core"
 
 /** A valid `{ start, end }` range of indexes, as `Array.slice()` takes them:  from `start` up to, not including, `end`. */
 export type Range = {
@@ -682,10 +682,12 @@ export const collectionOtherMethods = defineCoreModule({
    * - Returns whether it moved:  refused, nothing changes.
    *   See `List.moveHere()`.
    * - A plain list has no guards:  `thing` is just added.
+   * - Nothing (`undefined` / `null`) never moves:  no, and nothing changes (epic `language` T153).
    * - Compiles from `move thing to my-list`, a statement or a yes / no -- see `rules/lists/ListMove.ts`.
    */
   move(thing?: unknown, collection?: unknown): boolean {
     if (!assert.isArrayLike(collection, "core.move(thing, collection)")) return false
+    if (!isSomething(thing)) return false
     const guarded = collection as Partial<Guarded>
     if (typeof guarded.moveHere === "function") return guarded.moveHere(thing)
     core.append(collection, thing)

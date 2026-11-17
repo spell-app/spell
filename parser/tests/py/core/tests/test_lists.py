@@ -116,7 +116,9 @@ def test_setting_and_deleting_by_index_and_slice() -> None:
     deck[-9] = "nothing changes"
     assert list(deck) == ["A", "b", "C"]
     deck[5] = "F"
-    assert list(deck) == ["A", "b", "C", None, None, "F"]
+    assert deck.items == ["A", "b", "C", None, None, "F"]
+    # a loop skips the gap's empty items (epic `language` T153)
+    assert list(deck) == ["A", "b", "C", "F"]
     deck[3:5] = ["d", "e"]
     del deck[0]
     del deck[9]
@@ -428,3 +430,29 @@ def test_length_says_how_many_it_holds() -> None:
     """`the length of the deck` reads `.length`, which once answered nothing (epic `language` I7)."""
     assert List().length == 0
     assert List([1, 2]).length == 2
+
+
+def test_nothing_is_never_added_and_loops_skip_it() -> None:
+    """Adding nothing adds nothing, moving it moves nothing, and a loop skips it (epic `language` T153)."""
+    deck = Deck(["a"])
+    deck.append(None)
+    deck.prepend(None)
+    deck.add_at(0, None, "b", None)
+    deck.add_before("a", None)
+    deck.add_after("a", None)
+    deck.insert(0, None)
+    core.append(deck, None)
+    core.merge_lists_into(deck, [None, "c"])
+    assert deck.items == ["b", "a", "c"]
+    plain: list[object] = []
+    core.append(plain, None)
+    assert plain == []
+    assert core.move(None, deck) is False
+    assert deck.move_here(None) is False
+    assert deck.items == ["b", "a", "c"]
+
+    seen: list[object] = []
+    core.for_each(["a", None, "b"], lambda item, position: seen.append((item, position)))
+    assert seen == [("a", 0), ("b", 2)]
+    assert list(core.filter(["a", None, "b"], lambda item: True)) == ["a", "b"]
+    assert list(core.pick_from_each(["a", None], lambda item: item)) == ["a"]

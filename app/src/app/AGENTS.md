@@ -196,6 +196,8 @@ and in the app's build folder, `app/` at the app folder's root.
       a tab past its tabs, as a plain line's words are (`CodeMirrorBubbly`'s `WordsPlace`, epic `language` I157).
       - Not between a drawing's tags or right above them, where a typed tag starts at its indent;
         nor a group's own lines, already drawn where its members' words are.
+      - Drawn so at once, as the caret's snap or Enter writes the line, never after the layout's pause:
+        the caret never moves once it lands (`blankLinesDrawn()`, epic `language` I158).
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
       [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
@@ -224,7 +226,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - the snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
       - not the blank lines before a group's line:  they're drawn outside the group above, so the caret stays at the
         margin (epic `language` I121)
-    - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
+    - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in;
+      not on a line Backspace or Shift+Tab just took out a level, where it stays at that level (epic `language` I159)
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
     - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
       `<action ` => `<action "|" />`, the program's actions listed once the typing pauses;  `<divider ` => `<divider | />`;
@@ -253,6 +256,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - with the caret anywhere in the gap before the comment, or between its `--`'s dashes, which the bubbly look
         draws as one, `—` (epic `codemirror` I24)
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
+  - Enter at the end of a head (`when creating solitaire`, `to draw solitaire`, `for each ...`, `if ...`) goes in a
+    level, so its body stays its body (`LSP.SpellKeywords.OPENS_BODY`, epic `language` I160)
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;
     between `<x>` and `</x>`, the caret a level in and the closing tag on its own line (epic `editor` I65):
     Spell's Enter rules, ONE table, `LSP.SpellTyping.ENTER_RULES`, which `CodeMirrorTyping` follows,

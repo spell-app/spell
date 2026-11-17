@@ -108,9 +108,9 @@ describe("a body's rail under the caret", () => {
     ])
     // `</>` and `</container>` are their own blocks' feet:  on the rail of the block round them
     const settings = getComputedStyle(view.dom)
-    const [railWidth, tab] = ["--cmb-rail", "--cmb-indent"].map((name) =>
+    const [railWidth, tab, pull] = ["--cmb-rail", "--cmb-indent", "--cmb-tag-pull"].map((name) =>
       Number.parseFloat(settings.getPropertyValue(name))
-    ) as [number, number]
+    ) as [number, number, number]
     // a band's room before its words, less a tab:  what a Spell band pads its words by
     const spellBand = view.dom.querySelector<HTMLElement>(".cmb-band-open:not(.cmb-tag-band, .cmb-band-hung)")!
     const bandRoom = Number.parseFloat(getComputedStyle(spellBand).paddingLeft) - tab
@@ -121,12 +121,13 @@ describe("a body's rail under the caret", () => {
       const start = tag ? tag.getBoundingClientRect().left : await caretMiddle(view, line)
       atRails.push({ line, start, rail: railMiddle(view, line)! })
     }
-    // a tag's pointed end:  a tab and a band's room right of the rail's left edge;  Spell's words a tab further, where
-    // a band's words on their level are (I142)
+    // Spell's words a tab and a band's room right of the rail's left edge, then a tab further, where a band's words on
+    // their level are (I142);  a tag inside another tag's pointed end a tab right of its rail's left edge, less the pull
+    // toward it (I162)
     for (const { line, start, rail } of atRails) {
       const text = view.state.doc.line(line).text
-      const spellTab = text.trimStart().startsWith("<") ? 0 : tab
-      expect(Math.abs(start - (rail - railWidth / 2) - tab - bandRoom - spellTab), text).toBeLessThan(0.1)
+      const offset = text.trimStart().startsWith("<") ? tab - pull : tab + bandRoom + tab
+      expect(Math.abs(start - (rail - railWidth / 2) - offset), text).toBeLessThan(0.1)
     }
     // four levels of rail, each a tab stop further in
     const rails = [...new Set(atRails.map(({ rail }) => rail.toFixed(1)))]
@@ -501,6 +502,106 @@ describe("a body's rail under the caret", () => {
       const last = pieces.reduce((lowest, piece) => (piece.top > lowest.top ? piece : lowest))
       expect(Math.abs(last.right - caret)).toBeLessThan(0.5)
     })
+  })
+
+  describe("a blank line an edit writes:  drawn at once, as the next layout draws it (I158)", () => {
+    /** Bodies with an empty line in each:  an `if`'s, an action's, a group's, a drawing's. */
+    const EMPTIES = `a "card" is a view
+\tgroup "Moves"
+\tto turn it over
+\t\tif it is face up
+\t\t\tturn it face down
+
+\t\t\tpause for 10 msec
+\t\tsay "done"
+
+\tto draw it
+\t\t<container columns="7">
+\t\t\t<stock-pile "stock" />
+
+\t\t\t<action "cheat" />
+\t\t</container>
+`
+
+    /** Where the caret is drawn right after `spec`'s edit, before the pause lays the text out again, and after. */
+    async function caretAtOnceAndLaidOut(view: EditorView, spec: { at: number; insert: string }) {
+      view.dispatch({
+        changes: { from: spec.at, insert: spec.insert },
+        selection: { anchor: spec.at + spec.insert.length }
+      })
+      const atOnce = await caretX(view)
+      await new Promise((done) => setTimeout(done, CodeMirrorBubbly.RELAYOUT_MSEC + 50))
+      return { atOnce, laidOut: await caretX(view) }
+    }
+
+    test("the caret's snap onto an empty body line:  where the line's words will go, at once", async () => {
+      for (const [above, indent] of [
+        ["turn it face down", "\t\t\t"],
+        ['say "done"', "\t"]
+      ] as const) {
+        view?.dom.parentElement?.remove()
+        view?.destroy()
+        const editor = await bubblyEditorOf(EMPTIES)
+        const [number] = linesStarting(editor, [above])
+        const { atOnce, laidOut } = await caretAtOnceAndLaidOut(editor, {
+          at: editor.state.doc.line(number! + 1).from,
+          insert: indent
+        })
+        expect(Math.abs(atOnce - laidOut), above).toBeLessThan(0.5)
+        const words = editor.coordsAtPos(editor.state.doc.line(number! + 2).from + indent.length, 1)!.left
+        expect(Math.abs(laidOut - words), above).toBeLessThan(0.5)
+      }
+    })
+
+    test("Enter at a body line's end, and a letter typed on the line it makes:  never moved by the layout", async () => {
+      const view = await bubblyEditorOf(EMPTIES)
+      const [number] = linesStarting(view, ["turn it face down"])
+      const { atOnce, laidOut } = await caretAtOnceAndLaidOut(view, {
+        at: view.state.doc.line(number!).to,
+        insert: "\n\t\t\t"
+      })
+      expect(Math.abs(atOnce - laidOut)).toBeLessThan(0.5)
+      // a letter typed with its indent on an empty line, as `indentToAdd()` writes it
+      const empty = view.state.doc.line(number! + 2)
+      view.dispatch({ changes: { from: empty.from, insert: "\t\t\ts" }, selection: { anchor: empty.from + 4 } })
+      await frames()
+      const letter = () => view.coordsForChar(view.state.selection.main.head - 1)!.left
+      const typed = letter()
+      await new Promise((done) => setTimeout(done, CodeMirrorBubbly.RELAYOUT_MSEC + 50))
+      await frames()
+      expect(Math.abs(typed - letter())).toBeLessThan(0.5)
+    })
+
+    test("every blank line Enter could make, after every line:  at once where the layout puts it", async () => {
+      // and a drawing's laid-out tag, its attributes on lines of their own (I133)
+      for (const sample of [EMPTIES.replaceAll("\n\n", "\n"), LAID_OUT]) {
+        view?.dom.parentElement?.remove()
+        view?.destroy()
+        await everyBlankLineIn(await bubblyEditorOf(sample))
+      }
+      // each blank line waits for its layout:  about 50 of them
+    }, 60_000)
+
+    /** Each blank line Enter could make in `view`'s text, after each line:  drawn at once where the layout puts it. */
+    async function everyBlankLineIn(view: EditorView) {
+      const lines = view.state.doc.lines
+      for (let number = 1; number < lines; number++) {
+        // the next line's indent, as the caret's snap writes it;  a level in from the line's, as Enter after a head
+        const own = /^\t*/.exec(view.state.doc.line(number).text)![0]
+        const next = /^\t*/.exec(view.state.doc.line(number + 1).text)![0]
+        for (const indent of new Set([next, own + "\t"])) {
+          const text = view.state.doc.toString()
+          const { atOnce, laidOut } = await caretAtOnceAndLaidOut(view, {
+            at: view.state.doc.line(number).to,
+            insert: "\n" + indent
+          })
+          const where = `after line ${number}, ${JSON.stringify(indent)}`
+          expect(Math.abs(atOnce - laidOut), where).toBeLessThan(0.5)
+          view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } })
+          await new Promise((done) => setTimeout(done, CodeMirrorBubbly.RELAYOUT_MSEC + 50))
+        }
+      }
+    }
   })
 
   /**

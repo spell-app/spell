@@ -176,8 +176,11 @@ class MarkupShapes {
     private readonly decorations: CodeMirrorDecorations
   ) {}
 
-  /** `shapes`, inside the blocks `rails` holds. */
-  draw(shapes: MarkupShape[], rails: Rail[]) {
+  /**
+   * `shapes`, inside the blocks `rails` holds;  `depth`, how many of a drawing's tags they're inside
+   * (0:  a drawing's outermost, right in a Spell body or an HTML file)
+   */
+  draw(shapes: MarkupShape[], rails: Rail[], depth = 0) {
     for (const shape of shapes) {
       switch (shape.kind) {
         case "tag": {
@@ -194,14 +197,17 @@ class MarkupShapes {
           break
         }
         case "markup-block":
-          this.block(shape, rails)
+          this.block(shape, rails, depth)
           break
       }
     }
   }
 
-  /** An element with what's inside it on lines of its own:  its band, its body's rail, its end tag's tiny pill. */
-  private block(block: Extract<MarkupShape, { kind: "markup-block" }>, rails: Rail[]) {
+  /**
+   * An element with what's inside it on lines of its own:  its band, its body's rail, its end tag's tiny pill;
+   * `depth` tags deep, its rail and foot pulled left with it (`Rail.nest`)
+   */
+  private block(block: Extract<MarkupShape, { kind: "markup-block" }>, rails: Rail[], depth: number) {
     const head = this.marks[block.head]
     const whole = this.marks[block.place]
     if (!head || !whole) return
@@ -212,7 +218,10 @@ class MarkupShapes {
       return
     }
     this.tagOn(block.head, ["cmb-tag-band", "cmb-band-open", "cmb-tag-start", ...hue], block.partOfSpeech)
-    const inside = [...rails, { ...this.decorations.indentAt(head.start), partOfSpeech: block.partOfSpeech }]
+    const inside = [
+      ...rails,
+      { ...this.decorations.indentAt(head.start), partOfSpeech: block.partOfSpeech, nest: depth }
+    ]
     // the rail:  every line under its start tag's first, its attributes' lines too (I133), to its end tag's
     const { doc } = this.decorations.state
     const first = doc.lineAt(head.start).number + 1
@@ -227,7 +236,7 @@ class MarkupShapes {
       if (END_TAGS_ONLY.test(doc.sliceString(line.from, line.to))) this.decorations.footAlone(foot, inside)
     }
 
-    this.draw(block.inside, inside)
+    this.draw(block.inside, inside, depth + 1)
   }
 
   /**
@@ -525,10 +534,10 @@ export class CodeMirrorDecorations {
         this.lines.delete(line)
       }
       const rail = foot.rails.length - 1
-      const { tabs, spaces } = foot.rails[rail]!
+      const { tabs, spaces, nest = 0 } = foot.rails[rail]!
       this.endRail(row.from, rail)
       this.mark(foot.start, foot.end, [], {
-        style: `--cmb-column: ${tabs}; --cmb-spaces: ${spaces}; --cmb-foot-level: ${level}`
+        style: `--cmb-column: ${tabs}; --cmb-spaces: ${spaces}; --cmb-foot-level: ${level}; --cmb-foot-nest: ${nest}`
       })
       const next = run[level + 1]
       // the line break to the next one hidden, one step for the caret
@@ -614,6 +623,13 @@ export class CodeMirrorDecorations {
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
       const styles = rails.length ? [railsStyle(rails, stopped, ended)] : []
       if (feet) styles.push(`--cmb-feet: ${feet}`)
+      // inside a drawing's tags:  its first tag pulled left a step for each (`.cmb-tag-nested`);  a row of feet places
+      // each foot itself
+      const nest = rails.filter((rail) => rail.nest !== undefined).length
+      if (nest && !classes.has("cmb-feet-row")) {
+        lineClasses.push("cmb-tag-nested")
+        styles.push(`--cmb-line-nest: ${nest}`)
+      }
       const attributes: Record<string, string> = styles.length ? { style: styles.join("; ") } : {}
       ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(from))
     }
@@ -637,8 +653,10 @@ export type Indent = { tabs: number; spaces: number }
  * One enclosing block, as a body line draws its rail:  where its band starts, and its colour.
  * - `groupOf`:  a group's rail, in its band's colour, the hue of the block it's in (`--cmb-group-<hue>`;
  *   epic `language` I147)
+ * - `nest`:  a drawing's tag's rail, how many tags its tag is inside (0:  a drawing's outermost);
+ *   its rail drawn that many pulls left (`--cmb-tag-pull`), as its band and foot are (epic `language` I162)
  */
-export type Rail = Indent & { partOfSpeech: string; groupOf?: string | undefined }
+export type Rail = Indent & { partOfSpeech: string; groupOf?: string | undefined; nest?: number }
 
 /**
  * `rails` as a CSS background:  one stripe per enclosing block, at its band's left edge, in its band's colour
@@ -650,8 +668,9 @@ export type Rail = Indent & { partOfSpeech: string; groupOf?: string | undefined
  */
 function railsOf(rails: Rail[]): string {
   return rails
-    .map(({ tabs, spaces, partOfSpeech, groupOf }) => {
-      const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) + var(--cmb-rail-left))`
+    .map(({ tabs, spaces, partOfSpeech, groupOf, nest }) => {
+      const pull = nest ? ` - ${nest} * var(--cmb-tag-pull)` : ""
+      const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space)${pull} + var(--cmb-rail-left))`
       const colour = groupOf ? `var(--cmb-group-${groupOf})` : `var(--cmb-band-${partOfSpeech})`
       return `linear-gradient(to right, transparent ${x}, ${colour} ${x}, ${colour} calc(${x} + var(--cmb-rail)), transparent calc(${x} + var(--cmb-rail)))`
     })

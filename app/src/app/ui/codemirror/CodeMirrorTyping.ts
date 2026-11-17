@@ -33,6 +33,8 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   - No undo step of its own:  kept out of undo, as an edit from outside the code is.
  * - A letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in;
  *   the same undo step as the letter.
+ *   - Not on a line Backspace (or Shift+Tab) just took out a level:  the letter stays where the caret's drawn,
+ *     at that level, till the caret leaves the line (`wentOut`;  epic `language` I159).
  * - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;
  *   one undo leaves `group ` again, and a `"` typed after the name steps over the closing one.
  * - A space after a tag's name writes the rest of the tag, the caret where its next words go:
@@ -66,6 +68,7 @@ export class CodeMirrorTyping {
     return [
       HAS_TYPING_HELPS.of(true),
       snapped,
+      wentOut,
       EditorState.transactionFilter.of((transaction) => CodeMirrorTyping.moved(transaction, lang)),
       // before the base setup's keys:  its Tab, ⌘[ and ⌘] would indent the line alone
       Prec.high(
@@ -255,7 +258,8 @@ export class CodeMirrorTyping {
     lines[index] = line.text.slice(0, column) + text + line.text.slice(column)
     const onLine = { from: line.number, to: line.number }
     if (text === ">" && closeWithBar(view, from)) return true
-    const indent = LSP.SpellTyping.indentToAdd(lines, index, column)
+    // a line Backspace took out a level:  its letter stays at that level (I159)
+    const indent = state.field(wentOut) === line.from ? "" : LSP.SpellTyping.indentToAdd(lines, index, column)
     // the letter and its indent, one undo step
     if (indent)
       return write(view, onLine, {
@@ -553,5 +557,25 @@ const snapped = StateField.define<Snapped | undefined>({
     const caretLine = transaction.state.doc.lineAt(transaction.state.selection.main.head).number
     if (line.text.trim() || (isTyped && caretLine !== line.number)) return undefined
     return { ...value, from: line.from }
+  }
+})
+
+/**
+ * The blank line Backspace or Shift+Tab last took the caret out a level on, by where it starts, till the caret leaves it
+ * or something's typed on it (epic `language` I159).
+ * - A letter typed there stays at the level the caret's drawn at:  no indent added (`indentToAdd()`).
+ * - Moves with edits above it.
+ */
+const wentOut = StateField.define<number | undefined>({
+  create: () => undefined,
+  update(value, transaction) {
+    const { state } = transaction
+    const caret = state.selection.main
+    const line = state.doc.lineAt(caret.head)
+    const isBlank = !line.text.trim()
+    if (transaction.docChanged && transaction.isUserEvent("delete") && caret.empty && isBlank) return line.from
+    if (value === undefined) return undefined
+    const from = transaction.docChanged ? transaction.changes.mapPos(value, -1) : value
+    return from === line.from && isBlank ? from : undefined
   }
 })

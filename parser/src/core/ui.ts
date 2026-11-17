@@ -3,6 +3,7 @@ import { schemaOf, type Schema } from "spell/util/reactive"
 
 import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
+import type { MenuItem } from "./acting"
 import { printAlone } from "./printing"
 
 /** The program said `scroll to the top`, this moment. */
@@ -224,6 +225,31 @@ export const uiMethods = defineCoreModule({
   },
 
   ////////////////
+  // ## Drawn things, by name
+  ////////////////
+
+  /**
+   * Show what the program drew and named `name`:  what `show "you won"` compiles to (epic `language` P61).
+   * - Named by the quoted word on its tag, `<modal "you won">`, drawn with its words joined by `-` as its id,
+   *   `you-won`:  found by that id, in the app's page and inside its views (`drawnNamed()`).
+   * - A modal, a menu or a popup shows (its `visible`).
+   * - Under node, with no page:  nothing.
+   * - throws `TypeError` when nothing drawn has that name
+   */
+  showDrawn(name: string): void {
+    setDrawnVisible("showDrawn", name, true)
+  },
+
+  /**
+   * Hide what the program drew and named `name`:  what `hide "you won"` compiles to.
+   * - As `showDrawn()`:  a modal closes.
+   * - throws `TypeError` when nothing drawn has that name
+   */
+  hideDrawn(name: string): void {
+    setDrawnVisible("hideDrawn", name, false)
+  },
+
+  ////////////////
   // ## Styles
   ////////////////
 
@@ -334,6 +360,63 @@ Object.assign(core, uiMethods)
  * - e.g. `{ "ui-button": { appearance: "pill" }, "ui-segment": { appearance: "raised" } }`
  */
 export type UIDefaultsTable = Readonly<Record<string, Readonly<Record<string, string | number | boolean>>>>
+
+/**
+ * Show or hide what the program drew and named `name` (`core.showDrawn()`, `core.hideDrawn()`), for `method`.
+ * - Shown by its `visible`, as Spell UI's modal is.
+ * - Under node, with no page:  nothing.
+ * - throws `TypeError` when nothing drawn has that name, or it can't be shown
+ */
+function setDrawnVisible(method: string, name: string, visible: boolean): void {
+  if (typeof document === "undefined") return
+  const element = drawnNamed(name)
+  if (!element) {
+    throw new TypeError(`core.${method}():  nothing drawn is named "${name}";  name it on its tag, <modal "${name}">`)
+  }
+  if (!("visible" in element)) {
+    throw new TypeError(`core.${method}():  <${element.localName}> "${name}" can't be shown or hidden`)
+  }
+  ;(element as { visible?: boolean }).visible = visible
+}
+
+/**
+ * The items of the menu the program drew and named `name`, `<menu "game menu">`, as its rows show them now:
+ * for a right-click menu that reuses it, `<context-menu "game menu" />` or `context-menu="game menu"`
+ * (epic `language` T156) -- `undefined` when nothing drawn has that name.
+ * - Each action's row holds its action (`core.drawAction()`'s `in-menu`), read live;  a divider is a line between groups.
+ * - Under node, with no page:  `undefined`.
+ */
+export function drawnMenuItemsOf(name: string): MenuItem[] | undefined {
+  if (typeof document === "undefined") return undefined
+  const menu = drawnNamed(name)
+  if (!menu) return undefined
+  return [...menu.querySelectorAll(MENU_ROW_TAG)].flatMap((row): MenuItem[] => {
+    if (row.getAttribute("kind") === MENU_DIVIDER) return [{ kind: "separator" }]
+    const action = (row as { action?: MenuItem }).action
+    return action ? [action] : []
+  })
+}
+
+/** A drawn menu's rows, and the kind of one that's a line between groups:  Spell UI's `<ui-action kind="divider">`. */
+const MENU_ROW_TAG = "ui-action"
+const MENU_DIVIDER = "divider"
+
+/**
+ * What the program drew and named `name`:  the element whose id is its words joined by `-`, `you-won` for
+ * `"you won"` -- `undefined` for none.
+ * - Looked for in the app's page (`core.domRoot()`), then inside every view drawn there:
+ *   a view draws in a shadow root of its own, which `getElementById()` can't see into.
+ */
+function drawnNamed(name: string): Element | undefined {
+  const id = name.trim().split(/\s+/).join("-")
+  const roots: Array<Document | ShadowRoot> = [core.domRoot()]
+  for (const root of roots) {
+    const found = root.getElementById(id)
+    if (found) return found
+    for (const element of root.querySelectorAll("*")) if (element.shadowRoot) roots.push(element.shadowRoot)
+  }
+  return undefined
+}
 
 /** The project's `.css` so far, by file:  `core.installStyles()`, for `core.projectSheet()`. */
 const projectCss = new Map<string, string>()

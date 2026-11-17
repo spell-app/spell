@@ -24,8 +24,9 @@ import { SpellJSXText } from "./SpellJSXText"
 // spell's own tag words, each meaning the web's tag:  `<children/>` => `<slot/>`
 // - the web's own `slot` too:  a word rule needs two forms
 // - and spell's own action tag, `<action "auto play"/>` (`action_button`), its `<context-menu>` and the `<divider/>` in it (`context_menu_block`)
+// - `<separator/>` is `<divider/>` too, wherever it's written (epic `language` T156;  Owen, 2026-11-17)
 JSX.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_TAG_MEANINGS }), {
-  syntax: "((slot:children)|slot|(action:action)|(context_menu:context-menu)|(divider:divider))"
+  syntax: "((slot:children)|slot|(action:action)|(context_menu:context-menu)|(divider:divider|separator))"
 })
 
 // spell's own attribute words, each meaning the web's attribute:  `<h3 in="header">` => `<h3 slot="header">`

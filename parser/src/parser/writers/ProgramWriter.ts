@@ -27,6 +27,7 @@ const BUILT_IN_EVENTS: Record<string, Record<string, string>> = {
   click: {},
   "double-click": {},
   "right-click": {},
+  "long-press": {},
   "center-click": {},
   "mouse-down": {},
   "mouse-up": {},

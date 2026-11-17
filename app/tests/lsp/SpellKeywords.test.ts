@@ -144,6 +144,82 @@ describe("SpellKeywords", () => {
     })
   })
 
+  describe("Enter after a head goes in a level (epic `language` I160)", () => {
+    const { OPENS_BODY } = LSP.SpellKeywords
+
+    /** The rules whose lines are heads, a body under them:  handlers, actions, control lines. */
+    const HEAD_RULES = [
+      "if",
+      "else",
+      "else_if",
+      "list_iteration",
+      "list_range_iteration",
+      "list_iteration_named_for_list",
+      "repeat_n_times",
+      "while_waiting",
+      "if_that_fails",
+      "if_there_are_none",
+      "create_hook",
+      "after_hook",
+      "draw_it",
+      "drag_handler",
+      "meanwhile"
+    ]
+
+    test("after a handler's, an action's or a control line's head, in every pack's words", () => {
+      for (const language of SP.Language.all.values()) {
+        const keywords = LSP.SpellKeywords.of(language)
+        for (const phrase of HEAD_RULES.flatMap((rule) => keywords.leadingPhrasesOf(rule))) {
+          expect(OPENS_BODY.test(`\t${phrase} x`), `${language.lang}:  ${phrase}`).toBe(true)
+        }
+      }
+      for (const head of [
+        "\twhen creating solitaire",
+        "\tto draw solitaire",
+        '\tto "reset the stock"',
+        "\t\tfor each card in the deck",
+        "\t\tif the stock is empty",
+        "\t\totherwise",
+        "\ton click",
+        '\tto "auto play" with shortcut "A", icon "play"',
+        "\tal crear el solitario",
+        "\t\tpara cada carta en el mazo",
+        "\t\tde lo contrario"
+      ]) {
+        expect(OPENS_BODY.test(head), head).toBe(true)
+      }
+    })
+
+    test("after a type's line at the top:  a type, an app", () => {
+      for (const head of [`a "card" is a view`, "a card\t\t-- play it on click", `un "mazo" es una pila`]) {
+        expect(OPENS_BODY.test(head), head).toBe(true)
+      }
+      expect(OPENS_BODY.test("solitaire is an app")).toBe(true)
+      expect(OPENS_BODY.test("solitario es una aplicación")).toBe(true)
+    })
+
+    test("not after a step, a member, a group's line, or a type's word inside a body", () => {
+      for (const line of [
+        "\t\tadd each card in the deck to the stock",
+        '\tits "rank" is a number',
+        '\tgroup "Dealing"',
+        "\t\ta card is face up",
+        "\t\ttoggle the stock",
+        "\t\tsiempre",
+        "add (a card) to the stock",
+        "\t\tset the score to 0"
+      ]) {
+        expect(OPENS_BODY.test(line), line).toBe(false)
+      }
+    })
+
+    test("only at the line's end:  Enter in a head's middle leaves its end at the head's level", () => {
+      expect(LSP.SpellTyping.enterRuleFor("\tto draw solitaire", "")?.indent).toBe("indent")
+      expect(LSP.SpellTyping.enterRuleFor("\tto draw solitaire", "  ")?.indent).toBe("indent")
+      expect(LSP.SpellTyping.enterRuleFor("\tto draw", " solitaire")).toBeUndefined()
+    })
+  })
+
   describe("Enter before a comment after code (epic `editor` I155)", () => {
     const { CODE_BEFORE, COMMENT_AFTER } = LSP.SpellKeywords
 

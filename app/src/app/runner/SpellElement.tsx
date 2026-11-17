@@ -11,6 +11,7 @@ import type { ElementApi, Core, MenuItem } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
 import { ActionMenus } from "./ActionMenus"
+import { LONG_PRESS_EVENT, LongPress } from "./LongPress"
 
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
@@ -965,13 +966,31 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.runThingHandler(event)
   }
 
-  /** A right click:  the menu its `context-menu=` names, if any (epic `elemental-spell` P10, Q30), and our handler. */
+  /**
+   * A right click:  the menu its `context-menu=` names, if any (epic `elemental-spell` P10, Q30), and our handler.
+   * - On a phone or tablet with no mouse, a finger held still sends it too, unless an `on long press` took it
+   *   (`LongPress`, epic `language` P62, T154).
+   */
   @E.on("contextmenu")
   protected onThingRightClick(event: MouseEvent) {
     const { entry } = this
     if (entry && !event.defaultPrevented) {
       ActionMenus.showContextMenu(event, this.domElement, this.currentThing, entry.core)
     }
+    this.runThingHandler(event)
+  }
+
+  /**
+   * A finger held still on us (`LongPress`, epic `language` T154):  `on long press`, our thing's or up its chain.
+   * - Taken, it's no right click as well:  we say so to `LongPress` (`preventDefault()`).
+   */
+  @E.on(LONG_PRESS_EVENT)
+  protected onThingLongPress(event: MouseEvent) {
+    const thing = this.currentThing as Record<string, unknown> | undefined
+    const core = this.entry?.core
+    if (!thing || !core || this.isInAControl(event)) return
+    const takes = core.remote ? SpellElement.handles(thing, LONG_PRESS) : core.takesEvent(thing, LONG_PRESS)
+    if (takes) event.preventDefault()
     this.runThingHandler(event)
   }
 
@@ -1007,6 +1026,11 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
       if (target instanceof Element && target.matches(CONTROL_SELECTOR)) return true
     }
     return false
+  }
+
+  /** Is a view's element on `path`, any runtime copy's:  a long press there opens its right-click menu (`LongPress`). */
+  private static isOnAView(path: readonly EventTarget[]): boolean {
+    return path.some((target) => target instanceof Element && SPELL_ELEMENTS.has(target.localName))
   }
 
   /** May people reorder `list`'s items, dragging them?  Its type says so:  `its items can be reordered`. */
@@ -1438,6 +1462,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    */
   static defineFor(tag: string, Class: Function, core: Core): void {
     SPELL_ELEMENTS.set(tag, { Class, core })
+    // on a phone, a finger held on a view opens its right-click menu (epic `language` P62)
+    LongPress.listen(SpellElement.isOnAView)
     const Base = (core.elementClassOf(Class) ?? SpellElement) as typeof SpellElement
     // never "":  `UI.styles.register()` takes that as "unregister", and the tag's elements would lose the sheet
     const css = SpellElement.sheetFor(tag, Class, Base) || `/* <${tag}>:  no styles of its own */`
@@ -1879,6 +1905,9 @@ type SelectableList = { selection: Iterable<object>; select?: (items: Iterable<o
 /** Each list's clicks to select:  its last item clicked, where a shift-click's range starts. */
 const LIST_SELECTIONS = new WeakMap<object, ListSelection<object>>()
 
+/** Spell's name for a finger held still on a view, `on long press` (`LongPress`, epic `language` T154). */
+const LONG_PRESS = "long-press"
+
 /**
  * The browser's mouse events a view's thing may handle, by spell's name for each (Q30, Q32):
  * `mousedown` is `mouse down`, so `- on mouse down:` is its handler, `onMouseDown()`.
@@ -1889,6 +1918,7 @@ const THING_EVENTS: Record<string, string> = {
   click: "click",
   dblclick: "double-click",
   contextmenu: "right-click",
+  [LONG_PRESS_EVENT]: LONG_PRESS,
   auxclick: "center-click",
   mousedown: "mouse-down",
   mouseup: "mouse-up",
@@ -1927,7 +1957,7 @@ const CORE_BASE_NAMES = new Set([
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]
 
 /** The mouse's events that are a person's action, which waits its turn (`core.runPressed()`). */
-const PRESSES = new Set(["click", "double-click", "right-click", "center-click"])
+const PRESSES = new Set(["click", "double-click", "right-click", LONG_PRESS, "center-click"])
 
 /** The cores keeping up with the page's mouse and keys already:  see `SpellElement.noteInput()`. */
 const LISTENING_CORES = new WeakSet<object>()

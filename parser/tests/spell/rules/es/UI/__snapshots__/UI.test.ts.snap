@@ -10,6 +10,7 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "print": "operator?|expressions",
   "prompt": "message|defaultValue?",
   "show_dates_as": "style",
+  "show_drawn": "hide?|name",
   "stop_sound": "sound",
   "warn": "message|title?|size?|okButton?",
 }

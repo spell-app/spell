@@ -165,6 +165,8 @@ export class SpellTyping {
     { beforeText: SpellKeywords.OPENS_TAG, indent: "indent" },
     // a comment after code goes on its own line, a level in (epic `editor` I155)
     { beforeText: SpellKeywords.CODE_BEFORE, afterText: SpellKeywords.COMMENT_AFTER, indent: "indent" },
+    // after a head, a body under it (epic `language` I160)
+    { beforeText: SpellKeywords.OPENS_BODY, afterText: SpellKeywords.AT_LINE_END, indent: "indent" },
     { beforeText: /:\s*$/, indent: "indent" },
     // a condition going on onto the next line (epic `language` P55, Q53)
     { beforeText: SpellKeywords.CONTINUES_LINE, indent: "indent" }

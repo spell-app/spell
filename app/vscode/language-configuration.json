@@ -45,6 +45,11 @@
       "action": { "indent": "indent" }
     },
     {
+      "beforeText": { "pattern": "^(?:[ \\t]*(?:when|on|after|to|for|if|otherwise|else|repeat|while|meanwhile|cuando|al|después\\s+de|despues\\s+de|para|por|si|sino|de\\s+lo\\s+contrario|repetir|mientras)(?![\\p{L}\\p{M}\\d_-])|(?:an?|una?)\\s|\\S.*\\s(?:is\\s+an?|es\\s+una?)\\s+(?:app|aplicación)(?![\\p{L}\\p{M}\\d_-]))", "flags": "u" },
+      "afterText": "^\\s*$",
+      "action": { "indent": "indent" }
+    },
+    {
       "beforeText": ":\\s*$",
       "action": { "indent": "indent" }
     },

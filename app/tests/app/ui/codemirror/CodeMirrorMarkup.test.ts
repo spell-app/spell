@@ -87,11 +87,11 @@ describe("CodeMirrorMarkup", () => {
     expect(rows.get("  </body>")!.style).toContain("--cmb-feet: 2")
     // the blocks' own rails end in the row:  each foot draws its own
     expect(rows.get("  </body>")!.style).toContain("--cmb-rail-sizes: 0 0, 0 0")
-    // each foot at its block's rail, the outer one a step down
+    // each foot at its block's rail, the outer one a step down;  a block inside `<html>` pulled toward its rail (I162)
     expect(feet.map(({ text, style }) => [text, style])).toEqual([
-      ["</head>", "--cmb-column: 0; --cmb-spaces: 2; --cmb-foot-level: 0"],
-      ["</body>", "--cmb-column: 0; --cmb-spaces: 2; --cmb-foot-level: 0"],
-      ["</html>", "--cmb-column: 0; --cmb-spaces: 0; --cmb-foot-level: 1"]
+      ["</head>", "--cmb-column: 0; --cmb-spaces: 2; --cmb-foot-level: 0; --cmb-foot-nest: 1"],
+      ["</body>", "--cmb-column: 0; --cmb-spaces: 2; --cmb-foot-level: 0; --cmb-foot-nest: 1"],
+      ["</html>", "--cmb-column: 0; --cmb-spaces: 0; --cmb-foot-level: 1; --cmb-foot-nest: 0"]
     ])
     // the line break between `</body>` and `</html>` hidden, one step for the caret;  nothing else
     expect(joins).toEqual([{ text: "\n", isAtomic: true }])

@@ -1705,6 +1705,19 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - Several words are joined by dashes, each as written (epic `language` T147):  `"discard pile" is a new discard pile`
       is `{ id: "discard-pile" }`, and `<discard-pile "discard pile"/>` draws `id="discard-pile"`;  `discard pile` still
       finds it (`core.thingNamed()`).
+- WHAT COMES AND GOES IS NAMED BY ITS QUOTED WORD (epic `language` P61;  Owen, 2026-11-17):  `<modal "you won">` ~==
+  `<modal id="you-won" heading="you won">`, so `show "you won"` shows it and `hide "you won"` hides it.
+  - A modal, a menu and a popup only (`NAMED_TAGS`, [SpellJSX.ts](rules/JSX/SpellJSX.ts);  Owen:  "Don't need it on
+    everything"):  `<menu "game menu">` is `id="game-menu"`;  `<popup "a hint">` is its id and its heading too.
+  - Its id is its words joined by dashes, as a view's;  a heading the word as written, unless the tag says its own.
+  - Only on a tag that's none of the project's views, in any language:  Spanish's `<modal "ganaste">` is
+    `<es-modal id="ganaste" encabezado="ganaste">`, the heading's name the pack's (`SP.ComponentPacks.attributeNameFor()`).
+  - On any other tag a quoted word is still unreadable.
+  - `show "you won"`, `hide "you won"` (`show_drawn`, [ShowDrawn.ts](rules/UI/ShowDrawn.ts)):  a quoted name, nothing
+    else;  Spanish's `mostrar "ganaste"`, `ocultar "ganaste"`.
+    - Compiled to `core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page or
+      inside a view's shadow root, its `visible` set.  Python's `core.show_drawn()` asks its page to (`page.ts`).
+    - A program's own `to show (word as text)` still wins:  its method's rule reads `show "fizz"` first.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
@@ -1770,6 +1783,23 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Compiles to `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`:  a hidden `<spell-context-menu>`, which
     the app's `ActionMenus.showContextMenu()` finds on the right click's path, before a `context-menu="name"`.
   - A `<divider/>` anywhere else keeps its word:  Spell UI's divider;  in a `<menu>`, a menu's line (above).
+  - REUSING A MENU BY ITS NAME (epic `language` T156;  Owen, 2026-11-17), either shape:
+    - `<context-menu "game menu" />` inside the element:  the menu of that name's items, drawn (`<menu "game menu">`)
+      or a template's, as they show when the right click comes;  compiled as one more item,
+      `core.drawContextMenu(this, [{ menu: "game menu" }])` (`P.ASTContextMenuItem`, `core.menuItemsOf()`).
+      - It may hold its own items too, no `<menu>` around them:  they come FIRST, then the menu's, with no line
+        between unless it writes one.
+    - `context-menu="game menu"` on the element (Spanish's `menú-contextual="..."`, written as the web's
+      `context-menu`):  as before, the page finds it by name (`core.menuOf()`):  a template's menu, else, new, the
+      drawn one (`drawnMenuItemsOf()`, core's `ui.ts`).
+    - Either refused, once the whole program has parsed, when no menu, drawn or a template's, has that name
+      (`unknown-menu`, `unknown-menu-attribute`).  The names are kept per project as they parse (`noteMenuName()`,
+      `hasMenuNamed()`, `JSX.shared.ts`), so a menu renamed in an editor counts by its old name until a fresh parse;
+      and a template's menu in an imported project isn't known there, so naming one is refused.
+  - `<separator/>` is `<divider/>` (T156;  Owen:  "make `<separator/>` an alias"), wherever it's written:  a word of
+    `spell_jsx_tag` meaning `divider` (Spanish's `<separador/>`), so a menu's, a toolbar's and a context menu's line;
+    anywhere else Spell UI's divider, named by the language's first word for it (`SpellJSX.dividerWordFor()`), unless the
+    project has a type of that name.
 - COMMENTS INSIDE MARKUP (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to

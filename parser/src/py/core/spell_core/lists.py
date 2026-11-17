@@ -148,8 +148,9 @@ class List(SpellObject, MutableSequence[Any]):
 
         - As they were when the loop started:  a loop moving cards out of the pile still sees each one.
           (Every change writes a new list of items, so the loop's stays as it was.)
+        - Skips an empty item (`None`):  a loop never runs its body on nothing (epic `language` T153).
         """
-        return iter(self._items)
+        return (item for item in self._items if item is not None)
 
     def __reversed__(self) -> Iterator[Any]:
         """Our items, last first:  `reversed(deck)`."""
@@ -552,7 +553,10 @@ class List(SpellObject, MutableSequence[Any]):
         - The list holding it:  the one of our family, if we're exclusive.
           Else no list is asked to give it up:  just `can_take()`.
         - Then added, as `append()`:  its owner changes ONCE.
+        - Nothing (`None`) never moves:  `False`, and nothing changes (epic `language` T153).
         """
+        if item is None:
+            return False
         family = self._family
         owner = family.owner_of(item) if family else None
         if owner is not None and not owner.can_give_up(item):
@@ -626,8 +630,11 @@ class List(SpellObject, MutableSequence[Any]):
         """SIDE EFFECT:  put `things` before Python's index `index`.
 
         - Exclusive:  one we hold already MOVES there.
+        - Nothing (`None`) is never added (epic `language` T153):  every way spell adds comes here.
         """
-        things = list(things)
+        things = [thing for thing in things if thing is not None]
+        if not things:
+            return
         items = list(self._items)
         if self._family:
             moving = {id(thing) for thing in things if is_ownable(thing)}
