@@ -162,6 +162,39 @@ describe("a body's rail under the caret", () => {
     }
   })
 
+  test("end tags on ONE line, `</></>`:  the same row of feet as on lines of their own, every foot alike (I146)", async () => {
+    // Owen:  "Wonky feet" -- one a tiny foot, the other an inline end tag on a rail stub
+    const feetOf = async (ends: string) => {
+      const view = await bubblyEditorOf(
+        `a "game" is a view\n\tto draw it\n\t\t<segment inverted>\n\t\t\t<toolbar class="x">\n\t\t\t\t<text "" />\n${ends}\t\t<container>\n\t\t\t<column "C1"/>\n\t\t</container>\n`
+      )
+      await frames()
+      const first = view.contentDOM.querySelector(".cmb-feet-row")!
+      const feet = [...first.querySelectorAll<HTMLElement>(".cmb-tag-foot")].map((foot) => {
+        const box = foot.getBoundingClientRect()
+        return { left: box.left, top: box.top, width: box.width, height: box.height }
+      })
+      const row = first.getBoundingClientRect().height
+      view.dom.parentElement?.remove()
+      view.destroy()
+      return { feet, row }
+    }
+    const apart = await feetOf("\t\t\t</>\n\t\t</>\n")
+    expect(apart.feet).toHaveLength(2)
+    for (const ends of ["\t\t\t</></>\n", " \t\t\t</></>\n"]) {
+      const together = await feetOf(ends)
+      expect(together.row).toBe(apart.row)
+      expect(together.feet).toHaveLength(2)
+      for (const [at, foot] of together.feet.entries()) {
+        const other = apart.feet[at]!
+        expect(Math.abs(foot.left - other.left), `foot ${at} left`).toBeLessThan(0.1)
+        expect(Math.abs(foot.top - other.top), `foot ${at} top`).toBeLessThan(0.1)
+        expect(Math.abs(foot.width - other.width), `foot ${at} width`).toBeLessThan(0.1)
+        expect(Math.abs(foot.height - other.height), `foot ${at} height`).toBeLessThan(0.1)
+      }
+    }
+  })
+
   test("a run of end tags alone on their lines:  ONE row of feet, each end tag reached by a click and the caret (I132)", async () => {
     const view = await bubblyEditorOf(NESTED)
     const [end, outerEnd] = linesStarting(view, ["</>", "</container>"])
@@ -277,6 +310,31 @@ describe("a body's rail under the caret", () => {
     cursorLineDown(view)
     expect(view.state.selection.main.head).toBe(line.from + 1)
     expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
+  })
+
+  test("Left, Left, Right at a pill's first letter, after a space or an `=`:  drawn in ONE place, at the word (I141)", async () => {
+    // Owen:  "Seeing the same thing in pills before unqoured white pill"
+    const view = await bubblyEditorOf(
+      "solitaire is an app\n\twhen creating solitaire\n\t\tpause for 10 msec\n\tto draw it\n\t\t<card-image direction=down />\n"
+    )
+    for (const word of ["creating", "down"]) {
+      const start = view.state.doc.toString().indexOf(word)
+      view.dispatch({ selection: { anchor: start + 1 } })
+      cursorCharLeft(view)
+      const left = await caretX(view)
+      expect(view.state.selection.main.head).toBe(start)
+      cursorCharLeft(view)
+      cursorCharRight(view)
+      expect(view.state.selection.main.head).toBe(start)
+      const right = await caretX(view)
+      expect(Math.abs(right - left), word).toBeLessThan(0.01)
+      // at the word's first letter, inside its pill
+      const letter = document.createRange()
+      const node = view.domAtPos(start + 1).node
+      letter.setStart(node, 0)
+      letter.setEnd(node, 1)
+      expect(Math.abs(left - letter.getBoundingClientRect().left), word).toBeLessThan(1)
+    }
   })
 
   test("a plain body line's first word where a band's words on its level are, at every level;  its column 0 on its rail (I142)", async () => {
@@ -451,6 +509,106 @@ describe("a body's rail under the caret", () => {
     const after = rows[1]!.getBoundingClientRect().right
     expect(after).toBeGreaterThan(before + 50)
     expect(Math.abs(rows[0]!.getBoundingClientRect().right - after)).toBeLessThan(0.1)
+  })
+
+  /** `LAID_OUT`, its `>` alone on the line under its last attribute, as Solitaire's toolbar is written (I144). */
+  const CLOSE_ALONE = `a "game" is a view
+\tto draw it
+\t\t<segment inverted>
+\t\t\t<toolbar
+\t\t\t\tclass="GameBar"
+\t\t\t\tappearance="pills"
+\t\t\t\tinverted
+\t\t\t\tsize="small"
+\t\t\t\tshrinkable
+\t\t\t>
+\t\t\t\t<action "cheat" />
+\t\t\t</>
+\t\t</segment>
+`
+
+  test("...its `>` alone on the line under:  still drawn on the last attribute's line, 4px past it (I144)", async () => {
+    const view = await bubblyEditorOf(CLOSE_ALONE)
+    await frames()
+    const [last, close] = linesStarting(view, ["shrinkable", ">"])
+    // Owen:  "End `>` is supposed to be on same line as `shrinkable`";  the file unchanged
+    expect(view.state.doc.line(close!).text.trim()).toBe(">")
+    const row = lineElement(view, last!)
+    expect(lineElement(view, close!)).toBe(row)
+    expect(row.querySelector(".cmb-tag-block")!.classList.contains("cmb-tag-block-last")).toBe(true)
+    // its `⟩`'s ink past `shrinkable`'s, as drawn now
+    const room = () => {
+      const line = lineElement(view, last!)
+      const angle = line.querySelector(".cmb-tag-point .bubbly-angle-close")!
+      const angleInk =
+        angle.getBoundingClientRect().right - 0.348 * Number.parseFloat(getComputedStyle(angle, "::before").fontSize)
+      return angleInk - inkRightOf(line.querySelector(".bubbly-attribute-name")!)
+    }
+    expect(Math.abs(room() - 4)).toBeLessThan(0.1)
+    const word = row.querySelector(".bubbly-attribute-name")!
+    // the caret:  at the word's end, at the end of its line or before the `>`;  after the `>`, past its point
+    const caretAt = async (at: number) => {
+      view.dispatch({ selection: { anchor: at } })
+      await frames()
+      return view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    }
+    const wordBox = word.getBoundingClientRect()
+    const closeLine = view.state.doc.line(close!)
+    for (const at of [view.state.doc.line(last!).to, closeLine.to - 1]) {
+      const caret = await caretAt(at)
+      expect(Math.abs(caret.left - wordBox.right), `caret at ${at}`).toBeLessThan(1)
+      expect(Math.abs(caret.top - wordBox.top), `caret at ${at}`).toBeLessThan(wordBox.height)
+    }
+    const point = row.querySelector(".cmb-tag-point")!.getBoundingClientRect()
+    expect(Math.abs((await caretAt(closeLine.to)).left - point.right)).toBeLessThan(1)
+    // typed on:  still on its line, and 4px past once it's laid out again
+    view.dispatch({ changes: { from: view.state.doc.line(last!).to, insert: "s" } })
+    await new Promise((done) => setTimeout(done, CodeMirrorBubbly.RELAYOUT_MSEC + 50))
+    await frames()
+    await frames()
+    expect(lineElement(view, close!)).toBe(lineElement(view, last!))
+    expect(Math.abs(room() - 4)).toBeLessThan(0.1)
+  })
+
+  test('...one attribute, its `/>` alone on the line under:  one row, `⟨ divider title="x" |⟩` (I144)', async () => {
+    const view = await bubblyEditorOf(`a "game" is a view\n\tto draw it\n\t\t<divider\n\t\t\ttitle="x"\n\t\t/>\n`)
+    await frames()
+    await frames()
+    const line = lineElement(view, 3)
+    expect(lineElement(view, 4)).toBe(line)
+    expect(lineElement(view, 5)).toBe(line)
+    expect(line.querySelector(".cmb-tag-block")!.classList.contains("cmb-tag-block-last")).toBe(true)
+    const slash = line.querySelector(".cmb-tag-point .bubbly-slash")!.getBoundingClientRect()
+    const quote = line.querySelector(".cmb-quote-close .cmb-quote-glyph")!
+    expect(Math.abs(slash.left - inkRightOf(quote) - 4)).toBeLessThan(0.1)
+  })
+
+  test("a quote left open breaks its own line only:  every tag, band and `⟩` after it drawn as before (I145)", async () => {
+    // Owen:  "Quotes don't span lines, so a quoted expression should only break its line"
+    const drawn = async (text: string) => {
+      const view = await bubblyEditorOf(text)
+      await frames()
+      const content = view.contentDOM
+      const shape = {
+        tags: content.querySelectorAll(".bubbly-tag-name").length,
+        bands: content.querySelectorAll(".cmb-band, .cmb-band-open").length,
+        rows: content.querySelectorAll(".cmb-tag-block").length,
+        points: content.querySelectorAll(".cmb-tag-point").length
+      }
+      view.dom.parentElement?.remove()
+      view.destroy()
+      return shape
+    }
+    const closed = await drawn(CLOSE_ALONE)
+    expect(closed.points).toBe(1)
+    expect(await drawn(CLOSE_ALONE.replace('size="small"', 'size="small'))).toEqual(closed)
+    // a plain Spell line's:  the lines after it keep their bands
+    const view = await bubblyEditorOf(
+      'a "card" is a view\n\tits "name is text\n\tits "rank" is a number\n\tits "suit" is text\n'
+    )
+    await frames()
+    for (const number of [1, 3, 4])
+      expect(lineElement(view, number).querySelector(".cmb-band"), `line ${number}`).toBeTruthy()
   })
 
   test("an attribute's opening quote mark a space's room after its `=`, as after a space", async () => {

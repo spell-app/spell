@@ -2141,11 +2141,10 @@
       height: var(--cmb-line-height);
       padding-bottom: calc(2 * var(--cmb-words-lift) + var(--cmb-band-margin));
     }
-    /* ... a `>` alone on its line, back at the tag's level (as I133 laid it out):  from the band's left edge */
-    .cmb-tag-row.cmb-tag-row-close {
-      margin-left: calc(var(--cmb-band-left) - var(--cmb-reach-before));
-    }
-    /* ... its last row:  its `>` on its line, its `⟩` 4px past the last attribute's ink (`--cmb-reach-point`;  I139) */
+    /*
+     * ... its last row:  its `>` on its line, its `⟩` 4px past the last attribute's ink (`--cmb-reach-point`;  I139),
+     * a `>` alone on the line under drawn there too (I144)
+     */
     .cmb-tag-block-last {
       position: relative;
       border-bottom-left-radius: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);

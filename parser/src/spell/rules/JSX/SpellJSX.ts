@@ -345,7 +345,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       return SP.SpellWarnings.refuseIf(match, message, () => !SpellJSX.isLaterView(laterView.type))
     }
     const { data } = match as P.Match<P.MatchGroups, { error?: P.Match }>
-    data.error = SP.spellParser.createParseError(scope, [element], message)
+    // an attribute it skipped:  that much broken, not the whole tag and all it holds (epic `language` I145)
+    data.error = SP.spellParser.createParseError(scope, [element.unreadableAt ?? element], message)
   }
 
   /**

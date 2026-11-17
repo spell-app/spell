@@ -8,6 +8,12 @@ import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
 import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE, cssBuildTarget } from "spell/element-tools/elementConfig"
 import { emitIconPacks } from "spell/ui/vite.config.ts"
+import {
+  PAGE_SERVER_PREFIXES,
+  SERVER_TOKEN_HEADER,
+  TOKEN_PREFIXES,
+  WEBSOCKET_PREFIXES
+} from "spell/app/spaces/server/node/routes/editorPaths"
 
 /**
  * Config every `vite*.config.ts` and `vitest.config.ts` here shares.
@@ -96,28 +102,22 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
  *   - only there:  the rest of the API takes no token, and the token's other doors (an invite) stay shut to the editor
  * - Every one with `changeOrigin`:  the page server checks its own `Host`.
  * - The live channel's websocket too (`/api`'s `ws`):  it tells the editor the person's theme changed.
+ * - Which paths:  `PAGE_SERVER_PREFIXES`, the list the built editor's own server passes on too (`EditorServer`).
  */
 export function pageServerProxy({ target, token }: { target: string; token?: string }): Record<string, ProxyOptions> {
   const passed = { target, changeOrigin: true }
-  return {
-    // FIRST:  vite takes the first entry a path starts with
-    "/api/places": { ...passed, ...(token && { headers: { [SERVER_TOKEN_HEADER]: token } }) },
-    "/api": { ...passed, ws: true },
-    // a project's files, by their URL:  `/spaces/<project>/<file>` (`SP.SpellUrls`)
-    "/spaces": passed,
-    "/element": passed,
-    // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
-    // (`@spell/guides/SpellUI/Avatar/Usage.spell`, epic `notebook` P10)
-    "/components": passed,
-    // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
-    // epic `debut` P24)
-    "/epics": passed,
-    "/_epic": passed
-  }
+  // in order:  vite takes the first entry a path starts with (`/api/places` before `/api`)
+  return Object.fromEntries(
+    PAGE_SERVER_PREFIXES.map((prefix) => [
+      prefix,
+      {
+        ...passed,
+        ...(WEBSOCKET_PREFIXES.includes(prefix) && { ws: true }),
+        ...(token && TOKEN_PREFIXES.includes(prefix) && { headers: { [SERVER_TOKEN_HEADER]: token } })
+      }
+    ])
+  )
 }
-
-/** The header the page server's guard reads its write token from (`SRV.Guard`). */
-const SERVER_TOKEN_HEADER = "x-server-token"
 
 ////////////////
 // ## One Solid per page

@@ -525,6 +525,18 @@ describe("matchNumber()", () => {
 // matchText()
 //
 describe("matchText()", () => {
+  test("a quote left open ends at its line's end:  no text, and the quotes after it pair as written (I145)", () => {
+    // Owen:  "Quotes don't span lines"
+    expect(tokenizer.matchText('"name is text\n\tits "rank"')).toBe(undefined)
+    const tokens = tokenizer.tokenize('its "name is text\nits "rank" is a number')
+    expect(tokens.filter((token) => token instanceof TextToken).map((token) => token.raw)).toEqual(['"rank"'])
+  })
+
+  test("a tag's attribute value may run over lines (language I12), not on to a line a tag starts", () => {
+    const [element] = tokenizer.tokenize('<p style="color: red;\n\tmargin: 0">Hi</p>') as [JSXElementToken]
+    expect(element.attributes![0]!.value!.raw).toBe('"color: red;\n\tmargin: 0"')
+  })
+
   test("Returns undefined for empty string", () => {
     const token = tokenizer.matchText("")!
     expect(token).toEqual(undefined)
@@ -951,6 +963,18 @@ describe("matchJSXEndTag()", () => {
 // matchJSXAttribute()
 //
 describe("matchJSXAttribute()", () => {
+  test("a laid-out tag's attribute with its quote left open:  skipped, the tag still ends at its `>` (I145)", () => {
+    const text = '<toolbar\n\tclass="GameBar"\n\tsize="small\n\tshrinkable\n>\n\t<action "cheat"/>\n</toolbar>'
+    const [element] = tokenizer.tokenize(text) as [JSXElementToken]
+    expect(element.tagName).toBe("toolbar")
+    expect(element.attributes!.map((attribute) => attribute.name)).toEqual(["class", "shrinkable"])
+    expect(element.unreadable).toBe('size="small')
+    // where it is, for the error:  that much, not the whole tag
+    expect(element.unreadableAt!.start).toBe(text.indexOf("size="))
+    expect(element.unreadableAt!.end).toBe(text.indexOf("small") + 5)
+    expect(element.children!.some((child) => child instanceof JSXElementToken && child.tagName === "action")).toBe(true)
+  })
+
   test("Returns undefined for empty string", () => {
     const token = tokenizer.matchJSXAttribute("")!
     expect(token).toEqual(undefined)
