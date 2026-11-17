@@ -28,6 +28,12 @@
   }
 }
 
+/* lines whose parse is on its way (`CodeMirrorRelayout`, epic `language` I148):  hidden till it comes, so their first
+   drawing is the parse's, not a parse of the file alone's for a second or two */
+.cm-editor.cm-awaiting-parse .cm-scroller {
+  visibility: hidden;
+}
+
 /* every CodeMirror editor's popups, the look on or off;  the find bar's below */
 .cm-editor.cmb {
   /****** popups:  go to line, suggestions, hover, problems, in the page's colours ******/
