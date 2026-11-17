@@ -10,6 +10,7 @@ import {
   type ThingChange,
   type ThingKind
 } from "spell/places/places.types"
+import { withArticle } from "spell/util/string"
 import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
 import type { FolderOperation } from "spell/server/places"
@@ -760,11 +761,6 @@ function atMostAnEditor(role: Role): SpaceRole {
 /** Is `role` one of the people library's roles? */
 function isRole(role: unknown): role is Role {
   return (Membership.Roles as readonly unknown[]).includes(role)
-}
-
-/** `role` with its article, for a message:  `a viewer`, `an editor`, `a manager`. */
-export function withArticle(role: string): string {
-  return `${/^[aeiou]/i.test(role) ? "an" : "a"} ${role}`
 }
 
 /** The space role `role` is:  an older word read as its new one.  - throws `HttpError(400)` for a role that isn't one */
