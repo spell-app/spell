@@ -25,6 +25,7 @@ import { For, createEffect, createMemo, onCleanup } from "solid-js"
 
 import { Cell } from "spell/util/reactive"
 
+import { parentOf } from "./printing"
 import { isGoingToTheTop } from "./ui"
 
 /** How many items are drawn at a time. */
@@ -290,11 +291,6 @@ function scrollerOf(element: Element): Element | null {
     if (overflowY === "auto" || overflowY === "scroll") return at
   }
   return document.scrollingElement
-}
-
-/** `element`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
-export function parentOf(element: Element): Element | null {
-  return element.assignedSlot ?? element.parentElement ?? (element.getRootNode() as ShadowRoot).host ?? null
 }
 
 ////////////////
