@@ -163,6 +163,7 @@ export const uiMethods = defineCoreModule({
 
   /**
    * Show `message` in a dialog, and wait until it's closed -- compiled from `alert "Yo!"` (`await`ed).
+   * - Its message is read as Markdown where it has some:  `alert "# You won!"` (`dialogFor()`).
    * - `options`:  its button's words, `alert "You won!" with "New game"`;  or, once a title or a size is written,
    *   `DialogOptions`:  `alert "You won!" titled "Solitaire" in big text` => `{ title: "Solitaire", size: "big" }`
    */
@@ -621,15 +622,25 @@ export type DialogOptions = {
 }
 
 /** A dialog as the page's Spell UI takes it:  `UI.modals`' `ModalOptions`, the part core uses. */
-type PageDialog = { message: string; title?: string; size?: string; okText?: string; cancelText?: string }
+type PageDialog = {
+  message: string
+  title?: string
+  size?: string
+  okText?: string
+  cancelText?: string
+  /** read the message as Markdown where it has some:  always, for a Spell program's dialogs */
+  markdown?: boolean
+}
 
 /**
  * The dialog `alert`, `warn` and `confirm` ask the page for:  `message` as text, and their buttons' words,
  * passed one by one (`okText`, `cancelText`) or as `DialogOptions`.
+ * - Its message is read as Markdown (epic `language` T145):  `alert "# You won!"` draws a heading, `**42**` bold.
+ *   Spell UI draws it sanitized, and only where it has Markdown in it:  a plain message looks as it always did.
  */
 function dialogFor(message: unknown, options: string | DialogOptions = {}, cancelText?: string): PageDialog {
   const words = typeof options === "string" ? { okText: options, cancelText } : options
-  return { ...words, message: String(message) }
+  return { ...words, message: String(message), markdown: true }
 }
 
 /**
