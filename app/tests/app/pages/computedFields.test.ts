@@ -124,6 +124,9 @@ describe.skipIf(!SERVING)("a thing's computed properties", { timeout: 180_000 },
     const symbol = fields.find((field) => field.label === "Symbol")
     expect(value?.isHalf, "Value:  half a row").toBe(true)
     expect(symbol?.isHalf, "Symbol:  half a row").toBe(true)
+    // a card's name is 20 letters or fewer ("queen of diamonds"):  half a row too (J191 C4)
+    const name = fields.find((field) => field.label === "Name")
+    expect(name?.isHalf, "Name:  half a row").toBe(true)
     // some pair shares a row
     const halves = fields.filter((field) => field.isHalf)
     const shareARow = halves.some((one) =>

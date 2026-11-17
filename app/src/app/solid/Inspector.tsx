@@ -3789,7 +3789,10 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
   )
 }
 
-/** A computed value short enough for half a row:  a yes or no, a number, or text of a few words (`7 of spades`). */
+/**
+ * A computed value short enough for half a row:  a yes or no, a number,
+ * or text of 20 letters or fewer (`queen of diamonds`;  Owen, J191 C4:  "20 letters").
+ */
 function isShortComputed(read: { value?: unknown; error?: unknown }): boolean {
   if ("error" in read) return false
   const { value } = read
@@ -3798,7 +3801,7 @@ function isShortComputed(read: { value?: unknown; error?: unknown }): boolean {
 }
 
 /** The most letters a computed text value has to sit in half a row (`isShortComputed()`). */
-const SHORT_COMPUTED_LENGTH = 12
+const SHORT_COMPUTED_LENGTH = 20
 
 /** What a computed property's field shows:  its value as text, a list's count, or its error's message. */
 function computedText(read: { value?: unknown; error?: unknown }): string {
