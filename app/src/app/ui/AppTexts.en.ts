@@ -157,6 +157,8 @@ export const APP_TEXTS = {
   startBlankLine: "An empty app, and things to drag in.",
   startCounter: "Counter",
   startCounterLine: "A button that counts its clicks.",
+  startConverter: "Converter",
+  startConverterLine: "Kilometers to miles, and more, as you type.",
   startTaskList: "To-do list",
   startTaskListLine: "Add tasks, check them off, make it yours.",
   newExample: "New Example",

@@ -220,9 +220,10 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
 /****************
  * ### `<StartCards>`
  * The ways to start making something, under the hero, in the group of cards the projects use:
- * - Blank:  an empty app, the palette open, so what it can hold shows at once
- * - a few tiny starters, each the person's own to change:  Counter, Task List
+ * - a few tiny starters, each the person's own to change:  the to-do list (Task List's copy), Counter, Converter
  *   (Owen, epic `mockup` I40:  no Roll a Six, Site or Solitaire here any more)
+ * - Blank, last:  an empty app, the palette open, so what it can hold shows at once
+ *   (Owen, epic `mockup` T44:  "adding things in the editor doesn't work that great yet, so don't lead with that")
  * - Import:  a project they exported, the way back after clearing a browser
  * - `drag`:  moving the whole section by its header, among the page's (in dev, in Spell's own checkout)
  ****************/
@@ -241,13 +242,9 @@ function StartCards(props: { drag?: TileCardDrag }) {
       </header>
       <div class="cards">
         <StartCard
-          name={appTexts.text("startBlank")}
-          line={appTexts.text("startBlankLine")}
-          start={() => {
-            Palette.openOnArrival()
-            Inspector.openQuietly()
-            void editor.startFrom("blank", { codeClosed: true })
-          }}
+          name={appTexts.text("startTaskList")}
+          line={appTexts.text("startTaskListLine")}
+          start={() => void editor.startFromCopy(TASK_LIST)}
         />
         <StartCard
           name={appTexts.text("startCounter")}
@@ -255,9 +252,18 @@ function StartCards(props: { drag?: TileCardDrag }) {
           start={() => void editor.startFrom("counter")}
         />
         <StartCard
-          name={appTexts.text("startTaskList")}
-          line={appTexts.text("startTaskListLine")}
-          start={() => void editor.startFromCopy(TASK_LIST)}
+          name={appTexts.text("startConverter")}
+          line={appTexts.text("startConverterLine")}
+          start={() => void editor.startFrom("converter")}
+        />
+        <StartCard
+          name={appTexts.text("startBlank")}
+          line={appTexts.text("startBlankLine")}
+          start={() => {
+            Palette.openOnArrival()
+            Inspector.openQuietly()
+            void editor.startFrom("blank", { codeClosed: true })
+          }}
         />
       </div>
     </section>

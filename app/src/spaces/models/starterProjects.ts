@@ -72,6 +72,40 @@ my app is an app:
 \t\t</container>
 `
   },
+  /**
+   * A converter (epic `mockup` T44):  a number typed in, and the same in other units beside it.
+   * - Each property says what it measures, `a length in km`, and `in miles` converts it:  Spell knows its units.
+   */
+  converter: {
+    name: "converter",
+    fileName: "Converter.spell",
+    contents: (title: string) => `# ${title}
+// Type a number, and see it in other units:  Spell knows what a kilometer, a degree and a kilogram are.
+
+my app is an app:
+\tits "distance" is a length in km
+\tits "temperature" is a temperature in °C
+\tits "weight" is a weight in kg
+\twhen creating it:
+\t\tset its distance to 5
+\t\tset its temperature to 20
+\t\tset its weight to 1
+\tto draw it:
+\t\t<container>
+\t\t\t<form value={it}>
+\t\t\t\t<field label="Kilometers">
+\t\t\t\t\t<input name="distance" type="number" labeled="right" label={its distance in miles with commas && "miles"} />
+\t\t\t\t</field>
+\t\t\t\t<field label="Degrees Celsius">
+\t\t\t\t\t<input name="temperature" type="number" labeled="right" label={its temperature in °F with commas && "°F"} />
+\t\t\t\t</field>
+\t\t\t\t<field label="Kilograms">
+\t\t\t\t\t<input name="weight" type="number" labeled="right" label={its weight in pounds with commas && "pounds"} />
+\t\t\t\t</field>
+\t\t\t</form>
+\t\t</container>
+`
+  },
   /** A little game:  roll a die, and see how far you get. */
   dice: {
     name: "roll-a-six",
