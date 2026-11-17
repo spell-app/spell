@@ -724,6 +724,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           interactive terminal session;  VS Code's panel runs `claude` as a stream, where none ever ran (checked
           2026-10-26, Claude Code 2.1.310, with a probe plugin:  no monitor;  its `asyncRewake` `Stop` hook woke it)
         - in a terminal session the monitor runs it too
+        - NOT in an unattended session (epic `epic-engine` I319):  the poller and the restart wake stand down
+          (`ClaudeSession.isUnattended()`, read from `CLAUDE_CODE_SESSION_ATTENDED`, which is "0" in `claude -p`), so a
+          scripted `claude -p` with the epic plugin starts in seconds instead of hanging
       - ONE per session, the newest:  `~/.spell-epic/listeners/<session pid>.pid` names it (and the batch it last
         announced, so the next turn's hook never announces it again);  an older one sees it gone and ends
       - the page server reads that file (`listenerOf()`):  a session with a poller is asked through its inbox, never
