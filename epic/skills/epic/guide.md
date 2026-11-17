@@ -54,8 +54,14 @@ epic pages link <page> --show     # the page's links, to give the person
 
 An agent that can start background agents keeps its own session free to answer the person, and has them do the work
 (the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
-<path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
-`epic turns run test -- yarn test`.  Else, the steps below, here.
+<path...>`) and merges with `epic worktree merge-main --as <name>`.  Else, the steps below, here.
+Tests come in three tiers, never a full run per commit (epic `epic-engine` T90;  the epic skill's same section):
+1. per change:  only the tests beside what changed (`yarn vp test run <test file>`, or `--project <name>`)
+2. before merging:  each touched folder's UNIT tests, no browser or integration projects, in its turn:
+   in Spell `cd <folder> && epic turns run test -- yarn test:unit` (the kit's own:  `yarn kit:test:unit`, at the root)
+3. after merging into `main`:  the full suite (`epic turns run test -- yarn test`, at the repo's root) only when
+   `epic agents last <name>` exits 0:  no other agent of the epic still runs;  what it finds becomes an issue
+- the parser's speed test only for a change on its hot path (`parser/src/parser/`, the spell rules' matching)
 Each piece of work goes into `main` the moment it's done and merges cleanly (`epic merge <epic>`), never held for the
 phase's end, so the person sees it at once (the same section;  a standing rule).  Never ask whether to merge:
 `epic worktree merge-main` first, always;  failures that aren't this work's don't hold it.  It can't:  say why on its
@@ -69,7 +75,9 @@ After a restart, agents it started are gone:  start each again from its task, as
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
-3. Do the work.  Record as you go:
+3. Do the work.  Record as you go
+   (a title is at most 30 plain words saying what it is, read cold, hours later:
+   nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
@@ -82,7 +90,7 @@ After a restart, agents it started are gone:  start each again from its task, as
        `epic file <epic>#T<n> <rN>`:  its words, Context and screenshots go into the todo, the request filed there
      - bigger, or about a to-do phase:  that phase, or a new one, then `epic file <epic>#P<n> <rN>`
      - a true duplicate only:  `epic file <epic> <rN> "same as T12"`, naming the todo or phase it repeats
-   - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
+   - a choice made without the person:  `epic add <epic>#J "<title>" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
    - something only the person can check:  `epic add <epic>#M "title" --step "..." --should "..."`

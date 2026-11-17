@@ -862,6 +862,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 - `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
   - rerun after changing an element or a page's sections, and commit `docs/__data/`
 - `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium):  fast, no turn needed
+- `yarn test:unit` -- `node` and the plain-node scripts, no browser or integration:  what an epic's agent runs before
+  merging (the epic skill's three test tiers, epic `epic-engine` T90)
 - `yarn test:integration` -- the slow tests that run real git and processes, one file at a time (`INTEGRATION_TESTS`
   in [vitest.config.ts](../vitest.config.ts);  epic `epic-engine` I313):  in the turn, `epic turns run test -- yarn
   test:integration`;  `yarn review` and CI run both

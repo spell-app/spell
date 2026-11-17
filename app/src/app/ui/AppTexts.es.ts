@@ -50,7 +50,6 @@ const APP_TEXTS_ES: AppTextPack = {
   hideCompiledTip: "Ocultar el {language} compilado",
   inspectTip: "Inspeccionar la app:  haz clic en una parte para elegirla",
   stopInspectingTip: "Dejar de inspeccionar",
-  addViewTip: "Añadir una vista",
   restartTip: "Reiniciar la app",
   youTip: "Editar tu nombre y tus correos",
   menuCut: "Cortar",

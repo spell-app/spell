@@ -14,6 +14,7 @@ import { PhaseIds } from "spell/epic/phases"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands, movedDown } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { PlanItem } from "spell/epic/tool/PlanItem"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
@@ -516,6 +517,45 @@ describe("PlanDocCommands add --details:  a name and its path", () => {
     expect(readFileSync(join(parts, part), "utf8")).toMatch(
       /<a href="\/packages\/x\/src\/buildTsx\.ts" target="src-packages-x-src-buildtsx-ts"\s*>\s*<code title="packages\/x\/src\/buildTsx\.ts:4">buildTsx\(\)<\/code\s*>\s*<\/a\s*>/
     )
+  })
+})
+
+// epic `epic-engine` I321, I322:  a title is at most 30 plain words, one sentence, read cold
+describe("PlanDocCommands:  short titles", () => {
+  const LONG =
+    "epic init puts the stand-aside words into the repo's AGENTS.md only when it finds superpowers on, and " +
+    "otherwise it asks nothing at all, and a flag writes them in without asking anyone first"
+
+  test("add refuses a title over 30 words, a ';' list or two sentences, asking for it rewritten;  writing nothing", async () => {
+    const skeleton = readFileSync(file, "utf8")
+    expect(await commands().run(["add", "x", "judgement", LONG, "--calm"])).toBe(1)
+    expect(await commands().run(["add", "x", "todo", "Retry it;  then tell them"])).toBe(1)
+    expect(await commands().run(["add", "x", "issue", "The turn was stuck. It hung for a minute"])).toBe(1)
+    expect(warned[0]).toMatch(/^epic:  rewrite this title:  it's 33 words \(the most is 30\)\./)
+    expect(warned[0]).toContain("read it as the person will, hours later and cold")
+    expect(warned[0]).toContain("the rest goes in --details")
+    expect(warned[1]).toContain('it runs on, a list after ";"')
+    expect(warned[2]).toContain("it's more than one sentence")
+    expect(readFileSync(file, "utf8")).toBe(skeleton)
+  })
+
+  test("add takes 30 words, a dash, and an e.g.", async () => {
+    const thirty = Array.from({ length: 30 }, (_, n) => `word${n}`).join(" ")
+    expect(await commands().run(["add", "x", "todo", thirty])).toBe(0)
+    expect(await commands().run(["add", "x", "todo", "Titles -- up to 30 words, e.g. Owen's own"])).toBe(0)
+  })
+
+  test("rename refuses a long title too, and leaves the body as it was", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("judgement", LONG, { details: "<p>Why:  it was asked.</p>" }))
+    expect(await commands().run(["rename", "x", "J1", LONG])).toBe(1)
+    expect(warned.at(-1)).toMatch(/rewrite this title/)
+
+    printed = []
+    expect(await commands().run(["rename", "x", "J1", "Superpowers words in AGENTS.md"])).toBe(0)
+    const item = FILES.read(file).item("j1")
+    expect(PlanItem.titleOf(item)).toBe("Superpowers words in AGENTS.md")
+    expect(item.textContent).not.toContain("only when it finds superpowers")
+    expect(item.textContent).toContain("it was asked")
   })
 })
 

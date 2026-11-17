@@ -1277,6 +1277,7 @@
     "/////// THE KIT'S OWN CHECKS:  one browser program (tsconfig.json), one node program (tsconfig.node.json), the tests' (tests/tsconfig.json);  one Vitest config of projects;  one lint config": "",
     "kit:ts": "node bin/spell-types.ts && tsc -p tests",
     "kit:test": "vp test run",
+    "kit:test:unit": "vp test run --project '!util' --project '!places' --project '!element'",
     "kit:lint": "node bin/spell-types.ts && vp lint --report-unused-disable-directives --max-warnings 0 src bin scripts tools tests vite.config.ts vitest.config.ts",
     "kit:lint:fix": "node bin/spell-types.ts && vp lint --fix src bin scripts tools tests vite.config.ts vitest.config.ts",
     "kit:format": "vp fmt src bin scripts tools tests vite.config.ts vitest.config.ts package.json tsconfig.json tsconfig.node.json tsconfig.tsx.json repos.json5 .yarnrc.yml .github .epic .claude-plugin",
@@ -1301,6 +1302,7 @@
     "/////// CHECKS OVER EVERY REPO, lowest first": "",
     "ts": "node tools/repos.ts run ts",
     "test": "node tools/repos.ts run test",
+    "test:unit": "node tools/repos.ts run test:unit",
     "lint": "node tools/repos.ts run lint",
     "review": "node tools/repos.ts run review"
   },

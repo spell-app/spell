@@ -546,18 +546,42 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
   - never mark ITSELF done (`epic agents done`):  the session does, when its notice arrives;  done early, `epic agents
     wait` stopped while it still worked (epic `epic-engine` I288)
   - merge with `epic worktree merge-main --as <name>`:  it never moves aside a file another running agent claims
-  - run a FULL test run in its turn, one at a time on the machine:
-    `epic turns run test -- yarn test` (and `yarn review`, `yarn kit:review`);  a single test file needs no turn
-    - why:  three full runs at once drove the load to about 50, and failed tests on their 5-second timeouts
-    - the FOLDERS it touched, run from each (`cd epic && epic turns run test -- yarn test`), never the kit's root
-      `yarn review` over every folder unless it changed the kit's `src/`:  that held the turn 30+ minutes while every
-      other agent waited (epic `epic-engine` I313)
-    - epic's own:  its `yarn test` is fast and needs no turn;  its slow tests that run real git and processes are
-      `yarn test:integration`, one file at a time, in the turn (`epic turns run test -- yarn test:integration`);
-      `yarn review` and CI run both
+  - test in THREE TIERS, never a full run per commit (epic `epic-engine` T90;  Owen, 2026-11-16, r74:  "this is taking
+    too long!!!  Do we need to cut down on tests?":  the language epic's agents each ran the parser's and the app's full
+    suites on every commit, 10-25 minutes each under load, one turn at a time, again after `merge-main`, and the speed
+    test twice):
+    1. PER CHANGE:  only the tests for what changed, the test files beside the changed files
+       (`yarn vp test run tests/x/Y.test.ts`, or `--project <name>`);  no turn needed
+    2. BEFORE MERGING:  each folder it touched, its UNIT tests, from that folder, in its turn:
+       `cd <folder> && epic turns run test -- yarn test:unit`;  no browser and no integration projects
+       - the kit, when it changed the kit's `src/`:  `yarn kit:test:unit`, at the root:  every project but the browser
+         ones (`util`, `places`, `element`)
+       - parser:  `yarn test:unit`, its `yarn test`:  it has no browser project;  its Python tests too
+       - ui:  `yarn test:unit`, the `ssr` project;  not `browser`, `motion`
+       - epic:  `yarn test:unit`, the `node` project and its plain-node scripts;  not `browser`, `motion`, `integration`
+       - app:  `yarn test:unit`, every project but `app:integration` and `app:browser`;  its Python tests too
+       - plus `yarn ts` and `yarn lint` in each;  never the root's `yarn review` or `yarn test` here
+    3. AFTER MERGING into `main`:  the FULL suite, only by the LAST AGENT STANDING:
+       `epic agents last <name>` exits 0 when no other agent of the epic is listed, 1 listing the others
+       (it's still listed itself until the session's `epic agents done`:  `last` leaves it out)
+       - last:  `epic turns run test -- yarn test` at the kit's root, every folder, the browser projects too, and each
+         touched folder's `yarn test:integration` where it has one;  nobody waits on it now
+       - what it finds is an issue, never a held merge (it's in `main` already):  `epic add <epic>#I "<the failure>"
+         --calm`, named in its report;  a failure its own work caused, it fixes and merges again
+       - not last:  no full run;  the last one catches it
+    - the parser's speed test (`SP.spellParser.speedTest()`, on the diff and on `HEAD`, both reported):  ONLY for a
+      change on the parser's HOT PATH, the code every parse runs:  the engine (`parser/src/parser/`:  `Parser`, `Match`,
+      the tokenizer, rules, scopes, incremental parsing) and the spell rules' matching (`parser/src/spell/rules/`);
+      once, before merging, never again after `merge-main`
+      - this narrows the standing "speed test on parser changes":  not for writers, compiled output, core, docs or
+        tests
+    - why turns at all:  three full runs at once drove the load to about 50, and failed tests on their 5-second
+      timeouts;  the root's `yarn review` over every folder held the turn 30+ minutes while every other agent waited
+      (epic `epic-engine` I313)
     - waiters go first come, first served, and wait while the line moves;  `epic turns list` shows the holder, how
       long, and the line
-  - record its choices as items (`epic add <epic>#J ... --calm`), and come back with any question for the person,
+  - record its choices as items (`epic add <epic>#J "<title>" --details "..." --calm`;  titles:  plan-doc.md's "Rules"),
+    and come back with any question for the person,
     rather than ask it:  an agent has no question modal
     - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
   - MERGE ITS OWN WORK INTO `main` THE MOMENT IT'S DONE, whenever it merges cleanly, so the person sees it at once
@@ -565,9 +589,11 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     merge into main, it should do so so I can see the changes.  I'm having to wait 2+ hours to see things"):
     1. commit its files by path
     2. `epic worktree merge-main --as <name>`
-    3. its folder's checks again (`epic turns run test -- ...`)
+    3. its folders' unit tests, tier 2 above (`cd <folder> && epic turns run test -- yarn test:unit`), once, on the
+       merged branch:  not before `merge-main` as well
     4. `epic merge <epic>`
     5. mark its item fixed or done (`epic update <epic>#<id> fixed "..."`)
+    6. `epic agents last <name>`:  the last agent standing runs the full suite, tier 3 above
     - NOT held for its phase's end, and NOT batched with other agents' work
     - "cleanly":  `merge-main` with no conflict, its checks passing (a test that has failed in full runs before called
       so), no red hard-to-undo judgement call open on it, the person's uncommitted edits in the main checkout carried
@@ -623,6 +649,8 @@ cut-off agents, "it should have restarted automatically").
    - No plan at all only when the person said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
    Record as you go, not at the end:
+   - Every item's title is at most 30 plain words saying what it is, read cold, hours later:
+     nothing about a passing condition;  the rest goes in --details (the full rule:  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
    - Found a problem:  `add <name>#I`.
    - A limit we accept:  `add <name>#T ... --limit`.
    - A choice:  `add <name>#D` (a question born answered).

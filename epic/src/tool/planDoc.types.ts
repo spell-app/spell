@@ -29,6 +29,58 @@ export class PlanDocError extends Error {}
 PlanDocError.prototype.name = "PlanDocError"
 
 ////////////////
+// ## Titles
+////////////////
+
+/****************
+ * ### `ShortTitle`
+ * The rule for a phase's or an item's title:  at most 30 plain words saying what it is, which read cold.
+ * - Owen, 2026-11-17 (epic `epic-engine` I322):  "Titles can be up to 30 words ... I'm looking at these things often
+ *   hours after the issue came up, so sentences referring to some weird condition or issue that only obtained for a
+ *   little while will be meaningless to me."
+ *   - I321 had 100 characters, and moved a retitled item's old title into its body:  no help either
+ * - `epic add` and `epic update --title` refuse one that's too long or runs on (`check()`):
+ *   the writer rewrites it, nothing is moved anywhere
+ * - the writer's own check, reading it cold, is the rest of the rule:  plan-doc.md, "Rules"
+ * - pure
+ ****************/
+export class ShortTitle {
+  /** The most words a title may have (I322). */
+  static readonly MOST_WORDS = 30
+
+  /** A `; ` list:  clauses run together. */
+  static readonly LIST = /;\s/
+
+  /** A sentence's end with another after it:  `.`, `!` or `?`, a space, a capital;  never after `e.g.`, `vs.` ... */
+  static readonly SECOND_SENTENCE = /(?<!\b(?:e\.g|i\.e|vs|etc|cf))[.!?]\s+(?=[A-Z])/
+
+  /** Why `title` isn't a title, or `undefined` when it is. */
+  static problemOf(title: string): string | undefined {
+    const words = title.trim().split(/\s+/).filter(Boolean).length
+    if (words > ShortTitle.MOST_WORDS) return `it's ${words} words (the most is ${ShortTitle.MOST_WORDS})`
+    if (ShortTitle.LIST.test(title)) return `it runs on, a list after ";"`
+    if (ShortTitle.SECOND_SENTENCE.test(title.trim())) return "it's more than one sentence"
+    return undefined
+  }
+
+  /**
+   * Throw when `title` isn't a title (`problemOf()`), asking for it rewritten to read cold.
+   * - throws `PlanDocError`
+   */
+  static check(title: string): void {
+    const problem = ShortTitle.problemOf(title)
+    if (!problem) return
+    throw new PlanDocError(
+      `rewrite this title:  ${problem}.\n` +
+        `- a title is at most ${ShortTitle.MOST_WORDS} plain words saying what the item is, in one sentence\n` +
+        `- read it as the person will, hours later and cold:  nothing about a passing condition ` +
+        `(a pid, "after the 4-line fix", "the turn was stuck")\n` +
+        `- the rest goes in --details`
+    )
+  }
+}
+
+////////////////
 // ## Page
 ////////////////
 

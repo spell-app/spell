@@ -972,6 +972,31 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92, T99, T106)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
+
+    // the bar's Edit tab, then 16px to the code's icons, 1px apart, then 16px to "+ Add a View" (I250, C5)
+    const modeBar = await page.evaluate(() => {
+      const drawn = (selector: string) =>
+        document.querySelector(selector)!.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
+      const tabs = [...document.querySelectorAll("ui-menu.ModeTabs > ui-item:not([appearance~=circular])")]
+      const edit = tabs.at(-1)!.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
+      const [code, compiled, inspect, add] = [
+        ".CodeToggle",
+        ".CompiledCodeToggle",
+        ".InspectAppButton",
+        ".AddPartButton"
+      ].map((name) => drawn(`ui-menu.ModeTabs ${name}`))
+      return {
+        gaps: [
+          code.left - edit.right,
+          compiled.left - code.right,
+          inspect.left - compiled.right,
+          add.left - inspect.right
+        ].map(Math.round),
+        words: document.querySelector(".AddPartButton")!.textContent!.trim()
+      }
+    })
+    expect(modeBar).toEqual({ gaps: [16, 1, 1, 16], words: "Add a View" })
+
     await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(600)
     expect(await popupShows()).toBe(true)
@@ -999,7 +1024,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           withIcons: names.every((name) => !!name.getAttribute("icon")),
           closes: strip.querySelectorAll(".PaletteClose").length,
           searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width,
-          // centred, its content's width and 16px either side, the search right after the last name (T106)
+          // centred, its content's width, 16px at its start and 4px past the search (T106, I252), the search right after the last name
           ...(() => {
             const box = strip.getBoundingClientRect()
             const add = strip.querySelector(".PaletteStripAdd")!.getBoundingClientRect()
@@ -1019,7 +1044,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       bold: true,
       withIcons: true,
       closes: 0,
-      room: [16, 16],
+      room: [16, 4],
       centred: true,
       searchAfterNames: 16
     })

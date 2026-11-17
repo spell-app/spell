@@ -613,7 +613,7 @@ export const HELP_TABLE: Readonly<
       label: 'The label, in the label row; `slot="label"` is the rich version.',
       description:
         'A tip behind an info icon at the end of the label row, shown on hover and focus; `slot="description"` is the rich version (bold words, line breaks).',
-      unsaved: "A change here can't be saved: a crossed-out save icon after the info icon, this text its tip.",
+      unsaved: "A change here can't be saved: a flask icon after the info icon, this text its tip.",
       hint: 'Text under the control; `slot="hint"` is the rich version.',
       output: 'A value shown at the end of the label row (`100%`, `+8°`); `slot="output"` is the rich version.',
       error: "An error, as a line under the control, and the `error` state.",
@@ -1314,7 +1314,7 @@ export const HELP_TABLE: Readonly<
       label: 'The label, in the label row; `slot="label"` is the rich version.',
       description:
         'A tip behind an info icon at the end of the label row, shown on hover and focus; `slot="description"` is the rich version (bold words, line breaks).',
-      unsaved: "A change here can't be saved: a crossed-out save icon after the info icon, this text its tip.",
+      unsaved: "A change here can't be saved: a flask icon after the info icon, this text its tip.",
       hint: 'Text under the control; `slot="hint"` is the rich version.',
       output: 'A value shown at the end of the label row (`100%`, `+8°`); `slot="output"` is the rich version.',
       error: "An error, as a line under the control, and the `error` state.",
@@ -1351,7 +1351,7 @@ export const HELP_TABLE: Readonly<
       "show-defaults":
         "A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).",
       unsaved:
-        "Changes here can't be saved: each property shows a crossed-out save icon after its info icon, this text its tip (`<ui-field unsaved>`).",
+        "Changes here can't be saved: each property shows a flask icon after its info icon, this text its tip (`<ui-field unsaved>`).",
       output: 'A value at the end of the title bar; `slot="output"`.',
       error: "An error under the title, and the `error` state.",
       fluid: "In a `<ui-stack>`'s row, takes the room left: a search field between a logo and a button.",
