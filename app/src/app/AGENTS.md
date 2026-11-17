@@ -196,6 +196,8 @@ and in the app's build folder, `app/` at the app folder's root.
       a tab past its tabs, as a plain line's words are (`CodeMirrorBubbly`'s `WordsPlace`, epic `language` I157).
       - Not between a drawing's tags or right above them, where a typed tag starts at its indent;
         nor a group's own lines, already drawn where its members' words are.
+      - Drawn so at once, as the caret's snap or Enter writes the line, never after the layout's pause:
+        the caret never moves once it lands (`blankLinesDrawn()`, epic `language` I158).
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, through
       [CodeMirrorLook](ui/codemirror/CodeMirrorLook.ts)'s compartment):  then Spell is coloured by the parser's own
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
