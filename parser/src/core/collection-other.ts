@@ -527,6 +527,42 @@ export const collectionOtherMethods = defineCoreModule({
   },
 
   /**
+   * The item at `index` among the items `condition` says yes to, asking one item at a time and stopping at the answer:
+   * `the first card in the columns where it can play the card`.
+   * - From the end for an index below 0:  `-1` is the last that says yes.
+   * - So a `condition` that does something (`can play the card`, which plays it) does it to no item after its answer.
+   * - `undefined` when too few say yes.
+   */
+  itemWhere<T = unknown>(
+    collection?: CollectionOf<T>,
+    condition?: CollectionIterationCallback<NoInfer<T>>,
+    index = 0
+  ): T | undefined {
+    if (!assert.isDefined(collection, "core.itemWhere(collection)")) return undefined
+    let wanted = index < 0 ? -index - 1 : index
+    for (const [value, position, _collection] of entriesInTurn<T>(collection, index < 0)) {
+      if (!(condition ? condition(value, position, _collection) : value)) continue
+      if (wanted-- === 0) return value
+    }
+    return undefined
+  },
+
+  /** As `itemWhere()`, when `condition` waits:  each item asked in turn, its answer waited for. */
+  async itemWhereInTurn<T = unknown>(
+    collection?: CollectionOf<T>,
+    condition?: CollectionIterationCallback<NoInfer<T>>,
+    index = 0
+  ): Promise<T | undefined> {
+    if (!assert.isDefined(collection, "core.itemWhereInTurn(collection)")) return undefined
+    let wanted = index < 0 ? -index - 1 : index
+    for (const [value, position, _collection] of entriesInTurn<T>(collection, index < 0)) {
+      if (!(condition ? await condition(value, position, _collection) : value)) continue
+      if (wanted-- === 0) return value
+    }
+    return undefined
+  },
+
+  /**
    * Return `true` if all items in collection match `condition`,
    * called as `condition(value, position, collection)`.
    */
@@ -747,4 +783,13 @@ function emptyRangeOf(collection: unknown): unknown {
 /** `value` as text, to look for it in text:  `"x5" includes 5`. */
 function asText(value: unknown): string {
   return typeof value === "string" ? value : String(value as number)
+}
+
+/** `collection`'s `[value, position, collection]` entries, in order, or from the end:  for `core.itemWhere()`. */
+function entriesInTurn<T>(collection: CollectionOf<T>, fromTheEnd: boolean): Array<[T, string | number, unknown]> {
+  const entries: Array<[T, string | number, unknown]> = []
+  core.forEach(collection, (value, position, _collection) => {
+    entries.push([value as T, position as string | number, _collection])
+  })
+  return fromTheEnd ? entries.reverse() : entries
 }

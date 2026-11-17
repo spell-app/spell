@@ -272,6 +272,19 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     (`refuseIfNamesNoItems()`, [lists.shared.ts](rules/lists/lists.shared.ts))
   - `spell repl` and `spell parse` say "Don't understand" for words left at a line's end, as a file does:
     they printed the part they read, and dropped the rest
+- `and` / `or` between VALUES (epic `language` T146, J226;  [`JoinedValues`](rules/expressions/JoinedValues.ts)):
+  - two questions:  a question, as always
+  - two values of one kind:  `or` the first that's there (`discardPile.lastItem || stock.firstItem`, the datatype a card),
+    `and` both, in a list (`[stock, discardPile]`;  `A and B and C` one list);  what reads the list says which items it
+    means, by its item word (`for each card in the stock and the discard pile`:  both piles' cards)
+  - in a condition (`if`, `X if C otherwise Y`, `when enabled`, a `where`):  a value is a test of whether it's there, as always
+  - refused, asked when the errors are gathered (`CompoundExpression.refuseIfJoinedWrong()`):  a question and a value
+    outside a condition, two kinds, `and` and `or` between values with no parentheses, `and <a word>` (`and red`), and in
+    a `where` a question then a thing
+  - `CompoundExpression` reads its datatype through `JoinedValues.of()`, the same shunting-yard as `getAST()`
+- `can <action>`, `can_do` ([CanDo.ts](rules/lists/CanDo.ts), T146, J228):  `where it can play the card`, `it` optional,
+  RUNS the action and reads its yes or no;  `the first card in ... where` with one asks one item at a time and stops at the
+  first yes (`core.itemWhere()`, `core.itemWhereInTurn()` when it waits).
 - A number word is a name where it can't be a number (J96):
   - the target of `set` / `poner` tries `{variable}` first:  `set three to 3`
   - a variable of the name in scope wins over the number (`NumberAsString.parse()`)
@@ -795,6 +808,8 @@ A kind that says so is saved in a file of its own.
   - so does a line with lines indented under it STARTING with `and` / `or` (`and its value is ...`), any number of
     them (T135, Owen's form);  the bubbly look draws them in the head line (`SP.BubblyLayout`), not its body
   - a line of just `and` / `or` joins the lines either side, each in parentheses of no width
+  - a line under it starting with `or`:  what follows the `or` in parentheses of no width, one alternative, its `where`
+    its own;  the first line's `where` ends at it (`SpellStatement.beforeAlternatives()`;  epic `language` T146, J227)
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
 - Then it loops over the root `BlockToken`'s items:

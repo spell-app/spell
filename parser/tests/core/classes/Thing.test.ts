@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, afterEach } from "vite-plus/test"
 
 import { observe } from "spell/util"
-import { core, Thing, List } from "spell/parser/core"
+import { core, Thing, List, App } from "spell/parser/core"
 
 /**
  * A thing written the way spell compiles one:  each property a getter / setter pair over `getProp` / `setProp`.
@@ -190,6 +190,30 @@ describe("Thing.id (people-and-orgs P1)", () => {
     const task = new Task({ id: 42 })
     expect(warn).toHaveBeenCalledWith("Expected id to be type 'text', got:", 42)
     expect(task.id).toBe(42)
+  })
+
+  test("an app's id is its name, lower kebab case:  chosen, the same every run;  a set id wins (language T147)", () => {
+    class Solitaire extends App {}
+    class Solitario extends App {}
+    class TodosApp extends App {}
+    const game = new Solitaire()
+    expect(game.id).toBe("solitaire")
+    expect(core.thingNamed(Solitaire, "solitaire")).toBe(game)
+    expect(core.referenceFor(game)).toBe("Solitaire#solitaire")
+    expect(new Solitario().id).toBe("solitario")
+    expect(new TodosApp().id).toBe("todos-app")
+    expect(new Solitaire({ id: "game-2" }).id).toBe("game-2")
+    // what it remembers is kept by name alone, as before:  `theme`, never `solitaire.theme`
+    expect((game as any).rememberedKeyFor("theme")).toBe("theme")
+  })
+
+  test("a thing named by the program counts as chosen, so it's remembered;  one made at run time doesn't", () => {
+    // `"chores" is a new task` => `new Task({ id: "chores" })`;  a new task at run time:  `new Task()`
+    const chores = new Task({ id: "chores" })
+    const task = new Task()
+    expect((chores as any).rememberedKeyFor("title")).toBe("chores.title")
+    expect(task.id).toMatch(/^task-[0-9a-z]{8}$/)
+    expect((task as any).rememberedKeyFor("title")).toBeUndefined()
   })
 
   test("`savedInline`:  no by default, set per class, inherited", () => {

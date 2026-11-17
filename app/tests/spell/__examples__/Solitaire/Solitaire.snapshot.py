@@ -95,6 +95,17 @@ class Card(TwoSidedView):
         assert self.pile is not None
         return self == self.pile.last_item
 
+    @property
+    def can_go_up(self) -> bool:
+        """onto its foundation:  a column's top card"""
+        return self.is_on_top_of_its_pile and isinstance(core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item, Foundation)
+
+    @property
+    def can_move_its_run(self) -> bool:
+        """it and the face-up cards on it, all together, onto another column:  a king already at the bottom stays put"""
+        assert self.pile is not None
+        return (self.rank != "king" or self != self.pile.first_item) and self == self.pile.filter(lambda card: card.is_face_direction("up")).first_item
+
     async def play(self) -> Any:
         if self.pile == solitaire.stock:
             await solitaire.turn_over_the_next_card()
@@ -452,6 +463,9 @@ def test_a_new_deck() -> None:
 # -----------
 
 
+# What auto play asks of a card
+
+
 class StockPile(Pile):
     """The cards not played yet, face down:  a click turns the next one over, so none can be taken from it"""
 
@@ -667,35 +681,19 @@ class Solitaire(App):
             card.turn_face_down()
 
     async def auto_play(self) -> None:
-        """Play every card that can go somewhere, until none can"""
-        anything_changed = False
-        if self.discard_pile:
-            test_card = self.discard_pile.last_item
-            if await test_card.play():
-                anything_changed = True
-                await core.pause_for(500, "msec")
-        # each column's last card onto its foundation
-        for pile in core.every_thing(Column):
-            if not pile:
-                continue
-            test_card = pile.last_item
-            foundation = core.filter(core.every_thing(Foundation), lambda pile: pile.suit == test_card.suit).first_item
-            if core.can_take(foundation, test_card):
-                anything_changed = True
-                await test_card.play()
-                await core.pause_for(100, "msec")
-        # each column's face-up cards, all together, onto another column
-        for pile in core.every_thing(Column):
-            face_up_cards = pile.filter(lambda card: card.is_face_direction("up"))
-            if not face_up_cards:
-                continue
-            test_card = face_up_cards.first_item
-            if test_card.rank == "king" and test_card == pile.first_item:
-                continue
-            if await test_card.play():
-                anything_changed = True
-                await core.pause_for(500, "msec")
-        if anything_changed:
+        """Play one card that can go somewhere, then the next, until none can"""
+        async def _each_1(card: Card) -> Any:
+            return await card.play()
+
+        async def _each_2(card: Card) -> bool:
+            return card.can_go_up and (await card.play())
+
+        async def _each_3(card: Card) -> bool:
+            return card.can_move_its_run and (await card.play())
+
+        played = (await core.item_where_in_turn(self.discard_pile, _each_1, -1)) or (await core.item_where_in_turn(core.merge_lists(core.every_thing(Column)), _each_2, 0)) or (await core.item_where_in_turn(core.merge_lists(core.every_thing(Column)), _each_3, 0))
+        if played is not None:
+            await core.pause_for(300, "msec")
             await self.auto_play()
 
     def cheat(self) -> None:

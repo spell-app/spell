@@ -9,7 +9,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/Statement.ts",
-          "line": 23,
+          "line": 24,
           "purpose": "Base class for all spell statement rules.",
           "syntaxes": [],
           "aliases": []
@@ -830,7 +830,7 @@
           "ruleNames": ["expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/CompoundExpression.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "An operand, then each operator suffix binding TIGHTER than `bound`, e.g. `x + 1 is 3`.",
           "syntaxes": [
             {
@@ -3356,7 +3356,7 @@
           "ruleNames": ["ordinal_where_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/OrdinalWhereExpression.ts",
-          "line": 27,
+          "line": 31,
           "purpose": "The first (second, last ...) item of a list that passes a test (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -3627,6 +3627,32 @@
             }
           ],
           "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "CanDo",
+          "ruleNames": ["can_do"],
+          "internal": false,
+          "file": "src/spell/rules/lists/CanDo.ts",
+          "line": 25,
+          "purpose": "Does an action say yes, asked of each item in a `where` (epic `language` T146) -- `the first card in the columns where it is face up and can play the card`.",
+          "syntaxes": [
+            {
+              "syntax": "it? {operator:can_or_cannot} {call:operand}",
+              "example": "it can play the card",
+              "outputs": {
+                "js": {
+                  "code": "card.play()"
+                },
+                "ts": {
+                  "code": "card.play()"
+                },
+                "py": {
+                  "code": "card.play()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
         },
         {
           "className": "RepeatNTimes",

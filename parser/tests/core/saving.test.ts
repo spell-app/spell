@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { Loader, parseRef, refText, Saver, core, Thing, List } from "spell/parser/core"
+import { Loader, parseRef, refText, Saver, core, Thing, List, App } from "spell/parser/core"
 
 /**
  * Things saved by id (`saving.ts`):  written by a `Saver`, read back by a `Loader`.
@@ -270,6 +270,37 @@ describe("Loader", () => {
   test("saved, loaded, saved again:  the same entries", () => {
     const { root, entries } = new Saver().save(loaderOf(EXPECTED.entries).load(EXPECTED.root)!)
     expect({ root, entries: Object.fromEntries(entries) }).toEqual(EXPECTED)
+  })
+
+  test("data saved before an app or a member took its name as its id still loads:  its old random ids, its references", () => {
+    // what a run before language T147 saved:  the app's id made up, `solitaire-zqjuremq`;  its pile's, `pile-k3x9q2mf`
+    class Solitaire extends App {
+      get stock(): Pile {
+        return this.getProp("stock")
+      }
+    }
+    const classes = { ...CLASSES, Solitaire } as Record<string, new (props?: Record<string, unknown>) => Thing | List>
+    const entries = new Map<string, Record<string, unknown>>([
+      [
+        "Solitaire#solitaire-zqjuremq",
+        { $type: "Solitaire", id: "solitaire-zqjuremq", stock: { $ref: "Pile#pile-k3x9q2mf" } }
+      ],
+      ["Pile#pile-k3x9q2mf", { $type: "Pile", id: "pile-k3x9q2mf", $items: [{ $type: "Card", rank: "ace" }] }],
+      ["List#saved", { $type: "List", id: "saved", $items: [{ $ref: "Solitaire#solitaire-zqjuremq" }] }]
+    ])
+    const loader = new Loader({ entryFor: (ref) => entries.get(ref), classNamed: (name) => classes[name] })
+    const game = loader.load("Solitaire#solitaire-zqjuremq") as Solitaire
+    expect(game).toBeInstanceOf(Solitaire)
+    expect(game.id).toBe("solitaire-zqjuremq")
+    expect(game.stock).toBeInstanceOf(Pile)
+    expect(game.stock.id).toBe("pile-k3x9q2mf")
+    expect(game.stock.items[0]).toMatchObject({ rank: "ace" })
+    // a reference to it from another entry finds the same app
+    const saved = loader.load("List#saved") as List
+    expect(saved.items[0]).toBe(game)
+    // a new one takes its name;  saved, it's keyed by it
+    const fresh = new Solitaire()
+    expect(new Saver().save(fresh).root).toBe("Solitaire#solitaire")
   })
 
   test("a reference to nothing saved:  left out of a list, with a warning", () => {

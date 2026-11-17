@@ -303,6 +303,20 @@ class ThingIdProp(Prop):
         return made
 
 
+class AppIdProp(ThingIdProp):
+    """An app's `id`:  its own name, lower kebab case, `solitaire` for `class Solitaire(App)` (language T147).
+
+    - A program has one app, so its name is enough to tell it apart:  the same id every run, so it counts as chosen
+      (`has_chosen_id()`).
+    - Still made only when read, and settable:  a set id, or a loaded one, wins.
+    - The twin of the JavaScript core's `APP_ID_PROP`.
+    """
+
+    def first_value(self, instance: "SpellObject") -> object:
+        """`instance`'s class's name, lower kebab case:  NOT kept as made up, so it counts as chosen."""
+        return _kind_of(instance) or "app"
+
+
 def has_chosen_id(thing: object) -> bool:
     """Did the program choose `thing`'s id, or load it, rather than one being made up for it (`new_thing_id()`)?
 
@@ -324,8 +338,13 @@ def new_thing_id(thing: object) -> str:
       ids get saved, so they must differ from run to run, even when a seeded run repeats everything else.
     - The twin of the JavaScript core's `newThingId()`.
     """
-    kind = "-".join(CLASS_NAME_WORDS.findall(builtins.type(thing).__name__)).lower() or "thing"
+    kind = _kind_of(thing) or "thing"
     return f"{kind}-{''.join(secrets.choice(ID_ALPHABET) for _ in range(ID_LENGTH))}"
+
+
+def _kind_of(thing: object) -> str:
+    """`thing`'s class's name in lower kebab case:  `DatedEvent` is `dated-event`;  `""` for a name with no words."""
+    return "-".join(CLASS_NAME_WORDS.findall(builtins.type(thing).__name__)).lower()
 
 
 class ThingRegistry:

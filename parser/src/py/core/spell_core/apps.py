@@ -20,7 +20,7 @@ from typing import Any
 from spell_core.described import describe_action
 from spell_core.drawing import h
 from spell_core.lists import List
-from spell_core.things import Thing, program_core, prop
+from spell_core.things import AppIdProp, Thing, program_core, prop
 
 
 class View(Thing):
@@ -49,7 +49,10 @@ class App(View):
     - Its element is named for its project and `app`, not its class:  `<solitaire-app>` (epic `elemental-spell` Q62);
       the compiled class names it, `element_tag = "solitaire-app"`.
     - Its `draw()` is compiled from `to draw (a game)`;  `start()` from `start the game`.
+    - Its `id` is its name, lower kebab case:  `solitaire` (`AppIdProp`, language T147).
     """
+
+    id = AppIdProp()
 
     def __init__(self, *args: Any, **props: Any) -> None:
         """SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:  see `core.send()`."""

@@ -115,7 +115,13 @@ export class JoinedLines {
 
     const last = lines.at(-1)!
     // each line's code, a space after it;  the last line whole, with its comment
-    const tokens = lines.flatMap((each) => (each === last ? each.tokens : JoinedLines.spaced(JoinedLines.codeOf(each))))
+    // - a line starting with `or`:  what follows it in parentheses, one alternative (epic `language` T146)
+    const tokens = lines.flatMap((each, at) => {
+      const code = at ? JoinedLines.orInParentheses(scope, each) : JoinedLines.codeOf(each)
+      if (each !== last) return JoinedLines.spaced(code)
+      const comment = each.tokens.at(-1) instanceof P.CommentToken ? [each.tokens.at(-1)!] : []
+      return [...code, ...comment]
+    })
     const joined = JoinedLines.lineOf(line, tokens, last)
     if (!body) return [joined]
     return JoinedLines.joinBelow(scope, joined, body) ?? [joined, body]
@@ -198,6 +204,31 @@ export class JoinedLines {
     )
   }
 
+  /**
+   * `line`'s code;  when it starts with `or`, what follows the `or` in parentheses of no width (epic `language` T146):
+   * so each line is one alternative, its `where` its own --
+   *
+   *   ```spell
+   *   set card to the last card in the discard pile
+   *   	or a random card in the columns where it is face down
+   *   	or the first card in the columns where it is face up
+   *   ```
+   *
+   * - A question reads the same:  `or` joins loosest, so `a or (b and c)` is `a or b and c`.
+   * - Not `and`, which binds tighter than `or`:  `a or b`, then `and c` under it, is `a or (b and c)` as it was.
+   */
+  private static orInParentheses(scope: P.Scope, line: P.LineToken): P.Token[] {
+    const code = JoinedLines.codeOf(line)
+    const [or, ...rest] = code
+    if (!or || !rest.length || !JoinedLines.joins(scope, or, "or")) return code
+    return [or, ...JoinedLines.inParentheses(new P.LineToken({ ...line.record, tokens: rest }))]
+  }
+
+  /** Is `token` a `(` of no width, one of ours:  a part, or an alternative (`orInParentheses()`)? */
+  static isWidthlessOpen(token: P.Token | undefined): boolean {
+    return token instanceof P.SymbolToken && token.value === "(" && token.raw === ""
+  }
+
   /** `line`'s tokens, a zero-width `(` before them and `)` after. */
   private static inParentheses(line: P.LineToken): P.Token[] {
     const { tokens } = line
@@ -244,9 +275,9 @@ export class JoinedLines {
     return code.length > 1 && JoinedLines.joins(scope, code.at(-1)!)
   }
 
-  /** Is `token` a joining word, `and` or `or` in the language's words (`and_or`)? */
-  private static joins(scope: P.Scope, token: P.Token): boolean {
-    return token instanceof P.WordToken && Wording.lengthAt(scope, "and_or", [token]) === 1
+  /** Is `token` a joining word, `and` or `or` in the language's words (`and_or`) -- `meaning`, if given? */
+  private static joins(scope: P.Scope, token: P.Token, meaning?: "and" | "or"): boolean {
+    return token instanceof P.WordToken && Wording.lengthAt(scope, "and_or", [token], 0, meaning) === 1
   }
 
   /** `line`'s tokens, without a comment at its end. */

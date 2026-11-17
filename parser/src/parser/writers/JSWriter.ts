@@ -56,6 +56,9 @@ const SAVED_IN = "savedIn"
 /** A view class's static naming its element's tag:  `static elementTag = core.defineElement(this, "Solitaire")`. */
 const ELEMENT_TAG = "elementTag"
 
+/** A `where`'s `core` helper, and its twin that asks each item in turn when its condition waits. */
+const WAITING_TWINS: Record<string, string> = { filter: "filterInTurn", itemWhere: "itemWhereInTurn" }
+
 /** `core`'s call a place's line compiles to. */
 const PLACE_CALL = "place"
 
@@ -583,12 +586,12 @@ export class JSWriter extends ProgramWriter {
   /**
    * `node`, a loop or a `where` whose function waits, one by one:
    * - a loop alone on its line, as a plain loop:  see `loop()`
-   * - else `core`'s own:  `await core.forEachSequential(...)`, `await core.filterInTurn(...)`
+   * - else `core`'s own:  `await core.forEachSequential(...)`, `await core.filterInTurn(...)`, `await core.itemWhereInTurn(...)`
    */
   protected inTurn(node: P.ASTScopedMethodInvocation): string {
     const loop = this.statements.has(node) ? this.loop(node) : undefined
     if (loop) return loop
-    const methodName = node.methodName === "filter" ? "filterInTurn" : "forEachSequential"
+    const methodName = WAITING_TWINS[node.methodName] ?? "forEachSequential"
     const args = node.args.args ?? []
     return `await ${this.call(new P.ASTCoreMethodInvocation(node.match, { methodName, args }))}`
   }
