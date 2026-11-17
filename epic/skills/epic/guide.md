@@ -28,6 +28,10 @@ The epic workflow in plain steps, for any agent:  Codex, Claude Code, or another
 Replies in the chat with more than one topic:  a `##` header per topic, never `#`.
 Anything waiting on the person comes first, under `## Waiting on you`, with its page's links.
 
+While `epic focus status` says focus mode is on (the person's `/focus`), ask them nothing until it's off:
+keep building and merging what's in flight, each choice a calm judgement call, each question a Q item left to wait.
+When it goes off, post `epic focus summary <epic>` in your reply, `## Waiting on you` first.
+
 ## find -- Find the epic and its page
 
 ```sh

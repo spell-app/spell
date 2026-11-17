@@ -407,6 +407,52 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     }
   ],
 
+  focus: [
+    {
+      name: "status",
+      usage: "[--json]",
+      description: "focus mode on or off, since when and why (the default verb)",
+      example: "epic focus status",
+      flags: {
+        "--json": "print it as JSON"
+      }
+    },
+    {
+      name: "on",
+      usage: '[--why "..."] [--json]',
+      description:
+        "turn focus mode on (/focus):  each running epic session gets a TELL: line, keep building, ask nothing until /back",
+      example: 'epic focus on --why "the demo"',
+      flags: {
+        "--why <text>": "what you're focusing on, said in each line",
+        "--json": "print the state and the lines as JSON"
+      }
+    },
+    {
+      name: "off",
+      usage: "[--json]",
+      description:
+        "turn focus mode off (/back):  each running epic session gets a TELL: line to post its status;  " +
+        "the epics with no session and news, a line each",
+      example: "epic focus off",
+      flags: {
+        "--json": "print the state, the lines and the idle epics as JSON"
+      }
+    },
+    {
+      name: "summary",
+      usage: "[<epic>] [--since <time>] [--json]",
+      description:
+        "what happened on an epic since focus started:  waiting on you, merged, still running;  " +
+        "no epic:  a line for each epic with news",
+      example: "epic focus summary seo",
+      flags: {
+        "--since <time>": "since then (default:  when focus mode last went on)",
+        "--json": "print it as JSON"
+      }
+    }
+  ],
+
   ////////////////
   // ## Worktrees, sessions, parked work, the epic repo:  this folder's classes
   ////////////////
@@ -1213,6 +1259,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  *   `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
+ * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93)
  */
 export type GroupName =
   | "ask"
@@ -1221,6 +1268,7 @@ export type GroupName =
   | "notes"
   | "agents"
   | "airplane"
+  | "focus"
   | "worktree"
   | "session"
   | "park"
