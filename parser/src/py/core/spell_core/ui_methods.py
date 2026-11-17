@@ -56,7 +56,7 @@ ANSWER_KEY = "answer"
 
 
 class UIMethods:
-    """`core.notify()`, `alert()`, `warn()`, `confirm()`, `prompt()`, `open_printing()`, `show_drawn()`:  module's docs."""
+    """`core.notify()`, `alert()`, `confirm()`, `open_printing()`, `show_drawn()` and the rest:  see the module docs."""
 
     # where they print with no page:  `Core` sets it
     console: "SpellConsole"
