@@ -283,6 +283,16 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "not-an-item-it":
     'eso es {what} aquí, que no es {aItem}, y {list} guarda {items}:  di qué {item}, u "obtener" eso antes',
   "not-an-item": '"{thing}" es {what}, que no es {aItem}:  {list} guarda {items}',
+  "not-items-in": '{list} guarda {items}, no {named}:  di "{items} en {list}"',
+  "can-do-yes-or-no":
+    '"{call}" no responde sí o no, así que "puede" no puede preguntarlo:  termina la acción con "devolver sí" o "devolver no"',
+  "and-in-where-joins-conditions":
+    'En un "donde", "y" une condiciones, y "{rhs}" no es una:  para juntarlo con lo que encuentra el "donde", pon la lista y su "donde" entre paréntesis, "(... donde ...) y {rhs}"',
+  "and-plain-value": '"y {rhs}" no pregunta nada:  di qué es {rhs}, p. ej. "y es {rhs}"',
+  "joined-question-and-value":
+    '"{lhs}" es una pregunta y "{rhs}" no, así que "{word}" no puede unirlas:  une dos preguntas, o dos valores de un mismo tipo',
+  "joined-values-and-or": '"y" y "o" entre valores:  di cuál va primero con paréntesis, "(A o B) y C" o "A o (B y C)"',
+  "joined-values-of-two-kinds": '"{lhs}" y "{rhs}" no son el mismo tipo de cosa, así que "{word}" no puede unirlos',
   "cant-save-built-in-inline":
     "No se puede guardar el tipo {type} dentro:  viene incorporado, y todos los proyectos lo comparten",
   "cant-publish-built-in":

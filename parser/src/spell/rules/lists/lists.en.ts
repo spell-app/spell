@@ -20,6 +20,7 @@ import { ListAppend } from "./ListAppend"
 import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
+import { ListItemsIn } from "./ListItemsIn"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
@@ -52,6 +53,7 @@ import { PossessiveOrdinal } from "./PossessiveOrdinal"
 import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
 import { RandomItemExpression } from "./RandomItemExpression"
+import { RandomItemWhere } from "./RandomItemWhere"
 import { RandomItemsExpression } from "./RandomItemsExpression"
 import { RangeBetweenExpression } from "./RangeBetweenExpression"
 import { RangeCountExpression } from "./RangeCountExpression"
@@ -532,6 +534,40 @@ lists.addRule(RandomItemExpression, {
   ]
 })
 
+// one item of a list that passes a test, at random (epic `language` I152)
+lists.addRule(RandomItemWhere, {
+  syntax:
+    "a random {arg:singular_identifier} (of|from|in) {list:expression} (where:where|which|that|who) {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a rank as a number",
+            "a pile is a list of cards",
+            "a column is a pile"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [
+          "a random card in the columns where its rank is 1",
+          "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Column)), (card) => card.rank === 1))",
+          "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Column)), (card: Card) => card.rank === 1))"
+        ],
+        [
+          "a random column in the columns where it is empty",
+          "core.filter(core.everyThing(Column), (column) => column.isEmpty).randomItem()",
+          "core.filter(core.everyThing(Column), (column: Column) => column.isEmpty).randomItem()"
+        ]
+      ]
+    }
+  ]
+})
+
 lists.addRule(RandomItemsExpression, {
   syntax: "{number} random {arg:plural_identifier} (of|from|in) {list:operand}",
   tests: [
@@ -686,6 +722,43 @@ lists.addRule(ListFilter, {
           "core.filter(core.mergeLists(core.everyThing(Foundation)), (card: Card) => card.rank === 1)"
         ]
       ]
+    }
+  ]
+})
+
+// a list's items by their word, its lists' items together when it holds lists of them (epic `language` I152)
+lists.addRule(ListItemsIn, {
+  syntax: "the? {arg:plural_identifier} in {list:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a rank as a number",
+            "a pile is a list of cards",
+            "a column is a pile"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["cards in the columns", "core.mergeLists(core.everyThing(Column))"],
+        ["the cards in the columns", "core.mergeLists(core.everyThing(Column))"],
+        {
+          title: "the lists themselves, named:  not their items",
+          input: "the piles in the columns",
+          js: "core.everyThing(Column)"
+        }
+      ]
+    },
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("my-list")
+      },
+      tests: [["the items in my-list", "myList"]]
     }
   ]
 })
@@ -1371,9 +1444,9 @@ lists.addRule(PluralCallStatement, {
           js: "deck.turnOver()"
         },
         {
-          title: "only a thing's action:  not any statement",
+          title: "only a thing's action:  not any statement -- the deck's cards printed (epic `language` I152)",
           input: "print the cards in the deck",
-          js: ["core.console.log(core.everyThing(Card))", '/* PARSE ERROR: Don\'t understand "in the deck" */']
+          js: "core.console.log(deck)"
         }
       ]
     }

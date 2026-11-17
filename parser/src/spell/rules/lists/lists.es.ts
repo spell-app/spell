@@ -27,6 +27,7 @@ import { ListAppend } from "./ListAppend"
 import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
+import { ListItemsIn } from "./ListItemsIn"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
@@ -58,6 +59,7 @@ import { OrdinalPositionExpression } from "./OrdinalPositionExpression"
 import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
 import { RandomItemExpression } from "./RandomItemExpression"
+import { RandomItemWhere } from "./RandomItemWhere"
 import { RandomItemsExpression } from "./RandomItemsExpression"
 import { RangeBetweenExpression } from "./RangeBetweenExpression"
 import { RangeCountExpression } from "./RangeCountExpression"
@@ -551,6 +553,35 @@ listsEs.addRule(RandomItemExpression, {
   ]
 })
 
+// un elemento de una lista que pasa una prueba, al azar (épica `language` I152)
+listsEs.addRule(RandomItemWhere, {
+  syntax:
+    "(un|una) {arg:singular_identifier} (al azar|aleatorio|aleatoria) (de|del|desde|en) {list:expression} (where:donde|que) {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un rango como un número",
+            "una pila es una lista de cartas",
+            "una columna es una pila"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [
+          "una carta al azar en las columnas donde su rango es 1",
+          "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Columna)), (carta) => carta.rango === 1))",
+          "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Columna)), (carta: Carta) => carta.rango === 1))"
+        ]
+      ]
+    }
+  ]
+})
+
 listsEs.addRule(RandomItemsExpression, {
   syntax: "{number} {arg:plural_identifier} (al azar|aleatorios|aleatorias) (de|del|desde|en) {list:operand}",
   tests: [
@@ -660,6 +691,32 @@ listsEs.addRule(ListFilter, {
           js: "core.filter(myList, (item) => item !== 1 && core.includes(myList, item))"
         },
         ["los items en my-list que son 1 o son 2", "core.filter(myList, (item) => item === 1 || item === 2)"]
+      ]
+    }
+  ]
+})
+
+// los elementos de una lista por su palabra, los de sus listas juntos si guarda listas de ellos (épica `language` I152)
+listsEs.addRule(ListItemsIn, {
+  syntax: "(los|las)? {arg:plural_identifier} en {list:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un rango como un número",
+            "una pila es una lista de cartas",
+            "una columna es una pila"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["cartas en las columnas", "core.mergeLists(core.everyThing(Columna))"],
+        ["las cartas en las columnas", "core.mergeLists(core.everyThing(Columna))"],
+        ["las pilas en las columnas", "core.everyThing(Columna)"]
       ]
     }
   ]
