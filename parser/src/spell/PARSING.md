@@ -1673,6 +1673,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Any language's tags alike:  it's the tag being a view that counts.
   - A member made new takes its name as its thing's `id` (`DefinePropertyHas.withMemberId()`):
     `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, so the drawing names it with no `with name "T1"`.
+    - Several words are joined by dashes, each as written (epic `language` T147):  `"discard pile" is a new discard pile`
+      is `{ id: "discard-pile" }`, and `<discard-pile "discard pile"/>` draws `id="discard-pile"`;  `discard pile` still
+      finds it (`core.thingNamed()`).
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
