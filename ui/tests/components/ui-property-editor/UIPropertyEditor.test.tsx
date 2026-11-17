@@ -364,3 +364,20 @@ describe("<ui-property-editor source>", () => {
     expect(host.querySelector("ui-property")!.getAttribute("name")).toBe("size")
   })
 })
+
+describe("<ui-property unsaved>", () => {
+  it("shows its editor's unsaved icon, but never while it's read only (epic `editor` I224)", async () => {
+    const host = await ElementFixture.render<Editor>(
+      `<ui-property-editor unsaved="Not saved:  this one is made as the program runs">
+         <ui-property name="title" label="Title"></ui-property>
+         <ui-property name="worked" label="Worked out" readonly><span>7</span></ui-property>
+       </ui-property-editor>`
+    )
+    host.schema = { name: "Card", attributes: [{ name: "title", kind: "string", type: "text", description: "" }] }
+    host.value = { title: "seven" }
+    const unsavedIcon = (name: string) =>
+      host.querySelector(`ui-property[name="${name}"]`)!.shadowRoot!.querySelector('[part~="unsaved"]')
+    await expect.poll(() => !!unsavedIcon("title"), { timeout: 5000 }).toBe(true)
+    expect(unsavedIcon("worked")).toBeNull()
+  })
+})

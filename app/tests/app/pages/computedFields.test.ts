@@ -19,7 +19,7 @@ type ComputedRead = {
   label: string
   /** Its value, when it's a yes or no. */
   selected?: boolean
-  /** Its box's top and left, to tell a row. */
+  /** Its field's top and left, to tell a row. */
   top: number
   left: number
   isHalf: boolean
@@ -36,7 +36,8 @@ describe.skipIf(!SERVING)("a thing's computed properties", { timeout: 180_000 },
   const computedFields = (): Promise<ComputedRead[]> =>
     page.evaluate(() =>
       [...document.querySelectorAll("ui-property.InspectorComputed")].map((property) => {
-        const box = property.getBoundingClientRect()
+        // the property itself is `display: contents`:  its field is the box
+        const box = (property.shadowRoot?.querySelector(".field") ?? property).getBoundingClientRect()
         const toggle = property.querySelector("ui-checkbox")
         return {
           label: property.getAttribute("label") ?? "",

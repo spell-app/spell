@@ -142,8 +142,12 @@ export class UIProperty extends UIField {
     return this.isConnected ? UIProperty.editorAround(this.domElement) : undefined
   }
 
-  /** Why a change here can't be saved:  its own `unsaved`, else its editor's. */
+  /**
+   * Why a change here can't be saved:  its own `unsaved`, else its editor's.
+   * - None while it's read only:  nothing here can change (epic `editor` I224, a thing's computed values).
+   */
   get unsavedText(): string | undefined {
+    if (this.isReadOnly) return undefined
     return this.unsaved || (this.editor as { unsaved?: string } | undefined)?.unsaved || undefined
   }
 
