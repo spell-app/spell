@@ -38,29 +38,33 @@
   }
 }
 
-/* The hero:  the pitch beside a few lines of spell */
+/*
+ * The hero:  the pitch, then a picture of real Spell (`<Hero>`).
+ * - Wide windows:  the picture beside the pitch;  narrower, under it, centred.
+ * - The picture as spell.app shows it:  521px wide at most, on white, 4px in, 16px corners, the page's shadow.
+ */
 .Home .Hero {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 36px;
   padding: 44px;
-  border-radius: calc(var(--Home-radius) + 10px);
+  border-radius: calc(var(--Home-radius) + 12px);
 
   /* no lone word on a line of its own */
   h1,
   .tagline,
-  .intro,
-  blockquote {
+  .intro {
     text-wrap: pretty;
   }
 
   .pitch {
-    flex: 999 1 420px;
+    flex: 999 1 400px;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
   }
   .eyebrow {
     font-size: 13px;
@@ -91,44 +95,37 @@
   .buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 6px;
+    gap: 12px;
+    margin-top: 4px;
   }
 
-  .quote {
-    flex: 1 1 320px;
+  .example {
+    flex: 0 1 auto;
     min-width: 0;
+    max-width: 100%;
     margin: 0;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 12px;
-    padding: 20px 22px;
-    border-radius: calc(var(--Home-radius) + 4px);
-    background: var(--ui-surface-strong);
-    border: 1px solid var(--spell-pane-border-color);
 
+    img {
+      display: block;
+      box-sizing: content-box;
+      width: 521px;
+      max-width: calc(100% - 8px);
+      height: auto;
+      padding: 4px;
+      border-radius: 16px;
+      background: #fff;
+      /* raised in every theme, Studio's flat panes too:  white on a light pane needs its edge */
+      box-shadow: var(--ui-shadow-raised);
+    }
     figcaption {
-      font-size: 12px;
-      font-weight: var(--ui-font-weight-semibold);
-      color: var(--ui-text-muted);
-    }
-    blockquote {
-      margin: 0;
       font-family: var(--Home-serif);
-      font-size: 20px;
-      line-height: 1.45;
-      white-space: pre-line;
-    }
-    .note {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      font-style: italic;
+      font-size: 15px;
       color: var(--ui-text-muted);
-
-      ui-icon {
-        color: var(--Home-accent);
-      }
     }
   }
 }
@@ -222,7 +219,7 @@
 /* phone width:  a smaller hero */
 @media (--ui-mobile) {
   .Home .Hero {
-    padding: 24px;
+    padding: 24px 16px;
     gap: 24px;
 
     h1 {

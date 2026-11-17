@@ -100,15 +100,15 @@ describe("the home page's rows", () => {
     expect(host.textContent).not.toMatch(/FizzBuzz|Family Cookbook|Statusphere|Org Admin/)
   })
 
-  test("an app made for an org:  your projects above the hero, as before;  no library there either", async () => {
+  test("an app made for an org:  the hero first, then your projects;  no library there either (T64)", async () => {
     const was = { id: SPACES.localPerson.id, org: SPACES.localPerson.org }
     SPACES.setLocalPerson({ id: was.id, org: "acme" })
     cleanups.push(() => SPACES.setLocalPerson(was))
     ownProjects = [{ path: `${SPACES.localPerson.address}/my-app`, title: "My App" }]
     const host = await mountHome()
-    const above = [...host.querySelectorAll(".Home > section.ProjectCards:not(.Hero ~ *)")].map((each) => each.id)
-    expect(above).toEqual(["projects"])
-    expect(rowIds(host)).toEqual(["start", "examples", "guides", "spanish"])
+    // nothing above the hero (Owen, epic `repo-split` T64:  the org's apps below the "read out loud" header)
+    expect(host.querySelector(".Home > section:not(.Hero ~ *)")?.classList.contains("Hero")).toBe(true)
+    expect(rowIds(host)).toEqual(["projects", "start", "examples", "guides", "spanish"])
   })
 
   test("the examples:  ONE set in Spell's order, no line over a kind of them (I48);  each card its description's first phrase", async () => {
