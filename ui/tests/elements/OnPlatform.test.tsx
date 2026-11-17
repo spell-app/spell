@@ -9,6 +9,7 @@ import type { DOMElement } from "spell/element"
 
 import resetCSS from "spell/ui/styles/reset.css?raw"
 import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-dropdown"
 
 /**
  * The shared `on-platform` (epic `mockup` T53):  an element shows only on the devices it names.
@@ -57,6 +58,21 @@ describe("on-platform", () => {
     label.removeAttribute("on-platform")
     await expect.poll(() => isShown(label)).toBe(true)
     expect(label.matches(":state(on-platform)")).toBe(false)
+  })
+
+  it("leaves a dropdown's item out of its menu on a device its list leaves out, live", async () => {
+    await emulate(DESKTOP)
+    const dropdown = await ElementFixture.render<DOMElement>(
+      `<ui-dropdown selection><ui-item value="a">Anywhere</ui-item>` +
+        `<ui-item value="b" on-platform="desktop, tablet">Not on phones</ui-item></ui-dropdown>`
+    )
+    dropdown.shadowRoot!.querySelector<HTMLElement>("[role=combobox]")!.click()
+    const rows = () => [...dropdown.shadowRoot!.querySelectorAll("[role=option]")].map((row) => row.textContent?.trim())
+    await expect.poll(rows).toEqual(["Anywhere", "Not on phones"])
+    await emulate(PHONE)
+    await expect.poll(rows).toEqual(["Anywhere"])
+    await emulate(TABLET)
+    await expect.poll(rows).toEqual(["Anywhere", "Not on phones"])
   })
 
   it("is hidden by reset.css, in PLATFORM_QUERIES' own media queries", () => {

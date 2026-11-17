@@ -21,6 +21,31 @@ export const PLATFORMS = ["phone", "tablet", "desktop"] as const
 /** A kind of device:  `phone`, `tablet` or `desktop`. */
 export type Platform = (typeof PLATFORMS)[number]
 
+/**
+ * Call `callback` with the new platform each time it changes:  the window resized past 600px, the device turned,
+ * a mouse plugged in.
+ * - Returns the function that stops listening.
+ * - Does nothing outside a browser.
+ */
+export function onPlatformChange(callback: (platform: Platform) => void): () => void {
+  if (typeof matchMedia !== "function") return () => {}
+  const stop = new AbortController()
+  const changed = () => callback(currentPlatform())
+  for (const platform of PLATFORMS) {
+    matchMedia(PLATFORM_QUERIES[platform]).addEventListener("change", changed, { signal: stop.signal })
+  }
+  return () => stop.abort()
+}
+
+/**
+ * Can this browser picture a screen, a window or a tab (`navigator.mediaDevices.getDisplayMedia()`)?
+ * - Desktop browsers only:  no iOS or Android browser has it.
+ * - Spell UI's `UI.browser.supports.screenCapture` is this.
+ */
+export function canCaptureScreen(): boolean {
+  return typeof globalThis.navigator?.mediaDevices?.getDisplayMedia === "function"
+}
+
 /** Each platform's name, any case. */
 const PLATFORM_WORD = {
   phone: /^phone$/i,

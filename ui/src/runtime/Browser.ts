@@ -1,6 +1,6 @@
 // Import directly:  the one dark-mode query, with no pref store
 import { DARK_QUERY } from "spell/util/persist/persist.types"
-import { currentPlatform, type Platform } from "spell/util/platform"
+import { canCaptureScreen, currentPlatform, type Platform } from "spell/util/platform"
 import { isBrowser, lazy } from "spell/ui/util"
 
 import type { BrowserSupports } from "./runtime.types"
@@ -132,7 +132,7 @@ export class Browser {
       interpolateSize: css && probe(() => CSS.supports("interpolate-size: allow-keywords")),
       anchoredQueries: css && probe(() => CSS.supports("container-type: anchored")),
       fieldSizing: css && probe(() => CSS.supports("field-sizing: content")),
-      screenCapture: typeof globalThis.navigator?.mediaDevices?.getDisplayMedia === "function"
+      screenCapture: canCaptureScreen()
     }
 
     /** Run a feature probe;  `false` if it throws. */

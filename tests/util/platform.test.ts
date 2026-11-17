@@ -3,7 +3,7 @@
 import { afterAll, describe, expect, it } from "vite-plus/test"
 import { cdp, page } from "vite-plus/test/browser"
 
-import { PLATFORMS, currentPlatform, isOnPlatform, platformsIn } from "spell/util/platform"
+import { PLATFORMS, currentPlatform, isOnPlatform, onPlatformChange, platformsIn } from "spell/util/platform"
 
 describe("platformsIn()", () => {
   it("reads a comma list, a space after a comma ignored, any case", () => {
@@ -52,6 +52,20 @@ describe("currentPlatform(), emulated", () => {
     expect(currentPlatform()).toBe("phone")
     expect(isOnPlatform("desktop,tablet")).toBe(false)
     expect(isOnPlatform(undefined)).toBe(true)
+  })
+
+  it("says when the platform changes, until stopped", async () => {
+    await touch(false)
+    await page.viewport(390, 844)
+    const seen: string[] = []
+    const stop = onPlatformChange((platform) => seen.push(platform))
+    await touch(true)
+    await expect.poll(() => seen.at(-1)).toBe("phone")
+    stop()
+    const count = seen.length
+    await touch(false)
+    expect(currentPlatform()).toBe("desktop")
+    expect(seen.length).toBe(count)
   })
 
   it("is a tablet with a finger on a big screen", async () => {

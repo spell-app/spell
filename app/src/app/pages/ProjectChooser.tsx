@@ -1,6 +1,7 @@
 import { For, Show, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { canCaptureScreen } from "spell/util/platform"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -277,11 +278,7 @@ function StartCards(props: { drag?: TileCardDrag }) {
         {(id) => (
           <StartCard
             id={id}
-            drag={cardDragFor(
-              id,
-              ids,
-              (run) => HomeArrangement.saveOrder(SPACES.HOME_START_KEY, run)
-            )}
+            drag={cardDragFor(id, ids, (run) => HomeArrangement.saveOrder(SPACES.HOME_START_KEY, run))}
           />
         )}
       </For>
@@ -653,12 +650,17 @@ function CardMenu(props: { projectRoot: SPACES.SpellProjectRoot; project: CardPr
       aria-label={appTexts.text("cardMenu")}
       title={appTexts.text("cardMenu")}
     >
-      <For each={CARD_ACTIONS.filter((action) => action === "divider" || !(action.needsServer && isStaticBuild))}>
+      <For each={CARD_ACTIONS.filter((action) => action === "divider" || canDo(action))}>
         {(action) =>
           action === "divider" ? (
             <ui-item kind="divider" />
           ) : (
-            <ui-item value={action.words} icon={action.icon} onClick={() => run(action)}>
+            <ui-item
+              value={action.words}
+              icon={action.icon}
+              on-platform={action.onPlatform}
+              onClick={() => run(action)}
+            >
               {appTexts.text(action.words)}
             </ui-item>
           )
@@ -678,6 +680,19 @@ type CardAction = {
   run: (project: SP.SpellProject) => unknown
   /** only where there's a server (not the static build):  versions, pictures */
   needsServer?: boolean
+  /** only where the browser can picture the screen (`canCaptureScreen()`):  no phone browser can */
+  needsScreenCapture?: boolean
+  /** only on these devices, Spell UI's shared `on-platform`:  `"desktop, tablet"` */
+  onPlatform?: string
+}
+
+/**
+ * Can this page do `action`?  Its server and its browser have what it needs.
+ * - Which device it's on is the item's `on-platform`, which hides it live as the window turns.
+ */
+function canDo(action: CardAction): boolean {
+  if (action.needsServer && isStaticBuild) return false
+  return !(action.needsScreenCapture && !canCaptureScreen())
 }
 
 /**
@@ -697,7 +712,10 @@ const CARD_ACTIONS: readonly (CardAction | "divider")[] = [
     run: async (project) => {
       if (await editor.updateSnapshot({ project })) setSnapshotAt({ ...snapshotAt(), [project.path]: Date.now() })
     },
-    needsServer: true
+    needsServer: true,
+    // Owen, epic `mockup` T53:  not on a phone
+    needsScreenCapture: true,
+    onPlatform: "desktop, tablet"
   },
   "divider",
   { words: "deleteProject", icon: "trash alternate outline", run: (project) => editor.deleteApp({ project }) }
@@ -763,7 +781,11 @@ const [dropOn, setDropOn] = createSignal<string>()
  * dropped on another of them, `save()` gets the row's new order.
  * - Not rearranging:  none, so the card is a plain link.
  */
-function cardDragFor(id: string, row: () => readonly string[], save: (run: string[]) => void): TileCardDrag | undefined {
+function cardDragFor(
+  id: string,
+  row: () => readonly string[],
+  save: (run: string[]) => void
+): TileCardDrag | undefined {
   if (!HomeArrangement.isRearranging) return undefined
   // a drag from this row's cards, onto another of them
   const takes = () => !!dragged() && dragged() !== id && row().includes(dragged()!)
