@@ -154,15 +154,56 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
   test("Update App Snapshot…:  the app in a phone, a snapshot cropped, saved as its picture, 780 by 439", async () => {
     await choose(title(), "Update App Snapshot…")
     await page.waitForSelector(".AppSnapshot iframe", { timeout: 15_000 })
-    expect(await page.locator(".AppSnapshotScreen").evaluate((screen) => (screen as HTMLElement).offsetWidth)).toBe(390)
+    /** The phone's screen's size on the page, in CSS pixels. */
+    const screenSize = () =>
+      page
+        .locator(".AppSnapshotScreen")
+        .evaluate((screen) => [(screen as HTMLElement).offsetWidth, (screen as HTMLElement).offsetHeight])
+    expect((await screenSize())[0]).toBe(390)
     // its app drawn:  a cold editor compiles it first
-    await page.frameLocator(".AppSnapshot iframe").locator("#spell-app-root > *").first().waitFor({ timeout: 90_000 })
+    const app = page.frameLocator(".AppSnapshot iframe")
+    await app.locator("#spell-app-root > *").first().waitFor({ timeout: 90_000 })
+    // what to do, over the phone
+    await page.locator(".AppSnapshotHint").waitFor()
+    // Change theme:  the app in Merlot, dark, at once;  only the app in the phone
+    const editorTheme = await page.locator("html").getAttribute("data-spell-theme")
+    for (const look of ["Merlot", "Dark"]) {
+      await page.locator(".AppSnapshotTheme").click()
+      await page.getByRole("option", { name: look }).click()
+    }
+    await expect.poll(() => app.locator("html").getAttribute("data-spell-theme")).toBe("merlot")
+    await expect.poll(() => app.locator("html").getAttribute("class")).toContain("ui-dark")
+    expect(await page.locator("html").getAttribute("data-spell-theme")).toBe(editorTheme)
+    // Rotate:  on its side, the app as wide as a phone is long
+    await page.locator(".AppSnapshotRotate").click()
+    await expect.poll(screenSize).toEqual([844, 390])
     await page.locator(".AppSnapshotGo").click()
     await page.waitForSelector(".AppSnapshotFrame", { timeout: 20_000 })
-    // the frame moves with the arrow keys
-    await page.locator(".AppSnapshotFrame").focus()
+    // the crop step's own message, at once
+    await expect.poll(() => page.locator(".AppSnapshotHint").textContent()).toContain("Drag a corner")
+    const frame = page.locator(".AppSnapshotFrame")
+    const width = async () => Number(await frame.getAttribute("data-width"))
+    // as big as fits:  the screen's height, in the card's shape
+    expect(await width()).toBe(Math.floor(390 / (9 / 16)))
+    // `-` makes it smaller, then stops:  where the picture would be blown up too far (past 2/3 of its pixels;
+    // where that is depends on the capture's pixels)
+    await frame.focus()
+    for (let i = 0; i < 30; i++) await page.keyboard.press("-")
+    const smallest = await width()
+    expect(smallest).toBeLessThan(693)
+    await page.keyboard.press("-")
+    expect(await width()).toBe(smallest)
+    // a corner dragged makes it bigger again
+    const corner = (await page.locator(".AppSnapshotCorner.bottom-right").boundingBox())!
+    await page.mouse.move(corner.x + 8, corner.y + 8)
+    await page.mouse.down()
+    await page.mouse.move(corner.x + 108, corner.y + 8, { steps: 5 })
+    await page.mouse.up()
+    expect(await width()).toBeGreaterThan(smallest)
+    // the arrow keys move it
+    await page.keyboard.press("Home")
     await page.keyboard.press("Shift+ArrowDown")
-    expect(await page.locator(".AppSnapshotFrame").getAttribute("aria-valuenow")).toBe("40")
+    expect(await frame.getAttribute("aria-valuenow")).toBe("40")
     await page.locator(".AppSnapshotGo").click()
     await page.waitForSelector(".AppSnapshot", { state: "detached", timeout: 15_000 })
     const picture = readFileSync(path.join(project.folder, "__thumbnail.png"))

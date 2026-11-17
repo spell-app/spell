@@ -51,7 +51,7 @@
   .overflow-menu,
   .ui-tooltip-bubble,
   .panel[popover],
-  .ui.modal,
+  .ui.modal:not(.basic),
   .ui.toast {
     backdrop-filter: var(--glass-blur);
   }
