@@ -53,22 +53,120 @@ my app is an app:
 \t\t</container>
 `
   },
-  /** A button that counts its clicks. */
+  /**
+   * Counters you name (epic `mockup` T50):  each counts up and down by its own step and resets;
+   * the app adds them up, and keeps them on this device.
+   * - Still a counter, showing more of Spell in a minute's read:  a type with actions and a test,
+   *   a list drawn as it changes, a worked-out total, and storage in two lines.
+   */
   counter: {
     name: "counter",
     fileName: "Counter.spell",
     contents: (title: string) => `# ${title}
-// A button that counts its clicks.
+// Counters you name:  each counts up and down by its own step, and starts again at 0.
+// The total adds them all up.  They're kept on this device, so they're still here next time.
 
-my app is an app:
-\tits "count" is a number
-\twhen creating it:
-\t\tset its count to 0
-\tto count up:
-\t\tset its count to its count + 1
-\tto draw it:
+## Where they're kept
+// In this browser's own storage:  change these two lines to keep them somewhere else.
+my counters is stored on this device
+a counter lives in my counters
+
+## A counter
+
+a "counter" is a view
+\tits "name" is text
+\tits "count" is a number starting at 0
+\tits "step" is a number starting at 1
+\t\t// How much one click adds, or takes away
+
+\tto "count up" with title "Up", icon "plus"
+\t\tset the count to the count + the step
+\tto "count down" with title "Down", icon "minus"
+\t\tset the count to the count - the step
+\tto "reset" with title "Reset", icon "undo"
+\t\tset the count to 0
+\tto "delete" with title "Delete", icon "trash alternate outline"
+\t\tremove it from its tally
+\t\tremove it from the counters
+
+\tto draw it
+\t\t// A form of its own, bound to it:  typing its name or its step changes the counter
+\t\t<form value={it}>
+\t\t\t<stack direction="horizontal" spacing="sm">
+\t\t\t\t<input name="name" aria-label="Name" appearance="transparent" fluid />
+\t\t\t\t<action "count down" icon-only />
+\t\t\t\t<header level="3">{the count}</header>
+\t\t\t\t<action "count up" icon-only />
+\t\t\t\t<input name="step" type="number" aria-label="Step" size="small" style="width: 5em" />
+\t\t\t\t<action "reset" icon-only appearance="tertiary" />
+\t\t\t\t<action "delete" icon-only appearance="tertiary" />
+\t\t\t</stack>
+\t\t</form>
+
+\tto test counting by its step
+\t\tset the counter to a new counter with step = 5
+\t\tcount up of the counter
+\t\tcount up of the counter
+\t\tcount down of the counter
+\t\tthe counter's count should be 5
+\t\treset the counter
+\t\tthe counter's count should be 0
+
+## The tally
+// The counters, one under the other
+
+a "tally" is a viewable list of counters
+\tto draw it
+\t\t<stack spacing="xs">
+\t\t\t<children />
+\t\t</stack>
+a counter belongs to one tally
+
+## The app
+
+my app is an app
+\t"tally" is a new tally
+\tits "draft" is text
+\t\t// The next counter's name, as the field holds it
+\tits "total" is
+\t\t// Every counter's count, added up
+\t\tset sum to 0
+\t\tfor counter in the tally
+\t\t\tset sum to sum + the count of counter
+\t\treturn sum
+
+\twhen creating it
+\t\t// The counters kept on this device;  the first time, two to start with
+\t\tfor counter in every counter
+\t\t\tadd it to the tally
+\t\tif the tally is not empty return
+\t\tadd the counter "Cups of coffee"
+\t\tadd the counter "Push-ups"
+
+\tto add the counter (name as text)
+\t\tset counter to a new counter with name = name
+\t\tadd counter to the counters
+\t\tadd counter to the tally
+
+\tto add the draft
+\t\tif the draft is "" return
+\t\tadd the counter the draft
+\t\tclear the draft
+
+\tto draw it
 \t\t<container>
-\t\t\t<button onClick={count up}>Clicked {its count} times</button>
+\t\t\t<stack>
+\t\t\t\t<stack direction="horizontal" justify="between">
+\t\t\t\t\t<header level="2">${title}</header>
+\t\t\t\t\t<label size="large">Total {the total}</label>
+\t\t\t\t</stack>
+\t\t\t\t{draw the tally}
+\t\t\t\t<form value={it}>
+\t\t\t\t\t<input name="draft" placeholder="Count something else" aria-label="New counter" fluid action>
+\t\t\t\t\t\t<button slot="action" color="primary" disabled={the draft is ""} onClick={add the draft}>Add</button>
+\t\t\t\t\t</input>
+\t\t\t\t</form>
+\t\t\t</stack>
 \t\t</container>
 `
   },

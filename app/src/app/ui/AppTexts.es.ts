@@ -158,7 +158,7 @@ const APP_TEXTS_ES: AppTextPack = {
   startBlank: "En blanco",
   startBlankLine: "Una app vacía, y cosas para arrastrar.",
   startCounter: "Contador",
-  startCounterLine: "Un botón que cuenta sus clics.",
+  startCounterLine: "Contadores con nombre, de a cualquier paso, y su total.",
   startConverter: "Conversor",
   startConverterLine: "De kilómetros a millas, y más, mientras escribes.",
   startTaskList: "Lista de tareas",

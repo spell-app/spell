@@ -14,7 +14,7 @@ import { ProjectChooser } from "spell/app/app/pages/ProjectChooser"
  * - your own projects first under the hero, and no row at all while you have none
  * - what Spell's own order hides (`SPACES.HOME_HIDDEN_KEY`) isn't there:
  *   the library, the editor's pieces, FizzBuzz and the sign-in examples, the guide of a hidden one
- * - the ways to start:  Blank, Counter and Task List
+ * - the ways to start:  Counter first, the to-do list, Converter, Blank
  * - the examples and guides written in Spanish:  a section of their own, "En español", after the English ones (I46)
  * - a "..." menu on each of your own projects' cards, and nobody else's (T47);  each item the editor's action on THAT
  *   project, never opening it
@@ -75,7 +75,7 @@ describe("the home page's rows", () => {
     expect(host.querySelector("#projects")).toBeNull()
     expect(rowIds(host)).toEqual(["start", "examples", "guides", "spanish"])
     // where a first app is made:  Blank last (epic `mockup` T44)
-    expect(cardsIn(host, "start")).toEqual(["To-do list", "Counter", "Converter", "Blank"])
+    expect(cardsIn(host, "start")).toEqual(["Counter", "To-do list", "Converter", "Blank"])
   })
 
   test("projects of your own:  their row first under the hero", async () => {

@@ -245,8 +245,9 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
 /****************
  * ### `<StartCards>`
  * The ways to start making something, under the hero, in the group of cards the projects use:
- * - a few tiny starters, each the person's own to change:  the to-do list (Task List's copy), Counter, Converter
- *   (Owen, epic `mockup` I40:  no Roll a Six, Site or Solitaire here any more)
+ * - a few tiny starters, each the person's own to change:  Counter, the to-do list (Task List's copy), Converter
+ *   (Owen, epic `mockup` I40:  no Roll a Six, Site or Solitaire here any more;
+ *   T50:  "Put counter first", its program counters you name, step, reset and total)
  * - Blank, last:  an empty app, the palette open, so what it can hold shows at once
  *   (Owen, epic `mockup` T44:  "adding things in the editor doesn't work that great yet, so don't lead with that")
  * - Import:  a project they exported, the way back after clearing a browser
@@ -262,14 +263,14 @@ function StartCards(props: { drag?: TileCardDrag }) {
       drag={props.drag}
     >
       <StartCard
-        name={appTexts.text("startTaskList")}
-        line={appTexts.text("startTaskListLine")}
-        start={() => void editor.startFromCopy(TASK_LIST)}
-      />
-      <StartCard
         name={appTexts.text("startCounter")}
         line={appTexts.text("startCounterLine")}
         start={() => void editor.startFrom("counter")}
+      />
+      <StartCard
+        name={appTexts.text("startTaskList")}
+        line={appTexts.text("startTaskListLine")}
+        start={() => void editor.startFromCopy(TASK_LIST)}
       />
       <StartCard
         name={appTexts.text("startConverter")}
