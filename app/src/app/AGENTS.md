@@ -197,7 +197,8 @@ and in the app's build folder, `app/` at the app folder's root.
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
     - Not in a page file.
     - ONE colour table, [CodeRules](ui/CodeRules.ts):  a role's `--ui-code-<role>` colour and CodeMirror's highlight
-      tags;  the compiled pane is coloured by it.
+      tags;  the compiled pane is coloured by it, and so is a CSS file (`styles.css`), by CodeMirror's CSS language
+      (epic `codemirror` I20).
     - A slice of a file, the Inspector's Code card (`<CodeSlice>`, epic `editor` T72):
       `FileStates.showSlice()`, the file's own text in another view, its edits the file's;
       only what's wholly in its lines is drawn bubbly, so the action whose body it shows draws no band or rail

@@ -1,5 +1,7 @@
 import { autocompletion, closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete"
 import { isolateHistory } from "@codemirror/commands"
+import { css, cssLanguage } from "@codemirror/lang-css"
+import { LanguageSupport, syntaxHighlighting } from "@codemirror/language"
 import { setDiagnostics } from "@codemirror/lint"
 import {
   Annotation,
@@ -14,12 +16,14 @@ import {
   type TransactionSpec
 } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, keymap } from "@codemirror/view"
+import { styleTags, tags } from "@lezer/highlight"
 import type { TextEdit } from "vscode-languageserver"
 
 import { observe } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
+import { CodeRules } from "spell/app/app/ui/CodeRules"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
 import { CodeMirrorHeadings } from "./CodeMirrorHeadings"
@@ -439,6 +443,8 @@ export class FileStates {
    * - A property editors file, `Card.editor.spell`, is Spell to look at but never parsed (`SP.isPropertyEditorsName()`):
    *   drawn from its text alone, as Spell is, bubbly or coloured;  its headings, and the help in its tags
    *   (epic `codemirror` I18:  it had no look at all, plain black text).
+   * - A CSS file (`styles.css`) coloured by CodeMirror's CSS language, through the ONE colour table (`CodeRules`),
+   *   whatever the look;  its property names and values suggested as you type (epic `codemirror` I20:  plain black).
    */
   private extensionsFor(file: SP.AnySpellFile, language: CodeMirrorLanguage | undefined): Extension {
     const spell = language
@@ -469,7 +475,9 @@ export class FileStates {
               CodeMirrorTyping.markupExtension(),
               CodeMirrorLook.extension((isBubbly) => (isBubbly ? CodeMirrorMarkup.extension() : []))
             ]
-          : []
+          : isCssFile(file)
+            ? cssExtensions()
+            : []
     return [
       EditorView.updateListener.of((update) => {
         const entry = this.entries.get(file.path)
@@ -632,6 +640,28 @@ type FileEntry = {
 /** Is `file` HTML, e.g. a property editor page, `Card.editor.html`:  drawn as the drawn-bubbly page draws HTML? */
 function isMarkupFile(file: SP.AnySpellFile): boolean {
   return /\.html?$/i.test(file.path)
+}
+
+/** Is `file` a style sheet, e.g. a project's `styles.css`? */
+function isCssFile(file: SP.AnySpellFile): boolean {
+  return /\.css$/i.test(file.path)
+}
+
+/**
+ * What a CSS file's editor takes:  CodeMirror's CSS language, coloured by `CodeRules`, its suggestions, its brackets
+ * closed as typed.
+ * - Its functions (`var()`, `calc()`) are actions, as a javascript call is:
+ *   CodeMirror's CSS calls them `operatorKeyword`, which would colour them as `and` and `not` are.
+ */
+function cssExtensions(): Extension {
+  const calls = cssLanguage.configure({ props: [styleTags({ Callee: tags.function(tags.variableName) })] })
+  return [
+    new LanguageSupport(calls, css().support),
+    syntaxHighlighting(CodeRules.codeMirrorStyle),
+    autocompletion({ icons: false }),
+    closeBrackets(),
+    keymap.of(closeBracketsKeymap)
+  ]
 }
 
 /**
