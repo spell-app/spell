@@ -157,7 +157,7 @@ class BareLayout extends PageLayout {
 }
 
 /**
- * A site whose pages are in groups (T34, I35):  its Home the one page of a group named for it, around it its dialogs
+ * A site whose pages are in groups (T34, I35, C2):  its Home the one page of a group named for it, around it its dialogs
  * (which the navigation doesn't list);  a group of one page of another name;  a group of two.
  */
 class Lobby extends Site {
@@ -275,17 +275,12 @@ describe("a running site", () => {
     expect(site.navCurrent()).toBe("")
   })
 
-  test("lists a group of one page named as it is as that page alone, no group's header;  other groups as groups (I35)", () => {
+  test("lists a group of one page as that page alone, whatever its name, no group's header;  other groups as groups (I35, C2)", () => {
     expect(new Lobby().navPages()).toEqual([
       // its own icon, else its group's
       { title: "Home", href: "/", id: "home", icon: "house" },
-      {
-        title: "Mine",
-        id: "group:Mine",
-        band: "group",
-        icon: "user",
-        pages: [{ title: "Inbox", href: "/inbox", id: "inbox", icon: "inbox" }]
-      },
+      // named otherwise:  still the page alone, its own icon
+      { title: "Inbox", href: "/inbox", id: "inbox", icon: "inbox" },
       {
         title: "help",
         id: "group:help",
