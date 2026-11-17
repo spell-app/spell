@@ -1,5 +1,25 @@
 {
-  "sections": ["start", "examples", "library", "guides", "projects", "org", "editor"],
+  "sections": ["projects", "start", "examples", "library", "guides", "org", "editor"],
+  "hidden": [
+    "library",
+    "editor",
+    "@spell/examples/fizzbuzz",
+    "@spell/examples/Counter",
+    "@spell/examples/PublicServers",
+    "@spell/examples/StarWarsSite",
+    "@spell/examples/RecipeBox",
+    "@spell/examples/FamilyCookbook",
+    "@spell/examples/PicnicLetter",
+    "@spell/examples/SignUpSheet",
+    "@spell/examples/Statusphere",
+    "@spell/library/OrgAdmin",
+    "@spell/library/OrgChat",
+    "@spell/library/OrgFeed",
+    "@spell/library/Inbox",
+    "@spell/library/OrgEvents",
+    "@spell/library/AdministracionDeLaOrg",
+    "@spell/guides/how-fizzbuzz-works"
+  ],
   "@spell/examples": [
     "fizzbuzz",
     "Counter",

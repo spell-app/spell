@@ -1032,7 +1032,7 @@ describe("the home page's order (epic `mockup` P19, `repo-split` P28)", () => {
     const json = "application/json"
     const notASection = await request("POST", "/api/home/order", '{"group":"sections","names":["sidebar"]}', json)
     expect(notASection.status).toBe(400)
-    expect(notASection.json().errors[0].message).toContain("the sections are start, examples")
+    expect(notASection.json().errors[0].message).toContain("the sections are projects, start, examples")
     const notAGroup = await request("POST", "/api/home/order", '{"group":"@acme/tools","names":["a"]}', json)
     expect(notAGroup.status).toBe(400)
   })
