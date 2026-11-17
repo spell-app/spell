@@ -111,6 +111,9 @@
     "prefix": "epic-",
     "dir": "src"
   },
+  "spell": {
+    "commands": "./src/cli/commands.ts"
+  },
   "spellPublish": {
     "exclude": [
       "demo/**"

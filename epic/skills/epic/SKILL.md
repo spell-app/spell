@@ -636,6 +636,20 @@ cut-off agents, "it should have restarted automatically").
 - No agents listed:  no wake.  The inbox poller's own hook listens again by itself.
 - In Codex:  no background agents to cut off:  `epic guide` says to start the epic's open items again from the page.
 
+### Focus mode (`/focus`, `/back`)
+
+The person is focusing on something else (epic `epic-engine` T93):  a `/focus:  ...` message from another session,
+`epic focus status` saying "focus on", or the session-start hook's notice ([the focus skill](../focus/SKILL.md)).
+Until a `/back:  ...` message (or `epic focus status` says off):
+- keep building what's in flight, an accepted next phase too, and merge what's clean, as by day
+- ask the person NOTHING:  no AskUserQuestion, no details page, no `epic ask show`, as in bedtime mode
+  - In Codex:  no question in the chat either:  record it and go on.
+  - a choice:  a calm judgement call (`epic add <epic>#J "..." --calm`);  a question:  a Q item on the page, left to
+    wait;  something only they can unblock:  work on what isn't blocked
+- the person writing here doesn't end it:  answer them, and go on as above
+- the `/back` message:  post your status in THIS window ([the back skill](../back/SKILL.md), "A session's status"),
+  then the usual rules again
+
 ## 5. Each phase
 
 1. `epic phase <name>#P<N> active`, then CHECK its accepted build plan ("4b. Build plans") against what's there now.
@@ -1654,6 +1668,7 @@ The person starts work in THIS epic, in one block:  a phase, or a handful of its
     - It reaches the page at the next `epic phase ... done` or `epic merge`;  sooner:  `epic commits <name> --backfill`.
   - Reply as a phase's end does:  what was done per item (in words, ids after), checks with numbers, what's next.
 - Bedtime mode on:  no modals, as `/bedtime` says.
+- Focus mode on (`epic focus status`):  no modals either, as "Focus mode" says.
   - It's on when `epic summary <name> --json` has a `bedtime`.
 
 ## 12. Request:  `/epic request <epic> [<rN>...]`
@@ -1898,6 +1913,7 @@ change <name> [--for <item id>]                     stamp the <epic-change item>
                                                     new first;  --for:  the item of marks naming none
 log <name> ["text"] [--last <n>]                    timestamped review line in the log;  no text:  print the newest
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
+focus status | summary <name> [--since <t>]         focus mode:  on?  what happened since (`/focus`, `/back`)
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview
 migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify] [--list]
                                                     pages up to today's markup, every step of their kind, oldest

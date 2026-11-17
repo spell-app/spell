@@ -466,6 +466,12 @@ export class EpicProgram {
     ).usage(
       '<epic> start "P3-P6,P9" | done "summary"  |  all plan | all questions <epic> --file <f> | all spec  |  status'
     )
+    this.group(
+      epic.command("focus"),
+      "focus mode (/focus, /back):  every running epic keeps building and asks you nothing;  " +
+        "on and off print a TELL: line for each running epic session;  summary:  what happened since",
+      (args) => EpicTools.planDoc(["focus", ...args])
+    )
     this.page(
       epic.command("backfill"),
       "items you already went through in past sessions:  a dry run unless --apply",

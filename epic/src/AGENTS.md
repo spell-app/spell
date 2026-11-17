@@ -445,6 +445,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `cli/` -- the `epic` COMMAND LINE (epic `repo-split` J114:  every repo's command-line tools in its `cli/`).
     - `EpicProgram`:  the commander tree, every verb on it under its heading, `epic --help`
     - `epicGroups.ts`:  each group's verbs, for their help (`epic ask create --help`)
+    - `commands.ts`:  the folder's ONE `spell` command, `spell voice check` (`VoiceCheck`, the same as `epic voice check`;
+      epic `epic-engine` J256), named in the folder manifest's `"spell": { "commands" }`;  every other tool stays an `epic` verb
     - its entry is [epicMain.ts](cli/epicMain.ts), run by [bin/epic](../bin/epic)
       - its base is the kit's `spell/cli` (`runCommand()`, `rawArgsAfter()`, `EXIT`, `CliError`;  epic `coherence` P20),
         NEVER the kit's program (`spell/cli/main`), and it loads no spell
@@ -759,6 +761,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - the page server:  `GET /api/epics/pages` (`<epic-page>`'s See Also box), and the docs tools' comments routes
         - `epic inbox wait <name>`:  a guide's Send wakes it
         - the docs tools' `GuideChanges` and `PageInboxes` (the pages no epic owns:  `feedback`'s)
+    - FOCUS MODE (epic `epic-engine` T93):  `epic focus on | off | status | summary`, for `/focus` and `/back`
+      - `FocusCommands`:  the verbs;  `on` and `off` print a `TELL:` line for each running epic session (the
+        `sessionsOf` `migrate --notify` uses), never sending one;  `off` lists the epics with news and no session
+      - `FocusSummary`:  what happened on an epic since focus started, on "0. While you were out"'s `NightSummary`,
+        plus its commits on `main` and its requests;  `## Waiting on you` first
+      - the switch is `FocusMode` (`spell/epic/config/FocusMode`):  `focus.json5` in the epic home, the lines each
+        session is told, and the session-start hook's notice ([focus-notice.mjs](../hooks/focus-notice.mjs));
+        plain `node` loads it
     - `StaleFacts` (epic `epic-engine` Q69):  `epic stale`, the facts for judging which open items have gone stale,
       for `/epic tidy`;  it decides nothing;  git runs a fixed few times for a whole page, never per item
     - `EpicTargets` (P15):  what a link to a saga, an epic, a phase or an item finds in a checkout

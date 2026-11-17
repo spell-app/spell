@@ -29,6 +29,7 @@ import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDo
 import { EpicOwners, type PathOwners } from "./EpicOwners"
 import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
+import { FocusCommands } from "./FocusCommands"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { ItemPictures, type PastedReader } from "./ItemPictures"
@@ -57,7 +58,7 @@ import { TestCommands } from "./TestCommands"
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
  * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`, `stale`,
- *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
+ *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `focus`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
  * - `docs`, `decisions` (`EpicDocs`, for `/docs-check`):
@@ -106,6 +107,9 @@ export class PlanDocCommands {
   /** the `option` command, `choose`, and `add`'s standing sets (epic `epic-engine` P50), on this object's files */
   readonly options: OptionCommands
 
+  /** the `focus` command (epic `epic-engine` T93):  focus mode, and what each running epic session is told */
+  readonly focus: FocusCommands
+
   /**
    * how long Claude worked on a phase while it was active, in minutes (`phase ... done`, `phase ... took`;  epic
    * `epic-engine` P41):  STATIC for the object's life
@@ -139,6 +143,7 @@ export class PlanDocCommands {
     this.sagas = new SagaCommands(this)
     this.tests = new TestCommands(this)
     this.options = new OptionCommands(this)
+    this.focus = new FocusCommands(this)
   }
 
   ////////////////
@@ -170,6 +175,8 @@ export class PlanDocCommands {
     // `bedtime all ...` and `bedtime status`:  every epic at once, not one page (`BedtimeAll`, epic `epic-engine` T85)
     if (command === "bedtime" && (name === "all" || name === "status"))
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
+    // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
+    if (command === "focus") return this.focus.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
     // `saga page`:  a saga's page (`SagaPage`);  every other `saga` verb is the list's (`SagaCommands`)
@@ -1712,6 +1719,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    it;  every verb above edits it as SAGA:/<id> (epic-workflow P15)
   bedtime <name> start "P3-P6"  /  done "summary"  a /bedtime run:  bedtime mode on (every change stays green
                                                    until reviewed) / off;  both logged
+  focus on [--why "..."] | off | status | summary [<name>] [--since <t>] [--json]
+                                                   focus mode (/focus, /back):  on and off print a TELL: line for
+                                                   each running epic session;  summary:  what happened since
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
   summary <name> [--json]                          open questions, issues, todos, limits, manual tests;  the next phase
   docs <name> [--json]                             the docs the epic wrote besides its epic page:  its
