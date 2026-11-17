@@ -17,6 +17,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 
 import { BracketedList } from "./BracketedList"
 import { CanGiveUp } from "./CanGiveUp"
+import { CanDo } from "./CanDo"
 import { CanTake } from "./CanTake"
 import { CopyList } from "./CopyList"
 import { EndsWith } from "./EndsWith"
@@ -1024,6 +1025,24 @@ listsEs.addRule(ListMove, {
       tests: [
         ["mover card a tableau", "core.move(card, tableau)"],
         ["si mover card a tableau entonces imprimir 1", "if (core.move(card, tableau)) core.console.log(1)"]
+      ]
+    }
+  ]
+})
+
+// ¿dice sí una acción?, preguntado a cada elemento (épica `language` T146):  `donde puede jugar la carta`
+listsEs.addRule(CanDo, {
+  syntax: "{operator:can_or_cannot} {call:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", '\tpara "jugarla"', "\t\tdevolver sí"].join("\n"), "block")
+        scope.variables?.add({ name: "carta", datatype: "Carta" })
+      },
+      tests: [
+        ["puede jugar la carta", "carta.jugar()"],
+        ["no puede jugar la carta", "!carta.jugar()"]
       ]
     }
   ]

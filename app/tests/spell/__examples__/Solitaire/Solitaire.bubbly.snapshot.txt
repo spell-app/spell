@@ -246,6 +246,15 @@
 |   |   the number of **cards** in the **deck** should be _52_    ‾value(the number of cards in the deck)
 
 ==== /Solitaire.spell
+[thing reopen_type L0]
+| a **card**		⟦-- What auto play asks of a card⟧
+|   [property quoted_type_expression L1]
+|   | it «"can go up"» if it is on top of its pile and (the first **pile** in every **pile** where it can take the **card**) is a **foundation**    ‾question(it is on top of its pile) ‾question((the first pile in every pile where it can take the card) is a foundation)
+|   |   ⟦-- onto its foundation:  a column's top card⟧
+|   [property quoted_type_expression L1]
+|   | it «"can move its run"» if (it is not a _king_ or it is not the first **card** of its **pile**) and it is the first **card** in its **pile** which is face up    ‾question(it is not a king) ‾value(it) ‾value(the first card of its pile) ‾value(it) ‾value(the first card in its pile which is face up)
+|   |   ⟦-- it and the face-up cards on it, all together, onto another column:  a king already at the bottom stays put⟧
+
 [thing create_one_of_a_kind L0]
 | «solitaire» is an **app**
 |   ⟦-- See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules⟧
@@ -370,38 +379,14 @@
 
 |   |   [action to_do_something L2]
 |   |   | to «"auto play"» with shortcut «"A"», icon «"play"»
-|   |   |   ⟦-- Play every card that can go somewhere, until none can⟧
-|   |   |   set **anything changed** to _no_    ‾value(anything changed)
+|   |   |   ⟦-- Play one card that can go somewhere, then the next, until none can⟧
+|   |   |   set **played** to the last **card** in the **discard pile** where it can play the **card**    ‾value(played) ‾value(the last card in the discard pile where it can play the card)
+|   |   |     or the first **card** in the **columns** where it can go up and can play the **card**    ‾value(the first card in the columns where it can go up and can play the card)
+|   |   |     or the first **card** in the **columns** where it can move its run and can play the **card**    ‾value(the first card in the columns where it can move its run and can play the card)
 |   |   |   [control if L3]
-|   |   |   | if the **discard pile** is not empty    ‾question(the discard pile is not empty)
-|   |   |   |   set **test card** to the last **card** of the **discard pile**    ‾value(test card) ‾value(the last card of the discard pile)
-|   |   |   |   [control if L4]
-|   |   |   |   | if play **test card**    ‾call(play test card)
-|   |   |   |   |   set **anything changed** to _yes_    ‾value(anything changed)
-|   |   |   |   |   pause for _500_ msec    ‾quantity(500 msec)
-|   |   |   ⟦-- each column's last card onto its foundation⟧
-|   |   |   [control list_iteration L3]
-|   |   |   | for **pile** in the **columns**    ‾value(the columns)
-|   |   |   |   if the **pile** is empty return    ‾question(the pile is empty)
-|   |   |   |   set **test card** to the last **card** of the **pile**    ‾value(test card) ‾value(the last card of the pile)
-|   |   |   |   set **foundation** to the first **pile** in the **foundations** where its **suit** is the **suit** of **test card**    ‾value(foundation) ‾value(the first pile in the foundations where its suit is the suit of test card)
-|   |   |   |   [control if L4]
-|   |   |   |   | if the **foundation** can take **test card**    ‾question(the foundation can take test card)
-|   |   |   |   |   set **anything changed** to _yes_    ‾value(anything changed)
-|   |   |   |   |   play **test card**    ‾call(play test card)
-|   |   |   |   |   pause for _100_ msec    ‾quantity(100 msec)
-|   |   |   ⟦-- each column's face-up cards, all together, onto another column⟧
-|   |   |   [control list_iteration L3]
-|   |   |   | for **pile** in the **columns**    ‾value(the columns)
-|   |   |   |   set **face up cards** to the **cards** in the **pile** where the **card** is face up    ‾value(face up cards) ‾value(the cards in the pile where the card is face up)
-|   |   |   |   if **face up cards** is empty return    ‾question(face up cards is empty)
-|   |   |   |   set **test card** to the first **card** of **face up cards**    ‾value(test card) ‾value(the first card of face up cards)
-|   |   |   |   if **test card** is a _king_ and **test card** is the first **card** of the **pile** return    ‾question(test card is a king) ‾value(test card) ‾value(the first card of the pile)
-|   |   |   |   [control if L4]
-|   |   |   |   | if play **test card**    ‾call(play test card)
-|   |   |   |   |   set **anything changed** to _yes_    ‾value(anything changed)
-|   |   |   |   |   pause for _500_ msec    ‾quantity(500 msec)
-|   |   |   if **anything changed** auto play    ‾value(anything changed) ‾call(auto play)
+|   |   |   | if **played** exists    ‾question(played exists)
+|   |   |   |   pause for _300_ msec    ‾quantity(300 msec)
+|   |   |   |   auto play    ‾call(auto play)
 |   |   
 |   |   [action to_do_something L2]
 |   |   | to «"cheat"» with shortcut «"C"», icon «"eye"»

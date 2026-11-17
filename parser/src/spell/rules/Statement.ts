@@ -7,6 +7,7 @@ import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import:  the word rules' folder builds on this file
 import { Wording } from "spell/parser/spell/rules/expressions/Wording"
 import { Block } from "./Block"
+import { JoinedLines } from "./JoinedLines"
 import { ParseError } from "./ParseError"
 
 /**
@@ -315,7 +316,10 @@ export class SpellStatement<
     // NOTE: `Scope.parse()` is typed for string input only;
     // call `parser.parse()` directly (exactly what `Scope.parse()` would do internally) so we can pass tokens instead.
     const { nestedScope } = statement
-    const tokens = SpellStatement.withVerbCarried(statement, SpellStatement.withWhichSubject(statement, unparsed))
+    const tokens = SpellStatement.withVerbCarried(
+      statement,
+      SpellStatement.withWhichSubject(statement, SpellStatement.beforeAlternatives(statement, unparsed))
+    )
     const inlineStatement = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
     if (inlineStatement) {
       statement.addMatch(inlineStatement, "body")
@@ -360,6 +364,29 @@ export class SpellStatement<
     // the words we changed, known to every rule's quick test of the line's words
     P.Sequence.addLineWords(tokens, unparsed)
     return tokens
+  }
+
+  /**
+   * `unparsed`, a condition after a list (`where`, `which`), up to an alternative on a line of its own
+   * (epic `language` T146):  the lines under it starting with `or`, each in parentheses of no width (`JoinedLines`).
+   *
+   *   ```spell
+   *   set card to the last card in the discard pile where it can play the card
+   *   	or the first card in the columns where it can go up and can play the card
+   *   ```
+   *
+   * - So the first line's `where` ends with its line, as each other line's does inside its parentheses:
+   *   the `or` joins the values, never the conditions.
+   * - On one line, `where it is face up or the deck is empty` is all the condition, as always.
+   */
+  static beforeAlternatives(statement: P.Match, unparsed: P.Token[]): P.Token[] {
+    if (!(statement.groups.where instanceof P.Match)) return unparsed
+    const { scope } = statement
+    const at = unparsed.findIndex(
+      (token, index) =>
+        Wording.lengthAt(scope, "and_or", [token], 0, "or") === 1 && JoinedLines.isWidthlessOpen(unparsed[index + 1])
+    )
+    return at > 0 ? unparsed.slice(0, at) : unparsed
   }
 
   /**

@@ -1199,8 +1199,10 @@ describe("outline style", () => {
     })
 
     test("a card's phrase on the game, after `and`, is an error, not silently false", () => {
+      // and what it read is a question and a thing, which `and` can't join (epic `language` T146)
       expect(errorsOf([...TYPES, "set both to the card is red and the game is face up"])).toEqual([
-        `11:41 Don't understand "is face up"`
+        `11:41 Don't understand "is face up"`,
+        `11:12 "the card is red" is a question and "the game" isn't, so "and" can't join them:  join two questions, or two values of one kind`
       ])
     })
   })

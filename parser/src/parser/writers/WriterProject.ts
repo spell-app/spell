@@ -426,11 +426,11 @@ export class WriterProject {
     return found
   }
 
-  /** Is `node` one of `core`'s loops, or a `where`, whose function `waits` says yes to? */
+  /** Is `node` one of `core`'s loops, or a `where` (`filter`, `itemWhere`), whose function `waits` says yes to? */
   protected functionWaits(node: P.ASTNode, waits: (callback: P.ASTMethodDefinition) => boolean): boolean {
     if (!isCoreCall(node)) return false
     const { methodName, args } = node as P.ASTScopedMethodInvocation
-    if (!P.CORE_LOOPS.has(methodName) && methodName !== "filter") return false
+    if (!P.CORE_LOOPS.has(methodName) && methodName !== "filter" && methodName !== "itemWhere") return false
     const arg = args.args?.[1]
     const callback = arg && unwrapped(arg)
     return callback instanceof P.ASTMethodDefinition && waits(callback)
