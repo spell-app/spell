@@ -823,6 +823,11 @@ cut-off agents, "it should have restarted automatically").
               - In Codex:  ask in the chat, yes or no, the files named.
             - moved aside, never deleted:  into `~/.spell-epic/ditched/<time>/`, which it prints
             - more than three is somebody's work:  `add <name>#I`, as above
+          - The merge changed a lockfile or a `package.json` (epic `epic-engine` T89):  it runs the install command
+            (`epic config installCommand`) in the main checkout, as `merge-main` does in a worktree, then restarts
+            the main checkout's page server, if it runs, and the editor (Vite) with it:
+            `main checkout:  installed the packages:  \`yarn install\` (yarn.lock changed)`.
+            - FAILED:  the merge stands;  the line says what to run there by hand.  Run it, then tell the person.
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/epic done`:  the worktree, the window and the session stay, for the next request.

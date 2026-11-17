@@ -126,8 +126,11 @@ export class Requests {
           for (const commit of commits) CLI.out(`  ${commit}`)
         }
       }
+      const installs = Requests.installReport(merged)
+      for (const line of installs.lines) CLI.out(line)
       await Requests.recordMerged(named, merged)
-      if (merged.some(({ commits }) => commits.length)) await Requests.refreshPageServer()
+      if (merged.some(({ commits }) => commits.length))
+        await Requests.refreshPageServer(process.cwd(), { restart: installs.restart })
       return EXIT.OK
     }
     if (verb === "home") {
@@ -492,6 +495,10 @@ export class Requests {
    *   - branch `<epic>` holds all of `main`:  else `main` moved, and the branch merges it first
    *     (`epic worktree merge-main`, in its worktree);  the verb does that itself first (`mergeTakingMain()`)
    * - Refused in one line where `main` takes only pull requests (`baseBranchProtected`).
+   * - Then the packages installed in the main checkout, when the merge changed a lockfile or a `package.json`
+   *   (`MainMerge.installAfter()`, as `epic worktree merge-main` does;  epic `epic-engine` T89):  `installed`
+   *   - why:  `epic merge codemirror` brought `@codemirror/lang-css` onto `main`, and main's editor couldn't load it
+   *   - a failed install never undoes the merge:  `installed.ok` is false, for the verb to say loudly
    * - Returns the commits it brought onto `main`, oldest first (`[]`:  nothing to merge), and what it moved aside.
    * - throws an `EpicCommandError` saying what to do, for any check that fails:  then nothing moved, nothing merged
    * - static:  about the repo `cwd` is in, not the epics folder
@@ -499,7 +506,7 @@ export class Requests {
   static merge(
     epic: string,
     cwd = process.cwd(),
-    { ditch = false, ditched = StrayFiles.folderFor(), label = "the main checkout" }: MergeOptions = {}
+    { ditch = false, ditched = StrayFiles.folderFor(), label = "the main checkout", install = {} }: MergeOptions = {}
   ): MergeResult {
     const main = Git.mainRoot(cwd)
     const base = new EpicConfig(main).baseBranch
@@ -509,9 +516,11 @@ export class Requests {
       .out.split("\n")
       .filter(Boolean)
     if (!commits.length) return result
+    const before = Git.out(["rev-parse", "HEAD"], main) ?? ""
     const merged = Git.run(["merge", "--ff-only", epic], main)
     if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${epic} failed:\n${merged.err}`)
-    return { ...result, commits }
+    const installed = MainMerge.installAfter(main, before, install.command, install.run)
+    return { ...result, commits, ...(installed ? { installed } : {}) }
   }
 
   /**
@@ -614,12 +623,12 @@ export class Requests {
    *   with no branch `<epic>`, is skipped
    * - EVERY repo checked before any moves (on its base branch, no stray file it may not move aside, the branch
    *   holding all of it):  one failing check throws, naming the repo, and nothing is moved aside or merged
-   * - `ditch`:  `merge()`'s;  one folder of moved files for the whole run, a folder per repo in it
+   * - `ditch`, `install`:  `merge()`'s;  one folder of moved files for the whole run, a folder per repo in it
    */
-  static mergeEach(epic: string, cwd = process.cwd(), { ditch = false }: MergeOptions = {}): MergeResult[] {
+  static mergeEach(epic: string, cwd = process.cwd(), { ditch = false, install }: MergeOptions = {}): MergeResult[] {
     const main = Git.mainRoot(cwd)
     const top = new EpicConfig(main).top
-    if (!top) return [Requests.merge(epic, cwd, { ditch })]
+    if (!top) return [Requests.merge(epic, cwd, { ditch, install })]
     // an old-layout child checkout found inside (`found`):  `mergeCheck()` refuses it until it crosses over
     const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout, found }) => {
       if (found) return []
@@ -632,26 +641,55 @@ export class Requests {
     const folder = StrayFiles.folderFor()
     return repos.map(({ repo, checkout, label }) => ({
       repo,
-      ...Requests.merge(epic, checkout, { ditch, ditched: join(folder, repo), label })
+      ...Requests.merge(epic, checkout, { ditch, ditched: join(folder, repo), label, install })
     }))
   }
 
   /**
+   * What `epic merge` says of the installs it ran in the main checkouts (`merge()`'s `installed`), a line each, and
+   * whether the page server restarts for them (epic `epic-engine` T89).
+   * - `restart`:  an install WORKED:  the editor's Vite remembers the imports it couldn't resolve before it, till
+   *   it restarts (`epic merge codemirror`:  `Failed to resolve import "@codemirror/lang-css"` after a by-hand install)
+   * - a failed one says FAILED, that the merge stands, and what to run by hand, there
+   * - static:  pure
+   */
+  static installReport(merged: MergeResult[]): { lines: string[]; restart: boolean } {
+    const lines = merged.flatMap(({ repo, installed }) => {
+      if (!installed) return []
+      const fix =
+        `the merge stands;  run it by hand:  cd ${installed.root} && ${installed.command}, ` + `then ${RESTART_BY_HAND}`
+      return [`${repo ? `${repo}'s ` : ""}main checkout:  ${MainMerge.installedLine(installed, fix)}`]
+    })
+    return { lines, restart: merged.some(({ installed }) => installed?.ok) }
+  }
+
+  /**
    * After `epic merge` moved `main`:  the main checkout's page server, when it runs, RESTARTED if the merge changed its
-   * code (`PageServer.ensure()`, which restarts one older than its code;  epic `epic-engine` I219).
+   * code (`PageServer.ensure()`, which restarts one older than its code;  epic `epic-engine` I219), or `restart` says
+   * so:  the merge's packages were just installed (`installReport()`, epic `epic-engine` T89).
    * - Owen, 2026-11-04:  "So why aren't you restarting the page server when you merge to main?" -- a merge of a new
    *   review mark (`hold`) left the running server refusing it, till a restart by hand
+   * - the editor (Vite) is the page server's child:  it restarts with it, and drops the imports it couldn't resolve
+   *   before the install;  what `spell server stop all` / `start all` did by hand, less the house site, which only
+   *   forwards to it
    * - one that isn't running stays stopped;  says so in one line when it restarted
+   * - `server`:  how it's asked, stopped and started (default the main checkout's own);  tests pass their own
    * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
    */
-  static async refreshPageServer(cwd = process.cwd()): Promise<void> {
+  static async refreshPageServer(
+    cwd = process.cwd(),
+    { restart = false, server = PAGE_SERVER }: { restart?: boolean; server?: PageServerControl } = {}
+  ): Promise<void> {
     try {
       const main = Git.mainRoot(cwd)
-      if (!(await new SRV.PidFile(main).status())) return
-      const server = await PageServer.ensure(main)
-      if (server.launched) CLI.out(`page server restarted with the merged code:  ${server.base}`)
+      if (!(await server.isRunning(main))) return
+      if (restart) await server.stop(main)
+      const started = await server.ensure(main)
+      if (restart) CLI.out(`page server restarted after the install, its editor with it:  ${started.base}`)
+      else if (started.launched) CLI.out(`page server restarted with the merged code:  ${started.base}`)
     } catch (error) {
-      CLI.out(`page server:  not restarted (${error instanceof Error ? error.message : String(error)})`)
+      const why = error instanceof Error ? error.message : String(error)
+      CLI.out(`page server:  not restarted (${why})${restart ? `;  by hand:  ${RESTART_BY_HAND}` : ""}`)
     }
   }
 
@@ -793,6 +831,23 @@ export type RequestsProps = { root?: string; sessions?: Sessions }
 
 /** `Requests.recordMerged()`'s options:  see it. */
 export type RecordMergedOptions = { cwd?: string; record?: (argv: string[], root: string) => Promise<number> }
+
+/** How `epic merge` asks, stops and starts the main checkout's page server (`Requests.refreshPageServer()`). */
+export type PageServerControl = {
+  isRunning: (main: string) => Promise<boolean>
+  stop: (main: string) => Promise<unknown>
+  ensure: (main: string) => Promise<{ base: string; launched: boolean }>
+}
+
+/** The main checkout's own page server, through its pid file. */
+const PAGE_SERVER: PageServerControl = {
+  isRunning: async (main) => Boolean(await new SRV.PidFile(main).status()),
+  stop: (main) => new SRV.PidFile(main).stop(),
+  ensure: (main) => PageServer.ensure(main)
+}
+
+/** Restarting the main checkout's page server and its editor by hand, run there. */
+const RESTART_BY_HAND = "epic server stop && epic server start --all"
 
 /** The verbs, for errors. */
 const VERBS = "send, requests, file, home or merge"

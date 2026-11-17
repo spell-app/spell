@@ -60,6 +60,8 @@ Each piece of work goes into `main` the moment it's done and merges cleanly (`ep
 phase's end, so the person sees it at once (the same section;  a standing rule).  Never ask whether to merge:
 `epic worktree merge-main` first, always;  failures that aren't this work's don't hold it.  It can't:  say why on its
 item.
+A merge that changed a lockfile or a `package.json` installs the packages in the main checkout itself, then restarts
+its page server and editor, and says so;  a FAILED install leaves the merge in, and prints what to run by hand.
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
 

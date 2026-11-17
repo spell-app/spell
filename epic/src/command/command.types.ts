@@ -536,15 +536,42 @@ export type PatchReport = {
  * - `base`:  its base branch;  `commits`:  the ones brought onto it, oldest first
  * - `ditched`:  the stray files moved aside first (`StrayFiles`), from the checkout's root;  `ditchedTo`:  where
  */
-export type MergeResult = { repo?: string; base: string; commits: string[]; ditched: string[]; ditchedTo?: string }
+export type MergeResult = {
+  repo?: string
+  base: string
+  commits: string[]
+  ditched: string[]
+  ditchedTo?: string
+  /** the install command run in the main checkout, because the merge changed its packages (epic `epic-engine` T89) */
+  installed?: PackagesInstalled
+}
+
+/**
+ * The install command a merge ran after it, because it changed the packages (`MainMerge.installAfter()`).
+ * - `command`:  as one string, to say and to run by hand
+ * - `root`:  the checkout it ran in
+ * - `changed`:  the lockfiles and `package.json`s it changed
+ * - `ok`:  it exited 0
+ */
+export type PackagesInstalled = { command: string; root: string; changed: string[]; ok: boolean }
+
+/** Runs an install command (`install`, as words) at checkout `root`;  whether it worked. */
+export type InstallRunner = (install: string[], root: string) => boolean
 
 /**
  * `Requests.merge()`'s options.
  * - `ditch`:  move aside the few hand-made stray files too, once Owen said so (`StrayFiles.ASK_LIMIT`)
  * - `ditched`:  the folder they go into;  default a new one in the epic home (`StrayFiles.folderFor()`)
  * - `label`:  how its errors name the checkout
+ * - `install`:  the install command and its runner after the merge (`MainMerge.installAfter()`);  default the
+ *   checkout's `installCommand`, run for real
  */
-export type MergeOptions = { ditch?: boolean; ditched?: string; label?: string }
+export type MergeOptions = {
+  ditch?: boolean
+  ditched?: string
+  label?: string
+  install?: { command?: string[]; run?: InstallRunner }
+}
 
 export type MergeMainReport = {
   branch: string
@@ -559,11 +586,8 @@ export type MergeMainReport = {
   repo?: string
   /** a multi-repo top's:  why this repo's merge couldn't start or go on (the others went on) */
   error?: string
-  /**
-   * the install command run after it, because it changed a lockfile (`MainMerge.reinstall()`):  `command`, the
-   * `lockfiles` changed, whether it worked;  left out when none changed
-   */
-  installed?: { command: string; lockfiles: string[]; ok: boolean }
+  /** the install command run after it, because it changed the packages (`MainMerge.installAfter()`);  none:  left out */
+  installed?: PackagesInstalled
   /** generated files left uncommitted, moved aside before the merge (`StrayFiles`);  `ditchedTo`:  where */
   ditched?: string[]
   ditchedTo?: string

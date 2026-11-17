@@ -460,8 +460,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `command/` -- what the `epic` command's verbs run (epic `epic-eject` P5).
     - a class per verb group, a method per verb:
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
+        - `merge` installs the packages in the main checkout when it changed a lockfile or a `package.json`
+          (`MainMerge.installAfter()`, the same as `merge-main`'s), then restarts its page server and editor
+          (`refreshPageServer()`;  epic `epic-engine` T89)
       - `Worktrees` (`worktree`), with `MainMerge`
-        (`worktree merge-main`:  installs the packages when it changed a lockfile, a root lockfile both sides changed
+        (`worktree merge-main`:  installs the packages when it changed a lockfile or a `package.json`, a root lockfile both sides changed
         rewritten by its own tool, snapshots updated by the repo's own runner, `snapshotUpdateOf()`)
         - then renames Spell UI's old names the branch still writes (`renameOldNames()`, epic `epic-engine` I143):
           the kit's `spell ui rename --write` over what the merged branch differs from `main` in, once every repo is
