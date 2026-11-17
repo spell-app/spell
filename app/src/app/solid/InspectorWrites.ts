@@ -163,7 +163,6 @@ export class InspectorWrites {
    * - The program's app (`core.RUNTIME.app`), however it's declared:  a program has one app.
    *   So it holds before the editor's first parse, while the program runs from a kept compile.
    */
-  // REFACTOR: Inspector.isOneOfAKind() is a copy of this;  make it call this one (Inspector.tsx was claimed by another agent)
   static isOneOfAKind(thing: object): boolean {
     if (runtimeCore()?.RUNTIME?.app === thing) return true
     const className = thing.constructor.name
