@@ -25,6 +25,8 @@ import { siteEditorUrlFor } from "./pages.types"
 import { EditableText } from "./EditableText"
 import { HomeArrangement } from "./HomeArrangement"
 import { EmptyCard, TileCard, type TileCardDrag, type TileCardEdit } from "./TileCard"
+// the hero's picture:  Solitaire's Card.spell, as spell.app shows it
+import cardExample from "./card-example.png"
 
 import "./ProjectChooser.css"
 
@@ -44,7 +46,9 @@ import "./ProjectChooser.css"
  * - Spell's own order also leaves some out, sections and projects (`SPACES.HOME_HIDDEN_KEY`, epic `mockup` I40):
  *   the library, the editor's pieces, the examples that need a sign-in ...
  * - In an app made for an org (`"spell": { "org": "acme" }` in its `package.json`):
- *   your own projects and each of the org's groups first, above the hero;  no library.
+ *   your own projects and each of the org's groups first, right under the hero;  no library.
+ * - The hero always comes first, every section after it
+ *   (Owen, epic `repo-split` T64:  the org's apps below the "read out loud" header).
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
  *   then a grid of cards per group:  each card a picture of its app (else its letter), its title,
  *   and the first phrase of its description (`<ProjectCards>`).
@@ -60,11 +64,10 @@ export function ProjectChooser() {
   const { projects, examples, library, guides, editorPieces } = SPACES.SpellProjectRoot
   const exampleList = trackProjectRoot(() => examples)
   const guideList = trackProjectRoot(() => guides)
-  // an app made for an org:  its person's projects and the org's groups first, above the hero;  no library
-  // (`SPACES.homeSections()`;  Owen, 2026-11-16:  "AT THE TOP")
+  // an app made for an org:  its person's projects and the org's groups first, under the hero;  no library
+  // (`SPACES.homeSections()`;  Owen, 2026-11-16:  "AT THE TOP";  T64:  below the hero)
   const inOrg = SPACES.localPerson.org !== SPACES.SPELL_ORG
   const sections = () => SPACES.homeSections(inOrg, HomeArrangement.layout.order)
-  const isAboveHero = (section: SPACES.HomeSection) => inOrg && SPACES.HOME_ORG_FIRST.includes(section)
   // the browser's tab:  plain "Spell" here, a project's name on the editor's pages (`<AppMark>`)
   onSettled(() => {
     document.title = appTexts.text("appName")
@@ -76,9 +79,8 @@ export function ProjectChooser() {
       <ChooserToolbar />
       <div class={["Home", { rearranging: HomeArrangement.isRearranging }]}>
         <RearrangeBar />
-        <For each={sections().filter(isAboveHero)}>{(section) => sectionFor(section)}</For>
         <Hero examples={exampleList()} guides={guideList()} />
-        <For each={sections().filter((section) => !isAboveHero(section))}>{(section) => sectionFor(section)}</For>
+        <For each={sections()}>{(section) => sectionFor(section)}</For>
         <RearrangeButton />
       </div>
     </SpellPage>
@@ -200,7 +202,10 @@ function OrgGroups(props: { drag?: TileCardDrag }) {
 /****************
  * ### `<Hero>`
  * The landing page's first box:  what Spell is, in a line, with buttons to the first example and the first guide,
- * beside a few lines of the Task List.
+ * then a picture of real Spell under it, centred.
+ * - The picture:  the start of Solitaire's Card.spell, drawn in the editor's bubbly look,
+ *   spell.app's own example (`card-example.png`, 1042 x 430, shown at half size;  epic `repo-split` T64).
+ * - Wide and short, so it sits under the words, not beside them.
  ****************/
 function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
   // the first English example the home page shows a card for, the Calculator
@@ -239,13 +244,9 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
           </ui-button>
         </div>
       </div>
-      <figure class="quote">
-        <figcaption>{appTexts.text("homeQuoteTitle")}</figcaption>
-        <blockquote>{appTexts.text("homeQuote")}</blockquote>
-        <span class="note">
-          <ui-icon name="magic" />
-          {appTexts.text("homeQuoteNote")}
-        </span>
+      <figure class="example">
+        <img src={cardExample} width="521" height="215" alt={appTexts.text("homeExampleAlt")} />
+        <figcaption>{appTexts.text("homeExampleCaption")}</figcaption>
       </figure>
     </section>
   )

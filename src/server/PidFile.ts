@@ -6,6 +6,7 @@ import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
 import { endProcess, isProcessAlive } from "./Heartbeat"
 import { LoadedCode } from "./LoadedCode"
+import { isFree } from "./ports"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 import { SERVER_API } from "./WebServer"
@@ -23,6 +24,9 @@ export { endProcess, isProcessAlive } from "./Heartbeat"
  * - `stop()` sends it `SIGTERM`, and waits for its process to end (`SIGKILL` after 10s)
  * - `stop({ restart: true })`, as `ensure()` does for one older than its code:  the server is told it's a restart
  *   (`isRestarting()`), so what can carry over to the next one stays up:  the editor's vite (epic `epic-engine` I329)
+ * - a FIXED `port` (the main checkout's page server, 4747):  `ensure()` and `stop()` also stop this root's server
+ *   holding it when the file names another, and `ensure()` starts the new one only once the port is free
+ *   (epic `epic-engine` I332)
  * - From the goals tools' `launch.js` (`ensureServer`, `serverStatus`, `stopServer`).
  */
 export class PidFile {
@@ -79,8 +83,10 @@ export class PidFile {
   }
 
   /**
-   * `<file>` with `.restart.json` for `.json`:  `{ pid }` of a server being stopped to start again (`stop({ restart })`).
-   * - read by the stopping server itself (`isRestarting()`), as it stops;  a stale one names a pid that's gone
+   * `<file>` with `.restart.json` for `.json`:  `{ pid, pids }` of the servers being stopped to start again
+   * (`stop({ restart })`).
+   * - read by each stopping server itself (`isRestarting()`), as it stops;  a stale one names pids that are gone
+   * - `pid`:  the first, for a server on code from before `pids` (epic `epic-engine` I332)
    */
   get restartFile(): string {
     return this.file.replace(/\.json$/, ".restart.json")
@@ -93,7 +99,8 @@ export class PidFile {
    */
   isRestarting(pid = process.pid): boolean {
     try {
-      return (JSON.parse(readFileSync(this.restartFile, "utf8")) as { pid?: number }).pid === pid
+      const note = JSON.parse(readFileSync(this.restartFile, "utf8")) as { pid?: number; pids?: number[] }
+      return note.pid === pid || Boolean(note.pids?.includes(pid))
     } catch {
       return false
     }
@@ -119,10 +126,26 @@ export class PidFile {
   }
 
   /**
+   * This root's server answering on `port`, whichever pid the file names;  else `undefined`.
+   * - finds one the file lost track of:  one of two started at once, whose pid file the other wrote over
+   *   (epic `epic-engine` I332)
+   * - NEVER throws
+   */
+  async ourServerOn(port: number): Promise<RunningServer | undefined> {
+    const base = `http://127.0.0.1:${port}`
+    const answer = await serverAt(base)
+    return answer?.root === this.root ? { ...answer, base } : undefined
+  }
+
+  /**
    * The running server, started in the background first if none runs.
    * - `command`:  argv that runs it in the foreground, e.g. `[node, --import, tsx, cli.ts, serve]`
    * - `log`:  file for its output (default `<root>/.spell-server.log`)
    * - waits up to `timeout` ms (15s) for it to answer
+   * - `port`:  the port it MUST hold (the main checkout's page server, 4747;  epic `epic-engine` I332)
+   *   - a running one on another port is restarted, and this root's server holding `port` is stopped with it
+   *   - one holding `port` the file doesn't name, on current code:  taken as the running one, its pid file rewritten
+   *   - the new one starts only once `port` is free;  throws `HttpError` 409 while something else holds it
    * - SIDE EFFECT:  may spawn `command` detached, in `root`
    */
   async ensure({
@@ -130,13 +153,23 @@ export class PidFile {
     env,
     log,
     sources = [],
-    timeout = 15_000
+    timeout = 15_000,
+    port
   }: EnsureOptions): Promise<RunningServer & { launched: boolean }> {
     const running = await this.status()
-    if (running && !this.isOlderThanCode(running, sources)) return { ...running, launched: false }
-    // older than its code (a merge changed it since):  a fresh one, so pages get the new routes (I5 of `skillz`)
-    if (running) await this.stop({ restart: true })
+    const holder = port ? await this.ourServerOn(port) : undefined
+    const isCurrent = (server: RunningServer) => !this.isOlderThanCode(server, sources)
+    if (running && (!port || running.port === port) && isCurrent(running)) return { ...running, launched: false }
+    if (!running && holder && isCurrent(holder)) {
+      const { base: _base, ...info } = holder
+      this.write(info)
+      return { ...holder, launched: false }
+    }
+    // older than its code (a merge changed it since):  a fresh one, so pages get the new routes (I5 of `skillz`);
+    // off its port:  a fresh one on it (I332)
+    if (running || holder) await this.stop({ restart: true, port })
     else await this.stopUnanswering()
+    if (port) await this.takePort(port)
     const out = openSync(log ?? join(this.root, ".spell-server.log"), "a")
     const [program, ...args] = command
     spawn(program!, args, {
@@ -172,17 +205,42 @@ export class PidFile {
    *   (epic `airplane`, 2026-10-10:  the log shows a start on port 54516)
    * - `restart`:  another server starts right after (`ensure()`, `epic merge`):  it says so first (`restartFile`), so
    *   the editor's vite stays up for the next one, and the editor's pages don't reload (epic `epic-engine` I329)
+   * - `port`:  the port the server must hold:  this root's server answering there is stopped too, when the file names
+   *   another (epic `epic-engine` I332:  an orphan kept 4747, and every restart after took a new port)
    */
-  async stop({ wait = STOP_WAIT_MS, restart = false }: { wait?: number; restart?: boolean } = {}): Promise<boolean> {
+  async stop({ wait = STOP_WAIT_MS, restart = false, port }: StopOptions = {}): Promise<boolean> {
     const running = await this.status()
-    if (!running) return false
-    if (restart) writeFileSync(this.restartFile, `${JSON.stringify({ pid: running.pid })}\n`)
+    const holder = port ? await this.ourServerOn(port) : undefined
+    const pids = [...new Set([running?.pid, holder?.pid].filter((pid) => pid !== undefined))]
+    if (!pids.length) return false
+    if (restart) writeFileSync(this.restartFile, `${JSON.stringify({ pid: pids[0], pids })}\n`)
     try {
-      await endProcess(running.pid, wait)
+      await Promise.all(pids.map((pid) => endProcess(pid, wait)))
     } finally {
       if (restart) rmSync(this.restartFile, { force: true })
     }
     return true
+  }
+
+  /**
+   * Wait for `port` to be free, for a server that MUST listen there (epic `epic-engine` I332).
+   * - this root's server still on it (one too busy to answer `stop()`'s ask within a second):  stopped, then waited for
+   * - throws `HttpError` 409 while something else holds it, naming what answers there
+   */
+  private async takePort(port: number): Promise<void> {
+    const isPortFree = () => isFree(port)
+    if (await waitUntil(isPortFree, { timeout: PORT_WAIT_MS / 1000 })) return
+    const holder = await serverAt(`http://127.0.0.1:${port}`)
+    if (holder?.root === this.root) {
+      await endProcess(holder.pid, STOP_WAIT_MS)
+      if (await waitUntil(isPortFree, { timeout: PORT_WAIT_MS / 1000 })) return
+    }
+    const who = holder ? `the server of ${holder.root} (pid ${holder.pid})` : "another program"
+    throw new HttpError(
+      409,
+      `the server for ${this.root} must listen on port ${port}, but ${who} holds it:  ` +
+        `stop that (lsof -nP -iTCP:${port} -sTCP:LISTEN names it), then start again`
+    )
   }
 
   /**
@@ -226,6 +284,9 @@ export async function serverAt(base: string): Promise<ServerInfo | undefined> {
 /** How long `stop()` lets a server end by itself before `SIGKILL`, in ms. */
 const STOP_WAIT_MS = 10_000
 
+/** How long `ensure()` waits for a fixed port to be free once ours are stopped, in ms. */
+const PORT_WAIT_MS = 5_000
+
 /** A server that answered:  its info and base URL, `http://127.0.0.1:<port>`. */
 export type RunningServer = ServerInfo & { base: string }
 
@@ -237,6 +298,7 @@ export type RunningServer = ServerInfo & { base: string }
  * - `timeout`:  ms to wait
  * - `sources`:  folders of the server's code
  *   - a running server that started before a `.ts` / `.js` file in them last changed is restarted
+ * - `port`:  the port it must hold;  none:  any
  */
 export type EnsureOptions = {
   command: string[]
@@ -244,7 +306,16 @@ export type EnsureOptions = {
   log?: string
   sources?: string[]
   timeout?: number
+  port?: number
 }
+
+/**
+ * `PidFile.stop()` options.
+ * - `wait`:  ms before `SIGKILL` (`STOP_WAIT_MS`)
+ * - `restart`:  another server starts right after;  the stopping ones are told so (`restartFile`)
+ * - `port`:  the port the server must hold:  this root's server there is stopped too, when the file names another
+ */
+export type StopOptions = { wait?: number; restart?: boolean; port?: number }
 
 /**
  * The newest modification time (ms) of the code files under `folders`, all the way down;  0 for none.

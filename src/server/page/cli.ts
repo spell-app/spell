@@ -82,7 +82,7 @@ async function main(args: string[]): Promise<void> {
     case "ensure":
       return print(await PageServer.ensure(root, port))
     case "stop":
-      return console.log((await pidFile.stop()) ? "stopped" : "not running")
+      return console.log((await PageServer.stop(root, { port })) ? "stopped" : "not running")
     case "status": {
       const running = await pidFile.status()
       if (!running) {

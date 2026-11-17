@@ -171,7 +171,7 @@ export async function stopServers(which = "local"): Promise<number> {
   const root = pageServerRoot(process.cwd())
   // read first:  a page server that stops takes its editor down with it, and the editor's record too
   const editorPid = editorPidOf(root)
-  const stopped = await new SRV.PidFile(root).stop()
+  const stopped = await PageServer.stop(root)
   CLI.out(`page server:  ${stopped ? "stopped" : "not running"}`)
   CLI.out(`editor:  ${stopEditor(root, editorPid, { withPageServer: stopped })}`)
   const stopMore = await CLI.hook<(root: string) => Promise<string | undefined>>("stopAllServers")

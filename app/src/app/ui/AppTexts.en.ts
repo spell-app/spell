@@ -464,10 +464,9 @@ export const APP_TEXTS = {
     "With Spell, an app is written in plain sentences.\nOpen an example, change a sentence, and watch the app change beside it.",
   tryAnExample: "Try an example",
   readFirstSpell: "Read your first spell",
-  homeQuoteTitle: "From the Task List",
-  homeQuote:
-    'A "task" is a thing where:\nits "title" is text,\nits "done" is yes or no,\nand it "is done" if its done is yes.',
-  homeQuoteNote: "Four lines, one working list.",
+  homeExampleCaption: "From Solitaire's Card.spell",
+  homeExampleAlt:
+    "A playing card, in Spell:  a card is a draggable two sided view;  its rank is one of ace, 2 ... 10, jack, queen, king;  its suit is one of clubs, diamonds, hearts or spades;  its color is red or black;  it is a face card if its rank is jack, queen or king;  it is a number card if it is not a face card",
   homeExamplesLine: "Open one, change it, make it yours.",
   homeGuidesLine: "Your idea, your pace.",
   homeLibraryLine:

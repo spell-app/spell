@@ -74,9 +74,9 @@ export function isHomeSection(name: string): name is HomeSection {
 
 /**
  * The sections an org's app shows first, in their saved order:  the person's own, then the org's.
- * - Above the home page's hero, too (`<ProjectChooser>`).
+ * - Right under the home page's hero, which always comes first (`<ProjectChooser>`;  epic `repo-split` T64).
  */
-export const HOME_ORG_FIRST: readonly HomeSection[] = ["projects", "org"]
+const HOME_ORG_FIRST: readonly HomeSection[] = ["projects", "org"]
 
 /**
  * `projects` of group `group` in the home page's order, `order` (default:  the saved one).
