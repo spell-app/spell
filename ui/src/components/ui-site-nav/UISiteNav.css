@@ -9,7 +9,10 @@
  * - An open group sits in a slight inset well, its label and its pages inside it (epic `mockup` I31, Owen's A):
  *   its label on the bar's own fill, as a header;  the well's darker fill only under it, round its pages (I32).
  * - A group's pages are 8px in from its label (I20, I31);
- *   collapsed, none:  every icon centred in its row, the same room on both sides (I31).
+ *   collapsed, none:  every icon in one column, the same room on both sides (I31).
+ * - Collapsed, each icon where it is with all of it shown (epic `mockup` C1 on J161):
+ *   the same room at a row's start, so nothing moves as a compact drawer opens or closes;  a group's pages excepted,
+ *   8px in only with all of it shown.
  * - Beside a bar (`--ui-site-nav-bar-height`, a `<ui-page-layout>`'s menu):  its first row's middle on the bar's,
  *   so the first page's icon lines up with the drawer's button (epic `mockup` I35).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
@@ -128,7 +131,7 @@
     padding-inline-start: calc((0.75em + 0.5em) / 0.875 + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent));
   }
 
-  /* ## `collapsed`:  the icons alone, each centred in its row, the titles their tooltips */
+  /* ## `collapsed`:  the icons alone, in one column, the titles their tooltips */
   :host(:state(collapsed)) .letter {
     visibility: visible;
   }
@@ -140,15 +143,27 @@
     display: none;
   }
   /*
-   * the same room on both sides (Owen, I31):  one column, the icon centred in it
-   * - not a flex row:  its empty end piece (the tree's actions, pushed to the end) pulled the icon off centre
+   * the same room on both sides (Owen, I31):  one column, its icons in a line
+   * - the room at a row's start its own with all of it shown, its end the same:  so the icons stay put as a compact
+   *   drawer opens or closes (Owen, epic `mockup` C1 on J161:  "keep the same left padding in open and closed modes";
+   *   was 0.5em each side, centred, and the icons moved 3.7px)
+   *   - the tree's:  8px, then its triangle's room (12px) and the gap after it, hidden here;
+   *     `appearance="nav"`:  a page's 0.75em, a group's label 0.75em of the tree's text (its arrow at the end)
+   *   - no step in by depth:  a group's pages in line with the rest (I31)
+   * - not a flex row:  its empty end piece (the tree's actions, pushed to the end) pulled the icon off its place
    */
   :host(:state(collapsed)) ui-tree-item::part(row) {
     display: grid;
-    justify-items: center;
+    justify-items: start;
     align-content: center;
     gap: 0;
-    padding-inline: 0.5em;
+    padding-inline: calc(8px + 12px + var(--_ui-tree-gap, 4px));
+  }
+  :host(:state(collapsed)) ui-tree-item:state(nav)::part(row) {
+    padding-inline: 0.75em;
+  }
+  :host(:state(collapsed)) ui-tree-item:state(nav)[band="group"]::part(row) {
+    padding-inline: calc(0.75em / 0.8125);
   }
   /* a group with no icon, a thin line across:  still a row to click, its line drawn through its middle */
   :host(:state(collapsed)) ui-tree-item[band="group"]:not([icon])::part(row) {
