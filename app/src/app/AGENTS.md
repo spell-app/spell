@@ -246,6 +246,8 @@ and in the app's build folder, `app/` at the app folder's root.
         only drawn so, the file keeps its lines
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
+      - with the caret anywhere in the gap before the comment, or between its `--`'s dashes, which the bubbly look
+        draws as one, `—` (epic `codemirror` I24)
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;
     between `<x>` and `</x>`, the caret a level in and the closing tag on its own line (epic `editor` I65):
