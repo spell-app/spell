@@ -911,6 +911,18 @@ methodsEs.addRule(ToDoSomething, {
             "}",
             'core.describeAction(Mazo, "barajarElMazo", { title: "Barajar el Mazo", undoneAs: "Barajar el Mazo" })'
           ]
+        },
+        {
+          title: "sin comillas, `obtener` es una palabra de su nombre (épica `language` T142)",
+          input: ['un "mazo" es una cosa', "\tpara obtener la siguiente carta", "\t\timprimir 1"],
+          js: [
+            "export class Mazo extends Thing {",
+            "  obtenerLaSiguienteCarta() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            'core.describeAction(Mazo, "obtenerLaSiguienteCarta", { title: "Obtener la Siguiente Carta", undoneAs: "Obtener la Siguiente Carta" })'
+          ]
         }
       ]
     }
@@ -919,8 +931,10 @@ methodsEs.addRule(ToDoSomething, {
 
 // its name quoted, and what it says about itself on its line (epic `language` P48, Q6):
 // `para "repartir las cartas" con título "Repartir", icono "carta", atajo "meta+N"`
+// un `obtener` antes del nombre entre comillas se deja fuera (epic `language` T142):
+// `para obtener "los puntos de una carta"` ~== `para "los puntos de una carta"`
 methodsEs.addRule(ToDoSomething, {
-  syntax: `para {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
+  syntax: `para obtener? {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
   tests: [
     {
       title:
@@ -953,6 +967,41 @@ methodsEs.addRule(ToDoSomething, {
             "export interface Pile { repartirElMazoEnPile(): any /* spell: type unknown */ }",
             "Pile.prototype.repartirElMazoEnPile = function (this: Pile) {}",
             'core.describeAction(Pile, "repartirElMazoEnPile", { title: "Repartir el Mazo en Pile", undoneAs: "Repartir el Mazo en Pile" })'
+          ]
+        }
+      ]
+    },
+    {
+      title:
+        "`obtener` antes de su nombre entre comillas se deja fuera:  la misma acción que sin él (épica `language` T142)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("card")
+        scope.types?.add("pile")
+      },
+      tests: [
+        {
+          input: 'para obtener "los puntos de una card en una pile"',
+          js: [
+            "Card.prototype.losPuntosDeCardEnPile = function (pile) {}",
+            'core.describeAction(Card, "losPuntosDeCardEnPile", { title: "Los Puntos de Card en Pile", undoneAs: "Los Puntos de Card en Pile" })'
+          ],
+          ts: [
+            "export interface Card { losPuntosDeCardEnPile(pile: Pile): any /* spell: type unknown */ }",
+            "Card.prototype.losPuntosDeCardEnPile = function (this: Card, pile: Pile) {}",
+            'core.describeAction(Card, "losPuntosDeCardEnPile", { title: "Los Puntos de Card en Pile", undoneAs: "Los Puntos de Card en Pile" })'
+          ]
+        },
+        {
+          input: 'para "los puntos de una card en una pile"',
+          js: [
+            "Card.prototype.losPuntosDeCardEnPile = function (pile) {}",
+            'core.describeAction(Card, "losPuntosDeCardEnPile", { title: "Los Puntos de Card en Pile", undoneAs: "Los Puntos de Card en Pile" })'
+          ],
+          ts: [
+            "export interface Card { losPuntosDeCardEnPile(pile: Pile): any /* spell: type unknown */ }",
+            "Card.prototype.losPuntosDeCardEnPile = function (this: Card, pile: Pile) {}",
+            'core.describeAction(Card, "losPuntosDeCardEnPile", { title: "Los Puntos de Card en Pile", undoneAs: "Los Puntos de Card en Pile" })'
           ]
         }
       ]

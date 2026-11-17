@@ -10254,7 +10254,7 @@
               }
             },
             {
-              "syntax": "to {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
+              "syntax": "to get? {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
               "example": "to \"count the points for a card on a pile\"",
               "outputs": {
                 "js": {

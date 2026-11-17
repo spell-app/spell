@@ -10213,7 +10213,7 @@
               }
             },
             {
-              "syntax": "para {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
+              "syntax": "para obtener? {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
               "example": "para \"contar los puntos de una card en una pile\"",
               "outputs": {
                 "js": {
