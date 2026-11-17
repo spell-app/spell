@@ -1,0 +1,277 @@
+==== /MetArtworks.api.spell
+⟪## The Met Museum:  every artwork in its collection, and a search of all of it⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in MetArtworks.spell.⟧
+⟦// `met museum` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://collectionapi.metmuseum.org/public/collection --kind "web server" --docs https://metmuseum.github.io⟧
+⟦//     --into MetArtworks.api.spell --name "met museum" --no-ai --collections "artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers"⟧
+⟦// `spell place update MetArtworks.api.spell` looks again, and changes only this file and MetArtworks.api.json5.⟧
+⟦// Its list is only ids, over 500,000 of them:  each artwork is read whole from its own address, only when something reads it.⟧
+⟦// Its search finds ids too, looking at all of each artwork, its tags too:  `every artwork matching ...`.⟧
+⟦// Asked only for artworks with pictures (`hasImages=true`, written in by hand):  the rest would be read for nothing.⟧
+⟦// It asks for 80 requests a second at most, in its docs:  a program keeps to that.⟧
+⟦// Its search pages by "limit" and "offset", up to 500 at a time;  its list of every id takes neither, and comes whole.⟧
+
+[thing create_place L0]
+| «met museum» is a web server at «"https://collectionapi.metmuseum.org/public/collection"»
+|   its id is its _"objectID"_
+|   its rows are its _"objectIDs"_
+|   its lists give only each one's _"objectID"_
+|   its next page is asked for with _"limit"_ and _"offset"_
+|   it gives up to _500_ at a time
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   it takes up to _80_ requests a second
+|   it searches everything with _"q"_ at _"/v1.1/search?hasImages=true"_
+|   **artworks** live at _"/v1/objects"_
+
+[thing create_type L0]
+| an «"artwork"» is a **thing**
+|   it lives in **met museum**    ‾value(met museum)
+|   [property define_property_has L1]
+|   | its «"highlight"» is yes or no, stored as «"isHighlight"»
+|   [property define_property_has L1]
+|   | its «"accession number"» is **text**
+|   [property define_property_has L1]
+|   | its «"accession year"» is a **number**
+|   [property define_property_has L1]
+|   | its «"public domain"» is yes or no, stored as «"isPublicDomain"»
+|   [property define_property_has L1]
+|   | its «"primary image"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"primary image small"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"additional images"» is a list of **text**
+|   [property define_property_has L1]
+|   | its «"constituents"» is a list of **constituents**
+|   [property define_property_has L1]
+|   | its «"department"» is **text**
+|   [property define_property_has L1]
+|   | its «"object name"» is **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"culture"» is **text**
+|   [property define_property_has L1]
+|   | its «"period"» is **text**
+|   [property define_property_has L1]
+|   | its «"dynasty"» is **text**
+|   [property define_property_has L1]
+|   | its «"reign"» is **text**
+|   [property define_property_has L1]
+|   | its «"portfolio"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist role"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist prefix"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist display name"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist display bio"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist suffix"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist alpha sort"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist nationality"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist begin date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"artist end date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"artist gender"» is **text**
+|   [property define_property_has L1]
+|   | its «"artist wikidata url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"artist ulan url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"object date"» is **text**
+|   [property define_property_has L1]
+|   | its «"object begin date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"object end date"» is a **number**
+|   [property define_property_has L1]
+|   | its «"medium"» is **text**
+|   [property define_property_has L1]
+|   | its «"dimensions"» is **text**
+|   [property define_property_has L1]
+|   | its «"measurements"» is a list of **measurements**
+|   [property define_property_has L1]
+|   | its «"credit line"» is **text**
+|   [property define_property_has L1]
+|   | its «"geography type"» is **text**
+|   [property define_property_has L1]
+|   | its «"city"» is **text**
+|   [property define_property_has L1]
+|   | its «"state"» is **text**
+|   [property define_property_has L1]
+|   | its «"county"» is **text**
+|   [property define_property_has L1]
+|   | its «"country"» is **text**
+|   [property define_property_has L1]
+|   | its «"region"» is **text**
+|   [property define_property_has L1]
+|   | its «"subregion"» is **text**
+|   [property define_property_has L1]
+|   | its «"locale"» is **text**
+|   [property define_property_has L1]
+|   | its «"locus"» is **text**
+|   [property define_property_has L1]
+|   | its «"excavation"» is **text**
+|   [property define_property_has L1]
+|   | its «"river"» is **text**
+|   [property define_property_has L1]
+|   | its «"classification"» is **text**
+|   [property define_property_has L1]
+|   | its «"rights and reproduction"» is **text**
+|   [property define_property_has L1]
+|   | its «"link resource"» is **text**
+|   [property define_property_has L1]
+|   | its «"metadata date"» is a **date**
+|   [property define_property_has L1]
+|   | its «"repository"» is **text**
+|   [property define_property_has L1]
+|   | its «"object url"» is **text**, stored as «"objectURL"»  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"tags"» is a list of **tags**
+|   [property define_property_has L1]
+|   | its «"object wikidata url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"timeline work"» is yes or no, stored as «"isTimelineWork"»
+|   [property define_property_has L1]
+|   | its «"gallery number"» is a **number**
+
+[thing create_type L0]
+| a «"constituent"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"constituent id"» is a **number**, stored as «"constituentID"»
+|   [property define_property_has L1]
+|   | its «"role"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"constituent ulan url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"constituent wikidata url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"gender"» is **text**
+
+[thing create_type L0]
+| a «"measurement"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"element name"» is **text**
+|   [property define_property_has L1]
+|   | its «"element description"» is **text**
+|   [property define_property_has L1]
+|   | its «"element measurements"» is an **element measurement**
+
+[thing create_type L0]
+| an «"element measurement"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"diameter"» is a **number**
+|   [property define_property_has L1]
+|   | its «"height"» is a **number**
+|   [property define_property_has L1]
+|   | its «"width"» is a **number**
+|   [property define_property_has L1]
+|   | its «"depth"» is a **number**
+
+[thing create_type L0]
+| a «"tag"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"term"» is **text**
+|   [property define_property_has L1]
+|   | its «"aat url"» is **text**  ⟦// an address⟧
+|   [property define_property_has L1]
+|   | its «"wikidata url"» is **text**  ⟦// an address⟧
+
+==== /MetArtworks.spell
+⟪# Artworks from the Met⟫
+⟦// Artworks of the Metropolitan Museum of Art, found by what you type:  a wall of pictures that goes on as you scroll.⟧
+⟦// Every thing it shows is in MetArtworks.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
+⟦// so looking again at the server never touches a line of this.⟧
+⟦// Its search answers only ids:  each artwork is read from its own address as it's drawn, and no others.⟧
+⟦// An artwork with no picture is left out:  the wall draws more as you scroll, so a short screen fills from the next ones.⟧
+
+[thing create_one_of_a_kind L0]
+| «met artworks» is an **app**
+|   [property define_property_has L1]
+|   | its «"search"» is **text**
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   set its **search** to _"sunflowers"_    ‾value(its search)
+|   [property property_value_getter L1]
+|   | its «"found"» is every **artwork** matching the **search**
+|   |   ⟦// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn⟧
+
+|   [action to_do_something L1]
+|   | to «try (words as text)»    ‾value(words as text) bold(words) bold(text)
+|   |   set its **search** to **words**    ‾value(its search) ‾value(words)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩>
+|   |     <⟨stack⟩ spacing=«"lg"»>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨stack⟩ spacing=«"sm"»>
+|   |           <⟨stack⟩ direction=«"horizontal"» wrap align=«"center"» justify=«"between"» spacing=«"sm"»>
+|   |             <⟨header⟩ size=«"large"»>Artworks from the Met</⟨header⟩>
+|   |             <⟨search⟩ name=«"search"» parameter=«"art"» icon=«"search"» placeholder=«"A title, an artist, a subject"» aria-label=«"Search the Met"» />
+|   |           </⟨stack⟩>
+|   |           <⟨toolbar⟩ appearance=«"secondary"» size=«"small"» aria-label=«"Try a search"»>
+|   |             <⟨text⟩ slot=«"title"» size=«"small"» color=«"grey"»>Try</⟨text⟩>
+|   |             <⟨item⟩ onClick={try _"sunflowers"_}>Sunflowers</⟨item⟩>    code({try "sunflowers"})
+|   |             <⟨item⟩ onClick={try _"van gogh"_}>Van Gogh</⟨item⟩>    code({try "van gogh"})
+|   |             <⟨item⟩ onClick={try _"hokusai"_}>Hokusai</⟨item⟩>    code({try "hokusai"})
+|   |             <⟨item⟩ onClick={try _"armor"_}>Armor</⟨item⟩>    code({try "armor"})
+|   |             <⟨item⟩ onClick={try _"cats"_}>Cats</⟨item⟩>    code({try "cats"})
+|   |             <⟨item⟩ onClick={try _"egypt"_}>Egypt</⟨item⟩>    code({try "egypt"})
+|   |           </⟨toolbar⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨form⟩>
+|   |       <⟨for⟩ its found as=«"cards"» layout=«"mosaic"» columns=«"4"» doubling loading=«"Asking the Met"» failed=«"The Met can't be reached just now."» empty=«"The Met has nothing for that."» />
+|   |       <⟨text⟩ size=«"small"» color=«"grey"» paragraph>
+|   |         From <link link=_"https://metmuseum.github.io"_>the Met Museum's API</link>, each artwork asked for as it's shown.  Press a picture to turn it over.
+|   |       </⟨text⟩>
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>
+
+⟪# An artwork⟫
+⟦// A card that turns over:  its picture on the front, what the Met knows of it on the back.⟧
+⟦// Only what's in the public domain has a picture:  the rest draw nothing, so the wall is all pictures.⟧
+
+[thing reopen_type L0]
+| an **artwork**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control if L2]
+|   |   | if its **primary image small**    ‾value(its primary image small)
+|   |   |   <⟨shape⟩ class=«"artwork"» direction=«"over"» flip-on=«"click"» aria-label={its **title**}>    code({its title})
+|   |   |     <⟨side⟩>
+|   |   |       <⟨card⟩ fluid>
+|   |   |         <⟨image⟩ src={its **primary image small**} alt={its **title**} />    code({its primary image small}) code({its title})
+|   |   |         <⟨content⟩>
+|   |   |           <⟨header⟩ size=«"small"»>{its **title**}</⟨header⟩>    code({its title})
+|   |   |           <⟨meta⟩>{its **artist display name**}</⟨meta⟩>    code({its artist display name})
+|   |   |           <⟨meta⟩>{its **object date**}</⟨meta⟩>    code({its object date})
+|   |   |         </⟨content⟩>
+|   |   |       </⟨card⟩>
+|   |   |     </⟨side⟩>
+|   |   |     <⟨side⟩>{draw the **about card** of it}</⟨side⟩>    code({draw the about card of it})
+|   |   |   </⟨shape⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **about card**
+|   |   ⟦// What the Met knows of it:  the back of its card⟧
+|   |   <⟨card⟩ fluid>
+|   |     <⟨content⟩>
+|   |       <⟨header⟩ size=«"small"»>{its **title**}</⟨header⟩>    code({its title})
+|   |       <⟨meta⟩>{its **artist display name**} · {its **object date**}</⟨meta⟩>    code({its artist display name}) code({its object date})
+|   |       <⟨description⟩>
+|   |         <⟨text⟩ paragraph>{its **medium**}</⟨text⟩>    code({its medium})
+|   |         <⟨text⟩ paragraph>{its **dimensions**}</⟨text⟩>    code({its dimensions})
+|   |         <⟨text⟩ paragraph color=«"grey"»>{its **department**} · {its **credit line**}</⟨text⟩>    code({its department}) code({its credit line})
+|   |       </⟨description⟩>
+|   |     </⟨content⟩>
+|   |     <⟨extra⟩>
+|   |       <⟨link⟩ link={its **object url**} target=«"_blank"»>On the Met's own pages</⟨link⟩>    code({its object url})
+|   |     </⟨extra⟩>
+|   |   </⟨card⟩>

@@ -64,8 +64,8 @@ describe("the home page's rows", () => {
     const host = await mountHome()
     expect(host.querySelector("#projects")).toBeNull()
     expect(rowIds(host)).toEqual(["start", "examples", "guides"])
-    // where a first app is made
-    expect(cardsIn(host, "start")).toEqual(["Blank", "Counter", "To-do list"])
+    // where a first app is made:  Blank last (epic `mockup` T44)
+    expect(cardsIn(host, "start")).toEqual(["To-do list", "Counter", "Converter", "Blank"])
   })
 
   test("projects of your own:  their row first under the hero", async () => {
@@ -77,7 +77,8 @@ describe("the home page's rows", () => {
 
   test("what Spell's order hides isn't there:  the library, the editor's pieces, hidden examples and guides", async () => {
     const host = await mountHome()
-    expect(cardsIn(host, "examples")).toEqual(["Calculator", "Task List"])
+    // Task List is hidden too:  the Start row's to-do list copies it (epic `mockup` T42)
+    expect(cardsIn(host, "examples")).toEqual(["Calculator"])
     expect(cardsIn(host, "guides")).toEqual(["How the Calculator works"])
     for (const id of ["library", "editor", "sign-in"]) expect(host.querySelector(`#${id}`), id).toBeNull()
     expect(host.textContent).not.toMatch(/FizzBuzz|Family Cookbook|Statusphere|Org Admin/)

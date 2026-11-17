@@ -122,7 +122,7 @@ describe("the home page's hidden list", () => {
     expect(SPACES.homeSections(false, order)).not.toContain("library")
   })
 
-  test("today's:  too techy, too basic, needing a sign-in, the org apps, and the guide of a hidden example", () => {
+  test("today's:  too techy, too basic, needing a sign-in, the org apps, the to-do the Start row copies, and the guides of hidden examples", () => {
     expect(SPACES.HOME_ORDER[SPACES.HOME_HIDDEN_KEY]).toEqual([
       "library",
       "editor",
@@ -141,7 +141,12 @@ describe("the home page's hidden list", () => {
       "@spell/library/Inbox",
       "@spell/library/OrgEvents",
       "@spell/library/AdministracionDeLaOrg",
-      "@spell/guides/how-fizzbuzz-works"
+      "@spell/guides/how-fizzbuzz-works",
+      // the Start row's to-do list copies Task List:  one to-do on the page, not three (epic `mockup` T42)
+      "@spell/examples/TaskList",
+      "@spell/examples/ListaDeTareas",
+      "@spell/guides/how-task-list-works",
+      "@spell/guides/como-funciona-lista-de-tareas"
     ])
   })
 

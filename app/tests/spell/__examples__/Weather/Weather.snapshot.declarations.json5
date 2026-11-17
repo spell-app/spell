@@ -1,0 +1,341 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Forecast",
+    "Current",
+    "Hour",
+    "Weather",
+    "City",
+    "OpenMeteo",
+    "name_the_weather_$code",
+    "picture_the_weather_$code"
+  ],
+  "statements": [
+    {
+      "type": "Forecast",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "open_meteo",
+        "placeType": "OpenMeteo",
+        "collection": "forecasts"
+      },
+      "defined": "/Weather.api.spell:1373-1722"
+    },
+    {
+      "property": "latitude",
+      "of": "Forecast",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:1422-1448"
+    },
+    {
+      "property": "longitude",
+      "of": "Forecast",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:1450-1477"
+    },
+    {
+      "property": "generationtime_ms",
+      "asWritten": "generationtime ms",
+      "of": "Forecast",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:1479-1514"
+    },
+    {
+      "property": "utc_offset_seconds",
+      "asWritten": "utc offset seconds",
+      "of": "Forecast",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:1516-1552"
+    },
+    {
+      "property": "timezone",
+      "of": "Forecast",
+      "datatype": "text",
+      "defined": "/Weather.api.spell:1554-1576"
+    },
+    {
+      "property": "timezone_abbreviation",
+      "asWritten": "timezone abbreviation",
+      "of": "Forecast",
+      "datatype": "text",
+      "defined": "/Weather.api.spell:1578-1613"
+    },
+    {
+      "property": "elevation",
+      "of": "Forecast",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:1615-1642"
+    },
+    {
+      "property": "current",
+      "of": "Forecast",
+      "datatype": "Current",
+      "defined": "/Weather.api.spell:1644-1670"
+    },
+    {
+      "property": "hours",
+      "of": "Forecast",
+      "datatype": "list of hours",
+      "defined": "/Weather.api.spell:1672-1722"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Forecast",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Weather.spell:1847-2381"
+    },
+    {
+      "type": "Current",
+      "superType": "Thing",
+      "defined": "/Weather.api.spell:1724-1927"
+    },
+    {
+      "property": "time",
+      "of": "Current",
+      "datatype": "date",
+      "defined": "/Weather.api.spell:1748-1768"
+    },
+    {
+      "property": "interval",
+      "of": "Current",
+      "datatype": "number",
+      "measure": {
+        "dimension": "Duration",
+        "unit": "second"
+      },
+      "defined": "/Weather.api.spell:1770-1809"
+    },
+    {
+      "property": "temperature",
+      "of": "Current",
+      "datatype": "number",
+      "measure": {
+        "dimension": "Temperature",
+        "unit": "celsius"
+      },
+      "defined": "/Weather.api.spell:1811-1879"
+    },
+    {
+      "property": "weather_code",
+      "asWritten": "weather code",
+      "of": "Current",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:1881-1911"
+    },
+    {
+      "type": "Hour",
+      "superType": "Thing",
+      "defined": "/Weather.api.spell:1929-2089"
+    },
+    {
+      "property": "time",
+      "of": "Hour",
+      "datatype": "date",
+      "defined": "/Weather.api.spell:1951-1971"
+    },
+    {
+      "property": "temperature",
+      "of": "Hour",
+      "datatype": "number",
+      "measure": {
+        "dimension": "Temperature",
+        "unit": "celsius"
+      },
+      "defined": "/Weather.api.spell:1973-2041"
+    },
+    {
+      "property": "weather_code",
+      "asWritten": "weather code",
+      "of": "Hour",
+      "datatype": "number",
+      "defined": "/Weather.api.spell:2043-2073"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Hour",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Weather.spell:2448-2682"
+    },
+    {
+      "type": "OpenMeteo",
+      "superType": "Place",
+      "place": {
+        "name": "open_meteo",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "collections": {
+            "forecasts": {
+              "at": "/v1/forecast?current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto",
+              "askedBy": [
+                "latitude",
+                "longitude"
+              ]
+            }
+          }
+        }
+      },
+      "defined": "/Weather.api.spell:1050-1371"
+    },
+    {
+      "syntax": "name the weather {callArgs:expression}",
+      "output": "name_the_weather_$code",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "name the weather (code as a number)",
+      "params": [
+        {
+          "name": "code",
+          "datatype": "number"
+        }
+      ],
+      "returns": "text",
+      "defined": "/Sky.spell:222-586"
+    },
+    {
+      "syntax": "picture the weather {callArgs:expression}",
+      "output": "picture_the_weather_$code",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "picture the weather (code as a number)",
+      "params": [
+        {
+          "name": "code",
+          "datatype": "number"
+        }
+      ],
+      "returns": "text",
+      "defined": "/Sky.spell:588-1018"
+    },
+    {
+      "type": "City",
+      "superType": "Thing",
+      "defined": "/Weather.spell:1666-1762"
+    },
+    {
+      "property": "name",
+      "of": "City",
+      "datatype": "text",
+      "defined": "/Weather.spell:1687-1705"
+    },
+    {
+      "property": "latitude",
+      "of": "City",
+      "datatype": "number",
+      "defined": "/Weather.spell:1707-1733"
+    },
+    {
+      "property": "longitude",
+      "of": "City",
+      "datatype": "number",
+      "defined": "/Weather.spell:1735-1762"
+    },
+    {
+      "type": "Weather",
+      "superType": "App",
+      "defined": "/Weather.spell:321-1630"
+    },
+    {
+      "property": "cities",
+      "of": "Weather",
+      "datatype": "list of cities",
+      "defined": "/Weather.spell:340-372"
+    },
+    {
+      "property": "place",
+      "of": "Weather",
+      "datatype": "text",
+      "defined": "/Weather.spell:374-451"
+    },
+    {
+      "kind": "method",
+      "name": "creating it",
+      "returns": "nothing",
+      "defined": "/Weather.spell:453-855"
+    },
+    {
+      "property": "city",
+      "of": "Weather",
+      "datatype": "City",
+      "defined": "/Weather.spell:857-927"
+    },
+    {
+      "property": "forecasts",
+      "of": "Weather",
+      "datatype": "list of forecasts",
+      "defined": "/Weather.spell:929-1056"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Weather",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Weather.spell:1141-1630"
+    }
+  ],
+  "codeLines": [
+    16,
+    17,
+    22,
+    27,
+    32,
+    37,
+    42,
+    47,
+    52,
+    57,
+    62,
+    97,
+    98,
+    103,
+    108,
+    114,
+    120,
+    121,
+    126,
+    132,
+    137,
+    146,
+    165,
+    180,
+    205,
+    206,
+    211,
+    216,
+    222,
+    225,
+    231,
+    236,
+    260,
+    265,
+    270
+  ]
+}

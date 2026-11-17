@@ -1,0 +1,693 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Artwork",
+    "Constituent",
+    "Measurement",
+    "ElementMeasurement",
+    "Tag",
+    "MetArtwork",
+    "MetMuseum"
+  ],
+  "statements": [
+    {
+      "type": "Artwork",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "met_museum",
+        "placeType": "MetMuseum",
+        "collection": "artworks"
+      },
+      "defined": "/MetArtworks.api.spell:1609-3496"
+    },
+    {
+      "property": "highlight",
+      "of": "Artwork",
+      "datatype": "choice",
+      "defined": "/MetArtworks.api.spell:1658-1711"
+    },
+    {
+      "property": "accession_number",
+      "asWritten": "accession number",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:1713-1743"
+    },
+    {
+      "property": "accession_year",
+      "asWritten": "accession year",
+      "of": "Artwork",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:1745-1777"
+    },
+    {
+      "property": "public_domain",
+      "asWritten": "public domain",
+      "of": "Artwork",
+      "datatype": "choice",
+      "defined": "/MetArtworks.api.spell:1779-1839"
+    },
+    {
+      "property": "primary_image",
+      "asWritten": "primary image",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:1841-1868"
+    },
+    {
+      "property": "primary_image_small",
+      "asWritten": "primary image small",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:1885-1918"
+    },
+    {
+      "property": "additional_images",
+      "asWritten": "additional images",
+      "of": "Artwork",
+      "datatype": "list of texts",
+      "defined": "/MetArtworks.api.spell:1935-1976"
+    },
+    {
+      "property": "constituents",
+      "of": "Artwork",
+      "datatype": "list of constituents",
+      "defined": "/MetArtworks.api.spell:1978-2022"
+    },
+    {
+      "property": "department",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2024-2048"
+    },
+    {
+      "property": "object_name",
+      "asWritten": "object name",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2050-2075"
+    },
+    {
+      "property": "title",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2077-2096"
+    },
+    {
+      "property": "culture",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2098-2119"
+    },
+    {
+      "property": "period",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2121-2141"
+    },
+    {
+      "property": "dynasty",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2143-2164"
+    },
+    {
+      "property": "reign",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2166-2185"
+    },
+    {
+      "property": "portfolio",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2187-2210"
+    },
+    {
+      "property": "artist_role",
+      "asWritten": "artist role",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2212-2237"
+    },
+    {
+      "property": "artist_prefix",
+      "asWritten": "artist prefix",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2239-2266"
+    },
+    {
+      "property": "artist_display_name",
+      "asWritten": "artist display name",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2268-2301"
+    },
+    {
+      "property": "artist_display_bio",
+      "asWritten": "artist display bio",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2303-2335"
+    },
+    {
+      "property": "artist_suffix",
+      "asWritten": "artist suffix",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2337-2364"
+    },
+    {
+      "property": "artist_alpha_sort",
+      "asWritten": "artist alpha sort",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2366-2397"
+    },
+    {
+      "property": "artist_nationality",
+      "asWritten": "artist nationality",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2399-2431"
+    },
+    {
+      "property": "artist_begin_date",
+      "asWritten": "artist begin date",
+      "of": "Artwork",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:2433-2468"
+    },
+    {
+      "property": "artist_end_date",
+      "asWritten": "artist end date",
+      "of": "Artwork",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:2470-2503"
+    },
+    {
+      "property": "artist_gender",
+      "asWritten": "artist gender",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2505-2532"
+    },
+    {
+      "property": "artist_wikidata_url",
+      "asWritten": "artist wikidata url",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2534-2567"
+    },
+    {
+      "property": "artist_ulan_url",
+      "asWritten": "artist ulan url",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2584-2613"
+    },
+    {
+      "property": "object_date",
+      "asWritten": "object date",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2630-2655"
+    },
+    {
+      "property": "object_begin_date",
+      "asWritten": "object begin date",
+      "of": "Artwork",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:2657-2692"
+    },
+    {
+      "property": "object_end_date",
+      "asWritten": "object end date",
+      "of": "Artwork",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:2694-2727"
+    },
+    {
+      "property": "medium",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2729-2749"
+    },
+    {
+      "property": "dimensions",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2751-2775"
+    },
+    {
+      "property": "measurements",
+      "of": "Artwork",
+      "datatype": "list of measurements",
+      "defined": "/MetArtworks.api.spell:2777-2821"
+    },
+    {
+      "property": "credit_line",
+      "asWritten": "credit line",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2823-2848"
+    },
+    {
+      "property": "geography_type",
+      "asWritten": "geography type",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2850-2878"
+    },
+    {
+      "property": "city",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2880-2898"
+    },
+    {
+      "property": "state",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2900-2919"
+    },
+    {
+      "property": "county",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2921-2941"
+    },
+    {
+      "property": "country",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2943-2964"
+    },
+    {
+      "property": "region",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2966-2986"
+    },
+    {
+      "property": "subregion",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:2988-3011"
+    },
+    {
+      "property": "locale",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3013-3033"
+    },
+    {
+      "property": "locus",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3035-3054"
+    },
+    {
+      "property": "excavation",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3056-3080"
+    },
+    {
+      "property": "river",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3082-3101"
+    },
+    {
+      "property": "classification",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3103-3131"
+    },
+    {
+      "property": "rights_and_reproduction",
+      "asWritten": "rights and reproduction",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3133-3170"
+    },
+    {
+      "property": "link_resource",
+      "asWritten": "link resource",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3172-3199"
+    },
+    {
+      "property": "metadata_date",
+      "asWritten": "metadata date",
+      "of": "Artwork",
+      "datatype": "date",
+      "defined": "/MetArtworks.api.spell:3201-3230"
+    },
+    {
+      "property": "repository",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3232-3256"
+    },
+    {
+      "property": "object_url",
+      "asWritten": "object url",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3258-3305"
+    },
+    {
+      "property": "tags",
+      "of": "Artwork",
+      "datatype": "list of tags",
+      "defined": "/MetArtworks.api.spell:3322-3350"
+    },
+    {
+      "property": "object_wikidata_url",
+      "asWritten": "object wikidata url",
+      "of": "Artwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3352-3385"
+    },
+    {
+      "property": "timeline_work",
+      "asWritten": "timeline work",
+      "of": "Artwork",
+      "datatype": "choice",
+      "defined": "/MetArtworks.api.spell:3402-3462"
+    },
+    {
+      "property": "gallery_number",
+      "asWritten": "gallery number",
+      "of": "Artwork",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:3464-3496"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Artwork",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/MetArtworks.spell:2391-2852"
+    },
+    {
+      "type": "Constituent",
+      "superType": "Thing",
+      "defined": "/MetArtworks.api.spell:3498-3753"
+    },
+    {
+      "property": "constituent_id",
+      "asWritten": "constituent id",
+      "of": "Constituent",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:3526-3585"
+    },
+    {
+      "property": "role",
+      "of": "Constituent",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3587-3605"
+    },
+    {
+      "property": "name",
+      "of": "Constituent",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3607-3625"
+    },
+    {
+      "property": "constituent_ulan_url",
+      "asWritten": "constituent ulan url",
+      "of": "Constituent",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3627-3661"
+    },
+    {
+      "property": "constituent_wikidata_url",
+      "asWritten": "constituent wikidata url",
+      "of": "Constituent",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3678-3716"
+    },
+    {
+      "property": "gender",
+      "of": "Constituent",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3733-3753"
+    },
+    {
+      "type": "Measurement",
+      "superType": "Thing",
+      "defined": "/MetArtworks.api.spell:3755-3898"
+    },
+    {
+      "property": "element_name",
+      "asWritten": "element name",
+      "of": "Measurement",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3783-3809"
+    },
+    {
+      "property": "element_description",
+      "asWritten": "element description",
+      "of": "Measurement",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:3811-3844"
+    },
+    {
+      "property": "element_measurements",
+      "asWritten": "element measurements",
+      "of": "Measurement",
+      "datatype": "ElementMeasurement",
+      "defined": "/MetArtworks.api.spell:3846-3898"
+    },
+    {
+      "type": "ElementMeasurement",
+      "superType": "Thing",
+      "defined": "/MetArtworks.api.spell:3900-4039"
+    },
+    {
+      "property": "diameter",
+      "of": "ElementMeasurement",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:3937-3963"
+    },
+    {
+      "property": "height",
+      "of": "ElementMeasurement",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:3965-3989"
+    },
+    {
+      "property": "width",
+      "of": "ElementMeasurement",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:3991-4014"
+    },
+    {
+      "property": "depth",
+      "of": "ElementMeasurement",
+      "datatype": "number",
+      "defined": "/MetArtworks.api.spell:4016-4039"
+    },
+    {
+      "type": "Tag",
+      "superType": "Thing",
+      "defined": "/MetArtworks.api.spell:4041-4160"
+    },
+    {
+      "property": "term",
+      "of": "Tag",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:4061-4079"
+    },
+    {
+      "property": "aat_url",
+      "asWritten": "aat url",
+      "of": "Tag",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:4081-4102"
+    },
+    {
+      "property": "wikidata_url",
+      "asWritten": "wikidata url",
+      "of": "Tag",
+      "datatype": "text",
+      "defined": "/MetArtworks.api.spell:4119-4145"
+    },
+    {
+      "type": "MetMuseum",
+      "superType": "Place",
+      "place": {
+        "name": "met_museum",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "searches": {
+            "param": "q",
+            "fields": [],
+            "at": "/v1.1/search?hasImages=true"
+          },
+          "collections": {
+            "artworks": {
+              "at": "/v1/objects"
+            }
+          }
+        }
+      },
+      "defined": "/MetArtworks.api.spell:1177-1607"
+    },
+    {
+      "type": "MetArtwork",
+      "superType": "App",
+      "defined": "/MetArtworks.spell:564-2167"
+    },
+    {
+      "property": "search",
+      "of": "MetArtwork",
+      "datatype": "text",
+      "defined": "/MetArtworks.spell:588-608"
+    },
+    {
+      "kind": "method",
+      "name": "creating it",
+      "returns": "nothing",
+      "defined": "/MetArtworks.spell:610-659"
+    },
+    {
+      "property": "found",
+      "of": "MetArtwork",
+      "datatype": "list of artworks",
+      "defined": "/MetArtworks.spell:661-709"
+    },
+    {
+      "syntax": "try {callArgs:expression} (of {thisArg:expression})?",
+      "output": "try_$words",
+      "rule": "method_call",
+      "of": "MetArtwork",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "try (words as text)",
+      "params": [
+        {
+          "name": "words",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/MetArtworks.spell:819-867"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "MetArtwork",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/MetArtworks.spell:870-2167"
+    }
+  ],
+  "codeLines": [
+    17,
+    18,
+    23,
+    28,
+    33,
+    39,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120,
+    125,
+    130,
+    135,
+    140,
+    145,
+    151,
+    157,
+    162,
+    167,
+    172,
+    177,
+    182,
+    187,
+    192,
+    197,
+    202,
+    207,
+    212,
+    217,
+    222,
+    227,
+    232,
+    237,
+    242,
+    247,
+    252,
+    257,
+    262,
+    267,
+    272,
+    278,
+    283,
+    289,
+    294,
+    299,
+    304,
+    356,
+    357,
+    362,
+    367,
+    373,
+    379,
+    384,
+    390,
+    391,
+    396,
+    401,
+    407,
+    408,
+    413,
+    418,
+    423,
+    429,
+    430,
+    436,
+    442,
+    448,
+    479,
+    482,
+    487,
+    492,
+    497,
+    501
+  ]
+}
