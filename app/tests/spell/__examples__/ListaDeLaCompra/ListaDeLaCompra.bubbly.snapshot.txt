@@ -1,0 +1,197 @@
+==== /ListaDeLaCompra.api.es.spell
+⟪## Lista de la compra:  dónde se guarda la lista⟫
+⟦// En un archivo CSV, en la propia carpeta de este ejemplo:  __data/shopping.csv.⟧
+⟦// Ábrelo en Numbers o Excel:  una fila por cada artículo, una columna por cada uno de sus campos.⟧
+⟦// El servidor de páginas lo escribe, cambiando solo las líneas que cambian;  todos los que usan ese servidor de páginas comparten una sola lista.⟧
+⟦// Fichas de Recetas también guarda aquí los ingredientes que eliges:  importa este archivo, así que los dos nombran esta misma lista.⟧
+[thing create_place L0]
+| «planilla» es una hoja en «"shopping.csv"»
+
+[thing create_type L0]
+| un «"artículo"» es una **vista**
+|   vive en la **planilla**    ‾value(la planilla)
+|   [property define_property_has L1]
+|   | su «"nombre"» es **texto**
+|   [property define_property_has L1]
+|   | su «"cantidad"» es un **número**
+|   |   ⟦// Cuántos, en su unidad:  nada cuando no importa⟧
+|   [property define_property_has L1]
+|   | su «"unidad"» es **texto**
+|   |   ⟦// "g", "tazas", "latas" ...;  nada para un conteo, 2 huevos⟧
+|   [property define_property_has L1]
+|   | su «"pasillo"» es **texto**
+|   |   ⟦// Dónde está en la tienda:  la lista se agrupa por esto⟧
+|   [property define_property_has L1]
+|   | su «"comprado"» es sí o no
+|   |   ⟦// Tachado:  ya está en el carrito⟧
+|   [property define_property_has L1]
+|   | su «"receta"» es **texto**
+|   |   ⟦// La receta para la que es, cuando Fichas de recetas lo agregó⟧
+|   [property quoted_type_expression L1]
+|   | «"se necesita"» si su **comprado** es _no_    ‾value(su comprado)
+
+==== /Artículo.es.spell
+⟪# Un artículo de la lista⟫
+⟦// Una fila propia:  una casilla para marcar, cuánto, su nombre, la receta a la que pertenece y un botón para sacarlo.⟧
+⟦// Marcar la casilla cambia el artículo, que se guarda solo:  la línea del archivo CSV cambia de inmediato.⟧
+
+[thing reopen_type L0]
+| un **artículo**
+|   [property property_value_getter L1]
+|   | su «"porción"» es
+|   |   ⟦// Su cantidad y unidad como las escribe la gente:  "2", "200 g", "1 1/2 tazas";  nada si no hay cantidad⟧
+|   |   si su **cantidad** es indefinido o su **cantidad** es _0_ devolver _""_    ‾question(su cantidad es indefinido) ‾value(su cantidad)
+|   |   devolver su **cantidad** && su **unidad**    ‾value(su cantidad) ‾value(su unidad)
+
+|   [action to_do_something L1]
+|   | para «"sacar"» con título «"Sacar"», icono «"close"»
+|   |   ⟦// Fuera de la lista, y fuera del archivo⟧
+|   |   quitar eso de los **artículos**    ‾value(eso) ‾value(los artículos)
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   <⟨formulario⟩ value={eso}>    code({eso})
+|   |     <⟨pila⟩ direccion=«"horizontal"» separacion=«"sm"» class=«"item"»>
+|   |       <⟨casilla⟩ name=«"comprado"» aria-label=«"Lo tengo"» />
+|   |       <⟨texto⟩ negrita class=«"how-much"»>{su **porción**}</⟨texto⟩>    code({su porción})
+|   |       <⟨texto⟩ class=«"name"»>{su **nombre**}</⟨texto⟩>    code({su nombre})
+|   |       <⟨si⟩ su receta no es «""»>
+|   |         <⟨texto⟩ color=«"gris"» tamano=«"pequeño"» class=«"for"»>para {su **receta**}</⟨texto⟩>    code({su receta})
+|   |       </⟨si⟩>
+|   |       <⟨action⟩ «"sacar"» solo-icono apariencia=«"terciario"» />
+|   |     </⟨pila⟩>
+|   |   </⟨formulario⟩>
+
+|   [action to_do_something L1]
+|   | para «probar cuánto se lee»
+|   |   poner el **artículo** a **un nuevo artículo** con **nombre** _"harina"_, **cantidad** = _200_, **unidad** = _"g"_    ‾value(el artículo) ‾value(un nuevo artículo con nombre "harina", cantidad = 200, unidad = "g")
+|   |   la **porción** del **artículo** debería ser _"200 g"_    ‾value(la porción del artículo)
+|   |   poner el **artículo** a **un nuevo artículo** con **nombre** _"limones"_    ‾value(el artículo) ‾value(un nuevo artículo con nombre "limones")
+|   |   la **porción** del **artículo** debería ser _""_    ‾value(la porción del artículo)
+
+==== /Recorrido.es.spell
+⟪# La lista, por pasillo⟫
+⟦// Lo que falta comprar, pasillo a pasillo, de la A a la Z;  después lo que ya tienes, atenuado, abajo del todo.⟧
+⟦// La Lista de la compra la dibuja, y también las Fichas de recetas:  importan este archivo, así que las dos muestran la misma lista.⟧
+
+[thing create_type L0]
+| un «"pasillo"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"nombre"» es **texto**
+|   [property define_property_has L1]
+|   | sus «"artículos"» es una lista de **artículos**
+|   |   ⟦// Lo que falta comprar en él⟧
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   <⟨pila⟩ separacion=«"xs"» class=«"aisle"»>
+|   |     <⟨encabezado⟩ tamano=«"diminuto"» class=«"aisle-name"»>{su **nombre**}</⟨encabezado⟩>    code({su nombre})
+|   |     <⟨para⟩ cada artículo en sus artículos />
+|   |   </⟨pila⟩>
+
+[thing create_type L0]
+| un «"recorrido"» es una **vista**
+|   [property property_value_getter L1]
+|   | sus «"pasillos"» es
+|   |   ⟦// Cada pasillo con algo que falta comprar, una sola vez, en el orden de sus nombres⟧
+|   |   poner **encontrados** a una nueva lista de **pasillos**    ‾value(encontrados) ‾value(una nueva lista de pasillos)
+|   |   [control list_iteration L2]
+|   |   | para **artículo** en (cada **artículo** donde su **comprado** es _no_) ordenados por su **pasillo**    ‾value((cada artículo donde su comprado es no) ordenados por su pasillo)
+|   |   |   poner **pasillo** al primer **pasillo** en **encontrados** donde su **nombre** es el **pasillo** del **artículo**    ‾value(pasillo) ‾value(primer pasillo en encontrados donde su nombre es el pasillo del artículo)
+|   |   |   [control if L3]
+|   |   |   | si **pasillo** no existe    ‾question(pasillo no existe)
+|   |   |   |   poner **pasillo** a **un nuevo pasillo** con **nombre** = el **pasillo** del **artículo**    ‾value(pasillo) ‾value(un nuevo pasillo con nombre = el pasillo del artículo)
+|   |   |   |   agregar **pasillo** a **encontrados**    ‾value(pasillo) ‾value(encontrados)
+|   |   |   agregar **artículo** a los **artículos** del **pasillo**    ‾value(artículo) ‾value(los artículos del pasillo)
+|   |   devolver **encontrados**    ‾value(encontrados)
+|   [property property_value_getter L1]
+|   | su «"comprado"» es cada **artículo** donde su **comprado** es _sí_
+|   |   ⟦// Ya en el carrito⟧
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   <⟨pila⟩ class=«"aisle-list"»>
+|   |     <⟨para⟩ cada pasillo en sus pasillos>
+|   |       <⟨vac⟩ío><⟨texto⟩ color=«"gris"»>No falta nada por comprar</⟨texto⟩></⟨vac⟩ío>
+|   |     </⟨para⟩>
+|   |     <⟨pila⟩ separacion=«"xs"» class=«"got"»>
+|   |       <⟨para⟩ cada artículo en su comprado />
+|   |     </⟨pila⟩>
+|   |   </⟨pila⟩>
+
+==== /ListaDeLaCompra.es.spell
+⟪# Lista de la compra⟫
+⟦// Qué comprar, por pasillo:  agrega un artículo, márcalo mientras compras, quita lo comprado e imprime lo que falta.⟧
+⟦// Sus artículos están en un archivo CSV que abren Numbers o Excel:  ListaDeLaCompra.api.es.spell dice dónde.⟧
+⟦// Un artículo se dibuja en Artículo.es.spell, y la lista por pasillo es Recorrido.es.spell;  este archivo tiene la aplicación.⟧
+
+[thing create_one_of_a_kind L0]
+| «lista de la compra» es una **aplicación**
+|   [property define_property_has L1]
+|   | «"recorrido"» es **un nuevo recorrido**
+|   [property define_property_has L1]
+|   | su «"nuevo artículo"» es **un nuevo artículo**
+|   |   ⟦// El próximo artículo, tal como lo tiene el formulario sobre la lista⟧
+
+|   [action create_hook L1]
+|   | al «crearla»
+|   |   ⟦// La primera vez, con el archivo vacío, unos cuantos para empezar⟧
+|   |   [control if L2]
+|   |   | si no hay **artículos**    ‾value(no hay artículos)
+|   |   |   agregar (**un nuevo artículo** con **nombre** _"leche"_, **pasillo** _"Lácteos"_, **cantidad** = _2_, **unidad** = _"litros"_) a los **artículos**    ‾value(un nuevo artículo con nombre "leche", pasillo "Lácteos", cantidad = 2, unidad = "litros") ‾value(los artículos)
+|   |   |   agregar (**un nuevo artículo** con **nombre** _"huevos"_, **pasillo** _"Lácteos"_, **cantidad** = _12_) a los **artículos**    ‾value(un nuevo artículo con nombre "huevos", pasillo "Lácteos", cantidad = 12) ‾value(los artículos)
+|   |   |   agregar (**un nuevo artículo** con **nombre** _"plátanos"_, **pasillo** _"Frutas y verduras"_, **cantidad** = _6_) a los **artículos**    ‾value(un nuevo artículo con nombre "plátanos", pasillo "Frutas y verduras", cantidad = 6) ‾value(los artículos)
+|   |   |   agregar (**un nuevo artículo** con **nombre** _"espinacas"_, **pasillo** _"Frutas y verduras"_, **cantidad** = _200_, **unidad** = _"g"_) a los **artículos**    ‾value(un nuevo artículo con nombre "espinacas", pasillo "Frutas y verduras", cantidad = 200, unidad = "g") ‾value(los artículos)
+|   |   |   agregar (**un nuevo artículo** con **nombre** _"pan"_, **pasillo** _"Panadería"_, **cantidad** = _1_, **unidad** = _"barra"_) a los **artículos**    ‾value(un nuevo artículo con nombre "pan", pasillo "Panadería", cantidad = 1, unidad = "barra") ‾value(los artículos)
+|   |   |   agregar (**un nuevo artículo** con **nombre** _"café"_, **pasillo** _"Bebidas"_, **cantidad** = _250_, **unidad** = _"g"_, **comprado** = _sí_) a los **artículos**    ‾value(un nuevo artículo con nombre "café", pasillo "Bebidas", cantidad = 250, unidad = "g", comprado = sí) ‾value(los artículos)
+
+|   [action to_do_something L1]
+|   | para «"agregar el artículo nuevo"» con título «"Agregar"», icono «"plus"»
+|   |   ⟦// El artículo del formulario, a la lista y al archivo;  el formulario se vacía, conservando su pasillo⟧
+|   |   si el **nombre** de su **nuevo artículo** es _""_ devolver    ‾value(el nombre de su nuevo artículo)
+|   |   agregar el **nuevo artículo** a los **artículos**    ‾value(el nuevo artículo) ‾value(los artículos)
+|   |   poner su **nuevo artículo** a **un nuevo artículo** con **pasillo** = el **pasillo** de su **nuevo artículo**    ‾value(su nuevo artículo) ‾value(un nuevo artículo con pasillo = el pasillo de su nuevo artículo)
+
+|   [action to_do_something L1]
+|   | para «"quitar lo comprado"» con título «"Quitar lo que ya tengo"», icono «"check"»
+|   |   ⟦// Cada artículo marcado fuera de la lista, en un solo paso para deshacer⟧
+|   |   quitar **artículos** en los **artículos** donde su **comprado** es _sí_    ‾value(los artículos) ‾value(su comprado)
+
+|   [action to_do_something L1]
+|   | para «"imprimir la lista"» con título «"Imprimir"», icono «"print"»
+|   |   ⟦// Solo lo que falta comprar, por pasillo:  styles.css dice qué sale en papel⟧
+|   |   abrir impresión
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   <⟨contenedor⟩ texto>
+|   |     <⟨pila⟩>
+|   |       <⟨barra-herramientas⟩>
+|   |         <⟨texto⟩ tamano=«"grande"» extranegrita slot=«"titulo"»>Lista de la compra</⟨texto⟩>
+|   |         <⟨action⟩ «"quitar lo comprado"» />
+|   |         <⟨action⟩ «"imprimir la lista"» />
+|   |         <⟨spacer⟩ />
+|   |         <⟨action⟩ «"deshacer"» solo-icono />
+|   |         <⟨action⟩ «"rehacer"» solo-icono />
+|   |       </⟨barra-herramientas⟩>
+|   |       <⟨formulario⟩ value={su **nuevo artículo**} class=«"new-item"»>    code({su nuevo artículo})
+|   |         <⟨campos⟩ no-apilable>
+|   |           <⟨campo⟩ ancho=«"3"»>
+|   |             <⟨entrada⟩ name=«"cantidad"» type=«"number"» min=«"0"» marcador=«"Cuántos"» aria-label=«"Cantidad"» />
+|   |           </⟨campo⟩>
+|   |           <⟨campo⟩ ancho=«"3"»>
+|   |             <⟨entrada⟩ name=«"unidad"» marcador=«"Unidad"» aria-label=«"Unidad"» />
+|   |           </⟨campo⟩>
+|   |           <⟨campo⟩ ancho=«"6"»>
+|   |             <⟨entrada⟩ name=«"nombre"» marcador=«"Algo que comprar"» aria-label=«"Elemento"» />
+|   |           </⟨campo⟩>
+|   |           <⟨campo⟩ ancho=«"4"»>
+|   |             <⟨entrada⟩ name=«"pasillo"» marcador=«"Pasillo"» aria-label=«"Pasillo"» accion>
+|   |               <⟨action⟩ «"agregar el artículo nuevo"» slot=«"accion"» color=«"primario"» solo-icono />
+|   |             </⟨entrada⟩>
+|   |           </⟨campo⟩>
+|   |         </⟨campos⟩>
+|   |       </⟨formulario⟩>
+|   |       {dibujar el **recorrido**}
+|   |     </⟨pila⟩>
+|   |   </⟨contenedor⟩>

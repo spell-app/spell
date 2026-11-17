@@ -1,0 +1,21 @@
+## Lista de la compra:  dónde se guarda la lista
+// En un archivo CSV, en la propia carpeta de este ejemplo:  __data/shopping.csv.
+// Ábrelo en Numbers o Excel:  una fila por cada artículo, una columna por cada uno de sus campos.
+// El servidor de páginas lo escribe, cambiando solo las líneas que cambian;  todos los que usan ese servidor de páginas comparten una sola lista.
+// Fichas de Recetas también guarda aquí los ingredientes que eliges:  importa este archivo, así que los dos nombran esta misma lista.
+planilla es una hoja en "shopping.csv"
+
+un "artículo" es una vista
+	vive en la planilla
+	su "nombre" es texto
+	su "cantidad" es un número
+		// Cuántos, en su unidad:  nada cuando no importa
+	su "unidad" es texto
+		// "g", "tazas", "latas" ...;  nada para un conteo, 2 huevos
+	su "pasillo" es texto
+		// Dónde está en la tienda:  la lista se agrupa por esto
+	su "comprado" es sí o no
+		// Tachado:  ya está en el carrito
+	su "receta" es texto
+		// La receta para la que es, cuando Fichas de recetas lo agregó
+	"se necesita" si su comprado es no

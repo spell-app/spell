@@ -1,0 +1,247 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Artículo",
+    "Pasillo",
+    "Recorrido",
+    "ListaDeLaCompra",
+    "Planilla",
+    "test_cuánto_se_lee"
+  ],
+  "statements": [
+    {
+      "type": "Artículo",
+      "superType": "View",
+      "gender": "masculine",
+      "savedIn": {
+        "place": "planilla",
+        "placeType": "Planilla",
+        "collection": "artículos"
+      },
+      "defined": "/ListaDeLaCompra.api.es.spell:552-1055"
+    },
+    {
+      "property": "nombre",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ListaDeLaCompra.api.es.spell:601-621"
+    },
+    {
+      "property": "cantidad",
+      "of": "Artículo",
+      "datatype": "number",
+      "defined": "/ListaDeLaCompra.api.es.spell:623-701"
+    },
+    {
+      "property": "unidad",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ListaDeLaCompra.api.es.spell:703-786"
+    },
+    {
+      "property": "pasillo",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ListaDeLaCompra.api.es.spell:788-868"
+    },
+    {
+      "property": "comprado",
+      "of": "Artículo",
+      "datatype": "choice",
+      "defined": "/ListaDeLaCompra.api.es.spell:870-931"
+    },
+    {
+      "property": "receta",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ListaDeLaCompra.api.es.spell:933-1019"
+    },
+    {
+      "syntax": "se necesita",
+      "output": "se_necesita",
+      "rule": "method_postfix",
+      "of": "Artículo",
+      "kind": "method",
+      "name": "\"se necesita\"",
+      "returns": "choice",
+      "defined": "/ListaDeLaCompra.api.es.spell:1021-1055"
+    },
+    {
+      "property": "porción",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/Artículo.es.spell:267-488"
+    },
+    {
+      "syntax": "sacar {thisArg:expression}?",
+      "output": "sacar",
+      "rule": "method_call",
+      "of": "Artículo",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "sacar",
+      "returns": "nothing",
+      "title": "Sacar",
+      "defined": "/Artículo.es.spell:491-611"
+    },
+    {
+      "type": "Planilla",
+      "superType": "Place",
+      "place": {
+        "name": "planilla",
+        "kind": "sheet",
+        "at": "/api/places/spaces/@spell/examples/ListaDeLaCompra/__data/shopping.csv"
+      },
+      "defined": "/ListaDeLaCompra.api.es.spell:512-550"
+    },
+    {
+      "syntax": "probar cuánto se lee",
+      "output": "test_cuánto_se_lee",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "cuánto se lee",
+      "defined": "/Artículo.es.spell:1076-1339"
+    },
+    {
+      "type": "Pasillo",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/Recorrido.es.spell:272-580"
+    },
+    {
+      "property": "nombre",
+      "of": "Pasillo",
+      "datatype": "text",
+      "defined": "/Recorrido.es.spell:299-319"
+    },
+    {
+      "property": "artículos",
+      "of": "Pasillo",
+      "datatype": "list of artículos",
+      "defined": "/Recorrido.es.spell:321-394"
+    },
+    {
+      "type": "Recorrido",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/Recorrido.es.spell:582-1492"
+    },
+    {
+      "property": "pasillos",
+      "of": "Recorrido",
+      "datatype": "list of pasillos",
+      "defined": "/Recorrido.es.spell:611-1145"
+    },
+    {
+      "property": "comprado",
+      "of": "Recorrido",
+      "datatype": "list of artículos",
+      "defined": "/Recorrido.es.spell:1147-1201"
+    },
+    {
+      "type": "ListaDeLaCompra",
+      "superType": "App",
+      "defined": "/ListaDeLaCompra.es.spell:378-3226"
+    },
+    {
+      "property": "recorrido",
+      "of": "ListaDeLaCompra",
+      "datatype": "Recorrido",
+      "defined": "/ListaDeLaCompra.es.spell:416-449"
+    },
+    {
+      "property": "nuevo_artículo",
+      "asWritten": "nuevo artículo",
+      "of": "ListaDeLaCompra",
+      "datatype": "Artículo",
+      "defined": "/ListaDeLaCompra.es.spell:451-564"
+    },
+    {
+      "kind": "method",
+      "name": "crearla",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/ListaDeLaCompra.es.spell:567-1374"
+    },
+    {
+      "syntax": "agregar el artículo nuevo ((de|del) {thisArg:expression})?",
+      "output": "agregar_el_artículo_nuevo",
+      "rule": "method_call",
+      "of": "ListaDeLaCompra",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar el artículo nuevo",
+      "returns": "nothing",
+      "title": "Agregar",
+      "defined": "/ListaDeLaCompra.es.spell:1377-1737"
+    },
+    {
+      "syntax": "quitar lo comprado ((de|del) {thisArg:expression})?",
+      "output": "quitar_lo_comprado",
+      "rule": "method_call",
+      "of": "ListaDeLaCompra",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "quitar lo comprado",
+      "returns": "nothing",
+      "waits": true,
+      "title": "Quitar lo que ya tengo",
+      "defined": "/ListaDeLaCompra.es.spell:1740-1952"
+    },
+    {
+      "syntax": "imprimir la lista ((de|del) {thisArg:expression})?",
+      "output": "imprimir_la_lista",
+      "rule": "method_call",
+      "of": "ListaDeLaCompra",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "imprimir la lista",
+      "returns": "nothing",
+      "title": "Imprimir",
+      "defined": "/ListaDeLaCompra.es.spell:1955-2114"
+    }
+  ],
+  "codeLines": [
+    7,
+    10,
+    16,
+    22,
+    28,
+    34,
+    40,
+    45,
+    51,
+    58,
+    101,
+    116,
+    139,
+    142,
+    148,
+    161,
+    165,
+    180,
+    203,
+    206,
+    212,
+    218,
+    259,
+    266,
+    271
+  ]
+}

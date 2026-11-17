@@ -1,0 +1,38 @@
+# La lista, por pasillo
+// Lo que falta comprar, pasillo a pasillo, de la A a la Z;  después lo que ya tienes, atenuado, abajo del todo.
+// La Lista de la compra la dibuja, y también las Fichas de recetas:  importan este archivo, así que las dos muestran la misma lista.
+
+un "pasillo" es una vista
+	su "nombre" es texto
+	sus "artículos" es una lista de artículos
+		// Lo que falta comprar en él
+
+	para dibujarlo
+		<pila separacion="xs" class="aisle">
+			<encabezado tamano="diminuto" class="aisle-name">{su nombre}</encabezado>
+			<para cada artículo en sus artículos />
+		</pila>
+
+un "recorrido" es una vista
+	sus "pasillos" es
+		// Cada pasillo con algo que falta comprar, una sola vez, en el orden de sus nombres
+		poner encontrados a una nueva lista de pasillos
+		para artículo en (cada artículo donde su comprado es no) ordenados por su pasillo
+			poner pasillo al primer pasillo en encontrados donde su nombre es el pasillo del artículo
+			si pasillo no existe
+				poner pasillo a un nuevo pasillo con nombre = el pasillo del artículo
+				agregar pasillo a encontrados
+			agregar artículo a los artículos del pasillo
+		devolver encontrados
+	su "comprado" es cada artículo donde su comprado es sí
+		// Ya en el carrito
+
+	para dibujarlo
+		<pila class="aisle-list">
+			<para cada pasillo en sus pasillos>
+				<vacío><texto color="gris">No falta nada por comprar</texto></vacío>
+			</para>
+			<pila separacion="xs" class="got">
+				<para cada artículo en su comprado />
+			</pila>
+		</pila>

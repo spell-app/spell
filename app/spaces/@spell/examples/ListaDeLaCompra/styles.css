@@ -1,0 +1,16 @@
+/* File styles.css:  what Spell UI's tags can't say yet. */
+
+/* got:  it fades */
+.got {
+  opacity: 0.6;
+}
+
+/* On paper (`open printing`):  only what's still to get, by aisle, each with its box to tick */
+@media print {
+  es-barra-herramientas,
+  .new-item,
+  .got,
+  .item es-boton {
+    display: none;
+  }
+}

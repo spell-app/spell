@@ -1,0 +1,304 @@
+{
+  "from": "en",
+  "to": "es",
+  "outFolder": "../ListaDeLaCompra",
+  "files": {
+    "/AisleList.spell": {
+      "output": "/Recorrido.es.spell",
+      "lines": [
+        "9c93ba6c934e",
+        "4507ba56d346",
+        "002875ad609a",
+        "da39a3ee5e6b",
+        "4ede325bae0b",
+        "224d6d8c375a",
+        "b2aed1f1a4c0",
+        "a159fde7b09d",
+        "da39a3ee5e6b",
+        "20473fe204b0",
+        "e63828942e3b",
+        "71cbbf55d348",
+        "26490bfcfb06",
+        "85e2a42500f7",
+        "da39a3ee5e6b",
+        "d738422ff29a",
+        "8892d22afca1",
+        "123abc13a732",
+        "23a780b73f92",
+        "cddf1797b2db",
+        "3247e9680176",
+        "80836699d3c9",
+        "0c0674a5b3ef",
+        "6f3cbe7ca357",
+        "e25106d0f5e0",
+        "a54eda2e2dc1",
+        "72e9bc2534a4",
+        "7096947ef55a",
+        "da39a3ee5e6b",
+        "20473fe204b0",
+        "24f5d5fb7411",
+        "8d9d334f3631",
+        "d6f7abdb5048",
+        "2b8e4e0068b4",
+        "da345c991b2f",
+        "9f8719149af9",
+        "befbb3aae81b",
+        "85e2a42500f7",
+        "da39a3ee5e6b"
+      ]
+    },
+    "/Item.spell": {
+      "output": "/Artículo.es.spell",
+      "lines": [
+        "6870b0526b84",
+        "6919a1766eaa",
+        "baa21981b2ff",
+        "da39a3ee5e6b",
+        "b5d4f5af9954",
+        "774229176214",
+        "016d5d3d5031",
+        "2e938fb10084",
+        "584233da3bfb",
+        "da39a3ee5e6b",
+        "a063ae936b34",
+        "c7d86fae1049",
+        "c763f94dba9a",
+        "da39a3ee5e6b",
+        "20473fe204b0",
+        "6189de09c989",
+        "a1e272e39165",
+        "ae8a4d24e9f4",
+        "6f87ca2aadb5",
+        "04493ea293a6",
+        "529d43ccdb87",
+        "c939b0ca2aa7",
+        "99c58c065a9e",
+        "c7b28968ace6",
+        "befbb3aae81b",
+        "b7243636aa27",
+        "da39a3ee5e6b",
+        "d27ab87fb2a4",
+        "6480b24d359b",
+        "3f25cb133192",
+        "5ef7449e8a22",
+        "30039968322f",
+        "da39a3ee5e6b"
+      ]
+    },
+    "/ShoppingList.api.spell": {
+      "output": "/ShoppingList.api.es.spell",
+      "lines": [
+        "48091d31b985",
+        "5a84eceaa8b4",
+        "f907da844b09",
+        "274e8ddc64c2",
+        "90e8252e38f2",
+        "fcdd49b6565a",
+        "da39a3ee5e6b",
+        "94a921ff8382",
+        "c2153e39503b",
+        "224d6d8c375a",
+        "17b6279e8e50",
+        "c9e60e8d8cf3",
+        "51c51f22e7f5",
+        "173eeb65fc16",
+        "39d32ce8e135",
+        "f76bed2b500a",
+        "0c4faaa159e1",
+        "bdd3a7a74f43",
+        "ad63d4721087",
+        "e86359b85c37",
+        "6da8f2e078c7",
+        "da39a3ee5e6b"
+      ]
+    },
+    "/ShoppingList.spell": {
+      "output": "/ListadelaCompra.es.spell",
+      "lines": [
+        "38a834b53163",
+        "398be329b779",
+        "16441eded4de",
+        "7dd63cbc0d24",
+        "da39a3ee5e6b",
+        "e4938c216398",
+        "2d9ca7203841",
+        "6e97496f4440",
+        "5f552c15c312",
+        "da39a3ee5e6b",
+        "9d0c4a244952",
+        "a42888d11e4e",
+        "a886e4d9bc6d",
+        "094a4b425d2d",
+        "ae691999b953",
+        "23001628c457",
+        "a5a7e1d5260d",
+        "4ebee20575a7",
+        "eddcd213380d",
+        "da39a3ee5e6b",
+        "56d105b824dc",
+        "216d354643ab",
+        "3039dad9bcc3",
+        "bda8c30f9d99",
+        "b47ad92086bc",
+        "da39a3ee5e6b",
+        "d4f3d784ca1a",
+        "f59ed3593378",
+        "5be0b0413a59",
+        "da39a3ee5e6b",
+        "0c3cfbe498aa",
+        "b66e5a35f9ac",
+        "766276e918a7",
+        "da39a3ee5e6b",
+        "20473fe204b0",
+        "d13b82448356",
+        "38e20f0732bb",
+        "ce126dc05301",
+        "22c25d7d5be5",
+        "f024639d01e9",
+        "0c5cfb3b3ccb",
+        "4cf6a3fc5746",
+        "92535b09e688",
+        "8f2700603d15",
+        "5aa3f350878c",
+        "29950baeef5d",
+        "62a85496b3bf",
+        "d86390405490",
+        "f582d4095e01",
+        "227bec3dac5e",
+        "d86390405490",
+        "93ceaf617913",
+        "227bec3dac5e",
+        "bd08281fc9a3",
+        "f2362f27f888",
+        "227bec3dac5e",
+        "571e4c0e9072",
+        "4f7989a73631",
+        "d01c577fa939",
+        "e634f27379c8",
+        "227bec3dac5e",
+        "421c70721ac2",
+        "469038c9395d",
+        "2af82078a03c",
+        "befbb3aae81b",
+        "dbf05d737bd2",
+        "da39a3ee5e6b"
+      ]
+    }
+  },
+  "fixes": [
+    {
+      "path": "/Item.spell",
+      "source": "584233da3bfb",
+      "mechanical": "\t\tdevolver su cantidad & & su unidad",
+      "fixed": "\t\tdevolver su cantidad && su unidad"
+    },
+    {
+      "path": "/Item.spell",
+      "source": "529d43ccdb87",
+      "mechanical": "\t\t\t\t<if its recipe is not \"\">",
+      "fixed": "\t\t\t\t<si su receta no es \"\">"
+    },
+    {
+      "path": "/Item.spell",
+      "source": "99c58c065a9e",
+      "mechanical": "\t\t\t\t</if>",
+      "fixed": "\t\t\t\t</si>"
+    },
+    {
+      "path": "/Item.spell",
+      "source": "c7b28968ace6",
+      "mechanical": "\t\t\t\t<action \"remove\" solo-icono apariencia=\"terciario\" />",
+      "fixed": "\t\t\t\t<action \"sacar\" solo-icono apariencia=\"terciario\" />"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "a886e4d9bc6d",
+      "mechanical": "\t\tif there are no items  // TODO: translate (meaning none of Keyword)",
+      "fixed": "\t\tsi no hay artículos"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "3039dad9bcc3",
+      "mechanical": "\t\tsi el nombre del nuevo artículo es \"\" devolver",
+      "fixed": "\t\tsi el nombre de su nuevo artículo es \"\" devolver"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "b47ad92086bc",
+      "mechanical": "\t\tponer su nuevo artículo a un nuevo artículo con pasillo = el pasillo del nuevo artículo",
+      "fixed": "\t\tponer su nuevo artículo a un nuevo artículo con pasillo = el pasillo de su nuevo artículo"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "f024639d01e9",
+      "mechanical": "\t\t\t\t\t<action \"clear what I got\" />",
+      "fixed": "\t\t\t\t\t<action \"quitar lo comprado\" />"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "0c5cfb3b3ccb",
+      "mechanical": "\t\t\t\t\t<action \"print the list\" />",
+      "fixed": "\t\t\t\t\t<action \"imprimir la lista\" />"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "92535b09e688",
+      "mechanical": "\t\t\t\t\t<action \"undo\" solo-icono />",
+      "fixed": "\t\t\t\t\t<action \"deshacer\" solo-icono />"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "8f2700603d15",
+      "mechanical": "\t\t\t\t\t<action \"redo\" solo-icono />",
+      "fixed": "\t\t\t\t\t<action \"rehacer\" solo-icono />"
+    },
+    {
+      "path": "/ShoppingList.spell",
+      "source": "d01c577fa939",
+      "mechanical": "\t\t\t\t\t\t\t\t<action \"add the new item\" ranura=\"acción\" color=\"principal\" solo-icono />",
+      "fixed": "\t\t\t\t\t\t\t\t<action \"agregar el elemento nuevo\" ranura=\"acción\" color=\"principal\" solo-icono />"
+    },
+    {
+      "path": "/AisleList.spell",
+      "source": "26490bfcfb06",
+      "mechanical": "\t\t\t<for item in its items />",
+      "fixed": "\t\t\t<para cada artículo en sus artículos />"
+    },
+    {
+      "path": "/AisleList.spell",
+      "source": "8d9d334f3631",
+      "mechanical": "\t\t\t<for aisle in its aisles>",
+      "fixed": "\t\t\t<para cada pasillo en sus pasillos>"
+    },
+    {
+      "path": "/AisleList.spell",
+      "source": "d6f7abdb5048",
+      "mechanical": "\t\t\t\t<empty><text color=\"grey\">Nothing left to get</text></empty>",
+      "fixed": "\t\t\t\t<vacío><texto color=\"gris\">No falta nada por comprar</texto></vacío>"
+    },
+    {
+      "path": "/AisleList.spell",
+      "source": "2b8e4e0068b4",
+      "mechanical": "\t\t\t</for>",
+      "fixed": "\t\t\t</para>"
+    },
+    {
+      "path": "/AisleList.spell",
+      "source": "9f8719149af9",
+      "mechanical": "\t\t\t\t<for item in its got />",
+      "fixed": "\t\t\t\t<para cada artículo en su comprado />"
+    },
+    {
+      "path": "/ShoppingList.api.spell",
+      "source": "fcdd49b6565a",
+      "mechanical": "planilla es una hoja de cálculo en \"shopping.csv\"",
+      "fixed": "planilla es una hoja en \"shopping.csv\""
+    },
+    {
+      "path": "/ShoppingList.api.spell",
+      "source": "c2153e39503b",
+      "mechanical": "\tvive en planilla",
+      "fixed": "\tvive en la planilla"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+# Un artículo de la lista
+// Una fila propia:  una casilla para marcar, cuánto, su nombre, la receta a la que pertenece y un botón para sacarlo.
+// Marcar la casilla cambia el artículo, que se guarda solo:  la línea del archivo CSV cambia de inmediato.
+
+un artículo
+	su "porción" es
+		// Su cantidad y unidad como las escribe la gente:  "2", "200 g", "1 1/2 tazas";  nada si no hay cantidad
+		si su cantidad es indefinido o su cantidad es 0 devolver ""
+		devolver su cantidad && su unidad
+
+	para "sacar" con título "Sacar", icono "close"
+		// Fuera de la lista, y fuera del archivo
+		quitar eso de los artículos
+
+	para dibujarlo
+		<formulario value={eso}>
+			<pila direccion="horizontal" separacion="sm" class="item">
+				<casilla name="comprado" aria-label="Lo tengo" />
+				<texto negrita class="how-much">{su porción}</texto>
+				<texto class="name">{su nombre}</texto>
+				<si su receta no es "">
+					<texto color="gris" tamano="pequeño" class="for">para {su receta}</texto>
+				</si>
+				<action "sacar" solo-icono apariencia="terciario" />
+			</pila>
+		</formulario>
+
+	para probar cuánto se lee
+		poner el artículo a un nuevo artículo con nombre "harina", cantidad = 200, unidad = "g"
+		la porción del artículo debería ser "200 g"
+		poner el artículo a un nuevo artículo con nombre "limones"
+		la porción del artículo debería ser ""
