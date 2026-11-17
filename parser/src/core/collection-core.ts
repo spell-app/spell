@@ -77,6 +77,14 @@ export type KeyOf<C> = C extends null | undefined
     ? number
     : string | number
 
+/**
+ * Is `value` something, not nothing (`undefined` / `null`)?
+ * - Nothing is never added to a list, nor looped over (epic `language` T153).
+ */
+export function isSomething(value: unknown): boolean {
+  return value !== undefined && value !== null
+}
+
 /** Cast a genuinely-dynamic `collection` argument to its duck-typed shape. */
 function asCollection(collection: unknown): CollectionLike {
   return collection as CollectionLike
@@ -195,9 +203,14 @@ export const collectionCoreMethods = defineCoreModule({
    * Add `things` in the middle of the `collection` at index `start`, from 0, moving things from `start` on down.
    * Array only.
    * - Compiles from `add thing to my-list at position of other-thing (+ 1)` -- see `rules/lists/`.
+   * - Adding nothing (`undefined` / `null`) adds nothing:  people skip it, as `add the top card of an empty stock`
+   *   should (epic `language` T153).
+   *   Every way spell adds comes here:  `append()`, `prepend()`, `addBefore()`, `addAfter()`, `move()`, merging.
    */
   addAtPosition(collection?: unknown, start?: number, ...things: unknown[]): void {
     if (!assert.isArrayLike(collection, "core.addAtPosition(collection)")) return
+    things = things.filter(isSomething)
+    if (!things.length) return
     const coll = asCollection(collection)
     const at = start ?? 0
     if (typeof coll.addAtPosition === "function") {
@@ -256,6 +269,8 @@ export const collectionCoreMethods = defineCoreModule({
   /**
    * Return an invoked iterator which yields `[value, position, collection]` for each item in the collection.
    * - Backs nearly every other iteration method here and in `collection-other.ts` (`forEach`, `map`, `all`, ...).
+   * - Skips an empty item (`undefined` / `null`):  a loop never runs its body on nothing (epic `language` T153).
+   *   Each item keeps its own position all the same.
    * - Typed by `collection`, so their callbacks are too -- see `CollectionOf`.
    * - e.g.
    *   ```
@@ -280,14 +295,16 @@ export const collectionCoreMethods = defineCoreModule({
       return (function* numericIterator() {
         const count = core.itemCountOf(collection)
         for (let position = 0; position < count; position++) {
-          yield [core.getItemAt(collection, position), position, collection] as [T, number, unknown]
+          const value = core.getItemAt(collection, position)
+          if (isSomething(value)) yield [value, position, collection] as [T, number, unknown]
         }
       })()
     }
     const keys = core.keysOf(collection)
     return (function* keyedIterator() {
       for (let i = 0; i < keys.length; i++) {
-        yield [core.getItemAt(collection, keys[i]), keys[i], collection] as [T, string | number, unknown]
+        const value = core.getItemAt(collection, keys[i])
+        if (isSomething(value)) yield [value, keys[i], collection] as [T, string | number, unknown]
       }
     })()
   }

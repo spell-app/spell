@@ -143,8 +143,12 @@ class CollectionMethods:
 
         - Negative counts from the end, as a Python slice does;  past the end is the end.
         - `add the card to the pile at position 2` is `core.add_at_position(pile, 1, card)`.
+        - Adding nothing (`None`) adds nothing (epic `language` T153):  every way spell adds comes here.
         """
         if not self._is_array_like(collection, "add_at_position"):
+            return
+        things = tuple(thing for thing in things if thing is not None)
+        if not things:
             return
         at = start if is_a_number(start) else 0
         if isinstance(collection, List):
@@ -183,15 +187,21 @@ class CollectionMethods:
 
         - Reads each item as it gets to it, from the count when it started:
           a callback that changes the list sees the change.
+        - Skips an empty item (`None`):  a loop never runs its body on nothing (epic `language` T153).
+          Each item keeps its own position all the same.
         """
         if not self._is_defined(collection, "get_iterator_for"):
             return
         if isinstance(collection, Mapping):
             for key in list(collection.keys()):
-                yield collection.get(key), key, collection
+                value = collection.get(key)
+                if value is not None:
+                    yield value, key, collection
             return
         for position in range(self.item_count_of(collection)):
-            yield self.get_item_at(collection, position), position, collection
+            value = self.get_item_at(collection, position)
+            if value is not None:
+                yield value, position, collection
 
     def position_of(self, collection: object = None, thing: object = None) -> Key:
         """The index of the first `thing` in `collection` (`is_same()`), from 0:  a dict's, its key.
@@ -708,8 +718,9 @@ class CollectionMethods:
         - `move the card to the tableau`;  see `List.move_here()`.
         - Returns whether it moved.  Refused:  nothing changes.
         - A plain list has no guards:  `thing` is just added.
+        - Nothing (`None`) never moves:  `False`, and nothing changes (epic `language` T153).
         """
-        if not self._is_array_like(collection, "move"):
+        if not self._is_array_like(collection, "move") or thing is None:
             return False
         move_here = getattr(collection, "move_here", None)
         if callable(move_here):

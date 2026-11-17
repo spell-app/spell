@@ -15,6 +15,7 @@ import {
   type PropInfo
 } from "spell/util"
 import { registerThing, noteItems, noteKept, noteMade, noteSetting, core } from "spell/parser/core/core"
+import { isSomething } from "spell/parser/core/collection-core"
 import type { CollectionIterationCallback } from "spell/parser/core/collection-other"
 import type { Drawing } from "spell/parser/core/drawing"
 import type { PropCheck } from "spell/parser/core/core.types"
@@ -292,8 +293,11 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    * Add one or more `things` to our items at index `start`, from 0, as `splice()` adds them.
    * - Pushes the items from `start` on over to make room;  past the end:  at the end.
    * - Exclusive:  one we hold already MOVES here -- we hold each item once.
+   * - Nothing (`undefined` / `null`) is never added, as `core.addAtPosition()` (epic `language` T153).
    */
   addAtPosition(start: number, ...things: T[]): void {
+    things = things.filter(isSomething)
+    if (!things.length) return
     let items = [...this.items]
     // past the end:  at the end;  negative from the end;  further back than the front:  the front
     let itemStart = start >= items.length ? items.length : (this._getZeroIndex(start) ?? 0)
@@ -677,8 +681,10 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    * - The list holding it:  the one of our family, if we're exclusive.  Else none is asked:  just `canTake()`.
    * - Then added, as `add`:  its owner changes ONCE -- see `writeItems()`.
    * - See `core.move()`.
+   * - Nothing (`undefined` / `null`) never moves:  no, and nothing changes (epic `language` T153).
    */
   moveHere(item: T): boolean {
+    if (!isSomething(item)) return false
     const owner = this.family?.ownerOf(item, "UNTRACKED")
     if (owner && !owner.canGiveUp(item)) return false
     if (!this.canTake(item)) return false
