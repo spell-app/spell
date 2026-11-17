@@ -1522,6 +1522,13 @@
     },
     {
       "kind": "method",
+      "name": "openPrinting",
+      "of": "core",
+      "module": "ui",
+      "description": "Open the browser's Print dialog for the app alone, not the page around it:  what `open printing` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "play",
       "of": "core",
       "module": "ui",

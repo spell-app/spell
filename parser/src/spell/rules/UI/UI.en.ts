@@ -15,6 +15,7 @@ import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
+import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
@@ -117,6 +118,11 @@ UI.addRule(ShowDatesAs, {
 UI.addRule(ScrollToTop, {
   syntax: "scroll to the top",
   tests: [{ compileAs: "statement", tests: [["scroll to the top", "core.scrollToTop()"]] }]
+})
+
+UI.addRule(OpenPrinting, {
+  syntax: "open printing",
+  tests: [{ compileAs: "statement", tests: [["open printing", "core.openPrinting()"]] }]
 })
 
 UI.addRule(PlaySound, {

@@ -203,7 +203,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `play` and `stop` a sound, styles | 14 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, `play` and `stop` a sound, styles | 15 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 77 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -652,6 +652,11 @@ export class Tableau extends Pile {
     that project in your project file's imports.
   - The app's element hands them to everything drawn inside it, as `<ui-root defaults>` does;
     the editor's Inspector says "From ui-defaults" on a value that came from them, naming the file.
+- `open printing` opens the browser's Print dialog for the app alone, HyperTalk's words:
+  `<ui-button onClick={open printing}>Print</ui-button>`, or a step in an action (Spanish:  `abrir impresión`).
+  - The editor and its toolbars and side bars around the app are left out, in the editor and in a tab of its own.
+  - What the app prints is up to its own styles:  `@media print { ui-toolbar { display: none } }` leaves its toolbar out.
+  - `print` is something else:  it writes on the program's console.
 
 ### Events
 

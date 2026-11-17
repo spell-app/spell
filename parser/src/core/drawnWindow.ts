@@ -292,8 +292,8 @@ function scrollerOf(element: Element): Element | null {
   return document.scrollingElement
 }
 
-/** `element`'s parent, across a shadow root. */
-function parentOf(element: Element): Element | null {
+/** `element`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
+export function parentOf(element: Element): Element | null {
   return element.assignedSlot ?? element.parentElement ?? (element.getRootNode() as ShadowRoot).host ?? null
 }
 

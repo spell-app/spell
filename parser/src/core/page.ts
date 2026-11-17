@@ -54,8 +54,8 @@ export type PageMessage =
  */
 export type PageQuestion = { ui: (typeof QUESTIONS)[number]; args: unknown[]; asks: number }
 
-/** The core's methods a program running elsewhere may ask its page to run:  its dialogs and toasts, no others. */
-const QUESTIONS = ["notify", "alert", "warn", "confirm", "prompt"] as const
+/** The core's methods a program running elsewhere may ask its page to run:  its dialogs and toasts, and printing. */
+const QUESTIONS = ["notify", "alert", "warn", "confirm", "prompt", "openPrinting"] as const
 
 /** A thing in a page's message:  by reference, `"Card#ace-of-hearts"`, else by its id, `{ "$id": "3" }`. */
 export type PageMessageThing = string | { [ID_KEY]: string }

@@ -59,4 +59,50 @@ describe("testing spell module UI", () => {
       expect(compiled).not.toContain("core.stop(")
     })
   })
+
+  describe("`open printing` (epic `mockup` P21)", () => {
+    /** `contents`, parsed whole as `path`:  what it compiled to, and its errors. */
+    function parsed(contents: string, path = "/Test.spell") {
+      const { compiled, errors } = parseSpellProject([{ path, contents }]).files[0]!
+      return { compiled, errors }
+    }
+
+    test("a button's click, and an action's step, in English", () => {
+      const { compiled, errors } = parsed(`shopping list is an app:
+	- to print the list:
+		open printing
+	- to draw it:
+		<ui-button onClick={open printing}>Print</ui-button>
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toMatch(/printTheList\(\) \{[^}]*core\.openPrinting\(\)/)
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.openPrinting())")
+    })
+
+    test("and in Spanish:  `abrir impresión`", () => {
+      const { compiled, errors } = parsed(
+        `lista de compras es una app:
+	- para imprimir la lista:
+		abrir impresión
+	- para dibujarla:
+		<ui-button onClick={abrir impresión}>Imprimir</ui-button>
+`,
+        "/Test.es.spell"
+      )
+      expect(errors).toEqual([])
+      expect(compiled.match(/core\.openPrinting\(\)/g)).toHaveLength(2)
+    })
+
+    test("a program's own `to open printing` is the one that runs", () => {
+      const { compiled, errors } = parsed(`a report is a thing:
+	- to open printing:
+		set x to 1
+	- to finish it:
+		open printing
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain("this.openPrinting()")
+      expect(compiled).not.toContain("core.openPrinting(")
+    })
+  })
 })

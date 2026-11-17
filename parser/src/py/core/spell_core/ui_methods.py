@@ -9,7 +9,7 @@ if await core.confirm("Deal again?"): ...          # yes or no
 name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` if cancelled
 ```
 
-- What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`.
+- What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`;  and `open_printing`.
   - Each takes what the JavaScript core's takes, in the same order, and answers as it does.
   - `alert`, `warn`, `confirm` and `prompt` are `async`:  the Python writer awaits them, as javascript's are.
   - `notify` isn't:  a toast is an aside, so the program carries on.
@@ -52,7 +52,7 @@ ANSWER_KEY = "answer"
 
 
 class UIMethods:
-    """`core.notify()`, `core.alert()`, `core.warn()`, `core.confirm()` and `core.prompt()`:  see the module's docs."""
+    """`core.notify()`, `core.alert()`, `core.warn()`, `core.confirm()`, `core.prompt()` and `core.open_printing()`:  see the module's docs."""
 
     # where they print with no page:  `Core` sets it
     console: "SpellConsole"
@@ -82,6 +82,17 @@ class UIMethods:
             self.console.info(str(message))
             return ToastShown(None)
         return ToastShown(asyncio.ensure_future(self._ask_or_say("notify", args)))
+
+    def open_printing(self) -> None:
+        """Open the browser's Print dialog for the app alone:  compiled from `open printing`.
+
+        - With a page:  the page opens it, as the JavaScript core's `openPrinting()` does.  Not awaited.
+        - No page:  nothing, as the JavaScript core does under node.
+        - NEVER throws.
+        """
+        if self.ask_page is None or not _is_loop_running():
+            return
+        asyncio.ensure_future(self._ask_or_say("openPrinting", []))
 
     async def alert(self, message: object, ok_text: "str | DialogOptions | None" = None) -> None:
         """Show `message` in a dialog, and wait until it's closed:  compiled from `alert "Yo!"`.
