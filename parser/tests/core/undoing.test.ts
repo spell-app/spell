@@ -420,6 +420,20 @@ describe("the program's opening (`core.runOpening()`, epic `language` J180)", ()
     expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Turn Card"])
   })
 
+  test("a creation hook that waits past the opening is still no step:  Recipe Box's recipes to start from (epic `epic-engine` I325)", async () => {
+    class Box extends Card {
+      override async create(): Promise<void> {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        this.turnOver()
+      }
+    }
+    let box: Box | undefined
+    await core.runOpening(() => (box = new Box({ rank: "joker" })))
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    expect(box!.faceUp).toBe(true)
+    expect(game.canUndo).toBe(false)
+  })
+
   test("no program running:  it just runs", () => {
     core.clearRuntime()
     expect(core.runOpening(() => 2)).toBe(2)
