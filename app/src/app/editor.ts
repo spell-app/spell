@@ -1083,11 +1083,14 @@ export class EditorStore extends Observable {
   /**
    * Make a project of the person's own from starter program `starter`, with no question asked, and show it.
    * - Not one of their apps until they change it, and gone if they leave it untouched (`leaveProject()`).
+   * - Its code shown, Blank's closed (`codeClosed`):  never what a thrown-away project at the same address had
+   *   (epic `mockup` T50, J217)
    */
   async startFrom(starter: SPACES.StarterProgram, { codeClosed = false } = {}): Promise<void> {
     try {
       const project = await SPACES.SpellProjectRoot.projects.createFrom(starter, { untouched: !isStaticBuild })
-      if (codeClosed) await editor.closeCodeOf(project.path)
+      // a fresh start's own choice, never what a thrown-away project at the same address had (J217)
+      await editor.showCodeOf(project.path, !codeClosed)
       editor.showEditor(project.path)
       editor.showKept()
     } catch (error) {
@@ -1095,10 +1098,10 @@ export class EditorStore extends Observable {
     }
   }
 
-  /** Close project `path`'s code:  loaded with the page's UI, which `editor` stays free of until it needs it. */
-  private async closeCodeOf(path: string): Promise<void> {
+  /** Show or close project `path`'s code:  loaded with the page's UI, which `editor` stays free of until it needs it. */
+  private async showCodeOf(path: string, shown: boolean): Promise<void> {
     const { CodeShown } = await import("spell/app/app/solid/EditorMode")
-    CodeShown.set(path, false)
+    CodeShown.set(path, shown)
   }
 
   /**
