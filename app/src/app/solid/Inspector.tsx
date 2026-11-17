@@ -2694,6 +2694,7 @@ class PartSelector {
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
  *   - except the last open card, which reaches the column's bottom, its body scrolling when it's long (I165):
  *     the column reads as one, with no empty page under it
+ *   - whatever sizes were remembered:  a px the last open card kept becomes a share (`lastOpenCardGrows()`, I228)
  * - As the selection changes or a card folds, the cards glide to their new sizes (`CardGlide`, T69).
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
@@ -2759,7 +2760,7 @@ export function InspectorColumn(): JSX.Element {
         <style>{brandTokens()}</style>
         <InspectorSheetBar />
         <ui-split-panel
-          rows={cardSizes.sizes()}
+          rows={lastOpenCardGrows(cardSizes.sizes(), layout().lastOpen)}
           resizable
           class="InspectorSplit"
           ref={[
@@ -2918,8 +2919,12 @@ function hasCodeCard(): boolean {
  * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140);
  *   the last open card takes what's left, to the column's bottom (I165).
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
+ * - `lastOpen`:  the last open card's place among `shown`, `-1` when every card is folded (`lastOpenCardGrows()`).
  */
-function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {
+function cardsLayout(
+  shown: readonly InspectorCardId[],
+  isEmpty: boolean
+): { id: string; sizes: string; lastOpen: number } {
   const isFolded = (panel: InspectorCardId) => Inspector.isFolded(panel) || (isEmpty && panel === "code")
   const open = shown.filter((panel) => !isFolded(panel))
   const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
@@ -2930,9 +2935,29 @@ function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id:
       .map((panel) =>
         isFolded(panel) ? `${FOLDED_CARD_HEIGHT}px` : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
       )
-      .join(",")
+      .join(","),
+    lastOpen: shown.findLastIndex((panel) => !isFolded(panel))
   }
 }
+
+/**
+ * The column's sizes (`sizes`, as remembered), with the last open card's (`lastOpen`) a share of the column,
+ * so it always grows to the column's bottom (Owen, 2026-11-16, epic `editor` I228:
+ * "Views pane got shorter -- should always pin to the bottom of the window"):
+ * - a size remembered in px held that card at its height, and every other card at what it shows,
+ *   with empty page under the column (a drag an older editor kept:  every card in px)
+ * - so its px becomes a share of what's left (`*`);  the other cards keep their sizes, px too
+ * - `Inspector.css` lets that share grow past what it shows (I165)
+ */
+function lastOpenCardGrows(sizes: string, lastOpen: number): string {
+  const each = sizes.split(",")
+  if (lastOpen < 0 || lastOpen >= each.length || each[lastOpen].trim().endsWith("%")) return sizes
+  each[lastOpen] = SHARE_OF_THE_REST
+  return each.join(",")
+}
+
+/** A `<ui-split-panel>` size that shares what the other panes leave (`lastOpenCardGrows()`). */
+const SHARE_OF_THE_REST = "*"
 
 /**
  * Fold each card dragged too small to show anything
