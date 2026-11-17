@@ -41,7 +41,7 @@ const BY_ID = `
 const SPLIT = `
   <ui-menu direction="vertical" aria-label="Part" style="width: 220px">
     <ui-item appearance="link">Copy</ui-item>
-    <ui-submenu label="Inspect Card" value="inspect" split>
+    <ui-submenu label="Inspect Card" value="inspect" flyout-label="Parts here" split>
       <ui-item value="pile">Pile</ui-item>
       <ui-item value="card">Card</ui-item>
     </ui-submenu>
@@ -637,9 +637,11 @@ describe("<ui-submenu split>", () => {
     expect(deepActive()).toBe(rowOf(split.querySelector("ui-item")!))
   })
 
-  test("its row still says it has a menu;  its chevron end is wider, after a line", async () => {
+  test("its row still says it has a menu;  its chevron end is wider, after a line, its tooltip the fly-out's name", async () => {
     const { split } = await renderSplit()
     expect(rowOf(split).getAttribute("aria-haspopup")).toBe("menu")
+    expect(chevronOf(split).title).toBe("Parts here")
+    expect(flyoutOf(split).querySelector("ui-menu")!.getAttribute("aria-label")).toBe("Parts here")
     const chevron = getComputedStyle(chevronOf(split))
     expect(parseFloat(chevron.borderInlineStartWidth)).toBeGreaterThan(0)
     expect(chevronOf(split).getBoundingClientRect().width).toBeGreaterThan(16)

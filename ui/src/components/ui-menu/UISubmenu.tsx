@@ -585,6 +585,7 @@ export class UISubmenu extends UIItem {
           ref={(element: HTMLElement) => (this.chevron = element)}
           class={CHEVRON}
           part={this.submenuPart(CHEVRON)}
+          title={this.split ? (this.flyoutLabel ?? undefined) : undefined}
           aria-hidden="true"
         >
           {this.chevronGlyph.svg}
@@ -613,7 +614,7 @@ export class UISubmenu extends UIItem {
           size={menu()?.size}
           ticks={menu()?.ticks || this.hasOnOrOffItems ? "" : undefined}
           icon-column={menu()?.iconColumn ? "" : undefined}
-          aria-label={this.label}
+          aria-label={this.flyoutLabel ?? this.label}
         >
           <slot />
         </ui-menu>
@@ -673,7 +674,9 @@ export class UISubmenu extends UIItem {
  * the item's it shares, and its own `split`.
  */
 export interface UISubmenu
-  extends E.AttributeValues<typeof itemVocabulary>, Pick<E.AttributeValues<typeof submenuVocabulary>, "split"> {}
+  extends
+    E.AttributeValues<typeof itemVocabulary>,
+    Pick<E.AttributeValues<typeof submenuVocabulary>, "split" | "flyoutLabel"> {}
 
 /** How a fly-out was opened. */
 type OpenedBy = {

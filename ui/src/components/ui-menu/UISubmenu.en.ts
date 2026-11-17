@@ -9,6 +9,7 @@
  *   - `menu`, the id of a menu elsewhere on the page to show as its fly-out
  *   - `split`:  its title chooses, as a plain item's does;  only its chevron end opens the fly-out
  *     (`value`, what the choice reports;  its `label` by default)
+ *   - `flyout-label`, the fly-out's own name, and a split row's chevron tooltip
  *   - the `chevron` and `flyout` parts
  *   - the `open` state
  */
@@ -54,6 +55,14 @@ export const submenuVocabulary = {
       description:
         "Id of a `<ui-menu>` elsewhere on the page to show as the fly-out, in place of the items inside.  It stays " +
         "where it is, shown beside the row while open;  write `popover` on it, so it's hidden until then."
+    },
+    {
+      name: "flyout-label",
+      group: "name",
+      kind: "string",
+      description:
+        "The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with " +
+        '`split` the chevron end\'s tooltip ("Pick one of the parts under the mouse").  Default:  its `label`.'
     },
     {
       name: "value",
