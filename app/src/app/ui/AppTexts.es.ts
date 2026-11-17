@@ -106,6 +106,7 @@ const APP_TEXTS_ES: AppTextPack = {
   menuShowInCode: "Mostrar en el código",
   menuInspect: "Inspeccionar {type}",
   menuInspectParts: "Elige una de las partes bajo el ratón",
+  menuInspectOtherViews: "Inspeccionar otras vistas",
   partIsApp: "Es la aplicación misma:\nno se puede cortar, duplicar ni borrar.",
   partNothingCopied: "Aún no se ha copiado nada.",
   partNothingSelected: "No hay nada seleccionado.",

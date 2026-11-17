@@ -339,7 +339,7 @@ ui-popup.MenuPopup {
 }
 
 /*
- * the part menu's Inspect row, with every part under the mouse at its side (`<InspectRow>`):
+ * the part menu's Inspect Other Views row, with every part under the mouse at its side (`<InspectRow>`):
  * each part indented under the one it's inside, 12px a level (`--InspectRow-depth`)
  */
 ui-menu.BarMenuItems ui-submenu.InspectRow > ui-action::part(item) {
