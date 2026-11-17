@@ -7,7 +7,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 14px;
+  padding: 16px;
   border-radius: var(--spell-pane-radius, var(--ui-radius-l, 12px));
   background: var(--spell-pane-background);
   border: 1px solid var(--spell-pane-border-color);
@@ -97,7 +97,7 @@
       object-position: top center;
     }
     .text {
-      padding: 12px 14px 14px;
+      padding: 12px 16px 16px;
     }
   }
   .text {
@@ -122,17 +122,38 @@
 }
 
 /*
- * A card with a "..." menu (`menu`, the home page's own projects;  epic `mockup` T47):
- * the card, and the menu over its top left corner, 12px in from both edges, over its picture.
- * - The menu is the card's sibling, so a click on it never opens the card's project.
+ * A card with a "..." menu (`menu`, the home page's own projects;  epic `mockup` T47, I49):
+ * the card, and its menu at the left end of the card's text, the title and tagline moved over to make room.
+ * - The menu is the card's sibling, laid over it, so a click on it never opens the card's project.
+ * - Its button is 24px, lined up with the text's inset;  its centre on the title line's (24px tall here too).
+ *   - a banner:  under the picture, 12px down and 16px in, as the text is;
+ *     the picture's height worked out from the card's width (`cqw`), as the picture's own `aspect-ratio` does
+ *   - beside a tile:  where the text starts, 12px past the tile, on the title line;
+ *     the tile and text start at the top, so the title line is at a known place
+ *   - each 1px further for the card's border
  */
 .TileCardHolder {
+  --TileCard-menu-size: 24px;
+  /* the menu's room before the text:  its button and 8px */
+  --TileCard-menu-room: calc(var(--TileCard-menu-size) + 8px);
   position: relative;
   display: grid;
+  container-type: inline-size;
 
   /* the card fills its place in the grid, as it would on its own */
   > .TileCard {
     min-width: 0;
+    align-items: flex-start;
+
+    .text {
+      padding-inline-start: var(--TileCard-menu-room);
+    }
+    .title {
+      line-height: var(--TileCard-menu-size);
+    }
+    &.banner .text {
+      padding-inline-start: calc(16px + var(--TileCard-menu-room));
+    }
   }
   /* it rises with the card on hover */
   &:has(> .TileCard:hover) > .TileCardMenu {
@@ -141,48 +162,73 @@
 }
 .TileCardMenu {
   position: absolute;
-  top: 12px;
-  left: 12px;
   z-index: 1;
+  /* beside a tile:  past the tile (40px) and the gap (12px), on the title line */
+  top: calc(1px + 16px);
+  left: calc(1px + 16px + 40px + 12px);
   transition: transform var(--ui-duration-fast, 0.15s) var(--ui-ease-out, ease-out);
+}
+/* under a banner's picture:  the card's border, the picture (16:9 of the card's inside, its own border in it), the text's 12px */
+.TileCardHolder:has(> .TileCard.banner) > .TileCardMenu {
+  top: calc(1px + (100cqw - 2px) * 9 / 16 + 12px);
+  left: calc(1px + 16px);
 }
 
 /*
- * the "..." button itself (`<CardMenu>`):  small and round, a dark glass chip, white dots, so it reads over any
- * picture or tile.
- * - The chip is the dropdown's own box:  its button lies over its icon, so a fill on the button would hide the dots.
+ * The "..." button itself (`<CardMenu>`):  the theme's quiet round button, as the code's file tabs' list button is
+ * (`<ui-toolbar>`'s, the same tokens):  no fill at rest, the theme's muted ink, a faint wash under the pointer.
+ * - The look is on the dropdown's own box:  its button covers its icon, so a fill on the button would hide the dots.
+ * - The dots centred in the circle:  the icon's slot is the circle, a flex box centring the glyph;
+ *   the icon itself shrinks to the glyph (no icon width, no gap after it), so the glyph is what's centred,
+ *   not a line of text or an icon box wider than its dots (T47's were 1.7px right and 0.9px low).
  */
 .TileCardMenu .CardMenu {
+  --ui-icon-width: auto;
+  --ui-icon-distance: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: 1px solid #fff5;
-  border-radius: 50%;
-  background: #000a;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  width: var(--TileCard-menu-size);
+  height: var(--TileCard-menu-size);
+  border-radius: var(--ui-toolbar-button-radius, 50%);
+  background: var(--ui-toolbar-button-background, transparent);
+  color: var(--ui-toolbar-button-color, var(--ui-text-muted));
   cursor: var(--ui-control-cursor, pointer);
+  transition: background-color var(--ui-duration-fast, 0.15s) var(--ui-ease-out, ease-out);
 
-  &:hover {
-    background: #000d;
+  &:hover,
+  &:has(:popover-open) {
+    color: var(--ui-text-color);
+    background: var(--ui-toolbar-button-hover-background, oklch(from var(--ui-ink) l c h / 0.08));
   }
-  &:focus-within {
-    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
-    outline-offset: 2px;
-  }
+  /* its button covers the whole circle, so a click anywhere in it opens the menu;  its ring on keyboard focus alone */
   &::part(trigger) {
     border: 0;
+    border-radius: var(--ui-toolbar-button-radius, 50%);
     background: transparent;
+    outline: none;
   }
+  &::part(trigger):focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: 1px;
+  }
+  /* the icon's box is the circle, the glyph centred in it */
   &::part(icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--TileCard-menu-size);
+    height: var(--TileCard-menu-size);
     margin: 0;
+    opacity: 1;
   }
   &::part(text) {
     display: none;
   }
   > ui-icon {
-    color: #fff;
+    display: flex;
+    width: auto;
+    height: auto;
+    color: inherit;
   }
 }

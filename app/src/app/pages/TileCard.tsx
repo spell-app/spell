@@ -13,8 +13,8 @@ import "./TileCard.css"
  * - `drag`:  its owner's drag and drop, to move it among its row (the home page, in dev);  none:  a link drags as usual.
  * - `banner`:  its picture (or its tile) across its top, the text under it:  the home page's rows of examples,
  *   each a picture of its app running (epic `mockup` P18).
- * - `menu`:  a "..." menu in its top left corner, 12px in, over its picture (epic `mockup` T47):
- *   a sibling of the card, not inside it, so a click on it never reaches the card's link.
+ * - `menu`:  a "..." menu at the left end of its text, on its title's line, the text moved over for it
+ *   (epic `mockup` T47, I49):  a sibling of the card, not inside it, so a click on it never reaches the card's link.
  ****************/
 export function TileCard(props: TileCardProps) {
   // read once:  a card has its menu for good, and its JSX is made once
@@ -131,7 +131,7 @@ export type TileCardProps = {
   onClick?: (event: MouseEvent) => void
   /** A double click on it. */
   onDblClick?: (event: MouseEvent) => void
-  /** A "..." menu in its top left corner, over its picture:  the home page's own projects' (`<CardMenu>`). */
+  /** A "..." menu at the left end of its text, on its title's line:  the home page's own projects' (`<CardMenu>`). */
   menu?: JSX.Element
 }
 

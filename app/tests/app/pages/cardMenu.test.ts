@@ -94,15 +94,33 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
     await project?.remove()
   })
 
-  test("on your own projects' cards alone, 12px in from the top left, named, its items in order", async () => {
+  test("on your own projects' cards alone, at the left of the title's line, named, its items in order", async () => {
     const menu = cardOf(title()).locator("ui-dropdown.CardMenu")
     expect(await menu.getAttribute("aria-label")).toBe("Project actions")
-    const insets = await cardOf(title()).evaluate((holder) => {
-      const card = holder.querySelector(".TileCard")!.getBoundingClientRect()
+    // I49:  its circle's centre on the title line's, the title after it;  the dots' ink centred in the circle
+    const place = await cardOf(title()).evaluate((holder) => {
       const button = holder.querySelector("ui-dropdown.CardMenu")!.getBoundingClientRect()
-      return { top: button.top - card.top, left: button.left - card.left }
+      const titleLine = holder.querySelector(".TileCard .title")!.getBoundingClientRect()
+      const dots = holder.querySelector("ui-dropdown.CardMenu ui-icon")!.shadowRoot!.querySelector("svg path")!
+      const ink = dots.getBBox()
+      const matrix = dots.getScreenCTM()!
+      const inkStart = new DOMPoint(ink.x, ink.y).matrixTransform(matrix)
+      const inkEnd = new DOMPoint(ink.x + ink.width, ink.y + ink.height).matrixTransform(matrix)
+      const middle = (start: number, end: number) => (start + end) / 2
+      return {
+        size: [button.width, button.height],
+        offTitleLine: middle(button.top, button.bottom) - middle(titleLine.top, titleLine.bottom),
+        titleAfter: titleLine.left >= button.right,
+        inkOff: [
+          middle(inkStart.x, inkEnd.x) - middle(button.left, button.right),
+          middle(inkStart.y, inkEnd.y) - middle(button.top, button.bottom)
+        ]
+      }
     })
-    expect(insets).toEqual({ top: 12, left: 12 })
+    expect(place.size).toEqual([24, 24])
+    expect(Math.abs(place.offTitleLine)).toBeLessThan(0.5)
+    expect(place.titleAfter).toBe(true)
+    for (const off of place.inkOff) expect(Math.abs(off)).toBeLessThan(0.5)
     expect(await page.locator("#examples ui-dropdown.CardMenu, #guides ui-dropdown.CardMenu").count()).toBe(0)
     const items = await menu.evaluate((dropdown) =>
       [...dropdown.querySelectorAll("ui-item")].map((item) =>
