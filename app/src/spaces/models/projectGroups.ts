@@ -12,7 +12,7 @@ import { SpellSetup } from "spell/parser/spell/SpellSetup"
 export const SPELL_ORG = "spell"
 
 /**
- * The person at THIS machine, whose space its own projects are in:  `owen@spell`, `kim-lee@acme`
+ * The person at THIS machine, whose space its own projects are in:  `owen@spell`, `alice@acme`
  * (epic `repo-split` P27).
  * - So a project of theirs, `my-app`, is `owen@spell/my-app`, in spell-spaces' `@spell/owen@/my-app/`.
  * - Their own file is `@spell/owen@/__me.json5`:
@@ -37,7 +37,7 @@ export const localPerson = {
 
 /**
  * Make `person` this machine's person:  their own projects' group, the first of `PROJECT_GROUPS`, moves to their space.
- * - SIDE EFFECT:  `SpellSetup` lists `kim-lee@acme` in place of the old address.
+ * - SIDE EFFECT:  `SpellSetup` lists `alice@acme` in place of the old address.
  */
 export function setLocalPerson(person: { id: string; org: string }): void {
   const group = PROJECT_GROUPS[0]!
@@ -55,7 +55,7 @@ export function setLocalPerson(person: { id: string; org: string }): void {
 
 /**
  * A person's id, made from what they typed or from their email:
- * `Kim Lee` and `kim.lee@acme.com` are both `kim-lee`;  `""` when nothing's left.
+ * `Alice Smith` and `alice.smith@acme.com` are both `alice-smith`;  `""` when nothing's left.
  * - lower case, ASCII, a dash between words (`slug()`);  starts with a letter
  */
 export function personIdFor(text: string): string {
@@ -109,7 +109,7 @@ export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number]
  *   - `@spell/editor`:  the editor's own Spell, one project, `spell-editor` (epic `editor` P22, P29), committed
  *   - `@spell/test`:  the test projects, beside them in `spaces/@spell/test/`, committed and frozen
  *   - `owen@spell`:  this machine's person's own (`localPerson`), `<spell-spaces>/@<org>/<person>@/`, outside git
- *   - an org's own groups in spell.spaces, `@acme/harbor`:  added as the server finds them (`addOrgGroups()`)
+ *   - an org's own groups in spell.spaces, `@acme/tools`:  added as the server finds them (`addOrgGroups()`)
  * - A project in one is its address, a slash and the project's folder name:  `@spell/examples/Solitaire`.
  *   Built-in projects' names are lower-kebab (decision Q39).
  * - Each group's `icon` is its projects' icon everywhere the editor shows one:
@@ -231,9 +231,9 @@ const PERSON_SPACE = /^([a-z][a-z0-9_-]*@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
 
 /**
  * The project group of a person's space in an org other than this machine's person's (epic `repo-split` P26):
- * `owen@acme` for `owen@acme/harbor-new`, in `<spell-spaces>/@acme/owen@/`;  `undefined` for anything else.
+ * `owen@acme` for `owen@acme/dashboard`, in `<spell-spaces>/@acme/owen@/`;  `undefined` for anything else.
  * - found by its address, as `orgProgramGroup()` finds an org's:  so the editor OPENS its projects
- *   (`/edit/owen@acme/harbor-new`), but doesn't list them;  only this machine's person's space is a listed group
+ *   (`/edit/owen@acme/dashboard`), but doesn't list them;  only this machine's person's space is a listed group
  * - only projects:  a data folder's address reads the same, and never asks
  */
 function personSpaceGroup(place: string): SP.ProjectRootSpec | undefined {
@@ -253,20 +253,20 @@ function personSpaceGroup(place: string): SP.ProjectRootSpec | undefined {
 
 SpellSetup.addProjectRootFinder(personSpaceGroup)
 
-/** An org's group kept in spell.spaces:  `@acme/harbor`, a folder of projects in the org's folder. */
+/** An org's group kept in spell.spaces:  `@acme/tools`, a folder of projects in the org's folder. */
 const ORG_GROUP = /^@([a-z][a-z0-9_]*)\/([a-z][a-z0-9_-]*)$/i
 
 /**
  * The groups of this machine's person's org that the server found in spell.spaces, by address:
- * `@acme/harbor` (epic `repo-split` P27).
+ * `@acme/tools` (epic `repo-split` P27).
  * - The home page lists each, after the person's own projects.
  */
 export const orgGroups: SP.ProjectRootPath[] = []
 
 /**
- * Add `paths`, an org's own groups in spell.spaces (`@acme/harbor`), as LISTED groups (`orgGroups`),
- * so `@acme/harbor/harbor-new` is a project in `@acme/harbor`, not a file of the org's programs.
- * - Each:  the org's folder's own sub-folder holding projects, in `<spell-spaces>/@acme/harbor/`
+ * Add `paths`, an org's own groups in spell.spaces (`@acme/tools`), as LISTED groups (`orgGroups`),
+ * so `@acme/tools/dashboard` is a project in `@acme/tools`, not a file of the org's programs.
+ * - Each:  the org's folder's own sub-folder holding projects, in `<spell-spaces>/@acme/tools/`
  *   (the server finds them:  spaces' node `localPerson.ts`)
  * - SIDE EFFECT:  registered with `SpellSetup`;  one already there is left as it is
  * - throws a `TypeError` for an address that isn't `@<org>/<group>`

@@ -20,7 +20,7 @@ import { isSourceCheckout, repoDir, spellSpacesDir } from "spell/app/spaces/serv
  * WHO IS AT THIS MACHINE, on the server (epic `repo-split` P27):  the person whose space its own projects are in,
  * and their org.
  * - The org:  the APP's setting, its `package.json`'s `"spell": { "org": "acme" }`;  left out, `spell`.
- * - The person:  remembered in the app's own folder, git-ignored, `.spell/me.json5`:  `{ person: "kim-lee" }`
+ * - The person:  remembered in the app's own folder, git-ignored, `.spell/me.json5`:  `{ person: "alice" }`
  *   (`ME_FILE`).
  *   - No such file, in a source checkout (the kit):  `owen`, Owen's own, so his setup never asks.
  *   - No such file, from an npm install:  nobody yet;  the editor asks their name first (`POST /api/people/local`).
@@ -28,7 +28,7 @@ import { isSourceCheckout, repoDir, spellSpacesDir } from "spell/app/spaces/serv
  *   - `SPELL_APP_DIR`, when set
  *   - a source checkout:  the kit's root, the app folder's parent
  *   - an install:  the project whose `package.json` is nearest where it was started (`INIT_CWD`, the folder `yarn`
- *     ran in;  else the process's own), e.g. `harbor-spell`
+ *     ran in;  else the process's own), e.g. `acme-spell`
  * - Read ONCE, the first time anything asks (`thisMachinesPerson()`), then set on spaces' models (`setLocalPerson()`),
  *   which every route reads;  so is the org's own groups' list in spell.spaces (`addOrgGroups()`).
  * - Node only:  the browser asks `GET /api/people/local` (spaces' people routes).
@@ -48,7 +48,7 @@ let isNamed = false
 
 /**
  * This machine's person, read from the app's settings and me file the first time (see the file's docs):
- * `localPerson`, `{ id: "kim-lee", org: "acme", address: "kim-lee@acme" }`.
+ * `localPerson`, `{ id: "alice", org: "acme", address: "alice@acme" }`.
  * - SIDE EFFECT, the first time:  sets spaces' `localPerson`, and adds the org's own groups (`addOrgGroups()`).
  * - Nobody named yet (an install's first start):  `you@<org>`, a stand-in nothing writes to, until the editor asks.
  * - NEVER throws:  a me file that won't read is nobody named, with a line in the log.
@@ -79,7 +79,7 @@ export function localPersonAnswer(): LocalPersonAnswer {
 
 /**
  * Make `id` this machine's person:  written into the app's me file (`ME_FILE`), and set at once.
- * - `id` is made an id first (`personIdFor()`:  `Kim Lee` => `kim-lee`)
+ * - `id` is made an id first (`personIdFor()`:  `Alice Smith` => `alice-smith`)
  * - throws a `TypeError` when nothing's left of it
  */
 export function nameThisMachinesPerson(id: string): typeof localPerson {
@@ -126,7 +126,7 @@ export function appOrg(dir = appDir()): string {
   }
 }
 
-/** The person the app's me file names, `kim-lee`;  `undefined` with none, or one that won't read. */
+/** The person the app's me file names, `alice`;  `undefined` with none, or one that won't read. */
 export function mePerson(dir = appDir()): string | undefined {
   const file = join(dir, ME_FILE)
   if (!existsSync(file)) return undefined
@@ -144,9 +144,9 @@ export function mePerson(dir = appDir()): string | undefined {
 ////////////////
 
 /**
- * The org's own GROUPS in spell.spaces, by address:  `@acme/harbor`, for `<spaces>/@acme/harbor/`.
+ * The org's own GROUPS in spell.spaces, by address:  `@acme/tools`, for `<spaces>/@acme/tools/`.
  * - a folder of the org's that isn't a project itself (no project file) and holds at least one project
- * - never a person's or a paired space (`kim@`, `events_team@`), nor one of spaces' own (`__admin`)
+ * - never a person's or a paired space (`alice@`, `events_team@`), nor one of spaces' own (`__admin`)
  */
 export function orgGroupsIn(spacesDir: string, org: string): string[] {
   const orgDir = join(spacesDir, `@${org}`)
@@ -157,7 +157,7 @@ export function orgGroupsIn(spacesDir: string, org: string): string[] {
     .map((name) => `@${org}/${name}`)
 }
 
-/** The people with a space in `org` in spell.spaces, by id:  `<spaces>/@acme/kim-lee@/` is `kim-lee`. */
+/** The people with a space in `org` in spell.spaces, by id:  `<spaces>/@acme/alice@/` is `alice`. */
 export function peopleIn(spacesDir: string, org: string): string[] {
   return foldersIn(join(spacesDir, `@${org}`))
     .filter((name) => /^[a-z][a-z0-9_-]*@$/.test(name))

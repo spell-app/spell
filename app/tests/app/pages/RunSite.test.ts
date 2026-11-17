@@ -40,12 +40,12 @@ describe("RunSite", () => {
  */
 describe("RunSite, a page in its own file", () => {
   const files = {
-    home: { path: "owen@spell/harbor-new/home.spell" },
-    systems: { path: "owen@spell/harbor-new/systems.spell" },
-    film: { path: "owen@spell/harbor-new/film.spell" },
-    site: { path: "owen@spell/harbor-new/HarborNew.site.spell" }
+    home: { path: "owen@spell/dashboard/home.spell" },
+    systems: { path: "owen@spell/dashboard/systems.spell" },
+    film: { path: "owen@spell/dashboard/film.spell" },
+    site: { path: "owen@spell/dashboard/Dashboard.site.spell" }
   }
-  /** harbor-new's site:  Home alone in `home.spell`;  Systems, class `System`, declared in `systems.spell`. */
+  /** The dashboard's site:  Home alone in `home.spell`;  Systems, class `System`, declared in `systems.spell`. */
   const pages = [
     { name: "Home", page: "Home", address: "/" },
     { name: "Systems", page: "System", address: "/hardware/systems" },
@@ -53,13 +53,13 @@ describe("RunSite, a page in its own file", () => {
     { name: "Film", page: "Film", address: "/films/:film", params: ["film"] }
   ]
   const project = {
-    path: "owen@spell/harbor-new",
+    path: "owen@spell/dashboard",
     getFile: (path: string) => Object.values(files).find((file) => file.path === path),
     fileForPage: (className: string) => ({ Home: files.home, Film: files.film })[className]
   }
 
-  /** A Run of harbor-new's site, as the editor and the site file tell it. */
-  function runningHarbor(isRunning = true) {
+  /** A Run of the dashboard's site, as the editor and the site file tell it. */
+  function runningDashboard(isRunning = true) {
     vi.spyOn(editor, "project", "get").mockReturnValue(project as never)
     const running = vi.spyOn(editor, "isRunningSite", "get").mockReturnValue(isRunning)
     vi.spyOn(editor, "sitePages").mockReturnValue(pages)
@@ -76,16 +76,16 @@ describe("RunSite, a page in its own file", () => {
   afterEach(() => void vi.restoreAllMocks())
 
   test("its Run URL is its file's;  a page declared in the site file, or with a value to fill, keeps its address", () => {
-    runningHarbor()
+    runningDashboard()
     const run = new RunSite()
-    expect(run.urlFor("/")).toBe("/run/owen@spell/harbor-new/home.spell")
-    expect(run.urlFor("/hardware/systems")).toBe("/run/owen@spell/harbor-new/systems.spell")
-    expect(run.urlFor("/settings")).toBe("/run/owen@spell/harbor-new/settings")
-    expect(run.urlFor("/films/4")).toBe("/run/owen@spell/harbor-new/films/4")
+    expect(run.urlFor("/")).toBe("/run/owen@spell/dashboard/home.spell")
+    expect(run.urlFor("/hardware/systems")).toBe("/run/owen@spell/dashboard/systems.spell")
+    expect(run.urlFor("/settings")).toBe("/run/owen@spell/dashboard/settings")
+    expect(run.urlFor("/films/4")).toBe("/run/owen@spell/dashboard/films/4")
   })
 
   test("a URL naming the file shows its page;  one naming the site file leaves the page shown", () => {
-    runningHarbor()
+    runningDashboard()
     const run = new RunSite()
     const shown: string[] = []
     run.listen((address) => shown.push(address))
@@ -98,7 +98,7 @@ describe("RunSite, a page in its own file", () => {
   })
 
   test("a file named before the site runs is looked up when the site asks", () => {
-    const running = runningHarbor(false)
+    const running = runningDashboard(false)
     const run = new RunSite()
     run.heard("/", files.systems.path)
     running.mockReturnValue(true)
@@ -106,7 +106,7 @@ describe("RunSite, a page in its own file", () => {
   })
 
   test("Edit in Run and the notebook open the same file as its Run URL, a page named apart from its class too", () => {
-    runningHarbor()
+    runningDashboard()
     vi.spyOn(editor as never as { runningSite: unknown }, "runningSite", "get").mockReturnValue({
       pageFor: (address: string) => {
         const entry = editor.sitePageAt(address)

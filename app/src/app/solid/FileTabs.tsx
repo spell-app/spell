@@ -45,7 +45,7 @@ import "./FileTabs.css"
  *     the toolbar's `closeItem()` takes it out of the row, and the list still has it.
  *     Closing the chosen tab shows its neighbour's file.
  *   - No key closes one:  ⌘W is the browser's, closing the page's own tab.
- *   - A site's own file (`HarborNew.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
+ *   - A site's own file (`Dashboard.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
  *     showing (epic `editor` I188:  "have the `.site.spell` file open and the 'more files' button on the right").
  ****************/
 export function FileTabs() {

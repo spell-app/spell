@@ -185,17 +185,17 @@ export type MeAnswer = { person: PersonView; orgs: OrgRole[]; problems: FileProb
  * draws anything, and what its name page shows.
  */
 export type LocalPersonAnswer = {
-  /** Their id, `kim-lee`;  left out while nobody's named yet (an install's first start). */
+  /** Their id, `alice`;  left out while nobody's named yet (an install's first start). */
   id?: string
   /** Their org:  the app's setting (`"spell": { "org" }` in its `package.json`), else `spell`. */
   org: string
-  /** The org's own groups in spell.spaces, by address:  `["@acme/harbor"]`. */
+  /** The org's own groups in spell.spaces, by address:  `["@acme/tools"]`. */
   orgGroups: string[]
-  /** The people who already have a space in the org here, by id:  `["kim-lee"]`. */
+  /** The people who already have a space in the org here, by id:  `["alice"]`. */
   people: string[]
   /** git's email on this machine (`git config user.email`), for the name page to start from;  none:  left out. */
   email?: string
 }
 
-/** `POST /api/people/local`'s body:  who's at this machine, by the id they picked (`kim-lee`). */
+/** `POST /api/people/local`'s body:  who's at this machine, by the id they picked (`alice`). */
 export type LocalPersonChange = { id: string }

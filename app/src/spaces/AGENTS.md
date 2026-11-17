@@ -97,8 +97,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `@spell/examples`, `@spell/library`, `@spell/guides`, `@spell/sites` | `spaces/@spell/<group>/`, committed |
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
-  | `kim-lee@acme`, this machine's person in another org | spell.spaces' `@acme/kim-lee@/`, outside git (epic `repo-split` P27) |
-  | `@acme/harbor`, an org's own group | spell.spaces' `@acme/harbor/`:  found as the server starts (`orgGroupsIn()`), listed on the home page (`SPACES.orgGroups`, P27) |
+  | `alice@acme`, this machine's person in another org | spell.spaces' `@acme/alice@/`, outside git (epic `repo-split` P27) |
+  | `@acme/tools`, an org's own group | spell.spaces' `@acme/tools/`:  found as the server starts (`orgGroupsIn()`), listed on the home page (`SPACES.orgGroups`, P27) |
   | `ana@acme`, any other person's space | spell.spaces' `@acme/ana@/`:  found by its address (`personSpaceGroup()`), opened but not listed (epic `repo-split` P26) |
 
   - spell.spaces:  beside the kit's main checkout (`~/www/spell.spaces`):
@@ -110,8 +110,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Read on the server by ONE function, `thisMachinesPerson()` ([localPerson.ts](server/node/people/localPerson.ts)):
       - the org:  the APP's `package.json`, `"spell": { "org": "acme" }`;  left out, `spell`
         - the app:  the project the page server was started for (`appDir()`):  the kit in a checkout,
-          the project `yarn` ran in from an install (harbor-spell);  `SPELL_APP_DIR` sets it
-      - the person:  the app's `.spell/me.json5`, git-ignored, `{ person: "kim-lee" }`
+          the project `yarn` ran in from an install (acme-spell);  `SPELL_APP_DIR` sets it
+      - the person:  the app's `.spell/me.json5`, git-ignored, `{ person: "alice" }`
         - none, in a source checkout:  `owen`, so Owen's kit is `owen@spell` with no question
         - none, from an install:  nobody yet;  the editor's first page asks their name (`<NamePage>`)
     - The browser reads it from `GET /api/people/local` before it draws anything, and sets it (`setLocalPerson()`).
