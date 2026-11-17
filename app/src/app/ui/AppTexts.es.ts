@@ -709,9 +709,9 @@ const APP_TEXTS_ES: AppTextPack = {
 
   youHeader: "Tú:  {address}",
   fileProblems: "Tu archivo tiene problemas:  se leyó de todos modos",
-  names: "Nombres",
+  names: "Nombre",
   nickname: "Apodo",
-  emails: "Correos, uno por línea",
+  emails: "Tus direcciones de correo, una por línea",
   dates: "Fechas",
   dateWhat: "Qué",
   dateDay: "Día",

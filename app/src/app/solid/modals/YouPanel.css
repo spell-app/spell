@@ -1,9 +1,14 @@
+/* The "You" panel:  narrower than a small modal, just wide enough for name and nickname side by side. */
+.YouPanel {
+  --ui-modal-width: min(496px, 95vw);
+}
+
 /* The "You" panel's dated events:  a label, a day and a remove button, on one row. */
 .YouPanel .date {
   display: flex;
-  gap: 0.5em;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 0.5em;
+  margin-bottom: 8px;
 }
 
 .YouPanel .date .label {

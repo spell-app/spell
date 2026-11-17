@@ -733,9 +733,9 @@ export const APP_TEXTS = {
 
   youHeader: "You:  {address}",
   fileProblems: "Your file has problems:  read anyway",
-  names: "Names",
+  names: "Name",
   nickname: "Nickname",
-  emails: "Emails, one a line",
+  emails: "Your email address(es), one per line",
   dates: "Dates",
   dateWhat: "What",
   dateDay: "Day",
