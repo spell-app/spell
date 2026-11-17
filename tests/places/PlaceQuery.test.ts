@@ -10,7 +10,7 @@ import {
   type PlaceContext,
   type PlaceRow
 } from "spell/places"
-import { rowsInOrder } from "spell/places/PlaceQuery"
+import { rowsInOrder, rowsMatching } from "spell/places/PlaceQuery"
 
 /** Five recipes, not in title order. */
 const RECIPES: PlaceRow[] = [
@@ -328,5 +328,21 @@ describe("rowsInOrder", () => {
     const order = (descending: boolean) => rowsInOrder(rows, [{ field: "at", descending }]).map(({ id }) => id)
     expect(order(false)).toEqual(["b", "d", "a", "c"])
     expect(order(true)).toEqual(["d", "b", "a", "c"])
+  })
+})
+
+describe("rowsMatching()", () => {
+  test("yes or no matches a sheet's text for it:  an empty cell, or none, is no (epic `mockup` P21)", () => {
+    const rows: PlaceRow[] = [
+      { id: "1", got: "true" },
+      { id: "2", got: "" },
+      { id: "3" },
+      { id: "4", got: "no" },
+      { id: "5", got: true },
+      { id: "6", got: "maybe" }
+    ]
+    expect(rowsMatching(rows, { got: true }).map(({ id }) => id)).toEqual(["1", "5"])
+    expect(rowsMatching(rows, { got: false }).map(({ id }) => id)).toEqual(["2", "3", "4"])
+    expect(rowsMatching(rows, { got: "" }).map(({ id }) => id)).toEqual(["2", "3"])
   })
 })
