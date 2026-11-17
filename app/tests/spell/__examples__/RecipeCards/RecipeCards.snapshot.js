@@ -644,10 +644,16 @@ export class RecipeCard extends App {
 
   /** The first time, with an empty file, three recipes to start with */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Recipe)) === 0) {
-      addTheTomatoSoup()
-      addTheRedLentilDal()
-      addThePancakes()
+    try {
+      if (core.itemCountOf(await core.savedThings(Recipe)) === 0) {
+        addTheTomatoSoup()
+        addTheRedLentilDal()
+        addThePancakes()
+      }
+    }
+    catch (error) {
+      // The file can't be read just now:  the recipes list says so
+      return
     }
     this.chosen = core.getItemAt(await core.savedThings(Recipe), 0)
   }

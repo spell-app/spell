@@ -351,7 +351,7 @@
     {
       "type": "Ficha",
       "superType": "App",
-      "defined": "/FichasDeRecetas.es.spell:347-3119"
+      "defined": "/FichasDeRecetas.es.spell:347-3212"
     },
     {
       "property": "elegida",
@@ -398,7 +398,7 @@
       "name": "crearla",
       "returns": "nothing",
       "waits": true,
-      "defined": "/FichasDeRecetas.es.spell:995-1229"
+      "defined": "/FichasDeRecetas.es.spell:995-1322"
     },
     {
       "syntax": "mostrar métrico ((de|del) {thisArg:expression})?",
@@ -414,7 +414,7 @@
       "name": "mostrar métrico",
       "returns": "nothing",
       "title": "Gramos y ml",
-      "defined": "/FichasDeRecetas.es.spell:1250-1374"
+      "defined": "/FichasDeRecetas.es.spell:1343-1467"
     },
     {
       "syntax": "mostrar tazas y cucharas ((de|del) {thisArg:expression})?",
@@ -430,7 +430,7 @@
       "name": "mostrar tazas y cucharas",
       "returns": "nothing",
       "title": "Tazas y cucharas",
-      "defined": "/FichasDeRecetas.es.spell:1377-1511"
+      "defined": "/FichasDeRecetas.es.spell:1470-1604"
     },
     {
       "type": "EditorDeReceta",
@@ -645,24 +645,24 @@
     639,
     646,
     652,
-    661,
-    668,
-    753,
-    757,
+    667,
+    674,
+    759,
     763,
-    768,
+    769,
     774,
-    779,
-    783,
-    830,
-    833,
-    838,
-    843,
-    852,
-    883,
-    886,
-    891,
-    896,
-    905
+    780,
+    785,
+    789,
+    836,
+    839,
+    844,
+    849,
+    858,
+    889,
+    892,
+    897,
+    902,
+    911
   ]
 }

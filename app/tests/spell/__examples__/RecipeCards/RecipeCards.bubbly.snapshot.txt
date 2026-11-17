@@ -210,6 +210,10 @@
 |   |   |   add the tomato soup    ‾call(add the tomato soup)
 |   |   |   add the red lentil dal    ‾call(add the red lentil dal)
 |   |   |   add the pancakes    ‾call(add the pancakes)
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   ⟦// The file can't be read just now:  the recipes list says so⟧
+|   |   |   return
 |   |   set its **chosen** to the first of (every **recipe**)    ‾value(its chosen) ‾value(the first of (every recipe))
 
 |   [plain group define_group L1]

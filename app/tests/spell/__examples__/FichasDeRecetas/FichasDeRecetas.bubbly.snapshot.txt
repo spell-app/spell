@@ -210,6 +210,10 @@
 |   |   |   agregar la sopa de tomate    ‾call(agregar la sopa de tomate)
 |   |   |   agregar el dal de lentejas rojas    ‾call(agregar el dal de lentejas rojas)
 |   |   |   agregar las tortitas    ‾call(agregar las tortitas)
+|   |   [control if_that_fails L2]
+|   |   | si falla
+|   |   |   ⟦// El archivo no se puede leer ahora:  la lista de recetas lo dice⟧
+|   |   |   devolver
 |   |   poner su **elegida** al primer de (cada **receta**)    ‾value(su elegida) ‾value(primer de (cada receta))
 
 |   [plain group define_group L1]

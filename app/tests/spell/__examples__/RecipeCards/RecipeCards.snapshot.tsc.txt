@@ -2,12 +2,12 @@
 115:38 TS2345 Argument of type '(item: Step, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
 116:17 TS2322 Type '{ children: number; circular: boolean; size: "small"; }' is not assignable to type 'UILabelJSXAttributes'.
 355:28 TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
-634:5 TS2322 Type 'Recipe | undefined' is not assignable to type 'Recipe'.
-659:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
-666:63 TS2322 Type '{ children: Element; direction: "vertical"; fluid: true; basic: boolean; }' is not assignable to type 'UIButtonsJSXAttributes'.
-667:125 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIButtonJSXAttributes'.
-667:151 TS2339 Property 'chosen' does not exist on type 'Recipe'.
-772:5 TS2322 Type 'undefined' is not assignable to type 'Recipe'.
+640:5 TS2322 Type 'Recipe | undefined' is not assignable to type 'Recipe'.
+665:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+672:63 TS2322 Type '{ children: Element; direction: "vertical"; fluid: true; basic: boolean; }' is not assignable to type 'UIButtonsJSXAttributes'.
+673:125 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIButtonJSXAttributes'.
+673:151 TS2339 Property 'chosen' does not exist on type 'Recipe'.
 778:5 TS2322 Type 'undefined' is not assignable to type 'Recipe'.
-887:57 TS18048 'place' is possibly 'undefined'.
-962:57 TS18048 'place' is possibly 'undefined'.
+784:5 TS2322 Type 'undefined' is not assignable to type 'Recipe'.
+893:57 TS18048 'place' is possibly 'undefined'.
+968:57 TS18048 'place' is possibly 'undefined'.

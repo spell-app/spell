@@ -182,7 +182,7 @@
     {
       "type": "ShoppingList",
       "superType": "App",
-      "defined": "/ShoppingList.spell:323-2728"
+      "defined": "/ShoppingList.spell:323-2860"
     },
     {
       "property": "aisle_list",
@@ -203,7 +203,7 @@
       "name": "creating it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/ShoppingList.spell:469-1131"
+      "defined": "/ShoppingList.spell:469-1251"
     },
     {
       "syntax": "add the new item (of {thisArg:expression})?",
@@ -218,7 +218,7 @@
       "name": "add the new item",
       "returns": "nothing",
       "title": "Add",
-      "defined": "/ShoppingList.spell:1134-1414"
+      "defined": "/ShoppingList.spell:1254-1534"
     },
     {
       "syntax": "clear what I got (of {thisArg:expression})?",
@@ -234,7 +234,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Clear what I got",
-      "defined": "/ShoppingList.spell:1417-1590"
+      "defined": "/ShoppingList.spell:1537-1710"
     },
     {
       "syntax": "print the list (of {thisArg:expression})?",
@@ -249,7 +249,7 @@
       "name": "print the list",
       "returns": "nothing",
       "title": "Print",
-      "defined": "/ShoppingList.spell:1593-1735"
+      "defined": "/ShoppingList.spell:1713-1855"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -262,7 +262,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/ShoppingList.spell:1738-2728"
+      "defined": "/ShoppingList.spell:1858-2860"
     }
   ],
   "codeLines": [
@@ -291,9 +291,9 @@
     205,
     211,
     217,
-    258,
-    265,
-    270,
-    274
+    266,
+    273,
+    278,
+    282
   ]
 }

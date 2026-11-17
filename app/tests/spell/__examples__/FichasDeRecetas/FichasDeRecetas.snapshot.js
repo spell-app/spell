@@ -651,10 +651,16 @@ export class Ficha extends App {
 
   /** La primera vez, con un archivo vacío, tres recetas para empezar */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Receta)) === 0) {
-      agregarLaSopaDeTomate()
-      agregarElDalDeLentejasRojas()
-      agregarLasTortitas()
+    try {
+      if (core.itemCountOf(await core.savedThings(Receta)) === 0) {
+        agregarLaSopaDeTomate()
+        agregarElDalDeLentejasRojas()
+        agregarLasTortitas()
+      }
+    }
+    catch (error) {
+      // El archivo no se puede leer ahora:  la lista de recetas lo dice
+      return
     }
     this.elegida = core.getItemAt(await core.savedThings(Receta), 0)
   }

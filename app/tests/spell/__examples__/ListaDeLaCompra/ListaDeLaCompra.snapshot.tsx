@@ -262,7 +262,15 @@ export class ListaDeLaCompra extends App {
 
   /** La primera vez, con el archivo vacío, unos cuantos para empezar */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Artículo)) === 0) {
+    let guardados: undefined = undefined
+    try {
+      guardados = await core.savedThings(Artículo)
+    }
+    catch (error) {
+      // El archivo no se puede leer ahora:  la lista lo dice, y lo vuelve a intentar
+      return
+    }
+    if (core.isEmpty(guardados)) {
       core.saveThing(new Artículo({
         nombre: "leche",
         pasillo: "Lácteos",
@@ -331,7 +339,7 @@ export class ListaDeLaCompra extends App {
             {core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })}
           </es-barra-herramientas>
           <es-formulario class="new-item" prop:value={this.nuevoArtículo}>
-            <es-campos>
+            <es-campos no-apilable={true}>
               <es-campo ancho="3">
                 <es-entrada name="cantidad" type="number" min="0" marcador="Cuántos" aria-label="Cantidad" />
               </es-campo>

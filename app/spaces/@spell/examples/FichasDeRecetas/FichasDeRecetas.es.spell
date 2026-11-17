@@ -25,6 +25,9 @@ fichas es una aplicación
 			agregar la sopa de tomate
 			agregar el dal de lentejas rojas
 			agregar las tortitas
+		si falla
+			// El archivo no se puede leer ahora:  la lista de recetas lo dice
+			devolver
 		poner su elegida al primer de (cada receta)
 
 	grupo "Unidades"

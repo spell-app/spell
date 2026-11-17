@@ -25,6 +25,9 @@ recipe cards is an app
 			add the tomato soup
 			add the red lentil dal
 			add the pancakes
+		if that fails
+			// The file can't be read just now:  the recipes list says so
+			return
 		set its chosen to the first of (every recipe)
 
 	group "Units"

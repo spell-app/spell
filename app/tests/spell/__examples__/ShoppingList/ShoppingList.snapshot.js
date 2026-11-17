@@ -216,7 +216,15 @@ export class ShoppingList extends App {
 
   /** The first time, with an empty file, a few to start with */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Item)) === 0) {
+    let kept = undefined
+    try {
+      kept = await core.savedThings(Item)
+    }
+    catch (error) {
+      // The file can't be read just now:  the list says so, and tries again
+      return
+    }
+    if (core.isEmpty(kept)) {
       core.saveThing(new Item({
         name: "milk",
         aisle: "Dairy",
@@ -284,7 +292,7 @@ export class ShoppingList extends App {
           core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })
         ),
         h("ui-form", { class: "new-item", "prop:value": () => this.newItem },
-          h("ui-fields",
+          h("ui-fields", { unstackable: true },
             h("ui-field", { width: "3" },
               h("ui-input", { name: "amount", type: "number", min: "0", placeholder: "How many", "aria-label": "Amount" })
             ),

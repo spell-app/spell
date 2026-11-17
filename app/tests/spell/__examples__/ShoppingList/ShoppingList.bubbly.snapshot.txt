@@ -136,8 +136,13 @@
 |   [action create_hook L1]
 |   | when «creating it»    ‾value(it)
 |   |   ⟦// The first time, with an empty file, a few to start with⟧
+|   |   set **kept** to every **item**    ‾value(kept) ‾value(every item)
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   ⟦// The file can't be read just now:  the list says so, and tries again⟧
+|   |   |   return
 |   |   [control if L2]
-|   |   | if there are no **items**    ‾value(there are no items)
+|   |   | if **kept** is empty    ‾question(kept is empty)
 |   |   |   add (**a new item** with **name** _"milk"_, **aisle** _"Dairy"_, **amount** = _2_, **unit** = _"litres"_) to the **items**    ‾value(a new item with name "milk", aisle "Dairy", amount = 2, unit = "litres") ‾value(the items)
 |   |   |   add (**a new item** with **name** _"eggs"_, **aisle** _"Dairy"_, **amount** = _12_) to the **items**    ‾value(a new item with name "eggs", aisle "Dairy", amount = 12) ‾value(the items)
 |   |   |   add (**a new item** with **name** _"bananas"_, **aisle** _"Fruit and veg"_, **amount** = _6_) to the **items**    ‾value(a new item with name "bananas", aisle "Fruit and veg", amount = 6) ‾value(the items)
@@ -175,7 +180,7 @@
 |   |         <⟨action⟩ «"redo"» icon-only />
 |   |       </⟨toolbar⟩>
 |   |       <⟨form⟩ value={its **new item**} class=«"new-item"»>    code({its new item})
-|   |         <⟨fields⟩>
+|   |         <⟨fields⟩ unstackable>
 |   |           <⟨field⟩ width=«"3"»>
 |   |             <⟨input⟩ name=«"amount"» type=«"number"» min=«"0"» placeholder=«"How many"» aria-label=«"Amount"» />
 |   |           </⟨field⟩>
