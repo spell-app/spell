@@ -64,11 +64,11 @@ export class CodeMirrorSelection {
    * - SIDE EFFECT:  reads the layout;  CodeMirror calls it when that's fine.
    */
   static markersIn(view: EditorView): RectangleMarker[] {
+    const ranges = view.state.selection.ranges.filter((range) => !range.empty)
+    // a caret alone, as while typing:  nothing to draw, and no probe laying the pane out again (epic `codemirror` I21)
+    if (!ranges.length) return []
     const bands = new LineBands(view)
-    return view.state.selection.ranges
-      .filter((range) => !range.empty)
-      .flatMap((range) => RectangleMarker.forRange(view, PIECE, range))
-      .map((piece) => bands.onBands(piece))
+    return ranges.flatMap((range) => RectangleMarker.forRange(view, PIECE, range)).map((piece) => bands.onBands(piece))
   }
 }
 
