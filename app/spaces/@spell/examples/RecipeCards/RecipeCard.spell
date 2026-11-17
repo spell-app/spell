@@ -1,0 +1,68 @@
+# A recipe's card, and its Edit screen
+// The card:  its picture, how many it's for, its ingredients to pick, and its numbered steps.
+// The Edit screen changes a draft:  nothing changes until Save.
+
+a recipe
+	its "picked count" is the length of (ingredients in its ingredients where its picked is yes)
+
+	to pick it
+		// Its card, in place of whatever was showing
+		set the chosen of recipe cards to it
+		set the editing of recipe cards to nothing
+
+	to "edit" with icon "pencil"
+		// Its Edit screen
+		set the editing of recipe cards to it
+
+	to "add the picked to the shopping list" with title "Add to shopping list", icon "cart plus"
+		// Each picked ingredient, for how many are eating, onto Shopping List's list;  the same thing in the same unit adds up
+		set dish to its title
+		for ingredient in its ingredients
+			if the ingredient's picked is yes
+				set measure to the ingredient's shown
+				set same to the first item in (every item where its got is no) where its name is the ingredient's name and its unit is measure's unit
+				if same exists
+					set same's amount to same's amount + measure's number
+				otherwise
+					add (a new item with name = the ingredient's name, amount = measure's number, unit = measure's unit, aisle = the ingredient's aisle, recipe = dish) to the items
+				set the ingredient's picked to no
+
+	to draw it
+		<card fluid class="recipe">
+			<if its picture is not "">
+				<image src={its picture} alt={its title} aspect-ratio="21:9" crop />
+			</if>
+			<content>
+				<stack>
+					<stack direction="horizontal" justify="between">
+						<header size="large">{its title}</header>
+						<action "edit" />
+					</stack>
+					<text color="grey">Written for {its serves};  shown for {the diners of recipe cards}</text>
+					<header size="small">Ingredients</header>
+					<stack spacing="xs">
+						<for ingredient in its ingredients />
+					</stack>
+					<stack direction="horizontal">
+						<button color="primary" icon="cart plus" disabled={its picked count is 0} onClick={add the picked to the shopping list}>
+							Add {its picked count} to shopping list
+						</button>
+					</stack>
+					<header size="small">Steps</header>
+					{draw the steps of it}
+				</stack>
+			</content>
+		</card>
+
+	to draw its steps
+		// Each step with its number
+		<stack spacing="sm">
+			{draw the numbered steps of it}
+		</stack>
+
+	to draw its numbered steps
+		for step, place in its steps
+			<stack direction="horizontal" spacing="sm" align="start" class="step">
+				<label circular size="small">{place}</label>
+				<text>{the step's instruction}</text>
+			</stack>

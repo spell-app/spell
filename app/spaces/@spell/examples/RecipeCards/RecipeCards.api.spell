@@ -1,0 +1,37 @@
+## Recipe Cards:  where the recipes are kept
+// In a JSON file, in this example's own folder:  __data/recipes.json.
+// Plain JSON any editor opens, { "recipes": [...] }:  each recipe whole, its ingredients and steps inside it.
+// The page server writes it, the whole file at each save;  everyone using that page server shares the recipes.
+// The shopping list isn't here:  it's Shopping List's, in its CSV file, which this project imports (__project.json5).
+recipe file is a json file at "recipes.json"
+	check it every 30 seconds
+
+a "recipe" is a view
+	it lives in recipe file
+	its "title" is text
+	its "serves" is a number
+		// How many people it's written for:  the amounts are for that many
+	its "picture" is text
+		// A picture's address:  one in this example's pictures folder, or any on the web
+	its "ingredients" is a list of ingredients
+		// What goes in, in order:  kept inside the recipe
+	its "steps" is a list of steps
+		// What to do, in order:  kept inside the recipe
+
+an "ingredient" is a view
+	// One line of a recipe:  how much, of what, and where it is in the shop
+	its "amount" is a number
+		// For the recipe's own number of people;  nothing for "a pinch" or "to taste"
+	its "unit" is text
+		// "g", "ml", "tbsp", "cups" ...;  nothing for a count, 2 eggs
+	its "name" is text
+	its "aisle" is text
+		// Where it is in the shop, for the shopping list
+	its "grams per cup" is a number
+		// How much a cup of it weighs, so grams show as cups:  flour 125, sugar 200;  nothing for most things
+	its "picked" is yes or no
+		// Ticked, to go on the shopping list
+
+a "step" is a view
+	// One thing to do
+	its "instruction" is text

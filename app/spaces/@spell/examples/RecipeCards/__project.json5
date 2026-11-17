@@ -1,0 +1,19 @@
+{
+  "title": "Recipe Cards",
+  "description": "Recipes kept in a JSON file:  scale one for how many are eating, show it in metric or in cups and spoons, edit its ingredients and steps, and send the ingredients you pick to Shopping List's own list",
+  "imports": [
+    {
+      "path": "@spell/examples/ShoppingList",
+      "active": true,
+      "import": ["Item", "Aisle", "AisleList"]
+    },
+    { "path": "/RecipeCards.api.spell", "active": true },
+    { "path": "/Measures.spell", "active": true },
+    { "path": "/Samples.spell", "active": true },
+    { "path": "/RecipeCards.spell", "active": true },
+    { "path": "/Ingredient.spell", "active": true },
+    { "path": "/RecipeCard.spell", "active": true },
+    { "path": "/RecipeEditor.spell", "active": true },
+    { "path": "/styles.css", "active": true }
+  ]
+}

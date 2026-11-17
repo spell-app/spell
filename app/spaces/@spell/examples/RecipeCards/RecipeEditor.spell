@@ -1,0 +1,123 @@
+# A recipe's Edit screen
+// A form over a draft of the recipe:  change its title, how many it serves and its picture;
+// add, remove and move its ingredients and steps.  Nothing changes until Save;  Cancel forgets it all.
+
+a "recipe editor" is a view
+	its "recipe" is a recipe
+		// The recipe being changed
+	its "draft" is a draft of its recipe
+		// A copy to change:  the recipe stays as it was until Save
+
+	to "save" with icon "check"
+		// Every change at once, one step to undo
+		save its draft
+		set the editing of recipe cards to nothing
+
+	to "cancel" with icon "close"
+		// The recipe never changed
+		discard its draft
+		set the editing of recipe cards to nothing
+
+	to "add ingredient" with title "Add an ingredient", icon "plus"
+		add (a new ingredient) to its draft's ingredients
+
+	to "add step" with title "Add a step", icon "plus"
+		add (a new step) to its draft's steps
+
+	to draw it
+		<card fluid class="editor">
+			<content>
+				<form value={its draft}>
+					<header size="medium">Edit {its recipe's title}</header>
+					<fields>
+						<field label="Recipe" width="10">
+							<input name="title" />
+						</field>
+						<field label="Serves" width="6">
+							<input name="serves" type="number" min="1" labeled="right" label="people" />
+						</field>
+					</fields>
+					<field label="Picture">
+						<input name="picture" placeholder="A picture's address" />
+					</field>
+				</form>
+				<header size="small">Ingredients</header>
+				{draw the ingredient rows of it}
+				<action "add ingredient" appearance="basic" />
+				<header size="small">Steps</header>
+				{draw the step rows of it}
+				<action "add step" appearance="basic" />
+			</content>
+			<extra>
+				<action "save" color="primary" />
+				<action "cancel" />
+			</extra>
+		</card>
+
+an "ingredient row" is a view
+	// One ingredient's fields on the Edit screen, with buttons to move it and take it out
+	its "ingredient" is an ingredient
+	its "editor" is a recipe editor
+
+	to "move up" with icon "arrow up"
+		set list to its editor's draft's ingredients
+		set moving to its ingredient
+		set place to the position of moving in list
+		if place is 1 return
+		remove moving from list
+		add moving to list before item (place - 1) of list
+
+	to "remove" with icon "trash alternate outline"
+		remove its ingredient from its editor's draft's ingredients
+
+	to draw it
+		<form value={its ingredient}>
+			<fields unstackable>
+				<field width="2"><input name="amount" type="number" min="0" aria-label="Amount" /></field>
+				<field width="2"><input name="unit" placeholder="Unit" aria-label="Unit" /></field>
+				<field width="6"><input name="name" placeholder="Ingredient" aria-label="Ingredient" /></field>
+				<field width="3"><input name="aisle" placeholder="Aisle" aria-label="Aisle" /></field>
+				<field width="3">
+					<stack direction="horizontal" spacing="xs">
+						<action "move up" icon-only appearance="tertiary" />
+						<action "remove" icon-only appearance="tertiary" />
+					</stack>
+				</field>
+			</fields>
+		</form>
+
+a "step row" is a view
+	// One step's words on the Edit screen, with buttons to move it and take it out
+	its "step" is a step
+	its "editor" is a recipe editor
+
+	to "move up" with icon "arrow up"
+		set list to its editor's draft's steps
+		set moving to its step
+		set place to the position of moving in list
+		if place is 1 return
+		remove moving from list
+		add moving to list before item (place - 1) of list
+
+	to "remove" with icon "trash alternate outline"
+		remove its step from its editor's draft's steps
+
+	to draw it
+		<form value={its step}>
+			<stack direction="horizontal" spacing="xs">
+				<textarea name="instruction" rows="2" aria-label="Step" fluid />
+				<action "move up" icon-only appearance="tertiary" />
+				<action "remove" icon-only appearance="tertiary" />
+			</stack>
+		</form>
+
+a recipe editor
+	to draw its ingredient rows
+		// A row of fields for each ingredient on the draft
+		for one in its draft's ingredients
+			draw (a new ingredient row with editor = it, ingredient = one)
+
+	to draw its step rows
+		// A box for each step on the draft
+		for one in its draft's steps
+			draw (a new step row with editor = it, step = one)

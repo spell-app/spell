@@ -1,0 +1,55 @@
+# Three recipes to start with
+// Added the first time Recipe Cards runs, while its file has none:  change them, or add your own.
+// The pictures were drawn for this example, and are free to use:  they're in its pictures folder.
+
+to add the tomato soup
+	set soup to a new recipe with title "Tomato Soup", serves = 4, picture = "/spaces/@spell/examples/RecipeCards/pictures/tomato-soup.svg"
+	add (a new ingredient with amount = 1, unit = "kg", name "ripe tomatoes", aisle "Fruit and veg") to soup's ingredients
+	add (a new ingredient with amount = 1, name "onion", aisle "Fruit and veg") to soup's ingredients
+	add (a new ingredient with amount = 2, unit = "cloves", name "garlic", aisle "Fruit and veg") to soup's ingredients
+	add (a new ingredient with amount = 2, unit = "tbsp", name "olive oil", aisle "Oils and spices") to soup's ingredients
+	add (a new ingredient with amount = 500, unit = "ml", name "vegetable stock", aisle "Tins and jars") to soup's ingredients
+	add (a new ingredient with amount = 1, unit = "tsp", name "sugar", aisle "Baking") to soup's ingredients
+	add (a new ingredient with amount = 15, unit = "g", name "fresh basil", aisle "Fruit and veg") to soup's ingredients
+	add (a new ingredient with amount = 100, unit = "ml", name "single cream", aisle "Dairy") to soup's ingredients
+	add (a new step with instruction "Heat the oven to 200 °C.  Halve the tomatoes, and roast them for 30 minutes with the onion, quartered, and the garlic.") to soup's steps
+	add (a new step with instruction "Warm the oil in a big pan, and tip in everything from the roasting tin.") to soup's steps
+	add (a new step with instruction "Pour in the stock, add the sugar, and simmer for 10 minutes.") to soup's steps
+	add (a new step with instruction "Blend until smooth, with most of the basil.  Season with salt and pepper.") to soup's steps
+	add (a new step with instruction "Serve with a swirl of cream and the last of the basil on top.") to soup's steps
+	add soup to the recipes
+
+to add the red lentil dal
+	set dal to a new recipe with title "Red Lentil Dal", serves = 4, picture = "/spaces/@spell/examples/RecipeCards/pictures/red-lentil-dal.svg"
+	add (a new ingredient with amount = 250, unit = "g", name "red lentils", aisle "Rice and pulses", grams per cup = 190) to dal's ingredients
+	add (a new ingredient with amount = 1, name "onion", aisle "Fruit and veg") to dal's ingredients
+	add (a new ingredient with amount = 3, unit = "cloves", name "garlic", aisle "Fruit and veg") to dal's ingredients
+	add (a new ingredient with amount = 20, unit = "g", name "fresh ginger", aisle "Fruit and veg") to dal's ingredients
+	add (a new ingredient with amount = 1, unit = "tbsp", name "vegetable oil", aisle "Oils and spices") to dal's ingredients
+	add (a new ingredient with amount = 2, unit = "tsp", name "cumin seeds", aisle "Oils and spices") to dal's ingredients
+	add (a new ingredient with amount = 1, unit = "tsp", name "ground turmeric", aisle "Oils and spices") to dal's ingredients
+	add (a new ingredient with amount = 400, unit = "g", name "chopped tomatoes", aisle "Tins and jars") to dal's ingredients
+	add (a new ingredient with amount = 400, unit = "ml", name "coconut milk", aisle "Tins and jars") to dal's ingredients
+	add (a new ingredient with amount = 1, name "lime", aisle "Fruit and veg") to dal's ingredients
+	add (a new step with instruction "Rinse the lentils until the water runs clear.") to dal's steps
+	add (a new step with instruction "Fry the cumin seeds in the oil until they crackle, then the onion, chopped, until soft.") to dal's steps
+	add (a new step with instruction "Stir in the garlic and ginger, grated, and the turmeric, for a minute.") to dal's steps
+	add (a new step with instruction "Add the lentils, the tomatoes, the coconut milk and 500 ml of water.  Simmer for 25 minutes, stirring now and then.") to dal's steps
+	add (a new step with instruction "Squeeze in the lime, season with salt, and serve with rice.") to dal's steps
+	add dal to the recipes
+
+to add the pancakes
+	set pancakes to a new recipe with title "Blueberry Pancakes", serves = 4, picture = "/spaces/@spell/examples/RecipeCards/pictures/pancakes.svg"
+	add (a new ingredient with amount = 200, unit = "g", name "plain flour", aisle "Baking", grams per cup = 125) to pancakes's ingredients
+	add (a new ingredient with amount = 2, unit = "tsp", name "baking powder", aisle "Baking") to pancakes's ingredients
+	add (a new ingredient with amount = 1, unit = "tbsp", name "sugar", aisle "Baking") to pancakes's ingredients
+	add (a new ingredient with amount = 2, name "eggs", aisle "Dairy") to pancakes's ingredients
+	add (a new ingredient with amount = 300, unit = "ml", name "milk", aisle "Dairy") to pancakes's ingredients
+	add (a new ingredient with amount = 30, unit = "g", name "butter", aisle "Dairy") to pancakes's ingredients
+	add (a new ingredient with amount = 150, unit = "g", name "blueberries", aisle "Fruit and veg") to pancakes's ingredients
+	add (a new step with instruction "Whisk the flour, baking powder, sugar and a pinch of salt in a bowl.") to pancakes's steps
+	add (a new step with instruction "Melt the butter.  Beat it with the eggs and milk, then whisk into the flour until just smooth.") to pancakes's steps
+	add (a new step with instruction "Heat a frying pan over a medium heat, with a little butter.") to pancakes's steps
+	add (a new step with instruction "Pour in a small ladle of batter, scatter on a few blueberries, and cook until bubbles show.  Flip, and cook a minute more.") to pancakes's steps
+	add (a new step with instruction "Keep them warm while you cook the rest, and serve with maple syrup.") to pancakes's steps
+	add pancakes to the recipes
