@@ -483,6 +483,7 @@ const APP_TEXTS_ES: AppTextPack = {
   referenceSpell: "Encanto",
   referenceNothing: "Elige algo para ver qué es.",
   referenceShowInCode: "Mostrar en el código",
+  referenceSearch: "Buscar en la referencia",
   referenceInstance: 'un {Type}{more} llamado "{name}"',
   thisApp: "Esta app",
   thisPage: "Esta página",

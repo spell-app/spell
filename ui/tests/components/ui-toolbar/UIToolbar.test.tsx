@@ -323,6 +323,30 @@ describe("<ui-toolbar> bar slots", () => {
       await expect.poll(() => listButton(host)).not.toBeNull()
     })
 
+    it("the list's chosen row is ticked FIRST, as every ticked menu's:  tick, icon, title (epic `editor` I243)", async () => {
+      const files = Array.from(
+        { length: 6 },
+        (_, index) => `<ui-item icon="file outline" ${index === 2 ? "selected" : ""}>File-${index}.spell</ui-item>`
+      ).join("")
+      const { host } = await toolbar(160, files, `${LOOK} max-visible all-items-icon="file outline"`)
+      await expect.poll(() => listButton(host)).not.toBeNull()
+      listButton(host)!.click()
+      await expect.poll(() => rows(host).length).toBe(6)
+      await ElementFixture.settle()
+      for (const [index, row] of rows(host).entries()) {
+        // every row keeps the tick's gutter, so the icons line up;  only the chosen one's shows
+        const [tick, icon, title] = [...row.children] as HTMLElement[]
+        expect(tick!.className).toBe("tick")
+        expect(icon!.className).toContain("icon")
+        expect(title!.className).toBe("title")
+        expect(getComputedStyle(tick!).visibility).toBe(index === 2 ? "visible" : "hidden")
+        expect(tick!.getBoundingClientRect().right).toBeLessThanOrEqual(icon!.getBoundingClientRect().left)
+        expect(getComputedStyle(row, "::after").content).toBe("none")
+      }
+      const lefts = rows(host).map((row) => Math.round(row.querySelector(".icon")!.getBoundingClientRect().left))
+      expect(new Set(lefts).size).toBe(1)
+    })
+
     it("many put away:  the few tabs left stay a row, never the dropdown (epic `editor` I188)", async () => {
       // a site's files, as the editor's file tabs have them:  an icon and a longer name each
       const files = Array.from(

@@ -94,6 +94,27 @@ describe.skipIf(!SERVING)("The file tabs' button listing every file (I235)", { t
     expect(bar.overflowBy).toBeLessThanOrEqual(1)
   })
 
+  test("opened at each width:  every tab fits, no button and no scroll arrow;  one doesn't, both (I235 reopened)", async () => {
+    for (const width of [1200, 1500, 1800]) {
+      await open(SOME_FILES, width)
+      const bar = await moreFiles()
+      const arrow = await page.evaluate(() => {
+        const toolbar = document.querySelector(".FileTabs > :not(ui-menu)")!.shadowRoot!.querySelector("ui-toolbar")!
+        const key = toolbar.shadowRoot!.querySelector<HTMLElement>("[part~=scroll-end]")
+        return !!key && getComputedStyle(key).display !== "none" && getComputedStyle(key).visibility !== "hidden"
+      })
+      if (bar.overflowBy <= 1) {
+        expect(bar.hasButton, `${width}px`).toBe(false)
+        expect(arrow, `${width}px`).toBe(false)
+      } else {
+        // a tab scrolled out, by more than the button's own room:  the list and the arrow both say so
+        expect(bar.overflowBy, `${width}px`).toBeGreaterThan(bar.buttonRoom)
+        expect(bar.hasButton, `${width}px`).toBe(true)
+        expect(arrow, `${width}px`).toBe(true)
+      }
+    }
+  })
+
   test("narrow, a file scrolled out:  the button;  widened till every tab fits, it goes once, and never flickers", async () => {
     await open(SOME_FILES, 1000)
     const narrow = await moreFiles()

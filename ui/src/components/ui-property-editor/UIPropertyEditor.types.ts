@@ -47,6 +47,8 @@ export type Names<K extends keyof E.ComponentVocabulary> = E.ComponentVocabulary
  * - `action`:  a small button at the row's end, which only says it was pressed (`ui-reset`, `ui-show-code`)
  * - `mark`:  a few words shown at the row's end, saying where in short:  "Real data · family cookbook"
  * - `readonly`:  it can't be changed here, whatever its kind:  `from` says why
+ * - `unsaved`:  why a change here won't be kept:  its field's not-saved icon, on hover or focus (`<ui-field unsaved>`)
+ * - `note`:  a short line under its control, in the hint's ink:  e.g. that the change just made won't be kept
  */
 export type PropertyOrigin = {
   /** Where it comes from. */
@@ -59,6 +61,10 @@ export type PropertyOrigin = {
   mark?: string
   /** Read only, whatever its kind. */
   readonly?: boolean
+  /** Why a change here won't be kept:  its not-saved icon's tip. */
+  unsaved?: string
+  /** A line under its control. */
+  note?: string
 }
 
 /**

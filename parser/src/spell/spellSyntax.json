@@ -1639,6 +1639,7 @@
             "toast_color",
             "toast_position",
             "toast_progress",
+            "text_size",
             "shown_dates",
             "take_or_give_up",
             "drag_or_drop",
@@ -1722,6 +1723,9 @@
             },
             {
               "syntax": "((top_up:with a progress bar filling up at the top)|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
+            },
+            {
+              "syntax": "((small:small)|(big:big)|(huge:huge))"
             },
             {
               "syntax": "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(date_and_time:dates and times)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
@@ -3052,7 +3056,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/lists/ListItemExpression.ts",
-          "line": 12,
+          "line": 16,
           "purpose": "Base for rules which pick ONE item out of a list, e.g. `the first card of the deck`: what we are is an item of it.",
           "syntaxes": [],
           "aliases": ["expression"]
@@ -3352,7 +3356,7 @@
           "ruleNames": ["ordinal_where_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/OrdinalWhereExpression.ts",
-          "line": 16,
+          "line": 27,
           "purpose": "The first (second, last ...) item of a list that passes a test (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -3393,6 +3397,32 @@
                 },
                 "py": {
                   "code": "core.random_item_of(my_list)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "RandomItemWhere",
+          "ruleNames": ["random_item_where"],
+          "internal": false,
+          "file": "src/spell/rules/lists/RandomItemWhere.ts",
+          "line": 14,
+          "purpose": "One item of a list that passes a test, at random (epic `language` I152) -- `a random card in the columns where it is face down`.",
+          "syntaxes": [
+            {
+              "syntax": "a random {arg:singular_identifier} (of|from|in) {list:expression} (where:where|which|that|who) {inline_expression}?",
+              "example": "a random card in the columns where its rank is 1",
+              "outputs": {
+                "js": {
+                  "code": "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Column)), (card) => card.rank === 1))"
+                },
+                "ts": {
+                  "code": "core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Column)), (card: Card) => card.rank === 1))"
+                },
+                "py": {
+                  "code": "core.random_item_of(\n    core.filter(core.merge_lists(core.every_thing(Column)), lambda card: card.rank == 1),\n)"
                 }
               }
             }
@@ -3530,6 +3560,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "ListItemsIn",
+          "ruleNames": ["list_items_in"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListItemsIn.ts",
+          "line": 24,
+          "purpose": "A list's items, by their word -- `the cards in the discard pile`, `cards in the columns` (epic `language` I152).",
+          "syntaxes": [
+            {
+              "syntax": "the? {arg:plural_identifier} in {list:operand}",
+              "example": "cards in the columns",
+              "outputs": {
+                "js": {
+                  "code": "core.mergeLists(core.everyThing(Column))"
+                },
+                "ts": {
+                  "code": "core.mergeLists(core.everyThing(Column))"
+                },
+                "py": {
+                  "code": "core.merge_lists(core.every_thing(Column))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "SortKeyField",
           "ruleNames": ["sort_key_field"],
           "internal": false,
@@ -3603,7 +3659,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 30,
+          "line": 40,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3644,7 +3700,7 @@
           "ruleNames": ["list_iteration_where"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 104,
+          "line": 117,
           "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
           "syntaxes": [
             {
@@ -3670,7 +3726,7 @@
           "ruleNames": ["list_iteration_named_for_list"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 117,
+          "line": 130,
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
@@ -4378,7 +4434,7 @@
           "ruleNames": ["each_in_statement"],
           "internal": false,
           "file": "src/spell/rules/lists/EachInStatement.ts",
-          "line": 24,
+          "line": 33,
           "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
           "syntaxes": [
             {
@@ -10036,11 +10092,11 @@
           "ruleNames": ["alert"],
           "internal": false,
           "file": "src/spell/rules/UI/Alert.ts",
-          "line": 13,
+          "line": 17,
           "purpose": "Show user a `message` in a modal alert.",
           "syntaxes": [
             {
-              "syntax": "alert {message:expression} (with {okButton:text})?",
+              "syntax": "alert {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
               "example": "alert \"Yo!\"",
               "outputs": {
                 "js": {
@@ -10062,11 +10118,11 @@
           "ruleNames": ["warn"],
           "internal": false,
           "file": "src/spell/rules/UI/Warn.ts",
-          "line": 11,
+          "line": 13,
           "purpose": "Warning message -- like alert but more dire.",
           "syntaxes": [
             {
-              "syntax": "warn {message:expression} (with {okButton:text})?",
+              "syntax": "warn {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
               "example": "warn \"Yo!\"",
               "outputs": {
                 "js": {
@@ -10088,11 +10144,11 @@
           "ruleNames": ["confirm"],
           "internal": false,
           "file": "src/spell/rules/UI/Confirm.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "Confirm message -- present a question with two answers.",
           "syntaxes": [
             {
-              "syntax": "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
+              "syntax": "confirm {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text} ((and|or) {cancelButton:text})?)?",
               "example": "confirm \"Yo!\"",
               "outputs": {
                 "js": {
@@ -10254,7 +10310,7 @@
               }
             },
             {
-              "syntax": "to {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
+              "syntax": "to get? {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
               "example": "to \"count the points for a card on a pile\"",
               "outputs": {
                 "js": {

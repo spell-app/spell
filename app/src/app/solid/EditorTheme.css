@@ -137,8 +137,12 @@
 
   /* the top bar's ends:  the hat and the avatar line up with the panels' edges under them, the end items' own room
      (8px and 6px) making up the rest */
+  /* ... and its bottom corners a panel's, the page showing past them, as under the Add View bar kept open
+     (epic `editor` T106, Owen:  "Make the bottom corners of the top toolbar rounded as well") */
   & ui-app-menu.AppMenu::part(menu) {
     padding-inline: max(0px, calc(var(--spell-gap) - 8px)) max(0px, calc(var(--spell-gap) - 6px));
+    border-end-start-radius: var(--spell-pane-radius);
+    border-end-end-radius: var(--spell-pane-radius);
   }
   /* its sections take the room their items need, never less, so no group ever runs over the next (I30):
      the middle one moves aside for a long left side, rather than sitting on the bar's centre over its menus

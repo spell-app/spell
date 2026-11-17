@@ -433,7 +433,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         <Show when={this.isInTicks}>
           <span class={TICK} part={this.partForName(TICK)} aria-hidden="true">
             <svg viewBox="0 0 16 16">
-              <path d="M3 8.5 6.5 12 13 4.5" />
+              <path d={UIT.TICK_PATH} />
             </svg>
           </span>
         </Show>

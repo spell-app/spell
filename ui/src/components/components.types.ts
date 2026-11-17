@@ -214,6 +214,13 @@ export type ItemOwner = {
   itemContext(item: Element): ItemContext
 }
 
+/**
+ * A ticked row's tick:  its path, on a 16 x 16 box, first in the row (epic `editor` J59:
+ * "a ticked menu's row:  the tick first, then the icon, then the title").
+ * - `<ui-menu ticks>`'s items, and the rows of a menu's list of every item (`UIMenu`'s overflow menu).
+ */
+export const TICK_PATH = "M3 8.5 6.5 12 13 4.5"
+
 ////////////////
 // ## Icon
 ////////////////

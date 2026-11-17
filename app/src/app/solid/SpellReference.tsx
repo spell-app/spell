@@ -16,13 +16,14 @@ import "./SpellReference.css"
 /****************
  * ### `<SpellReference>`
  * What you can use:  your app's templates and Spell's, with what each holds.
- * - In the Program panel's Reference tab, and the Inspector's Views card's (epic `editor` T104).
- * - ONE tree (`<ui-tree>`):  This app first, your own templates as the program declares them;
+ * - In the Program panel's Reference tab, and the compiled-code pane's (`<CodeOutputPane>`, epic `editor` T105).
+ * - ONE tree (`<ui-tree>`):  This app first, your own templates as the program declares them, its tests after them
+ *   and its constants last (`lastTestsThenConstants()`);
  *   then Spell's built-ins;  then each project the app imports, by its name.
  * - A template's rows are its members, in program order, each as `rowLookOf()` says:
  *   a thing it holds by its type then name (`Deck "deck"`), an action with a circled play, a test with a vial.
  * - `filter`, the header's search, finds any row, closed ones too.
- * - A click shows what it is beside the tree (`stacked`:  under it):  its description, and for your own, Show in Code.
+ * - A click shows what it is beside the tree:  its description, and for your own, Show in Code.
  * - Reads the scope tree the editor works out after each compile (`editor.scopeTree`),
  *   and each one's details as it's shown (`editor.scopeDetails()`).
  * - The runners keep `<TypeExplorer>`:  this is the editor's.
@@ -30,19 +31,17 @@ import "./SpellReference.css"
 export function SpellReference(props: {
   /** Only the rows holding these words. */
   filter?: string
-  /** What's picked under the tree, not beside it:  for a narrow column (the Inspector's). */
-  stacked?: boolean
 }): JSX.Element {
   const [selected, setSelected] = createSignal<ScopeNode>()
   const groups = createMemo(() => groupsOf(editor.scopeTree))
   const types = createMemo(() => typesIn(editor.scopeTree))
   return (
     <Show when={editor.scopeTree} fallback={<p class="InspectorTip">{appTexts.text("runToSeeScopes")}</p>}>
-      <div class={["SpellReference", { stacked: props.stacked }]}>
+      <div class="SpellReference">
         <ui-tree label={appTexts.text("referenceTab")} filter={props.filter ?? ""} ref={treeChoosesRows}>
           <For each={groups()}>
             {(group) => (
-              <ui-tree-item group="" label={group.title} which={String(group.nodes.length)} open="">
+              <ui-tree-item group="" label={group.title} open="">
                 <For each={group.nodes} keyed={(node) => node.path}>
                   {(node) => (
                     <ReferenceRow node={node()} types={types()} selected={selected()} onSelect={setSelected} />
@@ -151,9 +150,7 @@ function rowLookOf(node: ScopeNode, types: ReadonlyMap<string, ScopeNode>): RowL
   const holds = node.kind === "property" || node.kind === "variable"
   const type = holds && node.detail ? types.get(node.detail) : undefined
   if (type) return { icon: THING_ICON, label: typeWordsOf(type.name), which: `"${node.name}"`, type }
-  if (TEST.test(node.name) && (node.kind === "method" || node.kind === "function")) {
-    return { icon: TEST_ICON, label: node.name }
-  }
+  if (isTest(node)) return { icon: TEST_ICON, label: node.name }
   if (node.kind === "method") return { icon: ACTION_ICON, label: node.name }
   return { icon: SCOPE_ICONS[node.kind], label: node.name, which: node.detail }
 }
@@ -203,7 +200,8 @@ type ReferenceGroup = { title: string; nodes: ScopeNode[] }
 /**
  * The reference's groups, from the editor's scope tree:
  * - This app:  what the project's files declare, in program order (its files' order, then each one's own),
- *   its files left out
+ *   its files left out;  its tests, then its constants, at the end
+ *   (Owen, 2026-11-16, epic `editor` T105:  "Move the tests to the bottom, above `Blue`")
  * - Spell:  the built-ins, the root's own
  * - each project it imports, by its name, in its program order too
  * - The project is the root's last child (`LSP.ScopeExplorer`).
@@ -215,8 +213,21 @@ function groupsOf(tree: ScopeNode | undefined): ReferenceGroup[] {
   const declaredIn = (project: ScopeNode) =>
     project.children.flatMap((child) => (child.kind === "file" ? child.children : [child]))
   return [
-    ...(app ? [{ title: appTexts.text("thisApp"), nodes: declaredIn(app) }] : []),
+    ...(app ? [{ title: appTexts.text("thisApp"), nodes: lastTestsThenConstants(declaredIn(app)) }] : []),
     { title: appTexts.text("referenceSpell"), nodes: tree.children.filter((child) => child.kind !== "project") },
-    ...projects.slice(0, -1).map((project) => ({ title: project.name, nodes: declaredIn(project) }))
+    ...projects
+      .slice(0, -1)
+      .map((project) => ({ title: project.name, nodes: lastTestsThenConstants(declaredIn(project)) }))
   ].filter((group) => group.nodes.length)
+}
+
+/** `nodes` in their order, but the tests after the rest, and the constants after those. */
+function lastTestsThenConstants(nodes: ScopeNode[]): ScopeNode[] {
+  const rank = (node: ScopeNode) => (node.kind === "constant" ? 2 : isTest(node) ? 1 : 0)
+  return [...nodes].sort((a, b) => rank(a) - rank(b))
+}
+
+/** Is `node` a test:  a method or function named `test ...`. */
+function isTest(node: ScopeNode): boolean {
+  return TEST.test(node.name) && (node.kind === "method" || node.kind === "function")
 }

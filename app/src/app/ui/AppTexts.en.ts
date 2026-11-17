@@ -695,6 +695,7 @@ export const APP_TEXTS = {
   referenceSpell: "Spell",
   referenceNothing: "Pick something to see what it is.",
   referenceShowInCode: "Show in code",
+  referenceSearch: "Search the reference",
   // a thing a property holds, with no comment of its own:  `a Deck of playing cards named "deck"`,
   // `more` its type's description after its own words (`of playing cards`), or nothing
   referenceInstance: '{aType}{more} named "{name}"',

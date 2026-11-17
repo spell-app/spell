@@ -4,11 +4,12 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
- * The Inspector's Views card has a Reference tab (epic `editor` T104):  `<SpellReference>`, laid out for the column.
- * - Owen:  "Add it as another tab in the same panel as `Views`".
+ * The compiled-code pane has a Reference tab (epic `editor` T104, T105):  `<SpellReference>`, tree and details side by side.
+ * - Owen:  "it's too wide for that column ... maybe put it in the `Compiled Code` Panel?"
  * - A thing a property holds reads `Deck "deck"`, a thing's cube its icon;  with no comment of its own, its
  *   description is its type's:  `a Deck of playing cards named "deck"`.
- * - The app's templates in program order, not by name;  an action's icon a circled play, a test's a vial.
+ * - The app's templates in program order, not by name, its tests after them and its constants last;
+ *   no counts on the groups' rows.  An action's icon a circled play, a test's a vial.
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
@@ -17,25 +18,21 @@ import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 /** Solitaire, in the editor. */
 const SOLITAIRE = `${EDITOR}edit/@spell/examples/Solitaire`
 
-/** The page's debug globals, what's used of them. */
-type DebugGlobals = { Inspector: { toggle(): void } }
-
 /** A row of the reference:  its icon, words and muted words. */
 type Row = { icon: string; label: string; which: string }
 
-/** Open the Inspector, if it isn't, and show its Views card's Reference tab. */
+/** Open the compiled code, if it isn't, and show its Reference tab. */
 async function showReference(page: Page): Promise<void> {
-  if (!(await page.locator(".InspectorCard[data-panel=views]").count())) {
-    await page.evaluate(() => (window as unknown as DebugGlobals).Inspector.toggle())
-  }
-  await page.locator('.ViewsTab[data-tab="reference"]').click()
-  await page.locator(".InspectorCard[data-panel=views] .SpellReference.stacked").waitFor({ timeout: 20_000 })
+  if (!(await page.locator(".CodeOutputPane").count()))
+    await page.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first().click()
+  await page.locator('.CodeOutputTab[data-tab="reference"] [part~=item]').first().click()
+  await page.locator(".CodeOutputPane .SpellReference").waitFor({ timeout: 20_000 })
 }
 
 /** The rows under the reference's row labelled `label` (`This app`, `Solitaire`), each as it shows. */
 function rowsUnder(page: Page, label: string): Promise<Row[]> {
   return page.evaluate((label) => {
-    const parent = [...document.querySelectorAll(".InspectorCard .SpellReference ui-tree-item")].find(
+    const parent = [...document.querySelectorAll(".CodeOutputPane .SpellReference ui-tree-item")].find(
       (row) => row.getAttribute("label") === label
     )
     return [...(parent?.children ?? [])]
@@ -62,8 +59,9 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
   }, 120_000)
 
   afterAll(async () => {
-    // the next test file opens on Views, as Owen left it
-    await page?.locator('.ViewsTab[data-tab="views"]').click()
+    // the next test file opens with no compiled code, as Owen left it
+    await page?.locator('.CodeOutputTab[data-tab="js/solid"] [part~=item]').first().click()
+    await page?.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first().click()
     await browser?.close()
   })
 
@@ -73,6 +71,20 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
     expect(templates.indexOf("Card")).toBeLessThan(templates.indexOf("Pile"))
     expect(templates.indexOf("Pile")).toBeLessThan(templates.indexOf("Deck"))
     expect(templates.indexOf("Deck")).toBeLessThan(templates.indexOf("Solitaire"))
+  })
+
+  test("puts the app's tests after its templates, its constants last, and counts nothing", async () => {
+    const app = await rowsUnder(page, "This app")
+    const kinds = app.map((row) =>
+      row.icon === "fa7-free:vial-circle-check" ? "test" : row.icon === "lock" ? "constant" : "other"
+    )
+    expect(kinds.join(" ")).toMatch(/^(other )+(test )+(constant ?)+$/)
+    const counts = await page.evaluate(() =>
+      [...document.querySelectorAll(".CodeOutputPane .SpellReference ui-tree-item[group]")].map((row) =>
+        row.getAttribute("which")
+      )
+    )
+    expect(counts.every((which) => !which)).toBe(true)
   })
 
   test("names a thing a property holds by its type, then its name, with a thing's icon", async () => {
@@ -94,13 +106,13 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
 
   test("says what a held thing is from its type, in the header and under it", async () => {
     await page.evaluate(() => {
-      const row = [...document.querySelectorAll(".InspectorCard .SpellReference ui-tree-item")].find(
+      const row = [...document.querySelectorAll(".CodeOutputPane .SpellReference ui-tree-item")].find(
         (each) => each.getAttribute("label") === "Deck" && each.getAttribute("which") === '"deck"'
       ) as HTMLElement
       row.scrollIntoView()
       row.shadowRoot!.querySelector<HTMLElement>(".words")!.click()
     })
-    const details = page.locator(".InspectorCard .ReferenceDetails")
+    const details = page.locator(".CodeOutputPane .ReferenceDetails")
     await expect.poll(() => details.locator("h4").textContent(), { timeout: 8000 }).toMatch(/Deck\s*"deck"/)
     await expect.poll(() => details.textContent(), { timeout: 8000 }).toContain('a Deck of playing cards named "deck"')
   })

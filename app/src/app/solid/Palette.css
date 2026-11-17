@@ -60,35 +60,38 @@
   }
 }
 
-/* kept open:  the top bar's second row, edge to edge, part of the bar (epic `editor` T83;  Owen:  "Pinned Add menu should
+/* kept open:  the top bar's second row, part of the bar (epic `editor` T83;  Owen:  "Pinned Add menu should
    look like it is part of the app menubar -- same background.  Center the buttons."):
+   - centred under the top bar, only as wide as what it holds and 16px either side, its bottom corners a panel's;
+     the page shows beside it (T106, Owen:  "keep it centered but make it only 32px wider than the content it needs,
+     with rounded bottom corners, and show the page background in the unused space")
+   - a window too narrow for all of it:  the whole window's width, and its names scroll (T86)
    - the bar's own fill and blur, over the page as the bar's is (on its `::before`, so a menu inside it isn't held in
      its box)
-   - Add View in bold, then its topics' icons and names (T86), centred on the window, quiet, as the bar's menus are;
-     its pin at its far left (T92), its search at its end
-   - three columns:  the two outer ones share the room the names leave, so the names sit in the window's middle while
-     there's room for the end beside them;  short of that the end keeps its column and the names move left, and only
-     a window too narrow for all of them scrolls them (T86:  Owen's 1290px window scrolled them, as the names kept
-     the end's room clear on BOTH sides)
+   - its pin, Add View in bold, then its topics' icons and names (T86, T92), quiet, as the bar's menus are;
+     its search right after the last one (T106;  at the window's far right before)
    - a thin grey line between the two bars (T86, I232), a shadow inside its top edge taking no room, so both bars keep
-     their heights on the 4px grid (as a pane bar's line, I216);  and its own line under it */
+     their heights on the 4px grid (as a pane bar's line, I216);  and its own line round its sides and bottom */
 .PaletteStrip {
   flex: none;
   position: relative;
   isolation: isolate;
   /* the search's width:  fixed, typed in or not (T87) */
   --palette-search-width: 150px;
-  display: grid;
-  /* the end's column is at least as wide as the end:  a track's least size is its content's */
-  grid-template-columns: 1fr minmax(0, max-content) 1fr;
-  /* one row, the strip's height:  a toolbar's box is taller than its items, and centres them on it */
-  grid-template-rows: 100%;
+  display: flex;
   align-items: center;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
   height: 32px;
-  /* its pin under the bar's first icon, its search's end under its last */
-  padding-inline: 8px;
+  margin-inline: auto;
+  /* 16px to its outer edge, its 1px line included */
+  padding-inline: 15px;
   min-width: 0;
-  border-block-end: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
+  border: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
+  border-block-start: 0;
+  border-end-start-radius: var(--spell-pane-radius);
+  border-end-end-radius: var(--spell-pane-radius);
   box-shadow: inset 0 1px 0 var(--ui-border-color);
 
   &::before {
@@ -97,24 +100,15 @@
     /* clear of the line above it:  over it, this layer hid it (I232) */
     inset: 1px 0 0;
     z-index: -1;
+    border-radius: inherit;
     background: var(--spell-menu-bar-fill);
     -webkit-backdrop-filter: var(--spell-menu-bar-filter);
     backdrop-filter: var(--spell-menu-bar-filter);
     pointer-events: none;
   }
 
-  /* its pin, at its far left (T92) */
-  & .PaletteStripStart {
-    grid-column: 1;
-    justify-self: start;
-    display: flex;
-    align-items: center;
-    /* never touches Add View */
-    margin-inline-end: 12px;
-  }
-  /* Add View, then the names:  on one centre line */
+  /* its pin, Add View, then the names:  they shrink and scroll in a narrow window, never the search */
   & .PaletteStripAdd {
-    grid-column: 2;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -130,15 +124,12 @@
   & .PaletteStripGroups {
     min-width: 0;
   }
-  /* centred in their room;  too many for it, they start at its start and scroll */
   & .PaletteStripGroups::part(menu) {
-    justify-content: safe center;
-    /* no reach past its ends, as a row whose first word lines up with an edge has:  so it's centred */
+    /* no reach past its ends, as a row whose first word lines up with an edge has:  so the bar's room is even */
     margin-inline: 0;
   }
   & .PaletteStripEnd {
-    grid-column: 3;
-    justify-self: end;
+    flex: none;
     /* the names never touch the search */
     margin-inline-start: 16px;
     display: flex;
@@ -298,6 +289,8 @@ ui-popup.PaletteGroupPopup::part(popup) {
    (epic `editor` I191:  "Make pin in add view more subtle and black.  Fighting with the spell logo") */
 .PaletteStrip .PalettePin,
 .PaletteStrip .PalettePin.pinned {
+  /* the bar's first thing:  its room is the bar's (T106) */
+  margin-inline-start: 0;
   font-size: 0.95em;
   color: var(--ui-text-color);
   opacity: 0.75;

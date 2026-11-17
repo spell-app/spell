@@ -5,7 +5,14 @@ import { KindName } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { loopedList } from "./ListIteration"
-import { type MethodBody, type ItemVariableData } from "./lists.shared"
+import {
+  itemsAcrossAST,
+  itemsAcrossDatatype,
+  itemsAcrossOf,
+  type ItemsAcross,
+  type MethodBody,
+  type ItemVariableData
+} from "./lists.shared"
 
 /**
  * `each_in_statement` rule:  a statement run once for each item of a list, the list said in it --
@@ -14,6 +21,8 @@ import { type MethodBody, type ItemVariableData } from "./lists.shared"
  * - Spanish:  `agregar cada carta del mazo a la reserva`.
  * - The same as the loop, `for each card in the deck` then `add it to the stock`:
  *   `core.map(deck, (card) => core.append(stock, card))`.
+ * - Of a list of lists, its item's word naming THEIR items:  each list's items in turn (epic `language` I152) --
+ *   `turn each card in the columns face down`.
  * - Only when `in` follows the item:  `each card with rank = ace` is every card the program has, as before.
  * - Only a statement with no body:  `for each card in the deck` is the loop's, `to deal each card in ...` a method's.
  * - ONE `each ... in` a statement:  a second is an error saying so.
@@ -115,7 +124,10 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
     const cached = (match.data as { nested?: P.MethodScope }).nested
     if (cached) return cached
     const { item, list } = match.groups
-    const datatype = match.scope.getItemType(list.datatype)
+    // of a list of lists, the item's word naming THEIR items:  each list's items in turn (epic `language` I152)
+    const across = itemsAcrossOf(match.scope, item, list)
+    ;(match.data as { across?: ItemsAcross }).across = across
+    const datatype = match.scope.getItemType(itemsAcrossDatatype(across) ?? list.datatype)
     const name = this.itemName(match.scope, item)
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
     ;(match.data as ItemVariableData).itemVariable = variable
@@ -146,7 +158,7 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
     })
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "map",
-      args: [loopedList(match, P.matchAST(list)), method]
+      args: [loopedList(match, itemsAcrossAST(match, list, (match.data as { across?: ItemsAcross }).across)), method]
     })
   }
 }

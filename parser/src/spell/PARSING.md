@@ -254,6 +254,24 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     it keeps them by the line's last token, which the changed tokens share.
   - The loop's own:  `for each card in the deck which is not in the stock` (`list_iteration_where`), its item, list and
     condition one `each_item_where`, a `list_filter` of one item's word, never an expression alone.
+- A bare word after `and` / `or` in a filter carries the condition's verb (epic `language` I152,
+  `SpellStatement.withVerbCarried()`):  `which are face up and red` ~== `... and it is red`.
+  - Only when the condition starts with the item and its verb (`it is`, Spanish's bare `es`), and the clause is ONE word
+    that names nothing in scope.
+  - Not a negated verb after `or`:  `it isn't red or it isn't black` would always be true.
+  - Without it, `red` was a text, always true:  every face-up card passed.
+- A list of lists, read by its items' word (epic `language` I152;  T130 began it for `where` and `the number of`):
+  - `cards in the columns` (`list_items_in`) => `core.mergeLists(core.everyThing(Column))`:
+    every column's cards, together, in the columns' order;  `the cards in the discard pile` is the pile itself
+  - the same in `the first card in ...` (`ordinal_position_expression`), `a random card in ...`, `card 3 of ...`
+    (`ListItemExpression`), `the first card in ... where` (`ordinal_where_expression`),
+    `a random card in ... where` (`random_item_where`), and a loop's item (`for each card in the columns`,
+    `turn each card in the columns face down`)
+  - the word naming the lists themselves reads them as before:  `the piles in the columns`, `for each pile in the columns`
+  - a word naming neither, both known, is refused:  `the columns in the deck` says what the deck holds
+    (`refuseIfNamesNoItems()`, [lists.shared.ts](rules/lists/lists.shared.ts))
+  - `spell repl` and `spell parse` say "Don't understand" for words left at a line's end, as a file does:
+    they printed the part they read, and dropped the rest
 - A number word is a name where it can't be a number (J96):
   - the target of `set` / `poner` tries `{variable}` first:  `set three to 3`
   - a variable of the name in scope wins over the number (`NumberAsString.parse()`)
