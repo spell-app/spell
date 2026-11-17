@@ -570,6 +570,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
+    - `Superpowers` (epic `epic-engine` P72):  with the superpowers plugin on in Claude Code's settings
+      (`ClaudeHome.isPluginEnabled()`), what the same hook adds in an EPIC's worktree:  the guide's `superpowers` topic,
+      where superpowers stands aside (no design, plan, worktree or finish of its own;  no `npm install`), joined to the
+      guard's answer (`WorktreeGuard.withNotice()`);  plain `node` loads it by path
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
@@ -624,7 +628,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
         hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
         - and (P12) every skill linked into `~/.agents/skills/`, the SAME files, which the Codex CLI lists in every
-          repo;  the designer and coherence agents as Codex custom agents, `~/.codex/agents/epic-<name>.toml`,
+          repo;  the designer, coherence and plan-check agents as Codex custom agents, `~/.codex/agents/epic-<name>.toml`,
           generated from Claude Code's agent files (`codexAgent()`)
         - one route for the hooks:  the plugin's own Codex hooks file passes `--codex-plugin`, and a script started so
           does nothing while the user file runs it (`CodexHome.skipPluginHook()`)

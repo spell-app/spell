@@ -89,7 +89,16 @@ After a restart, agents it started are gone:  start each again from its task, as
      (`epic pages template epics/plan-doc.md`, "Rules")
 4. Commit the code by path, the message starting `<epic> P3:  ...`, and list it:
    `epic commit <epic>#P3 <sha> "what it did"`.
-5. `epic phase <epic>#P3 done`, and `epic inbox status <epic> --clear`.
+5. The plan check (the idea borrowed from superpowers' spec review, MIT):  hold the phase's diff up against its
+   accepted build plan, with the `plan-check` agent (Codex's custom agent, from `epic plugin install --codex`), else by
+   its agent file's steps yourself (`epic guide --root`, then `plan-check/plan-check-agent.md`).
+   - What the plan said that wasn't built, and what was built that it didn't say.
+   - Each miss:  built now if small, else `epic add <epic>#I "..." --calm`
+     (not calm only when it drops or changes what the person asked for).
+6. `epic phase <epic>#P3 done --done "<ul>...</ul>"`, and `epic inbox status <epic> --clear`.
+   - Proof before done (borrowed from superpowers' verification-before-completion, MIT):  the Done list's last bullet
+     names each check run and what it printed:  `Checked:  yarn test, 1128 passed;  yarn lint, 0 errors`.
+     A check already failing before the phase, or not run, is said so.
 
 ## review -- Take what the person sends from the page
 
@@ -149,6 +158,28 @@ epic turn end
      The rest happens once it's merged:  `git pull` on the base branch, then `epic worktree remove <epic> --branches`.
 3. Say what shipped, with the page's links (`epic pages link <page> --show`).
 
+## superpowers -- With superpowers installed
+
+superpowers (obra/superpowers, MIT) is a plugin of skills for the whole of a piece of work:
+a design, a plan, a worktree, the build, the finish.
+In an epic, the epic does four of those jobs:
+- the epic page is the design and the plan
+- `/epic` made this worktree, and ran the repo's own install command in it (`epic config installCommand`)
+- `/epic done` finishes:  the merge, the changelog, the worktree removed with its servers stopped
+
+So, in an epic, never use these superpowers skills:
+- brainstorming, writing-plans, executing-plans, subagent-driven-development:
+  no design doc or plan file in the repo (`docs/superpowers/`);  questions go on the epic page (`epic add <epic>#Q`)
+- using-git-worktrees:  no second worktree, and no set-up step:
+  never `npm install` (or any other install) in an epic's worktree;  the repo's own install has run
+- finishing-a-development-branch:  never merge, or remove an epic's worktree, with git;
+  `/epic done` (`epic guide done`) is the only finish
+
+Inside a phase, DO use these:
+- test-driven-development, where the repo wants tests first (its AGENTS.md or CLAUDE.md says;  test-first is the repo's call)
+- systematic-debugging, for any issue found;  file it on the page too (`epic add <epic>#I`)
+- verification-before-completion, before a phase closes:  its Done list names the checks run and what they printed
+
 ## tidy -- Close what other work made obsolete
 
 Only when the person asks (the skill's word:  `$epic tidy`).
@@ -187,7 +218,7 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | a details page (`/details`) | a question that needs a picture | `epic ask create <slug>`, then `epic ask wait <slug>` |
 | a skill, `/epic review` | the workflow's steps, one skill each | Codex:  the same skill, `$epic review`;  another agent:  this guide |
 | background agents (`Agent`, `/bg`) | several items answered at once, the chat free meanwhile | Codex:  ask for sub-agents, one per item, and wait for them (Codex waits, so the chat isn't free);  else one at a time, in this session |
-| the designer and coherence agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer` and `coherence`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
+| the designer, coherence and plan-check agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer`, `coherence` and `plan-check`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
 | messages to another session (`SendMessage`, `ListAgents`) | telling a running session to do something | print the line for the person to type into that session |
 | a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` / `epic inbox wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
 | plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |
