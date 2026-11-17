@@ -6,6 +6,7 @@
 // `spell place update MetArtworks.api.spell` looks again, and changes only this file and MetArtworks.api.json5.
 // Its list is only ids, over 500,000 of them:  each artwork is read whole from its own address, only when something reads it.
 // Its search finds ids too, looking at all of each artwork, its tags too:  `every artwork matching ...`.
+// Asked only for artworks with pictures (`hasImages=true`, written in by hand):  the rest would be read for nothing.
 // It asks for 80 requests a second at most, in its docs:  a program keeps to that.
 // Its search pages by "limit" and "offset", up to 500 at a time;  its list of every id takes neither, and comes whole.
 
@@ -17,7 +18,7 @@ met museum is a web server at "https://collectionapi.metmuseum.org/public/collec
 	it gives up to 500 at a time
 	check it every 30 seconds
 	it takes up to 80 requests a second
-	it searches everything with "q" at "/v1.1/search"
+	it searches everything with "q" at "/v1.1/search?hasImages=true"
 	artworks live at "/v1/objects"
 
 an "artwork" is a thing

@@ -440,10 +440,13 @@ export class RestPlace extends WebPlace implements Place {
     return at === undefined ? this.pathOf(collection) : `${this.url}${at}`
   }
 
-  /** Is `url` a page of `collection`'s search, at its own address:  the first, or a later one its `Link` header named? */
+  /**
+   * Is `url` a page of `collection`'s search, at its own address:  the first, or a later one its `Link` header named?
+   * - By its path alone, on both sides:  the search's own address may ask something of its own, `/v1.1/search?hasImages=true`.
+   */
   private isSearchAddress(collection: string, url: string): boolean {
     const at = this.searchesOf(collection)?.at
-    return at !== undefined && url.split("?")[0] === `${this.url}${at}`
+    return at !== undefined && url.split("?")[0] === `${this.url}${at}`.split("?")[0]
   }
 
   /** How `collection` searches:  its own search (`RestCollection.searches`), else the place's. */
