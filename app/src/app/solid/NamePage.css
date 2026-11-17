@@ -1,0 +1,36 @@
+/* The name page (`<NamePage>`):  one card in the middle of the window, on the editor's dark page. */
+#NamePage {
+  display: grid;
+  place-items: center;
+}
+
+#NamePage .NameCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(440px, calc(100vw - 32px));
+  padding: 32px;
+  border-radius: 12px;
+  background: var(--ui-background, #fff);
+  color: var(--ui-text, #222);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.3);
+}
+
+#NamePage h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+#NamePage .line,
+#NamePage .taken {
+  margin: 0;
+  white-space: pre-line;
+}
+
+#NamePage .taken {
+  opacity: 0.8;
+}
+
+#NamePage ui-button {
+  align-self: flex-end;
+}

@@ -3,6 +3,7 @@ import { getSearchQuery, openSearchPanel, searchPanelOpen } from "@codemirror/se
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 
+import { editorPrefs } from "spell/app/app/editorPrefs"
 import { CodeMirrorFind } from "spell/app/app/ui/codemirror/CodeMirrorFind"
 import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 
@@ -18,6 +19,8 @@ describe("the find bar", () => {
     view?.dom.parentElement?.remove()
     view?.destroy()
     view = undefined
+    // the replace row's fold is kept for every editor:  each test starts with it showing
+    editorPrefs.forget("findShowsReplace")
   })
 
   /** An editor holding `text`, with every editor's setup, the caret at its start. */
@@ -49,14 +52,15 @@ describe("the find bar", () => {
 
   const TEXT = "a card, a Card, a cardboard box, a card"
 
-  test("opens in one row, the find field in focus, the replace row hidden", () => {
+  test("opens with the replace row showing, the find field in focus", () => {
     const view = editorOf(TEXT)
     const bar = open(view)
     expect(searchPanelOpen(view.state)).toBe(true)
     const find = bar.querySelector<HTMLInputElement>("[main-field]")!
     expect(document.activeElement).toBe(find)
     expect(find.placeholder).toBe("Find")
-    expect(bar.querySelector<HTMLElement>(".row.replace")!.hidden).toBe(true)
+    expect(bar.querySelector<HTMLElement>(".row.replace")!.hidden).toBe(false)
+    expect(bar.querySelector(".expander")!.getAttribute("aria-expanded")).toBe("true")
     // the switches are inside the find field
     expect(bar.querySelectorAll(".field .toggle")).toHaveLength(3)
   })
@@ -98,15 +102,12 @@ describe("the find bar", () => {
     expect(count()).toMatch(/ of 3$/)
   })
 
-  test("the chevron shows the replace row;  Replace and Replace All change the text", () => {
+  test("Replace and Replace All change the text", () => {
     const view = editorOf(TEXT)
     const bar = open(view)
     typeInto(bar.querySelector<HTMLInputElement>("[main-field]")!, "card")
-    bar.querySelector<HTMLButtonElement>(".expander")!.click()
     const row = bar.querySelector<HTMLElement>(".row.replace")!
-    expect(row.hidden).toBe(false)
     const replace = row.querySelector<HTMLInputElement>("input")!
-    expect(document.activeElement).toBe(replace)
     typeInto(replace, "deck")
     press(replace, "Enter")
     expect(view.state.doc.toString()).toBe("a deck, a Card, a cardboard box, a card")
@@ -114,13 +115,33 @@ describe("the find bar", () => {
     expect(view.state.doc.toString()).toBe("a deck, a deck, a deckboard box, a deck")
   })
 
-  test("⌥⌘F opens it with the replace row;  the row stays open the next time", () => {
+  test("the chevron folds the replace row away, and it stays folded, in another editor too", () => {
+    const first = editorOf(TEXT)
+    const bar = open(first)
+    bar.querySelector<HTMLButtonElement>(".expander")!.click()
+    expect(bar.querySelector<HTMLElement>(".row.replace")!.hidden).toBe(true)
+    expect(document.activeElement).toBe(bar.querySelector("[main-field]"))
+    press(bar.querySelector("[main-field]")!, "Escape")
+    expect(open(first).querySelector<HTMLElement>(".row.replace")!.hidden).toBe(true)
+    first.dom.parentElement?.remove()
+    first.destroy()
+    // a new editor, as another file or a reload makes:  folded still
+    const second = editorOf(TEXT)
+    const again = open(second)
+    expect(again.querySelector<HTMLElement>(".row.replace")!.hidden).toBe(true)
+    // the chevron shows it again, the replace field in focus
+    again.querySelector<HTMLButtonElement>(".expander")!.click()
+    expect(again.querySelector<HTMLElement>(".row.replace")!.hidden).toBe(false)
+    expect(document.activeElement).toBe(again.querySelector(".row.replace input"))
+  })
+
+  test("⌥⌘F opens it with the replace row, even folded before", () => {
+    editorPrefs.set("findShowsReplace", false)
     const view = editorOf(TEXT)
     CodeMirrorFind.openToReplace(view)
     const bar = view.dom.querySelector<HTMLElement>(".CodeMirrorFind")!
     expect(bar.querySelector<HTMLElement>(".row.replace")!.hidden).toBe(false)
     press(bar.querySelector("[main-field]")!, "Escape")
-    expect(view.dom.querySelector<HTMLElement>(".CodeMirrorFind .row.replace")?.hidden ?? true).toBe(true)
     expect(open(view).querySelector<HTMLElement>(".row.replace")!.hidden).toBe(false)
   })
 

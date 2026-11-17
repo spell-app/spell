@@ -141,6 +141,8 @@ export type CodeEditorCommand =
   | "goToDefinition"
   | "goToTypeDefinition"
   | "findReferences"
+  | "peekDefinition"
+  | "peekReferences"
   | "rename"
 
 /**

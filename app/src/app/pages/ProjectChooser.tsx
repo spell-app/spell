@@ -27,6 +27,9 @@ import "./ProjectChooser.css"
 /****************
  * ### `<ProjectChooser>`
  * The landing page:  a hero line over cards for the examples, the library's apps, the guides and your own projects.
+ * - Its sections in Spell's own order, `SPACES.homeSections()`, dragged by their headers in dev (epic `repo-split` P28).
+ * - In an app made for an org (`"spell": { "org": "acme" }` in its `package.json`):
+ *   your own projects and each of the org's groups first, above the hero;  no library.
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
  *   then a grid of cards per group:  each card a picture of its app (else its letter), its title,
  *   and the first phrase of its description (`<ProjectCards>`).
@@ -42,6 +45,11 @@ export function ProjectChooser() {
   const { projects, examples, library, guides, editorPieces } = SPACES.SpellProjectRoot
   const exampleList = trackProjectRoot(() => examples)
   const guideList = trackProjectRoot(() => guides)
+  // an app made for an org:  its person's projects and the org's groups first, above the hero;  no library
+  // (`SPACES.homeSections()`;  Owen, 2026-11-16:  "AT THE TOP")
+  const inOrg = SPACES.localPerson.org !== SPACES.SPELL_ORG
+  const sections = () => SPACES.homeSections(inOrg, homeOrder())
+  const isAboveHero = (section: SPACES.HomeSection) => inOrg && SPACES.HOME_ORG_FIRST.includes(section)
   // the browser's tab:  plain "Spell" here, a project's name on the editor's pages (`<AppMark>`)
   onSettled(() => {
     document.title = appTexts.text("appName")
@@ -51,34 +59,105 @@ export function ProjectChooser() {
     <SpellPage id="ProjectChooser" fillWindow dark scrolling>
       <ChooserToolbar />
       <div class="Home">
+        <For each={sections().filter(isAboveHero)}>{(section) => sectionFor(section)}</For>
         <Hero examples={exampleList()} guides={guideList()} />
-        <StartCards />
-        <ProjectCards
-          id="examples"
-          projectRoot={examples}
-          line={appTexts.text("homeExamplesLine")}
-          create={<Actions.createExample button appearance="basic" size="small" />}
-        />
-        <ProjectCards id="library" projectRoot={library} line={appTexts.text("homeLibraryLine")} hideWhenNone />
-        <ProjectCards
-          id="guides"
-          projectRoot={guides}
-          line={appTexts.text("homeGuidesLine")}
-          empty={appTexts.text("homeNoGuides")}
-          create={<Actions.createGuide button appearance="basic" size="small" />}
-        />
-        <ProjectCards
-          id="projects"
-          projectRoot={projects}
-          line={appTexts.text("homeProjectsLine")}
-          create={<Actions.createProject button appearance="basic" size="small" />}
-        />
-        {/* a dev-only root is there in every build -- just not listed outside dev */}
-        <Show when={!!import.meta.env?.DEV || !editorPieces.devOnly}>
-          <ProjectCards id="editor" projectRoot={editorPieces} line={appTexts.text("homeEditorLine")} small />
-        </Show>
+        <For each={sections().filter((section) => !isAboveHero(section))}>{(section) => sectionFor(section)}</For>
       </div>
     </SpellPage>
+  )
+
+  /** One section of the page, by its id:  the org's is one per group of theirs. */
+  function sectionFor(section: SPACES.HomeSection): JSX.Element {
+    // read where it's used:  dragging turns on once the server has said it may (`mayReorder`)
+    const drag = () => (inOrg ? undefined : sectionDragFor(section))
+    switch (section) {
+      case "start":
+        return <StartCards drag={drag()} />
+      case "examples":
+        return (
+          <ProjectCards
+            id="examples"
+            projectRoot={examples}
+            line={appTexts.text("homeExamplesLine")}
+            create={<Actions.createExample button appearance="basic" size="small" />}
+            sectionDrag={drag()}
+          />
+        )
+      case "library":
+        return (
+          <ProjectCards
+            id="library"
+            projectRoot={library}
+            line={appTexts.text("homeLibraryLine")}
+            hideWhenNone
+            sectionDrag={drag()}
+          />
+        )
+      case "guides":
+        return (
+          <ProjectCards
+            id="guides"
+            projectRoot={guides}
+            line={appTexts.text("homeGuidesLine")}
+            empty={appTexts.text("homeNoGuides")}
+            create={<Actions.createGuide button appearance="basic" size="small" />}
+            sectionDrag={drag()}
+          />
+        )
+      case "projects":
+        return (
+          <ProjectCards
+            id="projects"
+            projectRoot={projects}
+            line={appTexts.text("homeProjectsLine")}
+            create={<Actions.createProject button appearance="basic" size="small" />}
+            sectionDrag={drag()}
+          />
+        )
+      case "org":
+        return <OrgGroups drag={drag()} />
+      case "editor":
+        // a dev-only root is there in every build -- just not listed outside dev
+        return (
+          <Show when={!!import.meta.env?.DEV || !editorPieces.devOnly}>
+            <ProjectCards
+              id="editor"
+              projectRoot={editorPieces}
+              line={appTexts.text("homeEditorLine")}
+              small
+              sectionDrag={drag()}
+            />
+          </Show>
+        )
+    }
+  }
+}
+
+/****************
+ * ### `<OrgGroups>`
+ * The org's own groups, a section each (epic `repo-split` P28):  `@acme/tools`, as the server found them in
+ * spell.spaces (`SPACES.orgGroups`).
+ * - None in Spell's own org.
+ * - Each group's cards by folder name:  Spell's own order never names an org's projects.
+ ****************/
+function OrgGroups(props: { drag?: TileCardDrag }) {
+  const org = SPACES.localPerson.org
+  return (
+    <For each={SPACES.orgGroups}>
+      {(path) => {
+        const group = new SPACES.SpellProjectRoot(path)
+        // the group's own title, `Tools` for `@acme/tools`:  its projects' word ("Apps") would name every org group alike
+        return (
+          <ProjectCards
+            id={`org-${SPACES.folderNameOf(path)}`}
+            projectRoot={group}
+            heading={group.title}
+            line={appTexts.text("homeOrgLine", { org })}
+            sectionDrag={props.drag}
+          />
+        )
+      }}
+    </For>
   )
 }
 
@@ -140,13 +219,19 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
  * The ways to start making something, under the hero, in the group of cards the projects use:
  * - Blank:  an empty app, the palette open, so what it can hold shows at once
  * - a few tiny starters, each the person's own to change
+ * - Site:  a site with its main page layout and a home page (epic `mockup` T40)
  * - Solitaire:  a whole game to change something in, with an invitation to
  * - Import:  a project they exported, the way back after clearing a browser
+ * - `drag`:  moving the whole section by its header, among the page's (in dev, in Spell's own checkout)
  ****************/
-function StartCards() {
+function StartCards(props: { drag?: TileCardDrag }) {
   return (
-    <section id="start" class="ProjectCards">
-      <header>
+    <section
+      id="start"
+      class={["ProjectCards", sectionDragClasses(props.drag)]}
+      {...sectionDropHandlers(() => props.drag)}
+    >
+      <header draggable={props.drag ? "true" : undefined} {...sectionGrabHandlers(() => props.drag)}>
         <h2>
           {appTexts.text("startTitle")}. <span class="line">{appTexts.text("startLine")}</span>
         </h2>
@@ -176,6 +261,11 @@ function StartCards() {
           name={appTexts.text("startDice")}
           line={appTexts.text("startDiceLine")}
           start={() => void editor.startFrom("dice")}
+        />
+        <StartCard
+          name={appTexts.text("startSite")}
+          line={appTexts.text("startSiteLine")}
+          start={() => void editor.startFrom("site")}
         />
         <StartCard
           name={appTexts.text("startSolitaire")}
@@ -217,6 +307,8 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  * - In the editor's order of each group, `SPACES.HOME_ORDER` (epic `mockup` P19);  one it doesn't list, last.
  *   - In dev, where the server says it may (`mayReorder`), a card is dragged among its run to reorder it:
  *     the group's new order is saved into that list at once (`saveHomeOrder()`).
+ *   - Only Spell's own groups:  an org's group (`SPACES.orgGroups`) never drags its cards.
+ * - `sectionDrag`:  moving the whole section by its header, among the page's (`<ProjectChooser>`).
  ****************/
 export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
@@ -230,7 +322,7 @@ export function ProjectCards(props: ProjectCardsProps) {
   onSettled(() => askMayReorder())
   // a card's drag among its run:  in dev, where the server lets this page reorder, never on a page of sites
   const dragFor = (project: CardProject, section: CardSection): TileCardDrag | undefined => {
-    if (!mayReorder() || props.sitesOnly) return undefined
+    if (!mayReorder() || props.sitesOnly || !isSpellsOwn(props.projectRoot.path)) return undefined
     // a drag from this run, onto another card of it
     const takes = () =>
       !!dragged() && dragged() !== project.path && section.projects.some((each) => each.path === dragged())
@@ -252,7 +344,14 @@ export function ProjectCards(props: ProjectCardsProps) {
       },
       onDrop: (event) => {
         event.preventDefault()
-        if (takes()) saveHomeOrder(props.projectRoot.path, movedOnto(listed(), dragged()!, project.path))
+        if (takes()) {
+          const paths = movedOnto(
+            listed().map((each) => each.path),
+            dragged()!,
+            project.path
+          )
+          saveHomeOrder(props.projectRoot.path, paths.map(SPACES.folderNameOf))
+        }
         setDropOn(undefined)
       },
       onEnd: () => {
@@ -265,8 +364,12 @@ export function ProjectCards(props: ProjectCardsProps) {
   const banner = () => listed().some((project) => project.hasThumbnail)
   return (
     <Show when={!props.hideWhenNone || listed().length > 0}>
-      <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
-        <header>
+      <section
+        id={props.id}
+        class={["ProjectCards", { small: !!props.small }, sectionDragClasses(props.sectionDrag)]}
+        {...sectionDropHandlers(() => props.sectionDrag)}
+      >
+        <header draggable={props.sectionDrag ? "true" : undefined} {...sectionGrabHandlers(() => props.sectionDrag)}>
           <h2>
             {props.heading ?? root().words.title}. <span class="line">{props.line}</span>
           </h2>
@@ -373,16 +476,21 @@ function askMayReorder(): void {
 }
 
 /**
- * `projects`' folder names with `from` moved onto `onto`'s place:  before it when dragged up the row, after it when
- * dragged down, as a list's drag reads.
+ * `names` with `from` moved onto `onto`'s place:  after it when dragged down the list, before it when dragged up,
+ * as a list's drag reads.
+ * - A card's run (projects' addresses), or the page's sections (their ids).
  */
-function movedOnto(projects: readonly CardProject[], from: string, onto: string): string[] {
-  const paths = projects.map((project) => project.path)
-  const fromIndex = paths.indexOf(from)
-  const without = paths.filter((path) => path !== from)
+function movedOnto<Name extends string>(names: readonly Name[], from: Name, onto: Name): Name[] {
+  const fromIndex = names.indexOf(from)
+  const without = names.filter((name) => name !== from)
   const ontoIndex = without.indexOf(onto)
   without.splice(fromIndex <= ontoIndex ? ontoIndex + 1 : ontoIndex, 0, from)
-  return without.map(SPACES.folderNameOf)
+  return without
+}
+
+/** Is `group` one of Spell's own groups, whose order Spell keeps:  never an org's (`SPACES.orgGroups`). */
+function isSpellsOwn(group: string): boolean {
+  return SPACES.PROJECT_GROUPS.some((each) => each.path === group)
 }
 
 /** Show group `group` in the order `names` at once, and save it into the editor's list;  a failure is shown. */
@@ -392,6 +500,79 @@ function saveHomeOrder(group: string, names: string[]): void {
   void $fetch({ url: SPACES.HOME_ORDER_URL, contents: change, requestFormat: KnownFormat.json }).catch((error) =>
     editor.showError(error)
   )
+}
+
+////////////////
+// ## The sections' order:  dragged by their headers, in dev (epic `repo-split` P28)
+////////////////
+
+/** The section being dragged, by its id;  the section it would drop on. */
+const [draggedSection, setDraggedSection] = createSignal<SPACES.HomeSection>()
+const [dropOnSection, setDropOnSection] = createSignal<SPACES.HomeSection>()
+
+/**
+ * Section `section`'s drag among the page's, by its header:  in dev, where the server lets this page reorder.
+ * - Its new place is saved at once, the whole list of sections (`saveHomeOrder()`, `SPACES.HOME_SECTIONS_KEY`).
+ * - The caller leaves it off an org's app:  its order is made from Spell's (`SPACES.homeSections()`), not saved.
+ */
+function sectionDragFor(section: SPACES.HomeSection): TileCardDrag | undefined {
+  if (!mayReorder()) return undefined
+  // a section's drag, onto another section
+  const takes = () => !!draggedSection() && draggedSection() !== section
+  return {
+    get dragging() {
+      return draggedSection() === section
+    },
+    get dropHere() {
+      return dropOnSection() === section
+    },
+    onStart: (event) => {
+      event.dataTransfer?.setData("text/plain", section)
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = "move"
+      setDraggedSection(section)
+    },
+    onOver: (event) => {
+      if (!takes()) return
+      event.preventDefault()
+      setDropOnSection(section)
+    },
+    onLeave: () => {
+      if (dropOnSection() === section) setDropOnSection(undefined)
+    },
+    onDrop: (event) => {
+      if (!takes()) return
+      event.preventDefault()
+      const order = movedOnto(SPACES.homeSections(false, homeOrder()), draggedSection()!, section)
+      saveHomeOrder(SPACES.HOME_SECTIONS_KEY, order)
+      setDropOnSection(undefined)
+    },
+    onEnd: () => {
+      setDraggedSection(undefined)
+      setDropOnSection(undefined)
+    }
+  }
+}
+
+/** A section's look while sections drag:  `grabbable` by its header;  the one moving faint, where it'd land marked. */
+function sectionDragClasses(drag: TileCardDrag | undefined) {
+  return { grabbable: !!drag, dragging: !!drag?.dragging, "drop-here": !!drag?.dropHere }
+}
+
+/** A section's own handlers:  it takes another section's drop.  `drag` is read as each event comes. */
+function sectionDropHandlers(drag: () => TileCardDrag | undefined) {
+  return {
+    onDragOver: (event: DragEvent) => drag()?.onOver(event),
+    onDragLeave: (event: DragEvent) => drag()?.onLeave(event),
+    onDrop: (event: DragEvent) => drag()?.onDrop(event)
+  }
+}
+
+/** A section's header's handlers, the header being what's dragged:  `drag` is read as each event comes. */
+function sectionGrabHandlers(drag: () => TileCardDrag | undefined) {
+  return {
+    onDragStart: (event: DragEvent) => drag()?.onStart(event),
+    onDragEnd: (event: DragEvent) => drag()?.onEnd(event)
+  }
 }
 
 /** One run of a group's cards, under its quiet line:  a category's, or a language's. */
@@ -458,6 +639,8 @@ export type ProjectCardsProps = {
   sitesOnly?: boolean
   /** Show nothing at all while it lists nothing, or hasn't loaded:  for a page of many groups (`<SitesHomePage>`). */
   hideWhenNone?: boolean
+  /** Moving the whole section by its header, among the home page's (`<ProjectChooser>`);  none:  it stays put. */
+  sectionDrag?: TileCardDrag
 }
 
 /**

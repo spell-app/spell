@@ -1,0 +1,41 @@
+"page-layout theming" is a notebook page
+	<header level="1">
+		Page layout
+		<header>A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tokens">Tokens</>
+			<item link="#themes">Themes</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-page-layout" playground>
+				<ui-page-layout style="min-height: 18em">
+					<ui-app-menu slot="menu">
+						<ui-site-nav-button slot="start" />
+						<ui-site-breadcrumbs slot="start" />
+						<ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices" />
+					</>
+					<ui-site-tabs slot="page-menu" />
+					<ui-site-nav slot="drawer" appearance="nav" current="#api" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Parts\", \"id\": \"group:Parts\", \"band\": \"group\", \"icon\": \"cubes\", \"pages\": \[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"pages\": \[{ \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }] }] }]" />
+					<ui-text paragraph>The page goes here.  Going to another page redraws only this part.</>
+					<ui-text slot="footer" color="grey">Made with Spell</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>

@@ -161,7 +161,8 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
         into.splice(first, 0, { kind: "tag-link", place: this.place(open.start, close.end), partOfSpeech, start, end })
       return
     }
-    const footStartsLine = this.startsLine(close.start)
+    // only end tags before it on its line count too:  `</></>`, two blocks' feet (epic `language` I146)
+    const footStartsLine = this.startsLine(close.start, "after end tags")
     const block: MarkupBlockShape = {
       kind: "markup-block",
       place: this.place(open.start, close.end),
@@ -390,9 +391,9 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
       this.mark(end, end + 1, `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-close`, { after: spacer("tag-quote", "after") })
     }
     const place = this.mark(start, end, INPUT, { before: spacer("input", "before"), after: spacer("input", "after") })
-    // a value written bare, `direction=down`:  drawn with its curly marks all the same (epic `language` I123)
-    const isBare = !isQuoted && !isTagWord
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted, inTag, ...(isBare && { isBare }) })
+    // a value written bare, `direction=down`:  its pill alone, no curly marks the text doesn't have (epic `language`
+    // I123;  Owen:  "Don't auto-add quotes if they are not present in the text. Just the pill.")
+    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted, inTag })
   }
 
   /**
@@ -457,10 +458,11 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
     return this.text.slice(start, end)
   }
 
-  /** Is only space before `offset` on its line? */
-  private startsLine(offset: number): boolean {
+  /** Is only space before `offset` on its line -- or, `"after end tags"`, only space and end tags (`</></>`)? */
+  private startsLine(offset: number, allowing?: "after end tags"): boolean {
     const lineStart = this.text.lastIndexOf("\n", offset - 1) + 1
-    return !this.text.slice(lineStart, offset).trim()
+    const before = this.text.slice(lineStart, offset)
+    return allowing ? /^\s*(?:<\/[^<>\s]*>\s*)*$/.test(before) : !before.trim()
   }
 
   /** Is only space after `offset` on its line? */
@@ -562,11 +564,6 @@ export type BubblyInputShape = {
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
-  /**
-   * an attribute's value written without quotes (`direction=down`):  drawn with curly marks all the same,
-   * which aren't in the text (epic `language` I123)
-   */
-  isBare?: boolean
   /**
    * a top-level head's bare name (`solitaire is an app`):  the head spacer is injected at its words too, before its
    * own, so its pill starts past it (epic `language` I84)

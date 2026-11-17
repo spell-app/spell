@@ -179,7 +179,7 @@ export class Tokenizer {
    * Call `callback` for each of `tokens` and every token nested inside them, parents first:
    * - `LineToken` tokens + its `newline`
    * - `BlockToken` lines / blocks
-   * - JSX element attributes + children, a fragment's children, attribute values, expression `contents` when it's a token
+   * - JSX element attributes, what it couldn't read of them + children, a fragment's children, attribute values, expression `contents` when it's a token
    * - JSX expression `innerTokens`, once a rule has parsed its `{...}` contents
    * - any other token's `nested` ones, e.g. a page's tag's (`SP.PageTagToken`)
    */
@@ -197,6 +197,7 @@ export class Tokenizer {
         token.tokens.forEach(visit)
       } else if (token instanceof P.JSXElementToken) {
         token.attributes?.forEach(visit)
+        visit(token.unreadableAt)
         token.children?.forEach(visit)
       } else if (token instanceof P.JSXFragmentToken) {
         token.children?.forEach(visit)
@@ -380,8 +381,24 @@ export class Tokenizer {
    * Match a quoted text literal string at `start` of `text`, as `TextToken`.
    * - e.g. `"hello"`, `'hello world'`, `"text \" with escaped quotes"`, etc.
    * - TESTME:  not sure the escaping logic is really right...
+   * - On ONE line:  a quote left open ends at its line's end, so it's no text, and the quotes after it still pair
+   *   as written (epic `language` I145;  Owen:  "Quotes don't span lines")
+   * - Except a tag's attribute value, which may run over lines (`matchJSXAttributeValue()`)
    */
-  matchText = (text: string, start = 0, end?: number): P.TextToken | undefined => {
+  matchText = (text: string, start = 0, end?: number): P.TextToken | undefined =>
+    this.matchQuoted(text, start, end, "one line")
+
+  /**
+   * A quoted text at `start` of `text`, as `matchText()`, its closing quote on its line or, `"over lines"`, anywhere.
+   * - `"over lines"`:  a tag's attribute value, `style="color: red;` then `margin: 0"` (epic `language` I12);
+   *   one that runs on to a line a tag starts is still refused (`UNCLOSED_QUOTE`)
+   */
+  private matchQuoted(
+    text: string,
+    start: number,
+    end: number | undefined,
+    lines: "one line" | "over lines"
+  ): P.TextToken | undefined {
     if (typeof end !== "number" || end > text.length) end = text.length
     if (start >= end) return undefined
 
@@ -393,7 +410,7 @@ export class Tokenizer {
     let textEnd = start + 1
     while (textEnd < end) {
       const char = text[textEnd]
-      if (char === quoteSymbol) break
+      if (char === quoteSymbol || (char === "\n" && lines === "one line")) break
       // if we get a backslash, consume next char if it's the same quote symbol
       if (char === P.BACKSLASH && text[textEnd + 1] === quoteSymbol) textEnd++
       textEnd++
@@ -637,7 +654,11 @@ export class Tokenizer {
         if (endBitMatch) break
         const skipped = this.endOfUnreadableAttribute(text, nextStart, end)
         if (skipped === undefined) break
-        jsxElement.record.unreadable ??= text.slice(nextStart, skipped).trim()
+        if (!jsxElement.record.unreadable) {
+          const raw = text.slice(nextStart, skipped).trim()
+          jsxElement.record.unreadable = raw
+          jsxElement.record.unreadableAt = new P.JSXUnreadableToken({ value: raw, raw, start: skipped - raw.length })
+        }
         nextStart = this.eatWhitespace(text, skipped, end)
       }
       if (attributes.length) jsxElement.record.attributes = attributes
@@ -660,10 +681,12 @@ export class Tokenizer {
    * Where the unreadable word at `start` of a tag's attributes ends, its quotes included:
    * `Ždge="1,048"` in `<button baŽdge="1,048" appearance="basic">` -- `undefined` if there's no word to skip.
    * - It stays on its line, and stops at the tag's end or the next tag, so a broken tag stays one tag.
+   * - It may start on a line of its own, an attribute of a tag laid out over lines:  `size="small`, its quote left
+   *   open, under `class="GameBar"` (epic `language` I145;  Owen:  "Quotes don't span lines")
    */
   private endOfUnreadableAttribute(text: string, start: number, end: number): number | undefined {
     let at = start
-    while (at < end && /[ \t]/.test(text[at]!)) at++
+    while (at < end && /\s/.test(text[at]!)) at++
     const from = at
     for (let quote = ""; at < end; at++) {
       const char = text[at]!
@@ -1009,6 +1032,8 @@ export class Tokenizer {
       const value = this.matchJSXAttributeValue(text, nextStart, end)
       // a quote left open, `color="bl`:  not an attribute, or it'd run on to the next tag's quote (epic `notebook` I5)
       if (value instanceof P.TextToken && UNCLOSED_QUOTE.test(`${value.raw}`)) return undefined
+      // ... or one never closed:  the whole attribute unreadable, `size="small`, not `size` and then `"small` (I145)
+      if (!value && (this.quoteSymbols as readonly string[]).includes(text[nextStart] ?? "")) return undefined
       if (value) {
         attribute.record.value = value
         nextStart = value.next
@@ -1026,7 +1051,7 @@ export class Tokenizer {
    */
   matchJSXAttributeValue(text: string, start: number, end?: number): P.JSXAttributeValue | undefined {
     return (
-      this.matchText(text, start, end) ||
+      this.matchQuoted(text, start, end, "over lines") ||
       this.matchJSXExpression(text, start, end) ||
       this.matchJSXElement(text, start, end) ||
       this.matchJSXAttributeValueIdentifier(text, start, end) ||

@@ -9,6 +9,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { CodeMirrorFollowed, SpellCodeMirror } from "spell/app/app/solid/codemirror"
 import { ErrorBoundary, tracked } from "spell/app/app/solid"
+import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 import { LazyCodeMirror } from "./LazyCodeMirror"
@@ -20,7 +21,7 @@ import "./CodeOutput.css"
  * the compiled code's tabs, the top bar's button for it, the Program panel's tabs.
  * - `icon`:  Font Awesome's brand icon (the app's `<ui-root icons="fa7-brands, fomantic">`)
  * - `text`:  its name's key, `JavaScript`
- * - `tip`:  the top bar's button's tooltip, `Compiled JavaScript`
+ * - `tip`:  the top bar's button's label, `Compiled JavaScript`
  */
 export const LANGUAGE_LOOKS = {
   javascript: { icon: "js", text: "javascriptTab", tip: "compiledJavaScript" },
@@ -90,7 +91,8 @@ let lastShown: OutputTarget = CodeOutputShown.target ?? "js/solid"
  * The top bar's compiled-code button, between the code's `</>` and Inspect app (epic `editor` T76):
  * shows the compiled code beside the code, or hides it, as View › Compiled Code does.
  * - Its icon is the language it shows, `js` for JavaScript:  the one showing, else the one it'd show.
- * - Its tooltip names it, "Compiled JavaScript".
+ * - Its tooltip says what a click does, "Show Compiled JavaScript" or "Hide Compiled JavaScript" (epic `editor` I230);
+ *   its label names it, "Compiled JavaScript".
  * - A plain toggle, no menu (Owen:  "I can change it when the compiled code is visible"):
  *   the compiled code's own tabs choose the language.
  * - `aria-pressed` while the compiled code shows, as the code's icon has it (`<ModeButtons>`).
@@ -104,7 +106,11 @@ export function CompiledCodeButton(): JSX.Element {
       appearance="circular"
       class="CompiledCodeToggle"
       label={appTexts.text(look().tip)}
-      title={appTexts.text(look().tip)}
+      {...barTooltip(
+        appTexts.text(CodeOutputShown.target ? "hideCompiledTip" : "showCompiledTip", {
+          language: appTexts.text(look().text)
+        })
+      )}
       aria-pressed={CodeOutputShown.target ? "true" : "false"}
       onClick={() => CodeOutputShown.toggle()}
     />

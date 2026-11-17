@@ -248,11 +248,15 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     }
   })
 
-  /** The part menu's rows on `on`:  each one's words, and whether it's greyed, with why. */
+  /**
+   * The part menu's rows on `on`:  each one's words, and whether it's greyed, with why.
+   * - Inspect, with parts to pick at its side, is a `<ui-submenu>`:  its words are its `label`, its side menu not read.
+   */
   const menuRows = (on: Page) =>
     on.evaluate(() =>
-      [...document.querySelectorAll(".PartMenu ui-action")].map((row) => ({
-        title: row.getAttribute("kind") === "divider" ? "-" : (row.textContent ?? "").trim(),
+      [...document.querySelectorAll(".PartMenu ui-menu.BarMenuItems > :is(ui-action, ui-submenu)")].map((row) => ({
+        title:
+          row.getAttribute("kind") === "divider" ? "-" : (row.getAttribute("label") ?? row.textContent ?? "").trim(),
         grey: row.hasAttribute("disabled"),
         why: row.getAttribute("title") ?? ""
       }))
@@ -271,7 +275,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      "Inspect",
+      expect.stringMatching(/^Inspect /),
       "-",
       "Change This..."
     ])
@@ -317,7 +321,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
     await page.mouse.click(card!.x, card!.y, { button: "right" })
     await page.waitForTimeout(500)
-    await page.locator('.PartMenu ui-action:has-text("Inspect")').click()
+    // a card holds parts of its own, so Inspect is a split row:  its title inspects the card (P31)
+    await page.locator(".PartMenu ui-submenu.InspectRow [part~=title]").first().click()
     await page.waitForTimeout(800)
     const state = await page.evaluate(() => {
       const { Inspector } = window as unknown as {
@@ -336,7 +341,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const grey = rows.filter((row) => row.grey)
     expect(grey.map((row) => row.title)).toEqual(expect.arrayContaining(["Cut", "Duplicate", "Delete"]))
     expect(grey.find((row) => row.title === "Cut")!.why).toMatch(/app itself/)
-    expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
+    expect(rows.find((row) => row.title.startsWith("Inspect "))!.grey).toBe(false)
     await page.keyboard.press("Escape")
     await page.waitForTimeout(300)
   })
@@ -348,8 +353,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       // straight at the corner of the window:  the app's area stops short of it
       await page.evaluate(
         ({ x, y }) => {
-          const { PartEdits } = window as unknown as { PartEdits: { onMenu(x: number, y: number): void } }
-          PartEdits.onMenu(x, y)
+          const { PartEdits } = window as unknown as { PartEdits: { onMenu(at: { x: number; y: number }): void } }
+          PartEdits.onMenu({ x, y })
         },
         { x, y }
       )
@@ -431,7 +436,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(cut.grey).toBe(true)
     expect(cut.why).toMatch(/one line of your program/)
     expect(rows.find((row) => row.title === "Show in Code")!.grey).toBe(false)
-    expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
+    expect(rows.find((row) => row.title.startsWith("Inspect "))!.grey).toBe(false)
     await other.keyboard.press("Escape")
     await other.waitForTimeout(300)
     await other.close()
@@ -534,17 +539,18 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const rows = (selector: string) =>
       other.evaluate(
         (menu) =>
-          [...document.querySelectorAll(`${menu} :is(ui-action, ui-item)`)].map((row) =>
+          [...document.querySelectorAll(`${menu} ui-menu > :is(ui-action, ui-item, ui-submenu)`)].map((row) =>
             row.getAttribute("kind") === "divider"
               ? row.classList.contains("ProgramMenuEnd")
                 ? "="
                 : "-"
-              : ((row as { action?: { title: string } }).action?.title ?? (row.textContent ?? "").trim())
+              : ((row as { action?: { title: string } }).action?.title ??
+                (row.getAttribute("label") ?? row.textContent ?? "").trim())
           ),
         selector
       )
     // Solitaire's `<context-menu>`, then ours
-    const program = ["Auto Play", "Cheat", "Restart The Game", "-"]
+    const program = ["Auto Play", "Cheat", "Restart the Game", "-"]
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(600)
     const shown = await rows(".PartMenu")
@@ -558,7 +564,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      "Inspect",
+      expect.stringMatching(/^Inspect /),
       "-",
       "Change This..."
     ])
@@ -733,6 +739,138 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
+  test("Inspect Card:  its title inspects the card;  its right end lists every part under the mouse, which rings and selects (P31)", async () => {
+    const other = await context.newPage()
+    await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
+    await other.waitForTimeout(7000)
+    // a face-up card on top of its pile, with a picture inside it:  where a right click lands on all of them
+    const at = await other.evaluate(() => {
+      const cards: Element[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === "solitaire-card" && !element.nextElementSibling) cards.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      const PICTURE = "solitaire-card-image"
+      // the last column's top card:  face up, fanned over the cards under it
+      const card = cards
+        .filter((each) => {
+          const { top, bottom, width } = each.getBoundingClientRect()
+          return width && top > 0 && bottom < innerHeight && each.shadowRoot?.querySelector(PICTURE)
+        })
+        .at(-1)!
+      Object.assign(window, { theCard: card })
+      const { Inspector } = window as unknown as { Inspector: { letGo(): void } }
+      Inspector.letGo()
+      const { x, y, width, height } = card.getBoundingClientRect()
+      return { x: x + width / 2, y: y + height / 2 }
+    })
+    const inspectRow = other.locator("ui-popup.PartMenu ui-submenu.InspectRow")
+    /** What's selected last, as the card or its picture. */
+    const selected = () =>
+      other.evaluate(() => {
+        const { Inspector, theCard } = window as unknown as {
+          Inspector: { allSelected: { element?: Element }[]; isOpen: boolean }
+          theCard: Element
+        }
+        const element = Inspector.allSelected.at(-1)?.element
+        const which =
+          element === theCard ? "card" : theCard.shadowRoot!.contains(element!) ? element!.localName : "other"
+        return { which, count: Inspector.allSelected.length, isOpen: Inspector.isOpen }
+      })
+
+    // its row names the card's type;  a click on its title inspects the card
+    await other.mouse.click(at.x, at.y, { button: "right" })
+    await other.waitForTimeout(600)
+    expect(await inspectRow.getAttribute("label")).toBe("Inspect Card")
+    await inspectRow.locator("[part~=title]").first().click()
+    await other.waitForTimeout(800)
+    expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
+    expect(await selected()).toEqual({ which: "card", count: 1, isOpen: true })
+
+    // its right end:  every part under the mouse, outermost first, the card's picture inside it
+    await other.mouse.click(at.x, at.y, { button: "right" })
+    await other.waitForTimeout(600)
+    await inspectRow.locator("[part~=chevron]").first().hover()
+    await other.waitForTimeout(600)
+    expect(await inspectRow.evaluate((row) => row.matches(":state(open)"))).toBe(true)
+    const rows = await inspectRow.locator(":scope > ui-action").evaluateAll((actions) =>
+      actions.map((action) => ({
+        title: action.textContent!.trim(),
+        depth: Number((action as HTMLElement).style.getPropertyValue("--InspectRow-depth")),
+        ticked: action.getAttribute("selected") !== "false" && action.hasAttribute("selected")
+      }))
+    )
+    const card = rows.findIndex((row) => row.ticked)
+    expect(rows.length).toBeGreaterThanOrEqual(4)
+    expect(rows[0]!.depth).toBe(0)
+    expect(rows[card]!.title).toMatch(/^Card /)
+    // the pile round it (a column) just before it, a level out;  its picture after it, a level in
+    expect(rows[card - 1]!).toMatchObject({ title: expect.stringMatching(/^Column /), depth: rows[card]!.depth - 1 })
+    expect(rows[card + 1]!.depth).toBe(rows[card]!.depth + 1)
+    // a tree:  each row at most one level in from the row above
+    expect(rows.every((row, index) => index === 0 || row.depth <= rows[index - 1]!.depth + 1)).toBe(true)
+
+    // pointing at the picture rings it;  choosing it selects it, and the properties card shows it
+    const picture = inspectRow.locator(":scope > ui-action").nth(card + 1)
+    await picture.hover()
+    await other.waitForTimeout(300)
+    expect(
+      await other.evaluate(() => {
+        const { theCard } = window as unknown as { theCard: Element }
+        const image = theCard.shadowRoot!.querySelector("solitaire-card-image:not([hidden])")!
+        const box = document.querySelector<HTMLElement>(".InspectorHover")
+        return image.hasAttribute("data-inspect-hover") || (!!box && !box.hidden)
+      })
+    ).toBe(true)
+    await picture.click()
+    await other.waitForTimeout(800)
+    expect(await selected()).toEqual({ which: "solitaire-card-image", count: 1, isOpen: true })
+    expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
+
+    // on the app's background, nothing under it but the app:  a plain row
+    const area = (await other.locator(".AppPaneBody").boundingBox())!
+    await other.mouse.click(area.x + area.width - 12, area.y + area.height - 12, { button: "right" })
+    await other.waitForTimeout(600)
+    expect(await inspectRow.count()).toBe(0)
+    expect(await other.locator('ui-popup.PartMenu ui-action:has-text("Inspect")').count()).toBe(1)
+    await other.keyboard.press("Escape")
+    await other.waitForTimeout(300)
+
+    // C3:  with Inspect app on, a long press opens the same menu, for the card;  no drag, and the press selects nothing
+    await other.evaluate(() => {
+      const { Inspector } = window as unknown as { Inspector: { letGo(): void; startInspecting(): void } }
+      Inspector.letGo()
+      Inspector.startInspecting()
+    })
+    await other.waitForTimeout(300)
+    await other.mouse.move(at.x, at.y)
+    await other.mouse.down()
+    await other.waitForTimeout(900)
+    expect(await inspectRow.getAttribute("label")).toBe("Inspect Card")
+    await other.mouse.up()
+    await other.waitForTimeout(300)
+    expect(await other.locator("ui-popup.PartMenu").count()).toBe(1)
+    expect(
+      await other.evaluate(() =>
+        [...document.body.children].some((element) => /grabbing/.test((element as HTMLElement).style.cssText))
+      )
+    ).toBe(false)
+    await other.keyboard.press("Escape")
+    // a press that moves is no long press
+    await other.mouse.move(at.x, at.y)
+    await other.mouse.down()
+    await other.mouse.move(at.x + 30, at.y + 30, { steps: 4 })
+    await other.waitForTimeout(900)
+    expect(await inspectRow.count()).toBe(0)
+    await other.mouse.up()
+    await other.keyboard.press("Escape")
+    await other.close()
+  })
+
   test("in Edit, the game's own right-click menu comes first, a thick line, then the editor's (T120)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
@@ -764,11 +902,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
             return element.classList.contains("ProgramMenuEnd") ? "=====" : "---"
           }
           const { action } = element as Element & { action?: { title: string } }
-          const title = action?.title ?? element.textContent!.trim()
+          const title = action?.title ?? element.getAttribute("label") ?? element.textContent!.trim()
           return element.matches(":state(disabled)") ? `${title} (off)` : title
         })
       )
-    const game = ["Auto Play", "Cheat", "Restart The Game", "---"]
+    const game = ["Auto Play", "Cheat", "Restart the Game", "---"]
 
     for (const at of [pile, card]) {
       await other.mouse.click(at.x, at.y, { button: "right" })
@@ -786,7 +924,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         "Delete",
         "---",
         "Show in Code",
-        "Inspect"
+        expect.stringMatching(/^Inspect /)
       ])
       await other.keyboard.press("Escape")
       await other.waitForTimeout(300)

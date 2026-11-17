@@ -596,6 +596,34 @@ describe("<ui-popup> positioning", () => {
     }
   })
 
+  it("bottom center by the window's right edge:  slides left to stay inside it, its arrow still at the target", async () => {
+    const { host, wrapper } = await popup(
+      `<button style="position: fixed; top: 0; right: 4px; width: 24px">T</button>` +
+        `<ui-popup open-on="manual" visible position="bottom center">Theme and light / dark:  Fruity, Light</ui-popup>`
+    )
+    await settle()
+    const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=popup]")!
+    await Promise.all(root.getAnimations().map((animation) => animation.finished))
+    const box = root.getBoundingClientRect()
+    const anchor = wrapper.querySelector("button")!.getBoundingClientRect()
+    expect(host.style.getPropertyValue("position-try-fallbacks")).toContain("span-left bottom")
+    expect(box.right).toBeLessThanOrEqual(document.documentElement.clientWidth)
+    expect(box.left).toBeGreaterThanOrEqual(0)
+    expect(box.top).toBeGreaterThanOrEqual(anchor.bottom)
+    if (UI.browser.supports.anchoredQueries) {
+      const arrow = getComputedStyle(root, "::before")
+      const arrowMiddle = box.right - Number.parseFloat(arrow.right) - Number.parseFloat(arrow.width) / 2
+      expect(arrowMiddle).toBeGreaterThan(anchor.left)
+      expect(arrowMiddle).toBeLessThan(anchor.right)
+    }
+  })
+
+  it("other positions keep the sheet's flips:  no fallbacks of their own", async () => {
+    const { host } = await popup(`<button>Target</button><ui-popup open-on="manual" visible>Tip</ui-popup>`)
+    await settle()
+    expect(host.style.getPropertyValue("position-try-fallbacks")).toBe("")
+  })
+
   it("anchors to the inner box of a target without one (display: contents, e.g. <ui-icon>)", async () => {
     const { host, wrapper, root } = await popup(
       `<ui-icon id="i" name="circle-info" label="Info"></ui-icon><ui-popup for="i" open-on="manual" visible>Tip</ui-popup>`

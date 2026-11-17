@@ -496,7 +496,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           address in the config (`contentRemote`);  a later person's clones it where the epic folder is missing
           (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
           says how to get it and does the rest
-        - the install command a new worktree runs (epic `epic-engine` P71:  harbor's `uv.lock` gave `uv sync`, which
+        - the install command a new worktree runs (epic `epic-engine` P71:  a work repo's `uv.lock` gave `uv sync`, which
           left out its development tools):  asked in a terminal (`installChoice()`), suggesting
           `EpicConfig.installSuggestionOf()`'s, the first whole command in the repo's README.md, AGENTS.md or
           CONTRIBUTING starting with the lock file's (`uv sync --all-packages --all-extras`), else the lock file's;

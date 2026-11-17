@@ -248,6 +248,60 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
   }
 
   ////////////////
+  // ## The preview's width
+  ////////////////
+
+  /**
+   * The preview holds a child that sizes itself by its own width:  so its children take the whole line.
+   * - Such a child (`<ui-page-layout>`, `<ui-form>`, `<ui-table>` ...) measures its width to lay itself out
+   *   (inline-size containment), so the browser never takes its width from what's inside it.
+   * - In the preview's wrapping flex row, which sizes each child by its contents, that's 0 wide (epic `mockup` I34).
+   * - A row of buttons keeps its own widths.
+   */
+  @E.cssState("wide-preview") @E.state accessor hasWideChild = false
+
+  /**
+   * SIDE EFFECT:  while drawn with its playground, checks the slotted children again
+   * whenever one is added, removed or resized, or finishes loading its styles;  the cleanup stops.
+   */
+  @E.onChange("isReady", "playground")
+  protected onPreviewShown(isReady: boolean, playground: boolean | undefined) {
+    const slot = this.previewBox?.querySelector("slot")
+    if (!isReady || !playground || !slot) return
+    const stop = new AbortController()
+    const resizes = new ResizeObserver(() => this.checkChildWidths(slot))
+    const watchChildren = () => {
+      for (const child of slot.assignedElements()) {
+        resizes.observe(child)
+        // a child's sheet may land after it's slotted:  its containment shows only then
+        void (child as Partial<E.DOMElement>).ready?.then(() => this.checkChildWidths(slot)).catch(() => {})
+      }
+      this.checkChildWidths(slot)
+    }
+    watchChildren()
+    slot.addEventListener("slotchange", watchChildren, { signal: stop.signal })
+    return () => {
+      stop.abort()
+      resizes.disconnect()
+    }
+  }
+
+  /** Set `hasWideChild`:  does a slotted child, or one of its own children, size itself by its width? */
+  private checkChildWidths(slot: HTMLSlotElement) {
+    this.hasWideChild = slot
+      .assignedElements()
+      .some((child) => [child, ...child.children].some((element) => UIDocsTokens.isWidthContainer(element)))
+  }
+
+  /**
+   * Does `element` measure its own width (`container-type` `inline-size` or `size`)?
+   * - One level down too, from `checkChildWidths()`:  a resizable box around a `<ui-page>` sizes by it.
+   */
+  private static isWidthContainer(element: Element): boolean {
+    return WIDTH_CONTAINER.test(getComputedStyle(element).containerType)
+  }
+
+  ////////////////
   // ## Rendering
   ////////////////
 
@@ -474,6 +528,9 @@ const BAR_CLASS = "bar"
 
 /** Class word of the preview's box. */
 const PREVIEW_CLASS = "preview"
+
+/** `container-type`s that measure an element's own width:  `inline-size` and `size` (with `scroll-state` too). */
+const WIDTH_CONTAINER = /\b(inline-size|size)\b/
 
 /** Class word of the filter input. */
 const SEARCH_CLASS = "search"

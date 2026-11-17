@@ -8,7 +8,7 @@ import { SPACES } from "spell/app/spaces"
 const PICTURE = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff])
 
 /** The group the tests' projects are in:  this machine's person's. */
-const GROUP = `${SPACES.LOCAL_PERSON}@${SPACES.HOME_ORG}`
+const GROUP = SPACES.localPerson.address
 
 /** Files the editor lists as a project's own (the server's `isManifestFile()`, in short). */
 const LISTED = /\.(spell|css|js)$/
@@ -167,5 +167,36 @@ describe("SpellProjectRoot:  File > Export, then Import", () => {
       `${GROUP}/texts-only/${SP.PROJECT_FILE}`
     ])
     expect(server.files.get(`${GROUP}/texts-only/${SP.PROJECT_FILE}`)).toContain("Texts Only!")
+  })
+})
+
+describe("SpellProjectRoot:  a new project from a starter", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test("a site (epic `mockup` T40):  its site file, then its main page layout and its home page", async () => {
+    const server = new PretendServer()
+    vi.spyOn(LoadableFile, "fetch").mockImplementation(server.fetch)
+    const project = await SPACES.SpellProjectRoot.projects.createFrom("site")
+    expect(project.projectId).toBe(`${GROUP}/my-site`)
+    expect(project.files.map((file) => file.filePath)).toEqual([
+      "/MySite.site.spell",
+      "/main.page-layout.spell",
+      "/home.spell"
+    ])
+    expect(server.files.get(`${GROUP}/my-site/main.page-layout.spell`)).toBe(
+      SPACES.STARTER_PROGRAMS.site.alongside[0].contents
+    )
+    expect(server.files.get(`${GROUP}/my-site/MySite.site.spell`)).toMatch(/^# My Site$/m)
+  })
+
+  test("a plain app makes its one file", async () => {
+    const server = new PretendServer()
+    vi.spyOn(LoadableFile, "fetch").mockImplementation(server.fetch)
+    const project = await SPACES.SpellProjectRoot.projects.createApp(`${GROUP}/plain`)
+    expect(project.projectId).toBe(`${GROUP}/plain`)
+    expect([...server.files.keys()]).toEqual([`${GROUP}/plain/${SPACES.STARTER_PROGRAMS.blank.fileName}`])
+    expect(server.asked.filter((each) => each.includes("/create/file"))).toEqual([])
   })
 })

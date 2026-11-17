@@ -59,14 +59,19 @@ ui-item.spring::part(item) {
  * the file bar's, the Inspector card's, the compiled code's, ONE look.
  * - Its values are tokens, so a ✕ drawn in a view's shadow root (the file bar's, `SpellEditor.spell`'s `.HideCode`)
  *   reads the same ones:  this sheet can't reach in there.
- * - Light, the theme's muted ink, until hovered;  then the text's.
+ * - Light until hovered or focused, half the theme's muted ink;  then the text's, fading in (I233, Owen:
+ *   "Make lighter when not hovered").
+ * - 12px from its panel's right edge, to the drawn ✕:  the bar's 8px, then 4px of its own (I233, Owen:
+ *   "too close to right edge";  8px since I213).
  * - The bar's own size, right after the button beside it, as the file bar's always was (3px between what's drawn).
  * - A panel's action beside its bar, not in it (`<InspectorCard close>`):  so the room before it is the same in each.
  */
 :root {
-  --spell-panel-close-color: var(--ui-text-muted);
+  --spell-panel-close-color: color-mix(in oklab, var(--ui-text-muted) 50%, transparent);
   --spell-panel-close-hover-color: var(--ui-text-color);
   --spell-panel-close-gap: 0px;
+  --spell-panel-close-end: 4px;
+  --spell-panel-close-fade: 120ms ease-out;
 }
 ui-icon.PanelClose {
   /* a box of its own (a `<ui-icon>` is `display: contents`):  its margin and its tooltip need one */
@@ -77,11 +82,12 @@ ui-icon.PanelClose {
   --ui-icon-distance: 0;
   flex: none;
   align-self: center;
-  margin-inline: var(--spell-panel-close-gap) 0;
+  margin-inline: var(--spell-panel-close-gap) var(--spell-panel-close-end);
   color: var(--spell-panel-close-color);
+  transition: color var(--spell-panel-close-fade);
   cursor: var(--ui-control-cursor, pointer);
 }
-ui-icon.PanelClose:hover {
+ui-icon.PanelClose:is(:hover, :focus-visible, :focus-within) {
   color: var(--spell-panel-close-hover-color);
 }
 
@@ -113,11 +119,17 @@ ui-icon.IconAction {
   --ui-section-tip-background: var(--spell-tooltip-background);
   --ui-section-tip-color: white;
 }
-/* the palette's tip, a popup:  the same colours, and the same two seconds' wait (a popup's own is 800ms) */
+/*
+ * The top bar's and the Add View bar's tooltips (`barTooltip()`, epic `editor` I217), the palette's tip, a popup, among
+ * them:  the same colours, after the page's hover pause (`--ui-hover-delay`, 800ms;  the palette's waited 2s until I217)
+ */
 ui-item.ThemeMenu ui-theme-menu {
-  --ui-hover-delay: 2s;
   --ui-popup-inverted-background: var(--spell-tooltip-background);
   --ui-popup-inverted-color: white;
+}
+#app-root [data-tooltip][data-inverted] {
+  --ui-tooltip-background: var(--spell-tooltip-background);
+  --ui-tooltip-color: white;
 }
 
 /* Scrollbars:  a grey thumb on no track of its own, so a pane's fill runs to its edge
@@ -332,7 +344,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
 }
 
 /*
- * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
+ * `<PublishDraft>`:  ONE pill just left of the modes' group (T102:  "Move `draft` panel to the left of run"), the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
  * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside the pill
@@ -351,7 +363,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   gap: var(--spell-bar-icon-gap, 12px);
   box-sizing: border-box;
   block-size: var(--spell-draft-height);
-  margin-inline-start: var(--spell-bar-icon-gap, 12px);
+  margin-inline-end: var(--spell-bar-icon-gap, 12px);
   padding: var(--spell-draft-inset) 12px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);

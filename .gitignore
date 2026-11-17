@@ -23,6 +23,8 @@ PARKED-*.md
 .spell-server.*.json
 # the MAIN checkout's marker:  worktree windows hide its folder's files (spell-epic's window script)
 /.spell-main
+# who's at this machine, as the editor asked (app's spaces, localPerson.ts;  epic repo-split P27):  never committed
+/.spell/
 
 # the declarations the kit builds for the repos above it (`spell-types`, epic repo-split I12):  never committed
 dist-types/

@@ -153,6 +153,8 @@ function Divider(): JSX.Element {
  * - `useRunner`:  the one chosen opens in Run.
  * - The Spell UI site's:  "Spell Notebooks".
  * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
+ * - SEE:  its App UI components page, with the bar's other menus,
+ *   `app/docs/MenuBar.html` (`/components/app/MenuBar.html`).
  ****************/
 export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
   const root = trackProjectRoot(() => undefined)
@@ -340,7 +342,8 @@ function ThemeItems(): JSX.Element {
  *   Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards.
  * - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File.
  * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
- * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
+ * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─,
+ *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
  * - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own.
  * - `mode`:  the page's, ticked in View.
@@ -371,6 +374,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
     inspectorOpen: Inspector.isOpen,
     lineNumbersShowing: LineNumbers.isShowing,
+    softWrapping: CodeSettings.choices.wrapLines,
     inspecting: Inspector.isInspecting,
     siteReady: EditorMode.hasSite,
     consoleEmpty: !runtimeConsole()?.lines.length
@@ -590,6 +594,8 @@ function handOverActions(spell: EditorSpell) {
     showProgramPanel: () => toggleProgramPanel(app.running ? "run" : "edit"),
     showInspector: () => Inspector.showOrHide(),
     showLineNumbers: () => LineNumbers.toggle(),
+    // the same choice as Code Editor Settings…' Wrap long lines:  one preference, so both agree
+    softWrap: () => CodeSettings.choose("wrapLines", !CodeSettings.choices.wrapLines),
     compileAndRun: () => editor.compileApp(),
     restart: () => editor.restartApp(),
     inspectApp: () => startInspecting(),

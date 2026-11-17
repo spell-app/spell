@@ -1059,7 +1059,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app serve [project]` | starts the Spell editor and the kit's page server, and opens the editor on a project, until `Ctrl-C` |
 | `spell app vscode [build \| install]` | builds the VS Code language extension, `spell-language.vsix`, and installs it;  no verb does both |
 | `spell app preview build` | builds the editor as plain files any web host serves, with the examples and guides compiled in:  a visitor's edits stay in their browser, until "Reset Example" |
-| `spell app preview viewer <folder> <project...>` | writes `<spell-viewer>` alone (run mode, no editor) and those projects, compiled, into a site's folder, at the paths the page server would answer (`element/`, `spaces/<project>/`);  `--editor` adds `<spell-editor>` and each project's index, for `<spell-editor static>`, which saves nothing |
+| `spell app preview viewer <folder> <project...>` | writes `<spell-viewer>` alone (run mode, no editor), `<spell-code>` for Spell shown in the bubbly look, and those projects, compiled, into a site's folder, at the paths the page server would answer (`element/`, `spaces/<project>/`);  `--editor` adds `<spell-editor>` and each project's index, for `<spell-editor static>`, which saves nothing |
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
 | `spell space takedown hide \| delete \| restore <target> --reason <words>` | for Spell's admins:  takes down a space's folder (`@family/cookbook`), one thing of it (`--record recipes/r-1`) or an account (`ana@spell`), or puts it back, the reason logged beside it;  `list <target>` prints that log |
 | `spell space backup now \| list \| status \| restore <space>` | every space's nightly backups, on this machine, a week kept:  makes one now, lists them, says if a night was missed (exits 1), or brings one space back (`--from <backup>`, default the newest) |
@@ -1113,6 +1113,7 @@ owen@spell       Projects       ...
 | Option | What it does |
 | --- | --- |
 | `spell app create <name> --in <folder>` | makes it in that folder instead of your own space |
+| `spell app create <name> --site` | makes a site instead:  `<name>.site.spell`, its main page layout `main.page-layout.spell`, and a `home.spell` page, as the editor's Site card does |
 | `spell app serve <project>` | opens the editor on that project, e.g. `@spell/examples/Solitaire`;  default:  the project here, else the chooser |
 | `spell app serve --port <n>` | the editor's port, for a page server this starts;  default 3000, else any free one |
 | `spell app serve --headless` | doesn't open a browser:  just prints the address |
@@ -1270,7 +1271,7 @@ After an unknown command it adds `(spell help lists the commands)`.
   loading it would write one there (`projectUtils.getIndex()`).
 - Loading any project may still rewrite its project file, if its imports are out of step with its files:
   `getIndex()` does that, the same as in the app.
-- `app create` writes its two files itself, never through `getIndex()`, which would add an `Untitled.spell`.
+- `app create` writes its files itself (two, or a site's four), never through `getIndex()`, which would add an `Untitled.spell`.
 - `ssr` and the `pack` verbs write what their tables above say, never over a page or a file that's there.
   - `pack create` also adds the new repo's yarn scripts to the commands page's data;  the kit itself needs no wiring.
   - So on `main` the commands check names the new scripts as missing until the branch merges.

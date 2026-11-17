@@ -278,7 +278,7 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(getComputedStyle(label).display).toBe("none")
   })
 
-  it("a group's icon shows before its label, its pages 8px in, inside an open group's well;  `collapsed`, one column, centred, an iconless group a line (I20, I31)", async () => {
+  it("a group's icon shows before its label, its pages 8px in, inside an open group's well;  `collapsed`, one column, the icons where they were, an iconless group a line (I20, I31, C1)", async () => {
     const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
     const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
     await ShadowTree.settle(host)
@@ -305,9 +305,23 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(getComputedStyle(row(host, "Run")).outlineStyle).toBe("none")
     // Run, with no icon, keeps an icon's room beside Design's
     expect(row(host, "Run").querySelector(':scope > [slot="icon"]')).not.toBeNull()
+    /** The middle of a row's icon as drawn, from the nav's edge:  `<ui-icon>`'s own box takes no room. */
+    const iconMiddle = (title: string) => {
+      const iconHost =
+        row(host, title).shadowRoot!.querySelector(".icon") ?? row(host, title).querySelector('[slot="icon"]')!
+      const icon = (iconHost.shadowRoot?.querySelector(".icon") ?? iconHost).getBoundingClientRect()
+      return icon.left + icon.width / 2 - host.getBoundingClientRect().left
+    }
+    const designIcon = iconMiddle("Design")
     host.setAttribute("collapsed", "")
     await ElementFixture.settle()
-    // collapsed:  no step in, the same room on both sides, each icon centred in its row (Owen, I31)
+    // collapsed, a group's label's icon where it was with all of it shown (Owen, C1 on J161:  "keep the same left
+    // padding in open and closed modes");  its pages no step in (I31)
+    expect(iconMiddle("Design")).toBeCloseTo(designIcon, 1)
+    // ... a page's within a pixel of it:  its text a little bigger than a label's
+    expect(Math.abs(iconMiddle("Explore") - designIcon)).toBeLessThan(1)
+    // ... the same room on both sides (Owen, I31), each icon at its row's start:  in a drawer as narrow as its icons,
+    // the middle of its row
     for (const title of ["Design", "Explore"]) {
       const style = getComputedStyle(rowOf(title))
       expect(style.paddingInlineStart).toBe(style.paddingInlineEnd)
@@ -317,7 +331,7 @@ describe("<ui-site-nav> pages' extras", () => {
         row(host, title).shadowRoot!.querySelector(".icon") ?? row(host, title).querySelector('[slot="icon"]')!
       const icon = (iconHost.shadowRoot?.querySelector(".icon") ?? iconHost).getBoundingClientRect()
       expect(icon.width).toBeGreaterThan(0)
-      expect(Math.abs(icon.left - box.left - (box.right - icon.right))).toBeLessThan(1)
+      expect(icon.left - box.left).toBeCloseTo(parseFloat(style.paddingInlineStart), 0)
     }
     const runRow = row(host, "Run").shadowRoot!.querySelector('[part~="row"]')!
     expect(getComputedStyle(runRow).backgroundImage).toContain("gradient")

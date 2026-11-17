@@ -97,14 +97,27 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `@spell/examples`, `@spell/library`, `@spell/guides`, `@spell/sites` | `spaces/@spell/<group>/`, committed |
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
+  | `alice@acme`, this machine's person in another org | spell.spaces' `@acme/alice@/`, outside git (epic `repo-split` P27) |
+  | `@acme/tools`, an org's own group | spell.spaces' `@acme/tools/`:  found as the server starts (`orgGroupsIn()`), listed on the home page (`SPACES.orgGroups`, P27) |
+  | `ana@acme`, any other person's space | spell.spaces' `@acme/ana@/`:  found by its address (`personSpaceGroup()`), opened but not listed (epic `repo-split` P26) |
 
   - spell.spaces:  beside the kit's main checkout (`~/www/spell.spaces`):
     ONE folder for main and every worktree.
     - It was `../spell-spaces` before epic `repo-split` P8.
     - `SPELL_SPACES_DIR` sets it.
     - Laid out by org, each person's space inside it:  `owen@spell/errors` is `@spell/owen@/errors/`.
-  - `SPACES.LOCAL_PERSON` is `owen`:  who this machine's person is, until a machine can have more than one person.
-    - `SPACES.HOME_ORG` is their org for now, spell:  so their space is `@spell/owen@/`.
+  - THIS MACHINE'S PERSON, `SPACES.localPerson` (epic `repo-split` P27):  whose space its own projects are in.
+    - Read on the server by ONE function, `thisMachinesPerson()` ([localPerson.ts](server/node/people/localPerson.ts)):
+      - the org:  the APP's `package.json`, `"spell": { "org": "acme" }`;  left out, `spell`
+        - the app:  the project the page server was started for (`appDir()`):  the kit in a checkout,
+          the project `yarn` ran in from an install (acme-spell);  `SPELL_APP_DIR` sets it
+      - the person:  the app's `.spell/me.json5`, git-ignored, `{ person: "alice" }`
+        - none, in a source checkout:  `owen`, so Owen's kit is `owen@spell` with no question
+        - none, from an install:  nobody yet;  the editor's first page asks their name (`<NamePage>`)
+    - The browser reads it from `GET /api/people/local` before it draws anything, and sets it (`setLocalPerson()`).
+    - `SPACES.SPELL_ORG`, `spell`, is Spell's own org:  where Spell accounts and Spell admins are, whatever this
+      machine's person's org.
+    - The static build's is `you@spell`.
   - A project's address:  its group's address, a slash and its folder's name, lower-kebab (P4, decision Q39).
     - Or as titled, as Solitaire's is, and its Spanish twin's:  `Solitaire`, `Solitario`.
       Owen's call, in epic `spanish` P11.
@@ -424,9 +437,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Its sessions and caught mail are in `environment.signInDir`.
       - Default `~/.spell/sign-in`;  `SPELL_SIGN_IN_DIR` sets it.
 - Its routes ([peopleRoutes.ts](server/node/people/peopleRoutes.ts)), what the app's "You" panel calls:
-  - `GET /api/people/me`:  whoever's signed in, else this machine's person (`SPACES.LOCAL_PERSON`);
+  - `GET /api/people/me`:  whoever's signed in, else this machine's person (`thisMachinesPerson()`);
     their orgs and roles, their file's problems
   - `POST /api/people/me`:  their changes written, answered as `GET`
+  - `GET /api/people/local`:  who's at this machine (`LocalPersonAnswer`):  their id once named, their org, its groups and
+    people in spell.spaces, git's email;  `POST` with `{ id }` names them (the app's me file and their `__me.json5`)
   - The answers' types:  [people.ts](models/people.ts), safe in a browser.
 
 ## Preferences
@@ -492,6 +507,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `/editor`
   - It starts the editor once the page server listens, and stops it with the page server:
     [EditorServer.ts](server/node/routes/EditorServer.ts), vite's dev server, run in `app/`.
+    - In an npm install of `spell`:  the BUILT editor (`app/dist/`, `yarn build`, which `spell publish` ships), on a
+      small server of its own passing the page server's paths on as vite's proxy does, the ONE list of them in
+      [editorPaths.ts](server/node/routes/editorPaths.ts) (epic `repo-split` P26).
+    - Never the house-network site from an install:  only a source checkout starts it.
   - The house-network test site the same way:  [LocalSiteServer.ts](server/node/routes/LocalSiteServer.ts),
     the cloud and Caddy, from the main checkout's page server alone, on a Mac `spell space local setup` has set up
     (epic `atmosphere` T58).

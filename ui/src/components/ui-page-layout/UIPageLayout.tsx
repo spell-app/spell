@@ -55,8 +55,11 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *   - so the drawer and the menu read as one surface, the bar beside the drawer's top with no line between them
  *   - the drawer's line starts under the menu, the menu's own line turning into it (epic `mockup` I25)
  * - `drawer="compact"`:  the drawer shows only its icons, as the layout sets `collapsed` on each `<ui-site-nav>` in it.
- *   - The pointer resting on it a moment (0.1s), or the keyboard's focus coming into it, opens it over the page,
- *     all of it, without pushing the page:  its column keeps its width.  Leaving it closes it, a moment later.
+ *   - The pointer resting on it half a second, or the keyboard's focus coming into it, opens it over the page,
+ *     all of it, the whole height of its column, without pushing the page:  its column keeps its width.
+ *     Leaving it closes it, a moment later (0.15s).
+ *   - Its icons stay where they are as it opens and closes:  the navigation keeps their room at the start the same
+ *     either way (`UISiteNav.css`, epic `mockup` C1 on J161).
  *   - It grows out from the column's edge and shrinks back into it;  switched to all of it and back, the column
  *     widens and narrows (`UIPageLayout.css`, "Motion").
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the start
@@ -292,9 +295,10 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   private cancelWidening: (() => void) | undefined
 
   /**
-   * The pointer came onto the compact drawer:  open it after a moment (`OPEN_DELAY`), or stay open.
+   * The pointer came onto the compact drawer:  open it after half a second (`OPEN_DELAY`), or stay open.
    * - Not the page's hover delay (`--ui-hover-delay`, 800ms) for pop-ups:  the drawer is where the pointer goes on
    *   purpose, and waiting that long for it read as broken (epic `mockup` I26).
+   * - Nor at once (0.1s, J161):  passing over it on the way to the page opened it (Owen, C1:  "a 1/2 second hover").
    */
   private onDrawerEnter(event: PointerEvent) {
     if (!this.isCompact || this.isNarrow || event.pointerType === "touch") return
@@ -331,11 +335,19 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     this.isOpen = true
   }
 
-  /** Its inline style:  the compact column's kept width, while it's open over the page, moving, or about to widen. */
+  /**
+   * Its inline style:
+   * - the compact column's kept width, while it's open over the page, moving, or about to widen
+   * - the menu's height, for the navigations in the drawer to line their first row up with it (`menuHeight`)
+   */
   get layoutStyle(): Record<string, string | undefined> {
     const isHeld = (this.isCompact && !this.isNarrow && (this.isOpen || this.isMoving)) || this.isWidening
     const width = isHeld ? this.compactWidth : undefined
-    return { [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px` }
+    const menuHeight = this.has("menu") ? this.menuHeight : undefined
+    return {
+      [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px`,
+      [NAV_BAR_HEIGHT]: menuHeight ? `${menuHeight}px` : undefined
+    }
   }
 
   ////////////////
@@ -346,9 +358,13 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   @E.whileConnected
   protected watchWidth() {
     if (isServer) return
-    const resized = new ResizeObserver(() => (this.isNarrow = this.isSlidOver()))
+    const resized = new ResizeObserver(() => {
+      this.isNarrow = this.isSlidOver()
+      this.measureMenu()
+    })
     resized.observe(this.domElement)
     if (this.drawerColumn) resized.observe(this.drawerColumn)
+    if (this.menuBox) resized.observe(this.menuBox)
     this.resized = resized
     return () => {
       resized.disconnect()
@@ -356,13 +372,39 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     }
   }
 
-  /** What watches its box and the drawer's column for a new size, while connected. */
+  /** What watches its box, the drawer's column and the menu for a new size, while connected. */
   private resized: ResizeObserver | undefined
 
   /** The drawer's column was drawn:  watch it too, as it's what goes narrow. */
   private drawerColumnDrawn(column: HTMLElement) {
     this.drawerColumn = column
     this.resized?.observe(column)
+  }
+
+  ////////////////
+  // ## The menu beside the drawer's top
+  ////////////////
+
+  /**
+   * The menu's height, in pixels, while it's drawn:  the navigations in the drawer line their first row up with it,
+   * its icon on the menu's middle, beside the drawer's button (epic `mockup` I35, `--ui-site-nav-bar-height`).
+   */
+  @E.state accessor menuHeight: number | undefined = undefined
+
+  /** The menu's box, while drawn. */
+  private menuBox: HTMLElement | undefined
+
+  /** The menu's box was drawn:  watch it for a new height. */
+  private menuDrawn(box: HTMLElement) {
+    this.menuBox = box
+    this.resized?.observe(box)
+    this.measureMenu()
+  }
+
+  /** Read the menu's height again:  none while it isn't on the page. */
+  private measureMenu() {
+    const box = this.menuBox
+    this.menuHeight = box?.isConnected ? box.getBoundingClientRect().height || undefined : undefined
   }
 
   /** Is the drawer slid over the page, rather than beside it?  Its style says (`UIPageLayout.css`). */
@@ -467,7 +509,11 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   private region(name: Exclude<Region, "drawer">): JSX.Element {
     return (
       <Show when={this.has(name)}>
-        <div class={name} part={this.partForName(name)}>
+        <div
+          class={name}
+          part={this.partForName(name)}
+          ref={(box: HTMLElement) => (name === MENU ? this.menuDrawn(box) : undefined)}
+        >
           <slot name={this.slotForName(name)} />
         </div>
       </Show>
@@ -500,11 +546,18 @@ const NAV_BUTTON = "ui-site-nav-button"
 /** The private custom property holding the compact column's kept width (`UIPageLayout.css`). */
 const COMPACT_WIDTH = "--_page-layout-compact-width"
 
+/** The menu's region, whose height the navigations in the drawer line their first row up with. */
+const MENU = "menu"
+
+/** `<ui-site-nav>`'s token for the height of the bar beside its top:  the menu's, set on the layout's box. */
+const NAV_BAR_HEIGHT = "--ui-site-nav-bar-height"
+
 /**
  * How long, in seconds, the pointer rests on the compact drawer before it opens:  long enough that passing over it
- * on the way somewhere else doesn't open it, short enough to feel at once.
+ * on the way somewhere else doesn't open it (Owen, epic `mockup` C1 on J161:  "Change to a 1/2 second hover").
+ * - The keyboard's focus opens it at once (`onDrawerFocusIn()`).
  */
-const OPEN_DELAY = 0.1
+const OPEN_DELAY = 0.5
 
 /** How long, in seconds, the pointer is off the open compact drawer before it closes:  a slip off its edge doesn't. */
 const CLOSE_DELAY = 0.15

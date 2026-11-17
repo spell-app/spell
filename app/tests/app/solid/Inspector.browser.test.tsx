@@ -5,6 +5,7 @@ import { render } from "@solidjs/web"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 import { PropertyLayouts } from "spell/ui/property"
+import { editorPrefs } from "spell/app/app/editorPrefs"
 import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell/app/app/solid"
 
 /**
@@ -501,6 +502,46 @@ describe("the cards' heights (I140)", () => {
     // as it was, for the other tests
     Inspector.toggleFolded("views")
     flush()
+  })
+
+  test("the last open card reaches the column's bottom whatever sizes were remembered, after a drag and a fold (I228)", async () => {
+    // sizes kept in px, as an older editor kept a drag:  each card held at a height, the room under them empty
+    const sizesKey = "spellEditor-inspectorCards-properties,code-folded,views-nothingSelected"
+    editorPrefs.set(sizesKey, "200px,40px,300px")
+    cleanups.push(() => editorPrefs.forget(sizesKey))
+    const host = await mount(() => <InspectorColumn />)
+    host.className = "SpellPage"
+    Inspector.toggle()
+    flush()
+    const column = host.querySelector<HTMLElement>(".InspectorColumn")!
+    column.style.height = "900px"
+    await ElementFixture.settle(host)
+    const split = host.querySelector<HTMLElement>(".InspectorSplit")!
+    const bottom = (element: Element) => element.getBoundingClientRect().bottom
+    const pane = (panel: string) => host.querySelector(`.InspectorCard[data-panel=${panel}]`)!.parentElement!
+    const reachesBottom = () => expect(Math.abs(bottom(pane("views")) - bottom(split))).toBeLessThan(1)
+    reachesBottom()
+    // at any height
+    for (const height of ["600px", "1300px"]) {
+      column.style.height = height
+      await ElementFixture.settle(host)
+      reachesBottom()
+    }
+    // the bar above Views moved (the arrow keys move it as a drag does, and keep the sizes it ends at)
+    const bars = split.shadowRoot!.querySelectorAll<HTMLElement>("[part~=bar]")
+    bars[bars.length - 1].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", shiftKey: true, bubbles: true }))
+    flush()
+    await ElementFixture.settle(host)
+    reachesBottom()
+    // Properties folded and unfolded
+    Inspector.toggleFolded("properties")
+    flush()
+    await ElementFixture.settle(host)
+    reachesBottom()
+    Inspector.toggleFolded("properties")
+    flush()
+    await ElementFixture.settle(host)
+    reachesBottom()
   })
 })
 

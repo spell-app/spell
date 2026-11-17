@@ -28,6 +28,7 @@ export class Card extends TwoSidedView {
     return "black"
   }
 
+  /** e.g. "the card is a face card" */
   get isAFaceCard() {
     return core.includes(["jack", "queen", "king"], this.rank)
   }
@@ -670,7 +671,7 @@ export class Solitaire extends App {
       <>
         <ui-segment inverted={true} attach-to="top">
           <ui-toolbar class="GameBar" appearance="pills" inverted={true} size="small" shrinkable={true}>
-            <ui-text slot="title" size="large" heavy={true}>Spell Solitaire</ui-text>
+            <ui-text size="big" slot="title" heavy={true}>Spell Solitaire</ui-text>
             {core.drawAction(this, "autoPlay", { "in-menu": true })}
             {core.drawAction(this, "cheat", { "in-menu": true })}
             {core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true })}
@@ -688,9 +689,9 @@ export class Solitaire extends App {
           <test-project-foundation id="diamonds" />
           <test-project-foundation id="hearts" />
           <test-project-foundation id="spades" />
-          <test-project-column id="C1" />
           <test-project-column id="C2" />
           <test-project-column id="C3" />
+          <test-project-column id="C1" />
           <test-project-column id="C4" />
           <test-project-column id="C5" />
           <test-project-column id="C6" />
@@ -724,15 +725,15 @@ export class Solitaire extends App {
   // <foundation "spades" suit=spades/>
   @prop({ init: () => new Foundation({ id: "spades", suit: "spades" }), early: true })
   accessor spades!: Foundation
-  // <column "C1"/>
-  @prop({ init: () => new Column({ id: "C1" }), early: true })
-  accessor C1!: Column
   // <column "C2"/>
   @prop({ init: () => new Column({ id: "C2" }), early: true })
   accessor C2!: Column
   // <column "C3"/>
   @prop({ init: () => new Column({ id: "C3" }), early: true })
   accessor C3!: Column
+  // <column "C1"/>
+  @prop({ init: () => new Column({ id: "C1" }), early: true })
+  accessor C1!: Column
   // <column "C4"/>
   @prop({ init: () => new Column({ id: "C4" }), early: true })
   accessor C4!: Column
@@ -854,9 +855,9 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "diamonds", kind: "json", description: "Its diamonds." },
     { name: "hearts", kind: "json", description: "Its hearts." },
     { name: "spades", kind: "json", description: "Its spades." },
-    { name: "-c1", kind: "json", description: "Its C1." },
     { name: "-c2", kind: "json", description: "Its C2." },
     { name: "-c3", kind: "json", description: "Its C3." },
+    { name: "-c1", kind: "json", description: "Its C1." },
     { name: "-c4", kind: "json", description: "Its C4." },
     { name: "-c5", kind: "json", description: "Its C5." },
     { name: "-c6", kind: "json", description: "Its C6." },

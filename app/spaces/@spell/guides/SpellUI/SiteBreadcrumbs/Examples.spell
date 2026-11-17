@@ -1,0 +1,36 @@
+"site-breadcrumbs examples" is a notebook page
+	<header level="1">
+		Site breadcrumbs
+		<header>Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="Where you are" sticky="stack" collapsible dividing>
+			<example "Where you are" description="`pages` is the side navigation's own list.  Site breadcrumbs find the page shown and draw the way down to it:  the group's name, each page above it a link, then the page itself.">
+				<site-breadcrumbs current="#systems" pages="\[{ \"title\": \"Hardware\", \"id\": \"group:Hardware\", \"band\": \"group\", \"pages\": \[{ \"title\": \"Machines\", \"href\": \"#machines\", \"pages\": \[{ \"title\": \"Systems\", \"href\": \"#systems\" }] }] }]" />
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="A page with a parameter" sticky="stack" collapsible dividing>
+			<example "A page with a parameter" description="A page above the one shown whose address has a parameter (`/films/:film`) can't be gone to without one:  its crumb is only its name.">
+				<site-breadcrumbs current="#cast" pages="\[{ \"title\": \"Films\", \"href\": \"#films\", \"pages\": \[{ \"title\": \"Film\", \"href\": \"/films/:film\", \"pages\": \[{ \"title\": \"Cast\", \"href\": \"#cast\" }] }] }]" />
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Not found" sticky="stack" collapsible dividing>
+			<example "Not found" description="The page shown isn't among the pages (a not found page):  nothing is drawn and it takes no room, `:state(empty)`.">
+				<site-breadcrumbs current="#missing" pages="\[{ \"title\": \"Home\", \"href\": \"#home\" }]" />
+			</example>
+		</>
+	</>

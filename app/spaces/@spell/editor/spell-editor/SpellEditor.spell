@@ -41,6 +41,8 @@ spell editor is an app
 		// The Inspector shows
 	its "line numbers showing" is yes or no
 		// The code shows its line numbers
+	its "soft wrapping" is yes or no
+		// The code wraps its long lines onto the next, rather than scrolling sideways
 	its "inspecting" is yes or no
 		// A click in the app picks what it clicks
 	its "site ready" is yes or no
@@ -128,6 +130,8 @@ spell editor is an app
 		selected when its inspector open is yes
 	to "show line numbers" with title "Line Numbers", icon "list ol"
 		selected when its line numbers showing is yes
+	to "soft wrap" with title "Soft Wrap", icon "level down alternate"
+		selected when its soft wrapping is yes
 
 	group "Running"
 	to "compile and run" with icon "play"
@@ -272,7 +276,7 @@ a "file tab bar" is a view
 	// At its far right a ✕ hides the code, as the top bar's code icon does, which shows it again (T83).
 	// Then a tab hovered shows a ✕ in its file icon's place:  it closes the tab, the file still in the list, and picking it there opens it again (T77).  The ✕ takes no room of its own, so no tab grows or moves (T82).
 	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
-	// A site's own file, `HarborNew.site.spell`, is always a tab;  and however narrow the bar, it's never one tab with a ▾ of its own:  the row scrolls (I188).
+	// A site's own file, `Dashboard.site.spell`, is always a tab;  and however narrow the bar, it's never one tab with a ▾ of its own:  the row scrolls (I188).
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
 	its "remember as" is text
@@ -342,15 +346,17 @@ a "file tab bar" is a view
 		/* the ✕ that hides the code, at the bar's far right:  every panel's ✕, the editor's tokens (`PanelClose`, T95) */
 		.HideCode {
 			display: inline-flex;
-			/* its box the glyph's own, no room after it for a label:  the bar's 8px ends at the drawn ✕ (I213) */
+			/* its box the glyph's own, no room after it for a label:  so the bar's room ends at the drawn ✕ (I213) */
 			--ui-icon-width: auto;
 			--ui-icon-distance: 0;
 			flex: none;
-			margin-inline: var(--spell-panel-close-gap) 0;
+			/* 12px from the bar's edge:  its 8px, then this (I233) */
+			margin-inline: var(--spell-panel-close-gap) var(--spell-panel-close-end);
 			color: var(--spell-panel-close-color);
+			transition: color var(--spell-panel-close-fade);
 			cursor: pointer;
 		}
-		.HideCode:hover {
+		.HideCode:is(:hover, :focus-visible, :focus-within) {
 			color: var(--spell-panel-close-hover-color);
 		}
 		.NotSaved[hidden],
@@ -525,11 +531,11 @@ a "view menu" is a bar menu
 			<divider/>
 			<action "show code"/>
 			<action "show compiled code"/>
+			<action "show inspector"/>
 			<action "show program panel"/>
 			<divider/>
-			<action "show inspector"/>
-			<divider/>
 			<action "show line numbers"/>
+			<action "soft wrap"/>
 		</menu>
 
 a "run menu" is a bar menu

@@ -238,14 +238,22 @@ function tokensOf(source: string, from: number, to: number): Token[] {
 
 /**
  * One attribute, or a start tag's end:  `/>` or `>` (1), a tag's quoted word (2), a name (3),
- * a value in `"` (4), `'` (5), a Spell `{…}` (6) or neither (7), which stops before a `/>`:  `suit=clubs/>`.
+ * a value in `"` (4), `'` (5), a Spell `{…}` (6) or neither (7), which stops before a `/>`:  `suit=clubs/>`;
+ * a stray `/`, or a quoted word left open (8, no group).
  * - A `{…}` ends at its own `}`, past a `{…}` or `"…"` inside it, on its line:  one with no `}` there
  *   (`padding={small" spacing="xs">`, typed half way) is a plain value, so the attributes after it still read as
  *   written (epic `editor` I144);  as the layout reads it (`SP.BubblyLayout`)
+ * - A quoted value or word ends on its line (epic `language` I145;  Owen:  "Quotes don't span lines"):
+ *   one left open, `size="small`, is a plain value, `"small`;  a quoted word left open, `<action "auto`, is skipped
+ *   up to its tag's end or its line's (8);  a tag still open at a line starting with a tag ends there, holding
+ *   nothing;  so the attributes and tags after it still read as written
  */
 const ATTRIBUTE_PATTERN =
-  /\s*(?:(\/?>)|"([^"]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\{(?:"[^"\n]*"|\{[^{}\n]*\}|[^{}"\n])*\})|((?:[^\s>/]|\/(?!>))+)))?|\/)/
+  /\s*(?:(\/?>)|"([^"\n]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"\n]*)"|'([^'\n]*)'|(\{(?:"[^"\n]*"|\{[^{}\n]*\}|[^{}"\n])*\})|((?:[^\s>/]|\/(?!>))+)))?|\/|"(?:[^"\n>/]|\/(?!>))*)/
     .source
+
+/** A line break, then a tag:  a start tag left open ends before it (epic `language` I145). */
+const NEXT_LINE_TAG = /\s*\n\s*</y
 
 /** A start tag's attributes, from `at` just past its name, to its `>`. */
 function attributesFrom(
@@ -258,6 +266,8 @@ function attributesFrom(
   pattern.lastIndex = at
   for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
     if (match[1]) return { attributes, end: pattern.lastIndex, selfClosing: match[1] === "/>" }
+    NEXT_LINE_TAG.lastIndex = pattern.lastIndex
+    if (NEXT_LINE_TAG.test(source)) return { attributes, end: pattern.lastIndex, selfClosing: true }
     const indices = match.indices!
     if (match[2] !== undefined) {
       const [start, end] = indices[2]!

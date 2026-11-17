@@ -183,6 +183,36 @@ function choose(event: CustomEvent<{ value: string }>) {
 }
 
 ////////////////
+// ## Bar tooltips
+////////////////
+
+/**
+ * Spell UI's tooltip for a button of the top bar or the Add View bar:  spread it on the button,
+ * `<ui-item {...barTooltip(text)} />`.
+ * - A small dark bubble under it, after the page's hover pause (`--ui-hover-delay`), at once on keyboard focus:
+ *   Spell UI's `data-tooltip`, shown in the top layer (its runtime's `DataTooltips`).
+ * - It stays inside the window:  near an edge it slides along, its arrow still at the button.
+ * - Text with line breaks (`\n`) shows as those lines.
+ * - `undefined`:  no tooltip.
+ * - Only these two bars (Owen, 2026-11-16, epic `editor` I217):  everywhere else the editor's tooltips are still the
+ *   browser's own, `title`.
+ */
+export function barTooltip(text: string | undefined): BarTooltip {
+  return { "data-tooltip": text, "data-position": BAR_TOOLTIP_POSITION, "data-inverted": "", "data-variation": "small" }
+}
+
+/** The attributes `barTooltip()` gives. */
+export type BarTooltip = {
+  "data-tooltip": string | undefined
+  "data-position": string
+  "data-inverted": string
+  "data-variation": string
+}
+
+/** Where a bar's tooltip shows:  under its button, centred on it while there's room. */
+const BAR_TOOLTIP_POSITION = "bottom center"
+
+////////////////
 // ## Icons
 ////////////////
 

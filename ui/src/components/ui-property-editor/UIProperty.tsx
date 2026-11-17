@@ -89,7 +89,7 @@ function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | un
  *   - in a `compact` editor (`:state(compact)`):  a yes or no on one line, the box then its label;  its hint at the
  *     label row's end
  *   - `:state(set)`:  its value isn't its default (`default`, else the schema's);  bold under `show-defaults`
- *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, a dot by its label;
+ *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, nothing drawn;
  *     `:state(inherited)`, a quieter label;  `worked out`, read only;  its label's tooltip says where, and a small
  *     button at the row's end says it was pressed (`ui-reset`, `ui-show-code`)
  *   - `data`:  kept in a place outside the program, `:state(data)`;  its `mark` at the row's end says where in short,
@@ -142,8 +142,12 @@ export class UIProperty extends UIField {
     return this.isConnected ? UIProperty.editorAround(this.domElement) : undefined
   }
 
-  /** Why a change here can't be saved:  its own `unsaved`, else its editor's. */
+  /**
+   * Why a change here can't be saved:  its own `unsaved`, else its editor's.
+   * - None while it's read only:  nothing here can change (epic `editor` I224, a thing's computed values).
+   */
   get unsavedText(): string | undefined {
+    if (this.isReadOnly) return undefined
     return this.unsaved || (this.editor as { unsaved?: string } | undefined)?.unsaved || undefined
   }
 
@@ -388,13 +392,31 @@ export class UIProperty extends UIField {
     const labels = spec.valueLabels
     const values = E.ValueSets.get(set)
     if (!icons && !labels) return values
-    return values.map((value) => {
+    // the same list for the same words:  a new one each read remade its control on every change around it (I6)
+    const made = this.labelledChoices
+    if (made?.values === values && made.icons === icons && made.labels === labels) return made.choices
+    const choices = values.map((value) => {
       const icon = icons?.[value]
       const text = labels?.[value] ?? value
       if (!icon) return text === value ? value : { value, text }
       return { value, text, icon }
     })
+    this.labelledChoices = { values, icons, labels, choices }
+    return choices
   }
+
+  /**
+   * The schema's values with their words and icons, as `choices` last made them, and what it made them from.
+   * - A plain cache, not a reactive member:  `choices` stays fresh by construction,
+   *   and hands back the same list only while its values, icons and words are the very same objects.
+   * - Why:  `onControlNeeded()` makes its control again whenever `choices` isn't `===` the last.
+   *   A new list on each read made it again (moving `valueVersion` from inside an effect)
+   *   each time the Inspector read its schema again:  every keystroke in its Code card,
+   *   in a language whose schema gives `valueLabels` (Solid's dev warning `EFFECT_RELAY_TEAR`, epic `codemirror` I6).
+   */
+  private labelledChoices:
+    | { values: readonly string[]; icons: unknown; labels: unknown; choices: readonly Choice[] }
+    | undefined
 
   /** Its choices are colours:  each drawn with a chip of its hue (`hueChips()`). */
   get isHueChoice(): boolean {

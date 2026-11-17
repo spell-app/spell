@@ -240,8 +240,8 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     if (this.parentMenu) return
     const item = UIMenu.activatedItem(event)
     if (!item || item.matches(UIT.DISABLED_STATE)) return
-    // a fly-out's items are its own menu's to choose, and a row that opens a fly-out chooses nothing
-    if (!this.itemsThatAsked.has(item) || UIMenu.componentOf(item)?.opensAMenu) return
+    // a fly-out's items are its own menu's to choose, and a click that opens a fly-out chooses nothing
+    if (!this.itemsThatAsked.has(item) || UIMenu.componentOf(item)?.opensAMenuOn?.(event)) return
     const isChosen = this.send("ui-choosing", { value: UIMenu.valueOf(item), item, originalEvent: event })
     if (!isChosen || !this.isSegmented) return
     if (this.choosesMany) this.toggle(item as ChoosableItem)
@@ -409,7 +409,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   protected onThumbChanged(hasThumb: boolean) {
     const box = this.box
     if (!hasThumb || !box) return
-    const thumb = new SegmentedThumb({ track: box, chosenBox: () => this.chosenBox() })
+    const thumb = new SegmentedThumb({
+      track: box,
+      chosenBox: () => this.chosenBox(),
+      onPlaced: () => this.onThumbPlaced()
+    })
     this.thumb = thumb
     const stop = thumb.start()
     return () => {
@@ -417,6 +421,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       this.thumb = undefined
     }
   }
+
+  /** The thumb just moved:  for a subclass whose box scrolls, as the thumb is in what it scrolls (`<ui-toolbar>`). */
+  protected onThumbPlaced() {}
 
   /**
    * An item's `selected` (or `active`) changed, items came and went, showed or hid, or their words changed:
@@ -1223,8 +1230,11 @@ export type ItemComponent = {
   readonly firstLetter?: string
   /** its light-DOM children in slot `name` */
   slotted?(name: "icon" | "badge"): Element[]
-  /** it opens a menu of its own (`<ui-submenu>`):  a click on it chooses nothing */
-  readonly opensAMenu?: boolean
+  /**
+   * `event`, a click on it, opens a menu of its own (`<ui-submenu>`), so it chooses nothing:
+   * anywhere on its row, or only its chevron end (`<ui-submenu split>`)
+   */
+  opensAMenuOn?(event: Event): boolean
 }
 
 /** One row of a `shrinkable` menu's overflow menu:  a fitted item, as read when it was (`readFolded()`). */

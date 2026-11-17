@@ -101,7 +101,7 @@ describe("diskFetch", () => {
 
     test("the test helpers and spaces agree where the test projects are, and whose space is yours", () => {
       expect(FIXTURES_DIR).toBe(environment.testFilesRoot)
-      expect(environment.userFilesRoot).toBe(resolve(environment.spellSpacesDir, "@spell", `${SPACES.LOCAL_PERSON}@`))
+      expect(environment.userFilesRoot).toBe(resolve(environment.spellSpacesDir, "@spell", `${SPACES.localPerson.id}@`))
     })
 
     test("a file elsewhere gets a `@local/<folder>` group, and loads + saves through it", async () => {

@@ -61,11 +61,13 @@ describe("<ui-panel> structure", () => {
     await expectAccessible(host)
   })
 
-  it("takes every `<ui-section>` attribute, slot, part and event (so the section's new ones reach it)", () => {
+  it("takes every `<ui-section>` attribute, slot, part, event and state (so the section's new ones reach it)", () => {
     const names = (specs: readonly { name: string }[]) => specs.map((spec) => spec.name)
-    for (const key of ["attributes", "slots", "parts", "events", "states"] as const) {
+    for (const key of ["attributes", "slots", "parts", "events"] as const) {
       expect(names(panelVocabulary[key])).toEqual(names(sectionVocabulary[key]))
     }
+    // and a pane's scroll shades' two
+    expect(names(panelVocabulary.states)).toEqual([...names(sectionVocabulary.states), "more-above", "more-below"])
     expect(UIPanel.prototype.vocabulary.tag).toBe("ui-panel")
     expect(customElements.get("ui-section")).toBeDefined()
   })
@@ -111,6 +113,11 @@ describe('<ui-panel appearance="pane">', () => {
     const bar = part(host, "title").getBoundingClientRect()
     expect(bar.height).toBe(40)
     expect(bar.top).toBe(host.getBoundingClientRect().top)
+    // its line a 1px shadow inside its bottom edge, no border taking room (epic `editor` I216)
+    const title = getComputedStyle(part(host, "title"))
+    expect(title.borderBottomWidth).toBe("0px")
+    expect(title.boxShadow).toMatch(/inset$|^inset| inset/)
+    expect(title.boxShadow).toContain("-1px")
     const content = part(host, "content").getBoundingClientRect()
     expect(Math.round(content.top)).toBe(Math.round(bar.bottom))
     expect(Math.round(content.bottom)).toBe(Math.round(host.getBoundingClientRect().bottom))
@@ -127,7 +134,8 @@ describe('<ui-panel appearance="pane">', () => {
       const box = element.getBoundingClientRect()
       return box.top + box.height / 2
     }
-    const centre = bar.top + (bar.height - 1) / 2
+    // the bar's line is a shadow, taking no room:  its middle is the bar's own (epic `editor` I216)
+    const centre = bar.top + bar.height / 2
     expect(Math.abs(middle(part(host, "fold-icon")) - centre)).toBeLessThan(1)
     expect(Math.abs(middle(toolbar.shadowRoot!.querySelector("[part~=menu]")!) - centre)).toBeLessThan(1)
     expect(Math.abs(middle(toolbar.shadowRoot!.querySelector("[part~=right]")!) - centre)).toBeLessThan(1)
@@ -143,7 +151,7 @@ describe('<ui-panel appearance="pane">', () => {
     await ElementFixture.tick()
     expect(host.matches(":state(collapsed)")).toBe(true)
     expect(part(host, "content").getAttribute("hidden")).toBe("until-found")
-    expect(getComputedStyle(part(host, "title")).borderBottomWidth).toBe("0px")
+    expect(getComputedStyle(part(host, "title")).boxShadow).toBe("none")
     expect(host.querySelector("ui-toolbar")!.getBoundingClientRect().width).toBeGreaterThan(0)
   })
 
@@ -355,5 +363,85 @@ describe("<ui-panel> accessibility", () => {
       const title = host.shadowRoot!.querySelector<HTMLElement>("[part~=title]")!
       expect(title.getBoundingClientRect().height).toBe(48)
     })
+  })
+})
+
+////////////////
+// ## Scroll shades
+////////////////
+
+describe('<ui-panel appearance="pane"> scroll shades', () => {
+  /** A pane 300px wide and 200px tall whose body scrolls by itself, holding `rows` rows 40px tall. */
+  async function scrollingPane(rows: number) {
+    const box = await ElementFixture.render(
+      `<div style="width: 300px; height: 200px"><ui-panel appearance="pane" label="Inspector">
+        <div class="body" style="flex: 1 1 auto; min-height: 0; overflow-y: auto">
+          ${Array.from({ length: rows }, (_, row) => `<div style="height: 40px">row ${row}</div>`).join("")}
+        </div>
+      </ui-panel></div>`
+    )
+    await ElementFixture.tick()
+    const host = box.querySelector<HTMLElement>("ui-panel")!
+    return { host, body: host.querySelector<HTMLElement>(".body")! }
+  }
+
+  /** A shade's opacity, once its fade is done. */
+  async function shade(host: Element, end: "top" | "bottom"): Promise<string> {
+    await vi.waitFor(() => expect(host.shadowRoot!.getAnimations().length).toBe(0))
+    return getComputedStyle(host.shadowRoot!.querySelector(`.${end}.scroll.shade`)!).opacity
+  }
+
+  /** The shades' states after the next frame, when the scroll or resize has been measured. */
+  async function ends(host: Element) {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    return { above: host.matches(":state(more-above)"), below: host.matches(":state(more-below)") }
+  }
+
+  it("shows none when the body fits", async () => {
+    const { host } = await scrollingPane(2)
+    expect(await ends(host)).toEqual({ above: false, below: false })
+    expect(await shade(host, "top")).toBe("0")
+    expect(await shade(host, "bottom")).toBe("0")
+  })
+
+  it("shows only the bottom one at the top, both in the middle, only the top one at the bottom", async () => {
+    const { host, body } = await scrollingPane(20)
+    expect(await ends(host)).toEqual({ above: false, below: true })
+    expect(await shade(host, "top")).toBe("0")
+    expect(await shade(host, "bottom")).toBe("1")
+    body.scrollTop = 100
+    expect(await ends(host)).toEqual({ above: true, below: true })
+    expect(await shade(host, "top")).toBe("1")
+    body.scrollTop = body.scrollHeight
+    expect(await ends(host)).toEqual({ above: true, below: false })
+    expect(await shade(host, "bottom")).toBe("0")
+  })
+
+  // I227:  a scroll-driven animation kept the top shade when a scrolled body's content shrank with no scroll
+  it("shows none once a scrolled body's content shrinks to fit", async () => {
+    const { host, body } = await scrollingPane(20)
+    body.scrollTop = 200
+    expect(await ends(host)).toEqual({ above: true, below: true })
+    body.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Click the crosshairs" }))
+    expect(await ends(host)).toEqual({ above: false, below: false })
+    expect(await shade(host, "top")).toBe("0")
+  })
+
+  it("starts the top shade `--ui-panel-scroll-shade-top` under the bar, over the body's whole width, taking no clicks", async () => {
+    const { host, body } = await scrollingPane(20)
+    host.style.setProperty("--ui-panel-scroll-shade-top", "22px")
+    body.scrollTop = 100
+    await ends(host)
+    const top = host.shadowRoot!.querySelector<HTMLElement>(".top.scroll.shade")!
+    expect(top.getBoundingClientRect().top - body.getBoundingClientRect().top).toBe(22)
+    // its scrollbar's column too (Owen, I201:  "Shadow should extend over the scrollbar row"):  the body's border box
+    expect(top.getBoundingClientRect().left).toBe(body.getBoundingClientRect().left)
+    expect(top.getBoundingClientRect().right).toBe(body.getBoundingClientRect().right)
+    expect(getComputedStyle(top).pointerEvents).toBe("none")
+  })
+
+  it("leaves a panel that isn't a pane alone", async () => {
+    const host = await ElementFixture.render(`<ui-panel label="Theme"><p>fields</p></ui-panel>`)
+    expect(host.shadowRoot!.querySelector(".scroll.shade")).toBeNull()
   })
 })

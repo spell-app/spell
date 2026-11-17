@@ -6,7 +6,7 @@ import { EDITOR, SERVING } from "./runningEditor"
 /**
  * What took over from the Things and Templates tabs, on Solitaire (epic `editor`, Rethink Things Templates):
  * - the Views card's sort, and its group of what isn't drawn
- * - This app, the app's own views, first in the add menu
+ * - App views, the app's own views, first in the add menu
  * - the Program panel's Reference tab
  * - NOTHING reaches the disk:  every save is answered here, so the built-in examples can't change.
  * - Needs this checkout's editor running:  `spell server start all`.
@@ -76,16 +76,16 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
 
   test("the Views card sorts by name or type, and remembers it", async () => {
     const inOrder = await boardRows()
-    expect(inOrder.slice(0, 3)).toEqual(["Stock Pile", "Discard Pile", "Foundation"])
+    expect(inOrder.slice(0, 3)).toEqual(["Stock Pile", "Discard Pile", "Spacer"])
     await sortBy("By name")
     expect((await boardRows()).slice(0, 2)).toEqual(["Column", "Column"])
     await sortBy("By type")
-    // by tag:  `solitaire-stock-pile` last of the program's own
-    expect((await boardRows()).at(-1)).toBe("Stock Pile")
+    // by tag:  `solitaire-stock-pile` last of the program's own, then Spell UI's `ui-spacer`
+    expect((await boardRows()).slice(-2)).toEqual(["Stock Pile", "Spacer"])
     await page.reload()
     await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(4000)
-    expect((await boardRows()).at(-1)).toBe("Stock Pile")
+    expect((await boardRows()).slice(-2)).toEqual(["Stock Pile", "Spacer"])
     await sortBy("In document order")
     expect(await boardRows()).toEqual(inOrder)
   })
@@ -175,14 +175,14 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect(await scrollTop()).toBeLessThanOrEqual(before)
   })
 
-  test("This app comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
+  test("App views comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
     await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(1500)
     const own = await page
       .locator(".PalettePopup .ThisApp ui-tree-item")
       .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
     // Solitaire as it is now:  a tableau is a column, and its deck is drawn too (I62)
-    expect(own).toEqual(["Card", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
+    expect(own).toEqual(["Card", "Card image", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
     const cards = () => page.evaluate(() => document.querySelectorAll("solitaire-card").length)
     const before = await cards()
     await page.locator('.PalettePopup .ThisApp ui-tree-item[label="Card"]').click()
@@ -242,7 +242,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect((await page.locator(".InspectorTypeSpell[name=value]").innerText()).replace(/\s+/g, " ")).toContain(
       "the position of its rank"
     )
-    expect(await page.locator('[data-panel="actions"]').innerText()).toContain("count the points for")
+    expect(await page.locator('[data-panel="actions"]').innerText()).toContain("the points for")
     // a pill taken away is taken out of the one-of, as one step
     const rankLine = () =>
       page.evaluate(() =>

@@ -65,13 +65,16 @@ describe("<spell-viewer>, a root", () => {
     expect(app.icons).toBe("fomantic")
   })
 
-  test("loads a spell tag inside it from beside its script:  `<spell-editor>` => `spell-editor.js`", async () => {
-    const app = await mountApp(`<spell-viewer><spell-nothing-here></spell-nothing-here></spell-viewer>`)
+  test("loads our element families inside it from beside its script (`<spell-editor>` => `spell-editor.js`), and no other spell tag", async () => {
+    const app = await mountApp(
+      `<spell-viewer><spell-markdown></spell-markdown><spell-more-below></spell-more-below></spell-viewer>`
+    )
     const failed = await new Promise<{ tag: string; reason: string }[]>((resolve) =>
       app.addEventListener("ui-ready", (event) => resolve((event as CustomEvent).detail.failed), { once: true })
     )
-    // in dev the script beside it is its source folder's, where no such file is:  tried, and failed
-    expect(failed.map(({ tag, reason }) => `${tag} ${reason}`)).toEqual(["spell-nothing-here failed"])
+    // in dev the script beside it is its source folder's, where no such file is:  a family tried, and failed;
+    // the core's marker tags (`<spell-more-below>`, `<spell-context-menu>`) never fetched:  a 404 on every page
+    expect(failed.map(({ tag, reason }) => `${tag} ${reason}`)).toEqual(["spell-markdown failed"])
   })
 })
 

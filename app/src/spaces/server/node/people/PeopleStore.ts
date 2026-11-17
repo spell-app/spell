@@ -10,7 +10,7 @@ import {
   type ThingsToSearch
 } from "spell/parser/core/model"
 import type { FileProblem, OrgRole, PersonChanges, PersonView, Role } from "spell/app/spaces/models/people"
-import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
+import { SPELL_ORG } from "spell/app/spaces/models/projectGroups"
 import { ADMIN_SPACE } from "spell/app/spaces/models/spaceNames"
 import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
@@ -58,7 +58,7 @@ export class PeopleStore {
    * - `person`:  `undefined` if they have no file.
    * - `problems`:  what each file read got wrong, by property;  read anyway.
    */
-  async person(id: string, org = HOME_ORG): Promise<{ person?: People.Person; problems: FileProblem[] }> {
+  async person(id: string, org = SPELL_ORG): Promise<{ person?: People.Person; problems: FileProblem[] }> {
     const { thing, problems } = await this.load(`Person#${id}@${org}`)
     return { person: thing instanceof People.Person ? thing : undefined, problems }
   }
@@ -67,7 +67,7 @@ export class PeopleStore {
    * Person `id`, their file made first if there's none:  returns the person, as `person()` does.
    * - The file made:  their names and email from git (`git config user.name`), and a comment saying what it is.
    */
-  async me(id: string, org = HOME_ORG): Promise<{ person: People.Person; problems: FileProblem[] }> {
+  async me(id: string, org = SPELL_ORG): Promise<{ person: People.Person; problems: FileProblem[] }> {
     const file = personFile(id, org)
     if ((await this.storage.read(file)) === undefined) await this.storage.write(file, starterPerson(id))
     const { person, problems } = await this.person(id, org)
@@ -90,7 +90,7 @@ export class PeopleStore {
 
   /** `person`'s address, their id and the org they were read from:  `owen@spell`. */
   addressOf(person: People.Person): string {
-    return `${person.id}@${this.placeOf(person) ?? HOME_ORG}`
+    return `${person.id}@${this.placeOf(person) ?? SPELL_ORG}`
   }
 
   /** `person` as the app shows them:  plain JSON, a day as `"1970-01-01"`. */
@@ -173,7 +173,7 @@ export class PeopleStore {
     const [id] = account.split("@")
     const members = (await this.org(org))?.members.items ?? []
     const addresses = members.flatMap((each) => (each.person ? [this.addressOf(each.person)] : []))
-    const spellAccount = `${id}@${HOME_ORG}`
+    const spellAccount = `${id}@${SPELL_ORG}`
     return !addresses.includes(account) && addresses.includes(spellAccount) ? spellAccount : account
   }
 
@@ -216,10 +216,10 @@ export class PeopleStore {
    * - Who may save into Spell UI, and take things down (epic `atmosphere` P6).
    * - `false` for someone with no file.
    */
-  async isSpellAdmin(id: string, org = HOME_ORG): Promise<boolean> {
+  async isSpellAdmin(id: string, org = SPELL_ORG): Promise<boolean> {
     const { person } = await this.person(id, org)
     if (!person) return false
-    return (await this.rolesOf(person)).some((each) => each.id === HOME_ORG && each.role === SPELL_ADMIN)
+    return (await this.rolesOf(person)).some((each) => each.id === SPELL_ORG && each.role === SPELL_ADMIN)
   }
 
   ////////////////
@@ -275,7 +275,7 @@ export class PeopleStore {
   protected placeOf(thing: object): string | undefined {
     const place = this.places.get(thing)
     if (place) return place
-    return thing instanceof People.Person ? HOME_ORG : undefined
+    return thing instanceof People.Person ? SPELL_ORG : undefined
   }
 }
 
@@ -309,7 +309,7 @@ export function rosterFile(id: string): string {
 /** The file entry `ref` is kept in:  a person's, an org's or an org's roster;  `undefined` for anything else. */
 function fileFor(ref: string): string | undefined {
   const { type, id, place } = parseRef(ref)
-  if (type === "Person") return personFile(id, place ?? HOME_ORG)
+  if (type === "Person") return personFile(id, place ?? SPELL_ORG)
   if (type === "Org") return orgFile(id)
   if (type === "Roster") return rosterFile(id)
   return undefined
@@ -318,7 +318,7 @@ function fileFor(ref: string): string | undefined {
 /** `ref` with its org:  `Person#matt` in `three-degrees` is `Person#matt@three-degrees`;  an org's has none. */
 function refWithPlace(ref: string, place: string | undefined): string {
   const { type, id } = parseRef(ref)
-  return type === "Person" ? `${type}#${id}@${place || HOME_ORG}` : `${type}#${id}`
+  return type === "Person" ? `${type}#${id}@${place || SPELL_ORG}` : `${type}#${id}`
 }
 
 /** `json` with each person's reference given an org, `place` if it has none:  a copy, `json` itself unchanged. */

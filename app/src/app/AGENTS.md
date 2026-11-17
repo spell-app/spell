@@ -103,7 +103,7 @@ and in the app's build folder, `app/` at the app folder's root.
       ([static/](static/));  the actions it leaves out are `HIDDEN_IN_STATIC_BUILD` (`Actions.tsx`)
     - Files load through `LoadableFile.fetch`, answered by `StaticFiles`:
       - the build's copies
-      - a visitor's own projects, in the group `you@spell` (`LOCAL_PERSON`, in this build):
+      - a visitor's own projects, in the group `you@spell` (`SPACES.localPerson`, in this build):
         the store `spell-static-projects`, their files' text with the edits
       - a visitor's edits, kept in their browser's database (`DatabasePlace`, the store `spell-static`):
         "Reset Example" forgets them
@@ -140,13 +140,18 @@ and in the app's build folder, `app/` at the app folder's root.
     ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts)).
     So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
-    - Suggestions, hover, folding, signature help (⇧⌘Space, or as a space is typed while Settings… says),
+    - Suggestions, hover, folding, signature help (⇧⌘Space, or once a space is typed and the typing pauses, while Settings… says),
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
       Find All References, code actions, accent fixes as you type;  hovers and signature help drawn by `<ui-markdown>`.
     - A Spell UI tag's help on Go to Definition;  Format Document, expand / shrink selection, Go to Symbol.
+    - Peek Definition (⌥F12) and Peek References (⇧⌥F12) (epic `codemirror` I5):
+      a box under the caret's line showing the place's file read only, a slice of its state (`FileStates.showSlice()`),
+      the uses listed on its right;  Enter or a double-click goes there, Esc closes it
+      ([CodeMirrorPeek](ui/codemirror/CodeMirrorPeek.ts), plain DOM, so `<spell-editor>` has it too)
   - Spell in CodeMirror is [SpellCodeMirror](ui/codemirror/SpellCodeMirror.ts):  `edit()` makes an editor of a view,
-    `codeExtensions()` shows another language's code (the compiled JavaScript, TypeScript and Python, read-only),
-    `merge()` the two sides of a diff.
+    `codeExtensions()` shows another language's code (the compiled JavaScript, TypeScript and Python, read-only);
+    the two sides of a diff are [CodeMirrorMerge](ui/codemirror/CodeMirrorMerge.ts), yours left, theirs right,
+    each change's arrow turning into an undo icon once taken (epic `editor` T101).
   - One state per file, [FileStates](ui/codemirror/FileStates.ts):  each file keeps its text, undo, folds and selection
     while another is shown;  the files' states follow `file.contents` both ways.
     - Edits from outside the code go in through `applyEdits()`, one undo step each, marked with their `EditWay`
@@ -155,7 +160,8 @@ and in the app's build folder, `app/` at the app folder's root.
     keys, undo, find, the gutter (no line numbers, fold arrows over the code's padding),
     and CodeMirror's words, which are `AppTexts` keys (`cm...`), following `appTexts.lang`.
     - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
-      the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
+      the switches inside the find field, a match count, previous / next, the replace row showing as it opens
+      (folded by its chevron, it stays folded:  `spellEditor:findShowsReplace`, epic `codemirror` I8 C1);
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
     - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
       as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
@@ -191,14 +197,15 @@ and in the app's build folder, `app/` at the app folder's root.
       tokens, `SP.SpellHighlighter` ([CodeMirrorTokens](ui/codemirror/CodeMirrorTokens.ts)), no grammar of our own.
     - Not in a page file.
     - ONE colour table, [CodeRules](ui/CodeRules.ts):  a role's `--ui-code-<role>` colour and CodeMirror's highlight
-      tags;  the compiled pane is coloured by it.
+      tags;  the compiled pane is coloured by it, and so is a CSS file (`styles.css`), by CodeMirror's CSS language
+      (epic `codemirror` I20).
     - A slice of a file, the Inspector's Code card (`<CodeSlice>`, epic `editor` T72):
       `FileStates.showSlice()`, the file's own text in another view, its edits the file's;
       only what's wholly in its lines is drawn bubbly, so the action whose body it shows draws no band or rail
       cut off at its edges.
       The card draws that band and rail itself, round the slice, from the same sheet
       (`CodeCard.css`, epic `editor` T98).
-    - Both sides of a diff too (Publish's `<DiffView>`, on CodeMirror's merge view, epic `editor` T75).
+    - Both sides of a diff too (Publish's `<DiffView>`, on CodeMirror's merge view, epic `editor` T75, T101).
   - The lines being followed (the place in focus, `editor.followed`) are a bar in the gutter
     ([CodeMirrorFollowed](ui/codemirror/CodeMirrorFollowed.ts)).
   - Pinned lines (Settings… › Pinned lines, epic `codemirror` T8):
@@ -216,7 +223,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
     - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
-      `<action ` => `<action "|" />`, the program's actions listed at once;  `<divider ` => `<divider | />`;
+      `<action ` => `<action "|" />`, the program's actions listed once the typing pauses;  `<divider ` => `<divider | />`;
       any other, its closing tag written out, `<segment ` => `<segment |></segment>`;  one undo leaves `<action `
       - the shape choosing it from the suggestion list writes, from the same table (`LSP.CompletionShapes.spaceAfterTag()`)
       - only with nothing more of the tag written after the caret
@@ -234,8 +241,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - Backspace at an attribute line's start joins it to the line above, a space between, its `>` with it;
         a `>` alone on the line under comes up too (`LSP.SpellTyping.tagLineJoined()`)
       - Format Document keeps such a tag as it is
-      - the bubbly look draws it as ONE block of the tag's colour, its `>` at the block's right edge, past the widest
-        attribute (`CodeMirrorMarkup.tagBlocks`)
+      - the bubbly look draws it as ONE block of the tag's colour (`CodeMirrorMarkup.tagBlocks`):  its first attribute
+        on its name's line, the others lined up under it, its `>` 4px past the last one's ink (I139);
+        only drawn so, the file keeps its lines
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
@@ -272,6 +280,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
+    - What shows by itself as you type (the list, signature help) waits for the typing to pause, `HOVER_DELAY` (800 msec,
+      the page's `--ui-hover-delay`), each key starting the wait again (epic `codemirror` I22);
+      Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
     - Settings… drives the editors live:
       `codeMirrorOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following `codeChoices`, which `CodeSettings` sets.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them
@@ -557,6 +568,8 @@ and in the app's build folder, `app/` at the app folder's root.
     talks to spaces' people routes in plain JSON:  it never loads the people library.
     - the route:  `/api/people/me`
     - typed by `SPACES.MeAnswer`
+  - The name page ([NamePage.tsx](solid/NamePage.tsx), epic `repo-split` P27):  `index.tsx` reads who's at this machine
+    (`/api/people/local`) before it draws anything, and asks their name first while nobody is, on this machine.
   - `<spell-viewer>` loads only the light files, without the parser:
     - `spell/app/spaces/models/projectGroups`, which registers spell's project groups
     - `spell/parser/spell/SpellSetup`

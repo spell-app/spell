@@ -6,6 +6,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
+import { barTooltip } from "./chrome"
 import { on } from "./on"
 import { tracked } from "./tracked"
 
@@ -128,8 +129,9 @@ export function toggleCode() {
  * (`inspect`), then Add (`add`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and
  * inspect buttons should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector";
  * T83:  "Move `add` to the immediate right of the inspector crosshair").
- * - After the group, while you have drafts of the project:  "Draft", Discard, then Publish, one pill
- *   (`<PublishDraft>`;  Owen, 2026-11-14:  "move it to the right of code/inspect buttons").
+ * - Before the group, while you have drafts of the project:  "Draft", Publish, then Discard, one pill
+ *   (`<PublishDraft>`;  Owen, 2026-11-16, T102:  "Move `draft` panel to the left of run";
+ *   right of the icons from 2026-11-14 until then).
  * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on;
  *   Add's `aria-haspopup`, that it opens a menu.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
@@ -148,6 +150,7 @@ export function ModeButtons(props: {
 }): JSX.Element {
   return (
     <ui-item class="ModeButtons">
+      <PublishDraft />
       <ui-menu
         appearance="segmented link header"
         tabs=""
@@ -171,7 +174,7 @@ export function ModeButtons(props: {
             appearance="circular"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
-            title={appTexts.text("menuCode")}
+            {...barTooltip(appTexts.text(CodeShown.isClosed(editor.project?.path) ? "showCodeTip" : "hideCodeTip"))}
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
           />
@@ -180,7 +183,6 @@ export function ModeButtons(props: {
           {props.add}
         </Show>
       </ui-menu>
-      <PublishDraft />
     </ui-item>
   )
 }
@@ -192,7 +194,7 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
     <ui-item
       icon={look().icon}
       selected={props.current === props.mode}
-      title={appTexts.text(look().text)}
+      {...barTooltip(appTexts.text(modeTipFor(props.mode, props.current)))}
       onClick={() => EditorMode.show(props.mode)}
     >
       <span class="ModeText">{appTexts.text(look().text)}</span>
@@ -200,14 +202,33 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
   )
 }
 
+/**
+ * A mode tab's tooltip:  what a click on it does, from the mode the page is in (epic `editor` I230).
+ * - The tab chosen says what's happening:  "You're editing the app".
+ * - Run, from Edit, is "Stop Editing";  from Site, "Run the App".
+ */
+function modeTipFor(mode: Mode, current: Mode): AppTextKey {
+  if (mode === current) return MODE_TIPS[mode].chosen
+  if (mode === "run" && current === "edit") return "stopEditingTip"
+  return MODE_TIPS[mode].other
+}
+
+/** Each mode tab's tooltips:  `chosen`, while the page is in it;  `other`, what a click on it does. */
+const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
+  run: { chosen: "runningTip", other: "runTip" },
+  edit: { chosen: "editingTip", other: "editTip" },
+  site: { chosen: "siteShownTip", other: "siteTip" }
+}
+
 /****************
  * ### `<PublishDraft>`
- * While you have drafts of the project (epic `editor` I44), right of the code and Inspect app buttons:
+ * While you have drafts of the project (epic `editor` I44), just left of Run | Edit (T102):
  * ONE pill, the size and shape of the bar's tools group, tinted a soft yellow (Owen, 2026-11-14, I77, I90, I93:
  * "one unified thing with a slight inset border").
  * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Draft", as plain words
  *   (Owen, 2026-11-16, I192:  "Change text from 'Editing a Draft' to just 'Draft'").
- *   - Its tooltip says what a draft is:  only you see it;  Publish makes it everyone's, Discard throws it away.
+ *   - Its tooltip says what a draft is:  only you see it.
+ *   - Publish's and Discard's each say what they do (Owen, I217):  send your changes out, or throw them away.
  * - Then "Publish", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
  * - Right:  "Discard", a link with a trash can, in the theme's primary colour, so it doesn't read as part of the label:
  *   the project menu's Delete Draft, which asks first, its red "Throw It Away" (`editor.deleteDraft()`;
@@ -222,17 +243,24 @@ function PublishDraft(): JSX.Element {
   return (
     <Show when={hasDrafts()}>
       <span class="PublishDraft">
-        <span class="DraftState" title={appTexts.text("draftTip")}>
+        <span class="DraftState" {...barTooltip(appTexts.text("draftTip"))}>
           <ui-icon name={DRAFT_ICON} />
           {appTexts.text("draft")}
         </span>
-        <ui-button class="Publish" color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
+        <ui-button
+          class="Publish"
+          color="primary"
+          icon={PUBLISH_ICON}
+          {...barTooltip(appTexts.text("publishDraftTip"))}
+          onClick={() => void editor.publish()}
+        >
           {appTexts.text("publishDraft")}
         </ui-button>
         <ui-button
           class="DiscardDraft"
           appearance="tertiary"
           icon={DISCARD_ICON}
+          {...barTooltip(appTexts.text("discardDraftTip"))}
           onClick={() => void editor.deleteDraft()}
         >
           {appTexts.text("discardDraft")}

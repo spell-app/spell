@@ -1,4 +1,4 @@
-import { type Extension } from "@codemirror/state"
+import { EditorSelection, EditorState, type Extension, type SelectionRange, type Text } from "@codemirror/state"
 import { EditorView, layer, RectangleMarker } from "@codemirror/view"
 
 /** The class of the layer drawn in place of CodeMirror's own:  the sheet hides that one. */
@@ -18,28 +18,57 @@ const PIECE = "cm-selectionBackground"
  *   the same pieces, in the same class, each moved onto the bands of the lines it's on;  a piece over several lines
  *   still meets the ones above and below it.
  * - Its colour, see-through black, is the sheet's (`bubbly.css`).
+ * - And the caret at a line's first word always drawn AT that word (`wordsSide`;  epic `language` I141).
  * - Its position in the import graph:  CodeMirror alone;  the bubbly look's extensions add it
  *   (`CodeMirrorBubbly`, `CodeMirrorMarkup`).
  ****************/
 export class CodeMirrorSelection {
-  /** The bubbly look's selection layer, over the text, as CodeMirror's own is in the look. */
-  static extension: Extension = layer({
-    above: false,
-    class: SELECTION_LAYER,
-    markers: (view) => CodeMirrorSelection.markersIn(view),
-    update: (update) => update.docChanged || update.selectionSet || update.viewportChanged || update.geometryChanged
+  /**
+   * The caret right before a line's first word sticks to that word (`assoc` 1), however it got there.
+   * - In the bubbly look the room before a line's words is the padding of the mark round them (a band's), or of
+   *   the mark round its indent (a plain body line's):  between the indent's end and the first letter.
+   * - CodeMirror draws a caret at a mark's edge on the side it came from:  stepping Left onto it, on the word;
+   *   stepping Right (or down from the line above), at the indent's end, a band's room further left, outside its
+   *   band (Owen, epic `language` I141:  "Inconsistent").
+   * - So that one place is drawn one way, at the word:  Left and Right step indent end <=> the line's column 0.
+   * - The same for a word after a space inside a line, a pill's first (Owen, I141:  "Seeing the same thing in pills
+   *   before unquoted white pill"):  `when |creating solitaire` at `creating`, not back at `when`'s end;
+   *   never before a `"`, whose curly mark places its caret itself (`QuoteWidget`)
+   */
+  static wordsSide: Extension = EditorState.transactionFilter.of((transaction) => {
+    const { selection } = transaction
+    if (!selection) return transaction
+    const doc = transaction.newDoc
+    if (selection.ranges.every((range) => !isBeforeWords(doc, range))) return transaction
+    const ranges = selection.ranges.map((range) =>
+      isBeforeWords(doc, range)
+        ? EditorSelection.cursor(range.head, 1, range.bidiLevel ?? undefined, range.goalColumn)
+        : range
+    )
+    return [transaction, { selection: EditorSelection.create(ranges, selection.mainIndex), sequential: true }]
   })
+
+  /** The bubbly look's selection layer, over the text, as CodeMirror's own is in the look;  and `wordsSide`. */
+  static extension: Extension = [
+    layer({
+      above: false,
+      class: SELECTION_LAYER,
+      markers: (view) => CodeMirrorSelection.markersIn(view),
+      update: (update) => update.docChanged || update.selectionSet || update.viewportChanged || update.geometryChanged
+    }),
+    CodeMirrorSelection.wordsSide
+  ]
 
   /**
    * The selection's pieces in `view`:  CodeMirror's, each moved onto its lines' bands.
    * - SIDE EFFECT:  reads the layout;  CodeMirror calls it when that's fine.
    */
   static markersIn(view: EditorView): RectangleMarker[] {
+    const ranges = view.state.selection.ranges.filter((range) => !range.empty)
+    // a caret alone, as while typing:  nothing to draw, and no probe laying the pane out again (epic `codemirror` I21)
+    if (!ranges.length) return []
     const bands = new LineBands(view)
-    return view.state.selection.ranges
-      .filter((range) => !range.empty)
-      .flatMap((range) => RectangleMarker.forRange(view, PIECE, range))
-      .map((piece) => bands.onBands(piece))
+    return ranges.flatMap((range) => RectangleMarker.forRange(view, PIECE, range)).map((piece) => bands.onBands(piece))
   }
 }
 
@@ -90,6 +119,18 @@ class LineBands {
     const room = Math.max(0, (lineHeight - this.bandHeight) / 2)
     return { top: top + room, bottom: top + Math.min(lineHeight, room + this.bandHeight) }
   }
+}
+
+/** Is `range` a caret right before a word (its line's first, or one after a space), stuck to what's before it? */
+function isBeforeWords(doc: Text, range: SelectionRange): boolean {
+  if (!range.empty || range.assoc >= 0) return false
+  const line = doc.lineAt(range.head)
+  const words = line.text.search(/\S/)
+  if (words < 0) return false
+  if (range.head === line.from + words) return true
+  // ... or a word after a space in the line:  a pill's first, `when |creating solitaire` (I141)
+  const at = range.head - line.from
+  return at > words && /[ \t]/.test(line.text[at - 1]!) && /[^\s"]/.test(line.text[at] ?? "")
 }
 
 /** A CSS length `length` (`var(--x)`, `calc(...)`) in px, as `element`'s styles make it. */

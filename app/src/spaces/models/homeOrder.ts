@@ -1,13 +1,17 @@
 import HOME_ORDER_LIST from "./homeOrder.json"
 
 /**
- * The order of the editor's home page cards, group by group (epic `mockup` P19):  ONE list, the editor's, not each
- * project's.
+ * The order of the editor's home page:  its sections, and each group's cards (epic `mockup` P19).
+ * ONE list, Spell's own, not each project's.
  * - Kept in `homeOrder.json` beside this file:  each group's address, then its projects' folder names in order,
  *   `{ "@spell/examples": ["fizzbuzz", "Counter", ...] }`.
+ *   - And the sections' order, under `HOME_SECTIONS_KEY`, `"sections"` (epic `repo-split` P28):
+ *     no group's address is a bare word, so a reader of a group's list never meets it.
  * - A project not on its group's list comes after the listed ones, by name:  a new example goes to the end by itself.
- * - Changed by dragging a card on the home page, in dev (`POST /api/home/order`, which writes the file);
- *   the README's table of examples reads it too (`yarn examples:readme`).
+ * - Changed by dragging a card, or a section by its header, on the home page:
+ *   in dev, in Spell's own checkout (`POST /api/home/order`, which writes the file).
+ *   - Never in an app that installs Spell:  the file is in its `node_modules` there, so nothing drags.
+ * - The README's table of examples reads it too (`yarn examples:readme`).
  * - Browser-safe:  the editor imports it.
  */
 export const HOME_ORDER: Readonly<Record<string, readonly string[]>> = HOME_ORDER_LIST
@@ -15,16 +19,61 @@ export const HOME_ORDER: Readonly<Record<string, readonly string[]>> = HOME_ORDE
 /** Where the home page's order is saved, and asked whether it may be:  `GET` / `POST`. */
 export const HOME_ORDER_URL = "/api/home/order"
 
-/** `GET HOME_ORDER_URL`'s answer:  may this page reorder the cards?  Refused (403) where it may not. */
+/** `GET HOME_ORDER_URL`'s answer:  may this page reorder its cards and sections?  Only in Spell's own checkout. */
 export type HomeOrderAnswer = { mayReorder: boolean }
 
-/** `POST HOME_ORDER_URL`'s body:  one group's new order. */
+/** `POST HOME_ORDER_URL`'s body:  one group's new order, or the sections'. */
 export type HomeOrderChange = {
-  /** the group's address, `@spell/examples` */
+  /** the group's address, `@spell/examples`;  or `HOME_SECTIONS_KEY`, for the sections' order */
   group: string
-  /** its projects' folder names, in their new order */
+  /** its projects' folder names, in their new order;  or the sections' ids (`HomeSection`) */
   names: string[]
 }
+
+/** The key in the home page's order that holds its SECTIONS' order, not a group's:  `"sections"`. */
+export const HOME_SECTIONS_KEY = "sections"
+
+/**
+ * The home page's sections under its hero, by id, in their order when the saved list names none of them.
+ * - `start`:  the ways to start something new
+ * - `examples`, `library`, `guides`:  Spell's own groups
+ * - `projects`:  this machine's person's own
+ * - `org`:  each of their org's own groups (`orgGroups`), one section each;  none in Spell's own org
+ * - `editor`:  the editor's own pieces, in dev only
+ */
+export const HOME_SECTIONS = ["start", "examples", "library", "guides", "projects", "org", "editor"] as const
+
+/** One of `HOME_SECTIONS`. */
+export type HomeSection = (typeof HOME_SECTIONS)[number]
+
+/**
+ * The home page's sections, in order (epic `repo-split` P28):  `order`'s list of them, then any it leaves out.
+ * - `inOrg`, in an app made for an org (its org isn't Spell's own, `localPerson.org`):
+ *   the person's own projects and the org's groups come first (`HOME_ORG_FIRST`), and the library isn't shown.
+ *   (Owen, 2026-11-16:  "Your own projects and the org's projects AT THE TOP.  NOT Library there.")
+ * - A name the list holds that isn't a section is skipped:  an old list never breaks the page.
+ */
+export function homeSections(
+  inOrg: boolean,
+  order: Readonly<Record<string, readonly string[]>> = HOME_ORDER
+): HomeSection[] {
+  const saved = (order[HOME_SECTIONS_KEY] ?? []).filter(isHomeSection)
+  const all = [...new Set([...saved, ...HOME_SECTIONS])]
+  if (!inOrg) return all
+  const first = all.filter((section) => HOME_ORG_FIRST.includes(section))
+  return [...first, ...all.filter((section) => !HOME_ORG_FIRST.includes(section) && section !== "library")]
+}
+
+/** Is `name` one of the home page's sections? */
+export function isHomeSection(name: string): name is HomeSection {
+  return (HOME_SECTIONS as readonly string[]).includes(name)
+}
+
+/**
+ * The sections an org's app shows first, in their saved order:  the person's own, then the org's.
+ * - Above the home page's hero, too (`<ProjectChooser>`).
+ */
+export const HOME_ORG_FIRST: readonly HomeSection[] = ["projects", "org"]
 
 /**
  * `projects` of group `group` in the home page's order, `order` (default:  the saved one).

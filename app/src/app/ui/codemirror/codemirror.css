@@ -28,6 +28,12 @@
   }
 }
 
+/* lines whose parse is on its way (`CodeMirrorRelayout`, epic `language` I148):  hidden till it comes, so their first
+   drawing is the parse's, not a parse of the file alone's for a second or two */
+.cm-editor.cm-awaiting-parse .cm-scroller {
+  visibility: hidden;
+}
+
 /* every CodeMirror editor's popups, the look on or off;  the find bar's below */
 .cm-editor.cmb {
   /****** popups:  go to line, suggestions, hover, problems, in the page's colours ******/
@@ -207,8 +213,8 @@
 
 /* Rename Symbol's field over the name (`CodeMirrorRename`), and what it says where it can't */
 .cmb-rename {
-  /* the tooltip's border, this padding, the field's border and padding:  1 + 4 + 1 + 6 */
-  --cmb-rename-inset: 12px;
+  /* the tooltip's border, this padding, the field's border and padding:  1 + 4 + 1 + 8 */
+  --cmb-rename-inset: 14px;
   padding: 4px;
   /* the field's text starts where the name's does:  the tooltip pulled left by what's before the text */
   margin-left: calc(-1 * var(--cmb-rename-inset));
@@ -221,6 +227,7 @@
     border-radius: 4px;
     background: var(--bubbly-paper);
     color: var(--bubbly-ink);
+    /* the name's own font, size and weight:  set as it's drawn (`CodeMirrorRename`) */
     font: inherit;
     outline: none;
   }
@@ -253,16 +260,48 @@
   }
 }
 
-/****** the merge view:  each change's arrow, its sides' colours ******/
+/****** the merge view:  each change's arrow, a change taken its undo icon, its sides' colours ******/
+/* (`CodeMirrorMerge`;  epic `editor` T101:  the arrows bigger and purple, the undo icons grey, in the same place) */
 .cm-mergeView {
   height: 100%;
 
-  .cm-merge-revert button {
+  /* the undo icons' box, laid over the centre column (`.cm-merge-taken`) */
+  .cm-mergeViewEditors {
+    position: relative;
+  }
+  .cm-merge-revert {
+    width: 32px;
+  }
+  .cm-merge-taken {
+    position: absolute;
+    pointer-events: none;
+  }
+  :is(.cm-merge-revert, .cm-merge-taken) button {
+    position: absolute;
+    left: 4px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
     cursor: pointer;
     border: 0;
     border-radius: 4px;
-    background: light-dark(#ece9f6, #34323f);
-    color: var(--bubbly-ink, inherit);
+    background: none;
+    font-size: 16px;
+    pointer-events: auto;
+    /* a `<ui-icon>` draws no room after its glyph here */
+    --ui-icon-width: auto;
+    --ui-icon-distance: 0;
+  }
+  .cm-merge-revert button {
+    color: var(--ui-primary, #6435c9);
+  }
+  .cm-merge-taken button {
+    color: var(--ui-text-muted, #888);
+  }
+  :is(.cm-merge-revert, .cm-merge-taken) button:hover {
+    background: color-mix(in srgb, currentColor 14%, transparent);
   }
   .cm-changedLine,
   .cm-deletedChunk {

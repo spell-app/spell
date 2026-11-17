@@ -6249,7 +6249,7 @@
       "name": "--ui-menu-header-bar-height",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `38px`"
+        "value": "`<ui-menu>`'s token.  Default:  `40px`"
       }
     },
     {
@@ -6267,10 +6267,10 @@
       }
     },
     {
-      "name": "--ui-menu-header-bar-border",
+      "name": "--ui-menu-header-bar-shadow",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `1px solid var(--ui-border-color)`"
+        "value": "`<ui-menu>`'s token.  Default:  `0 1px 0 var(--ui-border-color)`"
       }
     },
     {
@@ -6830,7 +6830,7 @@
       "name": "--ui-page-layout-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-page-layout>`'s token.  Default:  `var(--ui-font-size, 16px)`"
+        "value": "`<ui-page-layout>`'s token.  Default:  `var(--_page-layout-room)`"
       }
     },
     {
@@ -6838,6 +6838,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-page-layout>`'s token.  Default:  `0 0 0.75em color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 14%, transparent), 0 0 1px color-mix(in oklch, var(--ui-shadow-ink, CanvasText) 22%, transparent)`"
+      }
+    },
+    {
+      "name": "--ui-page-layout-end-room",
+      "description": {
+        "kind": "markdown",
+        "value": "the muted strip down the page's end side, beside its top-right corner (I219)\n\n`<ui-page-layout>`'s token.  Default:  `round(0.5em, var(--ui-grid, 4px))`"
       }
     },
     {
@@ -6915,6 +6922,27 @@
       "description": {
         "kind": "markdown",
         "value": "the box shadow\n\n`<ui-panel>`'s token.  Default:  `var(--spell-shadow-sm, var(--ui-shadow-raised))`"
+      }
+    },
+    {
+      "name": "--ui-panel-scroll-shade",
+      "description": {
+        "kind": "markdown",
+        "value": "the shade's colour at its edge, fading to nothing: a dark tint, deeper on a dark page\n\n`<ui-panel>`'s token.  Default:  `light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3))`"
+      }
+    },
+    {
+      "name": "--ui-panel-scroll-shade-size",
+      "description": {
+        "kind": "markdown",
+        "value": "how tall each shade is\n\n`<ui-panel>`'s token.  Default:  `16px`"
+      }
+    },
+    {
+      "name": "--ui-panel-scroll-shade-top",
+      "description": {
+        "kind": "markdown",
+        "value": "how far under the bar the top shade starts: under a line of the body's that sticks at its top\n\n`<ui-panel>`'s token.  Default:  `0px`"
       }
     },
     {
@@ -8895,7 +8923,7 @@
       "name": "--ui-site-nav-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-site-nav>`'s token.  Default:  `0.5em 0`"
+        "value": "`<ui-site-nav>`'s token.  Default:  `var(--_site-nav-padding-top) 0 round(0.5em, var(--ui-grid, 4px))`"
       }
     },
     {
@@ -8910,6 +8938,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-site-nav>`'s token.  Default:  `var(--ui-radius-l)`"
+      }
+    },
+    {
+      "name": "--ui-site-nav-bar-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-site-nav>`'s token.  Default:  `calc(var(--_site-nav-row-height) + 1em)`"
       }
     },
     {
@@ -10822,7 +10857,7 @@
       "name": "::part(chevron)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-submenu>`:  The chevron at the row's end, pointing to the fly-out."
+        "value": "Part of:\n\n- `<ui-submenu>`:  The chevron at the row's end, pointing to the fly-out;  with `split`, what opens it."
       }
     },
     {
@@ -12504,7 +12539,7 @@
       "name": ":state(here)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-property>`:  Its value is set on this thing (its editor's `origins`):  a dot by its label.\n- `<ui-theme-token>`:  The theme sets the token (●)."
+        "value": "Custom state of:\n\n- `<ui-property>`:  Its value is set on this thing (its editor's `origins`);  draws nothing of its own.\n- `<ui-theme-token>`:  The theme sets the token (●)."
       }
     },
     {
@@ -12879,6 +12914,20 @@
       }
     },
     {
+      "name": ":state(more-above)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  A pane whose body is scrolled down from its top:  a shade shows under its bar."
+      }
+    },
+    {
+      "name": ":state(more-below)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  A pane whose body has more below:  a shade shows at its bottom."
+      }
+    },
+    {
       "name": ":state(moved)",
       "description": {
         "kind": "markdown",
@@ -13121,6 +13170,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-statistics>`:  Set unless `horizontal` or `widths`:  the group keeps Fomantic's 1em top margin, which the HOST carries (so it collapses with the content above)."
+      }
+    },
+    {
+      "name": ":state(split)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-submenu>`:  Its title chooses;  its chevron end opens the fly-out (`split`)."
       }
     },
     {

@@ -522,6 +522,8 @@ export class SiteBase extends App {
    *   (`band: "group"`, epic `mockup` T34):  it opens by itself while the page shown is in it, and a click on it goes
    *   to its first page;  the rest as themselves.
    * - A group's row shows the icon its line names (`groupIcon`, epic `mockup` I20).
+   * - A group with one listed page (`group "Home"` round the Home page and its dialogs) is that page alone,
+   *   whatever its name, with no group's header over it (epic `mockup` I35, C2):  the page's own icon, else the group's.
    * - `listed` reads a run of entries that share a group, or none.
    */
   private static underGroups(
@@ -536,9 +538,14 @@ export class SiteBase extends App {
       while (end < entries.length && entries[end]!.group === group) end++
       const run = entries.slice(at, end)
       const pages = SiteBase.navRows(run, listed)
-      if (group) {
+      const [only] = pages
+      if (!group) rows.push(...pages)
+      // a group of one listed page, whatever its name:  that page alone, no header (I35, C2)
+      else if (pages.length === 1 && only) {
+        rows.push({ ...only, ...(!only.icon && groupIcon && { icon: groupIcon }) })
+      } else {
         rows.push({ title: group, id: `group:${group}`, band: "group", ...(groupIcon && { icon: groupIcon }), pages })
-      } else rows.push(...pages)
+      }
       at = end
     }
     return rows

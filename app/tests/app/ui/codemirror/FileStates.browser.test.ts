@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { currentCompletions, startCompletion } from "@codemirror/autocomplete"
 import { undo } from "@codemirror/commands"
 import { foldEffect, foldedRanges } from "@codemirror/language"
 import { EditorView } from "@codemirror/view"
@@ -6,6 +7,7 @@ import { EditorView } from "@codemirror/view"
 import { declareProp, Observable } from "spell/util"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { codeLook, showBubbly } from "spell/app/app/ui/codePopups"
 import { FileStates, type EditWay } from "spell/app/app/ui/codemirror/FileStates"
 
 /**
@@ -151,6 +153,50 @@ describe("FileStates", () => {
     states.releaseSlice(view)
   })
 
+  test("a property editors file, `Card.editor.spell`:  drawn as Spell, bubbly or coloured, never parsed (epic `codemirror` I18)", async () => {
+    const { states, project } = setUp()
+    const file = new StandInFile("@spell/test/standin/Card.editor.spell", project) as StandInFile & SP.AnySpellFile
+    file.contents = PROPERTY_EDITORS
+    const wasBubbly = codeLook.isBubbly
+    try {
+      showBubbly(true)
+      view = viewOf()
+      states.show(view, file)
+      expect(view.dom.classList.contains("bubbly")).toBe(true)
+      expect(textsOf(view, ".bubbly-heading")).toEqual([" A card's property editor"])
+      expect(textsOf(view, ".bubbly-tag-name")).toEqual(["property-editor", "ui-property", "property-editor"])
+      expect(textsOf(view, ".bubbly-input")).toContain("rank")
+      // the look off:  coloured by its tokens, its heading bold (was plain black text, I18)
+      showBubbly(false)
+      await Promise.resolve()
+      expect(view.dom.classList.contains("bubbly")).toBe(false)
+      expect(textsOf(view, ".cmt-heading")).toEqual(["# A card's property editor"])
+      expect(textsOf(view, ".cmt-string")).toEqual(['"rank"'])
+    } finally {
+      showBubbly(wasBubbly)
+    }
+  })
+
+  test("a CSS file, `styles.css`:  coloured through the ONE colour table, its property names suggested (epic `codemirror` I20)", async () => {
+    const { states, project } = setUp()
+    const file = new StandInFile("@spell/test/standin/styles.css", project) as StandInFile & SP.AnySpellFile
+    file.contents = STYLES
+    view = viewOf()
+    // each role's token, as the page theme sets them
+    view.dom.style.cssText =
+      "--ui-code-comment: rgb(1, 2, 3); --ui-code-member: rgb(4, 5, 6); --ui-code-action: rgb(7, 8, 9)"
+    states.show(view, file)
+    // was plain black text (I20):  no CSS language at all
+    expect(colourOf(view, "/* the felt */")).toBe("rgb(1, 2, 3)")
+    expect(colourOf(view, "background")).toBe("rgb(4, 5, 6)")
+    // a function an action, as a javascript call is, not a keyword
+    expect(colourOf(view, "var")).toBe("rgb(7, 8, 9)")
+
+    view.dispatch({ selection: { anchor: STYLES.indexOf("background") + 4 } })
+    startCompletion(view)
+    await vi.waitFor(() => expect(currentCompletions(view!.state).map(({ label }) => label)).toContain("background"))
+  })
+
   test("its waits:  a parse once the typing pauses 200 msec, a rename's save within 2 s (epic `codemirror` J4)", () => {
     expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([200, 2000])
   })
@@ -165,6 +211,34 @@ const GAME = "to play it:\n\tdeal cards\n\tshuffle"
 
 /** A card file's text. */
 const CARD = "a card is a thing"
+
+/** A property editors file's text:  a heading, prose, and a `<property-editor>` of markup. */
+const PROPERTY_EDITORS = `# A card's property editor
+What the Inspector shows for a card.
+
+<property-editor "card">
+\t<ui-property name="rank" />
+</property-editor>
+`
+
+/** A CSS file's text:  a comment, a rule, a property, a function. */
+const STYLES = `/* the felt */
+.table {
+  background: var(--felt);
+}
+`
+
+/** The colour the element holding exactly `text` in `view` is drawn in. */
+function colourOf(view: EditorView, text: string): string {
+  const element = [...view.dom.querySelectorAll(".cm-line span")].find((span) => span.textContent === text)
+  if (!element) throw new TypeError(`colourOf():  no span holds \`${text}\``)
+  return getComputedStyle(element).color
+}
+
+/** The text of each element matching `selector` in `view`, in order. */
+function textsOf(view: EditorView, selector: string): string[] {
+  return [...view.dom.querySelectorAll(selector)].map((element) => element.textContent ?? "")
+}
 
 /** A project file, standing in:  its `contents` a spell cell, as a real one's. */
 class StandInFile extends Observable {
@@ -192,7 +266,7 @@ function setUp({ onEdit }: { onEdit?: (file: SP.AnySpellFile) => void } = {}) {
   files.game.contents = GAME
   files.card.contents = CARD
   const states = new FileStates({ service: new LSP.SpellLanguageService(new LSP.AppAddresses()), onEdit })
-  return { states, files: files as unknown as Record<keyof typeof files, StandInFile & SP.AnySpellFile> }
+  return { states, project, files: files as unknown as Record<keyof typeof files, StandInFile & SP.AnySpellFile> }
 }
 
 /** A view in the page, showing nothing yet. */

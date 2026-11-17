@@ -1685,6 +1685,15 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
+   * Does `element` draw a thing its tag made for itself (`makeOwnThing()`), not one the program has:
+   * a card's `<card-image card={it} />`, a pile's placeholder?
+   */
+  static drawsItsOwnThing(element: Element): boolean {
+    const component = (element as Element & { component?: SpellElement }).component
+    return !!component?.ownThing && component.currentThing === component.ownThing
+  }
+
+  /**
    * The events the thing `element` draws handles itself, by spell's names, for the Inspector's Events
    * (epic `debut` P27):  `click` for `- on click:`, `drag-cancelled` for `- on drag cancelled:`,
    * `card-dropped` for a pile's `- on card dropped:`.

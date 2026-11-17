@@ -81,6 +81,14 @@ describe("LspToCodeMirror", () => {
     })
     expect(completion).toMatchObject({ label: "move", detail: "an action", info: "Move a card" })
     expect(typeof completion.apply).toBe("function")
+    // its description, when it has one, is what its row says;  its detail then heads its info
+    const described = LspToCodeMirror.completion(DOC, {
+      label: "turn",
+      detail: "property of TicTacToe",
+      labelDetails: { description: "Whose turn it is" },
+      documentation: { kind: "markdown", value: "X or O" }
+    })
+    expect(described).toMatchObject({ detail: "Whose turn it is", info: "property of TicTacToe\n\nX or O" })
     expect(LspToCodeMirror.snippet("move ${1:card} to $2$0")).toBe("move ${1:card} to ${2}${99}")
     expect(LspToCodeMirror.snippet('<action "$1" />')).toBe('<action "${1}" />')
   })

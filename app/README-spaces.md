@@ -103,12 +103,17 @@ The groups, and where each one's folder is:
   named after the folder it's in.
   The editor lists none of those.
 
-### Your own group is owen@spell, whoever you are
+### Your own group is you, at your org
 
-Your own projects live in `owen@spell`, the editor's "Projects" list, and that's its name on every machine.
-- It's fixed today:  `LOCAL_PERSON` in [projectGroups.ts](src/spaces/models/projectGroups.ts), the part before the
-  `@`, is the one person a machine has, until a machine can have more than one.
-- So your projects' addresses start `owen@spell/` too, in your own spaces folder:  nobody else's files are in it.
+Your own projects live in your own group, the editor's "Projects" list:  `alice@acme`, your name at your org.
+- The org is your app's setting, `"spell": { "org": "acme" }` in its `package.json`;  left out, `spell`.
+- The first time you start the editor from an install of Spell, it asks your name, the org on the field's right,
+  starting from your git email;  your app's folder remembers it, in `.spell/me.json5`, never committed.
+- In a checkout of Spell itself, with no such file, it's `owen@spell`, and nothing asks.
+- An org's own folders of projects in your spaces folder, `@acme/tools/`, are groups the home page lists too.
+  - In an app with its org set, the home page shows your own projects and each of those groups first, above the rest;
+    it leaves out the library.
+- The code:  [localPerson.ts](src/spaces/server/node/people/localPerson.ts) and [projectGroups.ts](src/spaces/models/projectGroups.ts).
 
 ## Setting up spaces for your own project
 

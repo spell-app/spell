@@ -236,6 +236,8 @@ function spyOnHotkeys() {
     "find",
     "goToDefinition",
     "findReferences",
+    "peekDefinition",
+    "peekReferences",
     "rename",
     "cutParts",
     "copyParts",

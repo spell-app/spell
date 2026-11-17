@@ -31902,12 +31902,12 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:columns"?: number | `${number}`
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   origins?: unknown
   /**
-   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows its reset, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`);  `data` is kept in a back-end, its `mark` a few words at the row's end;  `readonly` makes it read only.  A property it doesn't name looks as it always did.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `origins` -- `prop:` stays only for compiled spell
    */
@@ -45775,6 +45775,36 @@ export interface UISubmenuAttributes {
    * @deprecated write `menu` -- `prop:` stays only for compiled spell
    */
   "prop:menu"?: string
+  /**
+   * The fly-out's own name, when it isn't the row's `label`:  its menu's name for a screen reader, and with `split` the chevron end's tooltip ("Pick one of the parts under the mouse").  Default:  its `label`.
+   * - takes:  text
+   */
+  "flyout-label"?: string
+  /**
+   * `flyout-label`, as the DOM element's property.
+   * @deprecated write `flyout-label` -- `prop:` stays only for compiled spell
+   */
+  "prop:flyoutLabel"?: string
+  /**
+   * With `split`:  what its menu's `ui-choosing` reports when its title is chosen.  Default:  its `label`.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
+  /**
+   * Two things in one row:  its title is a plain item, which a click, Enter or Space chooses (the menu's `ui-choosing`, as any item's);  its chevron end, set off by a faint line, opens the fly-out, by the pointer, a click or the arrow key toward it.
+   * - takes:  flag (present / absent)
+   */
+  split?: boolean | ""
+  /**
+   * `split`, as the DOM element's property.
+   * @deprecated write `split` -- `prop:` stays only for compiled spell
+   */
+  "prop:split"?: boolean | ""
   /**
    * Can't be opened.
    * - takes:  flag (present / absent)

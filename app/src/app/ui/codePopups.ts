@@ -135,6 +135,11 @@ export function suggestsByItself(before: string): boolean {
 /**
  * How long the mouse rests on a word before its hover shows, in seconds:  the page's own wait, `--ui-hover-delay`.
  * - Every code editor's hover waits this long (epic `codemirror` P1).
+ * - So does every popup that shows by itself as you type, once the typing pauses (epic `codemirror` I22):
+ *   the suggestion list, signature help;  each key typed starts the wait again.
+ *   - Owen:  "the auto-help pops up waayy too fast":  the list showed 20-30 msec after a key, mid-word.
+ *   - Not what's asked for by name:  Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
+ *   - The words strip under an attribute's value waits longer, a second (`ValuePopups`' `REST_DELAY`).
  */
 export const HOVER_DELAY = 0.8
 

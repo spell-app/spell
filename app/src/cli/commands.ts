@@ -1,6 +1,6 @@
 /**
  * spell-app's `spell` commands (its `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):
- * - `spell app create <name>`:  a new spell project, in your space
+ * - `spell app create <name> [--site]`:  a new spell project, or a site, in your space
  * - `spell app serve [project]`:  the editor and its page server, opened in a browser
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
  * - `spell app preview viewer <folder> <project...> [--editor]`:  `<spell-viewer>` (and `<spell-editor>`) and those
@@ -81,6 +81,7 @@ export default function appCommands(spell: Command): void {
     .description("make a spell project:  <name>/__project.json5 and a starter <name>.spell")
     .argument("<name>", "the project's name, e.g. Snake")
     .option("--in <folder>", "make it in this folder -- default owen@spell's, your space in spell.spaces")
+    .option("--site", "make a site:  <name>.site.spell, its main page layout and a home page")
     .action((name: string, _options, command: Command) =>
       CLI.runCommand(async () => {
         checkProjectName(name)

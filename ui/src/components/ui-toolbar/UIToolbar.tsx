@@ -57,6 +57,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - Only with more items than that;  a bare `max-visible` means 8.
  *   - The button shows while some items aren't in view:  put away, or scrolled out of the row;
  *     with every item in view, there's none (epic `editor` T83, reversing T82's `all-items-always`).
+ *     - A row that would fit without the button has none:  shown, the button took the room the last item needed,
+ *       so the row overflowed only because of it (epic `editor` I235).
  *     An attribute, not on by default:  a toolbar of actions has nothing chosen to go by.
  *   - The row keeps the page's order.  The item chosen longest ago leaves it first;  the chosen one never does.
  *   - An item left out is `hidden`, so the menu's own rules skip it, and its overflow menu is the list.
@@ -87,13 +89,24 @@ export class UIToolbar extends UIMenu {
   readonly scrolling = new ScrollingRow({
     owner: this,
     // a shrinkable one fits its titles instead:  no keys, no fades;  unless it scrolls first, and is still whole
-    canScroll: () => !this.shrinkable || (!!this.scrollFirst && !this.isDropdown)
+    canScroll: () => !this.shrinkable || (!!this.scrollFirst && !this.isDropdown),
+    // the list's button, while drawn:  the row would get its room back
+    roomBeside: () => this.allItemsRoom()
   })
 
   /** The items don't all fit:  the box scrolls. */
   @E.cssState("overflowing")
   get isOverflowing(): boolean {
     return this.scrolling.isOverflowing
+  }
+
+  /**
+   * The thumb just moved:  the row measured again, as the thumb is in what it scrolls.
+   * - A tab closed at the row's end:  the row shrank and measured itself with the thumb still past its new end,
+   *   so its `›` stayed, mid-bar, with every tab in view (epic `mockup` I39).
+   */
+  protected override onThumbPlaced() {
+    this.scrolling.measure()
   }
 
   /** `scroll-first`:  the row scrolls before it's a dropdown. */
@@ -233,10 +246,14 @@ export class UIToolbar extends UIMenu {
   /**
    * The button listing every item is there:  with `max-visible`, while some items aren't in view,
    * put away (`isLimited`) or scrolled out of the row (`isOverflowing`).
-   * - Steady:  the button takes room from the row, so a row that overflowed without it still does with it.
+   * - Every item in view, it's gone:  a row that overflows only by the button's own room fits once it's gone,
+   *   so the button goes (`fitsWithRoomBack`;  epic `editor` I235:
+   *   "If all the files are present in the list, hide the 'more files' button").
+   * - Steady both ways, no flicker:  shown, the row overflows by more than its room;  gone, the row fits.
    */
   get showsAllItems(): boolean {
-    return this.isLimited || (this.visibleLimit !== undefined && this.isOverflowing)
+    if (this.isLimited) return true
+    return this.visibleLimit !== undefined && this.isOverflowing && !this.scrolling.fitsWithRoomBack
   }
 
   /** The list's button, while drawn. */
@@ -252,15 +269,23 @@ export class UIToolbar extends UIMenu {
    */
   protected override get fitHoldBack(): number {
     if (this.visibleLimit === undefined) return 0
+    this.allItemsRoom()
+    return this.allItemsWidth || ALL_ITEMS_FALLBACK_WIDTH
+  }
+
+  /**
+   * The room the list's button takes now, which hiding it gives back:  px, `0` while it isn't drawn.
+   * - Its width, its margins and the bar's gap before it.
+   * - SIDE EFFECT:  drawn, it's kept as `allItemsWidth`.
+   */
+  private allItemsRoom(): number {
     const button = this.allItemsButton
     const width = button?.isConnected ? button.getBoundingClientRect().width : 0
-    if (width) {
-      // its margins, and the bar's gap before it:  all of it comes back when it hides
-      const style = getComputedStyle(button!)
-      const gap = parseFloat(getComputedStyle(button!.parentElement!).columnGap) || 0
-      this.allItemsWidth = width + (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0) + gap
-    }
-    return this.allItemsWidth || ALL_ITEMS_FALLBACK_WIDTH
+    if (!width) return 0
+    const style = getComputedStyle(button!)
+    const gap = parseFloat(getComputedStyle(button!.parentElement!).columnGap) || 0
+    this.allItemsWidth = width + (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0) + gap
+    return this.allItemsWidth
   }
 
   protected override get overflowOpener(): HTMLButtonElement | undefined {
@@ -324,9 +349,11 @@ export class UIToolbar extends UIMenu {
     this.refitTitles()
     this.keepOpenValues(open)
     if (chosen && chosenValue !== this.followedValue) {
+      // a row just drawn jumps to its chosen item:  sliding there from the start flickered past every item (I38)
+      const smoothly = this.followedValue !== undefined
       this.followedValue = chosenValue
       const box = this.itemOf(chosen)?.focusTarget
-      if (box) E.beforeNextPaint(() => this.scrolling.bringIntoView(box, { smoothly: true }))
+      if (box) E.beforeNextPaint(() => this.scrolling.bringIntoView(box, { smoothly }))
     }
   }
 
@@ -367,12 +394,21 @@ export class UIToolbar extends UIMenu {
     this.limitRefresh.ask()
   }
 
-  /** Show `item` in the row, or put it away:  only ever hides what it can show again. */
+  /**
+   * Show `item` in the row, or put it away:  only ever hides what it can show again.
+   * - Put away at once, never animated out (`--ui-motion: none` on it while it's away):
+   *   an item animating out still takes its room, so the thumb, the titles' fit and the scroll measured the row
+   *   with every item in it, and nothing measured again once it went (epic `mockup` I38, I39:
+   *   HarborNew's 8 tabs scrolled 5,700px off, the thumb drawn past them;  titles cut with room to spare).
+   */
   private showInRow(item: HTMLElement, isShown: boolean) {
     if (isShown) {
-      if (this.putAway.delete(item)) item.hidden = false
+      if (!this.putAway.delete(item)) return
+      item.style.removeProperty(UIT.MOTION_PROPERTY)
+      item.hidden = false
     } else if (!item.hidden) {
       this.putAway.add(item)
+      item.style.setProperty(UIT.MOTION_PROPERTY, UIT.NO_ANIMATION)
       item.hidden = true
     }
   }

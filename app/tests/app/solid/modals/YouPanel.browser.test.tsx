@@ -68,6 +68,12 @@ describe("the You panel", () => {
     expect(value(modal, ".date .day")).toBe("1970-01-01")
     expect(modal.querySelector("ui-list")!.textContent).toContain("Spell · spell-admin")
     expect(modal.querySelector("ui-message")!.textContent).toContain("names is text, not a number")
+    // epic `editor` I231:  name and nickname side by side, the name the wider
+    const names = modal.querySelector("#YouPanel-names")!.getBoundingClientRect()
+    const nickname = modal.querySelector("#YouPanel-nickname")!.getBoundingClientRect()
+    expect(nickname.top).toBe(names.top)
+    expect(names.width).toBeGreaterThan(nickname.width)
+    expect(modal.querySelector("label[for=YouPanel-names]")!.textContent).toBe("Name")
     modal.querySelector<HTMLElement>(".cancel")!.click()
     expect(await answer).toEqual(ME)
     expect(requests.map((request) => request.method)).toEqual(["GET"])

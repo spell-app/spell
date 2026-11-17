@@ -69,7 +69,7 @@ export class CodeMirrorSetup {
       REVEALS_BLOCKS,
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
-      // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
+      // a tab 2 spaces wide:  each level of a body 8px further in, not 17px (epic `language` I113)
       EditorState.tabSize.of(TAB_SIZE),
       // the find bar (⌘F), VS Code's look and keys
       CodeMirrorFind.extension(),
@@ -142,8 +142,15 @@ export class CodeMirrorSetup {
     ]
   }
 
-  /** Line numbers in `view` or not, as View › Line Numbers says:  none at first. */
+  /**
+   * Line numbers in `view` or not, as View › Line Numbers says:  none at first.
+   * - Nothing when they're already so:  the code pane asks at each change of its file, at every key typed, and a
+   *   new gutter each time made each key a reconfigured editor (epic `codemirror` I21)
+   */
   static showLineNumbers(view: EditorView, show: boolean): void {
+    const now = CodeMirrorSetup.lineNumbers.get(view.state)
+    const isShowing = !(Array.isArray(now) && !now.length)
+    if (now !== undefined && isShowing === show) return
     view.dispatch({ effects: CodeMirrorSetup.lineNumbers.reconfigure(show ? lineNumbers() : []) })
   }
 
@@ -367,7 +374,7 @@ const REVEALS_BLOCKS = EditorView.scrollHandler.of((view, range) => {
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"
 
-/** How many spaces wide a tab is:  2, as Monaco's was (epic `language` I113);  `codemirror.css`'s `tab-size` too. */
+/** How many spaces wide a tab is:  2, so each level of a body is 8px further in (epic `language` I113);  `codemirror.css`'s `tab-size` too. */
 const TAB_SIZE = 2
 
 /** Whether `update` brought a new parse:  `CodeMirrorSetup.PARSED`. */

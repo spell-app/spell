@@ -37,15 +37,16 @@ import { SRV } from "spell/server"
 // Import directly:  the places barrel would load every place into the language server, which reads projects too
 import { contentHash } from "spell/server/places/contentVersion"
 import { SP } from "spell/parser/spell"
-import { SPACES, type DraftJSON, type PublishJSON, type VersionJSON } from "spell/app/spaces"
+import type { DraftJSON, PublishJSON, VersionJSON } from "spell/app/spaces"
 import { ADMIN_SPACE, PRIVATE_SPACE } from "spell/app/spaces/models/spaceNames"
 import { OrgRoles, type PairedSpace } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { unzipped, zipped } from "spell/app/spaces/server/node/storage/zip"
 
 import * as fileUtils from "./file-utils"
-import { ProjectRoles, THIS_MACHINES_PERSON } from "./ProjectRoles"
+import { ProjectRoles } from "./ProjectRoles"
 
 export class ProjectDrafts {
   /** the project's id, e.g. `@spell/examples/Counter` */
@@ -70,7 +71,7 @@ export class ProjectDrafts {
 
   constructor({
     projectId,
-    person = THIS_MACHINES_PERSON,
+    person = thisMachinesPerson().address,
     projectFolder = SP.SpellLocation.getProjectLocation(projectId).serverPath,
     privateFolder = projectFolder,
     org,
@@ -473,7 +474,8 @@ export class ProjectDrafts {
 
   /** How a draft's name says whose it is:  this machine's person by their id (`owen`), anyone else by address. */
   private get nameTag(): string {
-    return this.person === THIS_MACHINES_PERSON ? SPACES.LOCAL_PERSON : this.person
+    const local = thisMachinesPerson()
+    return this.person === local.address ? local.id : this.person
   }
 
   /** Path on disk of `filePath`'s public file. */
@@ -511,7 +513,8 @@ export class ProjectDrafts {
     const records: DraftRecords = {}
     for (const [key, value] of Object.entries(said)) {
       if (typeof value?.startedFrom === "string") {
-        const person = value.person === SPACES.LOCAL_PERSON ? THIS_MACHINES_PERSON : String(value.person)
+        const local = thisMachinesPerson()
+        const person = value.person === local.id ? local.address : String(value.person)
         ;(records[person] ??= {})[key] = { startedFrom: value.startedFrom }
       } else records[key] = { ...records[key], ...value }
     }

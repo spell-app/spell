@@ -104,6 +104,7 @@
   --spell-gap: 16px;
   --ui-menu-header-bar-background: transparent;
   --ui-menu-header-bar-border: 1px solid transparent;
+  --ui-menu-header-bar-shadow: none;
   /* a panel's edge:  the brand card's hairline round its soft shadow, so a white panel shows on the pale page */
   --spell-pane-shadow: 0 0 0 1px var(--spell-border-subtle), var(--ui-shadow-raised);
 }
@@ -238,7 +239,8 @@ ui-panel.InspectorCard::part(title) {
 ui-panel.InspectorCard::part(title)::before {
   content: "";
   position: absolute;
-  inset: 0;
+  /* clear of the bar's line, a shadow inside its bottom edge (`<ui-panel>`'s pane bar, I216):  over it, this layer hid it */
+  inset: 0 0 1px;
   z-index: -1;
   background: var(--spell-menu-bar-fill);
   -webkit-backdrop-filter: var(--spell-menu-bar-filter);

@@ -1,4 +1,11 @@
-import { type EditorState, type Extension, StateEffect, StateField } from "@codemirror/state"
+import {
+  EditorSelection,
+  type EditorState,
+  type Extension,
+  type SelectionRange,
+  StateEffect,
+  StateField
+} from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { SP } from "spell/parser/spell"
@@ -47,7 +54,15 @@ export class CodeMirrorBubbly {
     return [
       CodeMirrorRelayout.extension(
         (state) => CodeMirrorBubbly.decorationsOf(state, fileOf(), sliceOf(state)),
-        CodeMirrorBubbly.RELAYOUT_MSEC
+        CodeMirrorBubbly.RELAYOUT_MSEC,
+        {
+          isAwaitingParse: () => CodeMirrorRelayout.isUnparsed(fileOf()),
+          // a project's file just typed in:  its project parses it again once the typing pauses
+          isParseOnItsWay: (state) => {
+            const file = fileOf()
+            return !!file?.match && !SP.BubblyLayout.isParseOf(file, state.doc.toString())
+          }
+        }
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
       CodeMirrorMarkup.tabStops,
@@ -140,6 +155,8 @@ class BubblyDecorations {
           break
         case "line":
           this.decorations.line(node.start, rails, isGroupBody ? ["cmb-group-line"] : [])
+          // a plain body line's words where a band's on its level are, a tab in (I142);  a group's are already
+          if (!isGroupBody) this.plainIndent(node)
           this.line(node)
           break
         case "block":
@@ -171,6 +188,17 @@ class BubblyDecorations {
     return last
   }
 
+  /**
+   * A plain line's indent, in a body:  a tab wider (`cmb-plain-indent`), so its first word is where a band's words on
+   * the same level are (Owen, epic `language` I142:  "I'd prefer if `it lives` lined up where `it's name` does").
+   * - Its words moved, not the line:  its column 0, the caret's place on the rail (I140), stays where it is.
+   * - A line in no block, or a slice's line shown with no indent, keeps its words where they were.
+   */
+  private plainIndent(line: SP.BubblyLine) {
+    const { from, to } = this.decorations.shownIndentBefore(line.start)
+    if (this.text.slice(from, to).includes("\t")) this.mark(from, to, ["cmb-plain-indent"])
+  }
+
   /** A declaration, or a control line with steps under it:  its band, its body, its foot. */
   private block(block: SP.BubblyBlock, rails: Rail[]) {
     const { head, partOfSpeech } = block
@@ -179,8 +207,7 @@ class BubblyDecorations {
     const isFolded = isShown && this.decorations.isFoldedAt(head.start)
     const hasBody = !isFolded && block.body.some((node) => node.kind !== "gap")
     this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
-    // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it,
-    // as Monaco drew them (I113)
+    // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it (I113)
     const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
     const indent = hung(this.decorations.indentAt(head.start), isHung)
     const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? ["bubbly-group"] : [])]
@@ -196,8 +223,9 @@ class BubblyDecorations {
       this.bandLines.add(this.state.doc.lineAt(head.start).from)
     }
     if (!hasBody) return
-    // a block the slice cuts:  its body drawn, its rail not
-    const inside = isShown ? [...rails, { ...indent, partOfSpeech }] : rails
+    // a block the slice cuts:  its body drawn, its rail not;  a group's in its band's colour (I147)
+    const groupOf = block.isGroup ? groupHue(rails) : undefined
+    const inside = isShown ? [...rails, { ...indent, partOfSpeech, groupOf }] : rails
     this.nodes(block.body, inside, isShown && block.isGroup)
     if (!isShown) return
     this.foot(block, indent, rails)
@@ -207,7 +235,7 @@ class BubblyDecorations {
    * `block`'s foot, under its last line, its rail at `indent` inside `rails`.
    * - Blocks in it ending on the same line have theirs first, and this one goes under them,
    *   as far below the one right above it as its rail is left of that one's:  the feet as far apart down as the rails
-   *   across (Owen, 2026-11-11), as Monaco and the drawn-bubbly page stack them (epic `language` I125).
+   *   across (Owen, 2026-11-11), as the drawn-bubbly page stacks them (epic `language` I125).
    * - A group in it ending there too, hung on its rail, ends in the SAME foot, the group's drawn:
    *   stacked under it, they were one foot twice as thick, in two colours (Owen, 2026-11-13;  I125).
    */
@@ -225,9 +253,10 @@ class BubblyDecorations {
       else this.decorations.stopRail(last, rail)
       return
     }
-    // a group's foot turns out of the rail it hangs on, its parent's:  that rail's colour (its own is under it)
-    const hue = block.isGroup ? (rails.at(-1)?.partOfSpeech ?? block.partOfSpeech) : block.partOfSpeech
-    const foot = new FootWidget(indent.tabs, hue, rails)
+    // a group's foot is its band's colour, as its rail is (I147)
+    const foot = block.isGroup
+      ? new FootWidget(indent.tabs, groupHue(rails), rails, "group")
+      : new FootWidget(indent.tabs, block.partOfSpeech, rails)
     if (above) {
       above.stopped.add(rail)
       above.drop = above.column - indent.tabs
@@ -360,6 +389,14 @@ function opensWithGroup(block: SP.BubblyBlock): boolean {
   return first?.kind === "block" && first.isGroup
 }
 
+/**
+ * The hue of a group's band, in the block whose `rails` it's in:  that block's, as its band takes its line's
+ * (`.bubbly-group` in `bubbly.css`);  plain at the top of a file.
+ */
+function groupHue(rails: Rail[]): string {
+  return rails.at(-1)?.partOfSpeech ?? "plain"
+}
+
 /** `indent`, a tab further out when `isHung`:  where a group's band and rail start. */
 function hung(indent: Indent, isHung: boolean): Indent {
   return isHung ? { ...indent, tabs: indent.tabs - 1 } : indent
@@ -453,8 +490,86 @@ class DescriptionRoom {
     }
   )
 
-  /** Measuring and drawing the rows under heads, for a bubbly editor. */
-  static readonly extension: Extension = [DescriptionRoom.rows, DescriptionRoom.measure]
+  /**
+   * A press in the rows under a head:  the caret on the description's letter under the pointer, and a drag from it
+   * selects as over any text (epic `codemirror` I19).
+   * - CodeMirror finds the place under the pointer from the boxes of the line's pieces, in their order.
+   *   The description is drawn out of the band's box, in the rows under it, so its box is in no piece's:
+   *   CodeMirror took the band for the nearest piece, and put the caret in the head's words above the press.
+   * - Two clicks pick a word, three the line, as CodeMirror's own;  four and more are `CodeMirrorSetup`'s.
+   * - A drag from anywhere else is CodeMirror's own, so one ending in a description's rows ends in the head's words.
+   */
+  private static readonly presses = EditorView.mouseSelectionStyle.of((view, event) => {
+    if (event.button !== 0 || event.detail > 3 || event.metaKey || event.ctrlKey || event.altKey) return null
+    const pressed = DescriptionRoom.posInRows(view, event.clientX, event.clientY)
+    if (pressed === undefined) return null
+    const { state } = view
+    let start: SelectionRange
+    if (event.detail === 1) start = EditorSelection.cursor(pressed)
+    else if (event.detail === 2) start = state.wordAt(pressed) ?? EditorSelection.cursor(pressed)
+    else {
+      const line = state.doc.lineAt(pressed)
+      start = EditorSelection.range(line.from, Math.min(line.to + 1, state.doc.length))
+    }
+    if (event.shiftKey) start = EditorSelection.range(state.selection.main.anchor, start.head)
+    return {
+      get(current) {
+        const head =
+          DescriptionRoom.posInRows(view, current.clientX, current.clientY) ??
+          view.posAtCoords({ x: current.clientX, y: current.clientY }, false)
+        if (event.detail === 1) return EditorSelection.single(start.anchor, head)
+        if (head >= start.from && head <= start.to) return EditorSelection.single(start.anchor, start.head)
+        // past the press's word or line:  from its far end to the place under the pointer, a whole word or line
+        const line = view.state.doc.lineAt(head)
+        const to =
+          event.detail === 2
+            ? (view.state.wordAt(head) ?? EditorSelection.cursor(head))
+            : EditorSelection.range(line.from, line.to)
+        return head < start.from ? EditorSelection.single(start.to, to.from) : EditorSelection.single(start.from, to.to)
+      },
+      update(update) {
+        if (update.docChanged) start = start.map(update.changes)
+      }
+    }
+  })
+
+  /**
+   * The place under `x`, `y` when it's in the rows under a head, in its description:  the letter it's over, or, beside
+   * its words, the nearest end of the row it's in;  `undefined` anywhere else.
+   */
+  private static posInRows(view: EditorView, x: number, y: number): number | undefined {
+    for (const line of view.contentDOM.querySelectorAll<HTMLElement>(`.cm-line.${DescriptionRoom.BELOW}`)) {
+      const box = line.getBoundingClientRect()
+      const band = line.querySelector<HTMLElement>(".cmb-band")
+      const description = line.querySelector<HTMLElement>(".cmb-description")
+      if (!band || !description || y < band.getBoundingClientRect().bottom || y > box.bottom) continue
+      return DescriptionRoom.posInText(view, description, x, y)
+    }
+    return undefined
+  }
+
+  /** The place in `element`'s text nearest `x`, `y`:  in the row nearest `y`, before or after the letter nearest `x`. */
+  private static posInText(view: EditorView, element: HTMLElement, x: number, y: number): number | undefined {
+    let best: { node: Text; offset: number; dy: number; dx: number } | undefined
+    const letter = document.createRange()
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+    for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+      for (let at = 0; at < node.length; at++) {
+        letter.setStart(node, at)
+        letter.setEnd(node, at + 1)
+        const rect = letter.getBoundingClientRect()
+        if (!rect.height) continue
+        const dy = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0
+        const dx = x < rect.left ? rect.left - x : x > rect.right ? x - rect.right : 0
+        if (best && (dy > best.dy || (dy === best.dy && dx >= best.dx))) continue
+        best = { node, offset: x > (rect.left + rect.right) / 2 ? at + 1 : at, dy, dx }
+      }
+    }
+    return best && view.posAtDOM(best.node, best.offset)
+  }
+
+  /** Measuring and drawing the rows under heads, and presses in them, for a bubbly editor. */
+  static readonly extension: Extension = [DescriptionRoom.rows, DescriptionRoom.measure, DescriptionRoom.presses]
 
   /**
    * Each line on screen's rows for its description:  0 for one with none, or whose description fits on its band.
@@ -508,7 +623,7 @@ function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
 
 /****************
  * ### `FootWidget`
- * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner, as Monaco's did (I113),
+ * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner (I113),
  * on a line of its own under its last line.
  * - The rails of the blocks around it run on beside it;
  *   one whose own foot is in the row under it stops short there, for that foot's corner (`stopped`).
@@ -519,13 +634,16 @@ function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
  * - Right above a band, the last row has room under its foot (`--cmb-block-gap`), so the two blocks stand apart
  *   (Owen:  "add some space between the pill blocks";  T141):  in the foot's row, not the band's line,
  *   so the band's fold arrow stays centred on it, and a click there lands where a click on the foot does.
- * - A group's foot is in its parent's hue:  it turns out of the rail the group hangs on, its parent's, drawn over its own.
+ * - A group's foot is its band's colour, as its rail is, drawn over its parent's (Owen, epic `language` I147:
+ *   "This bar and curly should be colored by group, not app";  before, the parent's hue).
  ****************/
 class FootWidget extends WidgetType {
   constructor(
     readonly column: number,
     readonly partOfSpeech: string,
-    readonly rails: Rail[]
+    readonly rails: Rail[],
+    /** a group's foot:  its band's colour, lighter than its hue's other bands (`cmb-group-foot`) */
+    readonly of: "block" | "group" = "block"
   ) {
     super()
   }
@@ -552,6 +670,7 @@ class FootWidget extends WidgetType {
     return (
       other.column === this.column &&
       other.partOfSpeech === this.partOfSpeech &&
+      other.of === this.of &&
       other.drop === this.drop &&
       other.dropsAbove === this.dropsAbove &&
       other.isAboveBand === this.isAboveBand &&
@@ -567,7 +686,7 @@ class FootWidget extends WidgetType {
     if (this.isAboveBand) row.classList.add("cmb-foot-above-band")
 
     const foot = document.createElement("div")
-    foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}`
+    foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}${this.of === "group" ? " cmb-group-foot" : ""}`
     foot.style.setProperty("--cmb-column", String(this.column))
     row.append(foot)
     return row

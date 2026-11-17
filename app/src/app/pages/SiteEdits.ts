@@ -43,7 +43,7 @@ export class SiteEdits {
 
   /**
    * Is the file at `path` a site's routing alone, its pages each in a file of their own (epic `mockup` P17)?
-   * - `HarborNew.site.spell`;  in another language, `Sitio.site.es.spell`.
+   * - `Dashboard.site.spell`;  in another language, `Sitio.site.es.spell`.
    */
   static isRoutingOnly(path: string): boolean {
     return ROUTING_ONLY_FILE.test(path)

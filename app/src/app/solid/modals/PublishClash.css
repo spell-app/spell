@@ -1,28 +1,42 @@
-/* `<PublishClash>`:  each file's diff tall enough to read */
+/*
+ * `<PublishClash>` (`PublishClash.tsx`):  the files as tabs in a pane's bar, the two sides' headers, the diff.
+ * - The bar is the code's file tabs' look (`FileTabs.css`;  Owen, epic `editor` T101:  "look like the file header"),
+ *   its corners square:  the top bar's fill, 24px tabs, 8px round them.
+ */
+.PublishClash .PublishClashFiles {
+  display: block;
+  border: 1px solid var(--ui-border-color, #8884);
+  --ui-panel-pane-bar-background: var(--spell-menu-bar-fill);
+  --ui-panel-pane-bar-padding: 6px 8px;
+  --ui-menu-item-min-height: 24px;
+}
+
+/* each file's diff tall enough to read */
 .PublishClash .DiffView {
   height: 40vh;
   overflow: auto;
-  border: 1px solid var(--ui-border-color, #8884);
-  border-radius: 0 0 6px 6px;
 }
 
 /* the two sides' headers, each over its half of the diff (the merge view splits it in half) */
 .PublishClash .PublishClashSides {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--ui-border-color, #8884);
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid var(--ui-border-color, #8884);
 }
 
 .PublishClash .PublishClashSides h5 {
   margin: 0;
-  padding: 0.4em 0.75em;
+  padding: 8px 12px;
   font-weight: 600;
 }
 
-/* the right side's the one you publish:  its header says so in the primary colour */
-.PublishClash .PublishClashSides h5 + h5 {
-  border-left: 1px solid var(--ui-border-color, #8884);
-  color: var(--ui-primary-color, currentColor);
+/* the left side's the one you publish:  its header says so in the primary colour */
+.PublishClash .PublishClashSides h5:first-child {
+  border-right: 1px solid var(--ui-border-color, #8884);
+  color: var(--ui-primary-color, var(--ui-primary, currentColor));
+}
+
+/* "Use Their Changes" at the left, away from Cancel and Publish */
+.PublishClash ui-actions > .UseTheirs {
+  margin-inline-end: auto;
 }

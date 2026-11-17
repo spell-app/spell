@@ -1,4 +1,9 @@
-import type { Completion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
+import {
+  autocompletion,
+  type Completion,
+  type CompletionContext,
+  type CompletionResult
+} from "@codemirror/autocomplete"
 import { foldService } from "@codemirror/language"
 import {
   type ChangeSet,
@@ -22,7 +27,7 @@ import {
 } from "@codemirror/view"
 import type { CodeAction, CompletionItem, DocumentSymbol, SignatureHelp, WorkspaceEdit } from "vscode-languageserver"
 
-import { after, type CancelablePromise } from "spell/util/timing"
+import { after, waitUntil, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
@@ -67,11 +72,19 @@ export class CodeMirrorLanguage {
 
   /**
    * Every extension:  hover, folding, signature help and accent fixes;  a Spell UI tag's help, Format Document and
-   * expand selection
+   * expand selection;  the suggestions' wait for a pause in the typing
    * (suggestions go through `completions`, problems through `FileStates`).
    */
   extensions(): Extension {
-    return [this.hover(), this.folding(), this.signatureHelp(), this.accentFixes(), this.helpShown(), this.moreKeys()]
+    return [
+      this.suggestionsWait(),
+      this.hover(),
+      this.folding(),
+      this.signatureHelp(),
+      this.accentFixes(),
+      this.helpShown(),
+      this.moreKeys()
+    ]
   }
 
   /**
@@ -82,6 +95,17 @@ export class CodeMirrorLanguage {
     this.parseNow()
     const { file } = this
     return file.match && file.contents === doc.toString() ? file : undefined
+  }
+
+  /**
+   * The file, parsed and holding `doc`'s text, waiting up to `PARSE_WAIT_SECONDS` for its parse:
+   * for what a person asked for by name (Go to Definition, Find All References, Peek), whose answer must be right.
+   * - A file with no parse yet (the page just loaded, a parse from scratch in flight) answered nothing at all,
+   *   so Peek References said "No uses found" of a name used everywhere (epic `codemirror` I5).
+   * - What shows by itself (a hover, a suggestion) asks `fileReady()`:  it never waits.
+   */
+  async fileParsed(doc: Text): Promise<SP.SpellFile | undefined> {
+    return (await this.fileReady(doc)) ?? waitUntil(() => this.fileReady(doc), { timeout: PARSE_WAIT_SECONDS })
   }
 
   ////////////////
@@ -113,6 +137,16 @@ export class CodeMirrorLanguage {
       })),
       validFor: /^[\p{L}\p{M}\d_-]*$/u
     }
+  }
+
+  /**
+   * The suggestion list, shown by itself, waits for the typing to pause `HOVER_DELAY` (epic `codemirror` I22):
+   * each key starts CodeMirror's wait again (`activateOnTypingDelay`), so it never shows between quick keys.
+   * - Ctrl+Space shows it at once all the same:  CodeMirror waits 50 msec for what's asked for.
+   * - Only the wait:  `FileStates` gives CodeMirror the rest of the list's settings, which it merges with this.
+   */
+  private suggestionsWait(): Extension {
+    return autocompletion({ activateOnTypingDelay: HOVER_DELAY * 1000 })
   }
 
   ////////////////
@@ -193,7 +227,7 @@ export class CodeMirrorLanguage {
     method: "definition" | "typeDefinition" = "definition"
   ): Promise<CodeMirrorLocation | undefined> {
     const { doc } = view.state
-    const file = await this.fileReady(doc)
+    const file = await this.fileParsed(doc)
     const [location] = file ? this.service[method](file, LspToCodeMirror.lspPosition(doc, pos)) : []
     return location && LspToCodeMirror.location(location)
   }
@@ -201,7 +235,7 @@ export class CodeMirrorLanguage {
   /** Every use of the thing at `pos`, its declaration too:  each file's path and range. */
   async referencesAt(view: EditorView, pos: number): Promise<CodeMirrorLocation[]> {
     const { doc } = view.state
-    const file = await this.fileReady(doc)
+    const file = await this.fileParsed(doc)
     const locations = file ? this.service.references(file, LspToCodeMirror.lspPosition(doc, pos), true) : []
     return locations.flatMap((location) => LspToCodeMirror.location(location) ?? [])
   }
@@ -419,8 +453,9 @@ export class CodeMirrorLanguage {
   /**
    * The words of the call being typed, the argument at the caret in bold, over the line (`<ui-markdown>`):
    * VS Code's parameter hints.
-   * - As a space is typed, while Settings… › "Show parameter hints" is on (`CodeMirrorPopups`);
-   *   ⇧⌘Space (Ctrl+Shift+Space off a Mac) shows it in every mode.
+   * - Once a space is typed and the typing pauses `HOVER_DELAY`, while Settings… › "Show parameter hints" is on
+   *   (`CodeMirrorPopups`):  each key starts the wait again (epic `codemirror` I22);
+   *   ⇧⌘Space (Ctrl+Shift+Space off a Mac) shows it at once, in every mode.
    * - Asked again as the text or caret changes while it shows;  it goes where there's no call, or at Esc.
    */
   private signatureHelp(): Extension {
@@ -437,18 +472,31 @@ export class CodeMirrorLanguage {
           }
         }
       ]),
-      ViewPlugin.define((view) => ({
-        update: (update: ViewUpdate) => {
-          const isShowing = !!update.state.field(signatureShown)
-          const typedSpace = update.transactions.some(
-            (transaction) => transaction.isUserEvent("input.type") && typedText(transaction.changes) === " "
-          )
-          const asked = isShowing
-            ? update.docChanged || update.selectionSet
-            : typedSpace && CodeMirrorPopups.of(update.state).signatureHelp
-          if (asked) queueMicrotask(() => void this.showSignature(view))
+      ViewPlugin.define((view) => {
+        /** The wait for the typing to pause, once a space asked for it. */
+        let wait: CancelablePromise<unknown> | undefined
+        return {
+          update: (update: ViewUpdate) => {
+            // up already:  asked again at once, as the text or caret changes
+            if (update.state.field(signatureShown)) {
+              if (update.docChanged || update.selectionSet) queueMicrotask(() => void this.showSignature(view))
+              return
+            }
+            const typedSpace = update.transactions.some(
+              (transaction) => transaction.isUserEvent("input.type") && typedText(transaction.changes) === " "
+            )
+            const isWaiting = !!wait && (update.docChanged || update.selectionSet)
+            if (!isWaiting && !(typedSpace && CodeMirrorPopups.of(update.state).signatureHelp)) return
+            // each key starts the wait again
+            wait?.cancel()
+            wait = after(HOVER_DELAY, () => {
+              wait = undefined
+              void this.showSignature(view)
+            })
+          },
+          destroy: () => wait?.cancel()
         }
-      }))
+      })
     ]
   }
 
@@ -531,6 +579,9 @@ export type CodeMirrorLanguageProps = {
 ////////////////
 // ## Helpers
 ////////////////
+
+/** How long Go to Definition and Find All References wait for a file not parsed yet, in seconds. */
+const PARSE_WAIT_SECONDS = 10
 
 /** The class of a hover's words. */
 const HOVER_CLASS = "cmb-hover"

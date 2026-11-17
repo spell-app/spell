@@ -213,8 +213,9 @@ const environment = {
   testFilesRoot: resolve(spaceFolders.builtins, "@spell", "test"),
   /**
    * This machine's person's own projects, e.g. `<spell.spaces>/@spell/owen@/errors` -- `owen@spell`.
-   * - MUST be the folder of `SPACES.LOCAL_PERSON`'s space (a test checks).
-   *   - It can't import that name:  this file imports nothing, since vite's configs load it too.
+   * - Owen's kit's person's, the default:  the real one is `thisMachinesPerson()`'s
+   *   (spaces' `localPerson.ts`;  epic `repo-split` P27),
+   *   which this file can't import:  it imports nothing, since vite's configs load it too.
    */
   userFilesRoot: resolve(spellSpacesDir, "@spell", "owen@")
 }

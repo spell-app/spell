@@ -39,7 +39,7 @@ export type Names<K extends keyof E.ComponentVocabulary> = E.ComponentVocabulary
 /**
  * Where a property's value comes from, as whoever holds the thing knows it:  `<ui-property-editor origins>`.
  * - `kind`:
- *   - `"here"`:  set on this thing:  a dot by its label, its value bold under `show-defaults`
+ *   - `"here"`:  set on this thing:  its reset, its value bold under `show-defaults`
  *   - `"inherited"`:  it comes from somewhere else, e.g. its type:  a quieter label
  *   - `"worked out"`:  read only
  *   - `"data"`:  it's kept in a place outside the program, a back-end:  a mark by its label (`mark`)

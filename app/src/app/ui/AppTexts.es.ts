@@ -37,6 +37,22 @@ const APP_TEXTS_ES: AppTextPack = {
   modes: "Ejecutar, editar o depurar",
   runMode: "Ejecutar",
   editMode: "Editar",
+  runTip: "Ejecutar la app",
+  stopEditingTip: "Dejar de editar",
+  runningTip: "La app se está ejecutando",
+  editTip: "Editar la app",
+  editingTip: "Estás editando la app",
+  siteTip: "Ver las páginas del sitio",
+  siteShownTip: "Estás viendo las páginas del sitio",
+  showCodeTip: "Mostrar el código Spell",
+  hideCodeTip: "Ocultar el código Spell",
+  showCompiledTip: "Mostrar el {language} compilado",
+  hideCompiledTip: "Ocultar el {language} compilado",
+  inspectTip: "Inspeccionar la app:  haz clic en una parte para elegirla",
+  stopInspectingTip: "Dejar de inspeccionar",
+  addViewTip: "Añadir una vista",
+  restartTip: "Reiniciar la app",
+  youTip: "Editar tu nombre y tus correos",
   menuCut: "Cortar",
   menuCopy: "Copiar",
   menuPaste: "Pegar",
@@ -46,7 +62,10 @@ const APP_TEXTS_ES: AppTextPack = {
   paletteSearch: "Buscar vistas",
   paletteHint: "Haz clic o arrastra para añadir a la página",
   paletteMore: "{count} más",
-  paletteMoreTip: "Mostrar todo lo que hay en {topic}",
+  paletteGroupTip: "Añadir una vista de {topic}",
+  paletteAppViews: "Vistas de la app",
+  paletteAppViewsTip: "Añadir una de las vistas de tu app",
+  palettePageViewsTip: "Añadir una de las vistas de esta página",
   palettePin: "Mantener abierto",
   paletteUnpin: "Desanclar",
   paletteAddView: "Añadir vista",
@@ -89,7 +108,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisPicture: "Una imagen que va con el pedido",
   changeThisRemovePicture: "Quitar esta imagen",
   menuShowInCode: "Mostrar en el código",
-  menuInspect: "Inspeccionar",
+  menuInspect: "Inspeccionar {type}",
+  menuInspectParts: "Elige una de las partes bajo el ratón",
   partIsApp: "Es la aplicación misma:\nno se puede cortar, duplicar ni borrar.",
   partNothingCopied: "Aún no se ha copiado nada.",
   partNothingSelected: "No hay nada seleccionado.",
@@ -98,6 +118,7 @@ const APP_TEXTS_ES: AppTextPack = {
   partNoDrawing: "Este programa no tiene un dibujo al que añadir:\nañádele primero un <draw>.",
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
+  softWrap: "Ajuste de línea",
   // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "Acerca de Spell…",
@@ -145,6 +166,8 @@ const APP_TEXTS_ES: AppTextPack = {
   startTaskListLine: "Añade tareas, márcalas y hazla tuya.",
   startDice: "Saca un seis",
   startDiceLine: "Un jueguito de pocas líneas.",
+  startSite: "Sitio",
+  startSiteLine: "Páginas con su propia dirección, en un mismo marco.",
   startSolitaire: "Solitario",
   startSolitaireLine: "Un juego entero.  Cambia algo y mira.",
   startSolitaireInvite: "Haz clic en una carta y cambia su palo a la derecha.",
@@ -161,8 +184,9 @@ const APP_TEXTS_ES: AppTextPack = {
   discardDraft: "Descartar",
   publishDraft: "Publicar",
   draft: "Borrador",
-  draftTip:
-    "Tus cambios son un borrador:  solo tú los ves.\nPublicar los muestra a todos, y guarda una versión.\nDescartar los tira.",
+  draftTip: "Tus cambios son un borrador.\nSolo tú los ves.",
+  publishDraftTip: "Envía tus cambios a todos.\nGuarda una versión.",
+  discardDraftTip: "Tira tus cambios.",
   updatedInYourDraft: "Actualizado en tu borrador.",
   discardChanges: "Descartar los cambios",
   closeTab: "Cerrar",
@@ -179,13 +203,18 @@ const APP_TEXTS_ES: AppTextPack = {
   publishedFile: "{count} archivo publicado:  guardado como la versión {version}.",
   publishedFiles: "{count} archivos publicados:  guardados como la versión {version}.",
   nothingToPublish: "Nada que publicar:  ningún archivo tiene borrador.",
-  publishClashHeading: "Publicado después de empezar tu borrador",
+  publishClashHeading: "Algunos archivos cambiaron desde que empezaste tu borrador.  ¿Te quedas con los cambios?",
   publishClashMessage:
-    "Alguien publicó estos archivos después de que empezaras tu borrador.\nPara quedarte con uno de sus cambios, haz clic en su flecha;  ⌘Z devuelve el tuyo.\nPublicar envía Tus cambios tal como estén.",
+    "Alguien actualizó estos archivos desde que empezaste tu borrador.\nPara aceptar un cambio, haz clic en su flecha en la columna del centro.",
+  publishClashFiles: "Archivos cambiados",
   publishClashTheirs: "Versión publicada ahora",
   publishClashMine: "Tus cambios",
-  publishStartAgain: "Empezar de nuevo desde lo suyo",
-  publishMerged: "Publicar",
+  publishClashTake: "Usar su cambio",
+  publishClashPutBack: "Deshacer:  volver a tu cambio",
+  publishUseTheirs: "Usar sus cambios",
+  publishUseTheirsHeading: "¿Usar sus cambios?",
+  publishUseTheirsConfirm: "¿Seguro?\nSe pierden todos tus cambios en estos archivos,\ny se usan los suyos.",
+  publishMine: "Publicar mis cambios",
   noVersions: "Aún no hay versiones:  cada Publicar guarda una.",
   versionsMessage:
     "Cada vez que publicas, Encanto guarda una copia de todo tu proyecto.\nElige una para traerla de vuelta como tu borrador:\nreemplaza los cambios que aún no has publicado.\nLo que ven todos no cambia hasta que hagas clic en Publicar, y sigue en esta lista.\nPara guardar tus cambios antes, haz clic en Guardar los cambios actuales:\nse añaden a la lista como tu borrador, y solo tú los ves.",
@@ -520,6 +549,7 @@ const APP_TEXTS_ES: AppTextPack = {
   "category.web-data": "Datos de la web",
   "category.sites": "Sitios",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
+  homeOrgLine: "Compartidos por todos en @{org}.",
   editorPieceBroken:
     "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.\nArréglala y publícala de nuevo:\n{problem}",
   editorNameNeeded:
@@ -681,9 +711,9 @@ const APP_TEXTS_ES: AppTextPack = {
 
   youHeader: "Tú:  {address}",
   fileProblems: "Tu archivo tiene problemas:  se leyó de todos modos",
-  names: "Nombres",
+  names: "Nombre",
   nickname: "Apodo",
-  emails: "Correos, uno por línea",
+  emails: "Tus direcciones de correo, una por línea",
   dates: "Fechas",
   dateWhat: "Qué",
   dateDay: "Día",
@@ -692,6 +722,18 @@ const APP_TEXTS_ES: AppTextPack = {
   addDate: "Añadir una fecha",
   yourOrgs: "Tus organizaciones",
   noneYet: "Ninguna todavía.",
+
+  ////////////////
+  // ## The name page (`NamePage.tsx`)
+  ////////////////
+
+  nameHeading: "Bienvenido a Encanto",
+  nameLine:
+    "¿Quién está aquí?\nTus proyectos van en un espacio con tu nombre,\nen los espacios de {org} en esta máquina.",
+  yourName: "Tu nombre",
+  nameTaken: "{address} ya tiene un espacio aquí:  ¿eres tú?",
+  nameNeeded: "Escribe un nombre con alguna letra.",
+  nameStart: "Empezar",
 
   ////////////////
   // ## A project's settings
@@ -772,6 +814,12 @@ const APP_TEXTS_ES: AppTextPack = {
   cmNoReferences: "Ningún uso encontrado",
   cmReferences: "Usos",
   cmFindMenu: "Buscar…",
+  // el recuadro de vistazo bajo el código
+  cmPeekDefinition: "Ver la definición",
+  cmPeekReferences: "Ver los usos",
+  cmPeekDefinitionHead: "Definición",
+  cmPeekUses: "{count} usos",
+  cmPeekClose: "Cerrar (Esc)",
   // una dirección web en el código
   codeLinkTipMac: "⌘-clic para abrir",
   codeLinkTip: "Ctrl-clic para abrir"

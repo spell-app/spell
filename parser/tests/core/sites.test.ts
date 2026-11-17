@@ -156,6 +156,27 @@ class BareLayout extends PageLayout {
   }
 }
 
+/**
+ * A site whose pages are in groups (T34, I35, C2):  its Home the one page of a group named for it, around it its dialogs
+ * (which the navigation doesn't list);  a group of one page of another name;  a group of two.
+ */
+class Lobby extends Site {
+  static pages = [
+    { name: "home", page: "FilmsPage", address: "/", title: "Home", group: "Home", groupIcon: "house" },
+    {
+      name: "inbox",
+      page: "FilmsPage",
+      address: "/inbox",
+      title: "Inbox",
+      icon: "inbox",
+      group: "Mine",
+      groupIcon: "user"
+    },
+    { name: "help", page: "FilmsPage", address: "/help", title: "Help", group: "help", groupIcon: "circle question" },
+    { name: "faq", page: "FilmsPage", address: "/faq", title: "FAQ", group: "help" }
+  ]
+}
+
 /** A site with page layouts (T39):  its films in a group, a page drawn alone, one in the bare layout. */
 class StarCharts extends Site {
   static pages = [
@@ -252,6 +273,25 @@ describe("a running site", () => {
     expect(site.navCurrent()).toBe("/films")
     await site.showAddress("/planets")
     expect(site.navCurrent()).toBe("")
+  })
+
+  test("lists a group of one page as that page alone, whatever its name, no group's header;  other groups as groups (I35, C2)", () => {
+    expect(new Lobby().navPages()).toEqual([
+      // its own icon, else its group's
+      { title: "Home", href: "/", id: "home", icon: "house" },
+      // named otherwise:  still the page alone, its own icon
+      { title: "Inbox", href: "/inbox", id: "inbox", icon: "inbox" },
+      {
+        title: "help",
+        id: "group:help",
+        band: "group",
+        icon: "circle question",
+        pages: [
+          { title: "Help", href: "/help", id: "help" },
+          { title: "FAQ", href: "/faq", id: "faq" }
+        ]
+      }
+    ])
   })
 
   test("draws its navigation beside the page:  a `<ui-site-nav>`, marking the page shown (P3)", async () => {

@@ -1,7 +1,7 @@
 import { slug } from "spell/util/string"
 import { SignInError, type LinkedAccount, type SignInAccounts } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
-import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
+import { SPELL_ORG } from "spell/app/spaces/models/projectGroups"
 import type { Takedowns } from "spell/app/spaces/server/node/places/Takedowns"
 import { PeopleStore } from "./PeopleStore"
 
@@ -44,7 +44,7 @@ export class SpellAccounts implements SignInAccounts {
   /** What Spell took down:  left out, nothing is. */
   private readonly takedowns: Takedowns | undefined
 
-  constructor(people: PeopleStore, { org = HOME_ORG, takedowns }: SpellAccountsOptions = {}) {
+  constructor(people: PeopleStore, { org = SPELL_ORG, takedowns }: SpellAccountsOptions = {}) {
     this.people = people
     this.org = org
     this.takedowns = takedowns
@@ -176,7 +176,7 @@ export class SpellAccounts implements SignInAccounts {
 
 /** Options of `SpellAccounts`. */
 export type SpellAccountsOptions = {
-  /** The org accounts are in:  default Spell's own, `HOME_ORG`. */
+  /** The org accounts are in:  default Spell's own, `SPELL_ORG`. */
   org?: string
   /** What Spell took down:  an account taken down can't sign in.  Left out:  none is. */
   takedowns?: Takedowns

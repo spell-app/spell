@@ -86,8 +86,9 @@ describe("<ui-app-menu>", () => {
     expect(Math.round(menu.getBoundingClientRect().width)).toBe(800)
     const bar = menu.getBoundingClientRect()
     const name = itemBox(host, ".name")
-    // the bar's hairline under its items
-    expect(Math.abs(name.height - (bar.height - 1))).toBeLessThan(1)
+    // the bar's hairline a shadow under it, taking no room:  its items its whole 40px (epic `mockup` I36)
+    expect(bar.height).toBe(40)
+    expect(name.height).toBe(40)
   })
 
   it("scrolls sideways when too narrow, its sections never overlapping", async () => {
