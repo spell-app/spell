@@ -15,6 +15,7 @@ import {
   TypeSpecifierTextKind
 } from "spell/parser/spell/rules/classes"
 import { QuotedTypeExpression } from "spell/parser/spell/rules/methods"
+import { QuotedMember } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
@@ -495,7 +496,8 @@ export class DefinePropertyHas extends SpellStatement<
    * `"T1" is a new tableau` => `new Tableau({ id: "T1" })` (Owen, 2026-11-12).
    * - So the thing is found by that name, `tableau T1`, `<tableau "T1"/>`, with no `with name "T1"`:
    *   `core.thingNamed()` matches a chosen id after names.
-   * - Its name as written, `"new letter"`:  what `<message "new letter"/>` names it by.
+   * - Its name as one word, each word as written (`QuotedMember.idOf()`, language T147):  `"discard pile"` =>
+   *   `discard-pile`, what `<discard-pile "discard pile"/>` names it by.
    * - Not when its line gives an `id` itself:  `with id "first"` wins.
    * - Not a new LIST:  it's made when first read, and its member's name is no id of a thing (`madeEarly()`).
    * - Not a thing of a type saved in a place, e.g. Recipe Box's `"new recipe" is a new recipe`:
@@ -514,7 +516,7 @@ export class DefinePropertyHas extends SpellStatement<
     const props = new P.ASTObjectLiteral(made.props?.match ?? match, { properties: said })
     const { property } = match.groups
     const words = property.raw === undefined ? `${property.value}` : textOf(property)
-    const id = new P.ASTStringLiteral(property, { value: words, quote: '"' })
+    const id = new P.ASTStringLiteral(property, { value: QuotedMember.idOf(words), quote: '"' })
     props.properties.unshift(new P.ASTObjectLiteralProperty(match, { property: MEMBER_ID, value: id }))
     return new P.ASTNewInstanceExpression(made.match, { type: made.type, props })
   }

@@ -97,6 +97,7 @@ export const referencesMethods = defineCoreModule({
    * - No thing with that name:  one whose CHOSEN id it is (`hasChosenId()`), e.g. `"T1" is a new tableau`,
    *   made as `new Tableau({ id: "T1" })` (Owen, 2026-11-12).  A name still wins over an id.
    *   - A made-up id never counts:  it's new each run, so nothing names it.
+   *   - Its words joined by `-` match too:  `discard pile` finds the discard pile, whose id is `discard-pile`.
    * - No thing with that name:  a top-level thing of `Class` that the program keeps under that name,
    *   e.g. `thingNamed(Game, "game")` for `set the game to a new game`.
    * - Tracked, as `thingForReference()`.
@@ -106,8 +107,12 @@ export const referencesMethods = defineCoreModule({
     for (const thing of things.all()) {
       if (thing instanceof Class && nameOf(thing) === name) return thing
     }
+    // a member's thing takes its words joined by `-`:  `discard pile` finds `discard-pile` too (language T147)
+    const oneWord = name.trim().split(/\s+/).join("-")
     for (const thing of things.all()) {
-      if (thing instanceof Class && chosenIdOf(thing) === name) return thing
+      if (!(thing instanceof Class)) continue
+      const id = chosenIdOf(thing)
+      if (id === name || id === oneWord) return thing
     }
     const kept = things.exported?.[name]
     return kept instanceof Class ? kept : undefined

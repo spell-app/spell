@@ -92,6 +92,15 @@ describe("thing references", () => {
     expect(core.thingNamed(Tableau, unnamed.id)).toBeUndefined()
   })
 
+  test("a member's id is its words joined by `-`:  its words as written find it too (language T147)", () => {
+    // `"discard pile" is a new foundation` compiles to `new Foundation({ id: "discard-pile" })`
+    const discards = new Foundation({ id: "discard-pile" })
+    expect(core.thingNamed(Foundation, "discard-pile")).toBe(discards)
+    expect(core.thingNamed(Foundation, "discard pile")).toBe(discards)
+    expect(core.thingForReference("Pile#discard pile")).toBe(discards)
+    expect(core.referenceFor(discards)).toBe("Foundation#discard-pile")
+  })
+
   describe("elementIdFor():  the id of an element the program draws (J43)", () => {
     /** A card whose name follows its rank and suit, as Drawable Solitaire's does. */
     class Card extends View {

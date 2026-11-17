@@ -217,6 +217,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * (Owen, 2026-11-12).
    * - `<tableau "T1"/>` ~== `<tableau id="T1"/>`:  the view's element draws the tableau whose name, or chosen id, is T1
    *   (`core.thingFor()`).
+   * - Its words joined by `-`, the id the member it names takes:  `<discard-pile "discard pile"/>` ~==
+   *   `<discard-pile id="discard-pile"/>` (`QuotedMember.idOf()`, language T147).
    * - Any language's tags alike:  it's the tag being a view that counts, not its word.
    * - After its other attributes, so each of those keeps its place (`warnAboutListedValues()`).
    * - On any other tag the word means nothing:  `noteUnreadable()` says so.
@@ -228,7 +230,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const { quotedWord } = element
     if (!quotedWord || !(match.data.view || match.data.laterView)) return element.attributes
     const { start, value, raw } = quotedWord.record
-    const id = new P.JSXAttributeToken({ name: VIEW_ID_ATTRIBUTE, start, value, raw })
+    // one word, as the member it names takes it:  `"discard pile"` => `"discard-pile"` (`QuotedMember.idOf()`)
+    const word = value instanceof P.TextToken ? oneWordText(value) : value
+    const id = new P.JSXAttributeToken({ name: VIEW_ID_ATTRIBUTE, start, value: word, raw })
     return [...(element.attributes ?? []), id]
   }
 
@@ -894,6 +898,12 @@ const DRAWN_VALUE_TYPES = ["number", "text"]
 
 /** Spell UI's element that shows one measure:  `<ui-dimension value={its height}>`. */
 const MEASURE_TAG = "ui-dimension"
+
+/** `text`, a quoted word, as one word:  `"discard pile"` => `"discard-pile"`;  where it was written stays the same. */
+function oneWordText(text: P.TextToken): P.TextToken {
+  const quote = `${text.value}`.startsWith("'") ? "'" : '"'
+  return new P.TextToken({ ...text.record, value: `${quote}${QuotedMember.idOf(text.innerText)}${quote}` })
+}
 
 /** A quoted word's text, without its quotes:  `T1` for `"T1"`. */
 function textOf(word: P.JSXAttributeValue): string {
