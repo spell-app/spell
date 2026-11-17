@@ -983,7 +983,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".PaletteStrip .PaletteGroupName", { timeout: 60_000 })
     await page.waitForTimeout(1000)
 
-    // its pin at its far left, Add View in bold, each topic with its icon;  at 1290px wide, nothing scrolls (T86, T92)
+    // its pin at its far left, Add a View in bold, each topic with its icon;  at 1290px wide, nothing scrolls (T86, T92)
     await page.setViewportSize({ width: 1290, height: 800 })
     await page.waitForTimeout(600)
     const bar = () =>
@@ -1015,7 +1015,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await bar()).toMatchObject({
       overflowing: false,
       pinFirst: true,
-      label: "Add View",
+      label: "Add a View",
       bold: true,
       withIcons: true,
       closes: 0,

@@ -68,7 +68,7 @@
    - a window too narrow for all of it:  the whole window's width, and its names scroll (T86)
    - the bar's own fill and blur, over the page as the bar's is (on its `::before`, so a menu inside it isn't held in
      its box)
-   - its pin, Add View in bold, then its topics' icons and names (T86, T92), quiet, as the bar's menus are;
+   - its pin, Add a View in bold, then its topics' icons and names (T86, T92), quiet, as the bar's menus are;
      its search right after the last one (T106;  at the window's far right before)
    - a thin grey line between the two bars (T86, I232), a shadow inside its top edge taking no room, so both bars keep
      their heights on the 4px grid (as a pane bar's line, I216);  and its own line round its sides and bottom */
@@ -107,7 +107,7 @@
     pointer-events: none;
   }
 
-  /* its pin, Add View, then the names:  they shrink and scroll in a narrow window, never the search */
+  /* its pin, Add a View, then the names:  they shrink and scroll in a narrow window, never the search */
   & .PaletteStripAdd {
     display: flex;
     align-items: center;

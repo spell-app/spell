@@ -23,6 +23,7 @@ import {
   ChangeThisBox,
   PartMenu,
   ModeButtons,
+  PublishDraft,
   PROJECT_ICON,
   ProgramPanelShown,
   ProjectBarMenu,
@@ -546,7 +547,7 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * ### `<EditorToolbar>`
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
- *   then File · Edit · View · Run · Help (`MenuBar.tsx`)
+ *   then File · Edit · View · Run · Help (`MenuBar.tsx`), then the draft's pill while you have drafts (T107)
  * - middle:  Run | Edit, then in Edit, the code's icon, the compiled code's (its language's icon), Inspect app and Add,
  *   in the same group (epic `editor` T83)
  * - right, ONE group of icons:  Restart, the theme, you
@@ -562,6 +563,7 @@ export function EditorToolbar(props: { mode: Mode }) {
     spellMenu: { draw: () => <SpellBarMenu useRunner={props.mode === "run"} /> },
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
+    draft: { draw: () => <PublishDraft /> },
     modeButtons: {
       draw: () => (
         <ModeButtons
@@ -597,6 +599,7 @@ export function EditorToolbar(props: { mode: Mode }) {
             {parts.spellMenu.draw()}
             {parts.projectMenu.draw()}
             {parts.appMenus.draw()}
+            {parts.draft.draw()}
           </ui-menu>
           {parts.modeButtons.draw()}
           <ui-menu slot="end">

@@ -129,9 +129,7 @@ export function toggleCode() {
  * (`inspect`), then Add (`add`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and
  * inspect buttons should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector";
  * T83:  "Move `add` to the immediate right of the inspector crosshair").
- * - Before the group, while you have drafts of the project:  "Draft", Publish, then Discard, one pill
- *   (`<PublishDraft>`;  Owen, 2026-11-16, T102:  "Move `draft` panel to the left of run";
- *   right of the icons from 2026-11-14 until then).
+ * - The draft's pill is the bar's own part now, after Help (`<PublishDraft>`, T107).
  * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on;
  *   Add's `aria-haspopup`, that it opens a menu.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
@@ -150,7 +148,6 @@ export function ModeButtons(props: {
 }): JSX.Element {
   return (
     <ui-item class="ModeButtons">
-      <PublishDraft />
       <ui-menu
         appearance="segmented link header"
         tabs=""
@@ -222,7 +219,8 @@ const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
 
 /****************
  * ### `<PublishDraft>`
- * While you have drafts of the project (epic `editor` I44), just left of Run | Edit (T102):
+ * While you have drafts of the project (epic `editor` I44), right after the top bar's Help menu, 32px on (T107;
+ * just left of Run | Edit from T102, right of its icons before that):
  * ONE pill, the size and shape of the bar's tools group, tinted a soft yellow (Owen, 2026-11-14, I77, I90, I93:
  * "one unified thing with a slight inset border").
  * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Draft", as plain words
@@ -238,7 +236,7 @@ const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
  *     "Swap Publish and Discard buttons").
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
-function PublishDraft(): JSX.Element {
+export function PublishDraft(): JSX.Element {
   const hasDrafts = tracked(() => editor.canPublish)
   return (
     <Show when={hasDrafts()}>
