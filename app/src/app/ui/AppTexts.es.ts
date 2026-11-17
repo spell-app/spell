@@ -385,7 +385,7 @@ const APP_TEXTS_ES: AppTextPack = {
   programOutput: "Salida",
   spellTree: "Árbol de spell",
   spellTreeHint: "Haz clic en una línea de tu programa para ver cómo la lee Encanto.",
-  outputTab: "Salida",
+  outputTab: "Salida de depuración",
   typescriptTab: "TypeScript",
   pythonTab: "Python",
   inspector: "Inspector",

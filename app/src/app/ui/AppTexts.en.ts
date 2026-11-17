@@ -573,8 +573,8 @@ export const APP_TEXTS = {
   doIt: "Do it:  {action}()",
   thingsInOrderMade: "In the order they were made",
   thingsByType: "By template, sub-templates included",
-  // the Program panel's tabs (`<ProgramPanel>`)
-  outputTab: "Output",
+  // the Program panel's tabs (`<ProgramPanel>`);  the languages' names are the compiled code's tabs (`LANGUAGE_LOOKS`)
+  outputTab: "Debug Output",
   typescriptTab: "TypeScript",
   pythonTab: "Python",
   // a .spell file's code spell, the text it reads as (epic `elemental-spell` P8)
