@@ -108,9 +108,9 @@ describe("a body's rail under the caret", () => {
     ])
     // `</>` and `</container>` are their own blocks' feet:  on the rail of the block round them
     const settings = getComputedStyle(view.dom)
-    const [railWidth, tab] = ["--cmb-rail", "--cmb-indent"].map((name) =>
+    const [railWidth, tab, pull] = ["--cmb-rail", "--cmb-indent", "--cmb-tag-pull"].map((name) =>
       Number.parseFloat(settings.getPropertyValue(name))
-    ) as [number, number]
+    ) as [number, number, number]
     // a band's room before its words, less a tab:  what a Spell band pads its words by
     const spellBand = view.dom.querySelector<HTMLElement>(".cmb-band-open:not(.cmb-tag-band, .cmb-band-hung)")!
     const bandRoom = Number.parseFloat(getComputedStyle(spellBand).paddingLeft) - tab
@@ -121,12 +121,13 @@ describe("a body's rail under the caret", () => {
       const start = tag ? tag.getBoundingClientRect().left : await caretMiddle(view, line)
       atRails.push({ line, start, rail: railMiddle(view, line)! })
     }
-    // a tag's pointed end:  a tab and a band's room right of the rail's left edge;  Spell's words a tab further, where
-    // a band's words on their level are (I142)
+    // Spell's words a tab and a band's room right of the rail's left edge, then a tab further, where a band's words on
+    // their level are (I142);  a tag inside another tag's pointed end a tab right of its rail's left edge, less the pull
+    // toward it (I162)
     for (const { line, start, rail } of atRails) {
       const text = view.state.doc.line(line).text
-      const spellTab = text.trimStart().startsWith("<") ? 0 : tab
-      expect(Math.abs(start - (rail - railWidth / 2) - tab - bandRoom - spellTab), text).toBeLessThan(0.1)
+      const offset = text.trimStart().startsWith("<") ? tab - pull : tab + bandRoom + tab
+      expect(Math.abs(start - (rail - railWidth / 2) - offset), text).toBeLessThan(0.1)
     }
     // four levels of rail, each a tab stop further in
     const rails = [...new Set(atRails.map(({ rail }) => rail.toFixed(1)))]

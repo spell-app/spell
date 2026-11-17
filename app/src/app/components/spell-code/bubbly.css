@@ -1648,6 +1648,14 @@
      * - its feet, its rows of end tags and its inside corners start from it too
      */
     --cmb-rail-left: var(--cmb-band-left);
+    /*
+     * how far a drawing's tag inside another tag is pulled left, toward the rail of the tag it's in:  its line, band,
+     * rail, inside corners and foot alike, a pull for each tag it's inside (Owen, epic `language` I162:  "pull nested
+     * <html> 2px to the left");  a drawing's outermost tags and Spell's lines stay where they are
+     * - its line's first tag (`.cmb-tag-nested`, `--cmb-line-nest`), its rail (`CodeMirrorMarkup`'s `Rail.nest`),
+     *   its foot in a row of feet (`--cmb-foot-nest`)
+     */
+    --cmb-tag-pull: 2px;
 
     /*
      * the room on a band before its words, less a tab:  the page's, at the editor's size (2.81px)
@@ -2265,6 +2273,25 @@
      * ... the rail coming down into it, its corner with the body cut:  the row's own rail ends at the foot's top
      * (`CodeMirrorMarkup`), so none shows under it
      */
+    /*
+     * a tag starting a line inside other tags (`.cmb-tag-nested`):  a pull left for each (`--cmb-tag-pull`, I162), the
+     * rest of its line with it;  a one-line tag from its line's indent as a block's band is, so every tag in a block
+     * starts as far from its rail (it started 0.8px further)
+     * - its tag alone:  a blank line, its caret, and a `<` typed on it stay where they were, so nothing moves under the
+     *   caret once the layout catches up (I157, I158)
+     * - a block's band below, its rows after it (`tagBlocks` measures them where they're drawn)
+     */
+    .cm-line.cmb-tag-nested
+      > :is(.cmb-tag-band, .cmb-tag-pill, .cmb-tag-link):not(.cmb-band-open, .cmb-tag-row):first-child {
+      margin-left: calc(var(--cmb-band-left) - var(--cmb-line-nest) * var(--cmb-tag-pull));
+    }
+    .cm-line.cmb-tag-nested .cmb-tag-band.cmb-band-open {
+      margin-left: calc(var(--cmb-band-left) - var(--cmb-line-nest) * var(--cmb-tag-pull));
+    }
+    /* ... folded, a block's band with its room before it:  pulled as much */
+    .cm-line.cmb-tag-nested .cmb-tag-band.cmb-band-folded {
+      margin-left: calc(-1 * var(--cmb-line-nest) * var(--cmb-tag-pull));
+    }
     .cmb-tag-foot::before {
       content: "";
       position: absolute;
@@ -2343,7 +2370,7 @@
       /* its rail's left edge, from the row's */
       --cmb-feet-rail: calc(
         var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) + var(--cmb-spaces) * var(--cmb-space) +
-          var(--cmb-rail-left, var(--cmb-band-left))
+          var(--cmb-rail-left, var(--cmb-band-left)) - var(--cmb-foot-nest, 0) * var(--cmb-tag-pull)
       );
       /* from its rail's left edge to its tip:  the rail, the slant across, the bar */
       --cmb-feet-reach: calc(var(--cmb-rail) + var(--cmb-feet-turn) * var(--bubbly-tag-slope) + var(--cmb-feet-bar));
