@@ -553,6 +553,25 @@ describe("FolderPlace, limits (epic `atmosphere` P7)", () => {
     })
     await place.apply([notes("n-2", 100)], {})
   })
+
+  test("the folder is counted once for many writes, adding what each let in;  afresh before it refuses", async () => {
+    const bytesInUse = vi.fn(async () => 0)
+    const place = new FolderPlace({
+      storage: new ChunkFiles({ root: newFolder() }),
+      limits: { thing: 2048, space: 10_240 },
+      bytesInUse
+    })
+    for (let index = 0; index < 5; index++) await place.apply([notes(`n-${index}`, 2000)], {})
+    expect(bytesInUse).toHaveBeenCalledOnce()
+    // ~10 KB let in, so 2 KB more would be over:  counted again before refusing
+    bytesInUse.mockResolvedValue(10_000)
+    await expect(place.apply([notes("n-5", 2000)], {})).rejects.toMatchObject({ kind: "over the ceiling" })
+    expect(bytesInUse).toHaveBeenCalledTimes(2)
+    // the disk says there's room after all (something was deleted):  it goes through
+    bytesInUse.mockResolvedValue(0)
+    await place.apply([notes("n-5", 2000)], {})
+    expect(bytesInUse).toHaveBeenCalledTimes(3)
+  })
 })
 
 describe("FolderPlace, taken down (epic `atmosphere` P6)", () => {
