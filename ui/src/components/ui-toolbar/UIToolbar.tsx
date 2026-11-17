@@ -96,6 +96,15 @@ export class UIToolbar extends UIMenu {
     return this.scrolling.isOverflowing
   }
 
+  /**
+   * The thumb just moved:  the row measured again, as the thumb is in what it scrolls.
+   * - A tab closed at the row's end:  the row shrank and measured itself with the thumb still past its new end,
+   *   so its `›` stayed, mid-bar, with every tab in view (epic `mockup` I39).
+   */
+  protected override onThumbPlaced() {
+    this.scrolling.measure()
+  }
+
   /** `scroll-first`:  the row scrolls before it's a dropdown. */
   protected get scrollsFirst(): boolean {
     return !!this.scrollFirst

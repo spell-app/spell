@@ -55,11 +55,13 @@ export class ScrollingRow {
     this.row = row
     const stop = new AbortController()
     row.addEventListener("scroll", () => this.measure(), { passive: true, signal: stop.signal })
+    // a segmented row's thumb slides to its tab:  till it's there, it may stretch what the row scrolls (epic `mockup` I39)
+    row.addEventListener("transitionend", () => this.measure(), { signal: stop.signal })
     const resizes = new ResizeObserver(() => this.measure())
     resizes.observe(row)
     const slot = row.querySelector("slot")
     const watchItems = () => {
-      for (const item of this.items()) resizes.observe(item)
+      for (const item of this.items()) for (const box of ScrollingRow.boxesOf(item)) resizes.observe(box)
     }
     watchItems()
     slot?.addEventListener("slotchange", watchItems, { signal: stop.signal })
@@ -121,6 +123,18 @@ export class ScrollingRow {
     if (!by) return
     const isReduced = !!row.ownerDocument.defaultView?.matchMedia(REDUCED_MOTION).matches
     row.scrollBy({ left: by, behavior: smoothly && !isReduced ? "smooth" : "instant" })
+  }
+
+  /**
+   * The boxes `item` draws, whose sizes the row follows:  its own, else, for an element that draws no box of its
+   * own (`display: contents`, as `<ui-item>` is), its shadow root's top boxes.
+   * - A `ResizeObserver` never hears of an element with no box:  a tab renamed, or a title cut to fit, went unseen.
+   */
+  private static boxesOf(item: Element): Element[] {
+    if (getComputedStyle(item).display !== "contents") return [item]
+    return [...(item.shadowRoot?.children ?? [])].filter(
+      (each) => each.localName !== "style" && each.localName !== "slot"
+    )
   }
 
   /** The row's items:  what its `<slot>` holds (a toolbar's), else its own children (a tab set's buttons). */

@@ -18,6 +18,9 @@ import { EDITOR, SERVING } from "./runningEditor"
 /** A site of 3 files:  every tab fits. */
 const SITE = "@spell/examples/StarWarsSite"
 
+/** Owen's own site, of 59 files, where he closed tabs (I39):  skipped where there's no such project. */
+const OWENS_SITE = "owen@spell/harbor-new"
+
 /** A project of 13 files:  more than the bar's 8 tabs. */
 const MANY_FILES = "@spell/examples/PublicServers"
 
@@ -186,5 +189,65 @@ describe.skipIf(!SERVING)("Site mode and back, with tabs open", { timeout: 180_0
     expect(after.allItems).toBeDefined()
     expect(Math.abs(after.allItems!.left - after.gap - after.row.right)).toBeLessThan(2)
     expect(Math.abs(after.scrollEnd!.right - after.row.right)).toBeLessThan(2)
+  })
+
+  test("closing tabs, from the end and the middle, the row measures again:  a › only while they overflow (I39)", async (context) => {
+    // Owen:  "Happened again after closing tabs.  The arrow is not getting the notice that the tab is closed"
+    // His site, as he saw it:  no built-in project's names left the closed tab's thumb past the row's new end
+    await page.setViewportSize({ width: 1400, height: 860 })
+    await page.goto(`${EDITOR}edit/${OWENS_SITE}`)
+    await page.locator(".FileTabs ui-toolbar").first().waitFor({ timeout: 30_000 })
+    const fileCount = await page.evaluate(
+      () => (window as unknown as { project?: { files: unknown[] } }).project?.files.length ?? 0
+    )
+    if (fileCount < 11) context.skip()
+    await openFiles(11)
+    expect((await tabBar()).tabs).toHaveLength(8)
+
+    /** Close the tab at `index` of those in view (from the end when negative) with a middle click, as in VS Code. */
+    const closeTab = async (index: number) => {
+      const { tabs, row } = await tabBar()
+      // its middle in view, clear of the row's keys
+      const inView = tabs.filter((each) => {
+        const middle = (each.left + each.right) / 2
+        return middle > row.left + 30 && middle < row.right - 30
+      })
+      const tab = inView.at(index)!
+      await page.mouse.click((tab.left + tab.right) / 2, await tabMiddle(), { button: "middle" })
+      await page.waitForTimeout(1200)
+    }
+    /** The tabs' middle, down the page. */
+    const tabMiddle = () =>
+      page.evaluate(() => {
+        const tab = document
+          .querySelector(".FileTabs > :not(ui-menu)")!
+          .shadowRoot!.querySelector("ui-toolbar > ui-item:not([hidden])")!
+        const box = tab.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
+        return box.top + box.height / 2
+      })
+
+    const seen: string[] = []
+    for (const index of [-1, -1, 1, -1, 1, 0]) {
+      await closeTab(index)
+      const bar = await tabBar()
+      const { row } = bar
+      const overflows = row.scrollWidth > row.clientWidth + 1
+      seen.push(`${bar.tabs.length} tabs, ${overflows ? "overflowing" : "fitting"}`)
+      // a `›` only while there's more of the row on:  a closed tab's room never left behind it (I39)
+      const hasMore = row.scrollLeft + row.clientWidth < row.scrollWidth - 1
+      expect(bar.scrollEnd ? "›" : "no ›", seen.join(";  ")).toBe(hasMore ? "›" : "no ›")
+      if (overflows) {
+        // the row runs to the file menu, its `›` at its end
+        expect(Math.abs(bar.allItems!.left - bar.gap - row.right)).toBeLessThan(2)
+        if (bar.scrollEnd) expect(Math.abs(bar.scrollEnd.right - row.right)).toBeLessThan(2)
+      } else {
+        // every tab whole in the row
+        for (const tab of bar.tabs) expect(tab.right).toBeLessThanOrEqual(row.right + 1)
+      }
+      expectSaneRow(bar)
+    }
+    // it went from overflowing to fitting as the tabs closed
+    expect(seen[0], seen.join(";  ")).toMatch(/overflowing/)
+    expect(seen.at(-1), seen.join(";  ")).toMatch(/fitting/)
   })
 })
