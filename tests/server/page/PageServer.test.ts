@@ -20,7 +20,7 @@ import {
   withWorktreeLoads
 } from "spell/server/page"
 import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
-import { ask } from "spell/server/test/serve"
+import { ask, serveHandler } from "spell/server/test/serve"
 
 /**
  * Component sets and engine routes, as the repo root's `package.json` names them (`"pageServer"`):
@@ -103,6 +103,24 @@ describe("portFor()", () => {
   it("keeps any other port asked for, in a worktree too", () => {
     expect(portFor(worktree, 5123)).toBe(5123)
     expect(portFor(main, 0)).toBe(0)
+  })
+})
+
+// epic `epic-engine` I332:  main's server, finding 4747 taken, started on 59931, and the side bar lost it
+describe("PageServer.start():  its port, or no start", () => {
+  it("throws when its port is taken, and never takes another", async () => {
+    const root = mkdtempSync(join(tmpdir(), "page-taken-"))
+    const holder = await serveHandler(new SRV.Router().handle)
+    try {
+      const port = Number(new URL(holder.base).port)
+      await expect(new PageServer({ root }).start({ port, routes: false, pidFile: false })).rejects.toThrow(
+        new RegExp(`port ${port} is taken`)
+      )
+      expect(existsSync(join(root, ".spell-server.json"))).toBe(false)
+    } finally {
+      await holder.close()
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })
 

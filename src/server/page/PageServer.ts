@@ -70,7 +70,9 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  * - NO redirects for old URLs (epic `people-and-orgs`, Q30):  an old address answers "not found"
  * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
- * - port:  `DEFAULT_PORT` (4747) if free, else any;  a WORKTREE's server never asks for it (`portFor()`):
+ * - port:  `DEFAULT_PORT` (4747) for the main checkout, and ONLY that:  taken, it fails to start
+ *   (epic `epic-engine` I332:  a restart that found an orphan on 4747 started on 59931, and the side bar lost it);
+ *   a WORKTREE's server never asks for it (`portFor()`), and takes any free one:
  *   it's the main checkout's, which the side bar and every opener expect (epic `epic-engine` I276)
  *   - the real one goes in `<root>/.spell-server.json`, where `spell server start` and the openers find it
  * - its root:  the kit, from any folder of it (`pageServerRoot()`, epic `repo-split` P16)
@@ -233,12 +235,20 @@ export class PageServer {
   /**
    * Start watching, build the stale bundles in the background, load the route modules, listen, write the pid file,
    * then run route modules' `onListening`s.
-   * - `port`:  wanted port (default `DEFAULT_PORT`);  taken:  any free one
+   * - `port`:  its port (default `DEFAULT_PORT`);  0:  any free one
    *   - a worktree asking for `DEFAULT_PORT` gets any free one instead (`portFor()`)
+   *   - throws when it's taken, BEFORE loading anything:  never another port (epic `epic-engine` I332), and a
+   *     second server started at once leaves the editor's vite to the first
    * - `routes`:  load route modules and build the bundles (default `true`;  tests turn it off)
    * - `pidFile`:  write `.spell-server.json` (default `true`)
    */
   async start({ port = DEFAULT_PORT, routes = true, pidFile = true }: StartOptions = {}): Promise<this> {
+    const wanted = portFor(this.root, port)
+    if (wanted && !(await SRV.isFree(wanted)))
+      throw new Error(
+        `page server:  port ${wanted} is taken, and ${this.root}'s server runs only there:  ` +
+          `spell server stop, then start;  else see what holds it:  lsof -nP -iTCP:${wanted} -sTCP:LISTEN`
+      )
     const settings = this.settings()
     for (const dir of settings.watch ?? DEFAULT_WATCH) this.web.live!.watch(join(this.root, dir), { ignore: UNWATCHED })
     // the component sets' pages, parts and data, and their site bundle (rebuilt by `yarn site:dev`),
@@ -254,7 +264,7 @@ export class PageServer {
       this.bundles.start().watch()
       for (const path of settings.routes ?? []) await this.loadRoutes(path)
     }
-    const { port: actual } = await this.web.listen({ port: portFor(this.root, port) })
+    const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
     if (pidFile) {
       this.pidFile.write(this.info)
@@ -287,6 +297,8 @@ export class PageServer {
    * - what `spell server start`, the goals tools and the openers call
    * - throws a `TypeError` when `root` isn't a kit's root:  the page server starts from the kit's root only
    *   (`kitRootOf()`, epic `repo-split` P16)
+   * - the main checkout's:  on `DEFAULT_PORT`, only (`PidFile.ensure()`'s `port`, epic `epic-engine` I332):  this
+   *   checkout's server elsewhere, or one the pid file lost, is restarted onto it;  throws while something else holds it
    */
   static ensure(_root: string, port = DEFAULT_PORT) {
     const root = kitRootOf(_root)
@@ -313,8 +325,20 @@ export class PageServer {
         String(port)
       ],
       env: { TSX_TSCONFIG_PATH: code.tsconfig },
-      sources: [code.source, ...new Set(routes)]
+      sources: [code.source, ...new Set(routes)],
+      port: portFor(root, port) || undefined
     })
+  }
+
+  /**
+   * Stop the page server of the checkout at `root`;  whether one was stopped.
+   * - the pid file's, and this checkout's server holding its port when the file names another (epic `epic-engine`
+   *   I332):  so `spell server stop` frees 4747 for the next start
+   * - `restart`:  another starts right after;  the editor's vite stays up for it (`PidFile.stop()`, I329)
+   */
+  static stop(_root: string, { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}) {
+    const root = kitRootOf(_root)
+    return new SRV.PidFile(root).stop({ restart, port: portFor(root, port) || undefined })
   }
 
   /**

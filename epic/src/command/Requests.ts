@@ -6,7 +6,7 @@ import { escapeHTML } from "spell/util/string"
 import { localDate, localMinutes } from "spell/util/time"
 import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
-import { PageServer } from "spell/server/page"
+import { DEFAULT_PORT, PageServer } from "spell/server/page"
 import { CLI } from "spell/cli"
 import { CodeHost } from "spell/epic/config/CodeHost"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -842,9 +842,14 @@ export type PageServerControl = {
 
 /** The main checkout's own page server, through its pid file. */
 const PAGE_SERVER: PageServerControl = {
-  isRunning: async (main) => Boolean(await new SRV.PidFile(main).status()),
-  // a restart:  the editor's vite stays up unless the install changed what it runs on (`EditorServer`, I329)
-  stop: (main) => new SRV.PidFile(main).stop({ restart: true }),
+  // the pid file's, or this checkout's on 4747 when the file lost it (I332)
+  isRunning: async (main) => {
+    const pidFile = new SRV.PidFile(main)
+    return Boolean((await pidFile.status()) ?? (await pidFile.ourServerOn(DEFAULT_PORT)))
+  },
+  // a restart:  the editor's vite stays up unless the install changed what it runs on (`EditorServer`, I329);
+  // this checkout's server on 4747 is stopped too, when the pid file names another (I332)
+  stop: (main) => PageServer.stop(main, { restart: true }),
   ensure: (main) => PageServer.ensure(main)
 }
 

@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process"
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -171,7 +172,7 @@ describe("PidFile.stop():  waits for the PROCESS, not just for it to stop answer
     const pidFile = await start(serverAnswering(root, { onTerm: "note restart, then exit" }))
     const pid = server!.pid!
     expect(await pidFile.stop({ restart: true })).toBe(true)
-    expect(JSON.parse(readFileSync(join(root, "seen-on-term.json"), "utf8"))).toEqual({ pid })
+    expect(JSON.parse(readFileSync(join(root, "seen-on-term.json"), "utf8"))).toEqual({ pid, pids: [pid] })
     expect(pidFile.isRestarting(pid)).toBe(false)
   })
 
@@ -201,14 +202,19 @@ const SERVER_404 =
  * A server answering `SERVER_API` for `root`, writing its pid file there.
  * - `onTerm`, on `SIGTERM`:  exit (the default);  stop answering at once, but end only 800ms later (as the page
  *   server does while its route modules stop);  or ignore it
+ * - `port`:  where it listens (0:  any)
+ * - `of`:  the root it says it serves (default `root`):  another checkout's server, holding a port
  */
-function serverAnswering(root: string, { onTerm = "exit" }: { onTerm?: TermBehaviour } = {}): string {
+function serverAnswering(
+  root: string,
+  { onTerm = "exit", port = 0, of = root }: { onTerm?: TermBehaviour; port?: number; of?: string } = {}
+): string {
   return (
     `const fs = require('node:fs'); const s = require('node:http').createServer((q, r) => {` +
     `if (q.url === '${SRV.SERVER_API}') { r.setHeader('content-type', 'application/json');` +
-    `r.end(JSON.stringify({ pid: process.pid, port: s.address().port, root: ${JSON.stringify(root)}, started: new Date().toISOString() })) }` +
+    `r.end(JSON.stringify({ pid: process.pid, port: s.address().port, root: ${JSON.stringify(of)}, started: new Date().toISOString() })) }` +
     `else { r.statusCode = 404; r.end() } });` +
-    `s.listen(0, '127.0.0.1', () => fs.writeFileSync(${JSON.stringify(join(root, ".spell-server.json"))},` +
+    `s.listen(${port}, '127.0.0.1', () => fs.writeFileSync(${JSON.stringify(join(root, ".spell-server.json"))},` +
     `JSON.stringify({ pid: process.pid, port: s.address().port, root: ${JSON.stringify(root)}, started: new Date().toISOString() })));` +
     `const ROOT = ${JSON.stringify(root)}; process.on('SIGTERM', () => { ${ON_TERM[onTerm]} })`
   )
@@ -260,5 +266,107 @@ describe("PidFile.isOlderThanCode():  restart only for code the server LOADED (e
 
     utimesSync(loaded, after, after)
     expect(pidFile.isOlderThanCode(running, [root])).toBe(true)
+  })
+})
+
+// epic `epic-engine` I332:  an orphan of two servers started at once kept 4747, and every restart after took a new port
+describe("PidFile with a fixed port:  the server MUST hold it", () => {
+  let root: string
+  const servers: ChildProcess[] = []
+
+  beforeEach(() => {
+    root = realpathSync(mkdtempSync(join(tmpdir(), "pid-file-port-")))
+  })
+
+  afterEach(() => {
+    for (const server of servers.splice(0)) server.kill("SIGKILL")
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  /** run `code`, and wait till something answers on `port` */
+  async function run(code: string, port: number): Promise<ChildProcess> {
+    const server = spawn(process.execPath, ["-e", code], { stdio: "ignore" })
+    servers.push(server)
+    await vi.waitFor(async () => expect(await SRV.serverAt(`http://127.0.0.1:${port}`)).toBeDefined(), {
+      timeout: 5000,
+      interval: 50
+    })
+    return server
+  }
+
+  /** the fixed port's orphan:  this root's server on `port`, then the pid file's, elsewhere */
+  async function orphanAndPidFileServer(port: number) {
+    const orphan = await run(serverAnswering(root, { port }), port)
+    const other = await SRV.freePort()
+    const named = await run(serverAnswering(root, { port: other }), other)
+    const pidFile = new SRV.PidFile(root)
+    expect(pidFile.read()?.pid).toBe(named.pid)
+    return { orphan, named, pidFile }
+  }
+
+  it("stop():  the pid file's server, AND this root's server on the port, as one restart", async () => {
+    const port = await SRV.freePort()
+    const { orphan, named, pidFile } = await orphanAndPidFileServer(port)
+    expect(await pidFile.stop({ port, restart: true })).toBe(true)
+    expect(alive(orphan.pid!)).toBe(false)
+    expect(alive(named.pid!)).toBe(false)
+    expect(await SRV.isFree(port)).toBe(true)
+    expect(existsSync(pidFile.restartFile)).toBe(false)
+  })
+
+  it("ensure():  a restart off its port stops both, then starts the new one ON it", async () => {
+    const port = await SRV.freePort()
+    const { orphan, named, pidFile } = await orphanAndPidFileServer(port)
+    // the pid file's server, older than its code:  any `sources` file newer than its start
+    writeFileSync(join(root, "code.ts"), "")
+    utimesSync(join(root, "code.ts"), Date.now() / 1000 + 60, Date.now() / 1000 + 60)
+    const fresh = await pidFile.ensure({
+      command: [process.execPath, "-e", serverAnswering(root, { port })],
+      sources: [root],
+      timeout: 5000,
+      port
+    })
+    expect(fresh).toMatchObject({ launched: true, port })
+    expect(alive(orphan.pid!)).toBe(false)
+    expect(alive(named.pid!)).toBe(false)
+    expect(await pidFile.stop({ port })).toBe(true)
+    expect(alive(fresh.pid)).toBe(false)
+  })
+
+  it("ensure():  the pid file lost, this root's current server on the port is the running one", async () => {
+    const port = await SRV.freePort()
+    const server = await run(serverAnswering(root, { port }), port)
+    const pidFile = new SRV.PidFile(root)
+    rmSync(pidFile.file)
+    const found = await pidFile.ensure({ command: ["false"], port })
+    expect(found).toMatchObject({ launched: false, pid: server.pid, port })
+    expect(pidFile.read()?.pid).toBe(server.pid)
+  })
+
+  it("ensure():  another checkout's server on the port:  throws, and starts nothing on another port", async () => {
+    const port = await SRV.freePort()
+    // its pid file in a folder of its own:  only what it ANSWERS says whose it is
+    const other = join(root, "other")
+    mkdirSync(other)
+    const foreign = await run(serverAnswering(other, { port, of: "/elsewhere" }), port)
+    const pidFile = new SRV.PidFile(root)
+    const marker = join(root, "started")
+    await expect(
+      pidFile.ensure({
+        command: [process.execPath, "-e", `require('node:fs').writeFileSync(${JSON.stringify(marker)}, '')`],
+        timeout: 1000,
+        port
+      })
+    ).rejects.toThrow(/must listen on port \d+, but the server of \/elsewhere \(pid \d+\) holds it/)
+    expect(existsSync(marker)).toBe(false)
+    expect(alive(foreign.pid!)).toBe(true)
+  }, 15_000)
+
+  it("isRestarting():  each pid the restart note names, and the old note's one `pid`", () => {
+    const pidFile = new SRV.PidFile(root)
+    writeFileSync(pidFile.restartFile, JSON.stringify({ pid: 1, pids: [1, 2] }))
+    expect([1, 2, 3].map((pid) => pidFile.isRestarting(pid))).toEqual([true, true, false])
+    writeFileSync(pidFile.restartFile, JSON.stringify({ pid: 4 }))
+    expect(pidFile.isRestarting(4)).toBe(true)
   })
 })
