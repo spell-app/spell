@@ -38,14 +38,14 @@ a recipe
 						<header size="large">{its title}</header>
 						<action "edit" />
 					</stack>
-					<text color="grey">Written for {its serves};  shown for {the diners of recipe cards}</text>
+					<text color="grey">The recipe is for {its serves} people.  These amounts are for the {the diners of recipe cards} you're cooking for.</text>
 					<header size="small">Ingredients</header>
 					<stack spacing="xs">
 						<for ingredient in its ingredients />
 					</stack>
 					<stack direction="horizontal">
 						<button color="primary" icon="cart plus" disabled={its picked count is 0} onClick={add the picked to the shopping list}>
-							Add {its picked count} to shopping list
+							Add {its picked count} ticked items to the shopping list
 						</button>
 					</stack>
 					<header size="small">Steps</header>

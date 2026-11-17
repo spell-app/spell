@@ -1,0 +1,45 @@
+{
+  "title": "Fichas de recetas",
+  "description": "Recipe Cards in Spanish:  recipes in a JSON file;  scale one for how many are eating, show it in metric or in cups and spoons, edit its ingredients and steps, and send the ingredients you pick to Lista de la compra's own list",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "Tortitas de Arándanos" }, { "clickOn": "es-entrada[name=\"comensales\"] input" }, { "press": "ControlOrMeta+A" }, { "type": "6" }, { "clickOn": "es-casilla", "nth": 6 }, { "clickOn": "es-casilla", "nth": 9 }, { "scrollTo": "Ingredientes" }] },
+  "imports": [
+    {
+      "path": "@spell/examples/ListaDeLaCompra",
+      "active": true,
+      "import": ["Artículo", "Pasillo", "Recorrido"]
+    },
+    {
+      "path": "/FichasDeRecetas.api.es.spell",
+      "active": true
+    },
+    {
+      "path": "/Medidas.es.spell",
+      "active": true
+    },
+    {
+      "path": "/RecetasDeMuestra.es.spell",
+      "active": true
+    },
+    {
+      "path": "/FichasDeRecetas.es.spell",
+      "active": true
+    },
+    {
+      "path": "/Ingrediente.es.spell",
+      "active": true
+    },
+    {
+      "path": "/Ficha.es.spell",
+      "active": true
+    },
+    {
+      "path": "/EditorDeRecetas.es.spell",
+      "active": true
+    },
+    {
+      "path": "/styles.css",
+      "active": true
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+# Fichas de recetas
+// Tus recetas:  elige una, indica cuántos comen, y cada cantidad se ajusta;
+// muéstrala en métrico o en tazas y cucharas;  marca ingredientes y agrégalos a la lista de la compra.
+// Las recetas están en un archivo JSON, FichasDeRecetas.api.es.spell dice dónde;  la lista de la compra es la de Lista de la compra, importada.
+
+fichas es una aplicación
+	su "elegida" es una receta
+		// La receta que se muestra
+	su "editada" es una receta
+		// La receta en su pantalla de edición, mientras haya una
+	sus "comensales" es un número empezando en 4
+		// Cuántos comen
+	sus "unidades" es uno de métrico o tazas
+		// Gramos y mililitros, o tazas y cucharas
+	su "escala" es
+		// Cuánto más, o menos, de lo que dice la receta
+		si su elegida no existe o las raciones de su elegida es 0 devolver 1
+		devolver sus comensales / las raciones de su elegida
+	"recorrido" es un nuevo recorrido
+		// La propia lista de Lista de la compra, por pasillo:  la misma lista, desde su archivo CSV
+
+	al crearla
+		// La primera vez, con un archivo vacío, tres recetas para empezar
+		si no hay recetas
+			agregar la sopa de tomate
+			agregar el dal de lentejas rojas
+			agregar las tortitas
+		si falla
+			// El archivo no se puede leer ahora:  la lista de recetas lo dice
+			devolver
+		poner su elegida al primer de (cada receta)
+
+	grupo "Unidades"
+	para "mostrar métrico" con título "Gramos y ml"
+		seleccionada cuando sus unidades es métrico
+		poner sus unidades a métrico
+
+	para "mostrar tazas y cucharas" con título "Tazas y cucharas"
+		seleccionada cuando sus unidades es tazas
+		poner sus unidades a tazas
+
+	para dibujarla
+		<contenedor>
+			<pila>
+				<barra-herramientas>
+					<texto tamano="grande" extranegrita slot="titulo">Fichas de recetas</texto>
+					<action "mostrar métrico" />
+					<action "mostrar tazas y cucharas" />
+					<spacer />
+					<action "deshacer" solo-icono />
+					<action "rehacer" solo-icono />
+				</barra-herramientas>
+				<cuadricula apilable>
+					<columna ancho="5">
+						<pila>
+							<botones direccion="vertical" fluido basico>
+								<para receta en cada receta>
+									<boton activo={receta es su elegida} onClick={elegir receta}>{el título de receta}</boton>
+								</para>
+							</botones>
+							<formulario value={eso}>
+								<campo etiqueta="Cocinando para">
+									<entrada name="comensales" type="number" min="1" etiquetado="derecha" etiqueta="personas" />
+								</campo>
+							</formulario>
+							<encabezado tamano="pequeño">Lista de la compra</encabezado>
+							<texto color="gris" tamano="pequeño">Los ingredientes marcados van aquí, a la propia lista de la aplicación Lista de la compra</texto>
+							{dibujar el recorrido}
+						</pila>
+					</columna>
+					<columna ancho="11">
+						{dibujar la pantalla de eso}
+					</columna>
+				</cuadricula>
+			</pila>
+		</contenedor>
+
+	para dibujar su pantalla
+		// La pantalla de edición mientras se cambia una receta;  si no, la ficha de la receta elegida
+		si su editada
+			dibujar (un nuevo editor de receta con receta = su editada)
+		de lo contrario si su elegida
+			dibujar su elegida
+		de lo contrario
+			<texto color="gris">Elige una receta a la izquierda para ver sus ingredientes y pasos.</texto>

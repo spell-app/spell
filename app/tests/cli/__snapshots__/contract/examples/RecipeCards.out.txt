@@ -1,0 +1,13 @@
+✅ test how much reads
+  ▶️ Executing   `set the item to a new item with name "flour", amount = 200, unit = "g"`
+  ✅ As expected `the item's how much` is `"200 g"`
+  ▶️ Executing   `set the item to a new item with name "lemons"`
+  ✅ As expected `the item's how much` is `""`
+✅ test fractions
+  ✅ As expected `write 1.5 for a cook` is `"1 1/2"`
+  ✅ As expected `write 0.25 for a cook` is `"1/4"`
+  ✅ As expected `write 200 for a cook` is `"200"`
+  ✅ As expected `the written of (measure 250 in spoons or cups)` is `"1 cup"`
+  ✅ As expected `the written of (measure 15 in spoons or cups)` is `"1 tbsp"`
+
+<div id="spell-app-root"><test-project-app><ui-container><ui-stack><ui-toolbar><ui-text heavy="" size="large" slot="title">Recipe Cards</ui-text><ui-action></ui-action><ui-action></ui-action><spacer></spacer><ui-action icon-only="" shortcut="mod+Z"></ui-action><ui-action icon-only="" shortcut="mod+shift+Z"></ui-action></ui-toolbar><ui-grid stackable=""><ui-column width="5"><ui-stack><ui-buttons basic="" direction="vertical" fluid=""><ui-message color="red">Can't read this right now:  fetch failed:  this run is offline (/api/places/spaces/@spell/examples/RecipeCards/__data/recipes.json/list)<ui-button>Retry</ui-button></ui-message></ui-buttons><ui-form><ui-field label="Cooking for"><ui-input label="people" labeled="right" min="1" name="diners" type="number"></ui-input></ui-field></ui-form><ui-header size="small">Shopping list</ui-header><ui-text color="grey" size="small">Ticked ingredients go here, on the Shopping List app's own list</ui-text><test-project-aisle-list><ui-stack class="aisle-list"><ui-text color="grey">Can't reach the list just now:  it tries again soon</ui-text><ui-stack class="got" spacing="xs"></ui-stack></ui-stack></test-project-aisle-list></ui-stack></ui-column><ui-column width="11"><ui-text color="grey" part="screen">Choose a recipe on the left to see its ingredients and steps.</ui-text></ui-column></ui-grid></ui-stack></ui-container></test-project-app></div>

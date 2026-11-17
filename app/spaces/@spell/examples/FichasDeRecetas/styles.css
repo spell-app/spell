@@ -1,0 +1,6 @@
+/* File styles.css:  what Spell UI's tags can't say yet. */
+
+/* the shopping list's ticked items:  they fade, as on Lista de la compra */
+.got {
+  opacity: 0.6;
+}

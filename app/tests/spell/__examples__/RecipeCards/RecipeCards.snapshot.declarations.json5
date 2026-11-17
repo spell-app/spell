@@ -122,7 +122,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeCard.spell:1332-2223"
+      "defined": "/RecipeCard.spell:1332-2289"
     },
     {
       "type": "Ingredient",
@@ -190,7 +190,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Ingredient.spell:1368-1693"
+      "defined": "/Ingredient.spell:1368-1699"
     },
     {
       "type": "Step",
@@ -370,7 +370,7 @@
     {
       "type": "RecipeCard",
       "superType": "App",
-      "defined": "/RecipeCards.spell:313-2600"
+      "defined": "/RecipeCards.spell:313-2855"
     },
     {
       "property": "chosen",
@@ -418,7 +418,7 @@
       "name": "creating it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/RecipeCards.spell:909-1137"
+      "defined": "/RecipeCards.spell:909-1228"
     },
     {
       "syntax": "show metric (of {thisArg:expression})?",
@@ -433,8 +433,8 @@
       "kind": "method",
       "name": "show metric",
       "returns": "nothing",
-      "title": "Metric",
-      "defined": "/RecipeCards.spell:1155-1253"
+      "title": "Grams and ml",
+      "defined": "/RecipeCards.spell:1246-1350"
     },
     {
       "syntax": "show cups and spoons (of {thisArg:expression})?",
@@ -450,7 +450,7 @@
       "name": "show cups and spoons",
       "returns": "nothing",
       "title": "Cups and spoons",
-      "defined": "/RecipeCards.spell:1256-1368"
+      "defined": "/RecipeCards.spell:1353-1465"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -464,12 +464,12 @@
       "group": "Units",
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeCards.spell:1371-2321"
+      "defined": "/RecipeCards.spell:1468-2528"
     },
     {
       "type": "RecipeEditor",
       "superType": "View",
-      "defined": "/RecipeEditor.spell:223-1758"
+      "defined": "/RecipeEditor.spell:223-1789"
     },
     {
       "property": "recipe",
@@ -495,7 +495,8 @@
       "kind": "method",
       "name": "save",
       "returns": "nothing",
-      "defined": "/RecipeEditor.spell:409-542"
+      "title": "Save changes",
+      "defined": "/RecipeEditor.spell:409-564"
     },
     {
       "syntax": "cancel {thisArg:expression}?",
@@ -509,7 +510,7 @@
       "kind": "method",
       "name": "cancel",
       "returns": "nothing",
-      "defined": "/RecipeEditor.spell:545-669"
+      "defined": "/RecipeEditor.spell:567-691"
     },
     {
       "syntax": "add ingredient (of {thisArg:expression})?",
@@ -524,7 +525,7 @@
       "name": "add ingredient",
       "returns": "nothing",
       "title": "Add an ingredient",
-      "defined": "/RecipeEditor.spell:672-787"
+      "defined": "/RecipeEditor.spell:694-809"
     },
     {
       "syntax": "add step (of {thisArg:expression})?",
@@ -539,7 +540,7 @@
       "name": "add step",
       "returns": "nothing",
       "title": "Add a step",
-      "defined": "/RecipeEditor.spell:790-880"
+      "defined": "/RecipeEditor.spell:812-902"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -552,24 +553,24 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeEditor.spell:883-1758"
+      "defined": "/RecipeEditor.spell:905-1789"
     },
     {
       "type": "IngredientRow",
       "superType": "View",
-      "defined": "/RecipeEditor.spell:1760-3000"
+      "defined": "/RecipeEditor.spell:1791-3043"
     },
     {
       "property": "ingredient",
       "of": "IngredientRow",
       "datatype": "Ingredient",
-      "defined": "/RecipeEditor.spell:1879-1912"
+      "defined": "/RecipeEditor.spell:1910-1943"
     },
     {
       "property": "editor",
       "of": "IngredientRow",
       "datatype": "RecipeEditor",
-      "defined": "/RecipeEditor.spell:1914-1945"
+      "defined": "/RecipeEditor.spell:1945-1976"
     },
     {
       "syntax": "move up (of {thisArg:expression})?",
@@ -583,7 +584,7 @@
       "kind": "method",
       "name": "move up",
       "returns": "nothing",
-      "defined": "/RecipeEditor.spell:1948-2207"
+      "defined": "/RecipeEditor.spell:1979-2238"
     },
     {
       "syntax": "remove {thisArg:expression}?",
@@ -597,7 +598,7 @@
       "kind": "method",
       "name": "remove",
       "returns": "nothing",
-      "defined": "/RecipeEditor.spell:2210-2319"
+      "defined": "/RecipeEditor.spell:2241-2350"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -610,24 +611,24 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeEditor.spell:2322-3000"
+      "defined": "/RecipeEditor.spell:2353-3043"
     },
     {
       "type": "StepRow",
       "superType": "View",
-      "defined": "/RecipeEditor.spell:3002-3800"
+      "defined": "/RecipeEditor.spell:3045-3843"
     },
     {
       "property": "step",
       "of": "StepRow",
       "datatype": "Step",
-      "defined": "/RecipeEditor.spell:3107-3127"
+      "defined": "/RecipeEditor.spell:3150-3170"
     },
     {
       "property": "editor",
       "of": "StepRow",
       "datatype": "RecipeEditor",
-      "defined": "/RecipeEditor.spell:3129-3160"
+      "defined": "/RecipeEditor.spell:3172-3203"
     },
     {
       "syntax": "move up (of {thisArg:expression})?",
@@ -641,7 +642,7 @@
       "kind": "method",
       "name": "move up",
       "returns": "nothing",
-      "defined": "/RecipeEditor.spell:3163-3410"
+      "defined": "/RecipeEditor.spell:3206-3453"
     },
     {
       "syntax": "remove {thisArg:expression}?",
@@ -655,7 +656,7 @@
       "kind": "method",
       "name": "remove",
       "returns": "nothing",
-      "defined": "/RecipeEditor.spell:3413-3510"
+      "defined": "/RecipeEditor.spell:3456-3553"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -668,7 +669,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeEditor.spell:3513-3800"
+      "defined": "/RecipeEditor.spell:3556-3843"
     }
   ],
   "codeLines": [
@@ -683,61 +684,61 @@
     52,
     57,
     78,
-    152,
-    156,
-    162,
-    167,
-    173,
-    179,
-    185,
-    191,
-    197,
-    252,
-    264,
-    267,
-    279,
-    297,
+    153,
+    157,
+    163,
+    168,
+    174,
+    180,
+    186,
+    192,
+    198,
+    253,
+    265,
+    268,
+    280,
     298,
-    303,
-    309,
-    318,
-    323,
-    328,
-    366,
-    381,
-    398,
-    461,
-    536,
-    602,
-    606,
-    612,
-    618,
-    624,
-    631,
-    638,
-    644,
-    653,
+    299,
+    304,
+    310,
+    319,
+    324,
+    329,
+    367,
+    382,
+    399,
+    462,
+    537,
+    603,
+    607,
+    613,
+    619,
+    625,
+    632,
+    639,
+    645,
     660,
     667,
-    738,
-    742,
-    748,
-    753,
-    759,
-    764,
-    768,
-    772,
-    815,
-    818,
-    823,
-    828,
+    674,
+    752,
+    756,
+    762,
+    767,
+    773,
+    778,
+    782,
+    786,
+    829,
+    832,
     837,
-    841,
-    868,
-    871,
-    876,
-    881,
+    842,
+    851,
+    855,
+    882,
+    885,
     890,
-    894
+    895,
+    904,
+    908
   ]
 }

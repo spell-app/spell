@@ -1,0 +1,125 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Artículo",
+    "Pasillo",
+    "ListaDeLaCompra",
+    "test_los_pasillos"
+  ],
+  "statements": [
+    {
+      "type": "Artículo",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:860-1390"
+    },
+    {
+      "property": "nombre",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:888-908"
+    },
+    {
+      "property": "cantidad",
+      "of": "Artículo",
+      "datatype": "number",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:910-936"
+    },
+    {
+      "property": "unidad",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:938-958"
+    },
+    {
+      "property": "pasillo",
+      "of": "Artículo",
+      "datatype": "text",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:960-981"
+    },
+    {
+      "property": "comprado",
+      "of": "Artículo",
+      "datatype": "choice",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:983-1044"
+    },
+    {
+      "type": "Pasillo",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:1453-1696"
+    },
+    {
+      "property": "nombre",
+      "of": "Pasillo",
+      "datatype": "text",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:1480-1500"
+    },
+    {
+      "property": "artículos",
+      "of": "Pasillo",
+      "datatype": "list of artículos",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:1502-1543"
+    },
+    {
+      "type": "ListaDeLaCompra",
+      "superType": "App",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:1716-2733"
+    },
+    {
+      "property": "artículos",
+      "of": "ListaDeLaCompra",
+      "datatype": "list of artículos",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:1754-1879"
+    },
+    {
+      "property": "pasillos",
+      "of": "ListaDeLaCompra",
+      "datatype": "list of pasillos",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:1881-2415"
+    },
+    {
+      "syntax": "quitar lo comprado ((de|del) {thisArg:expression})?",
+      "output": "quitar_lo_comprado",
+      "rule": "method_call",
+      "of": "ListaDeLaCompra",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "quitar lo comprado",
+      "returns": "nothing",
+      "title": "Quitar lo comprado",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:2418-2580"
+    },
+    {
+      "syntax": "probar los pasillos",
+      "output": "test_los_pasillos",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "los pasillos",
+      "defined": "/ComoFuncionaLaListaDeLaCompra.es.spell:3492-3896"
+    }
+  ],
+  "codeLines": [
+    19,
+    22,
+    27,
+    32,
+    37,
+    43,
+    62,
+    65,
+    70,
+    85,
+    89,
+    95,
+    111,
+    161
+  ]
+}

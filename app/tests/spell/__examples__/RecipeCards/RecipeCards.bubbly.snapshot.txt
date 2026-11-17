@@ -210,12 +210,16 @@
 |   |   |   add the tomato soup    ‾call(add the tomato soup)
 |   |   |   add the red lentil dal    ‾call(add the red lentil dal)
 |   |   |   add the pancakes    ‾call(add the pancakes)
+|   |   [control if_that_fails L2]
+|   |   | if that fails
+|   |   |   ⟦// The file can't be read just now:  the recipes list says so⟧
+|   |   |   return
 |   |   set its **chosen** to the first of (every **recipe**)    ‾value(its chosen) ‾value(the first of (every recipe))
 
 |   [plain group define_group L1]
 |   | group «"Units"»
 |   |   [action to_do_something L2]
-|   |   | to «"show metric"» with title «"Metric"»
+|   |   | to «"show metric"» with title «"Grams and ml"»
 |   |   |   selected when its **units** is _metric_    ‾value(its units)
 |   |   |   set its **units** to _metric_    ‾value(its units)
 
@@ -250,6 +254,7 @@
 |   |   |               </⟨field⟩>
 |   |   |             </⟨form⟩>
 |   |   |             <⟨header⟩ size=«"small"»>Shopping list</⟨header⟩>
+|   |   |             <⟨text⟩ color=«"grey"» size=«"small"»>Ticked ingredients go here, on the Shopping List app's own list</⟨text⟩>
 |   |   |             {draw the **aisle list**}
 |   |   |           </⟨stack⟩>
 |   |   |         </⟨column⟩>
@@ -271,7 +276,7 @@
 |   |   |   |   draw its **chosen**    ‾value(its chosen)
 |   |   |   [control else L3]
 |   |   |   | otherwise
-|   |   |   |   <⟨text⟩ color=«"grey"»>Pick a recipe</⟨text⟩>
+|   |   |   |   <⟨text⟩ color=«"grey"»>Choose a recipe on the left to see its ingredients and steps.</⟨text⟩>
 
 ==== /Ingredient.spell
 ⟪# An ingredient, scaled and in the cook's units⟫
@@ -310,7 +315,7 @@
 |   |   ⟦// A box to pick it, how much, and what⟧
 |   |   <⟨form⟩ value={it}>    code({it})
 |   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» class=«"ingredient"»>
-|   |       <⟨checkbox⟩ name=«"picked"» aria-label=«"Pick for the shopping list"» />
+|   |       <⟨checkbox⟩ name=«"picked"» aria-label=«"Tick to add to the shopping list"» />
 |   |       <⟨text⟩ bold class=«"how-much"»>{the **written** of its **shown**}</⟨text⟩>    code({the written of its shown})
 |   |       <⟨text⟩>{its **name**}</⟨text⟩>    code({its name})
 |   |     </⟨stack⟩>
@@ -367,14 +372,14 @@
 |   |           <⟨header⟩ size=«"large"»>{its **title**}</⟨header⟩>    code({its title})
 |   |           <⟨action⟩ «"edit"» />
 |   |         </⟨stack⟩>
-|   |         <⟨text⟩ color=«"grey"»>Written for {its **serves**};  shown for {the **diners** of **recipe cards**}</⟨text⟩>    code({its serves}) code({the diners of recipe cards})
+|   |         <⟨text⟩ color=«"grey"»>The recipe is for {its **serves**} people.  These amounts are for the {the **diners** of **recipe cards**} you're cooking for.</⟨text⟩>    code({its serves}) code({the diners of recipe cards})
 |   |         <⟨header⟩ size=«"small"»>Ingredients</⟨header⟩>
 |   |         <⟨stack⟩ spacing=«"xs"»>
 |   |           <⟨for⟩ ingredient in its ingredients />
 |   |         </⟨stack⟩>
 |   |         <⟨stack⟩ direction=«"horizontal"»>
 |   |           <⟨button⟩ color=«"primary"» icon=«"cart plus"» disabled={its **picked count** is _0_} onClick={add the picked to the shopping list}>    code({its picked count is 0}) code({add the picked to the shopping list})
-|   |             Add {its **picked count**} to shopping list
+|   |             Add {its **picked count**} ticked items to the shopping list
 |   |           </⟨button⟩>
 |   |         </⟨stack⟩>
 |   |         <⟨header⟩ size=«"small"»>Steps</⟨header⟩>
@@ -414,7 +419,7 @@
 |   |   ⟦// A copy to change:  the recipe stays as it was until Save⟧
 
 |   [action to_do_something L1]
-|   | to «"save"» with icon «"check"»
+|   | to «"save"» with title «"Save changes"», icon «"check"»
 |   |   ⟦// Every change at once, one step to undo⟧
 |   |   save its **draft**    ‾value(its draft)
 |   |   set the **editing** of **recipe cards** to nothing    ‾value(the editing of recipe cards) ‾value(nothing)
@@ -448,7 +453,7 @@
 |   |           </⟨field⟩>
 |   |         </⟨fields⟩>
 |   |         <⟨field⟩ label=«"Picture"»>
-|   |           <⟨input⟩ name=«"picture"» placeholder=«"A picture's address"» />
+|   |           <⟨input⟩ name=«"picture"» placeholder=«"A link to a photo (optional)"» />
 |   |         </⟨field⟩>
 |   |       </⟨form⟩>
 |   |       <⟨header⟩ size=«"small"»>Ingredients</⟨header⟩>
@@ -490,9 +495,9 @@
 |   |   <⟨form⟩ value={its **ingredient**}>    code({its ingredient})
 |   |     <⟨fields⟩ unstackable>
 |   |       <⟨field⟩ width=«"2"»><⟨input⟩ name=«"amount"» type=«"number"» min=«"0"» aria-label=«"Amount"» /></⟨field⟩>
-|   |       <⟨field⟩ width=«"2"»><⟨input⟩ name=«"unit"» placeholder=«"Unit"» aria-label=«"Unit"» /></⟨field⟩>
+|   |       <⟨field⟩ width=«"2"»><⟨input⟩ name=«"unit"» placeholder=«"g, cups ..."» aria-label=«"Unit"» /></⟨field⟩>
 |   |       <⟨field⟩ width=«"6"»><⟨input⟩ name=«"name"» placeholder=«"Ingredient"» aria-label=«"Ingredient"» /></⟨field⟩>
-|   |       <⟨field⟩ width=«"3"»><⟨input⟩ name=«"aisle"» placeholder=«"Aisle"» aria-label=«"Aisle"» /></⟨field⟩>
+|   |       <⟨field⟩ width=«"3"»><⟨input⟩ name=«"aisle"» placeholder=«"Shop aisle"» aria-label=«"Aisle"» /></⟨field⟩>
 |   |       <⟨field⟩ width=«"3"»>
 |   |         <⟨stack⟩ direction=«"horizontal"» spacing=«"xs"»>
 |   |           <⟨action⟩ «"move up"» icon-only appearance=«"tertiary"» />

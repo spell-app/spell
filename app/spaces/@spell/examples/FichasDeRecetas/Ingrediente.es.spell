@@ -1,0 +1,34 @@
+# Un ingrediente, escalado y en las unidades de quien cocina
+// Su `cantidad` es para las raciones de la propia receta:  se muestra para cuantos comen, en sistema métrico o en tazas y cucharas.
+// Una casilla a su lado lo marca para la lista de la compra.
+
+un ingrediente
+	su "cantidad escalada" es su cantidad * la escala de fichas
+		// Para cuantos comen:  su `cantidad` por `comensales` entre `raciones`
+	su "mostrada" es
+		// Su `cantidad escalada` en las unidades de quien cocina
+		poner escalada a su cantidad escalada
+		si las unidades de fichas es tazas
+			si su unidad es "g" y su gramos taza > 0 devolver medir (escalada / su gramos taza) al cuarto en "tazas"
+			si su unidad es "g" devolver medir (escalada / (1 oz en g)) en "oz"
+			si su unidad es "kg" devolver medir (escalada * 1000 / (1 oz en g)) en "oz"
+			si su unidad es "ml" devolver medir escalada en cucharas o tazas
+			si su unidad es "l" devolver medir (escalada * 1000) en cucharas o tazas
+		de lo contrario
+			si su unidad es "tazas" y su gramos taza > 0 devolver medir (escalada * su gramos taza) en "g"
+			si su unidad es "tazas" devolver medir (escalada * (1 taza en ml)) en "ml"
+			si su unidad es "oz" devolver medir (escalada * (1 oz en g)) en "g"
+			si su unidad es "lb" devolver medir (escalada * (1 lb en g)) en "g"
+		si su unidad es "tazas" o su unidad es "cda" o su unidad es "cdta"
+			devolver medir escalada al cuarto en su unidad
+		devolver medir escalada en su unidad
+
+	para dibujarlo
+		// Una casilla para marcarlo, cuánto, y qué
+		<formulario value={eso}>
+			<pila direccion="horizontal" separacion="sm" class="ingredient">
+				<casilla name="marcado" aria-label="Marca para añadir a la lista de la compra" />
+				<texto negrita class="how-much">{el escrito de su mostrada}</texto>
+				<texto>{su nombre}</texto>
+			</pila>
+		</formulario>

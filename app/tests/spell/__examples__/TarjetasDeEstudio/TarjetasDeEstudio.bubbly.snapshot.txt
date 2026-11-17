@@ -48,7 +48,7 @@
 |   ⟦// Las tarjetas para aprender⟧
 
 ==== /TarjetasDeEstudio.es.spell
-# T**arjetas de** estudio
+⟪# Tarjetas de estudio⟫
 ⟦// Un mazo de tarjetas para aprender:  una palabra en inglés por delante, lo que significa por detrás.⟧
 ⟦// Haz clic en la tarjeta, o en Mostrar la respuesta, para voltearla, y luego di si la sabías:⟧
 ⟦// la puntuación lleva la cuenta, y la siguiente tarjeta sale al azar.⟧

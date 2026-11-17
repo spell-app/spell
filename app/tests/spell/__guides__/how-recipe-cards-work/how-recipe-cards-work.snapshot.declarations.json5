@@ -1,0 +1,174 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Ingredient",
+    "Recipe",
+    "RecipeCard",
+    "count_the_cups_in_$millilitres",
+    "test_the_measures"
+  ],
+  "statements": [
+    {
+      "type": "Ingredient",
+      "superType": "View",
+      "defined": "/HowRecipeCardsWork.spell:843-1200"
+    },
+    {
+      "property": "amount",
+      "of": "Ingredient",
+      "datatype": "number",
+      "defined": "/HowRecipeCardsWork.spell:870-937"
+    },
+    {
+      "property": "unit",
+      "of": "Ingredient",
+      "datatype": "text",
+      "defined": "/HowRecipeCardsWork.spell:939-957"
+    },
+    {
+      "property": "name",
+      "of": "Ingredient",
+      "datatype": "text",
+      "defined": "/HowRecipeCardsWork.spell:959-977"
+    },
+    {
+      "property": "scaled",
+      "of": "Ingredient",
+      "datatype": "number",
+      "defined": "/HowRecipeCardsWork.spell:979-1028"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Ingredient",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowRecipeCardsWork.spell:1060-1200"
+    },
+    {
+      "type": "Recipe",
+      "superType": "View",
+      "defined": "/HowRecipeCardsWork.spell:1202-1524"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/HowRecipeCardsWork.spell:1224-1243"
+    },
+    {
+      "property": "serves",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/HowRecipeCardsWork.spell:1245-1269"
+    },
+    {
+      "property": "ingredients",
+      "of": "Recipe",
+      "datatype": "list of ingredients",
+      "defined": "/HowRecipeCardsWork.spell:1271-1391"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowRecipeCardsWork.spell:1394-1524"
+    },
+    {
+      "syntax": "count the cups in {callArgs:expression}",
+      "output": "count_the_cups_in_$millilitres",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "count the cups in (millilitres as a number)",
+      "params": [
+        {
+          "name": "millilitres",
+          "datatype": "number"
+        }
+      ],
+      "returns": "number",
+      "defined": "/HowRecipeCardsWork.spell:1572-1709"
+    },
+    {
+      "type": "RecipeCard",
+      "superType": "App",
+      "defined": "/HowRecipeCardsWork.spell:1723-2227"
+    },
+    {
+      "property": "diners",
+      "of": "RecipeCard",
+      "datatype": "number",
+      "defined": "/HowRecipeCardsWork.spell:1747-1810"
+    },
+    {
+      "property": "soup",
+      "of": "RecipeCard",
+      "datatype": "Recipe",
+      "defined": "/HowRecipeCardsWork.spell:1812-1871"
+    },
+    {
+      "property": "scale",
+      "of": "RecipeCard",
+      "datatype": "number",
+      "defined": "/HowRecipeCardsWork.spell:1873-1923"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeCard",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowRecipeCardsWork.spell:1976-2227"
+    },
+    {
+      "syntax": "test the measures",
+      "output": "test_the_measures",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the measures",
+      "defined": "/HowRecipeCardsWork.spell:2644-2774"
+    }
+  ],
+  "codeLines": [
+    22,
+    26,
+    31,
+    36,
+    42,
+    46,
+    54,
+    57,
+    62,
+    68,
+    73,
+    84,
+    95,
+    99,
+    104,
+    114,
+    118,
+    154
+  ]
+}

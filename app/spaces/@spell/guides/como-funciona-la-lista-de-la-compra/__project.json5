@@ -1,0 +1,10 @@
+{
+  "title": "Cómo funciona Lista de la compra",
+  "description": "How Lista de la compra works, in Spanish:  a checkbox bound to each item, a list worked out by aisle, and where its CSV file is kept",
+  "imports": [
+    {
+      "path": "/ComoFuncionaLaListaDeLaCompra.es.spell",
+      "active": true
+    }
+  ]
+}

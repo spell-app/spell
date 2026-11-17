@@ -82,14 +82,20 @@ export class Recipe extends View {
               <ui-header size="large">{this.title}</ui-header>
               {core.drawAction(this, "edit")}
             </ui-stack>
-            <ui-text color="grey">Written for {this.serves}{";  shown for "}{recipeCards.diners}</ui-text>
+            <ui-text color="grey">
+              {"The recipe is for "}
+              {this.serves}
+              {" people.  These amounts are for the "}
+              {recipeCards.diners}
+              {" you're cooking for."}
+            </ui-text>
             <ui-header size="small">Ingredients</ui-header>
             <ui-stack spacing="xs">{core.drawEach(this.ingredients, (ingredient) => core.drawThing(ingredient))}</ui-stack>
             <ui-stack direction="horizontal">
               <ui-button color="primary" icon="cart plus" disabled={this.pickedCount === 0} onClick={core.pressed(this, async () => await this.addThePickedToTheShoppingList())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                 {"Add "}
                 {this.pickedCount}
-                {" to shopping list"}
+                {" ticked items to the shopping list"}
               </ui-button>
             </ui-stack>
             <ui-header size="small">Steps</ui-header>
@@ -232,7 +238,7 @@ export class Ingredient extends View {
     return (
       <ui-form prop:value={this}>
         <ui-stack class="ingredient" direction="horizontal" spacing="sm">
-          <ui-checkbox name="picked" aria-label="Pick for the shopping list" />
+          <ui-checkbox name="picked" aria-label="Tick to add to the shopping list" />
           <ui-text class="how-much" bold={true}>{this.shown.written}</ui-text>
           <ui-text>{this.name}</ui-text>
         </ui-stack>
@@ -620,10 +626,16 @@ export class RecipeCard extends App {
 
   /** The first time, with an empty file, three recipes to start with */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Recipe)) === 0) {
-      addTheTomatoSoup()
-      addTheRedLentilDal()
-      addThePancakes()
+    try {
+      if (core.itemCountOf(await core.savedThings(Recipe)) === 0) {
+        addTheTomatoSoup()
+        addTheRedLentilDal()
+        addThePancakes()
+      }
+    }
+    catch (error) {
+      // The file can't be read just now:  the recipes list says so
+      return
     }
     this.chosen = core.getItemAt(await core.savedThings(Recipe), 0)
   }
@@ -668,6 +680,7 @@ export class RecipeCard extends App {
                   </ui-field>
                 </ui-form>
                 <ui-header size="small">Shopping list</ui-header>
+                <ui-text color="grey" size="small">Ticked ingredients go here, on the Shopping List app's own list</ui-text>
                 {core.drawThing(this.aisleList)}
               </ui-stack>
             </ui-column>
@@ -682,7 +695,7 @@ export class RecipeCard extends App {
     // The Edit screen while a recipe is being changed;  else the chosen recipe's card
     if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
     else if (this.chosen) return core.drawThing(this.chosen!)
-    else return <ui-text color="grey" part="screen">Pick a recipe</ui-text>
+    else return <ui-text color="grey" part="screen">Choose a recipe on the left to see its ingredients and steps.</ui-text>
   }
 }
 
@@ -719,7 +732,7 @@ export class RecipeCardElement extends SpellElement<RecipeCard> {
 }
 core.useElement(RecipeCard, RecipeCardElement)
 export const recipeCards = new RecipeCard()
-core.describeAction(RecipeCard, "showMetric", { title: "Metric", selectedWhen: "showMetricIsSelected", undoneAs: "Metric" })
+core.describeAction(RecipeCard, "showMetric", { title: "Grams and ml", selectedWhen: "showMetricIsSelected", undoneAs: "Grams and ml" })
 core.describeAction(RecipeCard, "showCupsAndSpoons", { title: "Cups and spoons", selectedWhen: "showCupsAndSpoonsIsSelected", undoneAs: "Cups and spoons" })
 
 // -----------
@@ -794,7 +807,7 @@ export class RecipeEditor extends View {
               </ui-field>
             </ui-fields>
             <ui-field label="Picture">
-              <ui-input name="picture" placeholder="A picture's address" />
+              <ui-input name="picture" placeholder="A link to a photo (optional)" />
             </ui-field>
           </ui-form>
           <ui-header size="small">Ingredients</ui-header>
@@ -892,13 +905,13 @@ export class IngredientRow extends View {
             <ui-input name="amount" type="number" min="0" aria-label="Amount" />
           </ui-field>
           <ui-field width="2">
-            <ui-input name="unit" placeholder="Unit" aria-label="Unit" />
+            <ui-input name="unit" placeholder="g, cups ..." aria-label="Unit" />
           </ui-field>
           <ui-field width="6">
             <ui-input name="name" placeholder="Ingredient" aria-label="Ingredient" />
           </ui-field>
           <ui-field width="3">
-            <ui-input name="aisle" placeholder="Aisle" aria-label="Aisle" />
+            <ui-input name="aisle" placeholder="Shop aisle" aria-label="Aisle" />
           </ui-field>
           <ui-field width="3">
             <ui-stack direction="horizontal" spacing="xs">
@@ -994,7 +1007,7 @@ export class StepRowElement extends SpellElement<StepRow> {
 }
 core.useElement(StepRow, StepRowElement)
 
-core.describeAction(RecipeEditor, "save", { title: "Save", icon: "check", undoneAs: "Save" })
+core.describeAction(RecipeEditor, "save", { title: "Save changes", icon: "check", undoneAs: "Save changes" })
 core.describeAction(RecipeEditor, "cancel", { title: "Cancel", icon: "close", undoneAs: "Cancel" })
 core.describeAction(RecipeEditor, "addIngredient", { title: "Add an ingredient", icon: "plus", undoneAs: "Add an ingredient" })
 core.describeAction(RecipeEditor, "addStep", { title: "Add a step", icon: "plus", undoneAs: "Add a step" })

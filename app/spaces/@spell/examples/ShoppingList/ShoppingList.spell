@@ -10,7 +10,11 @@ shopping list is an app
 
 	when creating it
 		// The first time, with an empty file, a few to start with
-		if there are no items
+		set kept to every item
+		if that fails
+			// The file can't be read just now:  the list says so, and tries again
+			return
+		if kept is empty
 			add (a new item with name "milk", aisle "Dairy", amount = 2, unit = "litres") to the items
 			add (a new item with name "eggs", aisle "Dairy", amount = 12) to the items
 			add (a new item with name "bananas", aisle "Fruit and veg", amount = 6) to the items

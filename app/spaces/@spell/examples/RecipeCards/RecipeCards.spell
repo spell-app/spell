@@ -25,10 +25,13 @@ recipe cards is an app
 			add the tomato soup
 			add the red lentil dal
 			add the pancakes
+		if that fails
+			// The file can't be read just now:  the recipes list says so
+			return
 		set its chosen to the first of (every recipe)
 
 	group "Units"
-	to "show metric" with title "Metric"
+	to "show metric" with title "Grams and ml"
 		selected when its units is metric
 		set its units to metric
 
@@ -61,6 +64,7 @@ recipe cards is an app
 								</field>
 							</form>
 							<header size="small">Shopping list</header>
+							<text color="grey" size="small">Ticked ingredients go here, on the Shopping List app's own list</text>
 							{draw the aisle list}
 						</stack>
 					</column>
@@ -78,4 +82,4 @@ recipe cards is an app
 		otherwise if its chosen
 			draw its chosen
 		otherwise
-			<text color="grey">Pick a recipe</text>
+			<text color="grey">Choose a recipe on the left to see its ingredients and steps.</text>

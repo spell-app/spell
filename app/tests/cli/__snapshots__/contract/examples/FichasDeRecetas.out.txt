@@ -1,0 +1,13 @@
+✅ test cuánto se lee
+  ▶️ Ejecutando   `poner el artículo a un nuevo artículo con nombre "harina", cantidad = 200, unidad = "g"`
+  ✅ Como se esperaba, `la porción del artículo` es `"200 g"`
+  ▶️ Ejecutando   `poner el artículo a un nuevo artículo con nombre "limones"`
+  ✅ Como se esperaba, `la porción del artículo` es `""`
+✅ test fracciones
+  ✅ Como se esperaba, `escribir 1.5 para un cocinero` es `"1 1/2"`
+  ✅ Como se esperaba, `escribir 0.25 para un cocinero` es `"1/4"`
+  ✅ Como se esperaba, `escribir 200 para un cocinero` es `"200"`
+  ✅ Como se esperaba, `el escrito de (medir 250 en cucharas o tazas)` es `"1 taza"`
+  ✅ Como se esperaba, `el escrito de (medir 15 en cucharas o tazas)` es `"1 cda"`
+
+<div id="spell-app-root"><test-project-app><es-contenedor><es-pila><es-barra-herramientas><es-texto extranegrita="" slot="titulo" tamano="grande">Fichas de recetas</es-texto><ui-action></ui-action><ui-action></ui-action><spacer></spacer><ui-action icon-only="" shortcut="mod+Z"></ui-action><ui-action icon-only="" shortcut="mod+shift+Z"></ui-action></es-barra-herramientas><es-cuadricula apilable=""><es-columna ancho="5"><es-pila><es-botones basico="" direccion="vertical" fluido=""><ui-message color="red">No se puede leer ahora:  fetch failed:  this run is offline (/api/places/spaces/@spell/examples/FichasDeRecetas/__data/recetas.json/list)<ui-button>Reintentar</ui-button></ui-message></es-botones><es-formulario><es-campo etiqueta="Cocinando para"><es-entrada etiqueta="personas" etiquetado="derecha" min="1" name="comensales" type="number"></es-entrada></es-campo></es-formulario><es-encabezado tamano="pequeño">Lista de la compra</es-encabezado><es-texto color="gris" tamano="pequeño">Los ingredientes marcados van aquí, a la propia lista de la aplicación Lista de la compra</es-texto><test-project-recorrido><es-pila class="aisle-list"><es-texto color="gris">Ahora no se puede leer la lista:  lo vuelve a intentar enseguida</es-texto><es-pila class="got" separacion="xs"></es-pila></es-pila></test-project-recorrido></es-pila></es-columna><es-columna ancho="11"><es-texto color="gris" part="pantalla">Elige una receta a la izquierda para ver sus ingredientes y pasos.</es-texto></es-columna></es-cuadricula></es-pila></es-contenedor></test-project-app></div>

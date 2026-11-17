@@ -8,7 +8,7 @@ a "recipe editor" is a view
 	its "draft" is a draft of its recipe
 		// A copy to change:  the recipe stays as it was until Save
 
-	to "save" with icon "check"
+	to "save" with title "Save changes", icon "check"
 		// Every change at once, one step to undo
 		save its draft
 		set the editing of recipe cards to nothing
@@ -38,7 +38,7 @@ a "recipe editor" is a view
 						</field>
 					</fields>
 					<field label="Picture">
-						<input name="picture" placeholder="A picture's address" />
+						<input name="picture" placeholder="A link to a photo (optional)" />
 					</field>
 				</form>
 				<header size="small">Ingredients</header>
@@ -74,9 +74,9 @@ an "ingredient row" is a view
 		<form value={its ingredient}>
 			<fields unstackable>
 				<field width="2"><input name="amount" type="number" min="0" aria-label="Amount" /></field>
-				<field width="2"><input name="unit" placeholder="Unit" aria-label="Unit" /></field>
+				<field width="2"><input name="unit" placeholder="g, cups ..." aria-label="Unit" /></field>
 				<field width="6"><input name="name" placeholder="Ingredient" aria-label="Ingredient" /></field>
-				<field width="3"><input name="aisle" placeholder="Aisle" aria-label="Aisle" /></field>
+				<field width="3"><input name="aisle" placeholder="Shop aisle" aria-label="Aisle" /></field>
 				<field width="3">
 					<stack direction="horizontal" spacing="xs">
 						<action "move up" icon-only appearance="tertiary" />

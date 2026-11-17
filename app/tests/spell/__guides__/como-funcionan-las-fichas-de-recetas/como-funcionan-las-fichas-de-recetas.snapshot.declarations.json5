@@ -1,0 +1,137 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Ingrediente",
+    "Receta",
+    "Ficha",
+    "contar_las_tazas_en_$mililitros",
+    "test_las_medidas"
+  ],
+  "statements": [
+    {
+      "type": "Ingrediente",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:894-1287"
+    },
+    {
+      "property": "cantidad",
+      "of": "Ingrediente",
+      "datatype": "number",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:925-1003"
+    },
+    {
+      "property": "unidad",
+      "of": "Ingrediente",
+      "datatype": "text",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1005-1025"
+    },
+    {
+      "property": "nombre",
+      "of": "Ingrediente",
+      "datatype": "text",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1027-1047"
+    },
+    {
+      "property": "ajustada",
+      "of": "Ingrediente",
+      "datatype": "number",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1049-1099"
+    },
+    {
+      "type": "Receta",
+      "superType": "View",
+      "gender": "feminine",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1289-1663"
+    },
+    {
+      "property": "título",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1316-1336"
+    },
+    {
+      "property": "raciones",
+      "of": "Receta",
+      "datatype": "number",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1338-1365"
+    },
+    {
+      "property": "ingredientes",
+      "of": "Receta",
+      "datatype": "list of ingredientes",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1367-1505"
+    },
+    {
+      "syntax": "contar las tazas en {callArgs:expression}",
+      "output": "contar_las_tazas_en_$mililitros",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "contar las tazas en (mililitros como un número)",
+      "params": [
+        {
+          "name": "mililitros",
+          "datatype": "number"
+        }
+      ],
+      "returns": "number",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1714-1873"
+    },
+    {
+      "type": "Ficha",
+      "superType": "App",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1893-2460"
+    },
+    {
+      "property": "comensales",
+      "of": "Ficha",
+      "datatype": "number",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1919-1988"
+    },
+    {
+      "property": "sopa",
+      "of": "Ficha",
+      "datatype": "Receta",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:1990-2058"
+    },
+    {
+      "property": "escala",
+      "of": "Ficha",
+      "datatype": "number",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:2060-2115"
+    },
+    {
+      "syntax": "probar las medidas",
+      "output": "test_las_medidas",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "las medidas",
+      "defined": "/ComoFuncionanLasFichasDeRecetas.es.spell:2919-3068"
+    }
+  ],
+  "codeLines": [
+    19,
+    23,
+    28,
+    33,
+    39,
+    51,
+    54,
+    59,
+    65,
+    81,
+    92,
+    96,
+    101,
+    111,
+    151
+  ]
+}

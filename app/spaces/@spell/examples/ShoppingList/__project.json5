@@ -1,6 +1,8 @@
 {
   "title": "Shopping List",
   "description": "What to buy, by aisle, kept in a CSV file:  add an item, tick it off as you shop, clear what you got, and print what's left;  its rows are a real CSV file Numbers or Excel opens, in the example's own folder",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "clickOn": "ui-checkbox", "nth": 1 }, { "scrollTo": "Bakery" }] },
   "imports": [
     { "path": "/ShoppingList.api.spell", "active": true },
     { "path": "/Item.spell", "active": true },

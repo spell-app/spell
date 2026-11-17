@@ -1,0 +1,68 @@
+# La ficha de una receta, y su pantalla de Editar
+// La ficha:  su `imagen`, para cuántos es, sus `ingredientes` para marcar, y sus `pasos numerados`.
+// La pantalla de Editar cambia un `borrador`:  nada cambia hasta Guardar.
+
+una receta
+	su "total marcados" es el largo de (ingredientes en sus ingredientes donde su marcado es sí)
+
+	para elegirla
+		// Su ficha, en lugar de lo que se mostraba
+		poner la elegida de fichas a eso
+		poner la editada de fichas a indefinido
+
+	para "editar" con icono "pencil"
+		// Su pantalla de Editar
+		poner la editada de fichas a eso
+
+	para "agregar los marcados a la lista de la compra" con título "Agregar a la lista de la compra", icono "cart plus"
+		// Cada ingrediente marcado, para cuantos comen, a la lista de Lista de la compra;  lo mismo en la misma `unidad` se suma
+		poner plato a su título
+		para ingrediente en sus ingredientes
+			si el marcado del ingrediente es sí
+				poner medida a la mostrada del ingrediente
+				poner igual al primer artículo en (cada artículo donde su comprado es no) donde su nombre es el nombre del ingrediente y su unidad es unidad de medida
+				si igual existe
+					poner cantidad de igual a cantidad de igual + número de medida
+				de lo contrario
+					agregar (un nuevo artículo con nombre = el nombre del ingrediente, cantidad = el número de medida, unidad = la unidad de medida, pasillo = el pasillo del ingrediente, receta = plato) a los artículos
+				poner el marcado del ingrediente a no
+
+	para dibujarla
+		<tarjeta fluido class="recipe">
+			<si su imagen no es "">
+				<imagen src={su imagen} alt={su título} proporcion="21:9" recortar />
+			</si>
+			<contenido>
+				<pila>
+					<pila direccion="horizontal" repartir="entre">
+						<encabezado tamano="grande">{su título}</encabezado>
+						<action "editar" />
+					</pila>
+					<texto color="gris">La receta es para {sus raciones} personas.  Estas cantidades son para las {los comensales de fichas} para las que cocinas.</texto>
+					<encabezado tamano="pequeño">Ingredientes</encabezado>
+					<pila separacion="xs">
+						<para cada ingrediente en sus ingredientes />
+					</pila>
+					<pila direccion="horizontal">
+						<boton color="primario" icono="cart plus" desactivado={su total marcados es 0} onClick={agregar los marcados a la lista de la compra}>
+							Agregar {su total marcados} ingredientes marcados a la lista de la compra
+						</boton>
+					</pila>
+					<encabezado tamano="pequeño">Pasos</encabezado>
+					{dibujar el pasos de eso}
+				</pila>
+			</contenido>
+		</tarjeta>
+
+	para dibujar su pasos
+		// Cada `paso` con su `número`
+		<pila separacion="sm">
+			{dibujar el pasos numerados de eso}
+		</pila>
+
+	para dibujar su pasos numerados
+		para paso y puesto en sus pasos
+			<pila direccion="horizontal" separacion="sm" alinear="inicio" class="step">
+				<etiqueta circular tamano="pequeño">{puesto}</etiqueta>
+				<texto>{la instrucción del paso}</texto>
+			</pila>

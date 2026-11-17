@@ -1,0 +1,162 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Item",
+    "Aisle",
+    "ShoppingList",
+    "test_the_aisles"
+  ],
+  "statements": [
+    {
+      "type": "Item",
+      "superType": "View",
+      "defined": "/HowShoppingListWorks.spell:721-1192"
+    },
+    {
+      "property": "name",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/HowShoppingListWorks.spell:742-760"
+    },
+    {
+      "property": "amount",
+      "of": "Item",
+      "datatype": "number",
+      "defined": "/HowShoppingListWorks.spell:762-786"
+    },
+    {
+      "property": "unit",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/HowShoppingListWorks.spell:788-806"
+    },
+    {
+      "property": "aisle",
+      "of": "Item",
+      "datatype": "text",
+      "defined": "/HowShoppingListWorks.spell:808-827"
+    },
+    {
+      "property": "got",
+      "of": "Item",
+      "datatype": "choice",
+      "defined": "/HowShoppingListWorks.spell:829-889"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Item",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowShoppingListWorks.spell:892-1192"
+    },
+    {
+      "type": "Aisle",
+      "superType": "View",
+      "defined": "/HowShoppingListWorks.spell:1249-1440"
+    },
+    {
+      "property": "name",
+      "of": "Aisle",
+      "datatype": "text",
+      "defined": "/HowShoppingListWorks.spell:1271-1289"
+    },
+    {
+      "property": "items",
+      "of": "Aisle",
+      "datatype": "list of items",
+      "defined": "/HowShoppingListWorks.spell:1291-1321"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Aisle",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowShoppingListWorks.spell:1324-1440"
+    },
+    {
+      "type": "ShoppingList",
+      "superType": "App",
+      "defined": "/HowShoppingListWorks.spell:1454-2289"
+    },
+    {
+      "property": "items",
+      "of": "ShoppingList",
+      "datatype": "list of items",
+      "defined": "/HowShoppingListWorks.spell:1479-1589"
+    },
+    {
+      "property": "aisles",
+      "of": "ShoppingList",
+      "datatype": "list of aisles",
+      "defined": "/HowShoppingListWorks.spell:1591-2012"
+    },
+    {
+      "syntax": "clear what I got (of {thisArg:expression})?",
+      "output": "clear_what_I_got",
+      "rule": "method_call",
+      "of": "ShoppingList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "clear what I got",
+      "returns": "nothing",
+      "title": "Clear what I got",
+      "defined": "/HowShoppingListWorks.spell:2015-2153"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "ShoppingList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowShoppingListWorks.spell:2156-2289"
+    },
+    {
+      "syntax": "test the aisles",
+      "output": "test_the_aisles",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the aisles",
+      "defined": "/HowShoppingListWorks.spell:2901-3204"
+    }
+  ],
+  "codeLines": [
+    20,
+    23,
+    28,
+    33,
+    38,
+    44,
+    50,
+    63,
+    66,
+    71,
+    76,
+    86,
+    90,
+    96,
+    112,
+    116,
+    162
+  ]
+}

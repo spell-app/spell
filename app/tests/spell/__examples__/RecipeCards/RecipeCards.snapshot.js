@@ -92,10 +92,11 @@ export class Recipe extends View {
             core.drawAction(this, "edit")
           ),
           h("ui-text", { color: "grey" },
-            "Written for ",
+            "The recipe is for ",
             () => this.serves,
-            ";  shown for ",
-            () => recipeCards.diners
+            " people.  These amounts are for the ",
+            () => recipeCards.diners,
+            " you're cooking for."
           ),
           h("ui-header", { size: "small" }, "Ingredients"),
           h("ui-stack", { spacing: "xs" },
@@ -108,7 +109,7 @@ export class Recipe extends View {
               disabled: () => this.pickedCount === 0,
               onClick: core.pressed(this, async () => await this.addThePickedToTheShoppingList()),
               style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-            }, "Add ", () => this.pickedCount, " to shopping list")
+            }, "Add ", () => this.pickedCount, " ticked items to the shopping list")
           ),
           h("ui-header", { size: "small" }, "Steps"),
           () => this.drawSteps()
@@ -253,7 +254,7 @@ export class Ingredient extends View {
   draw() {
     return h("ui-form", { "prop:value": this },
       h("ui-stack", { class: "ingredient", direction: "horizontal", spacing: "sm" },
-        h("ui-checkbox", { name: "picked", "aria-label": "Pick for the shopping list" }),
+        h("ui-checkbox", { name: "picked", "aria-label": "Tick to add to the shopping list" }),
         h("ui-text", { class: "how-much", bold: true }, () => this.shown.written),
         h("ui-text", () => this.name)
       )
@@ -643,10 +644,16 @@ export class RecipeCard extends App {
 
   /** The first time, with an empty file, three recipes to start with */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Recipe)) === 0) {
-      addTheTomatoSoup()
-      addTheRedLentilDal()
-      addThePancakes()
+    try {
+      if (core.itemCountOf(await core.savedThings(Recipe)) === 0) {
+        addTheTomatoSoup()
+        addTheRedLentilDal()
+        addThePancakes()
+      }
+    }
+    catch (error) {
+      // The file can't be read just now:  the recipes list says so
+      return
     }
     this.chosen = core.getItemAt(await core.savedThings(Recipe), 0)
   }
@@ -692,6 +699,9 @@ export class RecipeCard extends App {
                 )
               ),
               h("ui-header", { size: "small" }, "Shopping list"),
+              h("ui-text", { color: "grey", size: "small" },
+                "Ticked ingredients go here, on the Shopping List app's own list"
+              ),
               () => core.drawThing(this.aisleList)
             )
           ),
@@ -705,11 +715,15 @@ export class RecipeCard extends App {
     // The Edit screen while a recipe is being changed;  else the chosen recipe's card
     if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
     else if (this.chosen) return core.drawThing(this.chosen)
-    else return h("ui-text", { color: "grey", part: "screen" }, "Pick a recipe")
+    else {
+      return h("ui-text", { color: "grey", part: "screen" },
+        "Choose a recipe on the left to see its ingredients and steps."
+      )
+    }
   }
 }
 export const recipeCards = new RecipeCard()
-core.describeAction(RecipeCard, "showMetric", { title: "Metric", selectedWhen: "showMetricIsSelected", undoneAs: "Metric" })
+core.describeAction(RecipeCard, "showMetric", { title: "Grams and ml", selectedWhen: "showMetricIsSelected", undoneAs: "Grams and ml" })
 core.describeAction(RecipeCard, "showCupsAndSpoons", { title: "Cups and spoons", selectedWhen: "showCupsAndSpoonsIsSelected", undoneAs: "Cups and spoons" })
 
 // -----------
@@ -782,7 +796,7 @@ export class RecipeEditor extends View {
             )
           ),
           h("ui-field", { label: "Picture" },
-            h("ui-input", { name: "picture", placeholder: "A picture's address" })
+            h("ui-input", { name: "picture", placeholder: "A link to a photo (optional)" })
           )
         ),
         h("ui-header", { size: "small" }, "Ingredients"),
@@ -846,13 +860,13 @@ export class IngredientRow extends View {
           h("ui-input", { name: "amount", type: "number", min: "0", "aria-label": "Amount" })
         ),
         h("ui-field", { width: "2" },
-          h("ui-input", { name: "unit", placeholder: "Unit", "aria-label": "Unit" })
+          h("ui-input", { name: "unit", placeholder: "g, cups ...", "aria-label": "Unit" })
         ),
         h("ui-field", { width: "6" },
           h("ui-input", { name: "name", placeholder: "Ingredient", "aria-label": "Ingredient" })
         ),
         h("ui-field", { width: "3" },
-          h("ui-input", { name: "aisle", placeholder: "Aisle", "aria-label": "Aisle" })
+          h("ui-input", { name: "aisle", placeholder: "Shop aisle", "aria-label": "Aisle" })
         ),
         h("ui-field", { width: "3" },
           h("ui-stack", { direction: "horizontal", spacing: "xs" },
@@ -903,7 +917,7 @@ export class StepRow extends View {
   }
 }
 
-core.describeAction(RecipeEditor, "save", { title: "Save", icon: "check", undoneAs: "Save" })
+core.describeAction(RecipeEditor, "save", { title: "Save changes", icon: "check", undoneAs: "Save changes" })
 core.describeAction(RecipeEditor, "cancel", { title: "Cancel", icon: "close", undoneAs: "Cancel" })
 core.describeAction(RecipeEditor, "addIngredient", { title: "Add an ingredient", icon: "plus", undoneAs: "Add an ingredient" })
 core.describeAction(RecipeEditor, "addStep", { title: "Add a step", icon: "plus", undoneAs: "Add a step" })

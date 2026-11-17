@@ -10,7 +10,11 @@ lista de la compra es una aplicación
 
 	al crearla
 		// La primera vez, con el archivo vacío, unos cuantos para empezar
-		si no hay artículos
+		poner guardados a cada artículo
+		si falla
+			// El archivo no se puede leer ahora:  la lista lo dice, y lo vuelve a intentar
+			devolver
+		si guardados está vacío
 			agregar (un nuevo artículo con nombre "leche", pasillo "Lácteos", cantidad = 2, unidad = "litros") a los artículos
 			agregar (un nuevo artículo con nombre "huevos", pasillo "Lácteos", cantidad = 12) a los artículos
 			agregar (un nuevo artículo con nombre "plátanos", pasillo "Frutas y verduras", cantidad = 6) a los artículos

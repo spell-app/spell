@@ -1,0 +1,143 @@
+==== /ComoFuncionaLaListaDeLaCompra.es.spell
+⟪## Cómo funciona la Lista de la compra⟫
+⟦// El ejemplo Lista de la compra guarda lo que hay que comprar en un archivo CSV, y lo muestra por pasillo:⟧
+⟦// agrega un artículo, márcalo mientras compras, quita lo comprado e imprime lo que falta.⟧
+⟦// Cuatro ideas hacen el trabajo:⟧
+⟦// - una línea dice dónde se guardan los artículos:  un archivo CSV en la propia carpeta del ejemplo⟧
+⟦// - un artículo se dibuja como una fila:  una casilla para marcar, ligada a su "comprado"⟧
+⟦// - la lista se calcula a partir de los artículos:  cada pasillo con lo que aún falta comprar en él⟧
+⟦// - "abrir impresión" imprime solo la aplicación, y su CSS dice qué va en el papel⟧
+⟦//⟧
+⟦// Esta guía conserva las tres primeras, con los artículos en memoria:  empiezan de cero en cada ejecución.⟧
+⟦// Abre Lista de la compra, en Ejemplos de la página de inicio, para verlo entero.⟧
+
+
+⟪## Un artículo⟫
+[thing create_type L0]
+| un «"artículo"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"nombre"» es **texto**
+|   [property define_property_has L1]
+|   | su «"cantidad"» es un **número**
+|   [property define_property_has L1]
+|   | su «"unidad"» es **texto**
+|   [property define_property_has L1]
+|   | su «"pasillo"» es **texto**
+|   [property define_property_has L1]
+|   | su «"comprado"» es sí o no
+|   |   ⟦// marcado:  ya está en el carrito⟧
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   ⟦// un formulario propio, ligado al artículo:  marcar la casilla cambia su "comprado"⟧
+|   |   <⟨formulario⟩ value={eso}>    code({eso})
+|   |     <⟨pila⟩ direccion=«"horizontal"» separacion=«"sm"»>
+|   |       <⟨casilla⟩ name=«"comprado"» aria-label=«"Lo tengo"» />
+|   |       <⟨texto⟩ negrita>{su **cantidad** && su **unidad**}</⟨texto⟩>    code({su cantidad && su unidad})
+|   |       <⟨texto⟩>{su **nombre**}</⟨texto⟩>    code({su nombre})
+|   |     </⟨pila⟩>
+|   |   </⟨formulario⟩>
+
+
+⟪## Un pasillo:  su nombre, y lo que aún falta comprar en él⟫
+[thing create_type L0]
+| un «"pasillo"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"nombre"» es **texto**
+|   [property define_property_has L1]
+|   | sus «"artículos"» es una lista de **artículos**
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   <⟨pila⟩ separacion=«"xs"»>
+|   |     <⟨encabezado⟩ tamano=«"diminuto"»>{su **nombre**}</⟨encabezado⟩>    code({su nombre})
+|   |     <⟨para⟩ cada artículo en sus artículos />
+|   |   </⟨pila⟩>
+
+
+⟪## La aplicación⟫
+[thing create_one_of_a_kind L0]
+| «lista de la compra» es una **aplicación**
+|   [property define_property_has L1]
+|   | sus «"artículos"» es una lista de **artículos**
+|   |   ⟦// todo lo de la lista, aquí en memoria;  los del ejemplo están en su archivo CSV⟧
+|   [property property_value_getter L1]
+|   | sus «"pasillos"» es
+|   |   ⟦// cada pasillo con algo aún por comprar, una sola vez, de la A a la Z⟧
+|   |   poner **encontrados** a una nueva lista de **pasillos**    ‾value(encontrados) ‾value(una nueva lista de pasillos)
+|   |   [control list_iteration L2]
+|   |   | para **artículo** en (sus **artículos**) ordenados por su **pasillo**    ‾value((sus artículos) ordenados por su pasillo)
+|   |   |   [control if L3]
+|   |   |   | si **comprado** de **artículo** es _no_    ‾value(comprado de artículo)
+|   |   |   |   poner **pasillo** al primer **pasillo** en **encontrados** donde su **nombre** es el **pasillo** del **artículo**    ‾value(pasillo) ‾value(primer pasillo en encontrados donde su nombre es el pasillo del artículo)
+|   |   |   |   [control if L4]
+|   |   |   |   | si **pasillo** no existe    ‾question(pasillo no existe)
+|   |   |   |   |   poner **pasillo** a **un nuevo pasillo** con **nombre** = el **pasillo** del **artículo**    ‾value(pasillo) ‾value(un nuevo pasillo con nombre = el pasillo del artículo)
+|   |   |   |   |   agregar **pasillo** a **encontrados**    ‾value(pasillo) ‾value(encontrados)
+|   |   |   |   agregar **artículo** a los **artículos** del **pasillo**    ‾value(artículo) ‾value(los artículos del pasillo)
+|   |   devolver **encontrados**    ‾value(encontrados)
+
+|   [action to_do_something L1]
+|   | para «"quitar lo comprado"» con título «"Quitar lo comprado"»
+|   |   ⟦// quita de la lista cada artículo marcado⟧
+|   |   quitar **artículos** en sus **artículos** donde su **comprado** es _sí_    ‾value(sus artículos) ‾value(su comprado)
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   <⟨contenedor⟩ texto>
+|   |     <⟨pila⟩>
+|   |       <⟨action⟩ «"quitar lo comprado"» />
+|   |       <⟨para⟩ cada pasillo en sus pasillos />
+|   |     </⟨pila⟩>
+|   |   </⟨contenedor⟩>
+
+
+⟪## Inicio:  cinco cosas que comprar, una ya comprada⟫
+agregar (**un nuevo artículo** con **nombre** _"leche"_, **cantidad** = _2_, **unidad** = _"litros"_, **pasillo** _"Lácteos"_) a los **artículos** de la **lista de** la **compra**    ‾value(un nuevo artículo con nombre "leche", cantidad = 2, unidad = "litros", pasillo "Lácteos") ‾value(los artículos de la lista de la compra)
+agregar (**un nuevo artículo** con **nombre** _"huevos"_, **cantidad** = _12_, **pasillo** _"Lácteos"_) a los **artículos** de la **lista de** la **compra**    ‾value(un nuevo artículo con nombre "huevos", cantidad = 12, pasillo "Lácteos") ‾value(los artículos de la lista de la compra)
+agregar (**un nuevo artículo** con **nombre** _"plátanos"_, **cantidad** = _6_, **pasillo** _"Frutas y verduras"_) a los **artículos** de la **lista de** la **compra**    ‾value(un nuevo artículo con nombre "plátanos", cantidad = 6, pasillo "Frutas y verduras") ‾value(los artículos de la lista de la compra)
+agregar (**un nuevo artículo** con **nombre** _"pan"_, **cantidad** = _1_, **unidad** = _"barra"_, **pasillo** _"Panadería"_) a los **artículos** de la **lista de** la **compra**    ‾value(un nuevo artículo con nombre "pan", cantidad = 1, unidad = "barra", pasillo "Panadería") ‾value(los artículos de la lista de la compra)
+agregar (**un nuevo artículo** con **nombre** _"café"_, **cantidad** = _250_, **unidad** = _"g"_, **pasillo** _"Bebidas"_, **comprado** = _sí_) a los **artículos** de la **lista de** la **compra**    ‾value(un nuevo artículo con nombre "café", cantidad = 250, unidad = "g", pasillo "Bebidas", comprado = sí) ‾value(los artículos de la lista de la compra)
+
+
+⟪## Una prueba⟫
+[action to_do_something L0]
+| para «probar los pasillos»
+|   poner **listado** a **una nueva lista de la compra**    ‾value(listado) ‾value(una nueva lista de la compra)
+|   agregar (**un nuevo artículo** con **nombre** _"leche"_, **pasillo** _"Lácteos"_) a **artículos** de **listado**    ‾value(un nuevo artículo con nombre "leche", pasillo "Lácteos") ‾value(artículos de listado)
+|   agregar (**un nuevo artículo** con **nombre** _"huevos"_, **pasillo** _"Lácteos"_) a **artículos** de **listado**    ‾value(un nuevo artículo con nombre "huevos", pasillo "Lácteos") ‾value(artículos de listado)
+|   agregar (**un nuevo artículo** con **nombre** _"manzanas"_, **pasillo** _"Fruta"_, **comprado** = _sí_) a **artículos** de **listado**    ‾value(un nuevo artículo con nombre "manzanas", pasillo "Fruta", comprado = sí) ‾value(artículos de listado)
+|   el **largo** de **pasillos** de **listado** debería ser _1_    ‾value(el largo de pasillos de listado)
+
+
+⟪## Pruébalo⟫
+⟦// - Marca "leche":  sale de Lácteos, que aún tiene los huevos.⟧
+⟦// - Pulsa "Quitar lo que tengo":  el café se va para siempre.⟧
+⟦// - Dale a un artículo un pasillo propio, "Congelados", y verás un nuevo encabezado.⟧
+⟦//⟧
+⟦// Y ahora:  Lista de la compra, en Ejemplos de la página de inicio, que guarda sus artículos en un archivo CSV.⟧
+
+
+⟪## Dónde guarda el ejemplo sus artículos⟫
+⟦// Los artículos de esta guía viven en memoria:  recarga, y empiezan de nuevo.⟧
+⟦// Lista de la compra los guarda en un archivo CSV, en su propia carpeta:  __data/shopping.csv.⟧
+⟦// Una línea, en su archivo de API, lo dice:⟧
+⟦//       hoja-compra es una hoja en "shopping.csv"⟧
+⟦// y un artículo dice que vive allí:⟧
+⟦//       vive en hoja-compra⟧
+⟦// El servidor de páginas escribe el archivo, cambiando solo las líneas que cambian:  ábrelo en Numbers o Excel y compruébalo.⟧
+⟦// Después de esas líneas, las palabras que ya conoces llegan al archivo:⟧
+⟦//       agregar (un nuevo artículo con ...) a los artículos⟧
+⟦//       cada artículo donde su comprado es no⟧
+⟦//       quitar artículos de los artículos donde su comprado es sí⟧
+⟦// Fichas de Recetas importa ese archivo de API, así que los ingredientes que agrega acaban en el mismo archivo, en la misma lista.⟧
+
+
+⟪## En papel⟫
+⟦// El botón Imprimir de la Lista de la compra ejecuta un paso:⟧
+⟦//       abrir impresión⟧
+⟦// que abre el diálogo Imprimir del navegador solo para la aplicación, no para el editor que la rodea.⟧
+⟦// Su CSS dice qué sale en papel:  solo lo que falta comprar, cada cosa con su casilla para marcar.⟧
+⟦//       @media print {⟧
+⟦//         ui-toolbar, .new-item, .got, .item ui-button { display: none; }⟧
+⟦//       }⟧

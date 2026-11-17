@@ -131,7 +131,7 @@
       "type": "Recorrido",
       "superType": "View",
       "gender": "masculine",
-      "defined": "/Recorrido.es.spell:582-1492"
+      "defined": "/Recorrido.es.spell:582-1635"
     },
     {
       "property": "pasillos",
@@ -148,7 +148,7 @@
     {
       "type": "ListaDeLaCompra",
       "superType": "App",
-      "defined": "/ListaDeLaCompra.es.spell:378-3226"
+      "defined": "/ListaDeLaCompra.es.spell:378-3370"
     },
     {
       "property": "recorrido",
@@ -168,7 +168,7 @@
       "name": "crearla",
       "returns": "nothing",
       "waits": true,
-      "defined": "/ListaDeLaCompra.es.spell:567-1374"
+      "defined": "/ListaDeLaCompra.es.spell:567-1518"
     },
     {
       "syntax": "agregar el artículo nuevo ((de|del) {thisArg:expression})?",
@@ -183,7 +183,7 @@
       "name": "agregar el artículo nuevo",
       "returns": "nothing",
       "title": "Agregar",
-      "defined": "/ListaDeLaCompra.es.spell:1377-1737"
+      "defined": "/ListaDeLaCompra.es.spell:1521-1881"
     },
     {
       "syntax": "quitar lo comprado ((de|del) {thisArg:expression})?",
@@ -199,7 +199,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Quitar lo que ya tengo",
-      "defined": "/ListaDeLaCompra.es.spell:1740-1952"
+      "defined": "/ListaDeLaCompra.es.spell:1884-2096"
     },
     {
       "syntax": "imprimir la lista ((de|del) {thisArg:expression})?",
@@ -214,7 +214,7 @@
       "name": "imprimir la lista",
       "returns": "nothing",
       "title": "Imprimir",
-      "defined": "/ListaDeLaCompra.es.spell:1955-2114"
+      "defined": "/ListaDeLaCompra.es.spell:2099-2258"
     }
   ],
   "codeLines": [
@@ -240,8 +240,8 @@
     206,
     212,
     218,
-    259,
-    266,
-    271
+    267,
+    274,
+    279
   ]
 }

@@ -1,0 +1,49 @@
+# Medidas:  una cantidad en las unidades del cocinero
+// Métrico (gramos y mililitros), o tazas y cucharas:  la misma cantidad, mostrada de cualquier forma.
+// Los tamaños de las unidades son las medidas propias de Spell, p. ej. "1 taza en ml" es 236.6.
+// Los gramos y las cuentas se muestran enteros;  las tazas y cucharas al cuarto más cercano, "1 1/2".
+
+una "medida" es una cosa
+	// Cuánto, y en qué:  lo que muestra un ingrediente, y lo que va en la lista de la compra
+	su "número" es un número
+	su "unidad" es texto
+	su "escrito" es
+		// Como lo escribe un cocinero:  "200 g", "1 1/2 tazas", "2"
+		si su número es indefinido o su número es 0 devolver ""
+		si su unidad es "" devolver escribir su número para un cocinero
+		si su unidad es "tazas" y su número <= 1 devolver (escribir su número para un cocinero) && "taza"
+		devolver (escribir su número para un cocinero) && su unidad
+
+para medir (cantidad como número) en (unidad como texto)
+	// Enteros:  gramos, mililitros, cuentas
+	devolver una nueva medida con número = redondear cantidad, unidad = unidad
+
+para medir (cantidad como número) al cuarto en (unidad como texto)
+	// Al cuarto más cercano:  tazas y cucharas
+	devolver una nueva medida con número = (redondear (cantidad * 4)) / 4, unidad = unidad
+
+para medir (mililitros como número) en cucharas o tazas
+	// La cuchara o taza que tomaría un cocinero
+	si mililitros < (1 cda en ml) devolver medir (mililitros / (1 cdta en ml)) al cuarto en "cdta"
+	si mililitros < (1/4 taza en ml) devolver medir (mililitros / (1 cda en ml)) al cuarto en "cda"
+	devolver medir (mililitros / (1 taza en ml)) al cuarto en "tazas"
+
+para escribir (cantidad como número) para un cocinero
+	// Un número entero, luego un cuarto, un medio o tres cuartos:  1.5 es "1 1/2"
+	poner cuartos a redondear (cantidad * 4)
+	poner entero a (cuartos / 4) como un entero
+	poner resto a cuartos - entero * 4
+	poner parte a ""
+	si resto es 1 poner parte a "1/4"
+	si resto es 2 poner parte a "1/2"
+	si resto es 3 poner parte a "3/4"
+	si parte es "" devolver "" + entero
+	si entero es 0 devolver parte
+	devolver entero && parte
+
+para probar fracciones
+	escribir 1.5 para un cocinero debería ser "1 1/2"
+	escribir 0.25 para un cocinero debería ser "1/4"
+	escribir 200 para un cocinero debería ser "200"
+	el escrito de (medir 250 en cucharas o tazas) debería ser "1 taza"
+	el escrito de (medir 15 en cucharas o tazas) debería ser "1 cda"

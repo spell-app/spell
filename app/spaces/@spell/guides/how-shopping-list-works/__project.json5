@@ -1,0 +1,10 @@
+{
+  "title": "How the Shopping List works",
+  "description": "The Shopping List example's item and its aisles:  a checkbox bound to each item, a list worked out by aisle, and where its CSV file is kept",
+  "imports": [
+    {
+      "path": "/HowShoppingListWorks.spell",
+      "active": true
+    }
+  ]
+}

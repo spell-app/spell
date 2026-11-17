@@ -66,7 +66,6 @@ export class Item extends View {
             {"for "}
             {this.recipe}
           </ui-text>
-          <spacer />
           {core.drawAction(this, "remove", { "icon-only": true, appearance: "tertiary" })}
         </ui-stack>
       </ui-form>
@@ -219,9 +218,9 @@ export class AisleList extends View {
   @drawn draw() {
     return (
       <ui-stack class="aisle-list">
-        {core.drawRead(() => this.aisles, (aisle: Aisle) => core.drawThing(aisle), { none: () => <ui-text color="grey">Nothing left to get</ui-text> })}
+        {core.drawRead(() => this.aisles, (aisle: Aisle) => core.drawThing(aisle), { none: () => <ui-text color="grey">Nothing left to get</ui-text>, failed: () => <ui-text color="grey">{"Can't reach the list just now:  it tries again soon"}</ui-text> })}
         <ui-stack class="got" spacing="xs">
-          {core.whileWaiting(() => core.drawEach(this.got, (item) => core.drawThing(item)))}
+          {core.drawRead(() => this.got, (item: Item) => core.drawThing(item), { failed: () => {} })}
         </ui-stack>
       </ui-stack>
     )
@@ -262,7 +261,15 @@ export class ShoppingList extends App {
 
   /** The first time, with an empty file, a few to start with */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Item)) === 0) {
+    let kept: undefined = undefined
+    try {
+      kept = await core.savedThings(Item)
+    }
+    catch (error) {
+      // The file can't be read just now:  the list says so, and tries again
+      return
+    }
+    if (core.isEmpty(kept)) {
       core.saveThing(new Item({
         name: "milk",
         aisle: "Dairy",
@@ -389,7 +396,7 @@ core.describeAction(ShoppingList, "addTheNewItem", { title: "Add", icon: "plus",
 core.describeAction(ShoppingList, "clearWhatIGot", { title: "Clear what I got", icon: "check", undoneAs: "Clear what I got" })
 core.describeAction(ShoppingList, "printTheList", { title: "Print", icon: "print", undoneAs: "Print" })
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet. */¬¬/* got:  it fades */¬.got {¬  opacity: 0.6;¬}¬¬/* On paper (\`open printing\`):  only what's still to get, by aisle, each with its box to tick */¬@media print {¬  ui-toolbar,¬  .new-item,¬  .got,¬  .item ui-action {¬    display: none;¬  }¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet. */¬¬/* got:  it fades */¬.got {¬  opacity: 0.6;¬}¬¬/* On paper (\`open printing\`):  only what's still to get, by aisle, each with its box to tick */¬@media print {¬  ui-toolbar,¬  .new-item,¬  .got,¬  .item ui-button {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) shoppingList.start()
 // -----------

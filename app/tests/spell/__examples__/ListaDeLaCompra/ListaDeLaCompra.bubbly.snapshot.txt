@@ -113,9 +113,12 @@
 |   |   <⟨pila⟩ class=«"aisle-list"»>
 |   |     <⟨para⟩ cada pasillo en sus pasillos>
 |   |       <⟨vac⟩ío><⟨texto⟩ color=«"gris"»>No falta nada por comprar</⟨texto⟩></⟨vac⟩ío>
+|   |       <⟨fallo⟩><⟨texto⟩ color=«"gris"»>Ahora no se puede leer la lista:  lo vuelve a intentar enseguida</⟨texto⟩></⟨fallo⟩>
 |   |     </⟨para⟩>
 |   |     <⟨pila⟩ separacion=«"xs"» class=«"got"»>
-|   |       <⟨para⟩ cada artículo en su comprado />
+|   |       <⟨para⟩ cada artículo en su comprado>
+|   |         <⟨fallo⟩></⟨fallo⟩>
+|   |       </⟨para⟩>
 |   |     </⟨pila⟩>
 |   |   </⟨pila⟩>
 
@@ -136,8 +139,13 @@
 |   [action create_hook L1]
 |   | al «crearla»
 |   |   ⟦// La primera vez, con el archivo vacío, unos cuantos para empezar⟧
+|   |   poner **guardados** a cada **artículo**    ‾value(guardados) ‾value(cada artículo)
+|   |   [control if_that_fails L2]
+|   |   | si falla
+|   |   |   ⟦// El archivo no se puede leer ahora:  la lista lo dice, y lo vuelve a intentar⟧
+|   |   |   devolver
 |   |   [control if L2]
-|   |   | si no hay **artículos**    ‾value(no hay artículos)
+|   |   | si **guardados** está vacío    ‾question(guardados está vacío)
 |   |   |   agregar (**un nuevo artículo** con **nombre** _"leche"_, **pasillo** _"Lácteos"_, **cantidad** = _2_, **unidad** = _"litros"_) a los **artículos**    ‾value(un nuevo artículo con nombre "leche", pasillo "Lácteos", cantidad = 2, unidad = "litros") ‾value(los artículos)
 |   |   |   agregar (**un nuevo artículo** con **nombre** _"huevos"_, **pasillo** _"Lácteos"_, **cantidad** = _12_) a los **artículos**    ‾value(un nuevo artículo con nombre "huevos", pasillo "Lácteos", cantidad = 12) ‾value(los artículos)
 |   |   |   agregar (**un nuevo artículo** con **nombre** _"plátanos"_, **pasillo** _"Frutas y verduras"_, **cantidad** = _6_) a los **artículos**    ‾value(un nuevo artículo con nombre "plátanos", pasillo "Frutas y verduras", cantidad = 6) ‾value(los artículos)

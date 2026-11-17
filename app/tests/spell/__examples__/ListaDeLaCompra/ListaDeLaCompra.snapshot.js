@@ -185,9 +185,9 @@ export class Recorrido extends View {
 
   draw() {
     return h("es-pila", { class: "aisle-list" },
-      () => core.drawRead(() => this.pasillos, (pasillo) => core.drawThing(pasillo), { none: () => h("es-texto", { color: "gris" }, "No falta nada por comprar") }),
+      () => core.drawRead(() => this.pasillos, (pasillo) => core.drawThing(pasillo), { none: () => h("es-texto", { color: "gris" }, "No falta nada por comprar"), failed: () => h("es-texto", { color: "gris" }, "Ahora no se puede leer la lista:  lo vuelve a intentar enseguida") }),
       h("es-pila", { class: "got", separacion: "xs" },
-        () => core.whileWaiting(() => core.drawEach(this.comprado, (artículo) => core.drawThing(artículo)))
+        () => core.drawRead(() => this.comprado, (artículo) => core.drawThing(artículo), { failed: () => {} })
       )
     )
   }
@@ -217,7 +217,15 @@ export class ListaDeLaCompra extends App {
 
   /** La primera vez, con el archivo vacío, unos cuantos para empezar */
   async create() {
-    if (core.itemCountOf(await core.savedThings(Artículo)) === 0) {
+    let guardados = undefined
+    try {
+      guardados = await core.savedThings(Artículo)
+    }
+    catch (error) {
+      // El archivo no se puede leer ahora:  la lista lo dice, y lo vuelve a intentar
+      return
+    }
+    if (core.isEmpty(guardados)) {
       core.saveThing(new Artículo({
         nombre: "leche",
         pasillo: "Lácteos",

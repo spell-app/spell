@@ -1,0 +1,668 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Receta",
+    "Ingrediente",
+    "Paso",
+    "Medida",
+    "Ficha",
+    "EditorDeReceta",
+    "FilaIngrediente",
+    "FilaPaso",
+    "Recetario",
+    "medir_$cantidad_en_$unidad",
+    "medir_$cantidad_al_cuarto_en_$unidad",
+    "medir_$mililitros_en_cucharas_o_tazas",
+    "escribir_$cantidad_para_un_cocinero",
+    "test_fracciones",
+    "agregar_la_sopa_de_tomate",
+    "agregar_el_dal_de_lentejas_rojas",
+    "agregar_las_tortitas"
+  ],
+  "statements": [
+    {
+      "type": "Receta",
+      "superType": "View",
+      "gender": "feminine",
+      "savedIn": {
+        "place": "recetario",
+        "placeType": "Recetario",
+        "collection": "recetas"
+      },
+      "defined": "/FichasDeRecetas.api.es.spell:610-1120"
+    },
+    {
+      "property": "título",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/FichasDeRecetas.api.es.spell:656-676"
+    },
+    {
+      "property": "raciones",
+      "of": "Receta",
+      "datatype": "number",
+      "defined": "/FichasDeRecetas.api.es.spell:678-782"
+    },
+    {
+      "property": "imagen",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/FichasDeRecetas.api.es.spell:784-908"
+    },
+    {
+      "property": "ingredientes",
+      "of": "Receta",
+      "datatype": "list of ingredientes",
+      "defined": "/FichasDeRecetas.api.es.spell:910-1017"
+    },
+    {
+      "property": "pasos",
+      "of": "Receta",
+      "datatype": "list of pasos",
+      "defined": "/FichasDeRecetas.api.es.spell:1019-1120"
+    },
+    {
+      "property": "total_marcados",
+      "asWritten": "total marcados",
+      "of": "Receta",
+      "datatype": "number",
+      "defined": "/Ficha.es.spell:239-331"
+    },
+    {
+      "syntax": "elegir {thisArg:expression}?",
+      "output": "elegir",
+      "rule": "method_call",
+      "of": "Receta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "elegirla",
+      "returns": "nothing",
+      "defined": "/Ficha.es.spell:334-470"
+    },
+    {
+      "syntax": "editar {thisArg:expression}?",
+      "output": "editar",
+      "rule": "method_call",
+      "of": "Receta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "editar",
+      "returns": "nothing",
+      "defined": "/Ficha.es.spell:473-567"
+    },
+    {
+      "syntax": "agregar los marcados a la lista de la compra ((de|del) {thisArg:expression})?",
+      "output": "agregar_los_marcados_a_la_lista_de_la_compra",
+      "rule": "method_call",
+      "of": "Receta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar los marcados a la lista de la compra",
+      "returns": "nothing",
+      "waits": true,
+      "title": "Agregar a la lista de la compra",
+      "defined": "/Ficha.es.spell:570-1469"
+    },
+    {
+      "type": "Ingrediente",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/FichasDeRecetas.api.es.spell:1122-1757"
+    },
+    {
+      "property": "cantidad",
+      "of": "Ingrediente",
+      "datatype": "number",
+      "defined": "/FichasDeRecetas.api.es.spell:1225-1340"
+    },
+    {
+      "property": "unidad",
+      "of": "Ingrediente",
+      "datatype": "text",
+      "defined": "/FichasDeRecetas.api.es.spell:1342-1430"
+    },
+    {
+      "property": "nombre",
+      "of": "Ingrediente",
+      "datatype": "text",
+      "defined": "/FichasDeRecetas.api.es.spell:1432-1452"
+    },
+    {
+      "property": "pasillo",
+      "of": "Ingrediente",
+      "datatype": "text",
+      "defined": "/FichasDeRecetas.api.es.spell:1454-1532"
+    },
+    {
+      "property": "gramos_taza",
+      "asWritten": "gramos taza",
+      "of": "Ingrediente",
+      "datatype": "number",
+      "defined": "/FichasDeRecetas.api.es.spell:1534-1686"
+    },
+    {
+      "property": "marcado",
+      "of": "Ingrediente",
+      "datatype": "choice",
+      "defined": "/FichasDeRecetas.api.es.spell:1688-1757"
+    },
+    {
+      "property": "cantidad_escalada",
+      "asWritten": "cantidad escalada",
+      "of": "Ingrediente",
+      "datatype": "number",
+      "defined": "/Ingrediente.es.spell:273-332"
+    },
+    {
+      "property": "mostrada",
+      "of": "Ingrediente",
+      "datatype": "Medida",
+      "defined": "/Ingrediente.es.spell:408-1457"
+    },
+    {
+      "type": "Paso",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/FichasDeRecetas.api.es.spell:1759-1831"
+    },
+    {
+      "property": "instrucción",
+      "of": "Paso",
+      "datatype": "text",
+      "defined": "/FichasDeRecetas.api.es.spell:1806-1831"
+    },
+    {
+      "type": "Recetario",
+      "superType": "Place",
+      "place": {
+        "name": "recetario",
+        "kind": "file",
+        "at": "/api/places/spaces/@spell/examples/FichasDeRecetas/__data/recetas.json",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
+      "defined": "/FichasDeRecetas.api.es.spell:534-608"
+    },
+    {
+      "type": "Medida",
+      "superType": "Thing",
+      "gender": "feminine",
+      "defined": "/Medidas.es.spell:358-887"
+    },
+    {
+      "property": "número",
+      "of": "Medida",
+      "datatype": "number",
+      "defined": "/Medidas.es.spell:475-499"
+    },
+    {
+      "property": "unidad",
+      "of": "Medida",
+      "datatype": "text",
+      "defined": "/Medidas.es.spell:501-521"
+    },
+    {
+      "property": "escrito",
+      "of": "Medida",
+      "defined": "/Medidas.es.spell:523-887"
+    },
+    {
+      "syntax": "medir {callArgs:expression} en {callArgs:expression}",
+      "output": "medir_$cantidad_en_$unidad",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "medir (cantidad como número) en (unidad como texto)",
+      "params": [
+        {
+          "name": "cantidad",
+          "datatype": "number"
+        },
+        {
+          "name": "unidad",
+          "datatype": "text"
+        }
+      ],
+      "returns": "Medida",
+      "defined": "/Medidas.es.spell:889-1063"
+    },
+    {
+      "syntax": "medir {callArgs:expression} (al|a el) cuarto en {callArgs:expression}",
+      "output": "medir_$cantidad_al_cuarto_en_$unidad",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "medir (cantidad como número) al cuarto en (unidad como texto)",
+      "params": [
+        {
+          "name": "cantidad",
+          "datatype": "number"
+        },
+        {
+          "name": "unidad",
+          "datatype": "text"
+        }
+      ],
+      "returns": "Medida",
+      "defined": "/Medidas.es.spell:1065-1264"
+    },
+    {
+      "syntax": "medir {callArgs:expression} en cucharas o tazas",
+      "output": "medir_$mililitros_en_cucharas_o_tazas",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "medir (mililitros como número) en cucharas o tazas",
+      "params": [
+        {
+          "name": "mililitros",
+          "datatype": "number"
+        }
+      ],
+      "returns": "Medida",
+      "defined": "/Medidas.es.spell:1266-1627"
+    },
+    {
+      "syntax": "escribir {callArgs:expression} para un cocinero",
+      "output": "escribir_$cantidad_para_un_cocinero",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "name": "escribir (cantidad como número) para un cocinero",
+      "params": [
+        {
+          "name": "cantidad",
+          "datatype": "number"
+        }
+      ],
+      "returns": "text",
+      "defined": "/Medidas.es.spell:1629-2102"
+    },
+    {
+      "syntax": "probar fracciones",
+      "output": "test_fracciones",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "fracciones",
+      "defined": "/Medidas.es.spell:2104-2410"
+    },
+    {
+      "syntax": "agregar la sopa de tomate",
+      "output": "agregar_la_sopa_de_tomate",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/RecetasDeMuestra.es.spell:270-2272"
+    },
+    {
+      "syntax": "agregar el dal de lentejas rojas",
+      "output": "agregar_el_dal_de_lentejas_rojas",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/RecetasDeMuestra.es.spell:2274-4583"
+    },
+    {
+      "syntax": "agregar las tortitas",
+      "output": "agregar_las_tortitas",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/RecetasDeMuestra.es.spell:4585-6513"
+    },
+    {
+      "type": "Ficha",
+      "superType": "App",
+      "defined": "/FichasDeRecetas.es.spell:347-3212"
+    },
+    {
+      "property": "elegida",
+      "of": "Ficha",
+      "datatype": "Receta",
+      "defined": "/FichasDeRecetas.es.spell:373-429"
+    },
+    {
+      "property": "editada",
+      "of": "Ficha",
+      "datatype": "Receta",
+      "defined": "/FichasDeRecetas.es.spell:431-517"
+    },
+    {
+      "property": "comensales",
+      "of": "Ficha",
+      "datatype": "number",
+      "defined": "/FichasDeRecetas.es.spell:519-582"
+    },
+    {
+      "property": "unidades",
+      "classVariable": "Unidades",
+      "of": "Ficha",
+      "enumeration": [
+        "métrico",
+        "tazas"
+      ],
+      "defined": "/FichasDeRecetas.es.spell:584-669"
+    },
+    {
+      "property": "escala",
+      "of": "Ficha",
+      "datatype": "number",
+      "defined": "/FichasDeRecetas.es.spell:671-862"
+    },
+    {
+      "property": "recorrido",
+      "of": "Ficha",
+      "datatype": "Recorrido",
+      "defined": "/FichasDeRecetas.es.spell:864-992"
+    },
+    {
+      "kind": "method",
+      "name": "crearla",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/FichasDeRecetas.es.spell:995-1322"
+    },
+    {
+      "syntax": "mostrar métrico ((de|del) {thisArg:expression})?",
+      "output": "mostrar_métrico",
+      "rule": "method_call",
+      "of": "Ficha",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Unidades",
+      "kind": "method",
+      "name": "mostrar métrico",
+      "returns": "nothing",
+      "title": "Gramos y ml",
+      "defined": "/FichasDeRecetas.es.spell:1343-1467"
+    },
+    {
+      "syntax": "mostrar tazas y cucharas ((de|del) {thisArg:expression})?",
+      "output": "mostrar_tazas_y_cucharas",
+      "rule": "method_call",
+      "of": "Ficha",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Unidades",
+      "kind": "method",
+      "name": "mostrar tazas y cucharas",
+      "returns": "nothing",
+      "title": "Tazas y cucharas",
+      "defined": "/FichasDeRecetas.es.spell:1470-1604"
+    },
+    {
+      "type": "EditorDeReceta",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/EditorDeRecetas.es.spell:245-2035"
+    },
+    {
+      "property": "receta",
+      "of": "EditorDeReceta",
+      "datatype": "Receta",
+      "defined": "/EditorDeRecetas.es.spell:281-343"
+    },
+    {
+      "property": "borrador",
+      "of": "EditorDeReceta",
+      "datatype": "PlaceDraft",
+      "defined": "/EditorDeRecetas.es.spell:345-386"
+    },
+    {
+      "syntax": "guardar {thisArg:expression}?",
+      "output": "guardar",
+      "rule": "method_call",
+      "of": "EditorDeReceta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "guardar",
+      "returns": "nothing",
+      "title": "Guardar cambios",
+      "defined": "/EditorDeRecetas.es.spell:461-645"
+    },
+    {
+      "syntax": "cancelar {thisArg:expression}?",
+      "output": "cancelar",
+      "rule": "method_call",
+      "of": "EditorDeReceta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "cancelar",
+      "returns": "nothing",
+      "defined": "/EditorDeRecetas.es.spell:648-775"
+    },
+    {
+      "syntax": "agregar ingrediente ((de|del) {thisArg:expression})?",
+      "output": "agregar_ingrediente",
+      "rule": "method_call",
+      "of": "EditorDeReceta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar ingrediente",
+      "returns": "nothing",
+      "title": "Agregar un ingrediente",
+      "defined": "/EditorDeRecetas.es.spell:778-917"
+    },
+    {
+      "syntax": "agregar paso ((de|del) {thisArg:expression})?",
+      "output": "agregar_paso",
+      "rule": "method_call",
+      "of": "EditorDeReceta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar paso",
+      "returns": "nothing",
+      "title": "Agregar un paso",
+      "defined": "/EditorDeRecetas.es.spell:920-1031"
+    },
+    {
+      "type": "FilaIngrediente",
+      "superType": "View",
+      "gender": "feminine",
+      "defined": "/EditorDeRecetas.es.spell:2037-3376"
+    },
+    {
+      "property": "ingrediente",
+      "of": "FilaIngrediente",
+      "datatype": "Ingrediente",
+      "defined": "/EditorDeRecetas.es.spell:2170-2204"
+    },
+    {
+      "property": "editor",
+      "of": "FilaIngrediente",
+      "datatype": "EditorDeReceta",
+      "defined": "/EditorDeRecetas.es.spell:2206-2240"
+    },
+    {
+      "syntax": "subir {thisArg:expression}?",
+      "output": "subir",
+      "rule": "method_call",
+      "of": "FilaIngrediente",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "subir",
+      "returns": "nothing",
+      "defined": "/EditorDeRecetas.es.spell:2243-2527"
+    },
+    {
+      "syntax": "quitar {thisArg:expression}?",
+      "output": "quitar",
+      "rule": "method_call",
+      "of": "FilaIngrediente",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "quitar",
+      "returns": "nothing",
+      "defined": "/EditorDeRecetas.es.spell:2530-2644"
+    },
+    {
+      "type": "FilaPaso",
+      "superType": "View",
+      "gender": "feminine",
+      "defined": "/EditorDeRecetas.es.spell:3378-4236"
+    },
+    {
+      "property": "paso",
+      "of": "FilaPaso",
+      "datatype": "Paso",
+      "defined": "/EditorDeRecetas.es.spell:3499-3519"
+    },
+    {
+      "property": "editor",
+      "of": "FilaPaso",
+      "datatype": "EditorDeReceta",
+      "defined": "/EditorDeRecetas.es.spell:3521-3555"
+    },
+    {
+      "syntax": "subir {thisArg:expression}?",
+      "output": "subir",
+      "rule": "method_call",
+      "of": "FilaPaso",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "subir",
+      "returns": "nothing",
+      "defined": "/EditorDeRecetas.es.spell:3558-3828"
+    },
+    {
+      "syntax": "quitar {thisArg:expression}?",
+      "output": "quitar",
+      "rule": "method_call",
+      "of": "FilaPaso",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "quitar",
+      "returns": "nothing",
+      "defined": "/EditorDeRecetas.es.spell:3831-3931"
+    }
+  ],
+  "codeLines": [
+    8,
+    11,
+    17,
+    23,
+    29,
+    35,
+    40,
+    46,
+    52,
+    57,
+    159,
+    163,
+    169,
+    174,
+    180,
+    186,
+    192,
+    198,
+    204,
+    271,
+    274,
+    286,
+    305,
+    306,
+    311,
+    317,
+    326,
+    331,
+    336,
+    374,
+    389,
+    406,
+    469,
+    544,
+    610,
+    614,
+    620,
+    626,
+    632,
+    639,
+    646,
+    652,
+    667,
+    674,
+    759,
+    763,
+    769,
+    774,
+    780,
+    785,
+    789,
+    836,
+    839,
+    844,
+    849,
+    858,
+    889,
+    892,
+    897,
+    902,
+    911
+  ]
+}
