@@ -15,7 +15,8 @@ a folder of the kit `spell`.
     [the kit's AGENTS.md](../AGENTS.md), "The kit" and "CI".
 - Its [package.json](package.json) is a FOLDER MANIFEST, not a package:
   a private workspace of the kit's install, still named `spell-epic`.
-  - It holds the folder's scripts, its settings (`"pageServer"`, `"spellPack"`, `"spellPublish"`), its `epic` bin
+  - It holds the folder's scripts, its settings (`"pageServer"`, `"spellPack"`, `"spellPublish"`), its `epic` bin,
+    its one `spell` command (`"spell": { "commands" }`:  `spell voice check`, [src/cli/commands.ts](src/cli/commands.ts))
     and its dependencies.
   - No `exports`:  the kit's [package.json](../package.json) holds every folder's names ("Imports", below).
 - It stands on the kit's `src/` and on Spell UI (`ui/`), by their import names (WWOD §4), never by a path into
@@ -69,6 +70,7 @@ a folder of the kit `spell`.
     reader, `claude -p` with Sonnet and nothing of the repo, checks a text against a voice (novice by default):
     comprehensible, concise, clear, no agent speak;  each problem quoted with a rewrite;  exit 0 on a pass, 1 on a fail.
     - Its instructions:  [voices/check/prompt.md](voices/check/prompt.md), a folder so it isn't taken for a voice.
+    - `spell voice check` is the same command, under `spell` (epic `epic-engine` J256).
   - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
   - A repo's own house style adds its specifics on top, and wins where they disagree.
 - Working an epic WITHOUT the skills (Codex, or any agent but Claude Code):  run `epic guide` and follow it

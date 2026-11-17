@@ -156,22 +156,23 @@ flowchart BT
   base["spell, the base<br/>server · bundle · commands · wwod · publish · pony · help"]
   lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
+  epic["spell-epic<br/>voice check"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
   app -. "its language hook does their work" .-> lang
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
-  class base,lang,ui,app repo
+  class base,lang,ui,epic,app repo
 ```
 
 _Each folder hands its commands to the base.
-The `epic/` folder adds none:  its tools are `epic`'s._
+The `epic/` folder adds one, `spell voice check`:  its other tools are `epic`'s._
 
 - The base looks at the root's own `package.json`, then each folder's, lowest first (`spellRepos()`):
   `parser/`, `ui/`, `epic/`, `app/`, the root's `workspaces`, the same list in a clone or installed from npm.
   Only a `package.json` with a `"spell"` entry counts.
 - `spell help` lists them in that order, one heading per folder, by its folder's name:
-  `spell:` (the root's own), `parser:`, `ui:`, `app:`.
+  `spell:` (the root's own), `parser:`, `ui:`, `epic:`, `app:`.
 - Names stay plain:  `spell compile`, `spell icon`.
   A word two repos both add goes under EACH one's short name, the repo's name less `spell-`,
   and the bare word, hidden from the help, only says where they went.
@@ -1211,6 +1212,8 @@ epic worktree merge-main
   `epic help <verb>`, or `epic <verb> --help`, shows one's usage, what it does and an example,
   and a group's verbs too (`epic ask create --help`).
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.
+- One verb is a `spell` command too:  `spell voice check` is `epic voice check`, the same code and flags,
+  so a check of text people see sits beside the repo's other checks.
 - The docs pages' tools are `epic`'s too, `epic pages <verb>`;
   `spell-app`'s root scripts reach it as `yarn epic`, and `yarn ask` for `epic ask`.
 - Every verb, by group, with what each takes:  [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md).

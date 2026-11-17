@@ -65,6 +65,7 @@ const INTEGRATION_TESTS = [
   "command/RepoInit.test.ts",
   "command/MultiRepo.test.ts",
   "cli/EpicProgram.test.ts",
+  "cli/commands.test.ts",
   "command/ProtectedBase.test.ts",
   "command/MainMerge.test.ts",
   "command/OneRepo.test.ts",
