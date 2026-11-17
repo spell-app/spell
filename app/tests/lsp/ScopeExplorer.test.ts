@@ -415,7 +415,7 @@ describe("ScopeExplorer scope packs", () => {
     expect(pack.entries.every((entry) => !("children" in entry) && !("members" in entry))).toBe(true)
     const suit = pack.entries.find((entry) => entry.path.endsWith("/property:suit"))!
     expect(suit).toMatchObject({ line: lineOf(CARD_TEXT, SUIT) })
-    const state = pack.entries.find((entry) => /\/type:Card\/property:short.name$/.test(entry.path))!
+    const state = pack.entries.find((entry) => /\/type:Card\/property:shorthand$/.test(entry.path))!
     expect(state.description).toBe(STATE_DESCRIPTION)
     // shown from its file and the compiled output, NOT kept in the pack
     expect(suit).not.toHaveProperty("spell")

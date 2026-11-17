@@ -154,6 +154,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Why:  it stops answering before it lets go of its port.
         `ensure` started the new one while the old one held the port, so the new one took another port,
         and pages on the old one found the server down (epic `airplane`, 2026-10-10).
+    - The main checkout's page server runs on 4747 ONLY (epic `epic-engine` I332):
+      - `PageServer.start()` throws when its port is taken, never falling back to another
+      - `ensure` and `stop` (`PageServer.stop()`) also stop this checkout's server holding 4747 when the pid file
+        names another, then `ensure` waits for 4747 to be free;  something else holding it:  a 409, naming it
+      - one on 4747 the pid file lost, on current code:  `ensure` takes it as the running one
+      - Why:  two servers started at once both ran;  the second wrote the pid file, the first kept 4747 unseen,
+        and every restart after started on a new port (52841, 59537 ... 59931)
   - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
     - 90s without a beat, or its process gone, and it's gone (`isLive()`)
     - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;
