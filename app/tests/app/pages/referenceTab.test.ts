@@ -4,8 +4,9 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
- * The compiled-code pane has a Reference tab (epic `editor` T104, T105):  `<SpellReference>`, tree and details side by side.
- * - Owen:  "it's too wide for that column ... maybe put it in the `Compiled Code` Panel?"
+ * The Program panel's Spell Reference tab (epic `editor` T104, T105, T109, T110):  `<SpellReference>`, tree and details
+ * side by side, the search at the top of the right column.
+ * - Owen:  "Remove `Reference` from the Compiled code pane -- it's also too narrow.  Leave it in the bottom bar."
  * - A thing a property holds reads `Deck "deck"`, a thing's cube its icon;  with no comment of its own, its
  *   description is its type's:  `a Deck of playing cards named "deck"`.
  * - The app's templates in program order, not by name, its tests after them and its constants last;
@@ -21,19 +22,27 @@ const SOLITAIRE = `${EDITOR}edit/@spell/examples/Solitaire`
 /** A row of the reference:  its icon, words and muted words. */
 type Row = { icon: string; label: string; which: string }
 
-/** Open the compiled code, if it isn't, and show its Reference tab. */
+/** Show the Program panel's Spell Reference tab, opening the panel (View › Program Panel) if it isn't. */
 async function showReference(page: Page): Promise<void> {
-  if (!(await page.locator(".CodeOutputPane").count()))
-    await page.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first().click()
-  await page.locator('.CodeOutputTab[data-tab="reference"] [part~=item]').first().click()
-  await page.locator(".CodeOutputPane .SpellReference").waitFor({ timeout: 20_000 })
+  if (!(await page.locator(".ProgramPanel").count())) await toggleProgramPanel(page)
+  await page.locator('.ProgramPanel [data-tab="reference"]').first().click()
+  await page.locator(".ProgramPanel .SpellReference").waitFor({ timeout: 20_000 })
+}
+
+/** View › Program Panel:  shows the panel, or hides it. */
+async function toggleProgramPanel(page: Page): Promise<void> {
+  await page.getByText("View", { exact: true }).first().click()
+  await page.waitForTimeout(500)
+  await page.getByText("Program Panel", { exact: true }).first().click()
+  await page.waitForTimeout(1500)
 }
 
 /** The rows under the reference's row labelled `label` (`This app`, `Solitaire`), each as it shows. */
 function rowsUnder(page: Page, label: string): Promise<Row[]> {
   return page.evaluate((label) => {
-    const parent = [...document.querySelectorAll(".CodeOutputPane .SpellReference ui-tree-item")].find(
-      (row) => row.getAttribute("label") === label
+    const parent = [...document.querySelectorAll(".ProgramPanel .SpellReference ui-tree-item")].find(
+      // a template's row, not a member named after its type (Card's `pile` reads `Pile "pile"`)
+      (row) => row.getAttribute("label") === label && !row.getAttribute("which")?.startsWith('"')
     )
     return [...(parent?.children ?? [])]
       .filter((row) => row.localName === "ui-tree-item")
@@ -59,10 +68,8 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
   }, 120_000)
 
   afterAll(async () => {
-    // the next test file opens with no compiled code, as Owen left it
-    await page?.locator('.CodeOutputTab[data-tab="js/solid"] [part~=item]').first().click()
-    await page?.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first().click()
-    await browser?.close()
+    // the next test file opens with no Program panel, as Owen left it
+    if (page) await toggleProgramPanel(page)
   })
 
   test("lists the app's templates in program order", async () => {
@@ -76,15 +83,33 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
   test("puts the app's tests after its templates, its constants last, and counts nothing", async () => {
     const app = await rowsUnder(page, "This app")
     const kinds = app.map((row) =>
-      row.icon === "fa7-free:vial-circle-check" ? "test" : row.icon === "lock" ? "constant" : "other"
+      row.icon === "fa7-free:vial-circle-check" ? "test" : row.icon === "fa7-free:t" ? "constant" : "other"
     )
     expect(kinds.join(" ")).toMatch(/^(other )+(test )+(constant ?)+$/)
     const counts = await page.evaluate(() =>
-      [...document.querySelectorAll(".CodeOutputPane .SpellReference ui-tree-item[group]")].map((row) =>
+      [...document.querySelectorAll(".ProgramPanel .SpellReference ui-tree-item[group]")].map((row) =>
         row.getAttribute("which")
       )
     )
     expect(counts.every((which) => !which)).toBe(true)
+  })
+
+  test("is titled Spell Reference, and isn't in the compiled code's tabs", async () => {
+    expect(await page.locator('.ProgramPanel [data-tab="reference"]').first().textContent()).toContain(
+      "Spell Reference"
+    )
+    await page.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first().click()
+    await page.locator(".CodeOutputPane").waitFor({ timeout: 10_000 })
+    expect(await page.locator(".CodeOutputPane .SpellReference, .CodeOutputPane [data-tab=reference]").count()).toBe(0)
+    await page.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first().click()
+  })
+
+  test("gives a constant, a word that's its own text, the text icon", async () => {
+    const pile = await rowsUnder(page, "Pile")
+    expect(pile.filter((row) => ["stacked", "vertical"].includes(row.label)).map((row) => row.icon)).toEqual([
+      "fa7-free:t",
+      "fa7-free:t"
+    ])
   })
 
   test("lists Spell's own types in Owen's order", async () => {
@@ -113,9 +138,9 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
         return { left, top }
       }
       return {
-        search: box(".CodeOutputPane .ReferenceDetails > .ReferenceSearch"),
-        details: box(".CodeOutputPane .ReferenceDetails"),
-        tree: box(".CodeOutputPane .SpellReference > ui-tree")
+        search: box(".ProgramPanel .ReferenceDetails > .ReferenceSearch"),
+        details: box(".ProgramPanel .ReferenceDetails"),
+        tree: box(".ProgramPanel .SpellReference > ui-tree")
       }
     })
     expect(boxes.search.left).toBeGreaterThan(boxes.tree.left + 100)
@@ -142,13 +167,13 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
 
   test("says what a held thing is from its type, in the header and under it", async () => {
     await page.evaluate(() => {
-      const row = [...document.querySelectorAll(".CodeOutputPane .SpellReference ui-tree-item")].find(
+      const row = [...document.querySelectorAll(".ProgramPanel .SpellReference ui-tree-item")].find(
         (each) => each.getAttribute("label") === "Deck" && each.getAttribute("which") === '"deck"'
       ) as HTMLElement
       row.scrollIntoView()
       row.shadowRoot!.querySelector<HTMLElement>(".words")!.click()
     })
-    const details = page.locator(".CodeOutputPane .ReferenceDetails")
+    const details = page.locator(".ProgramPanel .ReferenceDetails")
     await expect.poll(() => details.locator("h4").textContent(), { timeout: 8000 }).toMatch(/Deck\s*"deck"/)
     await expect.poll(() => details.textContent(), { timeout: 8000 }).toContain('a Deck of playing cards named "deck"')
   })

@@ -16,7 +16,8 @@ import "./SpellReference.css"
 /****************
  * ### `<SpellReference>`
  * What you can use:  your app's templates and Spell's, with what each holds.
- * - In the Program panel's Reference tab, and the compiled-code pane's (`<CodeOutputPane>`, epic `editor` T105).
+ * - The Program panel's Spell Reference tab:  only there, as the compiled-code pane and the Inspector are too narrow
+ *   for it (epic `editor` T110).
  * - ONE tree (`<ui-tree>`):  This app first, your own templates as the program declares them, its tests after them
  *   and its constants last (`lastTestsThenConstants()`);
  *   then Spell's built-ins;  then each project the app imports, by its name.
@@ -146,6 +147,8 @@ type RowLook = {
  *   says it:  `Deck "deck"`, `Stock Pile "stock"`
  * - a test (`test a new deck`, declared at the top level):  a vial with a check
  * - any other method (`draw solitaire`, `restart the game`):  a circled play, as every action shows
+ * - a constant (`stacked`, `red`, `blue`):  a T, as Spell UI's `<text>` has, since a word Spell knows as a value
+ *   is the text of its own name (`stacked` => `"stacked"`;  T110)
  * - else its kind's icon, its name, then its detail (`score number`, `Card is a TwoSidedView`)
  * - `types`:  every type in the tree, by name (`typesIn()`).
  */
@@ -155,11 +158,14 @@ function rowLookOf(node: ScopeNode, types: ReadonlyMap<string, ScopeNode>): RowL
   if (type) return { icon: THING_ICON, label: typeWordsOf(type.name), which: `"${node.name}"`, type }
   if (isTest(node)) return { icon: TEST_ICON, label: node.name }
   if (node.kind === "method") return { icon: ACTION_ICON, label: node.name }
+  if (node.kind === "constant") return { icon: TEXT_ICON, label: node.name }
   return { icon: SCOPE_ICONS[node.kind], label: node.name, which: node.detail }
 }
 
 /** A test's name:  `test a new deck`, as the language server names one (`ScopeExplorer.methodName()`). */
 const TEST = /^test\b/
+/** A constant's icon:  the T Spell UI's `<text>` shows, a constant's value being text. */
+const TEXT_ICON = "fa7-free:t"
 /** A test's icon, Font Awesome's vial with a check. */
 const TEST_ICON = "fa7-free:vial-circle-check"
 

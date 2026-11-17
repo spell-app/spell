@@ -1,4 +1,4 @@
-import { For, Loading, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
+import { For, Loading, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 import type { EditorView, ViewUpdate } from "@codemirror/view"
 
@@ -13,8 +13,6 @@ import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 import { LazyCodeMirror } from "./LazyCodeMirror"
-import { SpellReference } from "./SpellReference"
-import { on } from "./on"
 
 import "./CodeOutput.css"
 
@@ -54,23 +52,6 @@ const OUTPUT_PREF = "codeOutput"
 editorPrefs.declare(OUTPUT_PREF, { oneOf: [NO_OUTPUT, ...(Object.keys(OUTPUT_TARGETS) as OutputTarget[])] })
 
 const [outputTarget, setOutputTarget] = createSignal<string>(editorPrefs.get<string>(OUTPUT_PREF) || NO_OUTPUT)
-
-/** What the compiled-code pane shows:  the code, or the Reference (`<SpellReference>`, epic `editor` T105). */
-type OutputShows = "code" | "reference"
-
-/** The preference that remembers whether the compiled-code pane shows the code or the Reference. */
-const SHOWS_PREF = "codeOutputShows"
-editorPrefs.declare(SHOWS_PREF, { oneOf: ["code", "reference"] })
-
-const [outputShows, setOutputShows] = createSignal<OutputShows>(
-  editorPrefs.get<string>(SHOWS_PREF) === "reference" ? "reference" : "code"
-)
-
-/** Show the compiled code, or the Reference, in the compiled-code pane;  remembered. */
-function showInOutput(shows: OutputShows): void {
-  setOutputShows(shows)
-  editorPrefs.set(SHOWS_PREF, shows)
-}
 
 /****************
  * ### `CodeOutputShown`
@@ -139,9 +120,6 @@ export function CompiledCodeButton(): JSX.Element {
 /****************
  * ### `<CodeOutputPane>`
  * The compiled code beside the code, read only:  a bar choosing its language, as every header, then the code.
- * - The bar's last tab, Reference, shows what you can use instead, the tree and what's picked side by side
- *   (`<SpellReference>`;  Owen, 2026-11-16, epic `editor` T105:  "it's too wide for that column ... maybe put it in
- *   the `Compiled Code` Panel?"), its search at the top of its right column, not in the bar, where the tabs need the room (T109);  which one shows is remembered (`spellEditor:codeOutputShows`).
  * - The project as `target` writes it, afresh after each compile, with its source map (`project.codeWithMapFor()`).
  * - A click on a line says where in the program it came from (`editor.followed`), and its line follows a click elsewhere.
  * - A target whose writer can't write the project shows why, as a comment, and follows nothing.
@@ -170,8 +148,6 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
     const place = lines()?.placeOfLine(doc.lineAt(selection.main.head).number - 1)
     if (place) editor.followed = { path: place.path, line: place.line, from: "output" }
   }
-  const [filter, setFilter] = createSignal("")
-  const isReference = () => outputShows() === "reference"
   const follower = lineFollower()
   createEffect(
     () => [editor.followed, lines(), output(), written()] as const,
@@ -188,27 +164,13 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
           {(target) => (
             <ui-item
               icon={lookOf(target).icon}
-              class="CodeOutputTab"
-              data-tab={target}
-              selected={!isReference() && props.target === target}
-              onClick={() => {
-                showInOutput("code")
-                CodeOutputShown.set(target)
-              }}
+              selected={props.target === target}
+              onClick={() => CodeOutputShown.set(target)}
             >
               {appTexts.text(lookOf(target).text)}
             </ui-item>
           )}
         </For>
-        <ui-item
-          icon="book"
-          class="CodeOutputTab"
-          data-tab="reference"
-          selected={isReference()}
-          onClick={() => showInOutput("reference")}
-        >
-          {appTexts.text("referenceTab")}
-        </ui-item>
         <ui-icon
           slot="right"
           name="close"
@@ -219,24 +181,7 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
           onClick={() => CodeOutputShown.set(undefined)}
         />
       </ui-toolbar>
-      <Show when={isReference()}>
-        <div class="CodeOutputReference">
-          <SpellReference
-            filter={filter()}
-            search={
-              <ui-input
-                class="ReferenceSearch"
-                size="small"
-                icon="search"
-                aria-label={appTexts.text("referenceSearch")}
-                placeholder={appTexts.text("referenceSearch")}
-                ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
-              />
-            }
-          />
-        </div>
-      </Show>
-      <div class="CodeOutputCode" hidden={isReference()}>
+      <div class="CodeOutputCode">
         <ErrorBoundary onError={(error) => editor.showError(error)}>
           <Loading fallback={<LazyCodeMirror.Loading />}>
             <LazyCodeMirror.CodeMirrorEditor

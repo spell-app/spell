@@ -476,7 +476,7 @@ const APP_TEXTS_ES: AppTextPack = {
   compiledTypeScript: "TypeScript compilado",
   compiledPython: "Python compilado",
   codeOutputClose: "Ocultar el código compilado",
-  referenceTab: "Referencia",
+  referenceTab: "Referencia de Encanto",
   referenceSpell: "Encanto",
   referenceNothing: "Elige algo para ver qué es.",
   referenceShowInCode: "Mostrar en el código",

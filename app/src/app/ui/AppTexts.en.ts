@@ -687,7 +687,7 @@ export const APP_TEXTS = {
   compiledTypeScript: "Compiled TypeScript",
   compiledPython: "Compiled Python",
   codeOutputClose: "Hide the compiled code",
-  referenceTab: "Reference",
+  referenceTab: "Spell Reference",
   // the Reference tab (`<SpellReference>`):  what you can use
   referenceSpell: "Spell",
   referenceNothing: "Pick something to see what it is.",

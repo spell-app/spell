@@ -413,8 +413,9 @@ function SampleBar(): JSX.Element {
  * Debug's panel under the code:  one pane of tabs (`<RunnerPane>`), as VS Code's runner panel has.
  * - Debug Output:  what the program logged, and how compiling and running it went (`<ConsoleViewer>`).
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
- * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search in this header.
- * - At the right, whatever tab shows:  Clear Console, on Debug Output only, the Reference's search, and Close (`onClose`).
+ * - Spell Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search at the top of
+ *   its right column (epic `editor` T109, T110).
+ * - At the right, whatever tab shows:  Clear Console, on Debug Output only, and Close (`onClose`).
  * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`:
  *   a tab remembered from before (Things, Templates, JavaScript, TypeScript, Python) shows Debug Output.
  * - The compiled code isn't here:  it's its own pane, beside the code (View › Compiled Code, `<CodeOutputPane>`).
@@ -435,16 +436,6 @@ export function ProgramPanel(props: { onClose: () => void }) {
           <Show when={tab() === "output"}>
             <Actions.clearConsole iconOnly />
           </Show>
-          <Show when={tab() === "reference"}>
-            <ui-input
-              class="ReferenceSearch"
-              size="mini"
-              icon="search"
-              aria-label={appTexts.text("referenceSearch")}
-              placeholder={appTexts.text("referenceSearch")}
-              ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
-            />
-          </Show>
           <ui-icon
             name="close"
             link=""
@@ -464,7 +455,19 @@ export function ProgramPanel(props: { onClose: () => void }) {
           <TreeRoot showToolbar={false} />
         </Match>
         <Match when={tab() === "reference"}>
-          <SpellReference filter={filter()} />
+          <SpellReference
+            filter={filter()}
+            search={
+              <ui-input
+                class="ReferenceSearch"
+                size="small"
+                icon="search"
+                aria-label={appTexts.text("referenceSearch")}
+                placeholder={appTexts.text("referenceSearch")}
+                ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
+              />
+            }
+          />
         </Match>
       </Switch>
     </RunnerPane>
