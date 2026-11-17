@@ -401,7 +401,7 @@ export const APP_TEXTS = {
   noTests: "No tests -- write one as `to test <something>:`",
 
   ////////////////
-  // ## The project chooser (`ProjectChooser.tsx`, `ProjectDropdown.tsx`)
+  // ## The project chooser (`ProjectChooser.tsx`)
   ////////////////
 
   welcome: "Welcome to Spell!",
