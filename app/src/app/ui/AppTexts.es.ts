@@ -527,10 +527,10 @@ const APP_TEXTS_ES: AppTextPack = {
   notebookTabTitle: "{project} • Cuaderno de Encanto",
   homeInSpanish: "En Español",
   homeEyebrow: "Spell, en vista previa",
-  homeTitle: "Escribe una app en una frase.",
+  homeTitle: "Programas que se pueden leer en voz alta.",
   homeTagline: "Palabras sencillas.  Una app que funciona.",
   homeIntro:
-    "Spell es un lenguaje de programación que se puede leer en voz alta.\nAbre un ejemplo, cambia una frase y mira cómo cambia la app a su lado.",
+    "Con Spell, una app se escribe en frases sencillas.\nAbre un ejemplo, cambia una frase y mira cómo cambia la app a su lado.",
   tryAnExample: "Prueba un ejemplo",
   readFirstSpell: "Lee tu primer spell",
   homeQuoteTitle: "De la Lista de tareas",

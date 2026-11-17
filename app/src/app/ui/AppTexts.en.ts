@@ -420,10 +420,10 @@ export const APP_TEXTS = {
   notebookTabTitle: "{project} • Spell Notebook",
   homeInSpanish: "En Español",
   homeEyebrow: "Spell, in preview",
-  homeTitle: "Write an app in a sentence.",
+  homeTitle: "Programs you can read out loud.",
   homeTagline: "Plain words in.  A working app out.",
   homeIntro:
-    "Spell is a programming language you can read aloud.\nOpen an example, change a sentence, and watch the app change beside it.",
+    "With Spell, an app is written in plain sentences.\nOpen an example, change a sentence, and watch the app change beside it.",
   tryAnExample: "Try an example",
   readFirstSpell: "Read your first spell",
   homeQuoteTitle: "From the Task List",
