@@ -287,6 +287,12 @@ ui-panel.InspectorCard > .InspectorSection {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+/* a property editor that starts with a section's header:  the header right under the card's, no room above it
+   (Owen, epic `editor` I223:  "Don't add space before the top section header");  an untitled band (a thing's own
+   type's fields) or a note first keeps the room, as any first row does (I210) */
+.InspectorSection:has(> ui-property-editor:first-child > ui-property-group:first-child:not(.InspectorUntitled)) {
+  padding-block-start: 0;
+}
 /* A card body's scroll shades are its panel's (`<ui-panel appearance="pane">`, I201, I227):  shown only while there's
    more that way.  Views:  its path line sticks at the top while it's scrolled, so the top shade starts under it */
 .InspectorCard[data-panel="views"] {
