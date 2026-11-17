@@ -639,7 +639,7 @@ describe("SpellLanguageService", () => {
       test("typing a JSX tag, `<div><chi` => spell's own tags:  `children`, its word for `<slot>`, `action` ...", async () => {
         await typed("print <div><chi", (items) => {
           expect(items[0]).toEqual(expect.objectContaining({ label: "children", detail: "spell's word for <slot>" }))
-          expect(labels(items)).toEqual(["children", "action", "context-menu", "divider"])
+          expect(labels(items)).toEqual(["children", "action", "context-menu", "divider", "separator"])
         })
         // a comparison isn't a tag
         await typed("if 1 < 2", (items) => expect(labels(items)).not.toContain("children"))
