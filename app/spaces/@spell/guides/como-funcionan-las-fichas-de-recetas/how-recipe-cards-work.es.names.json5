@@ -1,0 +1,103 @@
+{
+  "types": {
+    "ingredient": {
+      "name": "ingrediente",
+      "gender": "masculine"
+    },
+    "recipe": {
+      "name": "receta",
+      "gender": "feminine"
+    },
+    "recipe card": {
+      "name": "ficha",
+      "gender": "feminine"
+    }
+  },
+  "names": {
+    "amount": "cantidad",
+    "diners": "comensales",
+    "how-recipe-cards-work": "TODO",
+    "ingredients": "ingredientes",
+    "millilitres": "mililitros",
+    "name": "nombre",
+    "recipe cards": "recetario",
+    "scale": "escala",
+    "scaled": "ajustada",
+    "serves": "raciones",
+    "soup": "sopa",
+    "title": "título",
+    "unit": "unidad"
+  },
+  "phrases": {
+    "count the cups in (millilitres as a number)": "contar las tazas en (mililitros como un número)",
+    "draw it": "dibujar eso",
+    "the measures": "las medidas"
+  },
+  "texts": {
+    "Cooking for": "Cocinar para",
+    "g": "g",
+    "ml": "ml",
+    "olive oil": "aceite de oliva",
+    "people": "personas",
+    "ripe tomatoes": "tomates maduros",
+    "tbsp": "cda",
+    "Tomato Soup": "Sopa de tomate",
+    "vegetable stock": "caldo de verduras"
+  },
+  "comments": {
+    "- a recipe holds its ingredients and steps INSIDE it:  lists of things saved nowhere else": "- una receta guarda sus ingredientes y pasos DENTRO:  listas de cosas que no se guardan en ningún otro sitio",
+    "- Add a step list:  a \"step\" with its words, and \"its steps is a list of steps\" on the recipe.": "- Agrega una lista de pasos:  un \"paso\" con sus palabras, y \"sus pasos son una lista de pasos\" en la receta.",
+    "- Change \"Cooking for\" to 2:  every amount halves.": "- Cambia \"Cocinando para\" a 2:  cada cantidad se reduce a la mitad.",
+    "- every amount is worked out from how many are eating:  its amount, times diners over servings": "- cada cantidad se calcula según cuántos comen:  su cantidad, por comensales entre raciones",
+    "- Show the stock in cups:  change its line in \"to draw it\" to say {count the cups in its scaled}.": "- Muestra el caldo en tazas:  cambia su línea en \"para dibujarlo\" para que diga {contar las tazas en su ajustada}.",
+    "- Spell's own measures say how big a cup is:  \"1 cup in ml\" is 236.6": "- las propias medidas de Spell dicen cuánto mide una taza:  \"1 taza en ml\" es 236.6",
+    "- the shopping list is Shopping List's own, imported:  one file, one list": "- la lista de la compra es la de Lista de la Compra, importada:  un archivo, una lista",
+    "{ \"path\": \"@spell/examples/ShoppingList\", \"import\": [\"Item\", \"Aisle\", \"AisleList\"] }": "{ \"path\": \"@spell/examples/ShoppingList\", \"import\": [\"Item\", \"Aisle\", \"AisleList\"] }",
+    "A check": "Una comprobación",
+    "a cup is 236.6 ml, so 1 litre is a little over 4 cups": "una taza son 236.6 ml, así que 1 litro es algo más de 4 tazas",
+    "a cup's size is Spell's own, from its volume units": "el tamaño de una taza es el de Spell, de sus unidades de volumen",
+    "An ingredient, and a recipe that holds them": "Un ingrediente, y una receta que los contiene",
+    "and a recipe says it lives there:": "y una receta dice que vive ahí:",
+    "Cups and millilitres, by Spell's measures": "Tazas y mililitros, con las medidas de Spell",
+    "each recipe with its ingredients and steps inside it, as this guide's recipe holds them.": "cada receta con sus ingredientes y pasos dentro, como los guarda la receta de esta guía.",
+    "for how many are eating": "para cuántos van a comer",
+    "for the recipe's own number of people": "para el número de personas de la propia receta",
+    "Four ideas do the work:": "Cuatro ideas hacen el trabajo:",
+    "how many are eating": "cuántos van a comer",
+    "how much more, or less, than the recipe says": "cuánto más, o menos, de lo que dice la receta",
+    "How Recipe Cards work": "Cómo funcionan las fichas de recetas",
+    "it lives in recipe file": "vive en recetario",
+    "Its shopping list isn't there:  Recipe Cards imports Shopping List's API file, in its project file,": "Su lista de la compra no está ahí:  Fichas de Recetas importa el archivo de API de Lista de la Compra, en su archivo de proyecto,",
+    "kept inside the recipe:  the example's JSON file holds each recipe whole": "guardados dentro de la receta:  el archivo JSON del ejemplo guarda cada receta entera",
+    "One line, in its API file, says so:": "Una línea, en su archivo de API, lo dice:",
+    "Open Recipe Cards, from Examples on the home page, for all of it.": "Abre Fichas de recetas, desde Ejemplos en la página de inicio, para verlo todo.",
+    "Recipe Cards keeps them in a JSON file, in its own folder:  __data/recipes.json.": "Fichas de recetas las guarda en un archivo JSON, en su propia carpeta:  __data/recipes.json.",
+    "recipe file is a json file at \"recipes.json\"": "recetario es un archivo json en \"recipes.json\"",
+    "show it in metric or in cups and spoons, and send the ingredients you pick to the shopping list.": "muéstrala en el sistema métrico o en tazas y cucharas, y envía los ingredientes que elijas a la lista de la compra.",
+    "so the ingredients it adds land in Shopping List's CSV file, and both show the same list.": "así los ingredientes que agrega van al archivo CSV de Lista de la Compra, y ambos muestran la misma lista.",
+    "Start:  the soup's ingredients": "Inicio:  los ingredientes de la sopa",
+    "The app": "La aplicación",
+    "The page server writes the file whole, as plain JSON:  { \"recipes\": [ ... ] },": "El servidor de páginas escribe el archivo entero, como JSON simple:  { \"recipes\": [ ... ] },",
+    "The Recipe Cards example keeps recipes in a JSON file:  pick one, set how many are eating,": "El ejemplo de fichas de recetas guarda las recetas en un archivo JSON:  elige una, indica cuántos comen,",
+    "This guide keeps the first three, with one recipe in memory.": "Esta guía se queda con las tres primeras, con una receta en memoria.",
+    "This guide's recipe lives in memory:  reload, and it starts again.": "La receta de esta guía vive en memoria:  recarga y vuelve a empezar.",
+    "Try it": "Pruébalo",
+    "Where next:  Recipe Cards, from Examples on the home page, with its pictures, its Edit screen and its shopping list.": "Y después:  Fichas de recetas, en Ejemplos de la página de inicio, con sus imágenes, su pantalla de Edición y su lista de la compra.",
+    "Where the example keeps its recipes": "Dónde guarda el ejemplo sus recetas"
+  },
+  "genders": {
+    "ajustada": "feminine",
+    "cantidad": "feminine",
+    "comensal": "masculine",
+    "escala": "feminine",
+    "mililitro": "masculine",
+    "nombre": "masculine",
+    "paso": "masculine",
+    "ración": "feminine",
+    "recetario": "masculine",
+    "sopa": "feminine",
+    "taza": "feminine",
+    "título": "masculine",
+    "unidad": "feminine"
+  }
+}

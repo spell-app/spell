@@ -88,7 +88,7 @@
     {
       "type": "ShoppingList",
       "superType": "App",
-      "defined": "/HowShoppingListWorks.spell:1459-2264"
+      "defined": "/HowShoppingListWorks.spell:1459-2294"
     },
     {
       "property": "items",
@@ -114,7 +114,8 @@
       "kind": "method",
       "name": "clear what I got",
       "returns": "nothing",
-      "defined": "/HowShoppingListWorks.spell:2020-2128"
+      "title": "Clear what I got",
+      "defined": "/HowShoppingListWorks.spell:2020-2158"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -127,7 +128,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowShoppingListWorks.spell:2131-2264"
+      "defined": "/HowShoppingListWorks.spell:2161-2294"
     },
     {
       "syntax": "test the aisles",
@@ -136,7 +137,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the aisles",
-      "defined": "/HowShoppingListWorks.spell:2876-3179"
+      "defined": "/HowShoppingListWorks.spell:2906-3209"
     }
   ],
   "codeLines": [

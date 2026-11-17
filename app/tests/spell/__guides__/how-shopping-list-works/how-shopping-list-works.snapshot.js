@@ -123,7 +123,7 @@ export class ShoppingList extends App {
   }
 }
 export const shoppingList = new ShoppingList()
-core.describeAction(ShoppingList, "clearWhatIGot", { title: "Clear What I Got", undoneAs: "Clear What I Got" })
+core.describeAction(ShoppingList, "clearWhatIGot", { title: "Clear what I got", undoneAs: "Clear what I got" })
 
 core.heading("Start:  five things to buy, one already got")
 //## Start:  five things to buy, one already got

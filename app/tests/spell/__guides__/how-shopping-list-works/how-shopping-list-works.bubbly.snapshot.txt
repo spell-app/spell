@@ -78,7 +78,7 @@
 |   |   return **found**    ‾value(found)
 
 |   [action to_do_something L1]
-|   | to «"clear what I got"»
+|   | to «"clear what I got"» with title «"Clear what I got"»
 |   |   ⟦// every ticked item off the list⟧
 |   |   remove **items** from its **items** where its **got** is _yes_    ‾value(its items) ‾value(its got)
 

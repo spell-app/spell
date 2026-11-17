@@ -59,7 +59,7 @@ shopping list is an app
 				add item to the aisle's items
 		return found
 
-	to "clear what I got"
+	to "clear what I got" with title "Clear what I got"
 		// every ticked item off the list
 		remove items from its items where its got is yes
 

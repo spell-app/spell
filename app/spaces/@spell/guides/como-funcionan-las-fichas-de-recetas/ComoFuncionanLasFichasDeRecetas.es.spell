@@ -1,0 +1,100 @@
+## Cómo funcionan las fichas de recetas
+// El ejemplo de fichas de recetas guarda las recetas en un archivo JSON:  elige una, indica cuántos comen,
+// muéstrala en el sistema métrico o en tazas y cucharas, y envía los ingredientes que elijas a la lista de la compra.
+// Cuatro ideas hacen el trabajo:
+// - una receta guarda sus ingredientes y pasos DENTRO:  listas de cosas que no se guardan en ningún otro sitio
+// - cada cantidad se calcula según cuántos comen:  su cantidad, por comensales entre raciones
+// - las propias medidas de Spell dicen cuánto mide una taza:  "1 taza en ml" es 236.6
+// - la lista de la compra es la de Lista de la compra, importada:  un archivo, una lista
+//
+// Esta guía se queda con las tres primeras, con una receta en memoria.
+// Abre Fichas de recetas, desde Ejemplos en la página de inicio, para verlo todo.
+
+
+## Un ingrediente, y una receta que los contiene
+un "ingrediente" es una vista
+	su "cantidad" es un número
+		// para el número de personas de la propia receta
+	su "unidad" es texto
+	su "nombre" es texto
+	su "ajustada" es su cantidad * la escala de fichas
+		// para cuántos van a comer
+
+	para dibujarlo
+		<pila direccion="horizontal" separacion="sm">
+			<texto negrita>{su ajustada && su unidad}</texto>
+			<texto>{su nombre}</texto>
+		</pila>
+
+una "receta" es una vista
+	su "título" es texto
+	sus "raciones" es un número
+	sus "ingredientes" es una lista de ingredientes
+		// guardados dentro de la receta:  el archivo JSON del ejemplo guarda cada receta entera
+
+	para dibujarla
+		<pila separacion="xs">
+			<encabezado tamano="pequeño">{su título}</encabezado>
+			<para cada ingrediente en sus ingredientes />
+		</pila>
+
+
+## Tazas y mililitros, con las medidas de Spell
+para contar las tazas en (mililitros como un número)
+	// el tamaño de una taza es el de Spell, de sus unidades de volumen
+	devolver mililitros / (1 taza en ml)
+
+
+## La aplicación
+fichas es una aplicación
+	sus "comensales" es un número empezando en 6
+		// cuántos van a comer
+	"sopa" es una nueva receta con título "Sopa de tomate", raciones = 4
+	su "escala" es sus comensales / las raciones de su sopa
+		// cuánto más, o menos, de lo que dice la receta
+
+	para dibujarla
+		<contenedor texto>
+			<pila>
+				<formulario value={eso}>
+					<campo etiqueta="Cocinar para">
+						<entrada name="comensales" type="number" min="1" etiquetado="derecha" etiqueta="personas" />
+					</campo>
+				</formulario>
+				{dibujar su sopa}
+			</pila>
+		</contenedor>
+
+
+## Inicio:  los ingredientes de la sopa
+agregar (un nuevo ingrediente con cantidad = 1000, unidad = "g", nombre "tomates maduros") a los ingredientes de la sopa de fichas
+agregar (un nuevo ingrediente con cantidad = 2, unidad = "cda", nombre "aceite de oliva") a los ingredientes de la sopa de fichas
+agregar (un nuevo ingrediente con cantidad = 500, unidad = "ml", nombre "caldo de verduras") a los ingredientes de la sopa de fichas
+
+
+## Una comprobación
+para probar las medidas
+	// una taza son 236.6 ml, así que 1 litro es algo más de 4 tazas
+	redondear ((contar las tazas en 1000) * 10) debería ser 42
+
+
+## Pruébalo
+// - Cambia "Cocinando para" a 2:  cada cantidad se reduce a la mitad.
+// - Muestra el caldo en tazas:  cambia su línea en "para dibujarlo" para que diga {contar las tazas en su ajustada}.
+// - Agrega una lista de pasos:  un "paso" con sus palabras, y "sus pasos son una lista de pasos" en la receta.
+//
+// Y después:  Fichas de recetas, en Ejemplos de la página de inicio, con sus imágenes, su pantalla de Edición y su lista de la compra.
+
+
+## Dónde guarda el ejemplo sus recetas
+// La receta de esta guía vive en memoria:  recarga y vuelve a empezar.
+// Fichas de recetas las guarda en un archivo JSON, en su propia carpeta:  __data/recipes.json.
+// Una línea, en su archivo de API, lo dice:
+//       recetario es un archivo json en "recetas.json"
+// y una receta dice que vive ahí:
+//       vive en recetario
+// El servidor de páginas escribe el archivo entero, como JSON simple:  { "recipes": [ ... ] },
+// cada receta con sus ingredientes y pasos dentro, como los guarda la receta de esta guía.
+// Su lista de la compra no está ahí:  Fichas de recetas importa el archivo de API de Lista de la compra, en su archivo de proyecto,
+//       { "path": "@spell/examples/ListaDeLaCompra", "import": ["Artículo", "Pasillo", "Recorrido"] }
+// así los ingredientes que agrega van al archivo CSV de Lista de la compra, y ambos muestran la misma lista.
