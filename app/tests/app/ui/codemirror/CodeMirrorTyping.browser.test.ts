@@ -219,6 +219,31 @@ describe("typing Spell in a real CodeMirror editor", () => {
       expect(text(code).split("\n").slice(0, 2)).toEqual([`\tits "face" is`, `\t\t-- the card it draws`])
     })
 
+    describe("a group's head, its comment after a space and tabs (epic `codemirror` I24)", () => {
+      /** Solitaire's card's group of names, as Card.spell writes it. */
+      const NAMES = [`\tgroup "Names" \t\t\t\t-- identifying a card`, `\tits "name" is its rank && "of" && its suit`]
+      const WANTED = [`\tgroup "Names"`, `\t\t-- identifying a card`, NAMES[1]]
+      const dashes = NAMES[0]!.indexOf("--") + 1
+
+      test.each([
+        ["right after the name", 15],
+        ["after the space", 16],
+        ["in the tabs", 18],
+        ["right before the `--`", dashes],
+        ["between its two dashes, as a click on the drawn dash puts it", dashes + 1]
+      ])(
+        "the caret %s:  the comment its first line, a level in, nothing left at the head's end;  one undo",
+        (_, column) => {
+          const code = editorOf(NAMES, 1, column)
+          press("Enter")
+          expect(text(code).split("\n")).toEqual(WANTED)
+          expect(position()).toMatchObject({ lineNumber: 2, column: 3 })
+          undo(code)
+          expect(text(code).split("\n")).toEqual(NAMES)
+        }
+      )
+    })
+
     test("Tab on the comment line moves it alone;  Shift+Tab takes it back", () => {
       const lines = [`\tits "face" is`, `\t\t-- the card it draws`, ...FACE.slice(1)]
       const code = editorOf(lines, 2, 3)

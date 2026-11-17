@@ -1,6 +1,7 @@
+import { spawnSync } from "node:child_process"
 import { existsSync, lstatSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
-import { join } from "node:path"
+import { basename, join, resolve } from "node:path"
 
 import { isProcessAlive } from "spell/server/Heartbeat"
 import { RealPath } from "spell/server/RealPath"
@@ -28,7 +29,8 @@ import { RealPath } from "spell/server/RealPath"
  *     (`transcripts()`, `transcriptOf()`);  a worktree's folder may be a link to its main checkout's
  *     (`SessionFolders.link()`)
  *   - `session-titles/<id>`:  a title waiting for that session's next prompt (`titlesFolder()`)
- *   - `settings.json`:  its settings, the plugins turned on among them (`settings()`, `isPluginEnabled()`)
+ *   - `settings.json`:  its settings, the plugins turned on among them (`settings()`, `isPluginEnabled()`, which reads
+ *     the project's settings, the managed file and the session's command line too)
  * - Reading ONE transcript:  `Transcript`, beside this.
  * - STATIC:  Claude Code's folder is the machine's;  each takes `home` (default `home()`), so a test reads a fixture.
  * - Its position:  node's own modules, and the kit's `RealPath` by its own name, so plain `node` loads it (the hooks,
@@ -56,23 +58,151 @@ export class ClaudeHome {
    * - throws on a file that won't parse:  a caller that must never fail catches it (`isPluginEnabled()`)
    */
   static settings(home = ClaudeHome.home()): ClaudeSettings | undefined {
-    const file = join(home, "settings.json")
+    return ClaudeHome.readSettings(join(home, "settings.json"))
+  }
+
+  /**
+   * Is plugin `name` turned on for a session, from any marketplace, however it was turned on (epic `epic-engine` I318)?
+   * - `superpowers` matches `superpowers@claude-plugins-official` and `superpowers@superpowers-marketplace` alike
+   * - every layer of Claude Code's settings, their `enabledPlugins` merged key by key, the later winning
+   *   (`settingsLayers()`):
+   *   1. the person's own, `<home>/settings.json`
+   *   2. the project's, `<project>/.claude/settings.json`:  how a team shares a plugin
+   *   3. the project's local file, `<project>/.claude/settings.local.json`
+   *   4. the session's `--settings <file>`
+   *   5. the machine's managed settings (`managedSettingsFile()`)
+   *   - a session started with `--setting-sources` reads only the first three it names, as Claude Code does
+   * - and a plugin loaded for the session alone, `claude --plugin-dir <folder>`:  its manifest's name, else the
+   *   folder's (`launchOptions()`)
+   * - `project`:  the folder the session started in;  none, no project layers
+   * - `args`:  the session's command line;  default `sessionArgs()`, a test hands its own
+   * - NEVER throws:  a file that won't read turns nothing on
+   */
+  static isPluginEnabled(
+    name: string,
+    { home = ClaudeHome.home(), project, managed = ClaudeHome.managedSettingsFile(), args }: PluginLookup = {}
+  ): boolean {
+    try {
+      const launch = ClaudeHome.launchOptions(args ?? ClaudeHome.sessionArgs(), project)
+      if (launch.pluginDirs.some((folder) => ClaudeHome.pluginNameOf(folder) === name)) return true
+      const enabled: Record<string, boolean> = {}
+      for (const file of ClaudeHome.settingsLayers({ home, project, managed, launch }))
+        Object.assign(enabled, ClaudeHome.readSettings(file)?.enabledPlugins)
+      return Object.entries(enabled).some(([key, on]) => on === true && key.split("@")[0] === name)
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * The settings files a session reads, the weakest first (`isPluginEnabled()`):  the person's, the project's, its
+   * local file, `--settings`'s, the machine's managed file;  missing ones included.
+   * - `--setting-sources` (`launch.sources`) keeps only the first three it names;  `--settings` and managed always count
+   */
+  static settingsLayers({
+    home = ClaudeHome.home(),
+    project,
+    managed = ClaudeHome.managedSettingsFile(),
+    launch = { pluginDirs: [] }
+  }: {
+    home?: string
+    project?: string
+    managed?: string
+    launch?: LaunchOptions
+  }): string[] {
+    const sources = launch.sources
+    const reads = (source: SettingSource) => !sources || sources.includes(source)
+    return [
+      ...(reads("user") ? [join(home, "settings.json")] : []),
+      ...(project && reads("project") ? [join(project, ".claude", "settings.json")] : []),
+      ...(project && reads("local") ? [join(project, ".claude", "settings.local.json")] : []),
+      ...(launch.settings ? [launch.settings] : []),
+      ...(managed ? [managed] : [])
+    ]
+  }
+
+  /** Settings file `file` as written;  `undefined` when there's none.  Throws on one that won't parse. */
+  static readSettings(file: string): ClaudeSettings | undefined {
     return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as ClaudeSettings) : undefined
   }
 
   /**
-   * Is plugin `name` turned on in Claude Code's settings (`enabledPlugins`), from any marketplace?
-   * - `superpowers` matches `superpowers@claude-plugins-official` and `superpowers@superpowers-marketplace` alike
-   * - only the person's own settings:  a plugin a project's `.claude/settings.json` turns on, or a session's
-   *   `--plugin-dir`, isn't seen
-   * - NEVER throws:  settings that won't read turn nothing on
+   * Where this machine's managed settings are (an organization's policy):  Claude Code's path for the system.
+   * - macOS `/Library/Application Support/ClaudeCode/managed-settings.json`;  Windows
+   *   `C:\Program Files\ClaudeCode\managed-settings.json`;  else `/etc/claude-code/managed-settings.json`
    */
-  static isPluginEnabled(name: string, home = ClaudeHome.home()): boolean {
+  static managedSettingsFile(platform: NodeJS.Platform = process.platform): string {
+    if (platform === "darwin") return "/Library/Application Support/ClaudeCode/managed-settings.json"
+    if (platform === "win32") return "C:\\Program Files\\ClaudeCode\\managed-settings.json"
+    return "/etc/claude-code/managed-settings.json"
+  }
+
+  /**
+   * The command line of the `claude` running this process (a hook, a tool), as `ps` prints it;  `[]` when unknown.
+   * - the session's process:  `$CLAUDE_PID`, which Claude Code gives everything it starts;  else this process's
+   *   parent or grandparent whose program is `claude` (a hook run through a shell)
+   * - split at spaces:  a folder whose path holds one isn't read right
+   * - `ps` only:  on Windows, `[]`
+   * - NEVER throws
+   */
+  static sessionArgs(): string[] {
     try {
-      const enabled = ClaudeHome.settings(home)?.enabledPlugins ?? {}
-      return Object.entries(enabled).some(([key, on]) => on === true && key.split("@")[0] === name)
+      const own = process.env.CLAUDE_PID
+      if (own) return ClaudeHome.argsOf(Number(own))
+      let pid = process.ppid
+      for (let up = 0; up < 2 && pid > 1; up++) {
+        const args = ClaudeHome.argsOf(pid)
+        if (args[0] && basename(args[0]) === "claude") return args
+        pid = Number(ClaudeHome.ps(pid, "ppid=")) || 0
+      }
     } catch {
-      return false
+      // no `ps`:  nothing known
+    }
+    return []
+  }
+
+  /** Process `pid`'s command line, split at spaces;  `[]` when there's no such process. */
+  static argsOf(pid: number): string[] {
+    return ClaudeHome.ps(pid, "args=").split(/\s+/).filter(Boolean)
+  }
+
+  /** What `ps` prints of process `pid`'s `field` (`args=`, `ppid=`), trimmed;  `""` for none. */
+  static ps(pid: number, field: string): string {
+    if (!Number.isInteger(pid) || pid <= 0) return ""
+    const run = spawnSync("ps", ["-ww", "-o", field, "-p", String(pid)], { encoding: "utf8", timeout: 2000 })
+    return run.status === 0 ? run.stdout.trim() : ""
+  }
+
+  /**
+   * What a session's command line `args` says about its settings and plugins:
+   * - `pluginDirs`:  each `--plugin-dir <folder>`, from `cwd` when relative
+   * - `sources`:  `--setting-sources user,project,local`'s list, when given
+   * - `settings`:  `--settings <file>`, when it names a file (not JSON written inline)
+   * - `--flag value` and `--flag=value` alike
+   */
+  static launchOptions(args: string[], cwd = process.cwd()): LaunchOptions {
+    const found: LaunchOptions = { pluginDirs: [] }
+    for (let index = 0; index < args.length; index++) {
+      const [flag, inline] = args[index].split(/=(.*)/s)
+      if (!LAUNCH_FLAGS.has(flag)) continue
+      const value = inline ?? args[++index]
+      if (!value) continue
+      if (flag === "--plugin-dir") found.pluginDirs.push(resolve(cwd, value))
+      else if (flag === "--setting-sources")
+        found.sources = value.split(",").map((source) => source.trim()) as SettingSource[]
+      else if (flag === "--settings" && !value.trimStart().startsWith("{")) found.settings = resolve(cwd, value)
+    }
+    return found
+  }
+
+  /** The name of the plugin in `folder`:  its manifest's (`.claude-plugin/plugin.json`), else the folder's own. */
+  static pluginNameOf(folder: string): string {
+    try {
+      const manifest = join(folder, ".claude-plugin", "plugin.json")
+      const name = existsSync(manifest) ? (JSON.parse(readFileSync(manifest, "utf8")) as { name?: unknown }).name : ""
+      return typeof name === "string" && name ? name : basename(folder)
+    } catch {
+      return basename(folder)
     }
   }
 
@@ -168,6 +298,34 @@ export type ClaudeSettings = {
   /** marketplaces added by hand:  each one's `source`, a folder for a local one */
   extraKnownMarketplaces?: Record<string, { source?: { path?: string } }>
 }
+
+/** `ClaudeHome.isPluginEnabled()`'s options:  where to look;  each defaults to this machine and session. */
+export type PluginLookup = {
+  /** Claude Code's folder;  default `ClaudeHome.home()` */
+  home?: string
+  /** folder the session started in, for its `.claude/` settings;  none, no project layers */
+  project?: string
+  /** the managed settings file;  default `ClaudeHome.managedSettingsFile()` */
+  managed?: string
+  /** the session's command line;  default `ClaudeHome.sessionArgs()` */
+  args?: string[]
+}
+
+/** A settings layer `--setting-sources` can name. */
+export type SettingSource = "user" | "project" | "local"
+
+/** What a session's command line says about settings and plugins (`ClaudeHome.launchOptions()`). */
+export type LaunchOptions = {
+  /** each `--plugin-dir`, absolute */
+  pluginDirs: string[]
+  /** `--setting-sources`' list, when given */
+  sources?: SettingSource[]
+  /** `--settings`' file, when given one */
+  settings?: string
+}
+
+/** The command-line flags `ClaudeHome.launchOptions()` reads. */
+const LAUNCH_FLAGS = new Set(["--plugin-dir", "--setting-sources", "--settings"])
 
 /** `ClaudeHome.liveSessions()`'s options. */
 export type LiveSessionsProps = {

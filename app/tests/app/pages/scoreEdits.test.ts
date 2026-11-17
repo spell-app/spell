@@ -9,6 +9,7 @@ import { EDITOR, SERVING } from "./runningEditor"
  * - Owen:  "Score should be editable".
  * - A one of a kind's changes go to its type (I183), where a value with no starting value was taken for one
  *   the code works out, so it was read only;  now a change runs at once, its note saying it won't be kept.
+ * - Its not-saved icon shows on hover, and the note is a small line under its box (I244).
  * - A real getter stays read only:  a card's Is a face card.
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
@@ -77,6 +78,37 @@ describe.skipIf(!SERVING)("the app's stored values in the Inspector", { timeout:
     await page.keyboard.press("Enter")
     await page.waitForTimeout(1000)
     expect(await score()).toMatchObject({ score: 42, field: "42" })
+  })
+
+  test("Score says it won't be kept:  its not-saved icon on hover, its note under it, small", async () => {
+    // after the change above (epic `editor` I244)
+    const property = page.locator('ui-property[name="score"]').first()
+    const icon = () =>
+      property.evaluate((element) => {
+        const unsaved = element.shadowRoot?.querySelector(".field > .row > .unsaved")
+        return { shows: !!unsaved, opacity: unsaved ? getComputedStyle(unsaved).opacity : "" }
+      })
+    expect((await icon()).shows, "Score:  a not-saved icon").toBe(true)
+    await property.hover()
+    await page.waitForTimeout(500)
+    expect((await icon()).opacity, "Score's not-saved icon:  shows on hover").toBe("1")
+    const note = await property.evaluate((element) => {
+      const shadow = element.shadowRoot!
+      const line = shadow.querySelector(".field > .note")
+      const control = shadow.querySelector(".field > .row ~ .control") ?? shadow.querySelector(".field .control")
+      const label = shadow.querySelector(".field > .row .label")
+      return {
+        text: line?.textContent ?? "",
+        isBelow: !!line && !!control && line.getBoundingClientRect().top >= control.getBoundingClientRect().bottom,
+        size: line ? parseFloat(getComputedStyle(line).fontSize) : 0,
+        labelSize: label ? parseFloat(getComputedStyle(label).fontSize) : 0
+      }
+    })
+    expect(note.text).toMatch(/won.t be saved/)
+    expect(note.isBelow, "the note:  under Score's box").toBe(true)
+    expect(note.size, "the note:  smaller than the label").toBeLessThan(note.labelSize)
+    const atTop = await page.evaluate(() => document.querySelectorAll(".InspectorNotSaved").length)
+    expect(atTop, "no note at the card's top").toBe(0)
   })
 
   test("a card's Is a face card, a getter, stays read only", async () => {

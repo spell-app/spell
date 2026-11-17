@@ -341,24 +341,25 @@ export class CodeMirrorTyping {
 
 /**
  * Enter before a comment after code (`its "face" is\t\t-- the card it draws`):  the comment goes on its own line,
- * at the level of the body under that line, so the body still reads as its body (I155, I161).
+ * at the level of the body under that line, so the body still reads as its body (I155, I161, I24).
  * - The tabs and spaces round the caret go:  none left at the end of the code's line, none before the comment.
+ * - The caret anywhere in the gap before the comment, or inside its `--`, drawn as one dash (I24):
+ *   `LSP.SpellTyping.commentSplitAt()`.
  * - Returns whether it did:  `false` leaves the key to Spell's Enter rules.
  */
 function enterBeforeComment(view: EditorView): boolean {
   const { state } = view
   const caret = state.selection.main.head
   const line = state.doc.lineAt(caret)
-  const before = state.sliceDoc(line.from, caret)
-  const after = state.sliceDoc(caret, line.to)
-  if (!LSP.SpellKeywords.CODE_BEFORE.test(before) || !LSP.SpellKeywords.COMMENT_AFTER.test(after)) return false
+  const split = LSP.SpellTyping.commentSplitAt(line.text, caret - line.from)
+  if (!split) return false
   const indent = LSP.SpellTyping.commentIndent(state.doc.toJSON(), line.number - 1, indentSettingsOf(state))
-  const from = line.from + before.trimEnd().length
+  const from = line.from + split.codeEnd
   return write(
     view,
     { from: line.number, to: line.number },
     {
-      changes: { from, to: line.to - after.trimStart().length, insert: state.lineBreak + indent },
+      changes: { from, to: line.from + split.commentStart, insert: state.lineBreak + indent },
       selection: { anchor: from + 1 + indent.length },
       scrollIntoView: true,
       userEvent: "input"

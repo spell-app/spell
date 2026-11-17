@@ -1499,6 +1499,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
     "--protected-base":
       "the base branch takes only pull requests:  put the two files on a new branch, epic-setup, and open one",
+    "--superpowers":
+      "put superpowers' stand-aside words in the repo's AGENTS.md, without asking (else asked when superpowers is on)",
     "--no-server": "don't start the epic server",
     "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",

@@ -509,10 +509,13 @@ function originOfProperty(thing: object, name: string, scope: InspectorScope): P
     }
     if (start) return { kind: "here", from: appTexts.text("inspectorOriginAll", { type: start.typeName }) }
     if (says) return { kind: WORKED_OUT, from: appTexts.text("inspectorOriginLine"), action: SHOW_CODE }
-    // a one of a kind's "all" is itself (the app's score):  changed as it runs, its note saying it won't be kept
-    // (epic `editor` I242);  for many, it would change only the one selected, so it stays read only
-    const kind = InspectorWrites.isOneOfAKind(thing) ? "inherited" : WORKED_OUT
-    return { kind, from: appTexts.text("inspectorOriginNoStart") }
+    // a one of a kind's "all" is itself (the app's score):  changed as it runs, its not-saved icon saying it won't
+    // be kept (epic `editor` I242, I244);  for many, it would change only the one selected, so it stays read only
+    const from = appTexts.text("inspectorOriginNoStart")
+    if (InspectorWrites.isOneOfAKind(thing)) {
+      return { kind: "inherited", from, unsaved: appTexts.text("inspectorNotSavedNoStart") }
+    }
+    return { kind: WORKED_OUT, from }
   }
   // this one
   if (!InspectorWrites.hasOwnLine(thing)) {

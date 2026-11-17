@@ -107,6 +107,7 @@ export const EDITOR_NAMES = {
       spellMenu: { kind: "part", words: "spell menu", for: "Spell's menu" },
       projectMenu: { kind: "part", words: "project menu", for: "the project's menu" },
       appMenus: { kind: "part", words: "app menus", for: "File, Edit, View, Run and Help" },
+      draft: { kind: "part", words: "draft", for: "Draft, Publish and Discard, while you have drafts" },
       modeButtons: { kind: "part", words: "mode buttons", for: "Run and Edit" },
       tools: { kind: "part", words: "tools", for: "Add, the Inspector's menu, Restart and the theme" },
       you: { kind: "part", words: "you", for: "the person's own menu" }

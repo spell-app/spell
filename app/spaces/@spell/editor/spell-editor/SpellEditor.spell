@@ -159,6 +159,8 @@ an "editor bar" is a view
 		// The project's menu:  its name, opening the project menu
 	its "app menus" is an editor part
 		// File, Edit, View, Run and Help, each opening its menu
+	its "draft" is an editor part
+		// Draft, Publish and Discard, one pill, after Help, while you have drafts of the project
 	its "mode buttons" is an editor part
 		// Run and Edit, then in Edit the code's icon, the compiled code's, Inspect app and Add
 	its "tools" is an editor part
@@ -172,6 +174,7 @@ an "editor bar" is a view
 				{draw its spell menu}
 				{draw its project menu}
 				{draw its app menus}
+				{draw its draft}
 				<item class="spring no-border"/>
 			</menu>
 			<menu position="left" class="third">

@@ -258,6 +258,7 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             <slot name={this.slotForName("hint")}>{this.hintText}</slot>
           </div>
         </Show>
+        {this.controlEnd()}
         <Show when={this.errors.length}>
           <div class={CLASSES.error} part={this.partForName("error")} role="alert">
             <For each={this.errors}>{(message) => <div class={UIT.MESSAGE}>{message}</div>}</For>
@@ -265,6 +266,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
         </Show>
       </div>
     )
+  }
+
+  /** What a subclass adds under the control, after the hint and before the errors:  nothing here. */
+  protected controlEnd(): JSX.Element {
+    return undefined
   }
 
   /** What a subclass adds at the label row's far end, before the hint:  nothing here. */

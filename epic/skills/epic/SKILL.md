@@ -965,6 +965,8 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
       (epic `epic-engine` P19:  about 45MB a session, not 170)
     - the plugin's `Stop` hook starts it at each turn's end (`asyncRewake`, epic `epic-engine` I144):  nothing to arm
       - Claude Code starts plugin MONITORS only in a terminal session, never in VS Code's panel
+    - never in a scripted `claude -p` (CI, an agent harness):  it ends at once there, as Claude Code's
+      `CLAUDE_CODE_SESSION_ATTENDED` is `0`;  `claude -p` waits for every session-start hook (epic `epic-engine` I319)
     - `/epic review`'s `epic inbox watch` takes the inbox over;  once that session's `wait` stops for good, the
       monitor takes it back within about 90s
   - it prints NOTHING until the person sends;  then ONE line, `📬 <epic>:  taking your Send ... (3 marks:  J149

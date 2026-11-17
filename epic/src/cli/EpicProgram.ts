@@ -676,7 +676,8 @@ export class EpicProgram {
       )
       .usage(
         "[--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote] " +
-          "[--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] " +
+          "[--public] [--host github|gitlab] [--protected-base] [--superpowers] [--no-plugin] [--no-commit] [--no-server] " +
+          "[--dry-run] " +
           "[--json]"
       )
       .addHelpText("after", INIT_HELP)
@@ -1193,6 +1194,8 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
                        protected):  says what a Maintainer runs, and epic init again finishes it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
+  AGENTS.md            superpowers' stand-aside words, a marked block, when superpowers is on here and you say
+                       yes (--superpowers:  without asking);  kept current once there;  never --local
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
   your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
                        with the plans, in the epic repo's people/
@@ -1218,6 +1221,11 @@ again stays local.  Refused where the base branch tracks .epic/config.json5 alre
 --protected-base:  the base branch takes only pull requests (baseBranchProtected in the config).  Without it,
 epic init asks GitHub or GitLab, with its command (gh, glab) logged in and a remote there, and says in one line when
 it found so.
+
+--superpowers puts the superpowers plugin's stand-aside words (epic guide superpowers) in the repo's AGENTS.md, which
+every session reads, however superpowers is turned on.  Without it, epic init asks in a terminal when superpowers is
+on for this repo (your settings, the project's, or the managed ones), and takes yes anywhere else;  a block there
+already is kept current with the guide.  Never with --local.
 
 --host github|gitlab:  where the code is hosted (codeHost in the config).  Left out, it's read off the origin
 remote's address;  for an address that doesn't say (git.acme.com), epic init asks in a terminal, and with no

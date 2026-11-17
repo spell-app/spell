@@ -31,6 +31,8 @@ import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
  *   - its parse as a block:  each line's rule, which `SP.BubblyPresentation` says how to present
  *     (a band or not, which parts are inputs, a block for a control line)
  *   - its indent:  what's under what, so a line that doesn't parse still sits where it should
+ *   - a line that doesn't parse alone, for a name another file declares (`if the stock is empty`):
+ *     its block from its first word, as its project's parse draws it (`shapeOf()`;  epic `codemirror` I23)
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
  * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so do the app's code editor (epic `codemirror` P3) and VS Code (P51).
@@ -98,7 +100,7 @@ export class BubblyLayout {
 
   private constructor(
     private readonly text: string,
-    parser: SP.SpellParser,
+    private readonly parser: SP.SpellParser,
     parsed?: P.Match
   ) {
     const { words } = parser.language ?? SP.Language.default
@@ -424,6 +426,18 @@ export class BubblyLayout {
         continue
       }
       const statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
+      // a head that didn't parse, for a name declared elsewhere:  its shape from its first word (`shapeOf()`)
+      const shape = statement?.rule.name === PARSE_ERROR_RULE ? this.shapeOf(line) : undefined
+      if (shape && line.children.length) {
+        if (shape.isControl) {
+          nodes.push(this.control(line, shape.rule, level, inSteps))
+          continue
+        }
+        if (shape.band && !inSteps) {
+          nodes.push(this.block(line, statement!, shape.band, line.children, level, shape.rule))
+          continue
+        }
+      }
       const row = statement && BubblyPresentation.for(statement.rule)
       const band = statement && BubblyRoles.of(statement.rule).band
       // a head going on onto the lines under it (`if its rank > 1` then `and its rank < 5`):  one head
@@ -442,7 +456,7 @@ export class BubblyLayout {
         continue
       }
       if (statement && row?.isControl && line.children.length) {
-        nodes.push(this.control(line, statement, level, inSteps))
+        nodes.push(this.control(line, statement.rule.name ?? "", level, inSteps))
         continue
       }
       nodes.push(this.lineOf(line, { depth }))
@@ -472,19 +486,23 @@ export class BubblyLayout {
     }
   }
 
-  /** A declaration:  its head, then what's under it. */
+  /**
+   * A declaration:  its head, then what's under it.
+   * - `rule`:  the rule its head would have matched, for a head that didn't parse (`shapeOf()`)
+   */
   private block(
     line: SourceLine,
     statement: P.Match,
     partOfSpeech: BubblyPartOfSpeech,
     under: SourceLine[],
-    level: number
+    level: number,
+    rule = statement.rule.name ?? ""
   ): BubblyBlock {
     const row = BubblyPresentation.for(statement.rule) ?? {}
     const roles = BubblyRoles.of(statement.rule)
     return {
       kind: "block",
-      rule: statement.rule.name ?? "",
+      rule,
       partOfSpeech,
       isGroup: !!row.isGroup,
       level,
@@ -495,13 +513,13 @@ export class BubblyLayout {
 
   /**
    * A control line with steps under it (`if`, `for each`):  a block in the light grey of control lines,
-   * its line plain on its band, its steps its body.
+   * its line plain on its band, its steps its body;  `rule`, the one it matched.
    * - No scope of its own:  a name it introduces (a loop's `card`) is the enclosing declaration's.
    */
-  private control(line: SourceLine, statement: P.Match, level: number, inSteps: boolean): BubblyBlock {
+  private control(line: SourceLine, rule: string, level: number, inSteps: boolean): BubblyBlock {
     return {
       kind: "block",
-      rule: statement.rule.name ?? "",
+      rule,
       partOfSpeech: "control",
       isGroup: false,
       level,
@@ -509,6 +527,64 @@ export class BubblyLayout {
       body: this.layout(line.children, { depth: 0, level: level + 1, inSteps })
     }
   }
+
+  /**
+   * The shape a line that didn't parse would have had, from its first word:  a control line or a declaration's head,
+   * so it draws as its project's parse draws it (epic `codemirror` I23).
+   * - Why:  laid out from its text alone, a line naming what another file declares (`the stock`, `moving a card`)
+   *   doesn't parse, so `if the stock is empty` lost its block and its foot, and its height with them.
+   * - The statement rules whose syntax starts with that word (`P.Sequence.firstWords`), in the parser's language:
+   *   - one of them a control line (`if`, `for`, `repeat`), and none a declaration:  a control line
+   *   - all of them declarations with one part of speech (`after`, `when`):  that declaration
+   *   - else, a word that starts steps too (`to`, `a`, `the`):  `undefined`, a step
+   *   - EXCEPT a type's name alone, `a card`, `a two sided view` (its article `reopen_type`'s first word):
+   *     reopening a type declared elsewhere, a thing's head
+   * - Used only for a line with lines under it:  a line alone stays a step.
+   */
+  private shapeOf(line: SourceLine): LineShape | undefined {
+    const words = this.text.slice(line.start, this.commentStart(line))
+    const word = /^[\p{L}]+/u.exec(words)?.[0]
+    if (!word) return undefined
+    const shape = BubblyLayout.shapesFor(this.parser).get(word)
+    if (shape) return shape
+    const reopen = this.parser.rules[REOPEN_TYPE_RULE]
+    const articles = reopen instanceof P.Group ? reopen.rules : reopen ? [reopen] : []
+    const isArticle = articles.some((rule) => rule instanceof P.Sequence && rule.firstWords?.includes(word))
+    return isArticle && TYPE_NAME_ALONE.test(words.trimEnd()) ? { rule: REOPEN_TYPE_RULE, band: "thing" } : undefined
+  }
+
+  /** Where `line`'s comment starts, or its end:  `a card  -- play the card on click`. */
+  private commentStart(line: SourceLine): number {
+    const comment = this.spans.find(
+      (span) => span.kind === "comment" && span.start >= line.start && span.start < line.end
+    )
+    return comment?.start ?? line.end
+  }
+
+  /** Each first word's shape (`shapeOf()`), for `parser`'s statements:  worked out once a parser. */
+  private static shapesFor(parser: SP.SpellParser): Map<string, LineShape | undefined> {
+    let shapes = BubblyLayout.shapes.get(parser)
+    if (shapes) return shapes
+    const byWord = new Map<string, P.Rule[]>()
+    const flatten = (rule: P.Rule): P.Rule[] => (rule instanceof P.Group ? rule.rules.flatMap(flatten) : [rule])
+    const statements = parser.rules[STATEMENT]
+    for (const rule of statements ? flatten(statements) : [])
+      for (const word of rule instanceof P.Sequence ? (rule.firstWords ?? []) : [])
+        byWord.set(word, [...(byWord.get(word) ?? []), rule])
+    shapes = new Map()
+    for (const [word, rules] of byWord) {
+      const control = rules.find((rule) => BubblyPresentation.for(rule)?.isControl)
+      const bands = rules.map((rule) => BubblyRoles.of(rule).band)
+      if (control && !bands.some(Boolean)) shapes.set(word, { rule: control.name ?? "", isControl: true })
+      else if (!control && bands.every((band) => band && band === bands[0]))
+        shapes.set(word, { rule: rules[0]!.name ?? "", band: bands[0]! })
+    }
+    BubblyLayout.shapes.set(parser, shapes)
+    return shapes
+  }
+
+  /** `shapesFor()`'s, by parser. */
+  private static readonly shapes = new WeakMap<SP.SpellParser, Map<string, LineShape | undefined>>()
 
   /** Does `line` declare a group? */
   private isGroupLine(line: SourceLine): boolean {
@@ -931,6 +1007,9 @@ type Paint = BubblyPieceKind
 /** A stretch the parse paints over the spans, `order` low first;  `overWordsOnly`:  only over Spell's own words. */
 type Overlay = { start: number; end: number; kind: BubblyPieceKind; order: number; overWordsOnly?: boolean }
 
+/** What a line that didn't parse is, by its first word (`shapeOf()`):  a control line, or a declaration's head. */
+type LineShape = { rule: string; isControl?: true; band?: BubblyPartOfSpeech }
+
 /** Where `BubblyLayout.layout()` lays lines out. */
 type LayoutPlace = { depth: number; level: number; inSteps?: boolean }
 
@@ -963,6 +1042,15 @@ type SourceLine = {
 
 /** The rule every line of a block matches:  its first child past a trailing comment is the line's statement. */
 const LINE_RULE = "line"
+
+/** The rule a line no other rule could read matches. */
+const PARSE_ERROR_RULE = "parse_error"
+
+/** The rule that reopens a type declared elsewhere, `a card`. */
+const REOPEN_TYPE_RULE = "reopen_type"
+
+/** An article and a name, nothing else:  `a card`, `a two sided view`. */
+const TYPE_NAME_ALONE = /^[\p{L}]+( +[\p{L}]+)+$/u
 
 /** The rule of a comment at a line's end. */
 const COMMENT_RULE = "comment"
