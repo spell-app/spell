@@ -273,7 +273,6 @@ const APP_TEXTS_ES: AppTextPack = {
   snapshotSave: "Guardar",
   snapshotRetake: "Repetir",
   snapshotTheme: "Cambiar tema",
-  snapshotRotate: "Girar",
   snapshotLight: "Claro",
   snapshotDark: "Oscuro",
   snapshotFrame: "La imagen de la tarjeta:  muévela con las flechas, cambia su tamaño con + y -",

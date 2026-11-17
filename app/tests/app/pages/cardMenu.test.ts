@@ -175,7 +175,8 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
     await expect.poll(() => app.locator("html").getAttribute("class")).toContain("ui-dark")
     expect(await page.locator("html").getAttribute("data-spell-theme")).toBe(editorTheme)
     // Rotate:  on its side, the app as wide as a phone is long
-    await page.locator(".AppSnapshotRotate").click()
+    // the device's own Rotate, in its bottom edge
+    await page.locator('.AppSnapshot [part~="rotate"]').click()
     await expect.poll(screenSize).toEqual([844, 390])
     await page.locator(".AppSnapshotGo").click()
     await page.waitForSelector(".AppSnapshotFrame", { timeout: 20_000 })

@@ -11,17 +11,21 @@ import "./AppSnapshot.css"
 
 /****************
  * ### `<AppSnapshot>`
- * A dialog to update a project's card picture (epic `mockup` T47, T49):  a phone floating over the dimmed page, its app
- * running on its screen;  a snapshot of it, then that cropped to the card's shape.
- * - No dialog box round it:  the phone is all there is, its buttons in its thick bottom edge (`basic` modal).
+ * A dialog to update a project's card picture (epic `mockup` T47, T49, P25):  a phone floating over the dimmed page, its
+ * app running on its screen;  a snapshot of it, then that cropped to the card's shape.
+ * - The phone is Spell UI's `<ui-device modal>`:  no dialog box round it, its buttons in its thick bottom edge.
+ *   - Its Rotate is the device's own;  its phone / tablet / desktop switch is off:  a card's picture is a phone's.
+ *   - Escape, Cancel and the dimmer are the device's modal's, as is the focus kept inside it.
  * - Playing:  the app runs on the phone's screen, the runner on its own (`runnerUrl`), for as long as the person likes.
- *   - Its screen is a phone's, 390 by 844 (less, in a short window);  Rotate turns it on its side, 844 by 390
- *     (narrower, in a narrow window), and the app draws itself again at that width.
+ *   - Its screen is a phone's, 390 by 844, drawn smaller in a short window;  Rotate turns it on its side, 844 by 390,
+ *     and the app draws itself again at that width.
  *   - Change theme:  the app in another of Spell's themes, light or dark, at once.
  *     Only for the picture:  the project and the editor keep theirs (`wearTheme()`).
  *   - The app sits on its theme's page colour (`APP_ALONE_CSS`), so the picture has the theme's background, not white.
  *   - "Snapshot" takes it.
  * - Cropping:  the snapshot in the screen's place, a frame of the card's shape (16 by 9) over it, the rest dimmed.
+ *   - Its place and size are in the screen's own CSS pixels (390 wide upright), whatever the device's scale on the page:
+ *     a pointer's move is divided by that scale (`screenScale()`).
  *   - Dragged, or moved with the arrow keys (Shift for bigger steps).
  *   - Resized by its corners, or `+` / `-`:  always 16 by 9, never bigger than the snapshot, and never so small the
  *     picture would be blown up past `SOFTEST` (`smallestWidth()`).
@@ -30,7 +34,7 @@ import "./AppSnapshot.css"
  * - The picture is the framed part alone, the card's size (`PICTURE_WIDTH`), as the home page's other pictures are
  *   (`yarn examples:readme --thumbnails`).
  * - Cancel or Escape, at any step:  nothing is saved.
- * - HOW IT SNAPSHOTS:  the browser's own screen capture of this tab (`captureOf()`), cut to the phone's screen;
+ * - HOW IT SNAPSHOTS:  the browser's own screen capture of this tab (`captureOf()`), cut to the device's screen alone;
  *   the browser asks the person first, each time.
  *   - Faithful:  it's the pixels on screen, every shadow root and style sheet as drawn.
  *   - Nothing in the kit draws a page into a picture in the browser;  the headless screenshot the README's pictures
@@ -38,14 +42,15 @@ import "./AppSnapshot.css"
  * - Open one with `openAppSnapshot()`;  the editor's `updateSnapshot()` saves what it answers.
  ****************/
 export function AppSnapshot(props: AppSnapshotProps) {
-  let modal!: HTMLElement & { visible: boolean }
+  let device!: HTMLElement & { visible: boolean }
   let screen!: HTMLIFrameElement
+  /** The app's box, filling the device's screen:  its size is the screen's own, in CSS pixels, unscaled. */
+  let screenBox!: HTMLElement
   let answer: Uint8Array | undefined
-  /** The phone's screen's size on screen when the snapshot was taken, in CSS pixels:  the snapshot's, shown. */
+  /** The phone's screen's own size when the snapshot was taken, in CSS pixels (unscaled):  the crop's units. */
   let shotSize = { width: 0, height: 0 }
   const [shot, setShot] = createSignal<HTMLCanvasElement>()
   const [frame, setFrame] = createSignal<CropFrame>({ left: 0, top: 0, width: 0 })
-  const [isLandscape, setLandscape] = createSignal(false)
   const [look, setLook] = createSignal<AppLook>()
   const [themes, setThemes] = createSignal<readonly string[]>([])
   const [hint, setHint] = createSignal<"play" | "crop" | undefined>("play")
@@ -102,8 +107,7 @@ export function AppSnapshot(props: AppSnapshotProps) {
     setCapturing(true)
     try {
       const taken = await captureOf(screen)
-      const box = screen.getBoundingClientRect()
-      shotSize = { width: box.width, height: box.height }
+      shotSize = { width: screenBox.offsetWidth, height: screenBox.offsetHeight }
       setShot(taken)
       const width = largestWidth()
       setFrame({ left: Math.round((shotSize.width - width) / 2), top: 0, width })
@@ -124,6 +128,8 @@ export function AppSnapshot(props: AppSnapshotProps) {
 
   /** The snapshot's pixels per CSS pixel of the screen it was taken of. */
   const shotScale = () => (shot()?.width ?? 0) / (shotSize.width || 1)
+  /** How much smaller than life the device draws its screen on the page:  a pointer's move is divided by it. */
+  const screenScale = () => screenBox.getBoundingClientRect().width / (screenBox.offsetWidth || 1) || 1
   /** The widest the frame can be:  the snapshot's width, or as wide as its height allows. */
   const largestWidth = () => Math.floor(Math.min(shotSize.width, shotSize.height / CARD_SHAPE))
   /** The narrowest:  where the picture would be blown up past `SOFTEST`;  never wider than the widest. */
@@ -159,8 +165,13 @@ export function AppSnapshot(props: AppSnapshotProps) {
     const box = event.currentTarget as HTMLElement
     const start = { x: event.clientX, y: event.clientY, ...frame() }
     cropStarted()
+    const scale = screenScale()
     follow(box, event, (moved) =>
-      placeFrame({ ...start, left: start.left + moved.clientX - start.x, top: start.top + moved.clientY - start.y })
+      placeFrame({
+        ...start,
+        left: start.left + (moved.clientX - start.x) / scale,
+        top: start.top + (moved.clientY - start.y) / scale
+      })
     )
   }
 
@@ -169,6 +180,7 @@ export function AppSnapshot(props: AppSnapshotProps) {
     event.stopPropagation()
     const handle = event.currentTarget as HTMLElement
     const crop = handle.closest(".AppSnapshotCrop")!.getBoundingClientRect()
+    const scale = screenScale()
     const { left, top, width } = frame()
     const isLeft = corner.endsWith("left")
     const isTop = corner.startsWith("top")
@@ -182,8 +194,8 @@ export function AppSnapshot(props: AppSnapshotProps) {
     )
     cropStarted()
     follow(handle, event, (moved) => {
-      const x = moved.clientX - crop.left
-      const y = moved.clientY - crop.top
+      const x = (moved.clientX - crop.left) / scale
+      const y = (moved.clientY - crop.top) / scale
       const wanted = Math.max(Math.abs(x - anchorX), Math.abs(y - anchorY) / CARD_SHAPE)
       const sized = Math.min(Math.max(wanted, smallestWidth()), largestWidth(), Math.max(room, smallestWidth()))
       placeFrame({
@@ -245,7 +257,7 @@ export function AppSnapshot(props: AppSnapshotProps) {
         PICTURE_HEIGHT
       )
       answer = await pngOf(picture)
-      modal.visible = false
+      device.visible = false
     } catch (error) {
       setProblem(String(error))
     } finally {
@@ -254,62 +266,66 @@ export function AppSnapshot(props: AppSnapshotProps) {
   }
 
   return (
-    <ui-modal
-      class="AppSnapshot"
-      appearance="basic"
+    <ui-device
+      class={["AppSnapshot", { capturing: isCapturing() }]}
+      modal=""
+      device="phone"
+      controls={shot() ? "none" : "rotate"}
       closedby="closerequest"
       aria-label={appTexts.text("snapshotHeading", { title: props.title })}
       visible=""
       ref={(element: HTMLElement) => {
-        modal = element as HTMLElement & { visible: boolean }
-        element.addEventListener("ui-closed", () => props.onAnswer(answer), { once: true })
+        device = element as HTMLElement & { visible: boolean }
+        // the device's own:  not a message's or the theme menu's, which bubble out of it too
+        const closed = (event: Event) => {
+          if (event.target !== element) return
+          element.removeEventListener("ui-closed", closed)
+          props.onAnswer(answer)
+        }
+        element.addEventListener("ui-closed", closed)
       }}
     >
-      <ui-content>
-        <div class={["AppSnapshotPhone", { landscape: isLandscape(), capturing: isCapturing() }]}>
-          <div class="AppSnapshotScreen">
-            <iframe
-              ref={(element: HTMLIFrameElement) => (screen = element)}
-              src={props.runnerUrl}
-              title={props.title}
-              hidden={!!shot()}
-              onLoad={onScreenLoad}
-            />
-            <Show when={shot()}>{(taken) => crop(taken())}</Show>
-          </div>
-          <div class="AppSnapshotMessages">
-            <Show when={hint()}>
-              {(step) => (
-                <ui-message
-                  class="AppSnapshotHint"
-                  floating=""
-                  dismissible=""
-                  size="small"
-                  icon={step() === "play" ? "hand pointer outline" : "crop"}
-                  ref={on("ui-closed", () => setHint(undefined))}
-                >
-                  {appTexts.text(step() === "play" ? "snapshotLine" : "snapshotCropLine")}
-                </ui-message>
-              )}
-            </Show>
-            <Show when={problem()}>
+      <div class="AppSnapshotScreen" ref={(element: HTMLElement) => (screenBox = element)}>
+        <iframe
+          ref={(element: HTMLIFrameElement) => (screen = element)}
+          src={props.runnerUrl}
+          title={props.title}
+          hidden={!!shot()}
+          onLoad={onScreenLoad}
+        />
+        <Show when={shot()}>{(taken) => crop(taken())}</Show>
+        <div class="AppSnapshotMessages">
+          <Show when={hint()}>
+            {(step) => (
               <ui-message
-                class="AppSnapshotProblem"
+                class="AppSnapshotHint"
                 floating=""
-                state="error"
-                size="small"
                 dismissible=""
-                role="alert"
-                ref={on("ui-closed", () => setProblem(undefined))}
+                size="small"
+                icon={step() === "play" ? "hand pointer outline" : "crop"}
+                ref={on("ui-closed", () => setHint(undefined))}
               >
-                {problem()}
+                {appTexts.text(step() === "play" ? "snapshotLine" : "snapshotCropLine")}
               </ui-message>
-            </Show>
-          </div>
-          <div class="AppSnapshotBezel">{buttons()}</div>
+            )}
+          </Show>
+          <Show when={problem()}>
+            <ui-message
+              class="AppSnapshotProblem"
+              floating=""
+              state="error"
+              size="small"
+              dismissible=""
+              role="alert"
+              ref={on("ui-closed", () => setProblem(undefined))}
+            >
+              {problem()}
+            </ui-message>
+          </Show>
         </div>
-      </ui-content>
-    </ui-modal>
+      </div>
+      {buttons()}
+    </ui-device>
   )
 
   /** The snapshot, the frame over it, its corners. */
@@ -348,23 +364,25 @@ export function AppSnapshot(props: AppSnapshotProps) {
     )
   }
 
-  /** The bottom edge's buttons:  Cancel, then this step's. */
+  /** The bottom edge's buttons, after the device's Rotate:  Cancel, then this step's. */
   function buttons() {
     return (
       <>
-        <ui-button class="cancel" size="small" onClick={() => (modal.visible = false)}>
+        {/* `cancel`:  the device hides itself, as a modal's Cancel does */}
+        <ui-button slot="buttons" class="cancel" size="small">
           {appTexts.text("cancel")}
         </ui-button>
-        <span class="AppSnapshotGap" />
+        <span slot="buttons" class="AppSnapshotGap" />
         <Show
           when={!shot()}
           fallback={
-            <ui-button class="AppSnapshotRetake" size="small" icon="undo" onClick={retake}>
+            <ui-button slot="buttons" class="AppSnapshotRetake" size="small" icon="undo" onClick={retake}>
               {appTexts.text("snapshotRetake")}
             </ui-button>
           }
         >
           <ui-dropdown
+            slot="buttons"
             class="AppSnapshotTheme"
             button=""
             size="small"
@@ -374,9 +392,9 @@ export function AppSnapshot(props: AppSnapshotProps) {
             title={appTexts.text("snapshotTheme")}
             ref={on<{ value: string }>("ui-changed", changeLook)}
           >
+            {/* its icon alone, its name its tooltip:  the bottom edge is a phone's width */}
             <span slot="trigger" class="AppSnapshotThemeTrigger">
               <ui-icon name="paint brush" />
-              {appTexts.text("snapshotTheme")}
             </span>
             <For each={themes()}>
               {(name) => (
@@ -394,17 +412,9 @@ export function AppSnapshot(props: AppSnapshotProps) {
               )}
             </For>
           </ui-dropdown>
-          <ui-button
-            class="AppSnapshotRotate"
-            size="small"
-            icon="redo"
-            title={appTexts.text("snapshotRotate")}
-            onClick={() => setLandscape(!isLandscape())}
-          >
-            {appTexts.text("snapshotRotate")}
-          </ui-button>
         </Show>
         <ui-button
+          slot="buttons"
           class="AppSnapshotGo"
           size="small"
           color="primary"

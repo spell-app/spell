@@ -273,7 +273,6 @@ export const APP_TEXTS = {
   snapshotSave: "Save",
   snapshotRetake: "Retake",
   snapshotTheme: "Change theme",
-  snapshotRotate: "Rotate",
   snapshotLight: "Light",
   snapshotDark: "Dark",
   snapshotFrame: "The card's picture:  move it with the arrow keys, resize it with + and -",

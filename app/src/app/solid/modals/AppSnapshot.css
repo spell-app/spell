@@ -1,110 +1,21 @@
 /*
- * `<AppSnapshot>` (`AppSnapshot.tsx`):  a phone floating over the dimmed page, no dialog box round it.
- * - Its screen holds the app, or its snapshot with the crop frame over it.
- * - Its thick bottom edge holds the buttons;  its camera island sits in the top edge, never over the screen,
- *   so it's never in the picture.
- * - Turned on its side (`.landscape`):  the screen wide and short, the island in the left edge;
- *   the buttons stay in the bottom edge, so they read the right way up.
+ * `<AppSnapshot>` (`AppSnapshot.tsx`):  a phone floating over the dimmed page, Spell UI's `<ui-device modal>`.
+ * - The phone itself (its body, camera island, Rotate, thick bottom edge) is the device's:  only what's on its screen,
+ *   and the buttons in its edge, are styled here.
  */
-.AppSnapshot {
-  /* the screen:  a phone's (an iPhone 14's), shorter or narrower when the window is */
-  --AppSnapshot-screen-long: 844px;
-  --AppSnapshot-screen-short: 390px;
-  --AppSnapshot-screen-width: var(--AppSnapshot-screen-short);
-  --AppSnapshot-screen-height: min(var(--AppSnapshot-screen-long), calc(100vh - 200px));
-  /* the phone's edges round the screen */
-  --AppSnapshot-edge: 16px;
-  --AppSnapshot-island-edge: 40px;
-  --AppSnapshot-bezel: 64px;
-  --AppSnapshot-body: #1c1c1e;
-  --AppSnapshot-rim: #48484a;
 
-  /* no box round the phone:  a basic modal, its content as wide as the phone */
-  --ui-modal-width: auto;
-  width: auto;
+/* while the snapshot's taken:  the screen's corners square, so no corner of the phone is in it */
+.AppSnapshot.capturing::part(screen) {
+  border-radius: 0;
 }
 
-/* room round the phone for its shadow:  the dialog's box clips what's outside it */
-.AppSnapshot > ui-content {
-  padding: 32px;
-}
-
-/* the phone:  a dark rounded body round the screen */
-.AppSnapshot .AppSnapshotPhone {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-  margin: 0 auto;
-  padding: var(--AppSnapshot-island-edge) var(--AppSnapshot-edge) 0;
-  border-radius: 56px;
-  background: var(--AppSnapshot-body);
-  box-shadow:
-    inset 0 0 0 2px var(--AppSnapshot-rim),
-    inset 0 0 0 6px var(--AppSnapshot-body),
-    inset 0 0 0 7px #0008,
-    0 8px 24px #0008;
-
-  /* the camera island, in the top edge */
-  &::before {
-    content: "";
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    width: 96px;
-    height: 24px;
-    border-radius: 12px;
-    background: #000;
-    transform: translateX(-50%);
-  }
-
-  /* the side buttons:  volume on the left, power on the right */
-  &::after {
-    content: "";
-    position: absolute;
-    top: 160px;
-    left: -4px;
-    width: 4px;
-    height: 48px;
-    border-radius: 4px 0 0 4px;
-    background: var(--AppSnapshot-rim);
-    box-shadow:
-      0 64px 0 var(--AppSnapshot-rim),
-      calc(var(--AppSnapshot-screen-width) + 2 * var(--AppSnapshot-edge) + 4px) 32px 0 var(--AppSnapshot-rim);
-  }
-}
-
-/* on its side:  wide and short;  the island in the left edge */
-.AppSnapshot .AppSnapshotPhone.landscape {
-  --AppSnapshot-screen-width: min(var(--AppSnapshot-screen-long), calc(100vw - 176px));
-  --AppSnapshot-screen-height: var(--AppSnapshot-screen-short);
-  padding: var(--AppSnapshot-edge) var(--AppSnapshot-edge) 0 var(--AppSnapshot-island-edge);
-
-  &::before {
-    top: calc(var(--AppSnapshot-edge) + var(--AppSnapshot-screen-height) / 2);
-    left: 8px;
-    width: 24px;
-    height: 96px;
-    transform: translateY(-50%);
-  }
-  &::after {
-    display: none;
-  }
-}
-
-/* the screen:  exactly a phone's size;  the app, or its snapshot */
+/* the app's box:  the device's whole screen, the app or its snapshot */
 .AppSnapshot .AppSnapshotScreen {
   position: relative;
-  width: var(--AppSnapshot-screen-width);
-  height: var(--AppSnapshot-screen-height);
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  border-radius: 40px;
   background: var(--ui-background, Canvas);
-
-  /* while the snapshot's taken:  square, so no corner of the phone is in it */
-  .capturing > & {
-    border-radius: 0;
-  }
 
   > iframe {
     display: block;
@@ -117,17 +28,9 @@
   }
 }
 
-/* the bottom edge:  the buttons, in a row, Cancel apart on the left */
-.AppSnapshot .AppSnapshotBezel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: var(--AppSnapshot-bezel);
-  padding: 0 8px;
-
-  > .AppSnapshotGap {
-    flex: 1;
-  }
+/* the bottom edge:  Cancel apart on the left, this step's buttons on the right */
+.AppSnapshot > .AppSnapshotGap {
+  flex: 1;
 }
 
 .AppSnapshot .AppSnapshotThemeTrigger {
@@ -139,7 +42,7 @@
 /* the messages:  over the top of the screen, in the middle */
 .AppSnapshot .AppSnapshotMessages {
   position: absolute;
-  top: calc(var(--AppSnapshot-island-edge) + 16px);
+  top: 16px;
   left: 50%;
   display: flex;
   flex-direction: column;
@@ -153,10 +56,6 @@
     white-space: pre-line;
     pointer-events: auto;
   }
-}
-
-.AppSnapshotPhone.landscape .AppSnapshotMessages {
-  top: calc(var(--AppSnapshot-edge) + 16px);
 }
 
 .AppSnapshot .AppSnapshotCrop {

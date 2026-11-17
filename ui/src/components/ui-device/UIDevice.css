@@ -76,6 +76,8 @@
     border-radius: var(--_ui-device-screen-radius);
     background: var(--ui-background, Canvas);
     box-shadow: 0 0 0 1px oklch(0 0 0 / 0.6);
+    /* a scaled iframe escapes a rounded `overflow` clip in Chromium:  this clips it too */
+    clip-path: inset(0 round var(--_ui-device-screen-radius));
   }
 
   /* the screen at its real size, scaled into the screen's box */
