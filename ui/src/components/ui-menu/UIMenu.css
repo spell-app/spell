@@ -1873,11 +1873,25 @@
   .overflow-menu > .row.selected {
     font-weight: var(--ui-font-weight-bold);
   }
-  /* the chosen row ticked, at its end */
-  .overflow-menu > .row.selected::after {
-    content: "✓" / "";
-    margin-inline-start: auto;
-    padding-inline-start: 1em;
+  /* the tick first, as a ticked menu's (`<ui-menu ticks>`):  every row keeps the gutter;  only the chosen one's shows */
+  .overflow-menu > .row > .tick {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    width: var(--ui-item-tick-width, 1em);
+    height: 1em;
+    visibility: hidden;
+  }
+  .overflow-menu > .row > .tick > svg {
+    width: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .overflow-menu > .row.selected > .tick {
+    visibility: visible;
   }
   .overflow-menu > .row.disabled {
     color: var(--ui-text-disabled);
