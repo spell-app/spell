@@ -1,0 +1,253 @@
+## How Star Wars works
+// The Star Wars example is a guide to the galaxy:  its films, the characters in them, the planets they're from.
+// None of it is in the example:  it's asked for as it runs, from a server other people run, swapi.py4e.com.
+// Three ideas do the work:
+// - a PLACE:  one line says where the server is, and a line per collection says where its rows are
+// - a TYPE per collection, which "lives in" the place:  each field of a row is a property,
+//   and a field that links to another row is that row's type, "its homeworld is a planet"
+// - "for every film" asks for the rows, and draws each one, with lines for while it waits and if it fails
+//
+// This guide keeps films, characters and planets, a list and a page for each.
+// It leaves out search, ships, the pictures from Wikipedia, and the opening crawl.
+// Open Star Wars, in the Examples, for all of it.
+
+
+## The place:  a server other people run
+// Star Wars' API file, cut down to three collections.  `spell place ingest` wrote it, from looking at the server:
+// - "its id is its url":  each row's address is its id, and what another row links to it by
+// - "its rows are its results", "its next page is its next":  how its answers come, a page at a time
+// - "it writes names like hair_color":  so "birth year" here is "birth_year" there
+// - "keep a copy on this device":  a row asked for once is kept, until 5am, when it's asked for again
+star wars is a web server at "https://swapi.py4e.com/api"
+	its id is its "url"
+	its rows are its "results"
+	its next page is its "next"
+	it writes names like "hair_color"
+	check it once a day at 5am
+	keep a copy on this device
+	characters live at "/people/"
+	planets live at "/planets/"
+	films live at "/films/"
+
+
+## The types:  a field each, and a link is a type
+// Also as `spell place ingest` wrote them, cut down:  it worked out each field's type from what came back.
+// The server sends a film's characters as a list of addresses;  "a list of characters" makes them characters,
+// so `the name of its homeworld` follows the link, and asks for the planet.
+a "film" is a thing
+	it lives in star wars
+	its "title" is text
+	its "episode id" is a number
+	its "director" is text
+	its "release date" is a date
+	its "characters" is a list of characters
+	its "planets" is a list of planets
+
+a "character" is a thing
+	it lives in star wars
+	its "name" is text
+	its "birth year" is text
+	its "hair color" is text
+	its "eye color" is text
+	its "homeworld" is a planet
+	its "films" is a list of films
+
+a "planet" is a thing
+	it lives in star wars
+	its "name" is text
+	its "climate" is text
+	its "terrain" is text
+	its "residents" is a list of characters
+	its "films" is a list of films
+
+
+## The app:  a list of films, or the page of whatever's open
+// "for every film" asks the server for its films, and draws each one in the cards.
+// - "while waiting" draws until they come;  "if that fails" when the server can't be reached
+// - a long list draws what fits, and more as you scroll
+guide is an app
+	its "showing" is a thing
+	"trail" is a new list of things
+
+	to go back
+		if its trail is empty
+			set its showing to nothing
+			return
+		set its showing to the last item of its trail
+		remove the last item of its trail
+		scroll to the top
+
+	to draw it
+		<ui-container>{draw its view}</ui-container>
+
+	to draw its view
+		if its showing
+			draw its showing's page
+		otherwise
+			<header size="medium">The films</header>
+			for every film
+			while waiting: <loader visible inline text>Waiting for a signal from the galaxy</loader>
+			if that fails say "The signal from swapi.py4e.com is lost."
+			show them in: <cards columns="4" doubling></cards>
+		<text paragraph size="small">
+			Films, characters and planets from <link link="https://swapi.py4e.com/">swapi.py4e.com</link>.
+			Star Wars belongs to Lucasfilm and Disney.
+		</text>
+
+// Any thing opens the same way:  the one showing goes on the trail, for Back
+to open (a thing)
+	if the guide's showing
+		add the guide's showing to the guide's trail
+	set the guide's showing to it
+	scroll to the top
+
+
+## A card, and a page's parts
+// Every type holds a card with its own words, and draws it:  a click anywhere on it opens the thing.
+a "card" is a thing
+	its "label" is text
+	its "kind" is text
+	its "subject" is a thing
+
+	to draw it
+		<ui-card onClick={open its subject}>
+			<content>
+				<header>{its label}</header>
+				<meta>{its kind}</meta>
+			</content>
+		</ui-card>
+
+	to draw its top
+		<button appearance="transparent" icon="arrow left" onClick={go back}>Back</button>
+		<header size="large">{its label}</header>
+		<text color="grey">{its kind}</text>
+
+// A row of what's known:  what a server writes when nothing's known isn't worth a row
+a "fact" is a thing
+	its "label" is text
+	its "value" is text
+	its "date" is a date
+	it "is known"
+		if its date
+			return yes
+		if its value is nothing or its value is ""
+			return no
+		return its value is not "unknown" and its value is not "n/a" and its value is not "none"
+	to draw it
+		<row>
+			<cell header>{its label}</cell>
+			<cell>{its value}{its date}</cell>
+		</row>
+
+a "fact table" is a thing
+	its "facts" is a list of facts
+	its "shown" is the facts in its facts where it is known
+	to draw it
+		if its shown is not empty
+			<table appearance="very-basic" unstackable>
+				{draw each fact in its shown}
+			</table>
+
+// A list under its heading;  "for its things" follows the links, and asks for each row they name
+a "section" is a thing
+	its "heading" is text
+	its "things" is a list of things
+	its "single" is a thing
+	to draw it
+		if its single
+			<header size="small" font="all-caps">{its heading}</header>
+			<cards columns="4" doubling>{draw its single}</cards>
+		otherwise
+			for its things
+			show it all in: <ui-section label={its heading} hide-empty=""></ui-section>
+			show them in: <cards columns="4" doubling></cards>
+
+
+## A film, a character, a planet:  a card, and a page
+// "a film", with no "is", adds to the film above:  in the example, the types are in StarWars.api.spell,
+// and these are in StarWars.spell, so looking at the server again never touches a line of these.
+a film
+	"card" is a new card with label = its title, kind = "Episode " + its episode id, subject = it
+	to draw it
+		draw its card
+	its "facts" is
+		set known to a new list of facts
+		add (a new fact with label "Directed by", value = its director) to known
+		add (a new fact with label "Released", date = its release date) to known
+		return known
+	to draw its page
+		draw the top of its card
+		draw (a new fact table with facts = its facts)
+		draw (a new section with heading "Who's in it", things = its characters)
+		draw (a new section with heading "Where it happens", things = its planets)
+		while waiting
+			<loader visible inline text>Following the links</loader>
+
+a character
+	"card" is a new card with label = its name, kind = "Born " + its birth year, subject = it
+	to draw it
+		draw its card
+	its "facts" is
+		set known to a new list of facts
+				add (a new fact with label "Hair", value = its hair color) to known
+		add (a new fact with label "Eyes", value = its eye color) to known
+		return known
+	to draw its page
+		draw the top of its card
+		draw (a new fact table with facts = its facts)
+		draw (a new section with heading "Home", single = its homeworld)
+		draw (a new section with heading "Films", things = its films)
+		while waiting
+			<loader visible inline text>Following the links</loader>
+
+a planet
+	"card" is a new card with label = its name, kind = its climate, subject = it
+	to draw it
+		draw its card
+	its "facts" is
+		set known to a new list of facts
+		add (a new fact with label "Climate", value = its climate) to known
+		add (a new fact with label "Terrain", value = its terrain) to known
+		return known
+	to draw its page
+		draw the top of its card
+		draw (a new fact table with facts = its facts)
+		draw (a new section with heading "Who's from here", things = its residents)
+		draw (a new section with heading "Seen in", things = its films)
+		while waiting
+			<loader visible inline text>Following the links</loader>
+
+
+## Start
+start the guide
+
+
+## A check:  which facts are worth a row
+to test which facts are known
+	set born to a new fact with label "Born", value = "19BBY"
+	born is known should be yes
+	set hair to a new fact with label "Hair", value = "n/a"
+	hair is known should be no
+
+
+## Try it
+// - Click A New Hope, then Luke Skywalker, then Tatooine:  each page follows the links of the one before.
+//   Back takes you back the way you came.
+// - Show one more fact:  add a "skin color" to the character, under "The types", the way its "eye color" is,
+//   and a fact for it on the character's page.  Nothing else changes:  the server already sends it.
+// - Show the films oldest first:  change "for every film" to "for every film sorted by its release date".
+//
+// Where next:  Star Wars, in the Examples, with search, ships, vehicles and species,
+// pictures from Wikipedia, a Punch it button, and each film's opening crawl.
+
+
+## Where the API file came from
+// Nobody wrote the example's types by hand.  One command looked at the server, and wrote them:
+//       spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"
+// It read a few pages of each collection, worked out each field's type from what came back,
+// and wrote two files:
+// - StarWars.api.spell:  the place and a type per collection, what this guide's first two sections are cut from
+// - StarWars.api.json5:  what it found, field by field, with an example of each, and what the server can do:
+//   read only, and no reaching it from a page on another address, so the editor asks it for you
+// `spell place update StarWars.api.spell` looks again, and changes only those two files.
+// What the example draws and does is in StarWars.spell, which adds to each type:  so an update never touches it.

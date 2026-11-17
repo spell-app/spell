@@ -1,0 +1,10 @@
+{
+  "title": "How Star Wars works",
+  "description": "The Star Wars example's films, characters and planets, from a server other people run:  one line says where it is, a type per collection lives in it, and a field that links to a row is followed by reading it",
+  "imports": [
+    {
+      "path": "/HowStarWarsWorks.spell",
+      "active": true
+    }
+  ]
+}

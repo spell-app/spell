@@ -1,0 +1,527 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Film",
+    "Character",
+    "Planet",
+    "Guide",
+    "Card",
+    "Fact",
+    "FactTable",
+    "Section",
+    "StarWar",
+    "test_which_facts_are_known"
+  ],
+  "statements": [
+    {
+      "type": "Film",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "films"
+      },
+      "defined": "/HowStarWarsWorks.spell:2080-2305"
+    },
+    {
+      "property": "title",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2124-2143"
+    },
+    {
+      "property": "episode_id",
+      "asWritten": "episode id",
+      "of": "Film",
+      "datatype": "number",
+      "defined": "/HowStarWarsWorks.spell:2145-2173"
+    },
+    {
+      "property": "director",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2175-2197"
+    },
+    {
+      "property": "release_date",
+      "asWritten": "release date",
+      "of": "Film",
+      "datatype": "date",
+      "defined": "/HowStarWarsWorks.spell:2199-2227"
+    },
+    {
+      "property": "characters",
+      "of": "Film",
+      "datatype": "list of characters",
+      "defined": "/HowStarWarsWorks.spell:2229-2269"
+    },
+    {
+      "property": "planets",
+      "of": "Film",
+      "datatype": "list of planets",
+      "defined": "/HowStarWarsWorks.spell:2271-2305"
+    },
+    {
+      "property": "card",
+      "of": "Film",
+      "datatype": "Card",
+      "defined": "/HowStarWarsWorks.spell:6119-6212"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Film",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:6214-6240"
+    },
+    {
+      "property": "facts",
+      "of": "Film",
+      "datatype": "list of facts",
+      "defined": "/HowStarWarsWorks.spell:6242-6456"
+    },
+    {
+      "type": "Character",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "characters"
+      },
+      "defined": "/HowStarWarsWorks.spell:2307-2512"
+    },
+    {
+      "property": "name",
+      "of": "Character",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2356-2374"
+    },
+    {
+      "property": "birth_year",
+      "asWritten": "birth year",
+      "of": "Character",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2376-2400"
+    },
+    {
+      "property": "hair_color",
+      "asWritten": "hair color",
+      "of": "Character",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2402-2426"
+    },
+    {
+      "property": "eye_color",
+      "asWritten": "eye color",
+      "of": "Character",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2428-2451"
+    },
+    {
+      "property": "homeworld",
+      "of": "Character",
+      "datatype": "Planet",
+      "defined": "/HowStarWarsWorks.spell:2453-2480"
+    },
+    {
+      "property": "films",
+      "of": "Character",
+      "datatype": "list of films",
+      "defined": "/HowStarWarsWorks.spell:2482-2512"
+    },
+    {
+      "property": "card",
+      "of": "Character",
+      "datatype": "Card",
+      "defined": "/HowStarWarsWorks.spell:6793-6882"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Character",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:6884-6910"
+    },
+    {
+      "property": "facts",
+      "of": "Character",
+      "datatype": "list of facts",
+      "defined": "/HowStarWarsWorks.spell:6912-7117"
+    },
+    {
+      "type": "Planet",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "planets"
+      },
+      "defined": "/HowStarWarsWorks.spell:2514-2697"
+    },
+    {
+      "property": "name",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2560-2578"
+    },
+    {
+      "property": "climate",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2580-2601"
+    },
+    {
+      "property": "terrain",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:2603-2624"
+    },
+    {
+      "property": "residents",
+      "of": "Planet",
+      "datatype": "list of characters",
+      "defined": "/HowStarWarsWorks.spell:2626-2665"
+    },
+    {
+      "property": "films",
+      "of": "Planet",
+      "datatype": "list of films",
+      "defined": "/HowStarWarsWorks.spell:2667-2697"
+    },
+    {
+      "property": "card",
+      "of": "Planet",
+      "datatype": "Card",
+      "defined": "/HowStarWarsWorks.spell:7430-7506"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Planet",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:7508-7534"
+    },
+    {
+      "property": "facts",
+      "of": "Planet",
+      "datatype": "list of facts",
+      "defined": "/HowStarWarsWorks.spell:7536-7740"
+    },
+    {
+      "type": "Card",
+      "superType": "Thing",
+      "defined": "/HowStarWarsWorks.spell:4196-4621"
+    },
+    {
+      "property": "label",
+      "of": "Card",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:4217-4236"
+    },
+    {
+      "property": "kind",
+      "of": "Card",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:4238-4256"
+    },
+    {
+      "property": "subject",
+      "of": "Card",
+      "datatype": "thing",
+      "defined": "/HowStarWarsWorks.spell:4258-4282"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:4285-4435"
+    },
+    {
+      "type": "Fact",
+      "superType": "Thing",
+      "defined": "/HowStarWarsWorks.spell:4710-5087"
+    },
+    {
+      "property": "label",
+      "of": "Fact",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:4731-4750"
+    },
+    {
+      "property": "value",
+      "of": "Fact",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:4752-4771"
+    },
+    {
+      "property": "date",
+      "of": "Fact",
+      "datatype": "date",
+      "defined": "/HowStarWarsWorks.spell:4773-4793"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} known",
+      "output": "is_known",
+      "rule": "method_postfix",
+      "of": "Fact",
+      "kind": "method",
+      "name": "\"is known\"",
+      "returns": "choice",
+      "defined": "/HowStarWarsWorks.spell:4795-4985"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Fact",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:4987-5087"
+    },
+    {
+      "type": "FactTable",
+      "superType": "Thing",
+      "defined": "/HowStarWarsWorks.spell:5089-5336"
+    },
+    {
+      "property": "facts",
+      "of": "FactTable",
+      "datatype": "list of facts",
+      "defined": "/HowStarWarsWorks.spell:5116-5146"
+    },
+    {
+      "property": "shown",
+      "of": "FactTable",
+      "datatype": "list of facts",
+      "defined": "/HowStarWarsWorks.spell:5148-5203"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "FactTable",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:5205-5336"
+    },
+    {
+      "type": "Section",
+      "superType": "Thing",
+      "defined": "/HowStarWarsWorks.spell:5436-5851"
+    },
+    {
+      "property": "heading",
+      "of": "Section",
+      "datatype": "text",
+      "defined": "/HowStarWarsWorks.spell:5460-5481"
+    },
+    {
+      "property": "things",
+      "of": "Section",
+      "datatype": "list of things",
+      "defined": "/HowStarWarsWorks.spell:5483-5515"
+    },
+    {
+      "property": "single",
+      "of": "Section",
+      "datatype": "thing",
+      "defined": "/HowStarWarsWorks.spell:5517-5540"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Section",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:5542-5851"
+    },
+    {
+      "type": "StarWar",
+      "superType": "Place",
+      "place": {
+        "name": "star_wars",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 86400,
+          "collections": {
+            "characters": {
+              "at": "/people/"
+            },
+            "planets": {
+              "at": "/planets/"
+            },
+            "films": {
+              "at": "/films/"
+            }
+          }
+        }
+      },
+      "defined": "/HowStarWarsWorks.spell:1420-1731"
+    },
+    {
+      "type": "Guide",
+      "superType": "App",
+      "defined": "/HowStarWarsWorks.spell:2996-3843"
+    },
+    {
+      "property": "showing",
+      "of": "Guide",
+      "datatype": "thing",
+      "defined": "/HowStarWarsWorks.spell:3013-3037"
+    },
+    {
+      "property": "trail",
+      "of": "Guide",
+      "datatype": "list of things",
+      "defined": "/HowStarWarsWorks.spell:3039-3070"
+    },
+    {
+      "syntax": "go back (of {thisArg:expression})?",
+      "output": "go_back",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "go back",
+      "returns": "nothing",
+      "defined": "/HowStarWarsWorks.spell:3073-3251"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HowStarWarsWorks.spell:3254-3311"
+    },
+    {
+      "syntax": "open {thisArg:expression}",
+      "output": "open",
+      "rule": "method_call",
+      "of": "Thing",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "The app:  a list of films, or the page of whatever's open",
+      "kind": "method",
+      "name": "open (a thing)",
+      "returns": "nothing",
+      "defined": "/HowStarWarsWorks.spell:3923-4061"
+    },
+    {
+      "syntax": "test which facts are known",
+      "output": "test_which_facts_are_known",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "which facts are known",
+      "defined": "/HowStarWarsWorks.spell:8125-8327"
+    }
+  ],
+  "codeLines": [
+    28,
+    29,
+    34,
+    39,
+    44,
+    49,
+    54,
+    59,
+    68,
+    72,
+    109,
+    110,
+    115,
+    120,
+    125,
+    130,
+    135,
+    140,
+    149,
+    153,
+    187,
+    188,
+    193,
+    198,
+    203,
+    208,
+    213,
+    222,
+    226,
+    261,
+    262,
+    267,
+    272,
+    277,
+    304,
+    305,
+    310,
+    315,
+    320,
+    326,
+    334,
+    335,
+    340,
+    345,
+    351,
+    352,
+    357,
+    362,
+    367,
+    384,
+    414,
+    417,
+    422,
+    427,
+    437,
+    465,
+    490
+  ]
+}
