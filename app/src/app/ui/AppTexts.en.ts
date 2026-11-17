@@ -449,11 +449,6 @@ export const APP_TEXTS = {
   homeGuidesLine: "Your idea, your pace.",
   homeLibraryLine:
     "Apps for an org:\nits Admin page, chat, feed, inbox and events.\nOpen one, change it, give it to your own org.",
-  "category.first-steps": "First steps",
-  "category.games": "Games",
-  "category.everyday": "Everyday apps",
-  "category.web-data": "Data from the web",
-  "category.sites": "Sites",
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeOrgLine: "Shared by everyone at @{org}.",
   editorPieceBroken:

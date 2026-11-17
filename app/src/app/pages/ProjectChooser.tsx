@@ -338,13 +338,12 @@ function HomeSection(props: {
  *   - In a row with any pictures, each card's picture (or tile) is a banner across its top.
  * - Clicking one opens it in the editor (`useRunner`:  in the runner).
  * - Nothing in it:  one quiet card saying so (`empty`, else "No examples yet!").
- * - Its projects with a category (the examples:  "First steps", "Games" ...) come under a quiet line per category,
- *   in `SPACES.EXAMPLE_CATEGORIES`' order (epic `mockup` P18);  those with none after them.
+ * - Its projects in ONE set, no line over them (Owen, epic `mockup` I48:  "Merge the examples into one set").
  * - `language`:  only its projects written in that language (`languageOf()`);
  *   the examples and guides show their English ones, and the Spanish ones are `<LanguageCards>`' (epic `mockup` I46).
  * - In the editor's order of each group, `SPACES.HOME_ORDER` (epic `mockup` P19);  one it doesn't list, last.
  *   - Not those it hides, nor a project that says `"onHome": false` (`onHomeIn()`).
- *   - In dev, where the server says it may (`mayReorder`), a card is dragged among its run to reorder it:
+ *   - In dev, where the server says it may (`mayReorder`), a card is dragged among the set's to reorder it:
  *     the group's new order is saved into that list at once (`saveHomeOrder()`).
  *   - Only Spell's own groups:  an org's group (`SPACES.orgGroups`) never drags its cards.
  * - `sectionDrag`:  moving the whole section by its header, among the page's (`<ProjectChooser>`).
@@ -419,7 +418,7 @@ function LanguageCards(props: {
 
 /**
  * One group's cards, in the grid of the section they're in:  `<ProjectCards>`' one group, `<LanguageCards>`' each.
- * - `title`:  one quiet line over them all;  none:  a line per category (`sectionsOf()`).
+ * - `title`:  one quiet line over them all, while there are any;  none:  no line.
  * - `empty`:  what its one card says while it has none;  none:  nothing at all.
  * - Still loading, or it failed:  one quiet card saying so.
  */
@@ -435,12 +434,11 @@ function GroupCards(props: {
 }) {
   const listed = () => cardsOf(props, props.root)
   onSettled(() => askMayReorder())
-  // a card's drag among its run:  in dev, where the server lets this page reorder, never on a page of sites
-  const dragFor = (project: CardProject, section: CardSection): TileCardDrag | undefined => {
+  // a card's drag among the group's:  in dev, where the server lets this page reorder, never on a page of sites
+  const dragFor = (project: CardProject): TileCardDrag | undefined => {
     if (!mayReorder() || props.sitesOnly || !isSpellsOwn(props.projectRoot.path)) return undefined
-    // a drag from this run, onto another card of it
-    const takes = () =>
-      !!dragged() && dragged() !== project.path && section.projects.some((each) => each.path === dragged())
+    // a drag from this group's cards, onto another of them
+    const takes = () => !!dragged() && dragged() !== project.path && listed().some((each) => each.path === dragged())
     return {
       dragging: dragged() === project.path,
       dropHere: dropOn() === project.path,
@@ -480,10 +478,6 @@ function GroupCards(props: {
   }
   // a row with pictures of its apps shows each big, across its card's top;  one without one, its letter as big
   const banner = () => listed().some((project) => project.hasThumbnail)
-  const runs = (): CardSection[] => {
-    if (!props.title) return sectionsOf(listed())
-    return listed().length > 0 ? [{ title: props.title, projects: listed() }] : []
-  }
   return (
     <Show
       when={props.root.loaded}
@@ -493,27 +487,26 @@ function GroupCards(props: {
         </EmptyCard>
       }
     >
-      <For each={runs()} fallback={props.empty === undefined ? undefined : <EmptyCard>{props.empty}</EmptyCard>}>
-        {(section) => (
-          <>
-            <Show when={section.title}>
-              <h3 class="subhead">{section.title}</h3>
-            </Show>
-            <For each={section.projects}>
-              {(project) => (
-                <ProjectCard
-                  project={project}
-                  useRunner={props.useRunner}
-                  sitesOnly={props.sitesOnly}
-                  banner={banner()}
-                  drag={dragFor(project, section)}
-                  menu={props.cardMenu ? <CardMenu projectRoot={props.projectRoot} project={project} /> : undefined}
-                />
-              )}
-            </For>
-          </>
-        )}
-      </For>
+      <Show
+        when={listed().length > 0}
+        fallback={props.empty === undefined ? undefined : <EmptyCard>{props.empty}</EmptyCard>}
+      >
+        <Show when={props.title}>
+          <h3 class="subhead">{props.title}</h3>
+        </Show>
+        <For each={listed()}>
+          {(project) => (
+            <ProjectCard
+              project={project}
+              useRunner={props.useRunner}
+              sitesOnly={props.sitesOnly}
+              banner={banner()}
+              drag={dragFor(project)}
+              menu={props.cardMenu ? <CardMenu projectRoot={props.projectRoot} project={project} /> : undefined}
+            />
+          )}
+        </For>
+      </Show>
     </Show>
   )
 }
@@ -531,7 +524,7 @@ function ProjectCard(props: {
   return (
     <TileCard
       title={project().name}
-      line={firstPhrase(project().description)}
+      line={SPACES.cardLineOf(project().description)}
       hueFrom={project().path}
       banner={props.banner}
       drag={props.drag}
@@ -819,32 +812,6 @@ function sectionGrabHandlers(drag: () => TileCardDrag | undefined) {
   }
 }
 
-/** One run of a group's cards, under its quiet line:  a category's, or the group's in `<LanguageCards>`. */
-type CardSection = {
-  /** Its line:  "Games", "Ejemplos";  none for those with no category. */
-  title?: string
-  /** Its projects, in the group's order. */
-  projects: ProjectRootState["projects"]
-}
-
-/**
- * `projects` in the runs the home page shows them in:
- * - those with a category, a run per category, in `SPACES.EXAMPLE_CATEGORIES`' order
- * - then those with none, with no line
- * - Runs with nothing in them are left out.
- */
-function sectionsOf(projects: ProjectRootState["projects"]): CardSection[] {
-  const categories: readonly string[] = SPACES.EXAMPLE_CATEGORIES
-  const sections: CardSection[] = [
-    ...SPACES.EXAMPLE_CATEGORIES.map((category) => ({
-      title: appTexts.text(`category.${category}`),
-      projects: projects.filter((project) => project.category === category)
-    })),
-    { projects: projects.filter((project) => !categories.includes(project.category ?? "")) }
-  ]
-  return sections.filter((section) => section.projects.length > 0)
-}
-
 /** Props for `<ProjectCards>`. */
 export type ProjectCardsProps = {
   /** The section's id:  a link target (`#examples`). */
@@ -873,14 +840,6 @@ export type ProjectCardsProps = {
   sectionDrag?: TileCardDrag
   /** Each card with a "..." menu of what you can do with its project (`<CardMenu>`):  your own projects'. */
   cardMenu?: boolean
-}
-
-/**
- * The first phrase of a project's description, for its card:  up to its first `:`, `;` or sentence's end.
- * - `"A to-do list in the outline style:  each task ..."` => `"A to-do list in the outline style"`.
- */
-function firstPhrase(description: string | undefined): string | undefined {
-  return description?.split(/[:;]\s|\.\s/)[0]?.trim() || undefined
 }
 
 /****************

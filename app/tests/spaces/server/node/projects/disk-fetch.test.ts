@@ -66,7 +66,6 @@ describe("diskFetch", () => {
       path: solitaire,
       title: "Solitaire",
       description: expect.stringMatching(/^Klondike solitaire/),
-      category: "games",
       hasThumbnail: true
     })
   })

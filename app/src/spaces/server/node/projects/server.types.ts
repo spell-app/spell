@@ -78,11 +78,6 @@ export type ProjectFileJSON = {
    * - Default, and any other value:  it's on the home page.
    */
   onHome?: false
-  /**
-   * Which row of the home page's examples it's in, e.g. `"games"`:  one of `SPACES.EXAMPLE_CATEGORIES` (epic `mockup` P18).
-   * - None, or one not on that list:  it comes after the rest.
-   */
-  category?: string
   /** This project's semver, e.g. `"1.2.0"` -- copied into its declarations, for importers' `version` ranges. */
   version?: string
   /** Names it offers importers, e.g. `["Card", "Deck"]` -- default:  everything it declares. */

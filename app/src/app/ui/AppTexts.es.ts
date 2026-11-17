@@ -556,11 +556,6 @@ const APP_TEXTS_ES: AppTextPack = {
   homeGuidesLine: "Tu idea, a tu ritmo.",
   homeLibraryLine:
     "Aplicaciones para una org:\nsu página de administración, chat, novedades, bandeja de entrada y eventos.\nAbre una, cámbiala, dásela a tu propia org.",
-  "category.first-steps": "Primeros pasos",
-  "category.games": "Juegos",
-  "category.everyday": "Aplicaciones de todos los días",
-  "category.web-data": "Datos de la web",
-  "category.sites": "Sitios",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   homeOrgLine: "Compartidos por todos en @{org}.",
   editorPieceBroken:

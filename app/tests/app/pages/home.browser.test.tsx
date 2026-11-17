@@ -25,14 +25,16 @@ import { ProjectChooser } from "spell/app/app/pages/ProjectChooser"
 /** Each group's list, by its address:  as `GET /api/projects/list/<group>` answers. */
 const LISTS: Record<string, SPACES.ProjectListEntryWithHome[]> = {
   "@spell/examples": [
-    { path: "@spell/examples/fizzbuzz", title: "FizzBuzz", category: "first-steps" },
-    { path: "@spell/examples/calculator", title: "Calculator", category: "first-steps" },
-    { path: "@spell/examples/Calculadora", title: "Calculadora", category: "first-steps", language: "es" },
-    { path: "@spell/examples/ListaDeTareas", title: "Lista de tareas", category: "everyday", language: "es" },
-    { path: "@spell/examples/Solitario", title: "Solitario", category: "games", language: "es" },
-    { path: "@spell/examples/TaskList", title: "Task List", category: "everyday" },
-    { path: "@spell/examples/FamilyCookbook", title: "Family Cookbook", category: "everyday" },
-    { path: "@spell/examples/Statusphere", title: "Statusphere", category: "web-data" }
+    { path: "@spell/examples/Solitaire", title: "Solitaire", description: "Klondike solitaire:  its own cards" },
+    { path: "@spell/examples/fizzbuzz", title: "FizzBuzz" },
+    { path: "@spell/examples/Weather", title: "Weather" },
+    { path: "@spell/examples/calculator", title: "Calculator" },
+    { path: "@spell/examples/Calculadora", title: "Calculadora", language: "es" },
+    { path: "@spell/examples/ListaDeTareas", title: "Lista de tareas", language: "es" },
+    { path: "@spell/examples/Solitario", title: "Solitario", language: "es" },
+    { path: "@spell/examples/TaskList", title: "Task List" },
+    { path: "@spell/examples/FamilyCookbook", title: "Family Cookbook" },
+    { path: "@spell/examples/Statusphere", title: "Statusphere" }
   ],
   "@spell/library": [
     { path: "@spell/library/OrgAdmin", title: "Org Admin" },
@@ -86,7 +88,7 @@ describe("the home page's rows", () => {
   test("what Spell's order hides isn't there:  the library, the editor's pieces, hidden examples and guides", async () => {
     const host = await mountHome()
     // Task List is hidden too:  the Start row's to-do list copies it (epic `mockup` T42)
-    expect(cardsIn(host, "examples")).toEqual(["Calculator"])
+    expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])
     expect(cardsIn(host, "guides")).toEqual(["How the Calculator works"])
     for (const id of ["library", "editor", "sign-in"]) expect(host.querySelector(`#${id}`), id).toBeNull()
     expect(host.textContent).not.toMatch(/FizzBuzz|Family Cookbook|Statusphere|Org Admin/)
@@ -103,9 +105,18 @@ describe("the home page's rows", () => {
     expect(rowIds(host)).toEqual(["start", "examples", "guides", "spanish"])
   })
 
+  test("the examples:  ONE set in Spell's order, no line over a kind of them (I48);  each card its description's first phrase", async () => {
+    const host = await mountHome()
+    expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])
+    expect(host.querySelector("#examples .subhead")).toBeNull()
+    expect([...host.querySelectorAll("#examples .TileCard .description")].map((line) => line.textContent)).toEqual([
+      "Klondike solitaire"
+    ])
+  })
+
   test('the Spanish examples and guides:  their own section, "En español", out of the English ones (I46)', async () => {
     const host = await mountHome()
-    expect(cardsIn(host, "examples")).toEqual(["Calculator"])
+    expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])
     expect(cardsIn(host, "guides")).toEqual(["How the Calculator works"])
     expect(host.querySelector("#spanish h2")?.textContent).toMatch(/^En español\./)
     // the examples, then the guides, each under its line;  Lista de tareas hidden, as Task List is

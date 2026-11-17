@@ -1,7 +1,6 @@
 {
   "title": "Lista de tareas",
   "description": "A to-do list in Spanish, an earlier, fuller Task List:  each task its own element with Spell UI's controls, a toolbar that filters it, and a click selecting tasks for a property editor that changes them all at once;  the tasks kept on this device, so they're still there next time, with no server and no sign-in",
-  "category": "everyday",
   "imports": [
     { "path": "/Tarea.es.spell", "active": true },
     { "path": "/ListaDeTareas.api.es.spell", "active": true },

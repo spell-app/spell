@@ -1,7 +1,6 @@
 {
   "title": "Counter",
   "description": "A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines",
-  "category": "first-steps",
   "imports": [
     {
       "path": "/Counter.spell",
