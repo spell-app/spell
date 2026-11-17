@@ -10,7 +10,7 @@
   ui-toolbar,
   .new-item,
   .got,
-  .item ui-action {
+  .item ui-button {
     display: none;
   }
 }
