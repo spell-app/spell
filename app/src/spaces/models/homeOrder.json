@@ -1,5 +1,5 @@
 {
-  "sections": ["projects", "start", "examples", "library", "guides", "org", "editor"],
+  "sections": ["projects", "start", "examples", "library", "guides", "spanish", "org", "editor"],
   "hidden": [
     "library",
     "editor",

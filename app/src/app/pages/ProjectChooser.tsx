@@ -27,6 +27,8 @@ import "./ProjectChooser.css"
 /****************
  * ### `<ProjectChooser>`
  * The landing page:  a hero line over cards for your own projects, the ways to start, the examples and the guides.
+ * - The examples and guides written in Spanish are a section of their own, "En español", after the English ones
+ *   (Owen, epic `mockup` I46:  "Split the english and Spanish into two sections");  `<LanguageCards>`.
  * - Its sections in Spell's own order, `SPACES.homeSections()`, dragged by their headers in dev (epic `repo-split` P28):
  *   your own projects first, under the hero, and only while you have some (epic `mockup` I40).
  * - Spell's own order also leaves some out, sections and projects (`SPACES.HOME_HIDDEN_KEY`, epic `mockup` I40):
@@ -81,6 +83,7 @@ export function ProjectChooser() {
           <ProjectCards
             id="examples"
             projectRoot={examples}
+            language={ENGLISH}
             line={appTexts.text("homeExamplesLine")}
             create={<Actions.createExample button appearance="basic" size="small" />}
             sectionDrag={drag()}
@@ -101,9 +104,24 @@ export function ProjectChooser() {
           <ProjectCards
             id="guides"
             projectRoot={guides}
+            language={ENGLISH}
             line={appTexts.text("homeGuidesLine")}
             empty={appTexts.text("homeNoGuides")}
             create={<Actions.createGuide button appearance="basic" size="small" />}
+            sectionDrag={drag()}
+          />
+        )
+      case "spanish":
+        return (
+          <LanguageCards
+            id="spanish"
+            language={SPANISH}
+            heading={appTexts.text("homeSpanishTitle")}
+            line={appTexts.text("homeSpanishLine")}
+            groups={[
+              { projectRoot: examples, title: appTexts.text("homeSpanishExamples") },
+              { projectRoot: guides, title: appTexts.text("homeSpanishGuides") }
+            ]}
             sectionDrag={drag()}
           />
         )
@@ -171,10 +189,12 @@ function OrgGroups(props: { drag?: TileCardDrag }) {
  * beside a few lines of the Task List.
  ****************/
 function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
-  // the first in the home page's order it shows a card for, the Calculator
-  const firstExample = () => onHomeIn(SPACES.SpellProjectRoot.examples, props.examples)[0]?.path
-  // the first guide the home page shows a card for
-  const firstGuide = () => onHomeIn(SPACES.SpellProjectRoot.guides, props.guides)[0]?.path
+  // the first English example the home page shows a card for, the Calculator
+  const firstExample = () =>
+    cardsOf({ projectRoot: SPACES.SpellProjectRoot.examples, language: ENGLISH }, props.examples)[0]?.path
+  // the first English guide the home page shows a card for
+  const firstGuide = () =>
+    cardsOf({ projectRoot: SPACES.SpellProjectRoot.guides, language: ENGLISH }, props.guides)[0]?.path
   return (
     <section class="Hero">
       <div class="pitch">
@@ -229,44 +249,38 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
  ****************/
 function StartCards(props: { drag?: TileCardDrag }) {
   return (
-    <section
+    <HomeSection
       id="start"
-      class={["ProjectCards", sectionDragClasses(props.drag)]}
-      {...sectionDropHandlers(() => props.drag)}
+      heading={appTexts.text("startTitle")}
+      line={appTexts.text("startLine")}
+      actions={<Actions.importApp button appearance="basic" size="small" />}
+      drag={props.drag}
     >
-      <header draggable={props.drag ? "true" : undefined} {...sectionGrabHandlers(() => props.drag)}>
-        <h2>
-          {appTexts.text("startTitle")}. <span class="line">{appTexts.text("startLine")}</span>
-        </h2>
-        <Actions.importApp button appearance="basic" size="small" />
-      </header>
-      <div class="cards">
-        <StartCard
-          name={appTexts.text("startTaskList")}
-          line={appTexts.text("startTaskListLine")}
-          start={() => void editor.startFromCopy(TASK_LIST)}
-        />
-        <StartCard
-          name={appTexts.text("startCounter")}
-          line={appTexts.text("startCounterLine")}
-          start={() => void editor.startFrom("counter")}
-        />
-        <StartCard
-          name={appTexts.text("startConverter")}
-          line={appTexts.text("startConverterLine")}
-          start={() => void editor.startFrom("converter")}
-        />
-        <StartCard
-          name={appTexts.text("startBlank")}
-          line={appTexts.text("startBlankLine")}
-          start={() => {
-            Palette.openOnArrival()
-            Inspector.openQuietly()
-            void editor.startFrom("blank", { codeClosed: true })
-          }}
-        />
-      </div>
-    </section>
+      <StartCard
+        name={appTexts.text("startTaskList")}
+        line={appTexts.text("startTaskListLine")}
+        start={() => void editor.startFromCopy(TASK_LIST)}
+      />
+      <StartCard
+        name={appTexts.text("startCounter")}
+        line={appTexts.text("startCounterLine")}
+        start={() => void editor.startFrom("counter")}
+      />
+      <StartCard
+        name={appTexts.text("startConverter")}
+        line={appTexts.text("startConverterLine")}
+        start={() => void editor.startFrom("converter")}
+      />
+      <StartCard
+        name={appTexts.text("startBlank")}
+        line={appTexts.text("startBlankLine")}
+        start={() => {
+          Palette.openOnArrival()
+          Inspector.openQuietly()
+          void editor.startFrom("blank", { codeClosed: true })
+        }}
+      />
+    </HomeSection>
   )
 }
 
@@ -279,6 +293,39 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
 }
 
 /****************
+ * ### `<HomeSection>`
+ * One section of the landing page:  its title and quiet line, its buttons on the right, then its cards in a grid.
+ * - `drag`:  moving the whole section by its header, among the page's (in dev, in Spell's own checkout);
+ *   none:  it stays put.
+ * - The shape every section shares:  the ways to start, a group's cards, a language's.
+ ****************/
+function HomeSection(props: {
+  id: string
+  heading: string
+  line?: string
+  actions?: JSX.Element
+  small?: boolean
+  drag?: TileCardDrag
+  children: JSX.Element
+}) {
+  return (
+    <section
+      id={props.id}
+      class={["ProjectCards", { small: !!props.small }, sectionDragClasses(props.drag)]}
+      {...sectionDropHandlers(() => props.drag)}
+    >
+      <header draggable={props.drag ? "true" : undefined} {...sectionGrabHandlers(() => props.drag)}>
+        <h2>
+          {props.heading}. <span class="line">{props.line}</span>
+        </h2>
+        {props.actions}
+      </header>
+      <div class="cards">{props.children}</div>
+    </section>
+  )
+}
+
+/****************
  * ### `<ProjectCards>`
  * One group of the landing page:  its title and line, its "create" button, then a card per project.
  * - A card:  a picture of its app running (its `__thumbnail.png`, epic `mockup` P18), else a coloured tile with the
@@ -288,8 +335,8 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  * - Nothing in it:  one quiet card saying so (`empty`, else "No examples yet!").
  * - Its projects with a category (the examples:  "First steps", "Games" ...) come under a quiet line per category,
  *   in `SPACES.EXAMPLE_CATEGORIES`' order (epic `mockup` P18);  those with none after them.
- * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
- *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
+ * - `language`:  only its projects written in that language (`languageOf()`);
+ *   the examples and guides show their English ones, and the Spanish ones are `<LanguageCards>`' (epic `mockup` I46).
  * - In the editor's order of each group, `SPACES.HOME_ORDER` (epic `mockup` P19);  one it doesn't list, last.
  *   - Not those it hides, nor a project that says `"onHome": false` (`onHomeIn()`).
  *   - In dev, where the server says it may (`mayReorder`), a card is dragged among its run to reorder it:
@@ -299,15 +346,87 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  ****************/
 export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
-  // the page of a group's sites lists every site;  the home page's rows, those it shows a card for
-  const listed = () =>
-    props.sitesOnly
-      ? SPACES.inHomeOrder(
-          props.projectRoot.path,
-          root().projects.filter((project) => project.isSite),
-          homeOrder()
-        )
-      : onHomeIn(props.projectRoot, root())
+  return (
+    <Show when={!props.hideWhenNone || cardsOf(props, root()).length > 0}>
+      <HomeSection
+        id={props.id}
+        heading={props.heading ?? root().words.title}
+        line={props.line}
+        actions={props.create}
+        small={props.small}
+        drag={props.sectionDrag}
+      >
+        <GroupCards
+          projectRoot={props.projectRoot}
+          root={root()}
+          language={props.language}
+          useRunner={props.useRunner}
+          sitesOnly={props.sitesOnly}
+          empty={props.empty ?? appTexts.text("nothingInGroup", root().words)}
+        />
+      </HomeSection>
+    </Show>
+  )
+}
+
+/****************
+ * ### `<LanguageCards>`
+ * The section of the projects written in one language other than English:
+ * "En español", its examples then its guides (Owen, epic `mockup` I46:  "Split the english and Spanish into two sections").
+ * - Each group's cards under a quiet line in that language, "Ejemplos", "Guías";  a group with none in it, no line.
+ * - Not there at all once every group has loaded with none.
+ * - Cards drag among their own group's, as in `<ProjectCards>`;  the section by its header.
+ ****************/
+function LanguageCards(props: {
+  /** The section's id:  a link target (`#spanish`) and its place in Spell's order (`SPACES.HOME_SECTIONS`). */
+  id: string
+  /** Its projects' language, `es`:  `languageOf()`. */
+  language: string
+  /** Its title and quiet line, in that language. */
+  heading: string
+  line: string
+  /** The groups it shows that language's projects of, in order, each with the line over its cards. */
+  groups: { projectRoot: SPACES.SpellProjectRoot; title: string }[]
+  /** Moving the whole section by its header, among the home page's. */
+  sectionDrag?: TileCardDrag
+}) {
+  const groups = props.groups.map((group) => ({ ...group, root: trackProjectRoot(() => group.projectRoot) }))
+  const hasAny = () =>
+    groups.some((group) => !group.root().loaded || cardsOf({ ...group, language: props.language }, group.root()).length)
+  return (
+    <Show when={hasAny()}>
+      <HomeSection id={props.id} heading={props.heading} line={props.line} drag={props.sectionDrag}>
+        <For each={groups}>
+          {(group) => (
+            <GroupCards
+              projectRoot={group.projectRoot}
+              root={group.root()}
+              language={props.language}
+              title={group.title}
+            />
+          )}
+        </For>
+      </HomeSection>
+    </Show>
+  )
+}
+
+/**
+ * One group's cards, in the grid of the section they're in:  `<ProjectCards>`' one group, `<LanguageCards>`' each.
+ * - `title`:  one quiet line over them all;  none:  a line per category (`sectionsOf()`).
+ * - `empty`:  what its one card says while it has none;  none:  nothing at all.
+ * - Still loading, or it failed:  one quiet card saying so.
+ */
+function GroupCards(props: {
+  projectRoot: SPACES.SpellProjectRoot
+  root: ProjectRootState
+  language?: string
+  useRunner?: boolean
+  sitesOnly?: boolean
+  title?: string
+  empty?: string
+}) {
+  const listed = () => cardsOf(props, props.root)
   onSettled(() => askMayReorder())
   // a card's drag among its run:  in dev, where the server lets this page reorder, never on a page of sites
   const dragFor = (project: CardProject, section: CardSection): TileCardDrag | undefined => {
@@ -341,7 +460,7 @@ export function ProjectCards(props: ProjectCardsProps) {
           )
           // the group's whole order, the projects the row doesn't show keeping their places
           const group = props.projectRoot.path
-          const all = SPACES.inHomeOrder(group, root().projects, homeOrder()).map((each) => each.path)
+          const all = SPACES.inHomeOrder(group, props.root.projects, homeOrder()).map((each) => each.path)
           saveHomeOrder(group, SPACES.withRunReordered(all, run).map(SPACES.folderNameOf))
         }
         setDropOn(undefined)
@@ -354,54 +473,39 @@ export function ProjectCards(props: ProjectCardsProps) {
   }
   // a row with pictures of its apps shows each big, across its card's top;  one without one, its letter as big
   const banner = () => listed().some((project) => project.hasThumbnail)
+  const runs = (): CardSection[] => {
+    if (!props.title) return sectionsOf(listed())
+    return listed().length > 0 ? [{ title: props.title, projects: listed() }] : []
+  }
   return (
-    <Show when={!props.hideWhenNone || listed().length > 0}>
-      <section
-        id={props.id}
-        class={["ProjectCards", { small: !!props.small }, sectionDragClasses(props.sectionDrag)]}
-        {...sectionDropHandlers(() => props.sectionDrag)}
-      >
-        <header draggable={props.sectionDrag ? "true" : undefined} {...sectionGrabHandlers(() => props.sectionDrag)}>
-          <h2>
-            {props.heading ?? root().words.title}. <span class="line">{props.line}</span>
-          </h2>
-          {props.create}
-        </header>
-        <div class="cards">
-          <Show
-            when={root().loaded}
-            fallback={
-              <EmptyCard>
-                {root().failed ? appTexts.text("couldNotLoadGroup", root().words) : appTexts.text("loadingGroup")}
-              </EmptyCard>
-            }
-          >
-            <For
-              each={sectionsOf(listed())}
-              fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
-            >
-              {(section) => (
-                <>
-                  <Show when={section.title}>
-                    <h3 class="subhead">{section.title}</h3>
-                  </Show>
-                  <For each={section.projects}>
-                    {(project) => (
-                      <ProjectCard
-                        project={project}
-                        useRunner={props.useRunner}
-                        sitesOnly={props.sitesOnly}
-                        banner={banner()}
-                        drag={dragFor(project, section)}
-                      />
-                    )}
-                  </For>
-                </>
+    <Show
+      when={props.root.loaded}
+      fallback={
+        <EmptyCard>
+          {props.root.failed ? appTexts.text("couldNotLoadGroup", props.root.words) : appTexts.text("loadingGroup")}
+        </EmptyCard>
+      }
+    >
+      <For each={runs()} fallback={props.empty === undefined ? undefined : <EmptyCard>{props.empty}</EmptyCard>}>
+        {(section) => (
+          <>
+            <Show when={section.title}>
+              <h3 class="subhead">{section.title}</h3>
+            </Show>
+            <For each={section.projects}>
+              {(project) => (
+                <ProjectCard
+                  project={project}
+                  useRunner={props.useRunner}
+                  sitesOnly={props.sitesOnly}
+                  banner={banner()}
+                  drag={dragFor(project, section)}
+                />
               )}
             </For>
-          </Show>
-        </div>
-      </section>
+          </>
+        )}
+      </For>
     </Show>
   )
 }
@@ -449,6 +553,38 @@ function onHomeIn(projectRoot: SPACES.SpellProjectRoot, root: ProjectRootState):
   )
   return SPACES.inHomeOrder(projectRoot.path, shown, homeOrder())
 }
+
+/**
+ * The cards a row of `group` shows, in the home page's order:
+ * - a page of a group's sites (`sitesOnly`):  every site of it
+ * - else those the home page shows (`onHomeIn()`), only those written in `language` when it says
+ */
+function cardsOf(
+  group: { projectRoot: SPACES.SpellProjectRoot; language?: string; sitesOnly?: boolean },
+  root: ProjectRootState
+): CardProject[] {
+  if (group.sitesOnly) {
+    const sites = root.projects.filter((project) => project.isSite)
+    return SPACES.inHomeOrder(group.projectRoot.path, sites, homeOrder())
+  }
+  const shown = onHomeIn(group.projectRoot, root)
+  return group.language ? shown.filter((project) => languageOf(project) === group.language) : shown
+}
+
+/**
+ * The language a project is written in:  its files', by their names (`SP.ProjectListEntry`'s `language`:
+ * `es` for Solitario's `Carta.es.spell` ...), else English.
+ * - The ONE rule for which of the home page's sections a project's card is in (epic `mockup` I46).
+ */
+function languageOf(project: CardProject): string {
+  return project.language ?? ENGLISH
+}
+
+/** English's code, `en`:  a project's language when its files name none. */
+const ENGLISH = "en"
+
+/** Spanish's code, `es`:  the language of the home page's `spanish` section, "En español". */
+const SPANISH = "es"
 
 ////////////////
 // ## The home page's order:  dragged in dev
@@ -582,9 +718,9 @@ function sectionGrabHandlers(drag: () => TileCardDrag | undefined) {
   }
 }
 
-/** One run of a group's cards, under its quiet line:  a category's, or a language's. */
+/** One run of a group's cards, under its quiet line:  a category's, or the group's in `<LanguageCards>`. */
 type CardSection = {
-  /** Its line:  "Games", "En Español";  none for those with no category. */
+  /** Its line:  "Games", "Ejemplos";  none for those with no category. */
   title?: string
   /** Its projects, in the group's order. */
   projects: ProjectRootState["projects"]
@@ -592,36 +728,20 @@ type CardSection = {
 
 /**
  * `projects` in the runs the home page shows them in:
- * - those in English with a category, a run per category, in `SPACES.EXAMPLE_CATEGORIES`' order
- * - then those in English with none, with no line
- * - then those in another language, a run per language
+ * - those with a category, a run per category, in `SPACES.EXAMPLE_CATEGORIES`' order
+ * - then those with none, with no line
  * - Runs with nothing in them are left out.
  */
 function sectionsOf(projects: ProjectRootState["projects"]): CardSection[] {
-  const english = projects.filter((project) => !project.language)
   const categories: readonly string[] = SPACES.EXAMPLE_CATEGORIES
   const sections: CardSection[] = [
     ...SPACES.EXAMPLE_CATEGORIES.map((category) => ({
       title: appTexts.text(`category.${category}`),
-      projects: english.filter((project) => project.category === category)
+      projects: projects.filter((project) => project.category === category)
     })),
-    { projects: english.filter((project) => !categories.includes(project.category ?? "")) },
-    ...languagesIn(projects).map((language) => ({
-      title: languageTitle(language),
-      projects: projects.filter((project) => project.language === language)
-    }))
+    { projects: projects.filter((project) => !categories.includes(project.category ?? "")) }
   ]
   return sections.filter((section) => section.projects.length > 0)
-}
-
-/** The languages other than English that `projects` are written in, in the order they come. */
-function languagesIn(projects: ProjectRootState["projects"]): string[] {
-  return [...new Set(projects.flatMap((project) => (project.language ? [project.language] : [])))]
-}
-
-/** The line over a language's projects:  "En Español", in that language;  else its name in English. */
-function languageTitle(language: string): string {
-  return language === "es" ? appTexts.text("homeInSpanish") : SP.Language.for(language).name
 }
 
 /** Props for `<ProjectCards>`. */
@@ -630,6 +750,8 @@ export type ProjectCardsProps = {
   id: string
   /** The group whose projects to show. */
   projectRoot: SPACES.SpellProjectRoot
+  /** Only its projects written in this language (`languageOf()`:  `en`, `es`);  none:  all of them. */
+  language?: string
   /** Its title, in place of its group's own (the group's word for what it holds). */
   heading?: string
   /** The quiet line after its title, if any. */

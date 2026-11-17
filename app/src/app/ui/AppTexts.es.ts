@@ -525,7 +525,6 @@ const APP_TEXTS_ES: AppTextPack = {
   notebooksAppName: "Cuadernos de Encanto",
   tabTitle: "{project} • Spell",
   notebookTabTitle: "{project} • Cuaderno de Encanto",
-  homeInSpanish: "En Español",
   homeEyebrow: "Spell, en vista previa",
   homeTitle: "Programas que se pueden leer en voz alta.",
   homeTagline: "Palabras sencillas.  Una app que funciona.",
@@ -562,6 +561,11 @@ const APP_TEXTS_ES: AppTextPack = {
   editorZonesCancel: "Cancelar",
   homeEditorLine: "Las piezas del propio editor, en Encanto:\ncambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",
+  // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
+  homeSpanishTitle: "En español",
+  homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeSpanishExamples: "Ejemplos",
+  homeSpanishGuides: "Guías",
 
   ////////////////
   // ## Project groups
