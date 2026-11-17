@@ -2,7 +2,7 @@ import { JSON5File, LoadableFile, getDier, KnownFormat, parseJSON5 } from "spell
 import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
-import { localPerson } from "./projectGroups"
+import { localPerson, type ProjectListEntryWithHome, type UnsavedApp } from "./projectGroups"
 import { ProjectFiles } from "./ProjectFiles"
 import { projectFileOf, projectFilesUrl, type ProjectArchive, type ProjectArchiveFile } from "./projectArchive"
 import {
@@ -265,18 +265,25 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
 
   /**
    * Create a project from starter program `starter`, named for it, with no question asked.
+   * - `untouched`:  marked as a start card's, not one of your apps until it changes (`markUnsaved()`)
    * - Returns the new project;  throws on error.
    */
-  async createFrom(starter: StarterProgram): Promise<SP.SpellProject> {
+  async createFrom(starter: StarterProgram, { untouched = false }: StartOptions = {}): Promise<SP.SpellProject> {
     await this.load(undefined)
-    return this.createApp(freeProjectId(this.path, STARTER_PROGRAMS[starter].name, this.projectPaths), starter)
+    const project = await this.createApp(
+      freeProjectId(this.path, STARTER_PROGRAMS[starter].name, this.projectPaths),
+      starter
+    )
+    if (untouched) await this.markUnsaved(project.path, "untouched")
+    return project
   }
 
   /**
    * Copy project `sourceId`, of any group, into this one, under its own name, with no question asked.
+   * - `untouched`:  marked as a start card's, not one of your apps until it changes (`markUnsaved()`)
    * - Returns the copy;  throws on error.
    */
-  async copyHere(sourceId: string): Promise<SP.SpellProject> {
+  async copyHere(sourceId: string, { untouched = false }: StartOptions = {}): Promise<SP.SpellProject> {
     const die = getDier(this, `copying into ${this.type}`, { sourceId })
     await this.loadOrDie(die)
     const newProjectId = freeProjectId(this.path, new SP.SpellLocation(sourceId, die).projectName!, this.projectPaths)
@@ -290,7 +297,41 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     } catch (e) {
       die(`Server error copying ${sourceId}`, e)
     }
-    return this.getProject(newProjectId) || die(`Couldn't copy ${sourceId}.`)
+    const copy = this.getProject(newProjectId) || die(`Couldn't copy ${sourceId}.`)
+    if (untouched) await this.markUnsaved(newProjectId, "untouched")
+    return copy
+  }
+
+  /**
+   * Mark project `projectId`, made from a start card, as `unsaved` (`UnsavedApp`, epic `mockup` I42);
+   * `null`:  keep it for good, the mark gone.
+   * - Its first change makes an untouched one `"changed"` by itself, on the server.
+   * - Marking one `"untouched"` also deletes the group's untouched ones left a day ago (the server's `sweepUntouched()`).
+   * - throws on error
+   */
+  async markUnsaved(projectId: string, unsaved: UnsavedApp | null): Promise<void> {
+    const die = getDier(this, `marking ${this.type}`, { projectId, unsaved })
+    try {
+      this.contents = await LoadableFile.fetch<SP.ProjectList>({
+        url: `/api/projects/unsaved/project`,
+        contents: { projectId, unsaved },
+        requestFormat: SpellProjectRoot.REQUEST_FORMAT_JSON,
+        format: "json"
+      })
+    } catch (e) {
+      die(`Server error marking ${projectId}`, e)
+    }
+  }
+
+  /**
+   * Project `projectId`'s mark, as the server says now (`UnsavedApp`):  `undefined` once it's kept,
+   * or when it's not in this group (any more).
+   * - Reads the group's list again first:  its first change marks it on the server alone.
+   * - throws on error
+   */
+  async unsavedNow(projectId: string): Promise<UnsavedApp | undefined> {
+    await this.reload()
+    return (this.contents as ProjectListEntryWithHome[] | undefined)?.find((entry) => entry.path === projectId)?.unsaved
   }
 
   /**
@@ -502,6 +543,15 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
 }
 
 /** What people call the project at `location`:  `my-app` => `My App`. */
+/** Options for `SpellProjectRoot.createFrom()` and `copyHere()`. */
+export type StartOptions = {
+  /**
+   * Made from a start card:  marked `"untouched"`, so it's not one of your apps until it changes (epic `mockup` I42).
+   * - Off by default;  never in the static build, which keeps a visitor's projects in their browser.
+   */
+  untouched?: boolean
+}
+
 /** Options for `SpellProjectRoot.importApp()`. */
 export type ImportOptions = {
   /** What the place it's made in keeps:  `"everything"` (default), or `"text"` alone (the static build). */

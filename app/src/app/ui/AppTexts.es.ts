@@ -193,6 +193,12 @@ const APP_TEXTS_ES: AppTextPack = {
   deleteDraftOk: "Tirarlo",
   draftDeletedFile: "Borrado tu borrador de {count} archivo.",
   draftDeletedFiles: "Borrado tu borrador de {count} archivos.",
+  keepAppHeading: "¿Guardar tu borrador de {name}?",
+  keepAppMessage:
+    "Todavía no tiene ninguna versión guardada.\nNo guardar el borrador lo tira:  no estará entre tus apps.",
+  keepAppSave: "Guardar el borrador",
+  keepAppDontSave: "No guardar el borrador",
+  appNotKept: "{name} no se guardó.",
   saveCurrentChanges: "Guardar los cambios actuales",
   keptDraftAt: "{time}:  tu borrador, sin publicar",
   publishedFile: "{count} archivo publicado:  guardado como la versión {version}.",

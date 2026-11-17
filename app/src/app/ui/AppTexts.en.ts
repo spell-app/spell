@@ -190,6 +190,12 @@ export const APP_TEXTS = {
   deleteDraftOk: "Throw It Away",
   draftDeletedFile: "Deleted your draft of {count} file.",
   draftDeletedFiles: "Deleted your draft of {count} files.",
+  /** Leaving a project made from a start card, changed but with no version saved (epic `mockup` I42). */
+  keepAppHeading: "Save your draft of {name}?",
+  keepAppMessage: "It has no saved version yet.\nDon't Save Draft throws it away:  it won't be in your apps.",
+  keepAppSave: "Save Draft",
+  keepAppDontSave: "Don't Save Draft",
+  appNotKept: "{name} wasn't saved.",
   saveCurrentChanges: "Save Current Changes",
   keptDraftAt: "{time}:  your draft, not published",
   publishedFile: "Published {count} file:  kept as version {version}.",

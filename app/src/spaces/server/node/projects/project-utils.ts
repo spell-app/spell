@@ -8,6 +8,7 @@
  *   and sets this machine's person and their org's groups (`thisMachinesPerson()`).
  */
 import { existsSync, readFileSync } from "fs"
+import { stat } from "fs/promises"
 import escapeRegExp from "lodash/escapeRegExp"
 import { basename, dirname, extname, relative, resolve, sep } from "path"
 
@@ -265,13 +266,9 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   return Promise.all(
     projectNames.map(async (projectName) => {
       const path = `${domain.projectRoot}/${projectName}`
-      const { title, description, onHome, category, imports } = await loadProjectFile(path).catch(() => ({
-        title: undefined,
-        description: undefined,
-        onHome: undefined,
-        category: undefined,
-        imports: []
-      }))
+      const { title, description, onHome, category, imports, unsaved } = await loadProjectFile(path)
+        .then((file) => file as ProjectFileWithMark)
+        .catch((): ProjectFileWithMark => ({ imports: [] }))
       const files = imports.map((each) => each.path)
       const language = languageOf(files)
       const isSite = await holdsSite(resolve(domain.serverPath, projectName), files)
@@ -284,7 +281,8 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
         ...(isSite && { isSite }),
         ...(onHome === false && { onHome }),
         ...(category && { category }),
-        ...(hasThumbnail && { hasThumbnail })
+        ...(hasThumbnail && { hasThumbnail }),
+        ...(unsaved && { unsaved })
       }
     })
   )
@@ -724,6 +722,8 @@ export const request_saveFile = respondWithJSON(async (request) => {
       return true
     }
   }
+  // its first change keeps a project made from a start card (epic `mockup` I42);  what spell builds isn't one
+  if (!isBuiltFile(location)) await noteAppChanged(location.projectId)
   if (!isDraftable(location) || typeof request.body !== "string") {
     await mayChangeOrDie(request, location.projectId, "save")
     return await saveFile(location.projectId, location.filePath!, request.body)
@@ -804,6 +804,8 @@ export const createProject = async (projectId: string, filePath: string, content
 export const request_createProject = respondWithJSON(async (request) => {
   const { projectId, title, filePath, contents } = request.body
   await createProject(projectId, filePath, contents)
+  // an imported project file never says it's a start card's, unkept (epic `mockup` I42):  that's marked after
+  await markUnsaved(projectId, null)
   await setProjectTitle(projectId, title)
   return await getProjectList(projectId)
 })
@@ -831,6 +833,8 @@ export const duplicateApp = async (projectId: string, newProjectId: string) => {
 export const request_duplicateApp = respondWithJSON(async (request) => {
   const { projectId, newProjectId, title } = request.body
   await duplicateApp(projectId, newProjectId)
+  // a copy is kept for good, whatever its original was (epic `mockup` I42):  a start card's is marked after
+  await markUnsaved(newProjectId, null)
   await setProjectTitle(newProjectId, title)
   return await getProjectList(newProjectId)
 })
@@ -860,6 +864,7 @@ export const renameApp = async (projectId: string, newProjectId: string) => {
 export const request_renameApp = respondWithJSON(async (request) => {
   const { projectId, newProjectId, title } = request.body
   await renameApp(projectId, newProjectId)
+  await noteAppChanged(newProjectId)
   await setProjectTitle(newProjectId, title)
   return await getProjectList(projectId)
 })
@@ -909,6 +914,7 @@ export async function saveProjectSettings(
  */
 export const request_saveProjectSettings = respondWithJSON(async (request) => {
   const { projectId, settings } = request.body
+  await noteAppChanged(projectId)
   return await saveProjectSettings(projectId, settings ?? {})
 })
 
@@ -985,6 +991,75 @@ export const request_deleteApp = respondWithJSON(async (request) => {
 })
 
 ////////////////
+// ## Apps made from a start card (epic `mockup` I42)
+////////////////
+
+/** A project's file, with the mark a start card's project carries until it's kept (`SPACES.UnsavedApp`). */
+type ProjectFileWithMark = ProjectFileJSON & { unsaved?: SPACES.UnsavedApp }
+
+/**
+ * How long an untouched project made from a start card stays, when nobody came back to delete it:
+ * the next one made in its group sweeps it away (`sweepUntouched()`).
+ * - A page closed or reloaded never deletes one:  the reload would find it gone.
+ */
+const UNTOUCHED_KEPT_MS = 24 * 60 * 60 * 1000
+
+/**
+ * SIDE EFFECT:  project `projectId`'s file says `unsaved` (`SPACES.UnsavedApp`);  `null` drops the key:  kept for good.
+ * - Nothing written when it already says so;  a project with no file yet gets one, its files listed as it's read.
+ */
+export async function markUnsaved(projectId: string, unsaved: SPACES.UnsavedApp | null): Promise<void> {
+  if (unsaved === null && !existsSync(projectFilePath(projectId))) return
+  const { unsaved: old, ...rest } = (await loadProjectFile(projectId)) as ProjectFileWithMark
+  if ((old ?? null) === unsaved) return
+  await saveProjectFile(projectId, unsaved === null ? rest : ({ ...rest, unsaved } as ProjectFileJSON))
+}
+
+/**
+ * SIDE EFFECT:  something in project `projectId` just changed:  an untouched project made from a start card is
+ * `"changed"` now, so it's one of your apps on the home page (`SPACES.UnsavedApp`).
+ * - Called by every route that changes a project, before its change;  any other project is left alone.
+ * - What spell builds for it, as it compiles, is no change.
+ */
+export async function noteAppChanged(projectId: string): Promise<void> {
+  if (!existsSync(projectFilePath(projectId))) return
+  const { unsaved } = (await loadProjectFile(projectId)) as ProjectFileWithMark
+  if (unsaved === "untouched") await markUnsaved(projectId, "changed")
+}
+
+/**
+ * SIDE EFFECT:  delete each untouched project of group `groupId` made from a start card more than
+ * `UNTOUCHED_KEPT_MS` ago:  left with its page closed, so nobody came back to delete it.
+ * - Never one that's changed, nor anything else in the group.
+ */
+async function sweepUntouched(groupId: string): Promise<void> {
+  const old = Date.now() - UNTOUCHED_KEPT_MS
+  for (const { path, unsaved } of (await getProjectList(groupId)) as SPACES.ProjectListEntryWithHome[]) {
+    if (unsaved !== "untouched") continue
+    const madeAt = (await stat(projectFilePath(path))).mtimeMs
+    if (madeAt < old) await deleteApp(path)
+  }
+}
+
+/**
+ * `POST /api/projects/unsaved/project` -- mark a project made from a start card, or keep it for good.
+ * - Client sends body:  `{ projectId, unsaved }`:
+ *   - `"untouched"`:  just made, nothing changed yet;  older untouched ones of its group go (`sweepUntouched()`)
+ *   - `null`:  kept for good, the mark gone
+ * - Returns:  updated project list for `projectId`'s group.
+ * - Failure:  400 for any other `unsaved`;  500 if `projectId` is invalid.
+ */
+export const request_markUnsaved = respondWithJSON(async (request) => {
+  const { projectId, unsaved } = request.body
+  if (unsaved !== "untouched" && unsaved !== null) {
+    throw new SRV.HttpError(400, `unsaved:  "untouched" or null, not ${JSON.stringify(unsaved)}`)
+  }
+  if (unsaved) await sweepUntouched(SP.SpellLocation.getProjectLocation(projectId).projectRoot)
+  await markUnsaved(projectId, unsaved)
+  return await getProjectList(projectId)
+})
+
+////////////////
 // ## Project file manipulation
 ////////////////
 
@@ -1008,6 +1083,7 @@ export const request_createFile = respondWithJSON(async (request) => {
   const contents =
     encoding === SPACES.BASE64_ENCODING ? Buffer.from(request.body.contents, "base64") : request.body.contents
   await mayChangeOrDie(request, projectId, "create")
+  await noteAppChanged(projectId)
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   // a new document is your draft until its first Publish (Q23):  nothing public before then
   if (isDraftable(location) && typeof contents === "string") {
@@ -1083,12 +1159,15 @@ export const request_getDrafts = respondWithJSON(async (request): Promise<SPACES
  */
 export const request_publish = respondWithJSON(async (request) => {
   const { projectId, anyway, of } = request.body
-  return await (
+  const published = await (
     await draftsFor(request, projectId)
   ).publish({
     anyway: !!anyway,
     ...(typeof of === "string" && { of })
   })
+  // a version of it now:  one of your apps for good (epic `mockup` I42)
+  await markUnsaved(projectId, null)
+  return published
 })
 
 /**
@@ -1110,7 +1189,10 @@ export const request_discard = respondWithJSON(async (request) => {
  */
 export const request_keepDraft = respondWithJSON(async (request) => {
   const { projectId } = request.body
-  return await (await draftsFor(request, projectId)).keepDraft()
+  const kept = await (await draftsFor(request, projectId)).keepDraft()
+  // a version of it now:  one of your apps for good (epic `mockup` I42)
+  await markUnsaved(projectId, null)
+  return kept
 })
 
 /**
@@ -1174,6 +1256,7 @@ export const reorderFiles = async (projectId: string, filePaths: string[]) => {
 export const request_reorderFiles = respondWithJSON(async (request) => {
   const { projectId, filePaths } = request.body
   await mayChangeOrDie(request, projectId, "reorder")
+  await noteAppChanged(projectId)
   await reorderFiles(projectId, filePaths ?? [])
   return await getIndex(projectId, { person: personOf(request) })
 })
@@ -1208,6 +1291,7 @@ async function removeIfEmpty(location: SP.SpellLocation): Promise<void> {
 export const request_renameFile = respondWithJSON(async (request) => {
   const { projectId, filePath, newFilePath } = request.body
   await mayChangeOrDie(request, projectId, "rename")
+  await noteAppChanged(projectId)
   await renameFile(projectId, filePath, newFilePath)
   return await getIndex(projectId, { person: personOf(request) })
 })
@@ -1238,6 +1322,7 @@ export const deleteFile = async (projectId: string, filePath: string) => {
 export const request_deleteFile = respondWithJSON(async (request) => {
   const { projectId, filePath } = request.body
   await mayChangeOrDie(request, projectId, "delete")
+  await noteAppChanged(projectId)
   await deleteFile(projectId, filePath)
   return await getIndex(projectId, { person: personOf(request) })
 })

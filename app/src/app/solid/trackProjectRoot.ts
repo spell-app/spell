@@ -10,6 +10,7 @@ import { tracked } from "./tracked"
 /**
  * A group of projects (a project root:  the Examples, the Guides ...) as Solid reads it, and opening one of them.
  * - Read by the Spell menu's project list (`<ProjectsMenu>`, `MenuBar.tsx`), the editor page and the landing page.
+ * - None of them lists a project made from a start card and left untouched (epic `mockup` I42).
  * - No component of its own:  the lists that draw a root draw it their own way.
  */
 
@@ -85,25 +86,34 @@ function readProjectRoot(projectRoot: SPACES.SpellProjectRoot | undefined): Omit
     loaded,
     projects: loaded
       ? // each project's title:  its file's `"title"`, which the list gave, else made from its name (Q45)
-        projectRoot!.projectPaths.map((path) => {
-          const entry: SPACES.ProjectListEntryWithHome | undefined = projectRoot!.contents?.find(
-            (each) => each.path === path
-          )
-          return {
-            path,
-            name: new SP.SpellProject(path).title,
-            description: entry?.description,
-            language: entry?.language,
-            isSite: entry?.isSite,
-            onHome: entry?.onHome,
-            category: entry?.category,
-            hasThumbnail: entry?.hasThumbnail
-          }
-        })
+        // not one made from a start card and left untouched:  not one of your apps yet (epic `mockup` I42)
+        projectRoot!.projectPaths
+          .filter((path) => !isUntouched(projectRoot!, path))
+          .map((path) => {
+            const entry: SPACES.ProjectListEntryWithHome | undefined = projectRoot!.contents?.find(
+              (each) => each.path === path
+            )
+            return {
+              path,
+              name: new SP.SpellProject(path).title,
+              description: entry?.description,
+              language: entry?.language,
+              isSite: entry?.isSite,
+              onHome: entry?.onHome,
+              category: entry?.category,
+              hasThumbnail: entry?.hasThumbnail
+            }
+          })
       : [],
     icon: projectRoot?.icon,
     words: appTexts.groupWords(projectRoot)
   }
+}
+
+/** Is project `path` of `projectRoot` one made from a start card, nothing changed yet (`SPACES.UnsavedApp`)? */
+function isUntouched(projectRoot: SPACES.SpellProjectRoot, path: string): boolean {
+  const entry: SPACES.ProjectListEntryWithHome | undefined = projectRoot.contents?.find((each) => each.path === path)
+  return entry?.unsaved === "untouched"
 }
 
 /** Show the project at `path`, in the editor or the runner. */

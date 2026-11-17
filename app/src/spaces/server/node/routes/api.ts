@@ -97,6 +97,7 @@ api.post("/projects/rename/project", projectUtils.request_renameApp)
 api.post("/projects/duplicate/project", projectUtils.request_duplicateApp)
 api.post("/projects/settings/project", projectUtils.request_saveProjectSettings)
 api.delete("/projects/remove/project", projectUtils.request_deleteApp)
+api.post("/projects/unsaved/project", projectUtils.request_markUnsaved)
 
 // working with project files:  each route's contract is on its `projectUtils.request_*` handler
 api.post("/projects/create/file", projectUtils.request_createFile)

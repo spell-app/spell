@@ -1,7 +1,8 @@
-import { onCleanup } from "solid-js"
+import { onCleanup, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 import { createRouter, defineRoutes, useNavigate, type RouterHistory, type RouterInstance } from "@solidjs/router"
 
+import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
 import { ProjectChooser } from "./ProjectChooser"
 import { SiteEditorRoute } from "./SiteEditorPage"
@@ -30,8 +31,19 @@ export const ROUTES = defineRoutes([
   },
   { path: THEME_PAGE, component: ThemeEditorPage },
   { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
-  { path: "*", component: ProjectChooser }
+  { path: "*", component: HomeRoute }
 ])
+
+/****************
+ * ### `<HomeRoute>`
+ * The home page, `<ProjectChooser>`, which leaves the project the editor showed (`editor.leaveProject()`):
+ * one made from a start card and not kept goes, or is asked about (epic `mockup` I42).
+ * - However the page was reached:  Home, the browser's Back, a typed address.
+ ****************/
+function HomeRoute() {
+  onSettled(() => void editor.leaveProject())
+  return <ProjectChooser />
+}
 
 /**
  * A router over `ROUTES`;  `history` defaults to the browser's (tests pass `memoryHistory()`).

@@ -81,7 +81,24 @@ export type ProjectListEntryWithHome = SP.ProjectListEntry & {
   category?: string
   /** It has a picture of its app running, `PROJECT_THUMBNAIL` in its folder, for its card (epic `mockup` P18). */
   hasThumbnail?: true
+  /** Made from a start card and not kept yet:  its project file's `unsaved` (`UnsavedApp`, epic `mockup` I42). */
+  unsaved?: UnsavedApp
 }
+
+/**
+ * Where a project made from a start card is, before it's one of your apps for good (epic `mockup` I42):
+ * its project file's `unsaved`, gone once it's kept.
+ * - `"untouched"`:  nothing changed yet.
+ *   The home page shows no card for it, and leaving it deletes it, no question asked.
+ * - `"changed"`:  changed, but no version saved yet.
+ *   On the home page;  leaving it asks whether to keep it, and "Don't Save" deletes it.
+ * - Its first change makes it `"changed"`:  a save of one of its files, a file made, renamed or deleted, a rename,
+ *   its settings (the server's `noteAppChanged()`).
+ * - Kept for good, the key gone:  "Save" as you leave it, Publish, or Versions' Save Current Changes.
+ * - Owen (epic `mockup` I42):  "Don't save it until I start making changes ... if it has no versions and I say
+ *   don't save draft -- don't save it at all."
+ */
+export type UnsavedApp = "untouched" | "changed"
 
 /**
  * A project's picture of its app running by itself, for its card on the home page:  `__thumbnail.png`, in its folder.
