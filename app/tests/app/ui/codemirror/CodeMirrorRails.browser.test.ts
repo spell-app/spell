@@ -373,6 +373,136 @@ describe("a body's rail under the caret", () => {
     }
   })
 
+  describe("the caret on a blank line, its tabs alone:  where its words will go once typed (I157)", () => {
+    /**
+     * Blank lines in bodies, as Enter and the caret's snap leave them:  in an `if`'s body, an action's, a group's,
+     * and between a drawing's tags.
+     */
+    const BLANKS = `a "card" is a view
+\tgroup "Moves"
+\tto turn it over
+\t\tif it is face up
+\t\t\tturn it face down
+\t\t\t
+\t\t\tpause for 10 msec
+\t\t
+\t\tsay "done"
+\t
+\tto draw it
+\t\t<container columns="7">
+\t\t\t<stock-pile "stock" />
+\t\t\t
+\t\t\t<action "cheat" />
+\t\t</container>
+`
+
+    /** The first letter of line `number`'s words, on the page. */
+    const firstLetter = (view: EditorView, number: number) => {
+      const line = view.state.doc.line(number)
+      return view.coordsAtPos(line.from + /^\s*/.exec(line.text)![0].length, 1)!.left
+    }
+
+    /** The caret put at the end of line `number`, stuck to what's before it or after (`assoc`), where it's drawn. */
+    const caretAtEnd = (view: EditorView, number: number, assoc: -1 | 1) => {
+      view.dispatch({
+        selection: EditorSelection.single(0).replaceRange(EditorSelection.cursor(view.state.doc.line(number).to, assoc))
+      })
+      return caretX(view)
+    }
+
+    /** `text` typed at the caret, as a key types it:  where its first letter is drawn, at once and once laid out again. */
+    async function typed(view: EditorView, text: string): Promise<{ atOnce: number; laidOut: number }> {
+      const at = view.state.selection.main.head
+      view.dispatch({
+        changes: { from: at, insert: text },
+        selection: { anchor: at + text.length },
+        userEvent: "input.type"
+      })
+      await frames()
+      const atOnce = view.coordsAtPos(at, 1)!.left
+      await new Promise((done) => setTimeout(done, CodeMirrorBubbly.RELAYOUT_MSEC + 50))
+      await frames()
+      return { atOnce, laidOut: view.coordsAtPos(at, 1)!.left }
+    }
+
+    test("in a body, at every level:  where the words of a plain line on its level are, however the caret got there;  a letter typed lands on it", async () => {
+      for (const [blank, words] of [
+        ["\t\t\t", "turn it face down"],
+        ["\t\t", 'say "done"']
+      ] as const) {
+        view?.dom.parentElement?.remove()
+        view?.destroy()
+        const editor = await bubblyEditorOf(BLANKS)
+        const [wordsLine] = linesStarting(editor, [words])
+        const number = editor.state.doc.toString().split("\n").indexOf(blank) + 1
+        const level = firstLetter(editor, wordsLine!)
+        // it stood a tab left:  at the end of its tabs, before the room after them
+        for (const assoc of [-1, 1] as const) {
+          expect(Math.abs((await caretAtEnd(editor, number, assoc)) - level), `${words}, ${assoc}`).toBeLessThan(0.5)
+        }
+        const { atOnce, laidOut } = await typed(editor, "s")
+        expect(Math.abs(atOnce - level), words).toBeLessThan(0.5)
+        expect(Math.abs(laidOut - level), words).toBeLessThan(0.5)
+      }
+    })
+
+    test("a tab taken off (Backspace):  where the words a level out are", async () => {
+      const view = await bubblyEditorOf(BLANKS)
+      const number = view.state.doc.toString().split("\n").indexOf("\t\t\t") + 1
+      const [levelOut] = linesStarting(view, ['say "done"'])
+      const end = view.state.doc.line(number).to
+      view.dispatch({
+        changes: { from: end - 1, to: end },
+        selection: { anchor: end - 1 },
+        userEvent: "delete.backward"
+      })
+      expect(Math.abs((await caretX(view)) - firstLetter(view, levelOut!))).toBeLessThan(0.5)
+    })
+
+    test("a group's own blank line (I134):  where its members' words are, as it was", async () => {
+      const view = await bubblyEditorOf(BLANKS)
+      const number = view.state.doc.toString().split("\n").indexOf("\t") + 1
+      const member = firstLetter(view, number + 1)
+      expect(Math.abs((await caretAtEnd(view, number, 1)) - member)).toBeLessThan(0.5)
+      expect(lineElement(view, number).querySelector(".cmb-words-place")).toBeNull()
+    })
+
+    test("between a drawing's tags:  at the end of its tabs, where a `<` typed there is drawn", async () => {
+      const view = await bubblyEditorOf(BLANKS)
+      const number = view.state.doc.toString().split("\n").lastIndexOf("\t\t\t") + 1
+      const caret = await caretAtEnd(view, number, 1)
+      expect(lineElement(view, number).querySelector(".cmb-words-place, .cmb-plain-indent")).toBeNull()
+      const { atOnce, laidOut } = await typed(view, "<")
+      expect(Math.abs(atOnce - caret)).toBeLessThan(0.5)
+      expect(Math.abs(laidOut - caret)).toBeLessThan(0.5)
+    })
+
+    test("right above a drawing's first tag:  at the end of its tabs too, where a `<` typed there is drawn", async () => {
+      const view = await bubblyEditorOf(
+        `a "card" is a view\n\tto draw it\n\t\t\n\t\t<container columns="7">\n\t\t\t<stock-pile "stock" />\n\t\t</container>\n`
+      )
+      const caret = await caretAtEnd(view, 3, 1)
+      expect(lineElement(view, 3).querySelector(".cmb-words-place, .cmb-plain-indent")).toBeNull()
+      const { atOnce, laidOut } = await typed(view, "<")
+      expect(Math.abs(atOnce - caret)).toBeLessThan(0.5)
+      expect(Math.abs(laidOut - caret)).toBeLessThan(0.5)
+    })
+
+    test("a selection ending on it reaches the caret, not the end of its tabs", async () => {
+      const view = await bubblyEditorOf(BLANKS)
+      const number = view.state.doc.toString().split("\n").indexOf("\t\t\t") + 1
+      view.dispatch({
+        selection: { anchor: view.state.doc.line(number - 1).from + 5, head: view.state.doc.line(number).to }
+      })
+      const caret = await caretX(view)
+      const pieces = [...view.dom.querySelectorAll(".cmb-selection-layer .cm-selectionBackground")].map((piece) =>
+        piece.getBoundingClientRect()
+      )
+      const last = pieces.reduce((lowest, piece) => (piece.top > lowest.top ? piece : lowest))
+      expect(Math.abs(last.right - caret)).toBeLessThan(0.5)
+    })
+  })
+
   /**
    * A drawing's start tag laid out as Enter lays a long one out (epic `language` I133):
    * each attribute on its own line, its `>` at the end of the last (I135).

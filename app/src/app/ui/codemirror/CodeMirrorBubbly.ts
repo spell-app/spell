@@ -145,7 +145,7 @@ class BubblyDecorations {
   private nodes(nodes: SP.BubblyNode[], rails: Rail[], isGroupBody = false) {
     for (let index = 0; index < nodes.length; index++) {
       const node = nodes[index]!
-      if (node.kind === "line" && this.text[node.start] === "<") {
+      if (this.isTagLine(node)) {
         index = this.markup(nodes, index, rails)
         continue
       }
@@ -155,8 +155,9 @@ class BubblyDecorations {
           break
         case "line":
           this.decorations.line(node.start, rails, isGroupBody ? ["cmb-group-line"] : [])
-          // a plain body line's words where a band's on its level are, a tab in (I142);  a group's are already
-          if (!isGroupBody) this.plainIndent(node)
+          // a plain body line's words where a band's on its level are, a tab in (I142);  a group's are already;
+          // a blank one right above a drawing's tags is the drawing's:  a tag typed there starts at its indent (I157)
+          if (!isGroupBody && !this.isAboveTags(nodes, index)) this.plainIndent(node)
           this.line(node)
           break
         case "block":
@@ -192,11 +193,32 @@ class BubblyDecorations {
    * A plain line's indent, in a body:  a tab wider (`cmb-plain-indent`), so its first word is where a band's words on
    * the same level are (Owen, epic `language` I142:  "I'd prefer if `it lives` lined up where `it's name` does").
    * - Its words moved, not the line:  its column 0, the caret's place on the rail (I140), stays where it is.
+   * - A blank line, its indent alone:  the caret at its end drawn past that room too,
+   *   where its words will go once typed (`WordsPlace`;  epic `language` I157).
    * - A line in no block, or a slice's line shown with no indent, keeps its words where they were.
    */
   private plainIndent(line: SP.BubblyLine) {
     const { from, to } = this.decorations.shownIndentBefore(line.start)
-    if (this.text.slice(from, to).includes("\t")) this.mark(from, to, ["cmb-plain-indent"])
+    if (!this.text.slice(from, to).includes("\t")) return
+    this.mark(from, to, ["cmb-plain-indent"])
+    if (isBlank(line)) this.decorations.add(WordsPlace.decoration.range(to))
+  }
+
+  /**
+   * Is `nodes[index]` a blank line among those right above a drawing's tags (a body's `<deck "deck" />`)?
+   * - A tag typed there is drawn from its indent, as the tags under it are:  so the caret stays at the indent's end,
+   *   and no room after it moves a `<` being typed (epic `language` I157).
+   */
+  private isAboveTags(nodes: SP.BubblyNode[], index: number): boolean {
+    const isBlankNode = (node: SP.BubblyNode) => node.kind === "gap" || (node.kind === "line" && isBlank(node))
+    if (!isBlankNode(nodes[index]!)) return false
+    const next = nodes.slice(index + 1).find((node) => !isBlankNode(node))
+    return !!next && this.isTagLine(next)
+  }
+
+  /** Does `node` start with a tag:  a line of a drawing (`<deck "deck" />`)? */
+  private isTagLine(node: SP.BubblyNode): boolean {
+    return node.kind === "line" && this.text[node.start] === "<"
   }
 
   /** A declaration, or a control line with steps under it:  its band, its body, its foot. */
@@ -402,8 +424,12 @@ function hung(indent: Indent, isHung: boolean): Indent {
   return isHung ? { ...indent, tabs: indent.tabs - 1 } : indent
 }
 
-/** Where `block`'s last line that isn't a gap ends. */
+/** Is `line` blank, its indent alone:  the caret on a new line in a body, before anything's typed on it? */
+function isBlank(line: SP.BubblyLine): boolean {
+  return line.start === line.end
+}
 
+/** Where `block`'s last line that isn't a gap ends. */
 function lastLineEnd(block: SP.BubblyBlock): number {
   const last = block.body.findLast((node) => node.kind !== "gap")
   if (!last) return block.head.end
@@ -702,5 +728,31 @@ class FootWidget extends WidgetType {
 
   ignoreEvent(): boolean {
     return false
+  }
+}
+
+/****************
+ * ### `WordsPlace`
+ * Where a blank body line's words will go:  an empty span at the line's end, of no width,
+ * past the room after its indent (`cmb-plain-indent`), so the caret at that end is drawn there (epic `language` I157).
+ * - CodeMirror draws the caret against what's beside it.
+ *   With nothing after a blank line's tabs, it was drawn at their end, before that room:
+ *   a tab left of where a letter typed there lands (Owen:  "this definitely feels like there is an extra tab in there").
+ * - Before the caret's place (`side: -1`):  a letter typed there goes after it, where the caret was, so nothing jumps.
+ * - Past the room's mark, not in it:  CodeMirror ends a mark before a widget at the mark's end.
+ * - Gone once the line has words:  the layout draws them past the same room (`plainIndent()`).
+ ****************/
+class WordsPlace extends WidgetType {
+  /** The one decoration, at a blank line's end. */
+  static readonly decoration = Decoration.widget({ widget: new WordsPlace(), side: -1 })
+
+  eq(): boolean {
+    return true
+  }
+
+  toDOM(): HTMLElement {
+    const place = document.createElement("span")
+    place.className = "cmb-words-place"
+    return place
   }
 }
