@@ -5198,10 +5198,13 @@ __metadata:
     wrap-ansi: "npm:^9"
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   peerDependencies:
+    "@solidjs/start-devtools": 1.0.0-next.9
     "@solidjs/web": 2.0.0-rc.21
     axe-core: ^4.13.0
     solid-js: 2.0.0-rc.21
   peerDependenciesMeta:
+    "@solidjs/start-devtools":
+      optional: true
     "@solidjs/web":
       optional: true
     axe-core:
