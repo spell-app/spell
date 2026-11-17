@@ -226,7 +226,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - the snap and its undoing are kept out of undo, marked as not typed (`FileStates.EDIT_WAY`)
       - not the blank lines before a group's line:  they're drawn outside the group above, so the caret stays at the
         margin (epic `language` I121)
-    - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
+    - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in;
+      not on a line Backspace or Shift+Tab just took out a level, where it stays at that level (epic `language` I159)
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
     - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
       `<action ` => `<action "|" />`, the program's actions listed once the typing pauses;  `<divider ` => `<divider | />`;
