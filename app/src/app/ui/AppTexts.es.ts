@@ -381,7 +381,6 @@ const APP_TEXTS_ES: AppTextPack = {
   ////////////////
 
   appMenu: "Aplicación",
-  javascriptOutput: "Salida en JavaScript",
   programOutput: "Salida",
   spellTree: "Árbol de spell",
   spellTreeHint: "Haz clic en una línea de tu programa para ver cómo la lee Encanto.",

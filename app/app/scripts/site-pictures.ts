@@ -55,8 +55,8 @@ type Picture = {
  */
 const DEBUG = { programPanel: "true", inspector: "true", "inspector:helpSeen": "true" }
 
-/** Debug, its Program panel on `tab`:  where the console, the compiled code and the sentence tree are drawn. */
-const debugOn = (tab: "output" | "javascript" | "tree") => ({ ...DEBUG, programTab: tab })
+/** Debug, its Program panel on `tab`:  where the console and the sentence tree are drawn. */
+const debugOn = (tab: "output" | "tree") => ({ ...DEBUG, programTab: tab })
 
 /** Every picture, by page. */
 const PICTURES: Picture[] = [
@@ -65,12 +65,11 @@ const PICTURES: Picture[] = [
   { name: "AppContainer", page: PROJECT, prefs: DEBUG, selector: ".AppContainer" },
   { name: "chrome", page: PROJECT, selector: ".AppMenu" },
   { name: "InputEditor", page: PROJECT, selector: ".InputRoot" },
-  { name: "OutputEditor", page: PROJECT, prefs: debugOn("javascript"), selector: ".OutputRoot" },
   {
     name: "CodeMirrorEditor",
     page: PROJECT,
-    prefs: debugOn("javascript"),
-    selector: ".OutputEditor .CodeMirrorEditor"
+    prefs: { ...DEBUG, codeOutput: "js/solid" },
+    selector: ".CodeOutputPane .CodeMirrorEditor"
   },
   { name: "ConsoleViewer", page: PROJECT, prefs: debugOn("output"), selector: ".ConsoleRoot" },
   {

@@ -382,7 +382,6 @@ export const APP_TEXTS = {
   ////////////////
 
   appMenu: "App",
-  javascriptOutput: "Javascript Output",
   programOutput: "Output",
   spellTree: "Spell Tree",
   spellTreeHint: "Click a line of your program to see how Spell reads it.",

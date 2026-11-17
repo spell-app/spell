@@ -23,11 +23,10 @@ import { CodeShown } from "spell/app/app/solid/EditorMode"
 import { FileTabs, trackProjectFiles } from "spell/app/app/solid/FileTabs"
 import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
 import { LazyCodeMirror } from "spell/app/app/solid/LazyCodeMirror"
-import { OutputEditor } from "spell/app/app/solid/OutputEditor"
 
 /**
  * The Solid source editors on real CodeMirror, in the browser:
- * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<OutputEditor>`, `<FileTabs>` and its `trackProjectFiles()`.
+ * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<FileTabs>` and its `trackProjectFiles()`.
  * - Files are FAKES, as spell cells (`reactiveObject()`):
  *   a `.js` file (no parse) with just what `FileStates` and `editor` read.
  * - Why:  a real `SpellProject` loads from the API server, which tests don't have.
@@ -105,20 +104,6 @@ describe("<InputEditor>", () => {
 
     fallback.dispatch({ changes: { from: 11, insert: "!" }, userEvent: "input.type" })
     expect(onInputChanged).toHaveBeenCalledWith("broken text!")
-  })
-})
-
-describe("<OutputEditor>", () => {
-  test("shows the compiled javascript, read-only;  its view goes with it", async () => {
-    const file = fakeFile("test-project/one.js", "")
-    Object.assign(file, { compiled: "export const one = 1" })
-    setEditor("file", file)
-    const dispose = await mountKept(() => <OutputEditor />)
-    const output = await viewIn(dispose.host)
-    await expect.poll(() => output.state.doc.toString()).toBe("export const one = 1")
-    expect(output.state.readOnly).toBe(true)
-    dispose()
-    expect(output.dom.isConnected).toBe(false)
   })
 })
 

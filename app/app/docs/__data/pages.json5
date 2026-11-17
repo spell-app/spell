@@ -124,13 +124,6 @@
       "group": "editors",
       "file": "src/app/solid/InputEditor.tsx"
     },
-    "OutputEditor": {
-      "title": "OutputEditor",
-      "summary": "The open file's compiled javascript, read only.",
-      "status": "done",
-      "group": "editors",
-      "file": "src/app/solid/OutputEditor.tsx"
-    },
     "CodeMirrorEditor": {
       "title": "CodeMirrorEditor",
       "summary": "A CodeMirror editor, filling its parent:  what every code editor in the app is.",

@@ -80,7 +80,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Node tools run the parser's SOURCE through `tsx` / esbuild / Vite's oxc,
     none of which compile Solid's JSX.
   - ASTs only write TEXT (`compile()`), JSX included.
-    - The app shows compiled JavaScript in CodeMirror (`<OutputEditor>`).
+    - The app shows compiled code in CodeMirror (`<CodeOutputPane>`, View › Compiled Code).
     - Solid's compiler builds the TypeScript target's JSX later (`spell/parser/spell/node/buildTsx`).
 - "Parser rules" (how to write a rule class + its `syntax` + `tests`) is in [spell's AGENTS.md](../spell/AGENTS.md).
   - The rules there are spell's, on this folder's `Rule`.
