@@ -474,8 +474,19 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `the first of its authors` is an item too, not a property named `first`:
       [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
       (never a property the owner declares, nor `the top of its card`).
+  - EACH ITEM'S, of a list of things (epic `language` I155):  a list, `core.mapToList(deck, (card) => card.shorthand)`.
+    - `the shorthand of each card in the deck`, and with a condition, `... in the deck where it is face up`
+      (its `each_item_where`, as a loop's).
+    - `the shorthand of the cards in the deck`:  its words name the items, so the items' member comes first,
+      before the deck's own `shorthand`.
+    - `the names of the people`:  the list has no `names`, its items have a `name`;  a plural word reads the singular.
+    - An enumeration's twin is each item's value here:  `the suit of each card` is no `Card.Suits`.
+    - As a statement's `each`, `add the shorthand of each card in the deck to names` is still the loop's
+      (`each_in_statement`):  one add per card.
+    - Into text, the list reads as any list does:  `deck: A♣↓, 2♣↓, ...`, joined by `", "`.
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
-    - its syntax:  `the {property:member_words} of {expression:operand}`
+    - its syntax:
+      `the {property:member_words} of ((each:each) ({expression:each_item_where}|{arg:singular_identifier} in {expression:operand})|{expression:operand})`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`
     - but NOT `the position of` / `the number of` (`Priority.mostSpecific`)
   - `its X` is two rules:
@@ -1673,6 +1684,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Any language's tags alike:  it's the tag being a view that counts.
   - A member made new takes its name as its thing's `id` (`DefinePropertyHas.withMemberId()`):
     `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, so the drawing names it with no `with name "T1"`.
+    - Several words are joined by dashes, each as written (epic `language` T147):  `"discard pile" is a new discard pile`
+      is `{ id: "discard-pile" }`, and `<discard-pile "discard pile"/>` draws `id="discard-pile"`;  `discard pile` still
+      finds it (`core.thingNamed()`).
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
@@ -1899,8 +1913,16 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
       - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type
+      - a type's QUESTION, either place (epic `language` I154):  `- it "can go up" if`, `a card "can go up" if`,
+        up to its `if`, its body left out (the language's `questionLine`)
+        - So an action above it asks it:  `where it can go up`, and T146's `or` lines.
+      - A type's line may end in a comment, `a card  -- what auto play asks of a card` (`subjectOf()`):
+        its body's methods are scanned too.
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
+      - A question's rule is its own, `MethodPostfixRule` / `MethodInfixRule`, stepping aside in `parse()`.
+      - Not a value kind's question (`a rank "is a face card"`):  it calls its kind's static method,
+        and a type the scan knows no kind of may be a value kind.
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`):
       every call registered ahead of its definition reads again (epic `editor` I170).

@@ -425,6 +425,44 @@ describe("outline style", () => {
       ])
       expect(run("x")).toEqual({ x: 42 })
     })
+
+    test("the scan finds a type's questions, its body left out (epic `language` I154)", () => {
+      const lines = [
+        "a card  -- what auto play asks of a card",
+        '\tit "can go up" if it is high',
+        '\t- "is high" if: its rank > 10',
+        'a pile "is tall" if its size > 3',
+        '\tits "suit" is a suit'
+      ]
+      expect(SP.spellParser.declaredMethods(lines.join("\n"))).toEqual([
+        'card\tit "can go up" if',
+        'card\t"is high" if:',
+        '\ta pile "is tall" if'
+      ])
+      const spanish = SP.Language.for("es").parser
+      expect(spanish.declaredMethods('una carta\n\t"puede subir" si es alta')).toEqual(['carta\t"puede subir" si'])
+    })
+
+    test("a type's question declared BELOW the app is asked in its action:  in a `where`, and an `or` (epic `language` I154)", () => {
+      const run = runSpell(
+        [
+          "a card is a thing",
+          "\tits rank is a number",
+          "game is an app",
+          "\tto choose",
+          "\t\tset picked to the last card in the cards where it is low",
+          "\t\t\tor the first card in the cards where it can go up",
+          "\t\treturn the rank of picked",
+          "set high to a new card with rank = 12",
+          "set top to choose",
+          "a card  -- what the game asks of a card",
+          '\tit "can go up" if its rank > 10',
+          '\tit "is low" if its rank < 3'
+        ],
+        { registered: true }
+      )
+      expect(run("top")).toEqual({ top: 12 })
+    })
   })
 
   describe("one-of-a-kind apps (P21):  `solitaire is an app where:`", () => {

@@ -16,7 +16,7 @@ a "pile" is a viewable list of cards:
 	- its "value" is:
 		0 if it is empty
 		the value of its last card otherwise
-	// Its name, then its cards' short names:  stock: Q♠↑ 7♥↓
+	// Its name, then its cards' shorthands:  stock: Q♠↑ 7♥↓
 	- its "state" is:
 		set summary to (its name or "pile") + ":"
 		for card in the pile

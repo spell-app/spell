@@ -55,8 +55,8 @@ export class Card extends TwoSidedView {
     return "♠"
   }
 
-  /** Its short name:  Q♠↓ is the queen of spades, face down */
-  get shortName() {
+  /** Its shorthand:  Q♠↓ is the queen of spades, face down */
+  get shorthand() {
     const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
     const arrow = this.isFaceDirection("up") ? "↑" : "↓"
     return letter + this.symbol + arrow
@@ -81,16 +81,6 @@ export class Card extends TwoSidedView {
   /** the card the next one goes on */
   get isOnTopOfItsPile() {
     return this === this.pile.lastItem
-  }
-
-  /** onto its foundation:  a column's top card */
-  get canGoUp() {
-    return this.isOnTopOfItsPile && core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem instanceof Foundation
-  }
-
-  /** it and the face-up cards on it, all together, onto another column:  a king already at the bottom stays put */
-  get canMoveItsRun() {
-    return (this.rank !== "king" || this !== this.pile.firstItem) && this === this.pile.filter((card) => card.isFaceDirection("up")).firstItem
   }
 
   async play() {
@@ -219,7 +209,7 @@ export function testCardSetup() {
     core.expect(it2.name, `its name`, "queen of spades", `"queen of spades"`)
     core.expect(it2.color, `its color`, "black", `black`)
     core.expect(it2.value, `its value`, 12, `12`)
-    core.expect(it2.shortName, `its short name`, "Q♠↓", `"Q♠↓"`)
+    core.expect(it2.shorthand, `its shorthand`, "Q♠↓", `"Q♠↓"`)
     core.expect(it2.isAFaceCard, `it is a face card`, true, `yes`)
     core.expect(it2.suit === "spades", `it is a spade`, true, `yes`)
     core.expect(it2.suit === "clubs", `it is a club`, false, `no`)
@@ -231,7 +221,7 @@ export function testCardSetup() {
     core.echoTestAction(`turn it over`)
     it2.turnOver()
     core.expect(it2.isFaceDirection("up"), `it is face up`, true, `yes`)
-    core.expect(it2.shortName, `its short name`, "Q♠↑", `"Q♠↑"`)
+    core.expect(it2.shorthand, `its shorthand`, "Q♠↑", `"Q♠↑"`)
 
     core.echoTestAction(`set seven to a new card whose rank is 7 and suit is hearts`)
     const seven = new Card({ rank: 7, suit: "hearts" })
@@ -294,10 +284,10 @@ export class Pile extends ViewableList {
     return this.lastItem.value
   }
 
-  /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
-  get shortName() {
+  /** Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓ */
+  get shorthand() {
     let summary = `${this.id}:`
-    this.forEach((card) => (summary = `${summary} ${card.shortName}`))
+    this.forEach((card) => (summary = `${summary} ${card.shorthand}`))
     return summary
   }
 
@@ -330,7 +320,7 @@ export function testPiles() {
     }))
     core.expect(stock.color, `stock's color`, "red", `red`)
     core.expect(stock.value, `stock's value`, 7, `7`)
-    core.expect(stock.shortName, `stock's short name`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
+    core.expect(stock.shorthand, `stock's shorthand`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
 
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
@@ -340,7 +330,7 @@ export function testPiles() {
     discards.append(it)
     core.expect(it?.pile === discards, `its pile is the discards`, true, `yes`)
     core.expect(stock.length, `the number of cards in the stock`, 1, `1`)
-    core.expect(discards.shortName, `the discards' short name`, "discards: 7♥↓", `"discards: 7♥↓"`)
+    core.expect(discards.shorthand, `the discards' shorthand`, "discards: 7♥↓", `"discards: 7♥↓"`)
   })
 }
 // -----------
@@ -355,9 +345,9 @@ export class Deck extends ViewableList {
   }
 
   /** its card names, top to bottom */
-  get shortName() {
+  get shorthand() {
     const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
+    this.forEach((card) => cardNames.append(card.shorthand))
     return `deck: ${cardNames}`
   }
 }
@@ -369,7 +359,7 @@ export function testANewDeck() {
     const deck = new Deck()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
     core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.shortName, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.firstItem?.shorthand, `deck's first card's shorthand`, "A♣↓", `"A♣↓"`)
     core.expect(deck.lastItem?.name, `deck's last card's name`, "king of spades", `"king of spades"`)
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
@@ -377,8 +367,6 @@ export function testANewDeck() {
   })
 }
 // -----------
-// What auto play asks of a card
-
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
@@ -494,7 +482,7 @@ export class Solitaire extends App {
       ),
       h("ui-container", { columns: "7", padding: "small", spacing: "xs" },
         h("test-project-stock-pile", { id: "stock" }),
-        h("test-project-discard-pile", { id: "discard pile" }),
+        h("test-project-discard-pile", { id: "discard-pile" }),
         h("spacer"),
         h("test-project-foundation", { id: "clubs" }),
         h("test-project-foundation", { id: "diamonds" }),
@@ -524,7 +512,7 @@ export class Solitaire extends App {
   get stock() { return this.getProp("stock") }
   set stock(value) { this.setProp("stock", value) }
   // <discard-pile "discard pile"/>
-  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
+  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard-pile" }), early: true }) }
   get discardPile() { return this.getProp("discardPile") }
   set discardPile(value) { this.setProp("discardPile", value) }
   // <foundation "clubs" suit=clubs/>
@@ -610,9 +598,9 @@ export class Solitaire extends App {
     this.stock.forEach((card) => card.turnFaceDown())
   }
 
-  /** Play one card that can go somewhere, then the next, until none can */
+  /** Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column */
   async autoPlay() {
-    const played = await core.itemWhereInTurn(this.discardPile, async (card) => await card.play(), -1) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => card.canGoUp && (await card.play()), 0) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => card.canMoveItsRun && (await card.play()), 0)
+    const played = await core.itemWhereInTurn(this.discardPile, async (card) => await card.play(), -1) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => card === card.pile.lastItem && core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, card)).firstItem instanceof Foundation && (await card.play()), 0) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => (card.rank !== "king" || card !== card.pile.firstItem) && card === card.pile.filter((card) => card.isFaceDirection("up")).firstItem && (await card.play()), 0)
     if (played !== undefined) {
       await core.pauseFor(300, "msec")
       await this.autoPlay()
@@ -685,7 +673,7 @@ export function testTheMoves() {
     core.expect(core.canTake(column, queen), `the column can take the queen`, true, `yes`)
     core.echoTestAction(`add the queen to the column`)
     column.append(queen)
-    core.expect(column.shortName, `the short name of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
+    core.expect(column.shorthand, `the shorthand of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
     core.expect(core.canGiveUp(column, queen), `the column can give up the queen`, true, `yes`)
     core.echoTestAction(`turn the queen face down`)
     queen.turnFaceDown()

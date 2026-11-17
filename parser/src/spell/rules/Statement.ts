@@ -384,7 +384,8 @@ export class SpellStatement<
     const { scope } = statement
     const at = unparsed.findIndex(
       (token, index) =>
-        Wording.lengthAt(scope, "and_or", [token], 0, "or") === 1 && JoinedLines.isWidthlessOpen(unparsed[index + 1])
+        // the cheap test first:  most conditions have no `(` of no width at all
+        JoinedLines.isWidthlessOpen(unparsed[index + 1]) && Wording.lengthAt(scope, "and_or", [token], 0, "or") === 1
     )
     return at > 0 ? unparsed.slice(0, at) : unparsed
   }

@@ -937,6 +937,22 @@
     },
     {
       "kind": "method",
+      "name": "mapToList",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "method"
+        }
+      ],
+      "section": "iteration",
+      "description": "What `method` answers for each item of `collection`, in a new plain `List`, in the items' order (epic `language` I155)."
+    },
+    {
+      "kind": "method",
       "name": "filter",
       "of": "core",
       "module": "collection-other",

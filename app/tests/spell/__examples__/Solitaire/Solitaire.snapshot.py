@@ -67,8 +67,8 @@ class Card(TwoSidedView):
         return "♠"
 
     @property
-    def short_name(self) -> str:
-        """Its short name:  Q♠↓ is the queen of spades, face down"""
+    def shorthand(self) -> str:
+        """Its shorthand:  Q♠↓ is the queen of spades, face down"""
         letter = 10 if self.value == 10 else core.upper_case(core.get_item_at(self.rank, 0))
         arrow = "↑" if self.is_face_direction("up") else "↓"
         return f"{letter}{self.symbol}{arrow}"
@@ -94,17 +94,6 @@ class Card(TwoSidedView):
         """the card the next one goes on"""
         assert self.pile is not None
         return self == self.pile.last_item
-
-    @property
-    def can_go_up(self) -> bool:
-        """onto its foundation:  a column's top card"""
-        return self.is_on_top_of_its_pile and isinstance(core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item, Foundation)
-
-    @property
-    def can_move_its_run(self) -> bool:
-        """it and the face-up cards on it, all together, onto another column:  a king already at the bottom stays put"""
-        assert self.pile is not None
-        return (self.rank != "king" or self != self.pile.first_item) and self == self.pile.filter(lambda card: card.is_face_direction("up")).first_item
 
     async def play(self) -> Any:
         if self.pile == solitaire.stock:
@@ -242,7 +231,7 @@ def test_card_setup() -> None:
         core.expect(it_2.name, "its name", "queen of spades", "\"queen of spades\"")
         core.expect(it_2.color, "its color", "black", "black")
         core.expect(it_2.value, "its value", 12, "12")
-        core.expect(it_2.short_name, "its short name", "Q♠↓", "\"Q♠↓\"")
+        core.expect(it_2.shorthand, "its shorthand", "Q♠↓", "\"Q♠↓\"")
         core.expect(it_2.is_a_face_card, "it is a face card", True, "yes")
         core.expect(it_2.suit == "spades", "it is a spade", True, "yes")
         core.expect(it_2.suit == "clubs", "it is a club", False, "no")
@@ -264,7 +253,7 @@ def test_card_setup() -> None:
         core.echo_test_action("turn it over")
         it_2.turn_over()
         core.expect(it_2.is_face_direction("up"), "it is face up", True, "yes")
-        core.expect(it_2.short_name, "its short name", "Q♠↑", "\"Q♠↑\"")
+        core.expect(it_2.shorthand, "its shorthand", "Q♠↑", "\"Q♠↑\"")
 
         core.echo_test_action("set seven to a new card whose rank is 7 and suit is hearts")
         seven = Card(rank=7, suit="hearts")
@@ -348,11 +337,11 @@ class Pile(ViewableList):
         return self.last_item.value
 
     @property
-    def short_name(self) -> str:
-        """Its id, then its cards' short names:  stock: Q♠↑ 7♥↓"""
+    def shorthand(self) -> str:
+        """Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓"""
         summary = f"{self.id}:"
         for card in self:
-            summary = f"{summary} {card.short_name}"
+            summary = f"{summary} {card.shorthand}"
         return summary
 
     def when_card_dropped_on(self, card: Card) -> None:
@@ -380,8 +369,8 @@ def test_piles() -> None:
         core.expect(stock.color, "stock's color", "red", "red")
         core.expect(stock.value, "stock's value", 7, "7")
         core.expect(
-            stock.short_name,
-            "stock's short name",
+            stock.shorthand,
+            "stock's shorthand",
             "stock: Q♠↑ 7♥↓",
             "\"stock: Q♠↑ 7♥↓\"",
         )
@@ -400,8 +389,8 @@ def test_piles() -> None:
         )
         core.expect(len(stock), "the number of cards in the stock", 1, "1")
         core.expect(
-            discards.short_name,
-            "the discards' short name",
+            discards.shorthand,
+            "the discards' shorthand",
             "discards: 7♥↓",
             "\"discards: 7♥↓\"",
         )
@@ -423,11 +412,11 @@ class Deck(ViewableList):
                 self.append(Card(rank=rank, suit=suit))
 
     @property
-    def short_name(self) -> str:
+    def shorthand(self) -> str:
         """its card names, top to bottom"""
         card_names = List(item_type="text")
         for card in self:
-            card_names.append(card.short_name)
+            card_names.append(card.shorthand)
         return f"deck: {card_names}"
 
 
@@ -444,8 +433,8 @@ def test_a_new_deck() -> None:
             "4",
         )
         core.expect(
-            getattr(deck.first_item, "short_name", None),
-            "deck's first card's short name",
+            getattr(deck.first_item, "shorthand", None),
+            "deck's first card's shorthand",
             "A♣↓",
             "\"A♣↓\"",
         )
@@ -461,9 +450,6 @@ def test_a_new_deck() -> None:
 
 
 # -----------
-
-
-# What auto play asks of a card
 
 
 class StockPile(Pile):
@@ -592,7 +578,7 @@ class Solitaire(App):
                 "ui-container",
                 {"columns": "7", "padding": "small", "spacing": "xs"},
                 h("test-project-stock-pile", {"id": "stock"}),
-                h("test-project-discard-pile", {"id": "discard pile"}),
+                h("test-project-discard-pile", {"id": "discard-pile"}),
                 h("spacer"),
                 h("test-project-foundation", {"id": "clubs"}),
                 h("test-project-foundation", {"id": "diamonds"}),
@@ -619,7 +605,7 @@ class Solitaire(App):
     # <stock-pile "stock"/>
     stock = prop(init=lambda: StockPile(id="stock"), early=True)
     # <discard-pile "discard pile"/>
-    discard_pile = prop(init=lambda: DiscardPile(id="discard pile"), early=True)
+    discard_pile = prop(init=lambda: DiscardPile(id="discard-pile"), early=True)
     # <foundation "clubs" suit=clubs/>
     clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
     # <foundation "diamonds" suit=diamonds/>
@@ -681,15 +667,17 @@ class Solitaire(App):
             card.turn_face_down()
 
     async def auto_play(self) -> None:
-        """Play one card that can go somewhere, then the next, until none can"""
+        """Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column"""
         async def _each_1(card: Card) -> Any:
             return await card.play()
 
         async def _each_2(card: Card) -> bool:
-            return card.can_go_up and (await card.play())
+            assert card.pile is not None
+            return card == card.pile.last_item and isinstance(core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, card)).first_item, Foundation) and (await card.play())
 
         async def _each_3(card: Card) -> bool:
-            return card.can_move_its_run and (await card.play())
+            assert card.pile is not None
+            return (card.rank != "king" or card != card.pile.first_item) and card == card.pile.filter(lambda card: card.is_face_direction("up")).first_item and (await card.play())
 
         played = (await core.item_where_in_turn(self.discard_pile, _each_1, -1)) or (await core.item_where_in_turn(core.merge_lists(core.every_thing(Column)), _each_2, 0)) or (await core.item_where_in_turn(core.merge_lists(core.every_thing(Column)), _each_3, 0))
         if played is not None:
@@ -759,8 +747,8 @@ def test_the_moves() -> None:
         core.echo_test_action("add the queen to the column")
         column.append(queen)
         core.expect(
-            column.short_name,
-            "the short name of the column",
+            column.shorthand,
+            "the shorthand of the column",
             "T1: K♠↑ Q♥↑",
             "\"T1: K♠↑ Q♥↑\"",
         )

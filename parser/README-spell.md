@@ -166,7 +166,7 @@ a "card" is a draggable two sided view, aka "playing card"
 	its score is a number, starting at -1
 	its "direction" is one of up or down, with default down
 	its "state" is
-		// Its short name:  Q♠↓ is the queen of spades, face down
+		// Its shorthand:  Q♠↓ is the queen of spades, face down
 		return its rank && its suit
 	to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"
 		undoable
@@ -175,8 +175,8 @@ a "card" is a draggable two sided view, aka "playing card"
 
 - `a "card" is a draggable two sided view`:  an ability is a word before the template.
   `clickable`, `selectable` and `droppable` are the others;  `it is draggable` under it says the same.
-- A declaration's description is the first comment inside its body, `// Its short name`:
-  hovered in an editor, and written above it in the code, `/** Its short name ... */`.
+- A declaration's description is the first comment inside its body, `// Its shorthand`:
+  hovered in an editor, and written above it in the code, `/** Its shorthand ... */`.
   - A line with no body takes one holding just the comment:  `its "hint" is text`, then `// Said beside the score`.
   - A comment right above a declaration still describes it, when nothing under it does.
 - The line that declares a thing can say more about it, after a comma:

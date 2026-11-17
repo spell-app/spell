@@ -84,6 +84,20 @@ describe("a list of lists, read by its items' word (epic `language` I152)", () =
     )
   })
 
+  test("a loop's `where`:  each card tested, not each column (I153)", () => {
+    const { code, errors } = compiled([
+      "for each card in the columns where it is face up",
+      "\tprint the card",
+      "for each pile in the columns where it is empty",
+      "\tprint the pile"
+    ])
+    expect(errors).toEqual([])
+    expect(code).toContain(
+      'core.map(core.filter(core.mergeLists(core.everyThing(Column)), (card) => card.isFaceDirection("up")), (card) =>'
+    )
+    expect(code).toMatch(/core\.filter\(core\.everyThing\(Column\), \((pile|column)\) => (pile|column)\.isEmpty\)/)
+  })
+
   test("a word naming none of its items is refused, saying what it holds", () => {
     const { errors } = compiled(["set x to the columns in the deck"])
     expect(errors).toEqual(['the deck holds cards, not columns:  say "cards in the deck"'])
