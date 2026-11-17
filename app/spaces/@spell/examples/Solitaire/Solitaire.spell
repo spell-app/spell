@@ -186,7 +186,7 @@ to test the moves
 	the column can take the jack should be no
 	the column can take the queen should be yes
 	add the queen to the column
-	the short name of the column should be "T1: K♠↑ Q♥↑"
+	the shorthand of the column should be "T1: K♠↑ Q♥↑"
 	the column can give up the queen should be yes
 	turn the queen face down
 	the column can give up the queen should be no

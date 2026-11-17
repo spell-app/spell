@@ -4,7 +4,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 "Card.spell
   template Card  is a TwoSidedView
     A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-    Properties  rank, suit, color, name, value, symbol, short name, last pile, pile
+    Properties  rank, suit, color, name, value, symbol, shorthand, last pile, pile
     Actions     is a face card, is a number card, is the (rank) of (suit), move a card to a pile,
                 is on top of its pile, play a card, the points for (a card) on (a pile)
     Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -46,7 +46,7 @@ Card.spell:1
 
 A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 
-Properties  rank, suit, color, name, value, symbol, short name, last pile, pile
+Properties  rank, suit, color, name, value, symbol, shorthand, last pile, pile
 Actions     is a face card, is a number card, is the (rank) of (suit), move a card to a pile,
             is on top of its pile, play a card, the points for (a card) on (a pile)
 Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -79,8 +79,8 @@ Spell
       "♦" if it is a diamond
       "♥" if it is a heart
       "♠" otherwise
-    its "short name" is
-      -- Its short name:  Q♠↓ is the queen of spades, face down
+    its "shorthand" is
+      -- Its shorthand:  Q♠↓ is the queen of spades, face down
       letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
       arrow is "↑" if it is face up otherwise "↓"
       return letter + its symbol + arrow
@@ -96,7 +96,7 @@ Spell
       its name should be "queen of spades"
       its color should be black
       its value should be 12
-      its short name should be "Q♠↓"
+      its shorthand should be "Q♠↓"
       it is a face card should be yes
       it is a spade should be yes
       it is a club should be no
@@ -107,7 +107,7 @@ Spell
   
       turn it over
       it is face up should be yes
-      its short name should be "Q♠↑"
+      its shorthand should be "Q♠↑"
   
       set seven to a new card whose rank is 7 and suit is hearts
       seven is a number card should be yes

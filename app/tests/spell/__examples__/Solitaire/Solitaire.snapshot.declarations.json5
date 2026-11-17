@@ -20,7 +20,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spell:0-2194"
+      "defined": "/Card.spell:0-2190"
     },
     {
       "property": "rank",
@@ -148,12 +148,11 @@
       "defined": "/Card.spell:1064-1165"
     },
     {
-      "property": "short_name",
-      "asWritten": "short name",
+      "property": "shorthand",
       "of": "Card",
       "group": "Names",
       "datatype": "text",
-      "defined": "/Card.spell:1167-1415"
+      "defined": "/Card.spell:1167-1413"
     },
     {
       "syntax": "move {thisArg:expression} to {callArgs:expression}",
@@ -173,7 +172,7 @@
         }
       ],
       "returns": "choice",
-      "defined": "/Pile.spell:684-1097"
+      "defined": "/Pile.spell:681-1094"
     },
     {
       "syntax": "{operator:is_or_is_not} on top of its pile",
@@ -183,7 +182,7 @@
       "kind": "method",
       "name": "\"is on top of its pile\"",
       "returns": "choice",
-      "defined": "/Pile.spell:1214-1274"
+      "defined": "/Pile.spell:1211-1271"
     },
     {
       "syntax": "play {thisArg:expression}",
@@ -239,30 +238,30 @@
       "of": "Card",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spell:1193-1212"
+      "defined": "/Pile.spell:1190-1209"
     },
     {
       "type": "CardImage",
       "superType": "View",
-      "defined": "/Card.spell:2196-4777"
+      "defined": "/Card.spell:2192-4773"
     },
     {
       "property": "card",
       "of": "CardImage",
       "datatype": "Card",
-      "defined": "/Card.spell:2719-2739"
+      "defined": "/Card.spell:2715-2735"
     },
     {
       "property": "rank",
       "of": "CardImage",
       "datatype": "CardRank",
-      "defined": "/Card.spell:2764-2789"
+      "defined": "/Card.spell:2760-2785"
     },
     {
       "property": "suit",
       "of": "CardImage",
       "datatype": "CardSuit",
-      "defined": "/Card.spell:2791-2816"
+      "defined": "/Card.spell:2787-2812"
     },
     {
       "property": "direction",
@@ -272,7 +271,7 @@
         "up",
         "down"
       ],
-      "defined": "/Card.spell:2818-2847"
+      "defined": "/Card.spell:2814-2843"
     },
     {
       "syntax": "{operator:is_or_is_not} face (expression:up|ups|down|downs)",
@@ -287,30 +286,30 @@
           "down"
         ]
       },
-      "defined": "/Card.spell:2849-2873"
+      "defined": "/Card.spell:2845-2869"
     },
     {
       "kind": "method",
       "name": "creating a card image",
       "returns": "nothing",
-      "defined": "/Card.spell:2875-3244"
+      "defined": "/Card.spell:2871-3240"
     },
     {
       "property": "color",
       "of": "CardImage",
-      "defined": "/Card.spell:3246-3320"
+      "defined": "/Card.spell:3242-3316"
     },
     {
       "constants": [
         "blue"
       ],
-      "defined": "/Card.spell:3263-3286"
+      "defined": "/Card.spell:3259-3282"
     },
     {
       "property": "picture",
       "of": "CardImage",
       "datatype": "text",
-      "defined": "/Card.spell:3322-4009"
+      "defined": "/Card.spell:3318-4005"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -323,7 +322,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Card.spell:4011-4068"
+      "defined": "/Card.spell:4007-4064"
     },
     {
       "syntax": "test card setup",
@@ -332,7 +331,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spell:1532-2194"
+      "defined": "/Card.spell:1530-2190"
     },
     {
       "syntax": "test card images",
@@ -341,13 +340,13 @@
       "alias": "statement",
       "kind": "function",
       "name": "card images",
-      "defined": "/Card.spell:4071-4777"
+      "defined": "/Card.spell:4067-4773"
     },
     {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spell:0-1097"
+      "defined": "/Pile.spell:0-1094"
     },
     {
       "property": "layout",
@@ -371,11 +370,10 @@
       "defined": "/Pile.spell:346-418"
     },
     {
-      "property": "short_name",
-      "asWritten": "short name",
+      "property": "shorthand",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spell:420-628"
+      "defined": "/Pile.spell:420-625"
     },
     {
       "syntax": "test piles",
@@ -384,13 +382,13 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spell:1310-1959"
+      "defined": "/Pile.spell:1307-1954"
     },
     {
       "type": "Deck",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Deck.spell:0-759"
+      "defined": "/Deck.spell:0-756"
     },
     {
       "kind": "method",
@@ -399,11 +397,10 @@
       "defined": "/Deck.spell:65-235"
     },
     {
-      "property": "short_name",
-      "asWritten": "short name",
+      "property": "shorthand",
       "of": "Deck",
       "datatype": "text",
-      "defined": "/Deck.spell:237-430"
+      "defined": "/Deck.spell:237-428"
     },
     {
       "syntax": "test a new deck",
@@ -412,7 +409,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a new deck",
-      "defined": "/Deck.spell:433-759"
+      "defined": "/Deck.spell:431-756"
     },
     {
       "type": "StockPile",
@@ -657,7 +654,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:6384-7839"
+      "defined": "/Solitaire.spell:6384-7838"
     }
   ],
   "codeLines": [

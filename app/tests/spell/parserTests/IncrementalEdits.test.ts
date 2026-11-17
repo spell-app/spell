@@ -97,8 +97,8 @@ describe("incremental parsing after each kind of edit ~== full parse", () => {
     expect(parsedAfter(card.contents.replace(typeLine, `\tit "is zz ready" if it exists\n${typeLine}`))).toEqual([
       "/Card.spell"
     ])
-    // the pile and the deck read a card's short name:  they parse again, the game doesn't
-    expect(parsedAfter(card.contents.replace('its "short name" is', 'its "short namez" is'))).toEqual([
+    // the pile and the deck read a card's shorthand:  they parse again, the game doesn't
+    expect(parsedAfter(card.contents.replace('its "shorthand" is', 'its "shorthandz" is'))).toEqual([
       "/Card.spell",
       "/Pile.spell",
       "/Deck.spell"

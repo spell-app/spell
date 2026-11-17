@@ -3,7 +3,7 @@
   ✅ As expected `its name` is `"queen of spades"`
   ✅ As expected `its color` is `black`
   ✅ As expected `its value` is `12`
-  ✅ As expected `its short name` is `"Q♠↓"`
+  ✅ As expected `its shorthand` is `"Q♠↓"`
   ✅ As expected `it is a face card` is `yes`
   ✅ As expected `it is a spade` is `yes`
   ✅ As expected `it is a club` is `no`
@@ -13,7 +13,7 @@
   ✅ As expected `it is the queen of clubs` is `no`
   ▶️ Executing   `turn it over`
   ✅ As expected `it is face up` is `yes`
-  ✅ As expected `its short name` is `"Q♠↑"`
+  ✅ As expected `its shorthand` is `"Q♠↑"`
   ▶️ Executing   `set seven to a new card whose rank is 7 and suit is hearts`
   ✅ As expected `seven is a number card` is `yes`
   ✅ As expected `the color of seven` is `red`
@@ -40,17 +40,17 @@
   ▶️ Executing   `add a new card with rank 7, suit hearts and direction down to the stock`
   ✅ As expected `stock's color` is `red`
   ✅ As expected `stock's value` is `7`
-  ✅ As expected `stock's short name` is `"stock: Q♠↑ 7♥↓"`
+  ✅ As expected `stock's shorthand` is `"stock: Q♠↑ 7♥↓"`
   ▶️ Executing   `get the top card of the stock`
   ▶️ Executing   `add it to the discards`
   ✅ As expected `its pile is the discards` is `yes`
   ✅ As expected `the number of cards in the stock` is `1`
-  ✅ As expected `the discards' short name` is `"discards: 7♥↓"`
+  ✅ As expected `the discards' shorthand` is `"discards: 7♥↓"`
 ✅ test a new deck
   ▶️ Executing   `the deck is a new deck`
   ✅ As expected `the number of cards in the deck` is `52`
   ✅ As expected `the number of (cards in the deck where it is a queen)` is `4`
-  ✅ As expected `deck's first card's short name` is `"A♣↓"`
+  ✅ As expected `deck's first card's shorthand` is `"A♣↓"`
   ✅ As expected `deck's last card's name` is `"king of spades"`
   ▶️ Executing   `shuffle the deck`
   ✅ As expected `the number of cards in the deck` is `52`
@@ -65,7 +65,7 @@
   ✅ As expected `the column can take the jack` is `no`
   ✅ As expected `the column can take the queen` is `yes`
   ▶️ Executing   `add the queen to the column`
-  ✅ As expected `the short name of the column` is `"T1: K♠↑ Q♥↑"`
+  ✅ As expected `the shorthand of the column` is `"T1: K♠↑ Q♥↑"`
   ✅ As expected `the column can give up the queen` is `yes`
   ▶️ Executing   `turn the queen face down`
   ✅ As expected `the column can give up the queen` is `no`

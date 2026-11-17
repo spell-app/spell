@@ -55,8 +55,8 @@ export class Card extends TwoSidedView {
     return "♠"
   }
 
-  /** Its short name:  Q♠↓ is the queen of spades, face down */
-  get shortName() {
+  /** Its shorthand:  Q♠↓ is the queen of spades, face down */
+  get shorthand() {
     const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
     const arrow = this.isFaceDirection("up") ? "↑" : "↓"
     return letter + this.symbol + arrow
@@ -228,10 +228,10 @@ export class Pile extends ViewableList {
     return this.lastItem.value
   }
 
-  /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
-  get shortName() {
+  /** Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓ */
+  get shorthand() {
     let summary = `${this.id}:`
-    this.forEach((card) => (summary = `${summary} ${card.shortName}`))
+    this.forEach((card) => (summary = `${summary} ${card.shorthand}`))
     return summary
   }
 
@@ -259,9 +259,9 @@ export class Deck extends ViewableList {
   }
 
   /** its card names, top to bottom */
-  get shortName() {
+  get shorthand() {
     const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
+    this.forEach((card) => cardNames.append(card.shorthand))
     return `deck: ${cardNames}`
   }
 }

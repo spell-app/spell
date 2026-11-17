@@ -9,11 +9,11 @@ a "pile" is a viewable, droppable list of cards
 	its "value" is
 		0 if it is empty
 		otherwise the value of its last card
-	its "short name" is
-		// Its id, then its cards' short names:  stock: Q♠↑ 7♥↓
+	its "shorthand" is
+		// Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓
 		set summary to its id + ":"
 		for card in the pile
-			set summary to summary + " " + the short name of the card
+			set summary to summary + " " + the shorthand of the card
 		return summary
 
 	when a card is dropped
@@ -41,7 +41,7 @@ to test piles
 	add a new card with rank 7, suit hearts and direction down to the stock
 	stock's color should be red
 	stock's value should be 7
-	stock's short name should be "stock: Q♠↑ 7♥↓"
+	stock's shorthand should be "stock: Q♠↑ 7♥↓"
 
 	// a card is in one pile at a time
 	set the discards to a new pile with id "discards"
@@ -49,4 +49,4 @@ to test piles
 	add it to the discards
 	its pile is the discards should be yes
 	the number of cards in the stock should be 1
-	the discards' short name should be "discards: 7♥↓"
+	the discards' shorthand should be "discards: 7♥↓"
