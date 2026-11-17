@@ -1,3 +1,5 @@
+/// <reference types="vite-plus/test/browser-playwright" />
+
 import { afterAll, describe, expect, it } from "vite-plus/test"
 import { cdp, page } from "vite-plus/test/browser"
 
