@@ -91,9 +91,9 @@
   min-width: 0;
   border: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
   border-block-start: 0;
-  /* 20px round (I252, Owen:  "Make this border-radius 20px";  the theme's pane radius before) */
-  border-end-start-radius: 20px;
-  border-end-end-radius: 20px;
+  /* 20px round, every corner (I252, Owen:  "Make this border-radius 20px", then C5:  "All corners round";
+     the theme's pane radius, bottom only, before) */
+  border-radius: 20px;
   /* the line under the top bar half as strong as a border (I251, Owen:  "I just wanted the border between the top menu
      and the add bar to be lighter, not the bar itself") */
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ui-border-color) 50%, transparent);
