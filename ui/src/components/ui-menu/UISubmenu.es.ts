@@ -11,6 +11,6 @@ export const submenuEs = {
   tag: "ui-submenu",
   name: "submenu",
   aka: ["submenú", "menú desplegable lateral", "menú en cascada", "menú anidado"],
-  attributes: { menu: "menu" },
+  attributes: { menu: "menu", split: "dividido", "flyout-label": "etiqueta-panel" },
   parts: { chevron: "flecha", flyout: "panel-flotante" }
 } as const satisfies E.TagDictionary

@@ -10,7 +10,7 @@
  * - The same noun (`section`) and `ownsParts`:  a panel nests in a section, and a section in a panel.
  * - The class words are the section's, then `panel` (and `sub` inside another panel):
  *   `<ui-panel color="violet">` => `ui violet panel section`.
- * - `appearance` gains `pane`, which only the panel draws.
+ * - `appearance` gains `pane`, which only the panel draws;  and the states gain a pane's scroll shades.
  */
 
 import type { E } from "spell/ui/core"
@@ -38,6 +38,12 @@ const APPEARANCE_DESCRIPTION =
   "Put a toolbar in its `slot=\"actions\"`, and the bar's chevron, the toolbar's items and its actions read as one row.  " +
   "Closed, only the bar is left.  The section's words too:  `bordered`, `styled`, `raised`, `basic`, `drawer`."
 
+/** A pane's scroll shades' states:  which ends of its body have more to scroll to. */
+const PANE_STATES = [
+  { name: "more-above", description: "A pane whose body is scrolled down from its top:  a shade shows under its bar." },
+  { name: "more-below", description: "A pane whose body has more below:  a shade shows at its bottom." }
+] as const
+
 /****************
  * ### `panelVocabulary`
  * The names of `<ui-panel>`, a property panel:  a tinted box with a full-width header band;
@@ -61,5 +67,6 @@ export const panelVocabulary = {
         : spec.name === "appearance"
           ? { ...spec, values: [...spec.values, PANE_APPEARANCE], description: APPEARANCE_DESCRIPTION }
           : spec
-  )
+  ),
+  states: [...sectionVocabulary.states, ...PANE_STATES]
 } as const satisfies E.ComponentVocabulary

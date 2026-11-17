@@ -211,7 +211,8 @@ export class JSXToken<
  *  - `element.children` is an array of child `jsxElement` instances.
  */
 /**
- * What couldn't be read as a child of an element:  `</butto` half typed, a stray `>`.
+ * What couldn't be read as a child of an element:  `</butto` half typed, a stray `>`;
+ * or among its attributes, `size="small` with its quote left open (`JSXElementToken.unreadableAt`).
  * - Matches no rule, so it's a parse error where it is;  the element around it carries on.
  */
 export class JSXUnreadableToken extends JSXToken<string> {}
@@ -248,6 +249,13 @@ export class JSXElementToken extends JSXToken<never, JSXElementTokenProps> {
   get unreadable() {
     return this.record.unreadable
   }
+  /**
+   * Where that is, an attribute it skipped, `size="small` with its quote left open:  so an error says that much is
+   * broken, not the whole tag (epic `language` I145) -- `undefined` when it read them all, or found no `>`.
+   */
+  get unreadableAt() {
+    return this.record.unreadableAt
+  }
   /** A chain branch's kind, `<if ...>`, `<otherwise>` ...:  see `Tokenizer.chainTags`.  `undefined` for an element. */
   get chain() {
     return this.record.chain
@@ -272,6 +280,8 @@ export type JSXElementTokenProps = Prettify<P.TokenProps<never>> & {
   quotedWord?: JSXAttributeToken
   /** What it couldn't read among its attributes -- see `JSXElementToken.unreadable`. */
   unreadable?: string
+  /** Where that is -- see `JSXElementToken.unreadableAt`. */
+  unreadableAt?: JSXUnreadableToken
   /** A chain branch's kind -- see `JSXElementToken.chain`. */
   chain?: JSXChainKind
   /** A chain branch's phrase -- see `JSXElementToken.phrase`. */

@@ -48,6 +48,7 @@ export class DOMPropertyGroupElement extends E.DOMLoadableBodyElement {
  *   - `:state(error)`:  its own `error`, or a property failing validation
  *   - `readonly`:  every property in it is readonly (each reads it as it connects)
  *   - `:state(changed)`:  a property in it holds an edit not saved yet
+ *   - `hide-empty` always:  with nothing in it (`:state(empty)`) it isn't drawn at all, no header for no properties
  * - The editor tells it about its properties (`markFieldFailed()`, `markChanged()`),
  *   and sends it `ui-invalid` and `ui-saved`.
  ****************/
@@ -92,6 +93,21 @@ export class UIPropertyGroup extends UIPanel {
   @E.cssState("changed")
   @E.state
   accessor isChanged = false
+
+  ////////////////
+  // ## Empty
+  ////////////////
+
+  /**
+   * `:state(empty)`:  nothing in it to see, so it isn't drawn at all -- a section's `hide-empty`, always on
+   * (Owen, epic `editor` I223:  "Don't auto-add `content` and `appearance` if no properties for them").
+   * - Follows its content, so a group filled later (its `select`, a Solid page's rows) shows as they come.
+   * - Its own `hide-empty="<selector>"` still says what counts.
+   */
+  @E.cssState("empty")
+  get isEmpty(): boolean {
+    return this.hideEmpty == null ? !this.slots.hasContent("") : super.isEmpty
+  }
 
   ////////////////
   // ## Its editor's look (epic `debut` P31)

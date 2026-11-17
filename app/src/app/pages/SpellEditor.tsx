@@ -596,7 +596,8 @@ export function EditorToolbar(props: { mode: Mode }) {
           <Show when={props.mode === "edit"}>
             <InspectHelp for={INSPECT_APP_ID} />
           </Show>
-          <Actions.restartApp iconOnly inBar />
+          {/* its tooltip and label say what a click does (I230) */}
+          <Actions.restartApp iconOnly inBar title={appTexts.text("restartTip")} />
           <ThemeMenu />
         </>
       )

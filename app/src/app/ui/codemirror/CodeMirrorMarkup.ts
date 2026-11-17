@@ -3,7 +3,7 @@ import { type EditorState, type Extension, type Range } from "@codemirror/state"
 import { Decoration, type DecorationSet, EditorView, type Rect, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
-import { type MarkMaker, type MarkedStretch, type Spacer, spacer } from "spell/app/app/ui/TextMarks"
+import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 import { CodeMirrorSelection } from "./CodeMirrorSelection"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
@@ -176,31 +176,8 @@ class MarkupShapes {
         case "markup-block":
           this.block(shape, rails)
           break
-        case "input":
-          if (shape.isBare) this.bareQuotes(shape.place)
-          break
       }
     }
-  }
-
-  /**
-   * A value written without quotes (`direction=down`) drawn as `direction="down"` is (epic `language` I123):
-   * its curly marks and the room outside them, as widgets beside its words, nothing added to the file.
-   * - Placed outside its pill's room, which is at its words' ends too (sides -1, 1)
-   */
-  private bareQuotes(place: number) {
-    const value = this.marks[place]
-    if (!value) return
-    const room = (kind: "quote" | "tag-quote", side: "before" | "after") => spacer(kind, side).inlineClassName
-    const { start, end } = value
-    this.decorations.add(
-      Decoration.widget({ widget: new SpacerWidget(room("quote", "before")), side: -3 }).range(start)
-    )
-    this.decorations.add(QuoteWidget.bare("open").range(start))
-    this.decorations.add(QuoteWidget.bare("close").range(end))
-    this.decorations.add(
-      Decoration.widget({ widget: new SpacerWidget(room("tag-quote", "after")), side: 3 }).range(end)
-    )
   }
 
   /** An element with what's inside it on lines of its own:  its band, its body's rail, its end tag's tiny pill. */
@@ -224,10 +201,10 @@ class MarkupShapes {
     const foot = block.foot === undefined ? undefined : this.marks[block.foot]
     if (foot) {
       this.on(block.foot!, ["cmb-tag-foot", ...hue])
-      // alone on its line:  a foot, on one row with the end tags alone on the lines round it (I132)
+      // alone on its line, or with other end tags only (`</></>`, I146):  a foot, on one row with the end tags on
+      // the lines round it (I132)
       const line = doc.lineAt(foot.start)
-      if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end))
-        this.decorations.footAlone(foot, inside)
+      if (END_TAGS_ONLY.test(doc.sliceString(line.from, line.to))) this.decorations.footAlone(foot, inside)
     }
 
     this.draw(block.inside, inside)
@@ -246,7 +223,8 @@ class MarkupShapes {
    *     should be indented as much as `class`")
    *   - every row from the block's left edge, its band's, to its right edge, past its widest row:
    *     how far each reaches past its words is measured once it's drawn (`tagBlocks`)
-   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139)
+   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139),
+   *     alone on the line under it too, the line break before it hidden (I144)
    */
   private tagOn(place: number, classes: string[], partOfSpeech: string) {
     const stretch = this.marks[place]
@@ -255,7 +233,7 @@ class MarkupShapes {
     const firstLine = doc.lineAt(stretch.start)
     if (stretch.end <= firstLine.to) return this.on(place, classes)
     const block = this.decorations.nextBlock()
-    const lastLine = doc.lineAt(stretch.end)
+    const closeLine = doc.lineAt(stretch.end)
     const isOpen = classes.includes("cmb-band-open")
     const rowOf = (extra: string[]) => {
       const row = this.decorations.nextRow()
@@ -278,11 +256,21 @@ class MarkupShapes {
     const joined = /^<[^\s"'=>]+\s*$/.test(name) ? doc.line(firstLine.number + 1) : undefined
     const joinedFrom = joined ? joined.from + /^\s*/.exec(joined.text)![0].length : 0
     const isJoined = joined !== undefined && joinedFrom < Math.min(joined.to, stretch.end)
-    const firstEnd = isJoined ? Math.min(joined.to, stretch.end) : firstLine.to
-    if (isJoined) {
-      this.decorations.add(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
-      if (firstEnd === stretch.end) first.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
+    // its `>` alone on the line under its last attribute (Solitaire's toolbar):  drawn on that attribute's line
+    // too, the line break and indent before it hidden (I144)
+    const close = /^\s*(\/?>)$/.exec(doc.sliceString(closeLine.from, stretch.end))
+    const isCloseAlone = close !== null && !(isJoined && joined.number === closeLine.number)
+    const lastLine = isCloseAlone ? doc.line(closeLine.number - 1) : closeLine
+    if (isCloseAlone) {
+      const words = lastLine.from + lastLine.text.trimEnd().length
+      this.decorations.add(TagJoinWidget.closeDecoration.range(words, stretch.end - close[1]!.length))
     }
+    const firstRowLine = isJoined ? joined.number : firstLine.number
+    const firstEnd =
+      firstRowLine === lastLine.number ? stretch.end : isJoined ? Math.min(joined.to, stretch.end) : firstLine.to
+    if (firstEnd === stretch.end) first.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
+    if (isJoined)
+      this.decorations.add(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
     // the tag's own mark (`bubbly-piece`) on its first row alone:  over all its lines, it cut the last row in two
     const own = this.decorations.unmark(stretch.start, stretch.end)
     this.decorations.mark(
@@ -295,13 +283,12 @@ class MarkupShapes {
     for (let number = after; number <= lastLine.number; number++) {
       const line = doc.line(number)
       const from = line.from + /^\s*/.exec(line.text)![0].length
-      const to = Math.min(line.to, stretch.end)
-      if (to <= from) continue
       const isLast = number === lastLine.number
+      // the last row round its `>` too, alone on the line under or not
+      const to = isLast ? stretch.end : Math.min(line.to, stretch.end)
+      if (to <= from) continue
       const row = rowOf(["cmb-tag-band", "cmb-tag-row", ...hueOf(partOfSpeech)])
       if (isLast) row.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
-      // its `>` alone on its line, back at the tag's level (as I133 laid it out):  from the band's left edge
-      if (/^\/?>$/.test(doc.sliceString(from, to))) row.classes.push("cmb-tag-row-close")
       // round what's marked on the line, never merged into a mark of the same stretch (a `>` alone, a bare attribute):
       // CodeMirror puts an inclusive mark outside an exclusive one over the same text
       this.decorations.add(
@@ -309,8 +296,8 @@ class MarkupShapes {
       )
     }
     // its `>` or `/>` past its last attribute
-    const close = /\/?>$/.exec(doc.sliceString(lastLine.from, stretch.end))
-    if (close) this.decorations.point(stretch.end - close[0].length, stretch.end)
+    const point = /\/?>$/.exec(doc.sliceString(lastLine.from, stretch.end))
+    if (point) this.decorations.point(stretch.end - point[0].length, stretch.end)
   }
 
   /** Classes `classes` on the mark at `place`. */
@@ -319,6 +306,9 @@ class MarkupShapes {
     if (stretch) this.decorations.mark(stretch.start, stretch.end, classes)
   }
 }
+
+/** A line of end tags only, `</>` or `</></>`:  each one a foot (`CodeMirrorDecorations.footAlone()`). */
+const END_TAGS_ONLY = /^\s*(?:<\/[^<>\s]*>\s*)+$/
 
 /** A part of speech's colour on a mark:  `bubbly.css`'s hue, and the band's own shades of it (`cmb-hue`). */
 function hueOf(partOfSpeech: string): string[] {
@@ -480,7 +470,8 @@ export class CodeMirrorDecorations {
     const lineOf = (foot: FootAlone) => doc.lineAt(foot.start).number
     for (let first = 0; first < feet.length;) {
       let last = first
-      while (feet[last + 1] && lineOf(feet[last + 1]!) === lineOf(feet[last]!) + 1) last++
+      // on the next line, or on the same one (`</></>`, I146)
+      while (feet[last + 1] && lineOf(feet[last + 1]!) - lineOf(feet[last]!) <= 1) last++
       this.feetRow(feet.slice(first, last + 1))
       first = last + 1
     }
@@ -509,7 +500,7 @@ export class CodeMirrorDecorations {
     for (const [level, foot] of run.entries()) {
       // a line joined to the row:  its own decoration not drawn, a rail stopping short in it (a Spell foot's under it) the row's
       const line = doc.lineAt(foot.start).from
-      if (level) {
+      if (level && line !== row.from) {
         for (const rail of this.lines.get(line)?.stopped ?? []) rowDecoration.stopped.add(rail)
         this.lines.delete(line)
       }
@@ -521,7 +512,7 @@ export class CodeMirrorDecorations {
       })
       const next = run[level + 1]
       // the line break to the next one hidden, one step for the caret
-      if (next) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
+      if (next && next.start > foot.end) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
     }
   }
 
@@ -619,22 +610,29 @@ type FootAlone = { start: number; end: number; rails: Rail[] }
 /** How far in a line's words start:  its tabs, then its spaces. */
 export type Indent = { tabs: number; spaces: number }
 
-/** One enclosing block, as a body line draws its rail:  where its band starts, and its colour. */
-export type Rail = Indent & { partOfSpeech: string }
+/**
+ * One enclosing block, as a body line draws its rail:  where its band starts, and its colour.
+ * - `groupOf`:  a group's rail, in its band's colour, the hue of the block it's in (`--cmb-group-<hue>`;
+ *   epic `language` I147)
+ */
+export type Rail = Indent & { partOfSpeech: string; groupOf?: string | undefined }
 
 /**
  * `rails` as a CSS background:  one stripe per enclosing block, at its band's left edge, in its band's colour
  *   (epic `language` I137, as before I131).
+ * - The innermost on top:  a group's rail hangs on its parent's, at the same place, and shows its own colour over it
+ *   (Owen, I147:  "This bar and curly should be colored by group, not app").
  * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`), a rail (`--cmb-rail`) and where a rail
  *   starts from its band's line's indent (`--cmb-rail-left`):  only the columns are written here.
  */
 function railsOf(rails: Rail[]): string {
   return rails
-    .map(({ tabs, spaces, partOfSpeech }) => {
+    .map(({ tabs, spaces, partOfSpeech, groupOf }) => {
       const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) + var(--cmb-rail-left))`
-      const colour = `var(--cmb-band-${partOfSpeech})`
+      const colour = groupOf ? `var(--cmb-group-${groupOf})` : `var(--cmb-band-${partOfSpeech})`
       return `linear-gradient(to right, transparent ${x}, ${colour} ${x}, ${colour} calc(${x} + var(--cmb-rail)), transparent calc(${x} + var(--cmb-rail)))`
     })
+    .reverse()
     .join(", ")
 }
 
@@ -651,7 +649,8 @@ export function railsStyle(
   const style = `--cmb-rails: ${railsOf(rails)}`
   if (![...stopped, ...ended].some((rail) => rail < rails.length)) return style
   const sizes = rails.map((_, rail) => (ended.has(rail) ? "0 0" : stopped.has(rail) ? STOPPED_RAIL : "100% 100%"))
-  return `${style}; --cmb-rail-sizes: ${sizes.join(", ")}`
+  // in the stripes' order, innermost first
+  return `${style}; --cmb-rail-sizes: ${sizes.reverse().join(", ")}`
 }
 
 /** A rail's size in a row it stops short in:  the row's width, its height less the corner's reach into it. */
@@ -676,8 +675,7 @@ const QUOTE_CLASS = /^bubbly-(?=quote-|tag-quote|tag-word-quote)/
 class QuoteWidget extends WidgetType {
   constructor(
     readonly classes: string,
-    readonly mark: string,
-    readonly isBare = false
+    readonly mark: string
   ) {
     super()
   }
@@ -689,18 +687,8 @@ class QuoteWidget extends WidgetType {
     return Decoration.replace({ widget: new QuoteWidget(["cmb-quote", ...own].join(" "), isOpen ? "“" : "”") })
   }
 
-  /**
-   * A curly mark for a value written without quotes (`direction=down`), with nothing of the file under it:
-   * outside the room either side of its words (sides -2, 2), inside the room outside the marks (-3, 3).
-   */
-  static bare(end: "open" | "close"): Decoration {
-    const classes = new Set([QUOTE_MARK, "bubbly-tag-quote", `bubbly-quote-${end}`])
-    const { classes: own, mark } = (QuoteWidget.over(classes).spec as { widget: QuoteWidget }).widget
-    return Decoration.widget({ widget: new QuoteWidget(own, mark, true), side: end === "open" ? -2 : 2 })
-  }
-
   eq(other: QuoteWidget): boolean {
-    return other.classes === this.classes && other.mark === this.mark && other.isBare === this.isBare
+    return other.classes === this.classes && other.mark === this.mark
   }
 
   /** `<span class="cmb-quote ..."><span class="cmb-quote-glyph">“</span></span>`:  the glyph placed in its box. */
@@ -718,14 +706,12 @@ class QuoteWidget extends WidgetType {
    * - CodeMirror's own measure was the box's:  no height, since its glyph is placed on its own (epic `language` I122:
    *   no caret after a closing quote, or before an opening one)
    * - `pos` 0 is before the `"`, 1 after it
-   * - A bare value's mark has no `"` to step over:  the caret beside it is at its words' edge, where a letter typed
-   *   goes into the value
    */
   coordsAt(box: HTMLElement, pos: number): Rect | null {
     const isOpen = this.mark === "“"
     const words = letterBeside(box, isOpen ? "after" : "before")
     if (!words) return null
-    const isOutside = !this.isBare && (pos === 0 ? isOpen : !isOpen)
+    const isOutside = pos === 0 ? isOpen : !isOpen
     return caretAt(isOutside ? outsideOf(box, isOpen ? "before" : "after") : isOpen ? words.left : words.right, words)
   }
 
@@ -871,23 +857,42 @@ class FeetJoinWidget extends WidgetType {
  * `⟨ toolbar class="GameBar"`, the file still `<toolbar`, then `class="GameBar"` on a line of its own.
  * - One step for the caret, as the feet's join (`FeetJoinWidget`):  before it, after the name;  after it, before
  *   the attribute
+ * - Also the line break and indent before a `>` alone on the line under the last attribute, drawn as nothing,
+ *   so the `>` is on that attribute's line (epic `language` I144;  Owen:  "End `>` is supposed to be on same line
+ *   as `shrinkable`")
  ****************/
 class TagJoinWidget extends WidgetType {
-  /** The hiding decoration:  `atomic`, so `CodeMirrorRelayout` makes it one step for the caret. */
-  static readonly decoration = Decoration.replace({ widget: new TagJoinWidget(), atomic: true })
+  /**
+   * The hiding decorations:  `atomic`, so `CodeMirrorRelayout` makes each one step for the caret.
+   * - `decoration`:  between the tag's name and its first attribute, drawn as a space
+   * - `closeDecoration`:  between its last attribute and a `>` alone on the line under it, drawn as nothing,
+   *   the `>`'s own room before it (`TagPointWidget`;  I144)
+   */
+  static readonly decoration = Decoration.replace({ widget: new TagJoinWidget(" ", "cmb-tag-join"), atomic: true })
+  static readonly closeDecoration = Decoration.replace({
+    widget: new TagJoinWidget("", "cmb-tag-close-join"),
+    atomic: true
+  })
 
-  eq(): boolean {
-    return true
+  constructor(
+    readonly shown: string,
+    readonly className: string
+  ) {
+    super()
+  }
+
+  eq(other: TagJoinWidget): boolean {
+    return other.className === this.className
   }
 
   toDOM(): HTMLElement {
     const join = document.createElement("span")
-    join.className = "cmb-tag-join"
-    join.textContent = " "
+    join.className = this.className
+    join.textContent = this.shown
     return join
   }
 
-  /** `pos` 0, before it:  after the tag's name;  else before its first attribute. */
+  /** `pos` 0, before it:  after the tag's name, or its last attribute;  else before its first attribute, or its `>`. */
   coordsAt(join: HTMLElement, pos: number): Rect | null {
     const letter = letterBeside(join, pos === 0 ? "before" : "after")
     const box = join.getBoundingClientRect()
@@ -985,8 +990,7 @@ function measureTagBlocks(view: EditorView): TagRow[] {
       left: box.left + reach("--cmb-reach-before"),
       right: box.right - after
     }
-    if (element.matches(".cmb-tag-row:not(.cmb-tag-row-close)"))
-      row.words = box.left + parseFloat(style.paddingLeft) - reach("--cmb-reach-in")
+    if (element.matches(".cmb-tag-row")) row.words = box.left + parseFloat(style.paddingLeft) - reach("--cmb-reach-in")
     const point = element.querySelector<HTMLElement>(".cmb-tag-point")
     if (point) {
       // its first ink:  a `/>`'s bar, drawn at its slash's left edge, else its `⟩`

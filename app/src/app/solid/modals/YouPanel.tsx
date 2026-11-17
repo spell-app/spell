@@ -16,9 +16,9 @@ const ME_URL = "/api/people/me"
 /****************
  * ### `<YouPanel>`
  * The "You" panel (epic `people-and-orgs` P9, Q13):  this machine's person, to change, and their orgs, to read.
- * - A `<ui-modal>` with a `<ui-form>`:
- *   - names, nickname
- *   - emails, one a line
+ * - A narrow `<ui-modal>` (`YouPanel.css`) with a `<ui-form>`:
+ *   - name and nickname, side by side
+ *   - email addresses, one a line
  *   - dated events, each a label and a day, added and removed by row
  * - Their orgs, and their role in each, read only.
  * - What their file got wrong (`checkEntry()`'s problems), above the form:  read anyway.
@@ -60,14 +60,16 @@ export function YouPanel(props: YouPanelProps) {
           </ui-message>
         </Show>
         <ui-form>
-          <ui-field>
-            <label for="YouPanel-names">{appTexts.text("names")}</label>
-            <ui-input id="YouPanel-names" name="names" value={props.me.person.names} />
-          </ui-field>
-          <ui-field>
-            <label for="YouPanel-nickname">{appTexts.text("nickname")}</label>
-            <ui-input id="YouPanel-nickname" name="nickname" value={props.me.person.nickname} />
-          </ui-field>
+          <ui-fields unstackable>
+            <ui-field width="11">
+              <label for="YouPanel-names">{appTexts.text("names")}</label>
+              <ui-input id="YouPanel-names" name="names" value={props.me.person.names} />
+            </ui-field>
+            <ui-field width="5">
+              <label for="YouPanel-nickname">{appTexts.text("nickname")}</label>
+              <ui-input id="YouPanel-nickname" name="nickname" value={props.me.person.nickname} />
+            </ui-field>
+          </ui-fields>
           <ui-field>
             <label for="YouPanel-emails">{appTexts.text("emails")}</label>
             <ui-textarea id="YouPanel-emails" name="emails" rows="2" value={props.me.person.emails.join("\n")} />

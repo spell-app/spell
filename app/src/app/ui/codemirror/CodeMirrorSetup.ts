@@ -69,7 +69,7 @@ export class CodeMirrorSetup {
       REVEALS_BLOCKS,
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
-      // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
+      // a tab 2 spaces wide:  each level of a body 8px further in, not 17px (epic `language` I113)
       EditorState.tabSize.of(TAB_SIZE),
       // the find bar (⌘F), VS Code's look and keys
       CodeMirrorFind.extension(),
@@ -367,7 +367,7 @@ const REVEALS_BLOCKS = EditorView.scrollHandler.of((view, range) => {
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"
 
-/** How many spaces wide a tab is:  2, as Monaco's was (epic `language` I113);  `codemirror.css`'s `tab-size` too. */
+/** How many spaces wide a tab is:  2, so each level of a body is 8px further in (epic `language` I113);  `codemirror.css`'s `tab-size` too. */
 const TAB_SIZE = 2
 
 /** Whether `update` brought a new parse:  `CodeMirrorSetup.PARSED`. */
