@@ -669,13 +669,20 @@ export class SpellParser extends P.Parser {
    *   `- to debug it:` under `solitaire is an app where:` is `solitaire\tto debug it`.
    *   - The type's line is any that declares one (`TYPE_DECLARATION`), or re-opens one, `a solitaire:`.
    * - Up to its `:`, so its body isn't parsed:  `to cheat at it:  print 1` is `to cheat at it`.
+   * - A type's question too (epic `language` I154), up to its `if`:
+   *   `a card "can go up" if` at a file's top, `- it "can go up" if` in its outline body.
    */
   declaredMethods(text: string): string[] {
+    const { methodLine, questionLine } = this.declarations
     const found: string[] = []
     this.eachDeclarationLine(text, (subject, line, bullet) => {
       if (bullet === undefined) {
-        if (this.declarations.methodLine.test(line)) found.push(`\t${firstLineOf(line)}`)
-      } else if (subject && this.declarations.methodLine.test(bullet)) found.push(`${subject}\t${firstLineOf(bullet)}`)
+        const method = methodLine.test(line) ? firstLineOf(line) : questionLine.exec(line)?.[0]
+        if (method) found.push(`\t${method}`)
+      } else if (subject) {
+        const method = methodLine.test(bullet) ? firstLineOf(bullet) : questionLine.exec(bullet)?.[0]
+        if (method) found.push(`${subject}\t${method}`)
+      }
     })
     return found
   }
@@ -848,6 +855,7 @@ export class SpellParser extends P.Parser {
    *   e.g. `klondike` for `klondike is a card game where:`.
    * - A place's line says what its body is about, as a type's does:
    *   `family-cookbook` for `family cookbook is a web server at "...":`, so its operations can be called ahead (epic `data` T67).
+   * - A re-opened type's line may end in a comment:  `a card  -- what auto play asks of a card`.
    */
   subjectOf(line: string, onlyOnes?: ReadonlySet<string>): string | undefined {
     const { typeDeclaration, kindDeclaration, placeDeclaration, reopenedType } = this.declarations
@@ -878,8 +886,9 @@ export class SpellParser extends P.Parser {
             .join("-")
         : undefined
     if (onlyOneName && onlyOnes!.has(onlyOneName)) return onlyOneName
+    // a comment after it:  `a card  -- what auto play asks of a card` (epic `language` I154)
     return reopenedType
-      .exec(line)?.[1]
+      .exec(line.replace(TRAILING_COMMENT, ""))?.[1]
       ?.split(/[ \t]+/)
       .join("-")
   }
@@ -1010,7 +1019,7 @@ type CallsAhead = { callAhead?: (match: P.Match) => void }
 /** Most words a kind's name may have, as `create_one_of_a_kind` reads it:  as many as a type's (drawable-thing J7). */
 const MAX_KIND_WORDS = 4
 
-/** A comment ending a line, `  -- A playing card`:  `SpellParser.declaredSuperTypes()` reads the line without it. */
+/** A comment ending a line, `  -- A playing card`:  `declaredSuperTypes()` and `subjectOf()` read the line without it. */
 const TRAILING_COMMENT = /[ \t]+--(?:[ \t].*)?$/gm
 
 /**

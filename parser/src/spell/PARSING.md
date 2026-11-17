@@ -1902,8 +1902,16 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
       - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type
+      - a type's QUESTION, either place (epic `language` I154):  `- it "can go up" if`, `a card "can go up" if`,
+        up to its `if`, its body left out (the language's `questionLine`)
+        - So an action above it asks it:  `where it can go up`, and T146's `or` lines.
+      - A type's line may end in a comment, `a card  -- what auto play asks of a card` (`subjectOf()`):
+        its body's methods are scanned too.
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
+      - A question's rule is its own, `MethodPostfixRule` / `MethodInfixRule`, stepping aside in `parse()`.
+      - Not a value kind's question (`a rank "is a face card"`):  it calls its kind's static method,
+        and a type the scan knows no kind of may be a value kind.
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`):
       every call registered ahead of its definition reads again (epic `editor` I170).

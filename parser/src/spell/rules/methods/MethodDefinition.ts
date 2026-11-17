@@ -580,16 +580,26 @@ export class MethodDefinition<
    * - Registers the same call rule `getRule()` will, marked `ahead`:  it steps aside once the definition has run.
    * - Added straight to the parser, journaled, so a rewind takes it back:
    *   NOT to the scope's rules, which a project's declarations export.
-   * - Only a call:  not a quoted phrase (a postfix or infix expression).
+   * - A type's question too (epic `language` I154):  `where it can go up` above `- it "can go up" if ...`.
+   *   - Not a value kind's (`a rank "is a face card"`):  it reads its kind's static method (`staticOf`),
+   *     and a type not declared yet, of no known kind, may be one (`declaredSuperTypes()` leaves values out).
    */
   callAhead(match: P.MatchFor<this>): void {
     const { asTest } = match.groups as { asTest?: P.Match }
     const signature = this.getSignature(match)
     if (!signature?.methodName || !signature.syntax) return
-    if (signature.asPostfixExpression || signature.asInfixExpression) return
-    const { of, params } = this.getOwnerAndParams(match)
-    const alias = asTest ? "statement" : ["statement", "expression"]
-    const rule = DynamicMethodRule.specialize({ output: signature.methodName, alias, of, params, ahead: true })
+    const { type, of, params } = this.getOwnerAndParams(match)
+    const output = signature.methodName
+    let rule: P.RuleConstructor
+    if (signature.asPostfixExpression) {
+      if (signature.valueKindOf || (type?.stub && !type.superType)) return
+      rule = MethodPostfixRule.specialize({ output, of, ahead: true })
+    } else if (signature.asInfixExpression) {
+      rule = MethodInfixRule.specialize({ output, of, params, ahead: true })
+    } else {
+      const alias = asTest ? "statement" : ["statement", "expression"]
+      rule = DynamicMethodRule.specialize({ output, alias, of, params, ahead: true })
+    }
     match.scope.parser?.addRule(rule, { syntax: signature.syntax })
   }
 
