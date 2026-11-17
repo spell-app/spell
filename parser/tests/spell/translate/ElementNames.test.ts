@@ -108,6 +108,17 @@ describe("ElementNames:  the elements a project draws with, in the other languag
     )
   })
 
+  test("a tag written bare, as plain Spell draws it, is bare in the other language too (epic `mockup` P21)", () => {
+    const source = `a "card" is a view
+	its "picture" is a text
+	to draw it
+		<text size="small"><item kind="header" aria-label="Auto play">Klondike</item></text>
+`
+    expect(translated(source)[3]).toBe(
+      '\t\t<texto tamano="pequeño"><elemento clase="encabezado" aria-label="Jugar solo">Klondike</elemento></texto>'
+    )
+  })
+
   test("without Spell UI's names, its tags stay as written", () => {
     expect(translated(CARD, { ui: false })[5]).toBe("\t\t\t<ui-text")
   })

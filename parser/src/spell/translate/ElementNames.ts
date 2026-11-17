@@ -3,6 +3,9 @@ import { P } from "spell/parser/parser"
 import type { TranslationNames } from "./TranslationNames"
 import type { MissingName, UIVocabulary } from "./translate.types"
 
+/** What starts each of Spell UI's tags, written in full:  plain Spell writes them bare, `<stack>`. */
+const UI_PREFIX = "ui-"
+
 /**
  * The names of the ELEMENTS a project draws with, in the other language (epic `spanish` P25):
  * its tags, their attributes and their values -- in its JSX, and in its style sheets' selectors.
@@ -55,9 +58,23 @@ export class ElementNames {
   // ## Names
   ////////////////
 
-  /** `tag` in the other language:  Spell UI's, else one of the project's own;  `undefined` to keep it. */
+  /**
+   * `tag` in the other language:  Spell UI's, else one of the project's own;  `undefined` to keep it.
+   * - Spell UI's tag written bare, as plain Spell draws it (`<stack>`), is bare in the other language too:
+   *   `<pila>` (epic `mockup` P21:  only `<ui-stack>` was translated, so a bare one stayed English and drew nothing)
+   */
   tag(tag: string): string | undefined {
-    return this.ui?.tag(tag) ?? this.ownTags.get(tag)
+    const ui = this.ui?.tag(tag)
+    if (ui) return ui
+    const bare = this.ui?.tag(`${UI_PREFIX}${tag}`)
+    return bare ? bare.slice(bare.indexOf("-") + 1) : this.ownTags.get(tag)
+  }
+
+  /** Spell UI's tag `tag` names, written in full (`stack` => `ui-stack`);  `undefined` for one that isn't Spell UI's. */
+  private uiTagOf(tag: string): string | undefined {
+    if (!this.ui) return undefined
+    if (this.ui.tag(tag)) return tag
+    return this.ui.tag(`${UI_PREFIX}${tag}`) ? `${UI_PREFIX}${tag}` : undefined
   }
 
   /**
@@ -73,8 +90,9 @@ export class ElementNames {
     const isBinding = BINDING_ATTRIBUTES.has(attribute) && !!value && !this.takesValues(tag, attribute)
     let name = attribute
     let translated = value
-    if (this.ui?.tag(tag)) {
-      const localized = this.ui.attribute(tag, attribute, isText || isPart ? undefined : value)
+    const uiTag = this.uiTagOf(tag)
+    if (this.ui && uiTag) {
+      const localized = this.ui.attribute(uiTag, attribute, isText || isPart ? undefined : value)
       if (localized) {
         name = localized.attribute
         if (!isText && !isPart) translated = localized.value
@@ -120,7 +138,8 @@ export class ElementNames {
 
   /** Does `attribute` of Spell UI's `tag` take only the values it names?  Then a text in it is one of them. */
   takesValues(tag: string, attribute: string): boolean {
-    return !!this.ui?.tag(tag) && this.ui.hasValues(tag, attribute)
+    const uiTag = this.uiTagOf(tag)
+    return !!this.ui && !!uiTag && this.ui.hasValues(uiTag, attribute)
   }
 
   ////////////////
