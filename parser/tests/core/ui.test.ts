@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach, vi } from "vite-plus/test"
+import { describe, test, expect, afterEach, onTestFinished, vi } from "vite-plus/test"
 
 import { core } from "spell/parser/core"
 
@@ -86,5 +86,49 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
     await Promise.resolve()
     expect(warn).toHaveBeenCalledTimes(1)
     expect(String(warn.mock.calls[0]![0])).toContain("five.ogg")
+  })
+})
+
+describe("core.alert() / warn() / confirm():  the dialog the page's Spell UI is asked for (epic `language` T143-T145)", () => {
+  /** A stand-in for the page's Spell UI runtime:  what its dialogs were asked for. */
+  function stubPageUI() {
+    const asked: { method: string; options: unknown }[] = []
+    const modals = {
+      alert: (options: unknown) => (asked.push({ method: "alert", options }), Promise.resolve()),
+      confirm: (options: unknown) => (asked.push({ method: "confirm", options }), Promise.resolve(true))
+    }
+    const page = { load: () => Promise.resolve(page), modals }
+    const key = Symbol.for("spell-ui:runtime")
+    ;(globalThis as Record<symbol, unknown>)[key] = page
+    onTestFinished(() => delete (globalThis as Record<symbol, unknown>)[key])
+    return asked
+  }
+
+  test("older compiled code's buttons, one by one, still work;  every message may be Markdown", async () => {
+    const asked = stubPageUI()
+    await core.alert("Yo!", "yep")
+    await core.confirm("Sure?", "Yes", "No")
+    expect(asked).toEqual([
+      { method: "alert", options: { okText: "yep", cancelText: undefined, message: "Yo!", markdown: true } },
+      { method: "confirm", options: { okText: "Yes", cancelText: "No", message: "Sure?", markdown: true } }
+    ])
+  })
+
+  test("a title and a size, as `titled ... in big text` compiles them", async () => {
+    const asked = stubPageUI()
+    await core.alert("You won!", { title: "Solitaire", size: "big", okText: "New game" })
+    await core.warn("Careful!", { title: "Deleting" })
+    expect(await core.confirm("Deal?", { title: "Solitaire", okText: "Deal", cancelText: "Not now" })).toBe(true)
+    expect(asked).toEqual([
+      {
+        method: "alert",
+        options: { title: "Solitaire", size: "big", okText: "New game", message: "You won!", markdown: true }
+      },
+      { method: "alert", options: { title: "Deleting", message: "Careful!", markdown: true } },
+      {
+        method: "confirm",
+        options: { title: "Solitaire", okText: "Deal", cancelText: "Not now", message: "Deal?", markdown: true }
+      }
+    ])
   })
 })
