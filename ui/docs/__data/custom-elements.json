@@ -11544,7 +11544,7 @@
             },
             {
               "name": "unsaved",
-              "description": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value.",
+              "description": "A change here can't be saved:  a flask icon after the info icon, this text its tip.  The control still changes the value.",
               "type": {
                 "text": "string"
               },
@@ -11804,7 +11804,7 @@
             },
             {
               "name": "unsaved",
-              "description": "The crossed-out save icon after the info icon, with `unsaved`."
+              "description": "The flask icon after the info icon, with `unsaved`."
             },
             {
               "name": "control",
@@ -29866,7 +29866,7 @@
             },
             {
               "name": "unsaved",
-              "description": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value.",
+              "description": "A change here can't be saved:  a flask icon after the info icon, this text its tip.  The control still changes the value.",
               "type": {
                 "text": "string"
               },
@@ -30152,7 +30152,7 @@
             },
             {
               "name": "unsaved",
-              "description": "The crossed-out save icon after the info icon, with `unsaved`."
+              "description": "The flask icon after the info icon, with `unsaved`."
             },
             {
               "name": "control",
@@ -30345,7 +30345,7 @@
             },
             {
               "name": "unsaved",
-              "description": "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its tip (`<ui-field unsaved>`).  The values still change as they're edited.",
+              "description": "Changes here can't be saved:  each property shows a flask icon after its info icon, this text its tip (`<ui-field unsaved>`).  The values still change as they're edited.",
               "type": {
                 "text": "string"
               },

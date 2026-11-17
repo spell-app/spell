@@ -82,10 +82,9 @@
     white-space: nowrap;
   }
 
-  /* ## The not-saved icon:  a save icon under a red "no" sign (a circle and its slash)
+  /* ## The not-saved icon:  a flask, "just trying it out", in the info icon's quiet ink
      - Shown only while the field is hovered or holds the focus, fading in;  its room is always kept, so nothing moves
-       (Owen, epic `editor` I226:  "'Can't save' icon only visible on hover over field";
-       "The `/` doesn't read in over the floppy, make it a red circle-slash instead") */
+       (Owen, epic `editor` I226:  "'Can't save' icon only visible on hover over field";  Q36 picked the flask) */
   .field > .row > .unsaved {
     position: relative;
     display: inline-flex;
@@ -104,24 +103,6 @@
     height: 100%;
     fill: currentColor;
     opacity: 0.5;
-  }
-  .field > .row > .unsaved::after {
-    --_field-unsaved-sign: var(--ui-negative, #db2828);
-    --_field-unsaved-stroke: 0.07em;
-    content: "";
-    position: absolute;
-    inset: -0.1em;
-    box-sizing: border-box;
-    border: calc(var(--_field-unsaved-stroke) * 2) solid var(--_field-unsaved-sign);
-    border-radius: 50%;
-    /* the slash, top left to bottom right */
-    background: linear-gradient(
-      45deg,
-      transparent calc(50% - var(--_field-unsaved-stroke)),
-      var(--_field-unsaved-sign) calc(50% - var(--_field-unsaved-stroke)),
-      var(--_field-unsaved-sign) calc(50% + var(--_field-unsaved-stroke)),
-      transparent calc(50% + var(--_field-unsaved-stroke))
-    );
   }
 
   /* ## The info icon and its tip;  the not-saved icon says why in the same bubble */
