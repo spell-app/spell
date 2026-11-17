@@ -44,7 +44,7 @@ lista de la compra es una aplicación
 					<action "rehacer" solo-icono />
 				</barra-herramientas>
 				<formulario value={su nuevo artículo} class="new-item">
-					<campos no-apilable>
+					<campos>
 						<campo ancho="3">
 							<entrada name="cantidad" type="number" min="0" marcador="Cuántos" aria-label="Cantidad" />
 						</campo>

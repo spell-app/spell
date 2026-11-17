@@ -1,6 +1,8 @@
 {
   "title": "Recipe Cards",
   "description": "Recipes kept in a JSON file:  scale one for how many are eating, show it in metric or in cups and spoons, edit its ingredients and steps, and send the ingredients you pick to Shopping List's own list",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "Blueberry Pancakes" }, { "clickOn": "ui-input[name=\"diners\"] input" }, { "press": "ControlOrMeta+A" }, { "type": "6" }, { "clickOn": "ui-checkbox", "nth": 6 }, { "clickOn": "ui-checkbox", "nth": 9 }, { "scrollTo": "Ingredients" }] },
   "imports": [
     {
       "path": "@spell/examples/ShoppingList",

@@ -331,7 +331,7 @@ export class ListaDeLaCompra extends App {
             {core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })}
           </es-barra-herramientas>
           <es-formulario class="new-item" prop:value={this.nuevoArtículo}>
-            <es-campos no-apilable={true}>
+            <es-campos>
               <es-campo ancho="3">
                 <es-entrada name="cantidad" type="number" min="0" marcador="Cuántos" aria-label="Cantidad" />
               </es-campo>

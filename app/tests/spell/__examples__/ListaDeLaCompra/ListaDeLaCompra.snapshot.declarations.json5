@@ -148,7 +148,7 @@
     {
       "type": "ListaDeLaCompra",
       "superType": "App",
-      "defined": "/ListaDeLaCompra.es.spell:378-3226"
+      "defined": "/ListaDeLaCompra.es.spell:378-3214"
     },
     {
       "property": "recorrido",

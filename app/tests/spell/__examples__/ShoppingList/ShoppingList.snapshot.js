@@ -70,7 +70,6 @@ export class Item extends View {
           "for ",
           () => this.recipe
         ),
-        h("spacer"),
         core.drawAction(this, "remove", { "icon-only": true, appearance: "tertiary" })
       )
     )
@@ -285,7 +284,7 @@ export class ShoppingList extends App {
           core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })
         ),
         h("ui-form", { class: "new-item", "prop:value": () => this.newItem },
-          h("ui-fields", { unstackable: true },
+          h("ui-fields",
             h("ui-field", { width: "3" },
               h("ui-input", { name: "amount", type: "number", min: "0", placeholder: "How many", "aria-label": "Amount" })
             ),
@@ -312,7 +311,7 @@ core.describeAction(ShoppingList, "addTheNewItem", { title: "Add", icon: "plus",
 core.describeAction(ShoppingList, "clearWhatIGot", { title: "Clear what I got", icon: "check", undoneAs: "Clear what I got" })
 core.describeAction(ShoppingList, "printTheList", { title: "Print", icon: "print", undoneAs: "Print" })
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet. */¬¬/* got:  it fades */¬.got {¬  opacity: 0.6;¬}¬¬/* On paper (\`open printing\`):  only what's still to get, by aisle, each with its box to tick */¬@media print {¬  ui-toolbar,¬  .new-item,¬  .got,¬  .item ui-action {¬    display: none;¬  }¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet. */¬¬/* got:  it fades */¬.got {¬  opacity: 0.6;¬}¬¬/* On paper (\`open printing\`):  only what's still to get, by aisle, each with its box to tick */¬@media print {¬  ui-toolbar,¬  .new-item,¬  .got,¬  .item ui-button {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) shoppingList.start()
 // -----------

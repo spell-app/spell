@@ -98,7 +98,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Item.spell:556-995"
+      "defined": "/Item.spell:556-980"
     },
     {
       "type": "ShoppingSheet",
@@ -117,7 +117,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "how much reads",
-      "defined": "/Item.spell:998-1216"
+      "defined": "/Item.spell:983-1201"
     },
     {
       "type": "Aisle",
@@ -182,7 +182,7 @@
     {
       "type": "ShoppingList",
       "superType": "App",
-      "defined": "/ShoppingList.spell:323-2740"
+      "defined": "/ShoppingList.spell:323-2728"
     },
     {
       "property": "aisle_list",
@@ -262,7 +262,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/ShoppingList.spell:1738-2740"
+      "defined": "/ShoppingList.spell:1738-2728"
     }
   ],
   "codeLines": [
@@ -277,23 +277,23 @@
     51,
     58,
     62,
-    102,
-    116,
-    139,
-    142,
-    148,
-    153,
-    161,
-    165,
-    180,
-    185,
-    203,
-    206,
-    212,
-    218,
-    259,
-    266,
-    271,
-    275
+    101,
+    115,
+    138,
+    141,
+    147,
+    152,
+    160,
+    164,
+    179,
+    184,
+    202,
+    205,
+    211,
+    217,
+    258,
+    265,
+    270,
+    274
   ]
 }

@@ -175,7 +175,7 @@
 |   |         <⟨action⟩ «"redo"» icon-only />
 |   |       </⟨toolbar⟩>
 |   |       <⟨form⟩ value={its **new item**} class=«"new-item"»>    code({its new item})
-|   |         <⟨fields⟩ unstackable>
+|   |         <⟨fields⟩>
 |   |           <⟨field⟩ width=«"3"»>
 |   |             <⟨input⟩ name=«"amount"» type=«"number"» min=«"0"» placeholder=«"How many"» aria-label=«"Amount"» />
 |   |           </⟨field⟩>

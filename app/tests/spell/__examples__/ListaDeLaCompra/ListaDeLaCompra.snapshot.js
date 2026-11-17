@@ -285,7 +285,7 @@ export class ListaDeLaCompra extends App {
           core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })
         ),
         h("es-formulario", { class: "new-item", "prop:value": () => this.nuevoArtículo },
-          h("es-campos", { "no-apilable": true },
+          h("es-campos",
             h("es-campo", { ancho: "3" },
               h("es-entrada", { name: "cantidad", type: "number", min: "0", marcador: "Cuántos", "aria-label": "Cantidad" })
             ),
