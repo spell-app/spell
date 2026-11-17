@@ -206,6 +206,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - a COMMENT's field, the pane's and a thread's reply (epic `epic-engine` I267):  `Pictures.intoWords()` saves a pasted
         or dropped picture beside the page (the comments route's `POST picture`) and writes `![picture](<path>)` into the
         words, so it goes wherever they go;  `<epic-thread>` draws it as a thumbnail, a click opening it full size
+      - an ITEM's picture, `<epic-picture>` (epic `epic-engine` T87):  the person's, pasted into the chat that filed
+        the item (`epic add ... --pasted <n>`, read from the session's transcript) or a file (`--picture <file>`),
+        saved beside the page in `pictures/` (the tool's `ItemPictures`);  its trash deletes it at once, Undo in the
+        page's notices for 6s (`PictureDeletes`), then `POST delete-picture` takes it out of the item and deletes its
+        file;  [check-picture-delete.mjs](demo/check-picture-delete.mjs) checks it in a browser
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and the person's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
@@ -215,6 +220,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           `doing`), a bare spinner (`draws="spinner"`, T53), its words beside it (I210), for OTHER work only ("Building
           P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
           `epic-engine` P55, Q62 A)
+        - while a phase is building (the step label names one under way, and the session does other work, or Claude
+          is at work on that phase):  the step label's circle turns, Spell UI's loading icon (`isStepTurning()`), and
+          the line beside Send keeps its words alone (`draws="words"`;  epic `epic-engine` I316, 2026-11-16:  "Don't
+          need both of these indicators.  Just make the one in the pill a loading spinner")
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -451,8 +460,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `command/` -- what the `epic` command's verbs run (epic `epic-eject` P5).
     - a class per verb group, a method per verb:
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
+        - `merge` installs the packages in the main checkout when it changed a lockfile or a `package.json`
+          (`MainMerge.installAfter()`, the same as `merge-main`'s), then restarts its page server and editor
+          (`refreshPageServer()`;  epic `epic-engine` T89)
       - `Worktrees` (`worktree`), with `MainMerge`
-        (`worktree merge-main`:  installs the packages when it changed a lockfile, a root lockfile both sides changed
+        (`worktree merge-main`:  installs the packages when it changed a lockfile or a `package.json`, a root lockfile both sides changed
         rewritten by its own tool, snapshots updated by the repo's own runner, `snapshotUpdateOf()`)
         - then renames Spell UI's old names the branch still writes (`renameOldNames()`, epic `epic-engine` I143):
           the kit's `spell ui rename --write` over what the merged branch differs from `main` in, once every repo is
@@ -561,6 +573,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
+    - `Superpowers` (epic `epic-engine` P72):  with the superpowers plugin on for the session
+      (`ClaudeHome.isPluginEnabled()`:  every settings layer, the person's, the project's, its local file, `--settings`,
+      the managed file, and `claude --plugin-dir` read off the session's process;  epic `epic-engine` I318), what the
+      same hook adds in an EPIC's worktree:  the guide's `superpowers` topic,
+      where superpowers stands aside (no design, plan, worktree or finish of its own;  no `npm install`), joined to the
+      guard's answer (`WorktreeGuard.withNotice()`);  plain `node` loads it by path
+      - and the same words in the repo's `AGENTS.md`, a marked block `epic init` writes and keeps current
+        (`agentsStep()`, `RepoInit.superpowersChoice()`:  asked when superpowers is on, `--superpowers`;  I318)
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
@@ -615,7 +635,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
         hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
         - and (P12) every skill linked into `~/.agents/skills/`, the SAME files, which the Codex CLI lists in every
-          repo;  the designer and coherence agents as Codex custom agents, `~/.codex/agents/epic-<name>.toml`,
+          repo;  the designer, coherence and plan-check agents as Codex custom agents, `~/.codex/agents/epic-<name>.toml`,
           generated from Claude Code's agent files (`codexAgent()`)
         - one route for the hooks:  the plugin's own Codex hooks file passes `--codex-plugin`, and a script started so
           does nothing while the user file runs it (`CodexHome.skipPluginHook()`)
@@ -704,6 +724,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           interactive terminal session;  VS Code's panel runs `claude` as a stream, where none ever ran (checked
           2026-10-26, Claude Code 2.1.310, with a probe plugin:  no monitor;  its `asyncRewake` `Stop` hook woke it)
         - in a terminal session the monitor runs it too
+        - NOT in an unattended session (epic `epic-engine` I319):  the poller and the restart wake stand down
+          (`ClaudeSession.isUnattended()`, read from `CLAUDE_CODE_SESSION_ATTENDED`, which is "0" in `claude -p`), so a
+          scripted `claude -p` with the epic plugin starts in seconds instead of hanging
       - ONE per session, the newest:  `~/.spell-epic/listeners/<session pid>.pid` names it (and the batch it last
         announced, so the next turn's hook never announces it again);  an older one sees it gone and ends
       - the page server reads that file (`listenerOf()`):  a session with a poller is asked through its inbox, never
@@ -839,6 +862,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 - `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
   - rerun after changing an element or a page's sections, and commit `docs/__data/`
 - `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium):  fast, no turn needed
+- `yarn test:unit` -- `node` and the plain-node scripts, no browser or integration:  what an epic's agent runs before
+  merging (the epic skill's three test tiers, epic `epic-engine` T90)
 - `yarn test:integration` -- the slow tests that run real git and processes, one file at a time (`INTEGRATION_TESTS`
   in [vitest.config.ts](../vitest.config.ts);  epic `epic-engine` I313):  in the turn, `epic turns run test -- yarn
   test:integration`;  `yarn review` and CI run both
@@ -1572,6 +1597,7 @@ In `tools/`:
         "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
         (I210:  bare, it read as "the server is listening").  Answering a
         Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
+        While a phase builds, the step label's circle turns instead, and the line keeps its words alone (I316).
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.

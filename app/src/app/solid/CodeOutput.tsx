@@ -18,7 +18,7 @@ import "./CodeOutput.css"
 
 /**
  * How each language of compiled code looks, wherever the editor names one:
- * the compiled code's tabs, the top bar's button for it, the Program panel's tabs.
+ * the compiled code's tabs, and the top bar's button for it.
  * - `icon`:  Font Awesome's brand icon (the app's `<ui-root icons="fa7-brands, fomantic">`)
  * - `text`:  its name's key, `JavaScript`
  * - `tip`:  the top bar's button's label, `Compiled JavaScript`

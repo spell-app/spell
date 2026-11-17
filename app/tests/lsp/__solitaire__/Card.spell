@@ -28,7 +28,7 @@ a "card" is a two sided view:
 	- group "names"
 	- its "name" is its rank + " of " + its suit
 	- it "is the (rank) of (suit)"
-	// Its short name:  Q♠↓ is the queen of spades, face down
+	// Its shorthand:  Q♠↓ is the queen of spades, face down
 	- its "state" is:
 		letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
 		arrow is "↑" if it is face up otherwise "↓"

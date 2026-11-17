@@ -260,16 +260,31 @@ ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
 /*
- * ... its round icons stand `--spell-bar-icon-gap` after the tabs, pill edge to circle edge (epic `editor` I202,
- * Owen:  "Add space between Edit and code button"):  the tabs' track keeps its options 1px apart,
+ * ... its round icons stand 16px after the tabs, pill edge to circle edge (epic `editor` I202, Owen:
+ * "Add space between Edit and code button";  doubled in T107, 12px in I250, then 16px in I250's C5:
+ * "16px between edit/code"):
+ * the tabs' track keeps its options 1px apart,
  * which left the chosen tab's pill touching the code's pressed circle
- * - the tabs and the icons are two halves of one group:  the icons keep their own 1px apart,
- *   their glyphs ~14px apart, the rule's 12px and a little
+ * - the tabs and the icons are two sections of one group:  the icons keep their own 1px apart
+ *   (C5:  "move inspector same distance as between code/compiled")
  * - on the first icon's drawn button:  the `<ui-item>` itself draws no box
  */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"]) + ui-item[appearance~="circular"]::part(item) {
   /* less the 1px the header tabs' track already keeps between its options (Spell UI's `UIMenu.css`) */
-  margin-inline-start: calc(var(--spell-bar-icon-gap) - 1px);
+  margin-inline-start: 15px;
+}
+/*
+ * ... and Add a View 16px after Inspect app (C5:  "16px between inspector and plus"):
+ * a pill of its plus and its words, the circles' height and round ends, as wide as its words
+ * (C5:  "Change plus to `+ Add a View`")
+ */
+ui-menu.ModeTabs ui-item.AddPartButton::part(item) {
+  margin-inline-start: 15px;
+  inline-size: auto;
+  padding-inline: 12px 16px;
+  gap: round(0.4em, var(--ui-grid, 4px));
+  border-radius: 999px;
+  white-space: nowrap;
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
@@ -277,8 +292,8 @@ ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, round(0.9em, var(--ui-grid, 4px)));
 }
-/* ... its icons alone (the code, the compiled code, Inspect app, Add) are Spell UI's circular items
-   (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
+/* ... its icons (the code, the compiled code, Inspect app) are Spell UI's circular items, and Add a View too, widened
+   for its words above (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {
@@ -316,7 +331,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * - each section its content's width:  too wide still, the bar scrolls sideways (above), never overlaps
  */
 @media (--ui-mobile) {
-  ui-app-menu.EditorBar ui-item.ModeButtons {
+  ui-app-menu.EditorBar :is(ui-item.ModeButtons, .PublishDraft) {
     display: none;
   }
   ui-app-menu.AppMenu .AppName,
@@ -344,7 +359,9 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
 }
 
 /*
- * `<PublishDraft>`:  ONE pill just left of the modes' group (T102:  "Move `draft` panel to the left of run"), the size and shape of the tools group at the bar's right
+ * `<PublishDraft>`:  ONE pill right after the bar's Help menu, 32px on, Help's word to the pill's edge
+ * (Owen, 2026-11-16, T107:  "Move `draft` bar over to the left, 32 px left of the `help` menu";
+ * T102 had it just left of Run | Edit), the size and shape of the tools group at the bar's right
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
  * - "Draft" plain words in deep amber;  "Publish" the primary button, a round thumb 2px inside the pill
@@ -354,16 +371,21 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * - the three stand the bar's icon gap apart, edge to drawn edge, each icon close to its own word (Spell UI's own
  *   distance):  at 8px "Discard"'s trash can sat closer to "Draft" than to its own word (I203)
  * - all three on one centre line (I192)
+ * - not on a phone, which only runs, as Run | Edit
  */
-.ModeButtons > .PublishDraft {
+ui-app-menu.AppMenu .PublishDraft {
   --spell-draft-height: 28px;
   --spell-draft-inset: 2px;
+  --spell-draft-after-help: 32px;
   display: inline-flex;
   align-items: center;
+  /* centred on the bar, as the menus' words:  a section's items stretch to its height, so it sat at the top (I247) */
+  align-self: center;
   gap: var(--spell-bar-icon-gap, 12px);
   box-sizing: border-box;
   block-size: var(--spell-draft-height);
-  margin-inline-end: var(--spell-bar-icon-gap, 12px);
+  /* Help's item keeps the tight menu's 8px after its word:  32px from the word, all told */
+  margin-inline-start: calc(var(--spell-draft-after-help) - 8px);
   padding: var(--spell-draft-inset) 12px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);

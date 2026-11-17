@@ -23,8 +23,7 @@ import {
   ChangeThisBox,
   PartMenu,
   ModeButtons,
-  OutputEditor,
-  OutputRoot,
+  PublishDraft,
   PROJECT_ICON,
   ProgramPanelShown,
   ProjectBarMenu,
@@ -51,13 +50,7 @@ import type { EditorMemberName, EditorPartName } from "spell/app/app/layout/edit
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
-import {
-  CodeOutputPane,
-  CodeOutputShown,
-  CompiledCodeButton,
-  FollowAlong,
-  LANGUAGE_LOOKS
-} from "spell/app/app/solid/CodeOutput"
+import { CodeOutputPane, CodeOutputShown, CompiledCodeButton, FollowAlong } from "spell/app/app/solid/CodeOutput"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
@@ -418,13 +411,14 @@ function SampleBar(): JSX.Element {
 /****************
  * ### `<ProgramPanel>`
  * Debug's panel under the code:  one pane of tabs (`<RunnerPane>`), as VS Code's runner panel has.
- * - Output:  what the program logged, and how compiling and running it went (`<ConsoleViewer>`).
- * - JavaScript:  the compiled code (`<OutputRoot>`);  TypeScript and Python:  the project as those targets write it.
+ * - Debug Output:  what the program logged, and how compiling and running it went (`<ConsoleViewer>`).
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
- * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search in this header.
- * - At the right, whatever tab shows:  Clear Console, on Output only, the Reference's search, and Close (`onClose`).
+ * - Spell Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search at the top of
+ *   its right column (epic `editor` T109, T110).
+ * - At the right, whatever tab shows:  Clear Console, on Debug Output only, and Close (`onClose`).
  * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`:
- *   a tab remembered from before, Things or Templates, shows Program Output.
+ *   a tab remembered from before (Things, Templates, JavaScript, TypeScript, Python) shows Debug Output.
+ * - The compiled code isn't here:  it's its own pane, beside the code (View › Compiled Code, `<CodeOutputPane>`).
  * - What the app made is the Inspector's Views card, its things not drawn among them (epic `editor` P19).
  ****************/
 export function ProgramPanel(props: { onClose: () => void }) {
@@ -442,16 +436,6 @@ export function ProgramPanel(props: { onClose: () => void }) {
           <Show when={tab() === "output"}>
             <Actions.clearConsole iconOnly />
           </Show>
-          <Show when={tab() === "reference"}>
-            <ui-input
-              class="ReferenceSearch"
-              size="mini"
-              icon="search"
-              aria-label={appTexts.text("paletteSearch")}
-              placeholder={appTexts.text("paletteSearch")}
-              ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
-            />
-          </Show>
           <ui-icon
             name="close"
             link=""
@@ -467,20 +451,23 @@ export function ProgramPanel(props: { onClose: () => void }) {
         <Match when={tab() === "output"}>
           <ConsoleRoot showToolbar={false} />
         </Match>
-        <Match when={tab() === "javascript"}>
-          <OutputRoot showToolbar={false} />
-        </Match>
-        <Match when={tab() === "typescript"}>
-          <OutputEditor showError={editor.showError} target="ts/solid" />
-        </Match>
-        <Match when={tab() === "python"}>
-          <OutputEditor showError={editor.showError} target="py" />
-        </Match>
         <Match when={tab() === "tree"}>
           <TreeRoot showToolbar={false} />
         </Match>
         <Match when={tab() === "reference"}>
-          <SpellReference filter={filter()} />
+          <SpellReference
+            filter={filter()}
+            search={
+              <ui-input
+                class="ReferenceSearch"
+                size="small"
+                icon="search"
+                aria-label={appTexts.text("referenceSearch")}
+                placeholder={appTexts.text("referenceSearch")}
+                ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
+              />
+            }
+          />
         </Match>
       </Switch>
     </RunnerPane>
@@ -540,13 +527,12 @@ function appGrows(hidesCode: boolean): string {
 }
 
 /** Tabs of `<ProgramPanel>`, in order. */
-const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "tree", "reference"] as const
+const PROGRAM_TABS = ["output", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
-/** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key:  a language's as the compiled code's. */
+/** Icon of each tab (Fomantic's names), and its title's key. */
 const TAB_LOOKS: Record<ProgramTabId, { icon: string; text: AppTextKey }> = {
   output: { icon: "list", text: "outputTab" },
-  ...LANGUAGE_LOOKS,
   tree: { icon: "tree", text: "treeTab" },
   reference: { icon: "book", text: "referenceTab" }
 }
@@ -564,7 +550,7 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * ### `<EditorToolbar>`
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
- *   then File · Edit · View · Run · Help (`MenuBar.tsx`)
+ *   then File · Edit · View · Run · Help (`MenuBar.tsx`), then the draft's pill while you have drafts (T107)
  * - middle:  Run | Edit, then in Edit, the code's icon, the compiled code's (its language's icon), Inspect app and Add,
  *   in the same group (epic `editor` T83)
  * - right, ONE group of icons:  Restart, the theme, you
@@ -580,6 +566,7 @@ export function EditorToolbar(props: { mode: Mode }) {
     spellMenu: { draw: () => <SpellBarMenu useRunner={props.mode === "run"} /> },
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
+    draft: { draw: () => <PublishDraft /> },
     modeButtons: {
       draw: () => (
         <ModeButtons
@@ -615,6 +602,7 @@ export function EditorToolbar(props: { mode: Mode }) {
             {parts.spellMenu.draw()}
             {parts.projectMenu.draw()}
             {parts.appMenus.draw()}
+            {parts.draft.draw()}
           </ui-menu>
           {parts.modeButtons.draw()}
           <ui-menu slot="end">

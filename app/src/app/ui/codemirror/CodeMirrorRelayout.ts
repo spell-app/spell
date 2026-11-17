@@ -1,6 +1,7 @@
 import { foldEffect, unfoldEffect } from "@codemirror/language"
 import {
-  type EditorState,
+  EditorSelection,
+  EditorState,
   type Extension,
   Prec,
   type RangeSet,
@@ -28,6 +29,15 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  *   - Shown when the parse comes, in the same update as its layout;  or after `AWAIT_PARSE_MSEC` at the most.
  * - And at once, in the same update, when a block folds or unfolds:  a folded block is drawn as its head alone
  *   (epic `language` I116), and waiting showed its body's rails and feet under it for a moment.
+ * - The caret's line stays where it is on screen as the layout changes under the typing (epic `codemirror` I21):
+ *   a new layout (at the pause, or with a parse) can make the lines above it taller or shorter, by a row of feet,
+ *   a block, a description's rows, which moved the line being typed in by up to 150px (`keepCaretLine()`).
+ *   - Only while the editor has the keyboard and the caret's on screen:  else CodeMirror keeps the top line still,
+ *     as it always does.
+ * - The pause doesn't lay a project's file out from its text alone when its project's parse is on its way
+ *   (`isParseOnItsWay()`):  that drew it the other way for a moment, 200px shorter in Solitaire.spell,
+ *   then back again 50ms later as the parse came (epic `codemirror` I21);  it waits for that parse,
+ *   or `AWAIT_PARSE_MSEC` at the most.
  * - In the editor's state, not a view plugin's, so its decorations may be block widgets.
  * - A decoration whose spec says `atomic: true` is one step for the caret (`EditorView.atomicRanges`):
  *   e.g. the line breaks hidden between a row of feet (`CodeMirrorDecorations.feetRow()`;  epic `language` I132)
@@ -54,8 +64,10 @@ export class CodeMirrorRelayout {
   static extension(
     decorationsOf: (state: EditorState) => DecorationSet,
     msec: number,
-    { isAwaitingParse = () => false }: RelayoutOptions = {}
+    { isAwaitingParse = () => false, isParseOnItsWay = () => false }: RelayoutOptions = {}
   ): Extension {
+    /** each view on this extension, so a transaction can find its own and keep its caret's line still */
+    const views = new Set<EditorView>()
     const laidOut = StateEffect.define<DecorationSet>()
     const field = StateField.define<DecorationSet>({
       create: (state) => decorationsOf(state),
@@ -80,6 +92,7 @@ export class CodeMirrorRelayout {
         private timer: CancelablePromise<void> | undefined
 
         constructor(readonly view: EditorView) {
+          views.add(view)
           // once more as a view takes the state:  a parse that came while it was shown nowhere told no plugin
           // (epic `editor` I215:  the code pane drew the `if`s it opened on as plain lines)
           this.relayoutSoon()
@@ -87,16 +100,25 @@ export class CodeMirrorRelayout {
 
         update(update: ViewUpdate) {
           if (update.docChanged) this.relayoutSoon()
+          // the parse it waited for came, and the field laid the text out with it
+          else if (update.transactions.some((it) => it.effects.some((effect) => effect.is(CodeMirrorSetup.PARSED))))
+            this.timer?.cancel()
         }
-        /** Lay the text out again `msec` from now, unless something else changes first. */
-        relayoutSoon() {
+        /**
+         * Lay the text out again `msec` from now, unless something else changes first.
+         * - Its parse on its way then:  wait for it (it lays the text out as it comes), `AWAIT_PARSE_MSEC` at the most.
+         */
+        relayoutSoon(wait = msec) {
           this.timer?.cancel()
-          this.timer = after(msec / 1000, () => {
-            this.view.dispatch({ effects: laidOut.of(decorationsOf(this.view.state)) })
+          this.timer = after(wait / 1000, () => {
+            const { state } = this.view
+            if (wait === msec && isParseOnItsWay(state)) return this.relayoutSoon(CodeMirrorRelayout.AWAIT_PARSE_MSEC)
+            this.view.dispatch({ effects: laidOut.of(decorationsOf(state)) })
           })
         }
 
         destroy() {
+          views.delete(this.view)
           this.timer?.cancel()
         }
       }
@@ -133,8 +155,35 @@ export class CodeMirrorRelayout {
           EditorView.editorAttributes.of((view) => (view.plugin(plugin)?.isAwaiting ? { class: AWAITING_PARSE } : null))
       }
     )
-    return [field, relayout, awaitingParse]
+    const caretLineStill = EditorState.transactionExtender.of((transaction) => {
+      if (!transaction.effects.some((effect) => effect.is(laidOut) || effect.is(CodeMirrorSetup.PARSED))) return null
+      for (const view of views) {
+        if (view.state === transaction.startState) return keepCaretLine(view)
+      }
+      return null
+    })
+    return [field, relayout, awaitingParse, caretLineStill]
   }
+}
+
+/**
+ * An effect keeping `view`'s caret's line where it is on screen through the transaction it goes in, as its lines
+ * above change height;  `null` when the editor hasn't the keyboard, or the caret's off screen.
+ * - CodeMirror's own scroll snapshot, anchored on the caret's line instead of the top one:  applied once the new
+ *   heights are measured, before anything's painted.
+ * - SIDE EFFECT:  reads the scroll position, and the layout if it's due:  once a layout, never at every key.
+ */
+function keepCaretLine(view: EditorView): { effects: StateEffect<unknown> } | null {
+  if (!view.hasFocus) return null
+  const { scrollTop, clientHeight } = view.scrollDOM
+  const line = view.lineBlockAt(view.state.selection.main.head)
+  const top = line.top - scrollTop
+  if (top < 0 || top > clientHeight) return null
+  const snapshot = view.scrollSnapshot()
+  // HACK:  CodeMirror makes snapshots of the top line alone;  its target's fields are plain, so this one's moved onto
+  // the caret's line (`ScrollTarget`:  `range` the line's place, `yMargin` its top below the scroller's)
+  Object.assign(snapshot.value, { range: EditorSelection.cursor(line.from), yMargin: top })
+  return { effects: snapshot }
 }
 
 /** What else `CodeMirrorRelayout.extension()` takes. */
@@ -145,6 +194,12 @@ export type RelayoutOptions = {
    * - MUST NOT throw.
    */
   isAwaitingParse?: () => boolean
+  /**
+   * Is a parse of `state`'s text on its way, as one of a project's files is parsed again once its typing pauses
+   * (`FileStates.parseSoon()`)?  The pause's layout waits for it, rather than drawing the text alone.
+   * - MUST NOT throw.
+   */
+  isParseOnItsWay?: (state: EditorState) => boolean
 }
 
 /** The editor's class while its lines wait for their parse:  `codemirror.css` hides them. */

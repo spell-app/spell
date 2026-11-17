@@ -164,7 +164,8 @@ The person writing in this session mid-run means they're awake:  bedtime mode en
 Everything else stands:
 - the repo's own rules (its `AGENTS.md`) and the person's standing ones;  in spell-app, say:
   - its VS Code extension rebuilt after each stage
-  - the parser speed test, on parser changes
+  - the parser speed test, only on its hot path (the epic skill's three test tiers, "The session answers;  agents
+    build")
   - the three logs:
     `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the epic folder (`epic config contentFolder`)
 - the epic page's rules
@@ -180,6 +181,8 @@ Everything else stands:
    epic add <name>#J "<the call>" --details "<p>chose ... over ... because ...</p><epic-choices>...</epic-choices><epic-net-effect>...</epic-net-effect>"
    ```
 
+   - Its title is at most 30 plain words saying what it is, read cold, hours later:
+     nothing about a passing condition;  the rest goes in --details (plan-doc.md's "Rules").
    - It prints the id (`J4`).
      The epic page's "Judgement calls" section is where the person finds them, open until they review each.
    - Its details ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Prose"):

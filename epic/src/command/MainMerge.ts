@@ -9,7 +9,15 @@ import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import { BaseBranch } from "./BaseBranch"
-import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
+import {
+  EXIT,
+  EpicCommandError,
+  type Generator,
+  type InstallRunner,
+  type MergeMainReport,
+  type PackagesInstalled,
+  type SnapshotReview
+} from "./command.types"
 import { StrayFiles, type ClaimOf } from "./StrayFiles"
 
 /**
@@ -32,6 +40,12 @@ const SNAPSHOT_UPDATE = (tests: string[]) => ["yarn", "vp", "test", "run", ...te
 
 /** The lockfiles, at a checkout's root, whose change means the merged packages need installing. */
 const LOCKFILES = ["yarn.lock", "package-lock.json", "pnpm-lock.yaml", "bun.lock"]
+
+/**
+ * What a merge changed that means the packages need installing (`MainMerge.installAfter()`), as git pathspecs:
+ * the root's lockfiles, and every `package.json` (a workspace's dependency, a bin;  epic `epic-engine` T89).
+ */
+const PACKAGE_FILES = [...LOCKFILES, ":(glob)**/package.json"]
 
 /**
  * What rewrites each lockfile from the merged `package.json`, in a checkout that lists no generator of its own for it.
@@ -90,7 +104,8 @@ const RENAME_MESSAGE = "merge-main:  old Spell UI names renamed (spell ui rename
  *   - a repo with neither Vitest nor Vite+:  its snapshot files are ordinary files, to resolve by hand if they conflict
  * - Any OTHER file in conflict stops it mid-merge:
  *   Claude resolves those, `git add`s them, and runs it again with `--continue`.
- * - A merge (or fast-forward) that changed a lockfile runs the checkout's install command after it (`reinstall()`).
+ * - A merge (or fast-forward) that changed a lockfile or a `package.json` runs the checkout's install command after it
+ *   (`installAfter()`);  `epic merge` runs it the same way in the main checkout (epic `epic-engine` T89).
  * - Then, in a Spell kit, Spell UI's old names the branch still writes are renamed, and committed on their own
  *   (`renameOldNames()`, epic `epic-engine` I143):  `runAll()` runs it once every repo is merged.
  * - Node built-ins and git only:  no spell imported.  The rename step RUNS the kit's `spell`, never loads it.
@@ -295,20 +310,51 @@ export class MainMerge {
     return { ...report, ...this.reinstall(before) }
   }
 
-  /**
-   * Install the merged packages when the merge changed a lockfile (epic `epic-engine` I77):  `install`, at the root.
-   * - Why:  a merge brought in main's `yarn.lock` (Solid rc.17) while rc.13 stayed installed;  the packs built here came
-   *   out on the old Solid, and main's pack check went red
-   * - `before`:  the branch's commit before the merge
-   * - `{}` when no lockfile changed, or there's no install command
-   * - NEVER throws:  the merge is committed;  a failed install is reported (`installed.ok`), to run by hand
-   */
+  /** Install the merged packages when the merge changed them (`installAfter()`);  `before`:  `HEAD` before it. */
   private reinstall(before: string): Pick<MergeMainReport, "installed"> {
-    const { root, install } = this
-    const lockfiles = before ? Git.lines(["diff", "--name-only", before, "HEAD", "--", ...LOCKFILES], root) : []
-    if (!lockfiles.length || !install.length) return {}
-    const run = spawnSync(install[0]!, install.slice(1), { cwd: root, stdio: ["ignore", 2, 2] })
-    return { installed: { command: install.join(" "), lockfiles, ok: run.status === 0 } }
+    const installed = MainMerge.installAfter(this.root, before, this.install)
+    return installed ? { installed } : {}
+  }
+
+  /**
+   * Install the packages in checkout `root` when its branch moved from `before` to `HEAD` changed them:
+   * a root lockfile, or any `package.json` (`PACKAGE_FILES`).
+   * - `install`:  the command, as words;  default the checkout's `installCommand` (`.epic/config.json5`)
+   * - `run`:  runs it, at `root`, saying whether it worked;  tests pass their own
+   * - Why, in a worktree (epic `epic-engine` I77):  a merge brought in main's `yarn.lock` (Solid rc.17) while rc.13
+   *   stayed installed;  the packs built here came out on the old Solid, and main's pack check went red
+   * - Why, in the main checkout (`epic merge`, T89):  a merge brought `@codemirror/lang-css` onto `main`, never
+   *   installed there, and main's editor failed to resolve it
+   * - `undefined` when nothing changed them, or there's no install command;  else what ran (`PackagesInstalled`)
+   * - NEVER throws:  the merge is committed;  a failed install is reported (`ok: false`), to run by hand
+   * - static:  any checkout, `epic merge`'s main one too
+   */
+  static installAfter(
+    root: string,
+    before: string,
+    install = EpicConfig.of(root).installCommand.split(/\s+/).filter(Boolean),
+    run: InstallRunner = runInstall
+  ): PackagesInstalled | undefined {
+    const changed = before ? Git.lines(["diff", "--name-only", before, "HEAD", "--", ...PACKAGE_FILES], root) : []
+    if (!changed.length || !install.length) return undefined
+    let ok = false
+    try {
+      ok = run(install, root)
+    } catch {
+      // a runner that couldn't start it:  failed, as one that exits non-zero
+    }
+    return { command: install.join(" "), root, changed, ok }
+  }
+
+  /**
+   * What `installAfter()` did, in one line:  `epic worktree merge-main`'s and `epic merge`'s.
+   * - worked:  `installed the packages:  \`yarn install\` (yarn.lock changed)`
+   * - failed:  `` `yarn install` FAILED (yarn.lock changed):  `` then `fix`, what to do by hand
+   * - static:  pure
+   */
+  static installedLine({ command, changed, ok }: PackagesInstalled, fix = "run it yourself"): string {
+    const why = `${changed.join(", ")} changed`
+    return ok ? `installed the packages:  \`${command}\` (${why})` : `\`${command}\` FAILED (${why}):  ${fix}`
   }
 
   /**
@@ -623,6 +669,11 @@ function dependenciesOf(root: string): Set<string> {
   } catch {
     return new Set()
   }
+}
+
+/** `MainMerge.installAfter()`'s runner:  `install` at `root`, its output to stderr;  whether it exited 0. */
+function runInstall(install: string[], root: string): boolean {
+  return spawnSync(install[0]!, install.slice(1), { cwd: root, stdio: ["ignore", 2, 2] }).status === 0
 }
 
 /** The last line of `text` with something on it. */

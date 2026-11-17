@@ -4,17 +4,17 @@ a "deck" is a viewable list of cards -- a deck of playing cards
 		for rank in card ranks
 			for suit in card suits
 				add a new card with rank and suit to the deck
-	its "short name" is -- its card names, top to bottom
+	its "shorthand" is -- its card names, top to bottom
 		set card names to a new list of text
 		for card in the deck
-			add the short name of the card to card names
+			add the shorthand of the card to card names
 		return "deck: " + card names
 
 	to test a new deck
 		the deck is a new deck
 		the number of cards in the deck should be 52
 		the number of (cards in the deck where it is a queen) should be 4
-		deck's first card's short name should be "A♣↓"
+		deck's first card's shorthand should be "A♣↓"
 		deck's last card's name should be "king of spades"
 		shuffle the deck
 		the number of cards in the deck should be 52

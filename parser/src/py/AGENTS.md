@@ -119,6 +119,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Not counted:  a plain `List`, a thing made inside a test, a helper's scratch result (made `core.quietly()`).
     - A name falls back to a thing's chosen id (`has_chosen_id()`), then to a thing the program keeps at its top
       level, as javascript's does.
+    - An app's id is its name, lower kebab case (`AppIdProp`, `solitaire`);  `discard pile` finds a member's
+      `discard-pile` (language T147).
 - PLACES (epic `data` P40):  a type saved in a place, as the JavaScript core's `saved.ts` has it
   ([places.py](core/spell_core/places.py)), for four kinds ([place_kinds.py](core/spell_core/place_kinds.py)):
   - a database on this device:  one JSON file beside the compiled program, `<Program>.device.json`

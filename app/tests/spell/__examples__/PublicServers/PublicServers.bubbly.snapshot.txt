@@ -629,7 +629,7 @@
 
 ==== /GitHub.spell
 ⟪# GitHub⟫
-⟦// Anyone on GitHub, a person or an org⟧_anization, and _⟦any repository, found by what you type.⟧
+⟦// Anyone on GitHub, a person or an organization, and any repository, found by what you type.⟧
 ⟦// Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
 ⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
 ⟦// A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.⟧
@@ -1034,8 +1034,8 @@
 
 ==== /OpenLibrary.spell
 ⟪# Open Library⟫
-⟦// Books by what they're called, ⟧_who wrote them, and their covers._
-_// E_very thing it shows is in OpenLibrary.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+⟦// Books by what they're called, who wrote them, and their covers.⟧
+⟦// Every thing it shows is in OpenLibrary.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,⟧
 ⟦// with `<extend>`, so looking again at the server never touches a line of this.⟧
 ⟦// Open Library has no list of every book, only a search:  so the page always searches, for what's typed.⟧
 

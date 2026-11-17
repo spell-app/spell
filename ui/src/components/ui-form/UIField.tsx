@@ -176,7 +176,7 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
   /** Glyph of the info icon, while there's a tip. */
   readonly infoGlyph = new E.IconGlyph({ owner: this, name: () => (this.hasDescription ? INFO_ICON : undefined) })
 
-  /** Glyph of the not-saved icon, while a change here can't be saved:  a save icon, crossed out by CSS. */
+  /** Glyph of the not-saved icon, while a change here can't be saved:  a flask (epic `editor` Q36). */
   readonly unsavedGlyph = new E.IconGlyph({ owner: this, name: () => (this.unsavedText ? UNSAVED_ICON : undefined) })
 
   ////////////////
@@ -258,6 +258,7 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             <slot name={this.slotForName("hint")}>{this.hintText}</slot>
           </div>
         </Show>
+        {this.controlEnd()}
         <Show when={this.errors.length}>
           <div class={CLASSES.error} part={this.partForName("error")} role="alert">
             <For each={this.errors}>{(message) => <div class={UIT.MESSAGE}>{message}</div>}</For>
@@ -265,6 +266,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
         </Show>
       </div>
     )
+  }
+
+  /** What a subclass adds under the control, after the hint and before the errors:  nothing here. */
+  protected controlEnd(): JSX.Element {
+    return undefined
   }
 
   /** What a subclass adds at the label row's far end, before the hint:  nothing here. */
@@ -412,8 +418,8 @@ export interface UIField extends E.AttributeValues<typeof fieldVocabulary> {}
 /** Icon of the tip. */
 const INFO_ICON = "circle info"
 
-/** The not-saved icon:  a save icon, which the CSS crosses out. */
-const UNSAVED_ICON = "save"
+/** The not-saved icon:  a flask, "just trying it out" (epic `editor` Q36). */
+const UNSAVED_ICON = "fa7-free:flask"
 
 /** Shadow-root id of the tip, which the info icon is described by. */
 const TIP_ID = "tip"

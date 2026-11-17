@@ -8,7 +8,7 @@ import { type Tag, tags } from "@lezer/highlight"
  * a ROLE, whose colour is the page theme's `--ui-code-<role>` token, light and dark (Spell UI's `codeRoles`).
  * - Its roles were Shades of Purple's, the code's colours under every theme until P22 (`ShadesOfPurple`, ported
  *   from Ahmad Awais's VS Code theme):  those colours are now the Spell theme's own, in its theme file.
- * - `codeMirrorStyle`:  another language's code (the compiled javascript, TypeScript, Python), by CodeMirror's
+ * - `codeMirrorStyle`:  another language's code (the compiled javascript, TypeScript, Python, a CSS file), by CodeMirror's
  *   highlight tags (`TAG_ROLES`), each colour a `var(--ui-code-<role>)`, so light and dark follow the page
  * - `roleForScope()`:  Spell's own tokens, as the parser's highlighter names them (highlight.js scopes,
  *   `SP.SpellHighlighter.SCOPES`), for `CodeMirrorTokens`
@@ -140,7 +140,8 @@ const TAG_ROLES: ReadonlyArray<readonly [Tag[], CodeRole]> = [
     ],
     "keyword"
   ],
-  [[tags.typeName, tags.className, tags.namespace], "type"],
+  // `labelName`:  a CSS `#id`, coloured as a `.class` is
+  [[tags.typeName, tags.className, tags.namespace, tags.labelName], "type"],
   [[tags.standard(tags.typeName), tags.standard(tags.variableName)], "library"],
   [[tags.variableName, tags.definition(tags.variableName)], "name"],
   [[tags.propertyName, tags.definition(tags.propertyName), tags.attributeName], "member"],
@@ -152,7 +153,8 @@ const TAG_ROLES: ReadonlyArray<readonly [Tag[], CodeRole]> = [
     ],
     "action"
   ],
-  [[tags.number, tags.bool, tags.null, tags.atom], "constant"],
+  // `unit` and `color`:  CSS's `px` of `12px`, and `#fff`
+  [[tags.number, tags.unit, tags.color, tags.bool, tags.null, tags.atom], "constant"],
   [[tags.string, tags.special(tags.string), tags.regexp, tags.attributeValue], "string"],
   [[tags.tagName], "tag"],
   [

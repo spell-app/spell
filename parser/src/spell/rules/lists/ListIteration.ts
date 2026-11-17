@@ -3,9 +3,19 @@ import { P } from "spell/parser/parser"
 import { isInDrawing, noteLoopItem } from "spell/parser/spell/rules/places/places.shared"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { KindName } from "spell/parser/spell/rules/types"
+// Through the folder:  read only when parsing
+import { EveryThingWhere } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { type MethodBody, type ItemVariableData } from "./lists.shared"
+import {
+  isAcross,
+  itemsAcrossAST,
+  itemsAcrossDatatype,
+  itemsAcrossOf,
+  type ItemsAcross,
+  type MethodBody,
+  type ItemVariableData
+} from "./lists.shared"
 import { type EachItemWhere } from "./EachItemWhere"
 
 /**
@@ -14,6 +24,9 @@ import { type EachItemWhere } from "./EachItemWhere"
  * - Optional `{position}` (`for item, index in ...`) adds a numeric index arg alongside `{item}`.
  * - Both a `statement` and an `expression`:  usable inline or as a block.
  * - Body runs as nested block or inline statement;  `{item}`'s value is also aliased from `it`.
+ * - Of a list of lists, its item's word naming THEIR items:  every list's items, in the lists' order
+ *   (epic `language` I152) -- `for each card in the columns` => `core.map(core.mergeLists(core.everyThing(Column)), ...)`;
+ *   `for each pile in the columns` is each column.
  * - The item may be named for a value kind of several words (`kind_name`, epic `spanish` P22):
  *   `for each card rank in card ranks`, then `card rank` in the body -- see `itemName()`.
  * - Builds `core.map(list, (item, position?) => { ... })`,
@@ -33,6 +46,18 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
   @proto static alias = ["statement", "expression"]
 
   /**
+   * Not over `the columns where ...` (`every_thing_where`) when the item's word names the columns' items, `card`:
+   * that condition is each card's, `list_iteration_where`'s (epic `language` I153);  it tested each column.
+   */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match || this instanceof ListIterationWhere) return match
+    const { list } = match.groups
+    if (list?.is(EveryThingWhere) && isAcross(itemsAcrossOf(scope, this.itemOf(match), list))) return undefined
+    return match
+  }
+
+  /**
    * Nested scope for body -- `{item}` (and optional numeric `{position}`) vars, `it` aliased to `{item}`.
    * - `{item}` and `it` are what the list holds, e.g. `Card` for `for each card in the deck`.
    * - Looked up now, while parsing:  a body parses in this scope.
@@ -40,7 +65,10 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
     const { position, list } = match.groups
     const item = this.itemOf(match)
-    const datatype = match.scope.getItemType(list.datatype)
+    // of a list of lists, the item's word naming THEIR items:  each list's items in turn (epic `language` I152)
+    const across = itemsAcrossOf(match.scope, item, list)
+    ;(match.data as LoopData).across = across
+    const datatype = match.scope.getItemType(itemsAcrossDatatype(across) ?? list.datatype)
     const name = ListIteration.itemName(item)
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
     // for `getAST()`, which can't look it up
@@ -79,7 +107,7 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
 
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "map", // TODO...
-      args: [loopedList(match, P.matchAST(list)), method]
+      args: [loopedList(match, itemsAcrossAST(match, list, (match.data as LoopData).across)), method]
     })
   }
 
@@ -100,6 +128,9 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
  * - Its list, its item and the condition are one `each_item_where`:  the list filtered, as `list_filter` does.
  * - `core.map(core.filter(deck, (card) => !core.includes(stock, card)), (card) => ...)`
  * - Anything else as `ListIteration`.
+ * - Of a list of lists, its item word naming their items, the condition is each item's:
+ *   `for each card in the columns where it is face up` (`list_filter`'s `across`, epic `language` I153);
+ *   the plain loop over `the columns where ...` (`every_thing_where`) steps aside for it:  see `ListIteration.parse()`.
  */
 export class ListIterationWhere extends ListIteration {
   /** The item, as the condition names it too:  `card` in `card in the deck which ...`. */
@@ -196,6 +227,8 @@ const ITEM_WITH_NO_NAME = "item"
 type LoopData = ItemVariableData & {
   /** It's in a drawing's lines:  a drawn read follows its place, as it should. */
   inDrawing?: boolean
+  /** What its lists hold, when its item's word may name their items -- see `itemsAcrossOf()` */
+  across?: ItemsAcross
 }
 
 /**

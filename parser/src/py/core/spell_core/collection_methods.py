@@ -475,6 +475,20 @@ class CollectionMethods:
             self.set_item_at(results, position, call(value, position, coll))
         return results
 
+    def map_to_list(self, collection: object = None, method: Callback | None = None) -> Any:
+        """What `method` answers for each item, in a new plain `List`, in the items' order (epic `language` I155).
+
+        - From `the shorthand of the cards in the deck`;  not `map()`, which makes a list of the collection's own kind.
+        - A scratch list:  it owns nothing (`new_scratch()`).
+        """
+        results = self.new_scratch(List)
+        if not self._is_defined(collection, "map_to_list") or method is None:
+            return results
+        call = _callback(method)
+        for value, position, coll in list(self.get_iterator_for(collection)):
+            results.append(call(value, position, coll))
+        return results
+
     def filter(self, collection: object = None, condition: Callback | None = None) -> Any:
         """The items `condition` says yes to, in a new collection of the same kind.
 
@@ -547,6 +561,50 @@ class CollectionMethods:
                 else:
                     self.set_item_at(results, position, value)
         return results
+
+    def item_where(self, collection: object = None, condition: Callback | None = None, index: Any = 0) -> Any:
+        """The item at `index` among those `condition` says yes to, asking one at a time and stopping at the answer.
+
+        - `the first card in the columns where it can play the card`:  the cards after it aren't asked.
+        - From the end for an index below 0:  `-1` is the last that says yes.
+        - `None` when too few say yes.
+        """
+        if not self._is_defined(collection, "item_where"):
+            return None
+        call = _callback(condition)
+        wanted, entries = self._entries_in_turn(collection, index)
+        for value, position, coll in entries:
+            if not is_js_truthy(call(value, position, coll)):
+                continue
+            if wanted == 0:
+                return value
+            wanted -= 1
+        return None
+
+    async def item_where_in_turn(
+        self, collection: object = None, condition: Callback | None = None, index: Any = 0
+    ) -> Any:
+        """As `item_where()`, when `condition` waits:  each item asked in turn, its answer waited for."""
+        if not self._is_defined(collection, "item_where_in_turn"):
+            return None
+        call = _callback(condition)
+        wanted, entries = self._entries_in_turn(collection, index)
+        for value, position, coll in entries:
+            if not is_js_truthy(await call(value, position, coll)):
+                continue
+            if wanted == 0:
+                return value
+            wanted -= 1
+        return None
+
+    def _entries_in_turn(self, collection: object, index: Any) -> tuple[int, list[Any]]:
+        """How many yes answers to pass over, and `collection`'s entries in the order to ask them:  `item_where()`'s."""
+        entries = list(self.get_iterator_for(collection))
+        place = int(index) if is_plain_number(index) else 0
+        if place < 0:
+            entries.reverse()
+            return -place - 1, entries
+        return place, entries
 
     ################
     # ## Copies and merges

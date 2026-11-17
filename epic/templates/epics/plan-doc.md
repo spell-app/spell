@@ -61,6 +61,16 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   effect (A, recommended):`); each option may carry its own, inside its `<epic-option>`. Worded otherwise ("once
   fixed"): a plain `<p><b>Net effect (once fixed):</b></p>` and its list.
 
+- TITLES (the one full wording;  everything else points here):
+  - A title is at most 30 plain words saying what the item is.
+  - Before writing it, read it as the person will, hours later and cold:
+    nothing about a passing condition (a pid, "after the 4-line fix", "the turn was stuck").
+  - The rest goes in --details.
+  - Why (Owen, 2026-11-17, epic `epic-engine` I322):  "I'm looking at these things often hours after the issue came
+    up, so sentences referring to some weird condition or issue that only obtained for a little while will be
+    meaningless to me."  (I321 before:  3-10 words, 100 characters.)
+  - `epic add` and `epic update --title` refuse one over 30 words, a `; ` list, or more than one sentence, asking
+    for it rewritten (`ShortTitle`, `PLAN-DOC.md`);  nothing is moved into the body.
 - Lists: bulleted, or numbered when order or reference matters.
 - NEVER delete an item: close it (`epic close`), and it stays, closed (not struck). An item another
   decision made moot: `epic cancel`, the one status shown struck through (J16 of `review-review`).

@@ -58,7 +58,9 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
     case "updated":
       return [[verb, ...around(ref === undefined ? [] : [needPhase(verb, args[at]!, ref)])]]
     case "file":
-      // `epic file seo#P7 r3` into the phase (`Requests`, which runs this):  the tool's `request`
+      // `epic file seo#P7 r3` into the phase, `seo#T5 r3` into the todo (`Requests`, which runs this):  the tool's
+      // `request`;  a todo since epic `epic-engine` T88
+      if (ref !== undefined && TODO_REF.test(ref)) return [["request", ...around([ref.toUpperCase()])]]
       return [["request", ...around(ref === undefined ? [] : [needPhase(verb, args[at]!, ref)])]]
     case "commit": {
       if (ref === undefined) return [["commit", ...args]]
@@ -497,6 +499,9 @@ const PHASE_EXAMPLES: Record<string, string> = {
 
 /** A phase ref by number:  `P3`, `p3`, `3`, a decimal phase's `P11.1`. */
 const PHASE_REF = /^[Pp]?(\d+(?:\.\d+)?)$/
+
+/** A todo's id as typed after the `#`:  `T5`, `t5`. */
+export const TODO_REF = /^[Tt]\d+$/
 
 /** One part of a bedtime run's phases:  `P3`, `P3-P6`, `3-6`. */
 const PHASE_RANGE = /^[Pp]?(\d+)(?:\s*-\s*[Pp]?(\d+))?$/

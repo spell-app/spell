@@ -392,7 +392,7 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
   /**
    * The comment that's `statement`'s description, as the first line under it (epic `language` P48) -- `undefined`
    * if none:
-   * - its body's first line, a comment:  `its "state" is`, then `// Its short name`, then its lines
+   * - its body's first line, a comment:  `its "state" is`, then `// Its shorthand`, then its lines
    * - else the first line of the block indented under it that no line took, when that's a comment:
    *   `its "hint" is text`, then `// Said beside the score`
    * - A `#` heading is never one.

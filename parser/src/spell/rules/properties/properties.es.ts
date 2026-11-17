@@ -103,7 +103,8 @@ propertiesEs.addRule(QuotedMember, {
 })
 
 propertiesEs.addRule(PropertyExpression, {
-  syntax: "(el|la|los|las)? {property:member_words} (de|del) {expression:operand}",
+  syntax:
+    "(el|la|los|las)? {property:member_words} (de|del) ((each:cada) ({expression:each_item_where}|{arg:singular_identifier} (en|de|del) {expression:operand})|{expression:operand})",
   tests: [
     {
       // Spanish names here:
@@ -133,6 +134,51 @@ propertiesEs.addRule(PropertyExpression, {
         ["el short rank de la última carta del mazo", "mazo.últimaCarta.shortRank"],
         ["el palo de la carta", "carta.palo"],
         ["los palos de la carta", "Carta.Palos"]
+      ]
+    },
+    {
+      title: "a list's items:  each item's, as a list (epic `language` I155)",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene una abreviatura como texto",
+            "un mazo es una lista de cartas",
+            "un mazo tiene una abreviatura como texto",
+            "la carta es una nueva carta",
+            "el mazo es un nuevo mazo"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        {
+          title: "each item",
+          input: "la abreviatura de cada carta en el mazo",
+          js: "core.mapToList(mazo, (carta) => carta.abreviatura)",
+          ts: "core.mapToList(mazo, (carta: Carta) => carta.abreviatura)"
+        },
+        {
+          title: "each item, `del`",
+          input: "la abreviatura de cada carta del mazo",
+          js: "core.mapToList(mazo, (carta) => carta.abreviatura)",
+          ts: "core.mapToList(mazo, (carta: Carta) => carta.abreviatura)"
+        },
+        {
+          title: "the words name the items",
+          input: "la abreviatura de las cartas en el mazo",
+          js: "core.mapToList(mazo, (carta) => carta.abreviatura)",
+          ts: "core.mapToList(mazo, (carta: Carta) => carta.abreviatura)"
+        },
+        {
+          title: "a plural word",
+          input: "las abreviaturas de las cartas en el mazo",
+          js: "core.mapToList(mazo, (carta) => carta.abreviatura)",
+          ts: "core.mapToList(mazo, (carta: Carta) => carta.abreviatura)"
+        },
+        { title: "the list's own, named as the list", input: "la abreviatura del mazo", js: "mazo.abreviatura" },
+        { title: "one thing:  unchanged", input: "la abreviatura de la carta", js: "carta.abreviatura" }
       ]
     },
     {

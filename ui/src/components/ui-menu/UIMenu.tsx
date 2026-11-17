@@ -859,8 +859,10 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   }
 
   /**
-   * One row of the overflow menu:  the item's icon (its `icon`, a copy of what's in its `icon` slot, else its first
+   * One row of the overflow menu:  a tick's gutter, the item's icon (its `icon`, a copy of what's in its `icon` slot, else its first
    * letter), its title and a copy of its counts;  the chosen one a `menuitemradio`, ticked.
+   * - The tick first, as every ticked menu's (`<ui-menu ticks>`;  epic `editor` I243):
+   *   every row keeps its gutter, so the icons line up.
    */
   private foldedRow(row: () => FoldedItem): JSX.Element {
     const copies = (name: "icon" | "badge") => {
@@ -891,6 +893,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
         tabindex="-1"
         onClick={() => this.pickFolded(row())}
       >
+        <span class={TICK} aria-hidden="true">
+          <svg viewBox="0 0 16 16">
+            <path d={UIT.TICK_PATH} />
+          </svg>
+        </span>
         <span class={UIT.ICON} aria-hidden="true">
           {icon()}
         </span>
@@ -1193,6 +1200,7 @@ const LETTER = "letter"
 const CARET = "caret"
 const DOT = "dot"
 const SELECTED_CLASS = "selected"
+const TICK = "tick"
 const DISABLED_CLASS = "disabled"
 
 /** Selector of the overflow menu's rows, in its box. */

@@ -9,6 +9,7 @@
  *   Moving a line there can change what parses.
  */
 export * from "./UI.parser"
+export * from "./UI.shared"
 export * from "./Print"
 export * from "./EndPrintGroup"
 export * from "./ScrollToTop"

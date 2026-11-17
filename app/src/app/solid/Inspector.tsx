@@ -305,8 +305,26 @@ export class Inspector {
     const { pivot } = clicks
     Inspector.selectAll(next)
     clicks.pivot = pivot
-    const place = Inspector.writtenPlaceOf(element)?.place
+    const place = Inspector.followedPlaceOf(element)
     if (place) editor.followed = { path: place.path, line: place.line, column: place.column, from: "parts" }
+  }
+
+  /**
+   * Where the code follows to when `element` is clicked (epic `editor` P17, Code Follows Along):
+   * where it's written (`writtenPlaceOf()`), except for a drawn thing made in a loop with others.
+   * - Those go to their type's declaration:  a card clicked shows `a "card" is a ...` in Card.spell,
+   *   not the `a new card` in Deck.spell that makes all 52 (Owen, 2026-11-17, I253:
+   *   "I inspected a card and `Deck.spell` opened").
+   * - A thing made on its own (the stock) still shows the line that makes it, its own place.
+   * - `undefined`:  written nowhere.
+   */
+  static followedPlaceOf(element: Element): P.SourcePlace | undefined {
+    const written = Inspector.writtenPlaceOf(element)
+    const thing = SpellElement.thingOf(element)
+    if (!written || written.sharedBy < 2 || !thing) return written?.place
+    const names = classNamesOf(thing)
+    const declared = declarationPlaces().find((place) => place.kind === "type" && place.name === names[0])
+    return declared ? { path: declared.path, line: declared.line, column: declared.column } : written.place
   }
 
   /**
@@ -976,7 +994,7 @@ export class Inspector {
    */
   static get typeWithCards(): object | undefined {
     const thing = Inspector.typeEdited
-    return thing && !Inspector.isOneOfAKind(thing) ? thing : undefined
+    return thing && !InspectorWrites.isOneOfAKind(thing) ? thing : undefined
   }
 
   /**
@@ -986,7 +1004,7 @@ export class Inspector {
   static get typeWithTests(): object | undefined {
     const thing = Inspector.typeEdited
     if (!thing) return undefined
-    return !Inspector.isOneOfAKind(thing) || Inspector.testsOf(thing).length ? thing : undefined
+    return !InspectorWrites.isOneOfAKind(thing) || Inspector.testsOf(thing).length ? thing : undefined
   }
 
   /** `thing`'s type's abilities and events, as `writtenEventsOf()` says a drawn thing's:  for its type's Events card. */
@@ -1174,7 +1192,8 @@ export class Inspector {
 
   /**
    * Field `name` of `part` was changed in the properties card:  the same change goes into the program's source.
-   * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
+   * - What can't go there says so under its field (`Inspector.noteNotSaved()`);
+   *   code, with a way to it, in the card (`<NotSavedNote>`).
    */
   static fieldWritten(part: Inspected, name: string, value: unknown): void {
     // a value kept in a place is the program's data, never the source's:  its change is held until it's committed
@@ -1186,7 +1205,7 @@ export class Inspector {
       `together:${name}`
     )
     const why = whys.find((reason) => reason)
-    setNotSaved(why && { part, why })
+    setNotSaved(why && { part, name, why })
   }
 
   /**
@@ -1197,30 +1216,14 @@ export class Inspector {
   static scopeOf(part: { value: object }): InspectorScope {
     if (!isThing(part.value)) return "this"
     // the only one of its type:  its type IS it, so changes go there, never asked (epic `editor` I183)
-    if (Inspector.isOneOfAKind(part.value)) return "all"
+    if (InspectorWrites.isOneOfAKind(part.value)) return "all"
     void scopeChoices()
     const chosen = Inspector.scopesChosen[part.value.constructor.name]
     return chosen ?? InspectorWrites.startingScope(part.value, Inspector.storedNamesOf(part.value))
   }
 
   /**
-   * Is `thing` the only one its program can have of its type, so "this one" and "all of them" are the same?
-   * (epic `editor` I183)
-   * - A one of a kind:  a type and its one thing declared together, `solitaire is an app`,
-   *   `leaderboard is a page`, a site, a place (`family cookbook is a web server at ...`).
-   *   The parse says so:  its thing is a variable of kind `only` in the project's scope.
-   * - The program's app (`core.RUNTIME.app`), however it's declared:  a program has one app.
-   *   So it holds before the editor's first parse, while the program runs from a kept compile.
-   */
-  static isOneOfAKind(thing: object): boolean {
-    if (runtimeCore()?.RUNTIME?.app === thing) return true
-    const className = thing.constructor.name
-    const variables = editor.project?.scope?.variables?.get() ?? []
-    return variables.some((variable) => variable.kind === "only" && variable.datatype === className)
-  }
-
-  /**
-   * Why changes to `part`'s fields can't all be saved, for each field's crossed-out save icon (Q29, Q30):
+   * Why changes to `part`'s fields can't all be saved, for each field's flask icon (Q29, Q30):
    * on This, a thing made in a loop has no line of its own to write to.
    * - Several:  each one's own line is written, and this says some can't be.
    * - `undefined`:  every change can be saved.
@@ -1258,12 +1261,27 @@ export class Inspector {
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
     const names = part.layout ? part.layout.fields.map((field) => field.name) : Inspector.storedNamesOf(part.value)
     const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    Inspector.noteNotSaved(part, origins)
     if (part.layout) return origins
     for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
       const origin = InspectorData.originOf(part.value, name)
       if (origin) origins[name] = InspectorData.propertyOrigin(origin)
     }
     return origins
+  }
+
+  /**
+   * The last change to one of `part`'s fields wasn't kept:  a line under that field says why (epic `editor` I244).
+   * - Not code it comes from:  that says so in the card, with a link to the code (`<NotSavedNote>`).
+   * - SIDE EFFECT:  writes `origins`.
+   */
+  private static noteNotSaved(part: Inspected, origins: ReturnType<typeof InspectorWrites.originsOf>): void {
+    const last = notSaved()
+    if (last?.part !== part || !isNotedUnderField(last.why)) return
+    origins[last.name] = {
+      ...(origins[last.name] ?? { kind: "inherited" }),
+      note: notSavedWords(last.why.reason, part)
+    }
   }
 
   /** The names of `thing`'s stored properties, which a data place may keep:  for `<DataSourceNote>`. */
@@ -1688,7 +1706,7 @@ function ownTitleOf(element: Element, words: "as said" | "as written" = "as said
  * - Read from its declaration's line (`declarationPlaces()`), so a Spanish type keeps its accents (`Fundación`).
  * - Declared nowhere this program says (a built-in type, a program not compiled here):  its class name, split.
  */
-function typeWordsOf(className: string): string {
+export function typeWordsOf(className: string): string {
   const declared = declarationPlaces().find((place) => place.kind === "type" && place.name === className)
   const line =
     declared &&
@@ -1853,10 +1871,9 @@ function knownPanels<Card extends InspectorCardId = InspectorPanel>(
 
 /**
  * One of the properties card's folding bands:  a group of a Spell UI element's fields, its Events or Actions,
- * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded),
- * or one of the Code card's rows, a project's each (`code:<project>:event|on click`).
+ * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded).
  */
-export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}` | `code:${string}`
+export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}`
 
 /** The properties card's folded sections (remembered:  `FOLDED_GROUPS_PREF`). */
 const [foldedGroups, setFoldedGroups] = createSignal<readonly InspectorBand[]>(
@@ -1959,12 +1976,8 @@ export function itemsOf(value: object): unknown[] | undefined {
 /** How a list's item is named in the trail:  `#3`. */
 export const ITEM_STEP = "#"
 
-/**
- * Where the running app draws, as `<AppPane>` last handed it over.
- * - Kept through a hot reload of this file:  the pane hands it over only as it's drawn, so without it the reloaded
- *   Inspector had no app (Views empty, the crosshairs inspecting nothing) until the page was reloaded.
- */
-let appArea = import.meta.hot?.data.appArea as HTMLElement | undefined
+/** Where the running app draws, as `<AppPane>` last handed it over. */
+let appArea: HTMLElement | undefined
 /**
  * Counts the area's moves, for its reactive readers (`Inspector.area`).
  * - The area itself is a plain variable:  a signal reads its old value until the next flush,
@@ -1992,7 +2005,6 @@ function clipToArea(box: { left: number; top: number; width: number; height: num
 
 function setArea(area: HTMLElement | undefined): void {
   appArea = area
-  if (import.meta.hot) import.meta.hot.data.appArea = area
   setAreaMoved((count) => count + 1)
 }
 
@@ -2292,7 +2304,7 @@ const ANTS_OUT = 8
 const INSPECTING_MARK = "data-inspecting"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
-const THING_ICON = "cube"
+export const THING_ICON = "cube"
 /** Where Spell UI's docs pages are:  the page server's, which the editor's dev server passes `/components/` on to. */
 const SPELL_UI_DOCS = "/components/ui/"
 /** The browser tab every Spell UI docs page opens in (`Inspector.openSpellUIDocs()`). */
@@ -3361,6 +3373,12 @@ function PropertiesCard(): JSX.Element {
 // DEBUG:  `Inspector` at the devtools console
 setDebugGlobal({ Inspector })
 
+// A change to the Inspector's code reloads the page, rather than swapping this file in (epic `editor` I236):
+// it and `InspectorParts` import each other, so a hot swap of either made a second Inspector,
+// its own selection, area and runtime, beside the first:  the Views tree chose parts in the new one,
+// the cards still showed the old one's, so a click on a row inspected nothing until the page was reloaded.
+import.meta.hot?.accept(() => location.reload())
+
 /** Bumped as a thing's scope is chosen:  `Inspector.scopeOf()` reads it. */
 const [scopeChoices, setScopeChoices] = createSignal(0)
 
@@ -3373,7 +3391,7 @@ const SCOPE_PREF = "scope"
  * so it costs no height.
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
- * - Never for a one of a kind, the app among them (`Inspector.isOneOfAKind()`):  its changes go to its type.
+ * - Never for a one of a kind, the app among them (`InspectorWrites.isOneOfAKind()`):  its changes go to its type.
  * - Several things:  one switch for them all, the choice remembered for their type;  of several types, none.
  * - A plain pair of the row's own items, so it collapses with the row when the card is narrow.
  ****************/
@@ -3415,7 +3433,7 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
 function hasScopeSwitch(part: Inspected): boolean {
   const main = part.together?.[0]
   const isOneType = !main || part.together!.every((each) => each.value.constructor === main.value.constructor)
-  return isThing(part.value) && isOneType && !Inspector.isOneOfAKind(part.value)
+  return isThing(part.value) && isOneType && !InspectorWrites.isOneOfAKind(part.value)
 }
 
 /**
@@ -3441,7 +3459,23 @@ function wordsOfType(thing: object): string {
 }
 
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
-const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
+const [notSaved, setNotSaved] = createSignal<{ part: object; name: string; why: NotWritten } | undefined>(undefined)
+
+/** Is `why` said under its field, not in the card?  Everything but code, which the card links to. */
+function isNotedUnderField(why: NotWritten): boolean {
+  return why.reason !== "expression" && why.reason !== "playing" && why.reason !== "allFromCode"
+}
+
+/** Why a change to `part` wasn't kept, in words. */
+function notSavedWords(reason: NotWritten["reason"], part: Inspected): string {
+  if (reason === "allFromCode") return appTexts.text("inspectorAllFromCode", { type: wordsOfType(part.value) })
+  if (reason === "expression") return appTexts.text("inspectorNotSavedCode")
+  if (reason === "noStart") return appTexts.text("inspectorNotSavedNoStart")
+  if (reason === "typeSets") {
+    return appTexts.text("inspectorNotSavedTypeSets", { types: P.pluralize(wordsOfType(part.value)) })
+  }
+  return appTexts.text("inspectorNotSavedRunning")
+}
 
 /**
  * Is `next` the part `last` was, reached the same way:  the same thing, drawn by the same element, by the same trail,
@@ -3498,35 +3532,29 @@ function DataSourceNote(props: { thing: object; names: string[] }): JSX.Element 
 
 /****************
  * ### `<NotSavedNote>`
- * Says the last change only changed the running app, and why, with a way to the code when there's code to see.
- * - No row of its own until a change can't be saved.
+ * Says, at the card's top, that the last change only changed the running app because the code works it out,
+ * with a way to that code;  or that nothing of all of them can change.
+ * - Any other change that can't be kept says so under its field (`Inspector.noteNotSaved()`, epic `editor` I244).
+ * - No row of its own until then.
  ****************/
 function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
   const why = (): NotWritten | undefined => {
-    // a thing made in a loop says so on each field, its crossed-out save icon (`Inspector.unsavedTipOf()`)
+    // a thing made in a loop says so on each field, its flask icon (`Inspector.unsavedTipOf()`)
     // All Cards edits the type's own fields (Q29):  no note that its values come from the code;
     // a one of a kind's type IS it, so a change it can't keep still says why (I183)
-    const isOneOfAKind = Inspector.isOneOfAKind(props.part.value)
+    const isOneOfAKind = InspectorWrites.isOneOfAKind(props.part.value)
     if (Inspector.typeEdited && !isOneOfAKind) return undefined
     // a one of a kind has no "each" to speak of
     const isAll = Inspector.scopeOf(props.part) === "all" && !isOneOfAKind
     if (isThing(props.part.value) && isAll && Inspector.isAllFromCode(props.part)) {
       return { reason: "allFromCode" }
     }
+    // the rest are said under their field (`Inspector.noteNotSaved()`)
     const why = notSaved()?.part === props.part ? notSaved()?.why : undefined
-    return why?.reason === "playing" ? undefined : why
+    return why?.reason === "expression" ? why : undefined
   }
-  const words = (reason: NotWritten["reason"]) => {
-    if (reason === "allFromCode") {
-      return appTexts.text("inspectorAllFromCode", { type: wordsOfType(props.part.value) })
-    }
-    if (reason === "expression") return appTexts.text("inspectorNotSavedCode")
-    if (reason === "noStart") return appTexts.text("inspectorNotSavedNoStart")
-    if (reason === "typeSets")
-      return appTexts.text("inspectorNotSavedTypeSets", { types: P.pluralize(wordsOfType(props.part.value)) })
-    return appTexts.text("inspectorNotSavedRunning")
-  }
+  const words = (reason: NotWritten["reason"]) => notSavedWords(reason, props.part)
   return (
     <Show when={why()}>
       {(note) => (

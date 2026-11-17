@@ -19,6 +19,8 @@ const PIECE = "cm-selectionBackground"
  *   still meets the ones above and below it.
  * - Its colour, see-through black, is the sheet's (`bubbly.css`).
  * - And the caret at a line's first word always drawn AT that word (`wordsSide`;  epic `language` I141).
+ * - And a click on something drawn as one step for the caret, a comment's `--` drawn as one dash,
+ *   puts the caret at its nearer end, as seen (`atomicPresses`;  epic `codemirror` I25).
  * - Its position in the import graph:  CodeMirror alone;  the bubbly look's extensions add it
  *   (`CodeMirrorBubbly`, `CodeMirrorMarkup`).
  ****************/
@@ -48,7 +50,37 @@ export class CodeMirrorSelection {
     return [transaction, { selection: EditorSelection.create(ranges, selection.mainIndex), sequential: true }]
   })
 
-  /** The bubbly look's selection layer, over the text, as CodeMirror's own is in the look;  and `wordsSide`. */
+  /**
+   * A click inside an atomic range (`EditorView.atomicRanges`) on one line puts the caret at its nearer end,
+   * by where the pointer is on screen;  a drag from it selects from there.
+   * - e.g. a comment's `--`, drawn as ONE dash (`BubblyHtml.DASH`):  a click on its left half, before it;
+   *   on its right half, after it (epic `codemirror` I25).
+   * - CodeMirror's own moves a place inside an atomic range to its nearer end by CHARACTERS,
+   *   and a tie to its end:  the place between the two `-`, which a click on the dash's left half finds too,
+   *   went after the dash.
+   * - Left to CodeMirror:  two clicks or more, ⇧, ⌘, and every press not inside an atomic range.
+   */
+  static atomicPresses: Extension = EditorView.mouseSelectionStyle.of((view, event) => {
+    if (event.button !== 0 || event.detail > 1 || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) {
+      return null
+    }
+    const pressed = nearerEndOfAtom(view, event.clientX, event.clientY)
+    if (pressed === undefined) return null
+    let anchor = pressed
+    return {
+      get(current) {
+        const head =
+          nearerEndOfAtom(view, current.clientX, current.clientY) ??
+          view.posAtCoords({ x: current.clientX, y: current.clientY }, false)
+        return EditorSelection.single(anchor, head)
+      },
+      update(update) {
+        if (update.docChanged) anchor = update.changes.mapPos(anchor)
+      }
+    }
+  })
+
+  /** The bubbly look's selection layer, over the text, as CodeMirror's own is in the look;  `wordsSide`, `atomicPresses`. */
   static extension: Extension = [
     layer({
       above: false,
@@ -56,7 +88,8 @@ export class CodeMirrorSelection {
       markers: (view) => CodeMirrorSelection.markersIn(view),
       update: (update) => update.docChanged || update.selectionSet || update.viewportChanged || update.geometryChanged
     }),
-    CodeMirrorSelection.wordsSide
+    CodeMirrorSelection.wordsSide,
+    CodeMirrorSelection.atomicPresses
   ]
 
   /**
@@ -64,11 +97,11 @@ export class CodeMirrorSelection {
    * - SIDE EFFECT:  reads the layout;  CodeMirror calls it when that's fine.
    */
   static markersIn(view: EditorView): RectangleMarker[] {
+    const ranges = view.state.selection.ranges.filter((range) => !range.empty)
+    // a caret alone, as while typing:  nothing to draw, and no probe laying the pane out again (epic `codemirror` I21)
+    if (!ranges.length) return []
     const bands = new LineBands(view)
-    return view.state.selection.ranges
-      .filter((range) => !range.empty)
-      .flatMap((range) => RectangleMarker.forRange(view, PIECE, range))
-      .map((piece) => bands.onBands(piece))
+    return ranges.flatMap((range) => RectangleMarker.forRange(view, PIECE, range)).map((piece) => bands.onBands(piece))
   }
 }
 
@@ -131,6 +164,29 @@ function isBeforeWords(doc: Text, range: SelectionRange): boolean {
   // ... or a word after a space in the line:  a pill's first, `when |creating solitaire` (I141)
   const at = range.head - line.from
   return at > words && /[ \t]/.test(line.text[at - 1]!) && /[^\s"]/.test(line.text[at] ?? "")
+}
+
+/**
+ * The end of the atomic range on one line `x`, `y` is inside, nearer it on screen;
+ * `undefined` when it's inside none (`CodeMirrorSelection.atomicPresses`).
+ */
+function nearerEndOfAtom(view: EditorView, x: number, y: number): number | undefined {
+  const pos = view.posAtCoords({ x, y })
+  if (pos === null) return undefined
+  let atom: { from: number; to: number } | undefined
+  for (const ranges of view.state.facet(EditorView.atomicRanges)) {
+    ranges(view).between(pos, pos, (from, to) => {
+      if (from < pos && pos < to) atom = { from, to }
+      return atom ? false : undefined
+    })
+    if (atom) break
+  }
+  if (!atom) return undefined
+  const start = view.coordsAtPos(atom.from, 1)
+  const end = view.coordsAtPos(atom.to, -1)
+  // over lines (a row of feet's hidden line breaks):  CodeMirror's own
+  if (!start || !end || start.top !== end.top) return undefined
+  return Math.abs(x - start.left) <= Math.abs(end.left - x) ? atom.from : atom.to
 }
 
 /** A CSS length `length` (`var(--x)`, `calc(...)`) in px, as `element`'s styles make it. */

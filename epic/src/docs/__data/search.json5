@@ -1504,6 +1504,31 @@
       ]
     },
     {
+      "path": "epic-picture.html",
+      "title": "<epic-picture>",
+      "summary": "The <epic-picture> element: a picture the person gave an item, a thumbnail with a trash that deletes it and its file.",
+      "tag": "epic-picture",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-behaviour",
+          "title": "2. Behaviour"
+        },
+        {
+          "id": "3-markup",
+          "title": "3. Markup"
+        },
+        {
+          "id": "epic-picture-parts",
+          "title": "Parts",
+          "parent": 2
+        }
+      ]
+    },
+    {
       "path": "epic-prompt.html",
       "title": "<epic-prompt>",
       "summary": "The <epic-prompt> element: the prompt that started the plan, folded under Kickoff prompt.",

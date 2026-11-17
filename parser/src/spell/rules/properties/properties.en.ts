@@ -95,7 +95,8 @@ properties.addRule(QuotedMember, {
 })
 
 properties.addRule(PropertyExpression, {
-  syntax: "the {property:member_words} of {expression:operand}",
+  syntax:
+    "the {property:member_words} of ((each:each) ({expression:each_item_where}|{arg:singular_identifier} in {expression:operand})|{expression:operand})",
   tests: [
     {
       title: "resolved:  what the type declares",
@@ -123,6 +124,89 @@ properties.addRule(PropertyExpression, {
         ["the short rank of the last card of the deck", "deck.lastCard.shortRank"],
         ["the suit of the card", "card.suit"],
         ["the suits of the card", "Card.Suits"]
+      ]
+    },
+    {
+      title: "a list's items:  each item's, as a list (epic `language` I155)",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a suit as one of clubs, diamonds",
+            "a card has a shorthand as text",
+            "a deck is a list of cards",
+            "a deck has a shorthand as text",
+            "the card is a new card",
+            "the deck is a new deck"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add({ name: "hand", datatype: "list of cards" })
+      },
+      tests: [
+        {
+          title: "each item",
+          input: "the shorthand of each card in the deck",
+          js: "core.mapToList(deck, (card) => card.shorthand)",
+          ts: "core.mapToList(deck, (card: Card) => card.shorthand)"
+        },
+        {
+          title: "each item that meets a condition",
+          input: "the shorthand of each card in the deck where its suit is clubs",
+          js: 'core.mapToList(deck.filter((card) => card.suit === "clubs"), (card) => card.shorthand)',
+          ts: 'core.mapToList(deck.filter((card) => card.suit === "clubs"), (card: Card) => card.shorthand)'
+        },
+        {
+          title: "the words name the items",
+          input: "the shorthand of the cards in the deck",
+          js: "core.mapToList(deck, (card) => card.shorthand)",
+          ts: "core.mapToList(deck, (card: Card) => card.shorthand)"
+        },
+        {
+          title: "a plural word",
+          input: "the shorthands of the cards in the deck",
+          js: "core.mapToList(deck, (card) => card.shorthand)",
+          ts: "core.mapToList(deck, (card: Card) => card.shorthand)"
+        },
+        { title: "the list's own, named as the list", input: "the shorthand of the deck", js: "deck.shorthand" },
+        {
+          title: "the list has none:  its items'",
+          input: "the shorthands of the hand",
+          js: "core.mapToList(hand, (card) => card.shorthand)",
+          ts: "core.mapToList(hand, (card: Card) => card.shorthand)"
+        },
+        {
+          title: "an enumeration's value, not its values",
+          input: "the suit of each card in the deck",
+          js: "core.mapToList(deck, (card) => card.suit)",
+          ts: "core.mapToList(deck, (card: Card) => card.suit)"
+        },
+        { title: "one thing:  unchanged", input: "the suit of the card", js: "card.suit" },
+        { title: "the items have none:  the list's", input: "the length of the cards in the deck", js: "deck.length" }
+      ]
+    },
+    {
+      title: "a statement's `each` is still its loop:  one add per card (epic `language` I155)",
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a shorthand as text",
+            "a deck is a list of cards",
+            "the deck is a new deck",
+            "the names is a new list of text"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        {
+          title: "add",
+          input: "add the shorthand of each card in the deck to the names",
+          js: "deck.map((card) => core.append(names, card.shorthand))"
+        }
       ]
     },
     {

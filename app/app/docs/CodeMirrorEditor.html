@@ -46,7 +46,7 @@
         <article class="site-article">
           <p class="lede">
             CodeMirror 6, as a Solid component that fills the box it's in. Every code editor in the app is one: the
-            code pane, the Inspector's Code card, the Program panel's JavaScript, TypeScript and Python tabs, Publish's
+            code pane, the Inspector's Code card, the compiled-code pane, Publish's
             diff, a notebook's cells, and the editor in a
             <a href="spell-editor.html" target="src-packages-app-docs-spell-editor-html"
               ><code>&lt;spell-editor&gt;</code></a
@@ -60,12 +60,8 @@
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
             <p>
-              The one in the Program panel's JavaScript tab, in Debug: Solitaire's Card.spell, compiled, read only, its
-              lines numbered.
-            </p>
-            <p>
-              <a href="OutputEditor.html" target="src-packages-app-docs-outputeditor-html">OutputEditor</a> shows the
-              same picture: that page is about the tab, this one about the code editor in it.
+              The one in the compiled-code pane (View › Compiled Code), beside the code: Solitaire's Card.spell,
+              compiled to JavaScript, read only, its lines numbered.
             </p>
             <ui-image
               src="_images/CodeMirrorEditor.png"
@@ -83,19 +79,21 @@
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
-              The Program panel's code tabs (<code>OutputEditor</code>) draw one on some text, read only. It loads it
+              The compiled-code pane (<code>CodeOutputPane</code>) draws one on the project's compiled code, read only. It loads it
               lazily, so it goes inside a
               <code>&lt;Loading&gt;</code> that shows "Loading editor…" till it's in:
             </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>OutputEditor.tsx · the compiled code · 6 lines</ui-title>
+              <ui-title>CodeOutput.tsx · the compiled code · 8 lines</ui-title>
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
                     <Loading fallback={<LazyCodeMirror.Loading />}>
                       <LazyCodeMirror.CodeMirrorEditor
-                        value={code()}
-                        language={target ? TARGET_LOOKS[target].language : "javascript"}
+                        value={written().code}
+                        language={OUTPUT_TARGETS[props.target].language}
+                        onMount={(made) => setOutput(() => made)}
+                        onUpdate={clicked}
                       />
                     </Loading>
                   </script></ui-code

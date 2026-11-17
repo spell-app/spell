@@ -254,6 +254,37 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     it keeps them by the line's last token, which the changed tokens share.
   - The loop's own:  `for each card in the deck which is not in the stock` (`list_iteration_where`), its item, list and
     condition one `each_item_where`, a `list_filter` of one item's word, never an expression alone.
+- A bare word after `and` / `or` in a filter carries the condition's verb (epic `language` I152,
+  `SpellStatement.withVerbCarried()`):  `which are face up and red` ~== `... and it is red`.
+  - Only when the condition starts with the item and its verb (`it is`, Spanish's bare `es`), and the clause is ONE word
+    that names nothing in scope.
+  - Not a negated verb after `or`:  `it isn't red or it isn't black` would always be true.
+  - Without it, `red` was a text, always true:  every face-up card passed.
+- A list of lists, read by its items' word (epic `language` I152;  T130 began it for `where` and `the number of`):
+  - `cards in the columns` (`list_items_in`) => `core.mergeLists(core.everyThing(Column))`:
+    every column's cards, together, in the columns' order;  `the cards in the discard pile` is the pile itself
+  - the same in `the first card in ...` (`ordinal_position_expression`), `a random card in ...`, `card 3 of ...`
+    (`ListItemExpression`), `the first card in ... where` (`ordinal_where_expression`),
+    `a random card in ... where` (`random_item_where`), and a loop's item (`for each card in the columns`,
+    `turn each card in the columns face down`)
+  - the word naming the lists themselves reads them as before:  `the piles in the columns`, `for each pile in the columns`
+  - a word naming neither, both known, is refused:  `the columns in the deck` says what the deck holds
+    (`refuseIfNamesNoItems()`, [lists.shared.ts](rules/lists/lists.shared.ts))
+  - `spell repl` and `spell parse` say "Don't understand" for words left at a line's end, as a file does:
+    they printed the part they read, and dropped the rest
+- `and` / `or` between VALUES (epic `language` T146, J226;  [`JoinedValues`](rules/expressions/JoinedValues.ts)):
+  - two questions:  a question, as always
+  - two values of one kind:  `or` the first that's there (`discardPile.lastItem || stock.firstItem`, the datatype a card),
+    `and` both, in a list (`[stock, discardPile]`;  `A and B and C` one list);  what reads the list says which items it
+    means, by its item word (`for each card in the stock and the discard pile`:  both piles' cards)
+  - in a condition (`if`, `X if C otherwise Y`, `when enabled`, a `where`):  a value is a test of whether it's there, as always
+  - refused, asked when the errors are gathered (`CompoundExpression.refuseIfJoinedWrong()`):  a question and a value
+    outside a condition, two kinds, `and` and `or` between values with no parentheses, `and <a word>` (`and red`), and in
+    a `where` a question then a thing
+  - `CompoundExpression` reads its datatype through `JoinedValues.of()`, the same shunting-yard as `getAST()`
+- `can <action>`, `can_do` ([CanDo.ts](rules/lists/CanDo.ts), T146, J228):  `where it can play the card`, `it` optional,
+  RUNS the action and reads its yes or no;  `the first card in ... where` with one asks one item at a time and stops at the
+  first yes (`core.itemWhere()`, `core.itemWhereInTurn()` when it waits).
 - A number word is a name where it can't be a number (J96):
   - the target of `set` / `poner` tries `{variable}` first:  `set three to 3`
   - a variable of the name in scope wins over the number (`NumberAsString.parse()`)
@@ -443,8 +474,19 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `the first of its authors` is an item too, not a property named `first`:
       [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
       (never a property the owner declares, nor `the top of its card`).
+  - EACH ITEM'S, of a list of things (epic `language` I155):  a list, `core.mapToList(deck, (card) => card.shorthand)`.
+    - `the shorthand of each card in the deck`, and with a condition, `... in the deck where it is face up`
+      (its `each_item_where`, as a loop's).
+    - `the shorthand of the cards in the deck`:  its words name the items, so the items' member comes first,
+      before the deck's own `shorthand`.
+    - `the names of the people`:  the list has no `names`, its items have a `name`;  a plural word reads the singular.
+    - An enumeration's twin is each item's value here:  `the suit of each card` is no `Card.Suits`.
+    - As a statement's `each`, `add the shorthand of each card in the deck to names` is still the loop's
+      (`each_in_statement`):  one add per card.
+    - Into text, the list reads as any list does:  `deck: A♣↓, 2♣↓, ...`, joined by `", "`.
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
-    - its syntax:  `the {property:member_words} of {expression:operand}`
+    - its syntax:
+      `the {property:member_words} of ((each:each) ({expression:each_item_where}|{arg:singular_identifier} in {expression:operand})|{expression:operand})`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`
     - but NOT `the position of` / `the number of` (`Priority.mostSpecific`)
   - `its X` is two rules:
@@ -777,6 +819,8 @@ A kind that says so is saved in a file of its own.
   - so does a line with lines indented under it STARTING with `and` / `or` (`and its value is ...`), any number of
     them (T135, Owen's form);  the bubbly look draws them in the head line (`SP.BubblyLayout`), not its body
   - a line of just `and` / `or` joins the lines either side, each in parentheses of no width
+  - a line under it starting with `or`:  what follows the `or` in parentheses of no width, one alternative, its `where`
+    its own;  the first line's `where` ends at it (`SpellStatement.beforeAlternatives()`;  epic `language` T146, J227)
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
 - Then it loops over the root `BlockToken`'s items:
@@ -1640,6 +1684,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Any language's tags alike:  it's the tag being a view that counts.
   - A member made new takes its name as its thing's `id` (`DefinePropertyHas.withMemberId()`):
     `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, so the drawing names it with no `with name "T1"`.
+    - Several words are joined by dashes, each as written (epic `language` T147):  `"discard pile" is a new discard pile`
+      is `{ id: "discard-pile" }`, and `<discard-pile "discard pile"/>` draws `id="discard-pile"`;  `discard pile` still
+      finds it (`core.thingNamed()`).
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
@@ -1866,8 +1913,16 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
       - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type
+      - a type's QUESTION, either place (epic `language` I154):  `- it "can go up" if`, `a card "can go up" if`,
+        up to its `if`, its body left out (the language's `questionLine`)
+        - So an action above it asks it:  `where it can go up`, and T146's `or` lines.
+      - A type's line may end in a comment, `a card  -- what auto play asks of a card` (`subjectOf()`):
+        its body's methods are scanned too.
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
+      - A question's rule is its own, `MethodPostfixRule` / `MethodInfixRule`, stepping aside in `parse()`.
+      - Not a value kind's question (`a rank "is a face card"`):  it calls its kind's static method,
+        and a type the scan knows no kind of may be a value kind.
     - Straight onto the parser, journaled:  not the scope's rules, so a project's declarations never export one.
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`):
       every call registered ahead of its definition reads again (epic `editor` I170).

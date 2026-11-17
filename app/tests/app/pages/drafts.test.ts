@@ -81,18 +81,33 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
 
   test("Publish makes it public, keeps a version, and the draft goes", async () => {
     await edit('"words"', '"text"')
-    // while there's a draft:  Draft | Publish | Discard left of the modes (T102), and a pen on its tab
+    // while there's a draft:  Draft | Publish | Discard right after Help (T107), and a pen on its tab
     // (I44, I90, I93, T67, I192);  the label says what a draft is, on hover (its bar tooltip, I217)
     await page.waitForSelector(".PublishDraft", { timeout: 5000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(1)
     expect(await page.locator(".PublishDraft ui-button.DiscardDraft").count()).toBe(1)
     expect((await page.locator(".PublishDraft .DraftState").textContent())?.trim()).toBe("Draft")
     expect(await page.locator(".PublishDraft .DraftState").getAttribute("data-tooltip")).toMatch(/only you see them/i)
-    // just left of Run | Edit (T102):  its right edge the bar's icon gap before Run's tab
+    // right after the Help menu (T107):  32px from Help's word to the pill's edge
     const pill = (await page.locator(".PublishDraft").boundingBox())!
-    const run = (await page.locator(".ModeTabs > ui-item [part~=item]").first().boundingBox())!
-    expect(run.x - (pill.x + pill.width)).toBeGreaterThanOrEqual(8)
-    expect(run.x - (pill.x + pill.width)).toBeLessThanOrEqual(16)
+    const helpWordRight = await page.locator("#HelpBarMenu").evaluate((help) => {
+      let right = -1
+      const visit = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent!.trim()) {
+          const range = document.createRange()
+          range.selectNodeContents(node)
+          for (const rect of range.getClientRects()) right = Math.max(right, rect.right)
+        }
+        if ((node as Element).shadowRoot) visit((node as Element).shadowRoot!)
+        for (const child of node.childNodes) visit(child)
+      }
+      visit(help)
+      return right
+    })
+    expect(Math.round(pill.x - helpWordRight)).toBe(32)
+    // ... centred on the bar, as the menus' words are (I247:  it sat 6px high, at the bar's top)
+    const bar = (await page.locator(".EditorBarPlace").boundingBox())!
+    expect(Math.abs(pill.y + pill.height / 2 - (bar.y + bar.height / 2))).toBeLessThanOrEqual(0.5)
     await page.locator(".PublishDraft ui-button.Publish").click()
     await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)

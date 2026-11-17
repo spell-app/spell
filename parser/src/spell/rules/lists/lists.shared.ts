@@ -63,6 +63,54 @@ export function itemsAcrossAST(match: P.Match, list: P.Match, across: ItemsAcros
   return isAcross(across) ? new P.ASTCoreMethodInvocation(match, { methodName: "mergeLists", args: [ast] }) : ast
 }
 
+/**
+ * The datatype of `list`'s items, as `across` reads them:  its lists' items when it's `isAcross()`, else what it
+ * holds -- `Card` for `the first card in the columns`.
+ */
+export function itemOfItemsAcross(
+  scope: P.Scope,
+  list: P.Match,
+  across: ItemsAcross | undefined
+): P.Datatype | undefined {
+  return scope.getItemType(itemsAcrossDatatype(across) ?? list.datatype)
+}
+
+/**
+ * SIDE EFFECT:  `match`, a rule naming `list`'s items by `arg` (`the columns in the deck`), is refused when `arg` names
+ * neither what `list` holds nor what its lists hold (epic `language` I152):
+ * `the deck holds cards, not columns`.
+ * - Only when SURE:  both kinds known, and neither is the other, nor a kind of it.
+ * - Asked when the errors are gathered:  a type declared below the line is a stub till then.
+ */
+export function refuseIfNamesNoItems(match: P.Match, arg: P.Match, list: P.Match): void {
+  const { scope } = match
+  const named = SP.singularIn(scope, `${arg.value}`)
+  const itemTypeOf = () => {
+    const item = scope.getItemType(list.datatype)
+    return typeof item === "string" ? scope.getType(item) : undefined
+  }
+  const namesNone = () => {
+    const namedType = scope.getType(SP.typeName(named))
+    const itemType = itemTypeOf()
+    if (!namedType || !itemType || namedType.stub || itemType.stub) return false
+    if (itemType.isA(namedType) || namedType.isA(itemType)) return false
+    return !isAcross(itemsAcrossOf(scope, arg, list))
+  }
+  SP.SpellWarnings.refuseIf(
+    match,
+    () => {
+      const language = SP.Language.of(scope)
+      const itemWord = SP.SpellWarnings.exampleNoun(scope, itemTypeOf()!, "definite").split(/\s+/).slice(1).join(" ")
+      return language.parserMessage("not-items-in", {
+        list: list.inputText.trim(),
+        items: language.inflector.pluralize(itemWord),
+        named: `${arg.value}`
+      })
+    },
+    namesNone
+  )
+}
+
 /** What `itemsAcrossOf()` found:  the type a list holds, and the word a rule names its items by. */
 export type ItemsAcross = {
   /** The type the list holds, `Foundation`:  its record, a stub if it's declared below */

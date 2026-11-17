@@ -379,6 +379,8 @@ export const spanishWords: SP.LanguageWords = {
      * - Not a loop, which starts `para cada` too:  `para cada carta en el mazo:`.
      */
     methodLine: /^(?:para(?![ \t]+cada\b)|(?:crear[ \t]+)?animaci[oó]n)[ \t]/iu,
+    /** A type's question, up to its body:  `"puede subir" si`, `una carta "puede subir" si`. */
+    questionLine: /^(?:un[oa]?[ \t]+[^"\n]*?[^\s"][ \t]+)?"[^"\n]+"(?:[ \t]+(?:si|es)(?=[ \t:]|$))?(?:[ \t]*:)?/iu,
     /** A line re-opening a type, its name captured:  `una carta:`, `un solitario donde:`, `una pila` (P48). */
     placeDeclaration:
       /^(?!(?:un[oa]?|el|la|los|las|su|sus)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+un[oa]?[ \t].*[ \t](?:en|desde)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,

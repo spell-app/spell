@@ -53,7 +53,9 @@ export class SpellHighlighter {
     }
     try {
       const match = parsed ?? parser.parse(text, "block")
-      if (match) for (const span of SpellHighlighter.matchSpans(match)) byStart.set(span.start, span)
+      // only `text`'s own tokens:  a fill-in's words (`"[solitaire's score]"`) count from their own start (I27)
+      const isText = (token: P.Token) => SpellHighlighter.isTokenOf(text, token)
+      if (match) for (const span of SpellHighlighter.matchSpans(match, isText)) byStart.set(span.start, span)
     } catch {
       // a parse that throws:  the token colours stand
     }
@@ -71,6 +73,16 @@ export class SpellHighlighter {
     const byStart = new Map<number, SpellHighlightSpan>()
     SpellHighlighter.walk(match, byStart, new Set(), keep)
     return [...byStart.values()]
+  }
+
+  /**
+   * Is `token` one of `text`'s:  its words there, where it says it is?
+   * - Not a token of words parsed on their own, counted from their own start:
+   *   a text's fill-in (`"Your score:  [solitaire's score]"`), a markdown hole.
+   *   Read as `text`'s, its `'s` lands on the file's first line, `solitaire is an app`'s `is` (epic `codemirror` I27).
+   */
+  static isTokenOf(text: string, token: P.Token): boolean {
+    return token.start !== undefined && !!token.raw && text.startsWith(token.raw, token.start)
   }
 
   /** Scope for `token` from its class alone (first pass);  `undefined` for none. */

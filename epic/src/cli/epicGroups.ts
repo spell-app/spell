@@ -323,6 +323,17 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "last",
+      usage: "<name>",
+      description:
+        "is this agent the last one of its epic still running?  exit 0 when no other is listed (it runs the full " +
+        "test suite after merging), exit 1 listing the others",
+      example: "epic agents last docstrings",
+      flags: {
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
       name: "wait",
       usage: "[--every <s>] [--max <s>] [--json]",
       description:
@@ -1338,7 +1349,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again",
     "--requested":
-      "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
+      "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
@@ -1370,11 +1381,14 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--details <html>": "its details",
     "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
     "--requested":
-      "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
+      "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
     "--start <words>":
       "taken up at once:  the person's words its body, an Underway card, the spinner on:  blue, not red (T78)",
     "--agent <name>": "with --start:  the agent on it, named on its Underway card",
+    "--picture <file>":
+      "a picture of the person's, copied to pictures/ beside the page and shown after its words;  repeat for more (T87)",
+    "--pasted <n>": "the n pictures the person pasted last into this session's chat, as --picture does (T87)",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",
@@ -1496,6 +1510,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
     "--protected-base":
       "the base branch takes only pull requests:  put the two files on a new branch, epic-setup, and open one",
+    "--superpowers":
+      "put superpowers' stand-aside words in the repo's AGENTS.md, without asking (else asked when superpowers is on)",
     "--no-server": "don't start the epic server",
     "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",

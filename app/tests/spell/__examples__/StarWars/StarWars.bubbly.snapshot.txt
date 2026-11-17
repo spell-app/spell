@@ -350,7 +350,7 @@
 |   | its «"talk"» is **text**  ⟦// an address⟧
 
 ==== /StarWars.spell
-# St**ar War**s
+⟪# Star Wars⟫
 ⟦// A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWars.api.spell, as `spell place ingest` wrote it:⟧
 ⟦// say what a field links to, and reading it follows the link, `the name of its homeworld`.⟧
 ⟦// Each type below adds to its type there, with `<extend>`:  so looking again at the server never touches a line of this.⟧

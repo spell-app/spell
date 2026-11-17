@@ -2,8 +2,8 @@
 
 exports[`testing spell module UI, in Spanish > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
-  "alert": "message|okButton?",
-  "confirm": "message|okButton?|cancelButton?",
+  "alert": "message|title?|size?|okButton?",
+  "confirm": "message|title?|size?|okButton?|cancelButton?",
   "load_sound": "sound",
   "notify": "kind?|message|title?|color?|inverted?|position?|time?|unit?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
   "play_sound": "sound",
@@ -11,6 +11,6 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "prompt": "message|defaultValue?",
   "show_dates_as": "style",
   "stop_sound": "sound",
-  "warn": "message|okButton?",
+  "warn": "message|title?|size?|okButton?",
 }
 `;

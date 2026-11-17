@@ -19,15 +19,30 @@ export class CodeMirrorFollowed {
   /**
    * Mark `lines`, from 0, in `view`, and bring the first into view when it's out of it;  none:  no mark.
    * - Never takes the keyboard's focus, and never moves the caret.
+   * - Whether it's in view is asked once the view has measured itself (`requestMeasure()`):
+   *   a file just shown has only guessed line heights, and the bubbly look's lines are taller than the guess,
+   *   so a line far down read as in view and was never scrolled to (epic `editor` I245).
    */
   static show(view: EditorView, lines: readonly number[]): void {
     const { doc } = view.state
     const starts = lines.filter((line) => line >= 0 && line < doc.lines).map((line) => doc.line(line + 1).from)
-    const effects: StateEffect<unknown>[] = [setFollowed.of(starts)]
+    view.dispatch({ effects: setFollowed.of(starts) })
     const first = starts[0]
-    if (first !== undefined && !CodeMirrorFollowed.isInView(view, first))
-      effects.push(EditorView.scrollIntoView(first, { y: "center" }))
-    view.dispatch({ effects })
+    if (first === undefined) return
+    view.requestMeasure({
+      // where to scroll to, centring the line:  none when it's in view
+      read: () => {
+        if (CodeMirrorFollowed.isInView(view, first)) return undefined
+        const block = view.lineBlockAt(first)
+        const scroller = view.scrollDOM
+        // the document's top in the scroller's content:  its padding above it
+        const documentStart = view.documentTop - scroller.getBoundingClientRect().top + scroller.scrollTop
+        return Math.max(0, documentStart + block.top - (scroller.clientHeight - block.height) / 2)
+      },
+      write: (scrollTop) => {
+        if (scrollTop !== undefined) view.scrollDOM.scrollTop = scrollTop
+      }
+    })
   }
 
   /** Take the marks away from `view`. */

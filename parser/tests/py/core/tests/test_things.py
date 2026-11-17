@@ -13,8 +13,8 @@ import time
 
 import pytest
 
-from spell_core import List, Thing, core, prop
-from spell_core.things import new_thing_id, things
+from spell_core import App, List, Thing, core, prop
+from spell_core.things import has_chosen_id, new_thing_id, things
 
 RANKS = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
 
@@ -340,6 +340,29 @@ def test_a_set_id_wins_by_keyword_or_set_later() -> None:
     made_up = card.id
     card.id = "ace-of-spades"
     assert card.id == "ace-of-spades" != made_up
+
+
+def test_an_apps_id_is_its_name_in_lower_kebab_case_chosen_and_a_set_id_wins() -> None:
+    # language T147:  `solitaire is an app` is `solitaire`, every run;  JavaScript's `APP_ID_PROP` the same
+    class Solitaire(App):
+        """`solitaire is an app`."""
+
+    class TodosApp(App):
+        """`todos app is an app`."""
+
+    game = Solitaire()
+    assert game.id == "solitaire"
+    assert has_chosen_id(game)
+    assert TodosApp().id == "todos-app"
+    assert Solitaire(id="game-2").id == "game-2"
+
+
+def test_a_thing_the_program_names_counts_as_chosen_one_made_at_run_time_does_not() -> None:
+    named = ThingCard(id="stock")
+    made = ThingCard()
+    assert made.id
+    assert has_chosen_id(named)
+    assert not has_chosen_id(made)
 
 
 def test_two_things_never_share_a_made_up_id_even_in_runs_seeded_the_same() -> None:

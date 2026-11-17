@@ -83,6 +83,17 @@ export class AgentList {
   }
 
   /**
+   * The agents running besides `name`, oldest first:  none means `name` is the LAST ONE STANDING (epic `epic-engine`
+   * T90), the one that runs the full test suite after it merges.
+   * - `name` itself needn't be listed:  short or full name
+   * - a `blocked on` agent counts:  it still has work to merge
+   */
+  othersThan(name: string): RunningAgent[] {
+    const fullName = this.fullName(name)
+    return this.agents.filter((agent) => agent.name !== fullName)
+  }
+
+  /**
    * Add agent `name`, doing `task`;  returns its entry (its full name).
    * - throws if an agent of that name is running
    */

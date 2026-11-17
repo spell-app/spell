@@ -90,6 +90,12 @@ ui-panel.InspectorCard > .InspectorSection {
   /* the room between its header and its body's first row, in every card (Owen, 2026-11-16, epic `editor` I210:
      "Too much space above Solitare and the rest of the panel views") */
   --spell-card-body-top: 8px;
+  /* where every chevron in a card sits, its own bar's and its sections' (epic `editor` I240):  the bar's chevron is
+     10px, centred in its 14px button after the bar's 6px (`UIPanel.css`), so 8px in from the card's edge */
+  --spell-card-chevron-inset: 8px;
+  --spell-card-chevron-size: 10px;
+  /* the bar's chevron's grey, taken here:  a section's own muted text is its panel's hue */
+  --spell-card-chevron-ink: var(--ui-text-muted);
   /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
      (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
   &.locked {
@@ -306,6 +312,20 @@ ui-panel.InspectorCard > .InspectorSection {
     margin-block-start: var(--spell-card-body-top);
   }
 }
+/* a section's header:  its chevron before its title, where the card's own is, as big and as grey (epic `editor` I239,
+   I240:  "they should all line up vertically"):  the band from the card's edge, the chevron 8px in, its title 4px on */
+ui-property-group::part(title) {
+  padding-inline-start: var(--spell-card-chevron-inset);
+}
+ui-property-group::part(toggle) {
+  gap: 4px;
+}
+ui-property-group::part(fold-icon) {
+  width: var(--spell-card-chevron-size);
+  height: var(--spell-card-chevron-size);
+  color: var(--spell-card-chevron-ink);
+  opacity: 1;
+}
 /* the thing's own type's band, its title left out (`<ThingBands>`, I200):  the card's header names the type */
 ui-property-group.InspectorUntitled::part(title) {
   display: none;
@@ -322,8 +342,8 @@ ui-property-group.InspectorUntitled:first-child::part(content) {
 ui-tree-item.InspectorHiddenRow::part(row) {
   color: var(--ui-text-muted);
 }
-/* each event, ability and action of the Code card (`<ui-section>`, folding on its own;  epic `editor` I109):
-   its chevron, icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
+/* each event, ability and action of the Code card (`<ui-section>`;  epic `editor` I109):
+   its icon and words (or run button), then its code, in the file (`<CodeSlice>`);  always open, no chevron (I240) */
 ui-section.InspectorEvent {
   display: block;
   /* one value:  above and below */
@@ -332,10 +352,6 @@ ui-section.InspectorEvent {
   --ui-section-title-gap: 8px;
   --ui-section-h3: 1;
   --ui-section-content-padding: 4px 0 0 0;
-  --ui-section-fold-icon-size: 12px;
-  /* the chevron down while open, as the cards' */
-  --ui-section-fold-icon-rotate: 0deg;
-  --ui-section-fold-icon-folded-rotate: -90deg;
   font-size: 13px;
 
   /* the card's own type, not a title's display face */

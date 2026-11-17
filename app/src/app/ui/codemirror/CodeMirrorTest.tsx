@@ -379,12 +379,12 @@ const CARD_EDITOR_PAGE = `<ui-property-editor schema="Card" label="Card">
 `
 
 /**
- * The lines of `file` a slice shows:  the last two of the block before `its "short name" is`, cut, then the whole of it
+ * The lines of `file` a slice shows:  the last two of the block before `its "shorthand" is`, cut, then the whole of it
  * -- or its first ten lines, when it has none.
  */
 function sliceOf(file: SP.SpellFile): { from: number; to: number } {
   const lines = (file.contents ?? "").split("\n")
-  const head = lines.findIndex((line) => line.includes('"short name" is'))
+  const head = lines.findIndex((line) => line.includes('"shorthand" is'))
   if (head < 0) return { from: 1, to: 10 }
   return { from: head - 1, to: head + 5 }
 }

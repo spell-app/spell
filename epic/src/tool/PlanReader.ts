@@ -10,6 +10,7 @@ import {
   ISSUE_ID,
   JUDGEMENT_ID,
   KINDS,
+  REQUESTED_ID,
   MANUAL_TEST_ID,
   OLD_DECISION,
   OPEN_KINDS,
@@ -292,7 +293,8 @@ export abstract class PlanReader {
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
    * - an issue Claude found and fixed itself, never needing Owen (epic `epic-engine` I236):  `handled`, grey:
    *   closed done, `calm`, never reviewed, not one he asked for (Owen:  "I don't need to worry about transient stuff")
-   * - an issue filed from his own words (`requested`), closed done, never reviewed:  `requested`, light orange
+   * - an issue or todo filed from his own words (`requested`;  a todo since T88), closed done, never reviewed:
+   *   `requested`, light orange
    *   (epic `epic-engine` P63;  Owen, 2026-11-08:  "light orange until reviewed")
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
@@ -464,12 +466,12 @@ function isSelfFixed({
   return ISSUE_ID.test(id) && status === "done" && !!calm && reviewed === undefined && !urgent && !requested
 }
 
-/** Is it an issue filed from Owen's own words, closed done, that he hasn't seen yet (`itemState()`)? */
+/** Is it an issue or todo filed from Owen's own words, closed done, that he hasn't seen yet (`itemState()`)? */
 function isRequestedFix({
   id,
   status,
   reviewed,
   requested
 }: Pick<ItemFacts, "id" | "status" | "reviewed" | "requested">): boolean {
-  return ISSUE_ID.test(id) && status === "done" && reviewed === undefined && requested
+  return REQUESTED_ID.test(id) && status === "done" && reviewed === undefined && requested
 }

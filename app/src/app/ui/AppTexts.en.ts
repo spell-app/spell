@@ -46,7 +46,6 @@ export const APP_TEXTS = {
   hideCompiledTip: "Hide Compiled {language}",
   inspectTip: "Inspect the App:  click a part to select it",
   stopInspectingTip: "Stop Inspecting",
-  addViewTip: "Add a View",
   restartTip: "Restart the app",
   youTip: "Edit Your Name and Emails",
   menuCut: "Cut",
@@ -58,13 +57,10 @@ export const APP_TEXTS = {
   paletteSearch: "Search Views",
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
-  paletteGroupTip: "Add {aTopic} view",
   paletteAppViews: "App views",
-  paletteAppViewsTip: "Add one of your app's views",
-  palettePageViewsTip: "Add one of this page's views",
   palettePin: "Keep this open",
   paletteUnpin: "Unpin",
-  paletteAddView: "Add View",
+  paletteAddView: "Add a View",
   paletteClearSearch: "Clear the search",
   partStepAdd: "Add {part}",
   partStepMove: "Move",
@@ -322,7 +318,7 @@ export const APP_TEXTS = {
   inspectorNotSavedCode: "Your program works this out for itself, so a change here won't be kept.",
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",
-  inspectorNotSavedNoStart: "Your program doesn't give this a starting value, so a change here won't be kept.",
+  inspectorNotSavedNoStart: "A change here won't be saved.",
   inspectorNotSavedTypeSets: "Every one of the {types} starts with this.\nTo change it, pick All {types} first.",
   inspectorUnsavedAuto: "Spell makes this for you, so a change here can't be kept.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
@@ -383,7 +379,6 @@ export const APP_TEXTS = {
   ////////////////
 
   appMenu: "App",
-  javascriptOutput: "Javascript Output",
   programOutput: "Output",
   spellTree: "Spell Tree",
   spellTreeHint: "Click a line of your program to see how Spell reads it.",
@@ -574,8 +569,8 @@ export const APP_TEXTS = {
   doIt: "Do it:  {action}()",
   thingsInOrderMade: "In the order they were made",
   thingsByType: "By template, sub-templates included",
-  // the Program panel's tabs (`<ProgramPanel>`)
-  outputTab: "Output",
+  // the Program panel's tabs (`<ProgramPanel>`);  the languages' names are the compiled code's tabs (`LANGUAGE_LOOKS`)
+  outputTab: "Debug Output",
   typescriptTab: "TypeScript",
   pythonTab: "Python",
   // a .spell file's code spell, the text it reads as (epic `elemental-spell` P8)
@@ -692,11 +687,15 @@ export const APP_TEXTS = {
   compiledTypeScript: "Compiled TypeScript",
   compiledPython: "Compiled Python",
   codeOutputClose: "Hide the compiled code",
-  referenceTab: "Reference",
+  referenceTab: "Spell Reference",
   // the Reference tab (`<SpellReference>`):  what you can use
   referenceSpell: "Spell",
   referenceNothing: "Pick something to see what it is.",
   referenceShowInCode: "Show in code",
+  referenceSearch: "Search the reference",
+  // a thing a property holds, with no comment of its own:  `a Deck of playing cards named "deck"`,
+  // `more` its type's description after its own words (`of playing cards`), or nothing
+  referenceInstance: '{aType}{more} named "{name}"',
   thisApp: "This app",
   thisPage: "This page",
   paletteNewView: "View",

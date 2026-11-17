@@ -38,6 +38,10 @@
  *   - written beside the page, `tests/m3-20261019-1432.png` (`TestShots.saveShot()`), never over a file
  *   - answers `{ shot }`, that path:  the failure's mark carries it
  *   - only a test's id (400);  its own body limit, since a screenshot is far bigger than a note
+ * - `POST /api/epics/review/delete-picture` `{ page, id, src }` -- the trash on an item's picture (`<epic-picture>`,
+ *   epic `epic-engine` T87):  taken out of item `id`, a log line, and its file deleted (`ItemPictures.remove()`)
+ *   - `src`:  its `<img src>`;  only a picture in the page's `pictures/` (else 400), one the item shows (else 404)
+ *   - answers `{ deleted }`, its path from the page's folder;  the page sees the item change by its live update
  * - `POST /api/epics/review/new` `{ page, id?, entry }` -- a NEW todo or question asked for from the page
  *   (epic `airplane` P2):  `entry` `{ kind, title, note?, near? }` under key `id` (`new1` ...),
  *   or, without one, the next free key
@@ -70,7 +74,8 @@
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - Loaded by the page server under `tsx` (`PageServer.loadRoutes()`), with `packages/server/tsconfig.json`'s aliases.
  *   Imports `ReviewInbox` (and `TestShots`, as light), never `PlanDoc`:  a request reads the doc's TEXT
- *   (`ReviewInbox.itemIds()`);  only an instant mark loads `InstantMarks`, and `PlanDoc` with it, when one comes.
+ *   (`ReviewInbox.itemIds()`);  only an instant mark loads `InstantMarks`, and `PlanDoc` with it, when one comes,
+ *   and a picture's delete `ItemPictures`.
  * - From the docs tools' `reviewRoutes.ts` (epic `epic-components`, P7).
  */
 
@@ -148,6 +153,15 @@ const reviewRoutes: RouteModule = {
       const { InstantUndo } = await import("./InstantUndo")
       const did = await InstantUndo.undo(file, root, id)
       reply.json({ ...ReviewInbox.read(ReviewInbox.pathFor(file)).forPage(), did })
+    })
+    // an item's picture deleted from the page, its file too (epic `epic-engine` T87):  `ItemPictures`, loaded only now,
+    // as it brings `PlanDoc`
+    api.post("/delete-picture", async (request, reply) => {
+      const body = request.body as { page?: unknown; id?: unknown; src?: unknown }
+      const file = planDoc(web.files, body.page)
+      const id = await itemOf(file, body.id)
+      const { ItemPictures } = await import("./ItemPictures")
+      reply.json({ deleted: await ItemPictures.remove(file, root, id, body.src) })
     })
     api.post("/now", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; action?: unknown; note?: unknown }

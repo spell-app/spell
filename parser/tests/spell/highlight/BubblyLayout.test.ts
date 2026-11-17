@@ -447,6 +447,28 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
+  it("draws a head's `is an` plain, only its kind bold, whatever a text's fill-in further down says (epic `codemirror` I27)", () => {
+    const head = (text: string, parser = SP.spellParser) => {
+      const line = blocksOf(SP.BubblyLayout.of(text, parser).nodes)[0]!.head
+      return line.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`).join(" | ")
+    }
+    // `[solitaire's score]` is parsed on its own, from 0:  its `'s` and `score` were painted over `is an app`
+    const alert = `\twhen the score changes\n\t\talert "Your score:  **[solitaire's score]**"\n`
+    expect(head(`solitaire is an app\n${alert}`)).toBe("input:solitaire | words: is an  | reference:app")
+    expect(head(`a "card" is a draggable two sided view\n${alert}`)).toBe(
+      'words:a  | input:"card" | words: is a  | reference:draggable two sided view'
+    )
+    expect(head(`an "apple" is a thing\n${alert}`)).toBe('words:an  | input:"apple" | words: is a  | reference:thing')
+    const alerta = `\tal crear solitario\n\t\talertar "Tu puntuación:  [la puntuación de solitario]"\n`
+    expect(head(`solitario es una aplicación\n${alerta}`, SP.Language.for("es").parser)).toBe(
+      "input:solitario | words: es una  | reference:aplicación"
+    )
+    // the highlighter's colours too:  none of the fill-in's on the first line
+    const text = `solitaire is an app\n${alert}`
+    const firstLine = SP.SpellHighlighter.spans(text).filter((span) => span.end <= text.indexOf("\n"))
+    expect(firstLine.map((span) => text.slice(span.start, span.end))).toEqual(["solitaire", "is", "an", "app"])
+  })
+
   it("draws every name bold, one weight, the word a head declares too;  pronouns plain;  a list's values italic", () => {
     expect(piecesOf(drawing, "reference")).toEqual(
       expect.arrayContaining(["draggable two sided view", "rank", "value", "column"])
@@ -487,6 +509,20 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(markup, "input").slice(1)).toEqual(['"7"', '"xs"'])
     expect(codesOf(markup)).toEqual([])
     expect(piecesOf(markup, "words")).toEqual(expect.arrayContaining(['small" spacing']))
+  })
+
+  it("draws a start tag laid out over lines exactly as on one line:  its values pills, its marks faint (epic `language` I151)", () => {
+    const oneLine = SP.BubblyLayout.of(
+      'to draw it\n\t<toolbar class="GameBar" inverted size={its size}>\n\t\t<spacer/>\n\tsay "hi"'
+    )
+    const overLines = SP.BubblyLayout.of(
+      'to draw it\n\t<toolbar\n\t\tclass="GameBar"\n\t\tinverted\n\t\tsize={its size}\n\t>\n\t\t<spacer/>\n\tsay "hi"'
+    )
+    for (const kind of ["input", "mark", "tag", "value"] as const)
+      expect(piecesOf(overLines, kind), kind).toEqual(piecesOf(oneLine, kind))
+    expect(codesOf(overLines)).toEqual(["{its size}"])
+    // the tag's `>` ends it:  the step after it is Spell again
+    expect(underlinesOf(overLines)).toEqual(underlinesOf(oneLine))
   })
 
   it("draws a control line going on onto the lines under it (`and ...`) as ONE head, its body after them", () => {

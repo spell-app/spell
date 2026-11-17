@@ -55,8 +55,8 @@ export class Card extends TwoSidedView {
     return "♠"
   }
 
-  /** Its short name:  Q♠↓ is the queen of spades, face down */
-  get shortName() {
+  /** Its shorthand:  Q♠↓ is the queen of spades, face down */
+  get shorthand() {
     const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
     const arrow = this.isFaceDirection("up") ? "↑" : "↓"
     return letter + this.symbol + arrow
@@ -228,10 +228,10 @@ export class Pile extends ViewableList {
     return this.lastItem.value
   }
 
-  /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
-  get shortName() {
+  /** Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓ */
+  get shorthand() {
     let summary = `${this.id}:`
-    this.forEach((card) => (summary = `${summary} ${card.shortName}`))
+    this.forEach((card) => (summary = `${summary} ${card.shorthand}`))
     return summary
   }
 
@@ -259,9 +259,9 @@ export class Deck extends ViewableList {
   }
 
   /** its card names, top to bottom */
-  get shortName() {
+  get shorthand() {
     const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
+    this.forEach((card) => cardNames.append(card.shorthand))
     return `deck: ${cardNames}`
   }
 }
@@ -385,7 +385,7 @@ export class Solitaire extends App {
       ),
       h("ui-container", { columns: "7", padding: "small", spacing: "xs" },
         h("test-project-stock-pile", { id: "stock" }),
-        h("test-project-discard-pile", { id: "discard pile" }),
+        h("test-project-discard-pile", { id: "discard-pile" }),
         h("spacer"),
         h("test-project-foundation", { id: "clubs" }),
         h("test-project-foundation", { id: "diamonds" }),
@@ -415,7 +415,7 @@ export class Solitaire extends App {
   get stock() { return this.getProp("stock") }
   set stock(value) { this.setProp("stock", value) }
   // <discard-pile "discard pile"/>
-  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
+  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard-pile" }), early: true }) }
   get discardPile() { return this.getProp("discardPile") }
   set discardPile(value) { this.setProp("discardPile", value) }
   // <foundation "clubs" suit=clubs/>
@@ -501,39 +501,13 @@ export class Solitaire extends App {
     this.stock.forEach((card) => card.turnFaceDown())
   }
 
-  /** Play every card that can go somewhere, until none can */
+  /** Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column */
   async autoPlay() {
-    let anythingChanged = false
-    if (!this.discardPile.isEmpty) {
-      const testCard = this.discardPile.lastItem
-      if (await testCard?.play()) {
-        anythingChanged = true
-        await core.pauseFor(500, "msec")
-      }
+    const played = await core.itemWhereInTurn(this.discardPile, async (card) => await card.play(), -1) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => card === card.pile.lastItem && core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, card)).firstItem instanceof Foundation && (await card.play()), 0) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card) => (card.rank !== "king" || card !== card.pile.firstItem) && card === card.pile.filter((card) => card.isFaceDirection("up")).firstItem && (await card.play()), 0)
+    if (played !== undefined) {
+      await core.pauseFor(300, "msec")
+      await this.autoPlay()
     }
-    // each column's last card onto its foundation
-    await core.forEachSequential(core.everyThing(Column), async (pile) => {
-      if (pile.isEmpty) return
-      const testCard = pile.lastItem
-      const foundation = core.filter(core.everyThing(Foundation), (pile) => pile.suit === testCard.suit).firstItem
-      if (core.canTake(foundation, testCard)) {
-        anythingChanged = true
-        await testCard.play()
-        await core.pauseFor(100, "msec")
-      }
-    })
-    // each column's face-up cards, all together, onto another column
-    await core.forEachSequential(core.everyThing(Column), async (pile) => {
-      const faceUpCards = pile.filter((card) => card.isFaceDirection("up"))
-      if (faceUpCards.isEmpty) return
-      const testCard = faceUpCards.firstItem
-      if (testCard.rank === "king" && testCard === pile.firstItem) return
-      if (await testCard.play()) {
-        anythingChanged = true
-        await core.pauseFor(500, "msec")
-      }
-    })
-    if (anythingChanged) await this.autoPlay()
   }
 
   /** Turn up a face-down card from a column, at random, onto the discard pile */

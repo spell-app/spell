@@ -55,7 +55,14 @@ export class CodeMirrorBubbly {
       CodeMirrorRelayout.extension(
         (state) => CodeMirrorBubbly.decorationsOf(state, fileOf(), sliceOf(state)),
         CodeMirrorBubbly.RELAYOUT_MSEC,
-        { isAwaitingParse: () => CodeMirrorRelayout.isUnparsed(fileOf()) }
+        {
+          isAwaitingParse: () => CodeMirrorRelayout.isUnparsed(fileOf()),
+          // a project's file just typed in:  its project parses it again once the typing pauses
+          isParseOnItsWay: (state) => {
+            const file = fileOf()
+            return !!file?.match && !SP.BubblyLayout.isParseOf(file, state.doc.toString())
+          }
+        }
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
       CodeMirrorMarkup.tabStops,

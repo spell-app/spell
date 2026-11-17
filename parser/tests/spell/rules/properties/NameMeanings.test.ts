@@ -451,9 +451,9 @@ const ENGLISH: NameRow[] = [
     js: "v = core.everyThing(Pile).names"
   },
   {
-    title: "plural possessive:  as the names of every thing",
+    title: "plural possessive:  as the names of every thing -- each pile's name (epic `language` I155)",
     spell: "set v to the names of the piles",
-    js: "v = core.everyThing(Pile).names"
+    js: "v = core.mapToList(core.everyThing(Pile), (pile) => pile.name)"
   },
   {
     title: "plural possessive:  an ordinal",

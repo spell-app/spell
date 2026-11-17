@@ -29,6 +29,58 @@ export class PlanDocError extends Error {}
 PlanDocError.prototype.name = "PlanDocError"
 
 ////////////////
+// ## Titles
+////////////////
+
+/****************
+ * ### `ShortTitle`
+ * The rule for a phase's or an item's title:  at most 30 plain words saying what it is, which read cold.
+ * - Owen, 2026-11-17 (epic `epic-engine` I322):  "Titles can be up to 30 words ... I'm looking at these things often
+ *   hours after the issue came up, so sentences referring to some weird condition or issue that only obtained for a
+ *   little while will be meaningless to me."
+ *   - I321 had 100 characters, and moved a retitled item's old title into its body:  no help either
+ * - `epic add` and `epic update --title` refuse one that's too long or runs on (`check()`):
+ *   the writer rewrites it, nothing is moved anywhere
+ * - the writer's own check, reading it cold, is the rest of the rule:  plan-doc.md, "Rules"
+ * - pure
+ ****************/
+export class ShortTitle {
+  /** The most words a title may have (I322). */
+  static readonly MOST_WORDS = 30
+
+  /** A `; ` list:  clauses run together. */
+  static readonly LIST = /;\s/
+
+  /** A sentence's end with another after it:  `.`, `!` or `?`, a space, a capital;  never after `e.g.`, `vs.` ... */
+  static readonly SECOND_SENTENCE = /(?<!\b(?:e\.g|i\.e|vs|etc|cf))[.!?]\s+(?=[A-Z])/
+
+  /** Why `title` isn't a title, or `undefined` when it is. */
+  static problemOf(title: string): string | undefined {
+    const words = title.trim().split(/\s+/).filter(Boolean).length
+    if (words > ShortTitle.MOST_WORDS) return `it's ${words} words (the most is ${ShortTitle.MOST_WORDS})`
+    if (ShortTitle.LIST.test(title)) return `it runs on, a list after ";"`
+    if (ShortTitle.SECOND_SENTENCE.test(title.trim())) return "it's more than one sentence"
+    return undefined
+  }
+
+  /**
+   * Throw when `title` isn't a title (`problemOf()`), asking for it rewritten to read cold.
+   * - throws `PlanDocError`
+   */
+  static check(title: string): void {
+    const problem = ShortTitle.problemOf(title)
+    if (!problem) return
+    throw new PlanDocError(
+      `rewrite this title:  ${problem}.\n` +
+        `- a title is at most ${ShortTitle.MOST_WORDS} plain words saying what the item is, in one sentence\n` +
+        `- read it as the person will, hours later and cold:  nothing about a passing condition ` +
+        `(a pid, "after the 4-line fix", "the turn was stuck")\n` +
+        `- the rest goes in --details`
+    )
+  }
+}
+
+////////////////
 // ## Page
 ////////////////
 
@@ -198,13 +250,23 @@ export const START_NOW_DID = "start now:  start an agent on it (its Underway car
 /** A note on a todo's plane asking for a phase of its own. */
 export const NEW_PHASE = /\b(new|own|its own|a) phase\b|\bin a phase\b/i
 /** What's left for the session when the note asks for a phase. */
-export const START_IN_PHASE = "a new phase for it, as his note asks:  `epic phase` it in, next, never an unrelated phase"
+export const START_IN_PHASE =
+  "a new phase for it, as his note asks:  `epic phase` it in, next, never an unrelated phase"
 
 /** A judgement call's id:  grey once it's `calm`, where a calm issue stays yellow (epic `epic-engine` P63). */
 export const JUDGEMENT_ID = /^j\d+$/
 
 /** An issue's id. */
 export const ISSUE_ID = /^i\d+$/
+
+/**
+ * An item that may be marked `requested`, filed from the person's own words:  an issue or a todo
+ * (a todo since epic `epic-engine` T88:  a request from another epic becomes a todo or a phase).
+ */
+export const REQUESTED_ID = /^[it]\d+$/
+
+/** A todo's id (a limit's too:  they share the letter). */
+export const TODO_ID = /^t\d+$/
 
 /** A manual test's id. */
 export const MANUAL_TEST_ID = /^m\d+$/
@@ -345,7 +407,10 @@ export type AddItemOptions = {
   calm?: boolean
   /** a todo that asks Owen to act:  red until reviewed (`PlanDoc.followUp()`) */
   urgent?: boolean
-  /** an issue filed from Owen's own words (`--requested`):  closed by Claude, light orange until he reviews it */
+  /**
+   * an issue or todo filed from Owen's own words (`--requested`;  a todo since epic `epic-engine` T88):
+   * closed by Claude, light orange until he reviews it
+   */
   requested?: boolean
 }
 
@@ -424,8 +489,8 @@ export type OptionCard = {
  * - `attention` (red):  needs Owen (an open question;  an open judgement call or issue not reviewed)
  * - `replied` (orange):  Owen's turn:  Claude answered it with options, or fixed it (Owen, 2026-10-09;  I232);
  *   a manual test whose phase isn't done yet (epic `epic-engine` P63)
- * - `requested` (light orange):  an issue filed from Owen's own words, closed by Claude, not reviewed:  his turn to
- *   see it (epic `epic-engine` P63);  the picker's icons have no light orange, so plain orange there
+ * - `requested` (light orange):  an issue or todo filed from Owen's own words, closed by Claude, not reviewed:  his
+ *   turn to see it (epic `epic-engine` P63);  the picker's icons have no light orange, so plain orange there
  * - `progress` (blue):  Claude is working on it (an underway status card, or `working`)
  * - `handed` (blue, outlined):  he pressed Do this, Claude hasn't started (epic `epic-engine` P63)
  * - `open` (yellow):  open, still undecided, not urgent

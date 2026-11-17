@@ -101,7 +101,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
    */
   protected cssStates() {
     return {
-      running: this.draws !== "spinner" && this.draws !== "doing" && this.agents.length > 0,
+      running: this.drawsAgents && this.agents.length > 0,
       doing: this.draws !== "agents" && !!this.doing && !this.isSendsRing
     }
   }
@@ -111,16 +111,28 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
    * ring turns (epic `epic-engine` P55, Q62 A;  Owen, r46).  Other work ("Building P35") still shows it.
    */
   get isSendsRing(): boolean {
-    return this.draws === "spinner" && !!this.doing?.items?.length
+    return this.isBare && !!this.doing?.items?.length
+  }
+
+  /**
+   * The line beside Send, bare:  `draws="spinner"`, or `draws="words"`, its words alone, while the header's step label
+   * turns for it (epic `epic-engine` I316;  Owen, 2026-11-16:  "Don't need both of these indicators.  Just make the
+   * one in the pill a loading spinner")
+   */
+  get isBare(): boolean {
+    return this.draws === "spinner" || this.draws === "words"
+  }
+
+  /** Does it draw the agents' button?  Unless it draws only the session's line. */
+  get drawsAgents(): boolean {
+    return this.draws !== "doing" && !this.isBare
   }
 
   render(): JSX.Element {
     return (
       <span class={TOOLS} part={this.partForName("base")}>
-        <Show when={this.draws === "spinner" && !this.isSendsRing && this.doing}>
-          {(doing) => this.bareSpinner(doing)}
-        </Show>
-        <Show when={this.draws !== "agents" && this.draws !== "spinner" && this.doing}>
+        <Show when={this.isBare && !this.isSendsRing && this.doing}>{(doing) => this.bareSpinner(doing)}</Show>
+        <Show when={this.draws !== "agents" && !this.isBare && this.doing}>
           {(doing) => (
             <>
               <span
@@ -139,7 +151,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
             </>
           )}
         </Show>
-        <Show when={this.draws !== "doing" && this.draws !== "spinner" && this.agents.length}>
+        <Show when={this.drawsAgents && this.agents.length}>
           {/* `1 🤖` at every width (Owen, 2026-10-25:  "`1 <robot icon>` is sufficient");  the words its name and tooltip */}
           <button
             type="button"
@@ -186,6 +198,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
    * already round, doesn't need to be in a circular border"):  no pill;  its words beside it, small and grey, cut short
    * when narrow, the whole line its tooltip (I210:  bare, it read as "the server is listening");  what it's answering in
    * the styled tooltip, as the line's.
+   * - `draws="words"`:  its words alone, no spinner:  the header's step label turns instead (I316)
    */
   private bareSpinner(doing: () => InboxDoing): JSX.Element {
     const answering = () => !!doing().items?.length
@@ -199,7 +212,9 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           aria-label={this.doingLabel(doing())}
           title={answering() ? undefined : doing().text}
         >
-          <span class={SPINNER} aria-hidden="true" />
+          <Show when={this.draws === "spinner"}>
+            <span class={SPINNER} aria-hidden="true" />
+          </Show>
           {/* its words beside it, inline (Owen, 2026-11-03, I210:  a bare spinner read as "the server is listening") */}
           <Show when={!answering()}>
             <span class={BARE_WORDS} aria-hidden="true">

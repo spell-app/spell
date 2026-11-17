@@ -56,7 +56,7 @@ export class UIPanel extends UISection {
     styleSheets: { ...UISection.prototype.elementSetup.styleSheets, panel: panelCSS }
   }
   // the band's chevron at its far end, after any actions (`fold-icon="start"` moves it back)
-  @E.proto static defaultFoldIcon = FoldIconPlace.end
+  @E.proto static defaultFoldIcon: FoldIconPlace = FoldIconPlace.end
 
   /** A whole pane under one flat bar:  `appearance` holds `pane`. */
   @E.cssState("pane")

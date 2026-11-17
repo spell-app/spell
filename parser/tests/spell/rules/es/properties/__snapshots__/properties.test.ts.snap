@@ -8,7 +8,7 @@ exports[`testing spell module properties, in Spanish > rule group specs > match 
   "its_property": "property",
   "named_object_literal_property": "property|value",
   "object_literal_property": "property|value",
-  "property_expression": "property|expression",
+  "property_expression": "property|each?|expression|arg?",
   "said_object_literal_property": "property|value",
   "the_object_literal_property": "property",
   "the_own_property": "definite_article|property",

@@ -10,6 +10,7 @@
     "/////// CHECKS": "",
     "ts": "spell-types --below && tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tests && tsc -p tests/app",
     "test": "vp test run --project '!app:integration' && uv run --directory src/spaces/server/py pytest -q",
+    "test:unit": "vp test run --project '!app:integration' --project '!app:browser' && uv run --directory src/spaces/server/py pytest -q",
     "lint": "spell-types --below && vp lint --report-unused-disable-directives --max-warnings 0 src tests scripts app && uv run --directory src/spaces/server/py ruff check . ../../../../tests/spaces/server/py/tests",
     "lint:fix": "spell-types --below && vp lint --fix src tests scripts app && uv run --directory src/spaces/server/py ruff check --fix . ../../../../tests/spaces/server/py/tests",
     "format": "vp fmt && uv run --directory src/spaces/server/py ruff format . ../../../../tests/spaces/server/py/tests",
@@ -57,6 +58,7 @@
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",
     "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.13.1",

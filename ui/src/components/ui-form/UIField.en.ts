@@ -50,7 +50,7 @@ export const fieldVocabulary = {
       group: "form",
       kind: "string",
       description:
-        "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  " +
+        "A change here can't be saved:  a flask icon after the info icon, this text its tip.  " +
         "The control still changes the value."
     },
     {
@@ -150,7 +150,7 @@ export const fieldVocabulary = {
     { name: "output", description: "The output." },
     { name: "info", description: "The info icon." },
     { name: "tip", description: "The tip, shown from the info icon." },
-    { name: "unsaved", description: "The crossed-out save icon after the info icon, with `unsaved`." },
+    { name: "unsaved", description: "The flask icon after the info icon, with `unsaved`." },
     {
       name: "control",
       description: "Around the control(s) under a label row;  no box of its own (`display: contents`)."

@@ -90,6 +90,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A thing with no name goes by the id the program CHOSE for it (`hasChosenId()`), after every name:
     `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, found as `Tableau#T1` (Owen, 2026-11-12).
     A made-up id never counts.
+  - A member's id is its words joined by `-`, each as written (language T147):
+    `"discard pile" is a new discard pile` is `{ id: "discard-pile" }`, and `<discard-pile "discard pile"/>` draws it
+    as `id="discard-pile"`;  `discard pile` still finds it (`thingNamed()`).
+  - An app's id is its own name, lower kebab case:  `solitaire`, Spanish `solitario` (`APP_ID_PROP`, language T147).
+    It counts as chosen, as a member's does;  what it remembers stays under the setting's name alone (`theme`).
+  - A thing made at run time with no name keeps a made-up id, `card-k3x9q2mf` (`newThingId()`);
+    an id the program sets, or loaded data has, always wins:  old saved data with made-up ids still loads.
   - A place counts the type's own things, in the order they were made.
   - Where they show up:
     - a view element's attribute:  `pile="Tableau#T1"`

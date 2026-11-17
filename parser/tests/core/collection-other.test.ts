@@ -1038,3 +1038,19 @@ describe("core.sortedBy()", () => {
     expect(pile.items).toEqual([3, 1, 2])
   })
 })
+
+describe("core.mapToList()", () => {
+  test("each item's answer, in a new plain list, in order", () => {
+    const pile = new Pile()
+    pile.append({ name: "a" }, { name: "b" })
+    const names = core.mapToList(pile, (item) => (item as { name: string }).name)
+    expect(names).toBeInstanceOf(List)
+    expect(names).not.toBeInstanceOf(Pile)
+    expect([...names]).toEqual(["a", "b"])
+    expect(`${names}`).toBe("a, b")
+  })
+  test("assertion fails if not defined:  an empty list", () => {
+    expect([...core.mapToList(undefined, (item) => item)]).toEqual([])
+    expect(assert.failed).toHaveBeenCalled()
+  })
+})

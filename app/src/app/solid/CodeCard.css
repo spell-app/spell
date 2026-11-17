@@ -3,8 +3,8 @@
  * - the row is a `.bubbly` box, so the bubbly look's tokens reach it (`bubbly.css`, the look's ONE sheet):
  *   its head a band in its part of speech's colour (`--bubbly-pill`), what was typed a white pill on it (`.bubbly-input`),
  *   its body (`<CodeSlice>`) on the code's paper, a rail down its left from the band's corner, a foot under it
- * - the fold chevron and the row's buttons (✕, ▶) beside the band, as the code pane's fold arrows sit beside its bands
- * - the chevron as big as the code pane's fold arrows:  its stroke's ends 8.5px apart, 5px tall (`CodeMirrorSetup`)
+ * - the row's buttons (✕, ▶) on the band's right end
+ * - no fold chevron:  always open, the band at the card's content edge (epic `editor` I240)
  * - a row with no code (an ability with no condition):  its band alone, every corner round
  */
 ui-section.InspectorEvent.bubbly {
@@ -32,11 +32,6 @@ ui-section.InspectorEvent.bubbly {
     --bubbly-hue: var(--bubbly-thing);
   }
 
-  /*
-   * the chevron the code pane's fold arrow's size, in its grey (`--cmb-fold-ink`):  10px draws it 8.75px by 5px,
-   * its arms 1.25px thick;  the fold arrow's stroke is 8.5px by 5px, 1.5px thick (was 12px:  10.5px by 6px, 1.5px)
-   */
-  --ui-section-fold-icon-size: 10px;
   --ui-section-title-gap: 4px;
   --ui-section-content-padding: 0;
   /*
@@ -45,19 +40,10 @@ ui-section.InspectorEvent.bubbly {
    */
   --ui-section-title-padding: 4px 0 0;
 
-  &::part(fold-icon) {
-    color: var(--cmb-fold-ink, currentColor);
-  }
-
-  /* the band the row's whole width, past the chevron to the card's right edge (I215) */
+  /* the band the row's whole width, to the card's right edge (I215) */
   &::part(header) {
     flex: 1 1 auto;
     min-width: 0;
-  }
-
-  /* the body under the band, lined up with it:  past the chevron */
-  &::part(content) {
-    margin-left: calc(var(--ui-section-fold-icon-size) + var(--ui-section-title-gap));
   }
 }
 
@@ -81,9 +67,9 @@ ui-section.InspectorEvent.bubbly:has(> [slot="actions"])::part(actions) {
  *   the paper's round corners carve their insides, so the rail runs the body's whole height into the foot,
  *   and the foot's swoop is one even curve (a left border, thinning round its round corner, stopped short of the foot)
  * - the band's colour behind the paper's round top-left corner too, so the paper curves out of the band
- * - folded, or with no code (an ability with no condition):  the band alone
+ * - with no code (an ability with no condition):  the band alone
  */
-ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"])::part(content) {
+ui-section.InspectorEvent.bubbly:has(> :is(.CodeSlice, pre.InspectorCode))::part(content) {
   padding-left: var(--bubbly-gutter);
   padding-bottom: var(--bubbly-foot-height);
   border-bottom-left-radius: var(--bubbly-gutter-corner);
@@ -119,8 +105,8 @@ ui-section.InspectorEvent.bubbly > .InspectorEventWords {
     color: color-mix(in srgb, var(--bubbly-ink) 60%, var(--bubbly-pill));
   }
 }
-/* open, with a body under it:  its bottom-left square, the rail dropping straight from it */
-ui-section.InspectorEvent.bubbly[collapsible]:not([open="false"]) > .InspectorEventWords {
+/* with a body under it:  its bottom-left square, the rail dropping straight from it */
+ui-section.InspectorEvent.bubbly:has(> :is(.CodeSlice, pre.InspectorCode)) > .InspectorEventWords {
   border-bottom-left-radius: 0;
 }
 /* with buttons after it:  its right end theirs (above) */

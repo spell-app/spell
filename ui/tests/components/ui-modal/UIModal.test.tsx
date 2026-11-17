@@ -639,6 +639,73 @@ describe("UI.modals", () => {
     expect(await cancelled).toBeUndefined()
   })
 
+  it("alert():  a title is the dialog's heading", async () => {
+    const done = UI.modals.alert({ title: "Solitaire", message: "You won!", okText: "New game" })
+    const host = await current()
+    expect(host.getAttribute("heading")).toBe("Solitaire")
+    expect(host.hasAttribute("aria-label")).toBe(false)
+    host.querySelector<HTMLElement>(".approve")!.click()
+    await done
+  })
+
+  it("alert():  `size` sizes the message, not the buttons;  medium adds nothing", async () => {
+    const big = UI.modals.alert({ message: "You won!", size: "big" })
+    let host = await current()
+    const words = host.querySelector("p > span")!
+    expect(words.className).toBe("ui-font-size-big")
+    expect(words.textContent).toBe("You won!")
+    expect(parseFloat(getComputedStyle(words).fontSize)).toBe(20)
+    // the paragraph keeps its 16px margins:  the dialog's spacing doesn't grow with the text
+    expect(getComputedStyle(host.querySelector("p")!).marginTop).toBe("16px")
+    host.querySelector<HTMLElement>(".approve")!.click()
+    await big
+    const medium = UI.modals.alert({ message: "You won!", size: "medium" })
+    host = await current()
+    expect(host.querySelector("p > span")).toBeNull()
+    host.querySelector<HTMLElement>(".approve")!.click()
+    await medium
+  })
+
+  it("alert():  `markdown` draws a message with Markdown in it, sanitized", async () => {
+    const done = UI.modals.alert({
+      message: "# You won!\nYour score:  **42**<img src=x onerror=alert(1)>",
+      markdown: true,
+      size: "huge"
+    })
+    const host = await current()
+    const markdown = host.querySelector<HTMLElement>("ui-markdown")!
+    expect(markdown.hasAttribute("sanitized")).toBe(true)
+    expect(markdown.getAttribute("size")).toBe("huge")
+    expect(host.querySelector("p")).toBeNull()
+    await expect.poll(() => markdown.shadowRoot?.querySelector("h1")?.textContent).toBe("You won!")
+    const body = markdown.shadowRoot!
+    expect(body.querySelector("strong")!.textContent).toBe("42")
+    expect(body.querySelector("img")?.hasAttribute("onerror") ?? false).toBe(false)
+    host.querySelector<HTMLElement>(".approve")!.click()
+    await done
+  })
+
+  it("alert():  `markdown` leaves a plain message exactly as without it", async () => {
+    const done = UI.modals.alert({ message: "You won!\nWell done, 5 * 3 = 15", markdown: true })
+    const host = await current()
+    expect(host.querySelector("ui-markdown")).toBeNull()
+    const paragraph = host.querySelector("p")!
+    expect(paragraph.textContent).toBe("You won!\nWell done, 5 * 3 = 15")
+    expect(paragraph.style.whiteSpace).toBe("pre-line")
+    host.querySelector<HTMLElement>(".approve")!.click()
+    await done
+  })
+
+  it("confirm():  title, size and Markdown too", async () => {
+    const answer = UI.modals.confirm({ title: "Deal", message: "Deal **again**?", markdown: true, okText: "Yes" })
+    const host = await current()
+    expect(host.getAttribute("heading")).toBe("Deal")
+    const markdown = host.querySelector<HTMLElement>("ui-markdown")!
+    await expect.poll(() => markdown.shadowRoot?.querySelector("strong")?.textContent).toBe("again")
+    host.querySelector<HTMLElement>(".approve")!.click()
+    expect(await answer).toBe(true)
+  })
+
   it("uses the translated ok / cancel texts", async () => {
     UI.i18n.register("fr", { ok: "D'accord", cancel: "Annuler" })
     const locale = UI.i18n.locale

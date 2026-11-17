@@ -9,7 +9,9 @@ import { SP } from "spell/parser/spell"
  * - An if-chain's next branch, `<otherwise>`, back at its `<if>`'s level:  one closer ends the chain
  *   (`P.Tokenizer.chainTags`).
  * - Some lines keep where they are, moved only as far as the line above them moved:
- *   - a tag's attributes on lines of their own, under its first line (lined up as written, epic `editor` I142)
+ *   - a tag's attributes on lines of their own, under its first line (lined up as written, epic `editor` I142),
+ *     but never at or left of the tag's own line:  one level in from it at least, a `>` alone on its line at its
+ *     tag's level at least (epic `language` I151)
  *   - a `{...}` running over lines
  *   - a raw-text tag's contents, `<css>`, `<markdown>` ...:  their indent is theirs (`P.Tokenizer.rawTextTags`)
  * - Pure text, no parse:  so a paste, which may not parse yet, is laid out too.
@@ -22,7 +24,8 @@ export class MarkupIndent {
    * - The first line comes back as it is:  the caller places it.
    * - Each other line at `base` plus a `tabSize` per tag open above it, written by `indentOfWidth()`;
    *   a blank line `""`.
-   * - A line that keeps where it is (see the class) moves as far as the line above it moved.
+   * - A line that keeps where it is (see the class) moves as far as the line above it moved;
+   *   a tag's attribute no further left than one level in from the tag's line.
    */
   static layout(lines: readonly string[], options: MarkupLayoutOptions): string[] {
     const { base, tabSize, indentOfWidth, tokenizer } = options
@@ -30,21 +33,32 @@ export class MarkupIndent {
     const [first = ""] = lines
     scan.read(first)
     let moved = options.firstMoved ?? base - MarkupIndent.widthOf(indentOfLine(first), tabSize)
+    // the width of the line the open tag starts on, its attributes' lines one level in from it at least
+    let tagWidth = base
     return [
       first,
       ...lines.slice(1).map((line) => {
         const trimmed = line.trim()
         if (!trimmed) return ""
         const indent = indentOfLine(line)
+        const wasInTag = scan.isInTag
+        const tagsBefore = scan.tagsStarted
+        let laidOut: string
         if (scan.keepsIndent) {
-          scan.read(trimmed)
-          return MarkupIndent.moved(indent, moved, options) + trimmed
+          laidOut = MarkupIndent.moved(indent, moved, options)
+          if (wasInTag) {
+            const least = tagWidth + (/^\/?>/.test(trimmed) ? 0 : tabSize)
+            if (MarkupIndent.widthOf(laidOut, tabSize) < least) laidOut = indentOfWidth(least)
+          }
+        } else {
+          const isBack = trimmed.startsWith("</") || scan.isBranch(trimmed, 0)
+          const width = base + Math.max(0, isBack ? scan.depth - 1 : scan.depth) * tabSize
+          moved = width - MarkupIndent.widthOf(indent, tabSize)
+          laidOut = indentOfWidth(width)
         }
-        const isBack = trimmed.startsWith("</") || scan.isBranch(trimmed, 0)
-        const width = base + Math.max(0, isBack ? scan.depth - 1 : scan.depth) * tabSize
-        moved = width - MarkupIndent.widthOf(indent, tabSize)
         scan.read(trimmed)
-        return indentOfWidth(width) + trimmed
+        if (scan.tagsStarted !== tagsBefore && scan.isInTag) tagWidth = MarkupIndent.widthOf(laidOut, tabSize)
+        return laidOut + trimmed
       })
     ]
   }
@@ -107,6 +121,8 @@ export type MarkupTokenizer = Pick<P.Tokenizer, "rawTextTags" | "chainTags">
 class MarkupScan {
   /** tags open */
   depth = 0
+  /** tags whose `<` has been read:  a new one tells its line's width is its attributes' to keep in from */
+  tagsStarted = 0
   /** the tag being read, its `<` read but not its `>`:  what its `>` does to `depth` */
   private tag: { name: string; opens: -1 | 0 | 1 } | undefined
   /** inside a `"..."` */
@@ -125,6 +141,11 @@ class MarkupScan {
   /** Does the next line start where its indent is its own:  in a tag, a `{...}`, quotes or raw text? */
   get keepsIndent(): boolean {
     return !!(this.tag || this.braces || this.isQuoted || this.raw)
+  }
+
+  /** Does the next line start among a tag's attributes, outside any `{...}` or quotes? */
+  get isInTag(): boolean {
+    return !!this.tag && !this.braces && !this.isQuoted
   }
 
   /** Does an if-chain's next branch start at `at` of `line`:  `<otherwise>`, `<otherwise if ...>`? */
@@ -163,12 +184,14 @@ class MarkupScan {
     const chainWord = this.chainWordAt(line, at)
     if (chainWord) {
       this.tag = { name: chainWord, opens: this.tokenizer.chainTags[chainWord] === "if" ? 1 : 0 }
+      this.tagsStarted++
       return at + chainWord.length
     }
     const name = /^<(\/?)([\p{L}][\p{L}\p{M}\d_.:-]*)?/u.exec(line.slice(at))!
     const isClosing = !!name[1]
     if (!name[2] && !isClosing && line[at + 1] !== ">") return at
     this.tag = { name: name[2] ?? "", opens: isClosing ? -1 : 1 }
+    this.tagsStarted++
     return at + name[0].length - 1
   }
 

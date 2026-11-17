@@ -31,6 +31,10 @@ import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
  *   - its parse as a block:  each line's rule, which `SP.BubblyPresentation` says how to present
  *     (a band or not, which parts are inputs, a block for a control line)
  *   - its indent:  what's under what, so a line that doesn't parse still sits where it should
+ *   - a line that doesn't parse alone, for a name another file declares (`if the stock is empty`):
+ *     its block from its first word, as its project's parse draws it (`shapeOf()`;  epic `codemirror` I23)
+ *   - a type's member that reads whole only in a list's body, for a type built on one another file declares
+ *     (`it is droppable when`):  read again as one (`rereadAsMember()`;  epic `codemirror` I26)
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
  * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so do the app's code editor (epic `codemirror` P3) and VS Code (P51).
@@ -69,8 +73,17 @@ export class BubblyLayout {
   /** Each line's statement, by line index. */
   private readonly statements = new Map<number, P.Match>()
 
+  /** The lines whose statement read only part of them, a parse error after it (`it is droppable`, then `when`). */
+  private readonly partlyRead = new Set<number>()
+
+  /** Was the text parsed here, alone, with no project's parse of it?  Only then is a line read again (`rereadAsMember()`). */
+  private isAlone = false
+
   /** Where each line starts. */
   private readonly lineStarts: number[] = []
+
+  /** Each line inside a start tag laid out over lines (`class="GameBar"` under `<toolbar`), by index:  markup too. */
+  private readonly linesInTags = new Set<number>()
 
   /** Stretches every line takes from the parse, whatever it is:  yes and no, `'s`, `item`;  `order` low first. */
   private readonly overlays: Overlay[] = []
@@ -95,7 +108,7 @@ export class BubblyLayout {
 
   private constructor(
     private readonly text: string,
-    parser: SP.SpellParser,
+    private readonly parser: SP.SpellParser,
     parsed?: P.Match
   ) {
     const { words } = parser.language ?? SP.Language.default
@@ -108,6 +121,7 @@ export class BubblyLayout {
       this.lineStarts.push(at)
       at += line.length + 1
     }
+    this.findTagsOverLines()
     this.readParse(parser, parsed)
     this.drawing = {
       text,
@@ -126,12 +140,21 @@ export class BubblyLayout {
    */
   private readParse(parser: SP.SpellParser, parsed?: P.Match) {
     let match = parsed
+    this.isAlone = !parsed
     try {
       match ??= parser.parse(this.text, "block")
     } catch {
       // the spans stand alone
     }
-    if (!match) return
+    if (match) this.read(match)
+  }
+
+  /**
+   * Take in `match`'s reading:  each line's statement, its underlines, the overlays, the tags that declare;
+   * then sort what's sorted.
+   * - A line already read keeps its statement:  only the first reading of a line counts.
+   */
+  private read(match: P.Match) {
     const seen = new Set<P.Match>()
     const walk = (each: P.Match) => {
       if (seen.has(each)) return
@@ -144,6 +167,8 @@ export class BubblyLayout {
           if (!this.statements.has(index)) {
             this.statements.set(index, statement)
             this.underlineStatement(statement)
+            const isError = (child: P.Match) => child.rule.name === PARSE_ERROR_RULE
+            if (!isError(statement) && childrenOf(each).some(isError)) this.partlyRead.add(index)
           }
         }
       }
@@ -151,11 +176,25 @@ export class BubblyLayout {
       // a tag that declares the member it draws (`<number "score"/>`), not one said on a line of its own
       const { declares } = each.data as { declares?: DrawnDeclaration }
       if (declares && !declares.drawnOnly && each.start !== undefined) this.declaringTags.add(each.start)
-      for (const child of childrenOf(each)) walk(child)
+      for (const child of childrenOf(each)) if (each.matched.includes(child) || this.isOfText(child)) walk(child)
     }
     walk(match)
     this.overlays.sort((a, b) => a.order - b.order)
     this.underlines.sort((a, b) => a.start - b.start)
+  }
+
+  /**
+   * Is `match`, kept in its parent's `data`, of this text:  every word of it there, where it says it is?
+   * - Not words a rule parsed on their own, counted from their own start:  a text's fill-in
+   *   (`"Your score:  [solitaire's score]"`), a markdown hole, `<ui-markdown>`'s attributes.
+   *   Read as the text's, its `'s` made `solitaire is an app`'s `is` half bold (epic `codemirror` I27).
+   */
+  private isOfText(match: P.Match): boolean {
+    let isOfText = true
+    P.Tokenizer.forEachToken(match.tokens ?? [], (token) => {
+      if (isOfText && isWordlike(token)) isOfText = SP.SpellHighlighter.isTokenOf(this.text, token)
+    })
+    return isOfText
   }
 
   /** The overlays `match`'s roles ask for:  a value written in, a name, Spell's own words. */
@@ -410,8 +449,14 @@ export class BubblyLayout {
    * `lines`, laid out:  `depth`, a plain line's indent in its body;  `level`, how deep a declaration sits.
    * - `inSteps`:  inside an action's body, which holds only steps:  a line there that reads as a declaration
    *   is a parse gone astray (Spanish's `para rango en ...`, a loop, read as `to ...` with no project around it)
+   * - `inType`:  inside a type's body (a thing's, or a group's in one), whose lines are its members
+   * - `inProperty`:  inside a property's body, its value worked out:  a line there that didn't parse is never given a
+   *   declaration's shape (`shapeOf()`), as `the pile's suit is ...` under `it is droppable when`, read alone
    */
-  private layout(lines: SourceLine[], { depth, level, inSteps = false }: LayoutPlace): BubblyNode[] {
+  private layout(
+    lines: SourceLine[],
+    { depth, level, inSteps = false, inType = false, inProperty = false }: LayoutPlace
+  ): BubblyNode[] {
     const nodes: BubblyNode[] = []
     for (let index = 0; index < lines.length; index++) {
       let line = lines[index]!
@@ -419,7 +464,19 @@ export class BubblyLayout {
         nodes.push({ kind: "gap", start: line.start })
         continue
       }
-      const statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
+      let statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
+      // a type's member that didn't read whole alone, for a type declared elsewhere:  read again, as a list's
+      if (inType && statement && this.rereadAsMember(line)) statement = this.statements.get(line.index)
+      // a head that didn't parse, for a name declared elsewhere:  its shape from its first word (`shapeOf()`)
+      const shape = statement?.rule.name === PARSE_ERROR_RULE ? this.shapeOf(line) : undefined
+      if (shape?.isControl && line.children.length) {
+        nodes.push(this.control(line, shape.rule, level, inSteps))
+        continue
+      }
+      if (shape?.band && !inSteps && !inProperty) {
+        nodes.push(this.block(line, statement!, shape.band, line.children, { level, inType }, shape.rule))
+        continue
+      }
       const row = statement && BubblyPresentation.for(statement.rule)
       const band = statement && BubblyRoles.of(statement.rule).band
       // a head going on onto the lines under it (`if its rank > 1` then `and its rank < 5`):  one head
@@ -434,15 +491,15 @@ export class BubblyLayout {
           members = lines.slice(index + 1, last)
           index = last - 1
         }
-        nodes.push(this.block(line, statement, band, [...line.children, ...members], level))
+        nodes.push(this.block(line, statement, band, [...line.children, ...members], { level, inType }))
         continue
       }
       if (statement && row?.isControl && line.children.length) {
-        nodes.push(this.control(line, statement, level, inSteps))
+        nodes.push(this.control(line, statement.rule.name ?? "", level, inSteps))
         continue
       }
       nodes.push(this.lineOf(line, { depth }))
-      nodes.push(...this.layout(line.children, { depth: depth + 1, level, inSteps }))
+      nodes.push(...this.layout(line.children, { depth: depth + 1, level, inSteps, inType, inProperty }))
     }
     return nodes
   }
@@ -468,36 +525,47 @@ export class BubblyLayout {
     }
   }
 
-  /** A declaration:  its head, then what's under it. */
+  /**
+   * A declaration:  its head, then what's under it.
+   * - `rule`:  the rule its head would have matched, for a head that didn't parse (`shapeOf()`)
+   * - Its body is a type's members when it's a thing, or a group inside one (`inType`)
+   */
   private block(
     line: SourceLine,
     statement: P.Match,
     partOfSpeech: BubblyPartOfSpeech,
     under: SourceLine[],
-    level: number
+    { level, inType }: Pick<LayoutPlace, "level" | "inType">,
+    rule = statement.rule.name ?? ""
   ): BubblyBlock {
     const row = BubblyPresentation.for(statement.rule) ?? {}
     const roles = BubblyRoles.of(statement.rule)
     return {
       kind: "block",
-      rule: statement.rule.name ?? "",
+      rule,
       partOfSpeech,
       isGroup: !!row.isGroup,
       level,
       head: this.lineOf(line, { depth: 0, head: { statement, row, roles, partOfSpeech } }),
-      body: this.layout(under, { depth: 0, level: level + 1, inSteps: partOfSpeech === "action" })
+      body: this.layout(under, {
+        depth: 0,
+        level: level + 1,
+        inSteps: partOfSpeech === "action",
+        inType: partOfSpeech === "thing" || (!!row.isGroup && inType),
+        inProperty: partOfSpeech === "property"
+      })
     }
   }
 
   /**
    * A control line with steps under it (`if`, `for each`):  a block in the light grey of control lines,
-   * its line plain on its band, its steps its body.
+   * its line plain on its band, its steps its body;  `rule`, the one it matched.
    * - No scope of its own:  a name it introduces (a loop's `card`) is the enclosing declaration's.
    */
-  private control(line: SourceLine, statement: P.Match, level: number, inSteps: boolean): BubblyBlock {
+  private control(line: SourceLine, rule: string, level: number, inSteps: boolean): BubblyBlock {
     return {
       kind: "block",
-      rule: statement.rule.name ?? "",
+      rule,
       partOfSpeech: "control",
       isGroup: false,
       level,
@@ -505,6 +573,137 @@ export class BubblyLayout {
       body: this.layout(line.children, { depth: 0, level: level + 1, inSteps })
     }
   }
+
+  /**
+   * The shape a line that didn't parse would have had, from its first word:  a control line or a declaration's head,
+   * so it draws as its project's parse draws it (epic `codemirror` I23).
+   * - Why:  laid out from its text alone, a line naming what another file declares (`the stock`, `moving a card`)
+   *   doesn't parse, so `if the stock is empty` lost its block and its foot, and its height with them.
+   * - The statement rules whose syntax starts with that word (`P.Sequence.firstWords`), in the parser's language:
+   *   - one of them a control line (`if`, `for`, `repeat`), and none a declaration:  a control line
+   *   - all of them declarations with one part of speech (`after`, `when`):  that declaration
+   *   - else, a word that starts steps too (`to`, `a`, `the`):  `undefined`, a step
+   *   - EXCEPT a type's name alone, `a card`, `a two sided view` (its article `reopen_type`'s first word),
+   *     with lines under it:  reopening a type declared elsewhere, a thing's head
+   *   - and a pronoun before a quoted name, `it "can go up" if ...`:  a property's head, the name it declares
+   * - A control line only with lines under it:  alone, it's a step (`if the pile is empty return`).
+   */
+  private shapeOf(line: SourceLine): LineShape | undefined {
+    const words = this.text.slice(line.start, this.commentStart(line))
+    const word = /^[\p{L}]+/u.exec(words)?.[0]
+    if (!word) return undefined
+    const shape = BubblyLayout.shapesFor(this.parser).get(word)
+    if (shape) return shape
+    if (this.pronouns.has(word.toLowerCase()) && QUOTED_NAME_AFTER.test(words.slice(word.length)))
+      return { rule: QUOTED_PROPERTY_RULE, band: "property" }
+    if (!line.children.length) return undefined
+    const reopen = this.parser.rules[REOPEN_TYPE_RULE]
+    const articles = reopen instanceof P.Group ? reopen.rules : reopen ? [reopen] : []
+    const isArticle = articles.some((rule) => rule instanceof P.Sequence && rule.firstWords?.includes(word))
+    return isArticle && TYPE_NAME_ALONE.test(words.trimEnd()) ? { rule: REOPEN_TYPE_RULE, band: "thing" } : undefined
+  }
+
+  /**
+   * Read `line`, a type's member that didn't read whole alone, again, as a LIST's member, with the lines under it:
+   * so it draws as its project's parse draws it (epic `codemirror` I26).
+   * - Why:  laid out from its text alone, a type built on one another file declares doesn't know what it is:
+   *   - `a "foundation" is a pile`:  not known to be a list, so `it is droppable when`, a list's own line, reads
+   *     only as far as `droppable`, a plain band;  and its body as the type's members, the property's band its
+   *     project draws gone, a band of its own drawn round its body
+   *   - `a card` (reopened):  no type at all, so `belongs to one pile` doesn't read
+   * - Read in a stand-in type's body, a list of things:  a list is a thing too, so either kind's members read.
+   *   - Its own scope, under the one the line was read in:  the names declared above it still known (`pile`), and
+   *     nothing it declares reaches the parse the drawing reads.
+   * - Taken only when its head reads whole, as a declaration:  its reading then replaces theirs, under it too.
+   * - Only a line that didn't read whole, and only from a parse of the text here (`isAlone`):  a project's parse knows.
+   * - The parser's own rules, so any language's:  `es soltable cuando`.
+   * - Returns whether it was taken.
+   */
+  private rereadAsMember(line: SourceLine): boolean {
+    const statement = this.statements.get(line.index)
+    const isRead = statement?.rule.name !== PARSE_ERROR_RULE && !this.partlyRead.has(line.index)
+    const scope = statement?.scope
+    if (!this.isAlone || isRead || !scope?.parser) return false
+    const lineStart = this.lineStarts[line.index]!
+    const end = (flattened(line.children).at(-1) ?? line).end
+    let match: P.Match | undefined
+    try {
+      // its lines alone, tokenized where they are in the text, so its matches' offsets are the text's
+      const { tokenizer } = scope.parser as SP.SpellParser
+      const tokens = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(this.text, lineStart, end))
+      const owner = new P.ProjectScope({ name: STAND_IN_TYPE, parentScope: scope })
+      owner.types.add({ name: STAND_IN_TYPE, superType: LIST_TYPE, itemType: THING_TYPE })
+      const body = new P.SubjectScope({ name: STAND_IN_TYPE, parentScope: owner, subject: STAND_IN_TYPE })
+      match = scope.parser.parse(tokens, BLOCK_RULE, body)
+    } catch {
+      return false
+    }
+    const head = match && BubblyLayout.lineMatchAt(match, line.start)
+    const read = head ? childrenOf(head).filter((child) => child.rule.name !== COMMENT_RULE) : []
+    if (read.length !== 1 || read[0]!.rule.name === PARSE_ERROR_RULE || !BubblyRoles.of(read[0]!.rule).band)
+      return false
+    this.forget(lineStart, end)
+    this.read(head!)
+    return true
+  }
+
+  /** The line match in `match` whose statement starts at `start`. */
+  private static lineMatchAt(match: P.Match, start: number): P.Match | undefined {
+    if (match.rule.name === LINE_RULE && childrenOf(match).some((child) => child.start === start)) return match
+    for (const child of childrenOf(match)) {
+      const found = BubblyLayout.lineMatchAt(child, start)
+      if (found) return found
+    }
+    return undefined
+  }
+
+  /** Forget what was read from `start` to `end`:  its lines' statements, its overlays, underlines and tags. */
+  private forget(start: number, end: number) {
+    const isInside = (each: Stretch) => each.start >= start && each.end <= end
+    for (let index = this.lineIndexOf(start); index <= this.lineIndexOf(end); index++) {
+      this.statements.delete(index)
+      this.partlyRead.delete(index)
+    }
+    const keep = <T extends Stretch>(list: T[]) =>
+      list.splice(0, list.length, ...list.filter((each) => !isInside(each)))
+    keep(this.overlays)
+    keep(this.choices)
+    keep(this.underlines)
+    for (const tag of this.declaringTags) if (tag >= start && tag < end) this.declaringTags.delete(tag)
+  }
+
+  /** Where `line`'s comment starts, or its end:  `a card  -- play the card on click`. */
+  private commentStart(line: SourceLine): number {
+    const comment = this.spans.find(
+      (span) => span.kind === "comment" && span.start >= line.start && span.start < line.end
+    )
+    return comment?.start ?? line.end
+  }
+
+  /** Each first word's shape (`shapeOf()`), for `parser`'s statements:  worked out once a parser. */
+  private static shapesFor(parser: SP.SpellParser): Map<string, LineShape | undefined> {
+    let shapes = BubblyLayout.shapes.get(parser)
+    if (shapes) return shapes
+    const byWord = new Map<string, P.Rule[]>()
+    const flatten = (rule: P.Rule): P.Rule[] => (rule instanceof P.Group ? rule.rules.flatMap(flatten) : [rule])
+    const statements = parser.rules[STATEMENT]
+    for (const rule of statements ? flatten(statements) : [])
+      for (const word of rule instanceof P.Sequence ? (rule.firstWords ?? []) : [])
+        byWord.set(word, [...(byWord.get(word) ?? []), rule])
+    shapes = new Map()
+    for (const [word, rules] of byWord) {
+      const control = rules.find((rule) => BubblyPresentation.for(rule)?.isControl)
+      const bands = rules.map((rule) => BubblyRoles.of(rule).band)
+      if (control && !bands.some(Boolean)) shapes.set(word, { rule: control.name ?? "", isControl: true })
+      else if (!control && bands.every((band) => band && band === bands[0]))
+        shapes.set(word, { rule: rules[0]!.name ?? "", band: bands[0]! })
+    }
+    BubblyLayout.shapes.set(parser, shapes)
+    return shapes
+  }
+
+  /** `shapesFor()`'s, by parser. */
+  private static readonly shapes = new WeakMap<SP.SpellParser, Map<string, LineShape | undefined>>()
 
   /** Does `line` declare a group? */
   private isGroupLine(line: SourceLine): boolean {
@@ -514,7 +713,38 @@ export class BubblyLayout {
 
   /** Is `line` a drawing's markup, `<text color={its color}>`? */
   private isMarkup(line: SourceLine): boolean {
-    return this.text[line.start] === "<"
+    return this.text[line.start] === "<" || this.linesInTags.has(line.index)
+  }
+
+  /**
+   * Each line a start tag runs on to (`linesInTags`):  its attributes laid out a line each, under `<toolbar`,
+   * read just as they'd be on the tag's own line (epic `language` I151).
+   * - A tag runs on past its line's end while its `>` hasn't come;  a line starting with a tag, or a blank one,
+   *   ends it, as the tokenizer reads it (I145).
+   * - A quoted value ends on its line, as `paintMarkup()` reads it.
+   */
+  private findTagsOverLines() {
+    const lines = this.text.split("\n")
+    let inTag = false
+    lines.forEach((raw, index) => {
+      const words = raw.trim()
+      if (inTag && (!words || words.startsWith("<"))) inTag = false
+      else if (inTag) this.linesInTags.add(index)
+      else if (!words.startsWith("<")) return
+      for (let at = 0; at < raw.length; at++) {
+        const char = raw[at]!
+        if (!inTag) {
+          if (char === "<" && /[a-z]/i.test(raw[at + 1] ?? "")) inTag = true
+        } else if (char === ">") inTag = false
+        else if (char === '"' && !WORD_CHARACTER.test(raw[at - 1] ?? "")) {
+          const close = raw.indexOf('"', at + 1)
+          at = close < 0 ? raw.length : close
+        } else if (char === "{") {
+          const close = raw.indexOf("}", at + 1)
+          at = close < 0 ? raw.length : close
+        }
+      }
+    })
   }
 
   ////////////////
@@ -530,7 +760,7 @@ export class BubblyLayout {
     if (head) this.paintHead(head)
     for (const choice of this.choices)
       if (choice.start >= start && choice.end <= end) this.paintChoice(choice.start, choice.end)
-    const codes = this.isMarkup(line) ? this.paintMarkup(start, end) : []
+    const codes = this.isMarkup(line) ? this.paintMarkup(start, end, this.linesInTags.has(line.index)) : []
     const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
     const pieces = this.piecesOf(start, end, [...underlines, ...codes])
     const { pillNames } = this
@@ -756,11 +986,12 @@ export class BubblyLayout {
    *     so the tag's other attributes still draw as they're written (epic `editor` I144).
    * - In a tag, a `"` right after a word (`small"`) is drawn plain:  never a value's start, which would pair the
    *   tag's quotes off by one, every pill after it over the wrong words (I144).
+   * - `inTag`:  the line is inside a start tag begun on a line above (`linesInTags`), so it starts among its
+   *   attributes (epic `language` I151).
    */
-  private paintMarkup(start: number, end: number): BubblyCode[] {
+  private paintMarkup(start: number, end: number, inTag = false): BubblyCode[] {
     const { text } = this
     const codes: BubblyCode[] = []
-    let inTag = false
     for (let at = start; at < end; at++) {
       const char = text[at]!
       if (char === "{") {
@@ -895,8 +1126,11 @@ type Paint = BubblyPieceKind
 /** A stretch the parse paints over the spans, `order` low first;  `overWordsOnly`:  only over Spell's own words. */
 type Overlay = { start: number; end: number; kind: BubblyPieceKind; order: number; overWordsOnly?: boolean }
 
+/** What a line that didn't parse is, by its first word (`shapeOf()`):  a control line, or a declaration's head. */
+type LineShape = { rule: string; isControl?: true; band?: BubblyPartOfSpeech }
+
 /** Where `BubblyLayout.layout()` lays lines out. */
-type LayoutPlace = { depth: number; level: number; inSteps?: boolean }
+type LayoutPlace = { depth: number; level: number; inSteps?: boolean; inType?: boolean; inProperty?: boolean }
 
 /** A declaration's head being laid out. */
 type Head = {
@@ -927,6 +1161,28 @@ type SourceLine = {
 
 /** The rule every line of a block matches:  its first child past a trailing comment is the line's statement. */
 const LINE_RULE = "line"
+
+/** The rule a line no other rule could read matches. */
+const PARSE_ERROR_RULE = "parse_error"
+
+/** The rule that reopens a type declared elsewhere, `a card`. */
+const REOPEN_TYPE_RULE = "reopen_type"
+
+/** The rule that declares a property by a quoted name, `it "can go up" if ...`. */
+const QUOTED_PROPERTY_RULE = "quoted_type_expression"
+
+/** A quoted name after a line's first word:  ` "can go up" if ...`. */
+const QUOTED_NAME_AFTER = /^\s+"[^"]+"/
+
+/** An article and a name, nothing else:  `a card`, `a two sided view`. */
+const TYPE_NAME_ALONE = /^[\p{L}]+( +[\p{L}]+)+$/u
+
+/** The stand-in type a member that didn't read alone is read again in (`rereadAsMember()`). */
+const STAND_IN_TYPE = "StandInList"
+
+/** The built-in types it's made of:  a list of things. */
+const LIST_TYPE = "List"
+const THING_TYPE = "Thing"
 
 /** The rule of a comment at a line's end. */
 const COMMENT_RULE = "comment"
@@ -975,6 +1231,16 @@ function childrenOf(match: P.Match): P.Match[] {
     for (const item of [value].flat()) if (item instanceof P.Match && item !== match) children.add(item)
   }
   return [...children]
+}
+
+/** Is `token` a word, symbol, number or text:  one with words of its own, not a line or block around others? */
+function isWordlike(token: P.Token): boolean {
+  return (
+    token instanceof P.WordToken ||
+    token instanceof P.SymbolToken ||
+    token instanceof P.NumberToken ||
+    token instanceof P.TextToken
+  )
 }
 
 /**

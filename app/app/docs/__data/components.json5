@@ -1667,10 +1667,6 @@
         {
           "name": "FileEditor",
           "file": "src/app/solid/codemirror/FileEditor.tsx"
-        },
-        {
-          "name": "OutputEditor",
-          "file": "src/app/solid/OutputEditor.tsx"
         }
       ],
       "href": "CodeMirrorEditor.html"
@@ -2064,10 +2060,6 @@
           "file": "src/app/solid/InputEditor.tsx"
         },
         {
-          "name": "OutputEditor",
-          "file": "src/app/solid/OutputEditor.tsx"
-        },
-        {
           "name": "TreeViewer",
           "file": "src/app/solid/TreeViewer.tsx"
         }
@@ -2425,10 +2417,6 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
-          "name": "OutputToolbar",
-          "file": "src/app/solid/OutputEditor.tsx"
-        },
-        {
           "name": "TreeToolbar",
           "file": "src/app/solid/TreeViewer.tsx"
         }
@@ -2513,110 +2501,6 @@
       "href": "Notice.html"
     },
     {
-      "tag": "OutputEditor",
-      "name": "OutputEditor",
-      "folder": "OutputEditor",
-      "mainTag": "OutputEditor",
-      "main": true,
-      "page": true,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "Read-only code editor showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.",
-      "noun": "OutputEditor",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "showError",
-          "type": "(error: unknown) => void",
-          "description": "Called with each error caught."
-        },
-        {
-          "name": "target",
-          "type": "OtherTarget",
-          "description": "The project's code for this target instead of the file's javascript, e.g. `py`."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "OutputRoot",
-          "file": "src/app/solid/OutputEditor.tsx"
-        },
-        {
-          "name": "ProgramPanel",
-          "file": "src/app/pages/SpellEditor.tsx"
-        }
-      ],
-      "href": "OutputEditor.html"
-    },
-    {
-      "tag": "OutputRoot",
-      "name": "OutputRoot",
-      "folder": "OutputEditor",
-      "mainTag": "OutputEditor",
-      "main": false,
-      "page": false,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "Root element to show the `<OutputEditor/>` in `SpellEditor`:  the \"Javascript Output\" pane.",
-      "noun": "OutputRoot",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "showToolbar",
-          "type": "boolean",
-          "description": "Show `<OutputToolbar>` above editor.  Default:  `true`."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "ProgramPanel",
-          "file": "src/app/pages/SpellEditor.tsx"
-        }
-      ],
-      "href": "OutputEditor.html#OutputRoot"
-    },
-    {
-      "tag": "OutputToolbar",
-      "name": "OutputToolbar",
-      "folder": "OutputEditor",
-      "mainTag": "OutputEditor",
-      "main": false,
-      "page": false,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "Toolbar above `<OutputEditor>`:  just a header today (no actions).",
-      "noun": "OutputToolbar",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "usedIn": [
-        {
-          "name": "OutputRoot",
-          "file": "src/app/solid/OutputEditor.tsx"
-        }
-      ],
-      "href": "OutputEditor.html#OutputToolbar"
-    },
-    {
       "tag": "PanelMenu",
       "name": "PanelMenu",
       "folder": "chrome",
@@ -2650,10 +2534,6 @@
         {
           "name": "ConsoleToolbar",
           "file": "src/app/solid/ConsoleViewer.tsx"
-        },
-        {
-          "name": "OutputToolbar",
-          "file": "src/app/solid/OutputEditor.tsx"
         },
         {
           "name": "TreeToolbar",
@@ -3450,10 +3330,6 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
-          "name": "OutputToolbar",
-          "file": "src/app/solid/OutputEditor.tsx"
-        },
-        {
           "name": "TreeToolbar",
           "file": "src/app/solid/TreeViewer.tsx"
         }
@@ -3908,20 +3784,6 @@
         "InputEditor",
         "InputRoot",
         "LineNumbers"
-      ],
-      "tokens": []
-    },
-    "OutputEditor": {
-      "folder": "OutputEditor",
-      "mainTag": "OutputEditor",
-      "title": "OutputEditor",
-      "summary": "The open file's compiled javascript, read only.",
-      "status": "done",
-      "docs": false,
-      "tags": [
-        "OutputEditor",
-        "OutputRoot",
-        "OutputToolbar"
       ],
       "tokens": []
     },

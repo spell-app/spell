@@ -969,6 +969,18 @@ methods.addRule(ToDoSomething, {
             "}",
             'core.describeAction(Deck, "shuffleTheDeck", { title: "Shuffle the Deck", undoneAs: "Shuffle the Deck" })'
           ]
+        },
+        {
+          title: "unquoted, `get` is a word of its name (epic `language` T142)",
+          input: ['a "deck" is a thing', "\tto get the next card", "\t\tprint 1"],
+          js: [
+            "export class Deck extends Thing {",
+            "  getTheNextCard() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            'core.describeAction(Deck, "getTheNextCard", { title: "Get the Next Card", undoneAs: "Get the Next Card" })'
+          ]
         }
       ]
     }
@@ -977,8 +989,10 @@ methods.addRule(ToDoSomething, {
 
 // its name quoted, and what it says about itself on its line (epic `language` P48, Q6):
 // `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`
+// a `get` before the quoted name is left out:  `to get "the points for a card"` ~== `to "the points for a card"`
+// (epic `language` T142);  unquoted, `to get the next card` is an action named "get the next card"
 methods.addRule(ToDoSomething, {
-  syntax: `to {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
+  syntax: `to get? {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
   tests: [
     {
       title: "its blanks as the unquoted name's:  `a / an <kind>` a blank, other words its name (epic `language` I97)",
@@ -1010,6 +1024,40 @@ methods.addRule(ToDoSomething, {
             "export interface Pile { dealTheStockToPile(): any /* spell: type unknown */ }",
             "Pile.prototype.dealTheStockToPile = function (this: Pile) {}",
             'core.describeAction(Pile, "dealTheStockToPile", { title: "Deal the Stock to Pile", undoneAs: "Deal the Stock to Pile" })'
+          ]
+        }
+      ]
+    },
+    {
+      title: "`get` before its quoted name is left out:  the same action as without it (epic `language` T142)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("card")
+        scope.types?.add("pile")
+      },
+      tests: [
+        {
+          input: 'to get "the points for a card on a pile"',
+          js: [
+            "Card.prototype.thePointsForCardOnPile = function (pile) {}",
+            'core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })'
+          ],
+          ts: [
+            "export interface Card { thePointsForCardOnPile(pile: Pile): any /* spell: type unknown */ }",
+            "Card.prototype.thePointsForCardOnPile = function (this: Card, pile: Pile) {}",
+            'core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })'
+          ]
+        },
+        {
+          input: 'to "the points for a card on a pile"',
+          js: [
+            "Card.prototype.thePointsForCardOnPile = function (pile) {}",
+            'core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })'
+          ],
+          ts: [
+            "export interface Card { thePointsForCardOnPile(pile: Pile): any /* spell: type unknown */ }",
+            "Card.prototype.thePointsForCardOnPile = function (this: Card, pile: Pile) {}",
+            'core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })'
           ]
         }
       ]

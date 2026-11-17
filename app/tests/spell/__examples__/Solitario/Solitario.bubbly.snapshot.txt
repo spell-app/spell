@@ -249,7 +249,7 @@
 |   ⟦// una carta está en una sola pila a la vez:  moverla a otra pila la quita de esta⟧
 
 ==== /Solitario.es.spell
-# Solitario Klondike
+⟪# Solitario Klondike⟫
 ⟦// Reparte siete columnas, luego arma cuatro fundaciones, del as al rey, un palo cada una:⟧
 ⟦// la [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) tiene sus reglas, y cómo se llama cada pila.⟧
 ⟦// Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pila`.⟧

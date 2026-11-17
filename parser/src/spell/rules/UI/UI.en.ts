@@ -20,6 +20,7 @@ import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
 import { Prompt } from "./Prompt"
+import { TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
 ////////////////
@@ -61,6 +62,11 @@ UI.addRule(Wording.specialize({ ruleName: "toast_progress", meanings: TOAST_PROG
     "((top_up:with a progress bar filling up at the top)" +
     "|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)" +
     "|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
+})
+
+// A dialog's text size, for `alert ... in big text`:  each meaning Spell UI's size word
+UI.addRule(Wording.specialize({ ruleName: "text_size", meanings: TEXT_SIZES }), {
+  syntax: "((small:small)|(big:big)|(huge:huge))"
 })
 
 ////////////////
@@ -182,40 +188,70 @@ UI.addRule(Notify, {
 })
 
 UI.addRule(Alert, {
-  syntax: "alert {message:expression} (with {okButton:text})?",
+  syntax: "alert {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`alert "Yo!"`, `await core.alert("Yo!")`],
-        [`alert "Yo!" with "yep"`, `await core.alert("Yo!", "yep")`]
+        [`alert "Yo!" with "yep"`, `await core.alert("Yo!", "yep")`],
+        [`alert "You won!" titled "Solitaire"`, `await core.alert("You won!", { title: "Solitaire" })`],
+        [`alert "You won!" in big text`, `await core.alert("You won!", { size: "big" })`],
+        [`alert "Tiny" in small text`, `await core.alert("Tiny", { size: "small" })`],
+        {
+          input: `alert "You won!" titled "Solitaire" in huge text with "New game"`,
+          js: [
+            `await core.alert("You won!", {`,
+            `  title: "Solitaire",`,
+            `  size: "huge",`,
+            `  okText: "New game"`,
+            `})`
+          ]
+        },
+        [`alert "You **won**!" in big text`, `await core.alert("You **won**!", { size: "big" })`]
       ]
     }
   ]
 })
 
 UI.addRule(Warn, {
-  syntax: "warn {message:expression} (with {okButton:text})?",
+  syntax: "warn {message:expression} (titled {title:expression})? (in {size:text_size} text)? (with {okButton:text})?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`warn "Yo!"`, 'await core.warn("Yo!")'],
-        [`warn "Yo!" with "yep"`, 'await core.warn("Yo!", "yep")']
+        [`warn "Yo!" with "yep"`, 'await core.warn("Yo!", "yep")'],
+        [`warn "Careful!" titled "Deleting"`, 'await core.warn("Careful!", { title: "Deleting" })'],
+        [`warn "Careful!" in big text with "OK"`, 'await core.warn("Careful!", { size: "big", okText: "OK" })']
       ]
     }
   ]
 })
 
 UI.addRule(Confirm, {
-  syntax: "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
+  syntax:
+    "confirm {message:expression} (titled {title:expression})? (in {size:text_size} text)?" +
+    " (with {okButton:text} ((and|or) {cancelButton:text})?)?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`confirm "Yo!"`, `await core.confirm("Yo!")`],
         [`confirm "Yo!" with "yep"`, `await core.confirm("Yo!", "yep")`],
-        [`confirm "Yo!" with "yep" and "nope"`, `await core.confirm("Yo!", "yep", "nope")`]
+        [`confirm "Yo!" with "yep" and "nope"`, `await core.confirm("Yo!", "yep", "nope")`],
+        [`confirm "Deal again?" titled "Solitaire"`, `await core.confirm("Deal again?", { title: "Solitaire" })`],
+        {
+          input: `confirm "Deal again?" titled "Solitaire" in big text with "Deal" or "Not now"`,
+          js: [
+            `await core.confirm("Deal again?", {`,
+            `  title: "Solitaire",`,
+            `  size: "big",`,
+            `  okText: "Deal",`,
+            `  cancelText: "Not now"`,
+            `})`
+          ]
+        }
       ]
     }
   ]

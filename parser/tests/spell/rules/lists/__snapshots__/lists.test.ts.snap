@@ -4,6 +4,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
 {
   "add_new_thing": "thing",
   "bracketed_list": "list?",
+  "can_do": "operator|call",
   "can_give_up": "operator|expression",
   "can_take": "operator|expression",
   "copy_list": "expression|type?",
@@ -16,6 +17,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
   "list_count": "list",
   "list_empty": "list",
   "list_filter": "arg|list|where|body?",
+  "list_items_in": "arg|list",
   "list_iteration": "item|position?|list|body?",
   "list_iteration_named_for_list": "list|body?",
   "list_iteration_where": "list|body?",
@@ -44,6 +46,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
   "position_expression": "arg|position|expression",
   "possessive_ordinal": "expression|possessive_mark|ordinal|arg",
   "random_item_expression": "arg|list",
+  "random_item_where": "arg|list|where|body?",
   "random_items_expression": "number|arg|list",
   "range_between_expression": "arg|start|end|list",
   "range_count_expression": "ordinal|number|arg|list",

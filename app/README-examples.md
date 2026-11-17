@@ -764,7 +764,7 @@ _The tableau's rule, in Spanish:  a column, `columna`._
 
 - Its tests are four, in Spanish:
   `spell test @spell/examples/Solitario` runs them.
-- Where the two differ, a Spanish word does:  the queen is `dama`, so its short name is D, and the king's R.
+- Where the two differ, a Spanish word does:  the queen is `dama`, so its shorthand is D, and the king's R.
 
 <img src="docs/images/examples/Solitario.png" width="640" alt="Solitario open in the Spell editor:  Carta.es.spell on the left;  on the right, the game running, its menu in Spanish, Puntos, Jugar solo, Trampa, Depurar, and the same Klondike board">
 

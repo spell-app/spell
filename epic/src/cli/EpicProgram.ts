@@ -150,10 +150,10 @@ export class EpicProgram {
 
     requests(epic.command("file"))
       .description(
-        "file a request into a phase:  your words and screenshots into its Requests field;  or, with no phase, " +
-          'mark where it went:  "dropped:  done in P3"'
+        "file a request into a phase or a todo:  your words and screenshots into its Requests field, or the todo's " +
+          'text and pictures;  or, a duplicate, mark which:  "same as T12"'
       )
-      .usage('<epic>#P3 <request id>  |  <epic> <request id> "where it went"')
+      .usage('<epic>#P3 <request id>  |  <epic>#T5 <request id>  |  <epic> <request id> "same as T12"')
       .addHelpText("after", FILE_HELP)
 
     requests(epic.command("home"))
@@ -676,7 +676,8 @@ export class EpicProgram {
       )
       .usage(
         "[--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote] " +
-          "[--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] " +
+          "[--public] [--host github|gitlab] [--protected-base] [--superpowers] [--no-plugin] [--no-commit] [--no-server] " +
+          "[--dry-run] " +
           "[--json]"
       )
       .addHelpText("after", INIT_HELP)
@@ -1193,6 +1194,8 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
                        protected):  says what a Maintainer runs, and epic init again finishes it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
+  AGENTS.md            superpowers' stand-aside words, a marked block, when superpowers is on here and you say
+                       yes (--superpowers:  without asking);  kept current once there;  never --local
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
   your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
                        with the plans, in the epic repo's people/
@@ -1218,6 +1221,11 @@ again stays local.  Refused where the base branch tracks .epic/config.json5 alre
 --protected-base:  the base branch takes only pull requests (baseBranchProtected in the config).  Without it,
 epic init asks GitHub or GitLab, with its command (gh, glab) logged in and a remote there, and says in one line when
 it found so.
+
+--superpowers puts the superpowers plugin's stand-aside words (epic guide superpowers) in the repo's AGENTS.md, which
+every session reads, however superpowers is turned on.  Without it, epic init asks in a terminal when superpowers is
+on for this repo (your settings, the project's, or the managed ones), and takes yes anywhere else;  a block there
+already is kept current with the guide.  Never with --local.
 
 --host github|gitlab:  where the code is hosted (codeHost in the config).  Left out, it's read off the origin
 remote's address;  for an address that doesn't say (git.acme.com), epic init asks in a terminal, and with no
@@ -1260,12 +1268,16 @@ Examples:
 
 /** After `epic file --help`. */
 const FILE_HELP = `
+Every request becomes a todo or a phase (epic-engine T88).
 Into a phase, the request's words, context and screenshots go into its Requests field, and the request is marked
-filed there (P3).  With no phase, it's only marked, saying where it went.
+filed there (P3).  Into a todo, they go at the end of its text, the screenshots as its pictures (deletable on the
+page), the todo marked requested (light orange once done), and the request filed there (T5).
+With neither, it's only marked, saying where it went:  only for a duplicate, naming the todo or phase it duplicates.
 
 Examples:
   epic file seo#P3 r3
-  epic file seo r3 "dropped:  done in P2"`
+  epic file seo#T5 r3
+  epic file seo r3 "same as T12"`
 
 /** After `epic update --help`. */
 const UPDATE_HELP = `
@@ -1274,7 +1286,7 @@ A phase (seo#P3):
   --estimate <time>                                       its estimate, e.g. 1-2h
   --title "New name" [--html]                             rename it:  links that say the old name follow
 An item (seo#J3):
-  --title "New title" [--html]                            retitle it
+  --title "New title" [--html]                            retitle it:  at most 30 plain words, read cold, as add's
   --calm  /  --loud                                       not urgent  /  urgent (red)
   --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
                                                           on its line, a Noted card linking it, left open)  /  not;
@@ -1326,6 +1338,12 @@ Prints the new item's id.  The letter after # is its kind:
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
 --calm (last):  a judgement call (grey) or issue (yellow) that wouldn't surprise you, rather than red.
+A title is at most 30 plain words saying what the item is.  Read it cold, as the person will hours later:  nothing
+about a passing condition (a pid, "after the 4-line fix").  The rest goes in --details.  One over 30 words, a "; "
+list, or two sentences is refused (epic-engine I322).
+The person's pictures (T87), saved in pictures/ beside the page, shown after the item's words, deletable on the page:
+  --picture <file>    a picture file;  repeat it for more
+  --pasted <n>        the n pictures they pasted last into this session's chat (read from its transcript)
 A manual test (M), answered by you on the epic page, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> a page to open;
@@ -1339,6 +1357,7 @@ Examples:
   epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm
   epic add seo#T "Retry the upload once it's online"
   epic add seo#T "Find-in-page misses folded text" --limit
+  epic add seo#I "The menu covers the title" --requested --start "<their words>" --pasted 1
   epic add seo#M "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"
   epic add seo#choices "Upgrades on offer" --multiple   (a standing option set, s-upgrades-on-offer, in the Choices section)`
 

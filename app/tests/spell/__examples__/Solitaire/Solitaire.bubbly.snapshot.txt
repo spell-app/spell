@@ -25,7 +25,7 @@
 |   |   | it «"is a number card"» if it is not a face card    ‾question(it is not a face card)
 |   |   [property quoted_property_formula L2]
 |   |   | it «"is the (rank) of (suit)"»  ⟦-- e.g. the card is the two of spades⟧
-|   |   
+
 |   [plain group define_group L1]
 |   | group «"Names"» 								⟦-- identifying a card⟧
 |   |   [property property_value_getter L2]
@@ -39,8 +39,8 @@
 |   |   |   _"♥"_ if it is a _heart_    ‾question(it is a heart)
 |   |   |   _"♠"_ otherwise
 |   |   [property property_value_getter L2]
-|   |   | its «"short name"» is
-|   |   |   ⟦-- Its short name:  Q♠↓ is the queen of spades, face down⟧
+|   |   | its «"shorthand"» is
+|   |   |   ⟦-- Its shorthand:  Q♠↓ is the queen of spades, face down⟧
 |   |   |   **letter** is _10_ if its **value** is _10_ otherwise the first **letter** of its **rank** as uppercase    ‾value(letter) ‾value(its value) ‾value(the first letter of its rank as uppercase)
 |   |   |   **arrow** is _"↑"_ if it is face up otherwise _"↓"_    ‾value(arrow) ‾question(it is face up)
 |   |   |   return **letter** + its **symbol** + **arrow**    ‾value(letter) ‾value(its symbol) ‾value(arrow)
@@ -60,7 +60,7 @@
 |   |   |   its **name** should be _"queen of spades"_    ‾value(its name)
 |   |   |   its **color** should be _black_    ‾value(its color)
 |   |   |   its **value** should be _12_    ‾value(its value)
-|   |   |   its **short name** should be _"Q♠↓"_    ‾value(its short name)
+|   |   |   its **shorthand** should be _"Q♠↓"_    ‾value(its shorthand)
 |   |   |   it is a face card should be _yes_    ‾question(it is a face card)
 |   |   |   it is a _spade_ should be _yes_    ‾question(it is a spade)
 |   |   |   it is a _club_ should be _no_    ‾question(it is a club)
@@ -71,7 +71,7 @@
 
 |   |   |   turn it over    ‾value(it)
 |   |   |   it is face up should be _yes_    ‾question(it is face up)
-|   |   |   its **short name** should be _"Q♠↑"_    ‾value(its short name)
+|   |   |   its **shorthand** should be _"Q♠↑"_    ‾value(its shorthand)
 
 |   |   |   set **seven** to **a new card** whose **rank** is _7_ and **suit** is _hearts_    ‾value(seven) ‾value(a new card whose rank is 7 and suit is hearts)
 |   |   |   **seven** is a number card should be _yes_    ‾question(seven is a number card)
@@ -166,12 +166,12 @@
 |   |   _0_ if it is empty    ‾question(it is empty)
 |   |   otherwise the **value** of its last **card**    ‾value(the value of its last card)
 |   [property property_value_getter L1]
-|   | its «"short name"» is
-|   |   ⟦// Its id, then its cards' short names:  stock: Q♠↑ 7♥↓⟧
+|   | its «"shorthand"» is
+|   |   ⟦// Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓⟧
 |   |   set **summary** to its **id** + _":"_    ‾value(summary) ‾value(its id)
 |   |   [control list_iteration L2]
 |   |   | for **card** in the **pile**    ‾value(the pile)
-|   |   |   set **summary** to **summary** + _" "_ + the **short name** of the **card**    ‾value(summary) ‾value(summary) ‾value(the short name of the card)
+|   |   |   set **summary** to **summary** + _" "_ + the **shorthand** of the **card**    ‾value(summary) ‾value(summary) ‾value(the shorthand of the card)
 |   |   return **summary**    ‾value(summary)
 
 |   [action drag_handler L1]
@@ -206,7 +206,7 @@
 |   add **a new card** with **rank** _7_, **suit** _hearts_ and **direction** _down_ to the **stock**    ‾value(a new card with rank 7, suit hearts and direction down) ‾value(the stock)
 |   **stock's color** should be _red_    ‾value(stock's color)
 |   **stock's value** should be _7_    ‾value(stock's value)
-|   **stock's short name** should be _"stock: Q♠↑ 7♥↓"_    ‾value(stock's short name)
+|   **stock's shorthand** should be _"stock: Q♠↑ 7♥↓"_    ‾value(stock's shorthand)
 
 |   ⟦// a card is in one pile at a time⟧
 |   set the **discards** to **a new pile** with **id** _"discards"_    ‾value(the discards) ‾value(a new pile with id "discards")
@@ -214,7 +214,7 @@
 |   add it to the **discards**    ‾value(it) ‾value(the discards)
 |   its **pile** is the **discards** should be _yes_    ‾value(its pile) ‾value(the discards)
 |   the number of **cards** in the **stock** should be _1_    ‾value(the number of cards in the stock)
-|   the **discards' short name** should be _"discards: 7♥↓"_    ‾value(the discards' short name)
+|   the **discards' shorthand** should be _"discards: 7♥↓"_    ‾value(the discards' shorthand)
 
 ==== /Deck.spell
 [thing create_viewable_list_type L0]
@@ -228,11 +228,11 @@
 |   |   |   | for **suit** in **card suits**    ‾value(card suits)
 |   |   |   |   add **a new card** with **rank** and **suit** to the **deck**    ‾value(a new card with rank and suit) ‾value(the deck)
 |   [property property_value_getter L1]
-|   | its «"short name"» is ⟦-- its card names, top to bottom⟧
+|   | its «"shorthand"» is ⟦-- its card names, top to bottom⟧
 |   |   set **card names** to a new list of **text**    ‾value(card names) ‾value(a new list of text)
 |   |   [control list_iteration L2]
 |   |   | for **card** in the **deck**    ‾value(the deck)
-|   |   |   add the **short name** of the **card** to **card names**    ‾value(the short name of the card) ‾value(card names)
+|   |   |   add the **shorthand** of the **card** to **card names**    ‾value(the shorthand of the card) ‾value(card names)
 |   |   return _"deck: "_ + **card names**    ‾value(card names)
 
 |   [action to_do_something L1]
@@ -240,7 +240,7 @@
 |   |   the **deck** is **a new deck**    ‾value(the deck) ‾value(a new deck)
 |   |   the number of **cards** in the **deck** should be _52_    ‾value(the number of cards in the deck)
 |   |   the number of (**cards** in the **deck** where it is a _queen_) should be _4_    ‾value(the number of (cards in the deck where it is a queen))
-|   |   **deck's** first **card's short name** should be _"A♣↓"_    ‾value(deck's first card's short name)
+|   |   **deck's** first **card's shorthand** should be _"A♣↓"_    ‾value(deck's first card's shorthand)
 |   |   **deck's** last **card's name** should be _"king of spades"_    ‾value(deck's last card's name)
 |   |   shuffle the **deck**    ‾value(the deck)
 |   |   the number of **cards** in the **deck** should be _52_    ‾value(the number of cards in the deck)
@@ -259,10 +259,10 @@
 |   |   <⟨deck⟩ «"deck"»hidden />    declares@0
 |   |   <⟨segment⟩ inverted attach-to=«"top"»>
 |   |     <⟨toolbar⟩
-|   |       class=_"GameBar"_
-|   |       appearance=_"pills"_
+|   |       class=«"GameBar"»
+|   |       appearance=«"pills"»
 |   |       inverted
-|   |       size=_"small"_
+|   |       size=«"small"»
 |   |       shrinkable
 |   |     >
 |   |       <⟨text⟩ size=«"big"» slot=«"title"» heavy>Spell Solitaire</>
@@ -370,38 +370,14 @@
 
 |   |   [action to_do_something L2]
 |   |   | to «"auto play"» with shortcut «"A"», icon «"play"»
-|   |   |   ⟦-- Play every card that can go somewhere, until none can⟧
-|   |   |   set **anything changed** to _no_    ‾value(anything changed)
+|   |   |   ⟦-- Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column⟧
+|   |   |   set **played** to the last **card** in the **discard pile** where it can play the **card**    ‾value(played) ‾value(the last card in the discard pile where it can play the card)
+|   |   |     or the first **card** in the **columns** where it is the top **card** of its **pile** and (the first **pile** in every **pile** where it can take the **card**) is a **foundation** and can play the **card**    ‾value(the first card in the columns where it is the top card of its pile and (the first pile in every pile where it can take the card) is a foundation and can play the card)
+|   |   |     or the first **card** in the **columns** where (it is not a _king_ or it is not the first **card** of its **pile**) and it is (the first **card** in its **pile** which is face up) and can play the **card**    ‾value(the first card in the columns where (it is not a king or it is not the first card of its pile) and it is (the first card in its pile which is face up) and can play the card)
 |   |   |   [control if L3]
-|   |   |   | if the **discard pile** is not empty    ‾question(the discard pile is not empty)
-|   |   |   |   set **test card** to the last **card** of the **discard pile**    ‾value(test card) ‾value(the last card of the discard pile)
-|   |   |   |   [control if L4]
-|   |   |   |   | if play **test card**    ‾call(play test card)
-|   |   |   |   |   set **anything changed** to _yes_    ‾value(anything changed)
-|   |   |   |   |   pause for _500_ msec    ‾quantity(500 msec)
-|   |   |   ⟦-- each column's last card onto its foundation⟧
-|   |   |   [control list_iteration L3]
-|   |   |   | for **pile** in the **columns**    ‾value(the columns)
-|   |   |   |   if the **pile** is empty return    ‾question(the pile is empty)
-|   |   |   |   set **test card** to the last **card** of the **pile**    ‾value(test card) ‾value(the last card of the pile)
-|   |   |   |   set **foundation** to the first **pile** in the **foundations** where its **suit** is the **suit** of **test card**    ‾value(foundation) ‾value(the first pile in the foundations where its suit is the suit of test card)
-|   |   |   |   [control if L4]
-|   |   |   |   | if the **foundation** can take **test card**    ‾question(the foundation can take test card)
-|   |   |   |   |   set **anything changed** to _yes_    ‾value(anything changed)
-|   |   |   |   |   play **test card**    ‾call(play test card)
-|   |   |   |   |   pause for _100_ msec    ‾quantity(100 msec)
-|   |   |   ⟦-- each column's face-up cards, all together, onto another column⟧
-|   |   |   [control list_iteration L3]
-|   |   |   | for **pile** in the **columns**    ‾value(the columns)
-|   |   |   |   set **face up cards** to the **cards** in the **pile** where the **card** is face up    ‾value(face up cards) ‾value(the cards in the pile where the card is face up)
-|   |   |   |   if **face up cards** is empty return    ‾question(face up cards is empty)
-|   |   |   |   set **test card** to the first **card** of **face up cards**    ‾value(test card) ‾value(the first card of face up cards)
-|   |   |   |   if **test card** is a _king_ and **test card** is the first **card** of the **pile** return    ‾question(test card is a king) ‾value(test card) ‾value(the first card of the pile)
-|   |   |   |   [control if L4]
-|   |   |   |   | if play **test card**    ‾call(play test card)
-|   |   |   |   |   set **anything changed** to _yes_    ‾value(anything changed)
-|   |   |   |   |   pause for _500_ msec    ‾quantity(500 msec)
-|   |   |   if **anything changed** auto play    ‾value(anything changed) ‾call(auto play)
+|   |   |   | if **played** exists    ‾question(played exists)
+|   |   |   |   pause for _300_ msec    ‾quantity(300 msec)
+|   |   |   |   auto play    ‾call(auto play)
 |   |   
 |   |   [action to_do_something L2]
 |   |   | to «"cheat"» with shortcut «"C"», icon «"eye"»
@@ -504,7 +480,7 @@
 |   |   the **column** can take the **jack** should be _no_    ‾question(the column can take the jack)
 |   |   the **column** can take the **queen** should be _yes_    ‾question(the column can take the queen)
 |   |   add the **queen** to the **column**    ‾value(the queen) ‾value(the column)
-|   |   the **short name** of the **column** should be _"T1: K♠↑ Q♥↑"_    ‾value(the short name of the column)
+|   |   the **shorthand** of the **column** should be _"T1: K♠↑ Q♥↑"_    ‾value(the shorthand of the column)
 |   |   the **column** can give up the **queen** should be _yes_    ‾question(the column can give up the queen)
 |   |   turn the **queen** face down    ‾value(the queen)
 |   |   the **column** can give up the **queen** should be _no_    ‾question(the column can give up the queen)

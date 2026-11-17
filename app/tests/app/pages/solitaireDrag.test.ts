@@ -54,7 +54,7 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire", { timeout: 240_000 }, 
         if (tagName !== "SOLITAIRE-CARD" || String(thing?.rank) !== "ace") return false
         const pile = thing.pile
         return (
-          String(thing.shortName).includes("↑") &&
+          String(thing.shorthand).includes("↑") &&
           pile?.lastItem === thing &&
           !/Foundation|StockPile/.test(pile.constructor.name)
         )

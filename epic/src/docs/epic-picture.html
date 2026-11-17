@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-picture</title>
+    <meta
+      name="description"
+      content="The &lt;epic-picture&gt; element: a picture the person gave an item, a thumbnail with a trash that deletes it and its file."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-picture&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-picture&gt;
+            <ui-header>The &lt;epic-picture&gt; element: a picture the person gave an item, a thumbnail with a trash that deletes it and its file.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            A picture you paste into the chat while asking for a fix goes onto the issue or todo it becomes.
+            <code>&lt;epic-picture&gt;</code> shows it in the item, after your words: a thumbnail, which a click opens full
+            size.
+          </p>
+          <p>
+            On an epic page being reviewed, a trash sits at its top right corner. One click deletes it: it goes at once,
+            with Undo in the page's notices for 6 seconds; then the page server takes it out of the item and deletes its
+            file.
+          </p>
+          <p class="meta">
+            For anyone reviewing an epic page.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> T87), its own
+            <a href="/epic/src/components/epic-picture/" target="src-spell-epic-src-components-epic-picture"><code title="epic/src/components/epic-picture/">epic-picture</code></a> family.<br />
+            Its vocabulary: <a href="/epic/src/components/epic-picture/EpicPicture.en.ts" target="src-spell-epic-src-components-epic-picture-epicpicture-en-ts"><code title="epic/src/components/epic-picture/EpicPicture.en.ts">EpicPicture.en.ts</code></a><br />
+            Its component: <a href="/epic/src/components/epic-picture/EpicPicture.tsx" target="src-spell-epic-src-components-epic-picture-epicpicture-tsx"><code title="epic/src/components/epic-picture/EpicPicture.tsx">EpicPicture.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>An issue filed with a picture pasted in the chat. The trash shows only on an epic page being reviewed: here, the picture alone.</p>
+            <div>
+              <epic-section id="issues" kind="issues" open>
+                <epic-item id="i9" title="The popup covers its button" status="open"
+                  ><p>Owen: “the popup covers the button, see the picture”</p
+                  ><epic-picture><img src="/components/ui/images/new_popup_alignment.png" alt="Picture pasted in the chat" /></epic-picture
+                ></epic-item>
+              </epic-section>
+            </div>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The item above · 4 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-item id="i9" title="The popup covers its button" status="open">
+                      <p>Owen: “the popup covers the button, see the picture”</p>
+                      <epic-picture><img src="pictures/i9-20261116-1302.png" alt="Picture pasted in the chat" /></epic-picture>
+                    </epic-item>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="2-behaviour" label="2. Behaviour" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="hand pointer"></ui-icon>
+            <ul>
+              <li>Its picture is the <code>&lt;img&gt;</code> inside it: a page with no script shows it too.</li>
+              <li>A thumbnail, at most 320px wide and 240px tall, its shape kept; a click opens it full size.</li>
+              <li>Its item is the <code>&lt;epic-item&gt;</code> it's written in.</li>
+              <li>Not reviewed: no trash.</li>
+              <li>
+                The trash: one click, no dialog, as a comment's. The picture hides at once; "Picture deleted" shows with
+                Undo for 6 seconds.
+              </li>
+              <li>
+                Then the page server takes it out of the item, writes a line in the Log, and deletes its file. Leaving the
+                page sooner sends the delete at once.
+              </li>
+              <li>Undo puts it back, and nothing changes on disk.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-markup" label="3. Markup" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ul>
+              <li>
+                The epic tool writes it:
+                <code>epic add &lt;epic&gt;#I "..." --picture &lt;file&gt;</code> (repeatable), and
+                <code>--pasted &lt;n&gt;</code>, the pictures pasted last into the session's chat.
+              </li>
+              <li>The files go beside the page, in <code>pictures/</code>, named for the item and the minute:
+                <code>pictures/i9-20261116-1302.png</code>.</li>
+              <li>It holds one <code>&lt;img src alt&gt;</code>, and has no attributes of its own.</li>
+            </ul>
+            <ui-section id="epic-picture-parts" label="Parts" sticky="stack" collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr><th>Name</th><th>What it is</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>base</code></td><td>The box around the picture.</td></tr>
+                    <tr><td><code>delete</code></td><td>The trash, at its top right corner, while the page is reviewed.</td></tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-11-16 against branch <code>epic-engine</code> (T87).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

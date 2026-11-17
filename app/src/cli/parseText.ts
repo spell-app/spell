@@ -43,6 +43,8 @@ export function lineScope(project?: SP.SpellProject): P.Scope {
  * several lines) -- then compile it.
  * - `commit`:  declare what it declares in `scope`, for later lines, as a project's statements do.
  * - Never throws:  a failure is in the result's `error`.
+ * - Words it couldn't read at the end are a failure too, `Don't understand "in the columns"`, as on a line of a file:
+ *   their tree is kept, to show how far it read.
  */
 export function parseText(
   text: string,
@@ -63,6 +65,12 @@ export function parseText(
   if (!match) return { text, rule: tried, tree: [], error: `Doesn't parse as ${rules.join(" or ")}` }
 
   const tree = matchTree(match)
+  // words it didn't read are an error, as on a line of a file:  never silently dropped (epic `language` I152)
+  const left = rules.includes("block") ? "" : unreadWords(text, match, scope)
+  if (left) {
+    const error = SP.Language.of(scope).parserMessage("dont-understand", { text: left })
+    return { text, rule: tried, tree, error }
+  }
   try {
     if (commit) scope.parser?.commit(match)
     const spellTree = P.TreeWriter.treeOf(match.AST)
@@ -70,6 +78,15 @@ export function parseText(
   } catch (error) {
     return { text, rule: tried, tree, error: error instanceof Error ? error.message : String(error) }
   }
+}
+
+/** The words at the end of `text` that `match` didn't read:  `""` when it read them all, or only a comment. */
+function unreadWords(text: string, match: P.Match, scope: P.Scope): string {
+  const read = match.inputText.trim()
+  const all = text.trim()
+  const left = all.startsWith(read) ? all.slice(read.length).trim() : ""
+  const tokens = left ? (scope.parser?.tokenize(left) ?? []) : []
+  return tokens.every((token) => token instanceof P.CommentToken) ? "" : left
 }
 
 /** `spellTree` as indented lines, one per box:  `slot: label  detail`, the slot and detail dim. */

@@ -752,6 +752,12 @@ export type DeclarationPatterns = {
   typePropertyLines: RegExp[]
   /** A line starting a method definition, e.g. `to play a card`. */
   methodLine: RegExp
+  /**
+   * A line defining a type's question, what it matched its head, its body left out (epic `language` I154):
+   * `it "can go up" if`, `"can go up" if`, at a file's top `a card "can go up" if`.
+   * - `iu`, never `g`:  it's tried line by line.
+   */
+  questionLine: RegExp
   /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */
   reopenedType: RegExp
   /**

@@ -20,8 +20,8 @@ const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.
 const CARD_TYPE = 'a "card" is a'
 /** Its line declaring the card's suit, whose node is `suit`. */
 const SUIT = 'its "suit" is one of'
-/** The card's short name, whose comment above it is its docstring. */
-const STATE_DESCRIPTION = "Its short name:  Q♠↓ is the queen of spades, face down"
+/** The card's shorthand, whose comment above it is its docstring. */
+const STATE_DESCRIPTION = "Its shorthand:  Q♠↓ is the queen of spades, face down"
 /** The `##` heading in the game's file that its kinds of pile are under, e.g. a foundation's `suit`:  their section. */
 const PILES_HEADING = "The piles"
 

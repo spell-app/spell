@@ -122,7 +122,7 @@
 
 ==== /OrgAdmin.spell
 ⟪# Org Admin⟫
-⟦// An org's Admin page:  who's in it⟧_, its teams and p_⟦rojects, who manages what and until when, who designs which pages,⟧
+⟦// An org's Admin page:  who's in it, its teams and projects, who manages what and until when, who designs which pages,⟧
 ⟦// which apps its spaces may install, its event stages, and the log of every change.⟧
 ⟦// A toolbar with who's signed in, the sections down the side, and one section at a time beside them.⟧
 ⟦// Where they're kept is in OrgAdmin.api.spell, and only its first line knows.⟧

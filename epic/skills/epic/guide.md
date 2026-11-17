@@ -54,12 +54,20 @@ epic pages link <page> --show     # the page's links, to give the person
 
 An agent that can start background agents keeps its own session free to answer the person, and has them do the work
 (the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
-<path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
-`epic turns run test -- yarn test`.  Else, the steps below, here.
+<path...>`) and merges with `epic worktree merge-main --as <name>`.  Else, the steps below, here.
+Tests come in three tiers, never a full run per commit (epic `epic-engine` T90;  the epic skill's same section):
+1. per change:  only the tests beside what changed (`yarn vp test run <test file>`, or `--project <name>`)
+2. before merging:  each touched folder's UNIT tests, no browser or integration projects, in its turn:
+   in Spell `cd <folder> && epic turns run test -- yarn test:unit` (the kit's own:  `yarn kit:test:unit`, at the root)
+3. after merging into `main`:  the full suite (`epic turns run test -- yarn test`, at the repo's root) only when
+   `epic agents last <name>` exits 0:  no other agent of the epic still runs;  what it finds becomes an issue
+- the parser's speed test only for a change on its hot path (`parser/src/parser/`, the spell rules' matching)
 Each piece of work goes into `main` the moment it's done and merges cleanly (`epic merge <epic>`), never held for the
 phase's end, so the person sees it at once (the same section;  a standing rule).  Never ask whether to merge:
 `epic worktree merge-main` first, always;  failures that aren't this work's don't hold it.  It can't:  say why on its
 item.
+A merge that changed a lockfile or a `package.json` installs the packages in the main checkout itself, then restarts
+its page server and editor, and says so;  a FAILED install leaves the merge in, and prints what to run by hand.
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
 
@@ -67,13 +75,22 @@ After a restart, agents it started are gone:  start each again from its task, as
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
-3. Do the work.  Record as you go:
+3. Do the work.  Record as you go
+   (a title is at most 30 plain words saying what it is, read cold, hours later:
+   nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
-     on them -- the epic skill's "The session answers;  agents build";  a request from another session:  its words
-     and its Context both, so it never sits at "What it says on the tin")
-   - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
+     on them -- the epic skill's "The session answers;  agents build";
+     a picture they pasted with it:  `--pasted <n>`, the n they pasted last into this session's chat, or
+     `--picture <file>`, repeatable:  saved beside the page, shown in the item, deletable there, its file too)
+   - a request another session sent (`epic requests <epic>`):  a TODO or a PHASE, never only a note on the request
+     (epic `epic-engine` T88;  the epic skill's "12. Request")
+     - small, one agent's work:  `epic add <epic>#T "title" --requested --start "<their words>"`, then
+       `epic file <epic>#T<n> <rN>`:  its words, Context and screenshots go into the todo, the request filed there
+     - bigger, or about a to-do phase:  that phase, or a new one, then `epic file <epic>#P<n> <rN>`
+     - a true duplicate only:  `epic file <epic> <rN> "same as T12"`, naming the todo or phase it repeats
+   - a choice made without the person:  `epic add <epic>#J "<title>" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
    - something only the person can check:  `epic add <epic>#M "title" --step "..." --should "..."`
@@ -82,7 +99,16 @@ After a restart, agents it started are gone:  start each again from its task, as
      (`epic pages template epics/plan-doc.md`, "Rules")
 4. Commit the code by path, the message starting `<epic> P3:  ...`, and list it:
    `epic commit <epic>#P3 <sha> "what it did"`.
-5. `epic phase <epic>#P3 done`, and `epic inbox status <epic> --clear`.
+5. The plan check (the idea borrowed from superpowers' spec review, MIT):  hold the phase's diff up against its
+   accepted build plan, with the `plan-check` agent (Codex's custom agent, from `epic plugin install --codex`), else by
+   its agent file's steps yourself (`epic guide --root`, then `plan-check/plan-check-agent.md`).
+   - What the plan said that wasn't built, and what was built that it didn't say.
+   - Each miss:  built now if small, else `epic add <epic>#I "..." --calm`
+     (not calm only when it drops or changes what the person asked for).
+6. `epic phase <epic>#P3 done --done "<ul>...</ul>"`, and `epic inbox status <epic> --clear`.
+   - Proof before done (borrowed from superpowers' verification-before-completion, MIT):  the Done list's last bullet
+     names each check run and what it printed:  `Checked:  yarn test, 1128 passed;  yarn lint, 0 errors`.
+     A check already failing before the phase, or not run, is said so.
 
 ## review -- Take what the person sends from the page
 
@@ -142,6 +168,35 @@ epic turn end
      The rest happens once it's merged:  `git pull` on the base branch, then `epic worktree remove <epic> --branches`.
 3. Say what shipped, with the page's links (`epic pages link <page> --show`).
 
+## superpowers -- With superpowers installed
+
+superpowers (obra/superpowers, MIT) is a plugin of skills for the whole of a piece of work:
+a design, a plan, a worktree, the build, the finish.
+In an epic, the epic does four of those jobs:
+- the epic page is the design and the plan
+- `/epic` made this worktree, and ran the repo's own install command in it (`epic config installCommand`)
+- `/epic done` finishes:  the merge, the changelog, the worktree removed with its servers stopped
+
+So, in an epic, never use these superpowers skills:
+- brainstorming, writing-plans, executing-plans, subagent-driven-development:
+  no design doc or plan file in the repo (`docs/superpowers/`);  questions go on the epic page (`epic add <epic>#Q`)
+- using-git-worktrees:  no second worktree, and no set-up step:
+  never `npm install` (or any other install) in an epic's worktree;  the repo's own install has run
+- finishing-a-development-branch:  never merge, or remove an epic's worktree, with git;
+  `/epic done` (`epic guide done`) is the only finish
+
+Inside a phase, DO use these:
+- test-driven-development, where the repo wants tests first (its AGENTS.md or CLAUDE.md says;  test-first is the repo's call)
+- systematic-debugging, for any issue found;  file it on the page too (`epic add <epic>#I`)
+- verification-before-completion, before a phase closes:  its Done list names the checks run and what they printed
+
+These words reach a session two ways:
+- the session-start hook says them in an epic's worktree whenever superpowers is turned on:
+  in the person's settings, the project's `.claude/settings.json` or `.claude/settings.local.json`,
+  the managed settings, or `claude --plugin-dir`
+- the repo's `AGENTS.md`, which every session reads:  `epic init` offers to put them there when superpowers is on
+  (`epic init --superpowers` without asking), and keeps them current once they are
+
 ## tidy -- Close what other work made obsolete
 
 Only when the person asks (the skill's word:  `$epic tidy`).
@@ -180,7 +235,7 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | a details page (`/details`) | a question that needs a picture | `epic ask create <slug>`, then `epic ask wait <slug>` |
 | a skill, `/epic review` | the workflow's steps, one skill each | Codex:  the same skill, `$epic review`;  another agent:  this guide |
 | background agents (`Agent`, `/bg`) | several items answered at once, the chat free meanwhile | Codex:  ask for sub-agents, one per item, and wait for them (Codex waits, so the chat isn't free);  else one at a time, in this session |
-| the designer and coherence agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer` and `coherence`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
+| the designer, coherence and plan-check agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer`, `coherence` and `plan-check`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
 | messages to another session (`SendMessage`, `ListAgents`) | telling a running session to do something | print the line for the person to type into that session |
 | a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` / `epic inbox wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
 | plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |

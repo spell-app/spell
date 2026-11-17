@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createSignal, flush, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { kebabCase, upperFirst, withArticle } from "spell/util"
+import { kebabCase, upperFirst } from "spell/util"
 import { beforeNextPaint } from "spell/util/timing"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { SP } from "spell/parser/spell"
@@ -302,12 +302,6 @@ function groupName(group: PaletteGroup): string {
   return definitions?.groupNameIn(group, appTexts.lang) ?? group.title ?? group.topic ?? ""
 }
 
-/** A topic's tooltip in the pinned bar:  `Add a text view`, `Añadir una vista de texto` (I229). */
-function groupTip(group: PaletteGroup): string {
-  const topic = groupName(group).toLowerCase()
-  return appTexts.text("paletteGroupTip", { aTopic: withArticle(topic), topic })
-}
-
 /** A step's title for adding `definition`. */
 function stepTitle(definition: ComponentDefinition): string {
   return appTexts.text("partStepAdd", { part: definition.name })
@@ -355,7 +349,9 @@ function thisGroupMatches(words: string): boolean {
 }
 
 /**
- * The top bar's `+`:  opens the palette, a menu with its search;  kept open too, beside the pinned bar.
+ * The top bar's "+ Add a View":  opens the palette, a menu with its search;  kept open too, beside the pinned bar.
+ * - Its plus, then its words, in the round pill its neighbours have, as wide as its words (epic `editor` I250, C5:
+ *   "Change plus to `+ Add a View`"):  no tooltip, the words say it.
  * - An item of the Run | Edit group, right after Inspect app (`<ModeButtons add>`;  epic `editor` T83:
  *   "Move `add` to the immediate right of the inspector crosshair"), so it stands as its neighbours do.
  * - It opens a menu, never becomes the mode chosen (its `aria-haspopup`).
@@ -372,12 +368,12 @@ export function AddPartButton(): JSX.Element {
         icon="plus"
         appearance="circular"
         class="AddPartButton"
-        label={appTexts.text("addPart")}
-        {...barTooltip(appTexts.text("addViewTip"))}
         aria-haspopup="menu"
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
-      />
+      >
+        <span class="AddViewText">{appTexts.text("paletteAddView")}</span>
+      </ui-item>
       <ui-popup
         for={ADD_BUTTON_ID}
         open-on="click"
@@ -395,17 +391,19 @@ export function AddPartButton(): JSX.Element {
   )
 }
 
-/** The `+`'s id, which its popup points at. */
+/** Add a View's id, which its popup points at. */
 const ADD_BUTTON_ID = "AddPartButton"
 
 /**
- * The palette kept open:  the top bar's second row, edge to edge, of its topics' names (epic `editor` T80).
- * - Its pin right before "Add View", pinned:  a click unpins it, closing the bar (epic `editor` T92, I212;  a ✕ by the search before).
- * - Add View, in bold, then each topic's icon and name (epic `editor` T86).
+ * The palette kept open:  the top bar's second row, of its topics' names (epic `editor` T80).
+ * - Centred under the top bar, only as wide as what it holds, its bottom corners rounded (epic `editor` T106).
+ * - Its pin right before "Add a View", pinned:  a click unpins it, closing the bar (epic `editor` T92, I212;  a ✕ by the search before).
+ * - Add a View, in bold, then each topic's icon and name (epic `editor` T86);
+ *   the names have no tooltips:  each says what it is (epic `editor` T107, which dropped I229's).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
  * - App views (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
  *   the window beside the search (`Palette.css`).
- * - Its search, at its end, looks as the popup's does (epic `editor` J140, revisited):
+ * - Its search, right after the last topic (T106), looks as the popup's does (epic `editor` J140, revisited):
  *   every topic with a match opens its menu at once, each listing only its matches, side by side under its name.
  *   - A magnifying glass at its start, a fixed width, and a ✕ inside its end while it holds text (epic `editor` T87).
  *   - Escape, clearing the field, a click elsewhere, or choosing or dragging a row closes them;  typing opens them again.
@@ -416,7 +414,6 @@ export function PaletteStrip(): JSX.Element {
   const [isDismissed, setDismissed] = createSignal(false)
   const words = () => filter().trim().toLowerCase()
   const thisGroup = () => appTexts.text(Palette.isPageShown ? "thisPage" : "paletteAppViews")
-  const thisGroupTip = () => appTexts.text(Palette.isPageShown ? "palettePageViewsTip" : "paletteAppViewsTip")
   const thisMatches = () => !!words() && thisGroupMatches(words())
   const groupMatches = () => (words() ? groupsMatching(words()) : [])
   const isShowingMatches = () => !isDismissed() && (thisMatches() || groupMatches().length > 0)
@@ -491,14 +488,12 @@ export function PaletteStrip(): JSX.Element {
 
   return (
     <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
-      {/* the bar's start, kept empty so its groups stay centred;  the pin sits right before "Add View" (epic `editor` I212) */}
-      <div class="PaletteStripStart" />
       <div class="PaletteStripAdd">
         <PinIcon />
         <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>
         <ui-toolbar appearance="text" class="PaletteStripGroups" aria-label={appTexts.text("addPart")}>
           <Show when={ownViewsFor(editor.file).length || Palette.isPageShown}>
-            <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON} tip={thisGroupTip()}>
+            <PaletteGroupMenu id={THIS_GROUP_MENU_ID} name={thisGroup()} icon={OWN_VIEW_ICON}>
               <ThisGroupRows words={() => ""} />
             </PaletteGroupMenu>
           </Show>
@@ -508,7 +503,6 @@ export function PaletteStrip(): JSX.Element {
                 id={groupMenuId(group)}
                 name={upperFirst(groupName(group))}
                 icon={group.icon ?? GROUP_ICON}
-                tip={groupTip(group)}
               >
                 <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
               </PaletteGroupMenu>
@@ -714,14 +708,7 @@ function matchPlaces(
  * One topic of the pinned bar:  its icon and name, a quiet button;  a click opens its rows under it.
  * - Choosing a row closes it, as a drag from it does (`Palette.closeMenus()`).
  */
-function PaletteGroupMenu(props: {
-  id: string
-  name: string
-  icon: string
-  /** its tooltip:  what a row of it adds, `Add a text view` (I229) */
-  tip: string
-  children: JSX.Element
-}): JSX.Element {
+function PaletteGroupMenu(props: { id: string; name: string; icon: string; children: JSX.Element }): JSX.Element {
   return (
     <>
       <ui-item
@@ -731,7 +718,6 @@ function PaletteGroupMenu(props: {
         icon={props.icon}
         aria-haspopup="menu"
         aria-label={props.name}
-        {...barTooltip(props.tip)}
       >
         {props.name}
       </ui-item>
