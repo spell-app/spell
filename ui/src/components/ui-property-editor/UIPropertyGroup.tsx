@@ -5,7 +5,7 @@ import { E } from "spell/ui/core"
 // the family barrel, not the leaf:  the lib build then imports `ui-panel.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-panel>`, and `<ui-section>` / `<ui-sections>`:  a group is a panel's band)
 import { UIPanel } from "spell/ui/components/ui-panel"
-import type { SectionVocabulary } from "spell/ui/components/ui-section/UISection.types"
+import { FoldIconPlace, type SectionVocabulary } from "spell/ui/components/ui-section/UISection.types"
 import { UIProperty } from "./UIProperty"
 import { COLUMNS_PROPERTY, UIPropertyEditor } from "./UIPropertyEditor"
 import { propertyGroupVocabulary } from "./UIPropertyGroup.en"
@@ -36,8 +36,10 @@ export class DOMPropertyGroupElement extends E.DOMLoadableBodyElement {
  *
  * - It IS a `<ui-section>`, drawn as a panel's SUB-HEAD BAND (it extends `UIPanel`, which extends `UISection`):
  *   the same attributes, slots, parts, events and folding.
- *   - Its title a band across its editor (small capitals, tinted, a hairline above), the chevron at its far end:
+ *   - Its title a band across its editor (small capitals, tinted, a hairline above):
  *     the theme editor's bands (Owen:  "Property panels should have this styling for section headers").
+ *   - Its chevron before the title, as a pane's bar has it (Owen, 2026-11-16, epic `editor` I239:
+ *     "The section headers need to have their expand icons on the left");  a panel's band keeps its at the far end.
  *   - The band reaches out through the panel padding around it (`--ui-panel-padding`), to its container's edges.
  *   - All but `source`:  a group's properties come from its editor.
  *   - Its `select` picks its part of the editor's page (P6).
@@ -59,6 +61,8 @@ export class UIPropertyGroup extends UIPanel {
     styleSheets: { ...UIPanel.prototype.elementSetup.styleSheets, group: groupCSS },
     DOMElement: DOMPropertyGroupElement
   } satisfies Partial<E.ElementSetup>
+  // the chevron before the title (a panel's default is its far end):  `fold-icon="end"` moves it back
+  @E.proto static defaultFoldIcon: FoldIconPlace = FoldIconPlace.start
 
   ////////////////
   // ## Errors and changes

@@ -1853,10 +1853,9 @@ function knownPanels<Card extends InspectorCardId = InspectorPanel>(
 
 /**
  * One of the properties card's folding bands:  a group of a Spell UI element's fields, its Events or Actions,
- * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded),
- * or one of the Code card's rows, a project's each (`code:<project>:event|on click`).
+ * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded).
  */
-export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}` | `code:${string}`
+export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}`
 
 /** The properties card's folded sections (remembered:  `FOLDED_GROUPS_PREF`). */
 const [foldedGroups, setFoldedGroups] = createSignal<readonly InspectorBand[]>(

@@ -12,7 +12,6 @@ import {
   isThing,
   itemsOf,
   partKeysFor,
-  type InspectorBand,
   type InspectorCardId,
   type PartRow,
   type SlicePlace
@@ -661,11 +660,10 @@ const ROWS_OPEN_PREF = "inspector:rowsOpen"
  * - Then a thing's actions (`InspectorActions.of()`), each its signature (`<ActionSignature>`) and its code.
  * - Each one's code is the code editor on its lines of the file (`<CodeSlice>`):  typing there is typing in the file.
  * - Each drawn as the code pane draws the same block (`CodeCard.css`, epic `editor` T98):  its head a band in its part of
- *   speech's colour, what was typed a white pill on it, its code on the paper under it, a rail down its left;
- *   its chevron the code pane's fold arrow's size
+ *   speech's colour, what was typed a white pill on it, its code on the paper under it, a rail down its left.
  *   Code it can't find in the file shows as written, to read.
- * - Each folds on its own, by its words, remembered for the project
- *   (`rowFold()`, Owen:  "event handlers / actions should be collapsible").
+ * - Always open, with no chevron (Owen, 2026-11-16, epic `editor` I240:  "take out the collapse markers inside the
+ *   code blocks, too much visual noise and leads to more horizontal scrolling");  they folded on their own before.
  * - Its header's Add Event and Add Action, icon and words (Owen, 2026-11-15, epic `editor` T79;  a bare "+" before):
  *   - Add Event:  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *     handler in its place (`Inspector.addEvent()`), which then takes the cursor
@@ -826,26 +824,9 @@ function sameWords(a: string, b: string): boolean {
 }
 
 /**
- * One of the Code card's rows, folded or not, remembered for the project by `key` (`event|on click`):
- * its `<ui-section>`'s `open`, and `follow`, its ref, which hears it fold.
- */
-function rowFold(key: string): { open: () => "false" | undefined; follow: (section: HTMLElement) => void } {
-  const band: InspectorBand = `code:${editor.project?.path ?? ""}:${key}`
-  return {
-    // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
-    open: () => (Inspector.isGroupFolded(band) ? "false" : undefined),
-    follow: (section) => {
-      // its own:  a section inside it (none today) would send these too
-      on("ui-closing", (event) => event.target === section && Inspector.setGroupFolded(band, true))(section)
-      on("ui-opening", (event) => event.target === section && Inspector.setGroupFolded(band, false))(section)
-    }
-  }
-}
-
-/**
  * One of a part's events or abilities:  its icon and words, then its code, in the file (`<WrittenCode>`).
  * - An event's icon a bolt;  an ability's a hand.
- * - An ability with no condition (`it can be dragged`):  its words alone, nothing to fold.
+ * - An ability with no condition (`it can be dragged`):  its words alone.
  * - Where its code is, read once as it's drawn:  its editor follows its lines from then on.
  */
 function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
@@ -855,19 +836,11 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
     place: Inspector.placeOfEvent(props.element, props.row),
     isAdded: Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.row.key)
   }))
-  const { open: foldOpen, follow: followFold } = rowFold(untrack(() => `${props.row.kind}|${props.row.key}`))
   // once drawn:  a write while drawing is refused
   if (isAdded) queueMicrotask(() => Inspector.tookCursor())
   const hasCode = () => !!(place || props.row.code)
   return (
-    <ui-section
-      class={["InspectorEvent", "bubbly", props.row.kind]}
-      level="3"
-      fold-icon="start"
-      collapsible={hasCode() ? "" : undefined}
-      open={hasCode() ? foldOpen() : undefined}
-      ref={followFold}
-    >
+    <ui-section class={["InspectorEvent", "bubbly", props.row.kind]} level="3">
       <span slot="label" class="InspectorEventWords">
         <ui-icon name={isEvent ? EVENT_ICON : ABILITY_ICON} />
         <BandWords words={props.row.words} />
@@ -931,18 +904,10 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
     place: Inspector.placeOfAction(props.thing, props.action),
     isAdded: Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.action.words)
   }))
-  const { open: foldOpen, follow: followFold } = rowFold(untrack(() => `action|${props.action.name}`))
   // once drawn:  a write while drawing is refused
   if (isAdded) queueMicrotask(() => Inspector.tookCursor())
   return (
-    <ui-section
-      class="InspectorEvent bubbly action"
-      level="3"
-      fold-icon="start"
-      collapsible={place ? "" : undefined}
-      open={place ? foldOpen() : undefined}
-      ref={followFold}
-    >
+    <ui-section class="InspectorEvent bubbly action" level="3">
       <span slot="label" class="InspectorEventWords">
         <ActionSignature thing={props.thing} action={props.action} />
       </span>
