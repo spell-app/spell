@@ -70,6 +70,7 @@ export class Dragging {
     window.addEventListener("pointercancel", this.onCancel, listening)
     window.addEventListener("keydown", this.onKey, { ...listening, capture: true })
     window.addEventListener("blur", this.onBlur, listening)
+    if (this.isTouch) window.addEventListener("touchmove", this.onTouchMove, { ...listening, passive: false })
   }
 
   /** Where the press started. */
@@ -121,6 +122,17 @@ export class Dragging {
     Dragging.send(this.element, "drag", event)
     if (this.options.placing) return this.options.placing(event.clientX, event.clientY)
     this.moveOver(Dragging.dropTargetAt(this.element, event.clientX, event.clientY), event)
+  }
+
+  /**
+   * A finger pressing a draggable thing never scrolls the page:  it drags.
+   * - Its owner's `touch-action: none` should say so, but Chrome loses it over text whose parent draws no box of its own
+   *   (`display: contents`):  slotted text, e.g. a card's letter in its `<ui-text>`, so the page scrolled under the finger
+   *   (epic `language` T157).
+   * - Only while this press lasts:  a finger anywhere else scrolls as ever.
+   */
+  private readonly onTouchMove = (event: TouchEvent) => {
+    if (event.cancelable) event.preventDefault()
   }
 
   /** The pointer is over `target` now:  `dragleave` on the one it left, `dragenter` on a new one, `dragover` on it. */

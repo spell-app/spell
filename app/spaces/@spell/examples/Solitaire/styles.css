@@ -13,6 +13,8 @@
   --card-height: 1.359;
   /* down a column, how much of each card shows under the next:  its rank and suit */
   --card-step-down: 0.2;
+  /* the most cards a column can hold:  six face down, then a king to an ace face up */
+  --longest-column: 19;
 }
 
 /* The table:  green felt, as on a casino's card table */
@@ -131,10 +133,32 @@ solitaire-card::part(back) {
     0 0 0.06em 0.025em rgb(150 80 255 / 0.55);
 }
 
-/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */
+/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it,
+   its column always as tall as the longest it can be, so the board never grows as it fills */
 [layout="vertical"]::before {
-  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));
+  padding-top: calc(
+    100% * var(--card-height) * (1 + (max(var(--count, 1), var(--longest-column)) - 1) * var(--card-step-down))
+  );
 }
 [layout="vertical"] > * {
   margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));
+}
+
+/* On a phone (Spell's phone:  a finger on a small screen), the game takes the whole width:
+   the bar half as tall, its title half as big, so the actions' icons fit beside it;
+   the board 4px inside the felt, with 4px between its piles */
+@media (pointer: coarse) and ((width < 600px) or (height < 600px)) {
+  solitaire-app > ui-segment {
+    --ui-segment-padding: 4px 8px;
+    --ui-text-size-big: 1;
+    --ui-menu-min-height: 0;
+    --ui-toolbar-pill-item-padding: 0.3em 0.4em;
+    --ui-menu-item-min: 24px;
+  }
+  solitaire-app > ui-container {
+    --ui-container-mobile-gutter: 0;
+    --ui-container-lightly-padded: 4px;
+    --ui-grid-very-compact-gutter: 4px;
+    --ui-grid-very-compact-row-spacing: 4px;
+  }
 }

@@ -44,3 +44,24 @@ describe("Dragging's cursor", () => {
     letGo()
   })
 })
+
+describe("Dragging with a finger", () => {
+  const element = document.body.appendChild(document.createElement("div"))
+  const at = { clientX: 10, clientY: 10, pointerId: 2, pointerType: "touch", bubbles: true }
+  /** A finger's move, as the browser sends it while it may still scroll:  `true` if something stopped the scroll. */
+  const fingerMoved = () => {
+    const move = new TouchEvent("touchmove", { cancelable: true, bubbles: true })
+    window.dispatchEvent(move)
+    return move.defaultPrevented
+  }
+
+  test("a press on a draggable thing never scrolls the page, until the finger lets go;  a mouse's changes nothing", () => {
+    new Dragging(element, new PointerEvent("pointerdown", at), { onDrop: () => {} })
+    expect(fingerMoved()).toBe(true)
+    window.dispatchEvent(new PointerEvent("pointerup", at))
+    expect(fingerMoved()).toBe(false)
+    const letGo = dragWith(element)
+    expect(fingerMoved()).toBe(false)
+    letGo()
+  })
+})

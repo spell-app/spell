@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page } from "playwright"
+import { chromium, devices, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { EDITOR, SERVING } from "./runningEditor"
@@ -111,4 +111,91 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire", { timeout: 240_000 }, 
       expect(after[ace.suit]).toBe(1)
     })
   }
+})
+
+/**
+ * A finger dragging a card on a phone moves the card, not the page (epic `language` T157):
+ * the page is made long, as spell.app's is, so a finger could scroll it.
+ * - Chrome loses the card's `touch-action: none` over its letter, slotted text in a `<ui-text>`:
+ *   `Dragging` stops the browser's scrolling itself while a finger presses a draggable thing.
+ * - And a finger on the felt still scrolls the page.
+ * - Real touches, through the browser's own input (`Input.dispatchTouchEvent`), so the browser decides to scroll.
+ */
+describe.skipIf(!SERVING)("dragging a card in Solitaire with a finger, on a phone", { timeout: 120_000 }, () => {
+  let browser: Browser
+  let page: Page
+  let swipe: (from: { x: number; y: number }, by: number) => Promise<void>
+
+  beforeAll(async () => {
+    browser = await chromium.launch()
+    const context = await browser.newContext({ ...devices["iPhone 13"] })
+    page = await context.newPage()
+    const cdp = await context.newCDPSession(page)
+    const touch = (type: string, x = 0, y = 0) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] })
+    swipe = async ({ x, y }, by) => {
+      await touch("touchStart", x, y)
+      for (let step = 1; step <= 10; step++) {
+        await touch("touchMove", x, y - (by * step) / 10)
+        await page.waitForTimeout(16)
+      }
+      await touch("touchEnd")
+      await page.waitForTimeout(500)
+    }
+    await page.goto(`${EDITOR}run/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await page.waitForSelector("solitaire-card", { timeout: 60_000 })
+    await page.waitForTimeout(6000)
+    await page.evaluate(() => {
+      document.body.style.height = "auto"
+      document.body.style.paddingBottom = "3000px"
+    })
+    // loading the editor and dealing take longer than a hook's usual 10s
+  }, 90_000)
+  afterAll(async () => {
+    await browser?.close()
+  })
+
+  /** Where to press:  the last face-up card that can be dragged, or the felt below the cards. */
+  const spotOf = (what: "card" | "felt") =>
+    page.evaluate((what) => {
+      const elements: Element[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          elements.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      if (what === "felt") {
+        const box = elements.find(({ localName }) => localName === "solitaire-app")!.getBoundingClientRect()
+        return { x: box.x + box.width / 2, y: Math.min(box.bottom, innerHeight) - 20 }
+      }
+      const card = elements.filter((element) => element.matches("solitaire-column > :state(draggable)")).at(-1)!
+      ;(globalThis as { pressed?: Element }).pressed = card
+      const box = card.getBoundingClientRect()
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    }, what)
+
+  test("the card follows the finger, and the page stays put", async () => {
+    await page.evaluate(() => scrollTo(0, 0))
+    const card = await spotOf("card")
+    // read where the card is mid-drag:  it slides back once let go, nobody taking it
+    const watching = page.evaluate(
+      () =>
+        new Promise<string>((done) => {
+          const pressed = (globalThis as { pressed?: HTMLElement }).pressed!
+          const watch = () => (pressed.style.translate ? done(pressed.style.translate) : requestAnimationFrame(watch))
+          watch()
+        })
+    )
+    await swipe(card, 150)
+    expect(await watching).not.toBe("")
+    expect(await page.evaluate(() => scrollY)).toBe(0)
+  })
+
+  test("a finger on the felt still scrolls the page", async () => {
+    await page.evaluate(() => scrollTo(0, 0))
+    await swipe(await spotOf("felt"), 200)
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(50)
+  })
 })
