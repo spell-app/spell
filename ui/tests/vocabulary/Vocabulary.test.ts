@@ -175,6 +175,7 @@ describe("Vocabulary.define() with the English identity dictionary", () => {
       "label",
       "movable",
       "resizable",
+      "on-platform",
       "checked"
     ])
     expect(localized.attributes.get("checked")).toBe(CARD.attributes[5])

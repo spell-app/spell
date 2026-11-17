@@ -6,18 +6,27 @@
  *   - `tablet`:  a finger is the main pointer, and the screen is big both ways
  *   - `desktop`:  a mouse or a trackpad is the main pointer (or none at all)
  * - Media queries, so CSS can use them as they are:
- *   Spell UI's `reset.css` hides an element whose shared `only-on-platform` leaves this one out,
+ *   Spell UI's `reset.css` hides an element whose shared `on-platform` leaves this one out,
  *   live as the window is resized or the device turned, with no script per element.
  *   Its queries MUST match these;  `platform.test.ts` checks they do.
  * - Generic, no DOM needed to import it:  outside a browser it's always `desktop`.
  * - Taken by file, `spell/util/platform`, in no barrel.
  */
 
+import { commaList } from "./string"
+
 /** Every platform, in the order docs list them. */
 export const PLATFORMS = ["phone", "tablet", "desktop"] as const
 
 /** A kind of device:  `phone`, `tablet` or `desktop`. */
 export type Platform = (typeof PLATFORMS)[number]
+
+/** Each platform's name, any case. */
+const PLATFORM_WORD = {
+  phone: /^phone$/i,
+  tablet: /^tablet$/i,
+  desktop: /^desktop$/i
+} as const satisfies Record<Platform, RegExp>
 
 /**
  * The media query each platform matches:  exactly one matches at a time.
@@ -39,20 +48,16 @@ export function currentPlatform(): Platform {
   return PLATFORMS.find((platform) => matchMedia(PLATFORM_QUERIES[platform]).matches) ?? "desktop"
 }
 
-/** Each platform's name as a whole word of a list, any case, between commas or spaces. */
-const PLATFORM_WORDS = Object.fromEntries(
-  PLATFORMS.map((platform) => [platform, new RegExp(`(^|[\\s,])${platform}($|[\\s,])`, "i")])
-) as Readonly<Record<Platform, RegExp>>
-
 /**
- * The platforms a list names, as `only-on-platform` takes them:  `"desktop,tablet"`, `"phone tablet"`.
- * - Commas and spaces both separate;  case is ignored.
+ * The platforms a list names, as `on-platform` takes them:  `"desktop,tablet"`, `"desktop, tablet"`.
+ * - A comma list (`commaList()`):  a space after a comma is ignored;  case is ignored.
  * - A word that's no platform is left out.
- * - `undefined` for no list (`undefined`, or nothing but separators):  every platform.
+ * - `undefined` for no list (`undefined`, or nothing but commas and spaces):  every platform.
  */
 export function platformsIn(list: string | undefined): ReadonlySet<Platform> | undefined {
-  if (!list || !/[^\s,]/.test(list)) return undefined
-  return new Set(PLATFORMS.filter((platform) => PLATFORM_WORDS[platform].test(list)))
+  const words = commaList(list)
+  if (!words.length) return undefined
+  return new Set(PLATFORMS.filter((platform) => words.some((word) => PLATFORM_WORD[platform].test(word))))
 }
 
 /**

@@ -133,6 +133,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
     `void editor.compileApp().catch((error) => editor.showError(error))`, plus a comment when the why isn't
     obvious.
 - **No unnecessary case normalization** (`.toLowerCase()`) for values with a defined format (env var names).
+- **Comma-separated lists, in attributes, settings and text people type, are split with `commaList()`
+  (`spell/util/string`):**  a space after a comma is ignored, empties dropped.  (Owen, 2026-11-17, epic `mockup` T53.)
 - **Formatting is oxfmt's** (through `vp fmt`):  120-char width, 2-space indent, no semicolons, double quotes, no
   trailing commas.
   - never hand-format against it;  `yarn format` settles it

@@ -248,11 +248,14 @@ const NO_TEXT = /^\s*(?:false|no|0)?\s*$/i
  */
 export function rowsMatching(rows: PlaceRow[], filter: Record<string, unknown>): PlaceRow[] {
   const wanted = Object.entries(filter)
-  return rows.filter((row) => wanted.every(([field, value]) => holdsValue(row[field], value)))
+  return rows.filter((row) => wanted.every(([field, value]) => holdsFilterValue(row[field], value)))
 }
 
-/** Does a row's `held` value match a filter's `value`:  see `rowsMatching()`. */
-function holdsValue(held: unknown, value: unknown): boolean {
+/**
+ * Does a row's `held` value match a filter's `value`:  see `rowsMatching()`.
+ * - Also how a read in the parser's core tells whether a changed row still fits its filter.
+ */
+export function holdsFilterValue(held: unknown, value: unknown): boolean {
   if (value === "") return (held ?? "") === ""
   if (held === value) return true
   if (value === true) return typeof held === "string" && YES_TEXT.test(held)

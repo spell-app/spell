@@ -13,7 +13,7 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
  *   a hard shadow behind its letters, and how wide its box is where it sits
  * - `movable` and `resizable` (epic `mockup` P14, J35):  people drag it to a new place, or its corner to resize it
  *   (`MoveAndResize`, in `spell/element`)
- * - `only-on-platform` (epic `mockup` T53):  shown only on the devices it names, `phone`, `tablet`, `desktop`
+ * - `on-platform` (epic `mockup` T53):  shown only on the devices it names, `phone`, `tablet`, `desktop`
  *   (`spell/util/platform`);  `reset.css` hides it everywhere else
  * - `UIComponent` reads them ("Shared states", "Shown or hidden"):
  *   so `<ui-menu disabled>`, `<ui-table loading>`, `<ui-message visible="false">`
@@ -257,11 +257,11 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
       "is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
   },
   {
-    name: "only-on-platform",
+    name: "on-platform",
     group: "behaviour",
     kind: "string",
     description:
-      'Shown only on these devices, a list:  `only-on-platform="desktop,tablet"` hides it on phones.  ' +
+      'Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  ' +
       "`phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch " +
       "screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at " +
       "once.  For what a device can't do (a phone has no screen capture), or has no room for."
@@ -296,9 +296,9 @@ const SHARED_STATES: readonly StateSpec[] = [
   },
   { name: "ready", description: "Ready to go:  drawn with its styles (its `ready` promise has resolved)." },
   {
-    name: "only-on-platform",
+    name: "on-platform",
     description:
-      "`only-on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  " +
+      "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  " +
       "On any other device it's hidden."
   }
 ]

@@ -70,7 +70,7 @@ export class Browser {
   /**
    * The kind of device:  `phone`, `tablet` or `desktop` (`spell/util/platform`, the one place that decides it).
    * - Live, as the window is resized or the device turned.
-   * - What the shared `only-on-platform` hides elements by.
+   * - What the shared `on-platform` hides elements by.
    */
   get platform(): Platform {
     return currentPlatform()

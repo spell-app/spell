@@ -1,3 +1,4 @@
+import { commaList } from "spell/util/string"
 import type { PageDevice, PageSchemes } from "./UIThemeEditor.types"
 
 /****************
@@ -23,7 +24,7 @@ export class BenchAddress {
       theme: params.get(PARAMS.theme) || undefined,
       schemes: SCHEMES.includes(scheme as PageSchemes) ? (scheme as PageSchemes) : undefined,
       isSwapped: params.has(PARAMS.swap) ? params.get(PARAMS.swap) === ON : undefined,
-      pages: pages ? pages.split(",").filter(Boolean) : undefined,
+      pages: pages ? commaList(pages) : undefined,
       device: params.has(PARAMS.phone) ? (params.get(PARAMS.phone) === ON ? "phone" : "desk") : undefined
     }
   }

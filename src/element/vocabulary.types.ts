@@ -600,7 +600,7 @@ export type SharedDictionary = {
         | "label"
         | "movable"
         | "resizable"
-        | "only-on-platform",
+        | "on-platform",
         string
       >
     >

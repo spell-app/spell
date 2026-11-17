@@ -913,23 +913,23 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   ////////////////
-  // ## Only on some platforms:  only-on-platform
+  // ## Only on some platforms:  on-platform
   //
-  // The shared `only-on-platform` (epic `mockup` T53):  the element shows only on the devices it names,
-  // `phone`, `tablet`, `desktop` (`spell/util/platform`), e.g. `only-on-platform="desktop,tablet"`.
-  // - This class only turns the list into states:  `:state(only-on-platform)`, and `:state(on-<platform>)` for each.
+  // The shared `on-platform` (epic `mockup` T53):  the element shows only on the devices it names,
+  // `phone`, `tablet`, `desktop` (`spell/util/platform`), e.g. `on-platform="desktop,tablet"`.
+  // - This class only turns the list into states:  `:state(on-platform)`, and `:state(on-<platform>)` for each.
   // - `reset.css` does the hiding, in a media query per platform:
   //   so it follows a resize or a turn of the device at once, with no script running.
   // - Not the same as `hidden`:  `visible` still says `true`, and turning the device round may show it.
   ////////////////
 
-  /** The shared `only-on-platform`'s list, as written;  `undefined`:  every platform. */
+  /** The shared `on-platform`'s list, as written;  `undefined`:  every platform. */
   get sharedPlatforms(): string | undefined {
-    return this.sharedText(ONLY_ON_PLATFORM)
+    return this.sharedText(ON_PLATFORM)
   }
 
   /**
-   * `only-on-platform` changed:  its states, which `reset.css` hides it by.
+   * `on-platform` changed:  its states, which `reset.css` hides it by.
    * - SIDE EFFECT:  sets the element's states;  clears them again once the list is gone.
    * - Not on a server:  the static render shows it everywhere.
    */
@@ -938,7 +938,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const { domElement, internalState } = this
     const platforms = platformsIn(list)
     if (isServer || (!platforms && !internalState.wrotePlatforms)) return
-    domElement.setState(ONLY_ON_PLATFORM, !!platforms)
+    domElement.setState(ON_PLATFORM, !!platforms)
     for (const platform of PLATFORMS) domElement.setState(`on-${platform}`, !!platforms?.has(platform))
     internalState.wrotePlatforms = !!platforms
   }
@@ -1556,8 +1556,8 @@ const MOVABLE = "movable"
 /** The shared `resizable`:  people drag its corner to resize it. */
 const RESIZABLE = "resizable"
 const LABEL = "label"
-/** The shared `only-on-platform`, and the state saying it's set. */
-const ONLY_ON_PLATFORM = "only-on-platform"
+/** The shared `on-platform`, and the state saying it's set. */
+const ON_PLATFORM = "on-platform"
 
 /** The attribute naming the container an element joins ("Parent"). */
 const PARENT = "parent"
@@ -1581,7 +1581,7 @@ type InternalState = {
   wroteShadow?: boolean
   /** the shared widths wrote the element's custom properties and states, so later empty ones clear them */
   wroteWidths?: boolean
-  /** the shared `only-on-platform` set the element's states, so a later empty one clears them */
+  /** the shared `on-platform` set the element's states, so a later empty one clears them */
   wrotePlatforms?: boolean
   /** `isVisible` as `onVisibleChange()` last ran with it;  `undefined` before the element first drew */
   wasVisible?: boolean

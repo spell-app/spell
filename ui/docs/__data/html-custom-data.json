@@ -413,10 +413,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -929,10 +929,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -1263,10 +1263,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -1694,10 +1694,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -2462,10 +2462,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -2831,10 +2831,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -3165,10 +3165,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -3506,10 +3506,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -3847,10 +3847,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -4235,10 +4235,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -4899,10 +4899,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -5518,10 +5518,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -6163,10 +6163,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -6751,10 +6751,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -7367,10 +7367,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -7754,10 +7754,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -8290,10 +8290,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -8684,10 +8684,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -9043,10 +9043,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -9864,10 +9864,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -10205,10 +10205,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -10605,10 +10605,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -10946,10 +10946,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -11489,10 +11489,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -11876,10 +11876,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -12217,10 +12217,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -12551,10 +12551,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -12885,10 +12885,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -13240,10 +13240,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -13581,10 +13581,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -13943,10 +13943,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -14376,10 +14376,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -14883,10 +14883,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -15628,10 +15628,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -16047,10 +16047,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -16421,10 +16421,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -16841,10 +16841,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -17224,10 +17224,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -17565,10 +17565,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -18032,10 +18032,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -18507,10 +18507,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -18933,10 +18933,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -19301,10 +19301,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -19773,10 +19773,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -20258,10 +20258,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -20859,10 +20859,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -21409,10 +21409,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -21940,10 +21940,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -22356,10 +22356,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -22757,10 +22757,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -23369,10 +23369,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -23798,10 +23798,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -24171,10 +24171,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -24886,10 +24886,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -25388,10 +25388,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -25818,10 +25818,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -26177,10 +26177,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -26536,10 +26536,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -27168,10 +27168,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -27665,10 +27665,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -28099,10 +28099,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -28599,10 +28599,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -29095,10 +29095,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -29527,10 +29527,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -30295,10 +30295,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -30836,10 +30836,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -31170,10 +31170,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -31631,10 +31631,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -32185,10 +32185,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -32519,10 +32519,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -32998,10 +32998,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -33344,10 +33344,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -34032,10 +34032,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -34380,10 +34380,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -34721,10 +34721,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -35069,10 +35069,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -35430,10 +35430,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -35764,10 +35764,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -36337,10 +36337,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -36928,10 +36928,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -37431,10 +37431,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -38276,10 +38276,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -39018,10 +39018,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -39352,10 +39352,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -39686,10 +39686,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -40034,10 +40034,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -40556,10 +40556,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -40976,10 +40976,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -41459,10 +41459,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -41800,10 +41800,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -42251,10 +42251,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -42730,10 +42730,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -43333,10 +43333,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -43912,10 +43912,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -44597,10 +44597,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -44938,10 +44938,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -45515,10 +45515,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -45958,10 +45958,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -46421,10 +46421,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -46825,10 +46825,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -47159,10 +47159,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -47630,10 +47630,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -48032,10 +48032,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -48373,10 +48373,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -48740,10 +48740,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -49242,10 +49242,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -49583,10 +49583,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -50164,10 +50164,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -50533,10 +50533,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -50895,10 +50895,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -51340,10 +51340,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -51807,10 +51807,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -52321,10 +52321,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -52769,10 +52769,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -53339,10 +53339,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -53694,10 +53694,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -54063,10 +54063,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -54397,10 +54397,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -54810,10 +54810,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -55592,10 +55592,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -56173,10 +56173,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -56514,10 +56514,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -56881,10 +56881,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -57455,10 +57455,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -57960,10 +57960,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -58301,10 +58301,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -58717,10 +58717,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -59051,10 +59051,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -59385,10 +59385,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -59915,10 +59915,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -60310,10 +60310,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -61123,10 +61123,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -61566,10 +61566,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -61951,10 +61951,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -62314,10 +62314,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -62729,10 +62729,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -63158,10 +63158,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -63499,10 +63499,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -63889,10 +63889,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -64263,10 +64263,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]
@@ -64632,10 +64632,10 @@
           }
         },
         {
-          "name": "only-on-platform",
+          "name": "on-platform",
           "description": {
             "kind": "markdown",
-            "value": "Shown only on these devices, a list:  `only-on-platform=\"desktop,tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
           }
         }
       ]

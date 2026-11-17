@@ -567,10 +567,11 @@ export class SpaceFolders {
    * - SIDE EFFECT:  makes its project's `__data/`, for a project that has none yet (`ownFileAt()`)
    */
   private csvFileAt(address: string): CsvPlace | undefined {
-    const known = this.csvFiles.get(address)
-    if (known) return known
+    // asked each time:  its __data/ made again, should someone have removed it
     const file = this.ownFileAt(address)
     if (!file) return undefined
+    const known = this.csvFiles.get(address)
+    if (known) return known
     const place = new CsvPlace({ file, idColumn: CSV_ID_COLUMN, addsColumns: true })
     this.csvFiles.set(address, place)
     return place
@@ -598,10 +599,11 @@ export class SpaceFolders {
    * - `undefined` for one in a space's own folder, or with no folder on disk:  the route answers 404.
    */
   private jsonFileAt(address: string): FilePlace | undefined {
-    const known = this.jsonFiles.get(address)
-    if (known) return known
+    // asked each time:  its __data/ made again, should someone have removed it
     const file = this.ownFileAt(address)
     if (!file) return undefined
+    const known = this.jsonFiles.get(address)
+    if (known) return known
     const place = new FilePlace({ storage: new DiskStorage(dirname(file)), path: basename(file) })
     this.jsonFiles.set(address, place)
     return place

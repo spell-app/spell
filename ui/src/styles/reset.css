@@ -265,24 +265,24 @@
 }
 
 /*
- * The shared `only-on-platform` (`UIComponent`, "Only on some platforms"):  hidden on every device it doesn't name.
+ * The shared `on-platform` (`UIComponent`, "Only on some platforms"):  hidden on every device it doesn't name.
  * - One media query per platform:  `PLATFORM_QUERIES` (`spell/util/platform`), word for word;
  *   `platform.test.ts` checks they match.
  * - Live:  a resize or a turn of the device shows or hides it at once.
  * - Unlayered, as the hiding above.
  */
 @media (pointer: coarse) and ((width < 600px) or (height < 600px)) {
-  :host(:state(only-on-platform):not(:state(on-phone))) {
+  :host(:state(on-platform):not(:state(on-phone))) {
     display: none;
   }
 }
 @media (pointer: coarse) and (width >= 600px) and (height >= 600px) {
-  :host(:state(only-on-platform):not(:state(on-tablet))) {
+  :host(:state(on-platform):not(:state(on-tablet))) {
     display: none;
   }
 }
 @media not (pointer: coarse) {
-  :host(:state(only-on-platform):not(:state(on-desktop))) {
+  :host(:state(on-platform):not(:state(on-desktop))) {
     display: none;
   }
 }

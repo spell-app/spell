@@ -81,10 +81,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /** `column-titles`, one a level:  none without it. */
   get columnTitleList(): string[] {
-    return (this.columnTitles ?? "")
-      .split(",")
-      .map((title) => title.trim())
-      .filter(Boolean)
+    return E.commaList(this.columnTitles)
   }
 
   /** The title over column `index`, 0 for the top rows':  the last title goes on for every deeper column. */

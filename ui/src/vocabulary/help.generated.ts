@@ -2409,5 +2409,5 @@ export const SHARED_HELP: Readonly<Record<string, string>> = {
   movable:
     "People can drag it to a new place inside its container: bare or `both`, `horizontally` or `vertically` for one way only.",
   resizable: "People can drag its corner to resize it: bare or `both`, `horizontally` or `vertically`.",
-  "only-on-platform": 'Shown only on these devices, a list: `only-on-platform="desktop,tablet"` hides it on phones.'
+  "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.'
 }

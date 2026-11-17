@@ -11,6 +11,7 @@
 
 import { parseArgs } from "node:util"
 
+import { commaList } from "spell/util/string"
 import { Terminal } from "spell/element-tools/Terminal"
 import { FlagError, VisualError, type VisualBrowser, type VisualOs } from "./visual.types.ts"
 import { VisualRunner } from "./VisualRunner.ts"
@@ -62,15 +63,15 @@ try {
   if (!oses) throw new FlagError(`--os must be local, linux or both, not "${os}"`)
   if (values.static && values.update) throw new FlagError("--static only reports:  it has no baselines to --update")
   const browsers = new Set<VisualBrowser>()
-  for (const word of values.browsers.split(",")) {
-    const selected = VisualSettings.BROWSER_FLAGS[word.trim()]
+  for (const word of commaList(values.browsers)) {
+    const selected = VisualSettings.BROWSER_FLAGS[word]
     if (!selected) throw new FlagError(`--browsers must be all, chrome, firefox or webkit, not "${word}"`)
     for (const browser of selected) browsers.add(browser)
   }
   if (values.workers !== undefined && !/^\d+%?$/.test(values.workers)) {
     throw new FlagError(`--workers must be a count or a percentage, not "${values.workers}"`)
   }
-  const grep = (values.grep ?? []).flatMap((value) => value.split(",")).map((value) => value.trim())
+  const grep = (values.grep ?? []).flatMap((value) => commaList(value))
   const runner = new VisualRunner({
     oses,
     browsers: VisualSettings.BROWSERS.filter((browser) => browsers.has(browser)),

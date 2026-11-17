@@ -4,10 +4,11 @@ import { cdp, page } from "vite-plus/test/browser"
 import { PLATFORMS, currentPlatform, isOnPlatform, platformsIn } from "spell/util/platform"
 
 describe("platformsIn()", () => {
-  it("reads a list split by commas or spaces, any case", () => {
+  it("reads a comma list, a space after a comma ignored, any case", () => {
     expect([...platformsIn("desktop,tablet")!]).toEqual(["tablet", "desktop"])
+    expect([...platformsIn("desktop, tablet")!]).toEqual(["tablet", "desktop"])
     expect([...platformsIn(" Phone ,  TABLET ")!]).toEqual(["phone", "tablet"])
-    expect([...platformsIn("phone tablet desktop")!]).toEqual([...PLATFORMS])
+    expect([...platformsIn("phone,tablet,desktop")!]).toEqual([...PLATFORMS])
   })
 
   it("leaves out words that are no platform, and whole-word matches only", () => {

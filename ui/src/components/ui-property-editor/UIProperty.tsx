@@ -400,7 +400,7 @@ export class UIProperty extends UIField {
    */
   get choices(): readonly Choice[] | undefined {
     const text = this.optionsText
-    if (text && text.includes(",")) return text.split(",").map((choice) => choice.trim())
+    if (text && text.includes(",")) return E.commaList(text)
     if (text || this.spec?.choicesFrom) return this.loadedChoices
     const spec = this.spec
     const set = spec && E.ValueSets.setFor(spec)

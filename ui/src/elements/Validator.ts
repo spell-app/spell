@@ -241,7 +241,7 @@ export class Validator {
       const number = value.replace(/[\s-]/g, "")
       if (!/^\d+$/.test(number)) return false
       if (typeof types === "string" && types) {
-        const brands = types.split(",").map((type) => this.cards[type.trim()])
+        const brands = E.commaList(types).map((type) => this.cards[type])
         const known = brands.some((card) => card && card.length.includes(number.length) && card.pattern.test(number))
         if (!known) return false
       }
@@ -401,10 +401,10 @@ export class Validator {
     return trim ? text.trim() : text
   }
 
-  /** Number of choices:  the array's length, else comma-separated entries of `value`. */
+  /** Number of choices:  the array's length, else the entries of `value`, a comma list (`commaList()`). */
   count(value: string, raw: E.FieldValue): number {
     if (Array.isArray(raw)) return raw.length
-    return value === "" ? 0 : value.split(",").length
+    return E.commaList(value).length
   }
 
   ////////////////
