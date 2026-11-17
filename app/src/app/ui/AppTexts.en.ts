@@ -318,7 +318,7 @@ export const APP_TEXTS = {
   inspectorNotSavedCode: "Your program works this out for itself, so a change here won't be kept.",
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",
-  inspectorNotSavedNoStart: "Your program doesn't give this a starting value, so a change here won't be kept.",
+  inspectorNotSavedNoStart: "A change here won't be saved.",
   inspectorNotSavedTypeSets: "Every one of the {types} starts with this.\nTo change it, pick All {types} first.",
   inspectorUnsavedAuto: "Spell makes this for you, so a change here can't be kept.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
