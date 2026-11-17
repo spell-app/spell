@@ -1004,8 +1004,8 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     // in a loop's body, written from a function per item:  ends that turn only
     if (!node.value) return this.returnContinues ? "continue" : "return"
-    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
-    if (this.givesNothing(node.value)) return this.bare(node.value)
+    // calling a method that gives nothing:  just the call, as at a body's last line (I47) -- see `returnAfter()`
+    if (this.givesNothing(node.value)) return `${this.bare(node.value)}${this.returnAfter(node)}`
     this.returnsInPlace.set(node, this.mayBeNothing(node.value))
     return this.testBlock(node.value) ?? `return ${this.bare(node.value)}`
   }
