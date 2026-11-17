@@ -759,6 +759,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - the page server:  `GET /api/epics/pages` (`<epic-page>`'s See Also box), and the docs tools' comments routes
         - `epic inbox wait <name>`:  a guide's Send wakes it
         - the docs tools' `GuideChanges` and `PageInboxes` (the pages no epic owns:  `feedback`'s)
+    - FOCUS MODE (epic `epic-engine` T93):  `epic focus on | off | status | summary`, for `/focus` and `/back`
+      - `FocusCommands`:  the verbs;  `on` and `off` print a `TELL:` line for each running epic session (the
+        `sessionsOf` `migrate --notify` uses), never sending one;  `off` lists the epics with news and no session
+      - `FocusSummary`:  what happened on an epic since focus started, on "0. While you were out"'s `NightSummary`,
+        plus its commits on `main` and its requests;  `## Waiting on you` first
+      - the switch is `FocusMode` (`spell/epic/config/FocusMode`):  `focus.json5` in the epic home, the lines each
+        session is told, and the session-start hook's notice ([focus-notice.mjs](../hooks/focus-notice.mjs));
+        plain `node` loads it
     - `StaleFacts` (epic `epic-engine` Q69):  `epic stale`, the facts for judging which open items have gone stale,
       for `/epic tidy`;  it decides nothing;  git runs a fixed few times for a whole page, never per item
     - `EpicTargets` (P15):  what a link to a saga, an epic, a phase or an item finds in a checkout
