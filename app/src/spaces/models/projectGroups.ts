@@ -41,12 +41,16 @@ export const localPerson = {
  */
 export function setLocalPerson(person: { id: string; org: string }): void {
   const group = PROJECT_GROUPS[0]!
-  delete SpellSetup.projectRoots[group.path]
+  const was = group.path
   localPerson.id = person.id
   localPerson.org = person.org
+  if (was === localPerson.address) return
   group.path = localPerson.address as SP.ProjectRootPath
   group.space = localPerson.address
-  SpellSetup.addProjectRoot(group)
+  // the same place in the registry's order, as every list of the groups shows it:  first
+  const roots = Object.values(SpellSetup.projectRoots)
+  for (const path of Object.keys(SpellSetup.projectRoots)) delete SpellSetup.projectRoots[path as SP.ProjectRootPath]
+  for (const spec of roots) SpellSetup.addProjectRoot(spec)
 }
 
 /**

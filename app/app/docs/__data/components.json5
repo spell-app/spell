@@ -3223,6 +3223,10 @@
       ],
       "usedIn": [
         {
+          "name": "NamePage",
+          "file": "src/app/solid/NamePage.tsx"
+        },
+        {
           "name": "ProjectChooser",
           "file": "src/app/pages/ProjectChooser.tsx"
         },
