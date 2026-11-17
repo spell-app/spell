@@ -111,6 +111,8 @@ Your own projects live in your own group, the editor's "Projects" list:  `kim-le
   starting from your git email;  your app's folder remembers it, in `.spell/me.json5`, never committed.
 - In a checkout of Spell itself, with no such file, it's `owen@spell`, and nothing asks.
 - An org's own folders of projects in your spaces folder, `@acme/harbor/`, are groups the home page lists too.
+  - In an app with its org set, the home page shows your own projects and each of those groups first, above the rest;
+    it leaves out the library.
 - The code:  [localPerson.ts](src/spaces/server/node/people/localPerson.ts) and [projectGroups.ts](src/spaces/models/projectGroups.ts).
 
 ## Setting up spaces for your own project
