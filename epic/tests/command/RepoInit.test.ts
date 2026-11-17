@@ -575,7 +575,7 @@ describe("epic init:  the epic repo (epic-friend P4)", () => {
   })
 })
 
-describe('epic init --local (epic-engine P69:  a colleague "doesn\'t want any of it in the harbor repo")', () => {
+describe('epic init --local (epic-engine P69:  a colleague "doesn\'t want any of it in the work repo")', () => {
   test("nothing in the repo:  .gitignore byte for byte, no commit, git status empty;  the config and links excluded", async () => {
     const app = codeRepo("local")
     writeFileSync(join(app, ".gitignore"), "node_modules/\n")
@@ -713,16 +713,16 @@ describe('epic init --local (epic-engine P69:  a colleague "doesn\'t want any of
 
 describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P69:  "Ask a Maintainer")', () => {
   test("refused:  says who has to do what, and the Maintainer's commands;  no push-by-hand;  sharing isn't working", async () => {
-    const app = codeRepo("harbor")
-    git(app, "remote", "add", "origin", "git@gitlab.acme.com:team/harbor.git")
+    const app = codeRepo("acme-app")
+    git(app, "remote", "add", "origin", "git@gitlab.acme.com:team/acme-app.git")
     const lab = stubGlab(app, { refuse: true })
     const report = await withGlab(lab, () => new RepoInit({ main: app }).init({ color: "green" }))
-    const branch = git(join(TEMP, "harbor", "harbor.epics"), "branch", "--show-current").trim()
+    const branch = git(join(TEMP, "acme-app", "acme-app.epics"), "branch", "--show-current").trim()
     expect(report.remote).toMatchObject({
       action: "made",
-      repo: "team/harbor.epics",
-      address: "git@lab.acme.test:team/harbor.epics.git",
-      refusal: { membersPage: "https://gitlab.acme.com/team/harbor.epics/-/project_members", branch }
+      repo: "team/acme-app.epics",
+      address: "git@lab.acme.test:team/acme-app.epics.git",
+      refusal: { membersPage: "https://gitlab.acme.com/team/acme-app.epics/-/project_members", branch }
     })
     const lines = said(report)
     expect(lines).toContain(
@@ -730,12 +730,12 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
     )
     expect(lines).toContain(
       `  A Maintainer has to push the first commit and allow pushes to ${branch}.  ` +
-        "Find one:  https://gitlab.acme.com/team/harbor.epics/-/project_members"
+        "Find one:  https://gitlab.acme.com/team/acme-app.epics/-/project_members"
     )
-    expect(lines).toContain("    git clone git@lab.acme.test:team/harbor.epics.git")
+    expect(lines).toContain("    git clone git@lab.acme.test:team/acme-app.epics.git")
     expect(lines).toContain(`    git push -u origin HEAD:${branch}`)
     expect(lines).toContain(
-      `    glab api --hostname gitlab.acme.com --method DELETE projects/team%2Fharbor.epics/protected_branches/${branch}`
+      `    glab api --hostname gitlab.acme.com --method DELETE projects/team%2Facme-app.epics/protected_branches/${branch}`
     )
     expect(lines.some((line) => /Every teammate needs to push to/.test(line))).toBe(true)
     expect(lines.some((line) => /push it by hand/.test(line))).toBe(false)
@@ -748,9 +748,9 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
     expect(readFileSync(lab.log, "utf8")).not.toMatch(/--method DELETE/)
 
     // the Maintainer does as it says:  the rule lifted, an empty first commit
-    rmSync(join(TEMP, "lab", "team", "harbor.epics.git", "hooks", "pre-receive"))
-    const maintainer = join(TEMP, "harbor", "maintainer")
-    git(TEMP, "clone", "-q", "git@lab.acme.test:team/harbor.epics.git", maintainer)
+    rmSync(join(TEMP, "lab", "team", "acme-app.epics.git", "hooks", "pre-receive"))
+    const maintainer = join(TEMP, "acme-app", "maintainer")
+    git(TEMP, "clone", "-q", "git@lab.acme.test:team/acme-app.epics.git", maintainer)
     git(
       maintainer,
       "-c",
@@ -767,19 +767,19 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
     const again = await withGlab(lab, () => new RepoInit({ main: app }).init())
     expect(again.remote).toMatchObject({ action: "already", pushed: true })
     expect(again.remote.refusal).toBeUndefined()
-    const bare = join(TEMP, "lab", "team", "harbor.epics.git")
+    const bare = join(TEMP, "lab", "team", "acme-app.epics.git")
     const log = git(TEMP, "--git-dir", bare, "log", "--format=%s", branch).trim().split("\n")
     expect(log.at(-1)).toBe("First commit of the epic repo")
     expect(log).toContain("The epic repo:  empty")
-    const colorFile = relative(join(TEMP, "harbor", "harbor.epics"), report.color!.file!)
+    const colorFile = relative(join(TEMP, "acme-app", "acme-app.epics"), report.color!.file!)
     expect(git(TEMP, "--git-dir", bare, "show", `${branch}:${colorFile}`)).toMatch(/green/)
-    expect(said(again).some((line) => /^ {2}pushed to +git@lab\.acme\.test:team\/harbor\.epics\.git$/.test(line))).toBe(
+    expect(said(again).some((line) => /^ {2}pushed to +git@lab\.acme\.test:team\/acme-app\.epics\.git$/.test(line))).toBe(
       true
     )
     expect(said(again).some((line) => /Sharing isn't working/.test(line))).toBe(false)
-    expect(said(again)).toContain("Your plans are shared now:  pushed to git@lab.acme.test:team/harbor.epics.git")
+    expect(said(again)).toContain("Your plans are shared now:  pushed to git@lab.acme.test:team/acme-app.epics.git")
     expect(readFileSync(lab.log, "utf8")).toMatch(
-      /--method DELETE projects\/team%2Fharbor\.epics\/protected_branches\//
+      /--method DELETE projects\/team%2Facme-app\.epics\/protected_branches\//
     )
   })
 })
@@ -825,9 +825,9 @@ describe("epic init:  first epic at work (epic-engine P71)", () => {
   })
 
   test("no terminal takes the suggestion:  the README's, written in the config, the summary naming it and its source", async () => {
-    const app = codeRepo("harbor-like")
+    const app = codeRepo("acme-like")
     writeFileSync(join(app, "uv.lock"), "")
-    writeFileSync(join(app, "README.md"), "# harbor\n\n```\nuv sync --all-packages --all-extras\n```\n")
+    writeFileSync(join(app, "README.md"), "# acme-app\n\n```\nuv sync --all-packages --all-extras\n```\n")
     const lines = await printed(() => offline(app).run(["--name", "Bo", "--no-remote", "--no-server", "--no-commit"]))
     expect(lines).toContain("> Install command:  uv sync --all-packages --all-extras  (from README.md)")
     const config = new EpicConfig(app)

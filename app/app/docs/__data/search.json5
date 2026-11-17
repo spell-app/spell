@@ -127,9 +127,9 @@
       ]
     },
     {
-      "path": "FileDropdown.html",
-      "title": "FileDropdown",
-      "summary": "The open project's files, as a dropdown showing the open one.",
+      "path": "FileEditor.html",
+      "title": "FileEditor",
+      "summary": "A CodeMirror editor on one Spell file at a time, kept in step with it.",
       "sections": [
         {"id":"1-what-it-looks-like","title":"1. What it looks like"},
         {"id":"2-using-it","title":"2. Using it"},
@@ -138,9 +138,9 @@
       ]
     },
     {
-      "path": "FileEditor.html",
-      "title": "FileEditor",
-      "summary": "A CodeMirror editor on one Spell file at a time, kept in step with it.",
+      "path": "FileTabs.html",
+      "title": "FileTabs",
+      "summary": "The open project's files, as tabs over the code, and a button at their end listing them all.",
       "sections": [
         {"id":"1-what-it-looks-like","title":"1. What it looks like"},
         {"id":"2-using-it","title":"2. Using it"},
@@ -171,6 +171,17 @@
       ]
     },
     {
+      "path": "MenuBar.html",
+      "title": "MenuBar",
+      "summary": "The top bar's menus: Spell's, listing the group's projects, then the project's, File, Edit, View, Run and Help.",
+      "sections": [
+        {"id":"1-what-it-looks-like","title":"1. What it looks like"},
+        {"id":"2-using-it","title":"2. Using it"},
+        {"id":"3-props","title":"3. Props, and where it's drawn"},
+        {"id":"4-its-code","title":"4. Its code"}
+      ]
+    },
+    {
       "path": "Notice.html",
       "title": "Notice",
       "summary": "A success message near the top of the page, which hides itself.",
@@ -185,17 +196,6 @@
       "path": "OutputEditor.html",
       "title": "OutputEditor",
       "summary": "The open file's compiled javascript, read only.",
-      "sections": [
-        {"id":"1-what-it-looks-like","title":"1. What it looks like"},
-        {"id":"2-using-it","title":"2. Using it"},
-        {"id":"3-props","title":"3. Props, and where it's drawn"},
-        {"id":"4-its-code","title":"4. Its code"}
-      ]
-    },
-    {
-      "path": "ProjectDropdown.html",
-      "title": "ProjectDropdown",
-      "summary": "Every project, as a dropdown or a menu of links.",
       "sections": [
         {"id":"1-what-it-looks-like","title":"1. What it looks like"},
         {"id":"2-using-it","title":"2. Using it"},

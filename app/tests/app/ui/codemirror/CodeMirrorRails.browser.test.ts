@@ -64,7 +64,7 @@ describe("a body's rail under the caret", () => {
   }
 
   /**
-   * The middle of the innermost rail line `number` draws, on the page;  `undefined`:  none.
+   * The middle of the innermost rail line `number` draws, on the page, its first stripe;  `undefined`:  none.
    * - Its column is a `calc()` in the line's `--cmb-rails`:  measured as a probe's width, in the line's own settings.
    */
   function railMiddle(view: EditorView, number: number): number | undefined {
@@ -73,7 +73,7 @@ describe("a body's rail under the caret", () => {
     const columns = [...element.style.getPropertyValue("--cmb-rails").matchAll(/transparent (calc\(.*?rail-left\)\))/g)]
     if (!columns.length) return undefined
     const probe = element.appendChild(document.createElement("span"))
-    probe.style.cssText = `position: absolute; display: inline-block; height: 0; width: ${columns.at(-1)![1]}`
+    probe.style.cssText = `position: absolute; display: inline-block; height: 0; width: ${columns[0]![1]}`
     const left = element.getBoundingClientRect().left + probe.getBoundingClientRect().width
     probe.remove()
     return left + Number.parseFloat(getComputedStyle(element).getPropertyValue("--cmb-rail")) / 2
@@ -609,6 +609,60 @@ describe("a body's rail under the caret", () => {
     await frames()
     for (const number of [1, 3, 4])
       expect(lineElement(view, number).querySelector(".cmb-band"), `line ${number}`).toBeTruthy()
+  })
+
+  test("a group's rail and foot in its band's colour, not the block round it's, light and dark (I147)", async () => {
+    // Owen:  "This bar and curly should be colored by group, not app"
+    const GROUPS = `a "card" is a view
+\t-- a playing card
+\tgroup "Card Rank & Suit" -- Ace is low
+\tits "rank" is a number
+\tits "color" is one of red, black
+\t\tred if its rank is 1
+\t\tblack otherwise
+
+\tgroup "Names"
+\tits "name" is "x"
+\tto turn it over
+\t\tsay "done"
+`
+    /** The colour of the stripe drawn on top in `element`'s rails:  the innermost's. */
+    const topRail = (element: Element) =>
+      getComputedStyle(element)
+        .backgroundImage.match(/(?:color|rgba?)\([^)]*\)/g)!
+        .find((colour) => colour !== "rgba(0, 0, 0, 0)")
+    const backgroundOf = (element: Element) => getComputedStyle(element).backgroundColor
+    for (const scheme of ["light", "dark"]) {
+      document.documentElement.style.colorScheme = scheme
+      const view = await bubblyEditorOf(GROUPS)
+      const [card, rankSuit, names] = [...view.dom.querySelectorAll(".cmb-band-open")].filter(
+        (band) => !band.closest(".cm-line")!.textContent!.match(/color|turn/)
+      )
+      const groupBand = backgroundOf(rankSuit!)
+      expect(backgroundOf(names!), scheme).toBe(groupBand)
+      expect(groupBand, scheme).not.toBe(backgroundOf(card!))
+      // a group's members' lines:  its rail, on its parent's, the group's band's colour
+      for (const start of ['its "rank"', 'its "color"', 'its "name"', "to turn"]) {
+        const [line] = linesStarting(view, [start])
+        expect(topRail(lineElement(view, line!)), `${scheme}:  ${start}`).toBe(groupBand)
+      }
+      // ... but the card's own lines, outside its groups, and the line its first group hangs on:  the card's band's colour
+      for (const start of ["-- a playing", "group"]) {
+        const [line] = linesStarting(view, [start])
+        expect(topRail(lineElement(view, line!)), `${scheme}:  ${start}`).toBe(backgroundOf(card!))
+      }
+      // the groups' feet the group's band's colour, the one it shares with the card's at the end too;  the others theirs
+      const feet = [...view.dom.querySelectorAll(".cmb-foot")].map(backgroundOf)
+      expect(feet, scheme).toEqual([
+        backgroundOf(view.dom.querySelector(".bubbly-property.cmb-band-open")!),
+        groupBand,
+        backgroundOf(view.dom.querySelector(".bubbly-action.cmb-band-open")!),
+        groupBand
+      ])
+      view.dom.parentElement?.remove()
+      view.destroy()
+    }
+    document.documentElement.style.colorScheme = ""
   })
 
   test("an attribute's opening quote mark a space's room after its `=`, as after a space", async () => {

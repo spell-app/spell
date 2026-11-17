@@ -103,7 +103,7 @@ and in the app's build folder, `app/` at the app folder's root.
       ([static/](static/));  the actions it leaves out are `HIDDEN_IN_STATIC_BUILD` (`Actions.tsx`)
     - Files load through `LoadableFile.fetch`, answered by `StaticFiles`:
       - the build's copies
-      - a visitor's own projects, in the group `you@spell` (`LOCAL_PERSON`, in this build):
+      - a visitor's own projects, in the group `you@spell` (`SPACES.localPerson`, in this build):
         the store `spell-static-projects`, their files' text with the edits
       - a visitor's edits, kept in their browser's database (`DatabasePlace`, the store `spell-static`):
         "Reset Example" forgets them
@@ -144,7 +144,7 @@ and in the app's build folder, `app/` at the app folder's root.
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
       Find All References, code actions, accent fixes as you type;  hovers and signature help drawn by `<ui-markdown>`.
     - A Spell UI tag's help on Go to Definition;  Format Document, expand / shrink selection, Go to Symbol.
-    - Peek Definition (⌥F12) and Peek References (⇧⌥F12), as Monaco's peek view (epic `codemirror` I5):
+    - Peek Definition (⌥F12) and Peek References (⇧⌥F12) (epic `codemirror` I5):
       a box under the caret's line showing the place's file read only, a slice of its state (`FileStates.showSlice()`),
       the uses listed on its right;  Enter or a double-click goes there, Esc closes it
       ([CodeMirrorPeek](ui/codemirror/CodeMirrorPeek.ts), plain DOM, so `<spell-editor>` has it too)
@@ -564,6 +564,8 @@ and in the app's build folder, `app/` at the app folder's root.
     talks to spaces' people routes in plain JSON:  it never loads the people library.
     - the route:  `/api/people/me`
     - typed by `SPACES.MeAnswer`
+  - The name page ([NamePage.tsx](solid/NamePage.tsx), epic `repo-split` P27):  `index.tsx` reads who's at this machine
+    (`/api/people/local`) before it draws anything, and asks their name first while nobody is, on this machine.
   - `<spell-viewer>` loads only the light files, without the parser:
     - `spell/app/spaces/models/projectGroups`, which registers spell's project groups
     - `spell/parser/spell/SpellSetup`

@@ -18,7 +18,7 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  * - Read by the file's own language's parser (`Spanish.es.spell` by Spanish's),
  *   and with its project's parse when that's of this very text, so a name declared in another file colours as one.
  * - A page file (`SP.formOfText()`) by its page tokens (`pageSpans()`), read by a page parser of its language,
- *   as Monaco coloured it (epic `codemirror` J14):
+ *   coloured this way (epic `codemirror` J14):
  *   - its prose and `<!-- ... -->` comments a comment
  *   - its head's name text, its flags (`notebook`) attribute names, the rest of it keywords
  *   - a tag's `<`, `>` and closers punctuation, its word a keyword, its attributes' names attribute names

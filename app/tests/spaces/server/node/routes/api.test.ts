@@ -29,7 +29,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
 /** Project used by every test, in the `owen@spell` group. */
 const PROJECT = "owen@spell/Proj"
-/** Its place:  your space (`SPACES.LOCAL_PERSON`), then its name. */
+/** Its place:  your space (`SPACES.localPerson`), then its name. */
 const PLACE = "owen@spell/Proj"
 /** Where its files are read:  `/spaces/<project>/<file>`. */
 const FILES = `/spaces/${PLACE}/`

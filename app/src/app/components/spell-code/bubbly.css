@@ -1621,7 +1621,7 @@
    */
   &.cmb-editor {
     /*
-     * a tab stop:  how far each level of a body is in from the one round it, rail to rail (Monaco's, 8px;  I113)
+     * a tab stop:  how far each level of a body is in from the one round it, rail to rail (8px;  I113)
      * - set by the code from the font's own 2 spaces, so every rail and foot stands at its band's end
      *   (`CodeMirrorMarkup.tabStops`);  a guess till then
      */
@@ -1646,12 +1646,12 @@
 
     /*
      * the room on a band before its words, less a tab:  the page's, at the editor's size (2.81px)
-     * - a head's words a tab further in, on its band (`--bubbly-pill-left-shift`'s place), as Monaco drew them (I113)
+     * - a head's words a tab further in, on its band (`--bubbly-pill-left-shift`'s place) (I113)
      */
     --cmb-band-inset: calc(var(--bubbly-pill-pad-left) * var(--bubbly-editor-scale));
     /* a rail's width, a foot's height */
     --cmb-rail: 3px;
-    /* a line's height:  room for a band, with a little between two;  15px times 1.65, as Monaco's (I113) */
+    /* a line's height:  room for a band, with a little between two;  15px times 1.65 (I113) */
     --cmb-line-height: 25px;
     /* a band in the middle of its line:  this much of the line above and below it */
     --cmb-band-margin: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2);
@@ -1680,6 +1680,34 @@
     --cmb-band-structure: light-dark(
       color-mix(in srgb, var(--bubbly-structure) 20%, white),
       color-mix(in srgb, var(--bubbly-structure) 34%, var(--bubbly-paper-dark))
+    );
+    /*
+     * ... and a group's band in each hue, for a group's rail:  the band of the block it's in, as light as a group's band
+     * is (`.bubbly-group.cmb-hue`, below;  Owen, I147:  "This bar and curly should be colored by group, not app")
+     */
+    --cmb-group-thing: light-dark(
+      color-mix(in srgb, var(--bubbly-thing) 13%, white),
+      color-mix(in srgb, var(--bubbly-thing) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-action: light-dark(
+      color-mix(in srgb, var(--bubbly-action) 13%, white),
+      color-mix(in srgb, var(--bubbly-action) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-property: light-dark(
+      color-mix(in srgb, var(--bubbly-property) 13%, white),
+      color-mix(in srgb, var(--bubbly-property) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-plain: light-dark(
+      color-mix(in srgb, var(--bubbly-plain) 13%, white),
+      color-mix(in srgb, var(--bubbly-plain) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-control: light-dark(
+      color-mix(in srgb, var(--bubbly-control) 13%, white),
+      color-mix(in srgb, var(--bubbly-control) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-structure: light-dark(
+      color-mix(in srgb, var(--bubbly-structure) 13%, white),
+      color-mix(in srgb, var(--bubbly-structure) 20%, var(--bubbly-paper-dark))
     );
     /* a space's width in the drawing's font:  an HTML file's rails start at its lines' indent of spaces;  set too */
     --cmb-space: 0.28em;
@@ -1754,7 +1782,7 @@
     /*
      * what a person typed, on its band:  in the middle of it (I113), its words' small letters in the middle of its
      * white (I114), so it stays put on its band while the band's words go up
-     * - as tall as Monaco's, the page's at the editor's size
+     * - the page's height, at the editor's size
      */
     .cm-line .bubbly-input {
       box-sizing: border-box;
@@ -1835,7 +1863,8 @@
       );
       --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
     }
-    .bubbly-group.cmb-hue {
+    /* a group's band, and its foot (`cmb-group-foot`):  its hue, as light as on the page (I119, I147) */
+    :is(.bubbly-group, .cmb-group-foot).cmb-hue {
       --bubbly-pill: light-dark(
         color-mix(in srgb, var(--bubbly-hue) 13%, white),
         color-mix(in srgb, var(--bubbly-hue) 20%, var(--bubbly-paper-dark))
@@ -1887,7 +1916,7 @@
     }
     /*
      * ... and its inside corner, where the band's bottom meets its rail, curving from one into the other:  the page's
-     * body's top corner (`--bubbly-inner-top`) at the editor's size (11.25px), as Monaco drew it (I117);
+     * body's top corner (`--bubbly-inner-top`) at the editor's size (11.25px) (I117);
      * under the text and the bands below, which it reaches into
      * - a tag's band has its own, cut at a tag's slant (`.cmb-tag-band.cmb-band-open::after`)
      */
@@ -1912,7 +1941,7 @@
     }
 
     /*
-     * a block's foot:  its rail turning round a corner into a short bar, as Monaco drew it (I113), on a thin line of its
+     * a block's foot:  its rail turning round a corner into a short bar (I113), on a thin line of its
      * own;  the page's sizes, at the editor's size
      * - the corner:  as thick round it as down the rail and along the bar, its outside the page's gutter corner
      *   (10.3px);  it reaches up into the row above, where the rail stops short for it (`--cmb-rail-sizes`)
@@ -1949,7 +1978,7 @@
     /*
      * ... one with a foot under it, a block round it ending on the same line:  as tall as their rails are apart across
      * (`--cmb-foot-drop-tabs`), so that one's foot is as far below this one as its rail is left of it (Owen, 2026-11-11;
-     * Monaco's and the drawn-bubbly page's stack, I125)
+     * the drawn-bubbly page's stack, I125)
      */
     .cmb-foot-row.cmb-foot-over {
       height: calc(var(--cmb-foot-drop-tabs) * var(--cmb-indent));
@@ -2184,7 +2213,7 @@
       border-bottom-left-radius: 0;
     }
     /*
-     * ... its rail dropping from it, its corner with its body cut, as Monaco's:  under the text, into the line below
+     * ... its rail dropping from it, its corner with its body cut:  under the text, into the line below
      * (`z-index`), the rows' own rails carrying on from it
      */
     .cmb-tag-band.cmb-band-open:not(.cmb-tag-block) {
@@ -2203,14 +2232,14 @@
       clip-path: polygon(0 0, 100% 0, var(--cmb-rail) 100%, 0 100%);
     }
     /*
-     * a block's end tag on its own line:  a tiny pill at its rail's turn, its letters tiny (Q61);  as Monaco's (I114):
+     * a block's end tag on its own line:  a tiny pill at its rail's turn, its letters tiny (Q61;  I114):
      * its top-left square, the rail running into it;  its right end a point at a tag's slant, its bottom-left cut
      */
     .cmb-tag-foot {
       position: relative;
       height: var(--cmb-foot-tiny-height);
       line-height: var(--cmb-foot-tiny-height);
-      /* its `⟨` just past its rail, as Monaco's */
+      /* its `⟨` just past its rail */
       padding: 0 var(--bubbly-foot-tiny-pad-right) 0 calc(var(--bubbly-foot-tiny-pad-left) * var(--bubbly-editor-scale));
       margin-top: calc((var(--cmb-line-height) - var(--cmb-foot-tiny-height)) / 2);
       /* at its rail */
@@ -2221,7 +2250,7 @@
         calc(var(--cmb-foot-tiny-height) / 2) calc(var(--bubbly-foot-tiny-cut) * var(--bubbly-editor-scale));
       font-size: var(--bubbly-foot-tiny-font);
     }
-    /* a `</>` foot as wide as Monaco's, its `⟨|⟩` at its right end (it was 10px narrower) */
+    /* a `</>` foot 10px wider than it was, its `⟨|⟩` at its right end */
     .cmb-tag-foot:has(> .bubbly-end-bare) {
       padding-left: calc(var(--bubbly-foot-bare-pad-left) * var(--bubbly-editor-scale));
     }
@@ -2372,7 +2401,7 @@
     }
     /*
      * a one-line element with something between its tags:  a line along the top and bottom of their bands between them
-     * (Q58), from one tag's point to the other's, under the tags, as Monaco drew it (I114);  its words on the tags' line
+     * (Q58), from one tag's point to the other's, under the tags (I114);  its words on the tags' line
      * - its own box a band's, so a tag inside it sits in it as in its line
      */
     .cmb-tag-link {
@@ -2459,8 +2488,8 @@
       pointer-events: none;
     }
     /*
-     * a quoted input's curly marks on a Spell band, as Monaco drew them (I114:  "Curlies lost their curl", "comma too
-     * faint"):  outside its white, where Monaco's `"` was, a gap and half a `"` from it;
+     * a quoted input's curly marks on a Spell band (I114:  "Curlies lost their curl", "comma too faint"):
+     * outside its white, where a plain `"` would be, a gap and half a `"` from it;
      * the opening one high and centred there, the closing one low and tucked in, clear of a comma after it
      * - placed from the white (each mark's box takes no room in it);  they were a size bigger, the closing one
      *   right over the comma
@@ -2471,7 +2500,7 @@
       height: 0;
     }
     .cm-line .bubbly-quoted > .cmb-quote > .cmb-quote-glyph {
-      /* from the top of the white, on a line as tall as the editor's, as Monaco's were on theirs */
+      /* from the top of the white, on a line as tall as the editor's */
       top: calc(-0.1em - 0.18px);
       line-height: var(--cmb-line-height);
     }
@@ -2496,8 +2525,8 @@
       vertical-align: text-top;
     }
     /*
-     * a value in a tag close after its opening quote mark, as Monaco's (I114):  at the white's usual 2px gap, the mark
-     * stood 1.5px further from it than Monaco's
+     * a value in a tag close after its opening quote mark (I114):  at the white's usual 2px gap, the mark
+     * stood 1.5px too far from it
      */
     .cm-line .cmb-quote-open + .bubbly-input-spacer + .bubbly-input,
     .cm-line .cmb-quote-open + .bubbly-input-spacer + .cm-widgetBuffer + .bubbly-input,

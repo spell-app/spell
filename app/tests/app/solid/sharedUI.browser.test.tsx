@@ -150,7 +150,10 @@ describe("chrome + Actions", () => {
     const createFile = spyOnEditor("createFile")
     const host = await mount(() => (
       <MoreMenu>
-        <Actions.FILE_DROPDOWN_ACTIONS />
+        <Actions.createFile />
+        <Actions.duplicateFile />
+        <Actions.renameFile />
+        <Actions.deleteFile />
       </MoreMenu>
     ))
     const dropdown = host.querySelector("ui-dropdown") as HTMLElement & { open: boolean; value: unknown }
