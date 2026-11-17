@@ -46,7 +46,6 @@ export const APP_TEXTS = {
   hideCompiledTip: "Hide Compiled {language}",
   inspectTip: "Inspect the App:  click a part to select it",
   stopInspectingTip: "Stop Inspecting",
-  addViewTip: "Add a View",
   restartTip: "Restart the app",
   youTip: "Edit Your Name and Emails",
   menuCut: "Cut",

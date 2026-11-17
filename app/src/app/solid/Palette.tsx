@@ -349,7 +349,9 @@ function thisGroupMatches(words: string): boolean {
 }
 
 /**
- * The top bar's `+`:  opens the palette, a menu with its search;  kept open too, beside the pinned bar.
+ * The top bar's "+ Add a View":  opens the palette, a menu with its search;  kept open too, beside the pinned bar.
+ * - Its plus, then its words, in the round pill its neighbours have, as wide as its words (epic `editor` I250, C5:
+ *   "Change plus to `+ Add a View`"):  no tooltip, the words say it.
  * - An item of the Run | Edit group, right after Inspect app (`<ModeButtons add>`;  epic `editor` T83:
  *   "Move `add` to the immediate right of the inspector crosshair"), so it stands as its neighbours do.
  * - It opens a menu, never becomes the mode chosen (its `aria-haspopup`).
@@ -366,12 +368,12 @@ export function AddPartButton(): JSX.Element {
         icon="plus"
         appearance="circular"
         class="AddPartButton"
-        label={appTexts.text("addPart")}
-        {...barTooltip(appTexts.text("addViewTip"))}
         aria-haspopup="menu"
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
-      />
+      >
+        <span class="AddViewText">{appTexts.text("paletteAddView")}</span>
+      </ui-item>
       <ui-popup
         for={ADD_BUTTON_ID}
         open-on="click"
@@ -389,7 +391,7 @@ export function AddPartButton(): JSX.Element {
   )
 }
 
-/** The `+`'s id, which its popup points at. */
+/** Add a View's id, which its popup points at. */
 const ADD_BUTTON_ID = "AddPartButton"
 
 /**
