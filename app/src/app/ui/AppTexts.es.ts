@@ -108,7 +108,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisPicture: "Una imagen que va con el pedido",
   changeThisRemovePicture: "Quitar esta imagen",
   menuShowInCode: "Mostrar en el código",
-  menuInspect: "Inspeccionar",
+  menuInspect: "Inspeccionar {type}",
+  menuInspectParts: "Elige una de las partes bajo el ratón",
   partIsApp: "Es la aplicación misma:\nno se puede cortar, duplicar ni borrar.",
   partNothingCopied: "Aún no se ha copiado nada.",
   partNothingSelected: "No hay nada seleccionado.",
@@ -720,6 +721,18 @@ const APP_TEXTS_ES: AppTextPack = {
   addDate: "Añadir una fecha",
   yourOrgs: "Tus organizaciones",
   noneYet: "Ninguna todavía.",
+
+  ////////////////
+  // ## The name page (`NamePage.tsx`)
+  ////////////////
+
+  nameHeading: "Bienvenido a Encanto",
+  nameLine:
+    "¿Quién está aquí?\nTus proyectos van en un espacio con tu nombre,\nen los espacios de {org} en esta máquina.",
+  yourName: "Tu nombre",
+  nameTaken: "{address} ya tiene un espacio aquí:  ¿eres tú?",
+  nameNeeded: "Escribe un nombre con alguna letra.",
+  nameStart: "Empezar",
 
   ////////////////
   // ## A project's settings

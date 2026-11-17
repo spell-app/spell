@@ -1,6 +1,6 @@
 import { CLI } from "spell/cli"
 import { SP } from "spell/parser/spell"
-import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import environment from "spell/app/spaces/server/node/environment"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -95,8 +95,8 @@ export async function exportCommand(space: string, folder: string): Promise<numb
 export async function deleteCommand(target: string, { yes }: DeleteOptions): Promise<number> {
   if (!yes) throw new CLI.CliError(`deleting ${target} is for good:  say so with --yes`)
   const people = new PeopleStore(new DiskStorage(environment.spellSpacesDir))
-  const me = `${LOCAL_PERSON}@${HOME_ORG}`
-  const isSpellAdmin = await people.isSpellAdmin(LOCAL_PERSON, HOME_ORG)
+  const { id, org, address: me } = thisMachinesPerson()
+  const isSpellAdmin = await people.isSpellAdmin(id, org)
   const account = SP.SpellLocation.accountParts(target)
   if (account) {
     if (target !== me && !isSpellAdmin) throw new CLI.CliError(`only ${target}, or a Spell admin, deletes ${target}`)

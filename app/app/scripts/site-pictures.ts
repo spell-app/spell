@@ -94,7 +94,7 @@ const PICTURES: Picture[] = [
     selector: ".TreeRoot"
   },
   {
-    name: "FileDropdown",
+    name: "FileTabs",
     page: PROJECT,
     prepare: async (page) => {
       // a narrow tab row puts most tabs away:  its all-files button, at its end, lists every file
@@ -102,6 +102,13 @@ const PICTURES: Picture[] = [
       await openDropdown(page, ".FileTabs button.all-items")
     },
     clip: { x: 0, y: 30, width: 720, height: 420 }
+  },
+  {
+    name: "MenuBar",
+    page: PROJECT,
+    // the Spell menu, the bar's first:  its home row, then every example, the one shown ticked
+    prepare: (page) => openDropdown(page, "#SpellBarMenu"),
+    clip: { x: 0, y: 0, width: 640, height: 340 }
   },
   {
     name: "Chooser",

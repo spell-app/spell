@@ -237,6 +237,14 @@ export class Inspector {
     if (area) PartSelector.listen(area)
   }
 
+  /**
+   * Ring `element` in the app, as Inspect app does on hover (`undefined`:  take the ring away):
+   * pointing at a part in the part menu's Inspect submenu (epic `editor` P31).
+   */
+  static ring(element: Element | undefined): void {
+    PartSelector.hover(element)
+  }
+
   /** Stop inspecting:  the app gets its clicks back. */
   static stopInspecting(): void {
     setInspecting(false)
@@ -777,6 +785,15 @@ export class Inspector {
     const thing = SpellElement.thingOf(element)
     if (!thing) return { title: Inspector.labelFor(element), which: "" }
     return Inspector.thingWordsOf(thing, element)
+  }
+
+  /**
+   * What kind of part `element` is, as a person would say it:  "Inspect {type}" in the part menu (epic `editor` P31).
+   * - A drawn thing:  its type in words, as its Views tree row shows it (`labelPartsFor()`):  `Card`, `Stock Pile`.
+   * - A Spell UI element:  its tag, `ui-button`.
+   */
+  static typeWordsOf(element: Element): string {
+    return SpellElement.thingOf(element) ? Inspector.labelPartsFor(element).title : element.localName
   }
 
   /**
@@ -2261,6 +2278,8 @@ function hasOwnHandler(element: Element): boolean {
 
 /** The mark that rings the part under the pointer, by its own `::after` (`Inspector.css`). */
 const HOVER_MARK = "data-inspect-hover"
+/** How long a press is held still before it opens the part menu, while inspecting (`PartSelector.startLongPress()`). */
+const LONG_PRESS_SECONDS = 0.5
 /** How far that ring is outside the part, in CSS px (`Inspector.css`). */
 const RING_OUT = 3
 /**
@@ -2351,6 +2370,7 @@ class PartSelector {
       "pointerdown",
       (event) => {
         PartSelector.bandJustEnded = false
+        PartSelector.startLongPress(event, area)
         const part = PartSelector.partAt(event, area)
         // the app itself is its own background:  a press there may be a band, and still a click on it if it never moves
         if (part) event.stopPropagation()
@@ -2379,6 +2399,57 @@ class PartSelector {
     Inspector.dismissHelp()
     // on a phone, the sheet comes up with what's selected
     setSheetUp(true)
+  }
+
+  /**
+   * A press held still for `LONG_PRESS_SECONDS`, mouse or touch:  the part menu opens there, as a right click's,
+   * for the top-most part under it, Inspect's submenu listing every part there (Owen, epic `editor` P31, C3).
+   * - A move past `DRAG_START_PX`, or letting go, before then:  no long press;  the drag or click goes on as ever.
+   * - Once open, the click the same press ends in is swallowed, on the window, before anyone hears it:
+   *   it would select the part, and the menu would take it for a click outside it, and close.
+   */
+  private static startLongPress(down: PointerEvent, area: HTMLElement): void {
+    if (down.button !== 0) return
+    const stop = new AbortController()
+    const options = { capture: true, signal: stop.signal }
+    // read now:  once the press has been dispatched, its path is empty
+    const part = PartSelector.partAt(down, area) ?? Inspector.partsIn(area)[0]?.element
+    const programMenu = SpellElement.programMenuAt(down.composedPath())
+    if (!part) return
+    const timer = setTimeout(() => {
+      stop.abort()
+      PartSelector.swallowNextClick()
+      PartSelector.hover(undefined)
+      const { clientX: x, clientY: y } = down
+      PartEdits.openMenu(part, { x, y, programMenu, partsUnder: PartEdits.partsAt(x, y, area) })
+    }, LONG_PRESS_SECONDS * 1000)
+    const cancel = () => {
+      clearTimeout(timer)
+      stop.abort()
+    }
+    window.addEventListener(
+      "pointermove",
+      (move) => Math.hypot(move.clientX - down.clientX, move.clientY - down.clientY) >= DRAG_START_PX && cancel(),
+      options
+    )
+    window.addEventListener("pointerup", cancel, options)
+    window.addEventListener("pointercancel", cancel, options)
+  }
+
+  /** Swallow the next click anywhere, before anyone hears it;  a press first means there's none to swallow. */
+  private static swallowNextClick(): void {
+    const stop = new AbortController()
+    const options = { capture: true, signal: stop.signal }
+    window.addEventListener(
+      "click",
+      (click) => {
+        click.preventDefault()
+        click.stopImmediatePropagation()
+        stop.abort()
+      },
+      options
+    )
+    window.addEventListener("pointerdown", () => stop.abort(), options)
   }
 
   /**

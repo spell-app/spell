@@ -104,7 +104,8 @@ export const APP_TEXTS = {
   changeThisPicture: "A picture sent with it",
   changeThisRemovePicture: "Take this picture out",
   menuShowInCode: "Show in Code",
-  menuInspect: "Inspect",
+  menuInspect: "Inspect {type}",
+  menuInspectParts: "Pick one of the parts under the mouse",
   partIsApp: "That's the app itself:\nit can't be cut, duplicated or deleted.",
   partNothingCopied: "Nothing's been copied yet.",
   partNothingSelected: "Nothing's selected.",
@@ -401,7 +402,7 @@ export const APP_TEXTS = {
   noTests: "No tests -- write one as `to test <something>:`",
 
   ////////////////
-  // ## The project chooser (`ProjectChooser.tsx`, `ProjectDropdown.tsx`)
+  // ## The project chooser (`ProjectChooser.tsx`)
   ////////////////
 
   welcome: "Welcome to Spell!",
@@ -744,6 +745,17 @@ export const APP_TEXTS = {
   addDate: "Add a date",
   yourOrgs: "Your orgs",
   noneYet: "None yet.",
+
+  ////////////////
+  // ## The name page (`NamePage.tsx`):  who's at this machine, asked on its first start
+  ////////////////
+
+  nameHeading: "Welcome to Spell",
+  nameLine: "Who's here?\nYour projects go in a space with your name,\nin {org}'s spaces on this machine.",
+  yourName: "Your name",
+  nameTaken: "{address} already has a space here:  that's you?",
+  nameNeeded: "Type a name with a letter in it.",
+  nameStart: "Start",
 
   ////////////////
   // ## A project's settings (`ProjectSettings.tsx`)

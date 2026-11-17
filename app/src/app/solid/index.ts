@@ -18,11 +18,11 @@
  *   - `SpellPage`
  *   - `rememberedSizes()`:  what a `<ui-split-panel>` was dragged to
  *   - `AppRoot` / `AppContainer`:  where a program draws, with React
- *   - `ProjectMenu` / `ProjectDropdown`
+ *   - `trackProjectRoot()`:  a group of projects as Solid reads it, and `openProject()`
  *   - `EditorZones`:  the app pane of the editor's own Spell, a zone per view (epic `editor` T63)
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
- *   console, match and AST viewers, type and thing explorers, the code editors, `FileDropdown`, `FileTabs`.
+ *   console, match and AST viewers, type and thing explorers, the code editors, `FileTabs`.
  * - NOTE: deliberately NOT here:
  *   - `./codemirror`:  CodeMirror loads on first use, through `LazyCodeMirror`;  NEVER import it statically, types aside
  *   - `./modals`:  `editor.ts` imports it on first use (`import()`), so the editor never loads Solid up front
@@ -64,11 +64,11 @@ export * from "./LazyCodeMirror"
 export * from "./InputEditor"
 export * from "./CodeSettings"
 export * from "./OutputEditor"
-export * from "./FileDropdown"
 
 export * from "./SpellPage"
+export * from "./NamePage"
 export * from "./rememberedSizes"
 export * from "./AppContainer"
 export * from "./AppRoot"
-export * from "./ProjectDropdown"
+export * from "./trackProjectRoot"
 export * from "./MenuBar"

@@ -162,7 +162,7 @@ const UNDO_KEYS = [
   { shortcut: "shift+mod+Z", action: "redo" }
 ] as const
 
-/** A file's name, from its path:  `/HarborNew.site.spell` => `HarborNew.site.spell`. */
+/** A file's name, from its path:  `/Dashboard.site.spell` => `Dashboard.site.spell`. */
 function fileName(filePath: string): string {
   return filePath.split("/").at(-1) ?? filePath
 }
