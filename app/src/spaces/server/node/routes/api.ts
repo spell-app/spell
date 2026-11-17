@@ -143,9 +143,9 @@ api.get("/changes", changesRoutes.request_getChange)
 api.get("/themes/spell-ui", themesRoutes.request_canSaveIntoSpellUi)
 api.post("/themes/spell-ui", themesRoutes.request_saveIntoSpellUi)
 
-// The home page's order of cards, dragged in dev -- see `homeOrderRoutes.ts` (epic `mockup` P19)
-api.get("/home/order", homeOrderRoutes.request_mayReorder)
-api.post("/home/order", homeOrderRoutes.request_saveHomeOrder)
+// The home page's layout, rearranged by anyone (everyone's by `@spell`'s people) -- see `homeOrderRoutes.ts` (epic `mockup` P19, T51)
+api.get("/home/order", homeOrderRoutes.request_homeLayout)
+api.post("/home/order", homeOrderRoutes.request_changeHomeLayout)
 
 ////////////////
 // ## Preferences

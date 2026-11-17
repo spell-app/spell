@@ -1,7 +1,6 @@
 import { For, Show, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { $fetch, KnownFormat } from "spell/util"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -22,7 +21,9 @@ import {
   type ProjectRootState
 } from "spell/app/app/solid"
 import { siteEditorUrlFor } from "./pages.types"
-import { EmptyCard, TileCard, type TileCardDrag } from "./TileCard"
+import { EditableText } from "./EditableText"
+import { HomeArrangement } from "./HomeArrangement"
+import { EmptyCard, TileCard, type TileCardDrag, type TileCardEdit } from "./TileCard"
 
 import "./ProjectChooser.css"
 
@@ -31,8 +32,12 @@ import "./ProjectChooser.css"
  * The landing page:  a hero line over cards for your own projects, the ways to start, the examples and the guides.
  * - The examples and guides written in Spanish are a section of their own, "En español", after the English ones
  *   (Owen, epic `mockup` I46:  "Split the english and Spanish into two sections");  `<LanguageCards>`.
- * - Its sections in Spell's own order, `SPACES.homeSections()`, dragged by their headers in dev (epic `repo-split` P28):
+ * - Its sections in Spell's own order, `SPACES.homeSections()`:
  *   your own projects first, under the hero, and only while you have some (epic `mockup` I40).
+ * - "Rearrange Home Screen", at its foot, turns on a mode where everything moves, and its words change
+ *   (epic `mockup` T51, `HomeArrangement`):  cards drag among their section's, sections by their headers;
+ *   a card's title and tagline, a section's header and line, are typed in where they are.
+ *   - `@spell`'s people change everyone's;  anyone else, their own, with "Reset to Default".
  * - Each of your own projects' cards has a "..." menu, 12px in from its top left:
  *   run it, rename, duplicate, its versions, export, its picture, delete (`<CardMenu>`, epic `mockup` T47).
  * - Spell's own order also leaves some out, sections and projects (`SPACES.HOME_HIDDEN_KEY`, epic `mockup` I40):
@@ -57,27 +62,30 @@ export function ProjectChooser() {
   // an app made for an org:  its person's projects and the org's groups first, above the hero;  no library
   // (`SPACES.homeSections()`;  Owen, 2026-11-16:  "AT THE TOP")
   const inOrg = SPACES.localPerson.org !== SPACES.SPELL_ORG
-  const sections = () => SPACES.homeSections(inOrg, homeOrder())
+  const sections = () => SPACES.homeSections(inOrg, HomeArrangement.layout.order)
   const isAboveHero = (section: SPACES.HomeSection) => inOrg && SPACES.HOME_ORG_FIRST.includes(section)
   // the browser's tab:  plain "Spell" here, a project's name on the editor's pages (`<AppMark>`)
   onSettled(() => {
     document.title = appTexts.text("appName")
+    HomeArrangement.load()
   })
 
   return (
     <SpellPage id="ProjectChooser" fillWindow dark scrolling>
       <ChooserToolbar />
-      <div class="Home">
+      <div class={["Home", { rearranging: HomeArrangement.isRearranging }]}>
+        <RearrangeBar />
         <For each={sections().filter(isAboveHero)}>{(section) => sectionFor(section)}</For>
         <Hero examples={exampleList()} guides={guideList()} />
         <For each={sections().filter((section) => !isAboveHero(section))}>{(section) => sectionFor(section)}</For>
+        <RearrangeButton />
       </div>
     </SpellPage>
   )
 
   /** One section of the page, by its id:  the org's is one per group of theirs. */
   function sectionFor(section: SPACES.HomeSection): JSX.Element {
-    // read where it's used:  dragging turns on once the server has said it may (`mayReorder`)
+    // read where it's used:  sections drag while the page is rearranged
     const drag = () => (inOrg ? undefined : sectionDragFor(section))
     switch (section) {
       case "start":
@@ -251,9 +259,12 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
  * - Blank, last:  an empty app, the palette open, so what it can hold shows at once
  *   (Owen, epic `mockup` T44:  "adding things in the editor doesn't work that great yet, so don't lead with that")
  * - Import:  a project they exported, the way back after clearing a browser
- * - `drag`:  moving the whole section by its header, among the page's (in dev, in Spell's own checkout)
+ * - `drag`:  moving the whole section by its header, among the page's, while it's rearranged
+ * - Its cards in the layout's order (`SPACES.HOME_START_KEY`), dragged among themselves while it's rearranged,
+ *   their words changed per language (`START_CARDS`).
  ****************/
 function StartCards(props: { drag?: TileCardDrag }) {
+  const ids = () => inOrderOf(SPACES.HOME_START_KEY, SPACES.HOME_START_CARDS)
   return (
     <HomeSection
       id="start"
@@ -262,30 +273,18 @@ function StartCards(props: { drag?: TileCardDrag }) {
       actions={<Actions.importApp button appearance="basic" size="small" />}
       drag={props.drag}
     >
-      <StartCard
-        name={appTexts.text("startCounter")}
-        line={appTexts.text("startCounterLine")}
-        start={() => void editor.startFrom("counter")}
-      />
-      <StartCard
-        name={appTexts.text("startTaskList")}
-        line={appTexts.text("startTaskListLine")}
-        start={() => void editor.startFromCopy(TASK_LIST)}
-      />
-      <StartCard
-        name={appTexts.text("startConverter")}
-        line={appTexts.text("startConverterLine")}
-        start={() => void editor.startFrom("converter")}
-      />
-      <StartCard
-        name={appTexts.text("startBlank")}
-        line={appTexts.text("startBlankLine")}
-        start={() => {
-          Palette.openOnArrival()
-          Inspector.openQuietly()
-          void editor.startFrom("blank", { codeClosed: true })
-        }}
-      />
+      <For each={ids()}>
+        {(id) => (
+          <StartCard
+            id={id}
+            drag={cardDragFor(
+              id,
+              ids,
+              (run) => HomeArrangement.saveOrder(SPACES.HOME_START_KEY, run)
+            )}
+          />
+        )}
+      </For>
     </HomeSection>
   )
 }
@@ -293,16 +292,53 @@ function StartCards(props: { drag?: TileCardDrag }) {
 /** The example the to-do starter copies. */
 const TASK_LIST = "@spell/examples/TaskList"
 
-/** One way to start:  a card like a project's. */
-function StartCard(props: { name: string; line: string; start: () => void }) {
-  return <TileCard title={props.name} line={props.line} hueFrom={props.name} onClick={() => props.start()} />
+/**
+ * Each start card's words and what it does, by id (`SPACES.HOME_START_CARDS`), in no order:  the layout's.
+ * - Counter first (Owen, epic `mockup` T50);  Blank last, its palette open on arrival (T44).
+ */
+const START_CARDS: Record<SPACES.HomeStartCard, { name: AppTextKey; line: AppTextKey; start: () => void }> = {
+  counter: { name: "startCounter", line: "startCounterLine", start: () => void editor.startFrom("counter") },
+  todo: { name: "startTaskList", line: "startTaskListLine", start: () => void editor.startFromCopy(TASK_LIST) },
+  converter: { name: "startConverter", line: "startConverterLine", start: () => void editor.startFrom("converter") },
+  blank: {
+    name: "startBlank",
+    line: "startBlankLine",
+    start: () => {
+      Palette.openOnArrival()
+      Inspector.openQuietly()
+      void editor.startFrom("blank", { codeClosed: true })
+    }
+  }
+}
+
+/** One way to start:  a card like a project's, its words as changed in this language (`HomeArrangement`). */
+function StartCard(props: { id: SPACES.HomeStartCard; drag?: TileCardDrag }) {
+  const card = () => START_CARDS[props.id]
+  const key = () => SPACES.homeTextKey({ start: props.id, lang: appTexts.lang })
+  const title = () => HomeArrangement.textFor(key()).title ?? appTexts.text(card().name)
+  const line = () => HomeArrangement.textFor(key()).line ?? appTexts.text(card().line)
+  return (
+    <Show
+      when={HomeArrangement.isRearranging}
+      fallback={<TileCard title={title()} line={line()} hueFrom={title()} onClick={() => card().start()} />}
+    >
+      <TileCard
+        title={title()}
+        line={line()}
+        hueFrom={title()}
+        drag={props.drag}
+        edit={cardEditFor(key, SPACES.CARD_LINE_LENGTH)}
+      />
+    </Show>
+  )
 }
 
 /****************
  * ### `<HomeSection>`
  * One section of the landing page:  its title and quiet line, its buttons on the right, then its cards in a grid.
- * - `drag`:  moving the whole section by its header, among the page's (in dev, in Spell's own checkout);
+ * - `drag`:  moving the whole section by its header, among the page's, while it's rearranged;
  *   none:  it stays put.
+ * - Its header and line as changed in this language (`HomeArrangement`), typed in where they are while it's rearranged.
  * - The shape every section shares:  the ways to start, a group's cards, a language's.
  ****************/
 function HomeSection(props: {
@@ -314,16 +350,43 @@ function HomeSection(props: {
   drag?: TileCardDrag
   children: JSX.Element
 }) {
+  const key = () => SPACES.homeTextKey({ section: props.id, lang: appTexts.lang })
+  const heading = () => HomeArrangement.textFor(key()).title ?? props.heading
+  const line = () => HomeArrangement.textFor(key()).line ?? props.line ?? ""
   return (
     <section
       id={props.id}
       class={["ProjectCards", { small: !!props.small }, sectionDragClasses(props.drag)]}
       {...sectionDropHandlers(() => props.drag)}
     >
-      <header draggable={props.drag ? "true" : undefined} {...sectionGrabHandlers(() => props.drag)}>
-        <h2>
-          {props.heading}. <span class="line">{props.line}</span>
-        </h2>
+      <header
+        draggable={props.drag && !HomeArrangement.isEditingText ? "true" : undefined}
+        {...sectionGrabHandlers(() => props.drag)}
+      >
+        <Show
+          when={HomeArrangement.isRearranging}
+          fallback={
+            <h2>
+              {heading()}. <span class="line">{line()}</span>
+            </h2>
+          }
+        >
+          <h2>
+            <EditableText
+              value={heading()}
+              label={appTexts.text("homeSectionHeader")}
+              onSave={(text) => HomeArrangement.saveText(key(), { title: text })}
+            />
+            .{" "}
+            <EditableText
+              class="line"
+              value={line()}
+              label={appTexts.text("homeSectionLine")}
+              placeholder={appTexts.text("homeSectionLine")}
+              onSave={(text) => HomeArrangement.saveText(key(), { line: text })}
+            />
+          </h2>
+        </Show>
         {props.actions}
       </header>
       <div class="cards">{props.children}</div>
@@ -344,9 +407,9 @@ function HomeSection(props: {
  *   the examples and guides show their English ones, and the Spanish ones are `<LanguageCards>`' (epic `mockup` I46).
  * - In the editor's order of each group, `SPACES.HOME_ORDER` (epic `mockup` P19);  one it doesn't list, last.
  *   - Not those it hides, nor a project that says `"onHome": false` (`onHomeIn()`).
- *   - In dev, where the server says it may (`mayReorder`), a card is dragged among the set's to reorder it:
- *     the group's new order is saved into that list at once (`saveHomeOrder()`).
- *   - Only Spell's own groups:  an org's group (`SPACES.orgGroups`) never drags its cards.
+ *   - While the page is rearranged, a card is dragged among the set's to reorder it:
+ *     the group's new order is saved at once (`HomeArrangement.saveOrder()`).
+ *   - Only Spell's own groups and your own:  an org's group (`SPACES.orgGroups`) never drags its cards.
  * - `sectionDrag`:  moving the whole section by its header, among the page's (`<ProjectChooser>`).
  ****************/
 export function ProjectCards(props: ProjectCardsProps) {
@@ -434,48 +497,20 @@ function GroupCards(props: {
   empty?: string
 }) {
   const listed = () => cardsOf(props, props.root)
-  onSettled(() => askMayReorder())
-  // a card's drag among the group's:  in dev, where the server lets this page reorder, never on a page of sites
+  // a card's drag among the group's, while the page is rearranged:  never on a page of sites, nor an org's group
   const dragFor = (project: CardProject): TileCardDrag | undefined => {
-    if (!mayReorder() || props.sitesOnly || !isSpellsOwn(props.projectRoot.path)) return undefined
-    // a drag from this group's cards, onto another of them
-    const takes = () => !!dragged() && dragged() !== project.path && listed().some((each) => each.path === dragged())
-    return {
-      dragging: dragged() === project.path,
-      dropHere: dropOn() === project.path,
-      onStart: (event) => {
-        event.dataTransfer?.setData("text/plain", project.path)
-        if (event.dataTransfer) event.dataTransfer.effectAllowed = "move"
-        setDragged(project.path)
-      },
-      onOver: (event) => {
-        if (!takes()) return
-        event.preventDefault()
-        setDropOn(project.path)
-      },
-      onLeave: () => {
-        if (dropOn() === project.path) setDropOn(undefined)
-      },
-      onDrop: (event) => {
-        event.preventDefault()
-        if (takes()) {
-          const run = movedOnto(
-            listed().map((each) => each.path),
-            dragged()!,
-            project.path
-          )
-          // the group's whole order, the projects the row doesn't show keeping their places
-          const group = props.projectRoot.path
-          const all = SPACES.inHomeOrder(group, props.root.projects, homeOrder()).map((each) => each.path)
-          saveHomeOrder(group, SPACES.withRunReordered(all, run).map(SPACES.folderNameOf))
-        }
-        setDropOn(undefined)
-      },
-      onEnd: () => {
-        setDragged(undefined)
-        setDropOn(undefined)
+    if (props.sitesOnly || !isSpellsOwn(props.projectRoot.path)) return undefined
+    return cardDragFor(
+      project.path,
+      () => listed().map((each) => each.path),
+      (run) => {
+        // the group's whole order, the projects the row doesn't show keeping their places
+        const group = props.projectRoot.path
+        const order = HomeArrangement.layout.order
+        const all = SPACES.inHomeOrder(group, props.root.projects, order).map((each) => each.path)
+        HomeArrangement.saveOrder(group, SPACES.withRunReordered(all, run).map(SPACES.folderNameOf))
       }
-    }
+    )
   }
   // a row with pictures of its apps shows each big, across its card's top;  one without one, its letter as big
   const banner = () => listed().some((project) => project.hasThumbnail)
@@ -512,7 +547,11 @@ function GroupCards(props: {
   )
 }
 
-/** One project's card:  its tile, its title, the first phrase of its description;  a click opens it. */
+/**
+ * One project's card:  its tile, its title, the first phrase of its description;  a click opens it.
+ * - Its title and line as changed on the home page (`HomeArrangement`), over the project's own:
+ *   typed in where they are while it's rearranged, when it can be dragged.
+ */
 function ProjectCard(props: {
   project: CardProject
   useRunner?: boolean
@@ -522,23 +561,53 @@ function ProjectCard(props: {
   menu?: JSX.Element
 }) {
   const project = () => props.project
+  const key = () => SPACES.homeTextKey({ project: project().path })
+  const title = () => (props.sitesOnly ? undefined : HomeArrangement.textFor(key()).title) ?? project().name
+  const line = () =>
+    (props.sitesOnly ? undefined : HomeArrangement.textFor(key()).line) ?? SPACES.cardLineOf(project().description)
   return (
-    <TileCard
-      title={project().name}
-      line={SPACES.cardLineOf(project().description)}
-      hueFrom={project().path}
-      banner={props.banner}
-      drag={props.drag}
-      menu={props.menu}
-      picture={pictureOf(project())}
-      href={props.sitesOnly ? siteEditorUrlFor(project().path) : project().path}
-      onClick={(event) => {
-        event.preventDefault()
-        if (props.sitesOnly) editor.showSiteEditor(project().path)
-        else openProject(project().path, props.useRunner)
-      }}
-    />
+    <Show
+      when={HomeArrangement.isRearranging && props.drag}
+      fallback={
+        <TileCard
+          title={title()}
+          line={line()}
+          hueFrom={project().path}
+          banner={props.banner}
+          drag={props.drag}
+          menu={props.menu}
+          picture={pictureOf(project())}
+          href={props.sitesOnly ? siteEditorUrlFor(project().path) : project().path}
+          onClick={(event) => {
+            event.preventDefault()
+            if (props.sitesOnly) editor.showSiteEditor(project().path)
+            else openProject(project().path, props.useRunner)
+          }}
+        />
+      }
+    >
+      <TileCard
+        title={title()}
+        line={line()}
+        hueFrom={project().path}
+        banner={props.banner}
+        drag={props.drag}
+        picture={pictureOf(project())}
+        edit={cardEditFor(key, SPACES.CARD_LINE_LENGTH)}
+      />
+    </Show>
   )
+}
+
+/** A card's words, typed in where they are, kept under `key()` (`SPACES.homeTextKey()`);  past `lineLimit`, marked. */
+function cardEditFor(key: () => string, lineLimit: number): TileCardEdit {
+  return {
+    onTitle: (text) => HomeArrangement.saveText(key(), { title: text }),
+    onLine: (text) => HomeArrangement.saveText(key(), { line: text }),
+    titleLabel: appTexts.text("homeCardTitle"),
+    lineLabel: appTexts.text("homeCardTagline"),
+    lineLimit
+  }
 }
 
 /** One project, as a group's card shows it. */
@@ -644,9 +713,9 @@ const [snapshotAt, setSnapshotAt] = createSignal<Readonly<Record<string, number>
  */
 function onHomeIn(projectRoot: SPACES.SpellProjectRoot, root: ProjectRootState): CardProject[] {
   const shown = root.projects.filter(
-    (project) => project.onHome !== false && SPACES.isOnHome(project.path, homeOrder())
+    (project) => project.onHome !== false && SPACES.isOnHome(project.path, HomeArrangement.layout.order)
   )
-  return SPACES.inHomeOrder(projectRoot.path, shown, homeOrder())
+  return SPACES.inHomeOrder(projectRoot.path, shown, HomeArrangement.layout.order)
 }
 
 /**
@@ -660,7 +729,7 @@ function cardsOf(
 ): CardProject[] {
   if (group.sitesOnly) {
     const sites = root.projects.filter((project) => project.isSite)
-    return SPACES.inHomeOrder(group.projectRoot.path, sites, homeOrder())
+    return SPACES.inHomeOrder(group.projectRoot.path, sites, HomeArrangement.layout.order)
   }
   const shown = onHomeIn(group.projectRoot, root)
   return group.language ? shown.filter((project) => languageOf(project) === group.language) : shown
@@ -682,32 +751,58 @@ const ENGLISH = "en"
 const SPANISH = "es"
 
 ////////////////
-// ## The home page's order:  dragged in dev
+// ## Rearranging:  cards and sections dragged, while the page is rearranged (epic `mockup` T51)
 ////////////////
 
-/** Each group's order on the home page:  as saved (`SPACES.HOME_ORDER`), then as dragged since. */
-const [homeOrder, setHomeOrder] = createSignal<Readonly<Record<string, readonly string[]>>>(SPACES.HOME_ORDER)
-
-/** May this page drag cards to reorder them?  Only once the server has said so (`askMayReorder()`). */
-const [mayReorder, setMayReorder] = createSignal(false)
-
-/** The card being dragged, by its project's address;  the card it would drop on. */
+/** The card being dragged, by its id (a project's address, a start card's id);  the card it would drop on. */
 const [dragged, setDragged] = createSignal<string>()
 const [dropOn, setDropOn] = createSignal<string>()
 
-/** Asked once already? */
-let askedMayReorder = false
-
 /**
- * Ask the server, once, whether this page may reorder the cards:  only in dev.
- * - NEVER throws:  where it may not (the house-network site, a build), it's refused, and the cards just don't drag.
+ * Card `id`'s drag among `row()` (the ids of the cards beside it, in order), while the page is rearranged:
+ * dropped on another of them, `save()` gets the row's new order.
+ * - Not rearranging:  none, so the card is a plain link.
  */
-function askMayReorder(): void {
-  if (askedMayReorder || !import.meta.env?.DEV) return
-  askedMayReorder = true
-  $fetch<SPACES.HomeOrderAnswer>({ url: SPACES.HOME_ORDER_URL, format: KnownFormat.json })
-    .then((answer) => setMayReorder(answer.mayReorder))
-    .catch(() => setMayReorder(false))
+function cardDragFor(id: string, row: () => readonly string[], save: (run: string[]) => void): TileCardDrag | undefined {
+  if (!HomeArrangement.isRearranging) return undefined
+  // a drag from this row's cards, onto another of them
+  const takes = () => !!dragged() && dragged() !== id && row().includes(dragged()!)
+  return {
+    get dragging() {
+      return dragged() === id
+    },
+    get dropHere() {
+      return dropOn() === id
+    },
+    onStart: (event) => {
+      event.dataTransfer?.setData("text/plain", id)
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = "move"
+      setDragged(id)
+    },
+    onOver: (event) => {
+      if (!takes()) return
+      event.preventDefault()
+      setDropOn(id)
+    },
+    onLeave: () => {
+      if (dropOn() === id) setDropOn(undefined)
+    },
+    onDrop: (event) => {
+      event.preventDefault()
+      if (takes()) save(movedOnto(row(), dragged()!, id))
+      setDropOn(undefined)
+    },
+    onEnd: () => {
+      setDragged(undefined)
+      setDropOn(undefined)
+    }
+  }
+}
+
+/** `all`, in the layout's order under `key`:  those it lists first, then the rest as `all` has them. */
+function inOrderOf<Id extends string>(key: string, all: readonly Id[]): Id[] {
+  const listed = (HomeArrangement.layout.order[key] ?? []).filter((id): id is Id => all.includes(id as Id))
+  return [...new Set([...listed, ...all])]
 }
 
 /**
@@ -723,22 +818,13 @@ function movedOnto<Name extends string>(names: readonly Name[], from: Name, onto
   return without
 }
 
-/** Is `group` one of Spell's own groups, whose order Spell keeps:  never an org's (`SPACES.orgGroups`). */
+/** Is `group` one of Spell's own groups, or your own, whose order is kept:  never an org's (`SPACES.orgGroups`). */
 function isSpellsOwn(group: string): boolean {
   return SPACES.PROJECT_GROUPS.some((each) => each.path === group)
 }
 
-/** Show group `group` in the order `names` at once, and save it into the editor's list;  a failure is shown. */
-function saveHomeOrder(group: string, names: string[]): void {
-  setHomeOrder({ ...homeOrder(), [group]: names })
-  const change: SPACES.HomeOrderChange = { group, names }
-  void $fetch({ url: SPACES.HOME_ORDER_URL, contents: change, requestFormat: KnownFormat.json }).catch((error) =>
-    editor.showError(error)
-  )
-}
-
 ////////////////
-// ## The sections' order:  dragged by their headers, in dev (epic `repo-split` P28)
+// ## The sections' order:  dragged by their headers, while the page is rearranged (epic `repo-split` P28, `mockup` T51)
 ////////////////
 
 /** The section being dragged, by its id;  the section it would drop on. */
@@ -746,12 +832,12 @@ const [draggedSection, setDraggedSection] = createSignal<SPACES.HomeSection>()
 const [dropOnSection, setDropOnSection] = createSignal<SPACES.HomeSection>()
 
 /**
- * Section `section`'s drag among the page's, by its header:  in dev, where the server lets this page reorder.
- * - Its new place is saved at once, the whole list of sections (`saveHomeOrder()`, `SPACES.HOME_SECTIONS_KEY`).
+ * Section `section`'s drag among the page's, by its header, while the page is rearranged.
+ * - Its new place is saved at once, the whole list of sections (`HomeArrangement.saveOrder()`, `SPACES.HOME_SECTIONS_KEY`).
  * - The caller leaves it off an org's app:  its order is made from Spell's (`SPACES.homeSections()`), not saved.
  */
 function sectionDragFor(section: SPACES.HomeSection): TileCardDrag | undefined {
-  if (!mayReorder()) return undefined
+  if (!HomeArrangement.isRearranging) return undefined
   // a section's drag, onto another section
   const takes = () => !!draggedSection() && draggedSection() !== section
   return {
@@ -777,11 +863,12 @@ function sectionDragFor(section: SPACES.HomeSection): TileCardDrag | undefined {
     onDrop: (event) => {
       if (!takes()) return
       event.preventDefault()
-      const run = movedOnto(SPACES.homeSections(false, homeOrder()), draggedSection()!, section)
+      const order = HomeArrangement.layout.order
+      const run = movedOnto(SPACES.homeSections(false, order), draggedSection()!, section)
       // every section's place, the hidden ones' kept
-      const saved = (homeOrder()[SPACES.HOME_SECTIONS_KEY] ?? []).filter(SPACES.isHomeSection)
+      const saved = (order[SPACES.HOME_SECTIONS_KEY] ?? []).filter(SPACES.isHomeSection)
       const all = [...new Set([...saved, ...SPACES.HOME_SECTIONS])]
-      saveHomeOrder(SPACES.HOME_SECTIONS_KEY, SPACES.withRunReordered(all, run))
+      HomeArrangement.saveOrder(SPACES.HOME_SECTIONS_KEY, SPACES.withRunReordered(all, run))
       setDropOnSection(undefined)
     },
     onEnd: () => {
@@ -841,6 +928,53 @@ export type ProjectCardsProps = {
   sectionDrag?: TileCardDrag
   /** Each card with a "..." menu of what you can do with its project (`<CardMenu>`):  your own projects'. */
   cardMenu?: boolean
+}
+
+/****************
+ * ### `<RearrangeBar>`
+ * While the home page is rearranged:  a bar along its top saying how, and whose the changes are,
+ * with Done (and, for a person's own changes, Reset to Default) on its right (epic `mockup` T51).
+ ****************/
+function RearrangeBar() {
+  return (
+    <Show when={HomeArrangement.isRearranging}>
+      <div class="RearrangeBar" role="status">
+        <ui-icon name="arrows alternate" />
+        <span class="how">
+          {appTexts.text(HomeArrangement.setsDefaults ? "homeRearrangeEveryone" : "homeRearrangeYours")}
+        </span>
+        <Show when={!HomeArrangement.setsDefaults && HomeArrangement.hasOwnChanges}>
+          <ui-button appearance="basic" size="small" icon="undo" onClick={() => HomeArrangement.reset()}>
+            {appTexts.text("homeRearrangeReset")}
+          </ui-button>
+        </Show>
+        <ui-button color="primary" size="small" onClick={() => HomeArrangement.rearrange(false)}>
+          {appTexts.text("homeRearrangeDone")}
+        </ui-button>
+      </div>
+    </Show>
+  )
+}
+
+/**
+ * At the home page's foot, quiet:  "Rearrange Home Screen", which turns the mode on (epic `mockup` T51).
+ * - Not while it's on:  the bar's Done turns it off.
+ */
+function RearrangeButton() {
+  return (
+    <Show when={!HomeArrangement.isRearranging}>
+      <div class="RearrangeFoot">
+        <ui-button
+          appearance="basic"
+          size="small"
+          icon="arrows alternate"
+          onClick={() => HomeArrangement.rearrange(true)}
+        >
+          {appTexts.text("homeRearrange")}
+        </ui-button>
+      </div>
+    </Show>
+  )
 }
 
 /****************

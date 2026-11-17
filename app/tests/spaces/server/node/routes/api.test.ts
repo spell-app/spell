@@ -1022,18 +1022,27 @@ describe("/api/prefs:  each person's preferences, in their space", () => {
 })
 
 describe("the home page's order (epic `mockup` P19, `repo-split` P28)", () => {
-  it("GET /api/home/order:  Spell's own checkout may reorder (an install's server says no)", async () => {
+  it("GET /api/home/order:  both layers;  this machine's person is `@spell`'s, in Spell's own checkout, so a change is everyone's (T51)", async () => {
     const reply = await request("GET", "/api/home/order")
     expect(reply.status).toBe(200)
-    expect(reply.json()).toEqual({ mayReorder: true })
+    const answer = reply.json() as { setsDefaults: boolean; defaults: { order: Record<string, string[]> }; mine: object }
+    expect(answer.setsDefaults).toBe(true)
+    expect(answer.defaults.order.sections).toContain("examples")
+    expect(answer.mine).toEqual({ order: {}, texts: {} })
+  })
+
+  it("a change that says nothing, or words on nothing, is 400 (T51)", async () => {
+    const json = "application/json"
+    expect((await request("POST", "/api/home/order", '{"group":"sections","names":["start"]}', json)).status).toBe(400)
+    expect((await request("POST", "/api/home/order", '{"text":{"title":"x"}}', json)).status).toBe(400)
   })
 
   it("a sections' order naming something that isn't a section, or a group that isn't Spell's, is 400:  nothing written", async () => {
     const json = "application/json"
-    const notASection = await request("POST", "/api/home/order", '{"group":"sections","names":["sidebar"]}', json)
+    const notASection = await request("POST", "/api/home/order", '{"order":{"group":"sections","names":["sidebar"]}}', json)
     expect(notASection.status).toBe(400)
     expect(notASection.json().errors[0].message).toContain("the sections are projects, start, examples")
-    const notAGroup = await request("POST", "/api/home/order", '{"group":"@acme/tools","names":["a"]}', json)
+    const notAGroup = await request("POST", "/api/home/order", '{"order":{"group":"@acme/tools","names":["a"]}}', json)
     expect(notAGroup.status).toBe(400)
   })
 })

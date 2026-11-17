@@ -488,6 +488,17 @@ export const APP_TEXTS = {
   // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
   homeSpanishTitle: "En español",
   homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeRearrange: "Rearrange Home Screen",
+  homeRearrangeDone: "Done",
+  homeRearrangeReset: "Reset to Default",
+  homeRearrangeEveryone: "Drag cards and sections to move them;  click a title or a line to change it.\nWhat you change here, everyone sees.",
+  homeRearrangeYours: "Drag cards and sections to move them;  click a title or a line to change it.\nOnly you see what you change here.",
+  homeTextClickToChange: "Click to change it",
+  homeTextTooLong: "Longer than a card shows whole:  {limit} characters",
+  homeCardTitle: "Title",
+  homeCardTagline: "Tagline",
+  homeSectionHeader: "Header",
+  homeSectionLine: "Line",
   homeSpanishExamples: "Ejemplos",
   homeSpanishGuides: "Guías",
 

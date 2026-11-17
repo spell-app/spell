@@ -1,0 +1,28 @@
+/*
+ * Look of `<EditableText>` (`EditableText.tsx`):  text changed where it is, while the home page is rearranged.
+ * - A dashed underline says it can be changed;  typing in it, a field's ring.
+ * - Past its limit, the warning colour, and its tooltip says why.
+ */
+.EditableText {
+  cursor: text;
+  border-radius: 4px;
+  text-decoration: underline dashed var(--ui-border-color);
+  text-underline-offset: 4px;
+
+  &:hover {
+    text-decoration-color: var(--ui-text-muted);
+  }
+  &:focus-visible,
+  &.editing {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: 2px;
+    text-decoration: none;
+  }
+  &:empty::before {
+    content: attr(data-placeholder);
+    color: var(--ui-text-muted);
+  }
+  &.too-long {
+    text-decoration: underline wavy var(--ui-warning);
+  }
+}

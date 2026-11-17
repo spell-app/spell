@@ -1,6 +1,9 @@
 import { Show, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { EditableText } from "./EditableText"
+import { HomeArrangement } from "./HomeArrangement"
+
 import "./TileCard.css"
 
 /****************
@@ -13,6 +16,8 @@ import "./TileCard.css"
  * - `drag`:  its owner's drag and drop, to move it among its row (the home page, in dev);  none:  a link drags as usual.
  * - `banner`:  its picture (or its tile) across its top, the text under it:  the home page's rows of examples,
  *   each a picture of its app running (epic `mockup` P18).
+ * - `edit`:  its title and line changed where they are, the home page rearranged (epic `mockup` T51):
+ *   it's neither a link nor a button then, so a click lands in its text, and only dragging moves it.
  * - `menu`:  a "..." menu at the left end of its text, on its title's line, the text moved over for it
  *   (epic `mockup` T47, I49):  a sibling of the card, not inside it, so a click on it never reaches the card's link.
  ****************/
@@ -41,12 +46,36 @@ export function TileCard(props: TileCardProps) {
         >
           <img class="picture" src={props.picture} alt="" />
         </Show>
-        <span class="text">
-          <span class="title">{props.title}</span>
-          <Show when={props.line}>
-            <span class="description">{props.line}</span>
-          </Show>
-        </span>
+        <Show
+          when={props.edit}
+          fallback={
+            <span class="text">
+              <span class="title">{props.title}</span>
+              <Show when={props.line}>
+                <span class="description">{props.line}</span>
+              </Show>
+            </span>
+          }
+        >
+          {(edit) => (
+            <span class="text">
+              <EditableText
+                class="title"
+                value={props.title}
+                label={edit().titleLabel}
+                onSave={(text) => edit().onTitle(text)}
+              />
+              <EditableText
+                class="description"
+                value={props.line ?? ""}
+                label={edit().lineLabel}
+                placeholder={edit().lineLabel}
+                limit={edit().lineLimit}
+                onSave={(text) => edit().onLine(text)}
+              />
+            </span>
+          )}
+        </Show>
       </>
     )
     const classes = () => [
@@ -60,6 +89,22 @@ export function TileCard(props: TileCardProps) {
         "drop-here": !!props.drag?.dropHere
       }
     ]
+    // being rearranged:  a plain box, dragged unless its text is being typed in
+    if (untrack(() => props.edit)) {
+      return (
+        <div
+          class={classes()}
+          draggable={props.drag && !HomeArrangement.isEditingText ? "true" : undefined}
+          onDragStart={(event) => props.drag?.onStart(event)}
+          onDragOver={(event) => props.drag?.onOver(event)}
+          onDragLeave={(event) => props.drag?.onLeave(event)}
+          onDrop={(event) => props.drag?.onDrop(event)}
+          onDragEnd={(event) => props.drag?.onEnd(event)}
+        >
+          {contents()}
+        </div>
+      )
+    }
     return (
       <Show
         when={props.href}
@@ -131,8 +176,26 @@ export type TileCardProps = {
   onClick?: (event: MouseEvent) => void
   /** A double click on it. */
   onDblClick?: (event: MouseEvent) => void
+  /**
+   * Its title and line changed where they are:  the home page, rearranged (epic `mockup` T51).
+   * - Read once, as it mounts:  the caller remounts it to change between the two.
+   */
+  edit?: TileCardEdit
   /** A "..." menu at the left end of its text, on its title's line:  the home page's own projects' (`<CardMenu>`). */
   menu?: JSX.Element
+}
+
+/** `<TileCard>`'s words, changed where they are:  its owner keeps them. */
+export type TileCardEdit = {
+  /** Its title, typed:  `""` puts its own back. */
+  onTitle: (text: string) => void
+  /** Its line, typed:  `""` puts its own back. */
+  onLine: (text: string) => void
+  /** What each is, for a screen reader;  the line's is its placeholder too. */
+  titleLabel: string
+  lineLabel: string
+  /** The most characters its line shows whole:  past it, marked.  Default:  no limit. */
+  lineLimit?: number
 }
 
 /** `<TileCard>`'s drag and drop:  its owner does the moving, the card shows it. */

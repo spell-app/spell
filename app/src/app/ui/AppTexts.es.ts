@@ -595,6 +595,17 @@ const APP_TEXTS_ES: AppTextPack = {
   // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
   homeSpanishTitle: "En español",
   homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeRearrange: "Reorganizar la pantalla de inicio",
+  homeRearrangeDone: "Listo",
+  homeRearrangeReset: "Restablecer",
+  homeRearrangeEveryone: "Arrastra tarjetas y secciones para moverlas;  haz clic en un título o una línea para cambiarlo.\nLo que cambies aquí lo ven todos.",
+  homeRearrangeYours: "Arrastra tarjetas y secciones para moverlas;  haz clic en un título o una línea para cambiarlo.\nSolo tú ves lo que cambies aquí.",
+  homeTextClickToChange: "Haz clic para cambiarlo",
+  homeTextTooLong: "Más largo de lo que una tarjeta muestra entero:  {limit} caracteres",
+  homeCardTitle: "Título",
+  homeCardTagline: "Lema",
+  homeSectionHeader: "Encabezado",
+  homeSectionLine: "Línea",
   homeSpanishExamples: "Ejemplos",
   homeSpanishGuides: "Guías",
 
