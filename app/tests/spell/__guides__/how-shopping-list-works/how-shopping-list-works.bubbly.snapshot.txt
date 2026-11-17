@@ -1,0 +1,143 @@
+==== /HowShoppingListWorks.spell
+⟪## How the Shopping List works⟫
+⟦// The Shopping List example keeps what to buy in a CSV file, and shows it by aisle:⟧
+⟦// add an item, tick it off as you shop, clear what you got, and print what's left.⟧
+⟦// Four ideas do the work:⟧
+⟦// - one line says where the items are kept:  a CSV file in the example's own folder⟧
+⟦// - an item draws itself as a row:  a box to tick bound to its "got"⟧
+⟦// - the list is worked out from the items:  each aisle with what's still to get in it⟧
+⟦// - "open printing" prints the app alone, and its CSS says what goes on paper⟧
+⟦//⟧
+⟦// This guide keeps the first three, with the items in memory:  they start afresh each run.⟧
+⟦// Open Shopping List, from Examples on the home page, for all of it.⟧
+
+
+⟪## An item⟫
+[thing create_type L0]
+| an «"item"» is a **view**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"amount"» is a **number**
+|   [property define_property_has L1]
+|   | its «"unit"» is **text**
+|   [property define_property_has L1]
+|   | its «"aisle"» is **text**
+|   [property define_property_has L1]
+|   | its «"got"» is yes or no
+|   |   ⟦// ticked off:  it's in the trolley⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// a form of its own, bound to the item:  ticking the box changes its "got"⟧
+|   |   <⟨form⟩ value={it}>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"»>
+|   |       <⟨checkbox⟩ name=«"got"» aria-label=«"Got it"» />
+|   |       <⟨text⟩ bold>{its **amount** && its **unit**}</⟨text⟩>    code({its amount && its unit})
+|   |       <⟨text⟩>{its **name**}</⟨text⟩>    code({its name})
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+
+⟪## An aisle:  its name, and what's still to get in it⟫
+[thing create_type L0]
+| an «"aisle"» is a **view**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"items"» is a list of **items**
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xs"»>
+|   |     <⟨header⟩ size=«"tiny"»>{its **name**}</⟨header⟩>    code({its name})
+|   |     <⟨for⟩ item in its items />
+|   |   </⟨stack⟩>
+
+
+⟪## The app⟫
+[thing create_one_of_a_kind L0]
+| «shopping list» is an **app**
+|   [property define_property_has L1]
+|   | its «"items"» is a list of **items**
+|   |   ⟦// everything on the list, in memory here;  the example's are in its CSV file⟧
+|   [property property_value_getter L1]
+|   | its «"aisles"» is
+|   |   ⟦// each aisle with something still to get in it, once, A to Z⟧
+|   |   set **found** to a new list of **aisles**    ‾value(found) ‾value(a new list of aisles)
+|   |   [control list_iteration L2]
+|   |   | for **item** in (its **items**) sorted by its **aisle**    ‾value((its items) sorted by its aisle)
+|   |   |   [control if L3]
+|   |   |   | if **item's got** is _no_    ‾value(item's got)
+|   |   |   |   set **aisle** to the first **aisle** in **found** where its **name** is the **item's aisle**    ‾value(aisle) ‾value(the first aisle in found where its name is the item's aisle)
+|   |   |   |   [control if L4]
+|   |   |   |   | if **aisle** does not exist    ‾question(aisle does not exist)
+|   |   |   |   |   set **aisle** to **a new aisle** with **name** = the **item's aisle**    ‾value(aisle) ‾value(a new aisle with name = the item's aisle)
+|   |   |   |   |   add **aisle** to **found**    ‾value(aisle) ‾value(found)
+|   |   |   |   add **item** to the **aisle's items**    ‾value(item) ‾value(the aisle's items)
+|   |   return **found**    ‾value(found)
+
+|   [action to_do_something L1]
+|   | to «"clear what I got"»
+|   |   ⟦// every ticked item off the list⟧
+|   |   remove **items** from its **items** where its **got** is _yes_    ‾value(its items) ‾value(its got)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩>
+|   |       <⟨action⟩ «"clear what I got"» />
+|   |       <⟨for⟩ aisle in its aisles />
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>
+
+
+⟪## Start:  five things to buy, one already got⟫
+add (**a new item** with **name** _"milk"_, **amount** = _2_, **unit** = _"litres"_, **aisle** _"Dairy"_) to the **items** of the **shopping list**    ‾value(a new item with name "milk", amount = 2, unit = "litres", aisle "Dairy") ‾value(the items of the shopping list)
+add (**a new item** with **name** _"eggs"_, **amount** = _12_, **aisle** _"Dairy"_) to the **items** of the **shopping list**    ‾value(a new item with name "eggs", amount = 12, aisle "Dairy") ‾value(the items of the shopping list)
+add (**a new item** with **name** _"bananas"_, **amount** = _6_, **aisle** _"Fruit and veg"_) to the **items** of the **shopping list**    ‾value(a new item with name "bananas", amount = 6, aisle "Fruit and veg") ‾value(the items of the shopping list)
+add (**a new item** with **name** _"bread"_, **amount** = _1_, **unit** = _"loaf"_, **aisle** _"Bakery"_) to the **items** of the **shopping list**    ‾value(a new item with name "bread", amount = 1, unit = "loaf", aisle "Bakery") ‾value(the items of the shopping list)
+add (**a new item** with **name** _"coffee"_, **amount** = _250_, **unit** = _"g"_, **aisle** _"Drinks"_, **got** = _yes_) to the **items** of the **shopping list**    ‾value(a new item with name "coffee", amount = 250, unit = "g", aisle "Drinks", got = yes) ‾value(the items of the shopping list)
+
+
+⟪## A check⟫
+[action to_do_something L0]
+| to «test the aisles»
+|   set **list** to **a new shopping list**    ‾value(list) ‾value(a new shopping list)
+|   add (**a new item** with **name** _"milk"_, **aisle** _"Dairy"_) to **list's items**    ‾value(a new item with name "milk", aisle "Dairy") ‾value(list's items)
+|   add (**a new item** with **name** _"eggs"_, **aisle** _"Dairy"_) to **list's items**    ‾value(a new item with name "eggs", aisle "Dairy") ‾value(list's items)
+|   add (**a new item** with **name** _"apples"_, **aisle** _"Fruit"_, **got** = _yes_) to **list's items**    ‾value(a new item with name "apples", aisle "Fruit", got = yes) ‾value(list's items)
+|   the **length** of **list's aisles** should be _1_    ‾value(the length of list's aisles)
+
+
+⟪## Try it⟫
+⟦// - Tick "milk":  it leaves Dairy, which still has the eggs.⟧
+⟦// - Press "Clear what I got":  the coffee goes for good.⟧
+⟦// - Give an item an aisle of its own, "Frozen", and see a new heading.⟧
+⟦//⟧
+⟦// Where next:  Shopping List, from Examples on the home page, which keeps its items in a CSV file.⟧
+
+
+⟪## Where the example keeps its items⟫
+⟦// This guide's items live in memory:  reload, and they start again.⟧
+⟦// Shopping List keeps them in a CSV file, in its own folder:  __data/shopping.csv.⟧
+⟦// One line, in its API file, says so:⟧
+⟦//       shopping sheet is a sheet at "shopping.csv"⟧
+⟦// and an item says it lives there:⟧
+⟦//       it lives in shopping sheet⟧
+⟦// The page server writes the file, changing only the lines that change:  open it in Numbers or Excel and see.⟧
+⟦// After those lines, the words you already know reach the file:⟧
+⟦//       add (a new item with ...) to the items⟧
+⟦//       every item where its got is no⟧
+⟦//       remove items from the items where its got is yes⟧
+⟦// Recipe Cards imports that API file, so the ingredients it adds land in the same file, on the same list.⟧
+
+
+⟪## On paper⟫
+⟦// Shopping List's Print button runs one step:⟧
+⟦//       open printing⟧
+⟦// which opens the browser's Print dialog for the app alone, not the editor around it.⟧
+⟦// Its CSS says what's on paper:  only what's still to get, each with its box to tick.⟧
+⟦//       @media print {⟧
+⟦//         ui-toolbar, .new-item, .got, .item ui-button { display: none; }⟧
+⟦//       }⟧

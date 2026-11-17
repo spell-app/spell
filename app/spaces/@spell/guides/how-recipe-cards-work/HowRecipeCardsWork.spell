@@ -1,0 +1,100 @@
+## How Recipe Cards work
+// The Recipe Cards example keeps recipes in a JSON file:  pick one, set how many are eating,
+// show it in metric or in cups and spoons, and send the ingredients you pick to the shopping list.
+// Four ideas do the work:
+// - a recipe holds its ingredients and steps INSIDE it:  lists of things saved nowhere else
+// - every amount is worked out from how many are eating:  its amount, times diners over servings
+// - Spell's own measures say how big a cup is:  "1 cup in ml" is 236.6
+// - the shopping list is Shopping List's own, imported:  one file, one list
+//
+// This guide keeps the first three, with one recipe in memory.
+// Open Recipe Cards, from Examples on the home page, for all of it.
+
+
+## An ingredient, and a recipe that holds them
+an "ingredient" is a view
+	its "amount" is a number
+		// for the recipe's own number of people
+	its "unit" is text
+	its "name" is text
+	its "scaled" is its amount * recipe cards's scale
+		// for how many are eating
+
+	to draw it
+		<stack direction="horizontal" spacing="sm">
+			<text bold>{its scaled && its unit}</text>
+			<text>{its name}</text>
+		</stack>
+
+a "recipe" is a view
+	its "title" is text
+	its "serves" is a number
+	its "ingredients" is a list of ingredients
+		// kept inside the recipe:  the example's JSON file holds each recipe whole
+
+	to draw it
+		<stack spacing="xs">
+			<header size="small">{its title}</header>
+			<for ingredient in its ingredients />
+		</stack>
+
+
+## Cups and millilitres, by Spell's measures
+to count the cups in (millilitres as a number)
+	// a cup's size is Spell's own, from its volume units
+	return millilitres / (1 cup in ml)
+
+
+## The app
+recipe cards is an app
+	its "diners" is a number starting at 6
+		// how many are eating
+	"soup" is a new recipe with title "Tomato Soup", serves = 4
+	its "scale" is its diners / the serves of its soup
+		// how much more, or less, than the recipe says
+
+	to draw it
+		<container text>
+			<stack>
+				<form value={it}>
+					<field label="Cooking for">
+						<input name="diners" type="number" min="1" labeled="right" label="people" />
+					</field>
+				</form>
+				{draw its soup}
+			</stack>
+		</container>
+
+
+## Start:  the soup's ingredients
+add (a new ingredient with amount = 1000, unit = "g", name "ripe tomatoes") to the ingredients of the soup of recipe cards
+add (a new ingredient with amount = 2, unit = "tbsp", name "olive oil") to the ingredients of the soup of recipe cards
+add (a new ingredient with amount = 500, unit = "ml", name "vegetable stock") to the ingredients of the soup of recipe cards
+
+
+## A check
+to test the measures
+	// a cup is 236.6 ml, so 1 litre is a little over 4 cups
+	round ((count the cups in 1000) * 10) should be 42
+
+
+## Try it
+// - Change "Cooking for" to 2:  every amount halves.
+// - Show the stock in cups:  change its line in "to draw it" to say {count the cups in its scaled}.
+// - Add a step list:  a "step" with its words, and "its steps is a list of steps" on the recipe.
+//
+// Where next:  Recipe Cards, from Examples on the home page, with its pictures, its Edit screen and its shopping list.
+
+
+## Where the example keeps its recipes
+// This guide's recipe lives in memory:  reload, and it starts again.
+// Recipe Cards keeps them in a JSON file, in its own folder:  __data/recipes.json.
+// One line, in its API file, says so:
+//       recipe file is a json file at "recipes.json"
+// and a recipe says it lives there:
+//       it lives in recipe file
+// The page server writes the file whole, as plain JSON:  { "recipes": [ ... ] },
+// each recipe with its ingredients and steps inside it, as this guide's recipe holds them.
+// Its shopping list isn't there:  Recipe Cards imports Shopping List's API file, in its project file,
+//       { "path": "@spell/examples/ShoppingList", "import": ["Item", "Aisle", "AisleList"] }
+// so the ingredients it adds land in Shopping List's CSV file, and both show the same list.

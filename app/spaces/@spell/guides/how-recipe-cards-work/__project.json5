@@ -1,0 +1,10 @@
+{
+  "title": "How Recipe Cards work",
+  "description": "The Recipe Cards example's recipe and its ingredients:  lists kept inside a thing, amounts worked out for how many are eating, and cups by Spell's own measures",
+  "imports": [
+    {
+      "path": "/HowRecipeCardsWork.spell",
+      "active": true
+    }
+  ]
+}

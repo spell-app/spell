@@ -1,0 +1,119 @@
+==== /HowRecipeCardsWork.spell
+⟪## How Recipe Cards work⟫
+⟦// The Recipe Cards example keeps recipes in a JSON file:  pick one, set how many are eating,⟧
+⟦// show it in metric or in cups and spoons, and send the ingredients you pick to the shopping list.⟧
+⟦// Four ideas do the work:⟧
+⟦// - a recipe holds its ingredients and steps INSIDE it:  lists of things saved nowhere else⟧
+⟦// - every amount is worked out from how many are eating:  its amount, times diners over servings⟧
+⟦// - Spell's own measures say how big a cup is:  "1 cup in ml" is 236.6⟧
+⟦// - the shopping list is Shopping List's own, imported:  one file, one list⟧
+⟦//⟧
+⟦// This guide keeps the first three, with one recipe in memory.⟧
+⟦// Open Recipe Cards, from Examples on the home page, for all of it.⟧
+
+
+⟪## An ingredient, and a recipe that holds them⟫
+[thing create_type L0]
+| an «"ingredient"» is a **view**
+|   [property define_property_has L1]
+|   | its «"amount"» is a **number**
+|   |   ⟦// for the recipe's own number of people⟧
+|   [property define_property_has L1]
+|   | its «"unit"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property property_value_getter L1]
+|   | its «"scaled"» is its **amount** * **recipe cards's scale**
+|   |   ⟦// for how many are eating⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"»>
+|   |     <⟨text⟩ bold>{its **scaled** && its **unit**}</⟨text⟩>    code({its scaled && its unit})
+|   |     <⟨text⟩>{its **name**}</⟨text⟩>    code({its name})
+|   |   </⟨stack⟩>
+
+[thing create_type L0]
+| a «"recipe"» is a **view**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"serves"» is a **number**
+|   [property define_property_has L1]
+|   | its «"ingredients"» is a list of **ingredients**
+|   |   ⟦// kept inside the recipe:  the example's JSON file holds each recipe whole⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"xs"»>
+|   |     <⟨header⟩ size=«"small"»>{its **title**}</⟨header⟩>    code({its title})
+|   |     <⟨for⟩ ingredient in its ingredients />
+|   |   </⟨stack⟩>
+
+
+⟪## Cups and millilitres, by Spell's measures⟫
+[action to_do_something L0]
+| to «count the cups in (millilitres as a number)»    ‾value(millilitres as a number) bold(millilitres) bold(number)
+|   ⟦// a cup's size is Spell's own, from its volume units⟧
+|   return **millilitres** / (_1_ cup in ml)    ‾value(millilitres) ‾value(1 cup in ml)
+
+
+⟪## The app⟫
+[thing create_one_of_a_kind L0]
+| «recipe cards» is an **app**
+|   [property define_property_has L1]
+|   | its «"diners"» is a **number** starting at «6»
+|   |   ⟦// how many are eating⟧
+|   [property define_property_has L1]
+|   | «"soup"» is **a new recipe** with **title** «"Tomato Soup"», **serves** = «4»
+|   [property property_value_getter L1]
+|   | its «"scale"» is its **diners** / the **serves** of its **soup**
+|   |   ⟦// how much more, or less, than the recipe says⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨field⟩ label=«"Cooking for"»>
+|   |           <⟨input⟩ name=«"diners"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"» />
+|   |         </⟨field⟩>
+|   |       </⟨form⟩>
+|   |       {draw its **soup**}
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>
+
+
+⟪## Start:  the soup's ingredients⟫
+add (**a new ingredient** with **amount** = _1000_, **unit** = _"g"_, **name** _"ripe tomatoes"_) to the **ingredients** of the **soup** of **recipe cards**    ‾value(a new ingredient with amount = 1000, unit = "g", name "ripe tomatoes") ‾value(the ingredients of the soup of recipe cards)
+add (**a new ingredient** with **amount** = _2_, **unit** = _"tbsp"_, **name** _"olive oil"_) to the **ingredients** of the **soup** of **recipe cards**    ‾value(a new ingredient with amount = 2, unit = "tbsp", name "olive oil") ‾value(the ingredients of the soup of recipe cards)
+add (**a new ingredient** with **amount** = _500_, **unit** = _"ml"_, **name** _"vegetable stock"_) to the **ingredients** of the **soup** of **recipe cards**    ‾value(a new ingredient with amount = 500, unit = "ml", name "vegetable stock") ‾value(the ingredients of the soup of recipe cards)
+
+
+⟪## A check⟫
+[action to_do_something L0]
+| to «test the measures»
+|   ⟦// a cup is 236.6 ml, so 1 litre is a little over 4 cups⟧
+|   round ((count the cups in _1000_) * _10_) should be _42_    ‾value(round ((count the cups in 1000) * 10))
+
+
+⟪## Try it⟫
+⟦// - Change "Cooking for" to 2:  every amount halves.⟧
+⟦// - Show the stock in cups:  change its line in "to draw it" to say {count the cups in its scaled}.⟧
+⟦// - Add a step list:  a "step" with its words, and "its steps is a list of steps" on the recipe.⟧
+⟦//⟧
+⟦// Where next:  Recipe Cards, from Examples on the home page, with its pictures, its Edit screen and its shopping list.⟧
+
+
+⟪## Where the example keeps its recipes⟫
+⟦// This guide's recipe lives in memory:  reload, and it starts again.⟧
+⟦// Recipe Cards keeps them in a JSON file, in its own folder:  __data/recipes.json.⟧
+⟦// One line, in its API file, says so:⟧
+⟦//       recipe file is a json file at "recipes.json"⟧
+⟦// and a recipe says it lives there:⟧
+⟦//       it lives in recipe file⟧
+⟦// The page server writes the file whole, as plain JSON:  { "recipes": [ ... ] },⟧
+⟦// each recipe with its ingredients and steps inside it, as this guide's recipe holds them.⟧
+⟦// Its shopping list isn't there:  Recipe Cards imports Shopping List's API file, in its project file,⟧
+⟦//       { "path": "@spell/examples/ShoppingList", "import": ["Item", "Aisle", "AisleList"] }⟧
+⟦// so the ingredients it adds land in Shopping List's CSV file, and both show the same list.⟧
