@@ -27,8 +27,8 @@ From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s t
 - **Plain `.css` beside its component:**
   - `<Name>.css` next to `<Name>.tsx`, imported by it (last import, WWOD §4):  `import "./InputEditor.css"`
   - native nesting and custom properties;  minimal use of preprocessor features (Lightning CSS), no Less
-  - it opens with a comment naming what it styles and anything surprising:  `/* Look of <FileDropdown>
-    (FileDropdown.tsx) ... Hosts are display: contents:  rules reach the boxes through ::part(). */`
+  - it opens with a comment naming what it styles and anything surprising:  `/* Look of <Notice>
+    (Notice.tsx):  each line of the notice on ONE line, never wrapped ... */`
   - `ui`'s global sheets (`src/styles/`):  SEE `packages/ui/AGENTS.md` "CSS"
   - TODO:  CSS in the component's own file, e.g. a `postcss`-tagged template, if VS Code still gives IntelliSense
     for it.
@@ -59,8 +59,8 @@ From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s t
     `<ui-root theme="dark">` -- never a second set of rules per scheme (`theming.md` "Overriding colours")
 
 - **Reach into `ui-*` elements through `::part()` and tokens:**
-  - many hosts are `display: contents`:  style the box through its part, `ui-dropdown.FileDropdown::part(trigger)`
-    (`FileDropdown.css`), `ui-icon.order::part(icon)` (`TypeExplorer.css`), `ui-menu.PanelMenu::part(menu)`
+  - many hosts are `display: contents`:  style the box through its part, `ui-menu.BarMenuItems::part(menu)`
+    (`MenuBar.css`), `ui-icon.order::part(icon)` (`TypeExplorer.css`), `ui-menu.PanelMenu::part(menu)`
     (`chrome.css`)
   - a page's `::part()` rule beats the element's own sheet (outer tree wins), layers or not
   - an override of `ui`'s class grammar goes in the app stylesheet, `@layer ui.app` (`theming.md` "The app

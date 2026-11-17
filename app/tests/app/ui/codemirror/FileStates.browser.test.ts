@@ -6,6 +6,7 @@ import { EditorView } from "@codemirror/view"
 import { declareProp, Observable } from "spell/util"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { codeLook, showBubbly } from "spell/app/app/ui/codePopups"
 import { FileStates, type EditWay } from "spell/app/app/ui/codemirror/FileStates"
 
 /**
@@ -151,6 +152,30 @@ describe("FileStates", () => {
     states.releaseSlice(view)
   })
 
+  test("a property editors file, `Card.editor.spell`:  drawn as Spell, bubbly or coloured, never parsed (epic `codemirror` I18)", async () => {
+    const { states, project } = setUp()
+    const file = new StandInFile("@spell/test/standin/Card.editor.spell", project) as StandInFile & SP.AnySpellFile
+    file.contents = PROPERTY_EDITORS
+    const wasBubbly = codeLook.isBubbly
+    try {
+      showBubbly(true)
+      view = viewOf()
+      states.show(view, file)
+      expect(view.dom.classList.contains("bubbly")).toBe(true)
+      expect(textsOf(view, ".bubbly-heading")).toEqual([" A card's property editor"])
+      expect(textsOf(view, ".bubbly-tag-name")).toEqual(["property-editor", "ui-property", "property-editor"])
+      expect(textsOf(view, ".bubbly-input")).toContain("rank")
+      // the look off:  coloured by its tokens, its heading bold (was plain black text, I18)
+      showBubbly(false)
+      await Promise.resolve()
+      expect(view.dom.classList.contains("bubbly")).toBe(false)
+      expect(textsOf(view, ".cmt-heading")).toEqual(["# A card's property editor"])
+      expect(textsOf(view, ".cmt-string")).toEqual(['"rank"'])
+    } finally {
+      showBubbly(wasBubbly)
+    }
+  })
+
   test("its waits:  a parse once the typing pauses 200 msec, a rename's save within 2 s (epic `codemirror` J4)", () => {
     expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([200, 2000])
   })
@@ -165,6 +190,20 @@ const GAME = "to play it:\n\tdeal cards\n\tshuffle"
 
 /** A card file's text. */
 const CARD = "a card is a thing"
+
+/** A property editors file's text:  a heading, prose, and a `<property-editor>` of markup. */
+const PROPERTY_EDITORS = `# A card's property editor
+What the Inspector shows for a card.
+
+<property-editor "card">
+\t<ui-property name="rank" />
+</property-editor>
+`
+
+/** The text of each element matching `selector` in `view`, in order. */
+function textsOf(view: EditorView, selector: string): string[] {
+  return [...view.dom.querySelectorAll(selector)].map((element) => element.textContent ?? "")
+}
 
 /** A project file, standing in:  its `contents` a spell cell, as a real one's. */
 class StandInFile extends Observable {
@@ -192,7 +231,7 @@ function setUp({ onEdit }: { onEdit?: (file: SP.AnySpellFile) => void } = {}) {
   files.game.contents = GAME
   files.card.contents = CARD
   const states = new FileStates({ service: new LSP.SpellLanguageService(new LSP.AppAddresses()), onEdit })
-  return { states, files: files as unknown as Record<keyof typeof files, StandInFile & SP.AnySpellFile> }
+  return { states, project, files: files as unknown as Record<keyof typeof files, StandInFile & SP.AnySpellFile> }
 }
 
 /** A view in the page, showing nothing yet. */

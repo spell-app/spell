@@ -266,7 +266,8 @@ export class EditorStore extends Observable {
     // if we were passed a `selection` and path matches full path passed in, select it
     if (selection && path === file.path) file.initialSelection = selection
 
-    // Set project and file together, else <FileDropdown> will blow up.  :-(
+    // Set project and file together:  `<FileTabs>` reads both,
+    // and would list the old project's file among the new one's
     editor.project = project
     editor.file = file
     await file.load(undefined)

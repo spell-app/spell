@@ -6,12 +6,12 @@ import { reactiveObject } from "spell/util"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SPACES } from "spell/app/spaces"
 import { editor, type EditorStore } from "spell/app/app/editor"
-import { ProjectDropdown, ProjectMenu, SpellPage, rememberedSizes, uiReady } from "spell/app/app/solid"
+import { SpellPage, openProject, rememberedSizes, trackProjectRoot, uiReady } from "spell/app/app/solid"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 
 /**
  * The pages' shell in the browser (P8):  `<SpellPage>`,
- * `<ProjectMenu>` / `<ProjectDropdown>` on a fake project root.
+ * `trackProjectRoot()` on a fake project root.
  */
 
 /** Undo for each test:  unmount, restore `editor` fields, forget prefs. */
@@ -71,74 +71,60 @@ describe("<SpellPage>", () => {
   })
 })
 
-describe("<ProjectMenu> / <ProjectDropdown>", () => {
-  test("`<ProjectMenu>`:  loads its root, then lists its projects;  choosing one shows it", async () => {
-    const showEditor = spyOnEditor("showEditor")
-    const showRunner = spyOnEditor("showRunner")
+describe("`trackProjectRoot()` / `openProject()`", () => {
+  test("loads its root, then lists its projects", async () => {
     const root = fakeRoot(false)
-    const host = await mount(() => (
-      <>
-        <ProjectMenu class="editing" direction="vertical" projectRoot={root} />
-        <ProjectMenu class="running" projectRoot={root} useRunner />
-      </>
-    ))
-    const editing = host.querySelector("ui-menu.ProjectMenu.editing")!
-    expect(editing.getAttribute("direction")).toBe("vertical")
+    let state!: ReturnType<typeof trackProjectRoot>
+    await mount(() => {
+      state = trackProjectRoot(() => root)
+      return null
+    })
     expect(root.load).toHaveBeenCalled()
-    expect(text(editing)).toBe("Loading...")
+    expect(state().loaded).toBe(false)
+    expect(state().projects).toEqual([])
 
     Object.assign(root, { isLoaded: true })
     flush()
-    await ElementFixture.settle(host)
-    const items = [...editing.querySelectorAll<HTMLElement>(":scope > ui-item")]
-    expect(items.map(text)).toEqual(["TaskList", "Solitaire"])
-    expect(items[0].querySelector("ui-icon")!.getAttribute("name")).toBe("app store ios")
-    items[1].click()
-    expect(showEditor).toHaveBeenCalledWith("@spell/examples/Solitaire")
-    host.querySelector<HTMLElement>("ui-menu.running > ui-item")!.click()
-    expect(showRunner).toHaveBeenCalledWith("@spell/examples/TaskList")
+    expect(state().loaded).toBe(true)
+    expect(state().icon).toBe("app store ios")
+    expect(state().words.title).toBe("Examples")
+    expect(state().projects.map((project) => [project.path, project.name])).toEqual([
+      ["@spell/examples/TaskList", "TaskList"],
+      ["@spell/examples/Solitaire", "Solitaire"]
+    ])
   })
 
-  test("`<ProjectMenu>`:  a root that fails to load says so", async () => {
+  test("a root that fails to load says so", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     cleanups.push(() => warn.mockRestore())
     const root = fakeRoot(false)
     root.load = vi.fn(() => Promise.reject(new Error("no such folder")))
-    const host = await mount(() => <ProjectMenu projectRoot={root} />)
-    await expect.poll(() => (flush(), text(host.querySelector("ui-menu")!))).toBe("Couldn't load Examples")
+    let state!: ReturnType<typeof trackProjectRoot>
+    await mount(() => {
+      state = trackProjectRoot(() => root)
+      return null
+    })
+    await expect.poll(() => (flush(), state().failed)).toBe(true)
     expect(warn).toHaveBeenCalled()
   })
 
-  test("`<ProjectDropdown>`:  `editor.projectRoot`'s projects, showing `editor.project`;  choosing one shows it", async () => {
+  test("no root given:  `editor.projectRoot`'s", async () => {
+    setEditor("projectRoot", fakeRoot(true))
+    let state!: ReturnType<typeof trackProjectRoot>
+    await mount(() => {
+      state = trackProjectRoot(() => undefined)
+      return null
+    })
+    expect(state().projects).toHaveLength(2)
+  })
+
+  test("`openProject()`:  shows it in the editor, or in Run", () => {
+    const showEditor = spyOnEditor("showEditor")
     const showRunner = spyOnEditor("showRunner")
-    const root = fakeRoot(true)
-    setEditor("projectRoot", root)
-    setEditor("project", undefined)
-    const host = await mount(() => <ProjectDropdown useRunner />)
-    const dropdown = host.querySelector<HTMLElement & { value: string }>("ui-dropdown.ProjectDropdown")!
-    // no label before it:  its trigger shows the group's icon
-    expect(host.querySelector(".dropdown-label")).toBeNull()
-    expect(host.querySelector(".ProjectDropdownTrigger > ui-icon")!.getAttribute("name")).toBe("app store ios")
-    // no project yet:  loading
-    expect(dropdown.hasAttribute("loading")).toBe(true)
-    expect(dropdown.querySelectorAll("ui-item")).toHaveLength(0)
-
-    editor.project = { path: "@spell/examples/TaskList" } as EditorStore["project"]
-    flush()
-    await ElementFixture.settle(host)
-    expect(dropdown.hasAttribute("loading")).toBe(false)
-    expect(dropdown.value).toBe("@spell/examples/TaskList")
-    expect(text(host.querySelector(".ProjectDropdownTrigger")!)).toBe("TaskList")
-    const items = [...dropdown.querySelectorAll(":scope > ui-item")]
-    expect(items.map((item) => [item.getAttribute("value"), text(item), item.getAttribute("icon")])).toEqual([
-      ["@spell/examples/TaskList", "TaskList", "app store ios"],
-      ["@spell/examples/Solitaire", "Solitaire", "app store ios"]
-    ])
-
-    dropdown.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "@spell/examples/Solitaire" } }))
-    expect(showRunner).toHaveBeenCalledWith("@spell/examples/Solitaire")
-    // still showing `editor.project` until it changes
-    expect(dropdown.value).toBe("@spell/examples/TaskList")
+    openProject("@spell/examples/Solitaire")
+    expect(showEditor).toHaveBeenCalledWith("@spell/examples/Solitaire")
+    openProject("@spell/examples/TaskList", true)
+    expect(showRunner).toHaveBeenCalledWith("@spell/examples/TaskList")
   })
 })
 
@@ -174,11 +160,6 @@ async function mount(component: () => unknown): Promise<HTMLElement> {
   flush()
   await ElementFixture.settle(host)
   return host
-}
-
-/** Text of `element`, trimmed. */
-function text(element: Element): string {
-  return element.textContent?.trim() ?? ""
 }
 
 /** Set `editor[key]`, restored after the test. */

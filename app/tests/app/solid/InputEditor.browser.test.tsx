@@ -20,15 +20,14 @@ import type * as UIT from "spell/app/app/ui/ui.types"
 import { uiReady } from "spell/app/app/solid"
 import { CodeSettings } from "spell/app/app/solid/CodeSettings"
 import { CodeShown } from "spell/app/app/solid/EditorMode"
-import { FileDropdown } from "spell/app/app/solid/FileDropdown"
-import { FileTabs } from "spell/app/app/solid/FileTabs"
+import { FileTabs, trackProjectFiles } from "spell/app/app/solid/FileTabs"
 import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
 import { LazyCodeMirror } from "spell/app/app/solid/LazyCodeMirror"
 import { OutputEditor } from "spell/app/app/solid/OutputEditor"
 
 /**
  * The Solid source editors on real CodeMirror, in the browser:
- * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<OutputEditor>`, `<FileDropdown>`, `<FileTabs>`.
+ * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<OutputEditor>`, `<FileTabs>` and its `trackProjectFiles()`.
  * - Files are FAKES, as spell cells (`reactiveObject()`):
  *   a `.js` file (no parse) with just what `FileStates` and `editor` read.
  * - Why:  a real `SpellProject` loads from the API server, which tests don't have.
@@ -123,76 +122,45 @@ describe("<OutputEditor>", () => {
   })
 })
 
-describe("<FileDropdown>", () => {
-  test("lists the project's files, showing `editor.file`;  choosing one shows it", async () => {
-    const showEditor = spyOnEditor("showEditor")
+describe("`trackProjectFiles()`", () => {
+  test("the project's files and the one shown, once its project's loaded", async () => {
     const file = fakeFile("test-project/one.js", "")
+    file.project.isLoaded = false
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
-    const host = await mount(() => <FileDropdown showActions />)
-    const dropdown = host.querySelector<HTMLElement & { value: string }>("ui-dropdown#FileDropdown")!
-    expect(dropdown.hasAttribute("loading")).toBe(false)
-    expect(dropdown.value).toBe("test-project/one.js")
-    const items = [...dropdown.querySelectorAll(":scope > ui-item")]
-    expect(items.map((item) => item.getAttribute("value") ?? item.getAttribute("kind") ?? text(item))).toEqual([
-      "test-project/one.js",
-      "test-project/two.js",
-      "divider",
-      "New File",
-      "Duplicate File",
-      "Rename File",
-      "Delete File"
-    ])
-    // no "File:" label:  the file icon and name are its trigger
-    expect(host.querySelector(".dropdown-label")).toBeNull()
-    expect(text(host.querySelector(".FileDropdownTrigger")!)).toBe("one.js")
+    let state!: ReturnType<typeof trackProjectFiles>
+    await mount(() => {
+      state = trackProjectFiles()
+      return null
+    })
+    expect(state()).toEqual({ ready: false, path: "test-project/one.js", files: [] })
 
-    dropdown.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "test-project/two.js" } }))
-    expect(showEditor).toHaveBeenCalledWith("test-project/two.js")
-    // still showing `editor.file` until it changes
-    expect(dropdown.value).toBe("test-project/one.js")
+    file.project.isLoaded = true
+    flush()
+    expect(state().ready).toBe(true)
+    expect(state().files.map((each) => each.path)).toEqual(["test-project/one.js", "test-project/two.js"])
   })
 
-  test("a project's folders:  each a header over its files;  the trigger and the tabs say the whole name", async () => {
+  test("a project's folders:  a file in one is named with its folder, its spell ending dropped", async () => {
     const file = fakeFile("test-project/Button/Usage.spell", "")
     const row = (path: string, location: object) => ({ path, location, file: reactiveObject({ isDirty: false }) })
     ;(file.project as unknown as { imports: unknown[] }).imports = [
       row("test-project/Button/Usage.spell", { file: "Usage.spell", folder: "/Button/" }),
       row("test-project/Card.spell", { file: "Card.spell", folder: "/" }),
-      row("test-project/Divider/Usage.spell", { file: "Usage.spell", folder: "/Divider/" }),
       row("test-project/Button/styles.css", { file: "styles.css", folder: "/Button/" })
     ]
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
-    const host = await mount(() => <FileDropdown />)
-    const dropdown = host.querySelector<HTMLElement>("ui-dropdown#FileDropdown")!
-    const items = [...dropdown.querySelectorAll(":scope > ui-item")]
-    expect(items.map((item) => [item.getAttribute("kind") ?? "item", text(item)])).toEqual([
-      ["item", "Card.spell"],
-      ["header", "Button"],
-      ["item", "Usage"],
-      ["item", "styles.css"],
-      ["header", "Divider"],
-      ["item", "Usage"]
+    let state!: ReturnType<typeof trackProjectFiles>
+    await mount(() => {
+      state = trackProjectFiles()
+      return null
+    })
+    expect(state().files.map(({ name, folder, nameInFolder }) => [name, folder, nameInFolder])).toEqual([
+      ["Button/Usage", "Button", "Usage"],
+      ["Card.spell", "", "Card.spell"],
+      ["Button/styles.css", "Button", "styles.css"]
     ])
-    expect(text(host.querySelector(".FileDropdownTrigger")!)).toBe("Button/Usage")
-  })
-
-  test("loading, with no items, until the project's loaded", async () => {
-    const file = fakeFile("test-project/one.js", "")
-    file.project.isLoaded = false
-    setEditor("project", file.project as unknown as EditorStore["project"])
-    setEditor("file", file)
-    const host = await mount(() => <FileDropdown />)
-    const dropdown = host.querySelector("ui-dropdown")!
-    expect(dropdown.hasAttribute("loading")).toBe(true)
-    expect(dropdown.querySelectorAll("ui-item")).toHaveLength(0)
-    expect(host.querySelector(".dropdown-label")).toBeNull()
-
-    file.project.isLoaded = true
-    flush()
-    expect(dropdown.hasAttribute("loading")).toBe(false)
-    expect(dropdown.querySelectorAll("ui-item")).toHaveLength(2)
   })
 })
 

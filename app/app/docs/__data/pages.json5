@@ -145,19 +145,20 @@
       "group": "editors",
       "file": "src/app/solid/codemirror/FileEditor.tsx"
     },
-    "FileDropdown": {
-      "title": "FileDropdown",
-      "summary": "The open project's files, as a dropdown showing the open one.",
+    "FileTabs": {
+      "title": "FileTabs",
+      "summary": "The open project's files, as tabs over the code, and a button at their end listing them all.",
       "status": "done",
       "group": "menus and dialogs",
-      "file": "src/app/solid/FileDropdown.tsx"
+      "file": "src/app/solid/FileTabs.tsx"
     },
-    "ProjectDropdown": {
-      "title": "ProjectDropdown",
-      "summary": "Every project, as a dropdown or a menu of links.",
+    "MenuBar": {
+      "title": "MenuBar",
+      "summary": "The top bar's menus:  Spell's, listing the group's projects, then the project's, File, Edit, View, Run and Help.",
       "status": "done",
       "group": "menus and dialogs",
-      "file": "src/app/solid/ProjectDropdown.tsx"
+      "file": "src/app/solid/MenuBar.tsx",
+      "mainTag": "SpellBarMenu"
     },
     "Actions": {
       "title": "Actions",

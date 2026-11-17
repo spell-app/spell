@@ -401,7 +401,7 @@ export const APP_TEXTS = {
   noTests: "No tests -- write one as `to test <something>:`",
 
   ////////////////
-  // ## The project chooser (`ProjectChooser.tsx`, `ProjectDropdown.tsx`)
+  // ## The project chooser (`ProjectChooser.tsx`)
   ////////////////
 
   welcome: "Welcome to Spell!",
@@ -443,6 +443,7 @@ export const APP_TEXTS = {
   "category.web-data": "Data from the web",
   "category.sites": "Sites",
   homeProjectsLine: "What you've made, and where to start the next one.",
+  homeOrgLine: "Shared by everyone at @{org}.",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
   editorNameNeeded:
