@@ -248,11 +248,11 @@
 |   |   ⟦-- - then it's crowned on the far row, or jumps again while it can, or the other side's turn comes⟧
 |   |   cancel if the **piece** cannot go to the **square**    ‾question(the piece cannot go to the square)
 |   |   set **board** to the **board** of the **square**    ‾value(board) ‾value(the board of the square)
-|   |   set **from** to the **square** of the **piece**    ‾value(from) ‾value(the square of the piece)
-|   |   set **jumped** to the absolute value of (the **row** of the **square** - the **row** of **from**) is _2_    ‾value(jumped) ‾value(the absolute value of (the row of the square - the row of from))
+|   |   set **start** to the **square** of the **piece**    ‾value(start) ‾value(the square of the piece)
+|   |   set **jumped** to the absolute value of (the **row** of the **square** - the **row** of **start**) is _2_    ‾value(jumped) ‾value(the absolute value of (the row of the square - the row of start))
 |   |   [control if L2]
 |   |   | if **jumped**    ‾value(jumped)
-|   |   |   set **middle** to the square at (the **row** of **from** + the **row** of the **square**) / _2_ and (the **column** of **from** + the **column** of the **square**) / _2_ on **board**    ‾value(middle) ‾call(the square at (the row of from + the row of the square) / 2 and (the column of from + the column of the square) / 2 on board)
+|   |   |   set **middle** to the square at (the **row** of **start** + the **row** of the **square**) / _2_ and (the **column** of **start** + the **column** of the **square**) / _2_ on **board**    ‾value(middle) ‾call(the square at (the row of start + the row of the square) / 2 and (the column of start + the column of the square) / 2 on board)
 |   |   |   empty **middle**    ‾value(middle)
 |   |   add the **piece** to the **square**    ‾value(the piece) ‾value(the square)
 |   |   set the **picked piece** of **board** to nothing    ‾value(the picked piece of board) ‾value(nothing)

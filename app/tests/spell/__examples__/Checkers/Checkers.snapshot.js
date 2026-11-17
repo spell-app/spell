@@ -97,10 +97,10 @@ export class Piece extends View {
     // - then it's crowned on the far row, or jumps again while it can, or the other side's turn comes
     if (!this.canGoToSquare(square)) core.cancel()
     const board = square.board
-    const from = this.square
-    const jumped = core.absoluteValue(square.row - from.row) === 2
+    const start = this.square
+    const jumped = core.absoluteValue(square.row - start.row) === 2
     if (jumped) {
-      const middle = board.theSquareAtRowAndColumnOnBoard((from.row + square.row) / 2, (from.column + square.column) / 2)
+      const middle = board.theSquareAtRowAndColumnOnBoard((start.row + square.row) / 2, (start.column + square.column) / 2)
       core.clear(middle)
     }
     square.append(this)

@@ -182,10 +182,10 @@ to move (a piece) to (a square)
 	-- - then it's crowned on the far row, or jumps again while it can, or the other side's turn comes
 	cancel if the piece cannot go to the square
 	set board to the board of the square
-	set from to the square of the piece
-	set jumped to the absolute value of (the row of the square - the row of from) is 2
+	set start to the square of the piece
+	set jumped to the absolute value of (the row of the square - the row of start) is 2
 	if jumped
-		set middle to the square at (the row of from + the row of the square) / 2 and (the column of from + the column of the square) / 2 on board
+		set middle to the square at (the row of start + the row of the square) / 2 and (the column of start + the column of the square) / 2 on board
 		empty middle
 	add the piece to the square
 	set the picked piece of board to nothing
