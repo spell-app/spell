@@ -1,5 +1,5 @@
 import { cp, readFile, readdir, stat } from "fs/promises"
-import { join } from "path"
+import { basename, dirname, join } from "path"
 
 import {
   ANYONE,
@@ -26,6 +26,7 @@ import { SRV } from "spell/server"
 import {
   CsvPlace,
   DirectReads,
+  FilePlace,
   FolderFiles,
   FolderPlace,
   PlaceServer,
@@ -74,6 +75,12 @@ const ROOM_COLLECTION = /^(?!__)[\w-]+$/
  * (epic `language` T65).
  */
 const CSV_FILE = /\.csv$/i
+
+/**
+ * A program's own JSON file in its project data folder:  `a json file at "recipes.json"` is
+ * `<project>/__data/recipes.json` (epic `mockup` P21).
+ */
+const JSON_FILE = /\.json$/i
 
 /** The column a program's own CSV file says each row's id in, until its line names another (`CsvPlace.withLines()`). */
 const CSV_ID_COLUMN = "id"
@@ -145,6 +152,9 @@ const CONNECTED_MS = 2 * 60_000
  *   - a program's own data only:  a space's own folder is written by its members, which a CSV file can't say
  *   - anyone who runs the program changes any row:  a CSV file has no owner column, nor a takedown log, nor a ceiling
  *   - its first line names its columns:  ship the file with them, or the first row's fields become them
+ * - A PROGRAM'S OWN JSON FILE (`a json file at "recipes.json"`, epic `mockup` P21):  a file too, the same way
+ *   - the kit's `FilePlace`:  written whole, plain JSON with each collection's rows, `{ "recipes": [...] }`,
+ *     a thing's lists inside its row
  * - Its member list is the place's own operations (`SPACE_MEMBER_OPERATIONS`), through the same route's `call`:
  *   who's in it, a member added or given a role, one removed or leaving.
  * - A folder with a `__members/` gets its person's membership written there, with the owner's role, if it's missing.
@@ -217,6 +227,8 @@ export class SpaceFolders {
   private readonly rolesPlaces = new Map<string, OrgRolesPlace>()
   /** Each program's own CSV file, by its address, made once. */
   private readonly csvFiles = new Map<string, CsvPlace>()
+  /** Each program's own JSON file, by its address, made once. */
+  private readonly jsonFiles = new Map<string, FilePlace>()
   /** Each space's files, by its address, made once. */
   private readonly files = new Map<string, FolderFiles>()
   /** Its files read direct. */
@@ -487,6 +499,7 @@ export class SpaceFolders {
     const address = this.addressFor(name, identity)
     if (!address) return undefined
     if (CSV_FILE.test(address)) return this.csvFileAt(address)
+    if (JSON_FILE.test(address)) return this.jsonFileAt(address)
     const rolesOf = OrgRolesPlace.orgAt(address)
     if (rolesOf !== undefined) return this.rolesPlaceOf(rolesOf)
     const feedOf = PersonFeed.personAt(address)
@@ -562,6 +575,21 @@ export class SpaceFolders {
   }
 
   /**
+   * A program's own JSON file at `address`, `<project>/__data/recipes.json`, made once:  see the class.
+   * - `undefined` for one in a space's own folder, or with no folder on disk:  the route answers 404.
+   */
+  private jsonFileAt(address: string): FilePlace | undefined {
+    const known = this.jsonFiles.get(address)
+    if (known) return known
+    if (whoWritesFolderAt(address) !== "only the owner") return undefined
+    const file = this.diskFolderFor(address)
+    if (!file) return undefined
+    const place = new FilePlace({ storage: new DiskStorage(dirname(file)), path: basename(file) })
+    this.jsonFiles.set(address, place)
+    return place
+  }
+
+  /**
    * A credential for `identity` to read the space the route names `name` direct:  its cookie, and where it's read.
    * - `undefined` for a program's own data, which isn't read direct:  the route answers 404.
    * - Anyone's, signed in or not, for a space anyone reads (`publicRead`).
@@ -595,6 +623,7 @@ export class SpaceFolders {
     this.folders.clear()
     this.places.clear()
     this.csvFiles.clear()
+    this.jsonFiles.clear()
     this.files.clear()
   }
 

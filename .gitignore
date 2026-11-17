@@ -23,6 +23,9 @@ PARKED-*.md
 .spell-server.*.json
 # the MAIN checkout's marker:  worktree windows hide its folder's files (spell-epic's window script)
 /.spell-main
+# what Spell's own examples keep as they run, each in its project data folder (`a sheet at "shopping.csv"`;  epic mockup
+# P21, C1):  each person's own, never committed;  each app fills in a few to start when its file is empty
+app/spaces/@spell/**/__data/
 # who's at this machine, as the editor asked (app's spaces, localPerson.ts;  epic repo-split P27):  never committed
 /.spell/
 

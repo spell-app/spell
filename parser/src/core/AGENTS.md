@@ -323,6 +323,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A PROGRAM'S OWN CSV FILE (epic `language` T65):  `task sheet is a sheet at "tasks.csv"`, a file's name alone.
       - The compiler turns it into the page server's address, `<project>/__data/tasks.csv` (`CreatePlace.csvAddressFor()`).
       - This makes a `RemotePlace` that takes writes, its id column `id` unless a line names another, sent with each request.
+    - A PROGRAM'S OWN JSON FILE (epic `mockup` P21):  `recipe file is a json file at "recipes.json"`, the same way.
+      - The compiler turns it into `<project>/__data/recipes.json` (`CreatePlace.jsonAddressFor()`);  the page server
+        answers it with the kit's `FilePlace`, written whole as plain JSON.
     - A PROJECT DATA FOLDER (epic `atmosphere` P1):  a data folder in spaces, on the page server.
       - The compiler turns its address into the page server's (`CreatePlace.folderAddressFor()`):
         `at "owen@spell/recipes"`, `"recipes"` and `personal "recipes"`.

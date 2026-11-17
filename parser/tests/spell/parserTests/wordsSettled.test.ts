@@ -136,6 +136,25 @@ describe("a place's line", () => {
       expect(es.js).toContain('at: "/api/places/spaces/@spell/examples/recetas/__data/recetas.csv"')
     })
 
+    it("a JSON file's name alone is the program's own file, in its project's __data (epic `mockup` P21)", () => {
+      const write = ["a recipe:", "\t- to rename:", '\t\tset its title to "x"']
+      const lines = ['family cookbook is a json file at "recipes.json"', RECIPE_AIRTABLE, ...write]
+      const { js, errors } = compiled(lines, "/Test.spell", "@spell/examples/recipe-box")
+      expect(errors).toEqual([])
+      expect(js).toContain('kind: "file"')
+      expect(js).toContain('at: "/api/places/spaces/@spell/examples/recipe-box/__data/recipes.json"')
+      // a project with no address keeps it as written;  a path is a file at that address, as before
+      expect(compiled(lines).js).toContain('at: "recipes.json"')
+      const beside = ['family cookbook is a json file at "./recipes.json"', RECIPE_AIRTABLE, ...write]
+      expect(compiled(beside, "/Test.spell", "@spell/examples/recipe-box").js).toContain('at: "./recipes.json"')
+      const es = compiled(
+        ['recetario es un archivo json en "recetas.json"'],
+        "/Test.es.spell",
+        "@spell/examples/recetas"
+      )
+      expect(es.js).toContain('at: "/api/places/spaces/@spell/examples/recetas/__data/recetas.json"')
+    })
+
     it("personal is one for each person;  a web folder's address is as it was", () => {
       expect(compiled(['family cookbook is a data folder at personal "recipes"', RECIPE_AIRTABLE]).js).toContain(
         'at: "/api/places/spaces/personal/recipes"'
