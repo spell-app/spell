@@ -120,3 +120,69 @@
     overflow: hidden;
   }
 }
+
+/*
+ * A card with a "..." menu (`menu`, the home page's own projects;  epic `mockup` T47):
+ * the card, and the menu over its top left corner, 12px in from both edges, over its picture.
+ * - The menu is the card's sibling, so a click on it never opens the card's project.
+ */
+.TileCardHolder {
+  position: relative;
+  display: grid;
+
+  /* the card fills its place in the grid, as it would on its own */
+  > .TileCard {
+    min-width: 0;
+  }
+  /* it rises with the card on hover */
+  &:has(> .TileCard:hover) > .TileCardMenu {
+    transform: translateY(-1px);
+  }
+}
+.TileCardMenu {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  transition: transform var(--ui-duration-fast, 0.15s) var(--ui-ease-out, ease-out);
+}
+
+/*
+ * the "..." button itself (`<CardMenu>`):  small and round, a dark glass chip, white dots, so it reads over any
+ * picture or tile.
+ * - The chip is the dropdown's own box:  its button lies over its icon, so a fill on the button would hide the dots.
+ */
+.TileCardMenu .CardMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #fff5;
+  border-radius: 50%;
+  background: #000a;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: var(--ui-control-cursor, pointer);
+
+  &:hover {
+    background: #000d;
+  }
+  &:focus-within {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: 2px;
+  }
+  &::part(trigger) {
+    border: 0;
+    background: transparent;
+  }
+  &::part(icon) {
+    margin: 0;
+  }
+  &::part(text) {
+    display: none;
+  }
+  > ui-icon {
+    color: #fff;
+  }
+}

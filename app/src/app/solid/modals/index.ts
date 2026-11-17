@@ -4,6 +4,7 @@
  *   methods call, through a dynamic `import()`.
  * - `Chooser.tsx`:  `<Chooser>` and `openChooser()`, behind `choose()`.
  * - `VersionsBox.tsx`:  `openVersions()`, the project menu's Versions, drawn by the editor's Spell (epic `editor` I115).
+ * - `AppSnapshot.tsx`:  `openAppSnapshot()`, a project's card picture from its app as the person sets it up (epic `mockup` T47).
  * - `modals.types.ts`:  their props (`AlertModalProps` ...), which `Actions`' `DialogActionProps` take too.
  */
 
@@ -14,3 +15,4 @@ export * from "./Chooser"
 export * from "./YouPanel"
 export * from "./PublishClash"
 export * from "./VersionsBox"
+export * from "./AppSnapshot"

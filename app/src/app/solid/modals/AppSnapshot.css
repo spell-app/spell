@@ -1,0 +1,95 @@
+/*
+ * `<AppSnapshot>` (`AppSnapshot.tsx`):  the app in a phone's screen, a phone's surround drawn round it;
+ * then the snapshot in the screen's place, a frame of the card's shape over it, the rest dimmed.
+ */
+.AppSnapshot {
+  --AppSnapshot-screen-width: 390px;
+  --AppSnapshot-screen-height: min(700px, calc(100vh - 320px));
+  --AppSnapshot-bezel: 12px;
+}
+
+.AppSnapshot .AppSnapshotLine {
+  margin: 0 0 16px;
+  white-space: pre-line;
+}
+
+.AppSnapshot .AppSnapshotProblem {
+  margin: 0 0 16px;
+  white-space: pre-line;
+  color: var(--ui-negative-color, #db2828);
+}
+
+/* the phone:  a dark rounded body round the screen, a speaker slot at its top */
+.AppSnapshot .AppSnapshotPhone {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 28px var(--AppSnapshot-bezel) 20px;
+  border-radius: 48px;
+  background: #1c1c1e;
+  box-shadow:
+    inset 0 0 0 2px #3a3a3c,
+    0 12px 32px #0006;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: 64px;
+    height: 4px;
+    border-radius: 4px;
+    background: #3a3a3c;
+    transform: translateX(-50%);
+  }
+}
+
+/* the screen:  exactly a phone's width;  the app, or its snapshot */
+.AppSnapshot .AppSnapshotScreen {
+  position: relative;
+  width: var(--AppSnapshot-screen-width);
+  height: var(--AppSnapshot-screen-height);
+  overflow: hidden;
+  border-radius: 28px;
+  background: var(--ui-background, #fff);
+
+  > iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  > iframe[hidden] {
+    display: none;
+  }
+}
+
+.AppSnapshot .AppSnapshotCrop {
+  position: absolute;
+  inset: 0;
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* the frame:  the card's shape, the rest of the snapshot dimmed round it */
+.AppSnapshot .AppSnapshotFrame {
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-shadow: 0 0 0 2000px #000a;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  cursor: grab;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+  &:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+  }
+}

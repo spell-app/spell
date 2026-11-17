@@ -374,66 +374,142 @@ export class EditorStore extends Observable {
     return name ? projectRoot.projectIdForName(name, basedOn?.projectId) : undefined
   }
 
-  /** Duplicate current `project` under `newProjectId` (no id:  asks for its name) and show it. */
-  async duplicateApp(newProjectId?: string): Promise<void> {
+  /**
+   * Duplicate a project under `newProjectId` (no id:  asks for its name).
+   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);  none:  the open one.
+   * - The open one's copy is shown;  another's stays where it is, its copy a card beside it.
+   */
+  async duplicateApp({
+    project: _project,
+    newProjectId
+  }: ProjectAction & { newProjectId?: string } = {}): Promise<void> {
     try {
-      const { project, projectRoot } = editor
-      if (editor.canChangeProject) {
+      const { project, projectRoot, isOpen } = editor.actionOn(_project)
+      const canChange = editor.canChangeIn(projectRoot)
+      if (canChange) {
         newProjectId ??= await editor.askForProjectId(
-          projectRoot!,
+          projectRoot,
           appTexts.text("askNewAppName", appTexts.groupWords(projectRoot)),
-          project!
+          project
         )
         if (!newProjectId) return
       }
       // the static build:  a copy of a built-in project is the visitor's own
-      const newProject = editor.canChangeProject
-        ? await projectRoot!.duplicateApp(project!.projectId, newProjectId!)
-        : await editor.rootForNew.copyHere(project!.projectId)
+      const newProject = canChange
+        ? await projectRoot.duplicateApp(project.projectId, newProjectId!)
+        : await editor.rootForNew.copyHere(project.projectId)
       if (newProject) {
-        editor.showEditor(newProject.path)
-        editor.showKept(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
+        if (isOpen) editor.showEditor(newProject.path)
+        editor.showKept(appTexts.text("duplicatedApp", appTexts.groupWords(projectRoot)))
       }
     } catch (e) {
       editor.showError(e)
     }
   }
-  /** Rename current `project` to `newProjectId` (no id:  asks for its name) and show it. */
-  async renameApp(newProjectId?: string): Promise<void> {
+  /**
+   * Rename a project to `newProjectId` (no id:  asks for its name).
+   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);  none:  the open one, shown under its new name.
+   */
+  async renameApp({ project: _project, newProjectId }: ProjectAction & { newProjectId?: string } = {}): Promise<void> {
     try {
+      const { project, projectRoot, isOpen } = editor.actionOn(_project)
       newProjectId ??= await editor.askForProjectId(
-        editor.projectRoot!,
-        appTexts.text("askRenameApp", appTexts.groupWords(editor.projectRoot)),
-        editor.project!
+        projectRoot,
+        appTexts.text("askRenameApp", appTexts.groupWords(projectRoot)),
+        project
       )
       if (!newProjectId) return
-      const project = await editor.projectRoot!.renameApp(editor.project!.projectId, newProjectId)
-      if (project) {
-        editor.showEditor(project.path)
-        editor.showNotice(appTexts.text("renamedApp", appTexts.groupWords(editor.projectRoot)))
+      const renamed = await projectRoot.renameApp(project.projectId, newProjectId)
+      if (renamed) {
+        if (isOpen) editor.showEditor(renamed.path)
+        editor.showNotice(appTexts.text("renamedApp", appTexts.groupWords(projectRoot)))
       }
     } catch (e) {
       editor.showError(e)
     }
   }
-  /** Delete current `project` (after asking), then navigate to `projectRoot`, which selects another project. */
-  async deleteApp(): Promise<void> {
+  /**
+   * Delete a project (after asking).
+   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);  none:  the open one,
+   *   then shows its group, which selects another project.
+   */
+  async deleteApp({ project: _project }: ProjectAction = {}): Promise<void> {
     try {
-      const { projectRoot, project } = editor
+      const { project, projectRoot, isOpen } = editor.actionOn(_project)
       const message = appTexts.text("confirmRemoveApp", {
         ...appTexts.groupWords(projectRoot),
-        name: project!.projectName!
+        name: project.projectName!
       })
       if (!(await editor.confirm({ message }))) return
-      const removed = await projectRoot!.deleteApp(project!.projectId)
+      const removed = await projectRoot.deleteApp(project.projectId)
       if (removed) {
-        // Navigate to nextProject, or the projectRoot, which will select another project
-        editor.showEditor(projectRoot!.path)
+        // Navigate to the projectRoot, which will select another project
+        if (isOpen) editor.showEditor(projectRoot.path)
         editor.showNotice(appTexts.text("removedApp", appTexts.groupWords(projectRoot)))
       }
     } catch (e) {
       editor.showError(e)
     }
+  }
+
+  /**
+   * A project running alone, the runner, in a new browser tab (the home page's card menu, epic `mockup` T47).
+   * - `project`:  which one;  none:  the open one.
+   */
+  runInNewTab({ project: _project }: ProjectAction = {}): void {
+    const { project } = editor.actionOn(_project)
+    window.open(new SP.SpellLocation(project.path).runnerUrl, "_blank", "noopener")
+  }
+
+  /**
+   * Update a project's card picture, its `__thumbnail.png`, from its app as the person sets it up
+   * (`<AppSnapshot>`, epic `mockup` T47):  the app running in a phone's screen, a snapshot of it, cropped to the card.
+   * - `project`:  which one, e.g. a home page card's;  none:  the open one.
+   * - Cancelled at any step:  nothing is saved.
+   * - Its card shows the new picture at once:  the group's list is read again.
+   * - Not in the static build:  it keeps no pictures.
+   * - Answers whether it saved one.
+   * - NEVER throws:  a failure is shown.
+   */
+  async updateSnapshot({ project: _project }: ProjectAction = {}): Promise<boolean> {
+    if (isStaticBuild) return false
+    try {
+      const { project, projectRoot } = editor.actionOn(_project)
+      const { openAppSnapshot } = await dialogs()
+      const picture = await openAppSnapshot({
+        runnerUrl: new SP.SpellLocation(project.path).runnerUrl,
+        title: project.title
+      })
+      if (!picture) return false
+      await new SPACES.ProjectFiles(project).writeFile(SPACES.PROJECT_THUMBNAIL, picture)
+      await projectRoot.reload()
+      editor.showNotice(appTexts.text("snapshotSaved"))
+      return true
+    } catch (e) {
+      editor.showError(e)
+      return false
+    }
+  }
+
+  /**
+   * The project a project action is about, and its group:
+   * - `project` given:  that one, e.g. a home page card's (epic `mockup` T47), its group worked out from its address
+   * - else the open one
+   * - `isOpen`:  it's the project the editor has open, so the action may show where it went
+   * - throws if there's neither
+   */
+  actionOn(project: SP.SpellProject | undefined): {
+    project: SP.SpellProject
+    projectRoot: SPACES.SpellProjectRoot
+    isOpen: boolean
+  } {
+    const open = editor.project
+    if (!project || project === open) {
+      if (!open || !editor.projectRoot) throw new TypeError("editor.actionOn():  no project open;  pass `project`")
+      return { project: open, projectRoot: editor.projectRoot, isOpen: true }
+    }
+    const projectRoot = new SPACES.SpellProjectRoot(new SP.SpellLocation(project.path).projectRoot!)
+    return { project, projectRoot, isOpen: false }
   }
 
   /**
@@ -996,7 +1072,12 @@ export class EditorStore extends Observable {
 
   /** Can the current `project` be renamed, deleted or given files?  In the static build, only a visitor's own. */
   get canChangeProject(): boolean {
-    return !isStaticBuild || editor.projectRoot === SPACES.SpellProjectRoot.projects
+    return editor.canChangeIn(editor.projectRoot)
+  }
+
+  /** Can a project of group `projectRoot` be renamed, deleted or given files?  In the static build, only a visitor's own. */
+  canChangeIn(projectRoot: SPACES.SpellProjectRoot | undefined): boolean {
+    return !isStaticBuild || projectRoot === SPACES.SpellProjectRoot.projects
   }
 
   /**
@@ -1097,14 +1178,17 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Save the current `project` as a zip, `<Project>.zip`, in the browser's downloads:  `importApp()` reads it back.
+   * Save a project as a zip, `<Project>.zip`, in the browser's downloads:  `importApp()` reads it back.
+   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);  none:  the open one.
    * - Every file of it, pictures too, at their paths, in a folder of its name:  see `SPACES.projectArchiveZip()`.
    * - NEVER throws:  a failure is shown.
    */
-  async exportApp(): Promise<void> {
-    const { project, projectRoot } = editor
-    if (!project || !projectRoot) return
+  async exportApp({ project: _project }: ProjectAction = {}): Promise<void> {
+    if (!_project && !editor.project) return
     try {
+      const { project, projectRoot } = editor.actionOn(_project)
+      // a card's project:  its index read first, for its files
+      if (!project.isLoaded) await project.load(undefined)
       const archive = await projectRoot.exportApp(project)
       const zip = await SPACES.projectArchiveZip(archive)
       const url = URL.createObjectURL(new Blob([zip as Uint8Array<ArrayBuffer>], { type: "application/zip" }))
@@ -1559,12 +1643,14 @@ export class EditorStore extends Observable {
    * - With a draft, or edits not saved, "Save Current Changes" on the box's left keeps them as an entry of its own,
    *   never published (`ProjectFiles.keepDraft()`):  the list shows it at once, and the box stays open.
    * - A kept draft restores as any version does:  it's your draft again.
+   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);  none:  the open one.
+   *   Another's restore is its draft, there when it's opened;  "Save Current Changes" keeps only its drafts.
    * - NEVER throws:  a failure is shown.
    */
-  async showVersions(): Promise<void> {
-    const { project } = editor
-    if (!project || isStaticBuild) return
+  async showVersions({ project: _project }: ProjectAction = {}): Promise<void> {
+    if ((!_project && !editor.project) || isStaticBuild) return
     try {
+      const { project, isOpen } = editor.actionOn(_project)
       const files = new SPACES.ProjectFiles(project)
       const { versions, drafts } = await files.drafts()
       const rowsFor = (list: SPACES.VersionJSON[]) =>
@@ -1576,11 +1662,11 @@ export class EditorStore extends Observable {
       await openVersions({
         versions: rowsFor(versions),
         chosen: (versions.find((version) => !version.draft) ?? versions[0])?.name,
-        canKeep: drafts.length > 0 || editor.hasUnsavedEdits,
+        canKeep: drafts.length > 0 || (isOpen && editor.hasUnsavedEdits),
         restore: async (version) => {
           try {
             const drafted = await files.restore(version)
-            await editor.reloadFiles(drafted)
+            if (isOpen) await editor.reloadFiles(drafted)
             editor.showNotice(
               appTexts.text(drafted.length === 1 ? "versionRestoredFile" : "versionRestoredFiles", {
                 count: drafted.length,
@@ -1590,20 +1676,20 @@ export class EditorStore extends Observable {
           } catch (error) {
             editor.showError(error)
           } finally {
-            await editor.refreshDrafts()
+            if (isOpen) await editor.refreshDrafts()
           }
         },
         keep: async () => {
           try {
             // edits not saved yet are part of what's kept:  saved into your draft first
-            await editor.saveAll()
+            if (isOpen) await editor.saveAll()
             await files.keepDraft()
             return rowsFor((await files.drafts()).versions)
           } catch (error) {
             editor.showError(error)
             throw error
           } finally {
-            await editor.refreshDrafts()
+            if (isOpen) await editor.refreshDrafts()
           }
         }
       })
@@ -2286,6 +2372,15 @@ setDebugGlobal({ editor })
  * Any of the file classes `editor.file` can hold, plus an ad-hoc `initialSelection`:
  * `editor.selectPath()` stashes it there, to tell `<InputEditor>` where to restore the cursor.
  */
+/**
+ * Which project one of the editor's project actions is about (`duplicateApp()`, `renameApp()` ...):
+ * the open one, unless it names another, e.g. a home page card's (`editor.actionOn()`, epic `mockup` T47).
+ */
+export type ProjectAction = {
+  /** the project;  none:  the open one */
+  project?: SP.SpellProject
+}
+
 export type EditorFile = SP.AnySpellFile & { initialSelection?: UIT.EditorSelection }
 
 ////////////////

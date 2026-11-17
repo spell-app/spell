@@ -2464,6 +2464,12 @@
           "description": "Icon name.  Default:  `\"ellipsis horizontal\"`."
         }
       ],
+      "usedIn": [
+        {
+          "name": "CardMenu",
+          "file": "src/app/pages/ProjectChooser.tsx"
+        }
+      ],
       "href": "chrome.html#MoreMenu"
     },
     {

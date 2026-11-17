@@ -5,6 +5,7 @@ import { render } from "@solidjs/web"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 import { SPACES } from "spell/app/spaces"
+import { editor } from "spell/app/app/editor"
 import { uiReady } from "spell/app/app/solid"
 import { ProjectChooser } from "spell/app/app/pages/ProjectChooser"
 
@@ -15,6 +16,8 @@ import { ProjectChooser } from "spell/app/app/pages/ProjectChooser"
  *   the library, the editor's pieces, FizzBuzz and the sign-in examples, the guide of a hidden one
  * - the ways to start:  Blank, Counter and Task List
  * - the examples and guides written in Spanish:  a section of their own, "En español", after the English ones (I46)
+ * - a "..." menu on each of your own projects' cards, and nobody else's (T47);  each item the editor's action on THAT
+ *   project, never opening it
  *
  * - Each group's list is made up here:  `load()` sets it, as the API server would answer.
  */
@@ -109,6 +112,60 @@ describe("the home page's rows", () => {
     expect(cardsIn(host, "spanish")).toEqual(["Calculadora", "Solitario", "Cómo funciona Solitario"])
     const lines = [...host.querySelectorAll("#spanish .subhead")].map((line) => line.textContent)
     expect(lines).toEqual(["Ejemplos", "Guías"])
+  })
+})
+
+describe('a card\'s "..." menu (T47)', () => {
+  test("on your own projects' cards alone:  named, its items in order, dividers between", async () => {
+    ownProjects = [{ path: `${SPACES.localPerson.address}/my-app`, title: "My App" }]
+    const host = await mountHome()
+    const menus = host.querySelectorAll("ui-dropdown.CardMenu")
+    expect(menus.length).toBe(1)
+    expect(menus[0]!.closest("section")?.id).toBe("projects")
+    expect(menus[0]!.getAttribute("aria-label")).toBe("Project actions")
+    const items = [...menus[0]!.querySelectorAll("ui-item")].map((item) =>
+      item.getAttribute("kind") === "divider" ? "-" : item.textContent?.trim()
+    )
+    expect(items).toEqual([
+      "Run App in a New Tab",
+      "-",
+      "Rename Project…",
+      "Duplicate Project…",
+      "Versions…",
+      "Export as .zip",
+      "Update App Snapshot…",
+      "-",
+      "Delete Project…"
+    ])
+  })
+
+  test("each item runs the editor's action on that card's project, and never opens it", async () => {
+    const path = `${SPACES.localPerson.address}/my-app`
+    ownProjects = [{ path, title: "My App" }]
+    const host = await mountHome()
+    const actions = [
+      "runInNewTab",
+      "renameApp",
+      "duplicateApp",
+      "showVersions",
+      "exportApp",
+      "updateSnapshot",
+      "deleteApp"
+    ]
+    const spies = actions.map((action) =>
+      vi
+        .spyOn(editor as unknown as Record<string, (...args: unknown[]) => unknown>, action)
+        .mockImplementation(() => undefined)
+    )
+    const shown = vi.spyOn(editor, "showEditor").mockImplementation(() => undefined)
+    cleanups.push(() => [...spies, shown].forEach((spy) => spy.mockRestore()))
+    const items = [...host.querySelectorAll<HTMLElement>("ui-dropdown.CardMenu ui-item:not([kind])")]
+    for (const item of items) item.click()
+    for (const spy of spies) {
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect((spy.mock.calls[0] as unknown as [{ project: { path: string } }])[0].project.path).toBe(path)
+    }
+    expect(shown).not.toHaveBeenCalled()
   })
 })
 

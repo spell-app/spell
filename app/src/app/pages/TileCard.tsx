@@ -1,4 +1,4 @@
-import { Show } from "solid-js"
+import { Show, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import "./TileCard.css"
@@ -13,45 +13,75 @@ import "./TileCard.css"
  * - `drag`:  its owner's drag and drop, to move it among its row (the home page, in dev);  none:  a link drags as usual.
  * - `banner`:  its picture (or its tile) across its top, the text under it:  the home page's rows of examples,
  *   each a picture of its app running (epic `mockup` P18).
+ * - `menu`:  a "..." menu in its top left corner, 12px in, over its picture (epic `mockup` T47):
+ *   a sibling of the card, not inside it, so a click on it never reaches the card's link.
  ****************/
 export function TileCard(props: TileCardProps) {
-  const contents = () => (
-    <>
+  // read once:  a card has its menu for good, and its JSX is made once
+  const menu = untrack(() => props.menu)
+  if (!menu) return card()
+  return (
+    <div class="TileCardHolder">
+      {card()}
+      <div class="TileCardMenu">{menu}</div>
+    </div>
+  )
+
+  /** The card itself:  a link, or a button. */
+  function card() {
+    const contents = () => (
+      <>
+        <Show
+          when={props.picture}
+          fallback={
+            <span class="tile" style={{ "--TileCard-hue": TileCard.hueFor(props.hueFrom) }} aria-hidden="true">
+              {props.title.charAt(0)}
+            </span>
+          }
+        >
+          <img class="picture" src={props.picture} alt="" />
+        </Show>
+        <span class="text">
+          <span class="title">{props.title}</span>
+          <Show when={props.line}>
+            <span class="description">{props.line}</span>
+          </Show>
+        </span>
+      </>
+    )
+    const classes = () => [
+      "TileCard",
+      "card",
+      props.class,
+      {
+        selected: !!props.selected,
+        banner: !!props.banner,
+        dragging: !!props.drag?.dragging,
+        "drop-here": !!props.drag?.dropHere
+      }
+    ]
+    return (
       <Show
-        when={props.picture}
+        when={props.href}
         fallback={
-          <span class="tile" style={{ "--TileCard-hue": TileCard.hueFor(props.hueFrom) }} aria-hidden="true">
-            {props.title.charAt(0)}
-          </span>
+          <button
+            type="button"
+            class={classes()}
+            draggable={props.drag ? "true" : undefined}
+            onDragStart={(event) => props.drag?.onStart(event)}
+            onDragOver={(event) => props.drag?.onOver(event)}
+            onDragLeave={(event) => props.drag?.onLeave(event)}
+            onDrop={(event) => props.drag?.onDrop(event)}
+            onDragEnd={(event) => props.drag?.onEnd(event)}
+            aria-pressed={props.selected === undefined ? undefined : props.selected ? "true" : "false"}
+            onClick={(event) => props.onClick?.(event)}
+            onDblClick={(event) => props.onDblClick?.(event)}
+          >
+            {contents()}
+          </button>
         }
       >
-        <img class="picture" src={props.picture} alt="" />
-      </Show>
-      <span class="text">
-        <span class="title">{props.title}</span>
-        <Show when={props.line}>
-          <span class="description">{props.line}</span>
-        </Show>
-      </span>
-    </>
-  )
-  const classes = () => [
-    "TileCard",
-    "card",
-    props.class,
-    {
-      selected: !!props.selected,
-      banner: !!props.banner,
-      dragging: !!props.drag?.dragging,
-      "drop-here": !!props.drag?.dropHere
-    }
-  ]
-  return (
-    <Show
-      when={props.href}
-      fallback={
-        <button
-          type="button"
+        <a
           class={classes()}
           draggable={props.drag ? "true" : undefined}
           onDragStart={(event) => props.drag?.onStart(event)}
@@ -59,30 +89,15 @@ export function TileCard(props: TileCardProps) {
           onDragLeave={(event) => props.drag?.onLeave(event)}
           onDrop={(event) => props.drag?.onDrop(event)}
           onDragEnd={(event) => props.drag?.onEnd(event)}
-          aria-pressed={props.selected === undefined ? undefined : props.selected ? "true" : "false"}
+          href={props.href}
           onClick={(event) => props.onClick?.(event)}
           onDblClick={(event) => props.onDblClick?.(event)}
         >
           {contents()}
-        </button>
-      }
-    >
-      <a
-        class={classes()}
-        draggable={props.drag ? "true" : undefined}
-        onDragStart={(event) => props.drag?.onStart(event)}
-        onDragOver={(event) => props.drag?.onOver(event)}
-        onDragLeave={(event) => props.drag?.onLeave(event)}
-        onDrop={(event) => props.drag?.onDrop(event)}
-        onDragEnd={(event) => props.drag?.onEnd(event)}
-        href={props.href}
-        onClick={(event) => props.onClick?.(event)}
-        onDblClick={(event) => props.onDblClick?.(event)}
-      >
-        {contents()}
-      </a>
-    </Show>
-  )
+        </a>
+      </Show>
+    )
+  }
 }
 
 /** A hue, 0 to 359, worked out from `text`:  the same text always gets the same colour. */
@@ -116,6 +131,8 @@ export type TileCardProps = {
   onClick?: (event: MouseEvent) => void
   /** A double click on it. */
   onDblClick?: (event: MouseEvent) => void
+  /** A "..." menu in its top left corner, over its picture:  the home page's own projects' (`<CardMenu>`). */
+  menu?: JSX.Element
 }
 
 /** `<TileCard>`'s drag and drop:  its owner does the moving, the card shows it. */

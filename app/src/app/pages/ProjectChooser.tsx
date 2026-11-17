@@ -4,8 +4,9 @@ import type { JSX } from "@solidjs/web"
 import { $fetch, KnownFormat } from "spell/util"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
-import { appTexts } from "spell/app/app/ui/AppTexts"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { editor } from "spell/app/app/editor"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   Actions,
   AppMark,
@@ -14,6 +15,7 @@ import {
   Submenu,
   ThemeMenu,
   Inspector,
+  MoreMenu,
   Palette,
   openProject,
   trackProjectRoot,
@@ -31,6 +33,8 @@ import "./ProjectChooser.css"
  *   (Owen, epic `mockup` I46:  "Split the english and Spanish into two sections");  `<LanguageCards>`.
  * - Its sections in Spell's own order, `SPACES.homeSections()`, dragged by their headers in dev (epic `repo-split` P28):
  *   your own projects first, under the hero, and only while you have some (epic `mockup` I40).
+ * - Each of your own projects' cards has a "..." menu, 12px in from its top left:
+ *   run it, rename, duplicate, its versions, export, its picture, delete (`<CardMenu>`, epic `mockup` T47).
  * - Spell's own order also leaves some out, sections and projects (`SPACES.HOME_HIDDEN_KEY`, epic `mockup` I40):
  *   the library, the editor's pieces, the examples that need a sign-in ...
  * - In an app made for an org (`"spell": { "org": "acme" }` in its `package.json`):
@@ -132,6 +136,7 @@ export function ProjectChooser() {
             projectRoot={projects}
             line={appTexts.text("homeProjectsLine")}
             create={<Actions.createProject button appearance="basic" size="small" />}
+            cardMenu
             hideWhenNone
             sectionDrag={drag()}
           />
@@ -362,6 +367,7 @@ export function ProjectCards(props: ProjectCardsProps) {
           language={props.language}
           useRunner={props.useRunner}
           sitesOnly={props.sitesOnly}
+          cardMenu={props.cardMenu}
           empty={props.empty ?? appTexts.text("nothingInGroup", root().words)}
         />
       </HomeSection>
@@ -423,6 +429,7 @@ function GroupCards(props: {
   language?: string
   useRunner?: boolean
   sitesOnly?: boolean
+  cardMenu?: boolean
   title?: string
   empty?: string
 }) {
@@ -500,6 +507,7 @@ function GroupCards(props: {
                   sitesOnly={props.sitesOnly}
                   banner={banner()}
                   drag={dragFor(project, section)}
+                  menu={props.cardMenu ? <CardMenu projectRoot={props.projectRoot} project={project} /> : undefined}
                 />
               )}
             </For>
@@ -517,6 +525,7 @@ function ProjectCard(props: {
   sitesOnly?: boolean
   banner?: boolean
   drag?: TileCardDrag
+  menu?: JSX.Element
 }) {
   const project = () => props.project
   return (
@@ -526,9 +535,8 @@ function ProjectCard(props: {
       hueFrom={project().path}
       banner={props.banner}
       drag={props.drag}
-      picture={
-        project().hasThumbnail ? SP.SpellUrls.fileUrl(`${project().path}/${SPACES.PROJECT_THUMBNAIL}`) : undefined
-      }
+      menu={props.menu}
+      picture={pictureOf(project())}
       href={props.sitesOnly ? siteEditorUrlFor(project().path) : project().path}
       onClick={(event) => {
         event.preventDefault()
@@ -541,6 +549,99 @@ function ProjectCard(props: {
 
 /** One project, as a group's card shows it. */
 type CardProject = ProjectRootState["projects"][number]
+
+/**
+ * A card's picture:  its project's `__thumbnail.png`, if it has one.
+ * - Updated since the page opened (`CardMenu`'s Update App Snapshot…):  asked for afresh, past the browser's copy.
+ */
+function pictureOf(project: CardProject): string | undefined {
+  if (!project.hasThumbnail) return undefined
+  const url = SP.SpellUrls.fileUrl(`${project.path}/${SPACES.PROJECT_THUMBNAIL}`)
+  const taken = snapshotAt()[project.path]
+  return taken ? `${url}?taken=${taken}` : url
+}
+
+////////////////
+// ## A card's "..." menu:  your own projects' (epic `mockup` T47)
+////////////////
+
+/****************
+ * ### `<CardMenu>`
+ * The "..." menu over the top left corner of each card of yours (the `projects` section), 12px in:
+ * what you can do with that project without opening it (Owen, epic `mockup` T47).
+ * - Its items are ONE list, `CARD_ACTIONS`, in their order:  add one there.
+ * - Each acts on THIS card's project:  the editor's own flows, handed it (`editor.renameApp({ project })` ...).
+ *   - a rename or a copy shows in the list at once, the card in its place;  a delete asks first, then the card goes
+ * - A click on it, or on an item, never opens the project:  it's the card's sibling (`<TileCard>`'s `menu`).
+ * - A button of its own on the keyboard, named "Project actions".
+ ****************/
+function CardMenu(props: { projectRoot: SPACES.SpellProjectRoot; project: CardProject }) {
+  // the project's model, from its group:  what the editor's flows take
+  const projectFor = () => props.projectRoot.getProject(props.project.path)
+  const run = (action: CardAction) => {
+    const project = projectFor()
+    if (project) void action.run(project)
+  }
+  return (
+    <MoreMenu
+      item={false}
+      class="CardMenu"
+      size="small"
+      aria-label={appTexts.text("cardMenu")}
+      title={appTexts.text("cardMenu")}
+    >
+      <For each={CARD_ACTIONS.filter((action) => action === "divider" || !(action.needsServer && isStaticBuild))}>
+        {(action) =>
+          action === "divider" ? (
+            <ui-item kind="divider" />
+          ) : (
+            <ui-item value={action.words} icon={action.icon} onClick={() => run(action)}>
+              {appTexts.text(action.words)}
+            </ui-item>
+          )
+        }
+      </For>
+    </MoreMenu>
+  )
+}
+
+/** One of a card's menu's items. */
+type CardAction = {
+  /** its words, a key of the editor's:  `renameProject` */
+  words: AppTextKey
+  /** its icon, Fomantic's name */
+  icon: string
+  /** what it does to the card's project */
+  run: (project: SP.SpellProject) => unknown
+  /** only where there's a server (not the static build):  versions, pictures */
+  needsServer?: boolean
+}
+
+/**
+ * A card's menu's items, in order, `"divider"` a line between (Owen, epic `mockup` T47):
+ * Run App in a New Tab;  Rename, Duplicate, Versions, Export, Update App Snapshot;  Delete.
+ */
+const CARD_ACTIONS: readonly (CardAction | "divider")[] = [
+  { words: "cardRunApp", icon: "external alternate", run: (project) => editor.runInNewTab({ project }) },
+  "divider",
+  { words: "renameProject", icon: "edit outline", run: (project) => editor.renameApp({ project }) },
+  { words: "duplicateProject", icon: "clone outline", run: (project) => editor.duplicateApp({ project }) },
+  { words: "cardVersions", icon: "history", run: (project) => editor.showVersions({ project }), needsServer: true },
+  { words: "cardExport", icon: "download", run: (project) => editor.exportApp({ project }) },
+  {
+    words: "cardSnapshot",
+    icon: "camera",
+    run: async (project) => {
+      if (await editor.updateSnapshot({ project })) setSnapshotAt({ ...snapshotAt(), [project.path]: Date.now() })
+    },
+    needsServer: true
+  },
+  "divider",
+  { words: "deleteProject", icon: "trash alternate outline", run: (project) => editor.deleteApp({ project }) }
+]
+
+/** When each card's picture was last updated, by its project's address:  its picture asked for afresh (`pictureOf()`). */
+const [snapshotAt, setSnapshotAt] = createSignal<Readonly<Record<string, number>>>({})
 
 /**
  * `projectRoot`'s projects the home page shows a card for, in its order:
@@ -770,6 +871,8 @@ export type ProjectCardsProps = {
   hideWhenNone?: boolean
   /** Moving the whole section by its header, among the home page's (`<ProjectChooser>`);  none:  it stays put. */
   sectionDrag?: TileCardDrag
+  /** Each card with a "..." menu of what you can do with its project (`<CardMenu>`):  your own projects'. */
+  cardMenu?: boolean
 }
 
 /**
