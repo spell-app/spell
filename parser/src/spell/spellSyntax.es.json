@@ -3434,11 +3434,11 @@
           "ruleNames": ["item_of_each"],
           "internal": false,
           "file": "src/spell/rules/lists/ItemOfEach.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "One item of each thing, by its place, as ONE list -- `the last card of each column` (epic `language` T152).",
           "syntaxes": [
             {
-              "syntax": "((el|la)? {ordinal} {arg:singular_identifier}|(un|una) {arg:singular_identifier} (random:al azar|aleatorio|aleatoria)) (en|de|del) ((each:cada) {thing:singular_identifier} (en|de|del) {list:operand}|{things:each_thing})",
+              "syntax": "((el|la)? {ordinal} {arg:singular_identifier}|(un|una) {arg:singular_identifier} (random:al azar|aleatorio|aleatoria)) (de|del) ((each:cada) {thing:singular_identifier} (en|de|del) {list:operand}|{things:each_thing})",
               "example": "la última carta de cada columna",
               "outputs": {
                 "js": {

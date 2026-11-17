@@ -586,7 +586,7 @@ listsEs.addRule(RandomItemWhere, {
 
 listsEs.addRule(ItemOfEach, {
   syntax:
-    "((el|la)? {ordinal} {arg:singular_identifier}|(un|una) {arg:singular_identifier} (random:al azar|aleatorio|aleatoria)) (en|de|del) ((each:cada) {thing:singular_identifier} (en|de|del) {list:operand}|{things:each_thing})",
+    "((el|la)? {ordinal} {arg:singular_identifier}|(un|una) {arg:singular_identifier} (random:al azar|aleatorio|aleatoria)) (de|del) ((each:cada) {thing:singular_identifier} (en|de|del) {list:operand}|{things:each_thing})",
   tests: [
     {
       compileAs: "expression",

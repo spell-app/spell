@@ -22,6 +22,8 @@ import { getWhereMethod, getWhereScope } from "./lists.shared"
  *     pick -- `the first card of each column where the card is face up` is each column's first face-up card
  *   - about the thing, `where the column is not empty`:  the things that pass, then the pick from each
  * - Spanish:  `la última carta de cada columna`.
+ * - Only `of` (Spanish's `de`) before `each`:  `the first pile in every pile where ...`, Spanish's
+ *   `la primera pila en cada pila donde ...`, is one pile of all of them, Spanish's `cada` meaning `every` too.
  * - Reads its pick by hand, as `each_in_statement` reads its statement:  the words with the thing in place of
  *   `each column`, `the last card of column`, read by the rule that reads one item of one list, in a scope where
  *   `column` is each thing.  So whatever that rule does, a `where` that asks an action included, this does for each.

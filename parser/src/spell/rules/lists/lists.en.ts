@@ -573,7 +573,7 @@ lists.addRule(RandomItemWhere, {
 // one item of each thing, by its place, as one list (epic `language` T152)
 lists.addRule(ItemOfEach, {
   syntax:
-    "(the {ordinal}|a (random:random)) {arg:singular_identifier} (of|in|from) ((each:each) {thing:singular_identifier} (in|of) {list:operand}|{things:each_thing})",
+    "(the {ordinal}|a (random:random)) {arg:singular_identifier} (of|from) ((each:each) {thing:singular_identifier} (in|of) {list:operand}|{things:each_thing})",
   tests: [
     {
       compileAs: "expression",

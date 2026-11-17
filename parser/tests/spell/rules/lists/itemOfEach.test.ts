@@ -271,3 +271,11 @@ describe("3. `and` joins words that say items into one flat list", () => {
     ])
   })
 })
+
+describe("only `of each`:  `in every` is one list", () => {
+  test("Spanish's `en cada pila` is every pile:  the first that passes", () => {
+    const { code, errors } = compiledEs(["poner p a la primera pila en cada pila donde su rango es 1"])
+    expect(errors).toEqual([])
+    expect(code).not.toContain("pickFromEach")
+  })
+})
