@@ -135,17 +135,17 @@ describe("a Python spell app, in a real browser", () => {
     expect(patches[1]!.map((thing) => thing["$type"])).toEqual(["DiscardPile", "StockPile", "Solitaire"])
     const [joined, , solitaire] = patches[1]!
     expect(joined!["$items"].at(-1)).toEqual({ $id: cardId })
-    expect(solitaire!["$history"]).toEqual(expect.objectContaining({ can_undo: true, undo_title: "Undo Play Card" }))
+    expect(solitaire!["$history"]).toEqual(expect.objectContaining({ can_undo: true, undo_title: "Undo Turn Card" }))
 
     // the toolbar's Undo, live:  it lights up for the move, and takes it back in Python
     // (an `<action>` right inside a `<toolbar>` is one of its rows, `<ui-action>`, handed its action)
     const undo = await toolbarRow(page.page, "Undo")
     const redo = await toolbarRow(page.page, "Redo")
-    await expect.poll(() => titleOf(undo)).toBe("Undo Play Card")
+    await expect.poll(() => titleOf(undo)).toBe("Undo Turn Card")
     expect(await isEnabled(undo)).toBe(true)
     await press(undo)
     await expect.poll(() => page.page.locator(DISCARDS).count()).toBe(discards)
-    await expect.poll(() => titleOf(redo)).toBe("Redo Play Card")
+    await expect.poll(() => titleOf(redo)).toBe("Redo Turn Card")
     expect(await isEnabled(undo)).toBe(false)
     await press(redo)
     await expect.poll(() => page.page.locator(DISCARDS).count()).toBe(discards + 1)
@@ -347,7 +347,7 @@ async function waitFor(url: string): Promise<void> {
 /** What a toolbar's row, `<ui-action>`, is handed:  the action, read live. */
 type RowAction = { title: string; isEnabled: boolean }
 
-/** The row of the game's toolbar whose action's title starts with `title`:  `Undo` finds `Undo Play Card`. */
+/** The row of the game's toolbar whose action's title starts with `title`:  `Undo` finds `Undo Turn Card`. */
 async function toolbarRow(page: Page, title: string): Promise<Locator> {
   const rows = page.locator("ui-toolbar ui-action")
   await expect.poll(() => rows.count()).toBeGreaterThan(0)
