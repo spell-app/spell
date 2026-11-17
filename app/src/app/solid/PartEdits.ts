@@ -9,10 +9,11 @@ import { SourceEdits, type ElementPlace, type TextSpan, type WrittenElement } fr
 import { editor } from "spell/app/app/editor"
 import { isRunningApp } from "spell/app/app/pages/editorHotkeys"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
-import { Inspector } from "./Inspector"
+import { Inspector, type PartRow } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 
 /**
@@ -436,7 +437,7 @@ export class PartEdits {
       if (isRunningApp() || shiftKey) return
       event.preventDefault()
       event.stopPropagation()
-      PartEdits.openMenu(element, clientX, clientY, SpellElement.programMenuOf(element))
+      PartEdits.openMenu(element, { x: clientX, y: clientY, programMenu: SpellElement.programMenuOf(element) })
     })
   }
 
@@ -491,6 +492,7 @@ export class PartEdits {
    * - A press on what's selected drags it, inspecting or not.
    * - A right click on a part selects it, if it isn't, and opens the part menu;  on the background, the app itself.
    *   - The program's own right-click menu there, if it has one, comes first in it, as Run finds it (epic `editor` I76).
+   *   - Its Inspect row lists every part under the mouse (`partsAt()`;  epic `editor` P31).
    *   The browser's own menu never shows there:  `preventDefault()` comes first, before any other work.
    * - In Run the program has every right click;  with Shift held, the browser does, for its Inspect Element.
    * - The Menu key and Shift+F10 open the menu on what's selected.
@@ -516,8 +518,10 @@ export class PartEdits {
         event.preventDefault()
         event.stopPropagation()
         const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
-        if (part)
-          PartEdits.openMenu(part, event.clientX, event.clientY, SpellElement.programMenuAt(event.composedPath()))
+        if (!part) return
+        const { clientX: x, clientY: y } = event
+        const programMenu = SpellElement.programMenuAt(event.composedPath())
+        PartEdits.openMenu(part, { x, y, programMenu, partsUnder: PartEdits.partsAt(x, y, area) })
       },
       options
     )
@@ -530,7 +534,7 @@ export class PartEdits {
         if (!selected) return
         event.preventDefault()
         const { left, bottom } = boxOf(selected)
-        PartEdits.onMenu?.(left, bottom, SpellElement.programMenuOf(selected))
+        PartEdits.onMenu?.({ x: left, y: bottom, programMenu: SpellElement.programMenuOf(selected), part: selected })
       },
       { signal: stop.signal }
     )
@@ -538,7 +542,7 @@ export class PartEdits {
   }
 
   /** Told to open the part menu at a place, the program's own right-click menu first if it has one:  `<PartMenu>`. */
-  static onMenu: ((x: number, y: number, programMenu?: readonly MenuItem[]) => void) | undefined
+  static onMenu: ((opening: MenuOpening) => void) | undefined
 
   /**
    * Open the part menu at (`x`, `y`) for `element`, selecting it if it isn't:  a right click on it, or on its row.
@@ -547,16 +551,62 @@ export class PartEdits {
    *   (a button's card starts a code editor for its `onClick`).
    * - Meanwhile the menu greys its items for `element` (`menuPart`),
    *   and a click on one selects it first (`selectMenuPart()`).
-   * - `programMenu`:  the program's own right-click menu there, as Run shows it (`SpellElement.programMenuAt()`),
-   *   shown first, then a dashed line, then ours (epic `editor` I76).
+   * - `opening`:  where, the program's own right-click menu there, and the parts under the point (`MenuOpening`).
    */
-  static openMenu(element: Element, x: number, y: number, programMenu?: readonly MenuItem[]): void {
+  static openMenu(element: Element, opening: MenuOpening): void {
     if (Inspector.isSelected(element)) PartEdits.menuPart = undefined
     else {
       PartEdits.menuPart = element
       beforeNextPaint(() => beforeNextPaint(() => PartEdits.selectMenuPart()))
     }
-    PartEdits.onMenu?.(x, y, programMenu)
+    PartEdits.onMenu?.({ ...opening, part: element })
+  }
+
+  /**
+   * Every part under (`x`, `y`) in `area`, outermost first, each under the one it's inside:
+   * a right click's Inspect submenu (epic `editor` P31).
+   * - What the browser draws there (`elementsFromPoint()`), into each shadow root the app draws in,
+   *   and the parts round each of those (a part with no box of its own, `display: contents`, is still around it).
+   * - Kept if the Inspector can show it, as Alt-click takes it:  a drawn thing, or any Spell UI element,
+   *   so the picture inside a card counts (`Inspector.isPart()`).
+   * - Never the editor's own boxes (`EDITOR_OWN`), nor what's inside a Spell UI element's own shadow root:
+   *   a button's icon is the button's.
+   * - Each part once.  Parts side by side under the same one (overlapping cards in a pile):  the one on top first.
+   *   - One in the very same box as another above it (the stock's cards, squarely stacked) is hidden by it:
+   *     left out, with what's inside it, so the stock lists its top card, not all 24 (epic `editor` P31).
+   * - `depth`:  how many of the others it's inside.
+   */
+  static partsAt(x: number, y: number, area: HTMLElement): PartRow[] {
+    const order = new Map<Element, number>()
+    drawnAt(document, x, y).forEach((hit) => {
+      for (let element: Element | undefined = hit; element && element !== area; element = composedParentOf(element)) {
+        if (!order.has(element)) order.set(element, order.size)
+      }
+    })
+    const parts = [...order.keys()].filter((element) => isShownPart(element, area))
+    const isAPart = new Set(parts)
+    const outerOf = (element: Element) => {
+      let outer = composedParentOf(element)
+      while (outer && outer !== area && !isAPart.has(outer)) outer = composedParentOf(outer)
+      return outer && isAPart.has(outer) ? outer : undefined
+    }
+    const inside = new Map<Element | undefined, Element[]>()
+    for (const part of parts) inside.set(outerOf(part), [...(inside.get(outerOf(part)) ?? []), part])
+    const rows: PartRow[] = []
+    const add = (outer: Element | undefined, depth: number) => {
+      const own = [...(inside.get(outer) ?? [])].sort((a, b) => order.get(a)! - order.get(b)!)
+      const shown: DOMRect[] = []
+      for (const part of own) {
+        // one squarely under another, the same box (the stock's cards):  hidden by it, so left out
+        const box = part.getBoundingClientRect()
+        if (box.width && shown.some((above) => isSameBox(above, box))) continue
+        shown.push(box)
+        rows.push({ element: part, depth })
+        add(part, depth + 1)
+      }
+    }
+    add(undefined, 0)
+    return rows
   }
 
   /**
@@ -578,6 +628,20 @@ export class PartEdits {
 ////////////////
 // ## Types
 ////////////////
+
+/** How the part menu opens:  `PartEdits.onMenu()`. */
+export type MenuOpening = {
+  /** where, on the page:  the click */
+  x: number
+  /** where, on the page:  the click */
+  y: number
+  /** the program's own right-click menu there, as Run shows it (`SpellElement.programMenuAt()`), shown first */
+  programMenu?: readonly MenuItem[]
+  /** the part it's for:  what was right-clicked, else what's selected (the Menu key) */
+  part?: Element
+  /** every part under the click, outermost first (`PartEdits.partsAt()`):  none from a Views tree row or a key */
+  partsUnder?: readonly PartRow[]
+}
 
 /** What can be done to what's selected. */
 export type PartAction = "cut" | "copy" | "paste" | "duplicate" | "remove"
@@ -748,3 +812,49 @@ function isOnTriangle(event: Event): boolean {
 }
 
 setDebugGlobal({ PartEdits })
+
+/**
+ * Every element the browser draws at (`x`, `y`) in `root`, top-most first,
+ * each followed by what its own shadow root draws there:  `PartEdits.partsAt()`.
+ * - Not into a Spell UI element's shadow root:  what's in there is the element's.
+ */
+function drawnAt(root: Document | ShadowRoot, x: number, y: number, seen = new Set<Element>()): Element[] {
+  return root.elementsFromPoint(x, y).flatMap((element) => {
+    if (seen.has(element)) return []
+    seen.add(element)
+    const inner = element.shadowRoot && !element.localName.startsWith(UI_PREFIX) ? element.shadowRoot : undefined
+    return [element, ...(inner ? drawnAt(inner, x, y, seen) : [])]
+  })
+}
+
+/** Are `a` and `b` the same box, to within a pixel on each edge? */
+function isSameBox(a: DOMRect, b: DOMRect): boolean {
+  return (
+    Math.abs(a.left - b.left) <= 1 &&
+    Math.abs(a.top - b.top) <= 1 &&
+    Math.abs(a.right - b.right) <= 1 &&
+    Math.abs(a.bottom - b.bottom) <= 1
+  )
+}
+
+/** The element `element` is inside, across shadow roots:  its parent, else its shadow root's host. */
+function composedParentOf(element: Element): Element | undefined {
+  return element.parentElement ?? ((element.getRootNode() as ShadowRoot).host || undefined)
+}
+
+/**
+ * Can Inspect's submenu list `element`, a part under the mouse in `area`:  a part the Inspector shows,
+ * inside `area`, never in the editor's own boxes nor in a Spell UI element's own shadow root?
+ */
+function isShownPart(element: Element, area: HTMLElement): boolean {
+  if (!Inspector.isPart(element) || !Inspector.partFor(element)) return false
+  if ((element.getRootNode() as ShadowRoot).host?.localName.startsWith(UI_PREFIX)) return false
+  for (let outer: Element | undefined = element; outer; outer = composedParentOf(outer)) {
+    if (outer === area) return true
+    if (outer.hasAttribute(EDITOR_OWN)) return false
+  }
+  return false
+}
+
+/** The tag start of Spell UI's elements:  what's inside one's shadow root is its own. */
+const UI_PREFIX = "ui-"

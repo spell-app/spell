@@ -1216,6 +1216,10 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "InspectRow",
+          "file": "src/app/solid/Palette.tsx"
+        },
+        {
           "name": "PartMenu",
           "file": "src/app/solid/Palette.tsx"
         },
