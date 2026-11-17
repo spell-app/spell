@@ -248,11 +248,15 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     }
   })
 
-  /** The part menu's rows on `on`:  each one's words, and whether it's greyed, with why. */
+  /**
+   * The part menu's rows on `on`:  each one's words, and whether it's greyed, with why.
+   * - Inspect, with parts to pick at its side, is a `<ui-submenu>`:  its words are its `label`, its side menu not read.
+   */
   const menuRows = (on: Page) =>
     on.evaluate(() =>
-      [...document.querySelectorAll(".PartMenu ui-action")].map((row) => ({
-        title: row.getAttribute("kind") === "divider" ? "-" : (row.textContent ?? "").trim(),
+      [...document.querySelectorAll(".PartMenu ui-menu.BarMenuItems > :is(ui-action, ui-submenu)")].map((row) => ({
+        title:
+          row.getAttribute("kind") === "divider" ? "-" : (row.getAttribute("label") ?? row.textContent ?? "").trim(),
         grey: row.hasAttribute("disabled"),
         why: row.getAttribute("title") ?? ""
       }))
@@ -271,7 +275,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      "Inspect",
+      expect.stringMatching(/^Inspect /),
       "-",
       "Change This..."
     ])
@@ -317,7 +321,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
     await page.mouse.click(card!.x, card!.y, { button: "right" })
     await page.waitForTimeout(500)
-    await page.locator('.PartMenu ui-action:has-text("Inspect")').click()
+    // a card holds parts of its own, so Inspect is a split row:  its title inspects the card (P31)
+    await page.locator(".PartMenu ui-submenu.InspectRow [part~=title]").first().click()
     await page.waitForTimeout(800)
     const state = await page.evaluate(() => {
       const { Inspector } = window as unknown as {
@@ -336,7 +341,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const grey = rows.filter((row) => row.grey)
     expect(grey.map((row) => row.title)).toEqual(expect.arrayContaining(["Cut", "Duplicate", "Delete"]))
     expect(grey.find((row) => row.title === "Cut")!.why).toMatch(/app itself/)
-    expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
+    expect(rows.find((row) => row.title.startsWith("Inspect "))!.grey).toBe(false)
     await page.keyboard.press("Escape")
     await page.waitForTimeout(300)
   })
@@ -431,7 +436,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(cut.grey).toBe(true)
     expect(cut.why).toMatch(/one line of your program/)
     expect(rows.find((row) => row.title === "Show in Code")!.grey).toBe(false)
-    expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
+    expect(rows.find((row) => row.title.startsWith("Inspect "))!.grey).toBe(false)
     await other.keyboard.press("Escape")
     await other.waitForTimeout(300)
     await other.close()
@@ -534,12 +539,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const rows = (selector: string) =>
       other.evaluate(
         (menu) =>
-          [...document.querySelectorAll(`${menu} :is(ui-action, ui-item)`)].map((row) =>
+          [...document.querySelectorAll(`${menu} ui-menu > :is(ui-action, ui-item, ui-submenu)`)].map((row) =>
             row.getAttribute("kind") === "divider"
               ? row.classList.contains("ProgramMenuEnd")
                 ? "="
                 : "-"
-              : ((row as { action?: { title: string } }).action?.title ?? (row.textContent ?? "").trim())
+              : ((row as { action?: { title: string } }).action?.title ??
+                (row.getAttribute("label") ?? row.textContent ?? "").trim())
           ),
         selector
       )
@@ -558,7 +564,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      "Inspect",
+      expect.stringMatching(/^Inspect /),
       "-",
       "Change This..."
     ])
@@ -896,7 +902,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
             return element.classList.contains("ProgramMenuEnd") ? "=====" : "---"
           }
           const { action } = element as Element & { action?: { title: string } }
-          const title = action?.title ?? element.textContent!.trim()
+          const title = action?.title ?? element.getAttribute("label") ?? element.textContent!.trim()
           return element.matches(":state(disabled)") ? `${title} (off)` : title
         })
       )
@@ -918,7 +924,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         "Delete",
         "---",
         "Show in Code",
-        "Inspect"
+        expect.stringMatching(/^Inspect /)
       ])
       await other.keyboard.press("Escape")
       await other.waitForTimeout(300)
