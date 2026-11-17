@@ -238,6 +238,48 @@ events.addRule(On, {
           ]
         }
       ]
+    },
+    {
+      title: "a finger held still on a view, `on long press` (epic `language` T154)",
+      compileAs: "block",
+      tests: [
+        {
+          input: ["a card is a view where:", "\t- on long press", "\t\tprint 1"],
+          js: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onLongPress(event) {",
+            "    core.console.log(1)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onLongPress(event: LongPressEvent) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-events-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its card's properties;  its methods call its card's.",
+            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " */",
+            "export class CardElement extends SpellElement<Card> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-events-card", "card", [])',
+            "",
+            "  onLongPress(event: LongPressEvent) {",
+            "    return this.currentThing?.onLongPress(event)",
+            "  }",
+            "}",
+            "core.useElement(Card, CardElement)"
+          ]
+        }
+      ]
     }
   ]
 })

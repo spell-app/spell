@@ -1718,7 +1718,7 @@
               "syntax": "((up:hacia arriba|para arriba)|(down:hacia abajo|para abajo))"
             },
             {
-              "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
+              "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(long_press:se mantiene pulsado|se mantiene pulsada)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
             },
             {
               "syntax": "((start:principio|comienzo|inicio|frente|abajo)|(end:final|fin|fondo|arriba))"

@@ -1,11 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 import h from "@solidjs/h"
 
 import { core, App, View } from "spell/parser/core"
 import { installSpellElements, SpellElement } from "spell/app/app/runner/SpellElement"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
-import { LONG_PRESS_MS } from "spell/app/app/runner/LongPress"
+import { LONG_PRESS_MS, LongPress } from "spell/app/app/runner/LongPress"
 
 import "spell/app/app/solid/cellsBridge"
 import "spell/ui/components/ui-action"
@@ -206,6 +206,12 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
   })
 
   describe("a finger held on the card opens its menu, as a right click does (P62)", () => {
+    // a phone:  no mouse here (the test's browser has one)
+    beforeEach(() => {
+      const noMouse = vi.spyOn(LongPress, "hasNoMouse").mockReturnValue(true)
+      return () => noMouse.mockRestore()
+    })
+
     /** A finger (or `pointerType`) on `target`:  `event` at (`x`, `y`). */
     function touch(target: EventTarget, event: string, { x = 40, y = 50, pointerType = "touch" } = {}) {
       const init = { bubbles: true, composed: true, cancelable: true, pointerId: 7, isPrimary: true, pointerType }
@@ -282,6 +288,71 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
       expect(document.querySelector("ui-menu[data-spell-action-menu]")).toBe(popup)
       touch(face, "pointerup")
     })
+
+    test("`on long press` takes it:  no menu, no right click (T154)", async () => {
+      const { card, game } = await mountedGame()
+      const face = card.shadowRoot!.querySelector(".card")!
+      const pressed: string[] = []
+      const proto = Card.prototype as unknown as Record<string, unknown>
+      proto.onLongPress = () => pressed.push("long press")
+      proto.onRightClick = () => pressed.push("right click")
+      try {
+        touch(face, "pointerdown")
+        await wait(LONG_PRESS_MS + 100)
+        touch(face, "pointerup")
+        await expect.poll(() => pressed).toEqual(["long press"])
+        expect(menusShowing()).toBe(0)
+        expect(game.card.faceUp).toBe(true)
+      } finally {
+        delete proto.onLongPress
+        delete proto.onRightClick
+      }
+    })
+
+    test("with no `on long press`, a long press is a right click:  `on right click` and the menu (T154)", async () => {
+      const { card } = await mountedGame()
+      const face = card.shadowRoot!.querySelector(".card")!
+      const pressed: string[] = []
+      const proto = Card.prototype as unknown as Record<string, unknown>
+      proto.onRightClick = () => pressed.push("right click")
+      try {
+        touch(face, "pointerdown")
+        await wait(LONG_PRESS_MS + 100)
+        touch(face, "pointerup")
+        await expect.poll(() => pressed).toEqual(["right click"])
+        expect(menusShowing()).toBe(1)
+      } finally {
+        delete proto.onRightClick
+      }
+    })
+  })
+
+  test("with a mouse, a finger held still is a long press only:  never a right click or its menu (T154)", async () => {
+    vi.spyOn(LongPress, "hasNoMouse").mockReturnValue(false)
+    const { card } = await mountedGame()
+    const face = card.shadowRoot!.querySelector(".card")!
+    const pressed: string[] = []
+    const proto = Card.prototype as unknown as Record<string, unknown>
+    proto.onLongPress = () => pressed.push("long press")
+    proto.onRightClick = () => pressed.push("right click")
+    const finger = { bubbles: true, composed: true, cancelable: true, pointerId: 9, isPrimary: true }
+    try {
+      face.dispatchEvent(new PointerEvent("pointerdown", { ...finger, pointerType: "touch", clientX: 40, clientY: 50 }))
+      await new Promise((resolve) => setTimeout(resolve, LONG_PRESS_MS + 100))
+      face.dispatchEvent(new PointerEvent("pointerup", { ...finger, pointerType: "touch", clientX: 40, clientY: 50 }))
+      await expect.poll(() => pressed).toEqual(["long press"])
+      delete proto.onLongPress
+      // nothing takes it:  still no menu
+      face.dispatchEvent(new PointerEvent("pointerdown", { ...finger, pointerType: "touch", clientX: 40, clientY: 50 }))
+      await new Promise((resolve) => setTimeout(resolve, LONG_PRESS_MS + 100))
+      face.dispatchEvent(new PointerEvent("pointerup", { ...finger, pointerType: "touch", clientX: 40, clientY: 50 }))
+      expect(document.querySelectorAll("ui-menu[data-spell-action-menu]").length).toBe(0)
+      expect(pressed).toEqual(["long press"])
+    } finally {
+      delete proto.onLongPress
+      delete proto.onRightClick
+      vi.restoreAllMocks()
+    }
   })
 
   test("a shortcut runs its action only while it's enabled;  the app's own undo takes ⌘Z", async () => {

@@ -3,31 +3,35 @@ import { Dragging } from "spell/util/Dragging"
 
 /****************
  * ### `LongPress`
- * A finger held still on a view opens its right-click menu, as a right click does:  a phone has no right click.
- *
- * - Held `LONG_PRESS_MS` without moving more than `LONG_PRESS_MOVE_PX`:  a `contextmenu` event on what was pressed,
- *   at the press point, so every right-click menu opens from it as it is
- *   (`SpellElement.onThingRightClick()`, the editor's own in Edit).
- * - One menu, whatever the phone:
+ * A finger held still on a view is a long press:  a view's `on long press` hears it, and on a phone or tablet with no
+ * mouse it's also a right click, opening the view's right-click menu.
+ * - Held `LONG_PRESS_MS` without moving more than `LONG_PRESS_MOVE_PX`:  a `LONG_PRESS_EVENT` on what was pressed
+ *   (`SpellElement.onThingLongPress()`, epic `language` T154).
+ *   - A view whose thing takes it (`on long press`, up its chain) says so, `preventDefault()`:  the press is that.
+ *   - Else, on a device with no mouse (`hasNoMouse()`):  a `contextmenu` event at the press point, so every right-click
+ *     menu opens from it as it is, and `on right click` hears it (`SpellElement.onThingRightClick()`, the editor's own
+ *     in Edit;  epic `language` P62).
+ *   - With a mouse, a right click stays the mouse's:  a long press is only a long press.
+ * - One press, whatever the phone:
  *   - Android Chrome sends its own `contextmenu` for a long press;  iPhone Safari never does.
- *   - Whichever comes first opens it;  the other is swallowed.
- * - No menu when, before then:
+ *   - Whichever comes first is the long press;  the browser's own is swallowed.
+ * - Nothing when, before then:
  *   - the finger lifts (a tap), or moves (a drag, a scroll)
  *   - a second finger comes down (a pinch)
  *   - a drag has started (`Dragging.current`)
- * - Once it opens, the press is the menu's:
+ * - Once it's a long press, the press is its:
  *   - whatever else was watching it hears `pointercancel`, so a card held under it never drags
  *   - the click the lift would make is swallowed
  *   - so is the text selection a held finger starts (`selectstart`)
  * - Only fingers:  a mouse and a pen right-click as ever.
  *   Nor a press in a text field:  holding there is the field's, to select and paste.
  * - Page-wide, ONE per page however many runtime copies run on it (`listen()`):
- *   each would otherwise send its own `contextmenu`.
+ *   each would otherwise send its own events.
  * - Plain DOM:  no Solid, no core.  Its owner says which presses are its (`isFor`).
  ****************/
 export class LongPress {
   /**
-   * Open right-click menus on a long press, for each press `isFor` says is a view's, e.g. on a `<solitaire-card>`.
+   * Send a long press, for each press `isFor` says is a view's, e.g. on a `<solitaire-card>`.
    * - Once per page:  again does nothing, even from another runtime copy.
    */
   static listen(isFor: (path: readonly EventTarget[]) => boolean): void {
@@ -47,16 +51,16 @@ export class LongPress {
     window.addEventListener("selectstart", this.onSelectStart, capture)
   }
 
-  /** The finger held down now, till it opens the menu, lifts, moves or is joined by another. */
+  /** The finger held down now, till it's a long press, lifts, moves or is joined by another. */
   private press: Press | undefined
 
-  /** The finger whose press opened a menu, till it lifts:  its click is swallowed. */
+  /** The finger whose press was a long press, till it lifts:  its click is swallowed. */
   private menuPointer: number | undefined
 
-  /** What we send as the menu opens:  never mistaken for the browser's own. */
+  /** What we send for a long press:  never mistaken for the browser's own. */
   private readonly sent = new WeakSet<Event>()
 
-  /** When we last opened a menu:  the browser's own `contextmenu` for the same press, coming after, is swallowed. */
+  /** When the last long press was:  the browser's own `contextmenu` for the same press, coming after, is swallowed. */
   private openedAt = -Infinity
 
   private readonly onDown = (event: PointerEvent) => {
@@ -82,20 +86,21 @@ export class LongPress {
     LongPress.swallowNextClick()
   }
 
-  // ours, sent as the menu opens, ends nothing:  the menu's press goes on till the finger lifts
+  // ours, sent for a long press, ends nothing:  its press goes on till the finger lifts
   private readonly onCancel = (event: PointerEvent) => {
     if (!this.sent.has(event) && event.pointerId === this.press?.pointerId) this.end()
   }
 
   /**
-   * The browser's own long-press menu event (Android):  it opens the menu, and our timer stops;
-   * after ours, it's swallowed.
+   * The browser's own long-press menu event (Android):  the long press, sooner than our timer;  swallowed, as is one
+   * coming after ours.
    */
   private readonly onContextMenu = (event: MouseEvent) => {
     if (this.sent.has(event)) return
     if (this.press) {
-      this.menuPointer = this.press.pointerId
-      return this.end()
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      return this.open()
     }
     if (performance.now() - this.openedAt < ECHO_MS) {
       event.preventDefault()
@@ -103,14 +108,14 @@ export class LongPress {
     }
   }
 
-  /** A finger held down selects text:  not while it may open, or has opened, a menu. */
+  /** A finger held down selects text:  not while it may be, or is, a long press. */
   private readonly onSelectStart = (event: Event) => {
     if (this.press || this.menuPointer !== undefined) event.preventDefault()
   }
 
   /**
-   * Held long enough:  the right-click menu, where the finger is.
-   * - Nothing opens if a drag has started meanwhile.
+   * Held long enough:  the long press, where the finger is;  with no mouse and nothing taking it, the right-click menu.
+   * - Nothing happens if a drag has started meanwhile.
    */
   private open() {
     const press = this.press!
@@ -119,12 +124,24 @@ export class LongPress {
     this.openedAt = performance.now()
     this.menuPointer = press.pointerId
     const { x: clientX, y: clientY } = press
-    const menuEvent = { bubbles: true, cancelable: true, composed: true, button: 2, buttons: 0, clientX, clientY }
-    press.target.dispatchEvent(this.send(new MouseEvent("contextmenu", menuEvent)))
-    // the press is the menu's now:  e.g. a card held under it never drags (`Dragging`)
+    const at = { bubbles: true, cancelable: true, composed: true, clientX, clientY }
+    const longPress = this.send(new MouseEvent(LONG_PRESS_EVENT, at))
+    press.target.dispatchEvent(longPress)
+    if (!longPress.defaultPrevented && LongPress.hasNoMouse()) {
+      press.target.dispatchEvent(this.send(new MouseEvent("contextmenu", { ...at, button: 2, buttons: 0 })))
+    }
+    // the press is the long press's now:  e.g. a card held under it never drags (`Dragging`)
     window.dispatchEvent(
       this.send(new PointerEvent("pointercancel", { pointerId: press.pointerId, pointerType: "touch" }))
     )
+  }
+
+  /**
+   * No mouse here, nor a trackpad or anything else that points finely:  a phone, a tablet.
+   * - So a long press is a right click too;  with one, a right click is the mouse's.
+   */
+  static hasNoMouse(): boolean {
+    return !globalThis.matchMedia?.(FINE_POINTER).matches
   }
 
   /** `event`, marked as ours. */
@@ -144,7 +161,7 @@ export class LongPress {
     return path.some((target) => target instanceof Element && target.matches(TEXT_FIELD_SELECTOR))
   }
 
-  /** The click the menu's lift would make is no click:  swallowed, once, before anything hears it. */
+  /** The click a long press's lift would make is no click:  swallowed, once, before anything hears it. */
   private static swallowNextClick() {
     const swallow = (event: Event) => {
       event.stopPropagation()
@@ -163,19 +180,28 @@ type Press = {
   /** where it came down, in the window */
   x: number
   y: number
-  /** what it pressed, innermost:  the menu event goes there */
+  /** what it pressed, innermost:  the long press goes there */
   target: EventTarget
-  /** opens the menu, unless the press ends first */
+  /** makes it a long press, unless the press ends first */
   timer: ReturnType<typeof setTimeout>
 }
 
-/** How long a finger is held still for a right-click menu, in ms:  about what a phone's own long press takes. */
+/**
+ * The event a long press sends to what was pressed, a `MouseEvent` at the press point:  `on long press` hears it.
+ * - Cancelable:  a view whose thing takes it cancels it, so it's no right click as well.
+ */
+export const LONG_PRESS_EVENT = "spell-long-press"
+
+/** Some pointer that points finely is here:  a mouse, a trackpad. */
+const FINE_POINTER = "(any-pointer: fine)"
+
+/** How long a finger is held still for a long press, in ms:  about what a phone's own long press takes. */
 export const LONG_PRESS_MS = 500
 
-/** How far a held finger may wander and still open the menu, in px:  more is a drag or a scroll. */
+/** How far a held finger may wander and still be a long press, in px:  more is a drag or a scroll. */
 export const LONG_PRESS_MOVE_PX = 8
 
-/** How long after our menu opens the browser's own events for the same press may still come, in ms. */
+/** How long after a long press the browser's own events for the same press may still come, in ms. */
 const ECHO_MS = 1000
 
 /** Where a long press is the field's own:  selecting text, pasting. */

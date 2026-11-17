@@ -11,7 +11,7 @@ import type { ElementApi, Core, MenuItem } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
 import { ActionMenus } from "./ActionMenus"
-import { LongPress } from "./LongPress"
+import { LONG_PRESS_EVENT, LongPress } from "./LongPress"
 
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
@@ -968,7 +968,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   /**
    * A right click:  the menu its `context-menu=` names, if any (epic `elemental-spell` P10, Q30), and our handler.
-   * - On a phone, a finger held still sends it too (`LongPress`, epic `language` P62).
+   * - On a phone or tablet with no mouse, a finger held still sends it too, unless an `on long press` took it
+   *   (`LongPress`, epic `language` P62, T154).
    */
   @E.on("contextmenu")
   protected onThingRightClick(event: MouseEvent) {
@@ -976,6 +977,20 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (entry && !event.defaultPrevented) {
       ActionMenus.showContextMenu(event, this.domElement, this.currentThing, entry.core)
     }
+    this.runThingHandler(event)
+  }
+
+  /**
+   * A finger held still on us (`LongPress`, epic `language` T154):  `on long press`, our thing's or up its chain.
+   * - Taken, it's no right click as well:  we say so to `LongPress` (`preventDefault()`).
+   */
+  @E.on(LONG_PRESS_EVENT)
+  protected onThingLongPress(event: MouseEvent) {
+    const thing = this.currentThing as Record<string, unknown> | undefined
+    const core = this.entry?.core
+    if (!thing || !core || this.isInAControl(event)) return
+    const takes = core.remote ? SpellElement.handles(thing, LONG_PRESS) : core.takesEvent(thing, LONG_PRESS)
+    if (takes) event.preventDefault()
     this.runThingHandler(event)
   }
 
@@ -1890,6 +1905,9 @@ type SelectableList = { selection: Iterable<object>; select?: (items: Iterable<o
 /** Each list's clicks to select:  its last item clicked, where a shift-click's range starts. */
 const LIST_SELECTIONS = new WeakMap<object, ListSelection<object>>()
 
+/** Spell's name for a finger held still on a view, `on long press` (`LongPress`, epic `language` T154). */
+const LONG_PRESS = "long-press"
+
 /**
  * The browser's mouse events a view's thing may handle, by spell's name for each (Q30, Q32):
  * `mousedown` is `mouse down`, so `- on mouse down:` is its handler, `onMouseDown()`.
@@ -1900,6 +1918,7 @@ const THING_EVENTS: Record<string, string> = {
   click: "click",
   dblclick: "double-click",
   contextmenu: "right-click",
+  [LONG_PRESS_EVENT]: LONG_PRESS,
   auxclick: "center-click",
   mousedown: "mouse-down",
   mouseup: "mouse-up",
@@ -1938,7 +1957,7 @@ const CORE_BASE_NAMES = new Set([
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]
 
 /** The mouse's events that are a person's action, which waits its turn (`core.runPressed()`). */
-const PRESSES = new Set(["click", "double-click", "right-click", "center-click"])
+const PRESSES = new Set(["click", "double-click", "right-click", LONG_PRESS, "center-click"])
 
 /** The cores keeping up with the page's mouse and keys already:  see `SpellElement.noteInput()`. */
 const LISTENING_CORES = new WeakSet<object>()

@@ -708,6 +708,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `click` | a click on the thing's view | the innermost thing under the mouse, then up its chain | no | |
 | `double click` | a double click | the same | no | |
 | `right click` | a right click | the same | no | |
+| `long press` | a finger held still on the view, half a second;  with no mouse (a phone, a tablet) it's a `right click` too, unless something takes it | the same | no | |
 | `center click` | a click of the center button | the same | no | |
 | `mouse down`, `mouse up` | a button pressed, let go | the same | no | |
 | `mouse enter`, `mouse leave` | the mouse comes onto the view, leaves it | the thing, then up its chain | no | |
@@ -721,7 +722,8 @@ A thing hears an event when its handler says so, and sends one with `send`:
 
 - The mouse's events come from the browser's own, `click` to `mouseleave`;  the view's element sends each once,
   from the innermost thing, and never for a press in a control inside the view.
-- The page's mouse and key events have English names only, so far.
+- The page's mouse and key events have English names only, so far;  Spanish says some with a passive `cuando`:
+  `cuando se pulsa con el botón derecho` is `right click`, `cuando se mantiene pulsada` is `long press`.
 
 </details>
 
