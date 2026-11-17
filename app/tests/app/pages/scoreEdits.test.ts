@@ -104,7 +104,7 @@ describe.skipIf(!SERVING)("the app's stored values in the Inspector", { timeout:
         labelSize: label ? parseFloat(getComputedStyle(label).fontSize) : 0
       }
     })
-    expect(note.text).toMatch(/starting value/)
+    expect(note.text).toMatch(/won.t be saved/)
     expect(note.isBelow, "the note:  under Score's box").toBe(true)
     expect(note.size, "the note:  smaller than the label").toBeLessThan(note.labelSize)
     const atTop = await page.evaluate(() => document.querySelectorAll(".InspectorNotSaved").length)

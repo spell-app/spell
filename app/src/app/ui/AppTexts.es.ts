@@ -317,7 +317,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorNotSavedCode: "Tu programa calcula esto por sí mismo, así que un cambio aquí no se guardará.",
   inspectorNotSavedRunning: "La aplicación lo pone mientras corre, así que este cambio no se guardará.",
   inspectorShowCode: "Mostrar el código",
-  inspectorNotSavedNoStart: "Tu programa no le da un valor inicial, así que un cambio aquí no se guardará.",
+  inspectorNotSavedNoStart: "Un cambio aquí no se guardará.",
   inspectorNotSavedTypeSets: "Todos empiezan con este valor.\nPara cambiarlo, elige antes En todos.",
   inspectorUnsavedAuto: "Encanto crea esto por ti, así que un cambio aquí no se puede guardar.",
   inspectorAllFromCode: "Cada {type} recibe estos valores del código que lo crea.",

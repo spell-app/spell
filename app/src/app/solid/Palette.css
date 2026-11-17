@@ -66,8 +66,8 @@
      the page shows beside it (T106, Owen:  "keep it centered but make it only 32px wider than the content it needs,
      with rounded bottom corners, and show the page background in the unused space")
    - a window too narrow for all of it:  the whole window's width, and its names scroll (T86)
-   - the bar's own fill and blur, over the page as the bar's is (on its `::before`, so a menu inside it isn't held in
-     its box)
+   - the bar's own fill and blur, a step lighter (I248), over the page as the bar's is
+     (on its `::before`, so a menu inside it isn't held in its box)
    - its pin, Add a View in bold, then its topics' icons and names (T86, T92), quiet, as the bar's menus are;
      its search right after the last one (T106;  at the window's far right before)
    - a thin grey line between the two bars (T86, I232), a shadow inside its top edge taking no room, so both bars keep
@@ -101,7 +101,10 @@
     inset: 1px 0 0;
     z-index: -1;
     border-radius: inherit;
-    background: var(--spell-menu-bar-fill);
+    /* a step lighter than the top bar, a white wash over its fill:  half in light, a touch in dark
+       (epic `editor` I248, Owen:  "make this bar lighter") */
+    --PaletteStrip-wash: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.05));
+    background: linear-gradient(var(--PaletteStrip-wash), var(--PaletteStrip-wash)), var(--spell-menu-bar-fill);
     -webkit-backdrop-filter: var(--spell-menu-bar-filter);
     backdrop-filter: var(--spell-menu-bar-filter);
     pointer-events: none;
