@@ -5,6 +5,10 @@ follow it and try it.
 Use it for any page whose first reader has never built software:
 a project's landing page and the top of its front page, a "your first ..." walkthrough, an explainer of one idea,
 a page of words and what they mean.
+And for the significant text a product shows people:  its dialogs, notices, errors, empty states, onboarding and help.
+- Short text keeps only the habits that fit it:  plain words (4), what happens next (5), short sentences (7),
+  warm and direct (8).
+- Check any of it cold before it ships:  `epic voice check <file>`, a reader with no context, this voice by default.
 
 The reader's own project adds its specifics on top:  its house style's writing rules, the names it never uses, its
 checker.

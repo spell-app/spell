@@ -78,7 +78,12 @@ After a restart, agents it started are gone:  start each again from its task, as
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
-3. Do the work.  Record as you go
+3. Do the work.
+   Text people will see (dialogs, notices, errors, empty states, onboarding, help):  written in the novice voice
+   (`epic voice novice`), then checked by a reader with no context before it ships, a dialog whole:
+   `epic voice check <file> --about "<what it is>"` (or `--text "..."`);  fix what it finds, or say why a finding is
+   wrong.  Its output goes in the commit's item (`--details`).
+   Record as you go
    (a title is at most 30 plain words saying what it is, read cold, hours later:
    nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`

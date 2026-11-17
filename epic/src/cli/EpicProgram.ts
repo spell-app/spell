@@ -23,6 +23,7 @@ import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
 import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Turns } from "spell/epic/command/Turns"
+import { VoiceCheck } from "spell/epic/command/VoiceCheck"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
@@ -663,9 +664,12 @@ export class EpicProgram {
 
     this.verb(epic.command("voice"), (args) => EpicProgram.voice(args))
       .description(
-        "the VOICE a kind of page is written in (readme, code ...):  its file, for a skill to read;  or every voice"
+        "the VOICE a kind of page is written in (readme, code ...):  its file, for a skill to read;  or every voice;  " +
+          "check:  a fresh reader checks a text against one (novice by default)"
       )
-      .usage("[<name> | --for <kind>] [--json]")
+      .usage(
+        "[<name> | --for <kind>] [--json]  |  check [--voice <name>] [<file> | - | --text <text>] [--about <what>] [--json]"
+      )
       .addHelpText("after", VOICE_HELP)
 
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
@@ -917,6 +921,8 @@ export class EpicProgram {
    * P13;  `EpicConfig.voiceFile()`).
    * - `<name>`:  that voice's file, alone on a line, for a skill to read:  `epic voice readme` => `/.../readme.md`
    * - `--for <kind>`:  the file of the voice that kind of page is written in:  `epic voice --for guide`
+   * - `check [--voice <name>] [<file> | - | --text "..."] [--about "..."] [--json]`:  a fresh reader with no context
+   *   checks the text against the voice (`VoiceCheck`);  exits 0 on a pass, 1 on a fail
    * - neither:  every voice, its file and the kinds of page written in it;  `--json`:  the same as JSON
    * - Returns 0.
    * - Throws `EpicCommandError`:  exit 2 for a voice this repo hasn't got, listing those it has;  1 for a config file
@@ -924,6 +930,8 @@ export class EpicProgram {
    * - static:  needs no tree
    */
   static async voice(args: string[]): Promise<number> {
+    // `epic voice check ...`:  a fresh reader checks a text against a voice (epic `epic-engine` T92)
+    if (args[0] === "check") return new VoiceCheck().run(args.slice(1))
     const json = args.includes("--json")
     const forAt = args.indexOf("--for")
     const kind = forAt === -1 ? undefined : args[forAt + 1]
@@ -1170,10 +1178,20 @@ A VOICE is how a kind of page is written:  who reads it, what it opens with, wha
 A repo's .epic/config.json5 adds or replaces voices ("voices", a name to a file from its main checkout) and says
 which voice each kind of page takes ("pageVoices":  readme, guide, code, epic-page ...).
 
+epic voice check:  a FRESH reader (claude -p, Sonnet, nothing of the repo, no tools) reads a text cold and says
+whether it is comprehensible, concise and clear, and whether it sounds like agent speak;  each problem quoted with a
+rewrite.  Exits 0 on a pass, 1 on a fail.  Its instructions:  spell-epic's voices/check/prompt.md.
+  --voice <name>   the voice to check against (default novice)
+  <file> | -       the text:  a file, or stdin;  or --text "..."
+  --about <what>   what the text is ("a dialog shown when leaving an example"), so the reader knows
+  --model <name>   the reader's model (default sonnet)
+
 Examples:
   epic voice readme
   epic voice --for guide
-  epic voice --json`
+  epic voice --json
+  epic voice check --text "Keep your changes to Solitaire?"
+  pbpaste | epic voice check - --about "an error message"`
 
 /** After `epic init --help`. */
 const INIT_HELP = `

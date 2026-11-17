@@ -589,6 +589,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       Haiku's (`claude -p`, hooks off);  every prompt logged to `epic-prompts.log` in the checkout's git folder;
       `promptAck` in the config turns it off (epic `epic-engine` P18)
       - plain `node` loads it by path, with `command.types.ts`
+    - `VoiceCheck`:  `epic voice check`, a FRESH reader (`claude -p`, Sonnet, its own system prompt, no tools, MCP,
+      skills, settings, hooks or session, run from the temp folder) checks a text against a voice, novice by default,
+      and answers in a fixed shape (`--json-schema`):  comprehensible, concise, clear, agent speak, each problem with a
+      rewrite, pass or fail (epic `epic-engine` T92);  its instructions [voices/check/prompt.md](../voices/check/prompt.md);
+      the reader a constructor option, so its test never calls a model
     - `SessionMoves`:  whether a session's move to another window (`epic window handoff`, `launch --move`) will
       really happen, and what's said when it didn't (epic `epic-engine` P26, request r20)
       - why:  the move is ONLY the end-of-turn hook's ([handoff.mjs](../hooks/handoff.mjs))

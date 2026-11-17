@@ -59,6 +59,10 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
    - Ranked:  by severity, then a broken T rule before a C rule, then what a person notices first.
    - One root cause, one finding, every place listed;  at most 15.  No padding to the cap, no praise.
    - Only what a shot shows:  a rule marked "Live look" (motion, timing) is a question for the person, never a finding.
+   - The page's significant TEXT (a dialog, a notice, an error, an empty state, onboarding, help;  not every label):
+     copy it from the shot, a dialog whole, and run `epic voice check --text "..." --about "<what it is>"` (a reader
+     with no context, the novice voice;  WWOD §6's standing rule, epic `epic-engine` T92).
+     A fail is a finding under C40, each problem it quoted with its rewrite as the fix.
    - Last, one line:  "Considered, left out:" with each rule you weighed and didn't apply, and why (a deliberate choice,
      another theme's rule).
 5. What happens to them:
