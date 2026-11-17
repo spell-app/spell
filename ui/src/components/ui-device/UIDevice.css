@@ -90,8 +90,14 @@
     transform-origin: 0 0;
   }
 
-  /* the thick bottom edge:  its own buttons, then the page's;  never wider than the screen, it wraps instead */
+  /*
+   * the thick bottom edge:  its own buttons, then the page's;  never wider than the screen, it wraps instead
+   * - on dark hardware, so what's in it is drawn in the dark scheme, whatever the page's
+   */
   .edge {
+    --ui-scheme: dark;
+    --ui-inverted: 1;
+    color-scheme: dark;
     box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;

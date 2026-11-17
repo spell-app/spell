@@ -313,8 +313,6 @@ export class UIDevice extends E.UIComponent<typeof deviceVocabulary> {
               {(device) => (
                 <ui-button
                   icon={device === PHONE ? "mobile" : device}
-                  inverted=""
-                  appearance="basic"
                   selected={this.device === device ? "" : undefined}
                   aria-label={this.translationForKey(device)}
                   title={this.translationForKey(device)}
@@ -329,8 +327,6 @@ export class UIDevice extends E.UIComponent<typeof deviceVocabulary> {
             part={this.partForName("rotate")}
             icon="redo"
             size="small"
-            inverted=""
-            appearance="basic"
             aria-label={this.translationForKey("rotate")}
             title={this.translationForKey("rotate")}
             onClick={this.rotate}
