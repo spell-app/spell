@@ -27,7 +27,7 @@ un ingrediente
 		// Una casilla para marcarlo, cuánto, y qué
 		<formulario value={eso}>
 			<pila direccion="horizontal" separacion="sm" class="ingredient">
-				<casilla name="marcado" aria-label="Marcar para la lista de la compra" />
+				<casilla name="marcado" aria-label="Marca para añadir a la lista de la compra" />
 				<texto negrita class="how-much">{el escrito de su mostrada}</texto>
 				<texto>{su nombre}</texto>
 			</pila>

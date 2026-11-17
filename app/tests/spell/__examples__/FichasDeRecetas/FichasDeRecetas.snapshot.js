@@ -92,10 +92,11 @@ export class Receta extends View {
             core.drawAction(this, "editar")
           ),
           h("es-texto", { color: "gris" },
-            "Escrita para ",
+            "La receta es para ",
             () => this.raciones,
-            ";  mostrada para ",
-            () => fichas.comensales
+            " personas.  Estas cantidades son para las ",
+            () => fichas.comensales,
+            " para las que cocinas."
           ),
           h("es-encabezado", { tamano: "pequeño" }, "Ingredientes"),
           h("es-pila", { separacion: "xs" },
@@ -108,7 +109,7 @@ export class Receta extends View {
               desactivado: () => this.totalMarcados === 0,
               onClick: core.pressed(this, async () => await this.agregarLosMarcadosALaListaDeLaCompra()),
               style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-            }, "Agregar ", () => this.totalMarcados, " a la lista de la compra")
+            }, "Agregar ", () => this.totalMarcados, " ingredientes marcados a la lista de la compra")
           ),
           h("es-encabezado", { tamano: "pequeño" }, "Pasos"),
           () => this.drawPasos()
@@ -259,7 +260,7 @@ export class Ingrediente extends View {
     // Una casilla para marcarlo, cuánto, y qué
     return h("es-formulario", { "prop:value": this },
       h("es-pila", { class: "ingredient", direccion: "horizontal", separacion: "sm" },
-        h("es-casilla", { name: "marcado", "aria-label": "Marcar para la lista de la compra" }),
+        h("es-casilla", { name: "marcado", "aria-label": "Marca para añadir a la lista de la compra" }),
         h("es-texto", { class: "how-much", negrita: true }, () => this.mostrada.escrito),
         h("es-texto", () => this.nombre)
       )
@@ -699,6 +700,9 @@ export class Ficha extends App {
                 )
               ),
               h("es-encabezado", { tamano: "pequeño" }, "Lista de la compra"),
+              h("es-texto", { color: "gris", tamano: "pequeño" },
+                "Los ingredientes marcados van aquí, a la propia lista de la aplicación Lista de la compra"
+              ),
               () => core.drawThing(this.recorrido)
             )
           ),
@@ -712,11 +716,15 @@ export class Ficha extends App {
     // La pantalla de edición mientras se cambia una receta;  si no, la ficha de la receta elegida
     if (this.editada) return core.drawThing(new EditorDeReceta({ receta: this.editada }))
     else if (this.elegida) return core.drawThing(this.elegida)
-    else return h("es-texto", { color: "gris", part: "pantalla" }, "Elige una receta")
+    else {
+      return h("es-texto", { color: "gris", part: "pantalla" },
+        "Elige una receta a la izquierda para ver sus ingredientes y pasos."
+      )
+    }
   }
 }
 export const fichas = new Ficha()
-core.describeAction(Ficha, "mostrarMétrico", { title: "Métrico", selectedWhen: "mostrarMétricoIsSelected", undoneAs: "Métrico" })
+core.describeAction(Ficha, "mostrarMétrico", { title: "Gramos y ml", selectedWhen: "mostrarMétricoIsSelected", undoneAs: "Gramos y ml" })
 core.describeAction(Ficha, "mostrarTazasYCucharas", { title: "Tazas y cucharas", selectedWhen: "mostrarTazasYCucharasIsSelected", undoneAs: "Tazas y cucharas" })
 
 // -----------
@@ -789,7 +797,7 @@ export class EditorDeReceta extends View {
             )
           ),
           h("es-campo", { etiqueta: "Imagen" },
-            h("es-entrada", { name: "imagen", marcador: "La dirección de una imagen" })
+            h("es-entrada", { name: "imagen", marcador: "Un enlace a una foto (opcional)" })
           )
         ),
         h("es-encabezado", { tamano: "pequeño" }, "Ingredientes"),
@@ -853,13 +861,13 @@ export class FilaIngrediente extends View {
           h("es-entrada", { name: "cantidad", type: "number", min: "0", "aria-label": "Cantidad" })
         ),
         h("es-campo", { ancho: "2" },
-          h("es-entrada", { name: "unidad", marcador: "Unidad", "aria-label": "Unidad" })
+          h("es-entrada", { name: "unidad", marcador: "g, tazas ...", "aria-label": "Unidad" })
         ),
         h("es-campo", { ancho: "6" },
           h("es-entrada", { name: "nombre", marcador: "Ingrediente", "aria-label": "Ingrediente" })
         ),
         h("es-campo", { ancho: "3" },
-          h("es-entrada", { name: "pasillo", marcador: "Pasillo", "aria-label": "Pasillo" })
+          h("es-entrada", { name: "pasillo", marcador: "Pasillo de la tienda", "aria-label": "Pasillo" })
         ),
         h("es-campo", { ancho: "3" },
           h("es-pila", { direccion: "horizontal", separacion: "xs" },
@@ -910,7 +918,7 @@ export class FilaPaso extends View {
   }
 }
 
-core.describeAction(EditorDeReceta, "guardar", { title: "Guardar", icon: "check", undoneAs: "Guardar" })
+core.describeAction(EditorDeReceta, "guardar", { title: "Guardar cambios", icon: "check", undoneAs: "Guardar cambios" })
 core.describeAction(EditorDeReceta, "cancelar", { title: "Cancelar", icon: "close", undoneAs: "Cancelar" })
 core.describeAction(EditorDeReceta, "agregarIngrediente", { title: "Agregar un ingrediente", icon: "plus", undoneAs: "Agregar un ingrediente" })
 core.describeAction(EditorDeReceta, "agregarPaso", { title: "Agregar un paso", icon: "plus", undoneAs: "Agregar un paso" })

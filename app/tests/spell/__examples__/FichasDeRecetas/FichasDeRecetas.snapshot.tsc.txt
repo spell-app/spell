@@ -1,10 +1,10 @@
 45:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
-111:38 TS2345 Argument of type '(item: Paso, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
-353:29 TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
-632:5 TS2322 Type 'Receta | undefined' is not assignable to type 'Receta'.
-657:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
-665:150 TS2339 Property 'elegida' does not exist on type 'Receta'.
-769:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
-775:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
-887:59 TS18048 'puesto' is possibly 'undefined'.
-962:59 TS18048 'puesto' is possibly 'undefined'.
+117:38 TS2345 Argument of type '(item: Paso, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
+359:29 TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
+638:5 TS2322 Type 'Receta | undefined' is not assignable to type 'Receta'.
+663:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+671:150 TS2339 Property 'elegida' does not exist on type 'Receta'.
+784:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
+790:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
+902:59 TS18048 'puesto' is possibly 'undefined'.
+977:59 TS18048 'puesto' is possibly 'undefined'.

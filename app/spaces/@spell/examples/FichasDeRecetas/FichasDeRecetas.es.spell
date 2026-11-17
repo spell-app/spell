@@ -28,7 +28,7 @@ fichas es una aplicación
 		poner su elegida al primer de (cada receta)
 
 	grupo "Unidades"
-	para "mostrar métrico" con título "Métrico"
+	para "mostrar métrico" con título "Gramos y ml"
 		seleccionada cuando sus unidades es métrico
 		poner sus unidades a métrico
 
@@ -61,6 +61,7 @@ fichas es una aplicación
 								</campo>
 							</formulario>
 							<encabezado tamano="pequeño">Lista de la compra</encabezado>
+							<texto color="gris" tamano="pequeño">Los ingredientes marcados van aquí, a la propia lista de la aplicación Lista de la compra</texto>
 							{dibujar el recorrido}
 						</pila>
 					</columna>
@@ -78,4 +79,4 @@ fichas es una aplicación
 		de lo contrario si su elegida
 			dibujar su elegida
 		de lo contrario
-			<texto color="gris">Elige una receta</texto>
+			<texto color="gris">Elige una receta a la izquierda para ver sus ingredientes y pasos.</texto>

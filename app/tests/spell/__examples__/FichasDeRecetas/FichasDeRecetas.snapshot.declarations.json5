@@ -351,7 +351,7 @@
     {
       "type": "Ficha",
       "superType": "App",
-      "defined": "/FichasDeRecetas.es.spell:347-2923"
+      "defined": "/FichasDeRecetas.es.spell:347-3119"
     },
     {
       "property": "elegida",
@@ -413,8 +413,8 @@
       "kind": "method",
       "name": "mostrar métrico",
       "returns": "nothing",
-      "title": "Métrico",
-      "defined": "/FichasDeRecetas.es.spell:1250-1370"
+      "title": "Gramos y ml",
+      "defined": "/FichasDeRecetas.es.spell:1250-1374"
     },
     {
       "syntax": "mostrar tazas y cucharas ((de|del) {thisArg:expression})?",
@@ -430,13 +430,13 @@
       "name": "mostrar tazas y cucharas",
       "returns": "nothing",
       "title": "Tazas y cucharas",
-      "defined": "/FichasDeRecetas.es.spell:1373-1507"
+      "defined": "/FichasDeRecetas.es.spell:1377-1511"
     },
     {
       "type": "EditorDeReceta",
       "superType": "View",
       "gender": "masculine",
-      "defined": "/EditorDeRecetas.es.spell:245-2004"
+      "defined": "/EditorDeRecetas.es.spell:245-2035"
     },
     {
       "property": "receta",
@@ -462,7 +462,8 @@
       "kind": "method",
       "name": "guardar",
       "returns": "nothing",
-      "defined": "/EditorDeRecetas.es.spell:461-619"
+      "title": "Guardar cambios",
+      "defined": "/EditorDeRecetas.es.spell:461-645"
     },
     {
       "syntax": "cancelar {thisArg:expression}?",
@@ -476,7 +477,7 @@
       "kind": "method",
       "name": "cancelar",
       "returns": "nothing",
-      "defined": "/EditorDeRecetas.es.spell:622-749"
+      "defined": "/EditorDeRecetas.es.spell:648-775"
     },
     {
       "syntax": "agregar ingrediente ((de|del) {thisArg:expression})?",
@@ -491,7 +492,7 @@
       "name": "agregar ingrediente",
       "returns": "nothing",
       "title": "Agregar un ingrediente",
-      "defined": "/EditorDeRecetas.es.spell:752-891"
+      "defined": "/EditorDeRecetas.es.spell:778-917"
     },
     {
       "syntax": "agregar paso ((de|del) {thisArg:expression})?",
@@ -506,25 +507,25 @@
       "name": "agregar paso",
       "returns": "nothing",
       "title": "Agregar un paso",
-      "defined": "/EditorDeRecetas.es.spell:894-1005"
+      "defined": "/EditorDeRecetas.es.spell:920-1031"
     },
     {
       "type": "FilaIngrediente",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/EditorDeRecetas.es.spell:2006-3326"
+      "defined": "/EditorDeRecetas.es.spell:2037-3376"
     },
     {
       "property": "ingrediente",
       "of": "FilaIngrediente",
       "datatype": "Ingrediente",
-      "defined": "/EditorDeRecetas.es.spell:2139-2173"
+      "defined": "/EditorDeRecetas.es.spell:2170-2204"
     },
     {
       "property": "editor",
       "of": "FilaIngrediente",
       "datatype": "EditorDeReceta",
-      "defined": "/EditorDeRecetas.es.spell:2175-2209"
+      "defined": "/EditorDeRecetas.es.spell:2206-2240"
     },
     {
       "syntax": "subir {thisArg:expression}?",
@@ -538,7 +539,7 @@
       "kind": "method",
       "name": "subir",
       "returns": "nothing",
-      "defined": "/EditorDeRecetas.es.spell:2212-2496"
+      "defined": "/EditorDeRecetas.es.spell:2243-2527"
     },
     {
       "syntax": "quitar {thisArg:expression}?",
@@ -552,25 +553,25 @@
       "kind": "method",
       "name": "quitar",
       "returns": "nothing",
-      "defined": "/EditorDeRecetas.es.spell:2499-2613"
+      "defined": "/EditorDeRecetas.es.spell:2530-2644"
     },
     {
       "type": "FilaPaso",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/EditorDeRecetas.es.spell:3328-4186"
+      "defined": "/EditorDeRecetas.es.spell:3378-4236"
     },
     {
       "property": "paso",
       "of": "FilaPaso",
       "datatype": "Paso",
-      "defined": "/EditorDeRecetas.es.spell:3449-3469"
+      "defined": "/EditorDeRecetas.es.spell:3499-3519"
     },
     {
       "property": "editor",
       "of": "FilaPaso",
       "datatype": "EditorDeReceta",
-      "defined": "/EditorDeRecetas.es.spell:3471-3505"
+      "defined": "/EditorDeRecetas.es.spell:3521-3555"
     },
     {
       "syntax": "subir {thisArg:expression}?",
@@ -584,7 +585,7 @@
       "kind": "method",
       "name": "subir",
       "returns": "nothing",
-      "defined": "/EditorDeRecetas.es.spell:3508-3778"
+      "defined": "/EditorDeRecetas.es.spell:3558-3828"
     },
     {
       "syntax": "quitar {thisArg:expression}?",
@@ -598,7 +599,7 @@
       "kind": "method",
       "name": "quitar",
       "returns": "nothing",
-      "defined": "/EditorDeRecetas.es.spell:3781-3881"
+      "defined": "/EditorDeRecetas.es.spell:3831-3931"
     }
   ],
   "codeLines": [
@@ -612,56 +613,56 @@
     46,
     52,
     57,
-    158,
-    162,
-    168,
-    173,
-    179,
-    185,
-    191,
-    197,
-    203,
-    270,
-    273,
-    285,
-    304,
+    159,
+    163,
+    169,
+    174,
+    180,
+    186,
+    192,
+    198,
+    204,
+    271,
+    274,
+    286,
     305,
-    310,
-    316,
-    325,
-    330,
-    335,
-    373,
-    388,
-    405,
-    468,
-    543,
-    609,
-    613,
-    619,
-    625,
-    631,
-    638,
-    645,
-    651,
-    660,
-    667,
-    745,
-    749,
-    755,
-    760,
-    766,
-    771,
-    775,
-    822,
-    825,
+    306,
+    311,
+    317,
+    326,
+    331,
+    336,
+    374,
+    389,
+    406,
+    469,
+    544,
+    610,
+    614,
+    620,
+    626,
+    632,
+    639,
+    646,
+    652,
+    661,
+    668,
+    753,
+    757,
+    763,
+    768,
+    774,
+    779,
+    783,
     830,
-    835,
-    844,
-    875,
-    878,
+    833,
+    838,
+    843,
+    852,
     883,
-    888,
-    897
+    886,
+    891,
+    896,
+    905
   ]
 }

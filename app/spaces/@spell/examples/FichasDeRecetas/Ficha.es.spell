@@ -38,14 +38,14 @@ una receta
 						<encabezado tamano="grande">{su título}</encabezado>
 						<action "editar" />
 					</pila>
-					<texto color="gris">Escrita para {sus raciones};  mostrada para {los comensales de fichas}</texto>
+					<texto color="gris">La receta es para {sus raciones} personas.  Estas cantidades son para las {los comensales de fichas} para las que cocinas.</texto>
 					<encabezado tamano="pequeño">Ingredientes</encabezado>
 					<pila separacion="xs">
 						<para cada ingrediente en sus ingredientes />
 					</pila>
 					<pila direccion="horizontal">
 						<boton color="primario" icono="cart plus" desactivado={su total marcados es 0} onClick={agregar los marcados a la lista de la compra}>
-							Agregar {su total marcados} a la lista de la compra
+							Agregar {su total marcados} ingredientes marcados a la lista de la compra
 						</boton>
 					</pila>
 					<encabezado tamano="pequeño">Pasos</encabezado>

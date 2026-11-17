@@ -27,7 +27,7 @@ an ingredient
 		// A box to pick it, how much, and what
 		<form value={it}>
 			<stack direction="horizontal" spacing="sm" class="ingredient">
-				<checkbox name="picked" aria-label="Pick for the shopping list" />
+				<checkbox name="picked" aria-label="Tick to add to the shopping list" />
 				<text bold class="how-much">{the written of its shown}</text>
 				<text>{its name}</text>
 			</stack>

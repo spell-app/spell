@@ -215,7 +215,7 @@
 |   [plain group define_group L1]
 |   | grupo «"Unidades"»
 |   |   [action to_do_something L2]
-|   |   | para «"mostrar métrico"» con título «"Métrico"»
+|   |   | para «"mostrar métrico"» con título «"Gramos y ml"»
 |   |   |   seleccionada cuando sus **unidades** es _métrico_    ‾value(sus unidades)
 |   |   |   poner sus **unidades** a _métrico_    ‾value(sus unidades)
 
@@ -250,6 +250,7 @@
 |   |   |               </⟨campo⟩>
 |   |   |             </⟨formulario⟩>
 |   |   |             <⟨encabezado⟩ tamano=«"pequeño"»>Lista de la compra</⟨encabezado⟩>
+|   |   |             <⟨texto⟩ color=«"gris"» tamano=«"pequeño"»>Los ingredientes marcados van aquí, a la propia lista de la aplicación Lista de la compra</⟨texto⟩>
 |   |   |             {dibujar el **recorrido**}
 |   |   |           </⟨pila⟩>
 |   |   |         </⟨columna⟩>
@@ -271,7 +272,7 @@
 |   |   |   |   dibujar su **elegida**    ‾value(su elegida)
 |   |   |   [control else L3]
 |   |   |   | de lo contrario
-|   |   |   |   <⟨texto⟩ color=«"gris"»>Elige una receta</⟨texto⟩>
+|   |   |   |   <⟨texto⟩ color=«"gris"»>Elige una receta a la izquierda para ver sus ingredientes y pasos.</⟨texto⟩>
 
 ==== /Ingrediente.es.spell
 ⟪# Un ingrediente, escalado y en las unidades de quien cocina⟫
@@ -310,7 +311,7 @@
 |   |   ⟦// Una casilla para marcarlo, cuánto, y qué⟧
 |   |   <⟨formulario⟩ value={eso}>    code({eso})
 |   |     <⟨pila⟩ direccion=«"horizontal"» separacion=«"sm"» class=«"ingredient"»>
-|   |       <⟨casilla⟩ name=«"marcado"» aria-label=«"Marcar para la lista de la compra"» />
+|   |       <⟨casilla⟩ name=«"marcado"» aria-label=«"Marca para añadir a la lista de la compra"» />
 |   |       <⟨texto⟩ negrita class=«"how-much"»>{el **escrito** de su **mostrada**}</⟨texto⟩>    code({el escrito de su mostrada})
 |   |       <⟨texto⟩>{su **nombre**}</⟨texto⟩>    code({su nombre})
 |   |     </⟨pila⟩>
@@ -367,14 +368,14 @@
 |   |           <⟨encabezado⟩ tamano=«"grande"»>{su **título**}</⟨encabezado⟩>    code({su título})
 |   |           <⟨action⟩ «"editar"» />
 |   |         </⟨pila⟩>
-|   |         <⟨texto⟩ color=«"gris"»>Escrita para {sus **raciones**};  mostrada para {los **comensales** de **fichas**}</⟨texto⟩>    code({sus raciones}) code({los comensales de fichas})
+|   |         <⟨texto⟩ color=«"gris"»>La receta es para {sus **raciones**} personas.  Estas cantidades son para las {los **comensales** de **fichas**} para las que cocinas.</⟨texto⟩>    code({sus raciones}) code({los comensales de fichas})
 |   |         <⟨encabezado⟩ tamano=«"pequeño"»>Ingredientes</⟨encabezado⟩>
 |   |         <⟨pila⟩ separacion=«"xs"»>
 |   |           <⟨para⟩ cada ingrediente en sus ingredientes />
 |   |         </⟨pila⟩>
 |   |         <⟨pila⟩ direccion=«"horizontal"»>
 |   |           <⟨boton⟩ color=«"primario"» icono=«"cart plus"» desactivado={su **total marcados** es _0_} onClick={agregar los marcados a la lista de la compra}>    code({su total marcados es 0}) code({agregar los marcados a la lista de la compra})
-|   |             Agregar {su **total marcados**} a la lista de la compra
+|   |             Agregar {su **total marcados**} ingredientes marcados a la lista de la compra
 |   |           </⟨boton⟩>
 |   |         </⟨pila⟩>
 |   |         <⟨encabezado⟩ tamano=«"pequeño"»>Pasos</⟨encabezado⟩>
@@ -414,7 +415,7 @@
 |   |   ⟦// Una copia para cambiar:  la receta queda como estaba hasta Guardar⟧
 
 |   [action to_do_something L1]
-|   | para «"guardar"» con icono «"check"»
+|   | para «"guardar"» con título «"Guardar cambios"», icono «"check"»
 |   |   ⟦// Todos los cambios de una vez, un solo paso para deshacer⟧
 |   |   guardar su **borrador**    ‾value(su borrador)
 |   |   poner la **editada** de **fichas** a indefinido    ‾value(la editada de fichas) ‾value(indefinido)
@@ -448,7 +449,7 @@
 |   |           </⟨campo⟩>
 |   |         </⟨campos⟩>
 |   |         <⟨campo⟩ etiqueta=«"Imagen"»>
-|   |           <⟨entrada⟩ name=«"imagen"» marcador=«"La dirección de una imagen"» />
+|   |           <⟨entrada⟩ name=«"imagen"» marcador=«"Un enlace a una foto (opcional)"» />
 |   |         </⟨campo⟩>
 |   |       </⟨formulario⟩>
 |   |       <⟨encabezado⟩ tamano=«"pequeño"»>Ingredientes</⟨encabezado⟩>
@@ -490,9 +491,9 @@
 |   |   <⟨formulario⟩ value={su **ingrediente**}>    code({su ingrediente})
 |   |     <⟨campos⟩ no-apilable>
 |   |       <⟨campo⟩ ancho=«"2"»><⟨entrada⟩ name=«"cantidad"» type=«"number"» min=«"0"» aria-label=«"Cantidad"» /></⟨campo⟩>
-|   |       <⟨campo⟩ ancho=«"2"»><⟨entrada⟩ name=«"unidad"» marcador=«"Unidad"» aria-label=«"Unidad"» /></⟨campo⟩>
+|   |       <⟨campo⟩ ancho=«"2"»><⟨entrada⟩ name=«"unidad"» marcador=«"g, tazas ..."» aria-label=«"Unidad"» /></⟨campo⟩>
 |   |       <⟨campo⟩ ancho=«"6"»><⟨entrada⟩ name=«"nombre"» marcador=«"Ingrediente"» aria-label=«"Ingrediente"» /></⟨campo⟩>
-|   |       <⟨campo⟩ ancho=«"3"»><⟨entrada⟩ name=«"pasillo"» marcador=«"Pasillo"» aria-label=«"Pasillo"» /></⟨campo⟩>
+|   |       <⟨campo⟩ ancho=«"3"»><⟨entrada⟩ name=«"pasillo"» marcador=«"Pasillo de la tienda"» aria-label=«"Pasillo"» /></⟨campo⟩>
 |   |       <⟨campo⟩ ancho=«"3"»>
 |   |         <⟨pila⟩ direccion=«"horizontal"» separacion=«"xs"»>
 |   |           <⟨action⟩ «"subir"» solo-icono aspecto=«"terciario"» />

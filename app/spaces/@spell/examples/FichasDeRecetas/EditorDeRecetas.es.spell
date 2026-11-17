@@ -8,7 +8,7 @@ un "editor de receta" es una vista
 	su "borrador" es un borrador de su receta
 		// Una copia para cambiar:  la receta queda como estaba hasta Guardar
 
-	para "guardar" con icono "check"
+	para "guardar" con título "Guardar cambios", icono "check"
 		// Todos los cambios de una vez, un solo paso para deshacer
 		guardar su borrador
 		poner la editada de fichas a indefinido
@@ -38,7 +38,7 @@ un "editor de receta" es una vista
 						</campo>
 					</campos>
 					<campo etiqueta="Imagen">
-						<entrada name="imagen" marcador="La dirección de una imagen" />
+						<entrada name="imagen" marcador="Un enlace a una foto (opcional)" />
 					</campo>
 				</formulario>
 				<encabezado tamano="pequeño">Ingredientes</encabezado>
@@ -74,9 +74,9 @@ una "fila-ingrediente" es una vista
 		<formulario value={su ingrediente}>
 			<campos no-apilable>
 				<campo ancho="2"><entrada name="cantidad" type="number" min="0" aria-label="Cantidad" /></campo>
-				<campo ancho="2"><entrada name="unidad" marcador="Unidad" aria-label="Unidad" /></campo>
+				<campo ancho="2"><entrada name="unidad" marcador="g, tazas ..." aria-label="Unidad" /></campo>
 				<campo ancho="6"><entrada name="nombre" marcador="Ingrediente" aria-label="Ingrediente" /></campo>
-				<campo ancho="3"><entrada name="pasillo" marcador="Pasillo" aria-label="Pasillo" /></campo>
+				<campo ancho="3"><entrada name="pasillo" marcador="Pasillo de la tienda" aria-label="Pasillo" /></campo>
 				<campo ancho="3">
 					<pila direccion="horizontal" separacion="xs">
 						<action "subir" solo-icono aspecto="terciario" />
