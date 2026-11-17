@@ -23,8 +23,9 @@ import { CLI } from "spell/cli"
  *   which may be a worktree while `spell` runs from main
  * - `env`:  added to this process's
  */
-export function runTool(spec: CLI.ToolSpec, args: string[], env: NodeJS.ProcessEnv = {}): Promise<number> {
-  const root = CLI.findCheckout(spec.tool)
+export function runTool(_spec: CLI.ToolSpec, args: string[], env: NodeJS.ProcessEnv = {}): Promise<number> {
+  const root = CLI.findCheckout(_spec.tool)
+  const spec = builtTool(_spec, root)
   return runChild(process.execPath, [...toolArgs(spec, root), ...args], {
     cwd: spec.cwd ? join(root, spec.cwd) : process.cwd(),
     env: {
@@ -35,6 +36,33 @@ export function runTool(spec: CLI.ToolSpec, args: string[], env: NodeJS.ProcessE
     }
   })
 }
+
+/**
+ * `spec` as it runs from `root`:  as written in a checkout;
+ * in an npm install of `spell` (no `src/`, its code built into `dist/`), the built `.js` under plain `node`, no `tsx`:
+ * - `src/server/page/cli.ts` => `dist/server/page/cli.js`;  a big folder's, `app/src/x.ts` => `dist/app/x.js`
+ * - why:  the published package ships no source and no `tsconfig`, so `spell server` couldn't start there
+ *   (epic `repo-split` P26);  the epic engine's tools do the same through its `EngineFiles`
+ */
+export function builtTool(spec: CLI.ToolSpec, root: string): CLI.ToolSpec {
+  if (existsSync(join(root, SOURCE_FOLDER)) || !existsSync(join(root, BUILT_FOLDER))) return spec
+  const built = builtPath(spec.tool)
+  if (!built || !existsSync(join(root, built))) return spec
+  const { tsx: _tsx, ...plain } = spec
+  return { ...plain, tool: built }
+}
+
+/** A checkout's source file's place in the published package:  `dist/...`, `.js`;  `undefined` when not source. */
+function builtPath(tool: string): string | undefined {
+  const parts = tool.split("/")
+  const at = parts.indexOf(SOURCE_FOLDER)
+  if (at < 0 || at > 1 || !/\.tsx?$/.test(tool)) return undefined
+  return [BUILT_FOLDER, ...parts.slice(0, at), ...parts.slice(at + 1)].join("/").replace(/\.tsx?$/, ".js")
+}
+
+/** A checkout's source folder, and the published package's built one. */
+const SOURCE_FOLDER = "src"
+const BUILT_FOLDER = "dist"
 
 /**
  * What an engine tool run through checkout `root`'s spell-epic needs to work on THAT checkout, as `epic` tells

@@ -144,6 +144,7 @@ class PeekBox {
     const code = element("div", "cm-peek-code")
     body.append(code)
     if (!peek.locations.length) {
+      box.classList.add("cm-peek-empty")
       code.classList.add("cm-peek-none")
       code.textContent = appTexts.text("cmNoReferences")
     } else this.codeView = new EditorView({ parent: code, root: peek.view.root as Document | ShadowRoot })
@@ -311,12 +312,15 @@ class PeekWidget extends WidgetType {
   }
 
   override get estimatedHeight(): number {
-    return PEEK_HEIGHT
+    return this.box.peek.locations.length ? PEEK_HEIGHT : PEEK_EMPTY_HEIGHT
   }
 }
 
 /** How tall the box is drawn, its head and slice, in px:  `CodeMirrorPeek.css` says the same. */
 const PEEK_HEIGHT = 268
+
+/** How tall the box is drawn with nothing to show, its head and one row of message, in px. */
+const PEEK_EMPTY_HEIGHT = 72
 
 /** The narrowest the box is drawn, in px:  room for some code and the uses. */
 const PEEK_MIN_WIDTH = 480

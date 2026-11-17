@@ -41,6 +41,19 @@ describe("spell's project groups", () => {
   })
 })
 
+describe("a person's space in another org (repo-split P26)", () => {
+  test("is a group found by its address:  its projects open, unlisted", async () => {
+    const { SpellSetup } = await import("spell/parser/spell/SpellSetup")
+    expect(SpellSetup.groupFor("owen@acme/harbor-new")?.path).toBe("owen@acme")
+    expect(SpellSetup.projectRootPaths).not.toContain("owen@acme")
+  })
+  test("never its own folders, nor this machine's person's space", async () => {
+    const { SpellSetup } = await import("spell/parser/spell/SpellSetup")
+    expect(SpellSetup.groupFor("ana@rs/__inbox")).toBeUndefined()
+    expect(SpellSetup.groupFor("owen@spell/errors")?.description).toBe("Your own projects")
+  })
+})
+
 describe("spaces' own names", () => {
   test("are known by spaces' list, never by the `__` alone (J52)", () => {
     for (const name of ["__me.json5", "__org.json5", "__project.json5", "__members", "__pack", "__parts", "__data"])

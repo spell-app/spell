@@ -18,6 +18,32 @@ describe("toolArgs()", () => {
   })
 })
 
+describe("builtTool() (repo-split P26)", () => {
+  // the published spell:  its code built into dist/, no src/
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "built-tool-")))
+  afterAll(() => rmSync(temp, { recursive: true, force: true }))
+  for (const file of ["dist/server/page/cli.js", "dist/app/cli/main.js"]) {
+    mkdirSync(join(temp, "installed", file, ".."), { recursive: true })
+    writeFileSync(join(temp, "installed", file), "")
+  }
+  mkdirSync(join(temp, "checkout", "src"), { recursive: true })
+  const pageServer = { tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" }
+
+  test("an install:  the built .js, under plain node", () => {
+    expect(CLI.builtTool(pageServer, join(temp, "installed"))).toEqual({ tool: "dist/server/page/cli.js" })
+  })
+  test("a big folder's:  under dist/<folder>/", () => {
+    expect(CLI.builtTool({ tool: "app/src/cli/main.ts", tsx: "x" }, join(temp, "installed"))).toEqual({
+      tool: "dist/app/cli/main.js"
+    })
+  })
+  test("a checkout, or a tool the install doesn't ship:  as written", () => {
+    expect(CLI.builtTool(pageServer, join(temp, "checkout"))).toBe(pageServer)
+    const missing = { tool: "src/cli/readme/check.ts", tsx: "x" }
+    expect(CLI.builtTool(missing, join(temp, "installed"))).toBe(missing)
+  })
+})
+
 describe("epicBin()", () => {
   // a kit with its engine folder, epic/, in it, and a folder inside it
   const temp = realpathSync(mkdtempSync(join(tmpdir(), "epic-bin-")))
