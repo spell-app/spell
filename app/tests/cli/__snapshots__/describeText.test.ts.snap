@@ -19,7 +19,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 
 exports[`describeThing() > a property, with its compiled javascript 1`] = `
 "property color of Card
-Card.spell:8
+Card.spell:9
 
 Spell
     its "color" is one of red, black
@@ -57,18 +57,20 @@ Spell
     -- A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
     -- It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
     -- On the page each card is its own element, \`<solitaire-card>\`:  people may drag it (\`draggable\`), when its pile lets it go.
-    group "Card Rank & Suit" -- Ace is low:  ace = 1 ... king = 13
+    group "Card Rank & Suit"
+      -- Ace is low:  ace = 1 ... king = 13
     its "rank" is one of ace, 2 ... 10, jack, queen, king
     its "suit" is one of clubs, diamonds, hearts or spades
     its "color" is one of red, black
       red if it is a diamond or it is a heart
       black otherwise
   
-    group "Aliases"                 -- Spell for identifying cards
-    it "is a face card" if its rank is jack, queen or king
+    group "Aliases"
+      -- Spell for identifying cards
+    it "is a face card" if its rank is jack, queen or king  -- e.g. "the card is a face card"
     it "is a number card" if it is not a face card
     it "is the (rank) of (suit)"  -- e.g. the card is the two of spades
-  
+    
     group "Names"                 -- identifying a card
     its "name" is its rank && "of" && its suit
     its "value" is the position of its rank
@@ -78,7 +80,7 @@ Spell
       "♥" if it is a heart
       "♠" otherwise
     its "short name" is
-      // Its short name:  Q♠↓ is the queen of spades, face down
+      -- Its short name:  Q♠↓ is the queen of spades, face down
       letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
       arrow is "↑" if it is face up otherwise "↓"
       return letter + its symbol + arrow

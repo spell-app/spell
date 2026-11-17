@@ -292,6 +292,37 @@ describe("<ui-toolbar> bar slots", () => {
       expect(rows(narrow.host)).toHaveLength(6)
     })
 
+    it("widened till every item fits but for the button's own room:  the button goes, once, and stays gone (epic `editor` I235)", async () => {
+      const attributes = `${LOOK} max-visible all-items-icon="file outline" all-items-at-end`
+      const { host, menu } = await toolbar(120, items(6), attributes)
+      await expect.poll(() => listButton(host)).not.toBeNull()
+      await ElementFixture.settle()
+      const button = listButton(host)!
+      const room =
+        button.getBoundingClientRect().width + (parseFloat(getComputedStyle(button.parentElement!).columnGap) || 0)
+      // the row short by half the button's room:  it overflowed only because the button was there
+      const width = 120 + menu.scrollWidth - menu.clientWidth - room / 2
+      // each time the button comes or goes
+      const changes: string[] = []
+      new MutationObserver((records) => {
+        for (const record of records) {
+          for (const node of record.removedNodes)
+            if (node === button || (node as Element).part?.contains("all-items")) changes.push("gone")
+          for (const node of record.addedNodes) if ((node as Element).part?.contains("all-items")) changes.push("back")
+        }
+      }).observe(button.parentElement!, { childList: true })
+      host.parentElement!.style.width = `${width}px`
+      await expect.poll(() => listButton(host)).toBeNull()
+      await new Promise((done) => setTimeout(done, 300))
+      await ElementFixture.settle()
+      expect(listButton(host)).toBeNull()
+      expect(changes).toEqual(["gone"])
+      expect(menu.scrollWidth - menu.clientWidth).toBeLessThanOrEqual(1)
+      // narrowed again past that room:  it's back
+      host.parentElement!.style.width = `${width - room}px`
+      await expect.poll(() => listButton(host)).not.toBeNull()
+    })
+
     it("many put away:  the few tabs left stay a row, never the dropdown (epic `editor` I188)", async () => {
       // a site's files, as the editor's file tabs have them:  an icon and a longer name each
       const files = Array.from(

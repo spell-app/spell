@@ -387,7 +387,7 @@ describe('<ui-panel appearance="pane"> scroll shades', () => {
 
   /** A shade's opacity, once its fade is done. */
   async function shade(host: Element, end: "top" | "bottom"): Promise<string> {
-    await vi.waitFor(() => expect(host.shadowRoot!.getAnimations({ subtree: true }).length).toBe(0))
+    await vi.waitFor(() => expect(host.shadowRoot!.getAnimations().length).toBe(0))
     return getComputedStyle(host.shadowRoot!.querySelector(`.${end}.scroll.shade`)!).opacity
   }
 

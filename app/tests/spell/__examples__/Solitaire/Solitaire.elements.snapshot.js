@@ -26,6 +26,7 @@ export class Card extends TwoSidedView {
     return "black"
   }
 
+  /** e.g. "the card is a face card" */
   get isAFaceCard() {
     return core.includes(["jack", "queen", "king"], this.rank)
   }
@@ -372,7 +373,7 @@ export class Solitaire extends App {
     return [
       h("ui-segment", { inverted: true, "attach-to": "top" },
         h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
-          h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
+          h("ui-text", { size: "big", slot: "title", heavy: true }, "Spell Solitaire"),
           core.drawAction(this, "autoPlay", { "in-menu": true }),
           core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
@@ -390,9 +391,9 @@ export class Solitaire extends App {
         h("test-project-foundation", { id: "diamonds" }),
         h("test-project-foundation", { id: "hearts" }),
         h("test-project-foundation", { id: "spades" }),
-        h("test-project-column", { id: "C1" }),
         h("test-project-column", { id: "C2" }),
         h("test-project-column", { id: "C3" }),
+        h("test-project-column", { id: "C1" }),
         h("test-project-column", { id: "C4" }),
         h("test-project-column", { id: "C5" }),
         h("test-project-column", { id: "C6" }),
@@ -433,10 +434,6 @@ export class Solitaire extends App {
   static { this.declareProp("spades", { init: () => new Foundation({ id: "spades", suit: "spades" }), early: true }) }
   get spades() { return this.getProp("spades") }
   set spades(value) { this.setProp("spades", value) }
-  // <column "C1"/>
-  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
-  get C1() { return this.getProp("C1") }
-  set C1(value) { this.setProp("C1", value) }
   // <column "C2"/>
   static { this.declareProp("C2", { init: () => new Column({ id: "C2" }), early: true }) }
   get C2() { return this.getProp("C2") }
@@ -445,6 +442,10 @@ export class Solitaire extends App {
   static { this.declareProp("C3", { init: () => new Column({ id: "C3" }), early: true }) }
   get C3() { return this.getProp("C3") }
   set C3(value) { this.setProp("C3", value) }
+  // <column "C1"/>
+  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
+  get C1() { return this.getProp("C1") }
+  set C1(value) { this.setProp("C1", value) }
   // <column "C4"/>
   static { this.declareProp("C4", { init: () => new Column({ id: "C4" }), early: true }) }
   get C4() { return this.getProp("C4") }
