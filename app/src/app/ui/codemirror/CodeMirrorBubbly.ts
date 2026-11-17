@@ -209,8 +209,9 @@ class BubblyDecorations {
       this.bandLines.add(this.state.doc.lineAt(head.start).from)
     }
     if (!hasBody) return
-    // a block the slice cuts:  its body drawn, its rail not
-    const inside = isShown ? [...rails, { ...indent, partOfSpeech }] : rails
+    // a block the slice cuts:  its body drawn, its rail not;  a group's in its band's colour (I147)
+    const groupOf = block.isGroup ? groupHue(rails) : undefined
+    const inside = isShown ? [...rails, { ...indent, partOfSpeech, groupOf }] : rails
     this.nodes(block.body, inside, isShown && block.isGroup)
     if (!isShown) return
     this.foot(block, indent, rails)
@@ -238,9 +239,10 @@ class BubblyDecorations {
       else this.decorations.stopRail(last, rail)
       return
     }
-    // a group's foot turns out of the rail it hangs on, its parent's:  that rail's colour (its own is under it)
-    const hue = block.isGroup ? (rails.at(-1)?.partOfSpeech ?? block.partOfSpeech) : block.partOfSpeech
-    const foot = new FootWidget(indent.tabs, hue, rails)
+    // a group's foot is its band's colour, as its rail is (I147)
+    const foot = block.isGroup
+      ? new FootWidget(indent.tabs, groupHue(rails), rails, "group")
+      : new FootWidget(indent.tabs, block.partOfSpeech, rails)
     if (above) {
       above.stopped.add(rail)
       above.drop = above.column - indent.tabs
@@ -371,6 +373,14 @@ function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
 function opensWithGroup(block: SP.BubblyBlock): boolean {
   const first = block.body[0]
   return first?.kind === "block" && first.isGroup
+}
+
+/**
+ * The hue of a group's band, in the block whose `rails` it's in:  that block's, as its band takes its line's
+ * (`.bubbly-group` in `bubbly.css`);  plain at the top of a file.
+ */
+function groupHue(rails: Rail[]): string {
+  return rails.at(-1)?.partOfSpeech ?? "plain"
 }
 
 /** `indent`, a tab further out when `isHung`:  where a group's band and rail start. */
@@ -532,13 +542,16 @@ function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
  * - Right above a band, the last row has room under its foot (`--cmb-block-gap`), so the two blocks stand apart
  *   (Owen:  "add some space between the pill blocks";  T141):  in the foot's row, not the band's line,
  *   so the band's fold arrow stays centred on it, and a click there lands where a click on the foot does.
- * - A group's foot is in its parent's hue:  it turns out of the rail the group hangs on, its parent's, drawn over its own.
+ * - A group's foot is its band's colour, as its rail is, drawn over its parent's (Owen, epic `language` I147:
+ *   "This bar and curly should be colored by group, not app";  before, the parent's hue).
  ****************/
 class FootWidget extends WidgetType {
   constructor(
     readonly column: number,
     readonly partOfSpeech: string,
-    readonly rails: Rail[]
+    readonly rails: Rail[],
+    /** a group's foot:  its band's colour, lighter than its hue's other bands (`cmb-group-foot`) */
+    readonly of: "block" | "group" = "block"
   ) {
     super()
   }
@@ -565,6 +578,7 @@ class FootWidget extends WidgetType {
     return (
       other.column === this.column &&
       other.partOfSpeech === this.partOfSpeech &&
+      other.of === this.of &&
       other.drop === this.drop &&
       other.dropsAbove === this.dropsAbove &&
       other.isAboveBand === this.isAboveBand &&
@@ -580,7 +594,7 @@ class FootWidget extends WidgetType {
     if (this.isAboveBand) row.classList.add("cmb-foot-above-band")
 
     const foot = document.createElement("div")
-    foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}`
+    foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}${this.of === "group" ? " cmb-group-foot" : ""}`
     foot.style.setProperty("--cmb-column", String(this.column))
     row.append(foot)
     return row

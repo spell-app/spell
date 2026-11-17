@@ -1681,6 +1681,34 @@
       color-mix(in srgb, var(--bubbly-structure) 20%, white),
       color-mix(in srgb, var(--bubbly-structure) 34%, var(--bubbly-paper-dark))
     );
+    /*
+     * ... and a group's band in each hue, for a group's rail:  the band of the block it's in, as light as a group's band
+     * is (`.bubbly-group.cmb-hue`, below;  Owen, I147:  "This bar and curly should be colored by group, not app")
+     */
+    --cmb-group-thing: light-dark(
+      color-mix(in srgb, var(--bubbly-thing) 13%, white),
+      color-mix(in srgb, var(--bubbly-thing) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-action: light-dark(
+      color-mix(in srgb, var(--bubbly-action) 13%, white),
+      color-mix(in srgb, var(--bubbly-action) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-property: light-dark(
+      color-mix(in srgb, var(--bubbly-property) 13%, white),
+      color-mix(in srgb, var(--bubbly-property) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-plain: light-dark(
+      color-mix(in srgb, var(--bubbly-plain) 13%, white),
+      color-mix(in srgb, var(--bubbly-plain) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-control: light-dark(
+      color-mix(in srgb, var(--bubbly-control) 13%, white),
+      color-mix(in srgb, var(--bubbly-control) 20%, var(--bubbly-paper-dark))
+    );
+    --cmb-group-structure: light-dark(
+      color-mix(in srgb, var(--bubbly-structure) 13%, white),
+      color-mix(in srgb, var(--bubbly-structure) 20%, var(--bubbly-paper-dark))
+    );
     /* a space's width in the drawing's font:  an HTML file's rails start at its lines' indent of spaces;  set too */
     --cmb-space: 0.28em;
     /* the editor's font over the drawing's, for the shared rules of HTML's tags in the text (15px over 16px) */
@@ -1835,7 +1863,8 @@
       );
       --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
     }
-    .bubbly-group.cmb-hue {
+    /* a group's band, and its foot (`cmb-group-foot`):  its hue, as light as on the page (I119, I147) */
+    :is(.bubbly-group, .cmb-group-foot).cmb-hue {
       --bubbly-pill: light-dark(
         color-mix(in srgb, var(--bubbly-hue) 13%, white),
         color-mix(in srgb, var(--bubbly-hue) 20%, var(--bubbly-paper-dark))
