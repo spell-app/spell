@@ -667,11 +667,16 @@ card.turnOver()
       expect(card.getAttribute("direction")).toMatch(/^(up|down)$/)
       expect(card.getAttribute("suit")).toMatch(/^(clubs|diamonds|hearts|spades)$/)
     }
-    // each pile drawn by its tag, `<column "C1"/>`:  its id, its member's name (Owen, 2026-11-12)
-    expect(columns().map((pile) => pile.id)).toEqual(["C1", "C2", "C3", "C4", "C5", "C6", "C7"])
+    // each pile drawn by its tag, `<column "C1"/>`:  its id, its member's name (Owen, 2026-11-12);
+    // in the order Solitaire.spell draws them, which needn't be by name
+    expect(
+      columns()
+        .map((pile) => pile.id)
+        .toSorted()
+    ).toEqual(["C1", "C2", "C3", "C4", "C5", "C6", "C7"])
     // ... and the pile holding it, as that pile's reference (P18):  each column's cards say so
     expect(columns().map((pile) => [...pile.children].map((card) => card.getAttribute("pile")))).toEqual(
-      [1, 2, 3, 4, 5, 6, 7].map((count, index) => Array<string>(count).fill(`Column#C${index + 1}`))
+      columns().map((pile, index) => Array<string>(index + 1).fill(`Column#${pile.id}`))
     )
     expect(stock.lastElementChild!.getAttribute("pile")).toBe("StockPile#stock")
     // ... and each element is named after its thing, by its id (J43):  the inspector says which card it is
