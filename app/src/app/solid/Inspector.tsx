@@ -3918,7 +3918,8 @@ const HALF_ROW = "1/2"
  ****************/
 export function InspectAppButton(props: { id?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
-  const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
+  const title = () =>
+    Inspector.isHelpShown ? undefined : appTexts.text(Inspector.isInspecting ? "stopInspectingTip" : "inspectTip")
   const inspect = () => {
     if (!Inspector.isOpen) Inspector.toggle()
     else if (Inspector.isInspecting) Inspector.stopInspecting()
