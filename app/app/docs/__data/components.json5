@@ -218,6 +218,12 @@
           "kind": "string",
           "shared": true,
           "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
         }
       ],
       "slots": [],
@@ -259,6 +265,10 @@
         {
           "name": "ready",
           "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
       "texts": [],
@@ -477,6 +487,12 @@
           "kind": "string",
           "shared": true,
           "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
         }
       ],
       "slots": [],
@@ -524,6 +540,10 @@
         {
           "name": "ready",
           "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
       "texts": [
@@ -730,6 +750,12 @@
           "kind": "string",
           "shared": true,
           "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
         }
       ],
       "slots": [],
@@ -771,6 +797,10 @@
         {
           "name": "ready",
           "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
       "texts": [],
@@ -1032,6 +1062,12 @@
           "kind": "string",
           "shared": true,
           "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
         }
       ],
       "slots": [],
@@ -1079,6 +1115,10 @@
         {
           "name": "ready",
           "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
       "texts": [
@@ -3075,6 +3115,12 @@
           "kind": "string",
           "shared": true,
           "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
         }
       ],
       "slots": [],
@@ -3125,6 +3171,10 @@
         {
           "name": "ready",
           "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
       "texts": [],
