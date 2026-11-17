@@ -117,6 +117,11 @@ export class PyWriter extends PyBaseWriter {
     if (isCoreCall(node) && node.methodName === "filter" && this.project.waitsInTurn(node)) {
       return `await ${pyText.call("core.filter_in_turn", this.items(node.args.args))}`
     }
+    // the item at a place among those a `where` says yes to, its condition waiting:  each item asked in turn
+    if (isCoreCall(node) && node.methodName === "itemWhere" && this.project.waitsInTurn(node)) {
+      const inTurn = new P.ASTCoreMethodInvocation(node.match, { methodName: "itemWhereInTurn", args: node.args.args })
+      return `await ${super.ASTScopedMethodInvocation(inTurn)}`
+    }
     const written = super.ASTScopedMethodInvocation(node)
     // a read of a place, a dialog:  awaited wherever it's written, as `core.saved_things()` is a coroutine
     if (isCoreCall(node) && CORE_COROUTINES.has(node.methodName)) return `await ${written}`

@@ -1028,6 +1028,45 @@
     },
     {
       "kind": "method",
+      "name": "itemWhere",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "condition"
+        },
+        {
+          "name": "index"
+        }
+      ],
+      "section": "iteration",
+      "description": "The item at `index` among the items `condition` says yes to, asking one item at a time and stopping at the answer: `the first card in the columns where it can play the card`."
+    },
+    {
+      "kind": "method",
+      "name": "itemWhereInTurn",
+      "of": "core",
+      "module": "collection-other",
+      "waits": true,
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "condition"
+        },
+        {
+          "name": "index"
+        }
+      ],
+      "section": "iteration",
+      "description": "As `itemWhere()`, when `condition` waits:  each item asked in turn, its answer waited for."
+    },
+    {
+      "kind": "method",
       "name": "all",
       "of": "core",
       "module": "collection-other",

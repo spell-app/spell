@@ -71,6 +71,14 @@ def test_a_chosen_id_after_names() -> None:
     assert thing_for_reference(f"RefTableau#{made_up.id}", things, KEPT) is None
 
 
+def test_a_members_id_its_words_joined_by_dashes_found_by_its_words_too() -> None:
+    # `"discard pile" is a new pile` compiles to `RefPile(id="discard-pile")` (language T147)
+    discards = RefPile(id="discard-pile")
+    things = [*THINGS, discards]
+    assert thing_for_reference("RefPile#discard-pile", things, KEPT) is discards
+    assert thing_for_reference("RefPile#discard pile", things, KEPT) is discards
+
+
 def test_not_a_reference() -> None:
     assert thing_for_reference("Nope#1", THINGS, KEPT) is None
     assert thing_for_reference("queen of spades", THINGS, KEPT) is None

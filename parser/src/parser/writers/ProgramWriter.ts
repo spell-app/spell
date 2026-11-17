@@ -329,7 +329,10 @@ export abstract class ProgramWriter extends Writer {
     addAtPosition: [undefined, "index"],
     rangeBetween: [undefined, "index", "end"],
     removeRangeBetween: [undefined, "index", "end"],
-    rangeStartingAt: [undefined, "index"]
+    rangeStartingAt: [undefined, "index"],
+    // the item at a place among those a `where` says yes to:  `core.itemWhere(list, condition, 0)`
+    itemWhere: [undefined, undefined, "index"],
+    itemWhereInTurn: [undefined, undefined, "index"]
   }
 
   /** `core`'s helpers that give a position:  what they give is an index -- see `positionOut()`. */
@@ -985,7 +988,16 @@ export abstract class ProgramWriter extends Writer {
   }
 
   /** The `core` helpers that call a function with each item of a list, its first parameter. */
-  static ITEM_LOOPS = new Set(["map", "forEach", "forEachSequential", "filter", "all", "any", "removeWhere"])
+  static ITEM_LOOPS = new Set([
+    "map",
+    "forEach",
+    "forEachSequential",
+    "filter",
+    "all",
+    "any",
+    "removeWhere",
+    "itemWhere"
+  ])
 
   /** Each loop's function, and the list it goes through -- see `noteLoopItems()`. */
   private loopLists = new WeakMap<P.ASTMethodDefinition, P.ASTExpression>()

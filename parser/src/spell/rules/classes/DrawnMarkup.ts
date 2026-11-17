@@ -136,8 +136,8 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
       check.addProp("type", new P.ASTTypeNameLiteral(at, { value: declares.datatype, quote: "'" }))
       return new P.ASTReactiveProperty(at, { type, property: QuotedMember.nameOf(declares.name), check })
     }
-    // its id, the member's name, then its tag's other attributes:  `{ id: "clubs", suit: "clubs" }`
-    const id = new P.ASTStringLiteral(at, { value: declares.name, quote: '"' })
+    // its id, the member's name as one word, then its tag's other attributes:  `{ id: "clubs", suit: "clubs" }`
+    const id = new P.ASTStringLiteral(at, { value: QuotedMember.idOf(declares.name), quote: '"' })
     const props = new P.ASTObjectLiteral(at, {
       properties: [new P.ASTObjectLiteralProperty(at, { property: "id", value: id })]
     })

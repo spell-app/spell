@@ -81,13 +81,16 @@ def thing_named(
     """The first of `things` of class `cls`, or a sub-class, named `name`;  else whose chosen id it is;  else `kept`'s.
 
     - A chosen id counts after every name:  `Tableau(id="T1")` is `Tableau#T1` while nothing is named T1.
+    - Its words joined by `-` match too:  `discard pile` finds the discard pile, whose id is `discard-pile`
+      (language T147).
     """
     listed = list(things)
     for thing in listed:
         if isinstance(thing, cls) and name_of(thing) == name:
             return thing
+    one_word = "-".join(name.split())
     for thing in listed:
-        if isinstance(thing, cls) and chosen_id_of(thing) == name:
+        if isinstance(thing, cls) and chosen_id_of(thing) in (name, one_word):
             return thing
     keeper = (kept or {}).get(name)
     return keeper if isinstance(keeper, cls) else None

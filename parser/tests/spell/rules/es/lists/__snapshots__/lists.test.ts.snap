@@ -4,6 +4,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
 {
   "add_new_thing": "thing",
   "bracketed_list": "list?",
+  "can_do": "operator|call",
   "can_give_up": "operator|expression",
   "can_take": "operator|expression",
   "copy_list": "expression|type?",

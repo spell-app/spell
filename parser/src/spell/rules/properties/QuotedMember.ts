@@ -54,6 +54,17 @@ export class QuotedMember extends P.Rule {
       .join("_")
   }
 
+  /**
+   * The id a member's thing takes, from the member's words as written:  `discard pile` => `discard-pile`, `C1` => `C1`
+   * (language T147).
+   * - Its words joined by `-`, each as written:  an id is one word, as an element's `id` must be.
+   * - What a member made new gets (`"stock" is a new stock pile` => `{ id: "stock" }`), and a drawing's tag naming one
+   *   (`<discard-pile "discard pile"/>` => `id="discard-pile"`):  the two always agree.
+   */
+  static idOf(written: string): string {
+    return written.trim().split(/\s+/).join("-")
+  }
+
   /** A declaration names the member without its quotes, e.g. `short rank`. */
   declaredText(match: P.Match): string {
     return `${match.raw}`
