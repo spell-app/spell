@@ -91,7 +91,7 @@ const OWN_ATTRIBUTES = [
     name: "unsaved",
     kind: "string",
     description:
-      "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its " +
+      "Changes here can't be saved:  each property shows a flask icon after its info icon, this text its " +
       "tip (`<ui-field unsaved>`).  The values still change as they're edited."
   },
   { name: "output", kind: "string", description: 'A value at the end of the title bar;  `slot="output"`.' },

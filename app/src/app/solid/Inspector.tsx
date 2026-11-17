@@ -1205,7 +1205,7 @@ export class Inspector {
   }
 
   /**
-   * Why changes to `part`'s fields can't all be saved, for each field's crossed-out save icon (Q29, Q30):
+   * Why changes to `part`'s fields can't all be saved, for each field's flask icon (Q29, Q30):
    * on This, a thing made in a loop has no line of its own to write to.
    * - Several:  each one's own line is written, and this says some can't be.
    * - `undefined`:  every change can be saved.
@@ -3522,7 +3522,7 @@ function DataSourceNote(props: { thing: object; names: string[] }): JSX.Element 
 function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
   const why = (): NotWritten | undefined => {
-    // a thing made in a loop says so on each field, its crossed-out save icon (`Inspector.unsavedTipOf()`)
+    // a thing made in a loop says so on each field, its flask icon (`Inspector.unsavedTipOf()`)
     // All Cards edits the type's own fields (Q29):  no note that its values come from the code;
     // a one of a kind's type IS it, so a change it can't keep still says why (I183)
     const isOneOfAKind = InspectorWrites.isOneOfAKind(props.part.value)
