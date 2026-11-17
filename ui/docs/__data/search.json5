@@ -1022,7 +1022,7 @@
       "title": "Device",
       "summary": "A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.",
       "tag": "ui-device",
-      "tabs": {"examples":"Examples","usage":"Usage"},
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
       "sections": [
         {"id":"examples-types","title":"Types","tab":"examples"},
         {"id":"examples-types-a-phone","title":"A phone","parent":0},
@@ -1037,14 +1037,14 @@
         {"id":"usage-using-it","title":"Using it","tab":"usage"},
         {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
         {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
-        {"id":"api-attributes","title":"Attributes","tab":"usage"},
-        {"id":"api-events","title":"Events","tab":"usage"},
-        {"id":"api-slots","title":"Slots","tab":"usage"},
-        {"id":"api-parts","title":"Parts","tab":"usage"},
-        {"id":"api-states","title":"States","tab":"usage"},
-        {"id":"api-texts","title":"Texts","tab":"usage"},
-        {"id":"theming-tokens","title":"Tokens","tab":"usage"},
-        {"id":"theming-themes","title":"Themes","tab":"usage"}
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-slots","title":"Slots","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
       ]
     },
     {
