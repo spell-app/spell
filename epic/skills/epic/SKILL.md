@@ -78,6 +78,10 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - a **Net effect** list (`<epic-net-effect>`) closing every question, issue, judgement call and decision
   - NOT caveman (2026-10-04).
   - Replies:  short, the same plain words.
+  - Replies with more than one topic:  a `##` header per topic, never `#` (Owen, 2026-11-17, r75 from epic `language`).
+    - Anything waiting on the person comes FIRST, under `## Waiting on you`:  a page to answer, a modal's question,
+      a pick, with its link pair.
+    - Why:  a page waiting for him, named mid-reply, got missed.
 - Naming a doc in a reply (the epic page, a guide, any docs page):
   paste what `epic pages link` prints, run in the checkout the doc is in.
   - In full:  `epic pages link <ABSOLUTE path> --hash <id> [--text "..."]`.
