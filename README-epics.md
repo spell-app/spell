@@ -30,10 +30,10 @@ _An epic page:  everything on it has a short id, and buttons for answering it._
 
 If you've used a coding agent on anything bigger than a small fix, you've met these:
 - **The reasoning scrolls away.**
-  A ticket says what to do, and goes stale the day the work starts.
-  A pull request shows what was done, not the decisions behind it.
-  The chat in between is gone by morning.
-  An epic page holds all three, during the work and after the merge.
+  An epic page holds what a ticket, a pull request and a chat each hold, during the work and after the merge:
+  - a ticket says what to do, and goes stale the day the work starts
+  - a pull request shows what was done, not the decisions behind it
+  - the chat in between is gone by morning
 - **The agent guesses, or sits waiting for you.**
   Here a question goes on the page, with its options, what each would cost, and the one the agent recommends.
   You answer when you have time.
@@ -54,14 +54,15 @@ What it costs:
 2. **Answer its questions, on the page.**
    Press Choose on the option you want, or leave a note.
 3. **Agree the plan.**
-   Accept Overview once it has understood the job;  it then writes the phases, and you press Accept Phases.
+   Accept Overview once it has understood the job.
+   It then writes the phases, each with its build plan, and one press of Accept Phases agrees them all.
 4. **Let it build.**
-   It works through the phases in its worktree and commits each one.
-   You can go and do something else, or start another epic.
+   Named background agents build each phase in the worktree, commit it, and go straight on to the next agreed one.
+   - The session you typed into stays free to answer you, usually within seconds.
+   - You can go and do something else, or start another epic.
 5. **Review whenever you like.**
-   Every item has buttons:  Approve, Revisit with a note, Do this.
-   Any paragraph takes a comment.
-   Press Send, or wait two minutes for it to send itself, and the agent takes your marks.
+   Every item has buttons (Approve, Revisit with a note, Do this), and any paragraph takes a comment.
+   - Press Send, or leave the page alone for two minutes and it sends itself, and the agent takes your marks.
 6. **Finish.**
    `/epic done` merges the branch, or opens a pull or merge request.
    The worktree goes;  the page stays, as the record.
@@ -99,16 +100,21 @@ It leaves one config file and a block in `.gitignore` in your repo.
 
 Every step, and what each question means:  [Setting epics up](epic/README-setup.md).
 
-Three things to know before you start:
+Four things to know before you start:
 - **Sharing works with GitHub and GitLab.**
   `epic init` makes the team's epic repo with the host's own command:  `gh`, or `glab` ([On GitLab](epic/README-setup.md#on-gitlab)).
   Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
-  The skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
+  Fifteen of the twenty skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
   in VS Code or Cursor, on macOS, Linux or Windows (Cursor, Windows and Linux not yet tried by a person).
   Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](epic/README-teams.md#with-codex).
+- **Already using superpowers?**
+  Both plugins plan, make worktrees and finish, so in an epic's worktree superpowers is told to stand aside for those
+  three jobs;  inside a phase, its test-driven and debugging skills still run.
+  - `epic init` offers to write those words into your repo's agent instructions, which every session reads.
+  - The words, and the flag that skips the question:  [With superpowers](epic/README-config.md#with-superpowers).
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
   `/isolate done`'s merge, and the worktree removed after it.
@@ -116,7 +122,7 @@ Three things to know before you start:
 
 ## See also
 
-- [epic/README-setup.md](epic/README-setup.md):  every step of setting a repo up
-- [epic/README-pages.md](epic/README-pages.md):  a review round, on the page
-- [epic/README-skills.md](epic/README-skills.md):  the commands you type in Claude Code
-- [epic/README-cli.md](epic/README-cli.md):  every `epic` verb
+- [Setting epics up](epic/README-setup.md):  every step of setting a repo up
+- [The pages you review on](epic/README-pages.md):  a review round, on the page
+- [Skills and hooks](epic/README-skills.md):  the commands you type in Claude Code
+- [The `epic` command](epic/README-cli.md):  every `epic` verb

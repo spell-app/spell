@@ -250,7 +250,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
   /**
    * The part menu's rows on `on`:  each one's words, and whether it's greyed, with why.
-   * - Inspect, with parts to pick at its side, is a `<ui-submenu>`:  its words are its `label`, its side menu not read.
+   * - Inspect Other Views, with parts to pick at its side, is a `<ui-submenu>`:  its words are its `label`,
+   *   its side menu not read.
    */
   const menuRows = (on: Page) =>
     on.evaluate(() =>
@@ -276,6 +277,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "-",
       "Show in Code",
       expect.stringMatching(/^Inspect /),
+      "Inspect Other Views",
       "-",
       "Change This..."
     ])
@@ -321,8 +323,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
     await page.mouse.click(card!.x, card!.y, { button: "right" })
     await page.waitForTimeout(500)
-    // a card holds parts of its own, so Inspect is a split row:  its title inspects the card (P31)
-    await page.locator(".PartMenu ui-submenu.InspectRow [part~=title]").first().click()
+    // a card holds parts of its own, so Inspect Other Views is below:  Inspect Card inspects the card (Q37)
+    await page
+      .locator(".PartMenu ui-menu.BarMenuItems > ui-action", { hasText: /^\s*Inspect / })
+      .first()
+      .click()
     await page.waitForTimeout(800)
     const state = await page.evaluate(() => {
       const { Inspector } = window as unknown as {
@@ -331,6 +336,24 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       return { isOpen: Inspector.isOpen, isInspecting: Inspector.isInspecting, count: Inspector.allSelected.length }
     })
     expect(state).toEqual({ isOpen: true, isInspecting: false, count: 1 })
+  })
+
+  test("holding Option swaps Inspect Card for Inspect Other Views;  letting go swaps it back (Q37)", async () => {
+    const [card] = await drawn("ui-card")
+    await page.mouse.click(card!.x, card!.y, { button: "right" })
+    await page.waitForTimeout(500)
+    const inspectRows = async () =>
+      (await menuRows(page)).map((row) => row.title).filter((title) => title.startsWith("Inspect "))
+    expect(await inspectRows()).toEqual([expect.stringMatching(/^Inspect (?!Other)/), "Inspect Other Views"])
+    await page.keyboard.down("Alt")
+    await page.waitForTimeout(200)
+    expect(await inspectRows()).toEqual(["Inspect Other Views"])
+    await page.keyboard.up("Alt")
+    await page.waitForTimeout(200)
+    expect(await inspectRows()).toEqual([expect.stringMatching(/^Inspect (?!Other)/), "Inspect Other Views"])
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(300)
+    expect(await page.locator(".PartMenu").count()).toBe(0)
   })
 
   test("the background is the app:  only Copy, Paste, Show in Code and Inspect;  its tooltips say why", async () => {
@@ -565,6 +588,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "-",
       "Show in Code",
       expect.stringMatching(/^Inspect /),
+      "Inspect Other Views",
       "-",
       "Change This..."
     ])
@@ -739,7 +763,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("Inspect Card:  its title inspects the card;  its right end lists every part under the mouse, which rings and selects (P31)", async () => {
+  test("Inspect Card inspects the card;  Inspect Other Views lists every part under the mouse, which rings and selects (P31, Q37)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -768,6 +792,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       const { x, y, width, height } = card.getBoundingClientRect()
       return { x: x + width / 2, y: y + height / 2 }
     })
+    const inspectCard = other.locator("ui-popup.PartMenu ui-menu.BarMenuItems > ui-action", { hasText: /^\s*Inspect / })
     const inspectRow = other.locator("ui-popup.PartMenu ui-submenu.InspectRow")
     /** What's selected last, as the card or its picture. */
     const selected = () =>
@@ -782,19 +807,20 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         return { which, count: Inspector.allSelected.length, isOpen: Inspector.isOpen }
       })
 
-    // its row names the card's type;  a click on its title inspects the card
+    // its first row names the card's type, and inspects the card;  Inspect Other Views is below it
     await other.mouse.click(at.x, at.y, { button: "right" })
     await other.waitForTimeout(600)
-    expect(await inspectRow.getAttribute("label")).toBe("Inspect Card")
-    await inspectRow.locator("[part~=title]").first().click()
+    expect((await inspectCard.first().textContent())!.trim()).toMatch(/^Inspect Card/)
+    expect(await inspectRow.getAttribute("label")).toBe("Inspect Other Views")
+    await inspectCard.first().click()
     await other.waitForTimeout(800)
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
     expect(await selected()).toEqual({ which: "card", count: 1, isOpen: true })
 
-    // its right end:  every part under the mouse, outermost first, the card's picture inside it
+    // Inspect Other Views:  every part under the mouse, outermost first, the card's picture inside it
     await other.mouse.click(at.x, at.y, { button: "right" })
     await other.waitForTimeout(600)
-    await inspectRow.locator("[part~=chevron]").first().hover()
+    await inspectRow.locator("[part~=title]").first().hover()
     await other.waitForTimeout(600)
     expect(await inspectRow.evaluate((row) => row.matches(":state(open)"))).toBe(true)
     const rows = await inspectRow.locator(":scope > ui-action").evaluateAll((actions) =>
@@ -831,7 +857,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await selected()).toEqual({ which: "solitaire-card-image", count: 1, isOpen: true })
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
 
-    // on the app's background, nothing under it but the app:  a plain row
+    // on the app's background, nothing under it but the app:  Inspect alone, no Inspect Other Views
     const area = (await other.locator(".AppPaneBody").boundingBox())!
     await other.mouse.click(area.x + area.width - 12, area.y + area.height - 12, { button: "right" })
     await other.waitForTimeout(600)
@@ -850,7 +876,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.mouse.move(at.x, at.y)
     await other.mouse.down()
     await other.waitForTimeout(900)
-    expect(await inspectRow.getAttribute("label")).toBe("Inspect Card")
+    expect((await inspectCard.first().textContent())!.trim()).toMatch(/^Inspect Card/)
     await other.mouse.up()
     await other.waitForTimeout(300)
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(1)

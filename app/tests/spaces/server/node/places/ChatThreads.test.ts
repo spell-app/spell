@@ -33,6 +33,9 @@ const ORGANIZERS = "events_team@rs/__private"
 /** How many messages the busy thread takes, one after another, from one page. */
 const BUSY_MESSAGES = 200
 
+/** The most a busy thread's message may take, on average, in ms:  well under a second, for a busy evening. */
+const MOST_PER_MESSAGE_MS = 250
+
 const root = mkdtempSync(join(tmpdir(), "spell-chat-threads-"))
 const storage = new DiskStorage(root)
 const folders = new SpaceFolders({
@@ -181,18 +184,23 @@ describe("an ad-hoc thread in the org's shared space", () => {
 })
 
 describe("a busy thread", () => {
-  test(`${BUSY_MESSAGES} messages from one page, one after another, each landing by its writer`, async () => {
-    const vic = roomOf("vic", OPEN)
-    await vic.list("messages", {}, {})
-    const started = performance.now()
-    for (let index = 0; index < BUSY_MESSAGES; index++) {
-      const fields = { text: `Message ${index}`, sent: "2026-11-07" }
-      await vic.apply([{ kind: "insert", collection: "messages", id: `busy-${index}`, fields }], {})
+  test(
+    `${BUSY_MESSAGES} messages from one page, one after another, each landing by its writer`,
+    { timeout: BUSY_MESSAGES * MOST_PER_MESSAGE_MS },
+    async () => {
+      const vic = roomOf("vic", OPEN)
+      await vic.list("messages", {}, {})
+      const started = performance.now()
+      for (let index = 0; index < BUSY_MESSAGES; index++) {
+        const fields = { text: `Message ${index}`, sent: "2026-11-07" }
+        await vic.apply([{ kind: "insert", collection: "messages", id: `busy-${index}`, fields }], {})
+      }
+      const took = performance.now() - started
+      const { rows } = await vic.list("messages", {}, {})
+      expect(rows.filter((row) => `${row.id}`.startsWith("busy-"))).toHaveLength(BUSY_MESSAGES)
+      // the one writer keeps up with a busy evening;  the test's time is this budget, not Vitest's 5s:
+      // about 4ms a message alone, it took over 25ms in the kit's full run (epic `epic-engine` I326)
+      expect(took / BUSY_MESSAGES).toBeLessThan(MOST_PER_MESSAGE_MS)
     }
-    const took = performance.now() - started
-    const { rows } = await vic.list("messages", {}, {})
-    expect(rows.filter((row) => `${row.id}`.startsWith("busy-"))).toHaveLength(BUSY_MESSAGES)
-    // the one writer keeps up with a busy evening:  well under a second a message
-    expect(took / BUSY_MESSAGES).toBeLessThan(250)
-  })
+  )
 })
