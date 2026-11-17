@@ -239,7 +239,7 @@ class BubblyDecorations {
     // folded:  its head alone, a pill with the fold's `…` in its end;  nothing of its hidden body (I116)
     const isFolded = isShown && this.decorations.isFoldedAt(head.start)
     const hasBody = !isFolded && block.body.some((node) => node.kind !== "gap")
-    this.decorations.line(head.start, rails, [...(isShown ? ["cmb-head"] : []), ...(isInGroup ? [IN_GROUP] : [])])
+    this.decorations.line(head.start, rails, [...(isShown ? [HEAD] : []), ...(isInGroup ? [IN_GROUP] : [])])
     // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it (I113)
     const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
     const indent = hung(this.decorations.indentAt(head.start), isHung)
@@ -490,23 +490,43 @@ function blankLinesDrawn(decorations: DecorationSet, transaction: Transaction, h
 }
 
 /**
- * `decorations`, the marks running onto each of `lines` from the line above ended at that line's end.
- * - Enter at the end of a line whose last mark holds its end, a quoted name's (`to "reset the stock"`):
- *   the mark grew with the line break, so the new line was drawn inside the name's pill till the layout came.
+ * `decorations`, with what moved onto each of `lines` from the line above put back on it.
+ * - Enter at the end of a line puts the new line between that line and what was drawn at its end:
+ *   - a mark holding its end, a quoted name's (`to "reset the stock"`), grew with the line break, so the new line was
+ *     drawn inside the name's pill:  it ends at the line's end again
+ *   - what's drawn after its end (a tag's foot, a block's feet) moved down onto the new line, its caret pushed right:
+ *     back at the line's end
+ * - A words' place left anywhere but a blank line's end goes (`WordsPlace`), as a line left blank again keeps one at
+ *   its start:  `blankLineLook()` places its own.
  */
 function clippedAbove(decorations: DecorationSet, lines: readonly Line[]): DecorationSet {
+  const blanks = lines.filter((line) => !line.text.trim() && line.number > 1)
   const lineCrossedInto = (from: number, to: number, value: Decoration) =>
     value.point ? undefined : lines.find((line) => from < line.from && to >= line.from)
-  const kept: Range<Decoration>[] = []
+  // a words' place at a blank line's end is its own
+  const blankHolding = (from: number, value: Decoration) =>
+    value.spec.widget
+      ? blanks.find(
+          (line) =>
+            line.from <= from && from <= line.to && !(value.spec.widget instanceof WordsPlace && from === line.to)
+        )
+      : undefined
+  const putBack: Range<Decoration>[] = []
   let isAny = false
-  decorations.between(lines[0]!.from - 1, lines.at(-1)!.from, (from, to, value) => {
-    const line = lineCrossedInto(from, to, value)
-    if (!line) return
+  decorations.between(lines[0]!.from - 1, lines.at(-1)!.to, (from, to, value) => {
+    const crossed = lineCrossedInto(from, to, value)
+    const blank = blankHolding(from, value)
+    if (!crossed && !blank) return
     isAny = true
-    if (line.from - 1 > from) kept.push(value.range(from, line.from - 1))
+    if (crossed && crossed.from - 1 > from) putBack.push(value.range(from, crossed.from - 1))
+    if (blank && !(value.spec.widget instanceof WordsPlace) && from === to) putBack.push(value.range(blank.from - 1))
   })
   if (!isAny) return decorations
-  return decorations.update({ filter: (from, to, value) => !lineCrossedInto(from, to, value), add: kept, sort: true })
+  return decorations.update({
+    filter: (from, to, value) => !lineCrossedInto(from, to, value) && !blankHolding(from, value),
+    add: putBack,
+    sort: true
+  })
 }
 
 /**
@@ -524,7 +544,7 @@ function blankLineLook(decorations: DecorationSet, doc: Doc, line: Line, hiddenI
   const previous = nonBlankLine(doc, line.number, -1)
   // a typed `<` starts at its indent:  on a blank line right above a drawing's tags, or among them
   if (isBlankLine && next && isTagText(next.text)) return []
-  if (previous && isTagText(previous.text) && indentOf(previous).length <= indent.length) return []
+  if (isInDrawing(decorations, doc, line, indent)) return []
   // in a group's body:  as its own empty line was, else as the line beside it on its level, or right under its head
   const sibling = [next, previous].find((it) => it && indentOf(it) === indent)
   const isGroupLine =
@@ -534,6 +554,26 @@ function blankLineLook(decorations: DecorationSet, doc: Doc, line: Line, hiddenI
   if (isGroupLine) return [Decoration.line({ class: GROUP_LINE }).range(line.from)]
   const room = Decoration.mark({ class: PLAIN_INDENT }).range(shownFrom, shownTo)
   return isBlankLine ? [room, WordsPlace.decoration.range(line.to)] : [room]
+}
+
+/**
+ * Is `line`, at `indent`, among a drawing's lines, as the layout draws them from a drawing's first tag to the next
+ * block (`BubblyDecorations.markup()`):  after a tag on its own level, or under a tag (its children, a laid-out tag's
+ * attributes)?
+ * - Up through the lines above, out from its level:  those further in are inside something, and skipped;
+ *   a tag says yes, a head (`cmb-head`) no;  any other line (a tag's attribute, a step among the tags) goes on up,
+ *   from its own level.
+ */
+function isInDrawing(decorations: DecorationSet, doc: Doc, line: Line, indent: string): boolean {
+  let level = indent.length
+  for (let above = nonBlankLine(doc, line.number, -1); above; above = nonBlankLine(doc, above.number, -1)) {
+    const its = indentOf(above).length
+    if (its > level) continue
+    if (isTagText(above.text)) return true
+    if (hasClassAt(decorations, above.from, above.from, HEAD)) return false
+    level = its
+  }
+  return false
 }
 
 /** `line`'s indent:  its leading tabs and spaces. */
@@ -580,6 +620,9 @@ function nonBlankLine(doc: Doc, number: number, way: 1 | -1): Line | undefined {
 function isTagText(text: string): boolean {
   return text.trimStart().startsWith("<")
 }
+
+/** A head's line:  a declaration's or a control line's, a band on it. */
+const HEAD = "cmb-head"
 
 /** A plain body line's room after its tabs (`BubblyDecorations.plainIndent()`). */
 const PLAIN_INDENT = "cmb-plain-indent"

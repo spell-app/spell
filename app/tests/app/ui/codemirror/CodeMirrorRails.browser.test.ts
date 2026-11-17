@@ -573,7 +573,17 @@ describe("a body's rail under the caret", () => {
     })
 
     test("every blank line Enter could make, after every line:  at once where the layout puts it", async () => {
-      const view = await bubblyEditorOf(EMPTIES.replaceAll("\n\n", "\n"))
+      // and a drawing's laid-out tag, its attributes on lines of their own (I133)
+      for (const sample of [EMPTIES.replaceAll("\n\n", "\n"), LAID_OUT]) {
+        view?.dom.parentElement?.remove()
+        view?.destroy()
+        await everyBlankLineIn(await bubblyEditorOf(sample))
+      }
+      // each blank line waits for its layout:  about 50 of them
+    }, 60_000)
+
+    /** Each blank line Enter could make in `view`'s text, after each line:  drawn at once where the layout puts it. */
+    async function everyBlankLineIn(view: EditorView) {
       const lines = view.state.doc.lines
       for (let number = 1; number < lines; number++) {
         // the next line's indent, as the caret's snap writes it;  a level in from the line's, as Enter after a head
@@ -591,7 +601,7 @@ describe("a body's rail under the caret", () => {
           await new Promise((done) => setTimeout(done, CodeMirrorBubbly.RELAYOUT_MSEC + 50))
         }
       }
-    })
+    }
   })
 
   /**
