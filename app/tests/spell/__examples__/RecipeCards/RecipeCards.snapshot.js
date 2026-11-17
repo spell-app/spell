@@ -800,13 +800,15 @@ export class RecipeEditor extends View {
   }
 
   drawIngredientRows() {
-    // A row of fields for each ingredient on the draft
-    return core.drawEach(this.draft.ingredients, (one) => core.drawThing(new IngredientRow({ editor: one, ingredient: one })))
+    /** A row of fields for each ingredient on the draft */
+    const thisEditor = this
+    return core.drawEach(this.draft.ingredients, (one) => core.drawThing(new IngredientRow({ editor: thisEditor, ingredient: one })))
   }
 
   drawStepRows() {
-    // A box for each step on the draft
-    return core.drawEach(this.draft.steps, (one) => core.drawThing(new StepRow({ editor: one, step: one })))
+    /** A box for each step on the draft */
+    const thisEditor = this
+    return core.drawEach(this.draft.steps, (one) => core.drawThing(new StepRow({ editor: thisEditor, step: one })))
   }
 }
 

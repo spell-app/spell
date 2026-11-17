@@ -538,13 +538,15 @@
 |   [action draw_it L1]
 |   | to **draw** its **ingredient rows**
 |   |   ⟦// A row of fields for each ingredient on the draft⟧
+|   |   set **this editor** to it    ‾value(this editor) ‾value(it)
 |   |   [control list_iteration L2]
 |   |   | for **one** in its **draft's ingredients**    ‾value(its draft's ingredients)
-|   |   |   draw (**a new ingredient row** with **editor** = it, **ingredient** = **one**)    ‾value(a new ingredient row with editor = it, ingredient = one)
+|   |   |   draw (**a new ingredient row** with **editor** = **this editor**, **ingredient** = **one**)    ‾value(a new ingredient row with editor = this editor, ingredient = one)
 
 |   [action draw_it L1]
 |   | to **draw** its **step rows**
 |   |   ⟦// A box for each step on the draft⟧
+|   |   set **this editor** to it    ‾value(this editor) ‾value(it)
 |   |   [control list_iteration L2]
 |   |   | for **one** in its **draft's steps**    ‾value(its draft's steps)
-|   |   |   draw (**a new step row** with **editor** = it, **step** = **one**)    ‾value(a new step row with editor = it, step = one)
+|   |   |   draw (**a new step row** with **editor** = **this editor**, **step** = **one**)    ‾value(a new step row with editor = this editor, step = one)
