@@ -1,0 +1,55 @@
+# Tres recetas para empezar
+// Se añaden la primera vez que se abre Fichas de recetas, mientras su archivo no tiene ninguna:  cámbialas o añade las tuyas.
+// Las imágenes se dibujaron para este ejemplo y son de uso libre:  están en la carpeta pictures de Recipe Cards.
+
+para agregar la sopa de tomate
+	poner sopa a una nueva receta con título "Sopa de Tomate", raciones = 4, imagen = "/spaces/@spell/examples/RecipeCards/pictures/tomato-soup.svg"
+	agregar (un nuevo ingrediente con cantidad = 1, unidad = "kg", nombre "tomates maduros", pasillo "Frutas y verduras") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 1, nombre "cebolla", pasillo "Frutas y verduras") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 2, unidad = "dientes", nombre "ajo", pasillo "Frutas y verduras") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 2, unidad = "cda", nombre "aceite de oliva", pasillo "Aceites y especias") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 500, unidad = "ml", nombre "caldo de verduras", pasillo "Latas y conservas") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 1, unidad = "cdta", nombre "azúcar", pasillo "Repostería") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 15, unidad = "g", nombre "albahaca fresca", pasillo "Frutas y verduras") a ingredientes de sopa
+	agregar (un nuevo ingrediente con cantidad = 100, unidad = "ml", nombre "nata líquida", pasillo "Lácteos") a ingredientes de sopa
+	agregar (un nuevo paso con instrucción "Calienta el horno a 200 °C.  Corta los tomates por la mitad y ásalos 30 minutos con la cebolla, en cuartos, y el ajo.") a pasos de sopa
+	agregar (un nuevo paso con instrucción "Calienta el aceite en una olla grande y echa todo lo de la bandeja del horno.") a pasos de sopa
+	agregar (un nuevo paso con instrucción "Vierte el caldo, añade el azúcar y cuece a fuego lento 10 minutos.") a pasos de sopa
+	agregar (un nuevo paso con instrucción "Tritura hasta que quede fino, con casi toda la albahaca.  Sazona con sal y pimienta.") a pasos de sopa
+	agregar (un nuevo paso con instrucción "Sirve con un chorrito de nata y el resto de la albahaca por encima.") a pasos de sopa
+	agregar sopa a las recetas
+
+para agregar el dal de lentejas rojas
+	poner dal a una nueva receta con título "Dal de Lentejas Rojas", raciones = 4, imagen = "/spaces/@spell/examples/RecipeCards/pictures/red-lentil-dal.svg"
+	agregar (un nuevo ingrediente con cantidad = 250, unidad = "g", nombre "lentejas rojas", pasillo "Arroz y legumbres", gramos taza = 190) a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 1, nombre "cebolla", pasillo "Frutas y verduras") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 3, unidad = "dientes", nombre "ajo", pasillo "Frutas y verduras") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 20, unidad = "g", nombre "jengibre fresco", pasillo "Frutas y verduras") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 1, unidad = "cda", nombre "aceite vegetal", pasillo "Aceites y especias") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 2, unidad = "cdta", nombre "semillas de comino", pasillo "Aceites y especias") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 1, unidad = "cdta", nombre "cúrcuma molida", pasillo "Aceites y especias") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 400, unidad = "g", nombre "tomate troceado", pasillo "Latas y conservas") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 400, unidad = "ml", nombre "leche de coco", pasillo "Latas y conservas") a ingredientes de dal
+	agregar (un nuevo ingrediente con cantidad = 1, nombre "lima", pasillo "Frutas y verduras") a ingredientes de dal
+	agregar (un nuevo paso con instrucción "Enjuaga las lentejas hasta que el agua salga limpia.") a pasos de dal
+	agregar (un nuevo paso con instrucción "Fríe las semillas de comino en el aceite hasta que crepiten, y luego la cebolla, picada, hasta que esté blanda.") a pasos de dal
+	agregar (un nuevo paso con instrucción "Añade el ajo y el jengibre, rallados, y la cúrcuma, y remueve un minuto.") a pasos de dal
+	agregar (un nuevo paso con instrucción "Añade las lentejas, el tomate, la leche de coco y 500 ml de agua.  Cuece a fuego lento 25 minutos, removiendo de vez en cuando.") a pasos de dal
+	agregar (un nuevo paso con instrucción "Exprime la lima, sazona con sal y sirve con arroz.") a pasos de dal
+	agregar dal a las recetas
+
+para agregar las tortitas
+	poner tortitas a una nueva receta con título "Tortitas de Arándanos", raciones = 4, imagen = "/spaces/@spell/examples/RecipeCards/pictures/pancakes.svg"
+	agregar (un nuevo ingrediente con cantidad = 200, unidad = "g", nombre "harina de trigo", pasillo "Repostería", gramos taza = 125) a ingredientes de tortitas
+	agregar (un nuevo ingrediente con cantidad = 2, unidad = "cdta", nombre "levadura química", pasillo "Repostería") a ingredientes de tortitas
+	agregar (un nuevo ingrediente con cantidad = 1, unidad = "cda", nombre "azúcar", pasillo "Repostería") a ingredientes de tortitas
+	agregar (un nuevo ingrediente con cantidad = 2, nombre "huevos", pasillo "Lácteos") a ingredientes de tortitas
+	agregar (un nuevo ingrediente con cantidad = 300, unidad = "ml", nombre "leche", pasillo "Lácteos") a ingredientes de tortitas
+	agregar (un nuevo ingrediente con cantidad = 30, unidad = "g", nombre "mantequilla", pasillo "Lácteos") a ingredientes de tortitas
+	agregar (un nuevo ingrediente con cantidad = 150, unidad = "g", nombre "arándanos", pasillo "Frutas y verduras") a ingredientes de tortitas
+	agregar (un nuevo paso con instrucción "Bate la harina, la levadura, el azúcar y una pizca de sal en un bol.") a pasos de tortitas
+	agregar (un nuevo paso con instrucción "Derrite la mantequilla.  Bátela con los huevos y la leche, y luego mézclala con la harina hasta que quede lisa.") a pasos de tortitas
+	agregar (un nuevo paso con instrucción "Calienta una sartén a fuego medio, con un poco de mantequilla.") a pasos de tortitas
+	agregar (un nuevo paso con instrucción "Vierte un cucharón pequeño de masa, esparce unos arándanos y cocina hasta que salgan burbujas.  Dale la vuelta y cocina un minuto más.") a pasos de tortitas
+	agregar (un nuevo paso con instrucción "Mantenlas calientes mientras cocinas el resto, y sírvelas con sirope de arce.") a pasos de tortitas
+	agregar tortitas a las recetas

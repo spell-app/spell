@@ -1,0 +1,37 @@
+## Fichas de recetas:  dónde se guardan las recetas
+// En un archivo JSON, en la propia carpeta de este ejemplo:  __data/recetas.json.
+// JSON simple que abre cualquier editor, { "recetas": [...] }:  cada receta entera, con sus ingredientes y pasos dentro.
+// El servidor de páginas lo escribe, el archivo entero cada vez que se guarda;  todos los que usan ese servidor de páginas comparten las recetas.
+// La lista de la compra no está aquí:  es de Lista de la compra, en su archivo CSV, que este proyecto importa (__project.json5).
+recetario es un archivo json en "recetas.json"
+	se revisa cada 30 segundos
+
+una "receta" es una vista
+	vive en recetario
+	su "título" es texto
+	sus "raciones" es un número
+		// Para cuántas personas está escrita:  las cantidades son para ese número
+	su "imagen" es texto
+		// La dirección de una imagen:  una de la carpeta de imágenes de este ejemplo, o cualquiera de la web
+	sus "ingredientes" es una lista de ingredientes
+		// Lo que lleva, en orden:  se guarda dentro de la receta
+	sus "pasos" es una lista de pasos
+		// Lo que hay que hacer, en orden:  se guarda dentro de la receta
+
+un "ingrediente" es una vista
+	// Una línea de una receta:  cuánto, de qué, y dónde está en la tienda
+	su "cantidad" es un número
+		// Para el número de personas de la propia receta;  nada para "una pizca" o "al gusto"
+	su "unidad" es texto
+		// "g", "ml", "cda", "tazas" ...;  nada para una cuenta, 2 huevos
+	su "nombre" es texto
+	su "pasillo" es texto
+		// Dónde está en la tienda, para la lista de la compra
+	su "gramos taza" es un número
+		// Cuánto pesa una taza, para mostrar los gramos como tazas:  harina 125, azúcar 200;  nada para la mayoría de las cosas
+	su "marcado" es sí o no
+		// Marcado, para ir a la lista de la compra
+
+un "paso" es una vista
+	// Una cosa que hacer
+	su "instrucción" es texto

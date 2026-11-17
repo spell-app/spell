@@ -1,0 +1,552 @@
+==== /FichasDeRecetas.api.es.spell
+⟪## Fichas de recetas:  dónde se guardan las recetas⟫
+⟦// En un archivo JSON, en la propia carpeta de este ejemplo:  __data/recetas.json.⟧
+⟦// JSON simple que abre cualquier editor, { "recetas": [...] }:  cada receta entera, con sus ingredientes y pasos dentro.⟧
+⟦// El servidor de páginas lo escribe, el archivo entero cada vez que se guarda;  todos los que usan ese servidor de páginas comparten las recetas.⟧
+⟦// La lista de la compra no está aquí:  es de Lista de la compra, en su archivo CSV, que este proyecto importa (__project.json5).⟧
+[thing create_place L0]
+| «recetario» es un archivo json en «"recetas.json"»
+|   se revisa cada _30_ segundos    ‾quantity(30 segundos)
+
+[thing create_type L0]
+| una «"receta"» es una **vista**
+|   vive en **recetario**    ‾value(recetario)
+|   [property define_property_has L1]
+|   | su «"título"» es **texto**
+|   [property define_property_has L1]
+|   | sus «"raciones"» es un **número**
+|   |   ⟦// Para cuántas personas está escrita:  las cantidades son para ese número⟧
+|   [property define_property_has L1]
+|   | su «"imagen"» es **texto**
+|   |   ⟦// La dirección de una imagen:  una de la carpeta de imágenes de este ejemplo, o cualquiera de la web⟧
+|   [property define_property_has L1]
+|   | sus «"ingredientes"» es una lista de **ingredientes**
+|   |   ⟦// Lo que lleva, en orden:  se guarda dentro de la receta⟧
+|   [property define_property_has L1]
+|   | sus «"pasos"» es una lista de **pasos**
+|   |   ⟦// Lo que hay que hacer, en orden:  se guarda dentro de la receta⟧
+
+[thing create_type L0]
+| un «"ingrediente"» es una **vista**
+|   ⟦// Una línea de una receta:  cuánto, de qué, y dónde está en la tienda⟧
+|   [property define_property_has L1]
+|   | su «"cantidad"» es un **número**
+|   |   ⟦// Para el número de personas de la propia receta;  nada para "una pizca" o "al gusto"⟧
+|   [property define_property_has L1]
+|   | su «"unidad"» es **texto**
+|   |   ⟦// "g", "ml", "cda", "tazas" ...;  nada para una cuenta, 2 huevos⟧
+|   [property define_property_has L1]
+|   | su «"nombre"» es **texto**
+|   [property define_property_has L1]
+|   | su «"pasillo"» es **texto**
+|   |   ⟦// Dónde está en la tienda, para la lista de la compra⟧
+|   [property define_property_has L1]
+|   | su «"gramos taza"» es un **número**
+|   |   ⟦// Cuánto pesa una taza, para mostrar los gramos como tazas:  harina 125, azúcar 200;  nada para la mayoría de las cosas⟧
+|   [property define_property_has L1]
+|   | su «"marcado"» es sí o no
+|   |   ⟦// Marcado, para ir a la lista de la compra⟧
+
+[thing create_type L0]
+| un «"paso"» es una **vista**
+|   ⟦// Una cosa que hacer⟧
+|   [property define_property_has L1]
+|   | su «"instrucción"» es **texto**
+
+==== /Medidas.es.spell
+⟪# Medidas:  una cantidad en las unidades del cocinero⟫
+⟦// Métrico (gramos y mililitros), o tazas y cucharas:  la misma cantidad, mostrada de cualquier forma.⟧
+⟦// Los tamaños de las unidades son las medidas propias de Spell, p. ej. "1 taza en ml" es 236.6.⟧
+⟦// Los gramos y las cuentas se muestran enteros;  las tazas y cucharas al cuarto más cercano, "1 1/2".⟧
+
+[thing create_type L0]
+| una «"medida"» es una **cosa**
+|   ⟦// Cuánto, y en qué:  lo que muestra un ingrediente, y lo que va en la lista de la compra⟧
+|   [property define_property_has L1]
+|   | su «"número"» es un **número**
+|   [property define_property_has L1]
+|   | su «"unidad"» es **texto**
+|   [property property_value_getter L1]
+|   | su «"escrito"» es
+|   |   ⟦// Como lo escribe un cocinero:  "200 g", "1 1/2 tazas", "2"⟧
+|   |   si su **número** es indefinido o su **número** es _0_ devolver _""_    ‾question(su número es indefinido) ‾value(su número)
+|   |   si su **unidad** es _""_ devolver escribir su **número** para un cocinero    ‾value(su unidad) ‾call(escribir su número para un cocinero)
+|   |   si su **unidad** es _"tazas"_ y su **número** <= _1_ devolver (escribir su **número** para un cocinero) && _"taza"_    ‾value(su unidad) ‾value(su número) ‾call(escribir su número para un cocinero)
+|   |   devolver (escribir su **número** para un cocinero) && su **unidad**    ‾call(escribir su número para un cocinero) ‾value(su unidad)
+
+[action to_do_something L0]
+| para «medir (cantidad como número) en (unidad como texto)»    ‾value(cantidad como número) ‾value(unidad como texto) bold(cantidad) bold(número) bold(unidad) bold(texto)
+|   ⟦// Enteros:  gramos, mililitros, cuentas⟧
+|   devolver **una nueva medida** con **número** = redondear **cantidad**, **unidad** = **unidad**    ‾value(una nueva medida con número = redondear cantidad, unidad = unidad)
+
+[action to_do_something L0]
+| para «medir (cantidad como número) al cuarto en (unidad como texto)»    ‾value(cantidad como número) ‾value(unidad como texto) bold(cantidad) bold(número) bold(unidad) bold(texto)
+|   ⟦// Al cuarto más cercano:  tazas y cucharas⟧
+|   devolver **una nueva medida** con **número** = (redondear (**cantidad** * _4_)) / _4_, **unidad** = **unidad**    ‾value(una nueva medida con número = (redondear (cantidad * 4)) / 4, unidad = unidad)
+
+[action to_do_something L0]
+| para «medir (mililitros como número) en cucharas o tazas»    ‾value(mililitros como número) bold(mililitros) bold(número)
+|   ⟦// La cuchara o taza que tomaría un cocinero⟧
+|   si **mililitros** < (_1_ cda en ml) devolver medir (**mililitros** / (_1_ cdta en ml)) al cuarto en _"cdta"_    ‾value(mililitros) ‾value(1 cda en ml) ‾call(medir (mililitros / (1 cdta en ml)) al cuarto en "cdta")
+|   si **mililitros** < (_1/4_ taza en ml) devolver medir (**mililitros** / (_1_ cda en ml)) al cuarto en _"cda"_    ‾value(mililitros) ‾value(1/4 taza en ml) ‾call(medir (mililitros / (1 cda en ml)) al cuarto en "cda")
+|   devolver medir (**mililitros** / (_1_ taza en ml)) al cuarto en _"tazas"_    ‾call(medir (mililitros / (1 taza en ml)) al cuarto en "tazas")
+
+[action to_do_something L0]
+| para «escribir (cantidad como número) para un cocinero»    ‾value(cantidad como número) bold(cantidad) bold(número)
+|   ⟦// Un número entero, luego un cuarto, un medio o tres cuartos:  1.5 es "1 1/2"⟧
+|   poner **cuartos** a redondear (**cantidad** * _4_)    ‾value(cuartos) ‾value(redondear (cantidad * 4))
+|   poner **entero** a (**cuartos** / _4_) como un entero    ‾value(entero) ‾value((cuartos / 4) como un entero)
+|   poner **resto** a **cuartos** - **entero** * _4_    ‾value(resto) ‾value(cuartos) ‾value(entero)
+|   poner **parte** a _""_    ‾value(parte)
+|   si **resto** es _1_ poner **parte** a _"1/4"_    ‾value(resto) ‾value(parte)
+|   si **resto** es _2_ poner **parte** a _"1/2"_    ‾value(resto) ‾value(parte)
+|   si **resto** es _3_ poner **parte** a _"3/4"_    ‾value(resto) ‾value(parte)
+|   si **parte** es _""_ devolver _""_ + **entero**    ‾value(parte) ‾value(entero)
+|   si **entero** es _0_ devolver **parte**    ‾value(entero) ‾value(parte)
+|   devolver **entero** && **parte**    ‾value(entero) ‾value(parte)
+
+[action to_do_something L0]
+| para «probar fracciones»
+|   escribir _1.5_ para un cocinero debería ser _"1 1/2"_    ‾call(escribir 1.5 para un cocinero)
+|   escribir _0.25_ para un cocinero debería ser _"1/4"_    ‾call(escribir 0.25 para un cocinero)
+|   escribir _200_ para un cocinero debería ser _"200"_    ‾call(escribir 200 para un cocinero)
+|   el **escrito** de (medir _250_ en cucharas o tazas) debería ser _"1 taza"_    ‾value(el escrito de (medir 250 en cucharas o tazas))
+|   el **escrito** de (medir _15_ en cucharas o tazas) debería ser _"1 cda"_    ‾value(el escrito de (medir 15 en cucharas o tazas))
+
+==== /RecetasDeMuestra.es.spell
+⟪# Tres recetas para empezar⟫
+⟦// Se añaden la primera vez que se abre Fichas de recetas, mientras su archivo no tiene ninguna:  cámbialas o añade las tuyas.⟧
+⟦// Las imágenes se dibujaron para este ejemplo y son de uso libre:  están en la carpeta pictures de Recipe Cards.⟧
+
+[action to_do_something L0]
+| para «agregar la sopa de tomate»
+|   poner **sopa** a **una nueva receta** con **título** _"Sopa de Tomate"_, **raciones** = _4_, **imagen** = _"/spaces/@spell/examples/RecipeCards/pictures/tomato-soup.svg"_    ‾value(sopa) ‾value(una nueva receta con título "Sopa de Tomate", raciones = 4, imagen = "/spaces/@spell/examples/RecipeCards/pictures/tomato-soup.svg")
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **unidad** = _"kg"_, **nombre** _"tomates maduros"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 1, unidad = "kg", nombre "tomates maduros", pasillo "Frutas y verduras") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **nombre** _"cebolla"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 1, nombre "cebolla", pasillo "Frutas y verduras") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _2_, **unidad** = _"dientes"_, **nombre** _"ajo"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 2, unidad = "dientes", nombre "ajo", pasillo "Frutas y verduras") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _2_, **unidad** = _"cda"_, **nombre** _"aceite de oliva"_, **pasillo** _"Aceites y especias"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 2, unidad = "cda", nombre "aceite de oliva", pasillo "Aceites y especias") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _500_, **unidad** = _"ml"_, **nombre** _"caldo de verduras"_, **pasillo** _"Latas y conservas"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 500, unidad = "ml", nombre "caldo de verduras", pasillo "Latas y conservas") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **unidad** = _"cdta"_, **nombre** _"azúcar"_, **pasillo** _"Repostería"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 1, unidad = "cdta", nombre "azúcar", pasillo "Repostería") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _15_, **unidad** = _"g"_, **nombre** _"albahaca fresca"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 15, unidad = "g", nombre "albahaca fresca", pasillo "Frutas y verduras") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _100_, **unidad** = _"ml"_, **nombre** _"nata líquida"_, **pasillo** _"Lácteos"_) a **ingredientes** de **sopa**    ‾value(un nuevo ingrediente con cantidad = 100, unidad = "ml", nombre "nata líquida", pasillo "Lácteos") ‾value(ingredientes de sopa)
+|   agregar (**un nuevo paso** con **instrucción** _"Calienta el horno a 200 °C.  Corta los tomates por la mitad y ásalos 30 minutos con la cebolla, en cuartos, y el ajo."_) a **pasos** de **sopa**    ‾value(un nuevo paso con instrucción "Calienta el horno a 200 °C.  Corta los tomates por la mitad y ásalos 30 minutos con la cebolla, en cuartos, y el ajo.") ‾value(pasos de sopa)
+|   agregar (**un nuevo paso** con **instrucción** _"Calienta el aceite en una olla grande y echa todo lo de la bandeja del horno."_) a **pasos** de **sopa**    ‾value(un nuevo paso con instrucción "Calienta el aceite en una olla grande y echa todo lo de la bandeja del horno.") ‾value(pasos de sopa)
+|   agregar (**un nuevo paso** con **instrucción** _"Vierte el caldo, añade el azúcar y cuece a fuego lento 10 minutos."_) a **pasos** de **sopa**    ‾value(un nuevo paso con instrucción "Vierte el caldo, añade el azúcar y cuece a fuego lento 10 minutos.") ‾value(pasos de sopa)
+|   agregar (**un nuevo paso** con **instrucción** _"Tritura hasta que quede fino, con casi toda la albahaca.  Sazona con sal y pimienta."_) a **pasos** de **sopa**    ‾value(un nuevo paso con instrucción "Tritura hasta que quede fino, con casi toda la albahaca.  Sazona con sal y pimienta.") ‾value(pasos de sopa)
+|   agregar (**un nuevo paso** con **instrucción** _"Sirve con un chorrito de nata y el resto de la albahaca por encima."_) a **pasos** de **sopa**    ‾value(un nuevo paso con instrucción "Sirve con un chorrito de nata y el resto de la albahaca por encima.") ‾value(pasos de sopa)
+|   agregar **sopa** a las **recetas**    ‾value(sopa) ‾value(las recetas)
+
+[action to_do_something L0]
+| para «agregar el dal de lentejas rojas»
+|   poner **dal** a **una nueva receta** con **título** _"Dal de Lentejas Rojas"_, **raciones** = _4_, **imagen** = _"/spaces/@spell/examples/RecipeCards/pictures/red-lentil-dal.svg"_    ‾value(dal) ‾value(una nueva receta con título "Dal de Lentejas Rojas", raciones = 4, imagen = "/spaces/@spell/examples/RecipeCards/pictures/red-lentil-dal.svg")
+|   agregar (**un nuevo ingrediente** con **cantidad** = _250_, **unidad** = _"g"_, **nombre** _"lentejas rojas"_, **pasillo** _"Arroz y legumbres"_, **gramos taza** = _190_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 250, unidad = "g", nombre "lentejas rojas", pasillo "Arroz y legumbres", gramos taza = 190) ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **nombre** _"cebolla"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 1, nombre "cebolla", pasillo "Frutas y verduras") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _3_, **unidad** = _"dientes"_, **nombre** _"ajo"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 3, unidad = "dientes", nombre "ajo", pasillo "Frutas y verduras") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _20_, **unidad** = _"g"_, **nombre** _"jengibre fresco"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 20, unidad = "g", nombre "jengibre fresco", pasillo "Frutas y verduras") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **unidad** = _"cda"_, **nombre** _"aceite vegetal"_, **pasillo** _"Aceites y especias"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 1, unidad = "cda", nombre "aceite vegetal", pasillo "Aceites y especias") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _2_, **unidad** = _"cdta"_, **nombre** _"semillas de comino"_, **pasillo** _"Aceites y especias"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 2, unidad = "cdta", nombre "semillas de comino", pasillo "Aceites y especias") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **unidad** = _"cdta"_, **nombre** _"cúrcuma molida"_, **pasillo** _"Aceites y especias"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 1, unidad = "cdta", nombre "cúrcuma molida", pasillo "Aceites y especias") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _400_, **unidad** = _"g"_, **nombre** _"tomate troceado"_, **pasillo** _"Latas y conservas"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 400, unidad = "g", nombre "tomate troceado", pasillo "Latas y conservas") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _400_, **unidad** = _"ml"_, **nombre** _"leche de coco"_, **pasillo** _"Latas y conservas"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 400, unidad = "ml", nombre "leche de coco", pasillo "Latas y conservas") ‾value(ingredientes de dal)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **nombre** _"lima"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **dal**    ‾value(un nuevo ingrediente con cantidad = 1, nombre "lima", pasillo "Frutas y verduras") ‾value(ingredientes de dal)
+|   agregar (**un nuevo paso** con **instrucción** _"Enjuaga las lentejas hasta que el agua salga limpia."_) a **pasos** de **dal**    ‾value(un nuevo paso con instrucción "Enjuaga las lentejas hasta que el agua salga limpia.") ‾value(pasos de dal)
+|   agregar (**un nuevo paso** con **instrucción** _"Fríe las semillas de comino en el aceite hasta que crepiten, y luego la cebolla, picada, hasta que esté blanda."_) a **pasos** de **dal**    ‾value(un nuevo paso con instrucción "Fríe las semillas de comino en el aceite hasta que crepiten, y luego la cebolla, picada, hasta que esté blanda.") ‾value(pasos de dal)
+|   agregar (**un nuevo paso** con **instrucción** _"Añade el ajo y el jengibre, rallados, y la cúrcuma, y remueve un minuto."_) a **pasos** de **dal**    ‾value(un nuevo paso con instrucción "Añade el ajo y el jengibre, rallados, y la cúrcuma, y remueve un minuto.") ‾value(pasos de dal)
+|   agregar (**un nuevo paso** con **instrucción** _"Añade las lentejas, el tomate, la leche de coco y 500 ml de agua.  Cuece a fuego lento 25 minutos, removiendo de vez en cuando."_) a **pasos** de **dal**    ‾value(un nuevo paso con instrucción "Añade las lentejas, el tomate, la leche de coco y 500 ml de agua.  Cuece a fuego lento 25 minutos, removiendo de vez en cuando.") ‾value(pasos de dal)
+|   agregar (**un nuevo paso** con **instrucción** _"Exprime la lima, sazona con sal y sirve con arroz."_) a **pasos** de **dal**    ‾value(un nuevo paso con instrucción "Exprime la lima, sazona con sal y sirve con arroz.") ‾value(pasos de dal)
+|   agregar **dal** a las **recetas**    ‾value(dal) ‾value(las recetas)
+
+[action to_do_something L0]
+| para «agregar las tortitas»
+|   poner **tortitas** a **una nueva receta** con **título** _"Tortitas de Arándanos"_, **raciones** = _4_, **imagen** = _"/spaces/@spell/examples/RecipeCards/pictures/pancakes.svg"_    ‾value(tortitas) ‾value(una nueva receta con título "Tortitas de Arándanos", raciones = 4, imagen = "/spaces/@spell/examples/RecipeCards/pictures/pancakes.svg")
+|   agregar (**un nuevo ingrediente** con **cantidad** = _200_, **unidad** = _"g"_, **nombre** _"harina de trigo"_, **pasillo** _"Repostería"_, **gramos taza** = _125_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 200, unidad = "g", nombre "harina de trigo", pasillo "Repostería", gramos taza = 125) ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _2_, **unidad** = _"cdta"_, **nombre** _"levadura química"_, **pasillo** _"Repostería"_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 2, unidad = "cdta", nombre "levadura química", pasillo "Repostería") ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _1_, **unidad** = _"cda"_, **nombre** _"azúcar"_, **pasillo** _"Repostería"_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 1, unidad = "cda", nombre "azúcar", pasillo "Repostería") ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _2_, **nombre** _"huevos"_, **pasillo** _"Lácteos"_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 2, nombre "huevos", pasillo "Lácteos") ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _300_, **unidad** = _"ml"_, **nombre** _"leche"_, **pasillo** _"Lácteos"_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 300, unidad = "ml", nombre "leche", pasillo "Lácteos") ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _30_, **unidad** = _"g"_, **nombre** _"mantequilla"_, **pasillo** _"Lácteos"_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 30, unidad = "g", nombre "mantequilla", pasillo "Lácteos") ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo ingrediente** con **cantidad** = _150_, **unidad** = _"g"_, **nombre** _"arándanos"_, **pasillo** _"Frutas y verduras"_) a **ingredientes** de **tortitas**    ‾value(un nuevo ingrediente con cantidad = 150, unidad = "g", nombre "arándanos", pasillo "Frutas y verduras") ‾value(ingredientes de tortitas)
+|   agregar (**un nuevo paso** con **instrucción** _"Bate la harina, la levadura, el azúcar y una pizca de sal en un bol."_) a **pasos** de **tortitas**    ‾value(un nuevo paso con instrucción "Bate la harina, la levadura, el azúcar y una pizca de sal en un bol.") ‾value(pasos de tortitas)
+|   agregar (**un nuevo paso** con **instrucción** _"Derrite la mantequilla.  Bátela con los huevos y la leche, y luego mézclala con la harina hasta que quede lisa."_) a **pasos** de **tortitas**    ‾value(un nuevo paso con instrucción "Derrite la mantequilla.  Bátela con los huevos y la leche, y luego mézclala con la harina hasta que quede lisa.") ‾value(pasos de tortitas)
+|   agregar (**un nuevo paso** con **instrucción** _"Calienta una sartén a fuego medio, con un poco de mantequilla."_) a **pasos** de **tortitas**    ‾value(un nuevo paso con instrucción "Calienta una sartén a fuego medio, con un poco de mantequilla.") ‾value(pasos de tortitas)
+|   agregar (**un nuevo paso** con **instrucción** _"Vierte un cucharón pequeño de masa, esparce unos arándanos y cocina hasta que salgan burbujas.  Dale la vuelta y cocina un minuto más."_) a **pasos** de **tortitas**    ‾value(un nuevo paso con instrucción "Vierte un cucharón pequeño de masa, esparce unos arándanos y cocina hasta que salgan burbujas.  Dale la vuelta y cocina un minuto más.") ‾value(pasos de tortitas)
+|   agregar (**un nuevo paso** con **instrucción** _"Mantenlas calientes mientras cocinas el resto, y sírvelas con sirope de arce."_) a **pasos** de **tortitas**    ‾value(un nuevo paso con instrucción "Mantenlas calientes mientras cocinas el resto, y sírvelas con sirope de arce.") ‾value(pasos de tortitas)
+|   agregar **tortitas** a las **recetas**    ‾value(tortitas) ‾value(las recetas)
+
+==== /FichasDeRecetas.es.spell
+⟪# Fichas de recetas⟫
+⟦// Tus recetas:  elige una, indica cuántos comen, y cada cantidad se ajusta;⟧
+⟦// muéstrala en métrico o en tazas y cucharas;  marca ingredientes y agrégalos a la lista de la compra.⟧
+⟦// Las recetas están en un archivo JSON, FichasDeRecetas.api.es.spell dice dónde;  la lista de la compra es la de Lista de la compra, importada.⟧
+
+[thing create_one_of_a_kind L0]
+| «fichas» es una **aplicación**
+|   [property define_property_has L1]
+|   | su «"elegida"» es una **receta**
+|   |   ⟦// La receta que se muestra⟧
+|   [property define_property_has L1]
+|   | su «"editada"» es una **receta**
+|   |   ⟦// La receta en su pantalla de edición, mientras haya una⟧
+|   [property define_property_has L1]
+|   | sus «"comensales"» es un **número** empezando en «4»
+|   |   ⟦// Cuántos comen⟧
+|   [property define_property_has L1]
+|   | sus «"unidades"» es uno de ‹métrico› o ‹tazas›
+|   |   ⟦// Gramos y mililitros, o tazas y cucharas⟧
+|   [property property_value_getter L1]
+|   | su «"escala"» es
+|   |   ⟦// Cuánto más, o menos, de lo que dice la receta⟧
+|   |   si su **elegida** no existe o las **raciones** de su **elegida** es _0_ devolver _1_    ‾question(su elegida no existe) ‾value(las raciones de su elegida)
+|   |   devolver sus **comensales** / las **raciones** de su **elegida**    ‾value(sus comensales) ‾value(las raciones de su elegida)
+|   [property define_property_has L1]
+|   | «"recorrido"» es **un nuevo recorrido**
+|   |   ⟦// La propia lista de Lista de la compra, por pasillo:  la misma lista, desde su archivo CSV⟧
+
+|   [action create_hook L1]
+|   | al «crearla»
+|   |   ⟦// La primera vez, con un archivo vacío, tres recetas para empezar⟧
+|   |   [control if L2]
+|   |   | si no hay **recetas**    ‾value(no hay recetas)
+|   |   |   agregar la sopa de tomate    ‾call(agregar la sopa de tomate)
+|   |   |   agregar el dal de lentejas rojas    ‾call(agregar el dal de lentejas rojas)
+|   |   |   agregar las tortitas    ‾call(agregar las tortitas)
+|   |   poner su **elegida** al primer de (cada **receta**)    ‾value(su elegida) ‾value(primer de (cada receta))
+
+|   [plain group define_group L1]
+|   | grupo «"Unidades"»
+|   |   [action to_do_something L2]
+|   |   | para «"mostrar métrico"» con título «"Métrico"»
+|   |   |   seleccionada cuando sus **unidades** es _métrico_    ‾value(sus unidades)
+|   |   |   poner sus **unidades** a _métrico_    ‾value(sus unidades)
+
+|   |   [action to_do_something L2]
+|   |   | para «"mostrar tazas y cucharas"» con título «"Tazas y cucharas"»
+|   |   |   seleccionada cuando sus **unidades** es _tazas_    ‾value(sus unidades)
+|   |   |   poner sus **unidades** a _tazas_    ‾value(sus unidades)
+
+|   |   [action draw_it L2]
+|   |   | para **dibujarla**
+|   |   |   <⟨contenedor⟩>
+|   |   |     <⟨pila⟩>
+|   |   |       <⟨barra-herramientas⟩>
+|   |   |         <⟨texto⟩ tamano=«"grande"» extranegrita slot=«"titulo"»>Fichas de recetas</⟨texto⟩>
+|   |   |         <⟨action⟩ «"mostrar métrico"» />
+|   |   |         <⟨action⟩ «"mostrar tazas y cucharas"» />
+|   |   |         <⟨spacer⟩ />
+|   |   |         <⟨action⟩ «"deshacer"» solo-icono />
+|   |   |         <⟨action⟩ «"rehacer"» solo-icono />
+|   |   |       </⟨barra-herramientas⟩>
+|   |   |       <⟨cuadricula⟩ apilable>
+|   |   |         <⟨columna⟩ ancho=«"5"»>
+|   |   |           <⟨pila⟩>
+|   |   |             <⟨botones⟩ direccion=«"vertical"» fluido basico>
+|   |   |               <⟨para⟩ receta en cada receta>
+|   |   |                 <⟨boton⟩ activo={**receta** es su **elegida**} onClick={elegir **receta**}>{el **título** de **receta**}</⟨boton⟩>    code({receta es su elegida}) code({elegir receta}) code({el título de receta})
+|   |   |               </⟨para⟩>
+|   |   |             </⟨botones⟩>
+|   |   |             <⟨formulario⟩ value={eso}>    code({eso})
+|   |   |               <⟨campo⟩ etiqueta=«"Cocinando para"»>
+|   |   |                 <⟨entrada⟩ name=«"comensales"» type=«"number"» min=«"1"» etiquetado=«"derecha"» etiqueta=«"personas"» />
+|   |   |               </⟨campo⟩>
+|   |   |             </⟨formulario⟩>
+|   |   |             <⟨encabezado⟩ tamano=«"pequeño"»>Lista de la compra</⟨encabezado⟩>
+|   |   |             {dibujar el **recorrido**}
+|   |   |           </⟨pila⟩>
+|   |   |         </⟨columna⟩>
+|   |   |         <⟨columna⟩ ancho=«"11"»>
+|   |   |           {dibujar la **pantalla** de eso}
+|   |   |         </⟨columna⟩>
+|   |   |       </⟨cuadricula⟩>
+|   |   |     </⟨pila⟩>
+|   |   |   </⟨contenedor⟩>
+
+|   |   [action draw_it L2]
+|   |   | para **dibujar** su **pantalla**
+|   |   |   ⟦// La pantalla de edición mientras se cambia una receta;  si no, la ficha de la receta elegida⟧
+|   |   |   [control if L3]
+|   |   |   | si su **editada**    ‾value(su editada)
+|   |   |   |   dibujar (**un nuevo editor de receta** con **receta** = su **editada**)    ‾value(un nuevo editor de receta con receta = su editada)
+|   |   |   [control else_if L3]
+|   |   |   | de lo contrario si su **elegida**    ‾value(su elegida)
+|   |   |   |   dibujar su **elegida**    ‾value(su elegida)
+|   |   |   [control else L3]
+|   |   |   | de lo contrario
+|   |   |   |   <⟨texto⟩ color=«"gris"»>Elige una receta</⟨texto⟩>
+
+==== /Ingrediente.es.spell
+⟪# Un ingrediente, escalado y en las unidades de quien cocina⟫
+⟦// Su `cantidad` es para las raciones de la propia receta:  se muestra para cuantos comen, en sistema métrico o en tazas y cucharas.⟧
+⟦// Una casilla a su lado lo marca para la lista de la compra.⟧
+
+[thing reopen_type L0]
+| un **ingrediente**
+|   [property property_value_getter L1]
+|   | su «"cantidad escalada"» es su **cantidad** * la **escala** de **fichas**
+|   |   ⟦// Para cuantos comen:  su `cantidad` por `comensales` entre `raciones`⟧
+|   [property property_value_getter L1]
+|   | su «"mostrada"» es
+|   |   ⟦// Su `cantidad escalada` en las unidades de quien cocina⟧
+|   |   poner **escalada** a su **cantidad escalada**    ‾value(escalada) ‾value(su cantidad escalada)
+|   |   [control if L2]
+|   |   | si las **unidades** de **fichas** es _tazas_    ‾value(las unidades de fichas)
+|   |   |   si su **unidad** es _"g"_ y su **gramos taza** > _0_ devolver medir (**escalada** / su **gramos taza**) al cuarto en _"tazas"_    ‾value(su unidad) ‾value(su gramos taza) ‾call(medir (escalada / su gramos taza) al cuarto en "tazas")
+|   |   |   si su **unidad** es _"g"_ devolver medir (**escalada** / (_1_ oz en g)) en _"oz"_    ‾value(su unidad) ‾call(medir (escalada / (1 oz en g)) en "oz")
+|   |   |   si su **unidad** es _"kg"_ devolver medir (**escalada** * _1000_ / (_1_ oz en g)) en _"oz"_    ‾value(su unidad) ‾call(medir (escalada * 1000 / (1 oz en g)) en "oz")
+|   |   |   si su **unidad** es _"ml"_ devolver medir **escalada** en cucharas o tazas    ‾value(su unidad) ‾call(medir escalada en cucharas o tazas)
+|   |   |   si su **unidad** es _"l"_ devolver medir (**escalada** * _1000_) en cucharas o tazas    ‾value(su unidad) ‾call(medir (escalada * 1000) en cucharas o tazas)
+|   |   [control else L2]
+|   |   | de lo contrario
+|   |   |   si su **unidad** es _"tazas"_ y su **gramos taza** > _0_ devolver medir (**escalada** * su **gramos taza**) en _"g"_    ‾value(su unidad) ‾value(su gramos taza) ‾call(medir (escalada * su gramos taza) en "g")
+|   |   |   si su **unidad** es _"tazas"_ devolver medir (**escalada** * (_1_ taza en ml)) en _"ml"_    ‾value(su unidad) ‾call(medir (escalada * (1 taza en ml)) en "ml")
+|   |   |   si su **unidad** es _"oz"_ devolver medir (**escalada** * (_1_ oz en g)) en _"g"_    ‾value(su unidad) ‾call(medir (escalada * (1 oz en g)) en "g")
+|   |   |   si su **unidad** es _"lb"_ devolver medir (**escalada** * (_1_ lb en g)) en _"g"_    ‾value(su unidad) ‾call(medir (escalada * (1 lb en g)) en "g")
+|   |   [control if L2]
+|   |   | si su **unidad** es _"tazas"_ o su **unidad** es _"cda"_ o su **unidad** es _"cdta"_    ‾value(su unidad) ‾value(su unidad) ‾value(su unidad)
+|   |   |   devolver medir **escalada** al cuarto en su **unidad**    ‾call(medir escalada al cuarto en su unidad)
+|   |   devolver medir **escalada** en su **unidad**    ‾call(medir escalada en su unidad)
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   ⟦// Una casilla para marcarlo, cuánto, y qué⟧
+|   |   <⟨formulario⟩ value={eso}>    code({eso})
+|   |     <⟨pila⟩ direccion=«"horizontal"» separacion=«"sm"» class=«"ingredient"»>
+|   |       <⟨casilla⟩ name=«"marcado"» aria-label=«"Marcar para la lista de la compra"» />
+|   |       <⟨texto⟩ negrita class=«"how-much"»>{el **escrito** de su **mostrada**}</⟨texto⟩>    code({el escrito de su mostrada})
+|   |       <⟨texto⟩>{su **nombre**}</⟨texto⟩>    code({su nombre})
+|   |     </⟨pila⟩>
+|   |   </⟨formulario⟩>
+
+==== /Ficha.es.spell
+⟪# La ficha de una receta, y su pantalla de Editar⟫
+⟦// La ficha:  su `imagen`, para cuántos es, sus `ingredientes` para marcar, y sus `pasos numerados`.⟧
+⟦// La pantalla de Editar cambia un `borrador`:  nada cambia hasta Guardar.⟧
+
+[thing reopen_type L0]
+| una **receta**
+|   [property property_value_getter L1]
+|   | su «"total marcados"» es el **largo** de (**ingredientes** en sus **ingredientes** donde su **marcado** es _sí_)
+
+|   [action to_do_something L1]
+|   | para «elegirla»
+|   |   ⟦// Su ficha, en lugar de lo que se mostraba⟧
+|   |   poner la **elegida** de **fichas** a eso    ‾value(la elegida de fichas) ‾value(eso)
+|   |   poner la **editada** de **fichas** a indefinido    ‾value(la editada de fichas) ‾value(indefinido)
+
+|   [action to_do_something L1]
+|   | para «"editar"» con icono «"pencil"»
+|   |   ⟦// Su pantalla de Editar⟧
+|   |   poner la **editada** de **fichas** a eso    ‾value(la editada de fichas) ‾value(eso)
+
+|   [action to_do_something L1]
+|   | para «"agregar los marcados a la lista de la compra"» con título «"Agregar a la lista de la compra"», icono «"cart plus"»
+|   |   ⟦// Cada ingrediente marcado, para cuantos comen, a la lista de Lista de la compra;  lo mismo en la misma `unidad` se suma⟧
+|   |   poner **plato** a su **título**    ‾value(plato) ‾value(su título)
+|   |   [control list_iteration L2]
+|   |   | para **ingrediente** en sus **ingredientes**    ‾value(sus ingredientes)
+|   |   |   [control if L3]
+|   |   |   | si el **marcado** del **ingrediente** es _sí_    ‾value(el marcado del ingrediente)
+|   |   |   |   poner **medida** a la **mostrada** del **ingrediente**    ‾value(medida) ‾value(la mostrada del ingrediente)
+|   |   |   |   poner **igual** al primer **artículo** en (cada **artículo** donde su **comprado** es _no_) donde su **nombre** es el **nombre** del **ingrediente** y su **unidad** es **unidad** de **medida**    ‾value(igual) ‾value(primer artículo en (cada artículo donde su comprado es no) donde su nombre es el nombre del ingrediente y su unidad es unidad de medida)
+|   |   |   |   [control if L4]
+|   |   |   |   | si **igual** existe    ‾question(igual existe)
+|   |   |   |   |   poner **cantidad** de **igual** a **cantidad** de **igual** + **número** de **medida**    ‾value(cantidad de igual) ‾value(cantidad de igual) ‾value(número de medida)
+|   |   |   |   [control else L4]
+|   |   |   |   | de lo contrario
+|   |   |   |   |   agregar (**un nuevo artículo** con **nombre** = el **nombre** del **ingrediente**, **cantidad** = el **número** de **medida**, **unidad** = la **unidad** de **medida**, **pasillo** = el **pasillo** del **ingrediente**, **receta** = **plato**) a los **artículos**    ‾value(un nuevo artículo con nombre = el nombre del ingrediente, cantidad = el número de medida, unidad = la unidad de medida, pasillo = el pasillo del ingrediente, receta = plato) ‾value(los artículos)
+|   |   |   |   poner el **marcado** del **ingrediente** a _no_    ‾value(el marcado del ingrediente)
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   <⟨tarjeta⟩ fluido class=«"recipe"»>
+|   |     <⟨si⟩ su imagen no es «""»>
+|   |       <⟨imagen⟩ src={su **imagen**} alt={su **título**} proporcion=«"21:9"» recortar />    code({su imagen}) code({su título})
+|   |     </⟨si⟩>
+|   |     <⟨contenido⟩>
+|   |       <⟨pila⟩>
+|   |         <⟨pila⟩ direccion=«"horizontal"» repartir=«"entre"»>
+|   |           <⟨encabezado⟩ tamano=«"grande"»>{su **título**}</⟨encabezado⟩>    code({su título})
+|   |           <⟨action⟩ «"editar"» />
+|   |         </⟨pila⟩>
+|   |         <⟨texto⟩ color=«"gris"»>Escrita para {sus **raciones**};  mostrada para {los **comensales** de **fichas**}</⟨texto⟩>    code({sus raciones}) code({los comensales de fichas})
+|   |         <⟨encabezado⟩ tamano=«"pequeño"»>Ingredientes</⟨encabezado⟩>
+|   |         <⟨pila⟩ separacion=«"xs"»>
+|   |           <⟨para⟩ cada ingrediente en sus ingredientes />
+|   |         </⟨pila⟩>
+|   |         <⟨pila⟩ direccion=«"horizontal"»>
+|   |           <⟨boton⟩ color=«"primario"» icono=«"cart plus"» desactivado={su **total marcados** es _0_} onClick={agregar los marcados a la lista de la compra}>    code({su total marcados es 0}) code({agregar los marcados a la lista de la compra})
+|   |             Agregar {su **total marcados**} a la lista de la compra
+|   |           </⟨boton⟩>
+|   |         </⟨pila⟩>
+|   |         <⟨encabezado⟩ tamano=«"pequeño"»>Pasos</⟨encabezado⟩>
+|   |         {dibujar el **pasos** de eso}
+|   |       </⟨pila⟩>
+|   |     </⟨contenido⟩>
+|   |   </⟨tarjeta⟩>
+
+|   [action draw_it L1]
+|   | para **dibujar** su **pasos**
+|   |   ⟦// Cada `paso` con su `número`⟧
+|   |   <⟨pila⟩ separacion=«"sm"»>
+|   |     {dibujar el **pasos numerados** de eso}
+|   |   </⟨pila⟩>
+
+|   [action draw_it L1]
+|   | para **dibujar** su **pasos numerados**
+|   |   [control list_iteration L2]
+|   |   | para **paso** y **puesto** en sus **pasos**    ‾value(sus pasos)
+|   |   |   <⟨pila⟩ direccion=«"horizontal"» separacion=«"sm"» alinear=«"inicio"» class=«"step"»>
+|   |   |     <⟨etiqueta⟩ circular tamano=«"pequeño"»>{**puesto**}</⟨etiqueta⟩>    code({puesto})
+|   |   |     <⟨texto⟩>{la **instrucción** del **paso**}</⟨texto⟩>    code({la instrucción del paso})
+|   |   |   </⟨pila⟩>
+
+==== /EditorDeRecetas.es.spell
+⟪# La pantalla de edición de una receta⟫
+⟦// Un formulario sobre un borrador de la receta:  cambia su título, para cuántos rinde y su imagen;⟧
+⟦// agrega, quita y mueve sus ingredientes y pasos.  Nada cambia hasta Guardar;  Cancelar lo olvida todo.⟧
+
+[thing create_type L0]
+| un «"editor de receta"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"receta"» es una **receta**
+|   |   ⟦// La receta que se está cambiando⟧
+|   [property property_value_getter L1]
+|   | su «"borrador"» es un borrador de su **receta**
+|   |   ⟦// Una copia para cambiar:  la receta queda como estaba hasta Guardar⟧
+
+|   [action to_do_something L1]
+|   | para «"guardar"» con icono «"check"»
+|   |   ⟦// Todos los cambios de una vez, un solo paso para deshacer⟧
+|   |   guardar su **borrador**    ‾value(su borrador)
+|   |   poner la **editada** de **fichas** a indefinido    ‾value(la editada de fichas) ‾value(indefinido)
+
+|   [action to_do_something L1]
+|   | para «"cancelar"» con icono «"close"»
+|   |   ⟦// La receta nunca cambió⟧
+|   |   descartar su **borrador**    ‾value(su borrador)
+|   |   poner la **editada** de **fichas** a indefinido    ‾value(la editada de fichas) ‾value(indefinido)
+
+|   [action to_do_something L1]
+|   | para «"agregar ingrediente"» con título «"Agregar un ingrediente"», icono «"plus"»
+|   |   agregar (**un nuevo ingrediente**) a **ingredientes** de su **borrador**    ‾value(un nuevo ingrediente) ‾value(ingredientes de su borrador)
+
+|   [action to_do_something L1]
+|   | para «"agregar paso"» con título «"Agregar un paso"», icono «"plus"»
+|   |   agregar (**un nuevo paso**) a **pasos** de su **borrador**    ‾value(un nuevo paso) ‾value(pasos de su borrador)
+
+|   [action draw_it L1]
+|   | para **dibujarlo**
+|   |   <⟨tarjeta⟩ fluido class=«"editor"»>
+|   |     <⟨contenido⟩>
+|   |       <⟨formulario⟩ value={su **borrador**}>    code({su borrador})
+|   |         <⟨encabezado⟩ tamano=«"mediano"»>Editar {**título** de su **receta**}</⟨encabezado⟩>    code({título de su receta})
+|   |         <⟨campos⟩>
+|   |           <⟨campo⟩ etiqueta=«"Receta"» ancho=«"10"»>
+|   |             <⟨entrada⟩ name=«"título"» />
+|   |           </⟨campo⟩>
+|   |           <⟨campo⟩ etiqueta=«"Porciones"» ancho=«"6"»>
+|   |             <⟨entrada⟩ name=«"raciones"» type=«"number"» min=«"1"» etiquetado=«"derecha"» etiqueta=«"personas"» />
+|   |           </⟨campo⟩>
+|   |         </⟨campos⟩>
+|   |         <⟨campo⟩ etiqueta=«"Imagen"»>
+|   |           <⟨entrada⟩ name=«"imagen"» marcador=«"La dirección de una imagen"» />
+|   |         </⟨campo⟩>
+|   |       </⟨formulario⟩>
+|   |       <⟨encabezado⟩ tamano=«"pequeño"»>Ingredientes</⟨encabezado⟩>
+|   |       {dibujar el **filas-ingrediente** de eso}
+|   |       <⟨action⟩ «"agregar ingrediente"» aspecto=«"básico"» />
+|   |       <⟨encabezado⟩ tamano=«"pequeño"»>Pasos</⟨encabezado⟩>
+|   |       {dibujar el **filas-paso** de eso}
+|   |       <⟨action⟩ «"agregar paso"» aspecto=«"básico"» />
+|   |     </⟨contenido⟩>
+|   |     <⟨extra⟩>
+|   |       <⟨action⟩ «"guardar"» color=«"primario"» />
+|   |       <⟨action⟩ «"cancelar"» />
+|   |     </⟨extra⟩>
+|   |   </⟨tarjeta⟩>
+
+[thing create_type L0]
+| una «"fila-ingrediente"» es una **vista**
+|   ⟦// Los campos de un ingrediente en la pantalla de edición, con botones para moverlo y quitarlo⟧
+|   [property define_property_has L1]
+|   | su «"ingrediente"» es un **ingrediente**
+|   [property define_property_has L1]
+|   | su «"editor"» es un **editor de receta**
+
+|   [action to_do_something L1]
+|   | para «"subir"» con icono «"arrow up"»
+|   |   poner **lista** a **ingredientes** de **borrador** de su **editor**    ‾value(lista) ‾value(ingredientes de borrador de su editor)
+|   |   poner **movido** a su **ingrediente**    ‾value(movido) ‾value(su ingrediente)
+|   |   poner **puesto** a la posición de **movido** en **lista**    ‾value(puesto) ‾value(la posición de movido en lista)
+|   |   si **puesto** es _1_ devolver    ‾value(puesto)
+|   |   quitar **movido** de **lista**    ‾value(movido) ‾value(lista)
+|   |   agregar **movido** a **lista** antes del elemento (**puesto** - _1_) de **lista**    ‾value(movido) ‾value(lista) ‾value(elemento (puesto - 1) de lista)
+
+|   [action to_do_something L1]
+|   | para «"quitar"» con icono «"trash alternate outline"»
+|   |   quitar su **ingrediente** de **ingredientes** de **borrador** de su **editor**    ‾value(su ingrediente) ‾value(ingredientes de borrador de su editor)
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   <⟨formulario⟩ value={su **ingrediente**}>    code({su ingrediente})
+|   |     <⟨campos⟩ no-apilable>
+|   |       <⟨campo⟩ ancho=«"2"»><⟨entrada⟩ name=«"cantidad"» type=«"number"» min=«"0"» aria-label=«"Cantidad"» /></⟨campo⟩>
+|   |       <⟨campo⟩ ancho=«"2"»><⟨entrada⟩ name=«"unidad"» marcador=«"Unidad"» aria-label=«"Unidad"» /></⟨campo⟩>
+|   |       <⟨campo⟩ ancho=«"6"»><⟨entrada⟩ name=«"nombre"» marcador=«"Ingrediente"» aria-label=«"Ingrediente"» /></⟨campo⟩>
+|   |       <⟨campo⟩ ancho=«"3"»><⟨entrada⟩ name=«"pasillo"» marcador=«"Pasillo"» aria-label=«"Pasillo"» /></⟨campo⟩>
+|   |       <⟨campo⟩ ancho=«"3"»>
+|   |         <⟨pila⟩ direccion=«"horizontal"» separacion=«"xs"»>
+|   |           <⟨action⟩ «"subir"» solo-icono aspecto=«"terciario"» />
+|   |           <⟨action⟩ «"quitar"» solo-icono aspecto=«"terciario"» />
+|   |         </⟨pila⟩>
+|   |       </⟨campo⟩>
+|   |     </⟨campos⟩>
+|   |   </⟨formulario⟩>
+
+[thing create_type L0]
+| una «"fila-paso"» es una **vista**
+|   ⟦// Las palabras de un paso en la pantalla de edición, con botones para moverlo y quitarlo⟧
+|   [property define_property_has L1]
+|   | su «"paso"» es un **paso**
+|   [property define_property_has L1]
+|   | su «"editor"» es un **editor de receta**
+
+|   [action to_do_something L1]
+|   | para «"subir"» con icono «"arrow up"»
+|   |   poner **lista** a **pasos** de **borrador** de su **editor**    ‾value(lista) ‾value(pasos de borrador de su editor)
+|   |   poner **movido** a su **paso**    ‾value(movido) ‾value(su paso)
+|   |   poner **puesto** a la posición de **movido** en **lista**    ‾value(puesto) ‾value(la posición de movido en lista)
+|   |   si **puesto** es _1_ devolver    ‾value(puesto)
+|   |   quitar **movido** de **lista**    ‾value(movido) ‾value(lista)
+|   |   agregar **movido** a **lista** antes del elemento (**puesto** - _1_) de **lista**    ‾value(movido) ‾value(lista) ‾value(elemento (puesto - 1) de lista)
+
+|   [action to_do_something L1]
+|   | para «"quitar"» con icono «"trash alternate outline"»
+|   |   quitar su **paso** de **pasos** de **borrador** de su **editor**    ‾value(su paso) ‾value(pasos de borrador de su editor)
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   <⟨formulario⟩ value={su **paso**}>    code({su paso})
+|   |     <⟨pila⟩ direccion=«"horizontal"» separacion=«"xs"»>
+|   |       <⟨area-texto⟩ name=«"instrucción"» rows=«"2"» aria-label=«"Paso"» fluido />
+|   |       <⟨action⟩ «"subir"» solo-icono aspecto=«"terciario"» />
+|   |       <⟨action⟩ «"quitar"» solo-icono aspecto=«"terciario"» />
+|   |     </⟨pila⟩>
+|   |   </⟨formulario⟩>
+
+[thing reopen_type L0]
+| un **editor de receta**
+|   [action draw_it L1]
+|   | para **dibujar** su **filas-ingrediente**
+|   |   ⟦// Una fila de campos para cada ingrediente del borrador⟧
+|   |   poner **este-editor** a eso    ‾value(este-editor) ‾value(eso)
+|   |   [control list_iteration L2]
+|   |   | para **ejemplar** en **ingredientes** de su **borrador**    ‾value(ingredientes de su borrador)
+|   |   |   dibujar (**una nueva fila-ingrediente** con **editor** = **este-editor**, **ingrediente** = **ejemplar**)    ‾value(una nueva fila-ingrediente con editor = este-editor, ingrediente = ejemplar)
+
+|   [action draw_it L1]
+|   | para **dibujar** su **filas-paso**
+|   |   ⟦// Un cuadro para cada paso del borrador⟧
+|   |   poner **este-editor** a eso    ‾value(este-editor) ‾value(eso)
+|   |   [control list_iteration L2]
+|   |   | para **ejemplar** en **pasos** de su **borrador**    ‾value(pasos de su borrador)
+|   |   |   dibujar (**una nueva fila-paso** con **editor** = **este-editor**, **paso** = **ejemplar**)    ‾value(una nueva fila-paso con editor = este-editor, paso = ejemplar)

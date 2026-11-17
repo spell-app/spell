@@ -1,0 +1,125 @@
+# La pantalla de edición de una receta
+// Un formulario sobre un borrador de la receta:  cambia su título, para cuántos rinde y su imagen;
+// agrega, quita y mueve sus ingredientes y pasos.  Nada cambia hasta Guardar;  Cancelar lo olvida todo.
+
+un "editor de receta" es una vista
+	su "receta" es una receta
+		// La receta que se está cambiando
+	su "borrador" es un borrador de su receta
+		// Una copia para cambiar:  la receta queda como estaba hasta Guardar
+
+	para "guardar" con icono "check"
+		// Todos los cambios de una vez, un solo paso para deshacer
+		guardar su borrador
+		poner la editada de fichas a indefinido
+
+	para "cancelar" con icono "close"
+		// La receta nunca cambió
+		descartar su borrador
+		poner la editada de fichas a indefinido
+
+	para "agregar ingrediente" con título "Agregar un ingrediente", icono "plus"
+		agregar (un nuevo ingrediente) a ingredientes de su borrador
+
+	para "agregar paso" con título "Agregar un paso", icono "plus"
+		agregar (un nuevo paso) a pasos de su borrador
+
+	para dibujarlo
+		<tarjeta fluido class="editor">
+			<contenido>
+				<formulario value={su borrador}>
+					<encabezado tamano="mediano">Editar {título de su receta}</encabezado>
+					<campos>
+						<campo etiqueta="Receta" ancho="10">
+							<entrada name="título" />
+						</campo>
+						<campo etiqueta="Porciones" ancho="6">
+							<entrada name="raciones" type="number" min="1" etiquetado="derecha" etiqueta="personas" />
+						</campo>
+					</campos>
+					<campo etiqueta="Imagen">
+						<entrada name="imagen" marcador="La dirección de una imagen" />
+					</campo>
+				</formulario>
+				<encabezado tamano="pequeño">Ingredientes</encabezado>
+				{dibujar el filas-ingrediente de eso}
+				<action "agregar ingrediente" aspecto="básico" />
+				<encabezado tamano="pequeño">Pasos</encabezado>
+				{dibujar el filas-paso de eso}
+				<action "agregar paso" aspecto="básico" />
+			</contenido>
+			<extra>
+				<action "guardar" color="primario" />
+				<action "cancelar" />
+			</extra>
+		</tarjeta>
+
+una "fila-ingrediente" es una vista
+	// Los campos de un ingrediente en la pantalla de edición, con botones para moverlo y quitarlo
+	su "ingrediente" es un ingrediente
+	su "editor" es un editor de receta
+
+	para "subir" con icono "arrow up"
+		poner lista a ingredientes de borrador de su editor
+		poner movido a su ingrediente
+		poner puesto a la posición de movido en lista
+		si puesto es 1 devolver
+		quitar movido de lista
+		agregar movido a lista antes del elemento (puesto - 1) de lista
+
+	para "quitar" con icono "trash alternate outline"
+		quitar su ingrediente de ingredientes de borrador de su editor
+
+	para dibujarla
+		<formulario value={su ingrediente}>
+			<campos no-apilable>
+				<campo ancho="2"><entrada name="cantidad" type="number" min="0" aria-label="Cantidad" /></campo>
+				<campo ancho="2"><entrada name="unidad" marcador="Unidad" aria-label="Unidad" /></campo>
+				<campo ancho="6"><entrada name="nombre" marcador="Ingrediente" aria-label="Ingrediente" /></campo>
+				<campo ancho="3"><entrada name="pasillo" marcador="Pasillo" aria-label="Pasillo" /></campo>
+				<campo ancho="3">
+					<pila direccion="horizontal" separacion="xs">
+						<action "subir" solo-icono aspecto="terciario" />
+						<action "quitar" solo-icono aspecto="terciario" />
+					</pila>
+				</campo>
+			</campos>
+		</formulario>
+
+una "fila-paso" es una vista
+	// Las palabras de un paso en la pantalla de edición, con botones para moverlo y quitarlo
+	su "paso" es un paso
+	su "editor" es un editor de receta
+
+	para "subir" con icono "arrow up"
+		poner lista a pasos de borrador de su editor
+		poner movido a su paso
+		poner puesto a la posición de movido en lista
+		si puesto es 1 devolver
+		quitar movido de lista
+		agregar movido a lista antes del elemento (puesto - 1) de lista
+
+	para "quitar" con icono "trash alternate outline"
+		quitar su paso de pasos de borrador de su editor
+
+	para dibujarla
+		<formulario value={su paso}>
+			<pila direccion="horizontal" separacion="xs">
+				<area-texto name="instrucción" rows="2" aria-label="Paso" fluido />
+				<action "subir" solo-icono aspecto="terciario" />
+				<action "quitar" solo-icono aspecto="terciario" />
+			</pila>
+		</formulario>
+
+un editor de receta
+	para dibujar su filas-ingrediente
+		// Una fila de campos para cada ingrediente del borrador
+		poner este-editor a eso
+		para ejemplar en ingredientes de su borrador
+			dibujar (una nueva fila-ingrediente con editor = este-editor, ingrediente = ejemplar)
+
+	para dibujar su filas-paso
+		// Un cuadro para cada paso del borrador
+		poner este-editor a eso
+		para ejemplar en pasos de su borrador
+			dibujar (una nueva fila-paso con editor = este-editor, paso = ejemplar)
