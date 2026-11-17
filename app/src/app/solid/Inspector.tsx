@@ -1174,7 +1174,8 @@ export class Inspector {
 
   /**
    * Field `name` of `part` was changed in the properties card:  the same change goes into the program's source.
-   * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
+   * - What can't go there says so under its field (`Inspector.noteNotSaved()`);
+   *   code, with a way to it, in the card (`<NotSavedNote>`).
    */
   static fieldWritten(part: Inspected, name: string, value: unknown): void {
     // a value kept in a place is the program's data, never the source's:  its change is held until it's committed
@@ -1186,7 +1187,7 @@ export class Inspector {
       `together:${name}`
     )
     const why = whys.find((reason) => reason)
-    setNotSaved(why && { part, why })
+    setNotSaved(why && { part, name, why })
   }
 
   /**
@@ -1242,12 +1243,27 @@ export class Inspector {
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
     const names = part.layout ? part.layout.fields.map((field) => field.name) : Inspector.storedNamesOf(part.value)
     const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    Inspector.noteNotSaved(part, origins)
     if (part.layout) return origins
     for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
       const origin = InspectorData.originOf(part.value, name)
       if (origin) origins[name] = InspectorData.propertyOrigin(origin)
     }
     return origins
+  }
+
+  /**
+   * The last change to one of `part`'s fields wasn't kept:  a line under that field says why (epic `editor` I244).
+   * - Not code it comes from:  that says so in the card, with a link to the code (`<NotSavedNote>`).
+   * - SIDE EFFECT:  writes `origins`.
+   */
+  private static noteNotSaved(part: Inspected, origins: ReturnType<typeof InspectorWrites.originsOf>): void {
+    const last = notSaved()
+    if (last?.part !== part || !isNotedUnderField(last.why)) return
+    origins[last.name] = {
+      ...(origins[last.name] ?? { kind: "inherited" }),
+      note: notSavedWords(last.why.reason, part)
+    }
   }
 
   /** The names of `thing`'s stored properties, which a data place may keep:  for `<DataSourceNote>`. */
@@ -3425,7 +3441,23 @@ function wordsOfType(thing: object): string {
 }
 
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
-const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
+const [notSaved, setNotSaved] = createSignal<{ part: object; name: string; why: NotWritten } | undefined>(undefined)
+
+/** Is `why` said under its field, not in the card?  Everything but code, which the card links to. */
+function isNotedUnderField(why: NotWritten): boolean {
+  return why.reason !== "expression" && why.reason !== "playing" && why.reason !== "allFromCode"
+}
+
+/** Why a change to `part` wasn't kept, in words. */
+function notSavedWords(reason: NotWritten["reason"], part: Inspected): string {
+  if (reason === "allFromCode") return appTexts.text("inspectorAllFromCode", { type: wordsOfType(part.value) })
+  if (reason === "expression") return appTexts.text("inspectorNotSavedCode")
+  if (reason === "noStart") return appTexts.text("inspectorNotSavedNoStart")
+  if (reason === "typeSets") {
+    return appTexts.text("inspectorNotSavedTypeSets", { types: P.pluralize(wordsOfType(part.value)) })
+  }
+  return appTexts.text("inspectorNotSavedRunning")
+}
 
 /**
  * Is `next` the part `last` was, reached the same way:  the same thing, drawn by the same element, by the same trail,
@@ -3482,8 +3514,10 @@ function DataSourceNote(props: { thing: object; names: string[] }): JSX.Element 
 
 /****************
  * ### `<NotSavedNote>`
- * Says the last change only changed the running app, and why, with a way to the code when there's code to see.
- * - No row of its own until a change can't be saved.
+ * Says, at the card's top, that the last change only changed the running app because the code works it out,
+ * with a way to that code;  or that nothing of all of them can change.
+ * - Any other change that can't be kept says so under its field (`Inspector.noteNotSaved()`, epic `editor` I244).
+ * - No row of its own until then.
  ****************/
 function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
@@ -3498,19 +3532,11 @@ function NotSavedNote(props: { part: Inspected }): JSX.Element {
     if (isThing(props.part.value) && isAll && Inspector.isAllFromCode(props.part)) {
       return { reason: "allFromCode" }
     }
+    // the rest are said under their field (`Inspector.noteNotSaved()`)
     const why = notSaved()?.part === props.part ? notSaved()?.why : undefined
-    return why?.reason === "playing" ? undefined : why
+    return why?.reason === "expression" ? why : undefined
   }
-  const words = (reason: NotWritten["reason"]) => {
-    if (reason === "allFromCode") {
-      return appTexts.text("inspectorAllFromCode", { type: wordsOfType(props.part.value) })
-    }
-    if (reason === "expression") return appTexts.text("inspectorNotSavedCode")
-    if (reason === "noStart") return appTexts.text("inspectorNotSavedNoStart")
-    if (reason === "typeSets")
-      return appTexts.text("inspectorNotSavedTypeSets", { types: P.pluralize(wordsOfType(props.part.value)) })
-    return appTexts.text("inspectorNotSavedRunning")
-  }
+  const words = (reason: NotWritten["reason"]) => notSavedWords(reason, props.part)
   return (
     <Show when={why()}>
       {(note) => (

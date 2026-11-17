@@ -94,6 +94,8 @@ function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | un
  *     button at the row's end says it was pressed (`ui-reset`, `ui-show-code`)
  *   - `data`:  kept in a place outside the program, `:state(data)`;  its `mark` at the row's end says where in short,
  *     and is its button when it offers one;  an origin's `readonly` makes it read only, whatever its kind
+ *   - an origin's `unsaved` shows its not-saved icon (on hover or focus);  its `note` is a line under its control,
+ *     in the hint's ink
  *   - a run of three or more yes-or-no properties in one group is ONE select of pills (`FlagRun`):
  *     the first draws it (`:state(flags)`), the rest hide (`:state(flag)`), each still its own property
  *   - choices carry their icons (`ValueSets.iconsFor()`), a hue its colour's chip;  four or fewer, all with
@@ -143,12 +145,14 @@ export class UIProperty extends UIField {
   }
 
   /**
-   * Why a change here can't be saved:  its own `unsaved`, else its editor's.
+   * Why a change here can't be saved:  its own `unsaved`, else its origin's, else its editor's.
    * - None while it's read only:  nothing here can change (epic `editor` I224, a thing's computed values).
    */
   get unsavedText(): string | undefined {
     if (this.isReadOnly) return undefined
-    return this.unsaved || (this.editor as { unsaved?: string } | undefined)?.unsaved || undefined
+    return (
+      this.unsaved || this.origin?.unsaved || (this.editor as { unsaved?: string } | undefined)?.unsaved || undefined
+    )
   }
 
   /** What the schema says of its property, if the editor has a schema that names it. */
@@ -273,6 +277,19 @@ export class UIProperty extends UIField {
     return (
       <Show when={!this.origin?.mark} fallback={this.originMark()}>
         {this.originButton()}
+      </Show>
+    )
+  }
+
+  /** Its origin's `note`, a line under its control, drawn as its hint is. */
+  protected controlEnd(): JSX.Element {
+    return (
+      <Show when={this.origin?.note}>
+        {(note) => (
+          <div class={NOTE_CLASSES} part={this.partForName("hint")}>
+            {note()}
+          </div>
+        )}
       </Show>
     )
   }
@@ -912,6 +929,9 @@ class FlagRun {
 
 /** `PropertyOrigin.kind` of a value that can't be changed here. */
 const WORKED_OUT = "worked out"
+
+/** Its origin's note's class words:  styled as a hint, under the control. */
+const NOTE_CLASSES = "hint note"
 
 /** What each button a `PropertyOrigin` offers shows and says. */
 const ORIGIN_ACTIONS = {

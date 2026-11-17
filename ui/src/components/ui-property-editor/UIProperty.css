@@ -14,6 +14,7 @@
  * - Where its value comes from (`PropertyOrigin`):  `:state(here)` draws nothing of its own;  `:state(inherited)`,
  *   a quieter label;  `.origin`, its small button at the row's end:  a reset only while it's hovered or focused.
  * - `:state(data)`, kept in a place outside the program:  a square before its label, and `.origin.mark`, its few words.
+ * - `.note`, its origin's line under the control:  drawn as the hint, its own line breaks kept.
  * - A run of yes-or-no properties (`FlagRun`):  the one heading it shows only its pills' select;  the rest hide.
  */
 
@@ -39,6 +40,10 @@
   :host(:state(in-row)) .field {
     flex: 1 1 0;
     min-width: 0;
+  }
+  /* its origin's note:  a hint's line (`UIField.css`), keeping its own line breaks */
+  .field > .note {
+    white-space: pre-line;
   }
   @container ui-form (width < 18em) {
     :host(:state(half)) .field {
