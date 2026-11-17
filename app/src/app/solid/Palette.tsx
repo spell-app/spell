@@ -399,13 +399,14 @@ export function AddPartButton(): JSX.Element {
 const ADD_BUTTON_ID = "AddPartButton"
 
 /**
- * The palette kept open:  the top bar's second row, edge to edge, of its topics' names (epic `editor` T80).
+ * The palette kept open:  the top bar's second row, of its topics' names (epic `editor` T80).
+ * - Centred under the top bar, only as wide as what it holds, its bottom corners rounded (epic `editor` T106).
  * - Its pin right before "Add View", pinned:  a click unpins it, closing the bar (epic `editor` T92, I212;  a ✕ by the search before).
  * - Add View, in bold, then each topic's icon and name (epic `editor` T86).
  * - Each name opens a menu of what's filed under it, as the popup lists them:  a click adds one, a drag places it.
  * - App views (This page) first, then every topic, as in the popup;  the row scrolls with its ‹ › only when they don't fit
  *   the window beside the search (`Palette.css`).
- * - Its search, at its end, looks as the popup's does (epic `editor` J140, revisited):
+ * - Its search, right after the last topic (T106), looks as the popup's does (epic `editor` J140, revisited):
  *   every topic with a match opens its menu at once, each listing only its matches, side by side under its name.
  *   - A magnifying glass at its start, a fixed width, and a ✕ inside its end while it holds text (epic `editor` T87).
  *   - Escape, clearing the field, a click elsewhere, or choosing or dragging a row closes them;  typing opens them again.
@@ -491,8 +492,6 @@ export function PaletteStrip(): JSX.Element {
 
   return (
     <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
-      {/* the bar's start, kept empty so its groups stay centred;  the pin sits right before "Add View" (epic `editor` I212) */}
-      <div class="PaletteStripStart" />
       <div class="PaletteStripAdd">
         <PinIcon />
         <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>

@@ -969,7 +969,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92, T99)", async () => {
+  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92, T99, T106)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
     await page.locator("#AddPartButton [part~=item]").click()
@@ -998,7 +998,18 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           bold: Number(getComputedStyle(strip.querySelector(".PaletteStripLabel")!).fontWeight) >= 700,
           withIcons: names.every((name) => !!name.getAttribute("icon")),
           closes: strip.querySelectorAll(".PaletteClose").length,
-          searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width
+          searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width,
+          // centred, its content's width and 16px either side, the search right after the last name (T106)
+          ...(() => {
+            const box = strip.getBoundingClientRect()
+            const add = strip.querySelector(".PaletteStripAdd")!.getBoundingClientRect()
+            const end = strip.querySelector(".PaletteStripEnd")!.getBoundingClientRect()
+            return {
+              room: [Math.round(add.left - box.left), Math.round(box.right - end.right)],
+              centred: Math.abs(box.left - (innerWidth - box.right)) < 1,
+              searchAfterNames: Math.round(end.left - add.right)
+            }
+          })()
         }
       })
     expect(await bar()).toMatchObject({
@@ -1007,7 +1018,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       label: "Add View",
       bold: true,
       withIcons: true,
-      closes: 0
+      closes: 0,
+      room: [16, 16],
+      centred: true,
+      searchAfterNames: 16
     })
     const idleWidth = (await bar()).searchWidth
     await page.setViewportSize({ width: 1440, height: 800 })
