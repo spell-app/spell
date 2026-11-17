@@ -1118,6 +1118,7 @@ export class EditorStore extends Observable {
   /**
    * The person is leaving `project` (default:  the one shown) for another, or for the home page:
    * one made from a start card and not kept yet (`SPACES.UnsavedApp`, epic `mockup` I42) goes, or is asked about.
+   * - An example or a guide with your draft:  "Keep your changes?" (`askAboutExample()`, epic `mockup` T52).
    * - Untouched, nothing typed:  deleted, no question asked.
    * - Changed, with no version saved:  "Save your draft?";  Don't Save Draft deletes it, Save Draft (and Escape)
    *   keeps it for good, edits not saved yet saved first.
@@ -1129,6 +1130,9 @@ export class EditorStore extends Observable {
    */
   async leaveProject(project = editor.project): Promise<void> {
     const projectRoot = SPACES.SpellProjectRoot.projects
+    if (project && !isStaticBuild && SPACES.isExampleProject(project.path)) {
+      return await editor.askAboutExample(project, "leaving")
+    }
     if (!project || isStaticBuild || !project.path.startsWith(`${projectRoot.path}/`)) return
     if (leavingProjects.has(project.path)) return
     leavingProjects.add(project.path)
@@ -1157,6 +1161,91 @@ export class EditorStore extends Observable {
       editor.showError(error)
     } finally {
       leavingProjects.delete(project.path)
+    }
+  }
+
+  /**
+   * Example `project` (`SPACES.isExampleProject()`) has your draft:  ask what to keep, in one dialog (epic `mockup` T52).
+   * - Asked as you leave it (`leaveProject()`), and on Save (⌘S, `saveDraft()`).
+   * - "Save as My App":  a copy in your own space with your draft in it, `owen@spell/Solitaire` or the next free name;
+   *   the example is back as everyone sees it, for you too.  Saving, the copy is shown;  leaving, it waits in your apps.
+   * - "Discard Changes":  your draft goes.
+   * - "Update the Example", only for whoever may publish it (a manager of `@spell`, `mayPublish`):
+   *   after a second question, your draft becomes the example's own files, for everyone.
+   * - Escape keeps your draft, the safe side:  it's there the next time you open the example.
+   * - An edit not saved yet counts:  kept into the draft first, unless you discard.
+   * - Not in the static build, whose examples' edits are kept in the visitor's browser.
+   * - Once at a time for each project, as `leaveProject()`.
+   * - NEVER throws:  a failure is shown.
+   */
+  async askAboutExample(project: SP.SpellProject, when: "leaving" | "saving"): Promise<void> {
+    if (isStaticBuild || leavingProjects.has(project.path)) return
+    leavingProjects.add(project.path)
+    try {
+      const unsavedEdits = () => project.files.filter((file) => file.isDirty && !editor.isLocked(file))
+      if (editor.isAutoSaving || when === "saving") await editor.saveFiles(unsavedEdits())
+      const files = new SPACES.ProjectFiles(project)
+      const { drafts, mayPublish } = await files.drafts()
+      if (!drafts.length && !unsavedEdits().length) return
+      const name = project.title
+      const answer = await editor.askWithChoices<ExampleChoice>({
+        header: appTexts.text("keepExampleHeading", { name }),
+        message: appTexts.text(mayPublish ? "keepExampleMessageSpell" : "keepExampleMessage"),
+        choices: [
+          { value: "discard", text: appTexts.text("keepExampleDiscard"), color: "negative" },
+          ...(mayPublish ? [{ value: "update" as const, text: appTexts.text("keepExampleUpdate") }] : []),
+          { value: "mine", text: appTexts.text("keepExampleAsMine"), color: "primary" }
+        ]
+      })
+      if (answer !== "discard") await editor.saveFiles(unsavedEdits())
+      if (answer === "discard") {
+        await editor.discardExampleDraft(project, files)
+        editor.showNotice(appTexts.text("exampleDraftDiscarded", { name }))
+      } else if (answer === "mine") {
+        const copy = await SPACES.SpellProjectRoot.projects.copyHere(project.path, { withDraft: true })
+        await editor.readExampleAgain(project, drafts)
+        if (when === "saving") editor.showEditor(copy.path)
+        editor.showNotice(appTexts.text("exampleSavedAsApp", { name: copy.title }))
+      } else if (answer === "update") {
+        const sure = await editor.confirm({
+          header: appTexts.text("updateExampleHeading", { name }),
+          message: appTexts.text("updateExampleMessage"),
+          ok: appTexts.text("keepExampleUpdate"),
+          danger: true
+        })
+        if (!sure) return
+        await files.publish()
+        await editor.readExampleAgain(project, drafts)
+        editor.showNotice(appTexts.text("exampleUpdated", { name }))
+      }
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      leavingProjects.delete(project.path)
+    }
+  }
+
+  /** Example `project`'s draft gone, every file of it read again as everyone sees it, edits not saved yet too. */
+  private async discardExampleDraft(project: SP.SpellProject, files: SPACES.ProjectFiles): Promise<void> {
+    for (const file of project.files) editor.forgetWaitingKeep(file)
+    const { drafts } = await files.drafts()
+    for (const { filePath } of drafts) await files.discard(filePath)
+    const dirty = project.files
+      .filter((file) => file.isDirty)
+      .map((file) => ({ filePath: file.path.slice(project.path.length) }))
+    await editor.readExampleAgain(project, [...drafts, ...dirty])
+  }
+
+  /**
+   * Read the files of `drafts` of example `project` again, now its draft is gone:  so the example shows as everyone
+   * sees it, whether it's still open or opened again later.
+   */
+  private async readExampleAgain(project: SP.SpellProject, drafts: { filePath: string }[]): Promise<void> {
+    const filePaths = [...new Set(drafts.map(({ filePath }) => filePath))]
+    if (editor.project === project) return await editor.reloadFiles(filePaths)
+    for (const filePath of filePaths) {
+      const file = project.getFile(filePath)
+      if (file) await editor.readAgain(file)
     }
   }
 
@@ -1298,6 +1387,21 @@ export class EditorStore extends Observable {
     }
     await editor.saveSideBarEdits()
     await editor.refreshDrafts()
+  }
+
+  /**
+   * "Save" (⌘S):  `saveAll()`;  then, in an example or a guide with your draft, what to keep (`askAboutExample()`,
+   * epic `mockup` T52).
+   * - NEVER throws:  a failure is shown.
+   */
+  async saveDraft(): Promise<void> {
+    try {
+      await editor.saveAll()
+      const { project } = editor
+      if (project && SPACES.isExampleProject(project.path)) await editor.askAboutExample(project, "saving")
+    } catch (error) {
+      editor.showError(error)
+    }
   }
 
   /** Has the file open, or any other file of current `project`, edits not saved?  Lights Save. */
@@ -1953,6 +2057,14 @@ export class EditorStore extends Observable {
     return dialogs().then((modals) => modals.choose(props))
   }
 
+  /**
+   * Ask a question with a button per answer (`Modals.ChoicesModalProps`):  resolves the answer's `value`,
+   * `undefined` on Escape.
+   */
+  askWithChoices<Value extends string>(props: Modals.ChoicesModalProps<Value>): Promise<Value | undefined> {
+    return dialogs().then((modals) => modals.askWithChoices(props))
+  }
+
   ////////////////
   // ## InputEditor event handlers
   ////////////////
@@ -2261,6 +2373,9 @@ const KEEP_DELAY_MS = 2000
 
 /** The projects `leaveProject()` is deciding about now, by path. */
 const leavingProjects = new Set<string>()
+
+/** What `askAboutExample()` asks:  keep your draft as your own app, throw it away, or (`@spell`) update the example. */
+type ExampleChoice = "mine" | "discard" | "update"
 
 /** Each file's edit waiting for typing to pause, before AutoSave keeps it. */
 const waitingKeeps = new Map<SP.AnySpellFile, ReturnType<typeof setTimeout>>()

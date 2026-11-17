@@ -279,18 +279,24 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   }
 
   /**
-   * Copy project `sourceId`, of any group, into this one, under its own name, with no question asked.
+   * Copy project `sourceId`, of any group, into this one, under its own name, with no question asked:
+   * `owen@spell/Solitaire`, or the next free name, `Solitaire 2`.
    * - `untouched`:  marked as a start card's, not one of your apps until it changes (`markUnsaved()`)
+   * - `withDraft`:  the copy takes your draft of `sourceId`, which then goes (epic `mockup` T52):
+   *   an example you changed, saved as your own app
    * - Returns the copy;  throws on error.
    */
-  async copyHere(sourceId: string, { untouched = false }: StartOptions = {}): Promise<SP.SpellProject> {
+  async copyHere(
+    sourceId: string,
+    { untouched = false, withDraft = false }: CopyOptions = {}
+  ): Promise<SP.SpellProject> {
     const die = getDier(this, `copying into ${this.type}`, { sourceId })
     await this.loadOrDie(die)
     const newProjectId = freeProjectId(this.path, new SP.SpellLocation(sourceId, die).projectName!, this.projectPaths)
     try {
       this.contents = await LoadableFile.fetch<SP.ProjectList>({
         url: `/api/projects/duplicate/project`,
-        contents: { projectId: sourceId, newProjectId },
+        contents: { projectId: sourceId, newProjectId, withDraft: withDraft || undefined },
         requestFormat: SpellProjectRoot.REQUEST_FORMAT_JSON,
         format: "json"
       })
@@ -550,6 +556,12 @@ export type StartOptions = {
    * - Off by default;  never in the static build, which keeps a visitor's projects in their browser.
    */
   untouched?: boolean
+}
+
+/** Options for `SpellProjectRoot.copyHere()`. */
+export type CopyOptions = StartOptions & {
+  /** The copy takes your draft of the project copied, which then goes (epic `mockup` T52).  Off by default. */
+  withDraft?: boolean
 }
 
 /** Options for `SpellProjectRoot.importApp()`. */

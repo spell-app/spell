@@ -193,6 +193,20 @@ export const APP_TEXTS = {
   keepAppSave: "Save Draft",
   keepAppDontSave: "Don't Save Draft",
   appNotKept: "{name} wasn't saved.",
+  /** Leaving an example (or Save in one) with your draft of it (epic `mockup` T52). */
+  keepExampleHeading: "Keep your changes to {name}?",
+  keepExampleMessage:
+    "Your changes are only yours:  the example stays the same for everyone.\nSave as My App puts a copy with your changes in your apps.",
+  keepExampleMessageSpell:
+    "Your changes are only yours:  the example stays the same for everyone.\nSave as My App puts a copy with your changes in your apps.\nUpdate the Example changes it for everyone.",
+  keepExampleAsMine: "Save as My App",
+  keepExampleDiscard: "Discard Changes",
+  keepExampleUpdate: "Update the Example",
+  exampleSavedAsApp: "Saved as {name}, in your apps.",
+  exampleDraftDiscarded: "Your changes to {name} are gone.",
+  updateExampleHeading: "Update {name} for everyone?",
+  updateExampleMessage: "Everyone who opens this example will see your changes.",
+  exampleUpdated: "Updated {name} for everyone.",
   saveCurrentChanges: "Save Current Changes",
   keptDraftAt: "{time}:  your draft, not published",
   publishedFile: "Published {count} file:  kept as version {version}.",

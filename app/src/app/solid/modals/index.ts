@@ -3,6 +3,7 @@
  * - `dialogs.ts`:  `alert()`, `confirm()`, `prompt()`, `promptForNumber()`, `choose()` -- what `editor`'s dialog
  *   methods call, through a dynamic `import()`.
  * - `Chooser.tsx`:  `<Chooser>` and `openChooser()`, behind `choose()`.
+ * - `Choices.tsx`:  `<Choices>` and `openChoices()`, behind `askWithChoices()`:  a button per answer (epic `mockup` T52).
  * - `VersionsBox.tsx`:  `openVersions()`, the project menu's Versions, drawn by the editor's Spell (epic `editor` I115).
  * - `AppSnapshot.tsx`:  `openAppSnapshot()`, a project's card picture from its app as the person sets it up (epic `mockup` T47).
  * - `modals.types.ts`:  their props (`AlertModalProps` ...), which `Actions`' `DialogActionProps` take too.
@@ -12,6 +13,7 @@ export * from "./modals.types"
 
 export * from "./dialogs"
 export * from "./Chooser"
+export * from "./Choices"
 export * from "./YouPanel"
 export * from "./PublishClash"
 export * from "./VersionsBox"

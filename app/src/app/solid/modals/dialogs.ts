@@ -2,16 +2,19 @@ import { UI as SpellUI, type ModalOptions } from "spell/ui"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import type {
   AlertModalProps,
+  ChoicesModalProps,
   ChooserModalProps,
   ConfirmModalProps,
   PromptModalProps
 } from "spell/app/app/solid/modals"
 
+import { openChoices } from "./Choices"
 import { openChooser } from "./Chooser"
 
 /**
- * The app's dialogs, behind `editor.alert()` / `confirm()` / `prompt()` / `promptForNumber()` / `choose()`:
- * `spell-ui`'s `UI.modals` for the first four, `<Chooser>` for `choose()`.
+ * The app's dialogs, behind `editor.alert()` / `confirm()` / `prompt()` / `promptForNumber()` / `choose()` /
+ * `askWithChoices()`:  `spell-ui`'s `UI.modals` for the first four, `<Chooser>` for `choose()`,
+ * `<Choices>` for `askWithChoices()`.
  * - Each builds its own `<ui-modal>` in `<body>` and removes it once hidden:  no `editor.modals` stack, no root
  *   component to mount.  Several at once stack in the top layer, newest on top.
  * - Each waits for `uiReady` first:  `UI.modals` throws until `<ui-modal>` has registered its provider.
@@ -66,6 +69,11 @@ export function promptForNumber(props: string | PromptModalProps): Promise<strin
 /** Resolves the chosen value (an array with `multiple`), or `undefined` on Cancel -- see `<Chooser>`. */
 export function choose(props: ChooserModalProps): Promise<unknown> {
   return openChooser(props)
+}
+
+/** Resolves the chosen answer's `value`, or `undefined` on Escape -- see `<Choices>`. */
+export function askWithChoices<Value extends string>(props: ChoicesModalProps<Value>): Promise<Value | undefined> {
+  return openChoices(props)
 }
 
 ////////////////

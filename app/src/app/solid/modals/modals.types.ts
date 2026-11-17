@@ -58,6 +58,30 @@ export type ChooserModalProps = ConfirmModalProps & {
   multiple?: boolean
 }
 
+/**
+ * Props for `editor.askWithChoices()`:  a question with a button per answer, in a row (epic `mockup` T52),
+ * when OK and Cancel aren't enough.
+ * - Escape, or the close, answers none:  `undefined`.
+ */
+export type ChoicesModalProps<Value extends string = string> = {
+  /** Message to show. */
+  message: string
+  /** Header for the dialog.  Default:  none (the message names the dialog). */
+  header?: string
+  /** The answers, a button each, left to right:  the last is the one Enter presses. */
+  choices: ModalChoice<Value>[]
+}
+
+/** One answer of `ChoicesModalProps`:  a button. */
+export type ModalChoice<Value extends string = string> = {
+  /** what choosing it answers */
+  value: Value
+  /** its button's text */
+  text: string
+  /** its button's `color`:  `primary` for the one most people want, `negative` for one that throws something away */
+  color?: "primary" | "negative"
+}
+
 ////////////////
 // ## `<Chooser>` options
 ////////////////

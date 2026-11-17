@@ -1160,9 +1160,9 @@ describe("an example opened as it is:  your edits are your draft of it (epic `mo
 
   it("a save, even in a checkout, is your draft:  the example's file stays as it was", async () => {
     const folder = example("Ex2", "published")
-    expect((await request("POST", "/api/projects/file/@spell/examples/Ex2/Ex2.spell", "mine", "text/plain")).status).toBe(
-      200
-    )
+    expect(
+      (await request("POST", "/api/projects/file/@spell/examples/Ex2/Ex2.spell", "mine", "text/plain")).status
+    ).toBe(200)
     expect(fs.readFileSync(path.join(folder, "Ex2.spell"), "utf8")).toBe("published")
     expect((await request("GET", "/spaces/@spell/examples/Ex2/Ex2.spell")).text).toBe("mine")
     const { drafts, mayPublish } = (await request("GET", "/api/projects/drafts/@spell/examples/Ex2")).json()
