@@ -113,9 +113,12 @@
 |   |   <⟨stack⟩ class=«"aisle-list"»>
 |   |     <⟨for⟩ aisle in its aisles>
 |   |       <⟨empty⟩><⟨text⟩ color=«"grey"»>Nothing left to get</⟨text⟩></⟨empty⟩>
+|   |       <⟨failed⟩><⟨text⟩ color=«"grey"»>Can't reach the list just now:  it tries again soon</⟨text⟩></⟨failed⟩>
 |   |     </⟨for⟩>
 |   |     <⟨stack⟩ spacing=«"xs"» class=«"got"»>
-|   |       <⟨for⟩ item in its got />
+|   |       <⟨for⟩ item in its got>
+|   |         <⟨failed⟩></⟨failed⟩>
+|   |       </⟨for⟩>
 |   |     </⟨stack⟩>
 |   |   </⟨stack⟩>
 

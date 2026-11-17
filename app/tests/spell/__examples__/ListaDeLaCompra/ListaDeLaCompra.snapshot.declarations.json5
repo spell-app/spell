@@ -131,7 +131,7 @@
       "type": "Recorrido",
       "superType": "View",
       "gender": "masculine",
-      "defined": "/Recorrido.es.spell:582-1492"
+      "defined": "/Recorrido.es.spell:582-1635"
     },
     {
       "property": "pasillos",

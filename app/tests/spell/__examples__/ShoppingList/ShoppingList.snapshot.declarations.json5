@@ -152,7 +152,7 @@
     {
       "type": "AisleList",
       "superType": "View",
-      "defined": "/AisleList.spell:480-1249"
+      "defined": "/AisleList.spell:480-1380"
     },
     {
       "property": "aisles",
@@ -177,7 +177,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/AisleList.spell:1019-1249"
+      "defined": "/AisleList.spell:1019-1380"
     },
     {
       "type": "ShoppingList",

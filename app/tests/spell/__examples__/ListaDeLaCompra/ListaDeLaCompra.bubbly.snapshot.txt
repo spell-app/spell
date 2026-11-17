@@ -113,9 +113,12 @@
 |   |   <⟨pila⟩ class=«"aisle-list"»>
 |   |     <⟨para⟩ cada pasillo en sus pasillos>
 |   |       <⟨vac⟩ío><⟨texto⟩ color=«"gris"»>No falta nada por comprar</⟨texto⟩></⟨vac⟩ío>
+|   |       <⟨fallo⟩><⟨texto⟩ color=«"gris"»>Ahora no se puede leer la lista:  lo vuelve a intentar enseguida</⟨texto⟩></⟨fallo⟩>
 |   |     </⟨para⟩>
 |   |     <⟨pila⟩ separacion=«"xs"» class=«"got"»>
-|   |       <⟨para⟩ cada artículo en su comprado />
+|   |       <⟨para⟩ cada artículo en su comprado>
+|   |         <⟨fallo⟩></⟨fallo⟩>
+|   |       </⟨para⟩>
 |   |     </⟨pila⟩>
 |   |   </⟨pila⟩>
 

@@ -219,9 +219,9 @@ export class Recorrido extends View {
   @drawn draw() {
     return (
       <es-pila class="aisle-list">
-        {core.drawRead(() => this.pasillos, (pasillo: Pasillo) => core.drawThing(pasillo), { none: () => <es-texto color="gris">No falta nada por comprar</es-texto> })}
+        {core.drawRead(() => this.pasillos, (pasillo: Pasillo) => core.drawThing(pasillo), { none: () => <es-texto color="gris">No falta nada por comprar</es-texto>, failed: () => <es-texto color="gris">{"Ahora no se puede leer la lista:  lo vuelve a intentar enseguida"}</es-texto> })}
         <es-pila class="got" separacion="xs">
-          {core.whileWaiting(() => core.drawEach(this.comprado, (artículo) => core.drawThing(artículo)))}
+          {core.drawRead(() => this.comprado, (artículo: Artículo) => core.drawThing(artículo), { failed: () => {} })}
         </es-pila>
       </es-pila>
     )

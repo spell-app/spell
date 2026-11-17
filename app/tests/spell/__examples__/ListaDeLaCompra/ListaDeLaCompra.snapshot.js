@@ -185,9 +185,9 @@ export class Recorrido extends View {
 
   draw() {
     return h("es-pila", { class: "aisle-list" },
-      () => core.drawRead(() => this.pasillos, (pasillo) => core.drawThing(pasillo), { none: () => h("es-texto", { color: "gris" }, "No falta nada por comprar") }),
+      () => core.drawRead(() => this.pasillos, (pasillo) => core.drawThing(pasillo), { none: () => h("es-texto", { color: "gris" }, "No falta nada por comprar"), failed: () => h("es-texto", { color: "gris" }, "Ahora no se puede leer la lista:  lo vuelve a intentar enseguida") }),
       h("es-pila", { class: "got", separacion: "xs" },
-        () => core.whileWaiting(() => core.drawEach(this.comprado, (artículo) => core.drawThing(artículo)))
+        () => core.drawRead(() => this.comprado, (artículo) => core.drawThing(artículo), { failed: () => {} })
       )
     )
   }

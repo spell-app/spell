@@ -218,9 +218,9 @@ export class AisleList extends View {
   @drawn draw() {
     return (
       <ui-stack class="aisle-list">
-        {core.drawRead(() => this.aisles, (aisle: Aisle) => core.drawThing(aisle), { none: () => <ui-text color="grey">Nothing left to get</ui-text> })}
+        {core.drawRead(() => this.aisles, (aisle: Aisle) => core.drawThing(aisle), { none: () => <ui-text color="grey">Nothing left to get</ui-text>, failed: () => <ui-text color="grey">{"Can't reach the list just now:  it tries again soon"}</ui-text> })}
         <ui-stack class="got" spacing="xs">
-          {core.whileWaiting(() => core.drawEach(this.got, (item) => core.drawThing(item)))}
+          {core.drawRead(() => this.got, (item: Item) => core.drawThing(item), { failed: () => {} })}
         </ui-stack>
       </ui-stack>
     )
