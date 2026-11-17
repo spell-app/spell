@@ -259,10 +259,10 @@
 |   |   <⟨deck⟩ «"deck"»hidden />    declares@0
 |   |   <⟨segment⟩ inverted attach-to=«"top"»>
 |   |     <⟨toolbar⟩
-|   |       class=_"GameBar"_
-|   |       appearance=_"pills"_
+|   |       class=«"GameBar"»
+|   |       appearance=«"pills"»
 |   |       inverted
-|   |       size=_"small"_
+|   |       size=«"small"»
 |   |       shrinkable
 |   |     >
 |   |       <⟨text⟩ size=«"big"» slot=«"title"» heavy>Spell Solitaire</>

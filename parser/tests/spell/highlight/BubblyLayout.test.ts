@@ -489,6 +489,20 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(markup, "words")).toEqual(expect.arrayContaining(['small" spacing']))
   })
 
+  it("draws a start tag laid out over lines exactly as on one line:  its values pills, its marks faint (epic `language` I151)", () => {
+    const oneLine = SP.BubblyLayout.of(
+      'to draw it\n\t<toolbar class="GameBar" inverted size={its size}>\n\t\t<spacer/>\n\tsay "hi"'
+    )
+    const overLines = SP.BubblyLayout.of(
+      'to draw it\n\t<toolbar\n\t\tclass="GameBar"\n\t\tinverted\n\t\tsize={its size}\n\t>\n\t\t<spacer/>\n\tsay "hi"'
+    )
+    for (const kind of ["input", "mark", "tag", "value"] as const)
+      expect(piecesOf(overLines, kind), kind).toEqual(piecesOf(oneLine, kind))
+    expect(codesOf(overLines)).toEqual(["{its size}"])
+    // the tag's `>` ends it:  the step after it is Spell again
+    expect(underlinesOf(overLines)).toEqual(underlinesOf(oneLine))
+  })
+
   it("draws a control line going on onto the lines under it (`and ...`) as ONE head, its body after them", () => {
     const text = CARD.replace("\t\tif it is a face card\n", "\t\tif it is a face card\n\t\t\tand its rank is king\n\t")
     const control = blocksOf(SP.BubblyLayout.of(text).nodes).find((block) => block.partOfSpeech === "control")!
