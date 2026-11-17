@@ -155,6 +155,23 @@ export class InspectorWrites {
   }
 
   /**
+   * Is `thing` the only one its program can have of its type, so "this one" and "all of them" are the same?
+   * (epic `editor` I183)
+   * - A one of a kind:  a type and its one thing declared together, `solitaire is an app`,
+   *   `leaderboard is a page`, a site, a place (`family cookbook is a web server at ...`).
+   *   The parse says so:  its thing is a variable of kind `only` in the project's scope.
+   * - The program's app (`core.RUNTIME.app`), however it's declared:  a program has one app.
+   *   So it holds before the editor's first parse, while the program runs from a kept compile.
+   */
+  // REFACTOR: Inspector.isOneOfAKind() is a copy of this;  make it call this one (Inspector.tsx was claimed by another agent)
+  static isOneOfAKind(thing: object): boolean {
+    if (runtimeCore()?.RUNTIME?.app === thing) return true
+    const className = thing.constructor.name
+    const variables = editor.project?.scope?.variables?.get() ?? []
+    return variables.some((variable) => variable.kind === "only" && variable.datatype === className)
+  }
+
+  /**
    * Which side a thing's switch starts on:  this one, for what has a line of its own;  else all of them,
    * unless nothing there can change, as for a card a deck makes in a loop:  then this one, to play with.
    */
@@ -493,7 +510,10 @@ function originOfProperty(thing: object, name: string, scope: InspectorScope): P
     }
     if (start) return { kind: "here", from: appTexts.text("inspectorOriginAll", { type: start.typeName }) }
     if (says) return { kind: WORKED_OUT, from: appTexts.text("inspectorOriginLine"), action: SHOW_CODE }
-    return { kind: WORKED_OUT, from: appTexts.text("inspectorOriginNoStart") }
+    // a one of a kind's "all" is itself (the app's score):  changed as it runs, its note saying it won't be kept
+    // (epic `editor` I242);  for many, it would change only the one selected, so it stays read only
+    const kind = InspectorWrites.isOneOfAKind(thing) ? "inherited" : WORKED_OUT
+    return { kind, from: appTexts.text("inspectorOriginNoStart") }
   }
   // this one
   if (!InspectorWrites.hasOwnLine(thing)) {
