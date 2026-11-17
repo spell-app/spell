@@ -2,6 +2,8 @@
   "title": "Solitario",
   "description": "Solitaire's Spanish twin:  Klondike in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has;  the card a reversible view, the game's moves its actions, drawn as its toolbar and its right-click menu",
   "category": "games",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "clickOn": "button[aria-label=\"Más\"]" }, { "click": "Jugar Solo", "wait": 2500 }] },
   "imports": [
     {
       "path": "/Carta.es.spell",

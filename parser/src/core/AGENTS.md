@@ -70,6 +70,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - A long list draws what fits, and more as you scroll ([drawnWindow.ts](drawnWindow.ts), epic `data` T76):
   every loop in a drawing (`core.drawEach()`), `draw each ...` (`drawItems()`) and a read of a place (`drawRead()`).
   - Up to 24 items it's a plain drawing, no different;  past that, 24 at a time, as the end of the list comes near the view.
+  - What it drew last took no room (items still reading, or drawing nothing):  it waits a second before more,
+    so a list of the Met's artworks, read one by one, isn't read all at once (epic `mockup` T42).
   - Find and printing draw the rest first, up to 5,000.  Going back to the same list draws as many, and scrolls where it was.
   - A read of a place that only draws:  `core.savedThings(Recipe, {}, "as drawn")`, its later pages read as they're needed.
 - A view's own element, e.g. `<solitaire-card>`:

@@ -1,0 +1,148 @@
+==== /Tarjeta.es.spell
+⟪# Una tarjeta de estudio⟫
+⟦// Una palabra en su frente, lo que significa en su dorso.⟧
+⟦// Es una vista de dos caras, como las cartas de Solitario:  boca arriba muestra la palabra, boca abajo lo que significa.⟧
+⟦// Un clic la voltea.⟧
+
+[thing create_type L0]
+| una «"tarjeta"» es una **vista reversible pulsable**
+|   [property define_property_has L1]
+|   | su «"palabra"» es **texto**
+|   |   ⟦// La palabra en inglés, en su frente⟧
+|   [property define_property_has L1]
+|   | su «"significado"» es **texto**
+|   |   ⟦// Lo que significa, en su dorso⟧
+
+|   [action on L1]
+|   | al clic
+|   |   ⟦// Un clic la voltea⟧
+|   |   voltear eso    ‾value(eso)
+
+|   [action draw_it L1]
+|   | para **dibujar** su **frente**
+|   |   <⟨segmento⟩ apariencia=«"elevado"» color=«"azul"» alinear=«"centro"» relleno=«"lg"»>
+|   |     <⟨texto⟩ tamano=«"pequeño"» color=«"gris"» mayusculas>Inglés</⟨texto⟩>
+|   |     <⟨espacio⟩ />
+|   |     <⟨texto⟩ tamano=«"enorme"» negrita>{su **palabra**}</⟨texto⟩>    code({su palabra})
+|   |   </⟨segmento⟩>
+|   [action draw_it L1]
+|   | para **dibujar** su **dorso**
+|   |   <⟨segmento⟩ apariencia=«"elevado"» color=«"verde"» alinear=«"centro"» relleno=«"lg"»>
+|   |     <⟨texto⟩ tamano=«"pequeño"» color=«"gris"» mayusculas>Qué significa</⟨texto⟩>
+|   |     <⟨espacio⟩ />
+|   |     <⟨texto⟩ tamano=«"enorme"» negrita>{su **significado**}</⟨texto⟩>    code({su significado})
+|   |   </⟨segmento⟩>
+
+|   [action to_do_something L1]
+|   | para «probar darle la vuelta»
+|   |   poner la **tarjeta** a **una nueva tarjeta** con **palabra** _"the cat"_, **significado** = _"el gato"_    ‾value(la tarjeta) ‾value(una nueva tarjeta con palabra "the cat", significado = "el gato")
+|   |   voltear la **tarjeta** boca arriba    ‾value(la tarjeta)
+|   |   la **tarjeta** está boca arriba debería ser _sí_    ‾question(la tarjeta está boca arriba)
+|   |   voltear la **tarjeta**    ‾value(la tarjeta)
+|   |   la **tarjeta** está boca abajo debería ser _sí_    ‾question(la tarjeta está boca abajo)
+|   |   voltear la **tarjeta**    ‾value(la tarjeta)
+|   |   la **tarjeta** está boca arriba debería ser _sí_    ‾question(la tarjeta está boca arriba)
+
+[thing create_list_type L0]
+| un «"mazo"» es una **lista de tarjetas**
+|   ⟦// Las tarjetas para aprender⟧
+
+==== /TarjetasDeEstudio.es.spell
+# T**arjetas de** estudio
+⟦// Un mazo de tarjetas para aprender:  una palabra en inglés por delante, lo que significa por detrás.⟧
+⟦// Haz clic en la tarjeta, o en Mostrar la respuesta, para voltearla, y luego di si la sabías:⟧
+⟦// la puntuación lleva la cuenta, y la siguiente tarjeta sale al azar.⟧
+⟦// La tarjeta es de este proyecto, en `Tarjeta.es.spell`;  este archivo tiene el juego, y sus palabras.⟧
+
+[thing create_one_of_a_kind L0]
+| «juego» es una **aplicación**
+|   [property define_property_has L1]
+|   | «"mazo"» es **un nuevo mazo**
+|   [property define_property_has L1]
+|   | su «"tarjeta"» es una **tarjeta**
+|   |   ⟦// La tarjeta que se ve⟧
+|   [property define_property_has L1]
+|   | su «"acertadas"» es un **número**
+|   |   ⟦// Cuántas sabías⟧
+|   [property define_property_has L1]
+|   | su «"intentadas"» es un **número**
+|   |   ⟦// Cuántas has intentado⟧
+|   [property property_value_getter L1]
+|   | su «"puntuación"» es
+|   |   ⟦// Lo que dice la barra de herramientas⟧
+|   |   _"Aún no has intentado ninguna"_ si las **intentadas** es _0_    ‾value(las intentadas)
+|   |   _"[acertadas] de [intentadas] bien"_ de lo contrario
+
+|   [plain group define_group L1]
+|   | grupo «"Jugar"»
+|   |   [action to_do_something L2]
+|   |   | para «sacar otra»
+|   |   |   ⟦// Una tarjeta del mazo al azar, con la palabra arriba:  nunca la que se acaba de ver⟧
+|   |   |   poner **otras** a **tarjetas** en el **mazo** donde no es la **tarjeta** de **juego**    ‾value(otras) ‾value(tarjetas en el mazo donde no es la tarjeta de juego)
+|   |   |   poner la **tarjeta** a una **tarjeta** al azar de **otras**    ‾value(la tarjeta) ‾value(una tarjeta al azar de otras)
+|   |   |   voltear la **tarjeta** boca arriba    ‾value(la tarjeta)
+|   |   [action to_do_something L2]
+|   |   | para «mostrar la respuesta»
+|   |   |   atajo _espacio_
+|   |   |   voltear la **tarjeta**    ‾value(la tarjeta)
+|   |   [action to_do_something L2]
+|   |   | para «"decir que la sabía"» con título «"La sabía"», icono «"check"»
+|   |   |   ⟦// Se cuenta, y luego la siguiente tarjeta⟧
+|   |   |   atajo _S_
+|   |   |   poner las **acertadas** a las **acertadas** + _1_    ‾value(las acertadas) ‾value(las acertadas)
+|   |   |   poner las **intentadas** a las **intentadas** + _1_    ‾value(las intentadas) ‾value(las intentadas)
+|   |   |   sacar otra    ‾call(sacar otra)
+|   |   [action to_do_something L2]
+|   |   | para «"decir que no la sabía"» con título «"No la sabía"», icono «"close"»
+|   |   |   atajo _N_
+|   |   |   poner las **intentadas** a las **intentadas** + _1_    ‾value(las intentadas) ‾value(las intentadas)
+|   |   |   sacar otra    ‾call(sacar otra)
+|   |   [action to_do_something L2]
+|   |   | para «"empezar de nuevo"» con icono «"redo"»
+|   |   |   limpiar las **acertadas**    ‾value(las acertadas)
+|   |   |   limpiar las **intentadas**    ‾value(las intentadas)
+|   |   |   sacar otra    ‾call(sacar otra)
+|   |   [property define_menu L2]
+|   |   | su «"menú del juego"» es un menú de «"empezar de nuevo"»
+
+|   |   [action draw_it L2]
+|   |   | para **dibujarlo**
+|   |   |   ⟦// La barra de herramientas con la puntuación, la tarjeta, y luego lo que puedes hacer:  voltearla, o decir cómo te fue⟧
+|   |   |   <⟨contenedor⟩ texto>
+|   |   |     <⟨pila⟩>
+|   |   |       <⟨barra-herramientas⟩ menu=«"menú del juego"» aria-label=«"Juego"» encogible>
+|   |   |         <⟨texto⟩ slot=«"titulo"» tamano=«"grande"»>Tarjetas de estudio</⟨texto⟩>
+|   |   |         <⟨texto⟩ slot=«"derecha"»>{la **puntuación**}</⟨texto⟩>    code({la puntuación})
+|   |   |       </⟨barra-herramientas⟩>
+|   |   |       {dibujar la **tarjeta**}
+|   |   |       <⟨pila⟩ direccion=«"horizontal"» repartir=«"centro"»>
+|   |   |         <⟨si⟩ la tarjeta está boca arriba>
+|   |   |           <⟨bot⟩ón color=«"primario"» onClick={mostrar la respuesta}>Mostrar la respuesta</⟨bot⟩ón>    code({mostrar la respuesta})
+|   |   |         <⟨de⟩ lo contrario>
+|   |   |           <⟨bot⟩ón color=«"positivo"» icono=«"check"» onClick={decir que la sabía}>La sabía</⟨bot⟩ón>    code({decir que la sabía})
+|   |   |           <⟨bot⟩ón color=«"negativo"» apariencia=«"básico"» icono=«"close"» onClick={decir que no la sabía}>No la sabía</⟨bot⟩ón>    code({decir que no la sabía})
+|   |   |         </>
+|   |   |       </⟨pila⟩>
+|   |   |     </⟨pila⟩>
+|   |   |   </⟨contenedor⟩>
+
+⟪## El mazo:  doce palabras en inglés -- agrega las tuyas⟫
+
+[action to_do_something L0]
+| para «agregar (palabra como texto) significado (significado como texto)»    ‾value(palabra como texto) ‾value(significado como texto) bold(palabra) bold(texto) bold(significado) bold(texto)
+|   agregar (**una nueva tarjeta** con **palabra** = la **palabra**, **significado** = el **significado**) al **mazo** de **juego**    ‾value(una nueva tarjeta con palabra = la palabra, significado = el significado) ‾value(mazo de juego)
+
+agregar _"the cat"_ significado _"el gato"_    ‾call(agregar "the cat" significado "el gato")
+agregar _"the dog"_ significado _"el perro"_    ‾call(agregar "the dog" significado "el perro")
+agregar _"the house"_ significado _"la casa"_    ‾call(agregar "the house" significado "la casa")
+agregar _"the book"_ significado _"el libro"_    ‾call(agregar "the book" significado "el libro")
+agregar _"the apple"_ significado _"la manzana"_    ‾call(agregar "the apple" significado "la manzana")
+agregar _"the water"_ significado _"el agua"_    ‾call(agregar "the water" significado "el agua")
+agregar _"the moon"_ significado _"la luna"_    ‾call(agregar "the moon" significado "la luna")
+agregar _"the sun"_ significado _"el sol"_    ‾call(agregar "the sun" significado "el sol")
+agregar _"the beach"_ significado _"la playa"_    ‾call(agregar "the beach" significado "la playa")
+agregar _"the train"_ significado _"el tren"_    ‾call(agregar "the train" significado "el tren")
+agregar _"the key"_ significado _"la llave"_    ‾call(agregar "the key" significado "la llave")
+agregar _"the butterfly"_ significado _"la mariposa"_    ‾call(agregar "the butterfly" significado "la mariposa")
+
+empezar de nuevo    ‾call(empezar de nuevo)

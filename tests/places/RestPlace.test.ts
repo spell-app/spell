@@ -189,7 +189,7 @@ describe("RestPlace, a collection searched at its own address", () => {
    * A server shaped like GitHub's search:  `/search/users?q=` answers `{ total_count, items }`, a page at a time,
    * the next named in its `Link` header;  `/users/<login>` answers one.
    */
-  async function github() {
+  async function github(at = "/search/users") {
     const asked: string[] = []
     const http = createServer((request, response) => {
       const url = new URL(request.url!, "http://here")
@@ -211,7 +211,7 @@ describe("RestPlace, a collection searched at its own address", () => {
     const place = new RestPlace({
       url: `http://127.0.0.1:${port}`,
       can: { page: "cursor", idOf: "login" },
-      collections: { users: { path: "/users{/id}", searches: { param: "q", fields: [], at: "/search/users" } } }
+      collections: { users: { path: "/users{/id}", searches: { param: "q", fields: [], at } } }
     })
     return { place, asked }
   }
@@ -241,6 +241,13 @@ describe("RestPlace, a collection searched at its own address", () => {
       query: { search, page: { at: first.nextPage! } }
     })
     expect((await query.answer(new AbortController().signal)).rows).toEqual([{ login: "ryansolida" }])
+  })
+
+  test("its address may carry a question of its own:  the Met's `/v1.1/search?hasImages=true` (epic `mockup` T42)", async () => {
+    const { place, asked } = await github("/search/users?type=user")
+    const first = await place.list("users", { search: { "*": "ryan" } }, {})
+    expect(first.rows).toEqual([{ login: "ryansolid" }])
+    expect(asked).toEqual(["/search/users?type=user&q=ryan"])
   })
 })
 

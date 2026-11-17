@@ -3,7 +3,7 @@ import { createSignal, flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import "spell/app/app/solid/cellsBridge"
-import { MOST_AT_ONCE, drawnInWindow } from "spell/parser/core/drawnWindow"
+import { MOST_AT_ONCE, WAIT_WHEN_NOTHING_MOVED_MS, drawnInWindow } from "spell/parser/core/drawnWindow"
 import { isGoingToTheTop, uiMethods } from "spell/parser/core/ui"
 
 /**
@@ -22,7 +22,11 @@ afterEach(() => {
 /** These rows, drawn in a window, in a box of their own, or the one that's there:  as going back draws again in the same place. */
 function drawn(
   rows: readonly number[],
-  { key, more }: { key?: () => object; more?: Parameters<typeof drawnInWindow>[0]["more"] } = {}
+  {
+    key,
+    more,
+    height = 20
+  }: { key?: () => object; more?: Parameters<typeof drawnInWindow>[0]["more"]; height?: number } = {}
 ) {
   if (!box?.isConnected) {
     box = document.createElement("div")
@@ -36,7 +40,7 @@ function drawn(
         drawItem: (row) => {
           const element = document.createElement("div")
           element.className = "row"
-          element.style.height = "20px"
+          element.style.height = `${height}px`
           element.textContent = `${row as number}`
           return element
         },
@@ -76,6 +80,17 @@ describe("a long list draws what fits", () => {
     }
     expect(rowsDrawn()).toBe(500)
     expect(box.querySelector("spell-more-below")).toBeNull()
+  })
+
+  test("rows that take no room (reading, or drawing nothing) draw more a moment later, not all at once (epic `mockup` T42)", async () => {
+    drawn(rowsOf(500), { height: 0 })
+    await expect.poll(rowsDrawn).toBe(MOST_AT_ONCE * 2)
+    await nextFrames(10)
+    // the end never moved:  it waits, so the Met's artworks aren't all read at once
+    expect(rowsDrawn()).toBe(MOST_AT_ONCE * 2)
+    await new Promise((done) => setTimeout(done, WAIT_WHEN_NOTHING_MOVED_MS + 200))
+    await nextFrames()
+    expect(rowsDrawn()).toBe(MOST_AT_ONCE * 3)
   })
 
   test("Find draws the rest first:  a browser can only find what's there", () => {

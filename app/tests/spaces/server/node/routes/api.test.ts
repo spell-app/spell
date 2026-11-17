@@ -1032,8 +1032,112 @@ describe("the home page's order (epic `mockup` P19, `repo-split` P28)", () => {
     const json = "application/json"
     const notASection = await request("POST", "/api/home/order", '{"group":"sections","names":["sidebar"]}', json)
     expect(notASection.status).toBe(400)
-    expect(notASection.json().errors[0].message).toContain("the sections are start, examples")
+    expect(notASection.json().errors[0].message).toContain("the sections are projects, start, examples")
     const notAGroup = await request("POST", "/api/home/order", '{"group":"@acme/tools","names":["a"]}', json)
     expect(notAGroup.status).toBe(400)
+  })
+})
+
+describe("a project made from a start card, not one of your apps until it changes (epic `mockup` I42)", () => {
+  const JSON_TYPE = "application/json"
+  const json = (body: object) => JSON.stringify(body)
+  /** Make project `name` in your space as a start card does:  made, then marked untouched;  answers its list entry. */
+  async function started(name: string) {
+    const projectId = `owen@spell/${name}`
+    const made = await request("POST", "/api/projects/create/project", json({ projectId }), JSON_TYPE)
+    expect(made.status).toBe(200)
+    const marked = await request(
+      "POST",
+      "/api/projects/unsaved/project",
+      json({ projectId, unsaved: "untouched" }),
+      JSON_TYPE
+    )
+    expect(marked.status).toBe(200)
+    return projectId
+  }
+  /** Project `projectId`'s mark, as its group's list says now. */
+  async function markOf(projectId: string) {
+    const list = (await request("GET", "/api/projects/list/owen@spell")).json() as { path: string; unsaved?: string }[]
+    return list.find((entry) => entry.path === projectId)?.unsaved
+  }
+
+  it("marked untouched, its list entry says so, and its project file", async () => {
+    const projectId = await started("StartedA")
+    expect(await markOf(projectId)).toBe("untouched")
+    expect(readFixture("user/StartedA/__project.json5")).toContain('"unsaved": "untouched"')
+  })
+
+  it("its first saved edit makes it changed;  what spell builds as it compiles doesn't", async () => {
+    const projectId = await started("StartedB")
+    await request("POST", `/api/projects/file/${projectId}/StartedB.spell.js`, "export default 1\n", "text/plain")
+    expect(await markOf(projectId)).toBe("untouched")
+    await request("POST", `/api/projects/file/${projectId}/Untitled.spell`, "set x to 1\n", "text/plain")
+    expect(await markOf(projectId)).toBe("changed")
+  })
+
+  it("a file made, or its settings changed, is a change too", async () => {
+    const made = await started("StartedC")
+    await request(
+      "POST",
+      "/api/projects/create/file",
+      json({ projectId: made, filePath: "/More.spell", contents: "x" }),
+      JSON_TYPE
+    )
+    expect(await markOf(made)).toBe("changed")
+    const settled = await started("StartedD")
+    await request(
+      "POST",
+      "/api/projects/settings/project",
+      json({ projectId: settled, settings: { version: "1.0.0" } }),
+      JSON_TYPE
+    )
+    expect(await markOf(settled)).toBe("changed")
+  })
+
+  it("Save Current Changes keeps it for good:  the mark gone", async () => {
+    const projectId = await started("StartedE")
+    await request("POST", `/api/projects/file/${projectId}/Untitled.spell`, "set x to 2\n", "text/plain")
+    const kept = await request("POST", "/api/projects/keep-draft", json({ projectId }), JSON_TYPE)
+    expect(kept.status).toBe(200)
+    expect(await markOf(projectId)).toBeUndefined()
+    expect(readFixture("user/StartedE/__project.json5")).not.toContain("unsaved")
+  })
+
+  it("kept by hand (null), the mark goes;  a copy of a marked project is never marked", async () => {
+    const projectId = await started("StartedF")
+    const copied = await request(
+      "POST",
+      "/api/projects/duplicate/project",
+      json({ projectId, newProjectId: "owen@spell/StartedFCopy" }),
+      JSON_TYPE
+    )
+    expect(copied.status).toBe(200)
+    expect(await markOf("owen@spell/StartedFCopy")).toBeUndefined()
+    await request("POST", "/api/projects/unsaved/project", json({ projectId, unsaved: null }), JSON_TYPE)
+    expect(await markOf(projectId)).toBeUndefined()
+  })
+
+  it("an untouched one left a day ago goes when the next is made;  a changed one stays", async () => {
+    const old = await started("StartedOld")
+    const changed = await started("StartedOldChanged")
+    await request("POST", `/api/projects/file/${changed}/Untitled.spell`, "set x to 3\n", "text/plain")
+    const dayAgo = new Date(Date.now() - 25 * 60 * 60 * 1000)
+    for (const name of ["StartedOld", "StartedOldChanged"]) {
+      fs.utimesSync(fixturePath(`user/${name}/__project.json5`), dayAgo, dayAgo)
+    }
+    await started("StartedNew")
+    expect(fs.existsSync(fixturePath("user/StartedOld"))).toBe(false)
+    expect(await markOf(old)).toBeUndefined()
+    expect(await markOf(changed)).toBe("changed")
+  })
+
+  it("any other mark is 400", async () => {
+    const reply = await request(
+      "POST",
+      "/api/projects/unsaved/project",
+      json({ projectId: PROJECT, unsaved: "changed" }),
+      JSON_TYPE
+    )
+    expect(reply.status).toBe(400)
   })
 })

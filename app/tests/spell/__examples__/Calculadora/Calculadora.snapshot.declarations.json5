@@ -1,0 +1,163 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Calculadora",
+    "test_dos_cuentas_seguidas"
+  ],
+  "statements": [
+    {
+      "type": "Calculadora",
+      "superType": "App",
+      "defined": "/Calculadora.es.spell:229-4688"
+    },
+    {
+      "property": "entrada",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "groupDescription": "La cuenta que se escribe:  su número izquierdo, su operador y su número derecho",
+      "datatype": "text",
+      "defined": "/Calculadora.es.spell:368-484"
+    },
+    {
+      "property": "izquierdo",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "datatype": "text",
+      "defined": "/Calculadora.es.spell:486-509"
+    },
+    {
+      "property": "operador",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "datatype": "text",
+      "defined": "/Calculadora.es.spell:511-533"
+    },
+    {
+      "property": "derecho",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "datatype": "text",
+      "defined": "/Calculadora.es.spell:535-556"
+    },
+    {
+      "property": "total",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "datatype": "number",
+      "defined": "/Calculadora.es.spell:558-996"
+    },
+    {
+      "property": "cuenta",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "datatype": "text",
+      "defined": "/Calculadora.es.spell:998-1235"
+    },
+    {
+      "property": "resultado",
+      "of": "Calculadora",
+      "group": "Lo que guarda",
+      "datatype": "text",
+      "defined": "/Calculadora.es.spell:1237-1399"
+    },
+    {
+      "syntax": "borrar {thisArg:expression}?",
+      "output": "borrar",
+      "rule": "method_call",
+      "of": "Calculadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Lo Que Hacen Sus Teclas",
+      "kind": "method",
+      "name": "borrarla",
+      "returns": "nothing",
+      "defined": "/Calculadora.es.spell:1435-1535"
+    },
+    {
+      "syntax": "terminar {thisArg:expression}?",
+      "output": "terminar",
+      "rule": "method_call",
+      "of": "Calculadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Lo Que Hacen Sus Teclas",
+      "kind": "method",
+      "name": "terminarla",
+      "returns": "nothing",
+      "defined": "/Calculadora.es.spell:1537-1781"
+    },
+    {
+      "syntax": "pulsar {callArgs:expression} ((de|del) {thisArg:expression})?",
+      "output": "pulsar_$dígito",
+      "rule": "method_call",
+      "of": "Calculadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Lo Que Hacen Sus Teclas",
+      "kind": "method",
+      "name": "pulsar (dígito como texto)",
+      "params": [
+        {
+          "name": "dígito",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Calculadora.es.spell:1783-2266"
+    },
+    {
+      "syntax": "aplicar {callArgs:expression} ((de|del) {thisArg:expression})?",
+      "output": "aplicar_$tecla",
+      "rule": "method_call",
+      "of": "Calculadora",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Lo Que Hacen Sus Teclas",
+      "kind": "method",
+      "name": "aplicar (tecla como texto)",
+      "params": [
+        {
+          "name": "tecla",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Calculadora.es.spell:2268-2503"
+    },
+    {
+      "syntax": "probar dos cuentas seguidas",
+      "output": "test_dos_cuentas_seguidas",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "dos cuentas seguidas",
+      "defined": "/Calculadora.es.spell:4341-4688"
+    }
+  ],
+  "codeLines": [
+    9,
+    13,
+    18,
+    23,
+    28,
+    34,
+    44,
+    50,
+    55,
+    63,
+    72,
+    82,
+    238
+  ]
+}

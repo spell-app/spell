@@ -1,0 +1,39 @@
+# Una tarjeta de estudio
+// Una palabra en su frente, lo que significa en su dorso.
+// Es una vista de dos caras, como las cartas de Solitario:  boca arriba muestra la palabra, boca abajo lo que significa.
+// Un clic la voltea.
+
+una "tarjeta" es una vista reversible pulsable
+	su "palabra" es texto
+		// La palabra en inglés, en su frente
+	su "significado" es texto
+		// Lo que significa, en su dorso
+
+	al clic
+		// Un clic la voltea
+		voltear eso
+
+	para dibujar su frente
+		<segmento apariencia="elevado" color="azul" alinear="centro" relleno="lg">
+			<texto tamano="pequeño" color="gris" mayusculas>Inglés</texto>
+			<espacio />
+			<texto tamano="enorme" negrita>{su palabra}</texto>
+		</segmento>
+	para dibujar su dorso
+		<segmento apariencia="elevado" color="verde" alinear="centro" relleno="lg">
+			<texto tamano="pequeño" color="gris" mayusculas>Qué significa</texto>
+			<espacio />
+			<texto tamano="enorme" negrita>{su significado}</texto>
+		</segmento>
+
+	para probar darle la vuelta
+		poner la tarjeta a una nueva tarjeta con palabra "the cat", significado = "el gato"
+		voltear la tarjeta boca arriba
+		la tarjeta está boca arriba debería ser sí
+		voltear la tarjeta
+		la tarjeta está boca abajo debería ser sí
+		voltear la tarjeta
+		la tarjeta está boca arriba debería ser sí
+
+un "mazo" es una lista de tarjetas
+	// Las tarjetas para aprender

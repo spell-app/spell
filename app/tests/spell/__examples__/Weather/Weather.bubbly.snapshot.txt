@@ -1,0 +1,181 @@
+==== /Weather.api.spell
+⟪## Open-Meteo:  the weather now, and hour by hour, for anywhere on Earth⟫
+⟦// A server other people run, and what it holds.  What's drawn from it is in Weather.spell.⟧
+⟦// `open meteo` is what this wrote, from looking at the server:⟧
+⟦//   spell place ingest https://api.open-meteo.com --into Weather.api.spell --name "open meteo" --no-ai⟧
+⟦//     --collections "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto"⟧
+⟦// `spell place update Weather.api.spell` looks again, and changes only this file and Weather.api.json5.⟧
+⟦// It has no list of forecasts:  each is asked for by where it's for, `every forecast where its latitude is ... and its longitude is ...`.⟧
+⟦// Its hours, the next 12, come as lists side by side, one of times and one of each measure:  each hour is read as one of each.⟧
+⟦// Each temperature is in °C, and shows in the reader's own units:  °F in the US.⟧
+⟦// Its weather is a WMO code, a number:  Sky.spell says what each one looks like.⟧
+
+[thing create_place L0]
+| «open meteo» is a web server at «"https://api.open-meteo.com"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+|   it writes names like _"generationtime_ms"_
+|   **forecasts** live at _"/v1/forecast?current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&forecast_hours=12&timezone=auto"_
+|   **forecasts** are asked for by their **latitude** and **longitude**
+
+[thing create_type L0]
+| a «"forecast"» is a **thing**
+|   it lives in **open meteo**    ‾value(open meteo)
+|   [property define_property_has L1]
+|   | its «"latitude"» is a **number**
+|   [property define_property_has L1]
+|   | its «"longitude"» is a **number**
+|   [property define_property_has L1]
+|   | its «"generationtime ms"» is a **number**
+|   [property define_property_has L1]
+|   | its «"utc offset seconds"» is a **number**
+|   [property define_property_has L1]
+|   | its «"timezone"» is **text**
+|   [property define_property_has L1]
+|   | its «"timezone abbreviation"» is **text**
+|   [property define_property_has L1]
+|   | its «"elevation"» is a **number**
+|   [property define_property_has L1]
+|   | its «"current"» is a **current**
+|   [property define_property_has L1]
+|   | its «"hours"» is a list of **hours**, stored as «"hourly"»
+
+[thing create_type L0]
+| a «"current"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"time"» is a **date**
+|   [property define_property_has L1]
+|   | its «"interval"» is a **duration** in seconds
+|   [property define_property_has L1]
+|   | its «"temperature"» is a **temperature** in °C, stored as «"temperature_2m"»
+|   [property define_property_has L1]
+|   | its «"weather code"» is a **number**  ⟦// in wmo code⟧
+
+[thing create_type L0]
+| an «"hour"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"time"» is a **date**
+|   [property define_property_has L1]
+|   | its «"temperature"» is a **temperature** in °C, stored as «"temperature_2m"»
+|   [property define_property_has L1]
+|   | its «"weather code"» is a **number**  ⟦// in wmo code⟧
+
+==== /Sky.spell
+⟪## The sky:  what a weather code looks like⟫
+⟦// Open-Meteo says the weather as a number, a WMO code:  0 a clear sky, 61 rain, 95 a thunderstorm.⟧
+⟦// These two say each code as people do:  in a word or two, and as an emoji.⟧
+
+[action to_do_something L0]
+| to «name the weather (code as a number)»    ‾value(code as a number) bold(code) bold(number)
+|   ⟦// The weather in a word or two:  "Partly cloudy"⟧
+|   if **code** is _0_ return _"Clear"_    ‾value(code)
+|   if **code** <= _2_ return _"Partly cloudy"_    ‾value(code)
+|   if **code** is _3_ return _"Cloudy"_    ‾value(code)
+|   if **code** <= _48_ return _"Fog"_    ‾value(code)
+|   if **code** <= _67_ return _"Rain"_    ‾value(code)
+|   if **code** <= _77_ return _"Snow"_    ‾value(code)
+|   if **code** <= _82_ return _"Showers"_    ‾value(code)
+|   if **code** <= _86_ return _"Snow showers"_    ‾value(code)
+|   return _"Thunderstorms"_
+
+[action to_do_something L0]
+| to «picture the weather (code as a number)»    ‾value(code as a number) bold(code) bold(number)
+|   ⟦// The name of an emoji for it:  "sun", "cloud_with_rain"⟧
+|   if **code** is _0_ return _"sun"_    ‾value(code)
+|   if **code** <= _2_ return _"sun_behind_cloud"_    ‾value(code)
+|   if **code** is _3_ return _"cloud"_    ‾value(code)
+|   if **code** <= _48_ return _"fog"_    ‾value(code)
+|   if **code** <= _67_ return _"cloud_with_rain"_    ‾value(code)
+|   if **code** <= _77_ return _"cloud_with_snow"_    ‾value(code)
+|   if **code** <= _82_ return _"sun_behind_rain_cloud"_    ‾value(code)
+|   if **code** <= _86_ return _"cloud_with_snow"_    ‾value(code)
+|   return _"cloud_with_lightning_and_rain"_
+
+==== /Weather.spell
+⟪# Weather⟫
+⟦// The weather in the city you pick:  now, big, then the next 12 hours.⟧
+⟦// It comes from Open-Meteo, a server other people run:  Weather.api.spell, as `spell place ingest` wrote it.⟧
+⟦// What each weather code looks like, in words and as an emoji, is in Sky.spell.⟧
+
+⟪## The app:  a city to pick, and its forecast⟫
+
+[thing create_one_of_a_kind L0]
+| «weather» is an **app**
+|   [property define_property_has L1]
+|   | its «"cities"» is a list of **cities**
+|   [property define_property_has L1]
+|   | its «"place"» is **text**
+|   |   ⟦// The city picked, by its name:  what the picker holds⟧
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   add **a new city** with **name** _"Berlin"_, **latitude** = _52.52_, **longitude** = _13.41_ to its **cities**    ‾value(a new city with name "Berlin", latitude = 52.52, longitude = 13.41) ‾value(its cities)
+|   |   add **a new city** with **name** _"New York"_, **latitude** = _40.71_, **longitude** = _-74.01_ to its **cities**    ‾value(a new city with name "New York", latitude = 40.71, longitude = -74.01) ‾value(its cities)
+|   |   add **a new city** with **name** _"Tokyo"_, **latitude** = _35.68_, **longitude** = _139.69_ to its **cities**    ‾value(a new city with name "Tokyo", latitude = 35.68, longitude = 139.69) ‾value(its cities)
+|   |   add **a new city** with **name** _"Buenos Aires"_, **latitude** = _-34.6_, **longitude** = _-58.38_ to its **cities**    ‾value(a new city with name "Buenos Aires", latitude = -34.6, longitude = -58.38) ‾value(its cities)
+|   |   set its **place** to _"Berlin"_    ‾value(its place)
+|   [property property_value_getter L1]
+|   | its «"city"» is the first **city** in its **cities** where its **name** is the **place**
+|   [property property_value_getter L1]
+|   | its «"forecasts"» is every **forecast** where its **latitude** is the **latitude** of the **city** and its **longitude** is the **longitude** of the **city**
+|   |   ⟦// The city's, from Open-Meteo:  asked for by where it is;  it answers with one⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ text>
+|   |     <⟨stack⟩ spacing=«"lg"»>
+|   |       <⟨form⟩ value={it}>    code({it})
+|   |         <⟨select⟩ name=«"place"» aria-label=«"City"»>
+|   |           <⟨for⟩ city in its cities>
+|   |             <⟨item⟩ value={its **name**}>{its **name**}</⟨item⟩>    code({its name}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |       </⟨form⟩>
+|   |       <⟨for⟩ its forecasts loading=«"Asking Open-Meteo"» failed=«"Open-Meteo can't be reached just now."» />
+|   |       <⟨text⟩ size=«"small"» color=«"grey"»>From <⟨link⟩ link=«"https://open-meteo.com"»>Open-Meteo</⟨link⟩>, in your own units.</⟨text⟩>
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>
+
+⟪## A city:  where it is on Earth⟫
+
+[thing create_type L0]
+| a «"city"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"latitude"» is a **number**
+|   [property define_property_has L1]
+|   | its «"longitude"» is a **number**
+
+⟪## A forecast:  the weather now, big, then the next 12 hours in a row⟫
+
+[thing reopen_type L0]
+| a **forecast**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ spacing=«"lg"»>
+|   |     <⟨segment⟩ padded=«"very"»>
+|   |       <⟨stack⟩ align=«"center"» spacing=«"xs"»>
+|   |         <⟨emoji⟩ name={picture the weather (its **current's weather code**)} size=«"large"» />    code({picture the weather (its current's weather code)})
+|   |         <⟨statistic⟩ size=«"huge"»>
+|   |           <⟨value⟩>{its **current's temperature**}</⟨value⟩>    code({its current's temperature})
+|   |         </⟨statistic⟩>
+|   |         <⟨text⟩ size=«"large"»>{name the weather (its **current's weather code**)}</⟨text⟩>    code({name the weather (its current's weather code)})
+|   |       </⟨stack⟩>
+|   |     </⟨segment⟩>
+|   |     <⟨segment⟩>
+|   |       <⟨stack⟩ direction=«"horizontal"» spacing=«"lg"» class=«"hours"»>
+|   |         {draw each **hour** in its **hours**}
+|   |       </⟨stack⟩>
+|   |     </⟨segment⟩>
+|   |   </⟨stack⟩>
+
+⟪## An hour:  its time, its weather and its temperature⟫
+
+[thing reopen_type L0]
+| an **hour**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ align=«"center"» spacing=«"xs"»>
+|   |     <⟨text⟩ size=«"small"» color=«"grey"»>{its **time** as a short time}</⟨text⟩>    code({its time as a short time})
+|   |     <⟨emoji⟩ name={picture the weather (its **weather code**)} size=«"small"» />    code({picture the weather (its weather code)})
+|   |     <⟨text⟩>{its **temperature**}</⟨text⟩>    code({its temperature})
+|   |   </⟨stack⟩>

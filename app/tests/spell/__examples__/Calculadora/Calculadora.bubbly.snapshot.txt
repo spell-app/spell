@@ -1,0 +1,138 @@
+==== /Calculadora.es.spell
+⟪# Calculadora⟫
+⟦// Una calculadora de bolsillo:  un número, un operador, otro número, y el total mientras escribes.⟧
+⟦// Sus teclas son botones de Spell UI, cuatro por fila, y cada una ejecuta una de las acciones de la calculadora.⟧
+
+[thing create_one_of_a_kind L0]
+| «calculadora» es una **aplicación**
+|   [plain group define_group L1]
+|   | grupo «"Lo que guarda"»
+|   |   ⟦// La cuenta que se escribe:  su número izquierdo, su operador y su número derecho⟧
+|   |   [property define_property_has L2]
+|   |   | su «"entrada"» es **texto**
+|   |   |   ⟦// El número que se escribe, como texto, para que cada tecla pueda añadir un dígito al final⟧
+|   |   [property define_property_has L2]
+|   |   | su «"izquierdo"» es **texto**
+|   |   [property define_property_has L2]
+|   |   | su «"operador"» es **texto**
+|   |   [property define_property_has L2]
+|   |   | su «"derecho"» es **texto**
+|   |   [property property_value_getter L2]
+|   |   | su «"total"» es
+|   |   |   ⟦// La cuenta hasta ahora, calculada cada vez que se lee⟧
+|   |   |   fijar **número izquierdo** en el **izquierdo** como un número    ‾value(número izquierdo) ‾value(el izquierdo como un número)
+|   |   |   fijar **número derecho** en el **derecho** como un número    ‾value(número derecho) ‾value(el derecho como un número)
+|   |   |   si el **operador** es _"+"_ devolver **número izquierdo** + **número derecho**    ‾value(el operador) ‾value(número izquierdo) ‾value(número derecho)
+|   |   |   si el **operador** es _"–"_ devolver **número izquierdo** - **número derecho**    ‾value(el operador) ‾value(número izquierdo) ‾value(número derecho)
+|   |   |   si el **operador** es _"×"_ devolver **número izquierdo** por **número derecho**    ‾value(el operador) ‾value(número izquierdo) ‾value(número derecho)
+|   |   |   devolver **número izquierdo** dividido por **número derecho**    ‾value(número izquierdo) ‾value(número derecho)
+|   |   [property property_value_getter L2]
+|   |   | su «"cuenta"» es
+|   |   |   ⟦// Lo que muestra la línea de arriba de la pantalla:  0 hasta que se pulsa una tecla⟧
+|   |   |   poner **mostrado** a _"0"_ si el **izquierdo** es vacío de lo contrario el **izquierdo**    ‾value(mostrado) ‾question(el izquierdo es vacío) ‾value(el izquierdo)
+|   |   |   devolver **mostrado** + _" "_ + el **operador** + _" "_ + el **derecho**    ‾value(mostrado) ‾value(el operador) ‾value(el derecho)
+|   |   [property property_value_getter L2]
+|   |   | su «"resultado"» es
+|   |   |   ⟦// La segunda línea de la pantalla:  el total, una vez que hay un número derecho⟧
+|   |   |   _""_ si el **derecho** es vacío    ‾question(el derecho es vacío)
+|   |   |   de lo contrario _"= "_ + el **total**    ‾value(el total)
+
+|   [plain group define_group L1]
+|   | grupo «"Lo Que Hacen Sus Teclas"»
+|   |   [action to_do_something L2]
+|   |   | para «borrarla»
+|   |   |   limpiar la **entrada**    ‾value(la entrada)
+|   |   |   limpiar el **izquierdo**    ‾value(el izquierdo)
+|   |   |   limpiar el **operador**    ‾value(el operador)
+|   |   |   limpiar el **derecho**    ‾value(el derecho)
+|   |   [action to_do_something L2]
+|   |   | para «terminarla»
+|   |   |   ⟦// Igual:  el total pasa a ser el número izquierdo, listo para el siguiente operador⟧
+|   |   |   si el **derecho** es vacío devolver    ‾question(el derecho es vacío)
+|   |   |   fijar el **izquierdo** en el **total** como texto    ‾value(el izquierdo) ‾value(el total como texto)
+|   |   |   limpiar el **operador**    ‾value(el operador)
+|   |   |   limpiar el **derecho**    ‾value(el derecho)
+|   |   |   limpiar la **entrada**    ‾value(la entrada)
+|   |   [action to_do_something L2]
+|   |   | para «pulsar (dígito como texto)»    ‾value(dígito como texto) bold(dígito) bold(texto)
+|   |   |   ⟦// Un dígito, o el punto decimal:  al final del número que se escribe, el izquierdo hasta que haya un operador⟧
+|   |   |   [control if L3]
+|   |   |   | si el **dígito** es _"."_    ‾value(el dígito)
+|   |   |   |   [control if L4]
+|   |   |   |   | si la **entrada** es vacía    ‾question(la entrada es vacía)
+|   |   |   |   |   poner la **entrada** a _"0."_    ‾value(la entrada)
+|   |   |   |   [control else_if L4]
+|   |   |   |   | de lo contrario si la **entrada** no incluye _"."_    ‾value(la entrada)
+|   |   |   |   |   poner la **entrada** a la **entrada** + _"."_    ‾value(la entrada) ‾value(la entrada)
+|   |   |   [control else L3]
+|   |   |   | de lo contrario
+|   |   |   |   poner la **entrada** a la **entrada** + el **dígito**    ‾value(la entrada) ‾value(la entrada) ‾value(el dígito)
+|   |   |   [control if L3]
+|   |   |   | si el **operador** es vacío    ‾question(el operador es vacío)
+|   |   |   |   poner el **izquierdo** a la **entrada**    ‾value(el izquierdo) ‾value(la entrada)
+|   |   |   [control else L3]
+|   |   |   | de lo contrario
+|   |   |   |   poner el **derecho** a la **entrada**    ‾value(el derecho) ‾value(la entrada)
+|   |   [action to_do_something L2]
+|   |   | para «aplicar (tecla como texto)»    ‾value(tecla como texto) bold(tecla) bold(texto)
+|   |   |   ⟦// Un operador:  tras una cuenta completa, el total pasa a ser el número izquierdo de la siguiente cuenta⟧
+|   |   |   [control if L3]
+|   |   |   | si el **derecho** no es vacío    ‾question(el derecho no es vacío)
+|   |   |   |   terminar eso    ‾call(terminar eso)
+|   |   |   poner el **operador** a la **tecla**    ‾value(el operador) ‾value(la tecla)
+|   |   |   limpiar la **entrada**    ‾value(la entrada)
+
+|   [plain group define_group L1]
+|   | grupo «"Dibujo"»
+|   |   [action draw_it L2]
+|   |   | para **dibujarla**
+|   |   |   ⟦// La pantalla, luego el teclado, cuatro teclas por fila:  C y 0 ocupan dos teclas de ancho⟧
+|   |   |   <⟨contenedor⟩ ancho=«"20em"»>
+|   |   |     <⟨tarjeta⟩ fluido>
+|   |   |       <⟨segmento⟩ apariencia=«"secundario"» alinear=«"derecha"»>
+|   |   |         <⟨texto⟩ tamano=«"enorme"»>{la **cuenta**}</⟨texto⟩>    code({la cuenta})
+|   |   |         <⟨espacio⟩ />
+|   |   |         <⟨texto⟩ tamano=«"grande"» color=«"gris"»>{el **resultado**}</⟨texto⟩>    code({el resultado})
+|   |   |       </⟨segmento⟩>
+|   |   |       <⟨contenido⟩>
+|   |   |         <⟨cuadricula⟩ columnas=«"4"» separacion=«"compact"»>
+|   |   |           <⟨columna⟩ ancho=«"8"»><⟨bot⟩ón fluido color=«"negativo"» onClick={borrar eso}>C</⟨bot⟩ón></⟨columna⟩>    code({borrar eso})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"secundario"» onClick={terminar eso}>=</⟨bot⟩ón></⟨columna⟩>    code({terminar eso})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"primario"» onClick={aplicar _"÷"_}>÷</⟨bot⟩ón></⟨columna⟩>    code({aplicar "÷"})
+
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"7"_}>7</⟨bot⟩ón></⟨columna⟩>    code({pulsar "7"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"8"_}>8</⟨bot⟩ón></⟨columna⟩>    code({pulsar "8"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"9"_}>9</⟨bot⟩ón></⟨columna⟩>    code({pulsar "9"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"primario"» onClick={aplicar _"×"_}>×</⟨bot⟩ón></⟨columna⟩>    code({aplicar "×"})
+
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"4"_}>4</⟨bot⟩ón></⟨columna⟩>    code({pulsar "4"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"5"_}>5</⟨bot⟩ón></⟨columna⟩>    code({pulsar "5"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"6"_}>6</⟨bot⟩ón></⟨columna⟩>    code({pulsar "6"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"primario"» onClick={aplicar _"–"_}>–</⟨bot⟩ón></⟨columna⟩>    code({aplicar "–"})
+
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"1"_}>1</⟨bot⟩ón></⟨columna⟩>    code({pulsar "1"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"2"_}>2</⟨bot⟩ón></⟨columna⟩>    code({pulsar "2"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"3"_}>3</⟨bot⟩ón></⟨columna⟩>    code({pulsar "3"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"primario"» onClick={aplicar _"+"_}>+</⟨bot⟩ón></⟨columna⟩>    code({aplicar "+"})
+
+|   |   |           <⟨columna⟩ ancho=«"8"»><⟨bot⟩ón fluido onClick={pulsar _"0"_}>0</⟨bot⟩ón></⟨columna⟩>    code({pulsar "0"})
+|   |   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"."_}>.</⟨bot⟩ón></⟨columna⟩>    code({pulsar "."})
+|   |   |         </⟨cuadricula⟩>
+|   |   |       </⟨contenido⟩>
+|   |   |     </⟨tarjeta⟩>
+|   |   |   </⟨contenedor⟩>
+
+|   |   [action to_do_something L2]
+|   |   | para «probar dos cuentas seguidas»
+|   |   |   ⟦// 12 + 5, luego por 2:  el total pasa a ser el número izquierdo de la siguiente cuenta⟧
+|   |   |   pulsar _"1"_    ‾call(pulsar "1")
+|   |   |   pulsar _"2"_    ‾call(pulsar "2")
+|   |   |   aplicar _"+"_    ‾call(aplicar "+")
+|   |   |   pulsar _"5"_    ‾call(pulsar "5")
+|   |   |   el **resultado** debería ser _"= 17"_    ‾value(el resultado)
+|   |   |   aplicar _"×"_    ‾call(aplicar "×")
+|   |   |   pulsar _"2"_    ‾call(pulsar "2")
+|   |   |   el **resultado** debería ser _"= 34"_    ‾value(el resultado)
+|   |   |   terminar eso    ‾call(terminar eso)
+|   |   |   el **izquierdo** debería ser _"34"_    ‾value(el izquierdo)
+|   |   |   el **resultado** debería ser _""_    ‾value(el resultado)

@@ -1,0 +1,5 @@
+58:21 TS2322 Type '{ children: Element; padded: string; }' is not assignable to type 'UISegmentJSXAttributes'.
+124:44 TS2322 Type 'unknown' is not assignable to type 'Element'.
+249:67 TS2532 Object is possibly 'undefined'.
+249:98 TS2532 Object is possibly 'undefined'.
+258:43 TS2345 Argument of type '(city: City) => JSX.Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.

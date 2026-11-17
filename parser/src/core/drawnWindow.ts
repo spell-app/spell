@@ -7,6 +7,8 @@
  * - Past that:  the first `MOST_AT_ONCE`, then a small empty element after them, which says when it comes near the view.
  *   Each time it does, `MOST_AT_ONCE` more, until it's out of reach again.  When there's nothing more it's gone,
  *   so a list drawn to its end is the same elements a plain `<For>` would have drawn.
+ * - What it drew last took no room (items still reading from a server, or drawing nothing):  it waits a moment before more,
+ *   `WAIT_WHEN_NOTHING_MOVED_MS`, so such a list doesn't read every item at once (epic `mockup` T42, the Met's artworks).
  * - What's drawn stays drawn:  it's never taken down again, so keys, focus and what's in a form stay as they are.
  *   - NOTE:  so a list scrolled through to the end of 50,000 is 50,000 elements after all (`data` T43's limit).
  * - Why not `content-visibility`:  it saves a browser's layout and painting, and drawing's cost is making the things and elements.
@@ -36,6 +38,13 @@ const FRAMES_TO_GO_BACK = 60
 
 /** How far ahead of the view the end of the list starts more drawing. */
 const AHEAD_OF_THE_VIEW = "800px"
+
+/**
+ * How long it waits before drawing more, when what it drew last took no room:  items still reading, or drawing nothing.
+ * - Else a list whose items each read from a server (the Met's artworks), and draw nothing till then, or at all, would
+ *   draw every one at once:  the end never moves away from the view.  So at most `MOST_AT_ONCE` reads a second.
+ */
+export const WAIT_WHEN_NOTHING_MOVED_MS = 1000
 
 /** The element at the end of a list with more to come:  empty, and only there while there is more. */
 const MORE_BELOW_TAG = "spell-more-below"
@@ -152,11 +161,18 @@ export function drawnInWindow<Item>({
   const drawMore = () => {
     const all = items()
     if (all.length > count()) {
+      endBefore = moreBelow.getBoundingClientRect().top
       setCount(count() + atOnce)
       remembered.count = count()
     } else void morePages()?.readNextPage()
   }
 
+  /** Where the end was before it drew more:  if it hasn't moved, what it drew took no room. */
+  let endBefore: number | undefined
+  let waiting: ReturnType<typeof setTimeout> | undefined
+  let isGone = false
+  /** Watch the end again, unless the list is gone. */
+  const watchEnd = () => !isGone && observer.observe(moreBelow)
   const moreBelow = document.createElement(MORE_BELOW_TAG)
   moreBelow.setAttribute("aria-hidden", "true")
   // a whole row of a grid, and nothing to see:  only there while there's more
@@ -174,7 +190,19 @@ export function drawnInWindow<Item>({
     () => [count(), items().length, hasMore()] as const,
     ([, , isMore]) => {
       observer.unobserve(moreBelow)
-      if (isMore) observer.observe(moreBelow)
+      clearTimeout(waiting)
+      const before = endBefore
+      endBefore = undefined
+      if (isMore) {
+        // what it just drew took no room yet:  ask again in a moment, not at once
+        if (before !== undefined) {
+          requestAnimationFrame(() => {
+            const hasMoved = Math.abs(moreBelow.getBoundingClientRect().top - before) >= 1
+            if (hasMoved) watchEnd()
+            else waiting = setTimeout(watchEnd, WAIT_WHEN_NOTHING_MOVED_MS)
+          })
+        } else observer.observe(moreBelow)
+      }
       // only a list long enough to scroll has anywhere to come back to
       if (key && (isMore || remembered.scroller)) stopFollowingScroll ??= followScroll(moreBelow, remembered)
     }
@@ -188,6 +216,8 @@ export function drawnInWindow<Item>({
   }
   addLive(live)
   onCleanup(() => {
+    isGone = true
+    clearTimeout(waiting)
     observer.disconnect()
     stopFollowingScroll?.()
     removeLive(live)

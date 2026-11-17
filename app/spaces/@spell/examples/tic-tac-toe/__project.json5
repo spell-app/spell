@@ -2,6 +2,8 @@
   "title": "Tic-Tac-Toe",
   "description": "Noughts and crosses on Spell UI:  nine squares drawn as buttons in a grid, whose turn it is, and three in a row, written as sentences",
   "category": "games",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "clickOn": "ui-button", "nth": 4 }, { "clickOn": "ui-button", "nth": 0 }, { "clickOn": "ui-button", "nth": 2 }, { "clickOn": "ui-button", "nth": 6 }] },
   "imports": [{
     "path": "/Square.spell",
     "active": true

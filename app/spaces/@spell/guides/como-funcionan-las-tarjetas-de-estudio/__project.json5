@@ -1,0 +1,10 @@
+{
+  "title": "Cómo funcionan las Tarjetas de estudio",
+  "description": "How Tarjetas de estudio works, in Spanish:  a card that's a two sided view, drawing only the side that's up, and a game that deals one at random",
+  "imports": [
+    {
+      "path": "/ComoFuncionanLasTarjetasDeEstudio.es.spell",
+      "active": true
+    }
+  ]
+}

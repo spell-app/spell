@@ -1,0 +1,81 @@
+# Artworks from the Met
+// Artworks of the Metropolitan Museum of Art, found by what you type:  a wall of pictures that goes on as you scroll.
+// Every thing it shows is in MetArtworks.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// so looking again at the server never touches a line of this.
+// Its search answers only ids:  each artwork is read from its own address as it's drawn, and no others.
+// An artwork with no picture is left out:  the wall draws more as you scroll, so a short screen fills from the next ones.
+
+met artworks is an app
+	its "search" is text
+	when creating it
+		set its search to "sunflowers"
+	its "found" is every artwork matching the search
+		// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn
+
+	to try (words as text)
+		set its search to words
+
+	to draw it
+		<container>
+			<stack spacing="lg">
+				<form value={it}>
+					<stack spacing="sm">
+						<stack direction="horizontal" wrap align="center" justify="between" spacing="sm">
+							<header size="large">Artworks from the Met</header>
+							<search name="search" parameter="art" icon="search" placeholder="A title, an artist, a subject" aria-label="Search the Met" />
+						</stack>
+						<toolbar appearance="secondary" size="small" aria-label="Try a search">
+							<text slot="title" size="small" color="grey">Try</text>
+							<item onClick={try "sunflowers"}>Sunflowers</item>
+							<item onClick={try "van gogh"}>Van Gogh</item>
+							<item onClick={try "hokusai"}>Hokusai</item>
+							<item onClick={try "armor"}>Armor</item>
+							<item onClick={try "cats"}>Cats</item>
+							<item onClick={try "egypt"}>Egypt</item>
+						</toolbar>
+					</stack>
+				</form>
+				<for its found as="cards" layout="mosaic" columns="4" doubling loading="Asking the Met" failed="The Met can't be reached just now." empty="The Met has nothing for that." />
+				<text size="small" color="grey" paragraph>
+					From <link link="https://metmuseum.github.io">the Met Museum's API</link>, each artwork asked for as it's shown.  Press a picture to turn it over.
+				</text>
+			</stack>
+		</container>
+
+# An artwork
+// A card that turns over:  its picture on the front, what the Met knows of it on the back.
+// Only what's in the public domain has a picture:  the rest draw nothing, so the wall is all pictures.
+
+an artwork
+	to draw it
+		if its primary image small
+			<shape class="artwork" direction="over" flip-on="click" aria-label={its title}>
+				<side>
+					<card fluid>
+						<image src={its primary image small} alt={its title} />
+						<content>
+							<header size="small">{its title}</header>
+							<meta>{its artist display name}</meta>
+							<meta>{its object date}</meta>
+						</content>
+					</card>
+				</side>
+				<side>{draw the about card of it}</side>
+			</shape>
+
+	to draw its about card
+		// What the Met knows of it:  the back of its card
+		<card fluid>
+			<content>
+				<header size="small">{its title}</header>
+				<meta>{its artist display name} · {its object date}</meta>
+				<description>
+					<text paragraph>{its medium}</text>
+					<text paragraph>{its dimensions}</text>
+					<text paragraph color="grey">{its department} · {its credit line}</text>
+				</description>
+			</content>
+			<extra>
+				<link link={its object url} target="_blank">On the Met's own pages</link>
+			</extra>
+		</card>

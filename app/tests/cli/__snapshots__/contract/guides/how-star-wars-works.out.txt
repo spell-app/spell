@@ -1,0 +1,7 @@
+✅ test which facts are known
+  ▶️ Executing   `set born to a new fact with label "Born", value = "19BBY"`
+  ✅ As expected `born is known` is `yes`
+  ▶️ Executing   `set hair to a new fact with label "Hair", value = "n/a"`
+  ✅ As expected `hair is known` is `no`
+
+<div id="spell-app-root"><test-project-app><ui-container><ui-header part="view" size="medium">The films</ui-header><ui-message color="red">The signal from swapi.py4e.com is lost.<ui-button>Retry</ui-button></ui-message><ui-text paragraph="" part="view" size="small">Films, characters and planets from <ui-link link="https://swapi.py4e.com/">swapi.py4e.com</ui-link>. Star Wars belongs to Lucasfilm and Disney.</ui-text></ui-container></test-project-app></div>

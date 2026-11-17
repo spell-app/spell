@@ -1,0 +1,8 @@
+/* File styles.css:  what Spell UI's tags can't say yet.
+   - The hours to come are one row that scrolls sideways, each hour as wide as it needs. */
+.hours {
+  overflow-x: auto;
+}
+.hours > * {
+  flex: none;
+}

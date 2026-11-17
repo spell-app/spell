@@ -1,0 +1,27 @@
+## The sky:  what a weather code looks like
+// Open-Meteo says the weather as a number, a WMO code:  0 a clear sky, 61 rain, 95 a thunderstorm.
+// These two say each code as people do:  in a word or two, and as an emoji.
+
+to name the weather (code as a number)
+	// The weather in a word or two:  "Partly cloudy"
+	if code is 0 return "Clear"
+	if code <= 2 return "Partly cloudy"
+	if code is 3 return "Cloudy"
+	if code <= 48 return "Fog"
+	if code <= 67 return "Rain"
+	if code <= 77 return "Snow"
+	if code <= 82 return "Showers"
+	if code <= 86 return "Snow showers"
+	return "Thunderstorms"
+
+to picture the weather (code as a number)
+	// The name of an emoji for it:  "sun", "cloud_with_rain"
+	if code is 0 return "sun"
+	if code <= 2 return "sun_behind_cloud"
+	if code is 3 return "cloud"
+	if code <= 48 return "fog"
+	if code <= 67 return "cloud_with_rain"
+	if code <= 77 return "cloud_with_snow"
+	if code <= 82 return "sun_behind_rain_cloud"
+	if code <= 86 return "cloud_with_snow"
+	return "cloud_with_lightning_and_rain"

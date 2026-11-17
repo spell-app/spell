@@ -15,8 +15,9 @@ una "tarea" es una vista seleccionable arrastrable
 		// Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve
 	"está hecha" si su hecha es sí
 	"está pendiente" si su hecha es no
-	para tirarla: devolver
-		// Fuera de donde se guarda:  una tarea que no se guarda en ningún lugar no tiene nada que hacer;  cada clase de tarea guardada dice cómo, en el archivo de su guardián
+	para tirarla
+		// Fuera de donde se guarda, y también de la lista
+		quitar eso de las tareas
 
 	para dibujar eso
 		// Un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea;  su prioridad se muestra solo cuando no es normal

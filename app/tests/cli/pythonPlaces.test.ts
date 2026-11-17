@@ -5,7 +5,8 @@
  *   (`spell run` couldn't:  it compiles into a temporary folder each time.)
  * - Its data folder and CSV file:  on a page server's place routes the test starts (`SpaceFolders`), in a temporary
  *   spell.spaces, reached with the server's write token, as `spell run --target py` hands them over.
- * - Task List keeps its tasks in all four kinds of place, the Atmosphere too, on a fake AT Protocol host (epic `data` P46),
+ * - Task List, as it was, keeps its tasks in all four kinds of place, the Atmosphere too, on a fake AT Protocol host (epic `data` P46):
+ *   the frozen test project `@spell/test/tasks-in-four-places`, since the example keeps them only on this device (epic `mockup` T43);
  *   signed in with the handle and the app password `spell run --target py` hands on from the environment.
  */
 import { spawn } from "child_process"
@@ -49,8 +50,8 @@ asyncio.run(keeper.count_the_notes())
 print(json.dumps({"device": keeper.device_count, "folder": keeper.folder_count, "sheet": keeper.sheet_count}))
 `
 
-/** Task List, as a test project. */
-const TASK_LIST = "@spell/examples/TaskList"
+/** Task List as it was, with a keeper for each kind of place, as a test project. */
+const TASK_LIST = "tasks-in-four-places"
 
 /**
  * Each of Task List's keepers in turn, as the person picks where to keep them:  each fills the checklist from its place,

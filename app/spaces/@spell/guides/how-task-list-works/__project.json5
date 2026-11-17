@@ -1,6 +1,6 @@
 {
   "title": "How the Task List works",
-  "description": "The Task List example's task and its list:  a checkbox bound to each task, a count worked out with where, and a filter",
+  "description": "The Task List example's task and its list:  a checkbox bound to each task, a form that adds one, a count worked out with where, and tasks dragged into order",
   "imports": [
     {
       "path": "/HowTaskListWorks.spell",

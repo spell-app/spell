@@ -219,6 +219,8 @@ export class EditorStore extends Observable {
     const sameProject = editor.project === project
     if (!sameProject) {
       console.info("selecting project", project)
+      // the one shown goes, if it was a start card's and not kept (epic `mockup` I42):  asked while this one loads
+      void editor.leaveProject()
       editor.history.clear()
       if (editor.cameFromSite !== project.path) editor.cameFromSite = undefined
       // stop current compilation
@@ -997,10 +999,13 @@ export class EditorStore extends Observable {
     return !isStaticBuild || editor.projectRoot === SPACES.SpellProjectRoot.projects
   }
 
-  /** Make a project of the person's own from starter program `starter`, with no question asked, and show it. */
+  /**
+   * Make a project of the person's own from starter program `starter`, with no question asked, and show it.
+   * - Not one of their apps until they change it, and gone if they leave it untouched (`leaveProject()`).
+   */
   async startFrom(starter: SPACES.StarterProgram, { codeClosed = false } = {}): Promise<void> {
     try {
-      const project = await SPACES.SpellProjectRoot.projects.createFrom(starter)
+      const project = await SPACES.SpellProjectRoot.projects.createFrom(starter, { untouched: !isStaticBuild })
       if (codeClosed) await editor.closeCodeOf(project.path)
       editor.showEditor(project.path)
       editor.showKept()
@@ -1015,15 +1020,80 @@ export class EditorStore extends Observable {
     CodeShown.set(path, false)
   }
 
-  /** Make the person's own copy of built-in project `sourceId`, with no question asked, and show it. */
+  /**
+   * Make the person's own copy of built-in project `sourceId`, with no question asked, and show it.
+   * - Not one of their apps until they change it, and gone if they leave it untouched (`leaveProject()`).
+   */
   async startFromCopy(sourceId: string): Promise<void> {
     try {
-      const project = await SPACES.SpellProjectRoot.projects.copyHere(sourceId)
+      const project = await SPACES.SpellProjectRoot.projects.copyHere(sourceId, { untouched: !isStaticBuild })
       editor.showEditor(project.path)
       editor.showKept()
     } catch (error) {
       editor.showError(error)
     }
+  }
+
+  /**
+   * The person is leaving `project` (default:  the one shown) for another, or for the home page:
+   * one made from a start card and not kept yet (`SPACES.UnsavedApp`, epic `mockup` I42) goes, or is asked about.
+   * - Untouched, nothing typed:  deleted, no question asked.
+   * - Changed, with no version saved:  "Save your draft?";  Don't Save Draft deletes it, Save Draft (and Escape)
+   *   keeps it for good, edits not saved yet saved first.
+   * - Any other project:  nothing happens.
+   * - An edit AutoSave was still waiting to keep is kept first, so it counts as a change.
+   * - Once at a time for each project:  the home page and the next project shown may both ask.
+   * - Not in the static build, whose projects are the visitor's own, in their browser.
+   * - NEVER throws:  a failure is shown.
+   */
+  async leaveProject(project = editor.project): Promise<void> {
+    const projectRoot = SPACES.SpellProjectRoot.projects
+    if (!project || isStaticBuild || !project.path.startsWith(`${projectRoot.path}/`)) return
+    if (leavingProjects.has(project.path)) return
+    leavingProjects.add(project.path)
+    try {
+      const unsavedEdits = () => project.files.filter((file) => file.isDirty && !editor.isLocked(file))
+      if (editor.isAutoSaving) await editor.saveFiles(unsavedEdits())
+      const unsaved = await projectRoot.unsavedNow(project.path)
+      if (!unsaved) return
+      if (unsaved === "untouched" && !unsavedEdits().length) return await editor.deleteUnkept(project)
+      const name = project.title
+      const dontSave = await editor.confirm({
+        header: appTexts.text("keepAppHeading", { name }),
+        message: appTexts.text("keepAppMessage"),
+        ok: appTexts.text("keepAppDontSave"),
+        cancel: appTexts.text("keepAppSave"),
+        danger: true
+      })
+      if (dontSave) {
+        await editor.deleteUnkept(project)
+        editor.showNotice(appTexts.text("appNotKept", { name }))
+      } else {
+        await editor.saveFiles(unsavedEdits())
+        await projectRoot.markUnsaved(project.path, null)
+      }
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      leavingProjects.delete(project.path)
+    }
+  }
+
+  /** Save each of `files` now, an edit AutoSave was waiting to keep among them. */
+  private async saveFiles(files: SP.AnySpellFile[]): Promise<void> {
+    for (const file of files) {
+      editor.forgetWaitingKeep(file)
+      await file.save(undefined)
+    }
+  }
+
+  /**
+   * Delete project `project`, made from a start card and not kept (`leaveProject()`).
+   * - Its edits still waiting to be kept go first:  kept after, they'd make its folder again.
+   */
+  private async deleteUnkept(project: SP.SpellProject): Promise<void> {
+    for (const file of project.files) editor.forgetWaitingKeep(file)
+    await SPACES.SpellProjectRoot.projects.deleteApp(project.path)
   }
 
   /**
@@ -2102,6 +2172,9 @@ editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: true })
 
 /** How long typing pauses before AutoSave keeps an edit (`keepEdit()`), in milliseconds. */
 const KEEP_DELAY_MS = 2000
+
+/** The projects `leaveProject()` is deciding about now, by path. */
+const leavingProjects = new Set<string>()
 
 /** Each file's edit waiting for typing to pause, before AutoSave keeps it. */
 const waitingKeeps = new Map<SP.AnySpellFile, ReturnType<typeof setTimeout>>()

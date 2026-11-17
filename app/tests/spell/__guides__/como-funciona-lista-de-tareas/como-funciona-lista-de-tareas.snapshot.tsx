@@ -200,35 +200,21 @@ core.heading("Dónde guarda sus tareas el ejemplo")
 // ## Dónde guarda sus tareas el ejemplo
 ////////////////////////////////////////
 // Las tareas de esta guía viven en memoria:  recarga, y empiezan otra vez.
-// Lista de tareas las guarda en uno de cuatro lugares, el que la persona elige en "Guardarlas en", sobre la lista:
-// - Este navegador, con el que empieza:  "almacén del navegador es una base de datos en este dispositivo"
-// - Un archivo JSON en el servidor, un archivo por tarea:  "archivos de tareas es una carpeta de datos en "tareas""
-// - Un archivo CSV en el servidor, una fila por tarea:  "hoja de tareas es una hoja en "tareas.csv"", el archivo propio del proyecto
-// - Tu cuenta de atmosphere, el AT Protocol de Bluesky, como Statusphere:  "cielo de tareas es una cuenta personal de atmosphere"
-//
-// Cada lugar es un archivo de API propio, y cada uno tiene un GUARDIÁN con las mismas tres cosas:
-//       - sus "tareas guardadas" es cada tarea del navegador
-//       - para apuntar (título como texto):
-//           poner tarea a una nueva tarea del navegador con título = título
-//           agregar tarea a las tareas del navegador
-//           devolver tarea
-// y su clase de tarea dice cómo se tira:
-//       una "tarea del navegador" es una tarea:
-//           - vive en almacén del navegador
-//           - para tirarla:
-//               quitar eso de las tareas del navegador
-//
-// La aplicación nunca nombra un lugar.  Le pregunta a su guardián:
-//       para tarea en (las tareas guardadas de su guardián) ordenadas por su orden
-//       poner tarea a apuntar (el borrador) de su guardián
-//       tirar la tarea
-// Elegir otro lugar en "Guardarlas en" cambia su "almacén";  "cuando su almacén cambia", la aplicación toma el guardián
-// de ese lugar, y llena la lista con sus tareas.  Una tarea guardada en cualquier lugar se guarda sola al cambiar:
-// no hay paso de guardar.
+// Lista de tareas las guarda en este dispositivo, en el almacenamiento propio del navegador:  recarga, y siguen ahí.
+// No se le pregunta a ningún servidor, y no hay que iniciar sesión.  Dos líneas, en su archivo de API, lo dicen:
+//       mis tareas se guarda en este dispositivo
+//       una tarea vive en mis tareas
+// Después de ellas, las palabras que ya conoces llegan al dispositivo:
+//       para tarea en (cada tarea) ordenadas por su orden
+//       agregar tarea a las tareas
+//       quitar eso de las tareas
+// Una tarea guardada allí se guarda sola al cambiar:  marcarla, o escribir su título, queda guardado, sin paso de guardar.
 // Su lugar en la lista se guarda igual, como su "orden":  al soltar, cada tarea toma su lugar como orden,
 //       - cuando una tarea se suelta sobre ella:
 //           guardar el orden
-// así las tareas vuelven en el orden en que se arrastraron, sea cual sea el lugar que las guarda.
+// así las tareas vuelven en el orden en que se arrastraron.
+// Guardarlas en otro lugar, una carpeta de datos en el servidor, una hoja, una cuenta de atmosphere, es cambiar la primera línea:
+// nada más cambia.
 // -----------
 if (!core.isCarryingOver) listaDeTareas.start()
 // -----------

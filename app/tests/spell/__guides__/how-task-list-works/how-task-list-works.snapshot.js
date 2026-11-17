@@ -4,16 +4,17 @@ core.heading("How the Task List works")
 /////////////////////////////
 // ## How the Task List works
 /////////////////////////////
-// The Task List example is a to-do list:  type a task, tick it off when it's done,
-// and choose whether to see them all, only the ones to do, or only the ones done.
-// Three ideas do the work:
-// - each task is a THING of its own, which draws itself as a row with a checkbox
-// - the list picks tasks out with "where":  "tasks in its tasks where it is active"
-// - the list draws each task, or skips it, as its filter says
+// The Task List example is a to-do list:  type a task and add it, tick it off when it's done,
+// delete it, and drag the tasks into another order.
+// Four ideas do the work:
+// - each task is a THING of its own, which draws itself as a row:  a box to tick, its title, a button
+// - the new task's field is a form bound to the app:  Add makes a task from what's typed
+// - the count picks tasks out with "where":  "tasks in the checklist where it is active"
+// - one line lets the list's tasks be dragged into another order
 //
-// This guide keeps those three, and leaves out dragging, selecting, the property editor,
-// and where the tasks are kept:  here they're in memory, and start afresh each run.
-// Open Task List, in the Examples, for all of it.  Lista de tareas is the same list, written in Spanish.
+// This guide keeps those four, and leaves out where the tasks are kept:
+// here they're in memory, and start afresh each run.
+// Open Task List, from Make something on the home page, for all of it.
 
 core.heading("A task")
 /** A task */
@@ -35,7 +36,11 @@ export class Task extends View {
   }
 
   get isActive() {
-    return !this.done
+    return !this.isDone
+  }
+
+  delete() {
+    this.checklist.remove(this)
   }
 
   /** a form of its own, bound to the task:  ticking the box changes its "done" */
@@ -43,11 +48,15 @@ export class Task extends View {
     return h("ui-form", { "prop:value": this },
       h("ui-stack", { direction: "horizontal", spacing: "sm" },
         h("ui-checkbox", { name: "done", "aria-label": "Done" }),
-        h("ui-text", () => this.title)
+        h("ui-input", { name: "title", "aria-label": "Task", appearance: "transparent", fluid: true }),
+        core.drawAction(this, "delete", { "icon-only": true, appearance: "tertiary" })
       )
     )
   }
 
+  static draggable = true
+
+  /** so a task knows its checklist, to leave it */
   get checklist() {
     return Checklist.ownerOf(this)
   }
@@ -57,76 +66,84 @@ export class Task extends View {
   }
 }
 
-core.heading("The checklist:  the tasks, shown as its filter says")
-/** The checklist:  the tasks, shown as its filter says */
+/** The checklist:  the tasks, one under the other */
 export class Checklist extends ViewableList {
   static instanceType = Task
   static elementTag = core.defineElement(this, "test-project")
 
-  /** what it shows:  every task, the ones still to do, or the ones done */
-  // - its "showing" is one of all, active or done
-  static Showings = ["all", "active", "done"]
-  static { this.declareProp("showing", { oneOf: Checklist.Showings }) }
-  get showing() { return this.getProp("showing") }
-  set showing(value) { this.setProp("showing", value) }
-
-  drawEachItem(item) {
-    // each task in turn, unless the filter hides it:  "return nothing" draws nothing
-    if (this.showing === "active" && item.isDone) return undefined
-    if (this.showing === "done" && item.isActive) return undefined
-    return core.drawThing(item)
+  draw() {
+    return h("ui-stack", { spacing: "xs" }, h("slot"))
   }
+
+  static reorderItemsAfter = 0
 
   static exclusive = true
 }
+
+core.describeAction(Task, "delete", { title: "Delete", icon: "trash alternate outline", undoneAs: "Delete" })
+
+core.heading("The checklist:  the tasks, one under the other")
+// its tasks can be dragged to another place
+
+core.heading("How a task draws")
+//## How a task draws
 
 core.heading("The app")
 /** The app */
 export class TaskList extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "tasks" is a new checklist
-  static { this.declareProp("tasks", { init: () => new Checklist({ id: "tasks" }), early: true }) }
-  get tasks() { return this.getProp("tasks") }
-  set tasks(value) { this.setProp("tasks", value) }
+  // "checklist" is a new checklist
+  static { this.declareProp("checklist", { init: () => new Checklist({ id: "checklist" }), early: true }) }
+  get checklist() { return this.getProp("checklist") }
+  set checklist(value) { this.setProp("checklist", value) }
+
+  /** the next task's title, as the new task's field holds it */
+  // - its "draft" is text
+  static { this.declareProp("draft", { type: "text" }) }
+  get draft() { return this.getProp("draft") }
+  set draft(value) { this.setProp("draft", value) }
 
   /** how many are left:  the tasks picked out with "where", counted */
   get activeCount() {
-    return this.tasks.filter((task) => task.isActive).length
+    return this.checklist.filter((task) => task.isActive).length
+  }
+
+  /** a new task at the end of the list;  the field empties */
+  addTheDraft() {
+    if (this.draft === "") return
+    this.checklist.append(new Task({ title: this.draft }))
+    this.draft = ""
   }
 
   draw() {
-    return h("ui-container", { text: true },
-      h("ui-menu", { appearance: "secondary" },
-        h("ui-item", { kind: "header" }, () => `${this.activeCount} to do`),
-        h("ui-item", {
-          selected: () => this.tasks.showing === "all",
-          onClick: core.pressed(this, () => (this.tasks.showing = "all")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "All"),
-        h("ui-item", {
-          selected: () => this.tasks.showing === "active",
-          onClick: core.pressed(this, () => (this.tasks.showing = "active")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "To do"),
-        h("ui-item", {
-          selected: () => this.tasks.showing === "done",
-          onClick: core.pressed(this, () => (this.tasks.showing = "done")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Done")
-      ),
-      () => core.drawThing(this.tasks)
+    return h("ui-container",
+      h("ui-stack",
+        h("ui-text", { color: "grey" }, () => this.activeCount, " to do"),
+        h("ui-form", { "prop:value": this },
+          h("ui-input", { name: "draft", placeholder: "Something to do", "aria-label": "New task", fluid: true, action: true },
+            h("ui-button", {
+              slot: "action",
+              color: "primary",
+              disabled: () => this.draft === "",
+              onClick: core.pressed(this, () => this.addTheDraft()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Add")
+          )
+        ),
+        () => core.drawThing(this.checklist)
+      )
     )
   }
 }
 export const taskList = new TaskList()
+core.describeAction(TaskList, "addTheDraft", { title: "Add the Draft", undoneAs: "Add the Draft" })
 
 core.heading("Start:  three tasks, one of them done")
 //## Start:  three tasks, one of them done
-taskList.tasks.showing = "all"
-taskList.tasks.append(new Task({ title: "Read this guide", done: true }))
-taskList.tasks.append(new Task({ title: "Tick a box on the right" }))
-taskList.tasks.append(new Task({ title: "Try the To do filter" }))
+taskList.checklist.append(new Task({ title: "Read this guide", done: true }))
+taskList.checklist.append(new Task({ title: "Tick a box on the right" }))
+taskList.checklist.append(new Task({ title: "Drag a task to the top" }))
 
 core.heading("A check")
 /** A check */
@@ -146,49 +163,35 @@ core.heading("Try it")
 ////////////
 // ## Try it
 ////////////
-// - Tick "Tick a box on the right":  the count in the menu drops to 1.
-// - Click "To do", then "Done":  the list shows only the tasks that fit.
-// - Add a task:  copy one of the "add" lines under Start, and change its title.
+// - Tick "Tick a box on the right":  the count drops to 1.
+// - Type a task and press Add:  it's at the end of the list.
+// - Drag "Drag a task to the top" up above the others, then delete it with its button.
 // - Count the done ones too:  add a line under "its active count" that says
-//       - its "done count" is the length of (tasks in its tasks where it is done)
-//   and show it in the menu, the way the active count is.
+//       its "done count" is the length of (tasks in the checklist where it is done)
+//   and show it beside the active count.
 //
-// Where next:  Task List, in the Examples, where you type new tasks in, drag them into order,
-// and select a few to change them all at once.
+// Where next:  Task List, from Make something on the home page, which keeps its tasks on this device.
 
 core.heading("Where the example keeps its tasks")
 ///////////////////////////////////////
 // ## Where the example keeps its tasks
 ///////////////////////////////////////
 // This guide's tasks live in memory:  reload, and they start again.
-// Task List keeps them, in one of four places the person picks from "Keep them in", above the list:
-// - This browser, where it starts:  "browser storage is a database on this device"
-// - A JSON file on the server, one file a task:  "task files is a data folder at "tasks""
-// - A CSV file on the server, one row a task:  "task sheet is a sheet at "tasks.csv"", the project's own file
-// - Your atmosphere account, Bluesky's AT Protocol, as Statusphere does:  "task sky is a personal atmosphere account"
-//
-// Each place is an API file of its own, and each holds a KEEPER with the same three things:
-//       - its "kept tasks" is every browser task
-//       - to keep a new task titled (title as text):
-//           set task to a new browser task with title = title
-//           add task to the browser tasks
-//           return task
-// and its kind of task says how one is thrown away:
-//       a "browser task" is a task:
-//           - it lives in browser storage
-//           - to throw it away:
-//               remove it from the browser tasks
-//
-// The app never names a place.  It asks its keeper:
-//       for task in (the kept tasks of the keeper) sorted by its order
-//       set task to keep a new task titled title of the keeper
-//       throw the task away
-// Picking another place in "Keep them in" changes its "storage";  "when its storage changes", the app takes that place's
-// keeper, and fills the list from it.  A task kept anywhere saves itself as it changes:  there's no save step.
+// Task List keeps them on this device, in the browser's own storage:  reload, and they're still there.
+// No server is asked, and there's no sign-in.  Two lines, in its API file, say so:
+//       my tasks is stored on this device
+//       a task lives in my tasks
+// After them, the words you already know reach the device:
+//       for task in (every task) sorted by its order
+//       add task to the tasks
+//       remove it from the tasks
+// A task kept there saves itself as it changes:  ticking it, or typing its title, is kept, with no save step.
 // Its place in the list is kept the same way, as its "order":  a drop sets each task's order to its place,
 //       - when a task is dropped on it:
 //           keep the order
-// so the tasks come back in the order they were dragged into, whichever place keeps them.
+// so the tasks come back in the order they were dragged into.
+// Keeping them somewhere else, a data folder on the server, a sheet, an atmosphere account, is a change to the first line:
+// nothing else changes.
 // -----------
 if (!core.isCarryingOver) taskList.start()
 // -----------

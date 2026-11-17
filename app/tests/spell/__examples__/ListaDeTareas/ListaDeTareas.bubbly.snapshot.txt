@@ -25,8 +25,9 @@
 |   [property quoted_type_expression L1]
 |   | «"está pendiente"» si su **hecha** es _no_    ‾value(su hecha)
 |   [action to_do_something L1]
-|   | para «tirarla»: devolver
-|   |   ⟦// Fuera de donde se guarda:  una tarea que no se guarda en ningún lugar no tiene nada que hacer;  cada clase de tarea guardada dice cómo, en el archivo de su guardián⟧
+|   | para «tirarla»
+|   |   ⟦// Fuera de donde se guarda, y también de la lista⟧
+|   |   quitar eso de las **tareas**    ‾value(eso) ‾value(las tareas)
 
 |   [action draw_it L1]
 |   | para **dibujar** eso
@@ -51,144 +52,18 @@
 
 ==== /ListaDeTareas.api.es.spell
 ⟪## Lista de tareas:  dónde se guardan las tareas⟫
-⟦// La aplicación le pide sus tareas a un GUARDIÁN, y nunca dice dónde están:⟧
-⟦// cada clase de guardián está en un archivo propio, y lo dice a su manera.⟧
-⟦//   ListaDeTareas.navegador.api.es.spell:  en este navegador, con el que empieza⟧
-⟦//   ListaDeTareas.servidor.api.es.spell:  en un archivo JSON en el servidor⟧
-⟦//   ListaDeTareas.csv.api.es.spell:  en un archivo CSV en el servidor⟧
-⟦//   ListaDeTareas.atmosphere.api.es.spell:  en tu propia cuenta de atmosphere, el AT Protocol de Bluesky⟧
-⟦// Todo guardián hace las mismas tres cosas:⟧
-⟦// - sus tareas guardadas:  las tareas que tiene, leídas cuando la aplicación lo elige⟧
-⟦// - guardar una tarea nueva titulada ...:  una tarea nueva, guardada desde ahora⟧
-⟦// - tirarla:  una acción de la propia tarea, que dice su clase de tarea⟧
-⟦// Una tarea guardada en cualquier lugar se guarda sola al cambiar:  marcarla, o escribir su título, queda guardado, sin paso de guardar.⟧
-⟦// Su lugar en la lista se guarda igual, como su orden:  así las tareas vuelven en el orden en que la gente las arrastró.⟧
-
-[thing create_type L0]
-| un «"guardián de tareas"» es una **cosa**
-|   [property define_property_has L1]
-|   | sus «"tareas guardadas"» es una lista de **tareas**
-|   |   ⟦// las tareas que tiene, en cualquier orden:  la aplicación las pone en su propio orden⟧
-|   [action to_do_something L1]
-|   | para «guardar una tarea nueva titulada (título como texto)»    ‾value(título como texto) bold(título) bold(texto)
-|   |   ⟦// una tarea nueva, guardada desde ahora, que devuelve⟧
-|   |   devolver **una nueva tarea** con **título** = **título**    ‾value(una nueva tarea con título = título)
-
-==== /ListaDeTareas.navegador.api.es.spell
-⟪## Guardadas en este navegador⟫
-⟦// Las tareas se quedan en este dispositivo, en el almacenamiento propio de este navegador:  nadie más las ve, y no se le pregunta a ningún servidor.⟧
-⟦// La aplicación empieza aquí, así que funciona sin servidor y sin iniciar sesión.⟧
+⟦// En este dispositivo, en el almacenamiento propio de este navegador:  nadie más las ve, no se le pregunta a ningún servidor, y no hay que iniciar sesión.⟧
+⟦// Una tarea se guarda sola al cambiar:  marcarla, escribir su título, o arrastrarla a su lugar queda guardado, sin paso de guardar.⟧
+⟦// Cambia la primera línea para guardarlas en otro lugar, y nada más cambia.⟧
 [thing stored_on_this_device L0]
-| «almacén del navegador» se guarda en este dispositivo
-
-[thing create_type L0]
-| una «"tarea del navegador"» es una **tarea**
-|   vive en **almacén del navegador**    ‾value(almacén del navegador)
-|   [action to_do_something L1]
-|   | para «tirarla»
-|   |   quitar eso de las **tareas del navegador**    ‾value(eso) ‾value(las tareas del navegador)
-
-[thing create_type L0]
-| un «"guardián del navegador"» es un **guardián de tareas**
-|   [property property_value_getter L1]
-|   | sus «"tareas guardadas"» es cada **tarea del navegador**
-|   [action to_do_something L1]
-|   | para «guardar una tarea nueva titulada (título como texto)»    ‾value(título como texto) bold(título) bold(texto)
-|   |   poner **tarea** a **una nueva tarea del navegador** con **título** = **título**    ‾value(tarea) ‾value(una nueva tarea del navegador con título = título)
-|   |   agregar **tarea** a las **tareas del navegador**    ‾value(tarea) ‾value(las tareas del navegador)
-|   |   devolver **tarea**    ‾value(tarea)
-
-==== /ListaDeTareas.servidor.api.es.spell
-⟪## Guardadas en un archivo JSON en el servidor⟫
-⟦// Las tareas son una carpeta de datos del proyecto en el servidor de Spell:  cada tarea un archivo JSON, en `__data/tareas` de este proyecto.⟧
-⟦// Todos los que usan la aplicación las comparten, y cada persona cambia solo las tareas que hizo.⟧
-⟦// Abre una en un editor y cámbiala:  la aplicación lo muestra en su siguiente revisión.⟧
-[thing create_place L0]
-| «archivos de tareas» es una carpeta de datos en «"tareas"»
-|   se revisa cada _30_ segundos    ‾quantity(30 segundos)
-
-[thing create_type L0]
-| una «"tarea del servidor"» es una **tarea**
-|   vive en **archivos de tareas**    ‾value(archivos de tareas)
-|   [action to_do_something L1]
-|   | para «tirarla»
-|   |   quitar eso de las **tareas del servidor**    ‾value(eso) ‾value(las tareas del servidor)
-
-[thing create_type L0]
-| un «"guardián del servidor"» es un **guardián de tareas**
-|   [property property_value_getter L1]
-|   | sus «"tareas guardadas"» es cada **tarea del servidor**
-|   [action to_do_something L1]
-|   | para «guardar una tarea nueva titulada (título como texto)»    ‾value(título como texto) bold(título) bold(texto)
-|   |   poner **tarea** a **una nueva tarea del servidor** con **título** = **título**    ‾value(tarea) ‾value(una nueva tarea del servidor con título = título)
-|   |   agregar **tarea** a las **tareas del servidor**    ‾value(tarea) ‾value(las tareas del servidor)
-|   |   devolver **tarea**    ‾value(tarea)
-
-==== /ListaDeTareas.csv.api.es.spell
-⟪## Guardadas en un archivo CSV en el servidor⟫
-⟦// Las tareas son un archivo CSV en el servidor de Spell, `__data/tareas.csv` de este proyecto:  una fila cada una, bajo las columnas que nombra su primera línea.⟧
-⟦// Todos los que usan la aplicación lo comparten, y cualquiera cambia cualquier fila:  un archivo CSV no tiene columna que diga de quién es una fila.⟧
-⟦// Cada cambio reescribe solo su propia línea, así que el archivo se lee bien en un diff;  ábrelo en una hoja o un editor y cámbialo,⟧
-⟦// y la aplicación lo muestra en su siguiente revisión.⟧
-[thing create_place L0]
-| «hoja de tareas» es una hoja en «"tareas.csv"»
-|   su identificador está en _"id"_
-|   se revisa cada _30_ segundos    ‾quantity(30 segundos)
-
-[thing create_type L0]
-| una «"tarea de la hoja"» es una **tarea**
-|   vive en **hoja de tareas**    ‾value(hoja de tareas)
-|   [action to_do_something L1]
-|   | para «tirarla»
-|   |   quitar eso de las **tareas de** la **hoja**    ‾value(eso) ‾value(las tareas de la hoja)
-
-[thing create_type L0]
-| un «"guardián de la hoja"» es un **guardián de tareas**
-|   [property property_value_getter L1]
-|   | sus «"tareas guardadas"» es cada **tarea de** la **hoja**
-|   [action to_do_something L1]
-|   | para «guardar una tarea nueva titulada (título como texto)»    ‾value(título como texto) bold(título) bold(texto)
-|   |   poner **tarea** a **una nueva tarea de la hoja** con **título** = **título**    ‾value(tarea) ‾value(una nueva tarea de la hoja con título = título)
-|   |   agregar **tarea** a las **tareas de** la **hoja**    ‾value(tarea) ‾value(las tareas de la hoja)
-|   |   devolver **tarea**    ‾value(tarea)
-
-==== /ListaDeTareas.atmosphere.api.es.spell
-⟪## Guardadas en tu cuenta de atmosphere⟫
-⟦// Las tareas son registros en tu propia cuenta de atmosphere, el AT Protocol de Bluesky, como los estados de Statusphere:⟧
-⟦// inicia sesión, y van contigo a cualquier aplicación que las lea.⟧
-⟦// Allí los registros son públicos:  cualquiera puede leerlos, así que no guardes nada privado en una tarea.⟧
-[thing create_place L0]
-| «cielo de tareas» es una cuenta personal de atmosphere
-|   las **tareas del cielo** están en _"spaces.spell.examples.listadetareas.tarea"_
-
-[thing create_type L0]
-| una «"tarea del cielo"» es una **tarea**
-|   vive en **cielo de tareas**    ‾value(cielo de tareas)
-|   [action to_do_something L1]
-|   | para «tirarla»
-|   |   quitar eso de las **tareas del cielo**    ‾value(eso) ‾value(las tareas del cielo)
-
-[property define_property_has L0]
-| una **tarea del cielo** tiene un **dueño** como **texto**
-|   ⟦// de quién es:  la cuenta en la que está, que un registro no puede decir⟧
-
-[thing create_type L0]
-| un «"guardián del cielo"» es un **guardián de tareas**
-|   [property property_value_getter L1]
-|   | sus «"tareas guardadas"» es cada **tarea del cielo** donde su **dueño** es el **id** de esa persona
-|   |   ⟦// solo las tuyas:  las tareas de cada uno están en su propia cuenta⟧
-|   [action to_do_something L1]
-|   | para «guardar una tarea nueva titulada (título como texto)»    ‾value(título como texto) bold(título) bold(texto)
-|   |   poner **tarea** a **una nueva tarea del cielo** con **título** = **título**    ‾value(tarea) ‾value(una nueva tarea del cielo con título = título)
-|   |   agregar **tarea** a las **tareas del cielo**    ‾value(tarea) ‾value(las tareas del cielo)
-|   |   devolver **tarea**    ‾value(tarea)
+| «mis tareas» se guarda en este dispositivo
+una **tarea** vive en **mis tareas**    ‾value(mis tareas)
 
 ==== /ListaDeTareas.es.spell
 ⟪# Lista de tareas⟫
 ⟦// Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.⟧
 ⟦// Sus tareas son la `tarea` de este proyecto, en Tarea.es.spell;  este archivo tiene su lista, y la aplicación.⟧
-⟦// Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,⟧
-⟦// ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.⟧
+⟦// Se guardan en este dispositivo, así que siguen ahí la próxima vez:  ListaDeTareas.api.es.spell dice dónde.⟧
 
 ⟪## La agenda⟫
 ⟦// Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agenda>`, alrededor de sus `<lista-de-tareas-tarea>`.⟧
@@ -237,15 +112,15 @@
 |   |   el **largo** de (**tareas** en la **lista** donde está pendiente) debería ser _1_    ‾value(el largo de (tareas en la lista donde está pendiente))
 |   [action to_do_something L1]
 |   | para «probar un orden arrastrado se guarda»
-|   |   poner las **tareas** a **una nueva agenda**    ‾value(las tareas) ‾value(una nueva agenda)
+|   |   poner la **lista** a **una nueva agenda**    ‾value(la lista) ‾value(una nueva agenda)
 |   |   poner la **primera** a **una nueva tarea** con **título** _"primera"_    ‾value(la primera) ‾value(una nueva tarea con título "primera")
 |   |   poner la **segunda** a **una nueva tarea** con **título** _"segunda"_    ‾value(la segunda) ‾value(una nueva tarea con título "segunda")
-|   |   agregar la **segunda** a las **tareas**    ‾value(la segunda) ‾value(las tareas)
-|   |   agregar la **primera** a las **tareas**    ‾value(la primera) ‾value(las tareas)
-|   |   guardar el orden de las **tareas**    ‾call(guardar el orden de las tareas)
+|   |   agregar la **segunda** a la **lista**    ‾value(la segunda) ‾value(la lista)
+|   |   agregar la **primera** a la **lista**    ‾value(la primera) ‾value(la lista)
+|   |   guardar el orden de la **lista**    ‾call(guardar el orden de la lista)
 |   |   el **orden** de la **segunda** debería ser _1_    ‾value(el orden de la segunda)
 |   |   el **orden** de la **primera** debería ser _2_    ‾value(el orden de la primera)
-|   |   el **título** de la primera **tarea** en (las **tareas** ordenadas por su **orden**) debería ser _"segunda"_    ‾value(el título de la primera tarea en (las tareas ordenadas por su orden))
+|   |   el **título** de la primera **tarea** en (la **lista** ordenada por su **orden**) debería ser _"segunda"_    ‾value(el título de la primera tarea en (la lista ordenada por su orden))
 [property belongs_to_one L0]
 | una **tarea** pertenece a una **agenda**
 |   ⟦// una tarea está en una sola agenda a la vez⟧
@@ -256,99 +131,71 @@
 [thing create_one_of_a_kind L0]
 | «lista de tareas» es una **aplicación**
 |   [property define_property_has L1]
-|   | «"tareas"» es **una nueva agenda**
+|   | «"agenda"» es **una nueva agenda**
 |   [property define_property_has L1]
 |   | su «"borrador"» es **texto**
 |   |   ⟦// El título de la siguiente tarea, como lo tiene el campo de la nueva tarea⟧
 |   [property property_value_getter L1]
-|   | su «"cuenta pendiente"» es el **largo** de (**tareas** en las **tareas** donde está pendiente)
+|   | su «"cuenta pendiente"» es el **largo** de (**tareas** en la **agenda** donde está pendiente)
 
-|   [plain group define_group L1]
-|   | grupo «"Guardado"»
-|   |   ⟦// Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián⟧
-|   |   [property define_property_has L2]
-|   |   | su «"almacén"» es uno de ‹navegador›, ‹servidor›, ‹csv› o ‹atmosphere›
-|   |   |   ⟦// Dónde se guardan las tareas:  este navegador, un archivo JSON en el servidor, un archivo CSV en el servidor, o tu cuenta de atmosphere⟧
-|   |   [property define_property_has L2]
-|   |   | su «"guardián"» es un **guardián de tareas**
-|   |   |   ⟦// Quién las guarda, según dónde se guardan:  uno de los guardianes de los archivos de API⟧
+|   [action to_do_something L1]
+|   | para «llenar la agenda»
+|   |   ⟦// Las tareas guardadas en este dispositivo, en su orden;  la primera vez, sin ninguna guardada, unas cuantas para empezar⟧
+|   |   limpiar la **agenda**    ‾value(la agenda)
+|   |   [control list_iteration L2]
+|   |   | para **tarea** en (cada **tarea**) ordenadas por su **orden**    ‾value((cada tarea) ordenadas por su orden)
+|   |   |   agregar la **tarea** a la **agenda**    ‾value(la tarea) ‾value(la agenda)
+|   |   si la **agenda** no está vacía devolver    ‾question(la agenda no está vacía)
+|   |   agregar la tarea inicial _"Escribir el ejemplo Lista de tareas"_ con prioridad _alta_    ‾call(agregar la tarea inicial "Escribir el ejemplo Lista de tareas" con prioridad alta)
+|   |   agregar la tarea inicial _"Enseñarle a dibujar"_ con prioridad _normal_    ‾call(agregar la tarea inicial "Enseñarle a dibujar" con prioridad normal)
+|   |   agregar la tarea inicial _"Seleccionar unas tareas, y editarlas juntas"_ con prioridad _normal_    ‾call(agregar la tarea inicial "Seleccionar unas tareas, y editarlas juntas" con prioridad normal)
+|   |   agregar la tarea inicial _"Arrastrar tareas para reordenarlas"_ con prioridad _baja_    ‾call(agregar la tarea inicial "Arrastrar tareas para reordenarlas" con prioridad baja)
+|   |   poner la **hecha** de la primera **tarea** en la **agenda** a _sí_    ‾value(la hecha de la primera tarea en la agenda)
 
-|   |   [action to_do_something L2]
-|   |   | para «llenar la agenda»
-|   |   |   ⟦// Las tareas del guardián, en la lista;  un guardián sin ninguna empieza con unas cuantas⟧
-|   |   |   limpiar las **tareas**    ‾value(las tareas)
-|   |   |   [control list_iteration L3]
-|   |   |   | para **tarea** en (las **tareas guardadas** de su **guardián**) ordenadas por su **orden**    ‾value((las tareas guardadas de su guardián) ordenadas por su orden)
-|   |   |   |   agregar la **tarea** a las **tareas**    ‾value(la tarea) ‾value(las tareas)
-|   |   |   si las **tareas** no están vacías devolver    ‾question(las tareas no están vacías)
-|   |   |   agregar la tarea inicial _"Escribir el ejemplo Lista de tareas"_ con prioridad _alta_    ‾call(agregar la tarea inicial "Escribir el ejemplo Lista de tareas" con prioridad alta)
-|   |   |   agregar la tarea inicial _"Enseñarle a dibujar"_ con prioridad _normal_    ‾call(agregar la tarea inicial "Enseñarle a dibujar" con prioridad normal)
-|   |   |   agregar la tarea inicial _"Seleccionar unas tareas, y editarlas juntas"_ con prioridad _normal_    ‾call(agregar la tarea inicial "Seleccionar unas tareas, y editarlas juntas" con prioridad normal)
-|   |   |   agregar la tarea inicial _"Arrastrar tareas para reordenarlas"_ con prioridad _baja_    ‾call(agregar la tarea inicial "Arrastrar tareas para reordenarlas" con prioridad baja)
-|   |   |   poner la **hecha** de la primera **tarea** en las **tareas** a _sí_    ‾value(la hecha de la primera tarea en las tareas)
+|   [action create_hook L1]
+|   | al «crearla»
+|   |   ⟦// Una lista de tareas nueva muestra todas sus tareas⟧
+|   |   poner el **mostrando** de la **agenda** a _todas_    ‾value(el mostrando de la agenda)
+|   |   llenar la agenda    ‾call(llenar la agenda)
 
-|   |   [action on L2]
-|   |   | cuando su **almacén** cambia
-|   |   |   [control if L3]
-|   |   |   | si el **almacén** es _servidor_    ‾value(el almacén)
-|   |   |   |   poner el **guardián** a **un nuevo guardián del servidor**    ‾value(el guardián) ‾value(un nuevo guardián del servidor)
-|   |   |   [control else_if L3]
-|   |   |   | de lo contrario si el **almacén** es _csv_    ‾value(el almacén)
-|   |   |   |   poner el **guardián** a **un nuevo guardián de la hoja**    ‾value(el guardián) ‾value(un nuevo guardián de la hoja)
-|   |   |   [control else_if L3]
-|   |   |   | de lo contrario si el **almacén** es _atmosphere_    ‾value(el almacén)
-|   |   |   |   poner el **guardián** a **un nuevo guardián del cielo**    ‾value(el guardián) ‾value(un nuevo guardián del cielo)
-|   |   |   [control else L3]
-|   |   |   | de lo contrario
-|   |   |   |   poner el **guardián** a **un nuevo guardián del navegador**    ‾value(el guardián) ‾value(un nuevo guardián del navegador)
-|   |   |   llenar la agenda    ‾call(llenar la agenda)
+|   [action to_do_something L1]
+|   | para «agregar la tarea inicial (título como texto) con prioridad (nivel como texto)»    ‾value(título como texto) ‾value(nivel como texto) bold(título) bold(texto) bold(nivel) bold(texto)
+|   |   poner **tarea** a **una nueva tarea** con **título** = **título**, **prioridad** = **nivel**    ‾value(tarea) ‾value(una nueva tarea con título = título, prioridad = nivel)
+|   |   agregar **tarea** a las **tareas**    ‾value(tarea) ‾value(las tareas)
+|   |   agregar **tarea** a la **agenda**    ‾value(tarea) ‾value(la agenda)
+|   |   poner el **orden** de **tarea** al **largo** de la **agenda**    ‾value(el orden de tarea) ‾value(largo de la agenda)
 
-|   |   [action create_hook L2]
-|   |   | al «crearla»
-|   |   |   ⟦// Una lista de tareas nueva guarda sus tareas en este navegador, y las muestra todas⟧
-|   |   |   poner el **mostrando** de las **tareas** a _todas_    ‾value(el mostrando de las tareas)
-|   |   |   poner el **almacén** a _navegador_    ‾value(el almacén)
-|   |   |   poner el **guardián** a **un nuevo guardián del navegador**    ‾value(el guardián) ‾value(un nuevo guardián del navegador)
-|   |   |   llenar la agenda    ‾call(llenar la agenda)
-
-|   |   [action to_do_something L2]
-|   |   | para «agregar la tarea inicial (título como texto) con prioridad (nivel como texto)»    ‾value(título como texto) ‾value(nivel como texto) bold(título) bold(texto) bold(nivel) bold(texto)
-|   |   |   poner **tarea** a guardar una tarea nueva titulada **título** de su **guardián**    ‾value(tarea) ‾call(guardar una tarea nueva titulada título de su guardián)
-|   |   |   poner la **prioridad** de **tarea** a **nivel**    ‾value(la prioridad de tarea) ‾value(nivel)
-|   |   |   agregar **tarea** a las **tareas**    ‾value(tarea) ‾value(las tareas)
-|   |   |   poner el **orden** de **tarea** al **largo** de las **tareas**    ‾value(el orden de tarea) ‾value(largo de las tareas)
-
-|   |   [action to_do_something L2]
-|   |   | para «agregar el borrador»
-|   |   |   ⟦// El borrador, como una nueva tarea al final de la lista;  el campo se vacía⟧
-|   |   |   si el **borrador** es _""_ devolver    ‾value(el borrador)
-|   |   |   poner **tarea** a guardar una tarea nueva titulada (el **borrador**) de su **guardián**    ‾value(tarea) ‾call(guardar una tarea nueva titulada (el borrador) de su guardián)
-|   |   |   poner la **prioridad** de **tarea** a _normal_    ‾value(la prioridad de tarea)
-|   |   |   agregar **tarea** a las **tareas**    ‾value(tarea) ‾value(las tareas)
-|   |   |   poner el **orden** de **tarea** al **largo** de las **tareas**    ‾value(el orden de tarea) ‾value(largo de las tareas)
-|   |   |   limpiar el **borrador**    ‾value(el borrador)
+|   [action to_do_something L1]
+|   | para «agregar el borrador»
+|   |   ⟦// El borrador, como una nueva tarea al final de la lista;  el campo se vacía⟧
+|   |   si el **borrador** es _""_ devolver    ‾value(el borrador)
+|   |   poner **tarea** a **una nueva tarea** con **título** = el **borrador**, **prioridad** = _normal_    ‾value(tarea) ‾value(una nueva tarea con título = el borrador, prioridad = normal)
+|   |   agregar **tarea** a las **tareas**    ‾value(tarea) ‾value(las tareas)
+|   |   agregar **tarea** a la **agenda**    ‾value(tarea) ‾value(la agenda)
+|   |   poner el **orden** de **tarea** al **largo** de la **agenda**    ‾value(el orden de tarea) ‾value(largo de la agenda)
+|   |   limpiar el **borrador**    ‾value(el borrador)
 
 |   [plain group define_group L1]
 |   | grupo «"Filtro"»
 |   |   ⟦// Qué tareas muestra la lista:  la barra de herramientas marca la que muestra⟧
 |   |   [action to_do_something L2]
 |   |   | para «"mostrar todas"» con título «"Todas"», icono «"list"»
-|   |   |   seleccionada cuando las **tareas** están mostrando todas    ‾question(las tareas están mostrando todas)
-|   |   |   poner el **mostrando** de las **tareas** a _todas_    ‾value(el mostrando de las tareas)
+|   |   |   seleccionada cuando la **agenda** está mostrando todas    ‾question(la agenda está mostrando todas)
+|   |   |   poner el **mostrando** de la **agenda** a _todas_    ‾value(el mostrando de la agenda)
 |   |   [action to_do_something L2]
 |   |   | para «"mostrar pendientes"» con título «"Pendientes"», icono «"square outline"»
-|   |   |   seleccionada cuando las **tareas** están mostrando pendientes    ‾question(las tareas están mostrando pendientes)
-|   |   |   poner el **mostrando** de las **tareas** a _pendientes_    ‾value(el mostrando de las tareas)
+|   |   |   seleccionada cuando la **agenda** está mostrando pendientes    ‾question(la agenda está mostrando pendientes)
+|   |   |   poner el **mostrando** de la **agenda** a _pendientes_    ‾value(el mostrando de la agenda)
 |   |   [action to_do_something L2]
 |   |   | para «"mostrar hechas"» con título «"Hechas"», icono «"check square outline"»
-|   |   |   seleccionada cuando las **tareas** están mostrando hechas    ‾question(las tareas están mostrando hechas)
-|   |   |   poner el **mostrando** de las **tareas** a _hechas_    ‾value(el mostrando de las tareas)
+|   |   |   seleccionada cuando la **agenda** está mostrando hechas    ‾question(la agenda está mostrando hechas)
+|   |   |   poner el **mostrando** de la **agenda** a _hechas_    ‾value(el mostrando de la agenda)
 |   |   [action to_do_something L2]
 |   |   | para «"quitar las tareas hechas"» con título «"Quitar las tareas hechas"», icono «"trash alternate outline"»
 |   |   |   [control list_iteration L3]
-|   |   |   | para **tarea** en (**tareas** en las **tareas** donde está hecha)    ‾value(tareas en las tareas donde está hecha)
+|   |   |   | para **tarea** en (**tareas** en la **agenda** donde está hecha)    ‾value(tareas en la agenda donde está hecha)
 |   |   |   |   tirar la **tarea**    ‾call(tirar la tarea)
-|   |   |   |   quitar la **tarea** de las **tareas**    ‾value(la tarea) ‾value(las tareas)
+|   |   |   |   quitar la **tarea** de la **agenda**    ‾value(la tarea) ‾value(la agenda)
 
 |   [plain group define_group L1]
 |   | grupo «"Menús"»
@@ -373,23 +220,13 @@
 |   |   |         </⟨texto⟩>
 |   |   |       </⟨barra-herramientas⟩>
 |   |   |       <⟨formulario⟩ value={eso}>    code({eso})
-|   |   |         <⟨pila⟩>
-|   |   |           <⟨campo⟩ etiqueta=«"Guardarlas en"» en-linea>
-|   |   |             <⟨selector⟩ name=«"almacén"»>
-|   |   |               <⟨elemento⟩ value=«"navegador"» icono=«"desktop"»>Este navegador</⟨elemento⟩>
-|   |   |               <⟨elemento⟩ value=«"servidor"» icono=«"server"»>Un archivo JSON en el servidor</⟨elemento⟩>
-|   |   |               <⟨elemento⟩ value=«"csv"» icono=«"table"»>Un archivo CSV en el servidor</⟨elemento⟩>
-|   |   |               <⟨elemento⟩ value=«"atmosphere"» icono=«"cloud"»>Tu cuenta de atmosphere</⟨elemento⟩>
-|   |   |             </⟨selector⟩>
-|   |   |           </⟨campo⟩>
-|   |   |           <⟨entrada⟩ name=«"borrador"» marcador=«"Algo por hacer"» aria-label=«"Nueva tarea"» fluido accion>
-|   |   |             <⟨bot⟩ón slot=«"accion"» color=«"primario"» disabled={el **borrador** es _""_} onClick={agregar el borrador}>Agregar</⟨bot⟩ón>    code({el borrador es ""}) code({agregar el borrador})
-|   |   |           </⟨entrada⟩>
-|   |   |         </⟨pila⟩>
+|   |   |         <⟨entrada⟩ name=«"borrador"» marcador=«"Algo por hacer"» aria-label=«"Nueva tarea"» fluido accion>
+|   |   |           <⟨bot⟩ón slot=«"accion"» color=«"primario"» disabled={el **borrador** es _""_} onClick={agregar el borrador}>Agregar</⟨bot⟩ón>    code({el borrador es ""}) code({agregar el borrador})
+|   |   |         </⟨entrada⟩>
 |   |   |       </⟨formulario⟩>
 |   |   |       <⟨cuadricula⟩ columnas=«"2"» apilable context-menu=«"menú de la lista"»>
-|   |   |         {dibujar las **tareas**}
-|   |   |         <⟨es-editor-propiedades⟩ etiqueta=«"Tareas seleccionadas"» esquema=«"lista-de-tareas-tarea"» value={la **selección** de las **tareas**}>    code({la selección de las tareas})
+|   |   |         {dibujar la **agenda**}
+|   |   |         <⟨es-editor-propiedades⟩ etiqueta=«"Tareas seleccionadas"» esquema=«"lista-de-tareas-tarea"» value={la **selección** de la **agenda**}>    code({la selección de la agenda})
 |   |   |           <⟨es-propiedad⟩ name=«"título"»/>
 |   |   |           <⟨es-propiedad⟩ name=«"prioridad"»/>
 |   |   |           <⟨es-propiedad⟩ name=«"hecha"»/>

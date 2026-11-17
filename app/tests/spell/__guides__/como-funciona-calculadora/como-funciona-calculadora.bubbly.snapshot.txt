@@ -1,0 +1,92 @@
+==== /ComoFuncionaCalculadora.es.spell
+⟪# Cómo funciona Calculadora⟫
+⟦// El ejemplo Calculadora es una calculadora de bolsillo:  pulsa 7, +, 5, y muestra 12.⟧
+⟦// Está escrito en español:  cada línea de código también.⟧
+⟦// Cada tecla hace las mismas dos cosas:⟧
+⟦// - ejecuta una ACCIÓN, unas pocas líneas que cambian lo que guarda la calculadora⟧
+⟦// - y la pantalla, dibujada a partir de lo que guarda, cambia con ella⟧
+
+⟦// Esta guía hace una más pequeña, una sumadora, a la derecha:  tres teclas de números, una tecla + y una tecla C.⟧
+⟦// Abre Calculadora, en los Ejemplos, para verla entera con todas sus teclas.  Calculator es la misma, en inglés.⟧
+
+⟪## Lo que guarda⟫
+⟦// Cada línea `su "..." es` es una cosa que guarda toda sumadora.⟧
+⟦// - `es un número` hace del total un número, que empieza en 0.⟧
+⟦// - El número que se escribe es texto, para que cada tecla pueda añadir un dígito al final.⟧
+
+⟪## Lo que hacen sus teclas⟫
+⟦// Cada `para ...` es una acción:  lo que hace una tecla.⟧
+⟦// - La acción de una tecla de dígito recibe el dígito:  `pulsar (dígito como texto)`, así que `pulsar "5"` pone un 5 al final.⟧
+⟦// - Un "+" entre dos textos los une:  "1" + "2" es "12".⟧
+⟦// - `como un número` convierte el texto "12" en el número 12, para poder sumarlo.⟧
+⟦// - `limpiar` vacía lo que nombra:  un número vuelve a 0, un texto a "".⟧
+
+⟪## Cómo se dibuja⟫
+⟦// La pantalla, luego las teclas, en una tarjeta:  las etiquetas de Spell UI, por sus nombres cortos en español.⟧
+⟦// - `<botón>` es el botón de Spell UI, `<cuadricula columnas="5">` pone las teclas de cinco en cinco.⟧
+⟦// - `onClick` dice qué hace una tecla cuando se hace clic en ella:  una de las acciones de arriba.⟧
+⟦// - La pantalla muestra el número que se escribe, o el total cuando no hay ninguno.⟧
+
+[thing create_one_of_a_kind L0]
+| «sumadora» es una **aplicación**
+|   [property define_property_has L1]
+|   | su «"total"» es un **número**
+|   [property define_property_has L1]
+|   | su «"entrada"» es **texto**
+|   |   ⟦// El número que se escribe⟧
+
+|   [action to_do_something L1]
+|   | para «pulsar (dígito como texto)»    ‾value(dígito como texto) bold(dígito) bold(texto)
+|   |   ⟦// Una tecla de dígito:  ese dígito, al final del número que se escribe⟧
+|   |   poner la **entrada** a la **entrada** + el **dígito**    ‾value(la entrada) ‾value(la entrada) ‾value(el dígito)
+|   [action to_do_something L1]
+|   | para «sumarlo»
+|   |   ⟦// La tecla +:  el número escrito, sumado al total, y luego otra vez de cero para el siguiente⟧
+|   |   si la **entrada** es vacía devolver    ‾question(la entrada es vacía)
+|   |   fijar **escrito** en la **entrada** como un número    ‾value(escrito) ‾value(la entrada como un número)
+|   |   fijar el **total** en el **total** + **escrito**    ‾value(el total) ‾value(el total) ‾value(escrito)
+|   |   limpiar la **entrada**    ‾value(la entrada)
+|   [action to_do_something L1]
+|   | para «borrarla»
+|   |   ⟦// La tecla C:  vuelta a nada⟧
+|   |   limpiar el **total**    ‾value(el total)
+|   |   limpiar la **entrada**    ‾value(la entrada)
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   <⟨pila⟩ alinear=«"centro"»>
+|   |     <⟨tarjeta⟩>
+|   |       <⟨segmento⟩ apariencia=«"secundario"» alinear=«"derecha"»>
+|   |         <⟨texto⟩ tamano=«"enorme"»>{el **total** si la **entrada** es vacía de lo contrario la **entrada**}</⟨texto⟩>    code({el total si la entrada es vacía de lo contrario la entrada})
+|   |       </⟨segmento⟩>
+|   |       <⟨contenido⟩>
+|   |         <⟨cuadricula⟩ columnas=«"5"» separacion=«"compact"»>
+|   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"1"_}>1</⟨bot⟩ón></⟨columna⟩>    code({pulsar "1"})
+|   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"2"_}>2</⟨bot⟩ón></⟨columna⟩>    code({pulsar "2"})
+|   |           <⟨columna⟩><⟨bot⟩ón fluido onClick={pulsar _"5"_}>5</⟨bot⟩ón></⟨columna⟩>    code({pulsar "5"})
+|   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"primario"» onClick={sumar eso}>+</⟨bot⟩ón></⟨columna⟩>    code({sumar eso})
+|   |           <⟨columna⟩><⟨bot⟩ón fluido color=«"negativo"» onClick={borrar eso}>C</⟨bot⟩ón></⟨columna⟩>    code({borrar eso})
+|   |         </⟨cuadricula⟩>
+|   |       </⟨contenido⟩>
+|   |     </⟨tarjeta⟩>
+|   |   </⟨pila⟩>
+
+|   [action to_do_something L1]
+|   | para «probar sumar»
+|   |   ⟦// 12 y 5 son 17⟧
+|   |   pulsar _"1"_    ‾call(pulsar "1")
+|   |   pulsar _"2"_    ‾call(pulsar "2")
+|   |   sumar eso    ‾call(sumar eso)
+|   |   pulsar _"5"_    ‾call(pulsar "5")
+|   |   sumar eso    ‾call(sumar eso)
+|   |   el **total** debería ser _17_    ‾value(el total)
+
+⟪## Pruébalo⟫
+⟦// - Haz clic en 1, 2, +, 5, + a la derecha:  la pantalla muestra 12, luego 17.⟧
+⟦// - Agrega una tecla 9:  copia la línea que tiene el "5", y cambia los dos 5 por 9.⟧
+⟦//   Luego dale seis columnas a la cuadrícula:  `columnas="6"`.⟧
+⟦// - Haz que + reste:  en "sumarlo", cambia el + de "el total + escrito" por un -,⟧
+⟦//   y luego la etiqueta de la tecla.  La prueba de arriba se pondrá roja, porque 12 menos 5 no es 17.⟧
+
+⟦// Y después:  el ejemplo Calculadora, que guarda un número izquierdo, un operador y un número derecho,⟧
+⟦// así que puede hacer las cuatro cuentas.⟧

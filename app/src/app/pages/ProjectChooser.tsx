@@ -26,8 +26,11 @@ import "./ProjectChooser.css"
 
 /****************
  * ### `<ProjectChooser>`
- * The landing page:  a hero line over cards for the examples, the library's apps, the guides and your own projects.
- * - Its sections in Spell's own order, `SPACES.homeSections()`, dragged by their headers in dev (epic `repo-split` P28).
+ * The landing page:  a hero line over cards for your own projects, the ways to start, the examples and the guides.
+ * - Its sections in Spell's own order, `SPACES.homeSections()`, dragged by their headers in dev (epic `repo-split` P28):
+ *   your own projects first, under the hero, and only while you have some (epic `mockup` I40).
+ * - Spell's own order also leaves some out, sections and projects (`SPACES.HOME_HIDDEN_KEY`, epic `mockup` I40):
+ *   the library, the editor's pieces, the examples that need a sign-in ...
  * - In an app made for an org (`"spell": { "org": "acme" }` in its `package.json`):
  *   your own projects and each of the org's groups first, above the hero;  no library.
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
@@ -111,6 +114,7 @@ export function ProjectChooser() {
             projectRoot={projects}
             line={appTexts.text("homeProjectsLine")}
             create={<Actions.createProject button appearance="basic" size="small" />}
+            hideWhenNone
             sectionDrag={drag()}
           />
         )
@@ -167,11 +171,10 @@ function OrgGroups(props: { drag?: TileCardDrag }) {
  * beside a few lines of the Task List.
  ****************/
 function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
-  // the first in the home page's order, FizzBuzz
-  const firstExample = () =>
-    SPACES.inHomeOrder(SPACES.SpellProjectRoot.examples.path, props.examples.projects, homeOrder())[0]?.path
-  // the first guide the home page shows a card for:  a project may stay off it (`"onHome": false`)
-  const firstGuide = () => props.guides.projects.find((project) => project.onHome !== false)?.path
+  // the first in the home page's order it shows a card for, the Calculator
+  const firstExample = () => onHomeIn(SPACES.SpellProjectRoot.examples, props.examples)[0]?.path
+  // the first guide the home page shows a card for
+  const firstGuide = () => onHomeIn(SPACES.SpellProjectRoot.guides, props.guides)[0]?.path
   return (
     <section class="Hero">
       <div class="pitch">
@@ -217,10 +220,10 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
 /****************
  * ### `<StartCards>`
  * The ways to start making something, under the hero, in the group of cards the projects use:
- * - Blank:  an empty app, the palette open, so what it can hold shows at once
- * - a few tiny starters, each the person's own to change
- * - Site:  a site with its main page layout and a home page (epic `mockup` T40)
- * - Solitaire:  a whole game to change something in, with an invitation to
+ * - a few tiny starters, each the person's own to change:  the to-do list (Task List's copy), Counter, Converter
+ *   (Owen, epic `mockup` I40:  no Roll a Six, Site or Solitaire here any more)
+ * - Blank, last:  an empty app, the palette open, so what it can hold shows at once
+ *   (Owen, epic `mockup` T44:  "adding things in the editor doesn't work that great yet, so don't lead with that")
  * - Import:  a project they exported, the way back after clearing a browser
  * - `drag`:  moving the whole section by its header, among the page's (in dev, in Spell's own checkout)
  ****************/
@@ -239,13 +242,9 @@ function StartCards(props: { drag?: TileCardDrag }) {
       </header>
       <div class="cards">
         <StartCard
-          name={appTexts.text("startBlank")}
-          line={appTexts.text("startBlankLine")}
-          start={() => {
-            Palette.openOnArrival()
-            Inspector.openQuietly()
-            void editor.startFrom("blank", { codeClosed: true })
-          }}
+          name={appTexts.text("startTaskList")}
+          line={appTexts.text("startTaskListLine")}
+          start={() => void editor.startFromCopy(TASK_LIST)}
         />
         <StartCard
           name={appTexts.text("startCounter")}
@@ -253,27 +252,17 @@ function StartCards(props: { drag?: TileCardDrag }) {
           start={() => void editor.startFrom("counter")}
         />
         <StartCard
-          name={appTexts.text("startTaskList")}
-          line={appTexts.text("startTaskListLine")}
-          start={() => void editor.startFromCopy(TASK_LIST)}
+          name={appTexts.text("startConverter")}
+          line={appTexts.text("startConverterLine")}
+          start={() => void editor.startFrom("converter")}
         />
         <StartCard
-          name={appTexts.text("startDice")}
-          line={appTexts.text("startDiceLine")}
-          start={() => void editor.startFrom("dice")}
-        />
-        <StartCard
-          name={appTexts.text("startSite")}
-          line={appTexts.text("startSiteLine")}
-          start={() => void editor.startFrom("site")}
-        />
-        <StartCard
-          name={appTexts.text("startSolitaire")}
-          line={appTexts.text("startSolitaireLine")}
+          name={appTexts.text("startBlank")}
+          line={appTexts.text("startBlankLine")}
           start={() => {
+            Palette.openOnArrival()
             Inspector.openQuietly()
-            openProject(SOLITAIRE)
-            editor.showNotice(appTexts.text("startSolitaireInvite"))
+            void editor.startFrom("blank", { codeClosed: true })
           }}
         />
       </div>
@@ -283,9 +272,6 @@ function StartCards(props: { drag?: TileCardDrag }) {
 
 /** The example the to-do starter copies. */
 const TASK_LIST = "@spell/examples/TaskList"
-
-/** The example the whole-game way in opens. */
-const SOLITAIRE = "@spell/examples/Solitaire"
 
 /** One way to start:  a card like a project's. */
 function StartCard(props: { name: string; line: string; start: () => void }) {
@@ -305,6 +291,7 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
  *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
  * - In the editor's order of each group, `SPACES.HOME_ORDER` (epic `mockup` P19);  one it doesn't list, last.
+ *   - Not those it hides, nor a project that says `"onHome": false` (`onHomeIn()`).
  *   - In dev, where the server says it may (`mayReorder`), a card is dragged among its run to reorder it:
  *     the group's new order is saved into that list at once (`saveHomeOrder()`).
  *   - Only Spell's own groups:  an org's group (`SPACES.orgGroups`) never drags its cards.
@@ -312,13 +299,15 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  ****************/
 export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
-  // the page of a group's sites lists every site;  the home page's rows skip a project that says `"onHome": false`
+  // the page of a group's sites lists every site;  the home page's rows, those it shows a card for
   const listed = () =>
-    SPACES.inHomeOrder(
-      props.projectRoot.path,
-      root().projects.filter((project) => (props.sitesOnly ? project.isSite : project.onHome !== false)),
-      homeOrder()
-    )
+    props.sitesOnly
+      ? SPACES.inHomeOrder(
+          props.projectRoot.path,
+          root().projects.filter((project) => project.isSite),
+          homeOrder()
+        )
+      : onHomeIn(props.projectRoot, root())
   onSettled(() => askMayReorder())
   // a card's drag among its run:  in dev, where the server lets this page reorder, never on a page of sites
   const dragFor = (project: CardProject, section: CardSection): TileCardDrag | undefined => {
@@ -345,12 +334,15 @@ export function ProjectCards(props: ProjectCardsProps) {
       onDrop: (event) => {
         event.preventDefault()
         if (takes()) {
-          const paths = movedOnto(
+          const run = movedOnto(
             listed().map((each) => each.path),
             dragged()!,
             project.path
           )
-          saveHomeOrder(props.projectRoot.path, paths.map(SPACES.folderNameOf))
+          // the group's whole order, the projects the row doesn't show keeping their places
+          const group = props.projectRoot.path
+          const all = SPACES.inHomeOrder(group, root().projects, homeOrder()).map((each) => each.path)
+          saveHomeOrder(group, SPACES.withRunReordered(all, run).map(SPACES.folderNameOf))
         }
         setDropOn(undefined)
       },
@@ -445,6 +437,18 @@ function ProjectCard(props: {
 
 /** One project, as a group's card shows it. */
 type CardProject = ProjectRootState["projects"][number]
+
+/**
+ * `projectRoot`'s projects the home page shows a card for, in its order:
+ * - not one its order hides (`SPACES.HOME_HIDDEN_KEY`:  FizzBuzz, the org apps ...;  epic `mockup` I40)
+ * - nor one whose project file says `"onHome": false` (a library with no app of its own, the Spell UI site)
+ */
+function onHomeIn(projectRoot: SPACES.SpellProjectRoot, root: ProjectRootState): CardProject[] {
+  const shown = root.projects.filter(
+    (project) => project.onHome !== false && SPACES.isOnHome(project.path, homeOrder())
+  )
+  return SPACES.inHomeOrder(projectRoot.path, shown, homeOrder())
+}
 
 ////////////////
 // ## The home page's order:  dragged in dev
@@ -542,8 +546,11 @@ function sectionDragFor(section: SPACES.HomeSection): TileCardDrag | undefined {
     onDrop: (event) => {
       if (!takes()) return
       event.preventDefault()
-      const order = movedOnto(SPACES.homeSections(false, homeOrder()), draggedSection()!, section)
-      saveHomeOrder(SPACES.HOME_SECTIONS_KEY, order)
+      const run = movedOnto(SPACES.homeSections(false, homeOrder()), draggedSection()!, section)
+      // every section's place, the hidden ones' kept
+      const saved = (homeOrder()[SPACES.HOME_SECTIONS_KEY] ?? []).filter(SPACES.isHomeSection)
+      const all = [...new Set([...saved, ...SPACES.HOME_SECTIONS])]
+      saveHomeOrder(SPACES.HOME_SECTIONS_KEY, SPACES.withRunReordered(all, run))
       setDropOnSection(undefined)
     },
     onEnd: () => {

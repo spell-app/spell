@@ -1,0 +1,16 @@
+{
+  "title": "Tarjetas de estudio",
+  "description": "Flash Cards' Spanish twin:  a deck of English words to quiz yourself on, written in Spanish;  each card a two sided view that turns over on a click, you say whether you knew it, and a toolbar keeps the score",
+  "category": "games",
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "Mostrar la respuesta", "wait": 800 }, { "click": "La sabía", "wait": 800 }, { "click": "Mostrar la respuesta", "wait": 1200 }] },
+  // what its app does before its card's picture is taken (`yarn examples:readme --thumbnails`)
+  "thumbnail": { "steps": [{ "click": "Mostrar la respuesta", "wait": 800 }, { "click": "La sabía", "wait": 800 }, { "click": "Mostrar la respuesta", "wait": 2500 }, { "scrollToOn": "tarjetas-de-estudio-tarjeta" }] },
+  "imports": [{
+    "path": "/Tarjeta.es.spell",
+    "active": true
+  }, {
+    "path": "/TarjetasDeEstudio.es.spell",
+    "active": true
+  }]
+}

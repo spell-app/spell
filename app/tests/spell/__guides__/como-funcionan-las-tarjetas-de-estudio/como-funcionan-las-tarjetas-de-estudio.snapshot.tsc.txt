@@ -1,0 +1,1 @@
+116:5 TS2322 Type 'Tarjeta | undefined' is not assignable to type 'Tarjeta'.

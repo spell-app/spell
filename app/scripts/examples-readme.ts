@@ -9,6 +9,9 @@
  *   - its app running by itself, in the runner at a phone's width, its top 16 by 9, into its own folder as
  *     `__thumbnail.png`:
  *     its card's, on the editor's home page (`SPACES.PROJECT_THUMBNAIL`, epic `mockup` P18)
+ *     - the app in use:  first, the steps its project file names (`"thumbnail": { "steps" }`, spaces'
+ *       `ProjectThumbnailJSON`), e.g. the Calculator's `2 × 2 = 4`, a game a few moves in (epic `mockup` I41)
+ *     - with room above its first thing (`THUMBNAIL_TOP_ROOM`), so nothing touches the picture's top edge
  *   - Headless Playwright, at the address the kit's editor answers on (`.spell-server.editor.json`, at the page
  *     server's root, the kit's):
  *     start it first, with `yarn start` or `spell app serve`.
@@ -37,6 +40,8 @@ import JSON5 from "json5"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
 import { pageServerRoot } from "spell/server/page/settings"
+
+import type { ProjectFileJSON, ThumbnailStepJSON } from "spell/app/spaces/server/node/projects/server.types"
 
 /** spell-app's checkout. */
 const ROOT = path.resolve(import.meta.dirname, "..")
@@ -68,6 +73,15 @@ const THUMBNAIL_SHAPE = 9 / 16
 
 /** How many pixels a thumbnail has per point:  2, a phone's screen. */
 const THUMBNAIL_SCALE = 2
+
+/**
+ * Room above the app's first thing, in points, so nothing in a thumbnail touches its top edge (epic `mockup` I41):
+ * the app is taken with this much more padding at its top than it has in the runner.
+ */
+const THUMBNAIL_TOP_ROOM = 16
+
+/** How long a thumbnail step waits after itself, unless it says (`ThumbnailStepJSON.wait`). */
+const STEP_WAIT_MS = 300
 
 /**
  * Each group's order:  the editor's home page's, ONE list (spaces' `homeOrder.json`, epic `mockup` P19).
@@ -137,6 +151,8 @@ type Project = {
   folder: string
   /** a project with an app to picture;  a library that stays off the home page (`"onHome": false`) has none */
   hasPicture: boolean
+  /** what to do in its app before its thumbnail:  its project file's `thumbnail.steps`, none if it says none */
+  thumbnailSteps: ThumbnailStepJSON[]
 }
 
 /** Every project of the listed groups, examples first, each group in its order. */
@@ -170,12 +186,13 @@ function projectFor(group: string, name: string): Project {
     title: file.title ?? titleFor(name),
     description: file.description ?? firstComment(folder, file) ?? "",
     folder: path.relative(ROOT, folder),
-    hasPicture: file.onHome !== false
+    hasPicture: file.onHome !== false,
+    thumbnailSteps: file.thumbnail?.steps ?? []
   }
 }
 
-/** The parts of a project file this reads (spaces' `ProjectFileJSON` has them all). */
-type ProjectFile = { title?: string; description?: string; onHome?: false; imports?: { path: string }[] }
+/** The parts of a project file this reads. */
+type ProjectFile = Partial<Pick<ProjectFileJSON, "title" | "description" | "onHome" | "imports" | "thumbnail">>
 
 /** A folder's name as a title, as the editor makes it:  `lists-from-zero` => `Lists From Zero`. */
 function titleFor(name: string): string {
@@ -280,17 +297,22 @@ async function takePictures(projects: Project[]): Promise<void> {
       // the runner keeps a connection open, so it never goes quiet:  its load, then the settle
       await runner.goto(new URL(`run/${project.address}`, editor).href, { waitUntil: "load" })
       await runner.waitForTimeout(SETTLE_MS)
-      // the app's own element, without the editor's menu bar round it;  one that draws nothing gets no thumbnail
+      // the app's own element, without the editor's menu bar round it
       const app = runner.locator(".AppRoot").first()
       // its elements draw in their shadow roots, so ask whether it put any element on the page at all
       const drawsSomething = await app.evaluate((element) => !!element.querySelector("#spell-app-root > *"))
       if (drawsSomething) {
-        // its top, cut to the card's shape
+        // room above its first thing, then the app in use
+        await runner.addStyleTag({ content: `.AppRoot { padding-top: ${THUMBNAIL_TOP_ROOM}px !important }` })
+        let scrolledTo: number | undefined
+        for (const step of project.thumbnailSteps) scrolledTo = (await takeStep(runner, step)) ?? scrolledTo
+        // its top, cut to the card's shape;  scrolled, from what it scrolled to, inside the app and the window
         const box = (await app.boundingBox())!
-        await runner.screenshot({
-          path: thumbnailOf(project),
-          clip: { x: box.x, y: box.y, width: box.width, height: box.width * THUMBNAIL_SHAPE }
-        })
+        const height = box.width * THUMBNAIL_SHAPE
+        const lowest = Math.min(box.y + box.height, THUMBNAIL_WINDOW.height) - height
+        const top =
+          scrolledTo === undefined ? box.y : Math.max(box.y, Math.min(scrolledTo - THUMBNAIL_TOP_ROOM, lowest))
+        await runner.screenshot({ path: thumbnailOf(project), clip: { x: box.x, y: top, width: box.width, height } })
         console.log(path.relative(process.cwd(), thumbnailOf(project)))
       } else {
         rmSync(thumbnailOf(project), { force: true })
@@ -299,6 +321,62 @@ async function takePictures(projects: Project[]): Promise<void> {
       await runner.close()
     }
   })
+}
+
+/** A page of the runner, as `BrowserPage.newPage()` makes it. */
+type RunnerPage = Awaited<ReturnType<typeof BrowserPage.newPage>>
+
+/**
+ * Do one of a project's thumbnail steps in its running app (`ThumbnailStepJSON`), then wait;
+ * a scroll's says where the thing it scrolled to is now, in the window.
+ * - Looks only inside the app, never at the runner's menu bar.
+ * - throws if what it names isn't there:  the picture would show the app as it opens, not in use
+ */
+async function takeStep(runner: RunnerPage, step: ThumbnailStepJSON): Promise<number | undefined> {
+  const app = runner.locator(".AppRoot").first()
+  const nth = step.nth ?? 0
+  let top: number | undefined
+  // only what's showing:  a toolbar keeps a hidden copy of each button for its overflow menu
+  if (step.click !== undefined)
+    await app.getByText(step.click, { exact: true }).filter({ visible: true }).nth(nth).click()
+  else if (step.clickOn !== undefined) await app.locator(step.clickOn).filter({ visible: true }).nth(nth).click()
+  else if (step.type !== undefined) {
+    if (step.into !== undefined) await app.getByPlaceholder(step.into).or(app.getByLabel(step.into)).first().click()
+    await runner.keyboard.type(step.type)
+  } else if (step.press !== undefined) await runner.keyboard.press(step.press)
+  else if (step.scrollTo !== undefined)
+    top = await scrollToTop(app.getByText(step.scrollTo, { exact: true }).filter({ visible: true }).nth(nth))
+  else if (step.scrollToOn !== undefined) top = await scrollToTop(app.locator(step.scrollToOn).nth(nth))
+  await runner.waitForTimeout(step.wait ?? STEP_WAIT_MS)
+  return top
+}
+
+/**
+ * Scroll the app so `target` is `THUMBNAIL_TOP_ROOM` below its top, as far as it scrolls;
+ * where that thing's top is now, in the window.
+ * - An app too short to scroll that far doesn't move:  its picture starts lower down instead (`takePictures()`).
+ */
+async function scrollToTop(target: ReturnType<RunnerPage["locator"]>): Promise<number> {
+  return await target.evaluate((found, room) => {
+    // the first that draws a box of its own, inside it, else round it:
+    // a Spell UI element or label may draw none itself (`display: contents`)
+    const hasBox = (element: Element) => element.getBoundingClientRect().height > 0
+    const boxInside = (element: Element): Element | undefined => {
+      for (const child of [...(element.shadowRoot?.children ?? []), ...element.children])
+        if (hasBox(child)) return child
+        else {
+          const inside = boxInside(child)
+          if (inside) return inside
+        }
+      return undefined
+    }
+    let element: Element = hasBox(found) ? found : (boxInside(found) ?? found)
+    while (!hasBox(element) && (element.parentElement ?? (element.getRootNode() as ShadowRoot).host))
+      element = element.parentElement ?? (element.getRootNode() as ShadowRoot).host
+    ;(element as HTMLElement).style.scrollMarginTop = `${room}px`
+    element.scrollIntoView({ block: "start" })
+    return element.getBoundingClientRect().top
+  }, THUMBNAIL_TOP_ROOM)
 }
 
 /**

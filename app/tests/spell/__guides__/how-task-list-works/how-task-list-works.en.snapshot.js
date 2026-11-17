@@ -7,21 +7,24 @@ export const words = {
       done: "done",
       isDone: "is done",
       isActive: "is active",
+      delete: "delete",
       draw: "draw it",
       checklist: "checklist"
     },
     Checklist: {
-      showing: "showing"
+      draw: "draw it"
     },
     TaskList: {
-      tasks: "tasks",
+      checklist: "checklist",
+      draft: "draft",
       activeCount: "active count",
+      addTheDraft: "add the draft",
       draw: "draw it"
     }
   },
   groups: {
     Task: [
-      { name: "The checklist:  the tasks, shown as its filter says", members: ["checklist"] }
+      { name: "The checklist:  the tasks, one under the other", members: ["checklist"] }
     ]
   }
 }
