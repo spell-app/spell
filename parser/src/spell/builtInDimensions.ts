@@ -69,13 +69,22 @@ export function measureKeptIn(dimension: P.TypeScope, unit: P.DimensionUnit): P.
   return { dimension: dimension.name, unit: kept.id }
 }
 
-/** Every dimension `scope` knows, nearest first:  its own, its project's, then the root's built-in ones. */
+/**
+ * Every dimension `scope` knows, nearest first:  its own, its project's, then the root's built-in ones.
+ * - Looks through each list with `scan()`:  a new type with no units (`a "widget" is a thing`, in an earlier file)
+ *   leaves a file that reads a measure or a `pause for` kept, not parsed again (`P.Outline`, epic `language` P59).
+ */
 export function dimensionsIn(scope: P.Scope): P.TypeScope[] {
   const found: P.TypeScope[] = []
   for (let types = scope.types; types; types = types.parent) {
-    for (const type of types.get()) if (type.units?.length) found.push(type)
+    for (const type of types.scan(isDimension)) if (isDimension(type)) found.push(type)
   }
   return found
+}
+
+/** Is `type` a dimension:  has it units? */
+function isDimension(type: P.TypeScope): boolean {
+  return !!type.units?.length
 }
 
 /**

@@ -79,7 +79,7 @@ describe("incremental parsing after each kind of edit ~== full parse", () => {
   }
 
   // A file whose lookups find the same after an earlier file changed is kept, not parsed again (epic `language` P59).
-  test("a rename, a new member, kind or phrase in Card.spell keeps the Solitaire files that don't use it", () => {
+  test("a rename, a new member or kind in Card.spell keeps the Solitaire files that don't use it;  a new question doesn't", () => {
     const projectName = "@spell/examples/Solitaire"
     const files = loadFixtureProject(projectName)
     const options = { parentScope: fixtureImportScope(projectName), projectPath: fixtureProjectId(projectName) }
@@ -94,8 +94,13 @@ describe("incremental parsing after each kind of edit ~== full parse", () => {
     expect(parsedAfter(card.contents.replace('its "picture" is', 'its "picturez" is'))).toEqual(["/Card.spell"])
     expect(parsedAfter(card.contents.replace(typeLine, `\tits "zz extra" is 1\n${typeLine}`))).toEqual(["/Card.spell"])
     expect(parsedAfter(`${card.contents}\na "zz widget" is a thing\n`)).toEqual(["/Card.spell"])
+    // a new question is read ahead (epic `language` I154), so it's a method added:  every file parses again,
+    // as for any method added or deleted, its calls registered ahead read again (`changesMethods()`, epic `editor` I170)
     expect(parsedAfter(card.contents.replace(typeLine, `\tit "is zz ready" if it exists\n${typeLine}`))).toEqual([
-      "/Card.spell"
+      "/Card.spell",
+      "/Pile.spell",
+      "/Deck.spell",
+      "/Solitaire.spell"
     ])
     // the pile and the deck read a card's shorthand:  they parse again, the game doesn't
     expect(parsedAfter(card.contents.replace('its "shorthand" is', 'its "shorthandz" is'))).toEqual([
