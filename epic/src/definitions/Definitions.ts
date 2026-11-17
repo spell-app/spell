@@ -20,6 +20,7 @@ import { epicItemVocabulary } from "spell/epic/components/epic-item/EpicItem.en"
 import { epicLinkVocabulary } from "spell/epic/components/epic-link/EpicLink.en"
 import { epicMarkVocabulary } from "spell/epic/components/epic-mark/EpicMark.en"
 import { epicClarifyVocabulary } from "spell/epic/components/epic-clarify/EpicClarify.en"
+import { epicPictureVocabulary } from "spell/epic/components/epic-picture/EpicPicture.en"
 import { epicCardVocabulary } from "spell/epic/components/epic-list/EpicCard.en"
 import { epicListVocabulary } from "spell/epic/components/epic-list/EpicList.en"
 import { epicSortVocabulary } from "spell/epic/components/epic-list/EpicSort.en"
@@ -105,6 +106,8 @@ export class Definitions {
     "epic-mark": epicMarkVocabulary,
     // "Clarify" after a bodiless item's words (epic `epic-engine` I281):  asks for its details at once;  the tool writes it
     "epic-clarify": epicClarifyVocabulary,
+    // a picture the person gave an item, deletable from the page (epic `epic-engine` T87);  the tool writes it
+    "epic-picture": epicPictureVocabulary,
     // a change mark (epic `epic-engine` P30):  words an answer changed, in the text itself
     "epic-change": epicChangeVocabulary,
     // a screenshot full size over the page (epic `epic-engine` I129):  made by a click, never written in a page

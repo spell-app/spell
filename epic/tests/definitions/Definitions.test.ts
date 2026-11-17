@@ -124,6 +124,8 @@ describe("Definitions.all", () => {
       "epic-mark",
       // Clarify, after a bodiless item's words (epic `epic-engine` I281)
       "epic-clarify",
+      // a picture the person gave an item (epic `epic-engine` T87)
+      "epic-picture",
       // a change mark, around the words an answer changed (epic `epic-engine` P30)
       "epic-change"
     ])

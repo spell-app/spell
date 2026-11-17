@@ -826,11 +826,7 @@ function mergeResultLines(report: MergeMainReport): string[] {
       : [
           `  \`${carriedOn.command}\` FAILED crossing ${carriedOn.repos.join(", ")} over:  see what it said, then run it again`
         ]
-  const install = !installed
-    ? []
-    : installed.ok
-      ? [`  installed the packages:  \`${installed.command}\` (${installed.lockfiles.join(", ")} changed)`]
-      : [`  \`${installed.command}\` FAILED (${installed.lockfiles.join(", ")} changed):  run it yourself`]
+  const install = installed ? [`  ${MainMerge.installedLine(installed)}`] : []
   if (result === "up-to-date") return [`${branch}:  main is already in it`, ...crossed]
   if (result === "fast-forward") return [`${branch}:  fast-forwarded to main`, ...install, ...crossed]
   if (result === "conflicts") {

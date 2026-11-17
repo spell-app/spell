@@ -181,8 +181,8 @@ export const epicItemVocabulary = {
       name: "requested",
       kind: "boolean",
       description:
-        "An issue filed from the person's own words (`epic add ... --requested`, `epic file`, epic `epic-engine` " +
-        "P63):  closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing " +
+        "An issue or todo filed from the person's own words (`epic add ... --requested`, `epic file`, epic " +
+        "`epic-engine` P63;  a todo since T88):  closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing " +
         "Claude tripped over."
     },
     {

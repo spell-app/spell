@@ -15,6 +15,7 @@ import {
   PlanDocError,
   REVIEW_SECTIONS,
   TITLE_PREFIX,
+  TODO_ID,
   type CommitHistory,
   type Phase,
   type PhaseTimer,
@@ -29,6 +30,7 @@ import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
+import { ItemPictures, type PastedReader } from "./ItemPictures"
 import { MigrateCommands, type SessionFinder } from "./MigrateCommands"
 import { OptionCommands } from "./OptionCommands"
 import { PlanDoc } from "./PlanDoc"
@@ -110,18 +112,27 @@ export class PlanDocCommands {
   readonly phaseTimer: PhaseTimer
 
   /**
+   * the pictures pasted last into a session's chat, for `add --pasted <n>` (epic `epic-engine` T87):  default the
+   * transcript's (`Requests.pastedImages()`);  STATIC for the object's life
+   */
+  readonly pastedReader: PastedReader | undefined
+
+  /**
    * - `files`:  the checkout's epic pages
    * - `sessionsOf`:  an epic's running sessions, for `migrate --notify`
    *   - the `spell` CLI gives it (`epicSessions()`)
    * - `phaseTimer`:  default the transcripts' (`WorkTime.ofPhase()`);  a test's gives its own
+   * - `pastedReader`:  default the transcript's;  a test's gives its own
    */
   constructor({
     files = new PlanDocFiles(),
     sessionsOf,
-    phaseTimer = (request) => new WorkTime().ofPhase(request).minutes
-  }: { files?: PlanDocFiles; sessionsOf?: SessionFinder; phaseTimer?: PhaseTimer } = {}) {
+    phaseTimer = (request) => new WorkTime().ofPhase(request).minutes,
+    pastedReader
+  }: { files?: PlanDocFiles; sessionsOf?: SessionFinder; phaseTimer?: PhaseTimer; pastedReader?: PastedReader } = {}) {
     this.files = files
     this.phaseTimer = phaseTimer
+    this.pastedReader = pastedReader
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
@@ -152,7 +163,7 @@ export class PlanDocCommands {
 
   /** Run one command;  resolves to its exit code, `undefined` for 0. */
   private async main(argv: string[]): Promise<number | void> {
-    const { positional, flags } = parseVerbArgs(argv)
+    const { positional, flags, lists } = parseVerbArgs(argv)
     const [command, name, ...rest] = positional
     if (command === "list") return this.printEpics(this.files.listEpics(), Boolean(flags.json))
     // `bedtime all ...` and `bedtime status`:  every epic at once, not one page (`BedtimeAll`, epic `epic-engine` T85)
@@ -280,7 +291,25 @@ export class PlanDocCommands {
           if (value !== "on" && value !== "off") throw new PlanDocError(`standing:  on or off, not "${value}"`)
           plan.setStanding(value === "on")
         })
-      case "request":
+      case "request": {
+        // into a todo (epic `epic-engine` T88):  its text, its pictures copied in as the person's, marked requested
+        if (TODO_ID.test(need(rest[0], "a phase or a todo").toLowerCase())) {
+          const pictures = ItemPictures.fromFiles(lists.picture ?? [])
+          const html = readFileSync(need(stringFlag(flags.file), "--file (the request as html)"), "utf8")
+          const todo = rest[0]!.toLowerCase()
+          const requestId = need(rest[1], "a request id")
+          const filed = await this.edit(file, (plan) => {
+            const named = pictures.length ? ItemPictures.named(file, todo, pictures) : []
+            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named)}`)
+            return { title, named: title === undefined ? [] : named }
+          })
+          ItemPictures.save(file, filed.named)
+          return this.print(
+            filed.title === undefined
+              ? `${requestId} is in ${todo.toUpperCase()} already`
+              : `${requestId} filed into ${todo.toUpperCase()} · ${filed.title}`
+          )
+        }
         return this.edit(file, (plan) =>
           plan.addPhaseRequest(
             plan.phasePlace(need(rest[0], "a phase")),
@@ -289,6 +318,7 @@ export class PlanDocCommands {
             readFileSync(need(flags.file as string | undefined, "--file (the request as html)"), "utf8")
           )
         )
+      }
       case "rename": {
         const target = need(rest[0], "a phase (P6) or an item id")
         const title = need(rest[1], "the new title")
@@ -309,13 +339,24 @@ export class PlanDocCommands {
         if (kind === "choices") return this.options.addStanding(file, title, flags)
         const words = stringFlag(flags.start)
         if (flags.start === true) throw new PlanDocError(`--start needs the person's words:  --start "<his words>"`)
-        const { id, example } = await this.edit(file, (plan) => {
+        // the person's pictures (epic `epic-engine` T87):  `--picture <file>`, repeatable, then the ones pasted last
+        const pictures = [
+          ...ItemPictures.fromFiles(lists.picture ?? []),
+          ...(await ItemPictures.fromPasted(
+            flags.pasted,
+            stringFlag(flags.from) ?? process.env.CLAUDE_CODE_SESSION_ID,
+            this.pastedReader
+          ))
+        ]
+        const added = await this.edit(file, (plan) => {
           const given = words === undefined ? flags : { ...flags, details: flags.details ?? startedBody(words, plan) }
-          const added = this.tests.addItem(plan, kind, title, given)
-          if (words !== undefined) plan.addStatus(added.id, startedReading(flags))
-          return added
+          const item = this.tests.addItem(plan, kind, title, given, { file, pictures })
+          if (words !== undefined) plan.addStatus(item.id, startedReading(flags))
+          return item
         })
-        this.tests.saveExample(file, example)
+        const { id } = added
+        this.tests.saveExample(file, added.example)
+        ItemPictures.save(file, added.pictures)
         // taken up at once:  blue on the page now, never red as if it waited on him (epic `epic-engine` T78)
         if (words !== undefined) this.inbox.setWorking(file, id, true, { took: true })
         return this.print(id.toUpperCase())
@@ -1567,6 +1608,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    never done (epic epic-workflow)
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests
                                                    field (epic file writes it;  epic epic-workflow)
+  request <name> T<n> <rN> --file path [--picture <file>]...
+                                                   into todo T<n> instead:  at the end of its text, the
+                                                   pictures its own, marked requested (epic-engine T88)
   estimate <name> <N> "1-2h"                       set a phase's estimate;  the Overview's total follows
   phase <name> <N> todo|active|done|dropped [--done html] [--why html] [--no-open]
                                                    set a phase's status;  done drops its UPDATE markers
@@ -1595,6 +1639,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    an issue filed from the person's words and taken up at
                                                    once:  his words its body, an Underway card, the spinner
                                                    on:  blue, never red as if it waited on him (T78)
+  add <name> <kind> "title" [--picture <file>]... [--pasted <n>]
+                                                   with the person's pictures (T87):  each file, then the n
+                                                   he pasted last into this session's chat, saved in
+                                                   pictures/ beside the page, shown after its words;  each
+                                                   deletable on the page
   add <name> test "title" --step html --should html [--example <png> | "text"] [--if-not html]
                                                    a test your test run steps you through:  what to do (a
                                                    Step may hold <a class="epic-test-action" href> links,
@@ -1606,8 +1655,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    run's order (deferred ones last)
   test --all [--list] [--json]                     every epic with open tests, in your saga order;  the
                                                    first opened in test mode (?test=1&all=1)
-  requested <name> <id>...                         issues filed from the person's own words:  light orange once
-                                                   Claude closes them, until they review them (--requested on add)
+  requested <name> <id>...                         issues or todos filed from the person's own words:  light
+                                                   orange once Claude closes them, until they review them
+                                                   (--requested on add)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
   failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"

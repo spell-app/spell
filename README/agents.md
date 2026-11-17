@@ -447,7 +447,7 @@ skills and end-of-turn hooks too.
 | --- | --- | --- |
 | the `AGENTS.md` files | the epic plugin's skills, one copy (`/epic` in Claude Code, `$epic` in Codex), all but `bg`, `bedtime`, `comment`, `session`, `title` | `CLAUDE.md`'s `@` imports |
 | WWOD | the turn-end commit and sync, and the session-start notices (`epic plugin install --codex`) | the worktree hook, window moves, and Send waking a session |
-| the three logs | the designer and coherence reviewers, as Codex custom agents | the question modal, `/bg` agents (each skill says the plain way:  `epic guide claude-only-tools`) |
+| the three logs | the designer, coherence and plan-check reviewers, as Codex custom agents | the question modal, `/bg` agents (each skill says the plain way:  `epic guide claude-only-tools`) |
 | `spell` and `epic`:  plain command lines;  `epic guide`, the workflow in plain steps | | |
 | the checks (`yarn review`) | | the VS Code Claude panel's session list:  why every worktree's session folder is a link to the main checkout's |
 

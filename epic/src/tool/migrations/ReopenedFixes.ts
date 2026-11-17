@@ -65,7 +65,7 @@ export class ReopenedFixes implements Migration {
    * A label at the end of `item`'s title, as `PlanDoc.markUpdate()` writes one with no phase:
    * the title made a `slot="title"` child first when it's still the `title` attribute.
    */
-  private static addLabel(item: Element): Element {
+  static addLabel(item: Element): Element {
     const document = item.ownerDocument
     let slot = item.querySelector(':scope > [slot="title"]')
     if (!slot) {

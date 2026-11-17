@@ -142,8 +142,15 @@ export class CodeMirrorSetup {
     ]
   }
 
-  /** Line numbers in `view` or not, as View › Line Numbers says:  none at first. */
+  /**
+   * Line numbers in `view` or not, as View › Line Numbers says:  none at first.
+   * - Nothing when they're already so:  the code pane asks at each change of its file, at every key typed, and a
+   *   new gutter each time made each key a reconfigured editor (epic `codemirror` I21)
+   */
   static showLineNumbers(view: EditorView, show: boolean): void {
+    const now = CodeMirrorSetup.lineNumbers.get(view.state)
+    const isShowing = !(Array.isArray(now) && !now.length)
+    if (now !== undefined && isShowing === show) return
     view.dispatch({ effects: CodeMirrorSetup.lineNumbers.reconfigure(show ? lineNumbers() : []) })
   }
 

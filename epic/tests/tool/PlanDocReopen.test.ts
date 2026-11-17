@@ -68,3 +68,49 @@ describe("a fix sent back and taken up again is REOPENED (epic `epic-engine` I30
     expect(plan.document.getElementById("t1")!.getAttribute("status")).toBe("done")
   })
 })
+
+describe("a fix sent back, its note handed on to another item, is fixed again once that one is (epic `epic-engine` I317)", () => {
+  /** `planWithFix()`'s I1 sent back, its note handed on to item `to` (`I2`), which Claude is on. */
+  function handedOn(kind: "issue" | "todo") {
+    const plan = planWithFix()
+    plan.noteStatus("i1", "Sent back")
+    plan.addItem(kind, "Feet drawn the old way for a second")
+    const to = kind === "issue" ? "i2" : "t1"
+    plan.noteStatus("i1", `Your C2 (feet drawn the old way) is being fixed as ${to.toUpperCase()}`)
+    plan.addStatus(to, "finding why")
+    return { plan, issue: plan.document.getElementById("i1")!, to }
+  }
+
+  test("language's I147:  I2 fixed, I1 is orange and FIXED again, a Done card naming I2;  logged", () => {
+    const { plan, issue } = handedOn("issue")
+    expect(labelOf(plan, "i1")).toBe("reopened")
+    plan.fixedForReview("i2", "drawn once")
+    expect(issue.hasAttribute("fixed")).toBe(true)
+    expect(labelOf(plan, "i1")).toBe("fixed")
+    expect(plan.itemState(issue)).toBe("replied")
+    const card = Array.from(issue.querySelectorAll(":scope > epic-status")).at(-1)!
+    expect(card.getAttribute("state")).toBe("done")
+    expect(card.querySelector('a[href="#i2"]')!.textContent).toBe("I2")
+    expect(card.textContent).toContain("Feet drawn the old way for a second")
+    expect(plan.document.querySelector('epic-section[kind="log"]')!.textContent).toContain(
+      "I1 fixed, for review:  what was sent back was fixed as I2"
+    )
+    expect(Markup.validate(plan.document)).toEqual([])
+    // a second write changes nothing:  it's fixed
+    expect(plan.migrate()).toEqual([])
+  })
+
+  test("a todo it was handed on to, closed by `update ... done`, fixes it too", () => {
+    const { plan, issue, to } = handedOn("todo")
+    plan.finishWork(to, "drawn once")
+    expect(issue.hasAttribute("fixed")).toBe(true)
+    expect(labelOf(plan, "i1")).toBe("fixed")
+  })
+
+  test("still reopened while the item it was handed on to is open", () => {
+    const { plan, issue } = handedOn("issue")
+    expect(plan.migrate()).toEqual([])
+    expect(issue.hasAttribute("fixed")).toBe(false)
+    expect(labelOf(plan, "i1")).toBe("reopened")
+  })
+})

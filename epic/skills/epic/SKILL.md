@@ -36,6 +36,15 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   prints (epic `epic-friend` P11).
   - Its last topic, `claude-only-tools`, is the plain way to do each step that leans on a tool only Claude Code has.
   - A change to a step here that any agent takes changes it there too:  ONE copy of each step's words for the others.
+- With superpowers installed (obra/superpowers, MIT;  epic `epic-engine` P72):  in an epic, the epic page is the design
+  and the plan, `/epic` makes the worktree (and runs the repo's own install), and `/epic done` finishes.
+  - So NO brainstorming, writing-plans, executing-plans, subagent-driven-development, using-git-worktrees or
+    finishing-a-development-branch:  no design doc or plan file in the repo, no `npm install` in the worktree, no
+    merge or worktree removal by git.
+  - DO use test-driven-development (where the repo wants tests first), systematic-debugging (for an issue found, filed
+    as `#I` too) and verification-before-completion (before a phase closes).
+  - The words in full:  [guide.md](guide.md)'s `superpowers` topic, which the session-start hook also says in an epic's
+    worktree when superpowers is turned on (`Superpowers`).
 - Rules for the doc (sections, ids, markers, prose):  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md).
   Read it first.
   - It's spell-epic's, with every template:  `epic pages template epics/plan-doc.md` prints its path.
@@ -104,8 +113,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `phase` and `start`:  epic `skillz` P4.
   - `tidy`:  `/epic tidy [<epic>]` closes the items other work made obsolete, with a reason on each.
     Go to "14. Tidy" (epic `epic-engine` Q69).
-  - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session.
-    Go to "12. Request" (epic `epic-workflow`).
+  - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session:
+    it becomes a todo or a phase.  Go to "12. Request" (epic `epic-workflow`;  epic `epic-engine` T88).
   - `done`:  `/epic done` is `/isolate done`, word for word.
     - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (2026-10-24):
       the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
@@ -511,8 +520,12 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
       `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
       - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
-      - a request from another session (`/send`, "12. Request"):  `--start` gets its words AND its Context, so the
-        item never sits at "What it says on the tin" (epic `epic-engine` I292:  I287, filed from r70 with no body)
+      - a request from another session (`/send`, "12. Request") is a TODO, never an issue (epic `epic-engine` T88):
+        `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`, then
+        `epic file <epic>#T<n> <rN>`:  its words, its Context and its screenshots go into the todo, and the request is
+        marked filed there, so the item never sits at "What it says on the tin" (I292:  I287, filed from r70 with no body)
+      - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
+        `--pasted <n>`, as the guide's "build" says (`epic guide build`)
       - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
   - passes their redirects on to the agent doing that work (`SendMessage`)
   - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
@@ -726,10 +739,23 @@ cut-off agents, "it should have restarted automatically").
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
-4. A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
-   ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
-   - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
-   - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
+4. The reviews before the phase closes.
+   - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
+     ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
+     - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
+     - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
+   - Every phase:  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
+     a `plan-check` agent, named and listed `<name>-p<N>-check`, given the epic, the phase and the phase's diff
+     (its commits, or `git diff <base>` when not committed yet).
+     - In Codex:  its custom agent `plan-check` (`epic plugin install --codex`), else follow its agent file's steps yourself.
+     - It reads the accepted build plan, and returns two lists:  what the plan said that wasn't built, and what was
+       built that the plan didn't say.  It changes nothing.
+     - Each miss:  built now if small, else `add <name>#I "..." --calm` (red, no `--calm`, only when it drops or changes
+       what the person asked for).  A change made on purpose, already said in an Update block or an item:  no issue.
+     - One more kind of review beside the designer and coherence:  coherence asks "is this the one way we do it?",
+       the designer "does it look right?", the plan check "did we build what was agreed?".
+     - Its agent file:  [plan-check-agent.md](${CLAUDE_PLUGIN_ROOT}/plan-check/plan-check-agent.md).
+     - Left out only for a phase with no accepted plan ("just do it", bedtime mode), in one line.
 5. Close the phase:  `epic phase <name>#P<N> done --done "<ul><li>...</li></ul>"`.
    - It drops that phase's UPDATE markers, writes its Done field, and brings the doc forward.
    - It writes how long Claude worked on it, `took` (epic `epic-engine` P41):  its own agents' time from their
@@ -742,6 +768,12 @@ cut-off agents, "it should have restarted automatically").
      while the reply below goes out.
    - Done:  what was BUILT, ordered by what the person asks about first:
      where to see it, what changed in how they work, what's rough or not yet tried by hand.
+   - PROOF before done (epic `epic-engine` P72;  borrowed from superpowers' verification-before-completion, MIT):
+     the Done list's last bullet names each check run and what it printed, never "tests pass" alone.
+     - `Checked:  yarn test, 1128 passed / 65 files (was 1130:  two tests merged);  yarn lint, 0 errors;
+       epic skills check, no problems`
+     - a check that was already failing before the phase:  said so, by name
+     - a check not run:  said so, and why
    - Commit messages, so the doc can list them (its phase's and items' "Commits"):
      - a phase:  `P<n>:  <Name> -- <summary>`
        - `P4 + P5:` for two;  `WIP P3:` for a parked part
@@ -791,6 +823,11 @@ cut-off agents, "it should have restarted automatically").
               - In Codex:  ask in the chat, yes or no, the files named.
             - moved aside, never deleted:  into `~/.spell-epic/ditched/<time>/`, which it prints
             - more than three is somebody's work:  `add <name>#I`, as above
+          - The merge changed a lockfile or a `package.json` (epic `epic-engine` T89):  it runs the install command
+            (`epic config installCommand`) in the main checkout, as `merge-main` does in a worktree, then restarts
+            the main checkout's page server, if it runs, and the editor (Vite) with it:
+            `main checkout:  installed the packages:  \`yarn install\` (yarn.lock changed)`.
+            - FAILED:  the merge stands;  the line says what to run there by hand.  Run it, then tell the person.
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/epic done`:  the worktree, the window and the session stay, for the next request.
@@ -1604,7 +1641,23 @@ A REQUEST is something the person asked for in another session, sent here instea
 1. `epic requests <epic> --json`:  the request(s), status `new`.
    - Read each `request.md`, and look at each screenshot (`Read` on the image).
 2. One line, at once:  "taking r3 (from `🚧 python`):  <their first words>".
-3. The filing goes to a background `<epic>-plan-doc` agent (root `CLAUDE.md`, "Delegated work"), the session free.
+EVERY request becomes a TODO or a PHASE (epic `epic-engine` T88;  Owen, 2026-11-16:  "When an epic gets requests from
+other epics, it should make them a Todo or a phase"):  never only a note on the request ("fixed as I282").
+- SMALL, one agent's work (a fix, a tweak, one file or two):  a todo, taken up at once as "The session answers;
+  agents build" says:
+  `epic agents add <name> ...`, then `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`,
+  then `epic file <epic>#T<n> <rN>`
+  - the file puts their words, the Context and the screenshots into the todo (its pictures, deletable on the page),
+    marks it `requested` (light orange once done, until they look), and marks the request filed `T<n>`
+  - the agent builds it, and closes it with `epic update <epic>#T<n> fixed "..."`;  one line back:
+    "r3:  T41 · <title>, agent `<epic>-<name>` on it"
+- BIGGER, or about the same thing as a to-do phase:  a phase, steps 3 and 4.
+- A true DUPLICATE of a todo or phase the epic already has:  `epic file <epic> <rN> "same as T12"`, and say so.
+  - `where` MUST name that todo or phase (`T12`, `P7`):  the command refuses anything else.
+  - A todo it names is marked `requested` too.
+
+3. The filing of a phase goes to a background `<epic>-plan-doc` agent (root `CLAUDE.md`, "Delegated work"), the
+   session free.
    Its prompt, per request (Q3 of `epic-workflow`:  join a matching phase, else a new one):
    1. read the request, and every to-do phase (`epic summary <epic> --json`, each one's part file)
    2. a phase still TO DO (never active or done) about the SAME thing:  the request JOINS it
@@ -1629,7 +1682,8 @@ A REQUEST is something the person asked for in another session, sent here instea
      "Start P<N> · <Name>" first
      - In Codex:  in the chat.
    - a phase under way:  no modal;  the new work waits its turn.
-- A request that needs no phase (already done, a duplicate):  `epic file <epic> r3 "<why>"`, and say so.
+- A request with neither todo nor phase:  only a duplicate, `epic file <epic> r3 "same as T12"` (above);
+  one already done by other work is a todo too, closed at once with what did it.
 
 ## 13. Summarize:  condense an item after a lot of back and forth
 
@@ -1771,7 +1825,8 @@ update <name>#P<N> --plan "<ol>..</ol>" --accepted  their Accept carried comment
 updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase N's plan changed, no item the
                                                     cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there
-file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
+file <name>#T<n> <rN>                               a request into todo n:  words, context, pictures;  marked requested (T88)
+file <name> <rN> "same as T12"                      a duplicate:  only marked;  must name the todo or phase (T88)
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
 phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck through, finished as done;  why in place of Done
@@ -1779,13 +1834,14 @@ phase <name>#P<N> planning [off]                    Claude writing its plan:  a 
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
 add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
+add <name>#I|#T "title" ... --pasted <n> | --picture <file>...   with the pictures pasted last, or files (T87)
 stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
 add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
-update <name>#I3 --requested                        an issue filed from the person's own words:  light orange once closed
+update <name>#I3 --requested                        an issue or todo filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)
 commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase or an item

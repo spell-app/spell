@@ -1,6 +1,7 @@
 /**
  * Check the epic page HEADER of epic `epic-engine` P53 (Send Countdown) in a real browser:  Send at the header's
- * middle with Auto Send's ring part-filled round the plane, the session's bare spinner beside it, the gear's menu with
+ * middle with Auto Send's ring part-filled round the plane, the session's bare spinner beside it (or, while a phase
+ * builds, in the step label:  I316), the gear's menu with
  * each sub-menu open (Auto Send, Theme);  and a page in each stage (epic `epic-engine` I180):  the header still the plain
  * paper plane, with its ring, and the stage's Accept on the title row of what it accepts:  Accept Overview on the
  * Overview's, Accept Phases on the Phases section's, before its gear.
@@ -28,6 +29,9 @@
  * - Send's TURNING ring (P55):  the inbox says the session is answering two sent items, nothing unsent:  the ring
  *   turns round the plane, centred on it (1px), the element's height, no spinner beside it;  then idle:  neither ring;
  *   `working-<w>-<scheme>.png`
+ * - a phase BUILDING (epic `epic-engine` I316):  a copy with a phase under way, "Building P53":  the step label's icon
+ *   turns (Spell UI's loading circle), centred where its still icon is (1px), the same size;  the line beside Send keeps
+ *   its words, no spinner;  `building-<w>-<scheme>.png`, `building-pill-<w>-<scheme>.png`
  * - fails (exit 1) on a page error or a measure off;  re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -75,6 +79,8 @@ const STAGE_ON_MS = 60_000
 const STAGE_LEFT_S = (STAGE_COUNTDOWN_MS - STAGE_ON_MS) / 1000
 const STAGE_TOLERANCE_S = 1
 const STAGED = { overview: "send-header-overview", phases: "send-header-phases" }
+/** The copy with a phase under way (I316). */
+const BUILDING = "send-header-building"
 const problems = []
 const summary = {}
 
@@ -86,6 +92,7 @@ rmSync(join(CONTENT, "epics"), { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 const marked = copyEpic(NAME, "")
 for (const [stage, name] of Object.entries(STAGED)) copyEpic(name, stage)
+copyEpic(BUILDING, "", { building: true })
 const server = await DemoServer.start({ content: CONTENT })
 const browser = await BrowserPage.launch()
 try {
@@ -93,6 +100,7 @@ try {
     for (const scheme of ["light", "dark"]) {
       await header(width, scheme)
       await working(width, scheme)
+      await building(width, scheme)
       for (const which of Object.keys(STAGED)) await stage(which, width, scheme)
     }
 } catch (error) {
@@ -121,7 +129,7 @@ async function header(width, scheme) {
     .catch(() => problems.push(`${tag}:  no ring round the plane (marked ${marked})`))
   await page
     .waitForFunction(() => spinner(), null, { timeout: 8000 })
-    .catch(() => problems.push(`${tag}:  no spinner beside Send`))
+    .catch(() => problems.push(`${tag}:  no spinner beside Send, nor in the step label`))
   await page.clock.fastForward(45_000)
   // the ring drains a tick at a time:  wait for it to show the 45 seconds gone
   await page.waitForFunction(() => (measure().done ?? 0) > 0.15, null, { timeout: 5000 }).catch(() => undefined)
@@ -130,13 +138,15 @@ async function header(width, scheme) {
   if (width > 600 && Math.abs(measured.plane.middle - measured.header.middle) > 1)
     problems.push(`${tag}:  the plane ${measured.plane.middle} is off the header's middle ${measured.header.middle}`)
   if (measured.heading.right > measured.plane.left + 0.5) problems.push(`${tag}:  the h1 runs under the plane`)
-  if (measured.ring.right > measured.status.left + 0.5) problems.push(`${tag}:  the ring runs into the right side`)
-  if (measured.ring.top < measured.header.top - 0.5 || measured.ring.bottom > measured.header.bottom + 0.5)
+  // no ring is said above:  measure the rest
+  if (measured.ring && measured.ring.right > measured.status.left + 0.5)
+    problems.push(`${tag}:  the ring runs into the right side`)
+  if (measured.ring && (measured.ring.top < measured.header.top - 0.5 || measured.ring.bottom > measured.header.bottom + 0.5))
     problems.push(`${tag}:  the ring leaves the header (${JSON.stringify(measured.ring)})`)
   if (!(measured.done > 0.15 && measured.done < 0.5))
     problems.push(`${tag}:  the ring isn't part-filled (${measured.done})`)
   for (const name of ["spinner", "gear"])
-    if (Math.abs(measured[name].centre - measured.plane.centre) > 1)
+    if (measured[name] && Math.abs(measured[name].centre - measured.plane.centre) > 1)
       problems.push(
         `${tag}:  the ${name} is off the plane's middle line by ${measured[name].centre - measured.plane.centre}px`
       )
@@ -217,6 +227,56 @@ async function working(width, scheme) {
   ])
   if (rings.some(Boolean)) problems.push(`idle-${width}-${scheme}:  a ring shows with nothing to do (${rings})`)
   await idle.close()
+}
+
+/**
+ * A phase building (I316):  the step label's icon turns, centred where the still icon is, its size;  the line beside Send
+ * its words alone.  Then idle:  the still icon, measured for the comparison.
+ */
+async function building(width, scheme) {
+  const tag = `building-${width}-${scheme}`
+  writeInbox(BUILDING)
+  const page = await openPage(BUILDING, width, scheme)
+  await page
+    .waitForFunction(() => stepIcon().turning, null, { timeout: 8000 })
+    .catch(() => problems.push(`${tag}:  the step label's icon doesn't turn`))
+  const turning = await page.evaluate(() => ({
+    ...stepIcon(),
+    line: page_().querySelector('[part~="centre"] epic-agents')?.getAttribute("draws"),
+    words: page_().querySelector('[part~="centre"] epic-agents')?.shadowRoot?.querySelector(".doing-words")?.textContent,
+    spinner: !!page_().querySelector('[part~="centre"] epic-agents')?.shadowRoot?.querySelector(".spinner"),
+    header: measure().header,
+    pill: measure().pill
+  }))
+  await page.screenshot({ path: join(out, `${tag}.png`), clip: clipOf(turning.header, width) })
+  const pill = turning.pill
+  await page.screenshot({
+    path: join(out, `building-pill-${width}-${scheme}.png`),
+    clip: { x: Math.max(0, pill.left - 12), y: pill.top - 8, width: pill.right - pill.left + 24, height: pill.bottom - pill.top + 16 }
+  })
+  await page.close()
+  writeInbox(BUILDING, "idle")
+  const idle = await openPage(BUILDING, width, scheme)
+  await idle.waitForFunction(() => stepIcon().box, null, { timeout: 8000 }).catch(() => undefined)
+  const still = await idle.evaluate(() => stepIcon())
+  await idle.close()
+  summary[tag] = { turning, still }
+  if (turning.line !== "words") problems.push(`${tag}:  the line beside Send draws "${turning.line}", not its words alone`)
+  if (turning.spinner) problems.push(`${tag}:  a second spinner beside Send`)
+  if (!turning.words) problems.push(`${tag}:  the line's words are gone`)
+  if (still.turning) problems.push(`${tag}:  the icon still turns with nothing building`)
+  if (turning.box && still.box) {
+    for (const [what, a, b] of [
+      ["icon box's middle", turning.box.middle, still.box.middle],
+      ["icon box's centre line", turning.box.centre, still.box.centre],
+      ["glyph's middle", turning.glyph.middle, still.glyph.middle],
+      ["glyph's centre line", turning.glyph.centre, still.glyph.centre],
+      ["glyph's width", turning.glyph.width, still.glyph.width],
+      ["glyph's height", turning.glyph.height, still.glyph.height],
+      ["label's width", turning.label.width, still.label.width]
+    ])
+      if (Math.abs(a - b) > 1) problems.push(`${tag}:  the turning ${what} is ${a}, the still one's ${b}`)
+  }
 }
 
 /**
@@ -377,9 +437,40 @@ async function openPage(name, width, scheme) {
 function HELPERS() {
   window.page_ = () => document.querySelector("epic-page")?.shadowRoot
   window.sendRoot = () => page_()?.querySelector('[part~="send"]')?.shadowRoot
+  // the session's spinner:  beside Send, else the step label's turning icon while a phase builds (I316)
   window.spinner = () =>
-    page_()?.querySelector('epic-agents[draws="spinner"]')?.shadowRoot?.querySelector(".spinner") ?? null
+    page_()?.querySelector('epic-agents[draws="spinner"]')?.shadowRoot?.querySelector(".spinner") ??
+    page_()?.querySelector('[part~="step-spinner"]')?.shadowRoot?.querySelector('[part~="icon"]') ??
+    null
   window.gearButton = () => page_().querySelector('[part~="gear"]')
+  // the step label's icon (I316):  its box, and the glyph in it, from the label's own box;  a turning one's untransformed
+  // size (`offsetWidth`:  a rotated box's bounds grow), its centre unchanged by the turn
+  window.stepIcon = () => {
+    const label = page_()?.querySelector('[part~="step-pill"] ui-label')
+    const box = label?.shadowRoot?.querySelector('[part~="icon"]')
+    if (!box) return {}
+    const loading = label.querySelector('ui-icon[slot="icon"]')
+    const glyph = loading ? loading.shadowRoot?.querySelector('[part~="icon"]') : box.querySelector("svg")
+    // from the label's own box:  the header's height differs with and without Send
+    const frame = label.shadowRoot.querySelector('[part~="label"]').getBoundingClientRect()
+    const round = (n) => Math.round(n * 10) / 10
+    const at = (element) => {
+      const rect = element.getBoundingClientRect()
+      return {
+        middle: round(rect.left + rect.width / 2 - frame.left),
+        centre: round(rect.top + rect.height / 2 - frame.top),
+        // a turning box's own size:  its rotated bounds grow
+        width: round(element.offsetWidth ?? rect.width),
+        height: round(element.offsetHeight ?? rect.height)
+      }
+    }
+    return {
+      turning: !!loading && getComputedStyle(glyph).animationName === "ui-icon-spin",
+      label: { width: round(frame.width), height: round(frame.height) },
+      box: at(box),
+      glyph: glyph ? at(glyph) : null
+    }
+  }
   window.stageBlock = (which) =>
     document.querySelector(
       which === "overview" ? "epic-page > epic-overview" : 'epic-page > epic-section[kind="phases"]'
@@ -414,6 +505,7 @@ function HELPERS() {
       ring: sendRoot().querySelector('[part~="ring"]') ? box(sendRoot().querySelector('[part~="ring"]')) : null,
       done: done ? parseFloat(done.style.strokeDasharray) / 100 : null,
       spinner: spinner() ? box(spinner()) : null,
+      pill: box(page_().querySelector('[part~="step-pill"]')),
       gear: box(gearButton())
     }
   }
@@ -443,7 +535,7 @@ function clipOf(header, width) {
  * Copy epic `from`'s page (skeleton and parts) as epic `name`, in `stage` (none:  building);  the id of the open item
  * its inbox marks.
  */
-function copyEpic(name, stage) {
+function copyEpic(name, stage, { building = false } = {}) {
   const source = join(EpicConfig.contentOf(ROOT), "epics", from)
   const skeleton = join(source, `${from}.plan.html`)
   if (!existsSync(skeleton)) {
@@ -457,6 +549,9 @@ function copyEpic(name, stage) {
   let html = readFileSync(skeleton, "utf8").replaceAll(`epic="${from}"`, `epic="${name}"`)
   html = html.replace(/(<epic-page\b[^>]*?)\sstage="[^"]*"/, "$1")
   if (stage) html = html.replace(/<epic-page\b/, `<epic-page stage="${stage}"`)
+  // its first phase to do, under way (I316)
+  if (building && !/<epic-phase\b[^>]*?\sstatus="active"/.test(html))
+    html = html.replace(/(<epic-phase\b[^>]*?\sstatus=")todo(")/, "$1active$2")
   writeFileSync(join(folder, `${name}.plan.html`), html)
   return /<epic-item\s+id="([qj]\d+)"[^>]*status="open"/.exec(html)?.[1] ?? "q1"
 }

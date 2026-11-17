@@ -1,0 +1,40 @@
+/*
+ * `<epic-picture>` (`EpicPicture.tsx`):  a picture the person gave an item, a thumbnail with a trash at its corner.
+ * - Public tokens (`--epic-picture-*`) are never declared here:  read through private aliases.
+ *   - `--epic-picture-width`, `--epic-picture-height`:  the thumbnail's largest size (320px by 240px)
+ */
+
+@layer ui.components.epic-picture.types;
+
+@layer ui.components.epic-picture.types {
+  :host {
+    --_epic-picture-width: var(--epic-picture-width, 320px);
+    --_epic-picture-height: var(--epic-picture-height, 240px);
+    display: inline-block;
+    margin-block: 4px;
+    margin-inline-end: 8px;
+    vertical-align: top;
+  }
+  :host([hidden]),
+  :host(:state(deleted)) {
+    display: none;
+  }
+  [part~="base"] {
+    position: relative;
+    display: inline-block;
+  }
+  ::slotted(img) {
+    display: block;
+    max-width: min(var(--_epic-picture-width), 100%);
+    max-height: var(--_epic-picture-height);
+    border: 1px solid var(--epic-rule, light-dark(#d8d4cc, #4a4752));
+    border-radius: 4px;
+    cursor: zoom-in;
+  }
+  /* the trash:  over the picture's top right corner, inset 4px */
+  [part~="delete"] {
+    position: absolute;
+    inset-block-start: 4px;
+    inset-inline-end: 4px;
+  }
+}

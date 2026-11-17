@@ -2,6 +2,7 @@ import { AgentsMarked } from "./AgentsMarked"
 import { ChangesAfterGoal } from "./ChangesAfterGoal"
 import { ClarifiedBodies } from "./ClarifiedBodies"
 import { DoneCardsClose } from "./DoneCardsClose"
+import { HandedOnFixes } from "./HandedOnFixes"
 import { ItemBodies } from "./ItemBodies"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
@@ -60,7 +61,8 @@ export class Migrations {
     new ItemBodies(),
     new UpdateLabels(),
     new ClarifiedBodies(),
-    new ReopenedFixes()
+    new ReopenedFixes(),
+    new HandedOnFixes()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

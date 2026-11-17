@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { currentCompletions, startCompletion } from "@codemirror/autocomplete"
 import { undo } from "@codemirror/commands"
 import { foldEffect, foldedRanges } from "@codemirror/language"
 import { EditorView } from "@codemirror/view"
@@ -176,6 +177,26 @@ describe("FileStates", () => {
     }
   })
 
+  test("a CSS file, `styles.css`:  coloured through the ONE colour table, its property names suggested (epic `codemirror` I20)", async () => {
+    const { states, project } = setUp()
+    const file = new StandInFile("@spell/test/standin/styles.css", project) as StandInFile & SP.AnySpellFile
+    file.contents = STYLES
+    view = viewOf()
+    // each role's token, as the page theme sets them
+    view.dom.style.cssText =
+      "--ui-code-comment: rgb(1, 2, 3); --ui-code-member: rgb(4, 5, 6); --ui-code-action: rgb(7, 8, 9)"
+    states.show(view, file)
+    // was plain black text (I20):  no CSS language at all
+    expect(colourOf(view, "/* the felt */")).toBe("rgb(1, 2, 3)")
+    expect(colourOf(view, "background")).toBe("rgb(4, 5, 6)")
+    // a function an action, as a javascript call is, not a keyword
+    expect(colourOf(view, "var")).toBe("rgb(7, 8, 9)")
+
+    view.dispatch({ selection: { anchor: STYLES.indexOf("background") + 4 } })
+    startCompletion(view)
+    await vi.waitFor(() => expect(currentCompletions(view!.state).map(({ label }) => label)).toContain("background"))
+  })
+
   test("its waits:  a parse once the typing pauses 200 msec, a rename's save within 2 s (epic `codemirror` J4)", () => {
     expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([200, 2000])
   })
@@ -199,6 +220,20 @@ What the Inspector shows for a card.
 \t<ui-property name="rank" />
 </property-editor>
 `
+
+/** A CSS file's text:  a comment, a rule, a property, a function. */
+const STYLES = `/* the felt */
+.table {
+  background: var(--felt);
+}
+`
+
+/** The colour the element holding exactly `text` in `view` is drawn in. */
+function colourOf(view: EditorView, text: string): string {
+  const element = [...view.dom.querySelectorAll(".cm-line span")].find((span) => span.textContent === text)
+  if (!element) throw new TypeError(`colourOf():  no span holds \`${text}\``)
+  return getComputedStyle(element).color
+}
 
 /** The text of each element matching `selector` in `view`, in order. */
 function textsOf(view: EditorView, selector: string): string[] {

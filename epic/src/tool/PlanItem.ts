@@ -219,6 +219,22 @@ export class PlanItem {
   }
 
   /**
+   * The card sets of `item` asked BESIDE `set`, `set` included, in page order:  the ones in the same place as it
+   * (its text, one reply, More Details), so each is a question of its own and keeps its own pick (epic `epic-engine`
+   * I88:  "picking D wipes out previous answer to B").
+   * - a set in another place (a reply's new options over the question's own) is asked INSTEAD:  not among them
+   */
+  static setsBeside(item: Element, set: Element): Element[] {
+    const place = PlanItem.placeOf(set)
+    return PlanItem.choiceSets(item).filter((each) => PlanItem.placeOf(each) === place)
+  }
+
+  /** Where card set `set` was asked:  its nearest reply, More Details, item or phase. */
+  private static placeOf(set: Element): Element | null {
+    return set.parentElement?.closest(`${REPLY_TAG}, ${MORE_TAG}, ${ITEM_TAG}, ${PHASE_TAG}`) ?? null
+  }
+
+  /**
    * The card set a pick names:  `choiceSets()`' `index`;  none given, `item`'s own (`choicesOf()`), else its first.
    * `null` when there's no such set.
    */
@@ -404,6 +420,9 @@ const ORIGINAL_TAG = "epic-original"
 
 /** A reply on an item, and the `from` of Claude's (`awaitsPick()`). */
 const REPLY_TAG = "epic-reply"
+
+/** An item's More Details:  a place a card set may be asked (`setsBeside()`). */
+const MORE_TAG = "epic-more"
 
 /** Each card's heading as prose (`PlanItem.asProse()`):  what its element draws from its data. */
 const CARD_HEADINGS: Record<string, (element: Element) => string | undefined> = {

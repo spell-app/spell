@@ -161,6 +161,23 @@ export class WorktreeGuard {
     return last
   }
 
+  /**
+   * The hook's answer, `output`, with another `SessionStart` notice added (`Superpowers.notice()`, epic `epic-engine`
+   * P72):  each line for the person on a line of its own, the words for Claude after the guard's.
+   * - either one missing:  the other alone;  both:  `undefined`
+   */
+  static withNotice(
+    output: GuardOutput | undefined,
+    notice: { forPerson: string; forClaude: string } | undefined
+  ): GuardOutput | undefined {
+    if (!notice) return output
+    if (!output) return WorktreeGuard.output(notice.forPerson, notice.forClaude)
+    return WorktreeGuard.output(
+      `${output.systemMessage}\n${notice.forPerson}`,
+      `${output.hookSpecificOutput.additionalContext}\n\n${notice.forClaude}`
+    )
+  }
+
   /** The hook's JSON:  `systemMessage` for the person, `additionalContext` for Claude. */
   static output(forPerson: string, forClaude: string): GuardOutput {
     return {

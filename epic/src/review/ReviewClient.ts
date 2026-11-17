@@ -773,6 +773,23 @@ export class ReviewClient extends PageStore {
   }
 
   /**
+   * Delete item `id`'s picture `src` (`POST delete-picture`, epic `epic-engine` T87):  taken out of the item, its file
+   * deleted;  true when done, else false (a notice says why).
+   * - `src`:  its `<img src>`, as the page has it (`/epics/seo/pictures/t3-20261116-1302.png`)
+   * - `keepalive`:  the request outlives the page (a delete still waiting on its Undo as the page goes)
+   * - NEVER throws
+   */
+  async deletePicture(id: string, src: string, { keepalive = false }: { keepalive?: boolean } = {}): Promise<boolean> {
+    try {
+      await this.link.post(`${REVIEW_API}/delete-picture`, { page: this.options.page, id, src }, { keepalive })
+      return true
+    } catch (failure) {
+      this.notify(sentence((failure as Error).message))
+      return false
+    }
+  }
+
+  /**
    * Every epic with open tests, in Owen's saga order (`GET /api/epics/tests`):  where a run across every epic
    * (`epic test --all`) goes next;  `[]` when the server can't say.
    * - NEVER throws

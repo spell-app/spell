@@ -207,6 +207,49 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 
 </details>
 
+## <a id="with-superpowers"></a>With superpowers
+
+A session opened in an epic's worktree, with the superpowers plugin turned on, starts with this line:
+
+```text
+superpowers is on:  in epic seo it stands aside for planning, worktrees and finishing.
+```
+
+[superpowers](https://github.com/obra/superpowers) (MIT) is a popular plugin of skills that runs a piece of work from
+idea to merge:  a design doc, a plan file, a worktree, the build, the finish.
+epic does four of those jobs already, so with both installed, two plugins would plan, and two would finish.
+
+What epic tells it, in an epic's worktree only:
+- the epic page is the design and the plan:  no brainstorming, no plan file under `docs/superpowers/`
+- `/epic` made the worktree and ran your `installCommand`:  no second worktree, and no `npm install` in a yarn repo
+- `/epic done` is the only finish:  no bare `git merge`, no `git worktree remove` of an epic's worktree
+- inside a phase, DO use its test-driven-development, systematic-debugging and verification-before-completion
+
+The words are the `superpowers` topic of `epic guide`, said twice:  in the epic skill, and by the session-start hook
+on every start, `/clear` and compaction, when Claude Code's settings turn superpowers on.
+Outside an epic, superpowers runs as it always does.
+
+Two ideas from it are now epic's own, superpowers or not:
+- **Proof before done:**  a phase's Done list ends with each check run and what it printed.
+- **The plan check:**  before a phase closes, a `plan-check` agent holds the phase's diff up against its accepted
+  build plan, and lists what wasn't built and what was built unasked.
+
+The catch:  superpowers has no setting to turn a skill off, and obeys only YOUR instructions, by its own rule
+(CLAUDE.md, AGENTS.md, what you type).
+Words from another plugin's skill or hook may or may not count as yours;  nobody has tried it live yet.
+The one place they're certain to win is your repo's own AGENTS.md or CLAUDE.md, so copy the lines there if it matters:
+
+```sh
+epic guide superpowers      # the words, to paste into your AGENTS.md
+```
+
+- Test-first is your repo's call:  superpowers deletes code written before its test, so say in your AGENTS.md
+  whether you want that.
+- Its brainstorming skill's optional browser companion loads a logo from its maker's site, which tells them the
+  version in use;  Claude Code's `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` turns that off.
+- The hook reads only your own settings (`~/.claude/settings.json`):  superpowers turned on in a project's settings,
+  or loaded with `--plugin-dir`, gets no line at start, only the epic skill's.
+
 ## What's still Spell-shaped
 
 What you'd trip on today, roughly in the order you'd meet it.
