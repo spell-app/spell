@@ -21,6 +21,7 @@ import { openChooser } from "./Chooser"
  * - `editor` reaches these through a DYNAMIC `import()`, so `editor.ts` stays free of Solid and `spell-ui`.
  * - Props map onto `UI.modals`' options:  `header` => `title`, `ok` / `cancel` => `okText` / `cancelText`, `danger` => `okColor: "negative"`,
  *   `defaultValue` => `value`.
+ * - Every dialog has a close ✕ in its corner, which cancels (`closable`, on unless a caller says `false`).
  */
 
 ////////////////
@@ -87,8 +88,15 @@ function asProps<P extends AlertModalProps>(props: string | P): P {
 
 /** Our props as `UI.modals`' options. */
 function modalOptions(props: string | ConfirmModalProps): ModalOptions {
-  const { message, header, ok, cancel, danger } = asProps<ConfirmModalProps>(props)
-  return { message, title: header, okText: ok, cancelText: cancel, okColor: danger ? "negative" : undefined }
+  const { message, header, ok, cancel, danger, closable } = asProps<ConfirmModalProps>(props)
+  return {
+    message,
+    title: header,
+    okText: ok,
+    cancelText: cancel,
+    okColor: danger ? "negative" : undefined,
+    closable
+  }
 }
 
 /**

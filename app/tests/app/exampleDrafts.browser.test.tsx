@@ -11,9 +11,12 @@ import { openChoices } from "spell/app/app/solid/modals"
 
 /**
  * An example opened as it is, your edits your draft of it (epic `mockup` T52):
- * - leaving it with a draft (`editor.leaveProject()`), or Save in it (`editor.saveDraft()`), asks what to keep
- *   (`editor.askAboutExample()`):  Save as My App, Discard Changes, and for whoever may publish it, Update the Example
- * - Escape keeps the draft;  no draft, nothing asked
+ * - leaving it with a draft, or Save in it (`editor.saveDraft()`), asks what to keep (`editor.askAboutExample()`):
+ *   Update the Example alone on the left (for whoever may publish it), then Cancel, Discard Changes (after "are you
+ *   sure?") and Save in My Apps
+ * - it answers whether to go on:  Cancel, Escape, Keep Editing or no to Update stay, the draft as it was
+ * - asked before the address changes, only when it leaves the project (`editor.asksBeforeLeaving()`)
+ * - no draft, nothing asked
  * - `<Choices>`, the dialog it asks in:  a button per answer, Escape none
  * - The server's half (a save is a draft, the copy with your draft, Publish into the example):  spaces' `api.test.ts`.
  */
@@ -71,42 +74,58 @@ afterEach(() => {
 })
 
 describe("leaving an example with your draft (`editor.askAboutExample()`)", () => {
-  test("asked once, with Discard Changes and Save as My App;  no Update the Example for someone who may not publish", async () => {
+  test("asked once, with Discard Changes and Save in My Apps;  no Update the Example for someone who may not publish", async () => {
     const asked = choose("mine")
     await editor.leaveProject(example())
     expect(asked).toHaveBeenCalledOnce()
-    const { header, choices } = asked.mock.calls[0]![0]
+    const { header, choices, cancel } = asked.mock.calls[0]![0]
     expect(header).toBe("Keep your changes to Counter?")
-    expect(choices.map((choice) => choice.text)).toEqual(["Discard Changes", "Save as My App"])
+    expect(choices.map((choice) => choice.text)).toEqual(["Discard Changes", "Save in My Apps"])
+    expect(choices.some((choice) => choice.apart)).toBe(false)
+    expect(cancel).toBe("Cancel")
   })
 
-  test("Save as My App:  a copy in your apps with your draft;  leaving, it isn't shown", async () => {
+  test("Save in My Apps:  a copy in your apps with your draft;  leaving, it isn't shown, and it goes on", async () => {
     choose("mine")
-    await editor.leaveProject(example())
+    expect(await editor.askAboutExample(example(), "leaving")).toBe(true)
     expect(copied).toEqual([{ sourceId: "@spell/examples/Counter", withDraft: true }])
     expect(editor.showEditor).not.toHaveBeenCalled()
-    expect(editor.showNotice).toHaveBeenCalledWith("Saved as Counter, in your apps.")
+    expect(editor.showNotice).toHaveBeenCalledWith("Counter is in your apps now, with your changes.")
   })
 
-  test("Discard Changes:  your draft goes, nothing copied", async () => {
+  test("Discard Changes, then Discard:  your draft goes, nothing copied, and it goes on", async () => {
     choose("discard")
-    await editor.leaveProject(example())
+    const sure = confirm(true)
+    expect(await editor.askAboutExample(example(), "leaving")).toBe(true)
+    expect(sure.mock.calls[0]![0]).toMatchObject({
+      header: "Discard your changes to Counter?",
+      ok: "Discard",
+      cancel: "Keep Editing",
+      danger: true
+    })
     expect(discarded).toEqual(["/Counter.spell"])
     expect(copied).toEqual([])
   })
 
-  test("Escape:  the draft stays, nothing copied or discarded", async () => {
+  test("Discard Changes, then Keep Editing:  it stays, the draft as it was", async () => {
+    choose("discard")
+    confirm(false)
+    expect(await editor.askAboutExample(example(), "leaving")).toBe(false)
+    expect(discarded).toEqual([])
+  })
+
+  test("Cancel or Escape:  it stays, nothing copied or discarded", async () => {
     choose(undefined)
-    await editor.leaveProject(example())
+    expect(await editor.askAboutExample(example(), "leaving")).toBe(false)
     expect(discarded).toEqual([])
     expect(copied).toEqual([])
     expect(published).toBe(0)
   })
 
-  test("no draft:  nothing asked", async () => {
+  test("no draft:  nothing asked, and it goes on", async () => {
     drafts = []
     const asked = choose("mine")
-    await editor.leaveProject(example())
+    expect(await editor.askAboutExample(example(), "leaving")).toBe(true)
     expect(asked).not.toHaveBeenCalled()
   })
 
@@ -126,6 +145,39 @@ describe("leaving an example with your draft (`editor.askAboutExample()`)", () =
   })
 })
 
+describe("asked before the address changes, only when it leaves the example (`editor.asksBeforeLeaving()`)", () => {
+  /** Show `shown` as the editor's project, with drafts of `drafted`, for the test. */
+  function showing(shown: SP.SpellProject, drafted: string[]) {
+    const project = vi.spyOn(editor, "project", "get").mockReturnValue(shown)
+    const draftedFiles = vi.spyOn(editor, "draftedFiles", "get").mockReturnValue(drafted)
+    cleanups.push(() => {
+      project.mockRestore()
+      draftedFiles.mockRestore()
+    })
+  }
+
+  test("with a draft:  home or another project asks;  another file, Run or its site editor don't", () => {
+    showing(example(), ["@spell/examples/Counter/Counter.spell"])
+    expect(editor.asksBeforeLeaving("/")).toBe(true)
+    expect(editor.asksBeforeLeaving("/edit/@spell/examples/Solitaire")).toBe(true)
+    expect(editor.asksBeforeLeaving("/edit/@spell/examples/Counter/Other.spell")).toBe(false)
+    expect(editor.asksBeforeLeaving("/run/@spell/examples/Counter")).toBe(false)
+    expect(editor.asksBeforeLeaving("/site/@spell/examples/Counter")).toBe(false)
+  })
+
+  test("no draft and nothing unsaved, or not an example:  never", () => {
+    showing(example(), [])
+    expect(editor.asksBeforeLeaving("/")).toBe(false)
+    showing(example("owen@spell/Counter"), ["owen@spell/Counter/Counter.spell"])
+    expect(editor.asksBeforeLeaving("/")).toBe(false)
+  })
+
+  test("an edit not saved yet counts", () => {
+    showing(example("@spell/examples/Counter", [{ isDirty: true, path: "@spell/examples/Counter/Counter.spell" }]), [])
+    expect(editor.asksBeforeLeaving("/")).toBe(true)
+  })
+})
+
 describe("Update the Example, for whoever may publish it (a manager of `@spell`)", () => {
   test("offered between the two;  after a second question, your draft is published into the example", async () => {
     mayPublish = true
@@ -133,26 +185,27 @@ describe("Update the Example, for whoever may publish it (a manager of `@spell`)
     const sure = confirm(true)
     await editor.leaveProject(example())
     expect(asked.mock.calls[0]![0].choices.map((choice) => choice.text)).toEqual([
-      "Discard Changes",
       "Update the Example",
-      "Save as My App"
+      "Discard Changes",
+      "Save in My Apps"
     ])
-    expect(sure.mock.calls[0]![0]).toMatchObject({ header: "Update Counter for everyone?", danger: true })
+    expect(asked.mock.calls[0]![0].choices[0]).toMatchObject({ value: "update", apart: true })
+    expect(sure.mock.calls[0]![0]).toMatchObject({ header: "Change Counter for everyone?", danger: true })
     expect(published).toBe(1)
   })
 
-  test("the second question answered no:  nothing published, the draft stays", async () => {
+  test("the second question answered no:  nothing published, it stays, the draft as it was", async () => {
     mayPublish = true
     choose("update")
     confirm(false)
-    await editor.leaveProject(example())
+    expect(await editor.askAboutExample(example(), "leaving")).toBe(false)
     expect(published).toBe(0)
     expect(discarded).toEqual([])
   })
 })
 
 describe("Save (⌘S) in an example (`editor.saveDraft()`)", () => {
-  test("asks too;  Save as My App shows the copy", async () => {
+  test("asks too;  Save in My Apps shows the copy", async () => {
     const shown = example()
     const project = vi.spyOn(editor, "project", "get").mockReturnValue(shown)
     const saveAll = vi.spyOn(editor, "saveAll").mockResolvedValue(undefined)
@@ -172,6 +225,44 @@ describe("Save (⌘S) in an example (`editor.saveDraft()`)", () => {
 })
 
 describe("`<Choices>`:  a button per answer", () => {
+  test("an answer set apart stands at the left, then Cancel, then the rest;  Cancel answers none", async () => {
+    await uiReady
+    const cancelled = openChoices({
+      message: "Which?",
+      choices: [
+        { value: "drop", text: "Drop", color: "negative", apart: true },
+        { value: "keep", text: "Keep", color: "primary" }
+      ],
+      cancel: "Cancel"
+    })
+    const modal = await shownChoices()
+    await ElementFixture.settle(modal)
+    const buttons = [...modal.querySelectorAll<HTMLElement>("ui-button")]
+    expect(buttons.map((button) => button.textContent)).toEqual(["Drop", "Cancel", "Keep"])
+    const [drop, cancel, keep] = buttons.map((button) => button.getBoundingClientRect())
+    expect(cancel!.left - drop!.right).toBeGreaterThan(40)
+    expect(keep!.left).toBeGreaterThan(cancel!.right)
+    buttons[1]!.click()
+    expect(await cancelled).toBeUndefined()
+  })
+
+  test("a close ✕ in its corner, which answers none;  off with `closable: false`", async () => {
+    await uiReady
+    const closed = openChoices({ message: "Which?", choices: [{ value: "a", text: "A" }] })
+    const modal = await shownChoices()
+    await ElementFixture.settle(modal)
+    const close = await closeIconOf(modal)
+    close.click()
+    expect(await closed).toBeUndefined()
+
+    const answered = openChoices({ message: "Which?", choices: [{ value: "a", text: "A" }], closable: false })
+    const bare = await shownChoices()
+    await ElementFixture.settle(bare)
+    expect(bare.hasAttribute("closable")).toBe(false)
+    bare.querySelector<HTMLElement>("ui-button")!.click()
+    expect(await answered).toBe("a")
+  })
+
   test("a click answers its value;  Escape answers none", async () => {
     await uiReady
     // Escape through a keyboard binding rather than `CloseWatcher`, so the test can press it
@@ -217,6 +308,30 @@ function confirm(ok: boolean) {
   const spy = vi.spyOn(editor, "confirm").mockResolvedValue(ok)
   cleanups.push(() => spy.mockRestore())
   return spy
+}
+
+describe("every dialog has a close ✕ that cancels (Owen, epic `mockup` P24)", () => {
+  test("`editor.confirm()`:  its ✕ answers no", async () => {
+    await uiReady
+    const answer = editor.confirm({ header: "Sure?", message: "Really?" })
+    const modal = await vi.waitFor(() => {
+      const shown = [...document.querySelectorAll<HTMLElement>("ui-modal")].at(-1)
+      if (!shown?.hasAttribute("closable")) throw new Error("no closable dialog yet")
+      return shown
+    })
+    await ElementFixture.settle(modal)
+    ;(await closeIconOf(modal)).click()
+    expect(await answer).toBe(false)
+  })
+})
+
+/** The close ✕ `modal` draws in its shadow root, once it's there. */
+function closeIconOf(modal: HTMLElement): Promise<HTMLElement> {
+  return vi.waitFor(() => {
+    const close = modal.shadowRoot?.querySelector<HTMLElement>('[part~="close"]')
+    if (!close) throw new Error("no close icon yet")
+    return close
+  })
 }
 
 /** The `<Choices>` showing now, once it's there. */

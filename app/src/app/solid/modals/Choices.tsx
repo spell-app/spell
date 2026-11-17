@@ -1,16 +1,18 @@
-import { For } from "solid-js"
+import { For, Show } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { uiReady } from "spell/app/app/solid/loadUI"
-import type { ChoicesModalProps } from "spell/app/app/solid/modals"
+import type { ChoicesModalProps, ModalChoice } from "spell/app/app/solid/modals"
 
 /****************
  * ### `<Choices>`
  * Modal asking a question with a button per answer, in a row, when OK and Cancel aren't enough
  * (epic `mockup` T52:  "Keep your changes to Solitaire?").
- * - `onChoose()` gets, once the modal has HIDDEN:  the clicked button's `value`;  Escape or the close, `undefined`.
- * - Same look as `UI.modals`' dialogs:  `size="tiny"`, `closedby="closerequest"`, so a stray click on the dimmer
- *   does nothing.
+ * - `onChoose()` gets, once the modal has HIDDEN:  the clicked button's `value`;
+ *   Cancel, Escape or its close ✕ (on unless `closable` is `false`), `undefined`.
+ * - An answer set `apart` (Discard) stands alone at the left;  Cancel and the rest are on the right.
+ * - Like `UI.modals`' dialogs, `closedby="closerequest"`, so a stray click on the dimmer does nothing;
+ *   one size wider (`small`), so four buttons sit on one row.
  * - The `primary` button has the focus at first, so Enter is the answer most people want, never one that throws
  *   something away.
  * - Every button is an `approve` one (`UIT.ModalActionSelectors`), so a click closes it;
@@ -22,8 +24,9 @@ export function Choices(props: ChoicesProps) {
   return (
     <ui-modal
       class="Choices"
-      size="tiny"
+      size="small"
       closedby="closerequest"
+      closable={props.closable === false ? undefined : ""}
       heading={props.header}
       aria-label={props.header ? undefined : props.message}
       visible=""
@@ -40,16 +43,28 @@ export function Choices(props: ChoicesProps) {
         <p style={{ "white-space": "pre-line" }}>{props.message}</p>
       </ui-content>
       <ui-actions>
-        <For each={props.choices}>
-          {(choice) => (
-            <ui-button class="approve" color={choice.color} data-choice={choice.value}>
-              {choice.text}
-            </ui-button>
-          )}
-        </For>
+        <For each={props.choices.filter((choice) => choice.apart)}>{answer}</For>
+        <Show when={props.cancel}>
+          <ui-button class="deny">{props.cancel}</ui-button>
+        </Show>
+        <For each={props.choices.filter((choice) => !choice.apart)}>{answer}</For>
       </ui-actions>
     </ui-modal>
   )
+
+  /** An answer's button:  one set apart floats alone at the left, as Fomantic's `left floated` button in a modal. */
+  function answer(choice: ModalChoice) {
+    return (
+      <ui-button
+        class="approve"
+        color={choice.color}
+        data-choice={choice.value}
+        style={choice.apart ? { float: "inline-start", "margin-inline-start": "0" } : undefined}
+      >
+        {choice.text}
+      </ui-button>
+    )
+  }
 
   /** A button:  note its answer now, while it's still in the page. */
   function choose(event: Event) {

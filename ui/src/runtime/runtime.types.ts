@@ -502,6 +502,11 @@ export type ModalOptions = {
   okColor?: string
   /** `prompt()` only:  initial input value */
   value?: string
+  /**
+   * a close ✕ in its corner, which answers as Cancel and Escape do;  default on (Owen, epic `mockup` P24:
+   * "by default ALL dialogs should have the close x");  `false` for a dialog that must be answered
+   */
+  closable?: boolean
 }
 
 /** What the modal component registers as `Modals.provider`. */

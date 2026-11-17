@@ -37,6 +37,7 @@ export function YouPanel(props: YouPanelProps) {
       class="YouPanel"
       size="small"
       closedby="closerequest"
+      closable=""
       heading={appTexts.text("youHeader", { address: props.me.person.address })}
       visible=""
       ref={(element: HTMLElement) => {

@@ -35,6 +35,7 @@ export function ProjectSettings(props: ProjectSettingsProps) {
       size="tiny"
       heading={appTexts.text("projectSettingsHeading")}
       closedby="closerequest"
+      closable=""
       aria-label={appTexts.text("projectSettings", { title: props.project.title })}
       visible=""
       ref={(element: HTMLElement) => {

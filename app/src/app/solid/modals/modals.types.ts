@@ -21,6 +21,8 @@ export type AlertModalProps = {
   ok?: string
   /** OK throws something away:  its button is red (`negative`), not the primary colour. */
   danger?: boolean
+  /** `false`:  no close ✕ in its corner.  Every dialog has one by default, which answers as Cancel / Escape do. */
+  closable?: boolean
 }
 
 /** Props for `editor.confirm()`:  as `alert()`'s, plus a Cancel button. */
@@ -68,8 +70,12 @@ export type ChoicesModalProps<Value extends string = string> = {
   message: string
   /** Header for the dialog.  Default:  none (the message names the dialog). */
   header?: string
-  /** The answers, a button each, left to right:  the last is the one Enter presses. */
+  /** The answers, a button each, left to right;  the `primary` one has the focus at first. */
   choices: ModalChoice<Value>[]
+  /** A Cancel button's text, right of the answers set `apart`:  it answers none, as Escape does.  None:  no button. */
+  cancel?: string
+  /** `false`:  no close ✕ in its corner.  On by default:  it answers none, as Cancel and Escape do. */
+  closable?: boolean
 }
 
 /** One answer of `ChoicesModalProps`:  a button. */
@@ -80,6 +86,8 @@ export type ModalChoice<Value extends string = string> = {
   text: string
   /** its button's `color`:  `primary` for the one most people want, `negative` for one that throws something away */
   color?: "primary" | "negative"
+  /** Alone at the left, away from the rest:  for one that throws something away (Owen, epic `mockup` T52). */
+  apart?: boolean
 }
 
 ////////////////
