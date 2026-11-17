@@ -11,6 +11,8 @@ import type { ChoicesModalProps } from "spell/app/app/solid/modals"
  * - `onChoose()` gets, once the modal has HIDDEN:  the clicked button's `value`;  Escape or the close, `undefined`.
  * - Same look as `UI.modals`' dialogs:  `size="tiny"`, `closedby="closerequest"`, so a stray click on the dimmer
  *   does nothing.
+ * - The `primary` button has the focus at first, so Enter is the answer most people want, never one that throws
+ *   something away.
  * - Every button is an `approve` one (`UIT.ModalActionSelectors`), so a click closes it;
  *   the button clicked says which answer it was (`data-choice`).
  * - Show one with `openChoices()`, which mounts it and cleans up.
@@ -27,6 +29,10 @@ export function Choices(props: ChoicesProps) {
       visible=""
       ref={(modal: HTMLElement) => {
         modal.addEventListener("ui-approving", choose)
+        // the modal focuses its first button as it opens:  Discard, so Enter would throw the draft away
+        modal.addEventListener("ui-opened", () =>
+          modal.querySelector<HTMLElement>('ui-button[color="primary"]')?.focus()
+        )
         modal.addEventListener("ui-closed", () => props.onChoose(chosen), { once: true })
       }}
     >
