@@ -18,7 +18,7 @@ import { setTimeout as sleep } from "timers/promises"
 
 import { SRV } from "spell/server"
 import type { ReportedServer } from "spell/server/page"
-import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import { HOUSE_SITE_HEADER } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -1094,9 +1094,10 @@ const SEARCH_PATH = [process.env.PATH, "/opt/homebrew/bin", "/usr/local/bin", "/
 export async function machinePersonEmail(): Promise<string> {
   const storage = new DiskStorage(environment.spellSpacesDir)
   try {
-    const { person } = await new PeopleStore(storage).person(LOCAL_PERSON, HOME_ORG)
+    const { id, org, address } = thisMachinesPerson()
+    const { person } = await new PeopleStore(storage).person(id, org)
     const email = person?.emails.items[0]
-    if (!email) throw new LocalSiteError(`${LOCAL_PERSON}@${HOME_ORG} has no email:  say which one to use`)
+    if (!email) throw new LocalSiteError(`${address} has no email:  say which one to use`)
     return email
   } finally {
     storage.close()

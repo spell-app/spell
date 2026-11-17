@@ -1,8 +1,8 @@
 import type { PrefForgetRequest, PrefKeysAnswer, PrefLoadAnswer, PrefSaved, PrefSaveRequest } from "spell/util"
 import type { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import { queryText, respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { SpacePrefs, type PrefPerson } from "./SpacePrefs"
@@ -15,7 +15,7 @@ import { SpacePrefs, type PrefPerson } from "./SpacePrefs"
  * - `POST /api/prefs/forget`, body `{ store, under }`:  `{ keys }`, the keys left
  * - A store name that can't be one:  400.
  * - Kept in the person's space, `@spell/owen@/__prefs/<store>.json5` (`SpacePrefs`).
- * - Whose:  whoever's signed in, else this machine's person (`SPACES.LOCAL_PERSON`) -- `prefsPersonFor()`.
+ * - Whose:  whoever's signed in, else this machine's person (`thisMachinesPerson()`) -- `prefsPersonFor()`.
  * - The protocol's types are the kit's (`spell/util`'s `PrefLoadAnswer` ...):  the client is generic.
  * - Each save is told to whoever listens (`onPrefSaved()`):  the app's route module hands it to every open page,
  *   over the page server's live channel (epic `debut` P21:  the person's theme, picked in one place, shows in all).
@@ -33,10 +33,15 @@ export function spacePrefs(): SpacePrefs {
  * Who `request` is from, for every route of spaces that asks:
  * whose preferences, whose `/api/people/me`, who's a Spell admin, who's asking a project data folder.
  * - Whoever's signed in on the device asking (`request.person`, the page server's `SignInCheck`, epic `atmosphere` P3).
- * - Nobody:  this machine's person (`SPACES.LOCAL_PERSON`), as before sign-in.
+ * - Nobody:  this machine's person (`thisMachinesPerson()`), as before sign-in.
  */
 export function prefsPersonFor(request: SRV.Request): PrefPerson {
-  return SP.SpellLocation.accountParts(request.person ?? "") ?? { id: LOCAL_PERSON, org: HOME_ORG }
+  return (
+    SP.SpellLocation.accountParts(request.person ?? "") ?? {
+      id: thisMachinesPerson().id,
+      org: thisMachinesPerson().org
+    }
+  )
 }
 
 /** `GET /api/prefs/load`:  see the file's docs. */

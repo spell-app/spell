@@ -4,7 +4,8 @@
  * - Each change to a file goes through the page server's file operations (`SRV.FileOperations`), in-process:
  *   under the file lock, written all at once.
  * - It was spell's (`spell-parser/spell/node/project-utils`), until epic `people-and-orgs` P15.
- * - NOTE: loads spaces' barrel, so spell's project groups are registered (`SPACES.PROJECT_GROUPS`).
+ * - NOTE: loads spaces' barrel, so spell's project groups are registered (`SPACES.PROJECT_GROUPS`),
+ *   and sets this machine's person and their org's groups (`thisMachinesPerson()`).
  */
 import { existsSync, readFileSync } from "fs"
 import escapeRegExp from "lodash/escapeRegExp"
@@ -23,10 +24,14 @@ import { HOUSE_SITE_HEADER } from "spell/app/spaces/models/spaceNames"
 
 import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { ProjectDrafts } from "./ProjectDrafts"
-import { ProjectRoles, THIS_MACHINES_PERSON, type ProjectFileChange } from "./ProjectRoles"
+import { ProjectRoles, type ProjectFileChange } from "./ProjectRoles"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
+
+// This machine's person, and their org's groups in spell.spaces, set before any route answers or any address is read
+thisMachinesPerson()
 
 const { respondWithJSON } = responseUtils
 
@@ -458,7 +463,7 @@ export type GetIndexOptions = {
  */
 export const getIndex = async (
   projectId: string,
-  { saving = "always", reading = "your drafts", person = THIS_MACHINES_PERSON }: GetIndexOptions = {}
+  { saving = "always", reading = "your drafts", person = thisMachinesPerson().address }: GetIndexOptions = {}
 ): Promise<ProjectIndexJSON> => {
   const location = SP.SpellLocation.getProjectLocation(projectId)
 

@@ -1,23 +1,62 @@
 import type { SP } from "spell/parser/spell"
+import { initialCaps, slug } from "spell/util/string"
 // Import directly:  `<spell-viewer>` loads this file alone, without spell's barrel and its parser
 import { SpellSetup } from "spell/parser/spell/SpellSetup"
 
 /**
- * The person whose space this machine's own projects are in:  `owen@spell`.
+ * Spell's own org, `spell`:  where Spell accounts are (`ana@spell`), and Spell admins (`spell-admin` there).
+ * - A person read with no org is in it (`Person#owen` is `owen@spell`).
+ * - Its space's built-ins are the app folder's `spaces/@spell/`.
+ * - NOT necessarily this machine's person's org:  that's `localPerson.org`.
+ */
+export const SPELL_ORG = "spell"
+
+/**
+ * The person at THIS machine, whose space its own projects are in:  `owen@spell`, `kim-lee@acme`
+ * (epic `repo-split` P27).
  * - So a project of theirs, `my-app`, is `owen@spell/my-app`, in spell-spaces' `@spell/owen@/my-app/`.
  * - Their own file is `@spell/owen@/__me.json5`:
  *   the people store reads it, and the app's "You" panel changes it (epic `people-and-orgs` P9).
- * - WHO they are is still this name, until a machine can have more than one person.
- * - In the editor's static build, the public preview, it's `you`:  a visitor's projects are kept in their browser.
+ * - Who it is, the server says (`thisMachinesPerson()`, spaces' node `localPerson.ts`):
+ *   the app's settings name the org, the app's own folder remembers the person.
+ *   - The server sets it as it loads;  the editor, from `GET /api/people/local`, before it draws anything.
+ *   - Until then:  `owen@spell`, Owen's kit's person, as before P27.
+ * - In the editor's static build, the public preview, it's `you@spell`:  a visitor's projects are kept in their browser.
+ * - Change it with `setLocalPerson()`, never by hand:  its group moves with it.
  */
-export const LOCAL_PERSON = import.meta.env?.MODE === "static" ? "you" : "owen"
+export const localPerson = {
+  /** their id in their org:  `owen` */
+  id: import.meta.env?.MODE === "static" ? "you" : "owen",
+  /** their org:  `spell`, or the app's own (its `package.json`'s `"spell": { "org" }`) */
+  org: SPELL_ORG,
+  /** their address, and their space's:  `owen@spell` */
+  get address(): string {
+    return `${this.id}@${this.org}`
+  }
+}
 
 /**
- * The org every person on this machine is in, for now:
- * `owen@spell` is `Person#owen@spell`, their space `@spell/owen@/`.
- * - The people store files them there;  their preferences are kept there too (`SpacePrefs`).
+ * Make `person` this machine's person:  their own projects' group, the first of `PROJECT_GROUPS`, moves to their space.
+ * - SIDE EFFECT:  `SpellSetup` lists `kim-lee@acme` in place of the old address.
  */
-export const HOME_ORG = "spell"
+export function setLocalPerson(person: { id: string; org: string }): void {
+  const group = PROJECT_GROUPS[0]!
+  delete SpellSetup.projectRoots[group.path]
+  localPerson.id = person.id
+  localPerson.org = person.org
+  group.path = localPerson.address as SP.ProjectRootPath
+  group.space = localPerson.address
+  SpellSetup.addProjectRoot(group)
+}
+
+/**
+ * A person's id, made from what they typed or from their email:
+ * `Kim Lee` and `kim.lee@acme.com` are both `kim-lee`;  `""` when nothing's left.
+ * - lower case, ASCII, a dash between words (`slug()`);  starts with a letter
+ */
+export function personIdFor(text: string): string {
+  return slug(text.replace(/@.*$/, "")).replace(/^[^a-z]+/, "")
+}
 
 /**
  * Spell UI's component pages, one site of notebooks in the Guides group (epic `notebook` P10).
@@ -65,7 +104,8 @@ export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number]
  *     the `@spell` space's built-ins, `spaces/@spell/<group>/`, committed
  *   - `@spell/editor`:  the editor's own Spell, one project, `spell-editor` (epic `editor` P22, P29), committed
  *   - `@spell/test`:  the test projects, beside them in `spaces/@spell/test/`, committed and frozen
- *   - `owen@spell`:  this machine's person's own, `<spell-spaces>/@spell/<person>@/`, outside git
+ *   - `owen@spell`:  this machine's person's own (`localPerson`), `<spell-spaces>/@<org>/<person>@/`, outside git
+ *   - an org's own groups in spell.spaces, `@acme/harbor`:  added as the server finds them (`addOrgGroups()`)
  * - A project in one is its address, a slash and the project's folder name:  `@spell/examples/Solitaire`.
  *   Built-in projects' names are lower-kebab (decision Q39).
  * - Each group's `icon` is its projects' icon everywhere the editor shows one:
@@ -78,8 +118,8 @@ export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number]
  */
 export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
   {
-    path: `${LOCAL_PERSON}@${HOME_ORG}`,
-    space: `${LOCAL_PERSON}@${HOME_ORG}`,
+    path: localPerson.address as SP.ProjectRootPath,
+    space: localPerson.address,
     domain: "projects",
     title: "Projects",
     Type: "Project",
@@ -157,7 +197,7 @@ for (const group of PROJECT_GROUPS) SpellSetup.addProjectRoot(group)
 const ORG_PROGRAM = /^(@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
 
 /** Orgs with an address of their own that isn't a project group:  Spell's built-ins, and an editor's local folders. */
-const NOT_AN_ORG_GROUP = new Set([`@${HOME_ORG}`, "@local"])
+const NOT_AN_ORG_GROUP = new Set([`@${SPELL_ORG}`, "@local"])
 
 /**
  * The project group of an org's own programs, `@rs` for `@rs/OrgAdmin` (epic `atmosphere` I14):
@@ -183,7 +223,7 @@ function orgProgramGroup(place: string): SP.ProjectRootSpec | undefined {
 SpellSetup.addProjectRootFinder(orgProgramGroup)
 
 /** A person's space in an org, `owen@acme`, or a project in it:  never its own folders, `ana@rs/__inbox`. */
-const PERSON_SPACE = /^([a-z][a-z0-9_]*@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
+const PERSON_SPACE = /^([a-z][a-z0-9_-]*@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
 
 /**
  * The project group of a person's space in an org other than this machine's person's (epic `repo-split` P26):
@@ -194,7 +234,7 @@ const PERSON_SPACE = /^([a-z][a-z0-9_]*@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
  */
 function personSpaceGroup(place: string): SP.ProjectRootSpec | undefined {
   const space = PERSON_SPACE.exec(place)?.[1] as SP.ProjectRootPath | undefined
-  if (!space || space === `${LOCAL_PERSON}@${HOME_ORG}`) return undefined
+  if (!space || space === localPerson.address) return undefined
   return {
     path: space,
     space,
@@ -208,3 +248,40 @@ function personSpaceGroup(place: string): SP.ProjectRootSpec | undefined {
 }
 
 SpellSetup.addProjectRootFinder(personSpaceGroup)
+
+/** An org's group kept in spell.spaces:  `@acme/harbor`, a folder of projects in the org's folder. */
+const ORG_GROUP = /^@([a-z][a-z0-9_]*)\/([a-z][a-z0-9_-]*)$/i
+
+/**
+ * The groups of this machine's person's org that the server found in spell.spaces, by address:
+ * `@acme/harbor` (epic `repo-split` P27).
+ * - The home page lists each, after the person's own projects.
+ */
+export const orgGroups: SP.ProjectRootPath[] = []
+
+/**
+ * Add `paths`, an org's own groups in spell.spaces (`@acme/harbor`), as LISTED groups (`orgGroups`),
+ * so `@acme/harbor/harbor-new` is a project in `@acme/harbor`, not a file of the org's programs.
+ * - Each:  the org's folder's own sub-folder holding projects, in `<spell-spaces>/@acme/harbor/`
+ *   (the server finds them:  spaces' node `localPerson.ts`)
+ * - SIDE EFFECT:  registered with `SpellSetup`;  one already there is left as it is
+ * - throws a `TypeError` for an address that isn't `@<org>/<group>`
+ */
+export function addOrgGroups(paths: string[]): void {
+  for (const path of paths) {
+    const match = ORG_GROUP.exec(path)
+    if (!match) throw new TypeError(`addOrgGroups():  ${path} isn't an org's group, \`@<org>/<group>\``)
+    const [, org, name] = match as unknown as [string, string, string]
+    SpellSetup.addProjectRoot({
+      path: path as SP.ProjectRootPath,
+      space: `@${org}`,
+      domain: name,
+      title: initialCaps(name.replace(/[-_]+/g, " ")),
+      Type: "Project",
+      type: "project",
+      description: `@${org}'s ${name} projects`,
+      icon: "building"
+    })
+    if (!orgGroups.includes(path as SP.ProjectRootPath)) orgGroups.push(path as SP.ProjectRootPath)
+  }
+}

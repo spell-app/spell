@@ -703,6 +703,18 @@ const APP_TEXTS_ES: AppTextPack = {
   noneYet: "Ninguna todavía.",
 
   ////////////////
+  // ## The name page (`NamePage.tsx`)
+  ////////////////
+
+  nameHeading: "Bienvenido a Encanto",
+  nameLine:
+    "¿Quién está aquí?\nTus proyectos van en un espacio con tu nombre,\nen los espacios de {org} en esta máquina.",
+  yourName: "Tu nombre",
+  nameTaken: "{address} ya tiene un espacio aquí:  ¿eres tú?",
+  nameNeeded: "Escribe un nombre con alguna letra.",
+  nameStart: "Empezar",
+
+  ////////////////
   // ## A project's settings
   ////////////////
 

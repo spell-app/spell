@@ -10,7 +10,7 @@
  *   - publishing its pages:  `canPublish`, a manager (P26;  `ProjectDrafts`)
  * - Whose role:  the person's in the space the project is in (`SpaceMembers`, its address the project's):
  *   `ana@rs` in `@rs/minutes/Agenda`'s space, `@rs`.
- * - THIS MACHINE'S PERSON (`SPACES.LOCAL_PERSON`) changes anything this machine serves:  it's theirs, as Publish's
+ * - THIS MACHINE'S PERSON (`thisMachinesPerson()`) changes anything this machine serves:  it's theirs, as Publish's
  *   so is anyone, until they sign in (`prefsPersonFor()`).
  * - A PERSON'S OWN SPACE in an org (`ana@rs/about`, epic `atmosphere` P28) takes any file, code included, by the same
  *   rules (J130, Owen:  "don't limit for now").
@@ -19,7 +19,6 @@
  * - Node only;  the routes (`project-utils.ts`) are its one caller.
  */
 import { SRV } from "spell/server"
-import { SPACES } from "spell/app/spaces"
 import {
   SPACE_ROLES,
   leastRoleFor,
@@ -29,6 +28,7 @@ import {
   type SpaceRoleRights
 } from "spell/app/spaces/models/people"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { SpaceMembers, withArticle } from "spell/app/spaces/server/node/places/SpaceMembers"
@@ -58,9 +58,6 @@ const CHANGE_WORDS: Record<ProjectFileChange, string> = {
   delete: "delete a file",
   publish: "publish its pages"
 }
-
-/** This machine's person, by address:  `owen@spell`. */
-export const THIS_MACHINES_PERSON = `${SPACES.LOCAL_PERSON}@${SPACES.HOME_ORG}`
 
 /****************
  * ### `ProjectRoles`
@@ -94,7 +91,7 @@ export class ProjectRoles {
 
   /** Their role in the project's space:  `undefined` for someone who isn't in it.  This machine's person:  a manager. */
   async role(): Promise<SpaceRole | undefined> {
-    if (this.person === THIS_MACHINES_PERSON) return "manager"
+    if (this.person === thisMachinesPerson().address) return "manager"
     const members = new SpaceMembers({
       address: this.projectId,
       storage: new DiskStorage(this.folder),

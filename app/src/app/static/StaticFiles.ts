@@ -14,7 +14,7 @@ import {
 import { MissingResourceError } from "spell/util/spell/ResponseErrors"
 import { SP } from "spell/parser/spell"
 // Import directly:  the barrel would pull the group's models into this file's chunk
-import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import { localPerson } from "spell/app/spaces/models/projectGroups"
 import { PROJECT_FILES_URL } from "spell/app/spaces/models/projectArchive"
 
 import { STATIC_BUILD_CLASS } from "./staticBuild"
@@ -371,7 +371,7 @@ function ownProject(title: string | null | undefined, files: string[]): OwnProje
 }
 
 /** The group a visitor's own projects are in. */
-const VISITOR_GROUP = `${LOCAL_PERSON}@${HOME_ORG}`
+const VISITOR_GROUP = localPerson.address
 
 /** Is `projectId` one of a visitor's own? */
 function isOwnProject(projectId: string | undefined): boolean {

@@ -193,7 +193,7 @@ export class EditorStore extends Observable {
     } catch {
       console.warn(`editor.selectPath('${path}'): invalid path`)
       // default to user projects if `new SP.SpellLocation()` throws
-      location = new SP.SpellLocation("owen@spell")
+      location = new SP.SpellLocation(SPACES.localPerson.address)
     }
     console.info("editor.selectPath", { path, location })
 

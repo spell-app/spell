@@ -181,7 +181,7 @@ export const Actions = {
       onClick={() => editor.showYou()}
     >
       <span class="YouLetter" aria-hidden="true">
-        {SPACES.LOCAL_PERSON.charAt(0).toUpperCase()}
+        {SPACES.localPerson.id.charAt(0).toUpperCase()}
       </span>
     </button>
   ),

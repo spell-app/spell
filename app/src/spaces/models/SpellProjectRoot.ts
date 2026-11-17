@@ -2,7 +2,7 @@ import { JSON5File, LoadableFile, getDier, KnownFormat, parseJSON5 } from "spell
 import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
-import { LOCAL_PERSON } from "./projectGroups"
+import { localPerson } from "./projectGroups"
 import { ProjectFiles } from "./ProjectFiles"
 import { projectFileOf, projectFilesUrl, type ProjectArchive, type ProjectArchiveFile } from "./projectArchive"
 import {
@@ -31,9 +31,9 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
    */
   static REQUEST_FORMAT_JSON = KnownFormat.json
 
-  /** Singleton `owen@spell` root:  this machine's person's own projects. */
+  /** Singleton `owen@spell` root:  this machine's person's own projects (`localPerson`). */
   static get projects(): SpellProjectRoot {
-    return new SpellProjectRoot(`${LOCAL_PERSON}@spell`)
+    return new SpellProjectRoot(localPerson.address as SP.ProjectRootPath)
   }
   /** Singleton `@spell/examples` root. */
   static get examples(): SpellProjectRoot {

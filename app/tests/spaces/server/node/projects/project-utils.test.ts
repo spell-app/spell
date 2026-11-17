@@ -8,7 +8,7 @@ import { SP } from "spell/parser/spell"
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import { ProjectDrafts } from "spell/app/spaces/server/node/projects/ProjectDrafts"
-import { THIS_MACHINES_PERSON } from "spell/app/spaces/server/node/projects/ProjectRoles"
+import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPerson"
 
 /**
  * Where a project's files are on disk (epic `people-and-orgs` P11).
@@ -401,7 +401,7 @@ describe("project-utils", () => {
     test("a file only drafted, in a sub-folder, lists by its path", async () => {
       const projectId = project("Drafted")
       const { folderForPlace } = projectUtils
-      const drafts = await ProjectDrafts.for(projectId, THIS_MACHINES_PERSON, { folderFor: folderForPlace })
+      const drafts = await ProjectDrafts.for(projectId, thisMachinesPerson().address, { folderFor: folderForPlace })
       await drafts.save("/Button/New.spell", TAG)
 
       const index = await projectUtils.getIndex(projectId)

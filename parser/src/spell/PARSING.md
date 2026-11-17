@@ -2194,7 +2194,7 @@ sidebars any of them opens.
 - Everything is named by its ADDRESS (epic `people-and-orgs` P4, [SpellLocation](SpellLocation.ts)):
   - a group, e.g. `@spell/examples`
     - spell's own:  `@spell/examples`, `@spell/library`, `@spell/guides`, `@spell/test`
-    - `owen@spell`, Owen's own space (`SPACES.LOCAL_PERSON`)
+    - `owen@spell`, this machine's person's own space (`SPACES.localPerson`;  `kim-lee@acme` at work)
   - a project:  its group's, a slash, its name, ONE part, lower-kebab (decision Q39)
     - e.g. `@spell/examples/solitaire`, `owen@spell/errors`
   - a file in it:  a slash, then the file, whose name has a dot (decision Q41)

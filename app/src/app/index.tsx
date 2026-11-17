@@ -1,3 +1,4 @@
+import { createSignal, Show } from "solid-js"
 import { render } from "@solidjs/web"
 
 // Import parser bits
@@ -5,7 +6,16 @@ import "spell/parser/parser"
 import { editor } from "spell/app/app/editor"
 import { AppTexts } from "spell/app/app/ui/AppTexts"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
-import { BackToSite, EditorTheme, ErrorNotice, Notice, RestartNeeded, addAppIconsPageWide } from "spell/app/app/solid"
+import {
+  BackToSite,
+  EditorTheme,
+  ErrorNotice,
+  LocalPerson,
+  NamePage,
+  Notice,
+  RestartNeeded,
+  addAppIconsPageWide
+} from "spell/app/app/solid"
 import { Routes } from "spell/app/app/pages/routes"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
@@ -38,8 +48,14 @@ void addAppIconsPageWide()
 // The editor's look:  the theme and light / dark picked last, Fruity at first (`EditorTheme`).
 void EditorTheme.restore()
 
+// Who's at this machine, before anything draws:  their own projects' group, and their org's, follow it (epic `repo-split` P27).
+// Nobody named yet, on this machine:  the name page comes first, and the editor once they've said.
+const local = isStaticBuild ? undefined : await LocalPerson.load()
+const [isNamed, setIsNamed] = createSignal(!LocalPerson.asks(local))
+
 /**
  * Draw the app, in Solid, into `#app-root` (inside `index.html`'s `<ui-root icons="fomantic">`).
+ * - `<NamePage>` first, while nobody at this machine is named (`LocalPerson.asks()`).
  * - `<Routes>` picks `<ProjectChooser>` / `<SpellEditor>` (in Edit, Debug or Run) by URL.
  * - `<Notice>` / `<ErrorNotice>` show `editor.notice` / `editor.error` over every page.
  * - Dialogs need no root:  each `editor.alert()` / `choose()` ... opens its own `<ui-modal>`.
@@ -49,7 +65,9 @@ void EditorTheme.restore()
 render(
   () => (
     <>
-      <Routes />
+      <Show when={isNamed()} fallback={<NamePage local={local!} onNamed={() => setIsNamed(true)} />}>
+        <Routes />
+      </Show>
       <Notice />
       <RestartNeeded />
       <BackToSite />
