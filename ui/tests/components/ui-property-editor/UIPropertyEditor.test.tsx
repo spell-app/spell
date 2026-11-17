@@ -135,6 +135,23 @@ describe("<ui-property-editor> schema", () => {
     expect((family.querySelector("ui-input") as HTMLElement & { value: unknown }).value).toBe("Lora")
   })
 
+  it("draws no group with nothing in it, header and all (epic `editor` I223)", async () => {
+    const host = await editor(
+      `<ui-property-group label="Content"></ui-property-group>
+       <ui-property-group label="Look"><ui-property name="size"></ui-property></ui-property-group>`,
+      { size: "lg" }
+    )
+    const [empty, look] = [...host.querySelectorAll("ui-property-group")] as HTMLElement[]
+    expect(empty!.matches(":state(empty)")).toBe(true)
+    expect(empty!.getBoundingClientRect().height).toBe(0)
+    expect(look!.matches(":state(empty)")).toBe(false)
+    expect(look!.getBoundingClientRect().height).toBeGreaterThan(0)
+    // a property put in later draws it
+    empty!.append(document.createElement("ui-property"))
+    await expect.poll(() => empty!.matches(":state(empty)")).toBe(false)
+    await expect.poll(() => empty!.getBoundingClientRect().height).toBeGreaterThan(0)
+  })
+
   it("shows each value by its words, `valueLabels`, and writes the value itself (epic `language` T73)", async () => {
     const thing = { direction: "down" }
     const host = await ElementFixture.render<Editor>(
