@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Device | Spell UI</title>
+    <meta
+      name="description"
+      content="A device draws a phone, tablet or desktop round what it holds, at that device&#39;s screen size, with buttons in its thick bottom edge."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Device">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-device%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Device
+            <ui-header>A device draws a phone, tablet or desktop round what it holds, at that device&#39;s screen size, with buttons in its thick bottom edge.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-a-phone" label="A phone" sticky="stack" collapsible dividing>
+                <ui-example description="A phone round what it holds:  an app laid out at a phone&#x27;s screen size, 390 by 844, scaled down to fit the page.  Its own buttons are in its thick bottom edge:  the phone / tablet / desktop switch and Rotate.  The page&#x27;s buttons follow them (`slot=&quot;buttons&quot;`).">
+                  <ui-device>
+                    <ui-segment appearance="basic">
+                      <ui-header size="large">Groceries</ui-header>
+                      <ui-checkbox label="Apples"></ui-checkbox>
+                      <ui-checkbox label="Bread" selected></ui-checkbox>
+                      <ui-checkbox label="Coffee"></ui-checkbox>
+                    </ui-segment>
+                    <ui-button slot="buttons" size="small" color="primary">Done</ui-button>
+                  </ui-device>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-a-tablet" label="A tablet" sticky="stack" collapsible dividing>
+                <ui-example description="`device=&quot;tablet&quot;`:  820 by 1180, a thinner bezel and a camera dot.">
+                  <ui-device device="tablet" controls="none">
+                    <ui-segment appearance="basic">
+                      <ui-header size="large">A tablet</ui-header>
+                      <p>What it holds is laid out at the tablet&#x27;s size.</p>
+                    </ui-segment>
+                  </ui-device>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-a-desktop" label="A desktop" sticky="stack" collapsible dividing>
+                <ui-example description="`device=&quot;desktop&quot;`:  a laptop, its screen 1280 by 800.  A desktop is always wide, so it shows no Rotate.">
+                  <ui-device device="desktop" controls="none">
+                    <ui-segment appearance="basic">
+                      <ui-header size="large">A desktop</ui-header>
+                      <p>What it holds is laid out at a laptop&#x27;s size.</p>
+                    </ui-segment>
+                  </ui-device>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-on-its-side" label="On its side" sticky="stack" collapsible dividing>
+                <ui-example description="`orientation=&quot;landscape&quot;`:  844 by 390, the camera island in the left edge.  Rotate turns it back;  either way it sends `ui-changed`.">
+                  <ui-device orientation="landscape" controls="rotate">
+                    <ui-segment appearance="basic">
+                      <ui-header>On its side</ui-header>
+                      <p>The buttons stay in the bottom edge, the right way up.</p>
+                    </ui-segment>
+                  </ui-device>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-its-own-buttons" label="Its own buttons" sticky="stack" collapsible dividing>
+                <ui-example description="`controls` turns its own buttons off:  `rotate` or `device` keeps only that one, `none` neither.  Here, only the switch:  pick a tablet or a desktop.">
+                  <ui-device controls="device">
+                    <ui-segment appearance="basic"><p>Pick a device below.</p></ui-segment>
+                  </ui-device>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-modal" label="Modal" sticky="stack" collapsible dividing>
+              <ui-section id="examples-modal-a-device-as-a-modal" label="A device as a modal" sticky="stack" collapsible dividing>
+                <ui-example description="`modal`:  the device alone, floating over the dimmed page, no box round it.  It starts hidden, as a modal does:  a button with `commandfor` shows it, or `visible`.  Escape, a click on the dimmer or a `cancel` button in its edge hides it.">
+                  <ui-button commandfor="device-modal" command="--show" icon="mobile">Show the phone</ui-button>
+                  <ui-device id="device-modal" modal aria-label="A phone">
+                    <ui-segment appearance="basic">
+                      <ui-header size="large">Hello</ui-header>
+                      <p>A phone in a modal.  Rotate it, or make it a tablet.</p>
+                    </ui-segment>
+                    <ui-button slot="buttons" size="small" class="cancel">Close</ui-button>
+                  </ui-device>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-modal-in-a-basic-modal" label="In a basic modal" sticky="stack" collapsible dividing>
+                <ui-example description="The same, written as a device in a `&lt;ui-modal appearance=&quot;basic&quot;&gt;`:  a basic modal draws no box, so only the device shows.">
+                  <ui-button commandfor="device-in-modal" command="--show" icon="tablet">Show the tablet</ui-button>
+                  <ui-modal id="device-in-modal" appearance="basic" aria-label="A tablet">
+                    <ui-device device="tablet" controls="rotate">
+                      <ui-segment appearance="basic"><p>A tablet in a basic modal.</p></ui-segment>
+                      <ui-button slot="buttons" size="small" class="cancel">Close</ui-button>
+                    </ui-device>
+                  </ui-modal>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Put what the device shows inside it, and its buttons in `slot="buttons"`:
+
+                  - `device`:  `phone` (390 by 844), `tablet` (820 by 1180) or `desktop` (1280 by 800).
+                  - `orientation`:  `portrait` or `landscape`;  a desktop is always wide.
+                  - What it holds is laid out at that size, then scaled down to fit the width it's given and the
+                    window's height, never up.  Its frame and buttons stay their real size.
+                  - `controls`:  its own buttons, `all` (the default), `rotate`, `device` or `none`.
+                  - A person's Rotate or switch writes `device` / `orientation`, then sends `ui-changed`
+                    (`detail.device`, `detail.orientation`).  A page's own change sends nothing.
+                  - `modal`:  shown in a basic modal of its own, starting hidden.  Show it with `visible`, or a button's
+                    `commandfor` and `command="--show"`;  `ui-opened` and `ui-closed` say when.
+                    Escape, the dimmer and a `cancel` / `deny` button in its edge hide it;  `closedby` says which.
+
+                  In Spell, `<device "phone" modal>`;  in Spanish, `<dispositivo "teléfono" modal>`.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const device = document.querySelector("ui-device")
+                  device.addEventListener("ui-changed", (event) => console.log(event.detail.device, event.detail.orientation))
+                  device.visible = true // a modal device:  show it
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Its buttons are buttons:  Tab to them, Enter or Space to press.  As a modal, Escape hides it, and focus
+                  stays inside it while it shows, as in any `<ui-modal>`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - The switch is a group named "Device";  each of its buttons is named for its device, the one shown
+                    selected.
+                  - Rotate is named "Rotate".
+                  - A modal device takes its name from its own `aria-label`:  give it one.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-device" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-device" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-device" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-device" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-device" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-device" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-device" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-device device="phone">
+                  <ui-segment appearance="basic">
+                    <ui-header size="large">Hello</ui-header>
+                    <p>An app on a phone's screen, 390 by 844.</p>
+                    <ui-button color="primary">Start</ui-button>
+                  </ui-segment>
+                  <ui-button slot="buttons" size="small" color="primary">Done</ui-button>
+                </ui-device>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot.
+                  A device is hardware:  its frame stays dark in every theme;  what it holds wears the theme.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

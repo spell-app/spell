@@ -1,0 +1,181 @@
+/*
+ * `<ui-device>`:  a phone, tablet or desktop drawn round what it holds (`UIDevice.tsx`).
+ * - Shadow markup:  `.stage` (room for the shadow) > `.ui.<device> [landscape] device` (the body) >
+ *   `.screen` (the screen's size on the page) > `.display` (the screen's real size, scaled into it) > `<slot>`;
+ *   then `.edge`, the thick bottom edge:  the switch, Rotate, `<slot name="buttons">`.
+ * - The frame is hardware:  dark in both schemes, its edges drawn by shadows, never borders.
+ * - Its paddings MUST match `BEZELS` in `UIDevice.tsx`, which works out the scale from them.
+ * - Public tokens (`--ui-device-*`) are read through private aliases, never declared here.
+ */
+
+@layer ui.components.device.types, ui.components.device.content, ui.components.device.variations, ui.components.device.states;
+
+@layer ui.components.device.types {
+  :host {
+    display: block;
+  }
+  /* as a modal:  no box of its own;  the device is in the modal's dialog, in the top layer */
+  :host(:state(modal)) {
+    display: contents;
+  }
+
+  /* the modal it floats in:  as wide as the device, no box round it */
+  ui-modal::part(modal) {
+    width: fit-content;
+  }
+
+  /* room round the device for its shadow and a laptop's base:  `STAGE` in `UIDevice.tsx` */
+  .stage {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .ui.device {
+    --_ui-device-body: var(--ui-device-body, oklch(0.24 0.004 286));
+    --_ui-device-rim: var(--ui-device-rim, oklch(0.42 0.004 286));
+    --_ui-device-shadow: var(--ui-device-shadow, 0 8px 24px oklch(0 0 0 / 0.45), 0 2px 6px oklch(0 0 0 / 0.3));
+    --_ui-device-radius: var(--ui-device-radius, 56px);
+    --_ui-device-screen-radius: var(--ui-device-screen-radius, 40px);
+    --_ui-device-edge: var(--ui-device-edge, 56px);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    padding: 40px 16px 0 16px;
+    border-radius: var(--_ui-device-radius);
+    background: var(--_ui-device-body);
+    box-shadow:
+      inset 0 0 0 2px var(--_ui-device-rim),
+      inset 0 0 0 6px var(--_ui-device-body),
+      inset 0 0 0 7px oklch(0 0 0 / 0.5),
+      var(--_ui-device-shadow);
+    color: var(--ui-text-color);
+    font-family: var(--ui-font-family);
+    font-size: var(--ui-font-size);
+    line-height: var(--ui-line-height);
+  }
+
+  /* the camera:  a phone's island in its top edge, never over the screen */
+  .ui.device::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 96px;
+    height: 24px;
+    border-radius: 12px;
+    background: oklch(0 0 0);
+    transform: translateX(-50%);
+  }
+
+  /* the screen:  its size on the page, rounded, what it holds clipped to it */
+  .screen {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--_ui-device-screen-radius);
+    background: var(--ui-background, Canvas);
+    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.6);
+  }
+
+  /* the screen at its real size, scaled into the screen's box */
+  .display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    overflow: auto;
+    background: var(--ui-background, Canvas);
+    color: var(--ui-text-color);
+    transform-origin: 0 0;
+  }
+
+  /* the thick bottom edge:  its own buttons, then the page's;  never wider than the screen, it wraps instead */
+  .edge {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: 0;
+    min-width: 100%;
+    min-height: var(--_ui-device-edge);
+    padding: 12px 8px;
+  }
+  slot[name="buttons"] {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+@layer ui.components.device.variations {
+  /* ## A phone:  its side buttons, volume on the left, power on the right */
+  .ui.phone.device::after {
+    content: "";
+    position: absolute;
+    top: 160px;
+    right: -4px;
+    left: -4px;
+    height: 112px;
+    background:
+      linear-gradient(var(--_ui-device-rim), var(--_ui-device-rim)) left 0 top 0 / 4px 48px no-repeat,
+      linear-gradient(var(--_ui-device-rim), var(--_ui-device-rim)) left 0 top 64px / 4px 48px no-repeat,
+      linear-gradient(var(--_ui-device-rim), var(--_ui-device-rim)) right 0 top 32px / 4px 64px no-repeat;
+  }
+
+  /* on its side:  the island in the left edge;  the buttons stay in the bottom edge, the right way up */
+  .ui.phone.landscape.device {
+    padding: 16px 16px 0 40px;
+  }
+  .ui.phone.landscape.device::before {
+    top: 50%;
+    left: 8px;
+    width: 24px;
+    height: 96px;
+    transform: translateY(-50%);
+  }
+  .ui.phone.landscape.device::after {
+    display: none;
+  }
+
+  /* ## A tablet:  a thinner bezel, a camera dot */
+  .ui.tablet.device {
+    --_ui-device-radius: var(--ui-device-radius, 36px);
+    --_ui-device-screen-radius: var(--ui-device-screen-radius, 16px);
+    padding: 24px 24px 0 24px;
+  }
+  .ui.tablet.device::before,
+  .ui.desktop.device::before {
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: oklch(0.12 0.01 260);
+    box-shadow: inset 0 0 0 2px oklch(0.3 0.02 260);
+  }
+
+  /* ## A desktop:  a laptop's lid, its screen nearly square-cornered, and its base below */
+  .ui.desktop.device {
+    --_ui-device-radius: var(--ui-device-radius, 16px);
+    --_ui-device-screen-radius: var(--ui-device-screen-radius, 4px);
+    padding: 24px 16px 0 16px;
+    border-radius: var(--_ui-device-radius) var(--_ui-device-radius) 4px 4px;
+  }
+  .ui.desktop.device::after {
+    content: "";
+    position: absolute;
+    right: -16px;
+    bottom: -12px;
+    left: -16px;
+    height: 12px;
+    border-radius: 0 0 16px 16px / 0 0 12px 12px;
+    background:
+      radial-gradient(ellipse 64px 6px at 50% 0, oklch(0.62 0.004 286) 98%, transparent),
+      linear-gradient(oklch(0.86 0.004 286), oklch(0.68 0.004 286));
+    box-shadow: 0 6px 12px oklch(0 0 0 / 0.35);
+  }
+}

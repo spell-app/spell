@@ -368,6 +368,13 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-date": [{ name: "datetime", kind: "string", group: "appearance" }],
   "ui-description": [],
   "ui-detail": [{ name: "link", kind: "string", group: "link" }],
+  "ui-device": [
+    { name: "device", kind: "enum", group: "appearance", values: ["phone", "tablet", "desktop"] },
+    { name: "orientation", kind: "enum", group: "appearance", values: ["portrait", "landscape"] },
+    { name: "controls", kind: "enum", group: "behaviour", values: ["all", "rotate", "device", "none"] },
+    { name: "modal", kind: "boolean", group: "behaviour" },
+    { name: "closedby", kind: "enum", group: "behaviour", values: ["any", "closerequest", "none"] }
+  ],
   "ui-diagram": [
     { name: "spec", kind: "json", group: "content" },
     { name: "columns", kind: "number", group: "layout" },

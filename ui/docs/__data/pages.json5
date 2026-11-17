@@ -90,6 +90,11 @@
       "summary": "A container limits content to a maximum width.",
       "status": "done"
     },
+    "ui-device": {
+      "title": "Device",
+      "summary": "A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.",
+      "status": "done"
+    },
     "ui-diagram": {
       "title": "Diagram",
       "summary": "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.",

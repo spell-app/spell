@@ -11050,6 +11050,372 @@ export interface UIDetailAttributes {
 export interface UIDetailJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIDetailAttributes>, UIDetailAttributes {}
 
+/** `<ui-device>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIDeviceEventMap {
+  /**
+   * `ui-changed`:  A person changed the device or turned it, with its own buttons;  `device` and `orientation` say what it is now.
+   * - `event.detail`:  `{ device: "phone" | "tablet" | "desktop", orientation: "portrait" | "landscape", originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{
+    device: "phone" | "tablet" | "desktop"
+    orientation: "portrait" | "landscape"
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-opened`:  With `modal`:  shown, its entry transition finished.
+   * - `event.detail`:  `{ visible: true }`
+   */
+  "ui-opened": CustomEvent<{ visible: true }>
+  /**
+   * `ui-closed`:  With `modal`:  hidden, its exit transition finished.
+   * - `event.detail`:  `{ visible: false }`
+   */
+  "ui-closed": CustomEvent<{ visible: false }>
+}
+
+/** `<ui-device>`'s own attributes, from its vocabulary. */
+export interface UIDeviceAttributes {
+  /**
+   * Which device:  a `phone` (390 by 844), a `tablet` (820 by 1180) or a `desktop`, a laptop's screen (1280 by 800).  What it holds is drawn at that size, scaled down to fit.
+   * - takes:  `phone` · `tablet` · `desktop`
+   * - default:  `phone`
+   */
+  device?: "phone" | "tablet" | "desktop"
+  /**
+   * `device`, as the DOM element's property.
+   * @deprecated write `device` -- `prop:` stays only for compiled spell
+   */
+  "prop:device"?: "phone" | "tablet" | "desktop"
+  /**
+   * Held upright (`portrait`) or on its side (`landscape`).  A desktop is always wide, whatever this says.
+   * - takes:  `portrait` · `landscape`
+   * - default:  `portrait`
+   */
+  orientation?: "portrait" | "landscape"
+  /**
+   * `orientation`, as the DOM element's property.
+   * @deprecated write `orientation` -- `prop:` stays only for compiled spell
+   */
+  "prop:orientation"?: "portrait" | "landscape"
+  /**
+   * Its own buttons in its bottom edge:  `all` -- Rotate and the phone / tablet / desktop switch;  `rotate` or `device` -- only that one;  `none` -- neither.  A desktop never shows Rotate.
+   * - takes:  `all` · `rotate` · `device` · `none`
+   * - default:  `all`
+   */
+  controls?: "all" | "rotate" | "device" | "none"
+  /**
+   * `controls`, as the DOM element's property.
+   * @deprecated write `controls` -- `prop:` stays only for compiled spell
+   */
+  "prop:controls"?: "all" | "rotate" | "device" | "none"
+  /**
+   * Shown as a modal:  the device alone, floating over the dimmed page, no box round it (a `<ui-modal appearance="basic">`).  It then starts hidden, as a modal does:  `visible` shows it, and Escape, a click on the dimmer or a Cancel button hide it.
+   * - takes:  flag (present / absent)
+   */
+  modal?: boolean | ""
+  /**
+   * `modal`, as the DOM element's property.
+   * @deprecated write `modal` -- `prop:` stays only for compiled spell
+   */
+  "prop:modal"?: boolean | ""
+  /**
+   * With `modal`:  what dismisses it, as `<ui-modal closedby>`:  `any` -- Escape or a click on the dimmer;  `closerequest` -- Escape only;  `none` -- only its own buttons.
+   * - takes:  `any` · `closerequest` · `none`
+   * - default:  `any`
+   */
+  closedby?: "any" | "closerequest" | "none"
+  /**
+   * `closedby`, as the DOM element's property.
+   * @deprecated write `closedby` -- `prop:` stays only for compiled spell
+   */
+  "prop:closedBy"?: "any" | "closerequest" | "none"
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-changed`:  A person changed the device or turned it, with its own buttons;  `device` and `orientation` say what it is now.
+   * - `event.detail`:  `{ device: "phone" | "tablet" | "desktop", orientation: "portrait" | "landscape", originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UIDeviceEventMap["ui-changed"]) => void
+  /**
+   * `ui-opened`:  With `modal`:  shown, its entry transition finished.
+   * - `event.detail`:  `{ visible: true }`
+   */
+  "on-ui-opened"?: (event: UIDeviceEventMap["ui-opened"]) => void
+  /**
+   * `ui-closed`:  With `modal`:  hidden, its exit transition finished.
+   * - `event.detail`:  `{ visible: false }`
+   */
+  "on-ui-closed"?: (event: UIDeviceEventMap["ui-closed"]) => void
+}
+
+/** `<ui-device>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIDeviceJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIDeviceEventMap>>, keyof UIDeviceAttributes>, UIDeviceAttributes {}
+
 /** `<ui-diagram>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIDiagramEventMap {
   /**
@@ -57013,6 +57379,15 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-detail": UIDetailJSXAttributes
       /**
+       * `<ui-device>`:  A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.
+       * - also known as:  device frame, phone frame, mockup, device mockup, screen preview, simulator, bezel
+       * - slots:
+       *   - default:  What the device's screen shows, drawn at the screen's size.
+       *   - `buttons`:  Buttons in its thick bottom edge, after its own:  a `cancel` (or `deny`) one hides a modal device, as a modal's own does.
+       * - events:  `ui-changed`, `ui-opened`, `ui-closed`
+       */
+      "ui-device": UIDeviceJSXAttributes
+      /**
        * `<ui-diagram>`:  A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it.
        * - also known as:  graph, node graph, network diagram, boxes and lines, entity relationship diagram, ERD, NERD, data model, flowchart, concept map
        * - slots:
@@ -57921,10 +58296,10 @@ export interface UIEventMap {
   "ui-saved": CustomEvent<unknown>
   "ui-coloured": CustomEvent<unknown>
   "ui-copied": CustomEvent<unknown>
-  "ui-node-clicked": CustomEvent<unknown>
-  "ui-node-moved": CustomEvent<unknown>
   "ui-opened": CustomEvent<unknown>
   "ui-closed": CustomEvent<unknown>
+  "ui-node-clicked": CustomEvent<unknown>
+  "ui-node-moved": CustomEvent<unknown>
   "ui-searched": CustomEvent<unknown>
   "ui-added": CustomEvent<unknown>
   "ui-removed": CustomEvent<unknown>
@@ -58000,6 +58375,7 @@ declare global {
     "ui-date": HTMLElement
     "ui-description": HTMLElement
     "ui-detail": HTMLElement
+    "ui-device": UIHTMLElement<UIDeviceEventMap>
     "ui-diagram": UIHTMLElement<UIDiagramEventMap>
     "ui-diagram-node": HTMLElement
     "ui-dimension": HTMLElement
