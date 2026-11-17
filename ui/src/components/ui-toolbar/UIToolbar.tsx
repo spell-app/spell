@@ -324,9 +324,11 @@ export class UIToolbar extends UIMenu {
     this.refitTitles()
     this.keepOpenValues(open)
     if (chosen && chosenValue !== this.followedValue) {
+      // a row just drawn jumps to its chosen item:  sliding there from the start flickered past every item (I38)
+      const smoothly = this.followedValue !== undefined
       this.followedValue = chosenValue
       const box = this.itemOf(chosen)?.focusTarget
-      if (box) E.beforeNextPaint(() => this.scrolling.bringIntoView(box, { smoothly: true }))
+      if (box) E.beforeNextPaint(() => this.scrolling.bringIntoView(box, { smoothly }))
     }
   }
 
@@ -367,12 +369,21 @@ export class UIToolbar extends UIMenu {
     this.limitRefresh.ask()
   }
 
-  /** Show `item` in the row, or put it away:  only ever hides what it can show again. */
+  /**
+   * Show `item` in the row, or put it away:  only ever hides what it can show again.
+   * - Put away at once, never animated out (`--ui-motion: none` on it while it's away):
+   *   an item animating out still takes its room, so the thumb, the titles' fit and the scroll measured the row
+   *   with every item in it, and nothing measured again once it went (epic `mockup` I38, I39:
+   *   HarborNew's 8 tabs scrolled 5,700px off, the thumb drawn past them;  titles cut with room to spare).
+   */
   private showInRow(item: HTMLElement, isShown: boolean) {
     if (isShown) {
-      if (this.putAway.delete(item)) item.hidden = false
+      if (!this.putAway.delete(item)) return
+      item.style.removeProperty(UIT.MOTION_PROPERTY)
+      item.hidden = false
     } else if (!item.hidden) {
       this.putAway.add(item)
+      item.style.setProperty(UIT.MOTION_PROPERTY, UIT.NO_ANIMATION)
       item.hidden = true
     }
   }
