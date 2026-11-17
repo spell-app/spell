@@ -120,6 +120,7 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
   type Place (is a Thing)
   type Site (is a App)
     property current address (text)
+    property theme (text)
   type PageLayout (is a View)
   project Solitaire
     file Card.spell
@@ -207,6 +208,7 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
   type Place (is a Thing)
   type Site (is a App)
     property current address (text)
+    property theme (text)
   type PageLayout (is a View)
   project lib (imported)
     file Card.spell
