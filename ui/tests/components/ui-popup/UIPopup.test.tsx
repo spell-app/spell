@@ -618,6 +618,43 @@ describe("<ui-popup> positioning", () => {
     }
   })
 
+  it("at a point with room on neither side (a phone's middle):  centred on it, slid in to stay inside the window", async () => {
+    const width = document.documentElement.clientWidth
+    // wider than the room on either side of the point, narrower than the window
+    const menuWidth = Math.round(width * 0.6)
+    for (const x of [Math.round(width / 2), Math.round(width * 0.42), Math.round(width * 0.58)]) {
+      const { host } = await popup(
+        `<ui-popup open-on="manual" style="--ui-popup-max-width: none"><div style="width: ${menuWidth}px">Redo ⌘⇧Z</div></ui-popup>`
+      )
+      ;(host as Popup & { at: { x: number; y: number } }).at = { x, y: 40 }
+      host.visible = true
+      await settle()
+      const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=popup]")!
+      await Promise.all(root.getAnimations().map((animation) => animation.finished))
+      const box = root.getBoundingClientRect()
+      // `bottom span-all`, as the browser writes it back
+      expect(host.style.getPropertyValue("position-try-fallbacks")).toMatch(/, bottom, top$/)
+      expect(box.left).toBeGreaterThanOrEqual(0)
+      expect(box.right).toBeLessThanOrEqual(width)
+      expect(box.top).toBeGreaterThanOrEqual(40)
+      host.visible = false
+      await settle()
+    }
+  })
+
+  it("at a point by the window's right edge:  flips to its left", async () => {
+    const width = document.documentElement.clientWidth
+    const { host } = await popup(`<ui-popup open-on="manual"><div style="width: 120px">Redo</div></ui-popup>`)
+    ;(host as Popup & { at: { x: number; y: number } }).at = { x: width - 10, y: 40 }
+    host.visible = true
+    await settle()
+    const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=popup]")!
+    await Promise.all(root.getAnimations().map((animation) => animation.finished))
+    const box = root.getBoundingClientRect()
+    expect(box.right).toBeLessThanOrEqual(width - 9)
+    expect(box.left).toBeGreaterThanOrEqual(0)
+  })
+
   it("other positions keep the sheet's flips:  no fallbacks of their own", async () => {
     const { host } = await popup(`<button>Target</button><ui-popup open-on="manual" visible>Tip</ui-popup>`)
     await settle()

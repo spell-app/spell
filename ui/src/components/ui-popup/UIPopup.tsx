@@ -30,8 +30,8 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *   A centred one (`bottom center`) slides along its side first, to stay inside the window (`SHIFTED_FALLBACKS`).
  *
  * - `at`, a point in the window (`{ x, y }`), in place of a target:  a right click's menu.
- *   - It opens with its corner there, staying inside the window, and takes focus, which goes back when it closes:
- *     its `autofocus` element's, else its first tabbable's.
+ *   - It opens with its corner there, staying inside the window (`AT_POINT_FALLBACKS`).
+ *   - It takes focus, which goes back when it closes:  its `autofocus` element's, else its first tabbable's.
  *   - The point is a box the popup puts on the page while it's open (`placeAtPoint()`):  anchor positioning needs one.
  *   - Written with `open-on="manual"`, and with `visible` to open:  it has no target to listen to.
  *
@@ -446,13 +446,14 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
    * - A centred one (`bottom center`) slides along its side to stay in the window, its arrow still at the target:
    *   `SHIFTED_FALLBACKS`, and `UIPopup.anchored.css` for the arrow.
    * - Every other position flips, by the sheet's own fallbacks.
+   * - One at a point flips, then slides in from the window's edge:  `AT_POINT_FALLBACKS`.
    */
   @E.onChange("position", "point", { writesDOMElement: true })
   protected onPositionChanged(position: string | undefined, point: UIT.PopupPoint | undefined) {
     const area = point ? AT_POINT_POSITION : (position ?? DEFAULT_POSITION)
     const { style } = this.domElement
     style.setProperty("position-area", POSITION_AREAS[area])
-    const shifted = SHIFTED_FALLBACKS[area]
+    const shifted = point ? AT_POINT_FALLBACKS : SHIFTED_FALLBACKS[area]
     if (shifted) style.setProperty("position-try-fallbacks", shifted)
     else style.removeProperty("position-try-fallbacks")
   }
@@ -716,6 +717,17 @@ const QUIET_FOCUS = { preventScroll: true, focusVisible: false } as FocusOptions
 
 /** Where a popup at a point opens:  below it and to its right, until the window's edge flips it. */
 const AT_POINT_POSITION = "bottom left"
+
+/**
+ * Where a popup at a point goes when it doesn't fit below it and to its right, in turn:
+ * flipped to its left, above, or both;  else centred on the point, below it then above, and slid in from the
+ * window's edge to stay inside it.
+ * - Why:  at phone width a press near the middle had room on NEITHER side for a right-click menu
+ *   (a 390px window, a 230px menu, a press at 195px), so the browser took the first place, off the right edge
+ *   (epic `language` I161).
+ * - `span-all` makes the whole width the room it may use;  its centring (`anchor-center`) slides the popup in.
+ */
+const AT_POINT_FALLBACKS = "flip-inline, flip-block, flip-block flip-inline, bottom span-all, top span-all"
 
 /** The class word for no pointing arrow. */
 const BASIC_CLASS = "basic"
