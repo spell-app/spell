@@ -40,9 +40,12 @@ import {
   placeLineAt,
   placesIn,
   spellPartsFor,
+  spellLinesOf,
   spellTextOf,
   type SpellLine,
-  type SpellParts
+  type SpellParts,
+  type TypeLines,
+  type WrittenLine
 } from "./PlaceSpell"
 import { keptHeaders, PoliteReader, sessionEnded } from "./PoliteReader"
 import { writesTried, writeWordsFor } from "./WritesTried"
@@ -688,12 +691,18 @@ export class PlaceIngest {
       const text = spellTextOf(parts)
       const { errors, warnings } = compile(text, englishFile)
       if (!errors.length) return warnings
-      const lines = text.split("\n")
+      // each line by where it is, never its words:  another type may have a line saying the same (epic `data` I106)
+      const written = spellLinesOf(parts)
+      const tried = new Set<number>()
       let leftOut = 0
       for (const error of errors) {
         const [, at, message] = ERROR_LINE.exec(error) ?? []
-        const line = lines[Number(at) - 1]?.trim()
-        if (line && leaveOutLine(description, parts, line, message ?? error)) leftOut++
+        const index = Number(at) - 1
+        const line = written[index]
+        // one line left out once, however many errors it has
+        if (!line?.text.trim() || tried.has(index)) continue
+        tried.add(index)
+        if (leaveOutLine(description, line, message ?? error)) leftOut++
       }
       if (!leftOut) {
         throw new IngestStopped(`the Spell written for it doesn't compile:\n${errors.join("\n")}\n\n${text}`)
@@ -985,12 +994,14 @@ function withoutPlaceInFile(error: string): string {
 }
 
 /**
- * SIDE EFFECT:  `description` leaves out what this line says, with why:  `false` if it's not a line that can go.
- * - A field's, by itself;  a type's first lines, the whole collection.
+ * SIDE EFFECT:  the Spell leaves out the line `line` is, with why:  `false` if it's no line it can leave out.
+ * - A field's line, its field;  a collection's `lives at` or its type's header, the collection.
+ * - A type inside a row:  a line under it, its field;  its header, every field holding it, never their collection
+ *   (epic `data` I106).
  */
-function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: string, why: string): boolean {
-  const reason = `Spell couldn't read its line:  ${line} -- ${why}`
-  const key = keyOfLine(parts, line)
+function leaveOutLine(description: PlaceDescription, line: WrittenLine, why: string): boolean {
+  const reason = `Spell couldn't read its line:  ${line.text.trim()} -- ${why}`
+  const { key, type } = line
   if (key) {
     const [kind, collection, field] = key.split(":") as [string, string, string?]
     const held = description.collections[collection]
@@ -1005,7 +1016,7 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
       return true
     }
     if (held && kind === "lives") return leaveOutCollection(description, collection, reason)
-    if (kind === "inside") return leaveOutInside(description, parts, collection, field!, reason)
+    if (kind === "inside" && type) return leaveOutInside(description, type, collection, field!, reason)
     // an action route Spell can't name:  its description keeps it, disabled
     const action = held && kind === "action" ? held.operations?.[field!] : undefined
     if (action) {
@@ -1014,8 +1025,9 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
       return true
     }
   }
-  const type = parts.types.find(({ header }) => header === line)
-  return !!type && leaveOutCollection(description, type.collection, reason)
+  if (!type || line.text !== type.header) return false
+  if (type.isInside) return leaveOutHolders(description, type, reason)
+  return leaveOutCollection(description, type.collection, reason)
 }
 
 /**
@@ -1025,17 +1037,27 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
  */
 function leaveOutInside(
   description: PlaceDescription,
-  { types }: SpellParts,
+  { insideFields }: TypeLines,
   typeWords: string,
   words: string,
   reason: string
 ): boolean {
-  const fields = types.find(({ isInside, header }) => isInside && header.includes(`"${typeWords}"`))?.insideFields
-  const [name, about] = Object.entries(fields ?? {}).find(([, each]) => each.words === words && !each.leftOut) ?? []
+  const [name, about] =
+    Object.entries(insideFields ?? {}).find(([, each]) => each.words === words && !each.leftOut) ?? []
   if (!about) return false
   about.leftOut = reason
   description.notes.push(`Left out ${typeWords}'s "${name}":  ${reason}`)
   return true
+}
+
+/** SIDE EFFECT:  the Spell leaves out each field holding a type inside a row, so it's written no more. */
+function leaveOutHolders(description: PlaceDescription, { heldBy = [] }: TypeLines, reason: string): boolean {
+  const holders = heldBy.filter(({ field }) => !field.leftOut)
+  for (const { owner, field } of holders) {
+    field.leftOut = reason
+    description.notes.push(`Left out ${owner}'s "${field.words}":  ${reason}`)
+  }
+  return holders.length > 0
 }
 
 /** SIDE EFFECT:  the Spell leaves out a whole collection. */
@@ -1045,12 +1067,6 @@ function leaveOutCollection(description: PlaceDescription, collection: string, r
   held.leftOut = reason
   description.notes.push(`Left out the collection "${collection}":  ${reason}`)
   return true
-}
-
-/** The key of a line the tool wrote. */
-function keyOfLine({ placeLines, types }: SpellParts, line: string): string | undefined {
-  const all: SpellLine[] = [...placeLines, ...types.flatMap((type) => type.lines)]
-  return all.find(({ text }) => text.trim() === line)?.key
 }
 
 /** A type a Spell file declares:  `a "user" is a thing`, `a user is a thing`. */

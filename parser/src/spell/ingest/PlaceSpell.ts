@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
+import { SpellType } from "spell/parser/spell/rules/types"
 import { nameStyleLike, ourNameFor } from "spell/places/FieldNames"
 import type { KeyGoes } from "spell/places/keyGoes"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
@@ -66,6 +67,21 @@ export type TypeLines = {
    * so a line Spell can't read is left out there.
    */
   insideFields?: Record<string, FieldDescription>
+  /**
+   * A type inside a row:  each field holding it, and whose field it is, as several may share it (epic `data` I106),
+   * so a header Spell can't read leaves out those fields, not their collection.
+   */
+  heldBy?: Array<{ owner: string; field: FieldDescription }>
+}
+
+/** A line of a place's Spell, `spellLinesOf()`'s:  what wrote it, known by where it is, as two lines may say the same. */
+export type WrittenLine = {
+  /** The line, with its tab. */
+  text: string
+  /** The key of the line under a header, `SpellLine.key`. */
+  key?: string
+  /** The type it's in:  its header, or a line under it. */
+  type?: TypeLines
 }
 
 /** Is `after` the type `before` was:  a collection's own by its collection, one inside a row by its header. */
@@ -368,6 +384,38 @@ const NOT_IN_A_TYPE_NAME = new Set([
   "an"
 ])
 
+/** A schema's name an API gives the short copy of a thing:  `BriefModuleBayType`, `NestedTag`. */
+const SHORT_COPY_NAME = /^(?:Brief|Nested)(?=\p{Lu})/u
+
+/** The word a schema's name may end in that only its server's code means:  `CircuitGroupAssignmentSerializer`. */
+const CODE_WORD_AT_END = /(?<=\p{Ll})(?:Serializer|Schema)$/u
+
+/**
+ * What the type of a field's object is called by its schema's name, read as words (epic `data` I106):
+ * `#/components/schemas/FrontPortTemplateMapping` => `front port template mapping`.
+ * - A short copy of a thing is its summary:  `BriefModuleBayType` => `module bay type summary`.
+ * - Without a word only its server's code means:  `BriefCircuitGroupAssignmentSerializer` => `circuit group assignment summary`.
+ * - A place's own type's words, when they're its name:  `BriefIPSecProposal` => `ipsec proposal summary`, as its list is
+ *   the `ipsec proposals`;  else a run of capitals is a word, `BriefMACAddress` => `mac address summary`.
+ * - `undefined` for none, or a name with no word a type's name can hold.
+ */
+function typeOfSchema(schemaAt: string | undefined, own: ReadonlySet<string>): string | undefined {
+  const name = schemaAt?.split("/").pop()?.replace(CODE_WORD_AT_END, "")
+  if (!name) return undefined
+  const isShortCopy = SHORT_COPY_NAME.test(name)
+  const thing = name.replace(SHORT_COPY_NAME, "")
+  const squashed = thing.toLowerCase()
+  const ownWords = [...own].find((words) => words.replaceAll(" ", "") === squashed)
+  const parts = (ownWords ?? wordsFor(thing.replace(CAPITALS_THEN_WORD, "$1 $2")))
+    .split(" ")
+    .filter((word) => word && !NOT_IN_A_TYPE_NAME.has(word))
+  if (!parts.length) return undefined
+  return isShortCopy ? `${parts.join(" ")} summary` : parts.join(" ")
+}
+
+/** A run of capitals, then a capitalised word:  `MACAddress`, so it reads as two. */
+const CAPITALS_THEN_WORD = /(\p{Lu})(\p{Lu}\p{Ll})/gu
+
 /**
  * What a type holding a field's object is called:  one of it, `parts` => `part`.
  * - Without a word a type's name can't hold:  `evolves to` => `evolves`.
@@ -381,14 +429,26 @@ function typeInside(words: string): string {
 
 /**
  * The type holding the objects a field of `owner` holds:  `thumbnail` for `thumbnail`, `stat` for a list of `stats`.
- * - A name a place's own type has, or one of Spell's (`type`), says whose it is:  PokéAPI's `types` of a `pokemon`
- *   are each a `pokemon type entry`, as its `type` collection is the `pokemon type`.
+ * - Its schema's name first, when its description gives it one (epic `data` I106):  NetBox's module bay's
+ *   `module_bay_types`, each a `BriefModuleBayType`, are each a `module bay type summary`,
+ *   one type for every list holding them, as the description has it.
+ *   - Owner and field words, `module bay module bay type`, were five words:  more than Spell reads as a type's name.
+ * - A name a place's own type has, or one of Spell's (`type`, `speed`), says whose it is:  PokéAPI's `types` of a
+ *   `pokemon` are each a `pokemon type entry`, as its `type` collection is the `pokemon type`.
+ * - Never more words than a type's name holds (`SpellType.MAX_NAME_WORDS`, 4):  `module bay module bay type` is five,
+ *   so a module bay's `module bay types`, written in place, are each a `module bay type entry`.
  */
-function insideTypeFor(words: string, owner: string, own: ReadonlySet<string>): string {
+function insideTypeFor({ words, insideSchemaAt }: FieldDescription, owner: string, own: ReadonlySet<string>): string {
   const one = typeInside(words)
-  if (!own.has(one) && !isSpellsOwnType(one)) return one
   const owned = `${owner} ${one}`
-  return own.has(owned) ? `${owned} entry` : owned
+  const names = [typeOfSchema(insideSchemaAt, own), one, owned, `${owned} entry`, `${one} entry`]
+  // none free:  the line can't be read, and the field holding it is left out
+  return names.find((name) => name !== undefined && isFreeTypeName(name, own)) ?? owned
+}
+
+/** Can a type inside a row be called `words`:  no more words than a type's name holds, nor anyone's already? */
+function isFreeTypeName(words: string, own: ReadonlySet<string>): boolean {
+  return words.split(" ").length <= SpellType.MAX_NAME_WORDS && !own.has(words) && !isSpellsOwnType(words)
 }
 
 /**
@@ -405,10 +465,15 @@ function typesInside(
   const types = new Map<string, TypeLines>()
   const own = new Set(shown.map(([, { type }]) => type))
   const add = (collection: string, owner: string, fields: Readonly<Record<string, FieldDescription>>) => {
-    for (const { words: field, inside, leftOut } of Object.values(fields)) {
+    for (const field of Object.values(fields)) {
+      const { inside, leftOut } = field
       if (!inside || leftOut) continue
       const words = insideTypeFor(field, owner, own)
-      if (types.has(words)) continue
+      const held = types.get(words)
+      if (held) {
+        held.heldBy!.push({ owner, field })
+        continue
+      }
       const lines = Object.entries(inside).flatMap(([name, about]) => {
         if (about.leftOut || (!about.inside && !about.isItsOwner && !SPELL_TYPES[about.type])) return []
         const what = typeWordsFor(about, collections, words, own, place)
@@ -420,7 +485,7 @@ function typesInside(
         ]
       })
       const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
-      types.set(words, { collection, header, lines, isInside: true, insideFields: inside })
+      types.set(words, { collection, header, lines, isInside: true, insideFields: inside, heldBy: [{ owner, field }] })
       add(collection, words, inside)
     }
   }
@@ -609,12 +674,13 @@ function isLeftOut(
  *   Anywhere else, it's only an address:  text.
  */
 function typeWordsFor(
-  { type, linksTo, inside, isListInside, isItsOwner, isNamedLink, words, pictureAt, unit }: FieldDescription,
+  about: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>,
   owner: string,
   own: ReadonlySet<string>,
   place: string
 ): string {
+  const { type, linksTo, inside, isListInside, isItsOwner, isNamedLink, pictureAt, unit } = about
   // its picture's address, built as it's read
   if (pictureAt) return "text"
   // a number in a unit Spell knows:  a measure, shown in the reader's own units
@@ -622,7 +688,7 @@ function typeWordsFor(
   if (measure) return measure
   if (isItsOwner) return isListInside ? `a list of ${P.pluralize(owner)}` : articled(owner)
   if (inside) {
-    const held = insideTypeFor(words, owner, own)
+    const held = insideTypeFor(about, owner, own)
     return isListInside ? `a list of ${P.pluralize(held)}` : articled(held)
   }
   const target = linksTo === undefined ? undefined : collections[linksTo]
@@ -710,10 +776,30 @@ export function articled(word: string): string {
 }
 
 /** `parts` as text. */
-export function spellTextOf({ header, placeLines, types }: SpellParts): string {
-  const place = [header, ...placeLines.map(({ text }) => `\t${text}`)].join("\n")
-  const each = types.map(({ header: first, lines }) => [first, ...lines.map(({ text }) => `\t${text}`)].join("\n"))
-  return `${[place, ...each].join("\n\n")}\n`
+export function spellTextOf(parts: SpellParts): string {
+  return `${spellLinesOf(parts)
+    .map(({ text }) => text)
+    .join("\n")}\n`
+}
+
+/**
+ * Each line of `spellTextOf()`, in order, with what wrote it (epic `data` I106):
+ * line 12 of the text is `spellLinesOf(parts)[11]`.
+ * - So a line Spell can't read is found by where it is:  the same words may be on a line of another type too.
+ */
+export function spellLinesOf({ header, placeLines, types }: SpellParts): WrittenLine[] {
+  const written: WrittenLine[] = []
+  const add = (text: string, about: Omit<WrittenLine, "text">) => {
+    for (const line of text.split("\n")) written.push({ text: line, ...about })
+  }
+  add(header, {})
+  for (const { key, text } of placeLines) add(`\t${text}`, { key })
+  for (const type of types) {
+    written.push({ text: "" })
+    add(type.header, { type })
+    for (const { key, text } of type.lines) add(`\t${text}`, { key, type })
+  }
+  return written
 }
 
 /** The place a line in `text` declares at this address, by name, English or Spanish:  `undefined` if it has none. */

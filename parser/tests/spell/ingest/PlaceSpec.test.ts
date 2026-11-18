@@ -301,3 +301,162 @@ describe("spell place update, on a place read from its description (epic `data` 
     expect(result.changes).toEqual([])
   })
 })
+
+describe("NetBox's shapes that broke a whole description (epic `data` I106)", () => {
+  /** A schema of NetBox's shape:  an id, an address and the fields given. */
+  const thing = (properties: Record<string, unknown>) => ({
+    type: "object",
+    properties: {
+      id: { type: "integer", readOnly: true },
+      url: { type: "string", format: "uri", readOnly: true },
+      ...properties
+    }
+  })
+  /** A list of `schema`'s, as each `?format=json` description's lists are:  NetBox's paginated answer. */
+  const ref = (schema: string) => ({ $ref: `#/components/schemas/${schema}` })
+  const listOf = (schema: string) => ({
+    get: {
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  count: { type: "integer" },
+                  next: { type: "string" },
+                  results: { type: "array", items: ref(schema) }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  /** NetBox's small "value and label" object, written in place:  a console port's `speed`, a module bay's `status`. */
+  const valueAndLabel = (values: unknown[], labels: string[]) => ({
+    type: "object",
+    properties: {
+      value: { enum: values, type: typeof values[0] === "number" ? "integer" : "string" },
+      label: { enum: labels, type: "string" }
+    }
+  })
+
+  /** The place NetBox's shapes in `document` make:  its Spell and its description. */
+  async function ingestOf(document: Record<string, unknown>) {
+    const { files, texts, descriptions } = memoryFiles()
+    const ingest = new PlaceIngest({
+      fetch: (async (input: RequestInfo | URL) =>
+        `${input instanceof Request ? input.url : input}` === SPEC_AT
+          ? Response.json({ openapi: "3.0.3", info: { title: "NetBox REST API", version: "4.7.5" }, ...document })
+          : new Response("nope", { status: 404 })) as typeof globalThis.fetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
+    return { spell: texts.get("NetBox.api.spell")!, description: descriptions.get("NetBox.api.json5")! }
+  }
+
+  test("a type inside is named after its schema:  three lists share one, and none is left out", async () => {
+    const { spell, description } = await ingestOf({
+      paths: {
+        "/api/dcim/module-bay-types/": listOf("ModuleBayType"),
+        "/api/dcim/module-bays/": listOf("ModuleBay"),
+        "/api/dcim/module-types/": listOf("ModuleType"),
+        "/api/dcim/front-port-templates/": listOf("FrontPortTemplate")
+      },
+      components: {
+        schemas: {
+          ModuleBayType: thing({ name: { type: "string" } }),
+          BriefModuleBayType: thing({ name: { type: "string" }, slug: { type: "string" } }),
+          ModuleBay: thing({
+            name: { type: "string" },
+            module_bay_types: { type: "array", items: ref("BriefModuleBayType") }
+          }),
+          ModuleType: thing({
+            model: { type: "string" },
+            module_bay_types: { type: "array", items: ref("BriefModuleBayType") }
+          }),
+          FrontPortTemplate: thing({
+            name: { type: "string" },
+            rear_ports: { type: "array", items: ref("FrontPortTemplateMapping") }
+          }),
+          FrontPortTemplateMapping: {
+            type: "object",
+            properties: { position: { type: "integer" }, rear_port: { type: "integer" } }
+          }
+        }
+      }
+    })
+    expect(Object.values(description.collections).filter(({ leftOut }) => leftOut)).toEqual([])
+    expect(spell.match(/^a "module bay type summary" is a thing$/gm)).toHaveLength(1)
+    expect(spell.match(/^\tits "module bay types" is a list of module bay type summaries$/gm)).toHaveLength(2)
+    expect(spell).toMatch(/^\tits "rear ports" is a list of front port template mappings$/m)
+    expect(spell).not.toContain("module bay module bay type")
+  })
+
+  test("a line Spell can't read is left out where it is:  never the same words in another list", async () => {
+    // a type's name of five words:  more than Spell reads, so its first line fails, and each line under it
+    const { spell, description } = await ingestOf({
+      paths: {
+        "/api/dcim/device-types/": listOf("DeviceType"),
+        "/api/dcim/virtual-circuit-termination-role-sets/": listOf("RoleSet")
+      },
+      components: {
+        schemas: {
+          DeviceType: thing({ name: { type: "string" }, manufacturer: { type: "string" } }),
+          RoleSet: thing({ name: { type: "string" }, manufacturer: { type: "string" } })
+        }
+      }
+    })
+    const { device_types, virtual_circuit_termination_role_sets } = description.collections
+    expect(virtual_circuit_termination_role_sets!.leftOut).toMatch(/Spell couldn't read its line/)
+    // the same words in another list stay
+    expect(device_types!.leftOut).toBeUndefined()
+    expect(Object.values(device_types!.fields).filter(({ leftOut }) => leftOut)).toEqual([])
+    expect(spell).toMatch(
+      /^a "device type" is a thing\n(?:\t.*\n)*?\tits "name" is text\n\tits "manufacturer" is text$/m
+    )
+  })
+
+  test("a type inside whose first line Spell can't read leaves out the fields holding it, never their list", async () => {
+    const { spell, description } = await ingestOf({
+      paths: { "/api/dcim/module-bays/": listOf("ModuleBay") },
+      components: {
+        schemas: {
+          // no name of four words or fewer to give the type inside:  its schema's, its field's and its owner's are longer
+          ModuleBay: thing({
+            name: { type: "string" },
+            installed_module_bay_type_part: ref("BriefInstalledModuleBayTypePart")
+          }),
+          BriefInstalledModuleBayTypePart: { type: "object", properties: { name: { type: "string" } } }
+        }
+      }
+    })
+    const { module_bays } = description.collections
+    expect(module_bays!.leftOut).toBeUndefined()
+    expect(module_bays!.fields.installed_module_bay_type_part!.leftOut).toMatch(/Spell couldn't read its line/)
+    expect(module_bays!.fields.name!.leftOut).toBeUndefined()
+    expect(spell).toMatch(/^a "module bay" is a thing$/m)
+  })
+
+  test("a type inside named like one of Spell's measures says whose it is:  a console port's speed", async () => {
+    const { spell, description } = await ingestOf({
+      paths: { "/api/dcim/console-ports/": listOf("ConsolePort"), "/api/dcim/module-bays/": listOf("ModuleBay") },
+      components: {
+        schemas: {
+          ConsolePort: thing({ speed: valueAndLabel([1200, 2400], ["1200 bps", "2400 bps"]) }),
+          ModuleBay: thing({ status: valueAndLabel(["active", "planned"], ["Active", "Planned"]) })
+        }
+      }
+    })
+    expect(spell).toMatch(/^\tits "speed" is a console port speed$/m)
+    expect(spell).toMatch(/^a "console port speed" is a thing\n\tits "value" is a number\n\tits "label" is text$/m)
+    expect(spell).toMatch(/^a "status" is a thing\n\tits "value" is text\n\tits "label" is text$/m)
+    expect(description.notes.filter((note) => note.startsWith("Left out"))).toEqual([])
+  })
+})

@@ -53,6 +53,10 @@ const DAY_PARTS: Readonly<Record<DayPart, readonly [number, number]>> = {
 export type DayPart = "morning" | "afternoon" | "earlyEvening" | "evening" | "lateEvening" | "night"
 
 /** How a date or a duration is said as text:  `as a duration`, `as a short duration`, `as a long duration`. */
+/** `core.twoDigits()`'s answer:  text for a number, anything else as it came. */
+export type TwoDigits<T> = T extends number ? string : T
+/** `core.durationPartOf()`'s answer:  a number for a number, anything else as it came. */
+export type NumberOr<T> = T extends number ? number : T
 export type DurationStyle = "normal" | "short" | "long"
 
 /** Milliseconds in a day. */
@@ -206,10 +210,10 @@ export const dateMethods = defineCoreModule({
    * - A negative one keeps its sign in front:  `-5` is `-05`.
    * - Anything that isn't a number stays as it is.
    */
-  twoDigits(number: unknown): unknown {
-    if (typeof number !== "number" || !Number.isFinite(number)) return number
+  twoDigits<T>(number: T): TwoDigits<T> {
+    if (typeof number !== "number" || !Number.isFinite(number)) return number as TwoDigits<T>
     const digits = String(Math.trunc(Math.abs(number))).padStart(2, "0")
-    return number < 0 ? `-${digits}` : digits
+    return (number < 0 ? `-${digits}` : digits) as TwoDigits<T>
   },
 
   ////////////////
@@ -291,11 +295,11 @@ export const dateMethods = defineCoreModule({
    * - `days`, all of them;  `hours`, 0 to 23;  `minutes` and `seconds`, 0 to 59.
    * - A duration that's gone by (negative) gives parts below 0.
    */
-  durationPartOf(seconds: unknown, part: DurationPart): unknown {
-    if (typeof seconds !== "number" || !Number.isFinite(seconds)) return seconds
+  durationPartOf<T>(seconds: T, part: DurationPart): NumberOr<T> {
+    if (typeof seconds !== "number" || !Number.isFinite(seconds)) return seconds as NumberOr<T>
     const whole = Math.trunc(Math.abs(seconds))
     const value = part === "days" ? Math.floor(whole / PART_SECONDS.days) : partWithin(whole, part)
-    return seconds < 0 && value ? -value : value
+    return (seconds < 0 && value ? -value : value) as NumberOr<T>
   },
   /** Is `date` a day of the person's region's weekend:  `if now is a weekend day`. */
   isWeekendDay(date: unknown): boolean {
