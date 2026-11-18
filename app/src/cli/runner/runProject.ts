@@ -30,6 +30,8 @@ else headless()
 core.resetRuntime()
 // a place's key, `its key is the secret "GITHUB_TOKEN"`, from the environment:  this run is a server side (epic `data` T111)
 core.RUNTIME.keyFrom = (name) => process.env[name] || undefined
+// each place on the deployment picked for this run, `--deployment` or `SPELL_DEPLOYMENT` (epic `data` P49)
+if (spec.deployments) core.RUNTIME.deployments = spec.deployments
 // `--seed`, and the core contract:  the same random numbers every run, so a shuffle deals the same cards
 if (spec.seed !== undefined) core.seedRandom(spec.seed)
 // a test's lines in the language the program speaks, e.g. Spanish:  English when it has no messages

@@ -79,6 +79,11 @@ export default function languageCommands(spell: Command): void {
     .option("--no-browser", "never open a browser:  just skip what needs one")
     .option("--seed <n>", SEED_HELP, Number)
     .option("--target <name>", "run it as `ts` or `py` compiles it -- a Python app that draws is served on Quart")
+    .option(
+      "--deployment <name>",
+      'which deployment of each place to run on, as the project\'s file lists them under "places":  dev, staging, ' +
+        "production -- default SPELL_DEPLOYMENT, else each place as its line says"
+    )
     .addHelpText("after", PROJECT_HELP)
     .action((project: string | undefined, _options, command: Command) => language("run", listOf(project), command))
 

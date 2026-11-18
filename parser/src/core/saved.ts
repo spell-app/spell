@@ -56,6 +56,7 @@ import { nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
 import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
+import type { PlaceDeployment } from "./runtime"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
@@ -166,6 +167,21 @@ const ASYNC_FUNCTION = "AsyncFunction"
 
 /** Each run's places:  a new run has its own. */
 const PROGRAMS = new WeakMap<object, ProgramPlaces>()
+
+/**
+ * `details`, on the deployment picked for this run, when there is one (epic `data` P49):  its address, its key, and
+ * read only when it says.
+ */
+function deployedTo(details: PlaceDetails, deployment: PlaceDeployment | undefined): PlaceDetails {
+  if (!deployment) return details
+  return {
+    ...details,
+    at: deployment.at,
+    ...(deployment.key !== undefined && { keyNamed: deployment.key }),
+    ...(deployment.tokenFrom !== undefined && { tokenFrom: deployment.tokenFrom }),
+    ...(deployment.readOnly && { readOnly: true })
+  }
+}
 
 /** Where this run finds a place's key, when it runs on a server side:  `SpellRuntime.keyFrom`. */
 function keyFinder(): { keyFrom?: (name: string) => string | undefined } {
@@ -317,7 +333,7 @@ class ProgramPlaces {
       )
     }
     const { place: name } = savedIn
-    const details = declared.details
+    const details = deployedTo(declared.details, core.RUNTIME?.deployments?.[name])
     // what a line under it calls the collection there:  a web server's and a graphql server's is an address, read by their own mapping
     const mapped = details.collections?.[savedIn.collection]?.at
     const collection =

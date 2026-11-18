@@ -4,9 +4,12 @@ import { tmpdir } from "os"
 import { delimiter, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
+import { snakeCase } from "spell/util"
+import { readJSON5File } from "spell/util/node/json5"
 import environment from "spell/app/spaces/server/node/environment"
 import { P } from "spell/parser/parser"
 import { buildTsx } from "spell/parser/spell/node/buildTsx"
+import { projectFileIn } from "spell/parser/spell/node/projectFile"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CLI } from "spell/app/cli"
@@ -164,6 +167,29 @@ function checkSeed(seed: number | undefined): void {
   throw new CLI.CliError(`--seed takes a whole number from 1 to ${LARGEST_SEED}, not ${seed}`)
 }
 
+/**
+ * Each place's deployment named `deployment`, from `project`'s file, `"places"`, by the place's name as compiled code
+ * names it (epic `data` P49):  `{ netbox: { at: "...", readOnly: true } }`.
+ * - A place that lists no such deployment runs as its line says;  a deployment no place lists is a mistake.
+ * - throws `CliError` for a deployment no place in the project's file has
+ */
+function deploymentsPicked(project: SP.SpellProject, deployment: string): NonNullable<CLI.RunSpec["deployments"]> {
+  const file = projectFileIn(new SP.SpellLocation(project.projectId).serverPath)
+  const places = file ? (readJSON5File<{ places?: Record<string, Record<string, Deployment>> }>(file).places ?? {}) : {}
+  const picked = Object.entries(places).flatMap(([place, deployments]) =>
+    deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
+  )
+  if (!picked.length) {
+    throw new CLI.CliError(
+      `no place in ${project.projectId}'s project file has a deployment named "${deployment}":  list it under "places"`
+    )
+  }
+  return Object.fromEntries(picked)
+}
+
+/** One deployment of a place, as a project's file lists it. */
+type Deployment = NonNullable<CLI.RunSpec["deployments"]>[string]
+
 /** The largest seed `core.seedRandom()` takes:  one under its generator's modulus, 2 ** 31 - 1. */
 const LARGEST_SEED = 2147483646
 
@@ -187,8 +213,11 @@ export async function runCompiled(
   // in the language it speaks:  its app's file's, else its first file's (`SP.SpellDeclarations.speakingFirst()`)
   const messages = SP.SpellWords.messagesFor(project.wordsLanguages[0]!)
   const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
+  const deployment = (options as CLI.RunOptions).deployment ?? (process.env.SPELL_DEPLOYMENT || undefined)
+  const deployments = deployment === undefined ? undefined : deploymentsPicked(project, deployment)
   return runCode(mode, name, code, {
     ...options,
+    ...(deployments && { deployments }),
     projects: importedOutputs(project),
     capture,
     messages,
@@ -227,6 +256,7 @@ export async function runCode(
     sourceMap,
     env,
     offline,
+    deployments,
     ...options
   }: CLI.TestOptions & {
     extension?: string
@@ -240,6 +270,8 @@ export async function runCode(
     sourceMap?: string
     env?: Record<string, string>
     offline?: boolean
+    /** each place's deployment picked for this run, by the place's name -- see `CLI.RunSpec` */
+    deployments?: CLI.RunSpec["deployments"]
   } = {}
 ): Promise<ChildResult> {
   if (extension === PY) {
@@ -267,7 +299,8 @@ export async function runCode(
       seed: options.seed,
       messages,
       reports,
-      offline
+      offline,
+      ...(deployments && { deployments })
     }
     return await runChild(spec, capture)
   } finally {
