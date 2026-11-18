@@ -14,6 +14,7 @@ const VOCABULARY_FAMILY_FILES = {
   "spell-editor": "src/app/components/spell-editor/SpellEditor.tsx",
   "spell-code": "src/app/components/spell-code/SpellCode.tsx",
   "spell-markdown": "src/app/components/spell-markdown/SpellMarkdown.tsx",
+  "spell-reference-page": "src/app/components/spell-reference-page/SpellReferencePage.tsx",
   "spell-element": "src/app/runner/SpellElement.tsx"
 }
 

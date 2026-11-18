@@ -41,6 +41,7 @@ export const REFERENCE_EDIT_EVENT = "spell-reference-edit"
  *   - Nothing saves them:  it says so, and keeps them as they were.
  * - Its labels are in the reader's language (its texts);  the words in the file's (Q103).
  * - NEVER imports the editor (`spell/app/app/solid`, `editor`):  it's an element any page can hold.
+ * - SEE:  its App UI components page, `app/docs/spell-reference-page.html` (`/components/app/spell-reference-page.html`).
  ****************/
 export class SpellReferencePage extends E.UIComponent<typeof spellReferencePageVocabulary> {
   @E.proto static vocabulary = spellReferencePageVocabulary

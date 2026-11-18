@@ -1185,7 +1185,7 @@
         },
         {
           "key": "unverifiedWhy",
-          "text": "Spell has only read about this list, and hasn't tested it on the real server.\nRun spell place verify to test it.",
+          "text": "Spell knows this list only from the data source's description:  it hasn't been tested on the real server yet.\nTo test it, run spell place verify in your terminal.",
           "description": "Why it's not tried yet."
         },
         {
