@@ -3265,6 +3265,10 @@
           "file": "src/app/solid/NamePage.tsx"
         },
         {
+          "name": "PlaceReferencePage",
+          "file": "src/app/pages/PlaceReference.tsx"
+        },
+        {
           "name": "ProjectChooser",
           "file": "src/app/pages/ProjectChooser.tsx"
         },
