@@ -1,10 +1,13 @@
-Claude Code loads the cross-model `AGENTS.md` (the kit, and the rules across its folders) and WWOD here;  working in
-one of `src/`'s folders, its `AGENTS.md` comes next (`src/server/AGENTS.md` ...);  in a big folder, its own
-(`ui/AGENTS.md` ...), then its sub-folder's (`parser/src/core/AGENTS.md` ...).
+Claude Code loads the cross-model `AGENTS.md` (the kit, and the rules across its folders) and WWOD here,
+with the WWOD option Spell opts in to (§21, the code is the spec);
+working in one of `src/`'s folders, its `AGENTS.md` comes next (`src/server/AGENTS.md` ...);
+in a big folder, its own (`ui/AGENTS.md` ...), then its sub-folder's (`parser/src/core/AGENTS.md` ...).
 
 @AGENTS.md
 
 @agents/wwod/WWOD.md
+
+@agents/wwod/code-is-the-spec.md
 
 The Claude-only rules, for every folder:
 

@@ -384,7 +384,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   - Version `2.0.0-rc.21`, for every folder of the kit:  one copy, pinned by the kit's `resolutions`.
   - So is what compiled spell draws (epic `output-targets` P10-P11).
   - React is left only in the `spell` CLI's terminal screens (Ink).
-- The rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), read IN FULL before Solid work
+- The rules:  [solid-2.md](../agents/solid/solid-2.md), read IN FULL before Solid work
   (the kit's [AGENTS.md](../AGENTS.md), at its top).
   - NOT `@`-imported on purpose:  it loads only when the task needs it.
   - Claude also has the [solid-2 skill](.claude/skills/solid-2/SKILL.md), which triggers on Solid work.

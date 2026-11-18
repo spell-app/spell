@@ -5,7 +5,8 @@ House style for this repo (spell).  Audience:  AI coding agents -- follow these 
 - Cite rules as `WWOD §N › "rule title"`, e.g. `WWOD §5 › "Sentinel errors as control flow"`.
 - How the rules fit together (root and package `AGENTS.md`, spokes, "As WWOD §N, plus:"):  `agents/wwod/README.md`.
 
-The universal rules are here (§1-7);  topic rules in the spokes beside it (§8-20).
+The universal rules are here (§1-7);  topic rules in the spokes beside it (§8-20);
+and one OPT-IN rule a project chooses, §21.
 §6's long before / afters are a spoke too, `writing.md`.
 Read the spoke(s) for what you're touching BEFORE writing code or text:
 
@@ -20,7 +21,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 | CSS / styling                                                  | `css.md`                                 | 18    |
 | logging, debug output                                          | `logging.md`                             | 19    |
 | tests                                                          | `tests.md`                               | 20    |
-| ANY Solid 2 code (signals, stores, `<ui-*>`):  read IN FULL    | `guides/solid/solid-2.md` | --    |
+| tests, when the project opts in to the code as the spec        | `code-is-the-spec.md`                    | 21    |
+| ANY Solid 2 code (signals, stores, `<ui-*>`):  read IN FULL    | `agents/solid/solid-2.md`                | --    |
 | anything inside a package                                      | `packages/<pkg>/AGENTS.md`               | --    |
 
 ## 1. Working process
@@ -31,8 +33,9 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
   - Start from user-facing feature definition -- what does the user see, work down from that.
   - README / types / API surface next.
   - Temporary inconsistency is fine, then a reconcile-and-fix pass.
-  - Source (types + implementation) is the spec;
-    tests get rewritten to match unless code is obviously wrong.
+  - Tests follow the project's own way:  test-first (TDD) or the code as the spec, as its `AGENTS.md` says.
+    - A project that treats the code as the spec, rewriting tests to match it, opts in to §21,
+      `agents/wwod/code-is-the-spec.md` (Spell does).
 - **Drive-by hygiene while in the neighborhood:**
   - import normalization
   - small inconsistency fixes in touched files

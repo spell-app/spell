@@ -74,12 +74,12 @@ describe("checkAgentRules()", () => {
   // epic `epic-eject` P12:  no `guides` or `goals` link at the checkout's root
   test("the epic folder's citers, named by their path there", () => {
     const content = realpathSync(mkdtempSync(join(tmpdir(), "agents-content-")))
-    mkdirSync(join(content, "guides", "solid"), { recursive: true })
-    writeFileSync(join(content, "guides", "solid", "solid-2.md"), "See WWOD §4.\n")
+    mkdirSync(join(content, "goals"), { recursive: true })
+    writeFileSync(join(content, "goals", "AGENTS.md"), "See WWOD §4.\n")
     vi.stubEnv("SPELL_SHARED_DIR", content)
     try {
       expect(checkAgentRules(CHECKOUT).problems).toContainEqual({
-        file: "guides/solid/solid-2.md",
+        file: "goals/AGENTS.md",
         line: 1,
         cite: "§4",
         problem: "no such section"

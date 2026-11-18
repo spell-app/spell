@@ -3127,6 +3127,6 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
 - When agents need a doc's rules, also write a distilled `.md` beside it:  bullets, `ts` code blocks.
   - Point to it from the top of an `AGENTS.md`, with an "if working with X, READ file" line.
   - The package's `AGENTS.md`, or the root's when other packages need it too.
-  - See [solid-2.md](../../spell.epics/guides/solid/solid-2.md), pointed to from the root's.
+  - See [solid-2.md](../../agents/solid/solid-2.md), pointed to from the root's.
 - A doc's rules are about ITS topic (Solid's mechanics, a tool's flags).
   - House style, how we write any code, goes in WWOD (`agents/wwod/`), not in a distilled doc.

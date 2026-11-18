@@ -38,7 +38,7 @@ a folder of the kit `spell`.
   - Its links lead from where it is now:  the epic folder's pages through `../../spell.epics/`,
     the kit's and the other folders' files by their paths (`../../ui/`, `../../agents/`).
   - Some of its prose still speaks from spell-app's checkout, which serves the epic folder's pages.
-- Its Solid code follows Spell's Solid 2 rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), IN FULL first.
+- Its Solid code follows Spell's Solid 2 rules:  [solid-2.md](../agents/solid/solid-2.md), IN FULL first.
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).
   - They reach the plugin's own files through `${CLAUDE_PLUGIN_ROOT}`.

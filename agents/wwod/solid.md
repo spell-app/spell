@@ -4,7 +4,7 @@ House style for Solid 2 components:  the app's UI (`packages/app/src/solid/`, `r
 Read with `agents/wwod/WWOD.md` (the hub).
 From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
 
-**Solid mechanics:  READ `guides/solid/solid-2.md` FIRST;  this spoke is house style on top.**
+**Solid mechanics:  READ `agents/solid/solid-2.md` FIRST;  this spoke is house style on top.**
 - A rule here that leans on a mechanic cites `solid-2.md`.  The few mechanics this house style is built on
   (reading once with `untrack`, `onCleanup`, `<Loading>`, `<Show keyed>`, `useContext`, `ClassBuilder`) are stated
   here, with the rule that uses them (Owen, epic `wwod`).

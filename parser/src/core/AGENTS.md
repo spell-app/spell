@@ -68,7 +68,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `resetRuntime()` forgets what it held of the last run.
 - Depends only on `spell/util`.
   NEVER import `spell/parser/spell` / `spell/parser/parser`, or anything above.
-- Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
+- Drawing code here is Solid work:  READ [the Solid 2 rules](../../../agents/solid/solid-2.md) IN FULL first.
   - That's [drawing.ts](drawing.ts):
     - drawing a thing or a list's items:  `drawThing()`, `drawItems()`
     - the `@drawn` decorator, and the error boundary it shares with `drawThing()`

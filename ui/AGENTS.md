@@ -735,7 +735,7 @@ As WWOD §18, plus:
 ## Solid authoring
 
 - Solid's own rules (no writes in an owned scope, staged writes, two-function effects, eager memos):
-  SEE:  [the Solid 2 rules](../spell.epics/guides/solid/solid-2.md).
+  SEE:  [the Solid 2 rules](../agents/solid/solid-2.md).
   - Below:  only what's `ui`'s own.
 - A tag's COMPONENT is a class `UI<Name> extends UIComponent<typeof nameVocabulary>`
   (or `FormComponent`, `PartComponent`).  It has:

@@ -1712,7 +1712,7 @@ export class ASTPropertyDefinition extends ASTClassMember {
  *   `static { this.declareProp('title', { type: 'text' }) }`, or `Todo.declareProp(...)` from outside the class.
  * - The same runtime shape as a hand-written class's `@prop({ type: 'text' }) accessor title`:
  *   compiled spell runs from a `blob:` URL, untranspiled, so it can't use decorators.
- *   See `guides/solid/solid-2.md`.
+ *   See `agents/solid/solid-2.md`.
  */
 export type ASTReactivePropertyProps = Prettify<{
   type: string | ASTTypeExpression

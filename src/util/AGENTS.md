@@ -160,7 +160,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (caveat C12 of `output-targets`;  epic `spell-element`, which that waited on, is in `main`).
 - Its files import each other as peers.
   - Spell's utilities (`spell/`) import it as `spell/util/reactive`, never through the barrel.
-- It's Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL first.
+- It's Solid work:  READ [the Solid 2 rules](../../agents/solid/solid-2.md) IN FULL first.
 
 ## Kept values (`persist/`)
 

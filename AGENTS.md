@@ -10,7 +10,7 @@ ONE repo, its own `src/` and its folders `parser/`, `ui/`, `epic/` and `app/` (e
 - A rule lives in exactly ONE place:  this file holds what's about the kit and what's ACROSS its folders;
   each big folder's, what's about it;  each sub-folder's, what's local to it.
 
-**If working with Solid (2.0):  READ [the Solid 2 rules](spell.epics/guides/solid/solid-2.md) IN FULL FIRST.**
+**If working with Solid (2.0):  READ [the Solid 2 rules](agents/solid/solid-2.md) IN FULL FIRST.**
 - Solid work is any of:
   - components, JSX, effects / signals / stores
   - spell-parser's `core` rendering, `spell/util` reactivity, `spell/element`
@@ -334,6 +334,9 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 ## Tests
 
+- Spell opts in to WWOD's §21, the code is the spec:  READ [code-is-the-spec.md](agents/wwod/code-is-the-spec.md).
+  - A test that disagrees with the code is rewritten to match it, unless the code is obviously wrong.
+  - It's opt-in because test-first (TDD) projects do the opposite (epic `repo-split` P31).
 - The kit's:  in `tests/` at its root, at the same paths as the code they test under `src/`
   (`tests/server/Router.test.ts` tests `src/server/Router.ts`), with their snapshots and test data.
   - The kit's [vitest.config.ts](vitest.config.ts) runs them, a project per folder;
@@ -680,6 +683,11 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 - WWOD (`agents/wwod/`) is TRACKED in the kit (epic `repo-split` P9):  a real `agents/` folder at its root.
   - Edit it here.
+- So are the Solid 2 rules, `agents/solid/solid-2.md` (epic `repo-split` P31;  the epic repo's `guides/solid/` before).
+  - The guides that explain them stay in the epic repo:  `guides/solid/solid-2.html`, `cheatsheet.html`.
+- Both ship in the npm `spell` package (`"spellPublish": { "files" }`), so another project can opt in to them:
+  [README/agents.md](README/agents.md), "Using these rules in your own project".
+  - Not the logs, nor `agents/coherence/`:  they're Spell's own.
 - The three logs stay in the epic repo (Q31):
   `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md` and `CODE-DEBT.md` are links into `../spell.epics/agents/`.
   - Edit them at their REAL path, `spell.epics/agents/<log>`, never through the link (above, "The epic repo").

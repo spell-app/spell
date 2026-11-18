@@ -8,7 +8,7 @@ when working with code in the kit's `src/element/` (`spell/element`), and its to
 the kit's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
-**This is Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL FIRST,**
+**This is Solid work:  READ [the Solid 2 rules](../../agents/solid/solid-2.md) IN FULL FIRST,**
 then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is written on this folder's code.
 
 ## This folder:  the kit's `src/element/`
@@ -242,7 +242,7 @@ the family ATTACHES it when it arrives.
 
 - Two copies of `src/element/` on a page would mean two `UIComponent`s and two registries.
   - It fails silently, as two Solids do
-    ([the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md), "One Solid per page").
+    ([the Solid 2 rules](../../agents/solid/solid-2.md), "One Solid per page").
 - So no bundle of ours carries its own:
   - Spell UI's `core` entry carries it, and so everything built on that entry:
     - Spell UI's built `core.js`
