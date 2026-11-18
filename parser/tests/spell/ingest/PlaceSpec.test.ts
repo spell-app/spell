@@ -129,6 +129,11 @@ describe("spell place ingest --spec", () => {
     expect(spell).toMatch(/^\tits "name" is required text, with maximum length 100$/m)
     // a short copy of another list's thing links to it, by its schema
     expect(spell).toMatch(/^\tits "group" is a tenant group$/m)
+    // each type unverified till verify tries it;  what the description offers, and its action routes
+    expect(spell).toMatch(
+      /^a "job" is a thing\n\tit lives in netbox\n\tthis type is unverified\n\tenabled operations are read$/m
+    )
+    expect(spell).toMatch(/^\tto sync a data source is at "\/api\/core\/data-sources\/\{id\}\/sync\/"$/m)
     expect(spell).toMatchSnapshot()
   })
 })

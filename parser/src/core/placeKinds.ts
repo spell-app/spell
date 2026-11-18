@@ -50,6 +50,8 @@ export type PlaceDetails = {
       askedBy?: string[]
       /** How this one is searched, at its own address:  `users are searched with "q" at "/search/users"`. */
       searches?: { param: string; fields: string[]; at?: string }
+      /** What it lets be done to all of them, by the line under its own:  `enabled operations are read, add` (epic `data` P49). */
+      operations?: string[]
     }
   >
   /** The NAME of the key it needs:  never the key. */
@@ -218,10 +220,24 @@ export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
   const { AtProtoPlace, GraphPlace, RestPlace } = making.folder
   const { collection, Class } = making
   if (behind instanceof RestPlace) behind.addFields(collection, storedAsIn(Class))
+  limitOperations(behind, making)
   // a record has no decimals:  a number field is kept as text, as its Lexicon says (epic `atmosphere` P10)
   if (behind instanceof AtProtoPlace) behind.addDecimals(collection, fieldsOfKind(Class, "number"))
   if (!(behind instanceof GraphPlace)) return
   behind.addCollection(collection, graphCollections(making)[collection]!)
+}
+
+/**
+ * SIDE EFFECT:  a web server's collection takes only what its lines enable (epic `data` P49):
+ * the switch under its `live at` line, then its thing's own `enabled operations are ...`, each narrowing.
+ * - Any other kind:  nothing.
+ */
+export function limitOperations(behind: PlaceBehind, { folder, collection, Class, details }: PlaceMaking): void {
+  if (!(behind instanceof folder.RestPlace)) return
+  const switched = details.collections?.[collection]?.operations
+  const own = (Class as { savedIn?: { operations?: readonly string[] } }).savedIn?.operations
+  if (switched) behind.limitOperations(collection, switched)
+  if (own) behind.limitOperations(collection, own)
 }
 
 /** Each kind's word, and how its place is made. */

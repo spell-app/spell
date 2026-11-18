@@ -54,7 +54,7 @@ import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import { nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
-import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
+import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
@@ -82,6 +82,8 @@ export type SavedIn = {
   select?: readonly string[]
   /** Which of Spell's two times it keeps, as rows name them:  stamped as it's saved.  Left out:  neither (epic `data` T57). */
   times?: readonly string[]
+  /** What its place lets be done to its things:  `enabled operations are add, change`.  Left out:  every one (epic `data` P49). */
+  operations?: readonly string[]
 }
 
 /** What a rider says to draw:  see `core.drawRead()`. */
@@ -339,6 +341,7 @@ class ProgramPlaces {
     if (!behind) {
       const { thing } = declared
       behind = details.kind ? placeBehind(making) : (thing.makePlace(details, this.folder) as PlaceBehind)
+      limitOperations(behind, making)
       this.places!.add(name, behind)
     } else if (details.kind) knowCollection(behind, making)
     this.startSignIn(name, behind)

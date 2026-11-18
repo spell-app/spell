@@ -201,6 +201,13 @@ export function spellPartsFor(
       placeLines.push({ key: `under:${collection}:${list}`, text: line })
     }
   }
+  // an action route under a thing, from its description:  `to sync a data source is at "/api/core/data-sources/{id}/sync/"`
+  for (const [collection, description] of shown) {
+    for (const [verb, { at }] of actionsOf(description)) {
+      const text = `to ${verb} ${articled(description.type)} is at "${at}"`
+      placeLines.push({ key: `action:${collection}:${verb}`, text })
+    }
+  }
   // a server's own time fields are Spell's two times, so a thing read from one isn't stamped twice (epic `data` T57)
   if (!isSheet) {
     for (const [collection, description] of shown) {
@@ -497,6 +504,11 @@ function typeLines(
   collections: Readonly<Record<string, CollectionDescription>>
 ): TypeLines {
   const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `it lives in ${place}` }]
+  // read from an API's description:  whether it was tried, and what its server lets be done (epic `data` P49)
+  const state = stateWordFor(description)
+  if (state) lines.push({ key: `state:${collection}`, text: `this type is ${state}` })
+  const enabled = enabledOperationsOf(description)
+  if (enabled) lines.push({ key: `enabled:${collection}`, text: `enabled operations are ${enabled.join(", ")}` })
   const own = new Set(Object.values(collections).map(({ type }) => type))
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
@@ -514,6 +526,46 @@ function typeLines(
     header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing`,
     lines
   }
+}
+
+/** The writes Spell has words for, in the order a line names them. */
+const WRITES = ["add", "change", "delete"] as const
+
+/** A one-word action Spell can name in a list of enabled operations, not one of its own words:  `sync`, `enqueue`. */
+const ACTION_VERB = /^\p{Ll}[\p{L}\d]*$/u
+
+/**
+ * The action routes `description`'s line can say, by verb, each with its address (epic `data` P49):
+ * one word each, and none named like Spell's own operations (`read`, `all`, a write).
+ */
+function actionsOf({ operations = {} }: CollectionDescription): Array<[string, { at: string }]> {
+  return Object.entries(operations).filter(
+    ([verb, { state }]) =>
+      ACTION_VERB.test(verb) && !["read", "all", ...WRITES].includes(verb) && state?.is !== "disabled"
+  )
+}
+
+/**
+ * What a type read from an API's description says of whether it was tried (Q56, Q62):  `unverified`, `verified`,
+ * `failed`;  nothing for a type read from rows, which a read through the Spell has tried.
+ */
+function stateWordFor({ state, schemaAt }: CollectionDescription): string | undefined {
+  const isFromDescription = schemaAt !== undefined || state?.is === "unverified" || state?.is === "untyped"
+  if (!state || state.readByTheLook || !isFromDescription) return undefined
+  return state.is === "untyped" ? "unverified" : state.is === "disabled" ? undefined : state.is
+}
+
+/**
+ * What its server lets be done to a type's things, when its description says less than everything (J264):
+ * `read, add, change`;  `undefined` when it takes every write, as no line means every operation.
+ */
+function enabledOperationsOf(description: CollectionDescription): string[] | undefined {
+  const { operations, schemaAt } = description
+  // read from a description that offers nothing more:  read only
+  if (!operations) return schemaAt === undefined ? undefined : ["read"]
+  const writes = WRITES.filter((write) => operations[write] && operations[write]!.state?.is !== "disabled")
+  if (writes.length === WRITES.length) return undefined
+  return ["read", ...writes, ...actionsOf(description).map(([verb]) => verb)]
 }
 
 /**

@@ -1,3 +1,5 @@
+import type { ApiMethod } from "spell/util/fetching"
+
 import {
   ANY_FIELD,
   canDoAll,
@@ -15,11 +17,23 @@ import {
   type PlaceContext,
   type PlaceErrorKind,
   type PlaceRow,
-  type SelectingContext
+  type SelectingContext,
+  type WriteAnswer,
+  type WriteKind,
+  type WriteQuestion
 } from "./places.types"
 import { FieldNames, type NameStyle } from "./FieldNames"
 import { DEFAULT_CEILING } from "./PlaceQuery"
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
+
+/** The word for every operation, in a list of enabled ones:  `enabled operations are all`. */
+const ALL_OPERATIONS = "all"
+
+/** Reading, as an operation (epic `data` P49, Q61):  `enabled operations are read` is read only. */
+const READ_OPERATION = "read"
+
+/** Each kind of write, as the operation a list of enabled ones names it. */
+const OPERATION_OF_WRITE: Readonly<Record<WriteKind, string>> = { insert: "add", update: "change", delete: "delete" }
 
 /** How many rows it asks for at a time on a place that pages, when nobody says. */
 const REST_PAGE_SIZE = 100
@@ -111,7 +125,9 @@ export class RestPlace extends WebPlace implements Place {
   /** Each thing's version, as last read or written, by collection and id. */
   private readonly seenVersions = new Map<string, string>()
   /** Each named operation's address. */
-  private readonly operations: Readonly<Record<string, string>>
+  private readonly operations: Readonly<Record<string, string | RestOperation>>
+  /** Each collection's enabled operations, by its line (`limitOperations()`):  a collection not here takes every one. */
+  private readonly enabled = new Map<string, ReadonlySet<string>>()
   /** How the server spells a field's name, for one it hasn't sent yet. */
   private readonly namesLike: NameStyle | undefined
   /** The query parameter it searches with, and which of our fields it searches. */
@@ -176,18 +192,66 @@ export class RestPlace extends WebPlace implements Place {
   }
 
   /**
-   * `POST` to a named operation's address:  what the server answers.
+   * SIDE EFFECT:  `collection` takes only these operations (epic `data` P49):  a thing's `enabled operations are ...`,
+   * or a collection's, the two together narrowing.
+   * - `read`, `add`, `change`, `delete`, and a named operation's name (`complete`);  `all` is every one.
+   * - None at all:  `all operations are disabled`, so not even reading.
+   * - A collection never limited takes every operation.
+   */
+  limitOperations(collection: string, operations: readonly string[]): void {
+    if (operations.includes(ALL_OPERATIONS)) return
+    const was = this.enabled.get(collection)
+    this.enabled.set(collection, new Set(was ? operations.filter((each) => was.has(each)) : operations))
+  }
+
+  /**
+   * Would it take this write?  Not one its collection's enabled operations leave out (`limitOperations()`).
+   * - `whyNot`:  `"place"`, as no one may.
+   */
+  canWrite({ collection, kind }: WriteQuestion): WriteAnswer {
+    if (kind && !this.isEnabled(collection, OPERATION_OF_WRITE[kind])) return { canWrite: false, whyNot: "place" }
+    return { canWrite: true }
+  }
+
+  /**
+   * Send a named operation:  what the server answers.
+   * - Its address's braces are filled from the thing sent (`Api.url()`):  `/jobs/{id}/complete` from its id, any
+   *   other name from its field by that name, the server's (epic `data` P49, Q48).
+   * - Its own method, `POST` unless its description said another.
    * - A row of `collection` goes in the server's own names, as a write does.
-   * - throws `TypeError` for an operation it wasn't told of;  `PlaceError` for an answer that means something
+   * - throws `TypeError` for an operation it wasn't told of;  `PlaceError` `"refused"` for one its collection's
+   *   enabled operations leave out, and for an answer that means something
    */
   async call(name: string, input: unknown, context: SelectingContext, collection?: string): Promise<unknown> {
-    const path = this.operations[name]
-    if (path === undefined) {
+    const operation = this.operations[name]
+    if (operation === undefined) {
       throw new TypeError(`RestPlace.call():  nobody says where "${name}" is;  name it in \`operations\``)
     }
+    if (collection) this.refuseUnlessEnabled(collection, name)
+    const { at, method = "POST" } = typeof operation === "string" ? { at: operation } : operation
     const data = collection && input ? this.onTheWire(collection, input as PlaceRow) : input
-    const response = await this.answerTo({ url: path, urlData: {}, method: "POST", data: data as never }, context)
+    const id = isOneRow(input) ? input.id : undefined
+    const urlData = isOneRow(data) ? { ...data, ...(id !== undefined && { id }) } : {}
+    const url = IS_ADDRESS.test(at) ? at : `${this.url}${at}`
+    const response = await this.answerTo({ url, urlData: urlData as never, method, data: data as never }, context)
     return jsonIn(response)
+  }
+
+  /** Does `collection` take `operation`? */
+  private isEnabled(collection: string, operation: string): boolean {
+    return this.enabled.get(collection)?.has(operation) ?? true
+  }
+
+  /** - throws `PlaceError` `"refused"` when `collection` doesn't take `operation`, saying which it does */
+  private refuseUnlessEnabled(collection: string, operation: string): void {
+    if (this.isEnabled(collection, operation)) return
+    const enabled = [...(this.enabled.get(collection) ?? [])]
+    const which = enabled.length
+      ? `its enabled operations are ${enabled.join(", ")}`
+      : "all its operations are disabled"
+    throw new PlaceError(`${collection} can't ${operation} here:  ${which}.`, {
+      cause: { kind: "refused", whyNot: "place" }
+    })
   }
 
   ////////////////
@@ -199,6 +263,7 @@ export class RestPlace extends WebPlace implements Place {
    * - throws `PlaceError` for an answer that means something;  `TypeError` for an answer that isn't a list
    */
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    this.refuseUnlessEnabled(collection, READ_OPERATION)
     const { page, at, size } = this.pageOf(query)
     const handled: ListHandled = {}
     // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
@@ -272,6 +337,7 @@ export class RestPlace extends WebPlace implements Place {
 
   /** The rows of `collection` with these ids:  one request each.  An id it doesn't hold is left out. */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]> {
+    this.refuseUnlessEnabled(collection, READ_OPERATION)
     const rows = await Promise.all(ids.map((id) => this.rowOrNothing(collection, id, context)))
     return rows.filter((row) => !!row)
   }
@@ -312,6 +378,7 @@ export class RestPlace extends WebPlace implements Place {
   /** Make one change:  its row, as the server now keeps it, if it said. */
   private async makeChange(change: PlaceChange, context: PlaceContext): Promise<PlaceRow | undefined> {
     const { kind, collection, id, changeId } = change
+    this.refuseUnlessEnabled(collection, OPERATION_OF_WRITE[kind])
     if (kind === "delete") {
       await this.answerTo({ ...this.thingAddress(collection, id!), method: "DELETE" }, context, changeId)
       this.seenVersions.delete(versionKey(collection, id!))
@@ -603,8 +670,11 @@ export type RestPlaceProps = WebPlaceProps & {
   allCollections?: RestCollection
   /** What this API does for itself, over a plain one that does nothing.  Declared per API:  they vary. */
   can?: Partial<Omit<PlaceCapabilities, "page">> & { page?: Exclude<PageKind, "range"> }
-  /** Each named operation's address under `url`, by its name:  `{ publish: "/recipes/publish" }`, for `call()`. */
-  operations?: Readonly<Record<string, string>>
+  /**
+   * Each named operation's address under `url`, by its name, for `call()`:  `{ publish: "/recipes/publish" }`;
+   * or its address and method, `{ complete: { at: "/jobs/{id}/complete", method: "PATCH" } }` (epic `data` P49).
+   */
+  operations?: Readonly<Record<string, string | RestOperation>>
   /** How it knows what version a thing is at.  Left out:  it doesn't, so the last save wins the whole record. */
   versions?: RestVersions
   /** How it updates:  `PATCH`, the fields changed (the default), or `PUT`, the whole record. */
@@ -665,6 +735,14 @@ export type RestSearch = {
   fields: readonly string[]
   /** Its own address under `url`, when a search isn't asked of a list's:  the Met Museum's `/v1.1/search`. */
   at?: string
+}
+
+/** A named operation's address, its braces filled from the thing sent, and its method (epic `data` P49). */
+export type RestOperation = {
+  /** Its address under `url`:  `/jobs/{id}/complete`. */
+  at: string
+  /** Its method:  `POST` when left out. */
+  method?: ApiMethod
 }
 
 /** How one collection maps onto the server. */

@@ -780,6 +780,13 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
     }
     if (held && kind === "lives") return leaveOutCollection(description, collection, reason)
     if (kind === "inside") return leaveOutInside(description, parts, collection, field!, reason)
+    // an action route Spell can't name:  its description keeps it, disabled
+    const action = held && kind === "action" ? held.operations?.[field!] : undefined
+    if (action) {
+      action.state = { is: "disabled", reason }
+      description.notes.push(`Left out ${collection}'s action "${field}":  ${reason}`)
+      return true
+    }
   }
   const type = parts.types.find(({ header }) => header === line)
   return !!type && leaveOutCollection(description, type.collection, reason)

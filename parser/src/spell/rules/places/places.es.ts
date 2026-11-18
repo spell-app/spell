@@ -58,6 +58,10 @@ import {
 import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
 import { KeepsNoTimes } from "./KeepsNoTimes"
+import { EnabledOperations, OPERATION_MEANINGS } from "./EnabledOperations"
+import { OperationName } from "./OperationName"
+import { OperationNames } from "./OperationNames"
+import { TypeVerified } from "./TypeVerified"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
@@ -91,6 +95,11 @@ import { WritesLike } from "./WritesLike"
 export const placesEs = new SpellParser({ module: "places" })
 
 const A = "(un|una)"
+
+/** Un servidor web para las pruebas, para las líneas de un tipo sobre lo que deja hacer (`EnabledOperations`, epic `data` P49). */
+function addNetboxEs(scope: P.Scope) {
+  scope.compile('netbox es un servidor web en "https://demo.netbox.dev"', "block")
+}
 const THE = "(el|la|los|las)"
 
 /** `hay menos de 2 recetas donde ...`, `no hay recetas`:  see `ThereAreThings`. */
@@ -353,7 +362,7 @@ placesEs.addRule(ConfirmedJoin, {
   syntax: "(los|las) {collection:identifier} (confirmados|confirmadas) se unen a {address:text}"
 })
 
-placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
+placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text} {nested_statements}?` })
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })
 placesEs.addRule(SearchedAt, { syntax: `${THE} {collection:plural_type} se buscan en {path:text}` })
 placesEs.addRule(PictureAt, {
@@ -884,6 +893,304 @@ placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive
 
 placesEs.addRule(KeepsNoTimes, { syntax: "{type:subject_implied} no guarda fechas" })
 placesEs.addRule(KeepsNoTimes, { syntax: `${A} {type:known_type} no guarda fechas` })
+
+// lo que un lugar deja hacer con las cosas de un tipo (epic `data` P49):  `operaciones activas: añadir, cambiar`
+placesEs.addRule(Wording.specialize({ ruleName: "operation_word", meanings: [...OPERATION_MEANINGS] }), {
+  syntax: "((read:leer)|(add:añadir)|(change:cambiar)|(delete:borrar)|(all:todas))"
+})
+placesEs.addRule(OperationName, {
+  tests: [
+    { tests: [["añadir", "añadir"], { title: "un nombre empieza en minúscula", input: "Añadir", js: undefined }] }
+  ]
+})
+placesEs.addRule(OperationNames, { syntax: "[{operation_name} (,|y|e|o|u)]" })
+placesEs.addRule(EnabledOperations, {
+  syntax: "(las)? operaciones activas (son)? :? {operations:operation_names}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addNetboxEs,
+      tests: [
+        [
+          'un "trabajo" es una cosa\n\tvive en netbox\n\toperaciones activas: añadir, cambiar, completar',
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"],',
+            "    operations: [",
+            '      "add",',
+            '      "change",',
+            '      "completar"',
+            "    ], select: [] }",
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}"
+          ],
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"],',
+            "    operations: [",
+            '      "add",',
+            '      "change",',
+            '      "completar"',
+            "    ], select: [] }",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'un "trabajo" es una cosa\n\tvive en netbox\n\toperaciones activas: leer',
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"],',
+            '    operations: ["read"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}"
+          ],
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"],',
+            '    operations: ["read"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'netbox es un servidor web en "https://demo.netbox.dev"\n\tlos trabajos están en "/api/jobs"\n\t\toperaciones activas: leer, añadir',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  collections: { trabajos: { at: "/api/jobs", operations: ["read", "add"] } },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(EnabledOperations, {
+  syntax: "todas las operaciones están desactivadas",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addNetboxEs,
+      tests: [
+        [
+          'una "sesión" es una cosa\n\tvive en netbox\n\ttodas las operaciones están desactivadas',
+          [
+            "export class Sesión extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "sesiones",',
+            '    times: ["created", "modified"],',
+            "    operations: [], select: [] }",
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}"
+          ],
+          [
+            "export class Sesión extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "sesiones",',
+            '    times: ["created", "modified"],',
+            "    operations: [], select: [] }",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+
+// si un tipo leído de la descripción de una API se probó en su servidor (epic `data` P49):  `este tipo está verificado`
+placesEs.addRule(Wording.specialize({ ruleName: "verify_state", meanings: ["verified", "failed", "unverified"] }), {
+  syntax: "((verified:verificado)|(failed:falló|fallido)|(unverified:sin verificar))"
+})
+placesEs.addRule(TypeVerified, {
+  syntax: "este? tipo (está|es)? {state:verify_state}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addNetboxEs,
+      tests: [
+        [
+          'un "trabajo" es una cosa\n\tvive en netbox\n\teste tipo está verificado',
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}"
+          ],
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'un "trabajo" es una cosa\n\tvive en netbox\n\teste tipo falló',
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}"
+          ],
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'un "trabajo" es una cosa\n\tvive en netbox\n\teste tipo está sin verificar',
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // vive en netbox",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}"
+          ],
+          [
+            "export class Trabajo extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "trabajos",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // vive en netbox",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })

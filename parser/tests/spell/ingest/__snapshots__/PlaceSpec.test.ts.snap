@@ -10,6 +10,10 @@ exports[`spell place ingest --spec > writes the whole place from the description
 	contacts live at "/api/tenancy/contacts/"
 	tenant groups live at "/api/tenancy/tenant-groups/"
 	tenants live at "/api/tenancy/tenants/"
+	to enqueue a background task is at "/api/core/background-tasks/{id}/enqueue/"
+	to requeue a background task is at "/api/core/background-tasks/{id}/requeue/"
+	to stop a background task is at "/api/core/background-tasks/{id}/stop/"
+	to sync a data source is at "/api/core/data-sources/{id}/sync/"
 	a data source's modified is its "last updated"
 	a contact's modified is its "last updated"
 	a tenant group's modified is its "last updated"
@@ -17,9 +21,12 @@ exports[`spell place ingest --spec > writes the whole place from the description
 
 a "background task" is a thing
 	it lives in netbox
+	this type is unverified
+	enabled operations are read, delete, enqueue, requeue, stop
 
 a "data source" is a thing
 	it lives in netbox
+	this type is unverified
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text
@@ -41,6 +48,8 @@ a "data source" is a thing
 
 a "job" is a thing
 	it lives in netbox
+	this type is unverified
+	enabled operations are read
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text
@@ -62,6 +71,7 @@ a "job" is a thing
 
 a "contact" is a thing
 	it lives in netbox
+	this type is unverified
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text
@@ -79,6 +89,7 @@ a "contact" is a thing
 
 a "tenant group" is a thing
 	it lives in netbox
+	this type is unverified
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text
@@ -96,6 +107,7 @@ a "tenant group" is a thing
 
 a "tenant" is a thing
 	it lives in netbox
+	this type is unverified
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text

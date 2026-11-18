@@ -1661,6 +1661,8 @@
             "clock_zone",
             "size_unit",
             "numbers_or_names",
+            "operation_word",
+            "verify_state",
             "there_are_how_many",
             "site_top_bar",
             "site_main_layout",
@@ -1789,6 +1791,12 @@
             },
             {
               "syntax": "((numbers:numbers)|(names:names))"
+            },
+            {
+              "syntax": "((read:read)|(add:add)|(change:change)|(delete:delete)|(all:all))"
+            },
+            {
+              "syntax": "((verified:verified)|(failed:failed)|(unverified:unverified))"
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
@@ -7716,7 +7724,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 100,
+          "line": 102,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -8607,6 +8615,98 @@
           "aliases": ["statement"]
         },
         {
+          "className": "OperationName",
+          "ruleNames": ["operation_name"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationName.ts",
+          "line": 10,
+          "purpose": "One operation a place may let be done, in an `enabled operations are ...` line (epic `data` P49).",
+          "syntaxes": [
+            {
+              "example": "add",
+              "outputs": {
+                "js": {
+                  "code": "add"
+                },
+                "ts": {
+                  "code": "add"
+                },
+                "py": {
+                  "error": "writes itself, in javascript:  no Python writer"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "EnabledOperations",
+          "ruleNames": ["enabled_operations"],
+          "internal": false,
+          "file": "src/spell/rules/places/EnabledOperations.ts",
+          "line": 36,
+          "purpose": "What a place lets be done to a type's things (epic `data` P49, Q47 / J264 D, Q57-Q63).",
+          "syntaxes": [
+            {
+              "syntax": "enabled operations? are? :? {operations:operation_names}",
+              "example": "a \"job\" is a thing\n\tit lives in netbox\n\tenabled operations are add, change, complete",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"complete\"\n    ], select: [] }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"complete\"\n    ], select: [] }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"jobs\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [\"add\", \"change\", \"complete\"],\n    }\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")"
+                }
+              }
+            },
+            {
+              "syntax": "all operations are disabled",
+              "example": "a \"job session\" is a thing\n\tit lives in netbox\n\tall operations are disabled",
+              "outputs": {
+                "js": {
+                  "code": "export class JobSession extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"job_sessions\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class JobSession extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"job_sessions\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}"
+                },
+                "py": {
+                  "code": "class JobSession(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"job_sessions\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [],\n    }\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TypeVerified",
+          "ruleNames": ["type_verified"],
+          "internal": false,
+          "file": "src/spell/rules/places/TypeVerified.ts",
+          "line": 15,
+          "purpose": "Whether a type read from an API's description was tried against a running server (epic `data` P49, Q56 C, Q62 B).",
+          "syntaxes": [
+            {
+              "syntax": "this? type is? {state:verify_state}",
+              "example": "a \"job\" is a thing\n\tit lives in netbox\n\tthis type is verified",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    saved_in = {\"place\": \"netbox\", \"collection\": \"jobs\", \"times\": [\"created\", \"modified\"]}\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ShowThemAtATime",
           "ruleNames": ["show_them_at_a_time"],
           "internal": false,
@@ -8761,11 +8861,11 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 12,
+          "line": 15,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
-              "syntax": "{collection:plural_type} live at {path:text}"
+              "syntax": "{collection:plural_type} live at {path:text} {nested_statements}?"
             },
             {
               "syntax": "{collection:plural_type} are found at {path:text}"
@@ -9059,7 +9159,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
@@ -9306,6 +9406,20 @@
           "syntaxes": [
             {
               "syntax": "[{identifier} (,|and)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "OperationNames",
+          "ruleNames": ["operation_names"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationNames.ts",
+          "line": 9,
+          "purpose": "The operations an `enabled operations are ...` line names, e.g. `add, change and delete` (epic `data` P49).",
+          "syntaxes": [
+            {
+              "syntax": "[{operation_name} (,|and|or)]"
             }
           ],
           "aliases": []

@@ -949,3 +949,46 @@ describe("a rate limit, in a running program (epic `data` T110)", () => {
     expect(sent.count).toBe(2)
   })
 })
+
+describe("enabled operations, and action routes (epic `data` P49)", () => {
+  test("a collection takes only the operations its lines enable, and says which", async () => {
+    const { box, place } = await served()
+    place.limitOperations("recipes", ["read", "add", "change"])
+    expect(place.canWrite({ collection: "recipes", kind: "delete" })).toEqual({ canWrite: false, whyNot: "place" })
+    expect(place.canWrite({ collection: "recipes", kind: "update" })).toEqual({ canWrite: true })
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: expect.any(Array) })
+    const deleting: PlaceChange = { kind: "delete", collection: "recipes", id: "r-1", changeId: "c-1" }
+    const refused = await place.apply([deleting], {}).catch((error: unknown) => error)
+    expect(refused).toBeInstanceOf(PlaceError)
+    expect((refused as PlaceError).message).toBe(
+      "recipes can't delete here:  its enabled operations are read, add, change."
+    )
+    expect((refused as PlaceError).cause).toMatchObject({ kind: "refused", whyNot: "place" })
+    expect(box.recipes.has("r-1")).toBe(true)
+  })
+
+  test("a thing's line and its collection's narrow each other;  all operations disabled stops reading too", async () => {
+    const { place } = await served()
+    place.limitOperations("recipes", ["all"])
+    expect(place.canWrite({ collection: "recipes", kind: "delete" })).toEqual({ canWrite: true })
+    place.limitOperations("recipes", ["read", "add"])
+    place.limitOperations("recipes", ["read", "change"])
+    expect(place.canWrite({ collection: "recipes", kind: "insert" })).toMatchObject({ canWrite: false })
+    place.limitOperations("recipes", [])
+    await expect(place.list("recipes", {}, {})).rejects.toThrow(
+      "recipes can't read here:  all its operations are disabled."
+    )
+  })
+
+  test("an action route's braces come from the thing sent, and it goes by its own method", async () => {
+    const { box, place } = await served(
+      {},
+      { operations: { star: { at: "/recipes/{id}/star", method: "PATCH" }, publish: "/recipes/publish" } }
+    )
+    await expect(place.call("star", { id: "r 1", title: "Soup" }, {}, "recipes")).resolves.toEqual({ starred: 1 })
+    expect(box.starred).toEqual([{ id: "r 1", method: "PATCH" }])
+    place.limitOperations("recipes", ["read", "publish"])
+    await expect(place.call("star", { id: "r-1" }, {}, "recipes")).rejects.toThrow("recipes can't star here")
+    await expect(place.call("publish", { id: "r-1" }, {}, "recipes")).resolves.toEqual({ published: 1 })
+  })
+})

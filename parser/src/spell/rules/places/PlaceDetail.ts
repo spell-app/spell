@@ -17,6 +17,8 @@ export type PlaceDetailValue = {
       askedBy?: string[]
       /** How this one is searched, at its own address:  see `CollectionSearchedWith`. */
       searches?: { param: string; fields: string[]; at?: string }
+      /** What its place lets be done to all of them:  see `EnabledOperations` (epic `data` P49). */
+      operations?: string[]
     }
   >
   keyNamed?: string

@@ -37,6 +37,9 @@ const PUBLISH_PATH = "/recipes/publish"
 /** The operation that takes nothing, for a program's `to reload is at "..."`:  it says how many there are. */
 const RELOAD_PATH = "/recipes/reload"
 
+/** An action route under one recipe, by its id (epic `data` P49):  `to star a recipe is at "/recipes/{id}/star"`. */
+const STAR_PATH = /^\/recipes\/([^/]+)\/star$/
+
 /** How many requests it remembers:  a page left polling mustn't grow it for ever. */
 const ASKS_KEPT = 10_000
 
@@ -65,6 +68,8 @@ export class RecipeBox {
   readonly asks: RecipeAsk[] = []
   /** What's been sent to `/recipes/publish`, oldest first. */
   readonly published: Record<string, unknown>[] = []
+  /** Each recipe starred at `/recipes/{id}/star`, by id, with the method it came by, oldest first. */
+  readonly starred: Array<{ id: string; method: string }> = []
   /** What each change's id made:  a change sent again is answered with this, and made once. */
   readonly changesMade = new Map<string, WireRecipe>()
   /** A request answered from here on waits for this, so a test can catch one under way. */
@@ -153,7 +158,8 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
     const { path, method } = request
     const isList = path === "/recipes"
     const one = ONE_RECIPE.exec(path)
-    if (!isList && !one) return next()
+    const star = STAR_PATH.exec(path)
+    if (!isList && !one && !star) return next()
     const body = await bodyOf(request)
     await noteAsk(box, request, reply, body)
 
@@ -163,6 +169,10 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
       return void reply.json({ published: box.published.length })
     }
     if (method === "POST" && path === RELOAD_PATH) return void reply.json({ recipes: box.recipes.size })
+    if (star) {
+      box.starred.push({ id: decodeURIComponent(star[1]!), method })
+      return void reply.json({ starred: box.starred.length })
+    }
 
     if (isList && method === "GET") return listRecipes(box, request, reply, { paging, wire })
 
