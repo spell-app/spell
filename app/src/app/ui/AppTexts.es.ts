@@ -381,6 +381,16 @@ const APP_TEXTS_ES: AppTextPack = {
   placeRefTried: "probada el {date}",
   placeRefTriedOn: "probada en {deployment}, el {date}",
   placeRefRows: "{count} filas leídas",
+  placeRefFailed401:
+    "El servidor real pidió una clave, el código secreto que deja entrar a Spell.\nAgrégala junto a este servidor en el archivo __project.json5 de tu proyecto, y vuelve a probar con spell place verify.",
+  placeRefFailed403:
+    "El servidor real no aceptó la clave, el código secreto que deja entrar a Spell.\nRevisa la clave en el archivo __project.json5 de tu proyecto, y vuelve a probar con spell place verify.",
+  placeRefFailed404:
+    "Spell no encontró esta lista en el servidor real, en la dirección que tenía.\nRevisa la dirección en la descripción del lugar, y vuelve a probar con spell place verify.",
+  placeRefFailed5xx:
+    "Algo falló en el servidor real, no en tu proyecto.\nEspera unos minutos, y vuelve a probar con spell place verify.",
+  placeRefFailedOther:
+    "La respuesta del servidor real no fue la que Spell esperaba.\nPasa el puntero sobre esta línea para ver qué dijo.",
   placeRefListLeftOut: "Fuera del Spell:  {why}",
   placeRefChanges: "Qué puede cambiar",
   placeRefFields: "Campos",

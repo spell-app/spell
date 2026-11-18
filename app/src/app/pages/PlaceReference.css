@@ -50,21 +50,45 @@
     display: block;
     margin-bottom: 8px;
 
-    /* a list under its tag:  set in, so it reads as the tag's */
+    /* a list under its tag, and a list's changes and fields under it:  set in, so each reads as its parent's */
     .Fold {
       margin-left: 20px;
     }
 
-    h4 {
-      margin: 16px 0 8px 0;
-    }
     p {
       margin: 0 0 8px 0;
     }
-    ui-table {
-      display: block;
-      max-width: 100%;
-      overflow-x: auto;
+  }
+
+  /* a fold whose badge is a state's label:  the label alone, no second pill around it */
+  .Fold.stated::part(badge) {
+    padding: 0;
+    background: transparent;
+  }
+
+  /* a list's address, under its name:  in the code face, as the header's address is */
+  .Fold.list::part(subhead) {
+    font-family: var(--ui-font-family-mono);
+  }
+
+  /* A table scrolls sideways inside its box on a phone, never squeezed;
+     its edge is the theme's raised shadow, not a border, and its cells keep their lines. */
+  .ReferenceTable {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 4px;
+    margin: 0 -4px;
+
+    > table {
+      min-width: 640px;
+      margin: 0 0 8px 0;
+      --ui-table-border-width: 0;
+      box-shadow: var(--ui-shadow-raised);
+    }
+    code {
+      font-family: var(--ui-font-family-mono);
+      font-size: 0.9em;
     }
   }
 

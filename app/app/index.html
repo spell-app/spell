@@ -42,6 +42,15 @@
       ui-table.ui.table {
         color: inherit;
       }
+      /* ... and its table and cells too:  `semantic.min.css` paints them white (`#fff`, its header cells `#f9fafb`)
+         with black text and borders, unlayered, so it beat Spell UI's table look and every table stayed white on a
+         dark page (epic `data` J282).  Each falls back to Spell UI's own, which follows the theme. */
+      ui-table > table.ui.ui.table,
+      ui-table > table.ui.ui.table > * > tr > :is(th, td) {
+        background: revert-layer;
+        color: revert-layer;
+        border: revert-layer;
+      }
       /* ... and sets its width, `auto` when `collapsing`, which fills a block:  its width is Spell UI's,
          so a collapsing table hugs its columns (epic `data` I91). */
       ui-table.ui.table,
