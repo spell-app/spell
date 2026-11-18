@@ -124,7 +124,11 @@ export const SUGGEST_WHERE_IT_HELPS: readonly { place: string; before: RegExp }[
     before: /<\p{L}[\p{L}\p{M}\d-]*(?:\s(?:[^<>"{}]|"[^"]*"|\{[^{}]*\})*)?\s$/u
   },
   { place: "the words an attribute takes, in its quotes", before: /<\p{L}[\p{L}\p{M}\d-]*\s[^<>]*[\p{L}\d-]="$/u },
-  { place: "a property, after its / 's / of", before: /\S\s+(?:its|of|su|sus|de)\s$|\p{L}'s\s$/iu }
+  { place: "a property, after its / 's / of", before: /\S\s+(?:its|of|su|sus|de)\s$|\p{L}'s\s$/iu },
+  {
+    place: "a built-in sound's name, in the quotes after play / stop / load (epic `mockup` P28)",
+    before: /(?:^|\s)(?:play|stop|load|preload|reproducir|parar|cargar|precargar)\s+"$/iu
+  }
 ]
 
 /** Should the suggestions show by themselves after `before`, the text before the caret on its line? */

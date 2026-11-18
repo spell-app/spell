@@ -900,7 +900,24 @@ export const APP_TEXTS = {
   cmPeekClose: "Close (Esc)",
   // a web address in the code, its tip on a plain hover (`CodeEditorFeatures.linkTip()`)
   codeLinkTipMac: "⌘-click to open",
-  codeLinkTip: "Ctrl-click to open"
+  codeLinkTip: "Ctrl-click to open",
+
+  ////////////////
+  // ## The sound picker (`ValuePopups`, epic `mockup` P28):  "Pick a sound…" in `play "|"`
+  ////////////////
+
+  soundPicker: "Sounds",
+  soundPickerHint: "Click ▶ to hear a sound.\nClick its name to use it.",
+  soundListen: "Hear \u201c{sound}\u201d",
+  soundKindInterface: "Clicks and switches",
+  soundKindCards: "Cards",
+  soundKindCasino: "Dice, chips and coins",
+  soundKindPieces: "Board pieces",
+  soundKindImpacts: "Knocks and hits",
+  soundKindFootsteps: "Footsteps",
+  soundKindThings: "Doors, books and things",
+  soundKindDigital: "Beeps and zaps",
+  soundKindJingles: "Short tunes"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

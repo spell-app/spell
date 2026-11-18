@@ -265,10 +265,12 @@ export const SHARED_DEFAULTS: Readonly<Record<string, string>> = { [H_PACKAGE]: 
 const SHARED_H = "\0spell-shared-h"
 
 /**
- * `ui`'s generated DATA, plain tables with no Solid in them (`spell/ui/vocabulary/partsOfSpeech.generated`, which
- * the bubbly look reads):  bundled where it's used, as any plain module is.
+ * `ui`'s plain DATA, tables with no Solid in them:  bundled where it's used, as any plain module is.
+ * - its generated tables (`spell/ui/vocabulary/partsOfSpeech.generated`, which the bubbly look reads)
+ * - the built-in sounds' names (`spell/ui/sounds`, which the language service lists;  epic `mockup` P28):
+ *   where their FILES are is the page's runtime's to say (`UI.sounds`), never this copy's
  */
-const UI_DATA = /^spell\/ui\/.+\.generated$/
+const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
 
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
@@ -283,7 +285,7 @@ const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)
  * - Side-effect imports too:  `import "spell/ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
  * - Looked up by the import name itself, the key of the maps above and of a page's `SpellUI.packModules`
  *   (`SHARED_SPECIFIERS`;  epic `repo-split` P14, Q45).
- * - `ui`'s generated data (`UI_DATA`) is bundled, as it holds no Solid.
+ * - `ui`'s plain data (`UI_DATA`) is bundled, as it holds no Solid.
  * - Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a build ERROR:
  *   add it to `FROM_SHARED_SOLID` and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
  * - Type-only imports (`@solidjs/web/types/jsx.js`) are gone before this runs.

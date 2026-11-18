@@ -873,7 +873,24 @@ const APP_TEXTS_ES: AppTextPack = {
   cmPeekClose: "Cerrar (Esc)",
   // una dirección web en el código
   codeLinkTipMac: "⌘-clic para abrir",
-  codeLinkTip: "Ctrl-clic para abrir"
+  codeLinkTip: "Ctrl-clic para abrir",
+
+  ////////////////
+  // ## The sound picker
+  ////////////////
+
+  soundPicker: "Sonidos",
+  soundPickerHint: "Pulsa ▶ para oír un sonido.\nPulsa su nombre para usarlo.",
+  soundListen: "Oír \u00ab{sound}\u00bb",
+  soundKindInterface: "Clics e interruptores",
+  soundKindCards: "Cartas",
+  soundKindCasino: "Dados, fichas y monedas",
+  soundKindPieces: "Piezas de tablero",
+  soundKindImpacts: "Golpes",
+  soundKindFootsteps: "Pasos",
+  soundKindThings: "Puertas, libros y cosas",
+  soundKindDigital: "Pitidos y chispazos",
+  soundKindJingles: "Melodías cortas"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

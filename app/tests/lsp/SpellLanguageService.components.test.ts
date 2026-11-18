@@ -85,6 +85,37 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
     })
   })
 
+  describe("a built-in sound's name, in quotes after `play` (epic `mockup` P28)", () => {
+    test("Pick a sound… first, then every sound's name, each replacing what's typed", async () => {
+      game.service.picksValues = true
+      const [pick, ...names] = await game.typedInAction('play "card s')
+      expect(pick?.label).toBe("Pick a sound…")
+      expect(pick?.command?.command).toBe(LSP.PICK_VALUE_COMMAND)
+      const [picker, values] = pick!.command!.arguments as [SP.ComponentValuePicker, string[]]
+      expect(picker.kind).toBe("sound")
+      expect(values).toContain("card slide")
+      expect(labels(names)).toEqual(expect.arrayContaining(["card slide", "win", "click"]))
+      const slide = names.find(({ label }) => label === "card slide")
+      expect(slide?.textEdit && "range" in slide.textEdit && slide.textEdit.range.start.character).toBe(
+        slide?.textEdit && "range" in slide.textEdit && slide.textEdit.range.end.character - "card s".length
+      )
+    })
+
+    test("`stop` and `load` too;  not after any other word", async () => {
+      game.service.picksValues = false
+      expect(labels(await game.typedInAction('stop "'))).toContain("win")
+      expect(labels(await game.typedInAction('load "'))).toContain("win")
+      expect(labels(await game.typedInAction('say "'))).not.toContain("win")
+    })
+
+    test("in Spanish:  `reproducir`, Elegir un sonido…, the names Spanish", async () => {
+      solitario.service.picksValues = true
+      const items = labels(await solitario.typed('reproducir "'))
+      expect(items[0]).toBe("Elegir un sonido…")
+      expect(items).toContain("deslizar carta")
+    })
+  })
+
   test("a thing's property says what it is in the list:  `set its tu` => `turn`, `Whose turn it is`", async () => {
     const items = await game.typedInAction("set its tu")
     const turn = items.find(({ label }) => label === "turn")

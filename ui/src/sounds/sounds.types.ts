@@ -36,18 +36,5 @@ export const SOUND_KINDS = [
 /** A kind of built-in sound:  one of `SOUND_KINDS`. */
 export type SoundKind = (typeof SOUND_KINDS)[number]
 
-/** Each kind's name, in English and Spanish:  the sound picker's group headings. */
-export const SOUND_KIND_NAMES: Record<SoundKind, { en: string; es: string }> = {
-  interface: { en: "Clicks and switches", es: "Clics e interruptores" },
-  cards: { en: "Cards", es: "Cartas" },
-  casino: { en: "Dice, chips and coins", es: "Dados, fichas y monedas" },
-  pieces: { en: "Board pieces", es: "Piezas de tablero" },
-  impacts: { en: "Knocks and hits", es: "Golpes" },
-  footsteps: { en: "Footsteps", es: "Pasos" },
-  things: { en: "Doors, books and things", es: "Puertas, libros y cosas" },
-  digital: { en: "Beeps and zaps", es: "Pitidos y chispazos" },
-  jingles: { en: "Jingles", es: "Sintonías" }
-}
-
 /** The folder the built-in sounds are in, beside `BuiltInSounds`' module (or chunk, once built). */
 export const SOUND_LIBRARY = "sound-library"
