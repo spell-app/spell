@@ -193,6 +193,18 @@ describe("@drawn", () => {
     expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
   })
 
+  test('<modal><action "..."/></modal>:  its button closes the modal after its click, as a dialog\'s OK (language T155)', () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    const game = new Game()
+    draw(() => core.drawAction(game, "restartTheGame", { class: "Big", "in-dialog": true }))
+    const button = element.querySelector("ui-button")
+    expect(button?.getAttribute("class")).toBe("Big approve")
+    expect(button?.hasAttribute("in-dialog")).toBe(false)
+  })
+
   test('<context-menu "game menu" />, context-menu="game menu":  a menu drawn with that name, reused (language T156)', () => {
     class Game extends Thing {
       restartTheGame(): void {}

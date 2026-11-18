@@ -1713,6 +1713,13 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Only on a tag that's none of the project's views, in any language:  Spanish's `<modal "ganaste">` is
     `<es-modal id="ganaste" encabezado="ganaste">`, the heading's name the pack's (`SP.ComponentPacks.attributeNameFor()`).
   - On any other tag a quoted word is still unreadable.
+  - A MODAL'S DRAWING (T155;  `SpellJSX.markDialog()`;  Owen:  "only for buttons in the modal's actions section"):
+    - An `<action "...">` in its ACTIONS, `<actions>` (Spanish's `<acciones>`, Spell UI's `<ui-actions>`), closes it once
+      its click has run the action, as a dialog's own buttons do (`in-dialog`:  the core gives its button Spell UI's
+      `approve` class);  `keep-open` (Spanish's `mantener-abierto`, `LanguageWords.keepOpenAttribute`) leaves it open.
+    - Anywhere else in it (its content, a menu's row), an action runs and the modal stays.
+    - A modal naming none of its parts is laid out for you (`dialogChildren()`):  what it holds in `<ui-content>`, the
+      `<action>`s at its top after it in `<ui-actions>`, so they're its actions and close it.
   - `show "you won"`, `hide "you won"` (`show_drawn`, [ShowDrawn.ts](rules/UI/ShowDrawn.ts)):  a quoted name, nothing
     else;  Spanish's `mostrar "ganaste"`, `ocultar "ganaste"`.
     - Compiled to `core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page or

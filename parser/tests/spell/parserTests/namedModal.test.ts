@@ -31,6 +31,8 @@ describe("a named modal, menu or popup, and show / hide by its name", () => {
     const file = parsed(game('<modal "you won">', "\t<text>Well done</>", "</>"))
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('h("ui-modal", { id: "you-won", heading: "you won" },')
+    // what it holds goes in its content part (T155)
+    expect(file.compiled).toContain('h("ui-content", h("ui-text", "Well done"))')
     expect(file.compiled).toContain('core.showDrawn("you won")')
     expect(file.compiled).toContain('core.hideDrawn("you won")')
   })
@@ -48,6 +50,70 @@ describe("a named modal, menu or popup, and show / hide by its name", () => {
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('h("ui-menu", { id: "game-menu" },')
     expect(file.compiled).toContain('h("ui-popup", { id: "you-won", heading: "you won" },')
+  })
+
+  test("an action in a modal closes it, its button in the modal's actions;  a menu's row in it stays a row (T155)", () => {
+    const file = parsed([
+      "game is an app",
+      "\tto draw game",
+      '\t\t<modal "you won">',
+      "\t\t\t<text>Well done</>",
+      '\t\t\t<action "deal" title="New game" />',
+      '\t\t\t<menu><action "deal" /></>',
+      "\t\t</>",
+      "\tto deal",
+      "\t\tprint 1"
+    ])
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain(
+      'h("ui-actions", core.drawAction(this, "deal", { title: "New game", "in-dialog": true }))'
+    )
+    expect(file.compiled).toContain('h("ui-menu", core.drawAction(this, "deal", { "in-menu": true }))')
+    const python = String(PY.PyWriter.instance.writeMatch(file.match!))
+    expect(python).toContain('core.draw_action(self, "deal", {"title": "New game", "in-dialog": True})')
+  })
+
+  test("a modal that lays out its own parts keeps them:  only an action in its <actions> closes it (T155)", () => {
+    const file = parsed([
+      "game is an app",
+      "\tto draw game",
+      '\t\t<modal "you won">',
+      "\t\t\t<header>Yes</>",
+      '\t\t\t<content><action "deal" title="In content" /></>',
+      "\t\t\t<actions>",
+      '\t\t\t\t<action "deal" title="Closes" />',
+      '\t\t\t\t<action "deal" title="Stays" keep-open />',
+      "\t\t\t</>",
+      "\t\t</>",
+      "\tto deal",
+      "\t\tprint 1"
+    ])
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain('h("ui-content", core.drawAction(this, "deal", { title: "In content" }))')
+    expect(file.compiled).toContain('core.drawAction(this, "deal", { title: "Closes", "in-dialog": true })')
+    expect(file.compiled).toContain('core.drawAction(this, "deal", { title: "Stays" })')
+    expect(file.compiled).not.toContain("keep-open")
+  })
+
+  test("Spanish:  <acciones> closes it, mantener-abierto leaves it open (T155)", () => {
+    const file = parsed(
+      [
+        "juego es una aplicación",
+        "\tpara dibujar eso",
+        '\t\t<modal "ganaste">',
+        "\t\t\t<acciones>",
+        '\t\t\t\t<acción "repartir" />',
+        '\t\t\t\t<acción "repartir" title="Mirar" mantener-abierto />',
+        "\t\t\t</>",
+        "\t\t</>",
+        "\tpara repartir",
+        "\t\timprimir 1"
+      ],
+      "/Juego.es.spell"
+    )
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain('core.drawAction(this, "repartir", { "in-dialog": true })')
+    expect(file.compiled).toContain('core.drawAction(this, "repartir", { title: "Mirar" })')
   })
 
   test("a quoted word on any other tag still can't be read", () => {

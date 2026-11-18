@@ -456,6 +456,12 @@ export type LanguageWords = {
    */
   iconOnlyAttribute: string
   /**
+   * `<action>`'s own attribute in a modal's actions, a button that leaves the modal open (epic `language` T155):
+   * English's `keep-open`, Spanish's `mantener-abierto` -- see `SpellJSX.markDialog()`.
+   * - Read without accents too.
+   */
+  keepOpenAttribute: string
+  /**
    * The tag of an example on a page, in a drawing (epic `elemental-spell` P16):
    * English's `<example "one counter">`, Spanish's `<ejemplo "un contador">`.
    * - SEE:  `example_block`.
