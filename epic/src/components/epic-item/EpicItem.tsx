@@ -534,43 +534,53 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             <Show when={this.reviewState.boxOpen()}>{this.noteBox()}</Show>
           </div>
         </Show>
-        <div
-          id={DETAILS_ID}
-          class={DETAILS}
-          part={this.partForName("details")}
-          hidden={!this.isOpen() || this.veiled() ? "until-found" : undefined}
-          style={this.showCommits ? { [COMMITS_PROPERTY]: "block" } : undefined}
-        >
-          {/* drawn from its first unfolding (`detailsDrawn`):  hidden till then anyway (I333) */}
-          <Show when={this.detailsDrawn()}>
-            <Show when={this.failureText()}>
-              <p class={NOTE} part={this.partForName("error")}>
-                {this.failureText()}
-              </p>
-            </Show>
-            <Show when={this.textLabel()}>
-              <div class={LABEL} part={this.partForName("label")}>
-                {this.textLabel()}
-              </div>
-            </Show>
+        {/* an item whose details come from its `source` part:  its details box drawn from its first unfolding
+            (`detailsDrawn`), its part loading then anyway;  folded and never opened, it's ~15 nodes apiece for nothing
+            (I333) */}
+        <Show when={!this.source || this.detailsDrawn()}>{this.details()}</Show>
+      </div>
+    )
+  }
+
+  /** Its details' box:  the light details (the default slot), the status cards, its review pieces. */
+  private details(): JSX.Element {
+    return (
+      <div
+        id={DETAILS_ID}
+        class={DETAILS}
+        part={this.partForName("details")}
+        hidden={!this.isOpen() || this.veiled() ? "until-found" : undefined}
+        style={this.showCommits ? { [COMMITS_PROPERTY]: "block" } : undefined}
+      >
+        {/* drawn from its first unfolding (`detailsDrawn`):  hidden till then anyway (I333) */}
+        <Show when={this.detailsDrawn()}>
+          <Show when={this.failureText()}>
+            <p class={NOTE} part={this.partForName("error")}>
+              {this.failureText()}
+            </p>
           </Show>
-          {/* the light details in a block of their own:  the details are a column, so a drive-by's status line
-              can go first (its `order`), and the prose's margins still collapse in here */}
-          <div class={BODY}>
-            <div class={FLOW}>
-              <slot />
+          <Show when={this.textLabel()}>
+            <div class={LABEL} part={this.partForName("label")}>
+              {this.textLabel()}
             </div>
-            {/* at the body's right, while reviewed:  asks Claude to clarify it now, turning while it does (T76) */}
-            <Show when={this.reviewState.reviewing() && this.detailsDrawn()}>
-              <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
-            </Show>
+          </Show>
+        </Show>
+        {/* the light details in a block of their own:  the details are a column, so a drive-by's status line
+              can go first (its `order`), and the prose's margins still collapse in here */}
+        <div class={BODY}>
+          <div class={FLOW}>
+            <slot />
           </div>
-          {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
-              it ("under my input", Owen, 2026-10-08, P13), then the box */}
-          <Show when={this.reviewState.reviewing() && this.hasDetails() && this.detailsDrawn()}>{this.saidNote()}</Show>
-          <slot name={this.slotForName(STATUS_SLOT)} />
-          <Show when={this.reviewState.reviewing() && this.hasDetails() && this.detailsDrawn()}>{this.noteBox()}</Show>
+          {/* at the body's right, while reviewed:  asks Claude to clarify it now, turning while it does (T76) */}
+          <Show when={this.reviewState.reviewing() && this.detailsDrawn()}>
+            <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
+          </Show>
         </div>
+        {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
+              it ("under my input", Owen, 2026-10-08, P13), then the box */}
+        <Show when={this.reviewState.reviewing() && this.hasDetails() && this.detailsDrawn()}>{this.saidNote()}</Show>
+        <slot name={this.slotForName(STATUS_SLOT)} />
+        <Show when={this.reviewState.reviewing() && this.hasDetails() && this.detailsDrawn()}>{this.noteBox()}</Show>
       </div>
     )
   }
@@ -1025,7 +1035,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         return item.partForName("toggle")
       },
       get controls() {
-        return item.hasDetails() ? DETAILS_ID : undefined
+        // the box it folds, once drawn (`detailsDrawn`)
+        return item.hasDetails() && (!item.source || item.detailsDrawn()) ? DETAILS_ID : undefined
       },
       tips: {
         get fold() {
