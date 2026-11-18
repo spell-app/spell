@@ -104,7 +104,9 @@ describe("core.alert() / warn() / confirm() / prompt():  the dialog the page's S
     const page = { load: () => Promise.resolve(page), modals }
     const key = Symbol.for("spell-ui:runtime")
     ;(globalThis as Record<symbol, unknown>)[key] = page
-    onTestFinished(() => delete (globalThis as Record<symbol, unknown>)[key])
+    onTestFinished(() => {
+      delete (globalThis as Record<symbol, unknown>)[key]
+    })
     return asked
   }
 

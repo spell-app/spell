@@ -428,7 +428,7 @@ describe("the program's opening (`core.runOpening()`, epic `language` J180)", ()
       }
     }
     let box: Box | undefined
-    await core.runOpening(() => (box = new Box({ rank: "joker" })))
+    core.runOpening(() => (box = new Box({ rank: "joker" })))
     await new Promise((resolve) => setTimeout(resolve, 5))
     expect(box!.faceUp).toBe(true)
     expect(game.canUndo).toBe(false)

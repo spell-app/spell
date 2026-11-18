@@ -38,8 +38,13 @@ describe("SpellKeywords", () => {
       expect(fixes.get("despues")).toBe("después")
     })
 
-    test("never a word the pack ALSO has as a keyword of its own:  `si` is `if`, so never `sí`", () => {
-      expect(fixesOf(SP.spanish).has("si")).toBe(false)
+    test("a word a rule ALSO writes on its own is fixed only in the rules that pair it:  `si` is `if`, `sí o no` yes", () => {
+      const keywords = LSP.SpellKeywords.of(SP.spanish) as unknown as { fixesByRule: Map<P.Rule, Map<string, string>> }
+      const rules = [...keywords.fixesByRule.keys()]
+      // `como sí o no` pairs them;  `si {condition}` writes `si` alone, so it's never one of these rules
+      expect(rules.filter((rule) => keywords.fixesByRule.get(rule)!.has("si")).length).toBeLessThan(rules.length)
+      // `esta mañana` writes `esta` alone, `(está|esta) vacía` pairs them
+      expect(fixesOf(SP.spanish).get("esta")).toBe("está")
     })
 
     test("a word only a repeat's separator says is one of the keywords too", () => {
