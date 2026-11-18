@@ -46270,14 +46270,14 @@ export interface UIStatisticAttributes {
   "prop:fluid"?: boolean | ""
   /**
    * Shorthand for a `<ui-value>`:  the number (or word) shown.
-   * - takes:  text
+   * - takes:  text or a number
    */
-  value?: string
+  value?: string | number
   /**
    * `value`, as the DOM element's property.
    * @deprecated write `value` -- `prop:` stays only for compiled spell
    */
-  "prop:value"?: string
+  "prop:value"?: string | number
   /**
    * The `value` shorthand is a WORD (`text value`):  smaller, bold, at least two lines tall.
    * - takes:  flag (present / absent)

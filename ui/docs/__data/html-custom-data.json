@@ -52814,7 +52814,7 @@
           "name": "value",
           "description": {
             "kind": "markdown",
-            "value": "Shorthand for a `<ui-value>`:  the number (or word) shown.\n\nTakes:  text"
+            "value": "Shorthand for a `<ui-value>`:  the number (or word) shown.\n\nTakes:  text or a number"
           }
         },
         {

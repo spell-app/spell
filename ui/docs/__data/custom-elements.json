@@ -42815,7 +42815,7 @@
               "name": "value",
               "description": "Shorthand for a `<ui-value>`:  the number (or word) shown.",
               "type": {
-                "text": "string"
+                "text": "string | number"
               },
               "fieldName": "value"
             },

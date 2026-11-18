@@ -541,6 +541,7 @@ export class ElementManifests {
   /**
    * An attribute's TypeScript type, as text:  `boolean` for a key-only flag, a string union for a value set,
    * `boolean | "left" | "right"` for one that's either, `string` / `number` otherwise.
+   * - `canBeNumber`:  `string | number`, text that may be a number (`<ui-statistic value>`).
    */
   static typeText(attribute: SiteAttribute): string {
     const values = ElementManifests.values(attribute).map((value) => JSON.stringify(value))
@@ -559,7 +560,7 @@ export class ElementManifests {
       case "width":
         return values.length ? [...values, "string"].join(" | ") : "string"
       default:
-        return values.length ? values.join(" | ") : "string"
+        return attribute.canBeNumber ? "string | number" : values.length ? values.join(" | ") : "string"
     }
   }
 
@@ -593,7 +594,7 @@ export class ElementManifests {
       case "number":
         return "number"
       default:
-        return values.length ? values.join(" · ") : "text"
+        return attribute.canBeNumber ? "text or a number" : values.length ? values.join(" · ") : "text"
     }
   }
 
