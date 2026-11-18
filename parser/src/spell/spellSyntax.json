@@ -608,7 +608,7 @@
           "ruleNames": ["parenthesized_expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/ParenthesizedExpression.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "`(expression)` -- parenthesized sub-expression.",
           "syntaxes": [
             {
@@ -660,7 +660,7 @@
           "ruleNames": ["the_date"],
           "internal": false,
           "file": "src/spell/rules/expressions/TheDate.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
           "syntaxes": [
             {
@@ -701,6 +701,136 @@
                 },
                 "py": {
                   "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DurationPart",
+          "ruleNames": ["duration_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DurationPart.ts",
+          "line": 17,
+          "purpose": "One part of a duration, a whole number -- `the hours of its time left`, for a countdown (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the {part:duration_part_name} of {expression:operand}",
+              "example": "the hours of 5400 seconds",
+              "outputs": {
+                "js": {
+                  "code": "core.durationPartOf(5400, \"hours\")"
+                },
+                "ts": {
+                  "code": "core.durationPartOf(5400, \"hours\")"
+                },
+                "py": {
+                  "code": "core.duration_part_of(5400, \"hours\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "NextWeekend",
+          "ruleNames": ["next_weekend"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/NextWeekend.ts",
+          "line": 14,
+          "purpose": "When the next weekend starts, a date -- `the next weekend - now` is how long until it (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the next weekend",
+              "example": "the next weekend",
+              "outputs": {
+                "js": {
+                  "code": "core.nextWeekend()"
+                },
+                "ts": {
+                  "code": "core.nextWeekend()"
+                },
+                "py": {
+                  "code": "core.next_weekend()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DaysUntil",
+          "ruleNames": ["days_until"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DaysUntil.ts",
+          "line": 13,
+          "purpose": "How many days until a date, or since one, counting midnights -- `the days until its due`, `the days since its added` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the days ((until:until)|(since:since)) {expression:operand}",
+              "example": "the days until due",
+              "outputs": {
+                "js": {
+                  "code": "core.daysUntil(due)"
+                },
+                "ts": {
+                  "code": "core.daysUntil(due)"
+                },
+                "py": {
+                  "code": "core.days_until(due)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "StartOfTheDay",
+          "ruleNames": ["start_of_the_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/StartOfTheDay.ts",
+          "line": 12,
+          "purpose": "The moment a date's day starts or ends -- `the start of the day of now` (midnight), `the end of the day of its due` (11:59:59 PM) (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the ((start:start)|(end:end)) of the day of {expression:operand}",
+              "example": "the start of the day of now",
+              "outputs": {
+                "js": {
+                  "code": "core.startOfDay(core.now())"
+                },
+                "ts": {
+                  "code": "core.startOfDay(core.now())"
+                },
+                "py": {
+                  "code": "core.start_of_day(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DaysInTheMonth",
+          "ruleNames": ["days_in_the_month"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DaysInTheMonth.ts",
+          "line": 12,
+          "purpose": "How many days a date's month has, 28 to 31 -- `the days in the month of now`, for a calendar (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the days in the month of {expression:operand}",
+              "example": "the days in the month of now",
+              "outputs": {
+                "js": {
+                  "code": "core.daysInMonth(core.now())"
+                },
+                "ts": {
+                  "code": "core.daysInMonth(core.now())"
+                },
+                "py": {
+                  "code": "core.days_in_month(core.now())"
                 }
               }
             }
@@ -1386,6 +1516,188 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "AsTwoDigits",
+          "ruleNames": ["as_two_digits"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsTwoDigits.ts",
+          "line": 12,
+          "purpose": "A whole number in two digits, as text, for a clock or a countdown: `the minute of now as two digits` is `05` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "(as two digits|with a leading zero)",
+              "example": "the minute of now as two digits",
+              "outputs": {
+                "js": {
+                  "code": "core.twoDigits(core.minuteOf(core.now()))"
+                },
+                "ts": {
+                  "code": "core.twoDigits(core.minuteOf(core.now()))"
+                },
+                "py": {
+                  "code": "core.two_digits(core.minute_of(core.now()))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsMeridiem",
+          "ruleNames": ["is_meridiem"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsMeridiem.ts",
+          "line": 11,
+          "purpose": "Is a date's time before noon or after -- `if now is PM`, `if its start is AM` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((am:am|AM|Am)|(pm:pm|PM|Pm))",
+              "example": "now is PM",
+              "outputs": {
+                "js": {
+                  "code": "core.isPM(core.now())"
+                },
+                "ts": {
+                  "code": "core.isPM(core.now())"
+                },
+                "py": {
+                  "code": "core.is_pm(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADuration",
+          "ruleNames": ["as_a_duration"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADuration.ts",
+          "line": 21,
+          "purpose": "How long ago a date was, or how long until it is, as text -- `its added as a duration`, `30 minutes ago`, `in 2 days`, `tomorrow` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "as (a|an)? {style:duration_style}? duration (in {unit:unit_words})?",
+              "example": "due as a duration",
+              "outputs": {
+                "js": {
+                  "code": "core.timeFromNow(due)"
+                },
+                "ts": {
+                  "code": "core.timeFromNow(due)"
+                },
+                "py": {
+                  "code": "core.time_from_now(due)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsWeekendDay",
+          "ruleNames": ["is_weekend_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsWeekendDay.ts",
+          "line": 11,
+          "purpose": "Is a date on the weekend -- `if now is a weekend day` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} a weekend day",
+              "example": "now is a weekend day",
+              "outputs": {
+                "js": {
+                  "code": "core.isWeekendDay(core.now())"
+                },
+                "ts": {
+                  "code": "core.isWeekendDay(core.now())"
+                },
+                "py": {
+                  "code": "core.is_weekend_day(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsBeforeOrAfter",
+          "ruleNames": ["is_before_or_after"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsBeforeOrAfter.ts",
+          "line": 14,
+          "purpose": "Is one date earlier or later than another -- `if its due is before now`, `if its start is after its end` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((before:before)|(after:after)) {expression:operand}",
+              "example": "due is before now",
+              "outputs": {
+                "js": {
+                  "code": "core.isBefore(due, core.now())"
+                },
+                "ts": {
+                  "code": "core.isBefore(due, core.now())"
+                },
+                "py": {
+                  "code": "core.is_before(due, core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsSameDayAs",
+          "ruleNames": ["is_same_day_as"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsSameDayAs.ts",
+          "line": 11,
+          "purpose": "Are two dates on the same day, whatever their times -- `if its due is the same day as now` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} the same day as {expression:operand}",
+              "example": "due is the same day as now",
+              "outputs": {
+                "js": {
+                  "code": "core.isSameDay(due, core.now())"
+                },
+                "ts": {
+                  "code": "core.isSameDay(due, core.now())"
+                },
+                "py": {
+                  "code": "core.is_same_day(due, core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayFromToday",
+          "ruleNames": ["is_day_from_today"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayFromToday.ts",
+          "line": 11,
+          "purpose": "Is a date today, tomorrow or yesterday, whatever its time -- `if its due is tomorrow` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:today)|(tomorrow:tomorrow)|(yesterday:yesterday))",
+              "example": "due is today",
+              "outputs": {
+                "js": {
+                  "code": "core.isDaysFromToday(due, 0)"
+                },
+                "ts": {
+                  "code": "core.isDaysFromToday(due, 0)"
+                },
+                "py": {
+                  "code": "core.is_days_from_today(due, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1468,11 +1780,11 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
-              "syntax": "as (a|an) (type:string|number|fraction|integer)",
+              "syntax": "as (a|an) (type:string|number|fraction|integer|date)",
               "example": "1 as a string",
               "outputs": {
                 "js": {
@@ -1629,6 +1941,8 @@
             "date_form",
             "date_or_time",
             "date_style",
+            "duration_style",
+            "duration_part_name",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1691,10 +2005,16 @@
               "syntax": "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
             },
             {
-              "syntax": "((date:date)|(time:time)|(timestamp:timestamp))"
+              "syntax": "((date:date)|(time_zone:time zone)|(time:time)|(timestamp:timestamp))"
             },
             {
               "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(date_and_time:date and time)|(timestamp:timestamp))"
+            },
+            {
+              "syntax": "((short:short)|(long:long))"
+            },
+            {
+              "syntax": "((days:days)|(hours:hours)|(minutes:minutes)|(seconds:seconds))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
@@ -2064,7 +2384,7 @@
           "ruleNames": ["plus"],
           "internal": false,
           "file": "src/spell/rules/math/Plus.ts",
-          "line": 8,
+          "line": 9,
           "purpose": "`plus` / `+`, e.g. `price + tax` -- `Precedence.sum`: tighter than comparisons, looser than `*` `/`.",
           "syntaxes": [
             {
@@ -2090,7 +2410,7 @@
           "ruleNames": ["minus"],
           "internal": false,
           "file": "src/spell/rules/math/Minus.ts",
-          "line": 10,
+          "line": 14,
           "purpose": "`minus` / `-`, e.g. `price - tax`.",
           "syntaxes": [
             {
@@ -6543,7 +6863,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 51,
+          "line": 52,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -7637,6 +7957,23 @@
                   "code": "core.stop_process(\"dealing\")"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EveryTimer",
+          "ruleNames": ["every_timer"],
+          "internal": false,
+          "file": "src/spell/rules/async/EveryTimer.ts",
+          "line": 28,
+          "purpose": "Steps a thing or an app runs again and again while its program runs, e.g. a clock's `every second`, then `set its time to now` under it (epic `language` T159; Owen, 2026-11-17).",
+          "syntaxes": [
+            {
+              "syntax": "every {interval:measure_literal} (until {until:expression}|{times:number} times)? :? {statement_body}?"
+            },
+            {
+              "syntax": "every {unit:unit_words} (until {until:expression}|{times:number} times)? :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]

@@ -216,6 +216,10 @@ export const dateMethods = defineCoreModule({
     else moved.setTime(moved.getTime() + amount * (UNIT_SECONDS[unit] ?? 1) * 1000)
     return moved
   },
+  /** `date` moved back by `amount` of duration unit `unit`:  `its due - 1 hour` -- see `addToDate()`. */
+  subtractFromDate(date: unknown, amount: unknown, unit: string = "second"): unknown {
+    return typeof amount === "number" ? dateMethods.addToDate(date, -amount, unit) : date
+  },
   /** How long from `earlier` to `later`, in seconds:  `the next weekend - now`, a duration. */
   secondsBetween(later: unknown, earlier: unknown): unknown {
     if (!isDate(later) || !isDate(earlier)) return undefined
@@ -397,9 +401,11 @@ function durationWords(parts: Array<[DurationPart, number]>): string {
   if (DurationFormat) return spaced(new DurationFormat(core.message("language"), { style: "long" }).format(duration))
   // a browser without it:  each part said by `Intl.NumberFormat`'s units, joined as a list
   const words = parts.map(([unit, amount]) =>
-    new Intl.NumberFormat(core.message("language"), { style: "unit", unit: unit.slice(0, -1), unitDisplay: "long" }).format(
-      amount
-    )
+    new Intl.NumberFormat(core.message("language"), {
+      style: "unit",
+      unit: unit.slice(0, -1),
+      unitDisplay: "long"
+    }).format(amount)
   )
   return spaced(new Intl.ListFormat(core.message("language"), { type: "unit", style: "long" }).format(words))
 }
@@ -413,7 +419,9 @@ type DurationFormatClass = new (
 /** `seconds` from now, in `unit`, rounded:  `in 3 days`, `tomorrow`. */
 function relativeIn(seconds: number, unit: string): string {
   const size = UNIT_SECONDS[unit] ?? 1
-  const word = (unit in UNIT_SECONDS && unit !== "millisecond" && unit !== "tick" ? unit : "second") as Intl.RelativeTimeFormatUnit
+  const word = (
+    unit in UNIT_SECONDS && unit !== "millisecond" && unit !== "tick" ? unit : "second"
+  ) as Intl.RelativeTimeFormatUnit
   return relative(Math.round(seconds / size), word)
 }
 

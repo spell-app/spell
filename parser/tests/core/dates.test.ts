@@ -15,7 +15,14 @@ import { spanishMessages } from "spell/parser/spell/languages/es/messages"
 /** What both cores must say:  each case's method, date, language, region and clock => its text or number. */
 const EXPECTED = JSON5.parse(readFileSync(resolve(import.meta.dirname, "dates.expected.json5"), "utf8")) as {
   now: string
-  cases: Array<{ method: string; args: unknown[]; lang: string; region: string; clock?: "12" | "24"; expected: unknown }>
+  cases: Array<{
+    method: string
+    args: unknown[]
+    lang: string
+    region: string
+    clock?: "12" | "24"
+    expected: unknown
+  }>
 }
 
 /** `"2026-11-17T21:05:07"`, or `{ date: ... }` in a case's arguments, as a date where it's read. */
@@ -33,6 +40,7 @@ function localText(date: Date): string {
 /** Run as a program in `lang`, its person in `host`. */
 function speaking(lang: string, host: CalendarHost): void {
   core.useMessages(lang === "es" ? spanishMessages : undefined)
+  // oxlint-disable-next-line react-hooks/rules-of-hooks -- `CalendarSettings.use()` is no React hook (as `MeasureSystem.use()`)
   CalendarSettings.use(host)
 }
 
@@ -62,7 +70,11 @@ describe("the cases both cores say alike", () => {
 describe("the person's settings", () => {
   test("their region's first day of the week, clock and weekend", () => {
     speaking("en", { region: "US" })
-    expect([CalendarSettings.firstDay, CalendarSettings.uses24HourClock, CalendarSettings.weekend]).toEqual([7, false, [6, 7]])
+    expect([CalendarSettings.firstDay, CalendarSettings.uses24HourClock, CalendarSettings.weekend]).toEqual([
+      7,
+      false,
+      [6, 7]
+    ])
     speaking("en", { region: "ES" })
     expect([CalendarSettings.firstDay, CalendarSettings.uses24HourClock]).toEqual([1, true])
     speaking("en", { region: "IL" })

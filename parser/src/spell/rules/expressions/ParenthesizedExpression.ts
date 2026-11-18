@@ -1,4 +1,5 @@
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { SpellExpression } from "./SpellExpression"
 
 /**
@@ -10,6 +11,10 @@ export class ParenthesizedExpression extends SpellExpression<"expression"> {
   /** Parens don't change what it is. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return match.groups.expression.datatype
+  }
+  /** Nor what it measures (`SP.measureOf()`):  `(its due - now) as a duration`. */
+  getMeasure(match: P.MatchFor<this>): P.Measure | undefined {
+    return SP.measureOf(match.groups.expression)
   }
   getAST(match: P.MatchFor<this>): P.ASTParenthesizedExpression {
     const { expression } = match.groups

@@ -237,6 +237,10 @@ class DateMethods:
             return moment + timedelta(days=int(amount))
         return moment + timedelta(seconds=amount * UNIT_SECONDS.get(unit, 1))
 
+    def subtract_from_date(self, when: object, amount: object, unit: str = "second") -> object:
+        """`when` moved back by `amount` of duration unit `unit`:  `its due - 1 hour` -- see `add_to_date()`."""
+        return self.add_to_date(when, -amount, unit) if _is_number(amount) else when  # type: ignore[operator]
+
     def seconds_between(self, later: object, earlier: object) -> float | None:
         """How long from `earlier` to `later`, in seconds:  `the next weekend - now`, a duration."""
         if not is_date(later) or not is_date(earlier):

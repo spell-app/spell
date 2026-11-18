@@ -1806,6 +1806,25 @@
     },
     {
       "kind": "method",
+      "name": "subtractFromDate",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "amount"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "`date` moved back by `amount` of duration unit `unit`:  `its due - 1 hour` -- see `addToDate()`."
+    },
+    {
+      "kind": "method",
       "name": "secondsBetween",
       "of": "core",
       "module": "dates",

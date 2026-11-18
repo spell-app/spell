@@ -1,7 +1,8 @@
 import { createMemo, createRoot, createSignal, enableExternalSource, flush, onCleanup } from "solid-js"
-import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
+import { beforeAll, beforeEach, describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
 import { bridgeSolid, keysOf, observe } from "spell/util"
+import { CalendarSettings } from "spell/util/measures/CalendarSettings"
 import { MemoryStorage } from "spell/util/persist/MemoryStorage"
 import {
   LiveRoomPlace,
@@ -353,15 +354,18 @@ describe("PlaceThings, a refresh", () => {
   })
 
   test("a date said as HyperTalk says it:  short, long and abbreviated;  its time short and long", () => {
-    const morning = new Date(2026, 10, 7, 9, 14, 42)
+    // as in the US, a year before this one:  a short date has no year this year (epic `language` P63)
+    CalendarSettings.use({ region: "US" })
+    onTestFinished(() => CalendarSettings.use({}))
+    const morning = new Date(2025, 10, 7, 9, 14, 42)
     expect([
       core.shortDate(morning),
       core.longDate(morning),
       core.abbreviatedDate(morning),
       core.shortTime(morning),
-      core.longTime(new Date(2026, 10, 7, 0, 5, 3)),
+      core.longTime(new Date(2025, 10, 7, 0, 5, 3)),
       core.shortDate("x")
-    ]).toEqual(["11/7/26", "Saturday, November 7, 2026", "Sat, Nov 7, 2026", "9:14 AM", "12:05:03 AM", "x"])
+    ]).toEqual(["11/7/25", "Friday, November 7, 2025", "Fri, Nov 7, 2025", "9:14 AM", "12:05:03 AM", "x"])
   })
 
   test("`&` and `&&` join into text, a date said in words, nothing as nothing", () => {

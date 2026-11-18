@@ -1,5 +1,6 @@
-import { describe, test, expect } from "vite-plus/test"
+import { describe, test, expect, onTestFinished, vi } from "vite-plus/test"
 
+import { CalendarSettings } from "spell/util/measures/CalendarSettings"
 import { P } from "spell/parser/parser"
 import { core, ViewableList, List, Page, Thing, View } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
@@ -26,6 +27,14 @@ describe("built-in type table", () => {
   })
 
   test("each member's `readAs` template reads a REAL `core` helper or javascript member -- of its datatype", () => {
+    // a date said as in the US, in 2026:  its short date has no year this year
+    CalendarSettings.use({ region: "US" })
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date(2026, 10, 17, 12))
+    onTestFinished(() => {
+      vi.useRealTimers()
+      CalendarSettings.use({})
+    })
     const read: string[] = []
     for (const entry of SP.BUILT_IN_TYPE_TABLE) {
       for (const member of entry.members.filter((it) => it.readAs)) {
@@ -48,9 +57,31 @@ describe("built-in type table", () => {
         "text characters => ["A","d","a"]",
         "text letters => ["A","d","a"]",
         "date year => 2026",
+        "date years => 2026",
+        "date short year => 26",
+        "date month => "October"",
+        "date short month => "Oct"",
+        "date month number => 10",
         "date day => 4",
+        "date days => 4",
         "date hour => 14",
-        "date short date => "10/4/26"",
+        "date hours => 14",
+        "date minute => 0",
+        "date minutes => 0",
+        "date second => 0",
+        "date seconds => 0",
+        "date week => 40",
+        "date weekday => "Sunday"",
+        "date day of the week => "Sunday"",
+        "date short weekday => "Sun"",
+        "date short day of the week => "Sun"",
+        "date weekday number => 1",
+        "date day of the week number => 1",
+        "date AM or PM => "PM"",
+        "date AMPM => "PM"",
+        "date meridiem => "PM"",
+        "date meridian => "PM"",
+        "date short date => "10/4"",
         "date long date => "Sunday, October 4, 2026"",
         "date abbreviated date => "Sun, Oct 4, 2026"",
         "date short time => "2:00 PM"",

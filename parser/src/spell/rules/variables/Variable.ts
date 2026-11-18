@@ -64,6 +64,11 @@ export class Variable extends P.Sequence<"identifier", VariableMatchData> {
     const { scopeVar } = match.data
     return scopeVar === NONE ? undefined : scopeVar?.datatype
   }
+  /** What the variable it named measures, if anything:  `set left to the next weekend - now` (`SP.measureOf()`). */
+  getMeasure(match: P.MatchFor<this>): P.Measure | undefined {
+    const { scopeVar } = match.data
+    return scopeVar === NONE ? undefined : scopeVar?.measure
+  }
   getAST(match: P.MatchFor<this>): P.ASTVariableExpression {
     // `the` adds nothing -- output is whatever the identifier outputs.
     return match.groups.identifier.AST as P.ASTVariableExpression

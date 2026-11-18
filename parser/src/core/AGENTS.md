@@ -39,6 +39,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Its words for the parser:  spell's `loadBuiltInTemplates()`, from the declarations the same run writes.
   - The generator is spell's ([builtInTemplateFiles.ts](../spell/node/builtInTemplateFiles.ts)):  core never imports
     spell, the templates are data here.
+- Dates are [dates.ts](dates.ts)'s (epic `language` P63):  a date's parts and names, the time zone, two digits, how
+  long ago, working with dates;  and [string.ts](string.ts)'s formats (`short date` ...).
+  - Names in the PROGRAM's language (`core.message("language")`);  formats in the PERSON's region, first day of the
+    week and clock:  the kit's `CalendarSettings` (`spell/util/measures/CalendarSettings`), their choice else their
+    region's.  `Intl` does every word.
+  - A duration is a number of seconds there:  the compiler converts a measure in another unit first.
 - [dimensions/](dimensions/) holds spell's built-in DIMENSIONS, kinds of measure and their units, written in spell:
   [dimensions.spell](dimensions/dimensions.spell) and its Spanish twin (epic `language` P23).
   - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
@@ -593,14 +599,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
-  - The six files both cores read stay in the JavaScript core:
-    its method list here, the five expected files with its tests (`tests/core/`):
+  - The seven files both cores read stay in the JavaScript core:
+    its method list here, the six expected files with its tests (`tests/core/`):
     - [core.declarations.json5](core.declarations.json5)
     - [messages.expected.json5](../../tests/core/messages.expected.json5)
     - [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
     - [stateById.expected.json5](../../tests/core/stateById.expected.json5)
     - [savedById.expected.json5](../../tests/core/savedById.expected.json5)
     - [undoing.expected.json5](../../tests/core/undoing.expected.json5):  a game's moves, undone and redone
+    - [dates.expected.json5](../../tests/core/dates.expected.json5):  dates' parts, names and formats, by language and region
 
 ## Decorators
 

@@ -8,6 +8,7 @@ import { DefinePropertyHas } from "spell/parser/spell/rules/classes"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { PossessiveProperty } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
+import { Block } from "spell/parser/spell/rules/Block"
 import { BlockLine } from "spell/parser/spell/rules/BlockLine"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { DRAFT_DATATYPE } from "spell/parser/spell/rules/places/DraftOf"
@@ -288,6 +289,12 @@ export class PropertyValueGetter extends SpellStatement<
       !!declared && (variable?.declaredBy?.data as { declared?: unknown[] } | undefined)?.declared === declared
     if (datatype && variable && isOurs && !variable.datatype) {
       P.ParseJournal.assign(match.scope.parser?.journal, variable, { datatype })
+    }
+    // what an inline value measures, too:  `its "time left" is the next weekend - now` is a duration (epic `language` P63)
+    const body = this.getBody(match)
+    const measure = body && !body.is(Block) ? SP.measureOf(body) : undefined
+    if (measure && variable && isOurs && !variable.measure) {
+      P.ParseJournal.assign(match.scope.parser?.journal, variable, { measure })
     }
     return datatype
   }
