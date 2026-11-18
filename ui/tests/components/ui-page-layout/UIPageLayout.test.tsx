@@ -185,14 +185,128 @@ describe("<ui-page-layout>", () => {
     expect(layout.getAttribute("drawer")).toBe("compact")
     // all of it while the column narrows, clipped;  its icons only once it's narrow (I32)
     await expect.poll(() => layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
-    expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({ newState: "compact", oldState: "full" })
+    expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({ region: "drawer", newState: "compact", oldState: "full" })
     // From its icons to all of it, the switch waits a frame:  the column holds its width first, to widen from
     layout.toggleDrawer()
     expect(layout.getAttribute("drawer")).toBe("compact")
     await new Promise(requestAnimationFrame)
     await ShadowTree.settle(layout)
     expect(layout.hasAttribute("drawer")).toBe(false)
-    expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({ newState: "full", oldState: "compact" })
+    expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({ region: "drawer", newState: "full", oldState: "compact" })
+  })
+
+  // epic `mockup` T55 (Owen:  "Make a button in the app bar to hide it")
+  test("`drawer-hides`:  wide, `toggleDrawer()` hides the whole drawer and shows it again, never its icons", async () => {
+    const layout = await pageLayout(`${NAV}<p>The page</p>`)
+    layout.setAttribute("drawer-hides", "")
+    await ShadowTree.settle(layout)
+    const toggled = vi.fn()
+    layout.addEventListener("ui-toggle", toggled)
+    layout.toggleDrawer()
+    await ShadowTree.settle(layout)
+    expect(layout.getAttribute("drawer")).toBe("hidden")
+    expect(layout.matches(":state(drawer-hidden)")).toBe(true)
+    expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({
+      region: "drawer",
+      newState: "hidden",
+      oldState: "full"
+    })
+    expect(layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(false)
+    // the column narrows to nothing, and the page takes the room
+    await expect.poll(() => box(layout, "drawer")!.getBoundingClientRect().width).toBeLessThan(1)
+    await expect.poll(() => getComputedStyle(box(layout, "drawer")!).visibility).toBe("hidden")
+    layout.toggleDrawer()
+    await ShadowTree.settle(layout)
+    expect(layout.hasAttribute("drawer")).toBe(false)
+    expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({
+      region: "drawer",
+      newState: "full",
+      oldState: "hidden"
+    })
+    await expect.poll(() => box(layout, "drawer")!.getBoundingClientRect().width).toBeGreaterThan(160)
+  })
+
+  describe("the side bars close (T55)", () => {
+    /** A right side bar, and a button for it in the menu. */
+    const RIGHT =
+      `<ui-app-menu slot="menu"><ui-site-nav-button slot="end" toggles="right"></ui-site-nav-button></ui-app-menu>` +
+      `<div slot="right">Contents</div><p>The page</p>`
+
+    test('wide, `toggleSidebar("right")` hides it (`right="hidden"`) and shows it again;  its button says so', async () => {
+      const layout = await pageLayout(RIGHT)
+      const button = layout.querySelector("ui-site-nav-button")!
+      await ShadowTree.settle(button)
+      const toggled = vi.fn()
+      layout.addEventListener("ui-toggle", toggled)
+      expect(box(layout, "right")!.getBoundingClientRect().width).toBeGreaterThan(0)
+      const inner = () => button.shadowRoot!.querySelector('[part~="item"]')!
+      expect(inner().getAttribute("aria-expanded")).toBe("true")
+      expect(inner().getAttribute("aria-label")).toBe("Show or hide the right side bar")
+      ;(inner() as HTMLElement).click()
+      await ShadowTree.settle(layout)
+      expect(layout.getAttribute("right")).toBe("hidden")
+      expect(box(layout, "right")!.getBoundingClientRect().width).toBe(0)
+      expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({
+        region: "right",
+        newState: "hidden",
+        oldState: "shown"
+      })
+      await ShadowTree.settle(button)
+      expect(inner().getAttribute("aria-expanded")).toBe("false")
+      layout.toggleSidebar("right")
+      await ShadowTree.settle(layout)
+      expect(layout.hasAttribute("right")).toBe(false)
+      expect(box(layout, "right")!.getBoundingClientRect().width).toBeGreaterThan(0)
+    })
+
+    test("narrow, a side bar with its button hides behind it, and slides over the page while open;  Escape closes it", async () => {
+      const layout = await pageLayout(RIGHT, { width: 360 })
+      await expect.poll(() => layout.matches(":state(narrow)")).toBe(true)
+      expect(layout.matches(":state(right-closable)")).toBe(true)
+      expect(getComputedStyle(box(layout, "right")!).visibility).toBe("hidden")
+      expect(getComputedStyle(box(layout, "right")!).position).toBe("absolute")
+      layout.toggleSidebar("right")
+      await ShadowTree.settle(layout)
+      expect(layout.matches(":state(right-open)")).toBe(true)
+      expect(layout.hasAttribute("right")).toBe(false)
+      await expect.poll(() => getComputedStyle(box(layout, "right")!).visibility).toBe("visible")
+      layout.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+      await ShadowTree.settle(layout)
+      expect(layout.matches(":state(right-open)")).toBe(false)
+    })
+
+    test("narrow, a side bar with no button stays in the row", async () => {
+      const layout = await pageLayout(`<div slot="right">Contents</div><p>The page</p>`, { width: 360 })
+      await expect.poll(() => layout.matches(":state(narrow)")).toBe(true)
+      expect(layout.matches(":state(right-closable)")).toBe(false)
+      expect(getComputedStyle(box(layout, "right")!).position).toBe("static")
+      expect(getComputedStyle(box(layout, "right")!).visibility).toBe("visible")
+    })
+  })
+
+  describe("`floating` (T55):  the drawer and the side bars cards over the page's ground", () => {
+    test("each a rounded card with a shadow, room round it;  the page's side no box of its own", async () => {
+      const layout = await pageLayout(`<div slot="menu">Menu</div>${NAV}<div slot="right">Contents</div><p>The page</p>`)
+      layout.setAttribute("floating", "")
+      await ShadowTree.settle(layout)
+      expect(layout.matches(":state(floating)")).toBe(true)
+      const host = layout.getBoundingClientRect()
+      const drawerBox = box(layout, "drawer-box")!
+      const right = box(layout, "right")!
+      for (const card of [drawerBox, right]) {
+        const style = getComputedStyle(card)
+        expect(style.boxShadow).not.toBe("none")
+        expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThan(0)
+      }
+      expect(drawerBox.getBoundingClientRect().left - host.left).toBeCloseTo(12, 0)
+      expect(drawerBox.getBoundingClientRect().top - host.top).toBeCloseTo(12, 0)
+      expect(host.right - right.getBoundingClientRect().right).toBeCloseTo(12, 0)
+      // the menu as far down as the drawer's card
+      expect(box(layout, "menu")!.getBoundingClientRect().top - host.top).toBeCloseTo(12, 0)
+      const underMenu = box(layout, "page")!.parentElement!.parentElement!
+      expect(getComputedStyle(underMenu).boxShadow).toBe("none")
+      expect(getComputedStyle(underMenu).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    })
   })
 
   // epic `mockup` I26 (Owen:  "Delay in hover animation on sidebar slide out takes too long, feels like an error"),

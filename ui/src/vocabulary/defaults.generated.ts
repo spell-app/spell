@@ -987,7 +987,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "fixed", kind: "boolean", group: "layout" },
     { name: "pure", kind: "boolean", group: "advanced" }
   ],
-  "ui-page-layout": [{ name: "drawer", kind: "valueOnly", group: "appearance", values: ["compact"] }],
+  "ui-page-layout": [
+    { name: "drawer", kind: "valueOnly", group: "appearance", values: ["compact", "hidden"] },
+    { name: "drawer-hides", kind: "keyOnly", group: "behaviour" },
+    { name: "left", kind: "valueOnly", group: "appearance", values: ["hidden"] },
+    { name: "right", kind: "valueOnly", group: "appearance", values: ["hidden"] },
+    { name: "floating", kind: "keyOnly", group: "appearance" }
+  ],
   "ui-panel": [
     { name: "label", kind: "string", group: "name" },
     { name: "hint", kind: "string", group: "form" },
@@ -1526,11 +1532,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
-    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] }
+    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "toggles", kind: "valueOnly", group: "behaviour", values: ["drawer", "left", "right"] }
   ],
   "ui-site-tabs": [
     { name: "pages", kind: "json", group: "content" },
     { name: "current", kind: "string", group: "content" },
+    { name: "appearance", kind: "valueOnly", group: "appearance", values: ["header"] },
     { name: "label", kind: "string", group: "content" }
   ],
   "ui-slider": [

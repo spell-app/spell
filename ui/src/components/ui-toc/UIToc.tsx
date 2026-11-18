@@ -44,6 +44,11 @@ import tocCSS from "./UIToc.css?inline"
  *   - light DOM only, but for the shadow roots another family names (`TocIndex.addShadowHost()`):
  *     the docs site's `<ui-docs-api only>` marks its rows and tag headers (`TocIndex.shadowEntries()`),
  *     so every attribute, event ... is listed under its section
+ * - In a `<ui-page-layout>` (one of its side bars), with no `for`, it follows the layout's page (epic `mockup` T55):
+ *   - the page the site shows in it, its first child in no slot, scanned again as the site shows another
+ *   - its scroll, the box the layout scrolls in (`TocIndex.scrollerAround()`), unless `scroller` names one
+ *   - headed by that page's title, its level 1 heading, unless `heading` says
+ *   - a click on a link scrolls there itself, the address left as it is:  a site inside the editor has the editor's
  * - It follows the scroll:  the entry whose top passed the reading line (`TocIndex.current()`) is `selected`,
  *   and its section opens;  `ui-scrolled-to { value }` when that changes.
  *   - The window's scroll, or, with `scroller`, the scroll of the box that id names:  content scrolling in a pane
@@ -172,10 +177,10 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("toc")}>
-        <Show when={this.heading || this.hasFolds}>
+        <Show when={this.shownHeading || this.hasFolds}>
           <div class={HEAD} part={this.partForName("head")}>
-            <Show when={this.heading}>
-              <ui-header part={this.partForName("header")}>{this.heading}</ui-header>
+            <Show when={this.shownHeading}>
+              <ui-header part={this.partForName("header")}>{this.shownHeading}</ui-header>
             </Show>
             <Show when={this.hasFolds}>{this.toggleAllButton()}</Show>
             <slot name="tools" />
@@ -405,8 +410,13 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
   /** Scan the followed content again, then follow the scroll. */
   private rescan(): void {
     const followed = this.followedContent()
-    const root = followed?.tabs ? TocIndex.shownPane(followed.tabs) : followed?.root
+    const root = followed?.tabs
+      ? TocIndex.shownPane(followed.tabs)
+      : followed?.layout
+        ? TocIndex.layoutPage(followed.layout)
+        : followed?.root
     const sections = root ? TocIndex.scan(root, UIToc.reservedIdsFor(followed?.tabs)) : []
+    this.pageTitle = followed?.layout && root ? TocIndex.pageTitle(root) : undefined
     this.sections = sections
     this.send("ui-drawn", { ids: TocIndex.flatten(sections).map((entry) => entry.id) })
     this.followScroll(sections)
@@ -432,14 +442,54 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
     if (hash) void HashLanding.forDocument(document).landOnHash(hash)
   }
 
-  /** What `for` names (else the page's `main`), and its tabs;  `undefined` while it doesn't exist. */
+  /**
+   * What `for` names (else the page layout it's in, else the page's `main`), and its tabs;
+   * `undefined` while it doesn't exist.
+   */
   private followedContent(): FollowedContent | undefined {
-    return TocIndex.followed(this.domElement.ownerDocument, this.for || undefined)
+    return TocIndex.followed(this.domElement.ownerDocument, this.for || undefined, this.domElement)
   }
 
-  /** The box `scroller` names, whose scroll it follows;  `undefined` for the window (or while it doesn't exist). */
+  /**
+   * The box whose scroll it follows:  the one `scroller` names;  in a page layout, with no `for`, the box the layout
+   * scrolls in;  `undefined` for the window (or while it doesn't exist).
+   */
   private scrollerElement(): Element | undefined {
-    return (this.scroller && this.domElement.ownerDocument.getElementById(this.scroller)) || undefined
+    if (this.scroller) return this.domElement.ownerDocument.getElementById(this.scroller) ?? undefined
+    const layout = this.followedContent()?.layout
+    return layout ? TocIndex.scrollerAround(layout) : undefined
+  }
+
+  ////////////////
+  // ## In a page layout
+  ////////////////
+
+  /**
+   * Its title:  `heading`, else, following a page layout's page, that page's title (epic `mockup` T55):
+   * the component's name over its contents in Spell UI's site.
+   */
+  get shownHeading(): string | undefined {
+    return this.heading || this.pageTitle
+  }
+
+  /** The page layout's page's title, from the last scan:  `undefined` when it follows no layout. */
+  @E.state accessor pageTitle: string | undefined = undefined
+
+  /**
+   * A click on one of its links, following a page layout's page:  it scrolls there itself, in the box the page
+   * scrolls in, and leaves the address as it is (a site inside the editor has the editor's address).
+   * - Its own links only (`#id`), the plain click:  a middle click or Command-click is the browser's.
+   */
+  @E.on("click")
+  protected onLinkClick(event: MouseEvent) {
+    if (!this.followedContent()?.layout || event.button !== 0 || event.metaKey || event.ctrlKey) return
+    const link = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
+    const hash = link?.getAttribute("href")
+    if (!hash?.startsWith("#")) return
+    const target = TocIndex.elementById(this.domElement.ownerDocument, decodeURIComponent(hash.slice(1)))
+    if (!target) return
+    event.preventDefault()
+    target.scrollIntoView({ block: "start" })
   }
 
   /** Ids a new heading id must not take:  the followed tabs' pane values (the URL hash names those too). */

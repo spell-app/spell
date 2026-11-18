@@ -26247,9 +26247,36 @@
           "name": "drawer",
           "kind": "valueOnly",
           "values": [
-            "compact"
+            "compact",
+            "hidden"
           ],
-          "description": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`."
+          "description": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  `hidden`:  no drawer at all, until its button shows it again.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`."
+        },
+        {
+          "name": "drawer-hides",
+          "kind": "keyOnly",
+          "description": "The drawer's button hides the whole drawer (`drawer=\"hidden\"`) and shows it again, never switching it to its icons:  for a navigation with no icons."
+        },
+        {
+          "name": "left",
+          "kind": "valueOnly",
+          "values": [
+            "hidden"
+          ],
+          "description": "`hidden`:  the left side bar isn't shown, until its button shows it again.  `toggleSidebar(\"left\")` switches it, and says so with `ui-toggle`."
+        },
+        {
+          "name": "right",
+          "kind": "valueOnly",
+          "values": [
+            "hidden"
+          ],
+          "description": "`hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles=\"right\">`) shows it again.  `toggleSidebar(\"right\")` switches it, and says so with `ui-toggle`.  Narrow, a side bar with such a button is hidden behind it, and slides over the page while open."
+        },
+        {
+          "name": "floating",
+          "kind": "keyOnly",
+          "description": "The drawer and the side bars float:  rounded cards with a soft shadow and room round them, over the page's own ground.  None:  the drawer a column of its own fill, the page's side a box beside it."
         },
         {
           "name": "disabled",
@@ -26457,8 +26484,8 @@
       "events": [
         {
           "name": "ui-toggle",
-          "detail": "{ newState: \"compact\" | \"full\", oldState: \"compact\" | \"full\" }",
-          "description": "The drawer switched between its icons only (`compact`) and all of it (`full`), from `toggleDrawer()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer` again next time."
+          "detail": "{ region: \"drawer\" | \"left\" | \"right\", newState: \"compact\" | \"hidden\" | \"full\" | \"shown\", oldState: \"compact\" | \"hidden\" | \"full\" | \"shown\" }",
+          "description": "The drawer switched between its icons only (`compact`), hidden (`hidden`) and all of it (`full`), from `toggleDrawer()`;  or a side bar between `hidden` and `shown`, from `toggleSidebar()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer`, `left` or `right` again next time."
         }
       ],
       "parts": [
@@ -26515,6 +26542,38 @@
         {
           "name": "narrow",
           "description": "Below 40em of its own box:  one column, the drawer slid out of the way."
+        },
+        {
+          "name": "drawer-hidden",
+          "description": "`drawer=\"hidden\"`:  no drawer, on a wide page."
+        },
+        {
+          "name": "floating",
+          "description": "`floating`:  the drawer and the side bars are cards floating over the page."
+        },
+        {
+          "name": "left-hidden",
+          "description": "`left=\"hidden\"`:  no left side bar, on a wide page."
+        },
+        {
+          "name": "right-hidden",
+          "description": "`right=\"hidden\"`:  no right side bar, on a wide page."
+        },
+        {
+          "name": "left-closable",
+          "description": "A `<ui-site-nav-button toggles=\"left\">` is in it:  narrow, the left side bar hides behind it."
+        },
+        {
+          "name": "right-closable",
+          "description": "A `<ui-site-nav-button toggles=\"right\">` is in it:  narrow, the right side bar hides behind it."
+        },
+        {
+          "name": "left-open",
+          "description": "The left side bar is slid over a narrow page, from its button."
+        },
+        {
+          "name": "right-open",
+          "description": "The right side bar is slid over a narrow page, from its button."
         },
         {
           "name": "disabled",
@@ -39277,7 +39336,7 @@
         "navigation toggle",
         "sidebar toggle"
       ],
-      "description": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.",
+      "description": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.",
       "noun": "item",
       "attributes": [
         {
@@ -39393,6 +39452,17 @@
           ],
           "default": "item",
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
+        },
+        {
+          "name": "toggles",
+          "kind": "valueOnly",
+          "values": [
+            "drawer",
+            "left",
+            "right"
+          ],
+          "default": "drawer",
+          "description": "What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  With one for a side bar, a narrow layout hides that side bar behind it."
         },
         {
           "name": "loading",
@@ -39637,6 +39707,16 @@
           "description": "What it's called, its tooltip and its name for a screen reader, without `aria-label`."
         },
         {
+          "key": "leftLabel",
+          "text": "Show or hide the left side bar",
+          "description": "What it's called with `toggles=\"left\"`, without `aria-label`."
+        },
+        {
+          "key": "rightLabel",
+          "text": "Show or hide the right side bar",
+          "description": "What it's called with `toggles=\"right\"`, without `aria-label`."
+        },
+        {
           "key": "menuLabel",
           "text": "Show or hide the menu",
           "description": "What it's called at a narrow width, where the drawer is hidden until it slides in:  its icon the menu's (`bars`)."
@@ -39676,6 +39756,14 @@
           "name": "current",
           "kind": "string",
           "description": "Which page is shown:  its `href` or its `id`.  None:  the page whose `href` is the browser's address."
+        },
+        {
+          "name": "appearance",
+          "kind": "valueOnly",
+          "values": [
+            "header"
+          ],
+          "description": "`header`:  a switch for an app menu's middle, the look of the editor's Run | Edit:  the row as wide as its tabs, on the bar's own fill, the page shown on the thumb.  None:  a segmented row of its own, each tab an equal share of it."
         },
         {
           "name": "label",
@@ -39868,6 +39956,10 @@
         {
           "name": "empty",
           "description": "The shown page has no family, so no tabs are drawn:  it takes no room."
+        },
+        {
+          "name": "header",
+          "description": "`appearance=\"header\"`:  a switch for an app menu's middle."
         },
         {
           "name": "disabled",
@@ -49132,17 +49224,17 @@
           "name": "for",
           "kind": "string",
           "property": "htmlFor",
-          "description": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`."
+          "description": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  inside a `<ui-page-layout>` (a side bar of it), the layout's page, followed as the site shows another;  else the page's `<main>`, else `<body>`."
         },
         {
           "name": "scroller",
           "kind": "string",
-          "description": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window."
+          "description": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  inside a `<ui-page-layout>`, the box the layout scrolls in;  else the window."
         },
         {
           "name": "heading",
           "kind": "string",
-          "description": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`."
+          "description": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Default:  inside a `<ui-page-layout>`, the title of the layout's page (its level 1 heading).  Its old name was `header`."
         },
         {
           "name": "size",
@@ -61943,6 +62035,17 @@
           "default": "round(0.5em, var(--ui-grid, 4px))",
           "description": "the muted strip down the page's end side, beside its top-right corner (I219)",
           "type": "length"
+        },
+        {
+          "name": "--ui-page-layout-float-room",
+          "default": "12px",
+          "description": "`floating`: the room round each card, and a side bar's width",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-layout-sidebar-width",
+          "default": "16em",
+          "type": "length"
         }
       ]
     },
@@ -65251,6 +65354,38 @@
           "default": "var(--ui-primary-background)",
           "description": "The toggle's background under the pointer.",
           "type": "color"
+        },
+        {
+          "name": "--ui-toc-head-background",
+          "default": "none",
+          "description": "The head's band (epic `mockup` T55: a page layout's floating side bar heads it as the editor's panels are): its fill, its padding, its least height, the room under it, and whether it sticks as the toc scrolls in its box.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-toc-head-padding",
+          "default": "0",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-head-height",
+          "default": "1.75em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-head-gap",
+          "default": "var(--ui-font-size)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-head-position",
+          "default": "static",
+          "type": "other"
+        },
+        {
+          "name": "--ui-toc-padding",
+          "default": "0",
+          "description": "Room round the links, under the head: the menu's margin.",
+          "type": "length"
         }
       ]
     },

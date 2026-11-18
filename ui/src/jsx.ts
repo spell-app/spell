@@ -28977,24 +28977,68 @@ export interface UIPageJSXAttributes
 /** `<ui-page-layout>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPageLayoutEventMap {
   /**
-   * `ui-toggle`:  The drawer switched between its icons only (`compact`) and all of it (`full`), from `toggleDrawer()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer` again next time.
-   * - `event.detail`:  `{ newState: "compact" | "full", oldState: "compact" | "full" }`
+   * `ui-toggle`:  The drawer switched between its icons only (`compact`), hidden (`hidden`) and all of it (`full`), from `toggleDrawer()`;  or a side bar between `hidden` and `shown`, from `toggleSidebar()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer`, `left` or `right` again next time.
+   * - `event.detail`:  `{ region: "drawer" | "left" | "right", newState: "compact" | "hidden" | "full" | "shown", oldState: "compact" | "hidden" | "full" | "shown" }`
    */
-  "ui-toggle": CustomEvent<{ newState: "compact" | "full"; oldState: "compact" | "full" }>
+  "ui-toggle": CustomEvent<{
+    region: "drawer" | "left" | "right"
+    newState: "compact" | "hidden" | "full" | "shown"
+    oldState: "compact" | "hidden" | "full" | "shown"
+  }>
 }
 
 /** `<ui-page-layout>`'s own attributes, from its vocabulary. */
 export interface UIPageLayoutAttributes {
   /**
-   * `compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`.
-   * - takes:  `compact`
+   * `compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  `hidden`:  no drawer at all, until its button shows it again.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`.
+   * - takes:  `compact` · `hidden`
    */
-  drawer?: "compact"
+  drawer?: "compact" | "hidden"
   /**
    * `drawer`, as the DOM element's property.
    * @deprecated write `drawer` -- `prop:` stays only for compiled spell
    */
-  "prop:drawer"?: "compact"
+  "prop:drawer"?: "compact" | "hidden"
+  /**
+   * The drawer's button hides the whole drawer (`drawer="hidden"`) and shows it again, never switching it to its icons:  for a navigation with no icons.
+   * - takes:  flag (present / absent)
+   */
+  "drawer-hides"?: boolean | ""
+  /**
+   * `drawer-hides`, as the DOM element's property.
+   * @deprecated write `drawer-hides` -- `prop:` stays only for compiled spell
+   */
+  "prop:drawerHides"?: boolean | ""
+  /**
+   * `hidden`:  the left side bar isn't shown, until its button shows it again.  `toggleSidebar("left")` switches it, and says so with `ui-toggle`.
+   * - takes:  `hidden`
+   */
+  left?: "hidden"
+  /**
+   * `left`, as the DOM element's property.
+   * @deprecated write `left` -- `prop:` stays only for compiled spell
+   */
+  "prop:left"?: "hidden"
+  /**
+   * `hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.  `toggleSidebar("right")` switches it, and says so with `ui-toggle`.  Narrow, a side bar with such a button is hidden behind it, and slides over the page while open.
+   * - takes:  `hidden`
+   */
+  right?: "hidden"
+  /**
+   * `right`, as the DOM element's property.
+   * @deprecated write `right` -- `prop:` stays only for compiled spell
+   */
+  "prop:right"?: "hidden"
+  /**
+   * The drawer and the side bars float:  rounded cards with a soft shadow and room round them, over the page's own ground.  None:  the drawer a column of its own fill, the page's side a box beside it.
+   * - takes:  flag (present / absent)
+   */
+  floating?: boolean | ""
+  /**
+   * `floating`, as the DOM element's property.
+   * @deprecated write `floating` -- `prop:` stays only for compiled spell
+   */
+  "prop:floating"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -29262,8 +29306,8 @@ export interface UIPageLayoutAttributes {
    */
   "prop:onPlatform"?: string
   /**
-   * `ui-toggle`:  The drawer switched between its icons only (`compact`) and all of it (`full`), from `toggleDrawer()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer` again next time.
-   * - `event.detail`:  `{ newState: "compact" | "full", oldState: "compact" | "full" }`
+   * `ui-toggle`:  The drawer switched between its icons only (`compact`), hidden (`hidden`) and all of it (`full`), from `toggleDrawer()`;  or a side bar between `hidden` and `shown`, from `toggleSidebar()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer`, `left` or `right` again next time.
+   * - `event.detail`:  `{ region: "drawer" | "left" | "right", newState: "compact" | "hidden" | "full" | "shown", oldState: "compact" | "hidden" | "full" | "shown" }`
    */
   "on-ui-toggle"?: (event: UIPageLayoutEventMap["ui-toggle"]) => void
 }
@@ -43243,6 +43287,17 @@ export interface UISiteNavButtonAttributes {
    */
   "prop:kind"?: "item" | "header" | "divider"
   /**
+   * What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  With one for a side bar, a narrow layout hides that side bar behind it.
+   * - takes:  `drawer` · `left` · `right`
+   * - default:  `drawer`
+   */
+  toggles?: "drawer" | "left" | "right"
+  /**
+   * `toggles`, as the DOM element's property.
+   * @deprecated write `toggles` -- `prop:` stays only for compiled spell
+   */
+  "prop:toggles"?: "drawer" | "left" | "right"
+  /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
@@ -43511,6 +43566,16 @@ export interface UISiteTabsAttributes {
    * @deprecated write `current` -- `prop:` stays only for compiled spell
    */
   "prop:current"?: string
+  /**
+   * `header`:  a switch for an app menu's middle, the look of the editor's Run | Edit:  the row as wide as its tabs, on the bar's own fill, the page shown on the thumb.  None:  a segmented row of its own, each tab an equal share of it.
+   * - takes:  `header`
+   */
+  appearance?: "header"
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: "header"
   /**
    * What a screen reader calls the row of tabs.  None:  the family's parent page's title.
    * - takes:  text
@@ -52817,7 +52882,7 @@ export interface UITocEventMap {
 /** `<ui-toc>`'s own attributes, from its vocabulary. */
 export interface UITocAttributes {
   /**
-   * Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`.
+   * Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  inside a `<ui-page-layout>` (a side bar of it), the layout's page, followed as the site shows another;  else the page's `<main>`, else `<body>`.
    * - takes:  text
    */
   for?: string
@@ -52827,7 +52892,7 @@ export interface UITocAttributes {
    */
   "prop:htmlFor"?: string
   /**
-   * Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window.
+   * Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  inside a `<ui-page-layout>`, the box the layout scrolls in;  else the window.
    * - takes:  text
    */
   scroller?: string
@@ -52837,7 +52902,7 @@ export interface UITocAttributes {
    */
   "prop:scroller"?: string
   /**
-   * Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`.
+   * Title above the links, e.g. the page's name (Fomantic's `Button`).  Default:  inside a `<ui-page-layout>`, the title of the layout's page (its level 1 heading).  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
@@ -57995,7 +58060,7 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-site-nav": UISiteNavJSXAttributes
       /**
-       * `<ui-site-nav-button>`:  A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.
+       * `<ui-site-nav-button>`:  A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.
        * - also known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle
        * - slots:
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.

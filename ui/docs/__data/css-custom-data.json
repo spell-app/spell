@@ -6890,6 +6890,20 @@
       }
     },
     {
+      "name": "--ui-page-layout-float-room",
+      "description": {
+        "kind": "markdown",
+        "value": "`floating`: the room round each card, and a side bar's width\n\n`<ui-page-layout>`'s token.  Default:  `12px`"
+      }
+    },
+    {
+      "name": "--ui-page-layout-sidebar-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-page-layout>`'s token.  Default:  `16em`"
+      }
+    },
+    {
       "name": "--ui-panel-background",
       "description": {
         "kind": "markdown",
@@ -10348,6 +10362,48 @@
       }
     },
     {
+      "name": "--ui-toc-head-background",
+      "description": {
+        "kind": "markdown",
+        "value": "The head's band (epic `mockup` T55: a page layout's floating side bar heads it as the editor's panels are): its fill, its padding, its least height, the room under it, and whether it sticks as the toc scrolls in its box.\n\n`<ui-toc>`'s token.  Default:  `none`"
+      }
+    },
+    {
+      "name": "--ui-toc-head-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toc>`'s token.  Default:  `0`"
+      }
+    },
+    {
+      "name": "--ui-toc-head-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toc>`'s token.  Default:  `1.75em`"
+      }
+    },
+    {
+      "name": "--ui-toc-head-gap",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toc>`'s token.  Default:  `var(--ui-font-size)`"
+      }
+    },
+    {
+      "name": "--ui-toc-head-position",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toc>`'s token.  Default:  `static`"
+      }
+    },
+    {
+      "name": "--ui-toc-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "Room round the links, under the head: the menu's margin.\n\n`<ui-toc>`'s token.  Default:  `0`"
+      }
+    },
+    {
       "name": "--ui-toolbar-gap",
       "description": {
         "kind": "markdown",
@@ -12487,6 +12543,13 @@
       }
     },
     {
+      "name": ":state(drawer-hidden)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  `drawer=\"hidden\"`:  no drawer, on a wide page."
+      }
+    },
+    {
       "name": ":state(dropdown)",
       "description": {
         "kind": "markdown",
@@ -12564,6 +12627,13 @@
       }
     },
     {
+      "name": ":state(floating)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  `floating`:  the drawer and the side bars are cards floating over the page."
+      }
+    },
+    {
       "name": ":state(fluid)",
       "description": {
         "kind": "markdown",
@@ -12616,7 +12686,7 @@
       "name": ":state(header)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-cell>`:  Set while it's a header cell (`header`).\n- `<ui-row>`:  Set while it's a table's header row (`header`)."
+        "value": "Custom state of:\n\n- `<ui-cell>`:  Set while it's a header cell (`header`).\n- `<ui-row>`:  Set while it's a table's header row (`header`).\n- `<ui-site-tabs>`:  `appearance=\"header\"`:  a switch for an app menu's middle."
       }
     },
     {
@@ -12963,6 +13033,27 @@
       }
     },
     {
+      "name": ":state(left-closable)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  A `<ui-site-nav-button toggles=\"left\">` is in it:  narrow, the left side bar hides behind it."
+      }
+    },
+    {
+      "name": ":state(left-hidden)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  `left=\"hidden\"`:  no left side bar, on a wide page."
+      }
+    },
+    {
+      "name": ":state(left-open)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  The left side bar is slid over a narrow page, from its button."
+      }
+    },
+    {
       "name": ":state(light)",
       "description": {
         "kind": "markdown",
@@ -13198,6 +13289,27 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-split-panel>`:  Its bars drag."
+      }
+    },
+    {
+      "name": ":state(right-closable)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  A `<ui-site-nav-button toggles=\"right\">` is in it:  narrow, the right side bar hides behind it."
+      }
+    },
+    {
+      "name": ":state(right-hidden)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  `right=\"hidden\"`:  no right side bar, on a wide page."
+      }
+    },
+    {
+      "name": ":state(right-open)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  The right side bar is slid over a narrow page, from its button."
       }
     },
     {

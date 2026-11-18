@@ -11,6 +11,9 @@ import pageLayoutCSS from "./UIPageLayout.css?inline"
 /** What a change to its light DOM may move:  an element in or out, or a `slot` changed. */
 const LIGHT_DOM_CHANGES = { childList: true, subtree: true, attributes: true, attributeFilter: ["slot"] }
 
+/** A `<ui-site-nav-button>`'s attribute naming what it shows and hides:  `@E.watches` reads it too. */
+const TOGGLES = "toggles"
+
 /****************
  * ### `DOMPageLayoutElement`
  * The DOM element of `<ui-page-layout>`:  its script API, `toggleDrawer()`.
@@ -19,10 +22,19 @@ const LIGHT_DOM_CHANGES = { childList: true, subtree: true, attributes: true, at
 export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
   /**
    * Show or hide the drawer, as its button does:  narrow, slide it over the page or away;  wide, switch it between
-   * its icons only and all of it (`drawer`), and say so (`ui-toggle`).
+   * its icons only and all of it (`drawer`), or with `drawer-hides`, between hidden and all of it;
+   * and say so (`ui-toggle`).
    */
   toggleDrawer() {
     this.component?.toggleDrawer()
+  }
+
+  /**
+   * Show or hide side bar `side` (`"left"` or `"right"`), as its button does:  wide, switch its attribute between
+   * `hidden` and none, and say so (`ui-toggle`);  narrow, with a button for it, slide it over the page or away.
+   */
+  toggleSidebar(side: Side) {
+    this.component?.toggleSidebar(side)
   }
 }
 
@@ -67,6 +79,14 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *   - Escape closes it;  so does going to a page from it (`ui-navigating` from inside the drawer).
  * - `toggleDrawer()` (the `<ui-site-nav-button>`'s click):  narrow, slides the drawer in or out;  wide, switches
  *   `drawer` and sends `ui-toggle`.  Remembering the choice is the site's:  the layout keeps nothing.
+ *   - `drawer-hides`:  wide, it switches the drawer between hidden (`drawer="hidden"`) and all of it, never to its
+ *     icons (epic `mockup` T55:  Spell UI's site, whose navigation has no icons).
+ * - The side bars close too (epic `mockup` T55):  `right="hidden"` (or `left`) hides one, wide;
+ *   `toggleSidebar("right")`, a `<ui-site-nav-button toggles="right">`'s click, switches it and sends `ui-toggle`.
+ *   - Narrow, a side bar with such a button in the layout is hidden behind it, and slides over the page from its
+ *     side while open (`:state(right-open)`);  one with no button stays in the row, as before.
+ * - `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them, over the
+ *   page's own ground (Spell UI's docs site's look);  the page's side is no box of its own then.
  * - It finds its navigations and buttons by their English tags (`ui-site-nav`, `ui-site-nav-button`).
  ****************/
 export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
@@ -87,6 +107,12 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   /** Has region `name` content?  An empty one isn't drawn. */
   has(name: Region): boolean {
     return this.slots.hasContent(this.slotForName(name))
+  }
+
+  /** `floating`:  the drawer and the side bars are cards floating over the page's ground. */
+  @E.cssState("floating")
+  get isFloating(): boolean {
+    return !!this.floating
   }
 
   ////////////////
@@ -112,9 +138,18 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
    */
   @E.cssState("narrow") @E.state accessor isNarrow = false
 
-  /** Does the drawer show all of it:  wide and not compact, or open over the page?  A drawer button's `aria-expanded`. */
+  /** `drawer="hidden"`:  wide, no drawer at all;  its button shows it again. */
+  @E.cssState("drawer-hidden")
+  get isDrawerHidden(): boolean {
+    return this.drawer === HIDDEN
+  }
+
+  /**
+   * Does the drawer show all of it:  wide and neither compact nor hidden, or open over the page?
+   * A drawer button's `aria-expanded`.
+   */
   get isDrawerShown(): boolean {
-    return this.isNarrow ? this.isOpen : !this.isCompact || this.isOpen
+    return this.isNarrow ? this.isOpen : (!this.isCompact && !this.isDrawerHidden) || this.isOpen
   }
 
   /**
@@ -153,6 +188,10 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   toggleDrawer() {
     if (this.isNarrow) {
       this.isOpen = !this.isOpen
+      return
+    }
+    if (this.drawerHides || this.isDrawerHidden) {
+      this.hideOrShowDrawer()
       return
     }
     const oldState: DrawerState = this.isCompact ? COMPACT : FULL
@@ -216,21 +255,38 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     }
     this.drawer = newState === COMPACT ? COMPACT : undefined
     if (newState === FULL) this.whileDrawerMoves()
-    this.send("ui-toggle", { newState, oldState })
+    this.send("ui-toggle", { region: DRAWER, newState, oldState })
     // ... held till it's no longer compact everywhere (`:state(compact)` follows a moment later)
     if (this.isWidening) this.cancelWidening = E.beforeNextPaint(() => (this.isWidening = false))
   }
 
-  /** Escape closes the drawer open over the page. */
-  @E.on("keydown")
-  protected onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Escape") this.close()
+  /**
+   * Wide, hide the whole drawer (`drawer="hidden"`), or show all of it again, and say so (`ui-toggle`):
+   * `drawer-hides`, or a drawer hidden already.
+   * - The column narrows to nothing and widens back (`UIPageLayout.css`);  nothing in it switches to its icons.
+   */
+  private hideOrShowDrawer() {
+    const oldState: DrawerState = this.isDrawerHidden ? HIDDEN : this.isCompact ? COMPACT : FULL
+    const newState: DrawerState = oldState === HIDDEN ? FULL : HIDDEN
+    this.peekTimer?.cancel()
+    this.isOpen = false
+    this.drawer = newState === HIDDEN ? HIDDEN : undefined
+    this.send("ui-toggle", { region: DRAWER, newState, oldState })
   }
 
-  /** Going to a page from the drawer closes it. */
+  /** Escape closes the drawer or a side bar open over the page. */
+  @E.on("keydown")
+  protected onKeyDown(event: KeyboardEvent) {
+    if (event.key !== "Escape") return
+    this.close()
+    this.closeSidebars()
+  }
+
+  /** Going to a page from the drawer, or from a side bar open over the page, closes it. */
   @E.on("ui-navigating")
   protected onNavigating(event: Event) {
     if (this.isInDrawer(event.target)) this.close()
+    if (this.sideHolding(event.target)) this.closeSidebars()
   }
 
   /**
@@ -241,6 +297,117 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     if (!this.isOpen) return
     if (this.isCompact && !this.isNarrow) this.whileDrawerMoves()
     this.isOpen = false
+  }
+
+  ////////////////
+  // ## The side bars:  hidden, open over a narrow page
+  ////////////////
+
+  /** `right="hidden"`:  wide, the right side bar isn't shown;  its button shows it again. */
+  @E.cssState("right-hidden")
+  get isRightHidden(): boolean {
+    return this.right === HIDDEN
+  }
+
+  /** `left="hidden"`:  wide, the left side bar isn't shown;  its button shows it again. */
+  @E.cssState("left-hidden")
+  get isLeftHidden(): boolean {
+    return this.left === HIDDEN
+  }
+
+  /** The right side bar slid over a narrow page, from its button. */
+  @E.cssState("right-open") @E.state accessor isRightOpen = false
+
+  /** The left side bar slid over a narrow page, from its button. */
+  @E.cssState("left-open") @E.state accessor isLeftOpen = false
+
+  /**
+   * The side bars a `<ui-site-nav-button toggles="...">` in its light DOM shows and hides:
+   * narrow, those hide behind their button;  the rest stay in the row.
+   */
+  @E.watches({ ...LIGHT_DOM_CHANGES, attributeFilter: ["slot", TOGGLES], equals: E.isSameList })
+  get sidesWithButtons(): readonly Side[] {
+    return SIDES.filter((side) => this.domElement.querySelector(`${NAV_BUTTON}[${TOGGLES}="${side}"]`))
+  }
+
+  /** Narrow, the right side bar hides behind its button:  `:state(right-closable)`. */
+  @E.cssState("right-closable")
+  get isRightClosable(): boolean {
+    return this.sidesWithButtons.includes(RIGHT)
+  }
+
+  /** Narrow, the left side bar hides behind its button:  `:state(left-closable)`. */
+  @E.cssState("left-closable")
+  get isLeftClosable(): boolean {
+    return this.sidesWithButtons.includes(LEFT)
+  }
+
+  /** Is side bar `side` hidden (`hidden`) on a wide page? */
+  isSideHidden(side: Side): boolean {
+    return side === RIGHT ? this.isRightHidden : this.isLeftHidden
+  }
+
+  /** Is side bar `side` slid over a narrow page? */
+  isSideOpen(side: Side): boolean {
+    return side === RIGHT ? this.isRightOpen : this.isLeftOpen
+  }
+
+  /**
+   * Is side bar `side` shown:  narrow, behind its button, while it's open;  else unless it's hidden.
+   * Its button's `aria-expanded`.
+   */
+  isSideShown(side: Side): boolean {
+    const isBehindButton = this.isNarrow && this.sidesWithButtons.includes(side)
+    return isBehindButton ? this.isSideOpen(side) : !this.isSideHidden(side)
+  }
+
+  /**
+   * Show or hide side bar `side`, as its button does:  narrow, behind its button, slide it over the page or away;
+   * else switch its attribute between `hidden` and none, and say so (`ui-toggle`, `newState` `hidden` or `shown`).
+   * Script API, on the DOM element too.
+   */
+  toggleSidebar(side: Side) {
+    if (this.isNarrow && this.sidesWithButtons.includes(side)) {
+      const opens = !this.isSideOpen(side)
+      this.closeSidebars()
+      this.close()
+      if (side === RIGHT) this.isRightOpen = opens
+      else this.isLeftOpen = opens
+      return
+    }
+    const oldState: SideState = this.isSideHidden(side) ? HIDDEN : SHOWN
+    const newState: SideState = oldState === HIDDEN ? SHOWN : HIDDEN
+    if (side === RIGHT) this.right = newState === HIDDEN ? HIDDEN : undefined
+    else this.left = newState === HIDDEN ? HIDDEN : undefined
+    this.send("ui-toggle", { region: side, newState, oldState })
+  }
+
+  /** Close the side bars slid over a narrow page, if any are. */
+  private closeSidebars() {
+    this.isRightOpen = false
+    this.isLeftOpen = false
+  }
+
+  /** A link followed from a side bar slid over a narrow page (its table of contents) closes it. */
+  @E.on("click")
+  protected onClickInSide(event: MouseEvent) {
+    if (!this.isRightOpen && !this.isLeftOpen) return
+    const isLink = event
+      .composedPath()
+      .some((node) => node instanceof Element && (node.localName === "a" || node.hasAttribute("link")))
+    if (isLink && this.sideHolding(event.target)) this.closeSidebars()
+  }
+
+  /** The side bar holding `target`, slotted into it:  `undefined` for none. */
+  private sideHolding(target: EventTarget | null): Side | undefined {
+    if (!target || typeof (target as Node).nodeType !== "number") return undefined
+    const node = target as Node
+    return SIDES.find((side) => {
+      const name = this.slotForName(side)
+      return [...this.domElement.children].some(
+        (child) => child.getAttribute("slot") === name && (child === node || child.contains(node))
+      )
+    })
   }
 
   ////////////////
@@ -359,7 +526,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   protected watchWidth() {
     if (isServer) return
     const resized = new ResizeObserver(() => {
-      this.isNarrow = this.isSlidOver()
+      this.isNarrow = this.isNarrowByStyle()
       this.measureMenu()
     })
     resized.observe(this.domElement)
@@ -407,15 +574,23 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     this.menuHeight = box?.isConnected ? box.getBoundingClientRect().height || undefined : undefined
   }
 
-  /** Is the drawer slid over the page, rather than beside it?  Its style says (`UIPageLayout.css`). */
-  private isSlidOver(): boolean {
-    return !!this.drawerColumn && getComputedStyle(this.drawerColumn).position === ABSOLUTE
+  /**
+   * Is it narrow, below 40em of its own box?  Its style says (`UIPageLayout.css`'s container query sets
+   * `--_page-layout-narrow` on its grid):  so a layout with no drawer, only side bars, knows too.
+   */
+  private isNarrowByStyle(): boolean {
+    const box = this.layoutBox
+    return !!box && getComputedStyle(box).getPropertyValue(NARROW_FLAG).trim() === "1"
   }
 
-  /** Narrow, it closes as it widens:  wide, the open drawer would sit over the page. */
+  /** Its grid's box, while drawn. */
+  private layoutBox: HTMLElement | undefined
+
+  /** Narrow, it closes as it widens:  wide, the open drawer, or a side bar, would sit over the page. */
   @E.onChange("isNarrow", { defer: true })
   protected onNarrowChanged() {
     this.isOpen = false
+    this.closeSidebars()
   }
 
   /**
@@ -458,7 +633,12 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
 
   render(): JSX.Element {
     return (
-      <div class={LAYOUT} part={this.partForName("layout")} style={this.layoutStyle}>
+      <div
+        class={LAYOUT}
+        part={this.partForName("layout")}
+        style={this.layoutStyle}
+        ref={(box: HTMLElement) => (this.layoutBox = box)}
+      >
         <Show when={this.has("drawer")}>
           <div
             class={DRAWER}
@@ -527,14 +707,31 @@ export interface UIPageLayout extends E.AttributeValues<typeof pageLayoutVocabul
 /** A named region, each its slot's name. */
 type Region = "menu" | "page-menu" | "drawer" | "left" | "right" | "footer"
 
-/** What `ui-toggle` says the drawer was and is:  its icons only, or all of it. */
-type DrawerState = typeof COMPACT | typeof FULL
+/** What `ui-toggle` says the drawer was and is:  its icons only, hidden (`drawer-hides`), or all of it. */
+type DrawerState = typeof COMPACT | typeof HIDDEN | typeof FULL
+
+/** A side bar, by its region's name. */
+export type Side = typeof LEFT | typeof RIGHT
+
+/** What `ui-toggle` says a side bar was and is. */
+type SideState = typeof HIDDEN | typeof SHOWN
 
 /** `drawer="compact"`, and `ui-toggle`'s word for it. */
 const COMPACT = "compact"
 
 /** `ui-toggle`'s word for the whole drawer:  no `drawer`. */
 const FULL = "full"
+
+/** `drawer="hidden"`, `right="hidden"`, `left="hidden"`, and `ui-toggle`'s word for them. */
+const HIDDEN = "hidden"
+
+/** `ui-toggle`'s word for a side bar shown:  no `hidden`. */
+const SHOWN = "shown"
+
+/** The side bars' regions, and `ui-toggle`'s `region` for them. */
+const LEFT = "left"
+const RIGHT = "right"
+const SIDES = [LEFT, RIGHT] as const
 
 /** The navigation's tag, and its attribute for icons only. */
 const SITE_NAV = "ui-site-nav"
@@ -562,8 +759,8 @@ const OPEN_DELAY = 0.5
 /** How long, in seconds, the pointer is off the open compact drawer before it closes:  a slip off its edge doesn't. */
 const CLOSE_DELAY = 0.15
 
-/** The drawer's column's `position` while it's slid over a narrow page. */
-const ABSOLUTE = "absolute"
+/** The private custom property its grid has while it's narrow (`UIPageLayout.css`). */
+const NARROW_FLAG = "--_page-layout-narrow"
 
 /** The class words of its boxes (`UIPageLayout.css`). */
 const LAYOUT = "layout"

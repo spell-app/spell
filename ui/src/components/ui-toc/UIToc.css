@@ -39,6 +39,17 @@
     --_ui-toc-control-hover-color: var(--ui-toc-control-hover-color, var(--ui-link));
     /* The toggle's background under the pointer. */
     --_ui-toc-control-hover-background: var(--ui-toc-control-hover-background, var(--ui-primary-background));
+    /*
+     * The head's band (epic `mockup` T55:  a page layout's floating side bar heads it as the editor's panels are):
+     * its fill, its padding, its least height, the room under it, and whether it sticks as the toc scrolls in its box.
+     */
+    --_ui-toc-head-background: var(--ui-toc-head-background, none);
+    --_ui-toc-head-padding: var(--ui-toc-head-padding, 0);
+    --_ui-toc-head-height: var(--ui-toc-head-height, 1.75em);
+    --_ui-toc-head-gap: var(--ui-toc-head-gap, var(--ui-font-size));
+    --_ui-toc-head-position: var(--ui-toc-head-position, static);
+    /* Room round the links, under the head:  the menu's margin. */
+    --_ui-toc-padding: var(--ui-toc-padding, 0);
 
     display: block;
   }
@@ -51,10 +62,17 @@
     align-items: center;
     gap: 0.5em;
     /* the toggle's height, with or without it:  a page with no folds keeps the same row (epic `notebook` P9) */
-    min-height: 1.75em;
+    min-height: var(--_ui-toc-head-height);
+    box-sizing: border-box;
     /* the gap the header kept below itself, before it shared its row */
-    margin-block-end: var(--ui-font-size);
+    margin-block-end: var(--_ui-toc-head-gap);
+    position: var(--_ui-toc-head-position);
+    inset-block-start: 0;
+    z-index: 1;
+    padding: var(--_ui-toc-head-padding);
+    background: var(--_ui-toc-head-background);
   }
+
   /*
    * a page's own buttons, after the toggle, at the row's right end:  the row's own items (no box of the slot's), so
    * an empty slot leaves the toggle where it was
@@ -153,8 +171,9 @@
   .fold[aria-expanded="true"] .chevron {
     rotate: 90deg;
   }
+  /* the room round the links:  none of the menu's own */
   [part~="menu"] {
-    --ui-menu-margin: 0;
+    --ui-menu-margin: var(--_ui-toc-padding);
   }
   /* weights go on the item's own box:  its text is drawn in its shadow root */
   .section::part(item) {

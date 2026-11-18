@@ -37,6 +37,11 @@ export type FollowedContent = {
   readonly root: Element
   /** `root` itself, when it's a `<ui-tabs>`:  then only its shown pane is listed */
   readonly tabs?: Element
+  /**
+   * `root` itself, when it's the `<ui-page-layout>` the toc is in:  then only its page is listed,
+   * what's in no slot of it (`TocIndex.layoutPage()`)
+   */
+  readonly layout?: Element
 }
 
 /**

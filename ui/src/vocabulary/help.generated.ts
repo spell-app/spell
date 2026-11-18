@@ -1192,7 +1192,14 @@ export const HELP_TABLE: Readonly<
       "A page layout puts what stays on screen around a page: a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.",
     attributes: {
       drawer:
-        "`compact`: the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it."
+        "`compact`: the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.",
+      "drawer-hides":
+        'The drawer\'s button hides the whole drawer (`drawer="hidden"`) and shows it again, never switching it to its icons: for a navigation with no icons.',
+      left: "`hidden`: the left side bar isn't shown, until its button shows it again.",
+      right:
+        '`hidden`: the right side bar isn\'t shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.',
+      floating:
+        "The drawer and the side bars float: rounded cards with a soft shadow and room round them, over the page's own ground."
     }
   },
   "ui-panel": {
@@ -1810,7 +1817,7 @@ export const HELP_TABLE: Readonly<
   },
   "ui-site-nav-button": {
     description:
-      "A site nav button shows or hides the side navigation of the page layout around it: its icons only and back on a wide page, slid in and out on a narrow one.",
+      "A site nav button shows or hides the side navigation of the page layout around it: its icons only and back on a wide page, slid in and out on a narrow one; or one of its side bars (`toggles`).",
     attributes: {
       color: "Menu: hue of the item while selected (`red active item`).",
       position: "Menu: `right` pushes the item (and what follows) to the far end.",
@@ -1826,7 +1833,9 @@ export const HELP_TABLE: Readonly<
       disabled: "Can't be chosen or followed.",
       selected: "Chosen: the dropdown's value, the list's / menu's current item (`aria-current`).",
       padding: "Menu: `none`, no padding; `none-x` / `none-y` drop only the left and right, or top and bottom.",
-      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row)."
+      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row).",
+      toggles:
+        "What it shows and hides: the layout's `drawer` (its side navigation), or its `left` or `right` side bar."
     }
   },
   "ui-site-tabs": {
@@ -1837,6 +1846,8 @@ export const HELP_TABLE: Readonly<
       pages:
         "The site's pages, nested as the side navigation nests them: the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, pages?, tab?",
       current: "Which page is shown: its `href` or its `id`.",
+      appearance:
+        "`header`: a switch for an app menu's middle, the look of the editor's Run | Edit: the row as wide as its tabs, on the bar's own fill, the page shown on the thumb.",
       label: "What a screen reader calls the row of tabs."
     }
   },

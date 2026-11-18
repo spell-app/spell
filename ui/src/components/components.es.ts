@@ -629,6 +629,7 @@ export const sharedEs = {
     start: "inicio",
     end: "fin",
     full: "completo",
+    hidden: "oculto",
     filling: "llenando",
     sliding: "deslizando",
     swinging: "balanceando",

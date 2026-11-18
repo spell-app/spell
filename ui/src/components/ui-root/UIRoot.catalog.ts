@@ -927,7 +927,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-page-layout": {
     folder: "ui-page-layout",
     skeleton: { width: "24em", parts: [{ shape: "paragraph", lines: 4 }] },
-    attributes: ["drawer"]
+    attributes: ["drawer", "drawer-hides", "left", "right", "floating"]
   },
   "ui-panel": {
     folder: "ui-panel",
@@ -1388,10 +1388,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled",
       "selected",
       "padding",
-      "kind"
+      "kind",
+      "toggles"
     ]
   },
-  "ui-site-tabs": { folder: "ui-site-tabs", attributes: ["pages", "current", "label"] },
+  "ui-site-tabs": { folder: "ui-site-tabs", attributes: ["pages", "current", "appearance", "label"] },
   "ui-slider": {
     folder: "ui-slider",
     skeleton: { width: "16em", height: "1.25em" },

@@ -33430,13 +33430,54 @@
           "name": "drawer",
           "description": {
             "kind": "markdown",
-            "value": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`.\n\nTakes:  `compact`"
+            "value": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  `hidden`:  no drawer at all, until its button shows it again.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`.\n\nTakes:  `compact` · `hidden`"
           },
           "values": [
             {
               "name": "compact"
+            },
+            {
+              "name": "hidden"
             }
           ]
+        },
+        {
+          "name": "drawer-hides",
+          "description": {
+            "kind": "markdown",
+            "value": "The drawer's button hides the whole drawer (`drawer=\"hidden\"`) and shows it again, never switching it to its icons:  for a navigation with no icons.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "left",
+          "description": {
+            "kind": "markdown",
+            "value": "`hidden`:  the left side bar isn't shown, until its button shows it again.  `toggleSidebar(\"left\")` switches it, and says so with `ui-toggle`.\n\nTakes:  `hidden`"
+          },
+          "values": [
+            {
+              "name": "hidden"
+            }
+          ]
+        },
+        {
+          "name": "right",
+          "description": {
+            "kind": "markdown",
+            "value": "`hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles=\"right\">`) shows it again.  `toggleSidebar(\"right\")` switches it, and says so with `ui-toggle`.  Narrow, a side bar with such a button is hidden behind it, and slides over the page while open.\n\nTakes:  `hidden`"
+          },
+          "values": [
+            {
+              "name": "hidden"
+            }
+          ]
+        },
+        {
+          "name": "floating",
+          "description": {
+            "kind": "markdown",
+            "value": "The drawer and the side bars float:  rounded cards with a soft shadow and room round them, over the page's own ground.  None:  the drawer a column of its own fill, the page's side a box beside it.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "disabled",
@@ -49165,7 +49206,7 @@
       "name": "ui-site-nav-button",
       "description": {
         "kind": "markdown",
-        "value": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.\n\n**Slots:**  default, `icon`, `badge`"
       },
       "attributes": [
         {
@@ -49361,6 +49402,24 @@
             },
             {
               "name": "divider"
+            }
+          ]
+        },
+        {
+          "name": "toggles",
+          "description": {
+            "kind": "markdown",
+            "value": "What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  With one for a side bar, a narrow layout hides that side bar behind it.\n\nTakes:  `drawer` · `left` · `right`\nDefault:  `drawer`"
+          },
+          "values": [
+            {
+              "name": "drawer"
+            },
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
             }
           ]
         },
@@ -49676,6 +49735,18 @@
             "kind": "markdown",
             "value": "Which page is shown:  its `href` or its `id`.  None:  the page whose `href` is the browser's address.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "appearance",
+          "description": {
+            "kind": "markdown",
+            "value": "`header`:  a switch for an app menu's middle, the look of the editor's Run | Edit:  the row as wide as its tabs, on the bar's own fill, the page shown on the thumb.  None:  a segmented row of its own, each tab an equal share of it.\n\nTakes:  `header`"
+          },
+          "values": [
+            {
+              "name": "header"
+            }
+          ]
         },
         {
           "name": "label",
@@ -60347,21 +60418,21 @@
           "name": "for",
           "description": {
             "kind": "markdown",
-            "value": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`.\n\nTakes:  text"
+            "value": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  inside a `<ui-page-layout>` (a side bar of it), the layout's page, followed as the site shows another;  else the page's `<main>`, else `<body>`.\n\nTakes:  text"
           }
         },
         {
           "name": "scroller",
           "description": {
             "kind": "markdown",
-            "value": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window.\n\nTakes:  text"
+            "value": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  inside a `<ui-page-layout>`, the box the layout scrolls in;  else the window.\n\nTakes:  text"
           }
         },
         {
           "name": "heading",
           "description": {
             "kind": "markdown",
-            "value": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`.\n\nTakes:  text"
+            "value": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Default:  inside a `<ui-page-layout>`, the title of the layout's page (its level 1 heading).  Its old name was `header`.\n\nTakes:  text"
           }
         },
         {
