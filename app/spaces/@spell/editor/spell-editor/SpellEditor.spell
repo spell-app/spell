@@ -76,6 +76,7 @@ spell editor is an app
 
 	group "Spell"
 	to "home" with icon "home"
+	to "spell ui" with title "Spell UI", icon "book"
 	to "about spell" with title "About Spell…", icon "info circle"
 
 	group "The Project"
@@ -376,10 +377,11 @@ a "file tab bar" is a view
 		</panel>
 
 a "home row" is a view
-	// The top of Spell's menu, over its projects:  Home, then About Spell (epic `editor` I114)
+	// The top of Spell's menu, over its projects:  Home, Spell UI's site, then About Spell (epic `editor` I114, `mockup` T55)
 	to draw it
 		<menu direction="vertical" size="small" class="SpellMenuHome" ticks>
 			<action "home"/>
+			<action "spell ui"/>
 			<action "about spell"/>
 			<divider/>
 		</menu>

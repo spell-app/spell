@@ -28,7 +28,7 @@ export const EDITOR_NAMES = {
       editMenu: { kind: "view", words: "edit menu", for: "Edit" },
       viewMenu: { kind: "view", words: "view menu", for: "View" },
       runMenu: { kind: "view", words: "run menu", for: "Run" },
-      homeRow: { kind: "view", words: "home row", for: "Home and About Spell, atop Spell's menu" },
+      homeRow: { kind: "view", words: "home row", for: "Home, Spell UI and About Spell, atop Spell's menu" },
       aboutBox: { kind: "view", words: "about box", for: "what About Spell… shows" },
       versionsBox: { kind: "view", words: "versions box", for: "what Versions shows" },
 
@@ -58,6 +58,7 @@ export const EDITOR_NAMES = {
       duplicateWords: { kind: "value", words: "duplicate words", for: "Duplicate the project's title" },
 
       home: { kind: "action", words: "home", for: "Home" },
+      spellUi: { kind: "action", words: "spell ui", for: "Spell UI:  opens Spell UI's site" },
       aboutSpell: { kind: "action", words: "about spell", for: "About Spell…" },
       renameProject: { kind: "action", words: "rename project", for: "renames the project" },
       deleteProject: { kind: "action", words: "delete project", for: "deletes the project" },

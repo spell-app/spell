@@ -5,7 +5,7 @@ import { render } from "@solidjs/web"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { AppBarMenus, BarMenu, CodeSettings, ProjectBarMenu, uiReady } from "spell/app/app/solid"
+import { AppBarMenus, BarMenu, CodeSettings, ProjectBarMenu, SpellBarMenu, uiReady } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 
 /**
@@ -150,6 +150,27 @@ describe("<AppBarMenus>", () => {
     await waitForCondition(() => !CodeSettings.choices.wrapLines)
     expect(editorPrefs.get("codeWrapLines")).toBe(false)
     await waitForCondition(() => !ticked())
+  })
+})
+
+describe("<SpellBarMenu>", () => {
+  test("its top row:  Home, Spell UI, About Spell…;  Spell UI opens Spell UI's site in the editor (T55)", async () => {
+    const showSpellUI = spyOnEditor("showSpellUI", () => {})
+    const host = await mount(() => <SpellBarMenu />)
+    const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=SpellBarMenu]")!
+    popup.visible = true
+    flush()
+    const found = () => popup.querySelector("ui-menu.SpellMenuHome")
+    await waitForCondition(() => !!found()?.querySelector("ui-action:not([kind])"))
+    const row = found()!
+    await rowsReady(row)
+    const items = [...row.children].map((item) => (item.getAttribute("kind") === "divider" ? "─" : rowText(item)))
+    expect(items).toEqual(["Home", "Spell UI", "About Spell…", "─"])
+    const spellUI = [...row.querySelectorAll<HTMLElement>("ui-action")].find((item) => rowText(item) === "Spell UI")!
+    spellUI.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    flush()
+    await waitForCondition(() => showSpellUI.mock.calls.length > 0)
+    expect(showSpellUI).toHaveBeenCalledTimes(1)
   })
 })
 

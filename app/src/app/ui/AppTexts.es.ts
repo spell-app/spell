@@ -119,6 +119,8 @@ const APP_TEXTS_ES: AppTextPack = {
   // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "Acerca de Spell…",
+  // Spell › Spell UI, and the home page's footer:  Spell UI's site, in the editor (epic `mockup` T55)
+  spellUI: "Spell UI",
   codeSettings: "Ajustes del editor de código…",
   codeSettingsHeader: "Editor de código",
   codeSettingsClose: "Cerrar los ajustes del editor de código",

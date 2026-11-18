@@ -146,7 +146,8 @@ function Divider(): JSX.Element {
  * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
  * - Opens the project's group's projects (`<ProjectsMenu>`):
  *   the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more.
- * - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before,
+ * - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before;
+ *   Spell UI, its site in the editor (`editor.showSpellUI()`, epic `mockup` T55);
  *   and About Spell, which shows its `about box` (epic `editor` I94, I114).
  * - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to
  *   (Owen, 2026-11-14:  "Put <pen> New Example at the end of the list of examples").
@@ -559,6 +560,7 @@ function handOverActions(spell: EditorSpell) {
   // every action `EDITOR_NAMES` lists, and no other
   const actions: Record<EditorMemberName<"SpellEditor", "action">, () => unknown> = {
     home: () => editor.showProjectChooser(),
+    spellUi: () => editor.showSpellUI(),
     aboutSpell: () => showAboutSpell(spell),
     renameProject: () => editor.renameApp(),
     deleteProject: () => editor.deleteApp(),

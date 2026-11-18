@@ -115,6 +115,8 @@ export const APP_TEXTS = {
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "About Spell…",
+  // Spell › Spell UI, and the home page's footer:  Spell UI's site, in the editor (epic `mockup` T55)
+  spellUI: "Spell UI",
   codeSettings: "Code Editor Settings…",
   codeSettingsHeader: "Code editor",
   codeSettingsClose: "Close the code editor's settings",
