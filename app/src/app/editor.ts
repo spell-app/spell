@@ -219,6 +219,9 @@ export class EditorStore extends Observable {
     const sameProject = editor.project === project
     if (!sameProject) {
       console.info("selecting project", project)
+      // the old app goes at once, never shown while this one loads (I254);  nor run again meanwhile, or drawn back
+      comingProject = project
+      appRuntime?.unmountApp()
       // the one shown goes, if it was a start card's and not kept (epic `mockup` I42):  asked while this one loads
       void editor.leaveProject()
       editor.history.clear()
@@ -228,8 +231,8 @@ export class EditorStore extends Observable {
       // remember this project was selected for projectRoot
       editor.lastProjectForRoot(location.projectRoot, projectPath)
       await project.load(undefined)
-      // Clear application display when switching projects
-      appRuntime?.unmountApp()
+      // another project was picked while this one loaded:  that one shows, not this
+      if (comingProject !== project) return
     }
 
     // Figure out which file to show, using pref if not specified in `path`
@@ -790,7 +793,10 @@ export class EditorStore extends Observable {
     if (!project || !compiled) return
     // the site editor shows no app:  run, it'd draw over the page (epic `mockup` P4)
     if (editor.projectPage === "site") return
+    // no page shows an app (Home), or this project is leaving for another:  it'd draw over what's there (I254)
+    if (!isShowingApp(project)) return
     const runtime = await editor.loadRuntime()
+    if (!isShowingApp(project)) return
     const output = runtime.core.console
     const words = appTexts.groupWords(editor.projectRoot)
     output.group(appTexts.text("consoleExecuting", words))
@@ -810,8 +816,15 @@ export class EditorStore extends Observable {
       await RootLoader.useLanguage(lang)
     }
     const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
+    // the page may have gone while its language loaded:  it starts afresh when one shows it again
+    if (!isShowingApp(project)) {
+      editor.startAfresh = true
+      output.groupEnd()
+      return
+    }
+    const place = appRoot
     const run = runtime.runApp(compiled, {
-      appRoot,
+      appRoot: place,
       coreUrl: runtimeUrl(),
       keepConsole: true,
       keepThings,
@@ -827,6 +840,8 @@ export class EditorStore extends Observable {
     })
     editor.appRun = run
     const error = await run
+    // its page went while it ran:  what it drew there goes with it
+    if (appRoot !== place) unmountAppIn(place)
     editor.programRuns += 1
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
@@ -952,9 +967,12 @@ export class EditorStore extends Observable {
    * - Why "if":  moving between the editor and the runner,
    *   the old page's cleanup may run AFTER the new page's `<AppRoot>` handed its own over,
    *   which must not be forgotten.
+   * - SIDE EFFECT:  takes down the app drawn in `element`, either way:  its drawing, its Solid root, its keys
+   *   (`core.mountApp()`), never left running in an element no page shows (I254).
    */
   releaseAppRoot(element: HTMLElement): void {
     if (appRoot === element) appRoot = undefined
+    unmountAppIn(element)
   }
 
   ////////////////
@@ -2407,6 +2425,25 @@ export type RunningSitePage = {
 let loadingRuntime: Promise<SpellRuntime> | undefined
 /** Where the running app draws -- NOT spell state either.  See `editor.setAppRoot()`. */
 let appRoot: HTMLElement | undefined
+/**
+ * The project picked last (`selectPath()`), on its way in while it loads -- NOT spell state.
+ * - Until it's `editor.project`, the project still shown is leaving:  it doesn't run again (`executeCompiledApp()`).
+ */
+let comingProject: SP.SpellProject | undefined
+
+/**
+ * May `project` run, and draw, now?  Only while a page shows the app (an `<AppRoot>` handed over its place),
+ * and no other project is on its way in (`comingProject`).
+ * - Home has no `<AppRoot>`:  a compile that ends after leaving for it would draw the app over it (I254).
+ */
+function isShowingApp(project: SP.SpellProject): boolean {
+  return !!appRoot && (!comingProject || comingProject === project)
+}
+
+/** Take down the app `core.mountApp()` drew in `element`, if any:  it leaves its unmounting there, as `spellRoot`. */
+function unmountAppIn(element: HTMLElement | undefined): void {
+  ;(element as (HTMLElement & { spellRoot?: { unmount(): void } }) | undefined)?.spellRoot?.unmount()
+}
 /** Scope explorer on the in-page language service, once CodeMirror's loaded -- NOT spell state.  See `editor.setScopeExplorer()`. */
 let scopeExplorer: LSP.ScopeExplorer | undefined
 /**
