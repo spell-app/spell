@@ -10,6 +10,7 @@ import "spell/app/app/solid/cellsBridge"
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-action"
 import "spell/ui/components/ui-menu"
+import "spell/ui/components/ui-modal"
 
 /**
  * `<action "deal"/>`:  a button for one of the program's actions, drawn by the core (`core.drawAction()`, epic
@@ -346,5 +347,109 @@ describe("core.drawAction() in a menu:  an action's row", () => {
       [false, false]
     ])
     expect(title(undo)).toBe("Undo Deal")
+  })
+})
+
+/**
+ * A modal's buttons (epic `language` T155):  what spell compiles this to.
+ *
+ *       a lobby is an app
+ *         to deal ...
+ *         to draw it
+ *           <modal "you won">
+ *             <action "deal" />
+ *             <action ok />
+ *           </>
+ */
+describe("a modal's buttons:  each closes it once its action has run;  `show` waits, and `the result` says which", () => {
+  installSpellElements(core)
+
+  class Lobby extends App {
+    static elementTag = core.defineElement(this, "Lobby", "App")
+    static {
+      this.declareProp("deals", { type: "number", default: 0 })
+    }
+    get deals(): number {
+      return this.getProp("deals")
+    }
+    set deals(deals: number) {
+      this.setProp("deals", deals)
+    }
+    async deal(): Promise<void> {
+      await core.pauseFor(10, "msec")
+      this.deals++
+    }
+    draw(): ReturnType<View["draw"]> {
+      return (
+        h(
+          "ui-modal",
+          { id: "you-won", heading: "you won" },
+          h(
+            "ui-actions",
+            core.drawAction(this, "deal", { class: "Deal", answer: "deal", "in-dialog": true }),
+            core.drawAction(this, "ok", { class: "Ok", answer: "ok", "in-dialog": true })
+          )
+        ) as unknown as () => ReturnType<View["draw"]>
+      )()
+    }
+  }
+  core.describeAction(Lobby, "deal", { title: "Deal", undoneAs: "Deal" })
+
+  let root: HTMLElement
+
+  beforeEach(() => {
+    core.resetRuntime()
+    root = document.createElement("div")
+    document.body.append(root)
+  })
+
+  afterEach(() => root.remove())
+
+  /** The lobby, mounted:  it, its modal, and its buttons by class. */
+  async function mountedLobby() {
+    await Promise.resolve()
+    const lobby = new Lobby()
+    core.mountApp(lobby, root)
+    flush()
+    const app = root.querySelector("lobby-app") as HTMLElement & { ready: Promise<void> }
+    await app.ready
+    flush()
+    const modal = app.querySelector("ui-modal") as HTMLElement & { ready: Promise<void>; visible: boolean }
+    await modal.ready
+    const button = (name: string) => app.querySelector(`ui-button.${name}`) as HTMLElement & { ready: Promise<void> }
+    await Promise.all(["Deal", "Ok"].map((name) => button(name).ready))
+    flush()
+    return { lobby, modal, button }
+  }
+
+  /** Press `button` as a person would:  its inner `<button>`. */
+  function press(button: HTMLElement) {
+    button.shadowRoot!.querySelector("button")!.click()
+    flush()
+  }
+
+  test("Deal deals, then closes it:  `show` goes on, `the result` is its action's name", async () => {
+    const { lobby, modal, button } = await mountedLobby()
+    const shown = core.showDrawn("you won")
+    flush()
+    expect(modal.visible).toBe(true)
+    press(button("Deal"))
+    // still open while its action runs
+    expect(modal.visible).toBe(true)
+    expect(await shown).toBe("deal")
+    expect(lobby.deals).toBe(1)
+    expect(modal.visible).toBe(false)
+    expect(core.resultIs("Deal")).toBe(true)
+  })
+
+  test("<action ok /> with no action of that name:  labelled OK, it just closes, answering ok", async () => {
+    const { lobby, modal, button } = await mountedLobby()
+    expect(button("Ok").textContent).toBe("OK")
+    const shown = core.showDrawn("you won")
+    flush()
+    press(button("Ok"))
+    expect(await shown).toBe("ok")
+    expect(modal.visible).toBe(false)
+    expect(lobby.deals).toBe(0)
   })
 })

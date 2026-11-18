@@ -154,21 +154,47 @@ def test_a_toast_the_page_cant_show_is_said_on_the_console() -> None:
     assert "notify:  the page can't show it" in out.getvalue()
 
 
-def test_show_and_hide_by_name_ask_the_page_not_waiting() -> None:
-    a_core, asked = asking({})
+def test_show_waits_for_the_page_to_answer_and_hide_does_not() -> None:
+    # epic `language` T155:  `show` waits until the modal closes;  its answer is `the result`
+    a_core, asked = asking({"showDrawn": "deal the cards"})
 
     async def run() -> None:
-        a_core.show_drawn("you won")
+        assert await a_core.show_drawn("you won") == "deal the cards"
         a_core.hide_drawn("you won")
+        a_core.hide_drawn("you-won", "ok")
         await asyncio.sleep(0)
 
     asyncio.run(run())
-    assert asked == [("showDrawn", ["you won"]), ("hideDrawn", ["you won"])]
+    assert asked == [("showDrawn", ["you won"]), ("hideDrawn", ["you won"]), ("hideDrawn", ["you-won", "ok"])]
+    assert a_core.result() == "deal the cards"
+    assert a_core.result_is("Deal The Cards")
+    assert not a_core.result_is("ok")
+
+
+def test_the_result_after_alert_confirm_and_prompt() -> None:
+    a_core, _ = asking({"confirm": False, "prompt": None})
+
+    async def run() -> None:
+        await a_core.alert("You won!")
+        assert a_core.result() == "ok"
+        await a_core.confirm("Deal again?")
+        assert a_core.result() == "cancel"
+        await a_core.prompt("Name?")
+        assert a_core.result() == "cancel"
+
+    asyncio.run(run())
+
+
+def test_keep_open_is_asked_once() -> None:
+    a_core, _ = printing()
+    a_core.keep_open()
+    assert a_core.take_kept_open()
+    assert not a_core.take_kept_open()
 
 
 def test_show_by_name_with_no_page_does_nothing() -> None:
     a_core, out = printing()
-    a_core.show_drawn("you won")
+    assert asyncio.run(a_core.show_drawn("you won")) is None
     a_core.hide_drawn("you won")
     assert out.getvalue() == ""
 

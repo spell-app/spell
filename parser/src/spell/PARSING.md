@@ -1715,15 +1715,32 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - On any other tag a quoted word is still unreadable.
   - A MODAL'S DRAWING (T155;  `SpellJSX.markDialog()`;  Owen:  "only for buttons in the modal's actions section"):
     - An `<action "...">` in its ACTIONS, `<actions>` (Spanish's `<acciones>`, Spell UI's `<ui-actions>`), closes it once
-      its click has run the action, as a dialog's own buttons do (`in-dialog`:  the core gives its button Spell UI's
-      `approve` class);  `keep-open` (Spanish's `mantener-abierto`, `LanguageWords.keepOpenAttribute`) leaves it open.
+      its click has run the action, as a dialog's own buttons do (`in-dialog`:  the core closes it, `closeDialogOf()`);
+      `keep-open` (Spanish's `mantener-abierto`, `LanguageWords.keepOpenAttribute`) leaves it open.
     - Anywhere else in it (its content, a menu's row), an action runs and the modal stays.
-    - A modal naming none of its parts is laid out for you (`dialogChildren()`):  what it holds in `<ui-content>`, the
-      `<action>`s at its top after it in `<ui-actions>`, so they're its actions and close it.
+    - A modal naming none of its parts, with an `<action>` at its top, is laid out for you (`dialogChildren()`):  what it
+      holds in `<ui-content>`, those `<action>`s after it in `<ui-actions>`, so they're its actions and close it.
+      One with no action there keeps its drawing as written (StarWars' crawl places its words over the modal itself).
+    - A button's ANSWER, a bare word on it (`LanguageWords.answerWords`):  `<action ok />`, `<action "save the thing" ok />`,
+      `<action cancel />` (Spanish's `aceptar`, `cancelar`), compiled as the core's `answer="ok"`.
+      - With no quoted word, the word names the action:  the program's `ok` if it has one;  if not, the button just
+        closes, labelled OK / Cancel in the program's language (`dialog-ok`), and is never refused.
+      - A modal's button with neither word answers its action's name as written:  `answer="save the thing"`.
+    - `<statement> without closing`, `... without closing the modal` (`without_closing`, Spanish's `sin cerrar`,
+      `sin cerrar el modal`):  `core.keepOpen()`, then the statement, so the modal stays open after this run.
+      Only a call, as `without_waiting` takes.
   - `show "you won"`, `hide "you won"` (`show_drawn`, [ShowDrawn.ts](rules/UI/ShowDrawn.ts)):  a quoted name, nothing
     else;  Spanish's `mostrar "ganaste"`, `ocultar "ganaste"`.
-    - Compiled to `core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page or
-      inside a view's shadow root, its `visible` set.  Python's `core.show_drawn()` asks its page to (`page.ts`).
+    - Compiled to `await core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page
+      or inside a view's shadow root, its `visible` set.  Python's `core.show_drawn()` asks its page to (`page.ts`).
+    - `show` waits until a modal closes, as `alert` does (T155);  `show "you won" without waiting` doesn't
+      (`without_waiting`);  `hide` never waits.
+    - `the result` (`the_result`, Spanish's `el resultado`):  what closed the last dialog, `core.result()`:
+      a button's answer, `cancel` for Escape and the dimmer;  `ok` after `alert`, `ok` / `cancel` after `confirm`,
+      the text typed after `prompt`.
+      - `the result is ok` compiles to `core.resultIs("ok")` (`is_equal`):  `ok` / `cancel` (`aceptar` / `cancelar`)
+        read as its answers, unquoted, and text compares with no regard to case.
+      - A program's own `result` wins:  a variable of those words, or a property of the action's thing.
     - A program's own `to show (word as text)` still wins:  its method's rule reads `show "fizz"` first.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.

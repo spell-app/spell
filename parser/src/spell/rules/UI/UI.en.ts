@@ -18,6 +18,8 @@ import { ScrollToTop } from "./ScrollToTop"
 import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
 import { ShowDrawn } from "./ShowDrawn"
+import { TheResult } from "./TheResult"
+import { WithoutClosing } from "./WithoutClosing"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
@@ -127,8 +129,38 @@ UI.addRule(ShowDrawn, {
     {
       compileAs: "statement",
       tests: [
-        [`show "you won"`, `core.showDrawn("you won")`],
+        [`show "you won"`, `await core.showDrawn("you won")`],
         [`hide "you won"`, `core.hideDrawn("you won")`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(WithoutClosing, {
+  syntax: "{call:statement} without closing",
+  tests: [{ compileAs: "statement", tests: [[`print 1 without closing`, ["core.keepOpen()", "core.console.log(1)"]]] }]
+})
+
+UI.addRule(WithoutClosing, {
+  syntax: "{call:statement} without closing the modal",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [[`print 1 without closing the modal`, ["core.keepOpen()", "core.console.log(1)"]]]
+    }
+  ]
+})
+
+UI.addRule(TheResult, {
+  syntax: "the result",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`the result`, `core.result()`],
+        [`the result is ok`, `(core.resultIs("ok"))`],
+        [`the result is not cancel`, `(!core.resultIs("cancel"))`],
+        [`the result is "Save the Thing"`, `(core.resultIs("Save the Thing"))`]
       ]
     }
   ]

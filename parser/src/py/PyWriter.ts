@@ -12,6 +12,12 @@ const { isCoreCall } = P.jsShapes
  */
 const CORE_COROUTINES = new Set([...P.CORE_CALLS_THAT_WAIT].filter((name) => name !== "pauseFor"))
 
+/**
+ * `core`'s calls that wait only where the program says so, awaited only where it does:
+ * `notify ... and wait`, and `show "you won"` (not `... without waiting`;  epic `language` T155).
+ */
+const AWAITED_AS_WRITTEN = new Set(["notify", "showDrawn"])
+
 /****************
  * ### `PyWriter`
  * Writes a spell tree as Python, on `asyncio`:  the `py` target's writer (epic `python-target`;  one target since P22).
@@ -135,12 +141,13 @@ export class PyWriter extends PyBaseWriter {
 
   /**
    * What it waits for, which says its own `await` -- see the calls above.
-   * - But `notify ... and wait`:  `await core.notify(...)`, as `core.notify()` waits only when awaited.
+   * - But `notify ... and wait`:  `await core.notify(...)`, as `core.notify()` waits only when awaited;
+   *   and `show "you won"`, `await core.show_drawn(...)`, which waits until the modal closes (epic `language` T155).
    */
   ASTAwaitExpression(node: P.ASTAwaitExpression): string {
     const written = this.loop(node.expression) ?? String(this.write(node.expression))
     const inner = node.expression
-    return isCoreCall(inner) && (inner as P.ASTScopedMethodInvocation).methodName === "notify"
+    return isCoreCall(inner) && AWAITED_AS_WRITTEN.has((inner as P.ASTScopedMethodInvocation).methodName)
       ? `await ${written}`
       : written
   }

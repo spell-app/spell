@@ -173,3 +173,32 @@ def test_meanwhile_carries_on():
         return steps
 
     assert asyncio.run(run()) == ["carried on", "a starts", "a ends"]
+
+
+def test_an_action_waiting_on_a_modal_lets_the_next_one_run() -> None:
+    # epic `language` T155:  `show "you won"` inside an action, and the modal's button's call
+    queue = ActionQueue()
+    ran: list[str] = []
+    closed = asyncio.Event()
+
+    async def win() -> None:
+        await closed.wait()
+        ran.append("won")
+
+    async def deal() -> None:
+        ran.append("deal")
+        closed.set()
+
+    async def run() -> None:
+        queue.enter("game", "win", win)
+        await asyncio.sleep(0)
+        queue.enter("game", "deal", deal)
+        await asyncio.sleep(0)
+        assert ran == []
+        queue.let_next_run(queue._task)
+        for _ in range(5):
+            await asyncio.sleep(0)
+
+    asyncio.run(run())
+    assert ran == ["deal", "won"]
+    assert not queue.is_busy

@@ -58,7 +58,14 @@ import { SpellJSX } from "./SpellJSX"
  *   modal, as a dialog's buttons do (epic `language` T155):  `SpellJSX` marks it as the modal parses (`markDialog()`);
  *   it compiles with the core's own `in-dialog`.  `keep-open` (Spanish's `mantener-abierto`) leaves it open.
  *   Anywhere else in a modal, its click runs the action alone.
- * - Without a quoted word, `<action>` is Spell UI's `<ui-action>`, a menu's item, as before.
+ * - Its answer, a bare word on it (epic `language` T155):  `<action ok />`, `<action "save the thing" ok />`,
+ *   `<action cancel />`, `<action "nevermind" cancel />` (Spanish's `aceptar`, `cancelar`).
+ *   - It's what `the result` is once its click has closed the modal:  `ok` or `cancel`;
+ *     a button with neither gives its action's name.
+ *   - Compiled as the core's own `answer="ok"`.
+ *   - With no quoted word, the word names its action:  `<action ok />` runs the program's `ok`, if it has one;
+ *     if not, it just closes, labelled OK in the page's language (`core.drawAction()`), and is never refused.
+ * - Without a quoted word or an answer, `<action>` is Spell UI's `<ui-action>`, a menu's item, as before.
  */
 export class ActionButton extends P.TokenType<never, ActionButtonData> {
   @proto static alias = ["jsxChild", "expression"]
@@ -69,7 +76,10 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
   /** An element named by our language's action word, with a quoted word:  its action looked up, its parts parsed. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const [element] = tokens
-    if (!(element instanceof P.JSXElementToken) || !element.quotedWord || element.chain) return undefined
+    if (!(element instanceof P.JSXElementToken) || element.chain) return undefined
+    // its answer's word, `<action ok />`, names it when it has no quoted word (epic `language` T155)
+    const answered = ActionButton.answerOf(scope, element)
+    if (!element.quotedWord && !answered) return undefined
     if (webWordFor(scope, SPELL_TAG_WORDS, element.tagName) !== ACTION_TAG_MEANING) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
@@ -80,14 +90,20 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
     match.data.attributes = element.attributes?.map((attribute) => parser?.parse(attribute, "jsxAttribute", scope))
     match.data.readings = ActionButton.readingsOf(scope, element)
     match.data.keepOpenAt = ActionButton.keepOpenAt(scope, element)
-    const { value } = element.quotedWord
-    const words = (value instanceof P.TextToken ? value.innerText : `${value?.raw ?? ""}`).trim()
+    match.data.answer = answered?.answer
+    match.data.answerAt = answered?.at
+    const value = element.quotedWord?.value
+    const words = element.quotedWord
+      ? (value instanceof P.TextToken ? value.innerText : `${value?.raw ?? ""}`).trim()
+      : answered!.word
+    match.data.words = words
     // only a type with the action matters (`P.Outline`)
     const types = ActionButton.typesFor(scope, (type) => !!DefineMenu.actionNamed(type, words))
     const found = DefineMenu.appActionNamed(scope, words) ?? ActionButton.actionIn(types, words)
-    match.data.action = found ?? DefineMenu.methodNameFor(words)
+    // `<action ok />` with no action of that name:  its answer, which the core finds no action for, so it just closes
+    match.data.action = found ?? (element.quotedWord ? DefineMenu.methodNameFor(words) : answered!.answer)
     // declared further down, or nowhere:  refused once the whole program has parsed, if it's still nowhere
-    if (!found) {
+    if (!found && element.quotedWord) {
       const message = SP.Language.of(scope).parserMessage("unknown-action", { tag: element.tagName, action: words })
       SP.SpellWarnings.refuseIf(match, message, () => !ActionButton.actionIn(types, words))
     }
@@ -97,11 +113,13 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
 
   /** `core.drawAction(this, "autoPlay", props, ...children)`:  a `ui-button`'s element, marked with its action. */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
-    const { readings, keepOpenAt } = match.data
+    const { readings, keepOpenAt, answer, answerAt } = match.data
     const attrs = match.data.attributes
       ?.map((attr, index) => {
         // `keep-open` is the compiler's:  it leaves the action unmarked, and goes no further
         if (index === keepOpenAt) return undefined
+        // its answer's word, `ok`, in the core's own name:  `answer="ok"`
+        if (index === answerAt) return ActionButton.answerAttribute(match, answer!)
         const reading = readings?.[index]
         if (!attr || !reading) return P.asAST<P.ASTJSXAttribute>(attr?.AST)
         const { attribute: name, value } = reading
@@ -116,11 +134,13 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
     // a menu's row, or a modal's button:  the core's own mark, last, so the tag's attributes keep their places
     const mark = (name: string) =>
       new P.ASTJSXAttribute(match, { name, value: new P.ASTBooleanLiteral(match, { value: true }) })
-    const { inMenu, inDialog } = match.data
+    const { inMenu, inDialog, words } = match.data
+    // a modal's button with no answer of its own answers its action's name, as written:  `the result is "save the thing"`
+    const answered = inDialog && answer === undefined && words ? [ActionButton.answerAttribute(match, words)] : []
     const marked = inMenu
       ? [...(attrs ?? []), mark(IN_MENU_ATTRIBUTE)]
       : inDialog
-        ? [...(attrs ?? []), mark(IN_DIALOG_ATTRIBUTE)]
+        ? [...(attrs ?? []), ...answered, mark(IN_DIALOG_ATTRIBUTE)]
         : attrs
     return new P.ASTJSXElement(match, { tagName: BUTTON_TAG, attrs: marked, children, action: match.data.action })
   }
@@ -209,6 +229,37 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
     return index === undefined || index < 0 ? undefined : index
   }
 
+  /**
+   * The answer `element`'s button gives, by a bare word it says (epic `language` T155):
+   * `ok` in `<action ok />` and `<action "save the thing" ok />`, `cancel` in `<action cancel />` --
+   * `undefined` if it says neither.
+   * - Its language's words (`SP.LanguageWords.answerWords`:  Spanish's `aceptar`, `cancelar`), and English's in every
+   *   language;  case and accents never matter.
+   * - `word`:  as written, the name of the action `<action ok />` runs, if the program has one.
+   */
+  private static answerOf(
+    scope: P.Scope,
+    element: P.JSXElementToken
+  ): { answer: SP.DialogAnswer; at: number; word: string } | undefined {
+    const words = { ...ANSWER_WORDS, ...SP.Language.of(scope).words.answerWords }
+    const read = (name: string) =>
+      Object.entries(words).find(([word]) => withoutAccents(word).toLowerCase() === withoutAccents(name).toLowerCase())
+    const attributes = element.attributes ?? []
+    for (let at = 0; at < attributes.length; at++) {
+      const attribute = attributes[at]!
+      if (attribute.value !== undefined || !(attribute instanceof P.JSXAttributeToken)) continue
+      const found = read(attribute.name)
+      if (found) return { answer: found[1], at, word: attribute.name }
+    }
+    return undefined
+  }
+
+  /** The core's own attribute for a button's answer:  `answer="ok"`, `answer="save the thing"` (`core.drawAction()`). */
+  private static answerAttribute(match: P.Match, answer: string): P.ASTJSXAttribute {
+    const value = new P.ASTStringLiteral(match, { value: answer, quote: '"', raw: JSON.stringify(answer) })
+    return new P.ASTJSXAttribute(match, { name: ANSWER_ATTRIBUTE, value })
+  }
+
   /** The type whose drawing `scope` is in:  its method's thing's (`a solitaire` / `to draw it`), else the nearest type. */
   private static ownTypeOf(scope: P.Scope): P.TypeScope | undefined {
     const thing = P.MethodScope.thingTypeOf(scope)
@@ -256,6 +307,12 @@ type ActionButtonData = JSXMatchData & {
   inDialog?: boolean
   /** Which of its attributes is `keep-open`:  in a modal's actions, it leaves the modal open (T155). */
   keepOpenAt?: number
+  /** The answer it gives, `ok` or `cancel`, by its word (`<action ok />`):  what `the result` is once it closes (T155). */
+  answer?: SP.DialogAnswer
+  /** Which of its attributes is that word. */
+  answerAt?: number
+  /** Its action as written, its quoted word or its answer's word:  `save the thing`, `ok`. */
+  words?: string
 }
 
 /** One action `<action "...">` may name, as the editor offers it -- see `ActionButton.actionsIn()`. */
@@ -279,3 +336,9 @@ const BUTTON_TAG = "ui-button"
 
 /** `<action>`'s own attribute in a modal's actions, English's word:  its click leaves the modal open (T155). */
 const KEEP_OPEN = "keep-open"
+
+/** The answers' words in English, read in every language, as `keep-open` is (T155). */
+const ANSWER_WORDS: Readonly<Record<string, SP.DialogAnswer>> = { ok: "ok", cancel: "cancel" }
+
+/** The core's own attribute for the answer a button gives:  `answer="ok"` (`core.drawAction()`, T155). */
+const ANSWER_ATTRIBUTE = "answer"

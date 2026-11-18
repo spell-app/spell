@@ -760,8 +760,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * A modal's drawing (epic `language` T155;  Owen, 2026-11-17:  "only for buttons in the modal's actions section"):
-   * - naming none of its parts (`DIALOG_PART_TAGS`), nor an if-chain at its top:  laid out in them as it compiles
-   *   (`dialogChildren()`), each `<action>` at its top going to its actions
+   * - naming none of its parts (`DIALOG_PART_TAGS`), nor an if-chain at its top, and holding an `<action>` at its top:
+   *   laid out in them as it compiles (`dialogChildren()`), each `<action>` at its top going to its actions;
+   *   one with no action there keeps its drawing as written (StarWars' crawl)
    * - each `<action "...">` in its ACTIONS, the row of buttons at its bottom, closes it once its click has run the
    *   action, as a dialog's own buttons do (`action_button`'s `inDialog`):
    *   - written in its `<actions>` (Spell UI's `<ui-actions>`, Spanish's `<acciones>`), however deep;
@@ -787,9 +788,12 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       if (child.data.chain || DIALOG_PART_TAGS.includes(tag)) laidOut = true
       if (tag === DIALOG_ACTIONS_TAG) markAll(child)
     }
-    if (laidOut) return
+    // laid out for you only with a button to put in its bottom row:  one with none keeps its drawing as written,
+    // as StarWars' crawl, whose words are placed over the modal itself
+    const actions = children.filter((child): child is P.MatchFor<ActionButton> => !!child?.is(ActionButton))
+    if (laidOut || !actions.length) return
     dialog.data.dialogParts = true
-    for (const child of children) if (child?.is(ActionButton)) closes(child)
+    for (const action of actions) closes(action)
   }
 
   /**

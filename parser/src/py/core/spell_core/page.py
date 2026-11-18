@@ -15,6 +15,8 @@ session.handle({"trigger": "card-click", "details": {"card": {"$id": "12"}}})
 - What it sends, each thing in it by its id (`{"$id": "3"}`), or by a reference (`"Card#queen-of-spades"`, P27):
   - a call of one of the program's functions:  `{"call": "play_from_the_stock_pile", "args": []}`
   - a call of a thing's method:  `{"call": "turn_over", "on": "Card#3", "args": []}`
+  - a modal's button's call, with what it closes once it has run:
+    `{"call": "deal_the_cards", "args": [], "closes": {"name": "you-won", "answer": "deal the cards"}}`
   - an event, for the program's handlers:  `{"trigger": "card-click", "target": "Card#queen-of-spades"}`
     - `target`:  what it happened to, a reference or a list of them (`spell_core.references`):
       the handler gets it as `event.target`, and a single thing by its type's name too, `event.card`
@@ -103,6 +105,10 @@ class PageSession:
         # never waits its turn:  dropped while an action runs, e.g. the app's `undo`, as the JavaScript core's
         if description.get("refused_while_busy") and core.RUNTIME.actions.is_busy:
             return
+        # a modal's button, while an action waits on that modal:  its call runs now (epic `language` T155)
+        closes = message.get("closes")
+        if isinstance(closes, dict):
+            core.let_modal_call_run(str(closes.get("name", "")))
         core.RUNTIME.actions.enter(
             held,
             name,
@@ -112,10 +118,19 @@ class PageSession:
         )
 
     async def run_async(self, message: dict[str, Any]) -> None:
-        """Run `message` to its end, awaiting what's `async def` -- see `handle_async()`."""
+        """Run `message` to its end, awaiting what's `async def` -- see `handle_async()`.
+
+        - A modal's button's call names what it `closes`, `{"name": "you-won", "answer": "ok"}`:
+          the modal is hidden once it has run, with that answer, unless it said `... without closing`
+          (epic `language` T155).
+        """
+        closes = message.get("closes")
+        core.take_kept_open()
         for result in self.run(message):
             if inspect.isawaitable(result):
                 await result
+        if isinstance(closes, dict) and not core.take_kept_open():
+            core.hide_drawn(str(closes.get("name", "")), closes.get("answer"))
 
     def run(self, message: dict[str, Any]) -> list[object]:
         """Run `message`:  what it returned, each handler's for an event -- see `handle()`."""

@@ -400,6 +400,13 @@ export type ArticleAgreement = {
   article(kind: ArticleKind, noun: string, type: P.TypeScope | undefined): string
 }
 
+/**
+ * What a modal's button answers by a word on it, `the result` once it's closed by it (epic `language` T155).
+ * - `ok` and `cancel` so far;  a button's own word (`<action discard />`, T160) is meant to join them:
+ *   `answerWords` reads any word it lists, and the core keeps whatever answer a button gives.
+ */
+export type DialogAnswer = "ok" | "cancel"
+
 /** A language's small words, the tables spell's rules read while parsing -- English's in `languages/en/words.ts`. */
 export type LanguageWords = {
   /** Words which may never be a one-word name, so they stay spell's own, e.g. English's `is`, `the`. */
@@ -461,6 +468,13 @@ export type LanguageWords = {
    * - Read without accents too.
    */
   keepOpenAttribute: string
+  /**
+   * The words that say which answer a modal's button gives, `<action ok />`, and that `the result` is compared to,
+   * `if the result is ok` (epic `language` T155):  each word => its answer, `ok` or `cancel`.
+   * - English's `{ ok: "ok", cancel: "cancel" }`, Spanish's `{ aceptar: "ok", cancelar: "cancel" }`.
+   * - English's are read in every language too, as `keep-open` is;  case never matters.
+   */
+  answerWords: Record<string, DialogAnswer>
   /**
    * The tag of an example on a page, in a drawing (epic `elemental-spell` P16):
    * English's `<example "one counter">`, Spanish's `<ejemplo "un contador">`.

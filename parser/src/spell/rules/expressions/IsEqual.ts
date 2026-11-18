@@ -29,6 +29,17 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
       // the value as its list says it, and what that compiles to:  `it is a club` is `clubs`, `bloqueada` is `locked`
       SpellConstant.compileAs(match.groups.expression, property.valueOutputs?.[value] ?? value)
     }
+    // the last dialog's answer, `the result is ok`:  its own words read as its answers (epic `language` T155)
+    if (isLastAnswer(SuffixLeft.current) || isLastAnswer(match.groups.expression)) {
+      const data = match.data as IsEqualMatchData
+      data.comparesAnswer = true
+      // a bare word, unquoted:  `ok` is otherwise yes, and `aceptar` a word of its own
+      const left = SuffixLeft.current
+      const other = isLastAnswer(left) ? match.groups.expression : left
+      const word = other?.inputText.trim()
+      if (word && !/\s/.test(word)) data.answer = answerFor(scope, word)
+      return match
+    }
     // a value said for a built-in template's property, in its own language:  `arriba` is `up` (epic `language` T74)
     SpellConstant.sayFor(SuffixLeft.current, match.groups.expression)
     // a quoted value that isn't one of its values:  `if its lock is "banana"` (epic `language` P39)
@@ -51,6 +62,14 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
         : undefined
     if (other) {
       const call = new P.ASTCoreMethodInvocation(match, { methodName: "isCurrentPerson", args: [other] })
+      return Negatable.isNegated(operands.operator) ? new P.ASTNotExpression(match, { expression: call }) : call
+    }
+    // `the result is ok`:  compared with no regard to case (epic `language` T155)
+    if ((match.data as IsEqualMatchData).comparesAnswer) {
+      const { answer } = match.data as IsEqualMatchData
+      const given = isLastAnswerCall(operands.lhs) ? operands.rhs : operands.lhs
+      const value = answer ? new P.ASTStringLiteral(match, { value: answer, quote: '"' }) : given
+      const call = new P.ASTCoreMethodInvocation(match, { methodName: "resultIs", args: value ? [value] : [] })
       return Negatable.isNegated(operands.operator) ? new P.ASTNotExpression(match, { expression: call }) : call
     }
     const { property } = match.data as IsEqualMatchData
@@ -114,8 +133,46 @@ function isCurrentPerson(operand: P.ASTExpression | undefined): boolean {
   return operand instanceof P.ASTCoreMethodInvocation && operand.methodName === "currentPerson"
 }
 
+/** Is `operand` what `the result` compiles to, `core.result()`? */
+function isLastAnswerCall(operand: P.ASTExpression | undefined): boolean {
+  return operand instanceof P.ASTCoreMethodInvocation && operand.methodName === "result"
+}
+
+/**
+ * Is `match`, through matches of one child, the last dialog's answer, `the result` (`the_result`, epic `language` T155)?
+ * - Read off its data, as this rule's module can't see the `UI` rules:  not a program's own `result`.
+ */
+function isLastAnswer(match: P.Match | undefined): boolean {
+  for (let each = match; each; each = onlyChild(each)) {
+    if ((each.data as { isLastAnswer?: boolean } | undefined)?.isLastAnswer) return true
+  }
+  return false
+}
+
+/** `match`'s one child match, if it has exactly one. */
+function onlyChild(match: P.Match): P.Match | undefined {
+  const children = (Array.isArray(match.matched) ? match.matched : []).filter((it) => it instanceof P.Match)
+  return children.length === 1 ? (children[0] as P.Match) : undefined
+}
+
+/**
+ * The answer `word`, a bare word, is in `scope`'s language:  `ok` for `aceptar`;  `undefined` for none.
+ * - English's words in every language too, as `<action ok />` reads them;  case never matters.
+ */
+function answerFor(scope: P.Scope, word: string): SP.DialogAnswer | undefined {
+  const words = { ...ANSWER_WORDS, ...SP.Language.of(scope).words.answerWords }
+  return Object.entries(words).find(([each]) => each.toLowerCase() === word.toLowerCase())?.[1]
+}
+
+/** The answers' words in English, read in every language. */
+const ANSWER_WORDS: Readonly<Record<string, SP.DialogAnswer>> = { ok: "ok", cancel: "cancel" }
+
 /** What `is_equal` stashes on its match. */
 type IsEqualMatchData = {
+  /** It compares the last dialog's answer, `the result is ok`:  `core.resultIs(...)` (epic `language` T155). */
+  comparesAnswer?: boolean
+  /** The answer the other side's bare word says, `ok` for `aceptar`:  compared as that text. */
+  answer?: SP.DialogAnswer
   /** The property of the thing on its left it compares, e.g. `suit` for `it is clubs` -- see `listedPropertyFor()`. */
   property?: string
 }

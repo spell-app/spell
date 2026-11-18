@@ -193,6 +193,7 @@ export type TestCheck = {
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
  * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
+ * | `dialog-ok`, `dialog-cancel` | a modal's button that just closes it, `<action ok />` (epic `language` T155) | |
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
@@ -253,6 +254,8 @@ export const CORE_MESSAGES = {
   "cant-draw": "⚠ {type} can't draw",
   waiting: "…",
   "confirm-default": "{question} (yes)",
+  "dialog-ok": "OK",
+  "dialog-cancel": "Cancel",
   "drop-event": "{thing}-drop",
   undo: "Undo",
   "undo-step": "Undo {step}",

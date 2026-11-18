@@ -226,14 +226,17 @@ class DrawingMethods:
         - `in-menu`, the core's own:  a Spell UI menu or toolbar holds it, so it's the menu's ROW, `<ui-action>`,
           its key in Spell UI's words (`meta+Z` => `mod+Z`);  the page's drawing half hands it the action, live;
           `icon-only` goes on to it, Spell UI's own (its icon alone).
-        - `in-dialog`, the core's own:  a modal's actions hold it, so its click closes the modal too, as a dialog's do:
-          Spell UI's `approve` class on the button (epic `language` T155).
+        - `in-dialog` and `answer`, the core's own:  a modal's actions hold it, so its click closes the modal once its
+          action has run, with that answer (epic `language` T155).  The page's drawing half does that;  here they go no
+          further.
+        - `<action ok />` with no action of that name (`answer` `ok` or `cancel`):  a button that just closes,
+          labelled in the program's language, OK or Cancel.
         """
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)
         in_menu = given.pop(IN_MENU, False)
-        if given.pop(IN_DIALOG, False) and not in_menu:
-            given["class"] = " ".join(str(it) for it in (given.get("class"), DIALOG_CLOSER_CLASS) if it)
+        given.pop(IN_DIALOG, None)
+        answer = given.pop(ANSWER, None)
         # a `title` the tag gives is what it shows, over the action's own:
         # `<action "restart the game" title="Restart"/>`
         given_title = given.pop("title", None)
@@ -246,6 +249,9 @@ class DrawingMethods:
                 title = given_title
             enabled_when = description.get("enabled_when")
             is_enabled = bool(getattr(holder, enabled_when)) if enabled_when else True
+        elif answer in (OK, CANCEL) and not in_menu:
+            label = given_title if isinstance(given_title, str) else self.message(f"dialog-{answer}")
+            return h(BUTTON_TAG, given, *(children or (label,)))
         else:
             shown = given_title if isinstance(given_title, str) else name
             return h(MENU_ROW_TAG if in_menu else BUTTON_TAG, {"disabled": True, **given}, *(children or (shown,)))
@@ -302,8 +308,12 @@ IN_MENU = "in-menu"
 # `<action>`'s mark that a modal's actions hold it:  its click closes the modal too
 IN_DIALOG = "in-dialog"
 
-# What a modal closes on, once a click's handlers ran:  Fomantic's `approve`, which Spell UI's modal reads
-DIALOG_CLOSER_CLASS = "approve"
+# `<action>`'s answer, the core's own:  `answer="ok"`, what `the result` is once its click closed the modal
+ANSWER = "answer"
+
+# The answers a modal's button may say it gives, `<action ok />`
+OK = "ok"
+CANCEL = "cancel"
 
 # What `<action>` draws in a menu:  Spell UI's menu row, which the page defines
 MENU_ROW_TAG = "ui-action"

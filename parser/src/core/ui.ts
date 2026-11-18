@@ -185,8 +185,9 @@ export const uiMethods = defineCoreModule({
   async alert(message: unknown, options?: string | DialogOptions): Promise<void> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
-    if (!ui) return core.console.info(String(message))
+    if (!ui) return (core.console.info(String(message)), keepResult(OK))
     await (await ui.load()).modals.alert(dialogFor(message, options))
+    keepResult(OK)
   },
 
   /**
@@ -196,8 +197,9 @@ export const uiMethods = defineCoreModule({
   async warn(message: unknown, options?: string | DialogOptions): Promise<void> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
-    if (!ui) return core.console.warn(String(message))
+    if (!ui) return (core.console.warn(String(message)), keepResult(OK))
     await (await ui.load()).modals.alert(dialogFor(message, options))
+    keepResult(OK)
   },
 
   /**
@@ -208,8 +210,13 @@ export const uiMethods = defineCoreModule({
   async confirm(message: unknown, options?: string | DialogOptions, cancelText?: string): Promise<boolean> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
-    if (!ui) return (core.console.info(core.message("confirm-default", { question: String(message) })), true)
-    return (await ui.load()).modals.confirm(dialogFor(message, options, cancelText))
+    if (!ui) {
+      core.console.info(core.message("confirm-default", { question: String(message) }))
+      return (keepResult(OK), true)
+    }
+    const yes = await (await ui.load()).modals.confirm(dialogFor(message, options, cancelText))
+    keepResult(yes ? OK : CANCEL)
+    return yes
   },
 
   /**
@@ -220,8 +227,10 @@ export const uiMethods = defineCoreModule({
   async prompt(message: unknown, value?: string): Promise<string | undefined> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
-    if (!ui) return (core.console.info(`${String(message)} (${value ?? ""})`), value)
-    return (await ui.load()).modals.prompt({ message: String(message), value })
+    if (!ui) return (core.console.info(`${String(message)} (${value ?? ""})`), keepResult(value), value)
+    const typed = await (await ui.load()).modals.prompt({ message: String(message), value })
+    keepResult(typed ?? CANCEL)
+    return typed
   },
 
   ////////////////
@@ -233,20 +242,60 @@ export const uiMethods = defineCoreModule({
    * - Named by the quoted word on its tag, `<modal "you won">`, drawn with its words joined by `-` as its id,
    *   `you-won`:  found by that id, in the app's page and inside its views (`drawnNamed()`).
    * - A modal, a menu or a popup shows (its `visible`).
-   * - Under node, with no page:  nothing.
+   * - A modal:  the promise ends once it closes, with its answer, which `the result` is then (epic `language` T155):
+   *   - `ok` or `cancel` from a button that says so (`<action ok />`), else that button's action's name
+   *   - `cancel` for Escape, the dimmer and its close icon
+   *   - nothing for `hide "you won"`, which leaves `the result` as it was
+   *   - `show "you won"` awaits it:  the lines after it run once it closes;  `... without waiting` doesn't.
+   * - Anything else, or under node with no page:  ends at once, with nothing.
    * - throws `TypeError` when nothing drawn has that name
    */
-  showDrawn(name: string): void {
-    setDrawnVisible("showDrawn", name, true)
+  showDrawn(name: string): Promise<unknown> {
+    const element = setDrawnVisible("showDrawn", name, true)
+    if (!element || !isDialog(element)) return Promise.resolve(undefined)
+    return whileShowing(element)
   },
 
   /**
    * Hide what the program drew and named `name`:  what `hide "you won"` compiles to.
-   * - As `showDrawn()`:  a modal closes.
+   * - As `showDrawn()`:  a modal closes, and a `show` waiting for it goes on.
+   * - `answer`:  what `the result` is then;  a modal's button that closed it gives its own (`closeDialogOf()`).
+   *   `hide "you won"` gives none.
    * - throws `TypeError` when nothing drawn has that name
    */
-  hideDrawn(name: string): void {
-    setDrawnVisible("hideDrawn", name, false)
+  hideDrawn(name: string, answer?: unknown): void {
+    const element = setDrawnVisible("hideDrawn", name, false)
+    if (element && isDialog(element)) finishShowing(element, answer)
+  },
+
+  /**
+   * Leave the modal open after the action that's running now:  what `... without closing` compiles to, before its
+   * statement (epic `language` T155).
+   * - A modal's button closes it once its action has run (`<action>` in its `<actions>`), unless the action said this.
+   * - Anything else:  nothing.
+   */
+  keepOpen(): void {
+    keptOpen = true
+  },
+
+  /**
+   * What closed the last dialog:  what `the result` compiles to (epic `language` T155).
+   * - A modal's (`showDrawn()`):  `ok`, `cancel`, or its button's action's name, `save the thing`
+   * - `alert`, `warn`:  `ok`;  `confirm`:  `ok` or `cancel`;  `prompt`:  the text typed, or `cancel`
+   * - Nothing, before any has closed.
+   */
+  result(): unknown {
+    return resultBox().value
+  },
+
+  /**
+   * Is the last dialog's answer `value`:  what `the result is ok` compiles to (epic `language` T155).
+   * - Text compares with no regard to case:  `the result is "Save the Thing"` for a button of `"save the thing"`.
+   */
+  resultIs(value: unknown): boolean {
+    const result = resultBox().value
+    if (typeof result === "string" && typeof value === "string") return result.toLowerCase() === value.toLowerCase()
+    return result === value
   },
 
   ////////////////
@@ -362,13 +411,13 @@ Object.assign(core, uiMethods)
 export type UIDefaultsTable = Readonly<Record<string, Readonly<Record<string, string | number | boolean>>>>
 
 /**
- * Show or hide what the program drew and named `name` (`core.showDrawn()`, `core.hideDrawn()`), for `method`.
+ * Show or hide what the program drew and named `name` (`core.showDrawn()`, `core.hideDrawn()`), for `method`:
+ * the element, `undefined` under node, with no page.
  * - Shown by its `visible`, as Spell UI's modal is.
- * - Under node, with no page:  nothing.
  * - throws `TypeError` when nothing drawn has that name, or it can't be shown
  */
-function setDrawnVisible(method: string, name: string, visible: boolean): void {
-  if (typeof document === "undefined") return
+function setDrawnVisible(method: string, name: string, visible: boolean): Element | undefined {
+  if (typeof document === "undefined") return undefined
   const element = drawnNamed(name)
   if (!element) {
     throw new TypeError(`core.${method}():  nothing drawn is named "${name}";  name it on its tag, <modal "${name}">`)
@@ -377,6 +426,173 @@ function setDrawnVisible(method: string, name: string, visible: boolean): void {
     throw new TypeError(`core.${method}():  <${element.localName}> "${name}" can't be shown or hidden`)
   }
   ;(element as { visible?: boolean }).visible = visible
+  return element
+}
+
+////////////////
+// ## A modal's answer (epic `language` T155)
+//
+// `show "you won"` waits until the modal closes;  `the result` is then what closed it.
+// - A button in its actions closes it once its action has run (`core.drawAction()`'s `in-dialog`), with its answer:
+//   `closeDialogOf()`, unless the action said `... without closing` (`core.keepOpen()`).
+// - Escape, the dimmer and its close icon close it themselves:  heard as Spell UI's `ui-closed`, answering `cancel`;
+//   its own approve buttons answer `ok`.
+// - A program running elsewhere (Python's):  its page sends the button's call with what it closes, and the program
+//   hides the modal once the call has run, by `hideDrawn()` with the answer (`closingCallNow()`, `page.ts`).
+////////////////
+
+/** What a dialog answers:  `ok`, and `cancel`. */
+const OK = "ok"
+const CANCEL = "cancel"
+
+/**
+ * The event a modal sends once it's closed, by each language a program draws in:  Spell UI's English, and its Spanish
+ * dictionary's (`es-cerrado`, `components.es.ts`).  Written out, not asked of Spell UI:  the core sits below it.
+ */
+const DIALOG_CLOSED = ["ui-closed", "es-cerrado"]
+
+/** Why a modal closed itself (Spell UI's `ModalCloseReason`) that answers `ok`:  one of its own approve buttons. */
+const APPROVED = "approve"
+
+/** A modal shown, by its element:  how to end what waits on it, and the action that waited, if one did. */
+const SHOWING = new WeakMap<Element, { finish: (answer: unknown) => void; heldBy: unknown }>()
+
+/** Did the action running now say `... without closing` (`core.keepOpen()`)? */
+let keptOpen = false
+
+/** A modal's call to a program running elsewhere, while its button sends it:  see `closingCallNow()`. */
+let closingCall: { name: string; answer: unknown } | undefined
+
+/** Is `element` a modal, whose closing ends `show`'s wait?  Spell UI's, by its tag in any language:  `es-modal`. */
+function isDialog(element: Element): boolean {
+  return element.localName.endsWith(DIALOG_TAG_END)
+}
+
+/** How a modal's tag ends, in every language Spell UI draws in:  `ui-modal`, `es-modal`. */
+const DIALOG_TAG_END = "-modal"
+
+/**
+ * Until `dialog` closes:  its answer -- see `core.showDrawn()`.
+ * - Shown again while it shows:  the same wait.
+ * - SIDE EFFECT:  hears its own closing (Escape, the dimmer, its close icon) until then.
+ */
+function whileShowing(dialog: Element): Promise<unknown> {
+  return new Promise((resolve) => {
+    const previous = SHOWING.get(dialog)
+    const closed = (event: Event) => {
+      const reason = (event as CustomEvent<{ reason?: string } | undefined>).detail?.reason
+      finishShowing(dialog, reason === APPROVED ? OK : CANCEL)
+    }
+    for (const name of DIALOG_CLOSED) dialog.addEventListener(name, closed)
+    SHOWING.set(dialog, {
+      finish: (answer) => {
+        for (const name of DIALOG_CLOSED) dialog.removeEventListener(name, closed)
+        previous?.finish(answer)
+        resolve(answer)
+      },
+      heldBy: core.RUNTIME?.actions?.current?.signal
+    })
+  })
+}
+
+/**
+ * SIDE EFFECT:  `dialog` has closed with `answer`:  `the result` is it, and a `show` waiting for it goes on.
+ * - No answer (`hide "you won"`):  the result stays as it was.
+ */
+function finishShowing(dialog: Element, answer: unknown): void {
+  const showing = SHOWING.get(dialog)
+  if (answer !== undefined) keepResult(answer)
+  if (!showing) return
+  SHOWING.delete(dialog)
+  showing.finish(answer)
+}
+
+/** SIDE EFFECT:  `the result` is `answer` from now on (`core.result()`). */
+function keepResult(answer: unknown): void {
+  resultBox().value = answer
+}
+
+/** Where this run keeps `the result`. */
+function resultBox(): { value: unknown } {
+  return core.getRuntimeState("result", () => ({ value: undefined as unknown }))
+}
+
+/**
+ * The modal around `from`, if any:  the nearest one around the element, or around where the event happened
+ * (through shadow roots too).
+ */
+export function dialogAround(from: Event | Element | null | undefined): Element | undefined {
+  const path =
+    from && "composedPath" in from ? from.composedPath() : from ? ancestorsOf(from as Element) : ([] as EventTarget[])
+  // by its tag, not `instanceof Element`:  a page's own `Element` may not be this realm's (a test's fake page)
+  return path.find((at): at is Element => typeof (at as Element).localName === "string" && isDialog(at as Element))
+}
+
+/** `element` and every element around it, nearest first. */
+function ancestorsOf(element: Element): Element[] {
+  const found: Element[] = []
+  for (let at: Element | null = element; at; at = at.parentElement) found.push(at)
+  return found
+}
+
+/**
+ * Run `run`, a modal's button's click (`core.drawAction()`'s `in-dialog`), then close the modal around `button` (it,
+ * or its click), with
+ * `answer`, once it has run -- unless it said `... without closing` (`core.keepOpen()`).
+ * - `run`:  starts its action, through the core's queue;  false if it didn't start (not enabled), which closes nothing.
+ * - `thing`, `name`:  the action's, by which the queue says when it's done.
+ * - None:  it just closes, `<action ok />` with no action of that name.
+ * - A `show` waiting inside an action while the modal's up lets this click's action run, rather than holding it
+ *   behind itself for good (`ActionQueue.letNextRun()`).
+ * - A program running elsewhere (Python's):  the call goes with what it closes (`closingCallNow()`), and the program
+ *   hides it once the call has run, unless it said `... without closing`.
+ * - NEVER throws.
+ */
+export function closeDialogOf(
+  button: Event | Element | null | undefined,
+  answer: unknown,
+  action?: { thing: object; name: string; run: () => boolean }
+): void {
+  const dialog = dialogAround(button)
+  if (!action) {
+    if (dialog) closeDialog(dialog, answer)
+    return
+  }
+  if (core.remote) {
+    closingCall = dialog ? { name: dialog.id, answer } : undefined
+    try {
+      action.run()
+    } finally {
+      closingCall = undefined
+    }
+    return
+  }
+  const queue = core.RUNTIME?.actions
+  const held = dialog && SHOWING.get(dialog)?.heldBy
+  if (held && queue?.current?.signal === held) queue.letNextRun()
+  keptOpen = false
+  if (!action.run()) return
+  const finished = queue?.finishing(action.thing, action.name) ?? Promise.resolve()
+  void finished.then(() => {
+    const kept = keptOpen
+    keptOpen = false
+    if (dialog && !kept) closeDialog(dialog, answer)
+  })
+}
+
+/** SIDE EFFECT:  `dialog` closes, with `answer`. */
+function closeDialog(dialog: Element, answer: unknown): void {
+  ;(dialog as { visible?: boolean }).visible = false
+  finishShowing(dialog, answer)
+}
+
+/**
+ * The modal a page's call to its program closes once it has run, while a modal's button sends it
+ * (`closeDialogOf()`):  its name (its id) and the button's answer;  `undefined` for any other call.
+ * - `page.ts`'s `sendCall()` sends it as the call's `closes`.
+ */
+export function closingCallNow(): { name: string; answer: unknown } | undefined {
+  return closingCall
 }
 
 /**

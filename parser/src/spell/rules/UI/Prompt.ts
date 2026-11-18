@@ -9,7 +9,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - Returns a promise which `resolve()`s if they "OK", `reject()`s if they "cancel".
  * - TODO: `as number`, `as date`, etc?
  * - NOTE: we'll `await` the promise!
- * - TODO: `the result = await ...` ?
+ * - What closed it is `the result` after (`core.result()`, epic `language` T155).
  */
 export class Prompt extends SpellStatement<"message|defaultValue?"> {
   @proto static alias = "statement"

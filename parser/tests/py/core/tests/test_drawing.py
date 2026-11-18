@@ -320,9 +320,15 @@ class Dealer(Thing):
         """Deal again."""
 
 
-def test_an_action_in_a_modal_closes_it_by_the_approve_class(core: Core) -> None:
-    # language T155:  `<modal><action "deal"/></modal>`, as the page draws it
+def test_a_modal_button_draws_as_a_button_its_page_closes_the_modal_with(core: Core) -> None:
+    # language T155:  `<modal><action "deal"/></modal>`, as the page draws it:  the page's drawing half closes it
     core.describe_action(Dealer, "deal", {"title": "Deal"})
-    button = str(core.draw_action(Dealer(), "deal", {"class": "Big", "in-dialog": True}))
-    assert 'class="Big approve"' in button
+    button = str(core.draw_action(Dealer(), "deal", {"class": "Big", "answer": "deal", "in-dialog": True}))
+    assert 'class="Big"' in button
     assert "in-dialog" not in button
+    assert "answer" not in button
+
+
+def test_ok_with_no_action_of_that_name_is_a_button_labelled_ok(core: Core) -> None:
+    assert str(core.draw_action(Dealer(), "ok", {"answer": "ok", "in-dialog": True})) == "<ui-button>OK</ui-button>"
+    assert str(core.draw_action(Dealer(), "cancel", {"answer": "cancel"})) == "<ui-button>Cancel</ui-button>"
