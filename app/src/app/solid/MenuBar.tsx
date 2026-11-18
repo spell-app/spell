@@ -345,7 +345,8 @@ function ThemeItems(): JSX.Element {
  * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─,
  *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
- * - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own.
+ * - Help:  Keyboard Shortcuts (epic `editor` P36), then Help, which does nothing yet;  the editor's own, not the Spell's.
+ *   - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there.
  * - `mode`:  the page's, ticked in View.
  * - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows.
  ****************/
@@ -379,7 +380,12 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     siteReady: EditorMode.hasSite,
     consoleEmpty: !runtimeConsole()?.lines.length
   }))
-  const help = () => <Actions.showHelp menu disabled />
+  const help = () => (
+    <>
+      <Actions.showShortcuts menu />
+      <Actions.showHelp menu disabled />
+    </>
+  )
   return (
     <Show when={spell()}>
       {(loaded) => (
@@ -398,11 +404,9 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
                 )
               }}
             </For>
-            <Show when={!isStaticBuild}>
-              <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
-                {help()}
-              </BarMenu>
-            </Show>
+            <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
+              {help()}
+            </BarMenu>
           </span>
           <FoldedBarMenus spell={loaded()} help={help} />
         </>
@@ -447,11 +451,9 @@ function FoldedBarMenus(props: { spell: EditorSpell; help: () => JSX.Element }):
             </ui-submenu>
           )}
         </For>
-        <Show when={!isStaticBuild}>
-          <ui-submenu label={appTexts.text("menuHelp")} icon={FOLDED_ICONS.helpMenu}>
-            {props.help()}
-          </ui-submenu>
-        </Show>
+        <ui-submenu label={appTexts.text("menuHelp")} icon={FOLDED_ICONS.helpMenu}>
+          {props.help()}
+        </ui-submenu>
       </BarMenu>
     </span>
   )

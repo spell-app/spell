@@ -6,6 +6,7 @@
  * - `Choices.tsx`:  `<Choices>` and `openChoices()`, behind `askWithChoices()`:  a button per answer (epic `mockup` T52).
  * - `VersionsBox.tsx`:  `openVersions()`, the project menu's Versions, drawn by the editor's Spell (epic `editor` I115).
  * - `AppSnapshot.tsx`:  `openAppSnapshot()`, a project's card picture from its app as the person sets it up (epic `mockup` T47).
+ * - `ShortcutsDialog.tsx`:  `openShortcuts()`, Help › Keyboard Shortcuts:  every key of `EDITOR_HOTKEYS` (epic `editor` P36).
  * - `modals.types.ts`:  their props (`AlertModalProps` ...), which `Actions`' `DialogActionProps` take too.
  */
 
@@ -18,3 +19,4 @@ export * from "./YouPanel"
 export * from "./PublishClash"
 export * from "./VersionsBox"
 export * from "./AppSnapshot"
+export * from "./ShortcutsDialog"
