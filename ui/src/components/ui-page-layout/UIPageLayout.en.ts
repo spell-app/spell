@@ -38,7 +38,7 @@ export const pageLayoutVocabulary = {
       group: "behaviour",
       kind: "keyOnly",
       description:
-        "The drawer's button hides the whole drawer (`drawer=\"hidden\"`) and shows it again, never switching it to " +
+        'The drawer\'s button hides the whole drawer (`drawer="hidden"`) and shows it again, never switching it to ' +
         "its icons:  for a navigation with no icons."
     },
     {
@@ -47,7 +47,7 @@ export const pageLayoutVocabulary = {
       kind: "valueOnly",
       values: ["hidden"],
       description:
-        "`hidden`:  the left side bar isn't shown, until its button shows it again.  `toggleSidebar(\"left\")` " +
+        '`hidden`:  the left side bar isn\'t shown, until its button shows it again.  `toggleSidebar("left")` ' +
         "switches it, and says so with `ui-toggle`."
     },
     {
@@ -56,8 +56,8 @@ export const pageLayoutVocabulary = {
       kind: "valueOnly",
       values: ["hidden"],
       description:
-        "`hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles=\"right\">`) " +
-        "shows it again.  `toggleSidebar(\"right\")` switches it, and says so with `ui-toggle`.  Narrow, a side " +
+        '`hidden`:  the right side bar isn\'t shown, until its button (`<ui-site-nav-button toggles="right">`) ' +
+        'shows it again.  `toggleSidebar("right")` switches it, and says so with `ui-toggle`.  Narrow, a side ' +
         "bar with such a button is hidden behind it, and slides over the page while open."
     },
     {

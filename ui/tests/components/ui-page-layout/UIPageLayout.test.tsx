@@ -185,14 +185,22 @@ describe("<ui-page-layout>", () => {
     expect(layout.getAttribute("drawer")).toBe("compact")
     // all of it while the column narrows, clipped;  its icons only once it's narrow (I32)
     await expect.poll(() => layout.querySelector("ui-site-nav")!.hasAttribute("collapsed")).toBe(true)
-    expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({ region: "drawer", newState: "compact", oldState: "full" })
+    expect((toggled.mock.calls[0]![0] as CustomEvent).detail).toEqual({
+      region: "drawer",
+      newState: "compact",
+      oldState: "full"
+    })
     // From its icons to all of it, the switch waits a frame:  the column holds its width first, to widen from
     layout.toggleDrawer()
     expect(layout.getAttribute("drawer")).toBe("compact")
     await new Promise(requestAnimationFrame)
     await ShadowTree.settle(layout)
     expect(layout.hasAttribute("drawer")).toBe(false)
-    expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({ region: "drawer", newState: "full", oldState: "compact" })
+    expect((toggled.mock.calls[1]![0] as CustomEvent).detail).toEqual({
+      region: "drawer",
+      newState: "full",
+      oldState: "compact"
+    })
   })
 
   // epic `mockup` T55 (Owen:  "Make a button in the app bar to hide it")
@@ -286,7 +294,9 @@ describe("<ui-page-layout>", () => {
 
   describe("`floating` (T55):  the drawer and the side bars cards over the page's ground", () => {
     test("each a rounded card with a shadow, room round it;  the page's side no box of its own", async () => {
-      const layout = await pageLayout(`<div slot="menu">Menu</div>${NAV}<div slot="right">Contents</div><p>The page</p>`)
+      const layout = await pageLayout(
+        `<div slot="menu">Menu</div>${NAV}<div slot="right">Contents</div><p>The page</p>`
+      )
       layout.setAttribute("floating", "")
       await ShadowTree.settle(layout)
       expect(layout.matches(":state(floating)")).toBe(true)
