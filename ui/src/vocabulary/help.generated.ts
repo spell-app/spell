@@ -1823,6 +1823,18 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the trail."
     }
   },
+  "ui-site-links": {
+    description:
+      "Site links are the page shown's own links, for an app menu's end: the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it.",
+    empty: true,
+    attributes: {
+      pages:
+        "The site's pages, nested as the side navigation nests them: the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, live?, pages?",
+      current: "Which page is shown: its `href` or its `id`.",
+      report:
+        "Where to report a problem with the page shown: an address, `{title}` in it standing for the title of the page at the top of its family, e.g."
+    }
+  },
   "ui-site-nav": {
     description: "A site nav lists a site's pages as a tree, the page shown marked; a click goes to a page.",
     empty: true,

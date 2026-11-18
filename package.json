@@ -712,6 +712,11 @@
       "types": "./ui/dist-types/src/components/ui-site-breadcrumbs/index.d.ts",
       "default": "./ui/src/components/ui-site-breadcrumbs/index.ts"
     },
+    "./ui/components/ui-site-links": {
+      "spell-source": "./ui/src/components/ui-site-links/index.ts",
+      "types": "./ui/dist-types/src/components/ui-site-links/index.d.ts",
+      "default": "./ui/src/components/ui-site-links/index.ts"
+    },
     "./ui/components/ui-site-nav-button": {
       "spell-source": "./ui/src/components/ui-site-nav-button/index.ts",
       "types": "./ui/dist-types/src/components/ui-site-nav-button/index.d.ts",

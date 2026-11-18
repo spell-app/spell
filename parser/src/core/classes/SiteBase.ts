@@ -586,7 +586,9 @@ export class SiteBase extends App {
           id: entry.name,
           ...(entry.icon && { icon: entry.icon }),
           ...(entry.tab && { tab: entry.tab }),
-          ...(entry.tags && { tags: entry.tags })
+          ...(entry.tags && { tags: entry.tags }),
+          // the real page it stands for, which `<ui-site-links>` links to (epic `mockup` T55)
+          ...(entry.live && { live: entry.live })
         }
         return pages.length ? { ...page, pages } : page
       })
@@ -778,11 +780,12 @@ type SiteNavPage = {
   icon?: string
   tab?: string
   tags?: string[]
+  live?: string
   band?: "group"
   pages?: SiteNavPage[]
 }
 
-/** The store a site keeps what each person chose in:  `spell-sites:<Site>.<Layout>.compact`. */
+/** The store a site keeps what each person chose in:  `spell-sites:<Site>.<Layout>.drawer` ... */
 const SITES_PREFS = "spell-sites"
 
 /** The built-in frame's key in it:  a site with no main layout. */

@@ -1386,6 +1386,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     formControl: true
   },
   "ui-site-breadcrumbs": { folder: "ui-site-breadcrumbs", attributes: ["pages", "current", "label"] },
+  "ui-site-links": { folder: "ui-site-links", attributes: ["pages", "current", "report"] },
   "ui-site-nav": {
     folder: "ui-site-nav",
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },

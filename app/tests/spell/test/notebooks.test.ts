@@ -99,13 +99,19 @@ describe("the Spell UI site", () => {
     expect(new Set(addresses).size).toBe(addresses.length)
   })
 
+  // epic `mockup` T55 (Owen:  "Ditch the secondary tabs (Types|Content|States) -- they are in the sidebar anyway")
+  test("no row of section tabs is left:  a page's sections are in its contents, the layout's right side bar", () => {
+    for (const { path, contents } of PAGES)
+      expect({ path, sectionTabs: /ui-docs-section-tabs/.test(contents) }).toEqual({ path, sectionTabs: false })
+  })
+
   test("no tab bar is left:  no file, no line drawing one, no project-named tag", () => {
     for (const { path, contents } of PAGES)
       expect({ path, tab: /tab-bar/.test(contents) }).toEqual({ path, tab: false })
     const folders = readdirSync(FOLDER, { withFileTypes: true }).filter(
       (entry) => entry.isDirectory() && entry.name !== "snapshots"
     )
-    expect(folders.length).toBe(104)
+    expect(folders.length).toBe(105)
     for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spell"))).toBe(false)
   })
 

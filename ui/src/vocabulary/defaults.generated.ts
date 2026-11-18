@@ -1525,6 +1525,11 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "current", kind: "string", group: "content" },
     { name: "label", kind: "string", group: "content" }
   ],
+  "ui-site-links": [
+    { name: "pages", kind: "json", group: "content" },
+    { name: "current", kind: "string", group: "content" },
+    { name: "report", kind: "string", group: "link" }
+  ],
   "ui-site-nav": [
     { name: "pages", kind: "json", group: "content" },
     { name: "current", kind: "string", group: "content" },

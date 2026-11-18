@@ -109,6 +109,7 @@ export const COMPONENTS = [
   "ui-site-nav",
   "ui-site-tabs",
   "ui-site-breadcrumbs",
+  "ui-site-links",
   "ui-site-nav-button",
   "ui-page-layout",
   "ui-device",

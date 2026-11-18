@@ -3039,6 +3039,20 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-site-links" label="Site links" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  Site links are the page shown&#39;s own links, for an app menu&#39;s end:  the real page it stands for (its live link, Fomantic UI&#39;s original for Spell UI&#39;s pages), and a way to report a problem with it.
+                  <a href="ui-site-links.html">Site links page</a>
+                </p>
+                <ui-site-links
+                  current="#api"
+                  report="https://github.com/spell-app/spell-ui/issues/new?title={title}"
+                  pages='[{ "title": "Button", "href": "#usage", "live": "https://fomantic-ui.com/elements/button.html", "pages": [{ "title": "API", "href": "#api" }] }]'
+                ></ui-site-links>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-site-nav-button" label="Site nav button" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">

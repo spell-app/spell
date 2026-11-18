@@ -84,6 +84,7 @@ import { treeEs } from "spell/ui/components/ui-tree/UITree.es"
 import { siteNavEs } from "spell/ui/components/ui-site-nav/UISiteNav.es"
 import { siteTabsEs } from "spell/ui/components/ui-site-tabs/UISiteTabs.es"
 import { siteBreadcrumbsEs } from "spell/ui/components/ui-site-breadcrumbs/UISiteBreadcrumbs.es"
+import { siteLinksEs } from "spell/ui/components/ui-site-links/UISiteLinks.es"
 import { siteNavButtonEs } from "spell/ui/components/ui-site-nav-button/UISiteNavButton.es"
 import { pageLayoutEs } from "spell/ui/components/ui-page-layout/UIPageLayout.es"
 import { deviceEs } from "spell/ui/components/ui-device/UIDevice.es"
@@ -754,6 +755,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   siteNavEs,
   siteTabsEs,
   siteBreadcrumbsEs,
+  siteLinksEs,
   siteNavButtonEs,
   pageLayoutEs,
   deviceEs,

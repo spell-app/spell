@@ -112,6 +112,7 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-sidebar": "structure",
   "ui-sides": "structure",
   "ui-site-breadcrumbs": "structure",
+  "ui-site-links": "structure",
   "ui-site-nav": "structure",
   "ui-site-nav-button": "action",
   "ui-site-tabs": "structure",

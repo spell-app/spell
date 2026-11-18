@@ -1184,6 +1184,18 @@
       "active": true
     },
     {
+      "path": "/SiteLinks/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteLinks/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteLinks/API.spell",
+      "active": true
+    },
+    {
       "path": "/SiteNav/Usage.spell",
       "active": true
     },
