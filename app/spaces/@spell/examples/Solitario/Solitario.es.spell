@@ -95,6 +95,7 @@ solitario es una aplicación
 	para jugar una carta
 		deshacible como "Jugar carta"
 		si la carta está en la reserva
+			reproducir "deslizar carta"
 			robar de la reserva
 		de lo contrario
 			poner pila final a la primera pila en cada pila donde puede tomar la carta
@@ -103,6 +104,7 @@ solitario es una aplicación
 
 	después de mover una carta a una pila
 		// El movimiento suma puntos;  la columna que dejó voltea su nueva última carta
+		reproducir "poner carta"
 		agregar (los puntos por la carta en la pila) a la puntuación del solitario
 		si la última pila de la carta es una columna y no está vacía
 			voltear su última carta boca arriba
@@ -153,6 +155,7 @@ solitario es una aplicación
 
 	cuando su puntuación cambia
 		si el número de cartas en las fundaciones es 52
+			reproducir "ganar"
 			avisar "¡Ganaste!" con "Juego nuevo"
 			reiniciar el juego
 

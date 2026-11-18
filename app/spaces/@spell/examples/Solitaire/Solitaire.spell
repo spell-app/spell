@@ -89,6 +89,7 @@ solitaire is an app
 	
 	to "play a card"
 		if the card is in the stock
+			play "card slide"
 			turn over the next card
 		otherwise
 			set end pile to the first pile in every pile where it can take the card
@@ -97,6 +98,7 @@ solitaire is an app
 
 	after moving a card to a pile
 		-- The move scores;  the column it left turns its new last card face up
+		play "card place"
 		add the points for the card on the pile to solitaire's score
 		if the card's last pile is a column and it is not empty
 			turn its last card face up
@@ -128,6 +130,7 @@ solitaire is an app
 	
 	when the score changes
 		if the number of cards in the foundations is 52
+			play "win"
 			alert "You won!" with "New game"
 			restart the game
 

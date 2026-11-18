@@ -187,10 +187,14 @@ to move (a piece) to (a square)
 	if jumped
 		set middle to the square at (the row of start + the row of the square) / 2 and (the column of start + the column of the square) / 2 on board
 		empty middle
+		play "piece take"
+	otherwise
+		play "piece down"
 	add the piece to the square
 	set the picked piece of board to nothing
 	if the piece is not a king and the row of the square is the far row of the piece
 		set the rank of the piece to king
+		play "level up"
 		end the turn on board
 	otherwise if jumped and the piece has a jump
 		set the jumper of board to the piece
