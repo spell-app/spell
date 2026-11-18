@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
+import { nextFrame } from "spell/util/dom"
 import { E, UI } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
@@ -26,9 +27,20 @@ const PART = "/demo/parts/items-q6.html"
 /** A part's markup, as the fetch answers it. */
 const PART_HTML = `<!-- part -->\n<p class="from-part">From the part.</p><epic-answer id="d9" title="Yes"></epic-answer>`
 
+/**
+ * Render `html`, settled:  each item's line drawn in full (its review label, pills, icons, buttons) once it has come
+ * near the screen (`NearScreen`, a frame later;  epic `epic-engine` I333, I335).
+ */
+async function render<T extends Element = ItemHost>(html: string): Promise<T> {
+  const host = await ElementFixture.render<T>(html)
+  await nextFrame(3)
+  await ElementFixture.tick()
+  return host
+}
+
 /** Render `html`;  returns the host and its shadow pieces. */
 async function item(html: string) {
-  const host = await ElementFixture.render<ItemHost>(html)
+  const host = await render(html)
   const root = host.shadowRoot!
   const line = root.querySelector<HTMLElement>("[part~='line']")!
   return {
@@ -267,6 +279,9 @@ describe("<epic-item>", () => {
     const bare = await item(
       `<epic-item id="q6" title="A" status="decided" answered><epic-answer title="B"></epic-answer></epic-item>`
     )
+    // the label is drawn from its first unfolding (epic `epic-engine` I333)
+    for (const it of [answered, more, bare]) it.host.open = true
+    await ElementFixture.tick()
     expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", null, null])
   })
 
@@ -646,7 +661,7 @@ describe("<epic-item> actions slot", () => {
 
 describe("<epic-item> title, folded and open", () => {
   test("in full, wrapped, folded and open, no tooltip;  the buttons on its first line;  nothing moves as it opens", async () => {
-    const wrap = await ElementFixture.render(
+    const wrap = await render<HTMLElement>(
       `<div style="width: 320px"><epic-item id="t5" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open" overnight><p>Why</p>` +
         `<button slot="actions" aria-label="Copy">C</button></epic-item></div>`
     )
@@ -681,7 +696,7 @@ describe("<epic-item> title, folded and open", () => {
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top + OPEN_ROOM, 0)
     expect(bed.getBoundingClientRect().left).toBeCloseTo(folded.bed.left, 0)
     // nothing to unfold:  it never opens, so it always wraps
-    const bare = await ElementFixture.render(
+    const bare = await render<HTMLElement>(
       `<div style="width: 320px"><epic-item id="t6" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open"></epic-item></div>`
     )
     const bareTitle = bare.querySelector("epic-item")!.shadowRoot!.querySelector<HTMLElement>("[part~='title']")!
