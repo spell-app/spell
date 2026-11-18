@@ -4,6 +4,7 @@ import type { SPACES } from "spell/app/spaces"
 import { shownPathFor } from "spell/app/spaces/server/node/projects/project-utils"
 import { queryText, respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
 import { ChangeRequests } from "./ChangeRequests"
+import { ClaudeExplainer } from "./ClaudeExplainer"
 import { ClaudeStarter } from "./ClaudeStarter"
 
 /**
@@ -18,6 +19,9 @@ import { ClaudeStarter } from "./ClaudeStarter"
  * - The file a request names is the one the asker sees:  their draft of it, when they have one (`shownPathFor()`;
  *   epic `editor` I152, where Claude edited the public file under Owen's draft, and nothing showed)
  * - A request with no words, or no file:  400;  a picture that isn't a PNG, JPEG, GIF or WebP too (epic `editor` T62).
+ * - `POST /api/explain`, body `ExplainAsked`:  what a piece of Spell does, in plain words, answered at once by Claude Code
+ *   on this machine (`ClaudeExplainer`;  the code's right-click Explain This, epic `editor` P32, Q39)
+ *   - no code:  400;  Claude Code not on this machine:  409;  Claude couldn't answer:  502, saying why
  */
 
 /** `POST /api/changes`:  see the file's docs. */
@@ -58,6 +62,22 @@ export const request_getChange = respondWithJSON(async (request): Promise<SPACES
   const found = starter.settle(starter.inbox.of(queryText(request, "id")))
   if (!found) throw new SRV.HttpError(404, "GET /api/changes:  there's no such request")
   return answerFor(starter, found)
+})
+
+/** `POST /api/explain`:  see the file's docs. */
+export const request_explain = respondWithJSON(async (request): Promise<SPACES.ExplainAnswer> => {
+  const asked = request.body as SPACES.ExplainAsked
+  if (typeof asked?.code !== "string" || !asked.code.trim()) {
+    throw new SRV.HttpError(400, "POST /api/explain:  it needs `code`")
+  }
+  const explainer = new ClaudeExplainer()
+  if (!explainer.hasClaude) throw new SRV.HttpError(409, "POST /api/explain:  Claude Code isn't on this machine")
+  try {
+    const explanation = await explainer.explain({ ...asked, language: asked.language || "en" })
+    return { explanation }
+  } catch (error) {
+    throw new SRV.HttpError(502, `POST /api/explain:  ${error instanceof Error ? error.message : String(error)}`)
+  }
 })
 
 /**

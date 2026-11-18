@@ -1701,6 +1701,10 @@
           "file": "src/app/solid/codemirror/CodeSlice.tsx"
         },
         {
+          "name": "ConsoleLineEditor",
+          "file": "src/app/solid/codemirror/ConsoleLineEditor.tsx"
+        },
+        {
           "name": "FallbackEditor",
           "file": "src/app/solid/InputEditor.tsx"
         },
@@ -1906,7 +1910,7 @@
         "panes"
       ],
       "aka": [],
-      "description": "Root element to show the `<ConsoleViewer/>` in `SpellEditor`.",
+      "description": "Root element to show the `<ConsoleViewer/>` in `SpellEditor`:  its toolbar, its lines, and under them the Spell Console's line, where a line of Spell typed runs on the running app (`<SpellConsoleInput>`, epic `editor` P32).",
       "noun": "ConsoleRoot",
       "attributes": [],
       "slots": [],
@@ -1924,6 +1928,11 @@
           "name": "scrolling",
           "type": "boolean",
           "description": "Pass through to `<ConsoleViewer>`.  Default:  `true`."
+        },
+        {
+          "name": "showInput",
+          "type": "boolean",
+          "description": "Show the Spell Console's line under the lines (`<SpellConsoleInput>`).  Default:  `true`."
         }
       ],
       "usedIn": [
@@ -2098,6 +2107,10 @@
         {
           "name": "InputEditor",
           "file": "src/app/solid/InputEditor.tsx"
+        },
+        {
+          "name": "SpellConsoleInput",
+          "file": "src/app/solid/SpellConsoleInput.tsx"
         },
         {
           "name": "TreeViewer",

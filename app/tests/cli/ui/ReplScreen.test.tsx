@@ -1,6 +1,7 @@
 import { render } from "ink-testing-library"
 import { describe, test, expect } from "vite-plus/test"
 
+import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
 const ENTER = "\r"
@@ -11,11 +12,11 @@ const settle = () => new Promise((done) => setTimeout(done, 20))
 
 /** Draw a `<ReplScreen>` parsing in a fresh scope, then type each of `keys`.  Returns the last frame. */
 async function typeInto(...keys: string[]) {
-  const scope = CLI.lineScope()
+  const scope = SP.lineScope()
   const { stdin, lastFrame, unmount } = render(
     <CLI.ReplScreen
       title="spell repl"
-      onLine={(text) => CLI.parseText(text, scope, { commit: true })}
+      onLine={(text) => SP.parseLine(text, scope, { commit: true })}
       size={{ rows: 40 }}
     />
   )

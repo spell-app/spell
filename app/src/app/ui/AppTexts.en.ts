@@ -436,6 +436,22 @@ export const APP_TEXTS = {
   testResults: "Tests:  {passed} passed, {failed} failed",
   noTests: "No tests -- write one as `to test <something>:`",
 
+  // the Spell Console's line (epic `editor` P32)
+  consoleInputLabel: "A line of Spell to run in your app",
+  consolePlaceholder: "Type a line of Spell, then press Return to run it in your app",
+  consoleLineNotRead: "Spell can't read that line.\nCheck its words, or try a shorter line.",
+  consoleLineNotRun:
+    "Nothing happened.  That line doesn't ask your app to do anything.\nTry a line that changes something, or asks for a value.",
+
+  // Explain This, on the code's right-click menu (epic `editor` P32, Q39)
+  explainThis: "Explain This",
+  explainThisCode: "Your code",
+  explainThisWords: "What it does",
+  explainThisAsking: "Asking Claude for a summary…",
+  explainThisLineByLine: "Line by line",
+  explainThisNoWords: "Spell has no notes for this code.",
+  explainThisClose: "Close",
+
   ////////////////
   // ## The project chooser (`ProjectChooser.tsx`)
   ////////////////

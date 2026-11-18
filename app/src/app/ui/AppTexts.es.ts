@@ -543,6 +543,22 @@ const APP_TEXTS_ES: AppTextPack = {
   testResults: "Pruebas:  {passed} pasaron, {failed} fallaron",
   noTests: "No hay pruebas:  escribe una como `para probar <algo>:`",
 
+  // the Spell Console's line (epic `editor` P32)
+  consoleInputLabel: "Una línea de Encanto para ejecutar en tu app",
+  consolePlaceholder: "Escribe una línea de Encanto y pulsa Intro para ejecutarla en tu app",
+  consoleLineNotRead: "Encanto no puede leer esa línea.\nRevisa sus palabras, o prueba una línea más corta.",
+  consoleLineNotRun:
+    "No pasó nada.  Esa línea no le pide nada a tu app.\nPrueba una línea que cambie algo o que pida un valor.",
+
+  // Explicar esto, en el menú del clic derecho del código (epic `editor` P32, Q39)
+  explainThis: "Explicar esto",
+  explainThisCode: "Tu código",
+  explainThisWords: "Qué hace",
+  explainThisAsking: "Pidiendo a Claude un resumen…",
+  explainThisLineByLine: "Línea por línea",
+  explainThisNoWords: "Encanto no tiene notas para este código.",
+  explainThisClose: "Cerrar",
+
   ////////////////
   // ## The project chooser
   ////////////////
