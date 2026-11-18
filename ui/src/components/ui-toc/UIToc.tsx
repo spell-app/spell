@@ -182,7 +182,10 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
             <Show when={this.shownHeading}>
               <ui-header part={this.partForName("header")}>{this.shownHeading}</ui-header>
             </Show>
-            <Show when={this.hasFolds}>{this.toggleAllButton()}</Show>
+            {/* no folds:  the toggle's room kept, so a page's own buttons after it stay where they are */}
+            <Show when={this.hasFolds} fallback={<span class={TOGGLE_ROOM} aria-hidden="true" />}>
+              {this.toggleAllButton()}
+            </Show>
             <slot name="tools" />
           </div>
         </Show>
@@ -546,6 +549,9 @@ const CHEVRON = "chevron"
 
 /** Class of the header's expand all / collapse all button. */
 const TOGGLE_ALL = "toggle-all"
+
+/** What stands in for the toggle with nothing to fold:  its room (`UIToc.css`). */
+const TOGGLE_ROOM = "toggle-room"
 
 /** Class of its double chevron. */
 const CHEVRONS = "chevrons"

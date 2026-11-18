@@ -85,11 +85,10 @@
   }
   /*
    * no toggle (nothing folds):  its room kept, so the page's buttons stay where they are on a page with one
-   * (epic `notebook` P9:  the Hide icon jumped left between a notebook's tabs)
+   * (epic `notebook` P9:  the Hide icon jumped left between a notebook's tabs);  a real box in the toggle's place, not
+   * a pseudo-element after the slot:  a slotted item's host draws no box, so `order` couldn't put it after one
    */
-  .head:not(:has(.toggle-all))::after {
-    content: "";
-    order: 1;
+  .toggle-room {
     flex: none;
     width: 1.75em;
     margin-inline-start: auto;
