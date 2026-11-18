@@ -101,6 +101,24 @@ export const spanishWords: SP.LanguageWords = {
   // `después de poner una carta en una pila`:  the verb as an action says it
   verbsForDoing: (doing) => [doing],
 
+  // `mientras se completa un trabajo`:  `completa` => `completar`;  `abre` => `abrer`, `abrir`
+  verbsForDuring: (word) => {
+    if (/a$/i.test(word)) return [`${word}r`]
+    if (/e$/i.test(word)) return [`${word.slice(0, -1)}er`, `${word.slice(0, -1)}ir`, `${word}r`]
+    return [word]
+  },
+
+  errorNames: {
+    "no encontrado": "not found",
+    "sin autorizar": "not authorized",
+    "no permitido": "not permitted",
+    desactualizado: "out of date",
+    "servidor no encontrado": "server not found",
+    límite: "limit",
+    "sin conexión": "offline",
+    cualquiera: "anything"
+  },
+
   danglingWords: new Set([
     "de",
     "del",

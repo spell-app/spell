@@ -221,7 +221,7 @@ describe("an action at a place's address (Q17's C)", () => {
     expect(js).toContain('operations: { publish: "/recipes/publish", refresh: "/recipes/refresh" }')
     expect(js).toContain('return await core.callPlace("family_cookbook", "publish", this)')
     expect(js).toContain(
-      'export async function refresh() {\n  return await core.callPlace("family_cookbook", "refresh")'
+      'export async function refresh() {\n  return core.asAction({ cantBeUndone: "keeps history" }, async () => await core.callPlace("family_cookbook", "refresh"))'
     )
     expect(js).toContain("await (new Recipe()).publish()")
     expect(js).toContain("await refresh()")

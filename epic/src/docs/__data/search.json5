@@ -926,6 +926,31 @@
       ]
     },
     {
+      "path": "epic-kickoff.html",
+      "title": "<epic-kickoff>",
+      "summary": "The <epic-kickoff> element: the box at the top of a new epic's Overview, where you type what the epic should do, pictures and all.",
+      "tag": "epic-kickoff",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-behaviour",
+          "title": "2. Behaviour"
+        },
+        {
+          "id": "3-markup",
+          "title": "3. Markup"
+        },
+        {
+          "id": "epic-kickoff-parts",
+          "title": "Parts",
+          "parent": 2
+        }
+      ]
+    },
+    {
       "path": "epic-link.html",
       "title": "<epic-link>",
       "summary": "The <epic-link> element: a link to a saga, an epic, a phase or an item, written by what it points at.",

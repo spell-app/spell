@@ -1,4 +1,7 @@
+import type { P } from "spell/parser/parser"
+
 import type { ReadNote } from "./ReadGathering"
+import type { SourcePlace } from "./SourceMarks"
 
 //
 //  ## Types shared by the writers (`Writer` and every writer on it:  `ProgramWriter`, `TreeWriter` ...).
@@ -61,4 +64,18 @@ export type WriterOptions = {
    * how a writer's notes reach the warnings noted while parsing (`SP.SpellWarnings`), not a second list.
    */
   noteForAuthor?: (note: ReadNote) => void
+  /**
+   * A DEBUGGING build (epic `editor` P33, Q41):  the program can stop on a line and go on a line at a time,
+   * while the page around it keeps running -- see `P.DebugSteps`.
+   * - Every action and handler waits, so it can be held between its lines;  each of its lines asks first.
+   * - Only ever run by the editor while debugging:  the shipped build never has it.
+   * - Default:  none, the shipped build.
+   */
+  debugging?: DebugOptions
+}
+
+/** What a debugging build is told:  see `P.WriterOptions.debugging`. */
+export type DebugOptions = {
+  /** Where `node`, a statement or a function, is written:  its file, line and column, from 0;  none, no step there. */
+  placeOf: (node: P.ASTNode) => SourcePlace | undefined
 }

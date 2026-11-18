@@ -3,6 +3,7 @@ import { Box, Text, useApp, useInput, useStdout } from "ink"
 import { useState } from "react"
 import chalk from "chalk"
 
+import type { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
 /** Keys, for the footer. */
@@ -12,7 +13,7 @@ const HELP = "Enter parse · ↑↓ earlier lines · Esc quit"
  * ### `<ReplScreen>`
  * Live screen for `spell repl`:  type a line, see how spell reads it -- its match tree and javascript -- above,
  * newest last, with the input at the bottom.
- * - `onLine(text)` parses each line -- earlier lines' declarations stay known, see `CLI.parseText()`'s `commit`.
+ * - `onLine(text)` parses each line -- earlier lines' declarations stay known, see `SP.parseLine()`'s `commit`.
  * - `↑` / `↓` bring back earlier lines;  `Esc` or `Ctrl-C` quits.
  * - Shows as much as fits the terminal -- or `size`, e.g. in tests.
  ****************/
@@ -21,7 +22,7 @@ export function ReplScreen({ title, onLine, size }: ReplScreenProps) {
   const { stdout } = useStdout()
   const rows = size?.rows ?? stdout.rows ?? 24
 
-  const [entries, setEntries] = useState<CLI.ParsedText[]>([])
+  const [entries, setEntries] = useState<SP.ParsedLine[]>([])
   // `TextInput` keeps its own text:  a new `key` resets it, to `draft`
   const [inputKey, setInputKey] = useState(0)
   const [draft, setDraft] = useState("")
@@ -71,12 +72,12 @@ export function ReplScreen({ title, onLine, size }: ReplScreenProps) {
  */
 export type ReplScreenProps = {
   title: string
-  onLine: (text: string) => CLI.ParsedText
+  onLine: (text: string) => SP.ParsedLine
   size?: { rows: number }
 }
 
 /** How one parsed line shows:  what was typed, its tree, then its javascript -- or why not, in red. */
-export function entryLines({ text, tree, compiled, error }: CLI.ParsedText): string[] {
+export function entryLines({ text, tree, compiled, error }: SP.ParsedLine): string[] {
   const lines = [chalk.cyan(`› ${text}`), ...CLI.colorTree(tree).map((line) => `  ${line}`)]
   if (compiled !== undefined)
     lines.push(...compiled.split("\n").map((line, index) => `${index ? "   " : "=> "}${line}`))

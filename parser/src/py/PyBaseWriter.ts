@@ -1705,12 +1705,18 @@ export class PyBaseWriter extends P.ProgramWriter {
    * `core.describe_event(Card, "flipped", {"params": {"side": "direction"}})`.
    * - Fields and members by Python's names:  `"enabled_when": "turn_over_is_enabled"`.
    */
+  /** A member's name as text, as Python names it:  `"move_to_queue"`. */
+  ASTMemberNameLiteral(node: P.ASTMemberNameLiteral): string {
+    return this.quoted(this.nameOf(node.name))
+  }
+
   ASTTypeDescription(node: P.ASTTypeDescription): string {
     const method = {
       action: "describe_action",
       event: "describe_event",
       menu: "describe_menu",
-      after: "add_after_hook"
+      after: "add_after_hook",
+      hook: "add_action_hook"
     }[node.describes]
     const name = this.quoted(node.describes === "event" ? node.name : this.nameOf(node.name))
     const fields = Object.entries(node.description).map(([key, value]) => {
@@ -1718,7 +1724,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     })
     const code = `core.${method}(${this.write(node.type)}, ${name}, {${fields.join(", ")}})`
     // an event's and a menu's one line says it;  an action's spell, and an after hook's, is the method just above
-    return node.describes === "action" || node.describes === "after" ? code : this.withSpell(node, code)
+    return node.describes === "event" || node.describes === "menu" ? this.withSpell(node, code) : code
   }
 
   /** One field of a type's description as Python -- see `P.ASTDescriptionValue`. */
@@ -1727,6 +1733,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))
+    if ("type" in value && typeof value.type === "string") return `lambda: ${this.typeNameOf(value.type)}`
     if ("members" in value && Array.isArray(value.members)) {
       return `[${value.members.map((item) => this.quoted(item === "-" ? item : this.nameOf(item))).join(", ")}]`
     }

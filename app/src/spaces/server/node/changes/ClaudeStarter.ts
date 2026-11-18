@@ -234,13 +234,21 @@ function shellWord(path: string): string {
 }
 
 /**
- * The session's environment:  this server's, less the marks of a Claude Code session around it.
- * - A page server started from inside a session has them, and Claude Code won't start inside another.
+ * The session's environment:  `claudeEnv()`'s.
  * - `SPELL_CHANGES_COMMAND`:  `spell`, as the session runs it, so `take` tells it to say `done` the same way,
  *   the one way it's allowed
  */
 function sessionEnv(spell: string): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = { ...process.env, SPELL_CHANGES_COMMAND: spell }
+  return claudeEnv({ SPELL_CHANGES_COMMAND: spell })
+}
+
+/**
+ * The environment to start Claude Code in from this server:  this server's, less the marks of a Claude Code session
+ * around it (a page server started from inside a session has them, and Claude Code won't start inside another),
+ * plus `extra`.  `ClaudeExplainer`'s too.
+ */
+export function claudeEnv(extra: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, ...extra }
   for (const name of SESSION_MARKS) delete env[name]
   return env
 }

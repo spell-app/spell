@@ -1050,6 +1050,48 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     })
   }
 
+  /**
+   * Our DEBUGGING build (epic `editor` P33, Q41):  `codeWithMapFor()` of the running target, written so the program can
+   * stop on a line while the editor around it keeps going -- see `P.DebugSteps`.
+   * - What the editor runs while debugging is on, and only then:  nothing is saved, and the shipped build never has it.
+   * - Each step names its line by its file's path, as the editor's files have them (`debugPlaceOf()`).
+   * - throws as `codeFor()` does
+   */
+  debugCodeWithMap(): { code: string; map: P.SourceMapV3 } {
+    const target = SP.targetFor(SP.RUNNING_TARGET)
+    const files = [...this.sourceImportFiles, ...this.activeImports]
+    const parts = files.map((file) => (file.AST instanceof P.ASTStatementGroup ? file.AST : file.compiled))
+    const marks = new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
+    const options = { ...this.writerOptions(), debugging: { placeOf: SpellProject.debugPlaceOf } }
+    return this.scope!.parser!.inPlay(() => {
+      const marked = P.SourceMarks.during(marks, () =>
+        SpellProject.combineCompiled(
+          parts,
+          target.writer,
+          this.importHeader(target.writer),
+          this.scope,
+          options,
+          this.mainFileIn(files)
+        )
+      )
+      return marks.extract(SP.SpellDeclarations.stripComments(marked), {
+        file: this.outputFileFor(target).location.file,
+        sources: this.sourceTexts,
+        nameOf: SpellProject.sourceNameOf
+      })
+    })
+  }
+
+  /**
+   * Where `node` is written, for a debugging build's steps (`P.DebugOptions.placeOf`):
+   * a line of code, or a function, by where its words start.
+   * - Not a group of lines:  each of its lines has its own.
+   */
+  static debugPlaceOf(node: P.ASTNode): P.SourcePlace | undefined {
+    if (node instanceof P.ASTStatementGroup) return undefined
+    return SpellProject.placeOfMatch(node.match)
+  }
+
   /** What our project file says that changes our code:  see `writerOptionsFor()`. */
   writerOptions(): P.WriterOptions {
     return SpellProject.writerOptionsFor(this.contents ?? {})

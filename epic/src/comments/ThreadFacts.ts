@@ -428,10 +428,10 @@ const OLD_AGENT_TURN = "claude"
 const TYPED_ID = /^#?cm?(\d+)$/i
 
 /**
- * A picture in a comment's words (`Pictures.wordsFor()`, epic `epic-engine` I267):  written out here, as this file
+ * A picture in a comment's words (`Pictures.wordsFor()`, epic `epic-engine` I267;  labelled `IMG2` since P75):  written out here, as this file
  * imports nothing (the comments' own script loads it alone).
  */
-const PICTURE_WORDS = /!\[picture\]\([^)\s]+\)/g
+const PICTURE_WORDS = /!\[(?:picture|IMG\d+)\]\([^)\s]+\)/g
 
 /** How many characters of the selected text (or the block's) a header shows. */
 const HEADLINE_CHARS = 40

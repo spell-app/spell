@@ -432,6 +432,19 @@ export type LanguageWords = {
    */
   verbsForDoing?: (doing: string) => string[]
   /**
+   * The verbs an action's words may start with, given how a `while` hook says it (epic `data` P50, Q94):
+   * Spanish's `mientras se completa un trabajo`, `completa` => `completar`, `completer`, `completir` (the hook takes the
+   * one an action has);  none:  as `verbsForDoing` says, English's `while completing a job`.
+   * - See `while_hook`.
+   */
+  verbsForDuring?: (word: string) => string[]
+  /**
+   * The names a failure step tests an error by, as written in quotes, and the core's name each means
+   * (epic `data` Q95):  English's `"not found"`, Spanish's `"no encontrado"`, both the core's `"not found"`.
+   * - See `error_is`, `core.errorIs()`.
+   */
+  errorNames?: Record<string, string>
+  /**
    * Little words an action's title writes in lower case, unless first:  `Put Card on Pile` (epic `language` J156).
    * - Its articles, conjunctions and short prepositions:  English's `a`, `the`, `and`, `on`;  Spanish's `la`, `y`, `en`.
    */

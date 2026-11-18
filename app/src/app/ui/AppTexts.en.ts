@@ -354,6 +354,55 @@ export const APP_TEXTS = {
   siteDataId: "id",
   siteDataSamples: "{box}:  sample rows",
   siteDataStartAgain: "Start again",
+  siteDataReference: "Reference",
+  siteDataReferenceTip: "Every list, field and change this place has, and which ones were tried",
+  // a place's reference page, /place/<its description> (epic `data` P52):  its lists by tag, each one's state
+  placeRefLoading: "Reading the place…",
+  placeRefNotFound:
+    "Spell couldn't find a description of a data source at {path}.\nCheck the address, or run spell place ingest again to read the data source's description.",
+  placeRefVersion: "Version {version}",
+  placeRefLooked: "Looked at {date}",
+  placeRefLists: "Lists",
+  placeRefDeployments: "Where it runs",
+  placeRefDeploymentsNone: "Your project names no other server for it, so Spell uses {address}.",
+  placeRefNotes: "Notes",
+  placeRefVerified: "Verified",
+  placeRefVerifiedWhy: "Spell tested it on the real server, and it answered as its description says.",
+  placeRefFailed: "Failed",
+  placeRefFailedWhy: "Spell tested it on the real server, and it didn't answer as its description says.",
+  placeRefUntyped: "No field types",
+  placeRefUntypedWhy:
+    "The description doesn't say what kind of information each field holds.\nSpell fills this in when it reads the data source.",
+  placeRefDisabled: "Turned off",
+  placeRefDisabledWhy:
+    "Your Spell file switches this list off, so it's never tested.\nRemove that line to turn it back on.",
+  placeRefUnverified: "Not tried yet",
+  placeRefUnverifiedWhy:
+    "Spell has only read about this list, and hasn't tested it on the real server.\nRun spell place verify to test it.",
+  placeRefTried: "tried {date}",
+  placeRefTriedOn: "tried on {deployment}, {date}",
+  placeRefRows: "{count} rows read",
+  placeRefListLeftOut: "Left out of the Spell:  {why}",
+  placeRefChanges: "What it can change",
+  placeRefFields: "Fields",
+  placeRefName: "Name",
+  placeRefAddress: "Address",
+  placeRefKey: "Key",
+  placeRefReadOnly: "Read only",
+  placeRefYes: "yes",
+  placeRefChange: "Change",
+  placeRefTakes: "Takes",
+  placeRefState: "Tried",
+  placeRefField: "Field",
+  placeRefInSpell: "In Spell",
+  placeRefKind: "Holds",
+  placeRefFieldNotes: "Notes",
+  placeRefIsId: "says which row is which",
+  placeRefLinksTo: "links to {target}",
+  placeRefRequired: "required",
+  placeRefSetByServer: "set by the server",
+  placeRefOneOf: "one of {choices}",
+  placeRefLeftOut: "left out of the Spell",
   inspectorNotSavedCode: "Your program works this out for itself, so a change here won't be kept.",
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",
@@ -392,6 +441,7 @@ export const APP_TEXTS = {
   inspectorDataWhyNotFull: "Full:  {place} has no place left for this.",
   inspectorDataWhyNotNotListed: "Read only:  only the people {place} lists sign up here.",
   inspectorDataWhyNotUsedUp: "Used up:\nyou've asked {place} for every invitation you have.",
+  inspectorDataWhyNotSignedOut: "Read only:\nyou're not signed in to {place}.  Sign in to change this.",
   inspectorDataWorkedOutFrom: "Worked out from what it reads in {places}:\nchange those instead.",
   inspectorDataSourceReal: "Real data, kept in {place}:\nwhat you change here is saved there.",
   inspectorDataSourceReadOnly:
@@ -435,6 +485,22 @@ export const APP_TEXTS = {
   consoleExecuted: "{Type} executed without errors.",
   testResults: "Tests:  {passed} passed, {failed} failed",
   noTests: "No tests -- write one as `to test <something>:`",
+
+  // the Spell Console's line (epic `editor` P32)
+  consoleInputLabel: "A line of Spell to run in your app",
+  consolePlaceholder: "Type a line of Spell, then press Return to run it in your app",
+  consoleLineNotRead: "Spell can't read that line.\nCheck its words, or try a shorter line.",
+  consoleLineNotRun:
+    "Nothing happened.  That line doesn't ask your app to do anything.\nTry a line that changes something, or asks for a value.",
+
+  // Explain This, on the code's right-click menu (epic `editor` P32, Q39)
+  explainThis: "Explain This",
+  explainThisCode: "Your code",
+  explainThisWords: "What it does",
+  explainThisAsking: "Asking Claude for a summary…",
+  explainThisLineByLine: "Line by line",
+  explainThisNoWords: "Spell has no notes for this code.",
+  explainThisClose: "Close",
 
   ////////////////
   // ## The project chooser (`ProjectChooser.tsx`)
@@ -897,7 +963,25 @@ export const APP_TEXTS = {
   cmPeekClose: "Close (Esc)",
   // a web address in the code, its tip on a plain hover (`CodeEditorFeatures.linkTip()`)
   codeLinkTipMac: "⌘-click to open",
-  codeLinkTip: "Ctrl-click to open"
+  codeLinkTip: "Ctrl-click to open",
+  // the step debugger (`<Debugger>`, epic `editor` P33):  its bar's buttons, each said in full on hover
+  debugContinue: "Continue:  run on to the next red dot",
+  debugStepOver: "Step Over:  run this line, then pause on the next",
+  debugStepInto: "Step Into:  go inside the action this line runs",
+  debugStepOut: "Step Out:  finish this action, then pause on the line that ran it",
+  debugStop: "Stop Debugging:  let the app run as usual, past the red dots",
+  // what it says while the app runs, and where it's paused:  `{line}`, a line's number;  `{file}`, its file's name
+  debugRunning:
+    "Debugging:  the app pauses on a line with a red dot in the code's left margin.\nClick in the margin to add a dot;  click a dot to take it away.",
+  debugStoppedAt: "Paused on line {line} of {file}.\nThe app waits:  press a button above to go on.",
+  // its cards:  the thing the action is on, what it was given, what its lines have set, the actions that ran it
+  debugThing: "The thing it's about",
+  debugInputs: "What it was given",
+  debugValues: "What it has set so far",
+  debugCalledFrom: "How it got here",
+  debugNothing: "Nothing yet",
+  // a value it can't show as text:  `{type}`, its kind
+  debugValueOf: "a {type}"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

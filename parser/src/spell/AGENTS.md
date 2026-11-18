@@ -108,6 +108,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
 - `ingest/` (epic `data` P18):  looking at a data source for real, and writing what it found (`spell place ingest`, `spell place update`).
   - `PlaceIngest` runs the steps;  `PlaceLook`, a look per kind of place (`PlaceLookOthers`, those of a room, a data folder or a file, an Airtable, an atmosphere account);
     `PlaceInLanguage` hands what it wrote to the `Translator`, for a file in another language;  `PoliteReader`, everything it sends, which can't write;
+    `PlaceOnDisk`, how a description is written and read back whole, the ONE reading (`descriptionFromDisk()`, epic `data` P52:  `PlaceNerd` and the reference page use it too);
     `PlaceShape`, what rows show;  `PlaceReading`, what the agent reads in samples;  `PlaceSpell`, the Spell, and merging a later look,
     into a file in plain Spell, each member bare (since epic `language` P46;  in tags from P40 till then).
   - `PlaceSpec` (epic `data` P49):  an OpenAPI 3 description read whole as one more look (`--spec`), every list, field,

@@ -160,11 +160,15 @@ export const runtimeMethods = defineCoreModule({
    * Reset `core.RUNTIME`, e.g. when a project starts or a test is run.
    * Returns the new runtime.
    * - The new one's undo history is empty, and it remembers nothing until `core.remember()`.
-   * - SIDE EFFECT:  forgets the last run's things too -- see `core.things`.
+   * - SIDE EFFECT:  forgets the last run's things too -- see `core.things`;
+   *   and what the step debugger holds of it (`core._stepper`, `stepping.ts`).
    */
   resetRuntime(): SpellRuntimeState {
     if (core.DEBUG_RUNTIME) console.info("Resetting core.RUNTIME")
     core.things.clear()
+    // an action the step debugger holds belongs to the last run:  it never goes on into this one
+    const { _stepper: stepper } = core as { _stepper?: { forgetHeld(): void } }
+    stepper?.forgetHeld()
     core.RUNTIME = new SpellRuntime() as SpellRuntimeState
     return core.RUNTIME
   },

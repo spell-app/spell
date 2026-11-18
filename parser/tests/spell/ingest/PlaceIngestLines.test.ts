@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
-import { PlaceIngest, descriptionFromDisk } from "spell/parser/spell/ingest/PlaceIngest"
+import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { descriptionFromDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import type { IngestFiles, PlaceDescription, PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 
 /**

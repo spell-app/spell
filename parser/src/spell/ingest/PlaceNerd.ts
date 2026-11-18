@@ -1,4 +1,5 @@
 import type { CollectionDescription, FieldDescription, PlaceDescription, PlaceDescriptionOnDisk } from "./ingest.types"
+import { descriptionFromDisk } from "./PlaceOnDisk"
 
 /****************
  * ### `PlaceNerd`
@@ -149,16 +150,10 @@ export class PlaceNerd {
 
   /**
    * `description` with every collection whole:  as it's written on disk, what every collection agrees on is said once,
-   * in `allCollections`, which each collection takes (`descriptionFromDisk()`'s rule, kept here so this stays pure).
+   * in `allCollections`, which each collection takes (`descriptionFromDisk()`, the ONE reading, epic `data` J261).
    */
   private static whole(description: PlaceDescription | PlaceDescriptionOnDisk): PlaceDescription {
-    const { allCollections } = description as PlaceDescriptionOnDisk
-    if (!allCollections) return description as PlaceDescription
-    const each = Object.entries(description.collections).map(([key, described]) => [
-      key,
-      { ...allCollections, ...described }
-    ])
-    return { ...description, collections: Object.fromEntries(each) } as PlaceDescription
+    return descriptionFromDisk(description as PlaceDescriptionOnDisk)
   }
 
   /** `name`, or `name 2` ... when a box already has it. */

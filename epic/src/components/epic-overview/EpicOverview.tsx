@@ -43,6 +43,9 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - While the page agrees its Overview (`<epic-page stage="overview">`, reviewed), "Accept Overview" last on its
  *   title row (`<epic-stage-button>`, `EpicFold.renderStageButton()`;  epic `epic-engine` I180):  the header's green
  *   pill in Send's place before (P29);  with or without a summary
+ * - The KICKOFF BOX (`<epic-kickoff>`, epic `epic-engine` P75), first of all, while the epic has no kickoff prompt and
+ *   no phases, and the page is reviewed (`showsKickoff`):  what the epic should do, typed on its page;  Send makes it
+ *   the Kickoff prompt, which then shows in its place;  the Overview unfolds while it shows
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
@@ -79,6 +82,26 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
     return this.reviewState.reviewing() && !!this.domElement.querySelector(SUMMARY_TAG)
   }
 
+  /**
+   * The kickoff box shows (epic `epic-engine` P75):  the page reviewed, no Kickoff prompt yet (an `<epic-prompt>`, or
+   * an older doc's `slot="prompt"`), and no phases:  the epic is still to be planned.
+   * - read again on every layout change:  `epic inbox apply` writing the prompt takes it away
+   */
+  get showsKickoff(): boolean {
+    void this.layout
+    if (!this.reviewState.reviewing() || this.domElement.querySelector(PROMPT_TAG)) return false
+    return !this.domElement.closest(PAGE_TAG)?.querySelector(PHASE_TAG)
+  }
+
+  /**
+   * The kickoff box shows:  the Overview UNFOLDS, so it's seen (epic pages open folded;  a new epic's page has
+   * nothing else to read first).
+   */
+  @E.onChange("showsKickoff")
+  protected onKickoffShown(shows: boolean) {
+    if (shows && !this.isOpen) void this.reveal()
+  }
+
   /** Its number, by its place among the page's blocks (always the first:  `1`). */
   get number(): number {
     void this.layout
@@ -113,6 +136,10 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
       ),
       before: () => (
         <>
+          {/* the kickoff box, first, while there's nothing planned yet (P75) */}
+          <Show when={this.showsKickoff}>
+            <epic-kickoff part={this.partForName("kickoff")} />
+          </Show>
           {/* under the title row:  a marked note, then the note box once opened */}
           <Show when={this.reviewed}>
             <Show when={this.reviewState.noted() || this.reviewState.takenNote()}>
@@ -168,6 +195,13 @@ export interface EpicOverview extends E.AttributeValues<typeof epicOverviewVocab
 /** Classes of the shadow markup:  the folded prompt, the estimate line. */
 const PROMPT = "prompt"
 const ESTIMATE = "estimate"
+
+/** A Kickoff prompt in it:  today's `<epic-prompt>`, or an older doc's `slot="prompt"`. */
+const PROMPT_TAG = ':scope > epic-prompt, :scope > [slot="prompt"]'
+
+/** Its page, and a phase in it:  a page with phases is planned, so no kickoff box. */
+const PAGE_TAG = "epic-page"
+const PHASE_TAG = "epic-phase"
 
 /** Its summary:  what its review controls are about (keyed `summary`). */
 const SUMMARY_TAG = ":scope > epic-summary"

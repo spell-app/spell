@@ -6,6 +6,7 @@
   "author": {
     "name": "Owen Williams"
   },
+  "repository": "https://github.com/spell-app/spell",
   "license": "MIT",
   "keywords": ["epics", "planning", "worktrees", "review"],
   "agents": ["./designer/designer-agent.md", "./coherence/coherence-agent.md", "./plan-check/plan-check-agent.md"]

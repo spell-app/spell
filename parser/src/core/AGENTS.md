@@ -54,6 +54,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Negative positions count from the end either way:  `-1` is the last item.
 - The console sends a DUMP (a thing, a spell list ...) through `core.console.printDump()`:
   the page's console by default, stderr under `spell run`.
+- The step debugger's runtime half is [stepping.ts](stepping.ts) (epic `editor` P33):  `core._stepper`, ONE `Stepper`
+  per runtime copy, what a debugging build's lines ask (`P.DebugSteps`) and the editor drives.
+  - It holds a line by making its action wait:  breakpoints by file and line, Continue, Step Over / Into / Out,
+    and each frame's thing, inputs, values so far and callers.
+  - The `_` keeps it out of the core contract:  only the editor's runtime steps, so Python's core has none.
+  - `resetRuntime()` forgets what it held of the last run.
 - Depends only on `spell/util`.
   NEVER import `spell/parser/spell` / `spell/parser/parser`, or anything above.
 - Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
@@ -543,6 +549,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Described `cancels: true` (`core.describeAction()`, `core.asAction()`):  an action that never cancels costs nothing more.
 - After hooks, `after moving a card to a pile`, from any file:  `core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })`.
   - Each runs at the end of its action, inside its undo step, in the order added;  skipped when it's called off.
+- The other steps around an action (epic `data` P50), `core.addActionHook(Job, "complete", { moment, hook, level, page })`:
+  - `before`, `while` (what it changes put back when the action ends), `after`, `failed` (given the error), and
+    `around` (a second `to complete a job`, given what it wraps)
+  - by the file each is in, its `level`:  before, while and around from a page's file in to the `.api.spell` file's,
+    after and failure steps the other way;  a page's before and while steps only while one of it is made
+  - a failure step gives back `core.passTheError()` to send it on;  anything else caught it
+  - a server's action (`callsServer`) then runs `core.addServerFailureStep()`'s, last;  a refusal's notice, held till
+    then (`holdNotice()`), shows only for what nobody caught, and the error goes on to the caller
+  - `core.errorIs(error, "not found")`:  the error by Spell's names, from what places and the network throw
+  - `core.savedThingOrMissing(Job, 7151)`:  a missing id's stand-in runs only its failure steps, with "not found"
+  - all in `runActing()` ([undoing.ts](undoing.ts));  not in Python's core yet (`not_ported_yet.json5`)
 - A thing that belongs to one list remembers the one it was in before its latest move:  `Pile.lastOwnerOf(card)`,
   compiled spell's `the card's last pile` -- part of the undo step, put back by undo and by a cancel (`noteKept()`).
 - Python's core has the same history, `undoing.py` (epic `language` P54):

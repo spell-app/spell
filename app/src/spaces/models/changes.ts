@@ -112,3 +112,22 @@ export type ChangeAnswer = ChangeRequest & {
   /** is Claude Code installed on this machine, so the page server can start a session itself (epic `editor` T66)? */
   hasClaude: boolean
 }
+
+/**
+ * `POST /api/explain`'s body:  Spell to explain in plain words, for the code's right-click Explain This
+ * (epic `editor` P32, Q39).
+ */
+export type ExplainAsked = {
+  /** the Spell, as written:  a line, a selection, or a whole action */
+  code: string
+  /** the language to explain it in:  the editor's, `en` or `es` */
+  language: string
+  /** the project it's from, `@spell/examples/Solitaire`:  for its name alone, nothing is read */
+  projectId?: string
+}
+
+/** `POST /api/explain`'s answer. */
+export type ExplainAnswer = {
+  /** what the code does, in plain words:  a few short paragraphs or bullets, in Markdown */
+  explanation: string
+}

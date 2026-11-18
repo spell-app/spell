@@ -2866,6 +2866,58 @@
     },
     {
       "kind": "method",
+      "name": "addActionHook",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "Run `Class`'s member `hook` at `moment` of its action `name`, from a file at `level` (epic `data` P50): the steps around a server's action, `before completing a job` and its kin, from any file."
+    },
+    {
+      "kind": "method",
+      "name": "addServerFailureStep",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "step"
+        }
+      ],
+      "description": "Run `step` last when any server's action fails, after the action's own failure steps (epic `data` Q93): what `when any server call fails` compiles to, the app's one place for, say, signing in again."
+    },
+    {
+      "kind": "method",
+      "name": "passTheError",
+      "of": "core",
+      "module": "described",
+      "description": "What a failure step gives back to send its error on, to the next step, and in the end to Spell's notice: `pass the error` (epic `data` Q87).  See `runActing()`."
+    },
+    {
+      "kind": "method",
+      "name": "errorIs",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "error"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Is `error` the kind `name` says, in Spell's words (epic `data` Q95):  what `if the error is \"not found\"` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "describeEvent",
       "of": "core",
       "module": "described",
@@ -3640,9 +3692,28 @@
         },
         {
           "name": "input"
+        },
+        {
+          "name": "...params"
         }
       ],
       "description": "Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at \"...\"` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "savedThingOrMissing",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "id"
+        }
+      ],
+      "description": "One thing of a saved type, by its id, read first if it isn't held:  what `complete job 7151` calls it on (epic `data` Q77, Q91)."
     },
     {
       "kind": "method",

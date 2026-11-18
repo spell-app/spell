@@ -18,6 +18,17 @@ export function siteEditorUrlFor(projectPath: string): string {
   return `${SITE_PAGE}/${projectPath}`
 }
 
+/**
+ * Where a place's reference page is (`<PlaceReferencePage>`, epic `data` P52):
+ * `/place/<its description's address>`.
+ */
+export const PLACE_PAGE = "/place"
+
+/** The reference page of the place described at `path`:  `/place/@spell/examples/StarWars/StarWars.api.json5`. */
+export function placeReferenceUrlFor(path: string): string {
+  return `${PLACE_PAGE}/${path}`
+}
+
 /** Params parsed out of the `/:page/*address` route:  `/edit/...`, `/run/...`. */
 export type SpellRouteParams = {
   /** Which page:  `edit` or `run`. */

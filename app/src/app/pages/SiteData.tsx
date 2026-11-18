@@ -4,6 +4,8 @@ import type { TableColumn, TableEditDetail } from "spell/ui/components/component
 import { PlaceNerd, type ErdField, type NerdSpec } from "spell/parser/spell/ingest/PlaceNerd"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { on } from "spell/app/app/solid"
+import { navigate } from "./navigation"
+import { placeReferenceUrlFor } from "./pages.types"
 import { SitePlaces, type ProjectIndex, type SampleRow, type SitePlace } from "./SitePlaces"
 
 import "./SiteData.css"
@@ -22,6 +24,7 @@ import "./SiteData.css"
  * - Clicking a box also picks its collection:  its sample rows show under the diagram, in `<ui-table editable>`,
  *   kept in this browser (`SitePlaces.rowsOf()`).
  * - Several places:  a menu above picks one.
+ * - "Reference" opens the place's reference page, every list, field and change it has (`<PlaceReference>`, epic `data` P52).
  ****************/
 export function SiteData(props: SiteDataProps) {
   const [places, setPlaces] = createSignal<SitePlace[]>()
@@ -63,6 +66,18 @@ export function SiteData(props: SiteDataProps) {
                 />
               </Show>
               <p class="quiet">{appTexts.text("siteDataHint")}</p>
+              <ui-button
+                size="small"
+                appearance="basic"
+                icon="book"
+                title={appTexts.text("siteDataReferenceTip")}
+                onClick={() => {
+                  const showing = place()
+                  if (showing) navigate(placeReferenceUrlFor(showing.path))
+                }}
+              >
+                {appTexts.text("siteDataReference")}
+              </ui-button>
               <label class="columns">
                 {appTexts.text("siteDataColumns")}
                 <ui-input

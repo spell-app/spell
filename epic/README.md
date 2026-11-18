@@ -77,6 +77,9 @@ flowchart TD
 <summary>The nine steps, in detail</summary>
 
 1. You type `/epic <name> <what to plan>` in a Claude Code session.
+   - Or `/epic <name>` alone:  the page opens with a kickoff box at the top of its Overview.
+     You type what the epic should do there, paste or drop pictures (each labelled IMG1, IMG2 ... so your words can
+     name them), and press Send.
 2. A hook reads the prompt before Claude does:  it titles the session `🚧 <name>`,
    and refuses one that would go wrong (in plan mode, or inside another worktree), saving your text first.
 3. The session asks where to run, a new window or this one, and which saga the epic serves.

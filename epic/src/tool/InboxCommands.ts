@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs"
-import { relative, resolve } from "node:path"
+import { dirname, join, relative, resolve } from "node:path"
 
 import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
@@ -9,6 +9,8 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { isInstantDue, pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
+// the words' pictures alone:  the review barrel is the browser client's
+import { Pictures } from "spell/epic/review/Pictures"
 
 import {
   CALM_ID,
@@ -374,7 +376,8 @@ export class InboxCommands {
       },
       { timeout: seconds, every: 1 }
     ).finally(stopBeat)
-    if (found) return this.printWork(name, this.owner.read(file), found.work ?? NO_WORK, found.sent, Boolean(json))
+    if (found)
+      return this.printWork(name, file, this.owner.read(file), found.work ?? NO_WORK, found.sent, Boolean(json))
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
     else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
     return 2
@@ -425,7 +428,17 @@ export class InboxCommands {
    * - `json`:  `{ now, sent, canceled, guides }` with `item` (and `option`) on each mark;  `sent.comments` and each
    *   guide's `comments` as the inboxes have them
    */
-  private printWork(name: string, plan: PlanReader, work: TakenWork, guides: GuideWork[], json: boolean): void {
+  private printWork(
+    name: string,
+    file: string,
+    plan: PlanReader,
+    work: TakenWork,
+    guides: GuideWork[],
+    json: boolean
+  ): void {
+    // each picture in the person's words, by its label:  `IMG2:  <its file>` (epic `epic-engine` P75)
+    const folder = dirname(file)
+    const pictureLines = (words: string | undefined, indent: string) => picturesIn(words, folder, indent)
     const now = work.now.map((each) => withItem(each))
     const sent = work.sent && {
       at: work.sent.at,
@@ -484,6 +497,8 @@ export class InboxCommands {
             if (mark.result) lines.push(`        ${TEST_WORDS[mark.result]}`)
             // a test's note is Owen's COMMENT on it, with any result (it may still need work:  read every one)
             if (mark.note) lines.push(`        ${mark.action === "test" ? "comment" : "note"}:  "${mark.note}"`)
+            lines.push(...pictureLines(mark.note, "        "))
+            // a test answer's screenshot, or a note's one picture from before P75:  apart from its words
             if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
           }
           // an Accept that kept his comments in its text (epic `epic-engine` I163):  fold them in, no second Accept
@@ -503,7 +518,7 @@ export class InboxCommands {
       for (const entry of sent.urgency) lines.push(`    - ${line(entry)}  · ${calmWords(entry.calm)}`)
       if (sent.comments.length) lines.push(`  comments, to answer on their threads (${sent.comments.length}):`)
       for (const comment of sent.comments) {
-        lines.push(...commentLines(comment, "    "))
+        lines.push(...commentLines(comment, "    "), ...pictureLines(comment.text, "      "))
         // a revisit's note, made a comment as it was taken (I200):  answered on its thread, never in the chat
         if (comment.fromNote) lines.push(`      his revisit note on ${shown(comment.fromNote)}, made a comment`)
       }
@@ -909,7 +924,11 @@ const SENT_HEADINGS: Partial<Record<string, string>> = {
   drop: "drop, a todo dropped",
   skip: "skip, nothing to do",
   // Do this:  a phase's (epic `epic-engine` I181), a go-ahead;  an issue's or a call's (I232), worked in the item itself
-  todo: "todo:  a question's or a test's makes a todo;  a phase's is Do this, a go-ahead to build it;  an issue's or a call's is Do this, worked in the item"
+  todo: "todo:  a question's or a test's makes a todo;  a phase's is Do this, a go-ahead to build it;  an issue's or a call's is Do this, worked in the item",
+  // the kickoff box (epic `epic-engine` P75):  what the epic should do, typed on its page
+  kickoff:
+    "kickoff, what the epic should do, typed on its page:  `inbox apply` writes it as the Kickoff prompt;  then plan " +
+    "from it (the epic skill's \"3. Plan\"), opening each picture's file"
 }
 
 /** A test answer's result in words, as `inbox` and `wait` print it. */
@@ -977,6 +996,18 @@ const PHASE_REF = /^p(\d+|-[a-z0-9-]+)$/
 function workOf(mark: { action: string } | undefined): "revisit" | "details" | "prepare" {
   if (mark?.action === "revisit" || mark?.action === "prepare") return mark.action
   return "details"
+}
+
+/**
+ * A line per picture in the person's words (epic `epic-engine` P75):  `IMG2:  <its file>`, so "IMG2" in the words
+ * points at a file the session can open.
+ * - `folder`:  the page's folder, which the words' paths start from;  a root path (`/guides/...`) stays as it is
+ */
+function picturesIn(words: string | undefined, folder: string, indent: string): string[] {
+  return Pictures.picturesOf(words ?? "").map(
+    (picture) =>
+      `${indent}${picture.label}:  ${picture.path.startsWith("/") ? picture.path : join(folder, picture.path)}`
+  )
 }
 
 /**

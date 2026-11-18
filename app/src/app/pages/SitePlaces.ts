@@ -6,7 +6,7 @@ import { SAMPLE_STORE } from "spell/places/places.types"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import type { PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
+import type { Deployment, PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 import { PlaceNerd, type ErdField } from "spell/parser/spell/ingest/PlaceNerd"
 
 /****************
@@ -41,6 +41,18 @@ export class SitePlaces {
     }
     const places = await Promise.all(sources.map((source) => SitePlaces.placeAt(source.projectId, source.file)))
     return places.filter((place) => place !== undefined)
+  }
+
+  /**
+   * The place whose description is at `path`, `@spell/examples/StarWars/StarWars.api.json5`:
+   * what its reference page draws (`<PlaceReference>`, epic `data` P52).
+   * - Its project is the folder it's in.
+   * - `undefined` when it won't load or parse, said in the console.
+   * - NEVER throws.
+   */
+  static at(path: string): Promise<SitePlace | undefined> {
+    const split = path.lastIndexOf("/")
+    return SitePlaces.placeAt(path.slice(0, split), path.slice(split + 1))
   }
 
   /** The rows kept for `collection` of `place`, the running site's samples, else one made from its fields' examples. */
@@ -143,9 +155,30 @@ export class SitePlaces {
       const response = await fetch(SP.SpellUrls.fileUrl(path))
       if (!response.ok) throw new Error(`answered ${response.status}`)
       const description = JSON5.parse(await response.text()) as PlaceDescriptionOnDisk
-      return { name: description.about.name, path, description }
+      const deployments = await SitePlaces.deploymentsOf(projectId, description.about.name)
+      return { name: description.about.name, path, description, ...(deployments && { deployments }) }
     } catch (error) {
       console.error(`SitePlaces:  couldn't read the place description ${path}`, error)
+      return undefined
+    }
+  }
+
+  /**
+   * Where place `place` runs, as project `projectId`'s file lists it (epic `data` P49):
+   * `"places": { "netbox": { "dev": { "at": "..." } } }`.
+   * - `undefined`:  none listed, or the file won't load (said in the console).
+   */
+  private static async deploymentsOf(
+    projectId: string,
+    place: string
+  ): Promise<Record<string, Deployment> | undefined> {
+    try {
+      const response = await fetch(SP.SpellUrls.fileUrl(`${projectId}/${SP.PROJECT_FILE}`))
+      if (!response.ok) return undefined
+      const project = JSON5.parse(await response.text()) as { places?: Record<string, Record<string, Deployment>> }
+      return project.places?.[place]
+    } catch (error) {
+      console.error(`SitePlaces:  couldn't read ${projectId}'s places`, error)
       return undefined
     }
   }
@@ -166,6 +199,8 @@ export type SitePlace = {
   path: string
   /** What `spell place ingest` wrote of it. */
   description: PlaceDescriptionOnDisk
+  /** Where it runs, by name, as its project's file lists them (`dev`, `production`):  left out, none listed. */
+  deployments?: Record<string, Deployment>
 }
 
 /** A sample row:  values by the source's field names. */

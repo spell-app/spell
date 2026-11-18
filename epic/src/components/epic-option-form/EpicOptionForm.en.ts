@@ -20,8 +20,8 @@ export const epicOptionFormVocabulary = {
   description:
     "The form for one option of a set (epic `epic-engine` P50), drawn by `<epic-choices>` (Add choice, an added " +
     "option changed before it's sent) and `<epic-option>` (its pencil), never written in a doc:  ONE box that grows as it's " +
-    "typed, its first line the title and the rest the note, a picture pasted, dropped or chosen going into its words " +
-    "(I334), then Save and Cancel.  It saves nothing itself:  its " +
+    "typed, its first line the title and the rest the note, pictures pasted, dropped or chosen going into its words " +
+    "(I334), labelled IMG1, IMG2 ... and shown in a strip under the box, each with its x (P75), then Save and Cancel.  It saves nothing itself:  its " +
     "`epic-option-saved` event hands what was typed to the element drawing it.",
   attributes: [
     { name: "heading", kind: "string", description: "Its first line:  `New choice`, `Edit B`." },
@@ -52,8 +52,8 @@ export const epicOptionFormVocabulary = {
       name: "epic-option-saved",
       detail: "{ title: string, note: string }",
       description:
-        "Save pressed (or Ctrl / Cmd + Enter) with a title:  the box's first line, and the rest (a picture's words, " +
-        "`![picture](<path>)`, in it)."
+        "Save pressed (or Ctrl / Cmd + Enter) with a title:  the box's first line, and the rest (its pictures' words, " +
+        "`![IMG1](<path>)`, in it)."
     },
     { name: "epic-option-canceled", detail: "{}", description: "Cancel pressed, or Escape." }
   ],
@@ -72,11 +72,11 @@ export const epicOptionFormVocabulary = {
   texts: [
     {
       key: "words",
-      text: "Your choice on the first line, then what it means.  You can paste a picture too.",
+      text: "Your choice on the first line, then what it means.  You can paste pictures too.",
       description: "The box's placeholder (`spell voice check`:  a pass)."
     },
     { key: "wordsLabel", text: "Your choice and what it means", description: "The box's name, for a screen reader." },
-    { key: "choose", text: "Add a picture from a file", description: "The picture button's label and tooltip." },
+    { key: "choose", text: "Add pictures from your computer", description: "The picture button's label and tooltip." },
     { key: "save", text: "Save", description: "Save's words, without `submit`." },
     { key: "saveTip", text: "Keep it (Ctrl / Cmd + Enter):  sent with your next Send", description: "Save's tooltip." },
     { key: "cancel", text: "Cancel", description: "Cancel's words." },

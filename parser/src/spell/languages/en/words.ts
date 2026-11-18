@@ -118,6 +118,17 @@ export const englishWords: SP.LanguageWords = {
     return verbs
   },
 
+  errorNames: {
+    "not found": "not found",
+    "not authorized": "not authorized",
+    "not permitted": "not permitted",
+    "out of date": "out of date",
+    "server not found": "server not found",
+    limit: "limit",
+    offline: "offline",
+    anything: "anything"
+  },
+
   danglingWords: new Set([
     "of",
     "to",

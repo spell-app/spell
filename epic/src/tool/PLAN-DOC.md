@@ -458,12 +458,20 @@ As `plan-doc.md`, "Ids":
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
-    - A note's PICTURE (epic `epic-engine` P51):  any note box takes one, pasted (⌘V), dropped, or chosen with its
-      picture button.
-      - saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and shown under the words
-      - it rides in the mark as `shot` (revisit, todo, next, drop and skip take one);  a picture alone is a revisit
-      - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's,
-        next's or drop's picture in the person's kept reply
+    - A note's PICTURES (epic `epic-engine` P51;  several, in its words, since P75):  any note box takes them,
+      pasted (⌘V), dropped, or chosen with its picture button.
+      - each saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and written into the note's words,
+        labelled:  `![IMG2](tests/<id>-<stamp>.png)`;  a strip of them under the words, each with its ✕
+      - they ride in the mark's `note`;  a picture alone is a revisit
+      - `epic inbox wait` prints `IMG2:  <its file>` under the note;  `inbox apply` keeps a skip's, next's or drop's
+        note in the person's kept reply, each picture an `<epic-picture label="IMG2">`
+      - labels renumber only while the note isn't sent (P75's choice B)
+      - a mark from before P75 carries its one picture apart, as `shot`:  still read, printed
+        `screenshot:  tests/...png`
+    - The KICKOFF BOX (epic `epic-engine` P75):  a new epic's page with no prompt and no phases takes a `kickoff`
+      mark, `{ action: "kickoff", note }`, under its own key, `kickoff`;  `inbox apply` writes it as the Kickoff prompt
+      (`setPrompt()`, its pictures labelled `<epic-picture>`s), logged "Kickoff prompt written from the page";  a page
+      with phases drops it
   - `limit`:  a todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn
     calmer, never offered for the next phase, with an item's buttons (Approve, Revisit, Make Todo).
     - a todo without it is WORK still to do:  the plane, Revisit, the x (below)
