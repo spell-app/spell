@@ -301,7 +301,31 @@ export class SpellStatement<
     const inlineAs = this.bodySpec?.inlineAs
     if (inlineAs && unparsed.length) this.parseInlineStatement(statement, unparsed, inlineAs)
 
+    if (inlineAs === "statement" && statement.length < tokens.length) {
+      return this.parseAtComma(scope, tokens) ?? statement
+    }
     return statement
+  }
+
+  /**
+   * `tokens`, a block opener whose words ran on past its comma, read again with its comma ending it
+   * (epic `language` J269):  `if its rank is one of 1, 2, 3, print it`.
+   * - The opener's own words may hold commas (`one of 1, 2, 3`), and a list reads on over a word (`print`):
+   *   so the first parse took `print` into the list, and couldn't read `it`.
+   * - Each comma, left to right:  the words up to it read WHOLE as the opener, its syntax taking the comma
+   *   (`(:|,)?`), and every word after it reads as its statement.
+   * - The first that fits;  none:  `undefined`, and the first parse stands, its error and all.
+   * - Only after a first parse that left words over:  a line that reads whole never comes here.
+   */
+  private parseAtComma(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    for (let index = 1; index < tokens.length - 1; index++) {
+      if (tokens[index]!.value !== ",") continue
+      const opener = super.parse(scope, tokens.slice(0, index + 1))
+      if (opener?.length !== index + 1) continue
+      const body = this.parseInlineStatement(opener, tokens.slice(index + 1), "statement")
+      if (body && opener.length === tokens.length) return opener
+    }
+    return undefined
   }
 
   /**

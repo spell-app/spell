@@ -1304,8 +1304,8 @@ places.addRule(TypeVerified, {
   ]
 })
 
-places.addRule(WhileWaiting, { syntax: "while (waiting|loading) :? {statement_body}?" })
-places.addRule(IfThereAreNone, { syntax: "if there are none :? {statement_body}?" })
+places.addRule(WhileWaiting, { syntax: "while (waiting|loading) (:|,)? {statement_body}?" })
+places.addRule(IfThereAreNone, { syntax: "if there are none (:|,)? {statement_body}?" })
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })
 places.addRule(ShowThemPaged, { syntax: "show them in pages" })
 places.addRule(ShowThemAll, { syntax: "show them all" })
@@ -1327,10 +1327,10 @@ places.addRule(ShowThemAtATime, {
 })
 places.addRule(ShowThemIn, { syntax: "show them in :? {statement_body}?" })
 places.addRule(ShowItAllIn, { syntax: "show it all in :? {statement_body}?" })
-places.addRule(IfThatFails, { syntax: "if that fails :? {statement_body}?" })
+places.addRule(IfThatFails, { syntax: "if that fails (:|,)? {statement_body}?" })
 
 places.addRule(InOneGo, {
-  syntax: "in one go :? {statement_body}?",
+  syntax: "in one go (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "statement",
@@ -1624,7 +1624,7 @@ places.addRule(ErrorIs, { syntax: "the error is {name:text}" })
 places.addRule(Nevermind, { syntax: "(nevermind|never mind)" })
 places.addRule(PassTheError, { syntax: "pass the error" })
 places.addRule(AnyServerCallFails, {
-  syntax: "(when|if) any server call fails :? {statement_body}?",
+  syntax: "(when|if) any server call fails (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

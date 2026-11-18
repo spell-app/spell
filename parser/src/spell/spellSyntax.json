@@ -3243,7 +3243,7 @@
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
-              "syntax": "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "on event? {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "on card-click",
               "outputs": {
                 "js": {
@@ -3258,7 +3258,7 @@
               }
             },
             {
-              "syntax": "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "on event? {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "on card click",
               "outputs": {
                 "js": {
@@ -3273,7 +3273,7 @@
               }
             },
             {
-              "syntax": "when {passive:passive_event} :? {statement_body}?",
+              "syntax": "when {passive:passive_event} (:|,)? {statement_body}?",
               "example": "a card is a view where:\n\t- when double clicked print 1\n\t- when the drag is cancelled print 2",
               "outputs": {
                 "js": {
@@ -3288,7 +3288,7 @@
               }
             },
             {
-              "syntax": "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) :? {statement_body}?",
+              "syntax": "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) (:|,)? {statement_body}?",
               "example": "a game is a thing where:\n\t- its \"high score\" is a number\n\t- its \"hint\" is text\n\t- when its high score changes:\n\t\tset its hint to \"Best yet!\"\n\t- on hint change print its hint",
               "outputs": {
                 "js": {
@@ -3303,10 +3303,10 @@
               }
             },
             {
-              "syntax": "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "when {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "when {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3320,7 +3320,7 @@
           "purpose": "Run this when any thing of a saved type changes, whoever changed it, this page included (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "when (a|an) {type:known_type} changes :? {statement_body}?",
+              "syntax": "when (a|an) {type:known_type} changes (:|,)? {statement_body}?",
               "example": "when a recipe changes:\n\tprint the title of the recipe",
               "outputs": {
                 "js": {
@@ -3418,7 +3418,7 @@
           "purpose": "Run this when someone other than this page changes this thing (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "when someone else changes it :? {statement_body}?"
+              "syntax": "when someone else changes it (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3432,10 +3432,10 @@
           "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
           "syntaxes": [
             {
-              "syntax": "while the mouse is down (on it)? :? {statement_body}?"
+              "syntax": "while the mouse is down (on it)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while the mouse is over it :? {statement_body}?"
+              "syntax": "while the mouse is over it (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -4103,7 +4103,7 @@
           "purpose": "Repeat an action `N` times, e.g. `repeat 3 times: print the number`.",
           "syntaxes": [
             {
-              "syntax": "repeat {number:expression} (time|times) :? {statement_body}?",
+              "syntax": "repeat {number:expression} (time|times) (:|,)? {statement_body}?",
               "example": "repeat 1 time:",
               "outputs": {
                 "js": {
@@ -4129,7 +4129,7 @@
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
-              "syntax": "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
+              "syntax": "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} (:|,)? {statement_body}?",
               "example": "for each card in deck:",
               "outputs": {
                 "js": {
@@ -4144,7 +4144,7 @@
               }
             },
             {
-              "syntax": "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+              "syntax": "for (each|every)? {item:kind_name} (in|of) {list:expression} (:|,)? {statement_body}?",
               "example": "for each card rank in card ranks: print card rank",
               "outputs": {
                 "js": {
@@ -4170,7 +4170,7 @@
           "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
           "syntaxes": [
             {
-              "syntax": "for (each|every)? {list:each_item_where} :? {statement_body}?",
+              "syntax": "for (each|every)? {list:each_item_where} (:|,)? {statement_body}?",
               "example": "for each card in deck which is not in stock: print it",
               "outputs": {
                 "js": {
@@ -4196,10 +4196,10 @@
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
-              "syntax": "for each? {list:expression} :? {statement_body}?"
+              "syntax": "for each? {list:expression} (:|,)? {statement_body}?"
             },
             {
-              "syntax": "for {list:each_thing} :? {statement_body}?",
+              "syntax": "for {list:each_thing} (:|,)? {statement_body}?",
               "example": "for each column: print it",
               "outputs": {
                 "js": {
@@ -4956,7 +4956,7 @@
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
-              "syntax": "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+              "syntax": "for each? {item:identifier} from {start:expression} down? to {end:expression} (:|,)? {statement_body}?",
               "example": "for each number from 1 to 10:",
               "outputs": {
                 "js": {
@@ -7694,22 +7694,22 @@
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
+              "syntax": "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
+              "syntax": "(on|when) {item:known_type} is? {moment:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?"
+              "syntax": "(on|when) something is? {moment:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while (a|an) {item:type} is? {over:drag_moment} it? :? {statement_body}?"
+              "syntax": "while (a|an) {item:type} is? {over:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while {item:known_type} is? {over:drag_moment} it? :? {statement_body}?"
+              "syntax": "while {item:known_type} is? {over:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while something is? {over:drag_moment} it? :? {statement_body}?"
+              "syntax": "while something is? {over:drag_moment} it? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -7989,10 +7989,10 @@
           "purpose": "RETIRED words for waiting, as spell waits by itself (epic `language` P13, Q9): `await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
-              "syntax": "(await|wait for) :? {expression:operand}?"
+              "syntax": "(await|wait for) (:|,)? {expression:operand}?"
             },
             {
-              "syntax": "(await|wait for) :? {expression}?",
+              "syntax": "(await|wait for) (:|,)? {expression}?",
               "example": "await",
               "outputs": {
                 "js": {
@@ -8070,7 +8070,7 @@
           "purpose": "Runs its lines together, and carries on once they've all ended.",
           "syntaxes": [
             {
-              "syntax": "at the same time :? {statement_body}?",
+              "syntax": "at the same time (:|,)? {statement_body}?",
               "example": "to do something\n\tat the same time:\n\t\tprint 1\n\t\tprint 2",
               "outputs": {
                 "js": {
@@ -8096,7 +8096,7 @@
           "purpose": "Starts something and carries on, with no waiting for it: `meanwhile deal the cards`.",
           "syntaxes": [
             {
-              "syntax": "meanwhile :? {statement_body}?",
+              "syntax": "meanwhile (:|,)? {statement_body}?",
               "example": "to do something\n\tmeanwhile print 1",
               "outputs": {
                 "js": {
@@ -8174,10 +8174,10 @@
           "purpose": "Steps a thing or an app runs again and again while its program runs, e.g. a clock's `every second`, then `set its time to now` under it (epic `language` T159; Owen, 2026-11-17).",
           "syntaxes": [
             {
-              "syntax": "every {interval:measure_literal} (until {until:expression}|{times:number} times)? :? {statement_body}?"
+              "syntax": "every {interval:measure_literal} (until {until:expression}|{times:number} times)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "every {unit:unit_words} (until {until:expression}|{times:number} times)? :? {statement_body}?"
+              "syntax": "every {unit:unit_words} (until {until:expression}|{times:number} times)? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9374,7 +9374,7 @@
           "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "in one go :? {statement_body}?",
+              "syntax": "in one go (:|,)? {statement_body}?",
               "example": "in one go: print 1",
               "outputs": {
                 "js": {
@@ -9426,7 +9426,7 @@
           "purpose": "The app's own steps for every server action that fails, run last (epic `data` P50, Q90, Q93).",
           "syntaxes": [
             {
-              "syntax": "(when|if) any server call fails :? {statement_body}?",
+              "syntax": "(when|if) any server call fails (:|,)? {statement_body}?",
               "example": "when any server call fails\n\tif the error is \"not authorized\"\n\t\tprint \"sign in\"\n\totherwise if the error is \"limit\"\n\t\tpass the error\n\totherwise\n\t\tdo nothing",
               "outputs": {
                 "js": {
@@ -9885,7 +9885,7 @@
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "while (waiting|loading) :? {statement_body}?"
+              "syntax": "while (waiting|loading) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9899,7 +9899,7 @@
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "if there are none :? {statement_body}?"
+              "syntax": "if there are none (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9983,7 +9983,7 @@
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "if that fails :? {statement_body}?"
+              "syntax": "if that fails (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -10442,7 +10442,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 119,
+          "line": 121,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -10987,7 +10987,7 @@
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
-              "syntax": "if {condition:expression} (then|:)? {statement_body}?",
+              "syntax": "if {condition:expression} (then|:|,)? {statement_body}?",
               "example": "if a",
               "outputs": {
                 "js": {
@@ -11013,7 +11013,7 @@
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
-              "syntax": "(otherwise|else) if {condition:expression} (then|:)? {statement_body}?",
+              "syntax": "(otherwise|else) if {condition:expression} (then|:|,)? {statement_body}?",
               "example": "otherwise if a",
               "outputs": {
                 "js": {
@@ -11039,7 +11039,7 @@
           "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
-              "syntax": "(otherwise|else) :? {statement_body}?",
+              "syntax": "(otherwise|else) (:|,)? {statement_body}?",
               "example": "otherwise",
               "outputs": {
                 "js": {
@@ -11339,7 +11339,7 @@
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {
-              "syntax": "when {signature:method_signature} :? {statement_body}?",
+              "syntax": "when {signature:method_signature} (:|,)? {statement_body}?",
               "example": "a task is a thing where:\n\t- when created (with title as text, done as a choice):\n\t\tprint the title",
               "outputs": {
                 "js": {
@@ -11480,7 +11480,7 @@
           "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
           "syntaxes": [
             {
-              "syntax": "after {signature:method_signature} :? {statement_body}?",
+              "syntax": "after {signature:method_signature} (:|,)? {statement_body}?",
               "example": "a card is a thing\na pile is a list of cards\nto put a card on a pile\n\tadd the card to the pile\nafter putting a card on a pile\n\tprint the card\nafter putting a card on a pile\n\tprint the pile",
               "outputs": {
                 "js": {
@@ -11506,7 +11506,7 @@
           "purpose": "Steps that run before an action's own, from any file (epic `data` P50, Q81).",
           "syntaxes": [
             {
-              "syntax": "before {signature:method_signature} :? {statement_body}?",
+              "syntax": "before {signature:method_signature} (:|,)? {statement_body}?",
               "example": "a job is a thing\n\tits \"status\" is text\nto complete a job\n\tset the job's status to \"done\"\nbefore completing a job\n\tcancel if the job's status is \"done\"",
               "outputs": {
                 "js": {
@@ -11532,7 +11532,7 @@
           "purpose": "Steps that run as an action starts, whose changes are put back when it ends, worked or failed (epic `data` P50, Q94).",
           "syntaxes": [
             {
-              "syntax": "while {signature:method_signature} :? {statement_body}?",
+              "syntax": "while {signature:method_signature} (:|,)? {statement_body}?",
               "example": "a job is a thing\n\tits \"status\" is text\nto complete a job\n\tset the job's status to \"done\"\nwhile completing a job\n\tset the job's status to \"busy\"",
               "outputs": {
                 "js": {
@@ -11558,7 +11558,7 @@
           "purpose": "Steps that run when an action fails, from any file (epic `data` P50, Q82, Q87-Q89).",
           "syntaxes": [
             {
-              "syntax": "(if|when) {signature:method_signature} fails :? {statement_body}?",
+              "syntax": "(if|when) {signature:method_signature} fails (:|,)? {statement_body}?",
               "example": "a job is a thing\n\tits \"status\" is text\nto complete a job\n\tset the job's status to \"done\"\nif completing a job fails\n\tif the error is \"not found\"\n\t\tnevermind\n\totherwise if the error is \"offline\"\n\t\tpass the error",
               "outputs": {
                 "js": {

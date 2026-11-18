@@ -1065,15 +1065,15 @@ classes.addRule(DragHandler, {
       ello: "declaration"
     }
   },
-  syntax: "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
+  syntax: "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? (:|,)? {statement_body}?"
 })
 classes.addRule(DragHandler, {
-  syntax: "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
+  syntax: "(on|when) {item:known_type} is? {moment:drag_moment} it? (:|,)? {statement_body}?"
 })
-classes.addRule(DragHandler, { syntax: "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is? {over:drag_moment} it? :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while {item:known_type} is? {over:drag_moment} it? :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while something is? {over:drag_moment} it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "(on|when) something is? {moment:drag_moment} it? (:|,)? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is? {over:drag_moment} it? (:|,)? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while {item:known_type} is? {over:drag_moment} it? (:|,)? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while something is? {over:drag_moment} it? (:|,)? {statement_body}?" })
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- its items can be reordered`
 classes.addRule(ItemsReordered, {
   syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds)|{now:right_away})?"
