@@ -95,8 +95,68 @@ npm dist-tag add spell@<version> latest
 
 `spell publish --tag latest` does the same in one go, for a version that isn't out yet.
 
-## Logging in:  a token, not `npm login`
+## Publishing from GitHub
 
+A real publish runs on GitHub, in the publish workflow, [publish.yml](../.github/workflows/publish.yml),
+and needs no npm token:  npm trusts that one workflow by name.
+That's npm's [trusted publishing](https://docs.npmjs.com/trusted-publishers):
+nothing to keep in `~/.npmrc`, nothing that expires every 30 days.
+
+1. Bump `version` in the kit's `package.json`, and commit it to `main`:  the workflow never changes the version.
+2. On GitHub, open the repo's Actions tab, pick "publish", and press "Run workflow" on `main`.
+3. Choose:
+   - the tag:  `next` (the default) or `latest`
+   - dry run:  yes or no;  make a dry run first
+
+The run sets up the same machine the checks workflow does, builds the epic VS Code extension's package,
+checks the dependencies (`spell deps check`), then runs `spell publish --tag <tag>`, with `--dry-run` when asked.
+
+- `npm publish` finds the identity token GitHub hands the run, and npm checks it against the package's settings.
+  No login at all.
+- npm adds a provenance statement:  npmjs.com shows which commit and workflow built each version.
+- The run's summary shows what the publish printed;  its artifact holds the packed `.tgz` files.
+- Under `latest`, the publish turns the root marketplace file's `epic` entry to npm's `spell-epic`.
+  Nobody commits on GitHub, so the run's summary prints the file:  commit it on `main` yourself.
+- A real publish runs only from `main`;  a dry run, from any branch.
+- It stops after an hour.
+
+On a laptop, `spell publish --dry-run` still works, and needs no login:  it never publishes.
+
+### Linking each package to the workflow, once
+
+Only the packages' owner can, on npmjs.com, logged in with two-factor authentication.
+Each package has to exist on npm already:  all three do.
+
+1. For EACH of `spell`, `spell-ui` and `spell-epic`:
+   open the package's Settings, find "Trusted Publisher", pick GitHub Actions, and fill in:
+
+   | Setting | Value |
+   | --- | --- |
+   | Organization or user | `spell-app` |
+   | Repository | `spell` |
+   | Workflow filename | `publish.yml`, the name only, not its folder |
+   | Environment | empty |
+
+   Or from the terminal after a plain `npm login`, one line per package
+   (a token that bypasses two-factor authentication is refused for this):
+
+   ```sh
+   npm trust github spell --repo spell-app/spell --file publish.yml --allow-publish
+   ```
+
+   npm offers to skip the one-time password for 5 minutes after the first, so the other two go through at once.
+2. Within 2 days, start a dry run, then a real one under `next`.
+   npm drops a new trusted publisher that hasn't published within 2 days, and it has to be made again.
+3. Once a real run has published all three:
+   - each package's Settings, "Publishing access":  "Require two-factor authentication and disallow tokens".
+     The workflow keeps publishing;  only tokens are shut out.
+   - revoke the 30-day token on npmjs.com, and delete its line from `~/.npmrc`
+
+npm doesn't check a trusted publisher when you save it:  a typo shows up only as a failed publish.
+
+### Until then:  a 30-day token
+
+Before the workflow has published, a laptop publishes with a token.
 An `npm login` session lasts about two hours, so it's gone by the time a slow dry run finishes.
 Log in with a granular access token instead, made once a month:
 
@@ -131,10 +191,9 @@ Log in with a granular access token instead, made once a month:
 
    </details>
 
-The catch:  npm warns that tokens which bypass two-factor authentication lose direct publishing in January 2027.
-
-🌱 **Coming:**  trusted publishing, where a GitHub Actions workflow publishes with no token at all.
-Until then, a new token every 30 days.
+The catch:  npm says tokens which bypass two-factor authentication lose direct publishing around January 2027.
+After that, such a token can only stage a publish, which goes public once a person approves it.
+The workflow doesn't need one.
 
 ## Things that trip people up
 
@@ -143,6 +202,8 @@ Until then, a new token every 30 days.
 | a pasted command with a `#` comment after it fails | zsh doesn't take `#` comments typed at its prompt | paste commands without their comments |
 | `npm publish dist-packs/x.tgz` goes looking for a GitHub repo | a path without `./` reads as `user/repo` | write `npm publish ./dist-packs/x.tgz` |
 | `You cannot publish over the previously published versions` | a version can never be reused, not even one only staged and never released | bump `version` in the kit's `package.json`, and publish again |
+| the workflow's `npm publish` fails with `E422`, `repository.url ... expected to match` | with provenance, npm checks that the package names the repo that built it | the folder's `package.json` `repository` names `https://github.com/spell-app/spell`, with its folder as `directory` |
+| the workflow's `npm publish` asks for a login, or says it can't find a trusted publisher | the package's Trusted Publisher on npmjs.com doesn't match the run, or was dropped after 2 days unused | check its four settings (above), save it again, and run again within 2 days |
 | `spell-ui` or `spell-epic` fails to install | it was published before the `spell` it depends on | publish `spell` first;  `spell publish` does |
 | Claude stops at `npm publish` in auto mode | publishing isn't allowed by default | add `Bash(npm publish:*)` to `permissions.allow` in `~/.claude/settings.json` |
 
@@ -150,6 +211,7 @@ Until then, a new token every 30 days.
 
 | File | What it does |
 | --- | --- |
+| [publish.yml](../.github/workflows/publish.yml) | the publish workflow:  started by hand, the tag, the dry run, no token |
 | [publishCommand.ts](../src/cli/commands/publishCommand.ts) | `spell publish`:  the packages, the version, the order, the tag, the publish |
 | [PublishedPackage.ts](../src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |
 | [ScratchInstall.ts](../src/cli/publish/ScratchInstall.ts) | the packs installed in a scratch project, and what it tries |

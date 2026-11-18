@@ -41,8 +41,14 @@ import {
  *     Only `--tag latest` moves `latest`.
  *   - `spell-epic` published under `latest`:  the root marketplace's `epic` entry turns from `./epic` to it
  *     (`PluginPackage.sourceToNpm()`, epic `epic-engine` P49), to commit;  under `next` it stays `./epic`, as
- *     Claude Code installs an npm plugin's `latest`
- *   NOTE: `npm login` first;  npm asks for a one-time password itself when the account has one.
+ *     Claude Code installs an npm plugin's `latest`.
+ *     The publish workflow prints it in the run's summary, since nobody commits there.
+ * - Where it publishes from:  the publish workflow (`.github/workflows/publish.yml`, epic `repo-split` P29), started
+ *   by hand from GitHub's Actions tab.
+ *   - npm trusts that workflow by name (trusted publishing), so `npm publish` there needs no login and no token,
+ *     and adds a provenance statement.
+ *   - On a laptop, `--dry-run` needs no login either;  a real publish there needs `npm login` and a one-time password
+ *     (each package refuses tokens once the workflow has published it).
  * - Which kit:  the nearest from the current folder (`findCheckout(KIT_MARKER)`).
  * - Exits 1 when a check fails or a publish does.
  */
