@@ -94,13 +94,13 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
     await project?.remove()
   })
 
-  test("on your own projects' cards alone, at the left of the title's line, named, its items in order", async () => {
+  test("on your own projects' cards alone, in the card's bottom right corner, named, its items in order", async () => {
     const menu = cardOf(title()).locator("ui-dropdown.CardMenu")
     expect(await menu.getAttribute("aria-label")).toBe("Project actions")
-    // I49:  its circle's centre on the title line's, the title after it;  the dots' ink centred in the circle
+    // T56:  13px in from the card's right and bottom edges (12px, and 1px for its border);  the dots' ink centred in the circle
     const place = await cardOf(title()).evaluate((holder) => {
       const button = holder.querySelector("ui-dropdown.CardMenu")!.getBoundingClientRect()
-      const titleLine = holder.querySelector(".TileCard .title")!.getBoundingClientRect()
+      const card = holder.querySelector(".TileCard")!.getBoundingClientRect()
       const dots = holder
         .querySelector("ui-dropdown.CardMenu ui-icon")!
         .shadowRoot!.querySelector<SVGPathElement>("svg path")!
@@ -111,8 +111,7 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
       const middle = (start: number, end: number) => (start + end) / 2
       return {
         size: [button.width, button.height],
-        offTitleLine: middle(button.top, button.bottom) - middle(titleLine.top, titleLine.bottom),
-        titleAfter: titleLine.left >= button.right,
+        inFromCorner: [card.right - button.right, card.bottom - button.bottom],
         inkOff: [
           middle(inkStart.x, inkEnd.x) - middle(button.left, button.right),
           middle(inkStart.y, inkEnd.y) - middle(button.top, button.bottom)
@@ -120,8 +119,7 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
       }
     })
     expect(place.size).toEqual([24, 24])
-    expect(Math.abs(place.offTitleLine)).toBeLessThan(0.5)
-    expect(place.titleAfter).toBe(true)
+    for (const off of place.inFromCorner) expect(Math.abs(off - 13)).toBeLessThan(0.5)
     for (const off of place.inkOff) expect(Math.abs(off)).toBeLessThan(0.5)
     expect(await page.locator("#examples ui-dropdown.CardMenu, #guides ui-dropdown.CardMenu").count()).toBe(0)
     const items = await menu.evaluate((dropdown) =>
