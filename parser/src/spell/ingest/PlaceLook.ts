@@ -14,6 +14,7 @@ import {
 } from "./ingest.types"
 import { listsFoundUnder } from "./ListsUnderLook"
 import { lookAtAirtable, lookAtAtmosphere, lookAtFolder, lookAtPlaceServer, lookAtRoom } from "./PlaceLookOthers"
+import { PlaceSpec } from "./PlaceSpec"
 import { keptHeaders, PoliteReader, type ReadAnswer } from "./PoliteReader"
 
 /** How many collections it reads:  a source with more says so, and `--collections` names the ones wanted. */
@@ -62,7 +63,7 @@ export const IS_WEB_ADDRESS = /^(?:https?|file):/i
 const ROOM_ADDRESS = /\/api\/rooms\//
 
 /** What each kind's look needs. */
-export type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samples"> & {
+export type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samples" | "spec"> & {
   /** Reads it. */
   reader: PoliteReader
   /** Looking again:  `collections`, and whatever else it now lists. */
@@ -235,8 +236,11 @@ async function lookAtWebServer({
   collections,
   samples,
   addListed,
+  spec,
   reader
 }: LookAsk): Promise<PlaceLook> {
+  // its description is the source:  every list, from the schemas, with no cap and no rows (epic `data` P49)
+  if (spec) return lookAtSpec(address, spec, reader)
   const first = await reader.read(address)
   if (!collections?.length) refuseAnswer(address, first)
   const body = jsonOf(first.text)
@@ -992,6 +996,24 @@ async function docsOf({ address, docs, reader }: Pick<LookAsk, "address" | "docs
     }
   }
   return {}
+}
+
+/**
+ * A web server read whole from its OpenAPI description (epic `data` P49):  every list, its fields from the schemas,
+ * no row read.  See `PlaceSpec`.
+ * - throws `IngestStopped` for a description that won't answer, or isn't OpenAPI 3 in JSON
+ */
+async function lookAtSpec(address: string, specAt: string, reader: PoliteReader): Promise<PlaceLook> {
+  const answer = await reader.readDescription(specAt)
+  refuseAnswer(specAt, answer)
+  if (answer.isCut) throw new IngestStopped(`${specAt} is too big to read whole`)
+  const document = jsonOf(answer.text)
+  if (!PlaceSpec.isOne(document)) {
+    throw new IngestStopped(
+      `${specAt} isn't an OpenAPI 3 description in JSON:  Spell reads those only, for now.  Ask for its JSON, as NetBox's "?format=json"`
+    )
+  }
+  return new PlaceSpec(document, specAt).lookAt(address)
 }
 
 /** An OpenAPI document, as far as it's read. */

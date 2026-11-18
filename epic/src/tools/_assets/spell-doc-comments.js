@@ -41,6 +41,8 @@ import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
 import { DraftSaver, PAGE_COMMENTS_ATTRIBUTE, PAGE_COMMENTS_EVENT } from "spell/epic/answers"
 import { Pictures, ServerLink } from "spell/epic/review"
+// plain DOM:  the epic items' own watch for coming near the screen, alone
+import { NearScreen } from "spell/epic/components/epic-item/NearScreen"
 import {
   addBlockAction,
   BLOCK_ROW,
@@ -952,15 +954,21 @@ class PageComments {
         : block.matches(TITLE_ROW_BLOCKS)
           ? "title"
           : "block"
-    const button = iconButton("bullhorn", tip)
-    const mark = el("span", { class: `spell-comment-mark at-${where}`, "data-spell-added": true }, button)
+    const mark = el("span", { class: `spell-comment-mark at-${where}`, "data-spell-added": true })
     bullhornBlocks.set(mark, block)
-    button.addEventListener("click", (event) => {
-      event.stopPropagation()
-      // where it is NOW:  a kept bullhorn's block may have moved since it was drawn (an anchor is its place)
-      const now = this.placeOf(block)
-      this.openBox({ key: now.anchor, place: now }, event.currentTarget.getBoundingClientRect())
-    })
+    // its button made once its block comes near the screen (epic `epic-engine` I333):  an epic page's 800 items each
+    // drew a `<ui-button>` up front, most of them in folded sections;  a section's and the page's straight away
+    const drawButton = () => {
+      if (mark.firstChild) return
+      const button = iconButton("bullhorn", tip)
+      button.addEventListener("click", (event) => {
+        event.stopPropagation()
+        // where it is NOW:  a kept bullhorn's block may have moved since it was drawn (an anchor is its place)
+        const now = this.placeOf(block)
+        this.openBox({ key: now.anchor, place: now }, event.currentTarget.getBoundingClientRect())
+      })
+      mark.append(button)
+    }
     if (where === "section" || where === "title") {
       mark.slot = "actions"
       block.append(mark)
@@ -970,6 +978,8 @@ class PageComments {
       if (head) addHeadTool(head, mark, "comment")
       else block.append(mark)
     } else addBlockAction(block, mark, "comment")
+    if (where === "section" || where === "page") drawButton()
+    else NearScreen.once(mark, drawButton)
   }
 
   /** Where `block` is, as a comment on it is saved:  `{ anchor, kind, label, excerpt }` (`BlockAnchors.js`). */

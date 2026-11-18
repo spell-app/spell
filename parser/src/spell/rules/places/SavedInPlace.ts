@@ -19,7 +19,8 @@ import { collectionNameFor } from "./places.shared"
  *   - in the program's language (`su creado`), the rows' fields named `created` and `modified` in every language
  *   - a line of its own declaring either keeps that one its own:  `times` leaves it out, and Spell never stamps it
  *   - `- it keeps no times` (`keeps_no_times`):  neither
- *   - `times` says which Spell stamps:  `core`'s write path, for a place that says it can hold them
+ * - `times` says which Spell stamps:  `core`'s write path, for a place that says it can hold them
+ * - `operations`, what its place lets be done to its things, by its `enabled operations are ...` line (epic `data` P49)
  */
 export class SavedInPlace extends SpellStatement<"type|place"> {
   @proto static alias = "statement"
@@ -59,6 +60,15 @@ export class SavedInPlace extends SpellStatement<"type|place"> {
         property("collection", text(saved?.collection)),
         ...(times.length
           ? [property("times", new P.ASTArrayLiteral(match, { items: times.map(({ field }) => text(field)) }))]
+          : []),
+        // what its place lets be done to its things:  `enabled operations are add, change` (epic `data` P49)
+        ...(known.enabledOperations
+          ? [
+              property(
+                "operations",
+                new P.ASTArrayLiteral(match, { items: known.enabledOperations.map((each) => text(each)) })
+              )
+            ]
           : [])
       ]
     })

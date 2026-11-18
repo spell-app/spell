@@ -181,6 +181,10 @@ describe("<epic-clarify>", () => {
   test("icon in an item:  `<epic-item>` draws it at its body's right while reviewed, a given body's too", async () => {
     await adoptClient(new FakeRoutes())
     const item = await ElementFixture.render(ITEM)
+    // drawn from its first unfolding (epic `epic-engine` I333):  folded, its body is hidden anyway
+    await ElementFixture.tick()
+    expect(item.shadowRoot!.querySelector('[part~="clarify"]')).toBeNull()
+    item.setAttribute("open", "")
     await vi.waitFor(() => expect(item.shadowRoot!.querySelector('[part~="clarify"]')).not.toBeNull())
     const icon = item.shadowRoot!.querySelector('[part~="clarify"]')!
     expect(icon.getAttribute("of")).toBe("t9")

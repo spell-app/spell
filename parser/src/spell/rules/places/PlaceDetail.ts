@@ -17,9 +17,15 @@ export type PlaceDetailValue = {
       askedBy?: string[]
       /** How this one is searched, at its own address:  see `CollectionSearchedWith`. */
       searches?: { param: string; fields: string[]; at?: string }
+      /** What its place lets be done to all of them:  see `EnabledOperations` (epic `data` P49). */
+      operations?: string[]
     }
   >
   keyNamed?: string
+  /** Where its key's token is made, from the secret `keyNamed`:  see `TokenFrom` (epic `data` P49). */
+  tokenFrom?: string
+  /** Its real rows stay on this machine, in this folder:  see `DataIsPrivate` (epic `data` P49).  `""`:  the usual one. */
+  privateDataIn?: string
   keyIfSet?: boolean
   /** Where its key goes on a request:  see `KeyGoesInHeader`, `KeyGoesInAddress`. */
   keyGoes?: { header: string } | { inAddress: string }

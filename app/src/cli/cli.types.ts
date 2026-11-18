@@ -180,6 +180,8 @@ export type RunSpec = {
   messages?: Record<string, string>
   reports?: boolean
   offline?: boolean
+  /** The deployment picked for each place, by its name (epic `data` P49):  see `core.RUNTIME.deployments`. */
+  deployments?: Record<string, { at: string; key?: string; tokenFrom?: string; readOnly?: boolean }>
 }
 
 /**

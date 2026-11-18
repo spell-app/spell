@@ -1,3 +1,4 @@
+import { kindWordsOf, oneOfWords } from "spell/parser/core/schemaWords"
 import { P } from "spell/parser/parser"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
@@ -92,14 +93,21 @@ export function spellPartsFor(
   { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
 ): SpellParts {
-  const { name, kind, address, keySecret, keyIfSet, keyGoes } = about
+  const { name, kind, address, keySecret, keyIfSet, keyGoes, tokenFrom, privateDataIn } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
   const every = shown.map(([, collection]) => collection)
   const placeLines: SpellLine[] = []
   // a data folder's, a file's, a room's key is the server's run token:  no line of a program says it
-  if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
+  if (withKey && keySecret && tokenFrom !== undefined && KINDS_WITH_KEY_LINES.has(kind)) {
+    placeLines.push({ key: "key", text: `its token comes from "${tokenFrom}", made with the secret "${keySecret}"` })
+    if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
+  } else if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
     placeLines.push({ key: "key", text: `its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
+  }
+  // its real rows stay on this machine:  every later ingest, update and verify keeps to it
+  if (privateDataIn !== undefined) {
+    placeLines.push({ key: "private", text: `its data is private, located in "${privateDataIn}"` })
   }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"
@@ -198,6 +206,13 @@ export function spellPartsFor(
     for (const [list, at] of listsUnderShown(description, collections)) {
       const line = `${articled(description.type)}'s ${collectionWords(collections[list]!)} live at "${at}"`
       placeLines.push({ key: `under:${collection}:${list}`, text: line })
+    }
+  }
+  // an action route under a thing, from its description:  `to sync a data source is at "/api/core/data-sources/{id}/sync/"`
+  for (const [collection, description] of shown) {
+    for (const [verb, { at }] of actionsOf(description)) {
+      const text = `to ${verb} ${articled(description.type)} is at "${at}"`
+      placeLines.push({ key: `action:${collection}:${verb}`, text })
     }
   }
   // a server's own time fields are Spell's two times, so a thing read from one isn't stamped twice (epic `data` T57)
@@ -496,10 +511,15 @@ function typeLines(
   collections: Readonly<Record<string, CollectionDescription>>
 ): TypeLines {
   const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `it lives in ${place}` }]
+  // read from an API's description:  whether it was tried, and what its server lets be done (epic `data` P49)
+  const state = stateWordFor(description)
+  if (state) lines.push({ key: `state:${collection}`, text: `this type is ${state}` })
+  const enabled = enabledOperationsOf(description)
+  if (enabled) lines.push({ key: `enabled:${collection}`, text: `enabled operations are ${enabled.join(", ")}` })
   const own = new Set(Object.values(collections).map(({ type }) => type))
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
-    const what = typeWordsFor(about, collections, description.type, own, place)
+    const what = schemaWordsFor(about, typeWordsFor(about, collections, description.type, own, place))
     const line = `its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
@@ -513,6 +533,46 @@ function typeLines(
     header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing`,
     lines
   }
+}
+
+/** The writes Spell has words for, in the order a line names them. */
+const WRITES = ["add", "change", "delete"] as const
+
+/** A one-word action Spell can name in a list of enabled operations, not one of its own words:  `sync`, `enqueue`. */
+const ACTION_VERB = /^\p{Ll}[\p{L}\d]*$/u
+
+/**
+ * The action routes `description`'s line can say, by verb, each with its address (epic `data` P49):
+ * one word each, and none named like Spell's own operations (`read`, `all`, a write).
+ */
+function actionsOf({ operations = {} }: CollectionDescription): Array<[string, { at: string }]> {
+  return Object.entries(operations).filter(
+    ([verb, { state }]) =>
+      ACTION_VERB.test(verb) && !["read", "all", ...WRITES].includes(verb) && state?.is !== "disabled"
+  )
+}
+
+/**
+ * What a type read from an API's description says of whether it was tried (Q56, Q62):  `unverified`, `verified`,
+ * `failed`;  nothing for a type read from rows, which a read through the Spell has tried.
+ */
+function stateWordFor({ state, schemaAt }: CollectionDescription): string | undefined {
+  const isFromDescription = schemaAt !== undefined || state?.is === "unverified" || state?.is === "untyped"
+  if (!state || state.readByTheLook || !isFromDescription) return undefined
+  return state.is === "untyped" ? "unverified" : state.is === "disabled" ? undefined : state.is
+}
+
+/**
+ * What its server lets be done to a type's things, when its description says less than everything (J264):
+ * `read, add, change`;  `undefined` when it takes every write, as no line means every operation.
+ */
+function enabledOperationsOf(description: CollectionDescription): string[] | undefined {
+  const { operations, schemaAt } = description
+  // read from a description that offers nothing more:  read only
+  if (!operations) return schemaAt === undefined ? undefined : ["read"]
+  const writes = WRITES.filter((write) => operations[write] && operations[write]!.state?.is !== "disabled")
+  if (writes.length === WRITES.length) return undefined
+  return ["read", ...writes, ...actionsOf(description).map(([verb]) => verb)]
 }
 
 /**
@@ -579,6 +639,26 @@ function typeWordsFor(
   if (type === "list of links" || type === "list of text") return `a list of ${collectionWords(target)}`
   return SPELL_TYPES[type]!
 }
+
+/**
+ * What a schema says of a field, on its line, in the lexicon reader's words (epic `data` P49, J252):
+ * `required text, with maximum length 100`, `one of active, planned or retired`.
+ * - Only on a plain kind:  a link, a list or a type of the place's own says what it is, and nothing more.
+ */
+function schemaWordsFor({ type, isRequired, choices, minLetters, maxLetters }: FieldDescription, what: string): string {
+  if (!PLAIN_KINDS.has(what)) return what
+  const isText = type === "text"
+  const kind = (isText && choices && oneOfWords(choices)) || what
+  return kindWordsOf({
+    kind,
+    ...(isRequired && { isRequired }),
+    ...(isText && minLetters !== undefined && { minLetters }),
+    ...(isText && maxLetters !== undefined && { maxLetters })
+  }).said
+}
+
+/** The kinds a schema's words go on:  see `schemaWordsFor()`. */
+const PLAIN_KINDS: ReadonlySet<string> = new Set(["text", "a number", "a date"])
 
 /**
  * A number's words for none, as the source writes them:  ` or "unknown"`, ` or "n/a" or "unknown"`.

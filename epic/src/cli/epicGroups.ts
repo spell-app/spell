@@ -1395,7 +1395,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--title <title>": "a phase's or an item's new title:  links that say the old one follow",
     "--html": "the title is HTML",
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
-    "--loud": "an item urgent (red) again",
+    "--loud": "an item urgent (red) again;  a todo too, red as a reminder until you review it (T94)",
     "--requested":
       "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
@@ -1431,6 +1431,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--requested":
       "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
+    "--loud": "a todo:  urgent (red) until you review it, a reminder (T94)",
     "--start <words>":
       "taken up at once:  the person's words its body, an Underway card, the spinner on:  blue, not red (T78)",
     "--agent <name>": "with --start:  the agent on it, named on its Underway card",
@@ -1446,7 +1447,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--multiple": "a standing set (#choices):  pick any, not pick one",
     "--note <html>": "a standing set (#choices):  its lead, before it"
   },
-  calm: { "--loud": "urgent (red) again" },
+  calm: { "--loud": "urgent (red) again;  a todo red as a reminder (T94)" },
   decide: { "--details <html>": "the answer's details, and why", "--option <letter>": "the option chosen" },
   choose: { "--set <n>": "on the Nth card set (default the latest)" },
   option: {

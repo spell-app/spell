@@ -1,0 +1,302 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
+import { describe, expect, test } from "vite-plus/test"
+
+import { readThroughSpell } from "spell/parser/cli/placeIngest"
+import { PlaceIngest, descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceIngest"
+import { PlaceSpec, type OpenApiDocument } from "spell/parser/spell/ingest/PlaceSpec"
+import type { Deployment, IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
+
+/**
+ * An OpenAPI description read whole as a place (epic `data` P49):  NetBox's public demo's, saved, so no test needs the network.
+ * - `openapi/netbox.openapi.json`:  NetBox 4.7.5's description from `https://demo.netbox.dev/api/schema/?format=json`
+ *   (15 MB, 322 paths), cut on 2026-11-17 to the paths of six lists (core's jobs, data sources and background tasks;
+ *   tenancy's tenants, tenant groups and contacts) and every schema they reach, so it stays small.
+ */
+
+const NETBOX = "https://demo.netbox.dev"
+const SPEC_AT = `${NETBOX}/api/schema/?format=json`
+const DOCUMENT = JSON.parse(
+  readFileSync(join(import.meta.dirname, "openapi/netbox.openapi.json"), "utf8")
+) as OpenApiDocument
+
+/** A `fetch` answering the description, and nothing else. */
+const specFetch = (async (input: RequestInfo | URL) => {
+  const url = `${input instanceof Request ? input.url : input}`
+  if (url === SPEC_AT) return Response.json(DOCUMENT)
+  return new Response("nope", { status: 404 })
+}) as typeof globalThis.fetch
+
+/** Files in memory, as `PlaceIngest.test.ts` keeps them. */
+function memoryFiles() {
+  const texts = new Map<string, string>()
+  const descriptions = new Map<string, PlaceDescription>()
+  const files: IngestFiles = {
+    read: async (path) => texts.get(path),
+    write: async (path, text) => void texts.set(path, text),
+    readDescription: async (path) => {
+      const held = descriptions.get(path)
+      return held && descriptionOnDisk(held)
+    },
+    writeDescription: async (path, description) =>
+      void descriptions.set(path, descriptionFromDisk(structuredClone(description))),
+    otherSpellBeside: async () => []
+  }
+  return { files, texts, descriptions }
+}
+
+describe("PlaceSpec", () => {
+  const look = new PlaceSpec(DOCUMENT, SPEC_AT).lookAt(NETBOX)
+  const named = (name: string) => look.collections.find((each) => each.name === name)!
+
+  test("every list path is a collection, its fields from the schema, no rows read", () => {
+    expect(look.collections.map(({ name }) => name).sort()).toEqual([
+      "background-tasks",
+      "contacts",
+      "data-sources",
+      "jobs",
+      "tenant-groups",
+      "tenants"
+    ])
+    const tenants = named("tenants")
+    expect(tenants).toMatchObject({ at: "/api/tenancy/tenants/", rows: [], rowsAt: "results", nextAt: "next" })
+    expect(tenants.schemaAt).toBe("#/components/schemas/Tenant")
+    expect(tenants.fields!.name).toMatchObject({ type: "text", isRequired: true, maxLetters: 100 })
+    // the server writes it:  never required of a new one
+    expect(tenants.fields!.id).toMatchObject({ type: "number", isReadOnly: true })
+    expect(tenants.fields!.id!.isRequired).toBeUndefined()
+    expect(tenants.fields!.created).toMatchObject({ type: "date", format: "date-time" })
+    expect(tenants.fields!.group).toMatchObject({ type: "inside", schemaAt: "#/components/schemas/BriefTenantGroup" })
+    expect(tenants.fields!.custom_fields!.leftOut).toMatch(/map by name/)
+  })
+
+  test("writes and action routes come from the paths, each with its method and what it takes", () => {
+    expect(named("tenants").operations).toMatchObject({
+      add: { method: "POST", at: "/api/tenancy/tenants/", bodyAt: "#/components/schemas/TenantRequest" },
+      change: { method: "PATCH", at: "/api/tenancy/tenants/{id}/", params: { id: "number" } },
+      delete: { method: "DELETE", at: "/api/tenancy/tenants/{id}/" }
+    })
+    expect(named("tenants").operations!.add!.params!.name).toBe("text")
+    expect(Object.keys(named("background-tasks").operations!).sort()).toEqual(["delete", "enqueue", "requeue", "stop"])
+    expect(named("background-tasks").operations!.enqueue).toMatchObject({
+      method: "POST",
+      at: "/api/core/background-tasks/{id}/enqueue/",
+      state: { is: "unverified" }
+    })
+    // read only:  its description offers nothing more
+    expect(named("jobs").operations).toBeUndefined()
+  })
+
+  test("its version and a summary for the agent, never the whole description", () => {
+    expect(look.version).toEqual({ says: "4.7.5 (4.7)", where: "its OpenAPI description" })
+    expect(look.docs!.length).toBeLessThan(2000)
+    expect(look.docs).toMatch(/Tags:  core, tenancy/)
+  })
+
+  test("a place's own path is taken off each path under it", () => {
+    const under = new PlaceSpec(DOCUMENT, SPEC_AT).lookAt(`${NETBOX}/api`)
+    expect(under.collections.find(({ name }) => name === "jobs")!.at).toBe("/core/jobs/")
+  })
+})
+
+describe("spell place ingest --spec", () => {
+  test("writes the whole place from the description, each list unverified, reading nothing else", async () => {
+    const { files, texts, descriptions } = memoryFiles()
+    const ingest = new PlaceIngest({
+      fetch: specFetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    const result = await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
+    expect(result.warnings).toEqual([])
+    const description = descriptions.get("NetBox.api.json5")!
+    expect(description.about.specAt).toBe(SPEC_AT)
+    expect(Object.values(description.collections).map(({ state }) => state?.is)).toEqual([
+      "untyped",
+      "unverified",
+      "unverified",
+      "unverified",
+      "unverified",
+      "unverified"
+    ])
+    const spell = texts.get("NetBox.api.spell")!
+    expect(spell).toMatch(/^netbox is a web server at "https:\/\/demo.netbox.dev"$/m)
+    expect(spell).toMatch(/^\ttenants live at "\/api\/tenancy\/tenants\/"$/m)
+    expect(spell).toMatch(/^\tits "name" is required text, with maximum length 100$/m)
+    // a short copy of another list's thing links to it, by its schema
+    expect(spell).toMatch(/^\tits "group" is a tenant group$/m)
+    // each type unverified till verify tries it;  what the description offers, and its action routes
+    expect(spell).toMatch(
+      /^a "job" is a thing\n\tit lives in netbox\n\tthis type is unverified\n\tenabled operations are read$/m
+    )
+    expect(spell).toMatch(/^\tto sync a data source is at "\/api\/core\/data-sources\/\{id\}\/sync\/"$/m)
+    expect(spell).toMatchSnapshot()
+  })
+})
+
+describe("a private place, its key a token (epic `data` P49)", () => {
+  const API = "https://acme.test/api"
+  const TOKEN_AT = "https://auth.acme.test/api-keys/{key id}/token"
+
+  /** A source whose list takes only the token, and a token service making it from `k-1:sesame`. */
+  const acmeFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = `${input instanceof Request ? input.url : input}`.replace(/[?#].*$/, "")
+    const headers = new Headers(init?.headers)
+    if (url === "https://auth.acme.test/api-keys/k-1/token" && init?.method === "POST") {
+      const isKey = headers.get("authorization") === `Basic ${btoa("k-1:sesame")}`
+      return isKey ? Response.json({ token: "tok-1", expires_in: 600 }) : new Response("no", { status: 401 })
+    }
+    if (headers.get("authorization") !== "Bearer tok-1") return new Response("no", { status: 401 })
+    if (url === API) return Response.json({ jobs: `${API}/jobs` })
+    if (url === `${API}/jobs`) return Response.json([{ id: 1, name: "The real payroll run" }])
+    return new Response("nope", { status: 404 })
+  }) as typeof globalThis.fetch
+
+  test("its rows go to its folder, never its description;  its token is made from the secret, and said", async () => {
+    const { files, texts, descriptions } = memoryFiles()
+    const away = new Map<string, string>()
+    files.writeAway = async (path, text) => void away.set(path, text)
+    const ingest = new PlaceIngest({
+      fetch: acmeFetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      keyNamed: (name) => (name === "ACME_API_KEY" ? "k-1:sesame" : undefined),
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({
+      address: API,
+      into: "Acme.api.spell",
+      name: "acme",
+      keySecret: "ACME_API_KEY",
+      tokenFrom: TOKEN_AT,
+      dataIsPrivateIn: ""
+    })
+    const description = descriptions.get("Acme.api.json5")!
+    expect(JSON.stringify(description)).not.toContain("payroll")
+    expect(description.about).toMatchObject({ tokenFrom: TOKEN_AT, privateDataIn: "~/.spell/places/acme" })
+    expect([...away.keys()]).toEqual(["~/.spell/places/acme/Acme.jobs.samples.json"])
+    expect(JSON.parse(away.get("~/.spell/places/acme/Acme.jobs.samples.json")!)).toMatchObject({
+      page: `${API}/jobs`,
+      rows: [{ id: 1, name: "The real payroll run" }]
+    })
+    const spell = texts.get("Acme.api.spell")!
+    expect(spell).toContain(`\tits token comes from "${TOKEN_AT}", made with the secret "ACME_API_KEY"`)
+    expect(spell).toContain('\tits data is private, located in "~/.spell/places/acme"')
+    expect(description.collections.jobs!.state).toMatchObject({ is: "verified", rows: 1 })
+  })
+})
+
+describe("spell place verify (epic `data` P49)", () => {
+  /** A tenant as NetBox's answers hold one, in its schema's shape:  made up, not anyone's data. */
+  const TENANT = { id: 1, url: `${NETBOX}/api/tenancy/tenants/1/`, display: "Acme", name: "Acme", slug: "acme" }
+  /** NetBox's own answer to a request with no token, as its demo gave it on 2026-11-17. */
+  const NO_TOKEN = { detail: "Authentication credentials were not provided." }
+
+  /** The description, and saved answers:  tenants answer, jobs refuse, everything else a list with nothing in it. */
+  function answering(base = NETBOX) {
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      asked.push(url)
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(base, "").replace(/\?.*$/, "")
+      if (path === "/api/tenancy/tenants/") return Response.json({ count: 1, next: null, results: [TENANT] })
+      if (path === "/api/tenancy/tenants/1/") return Response.json(TENANT)
+      if (path === "/api/core/jobs/") return Response.json(NO_TOKEN, { status: 403 })
+      if (path === "/api/core/background-tasks/") return Response.json([{ id: "t-9", status: "queued" }])
+      if (path === "/api/core/background-tasks/t-9/") return Response.json({ id: "t-9" })
+      return Response.json({ count: 0, next: null, results: [] })
+    }) as typeof globalThis.fetch
+    return { fetch, asked }
+  }
+
+  /** An ingest of the description, then its verify, on `fetch`, with `deployments` in the project's file. */
+  async function ingested(fetch: typeof globalThis.fetch, deployments?: Record<string, Deployment>) {
+    const { files, texts, descriptions } = memoryFiles()
+    if (deployments) files.deploymentsOf = async () => deployments
+    const ingest = new PlaceIngest({
+      fetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
+    return { ingest, texts, descriptions }
+  }
+
+  test("each list and a thing by its id:  verified with its rows, or failed with its status and why", async () => {
+    const { fetch } = answering()
+    const { ingest, texts, descriptions } = await ingested(fetch)
+    const result = await ingest.verify("NetBox.api.spell")
+    const { collections } = descriptions.get("NetBox.api.json5")!
+    expect(collections.tenants!.state).toEqual({
+      is: "verified",
+      at: "2026-11-17T12:00:00.000Z",
+      status: 200,
+      rows: 1
+    })
+    expect(collections.jobs!.state).toMatchObject({
+      is: "failed",
+      status: 403,
+      reason: "it answered 403:  Authentication credentials were not provided"
+    })
+    // no schema said its fields:  what it read does
+    expect(collections.background_tasks!.state).toMatchObject({ is: "verified", rows: 1 })
+    expect(Object.keys(collections.background_tasks!.fields)).toEqual(["id", "status"])
+    expect(result.changes).toContain("tenants:  unverified => verified.")
+    const spell = texts.get("NetBox.api.spell")!
+    expect(spell).toMatch(/^a "tenant" is a thing\n\tit lives in netbox\n\tthis type is verified$/m)
+    expect(spell).toMatch(/^a "job" is a thing\n\tit lives in netbox\n\tthis type is failed$/m)
+    expect(spell).not.toContain("this type is unverified")
+  })
+
+  test("on a deployment from the project's file;  a read only one takes no writes", async () => {
+    const STAGING = "https://staging.netbox.test"
+    const { fetch, asked } = answering(STAGING)
+    const deployments = { staging: { at: STAGING }, production: { at: NETBOX, readOnly: true } }
+    const { ingest, descriptions } = await ingested(fetch, deployments)
+    await ingest.verify("NetBox.api.spell", { deployment: "staging" })
+    expect(asked).toContain(`${STAGING}/api/tenancy/tenants/`)
+    expect(descriptions.get("NetBox.api.json5")!.collections.tenants!.state).toMatchObject({
+      is: "verified",
+      deployment: "staging"
+    })
+    await expect(ingest.verify("NetBox.api.spell", { deployment: "production", triesWrites: true })).rejects.toThrow(
+      "its production deployment is read only, so nothing is written there"
+    )
+    await expect(ingest.verify("NetBox.api.spell", { deployment: "dev" })).rejects.toThrow(
+      'netbox has no deployment "dev":  staging, production'
+    )
+  })
+})
+
+describe("spell place update, on a place read from its description (epic `data` P49)", () => {
+  test("reads it again whole:  nothing new, nothing changes, and each state stays", async () => {
+    const { files, texts, descriptions } = memoryFiles()
+    const ingest = new PlaceIngest({
+      fetch: specFetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
+    const written = texts.get("NetBox.api.spell")!
+    // as a person would:  a line of their own
+    texts.set("NetBox.api.spell", `${written}\n// mine\n`)
+    const result = await ingest.update("NetBox.api.spell")
+    expect(result.couldntChange).toEqual([])
+    expect(texts.get("NetBox.api.spell")).toBe(`${written}\n// mine\n`)
+    expect(descriptions.get("NetBox.api.json5")!.collections.tenants!.state).toEqual({ is: "unverified" })
+    expect(result.changes).toEqual([])
+  })
+})

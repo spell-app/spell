@@ -1289,13 +1289,23 @@ export class PlanDoc extends PlanReader {
   /**
    * Item `id` is urgent (`calm` false) or not (`calm` true):  Owen's click on its id chip, applied (`epic inbox
    * apply`);  returns what it did, for the log (`not urgent`), or `undefined` when it already was.
-   * - only a judgement call, an issue, or a todo that asks Owen to act (`urgent`, I230):
-   *   throws for any other item, or an id the doc doesn't have
+   * - only a judgement call, an issue, or a todo (not a limit):  throws for any other item, or an id the doc doesn't have
+   * - a todo made urgent (`calm` false) is marked `urgent`, red until Owen reviews it, as a follow-up is (I230):
+   *   a reminder he flags for himself (epic `epic-engine` T94, r77:  "make a red todo so I can think about it
+   *   tomorrow");  its old review mark goes, so it's red now;  `calm` takes it back to yellow
    */
   setCalm(id: string, calm: boolean): string | undefined {
     const item = this.item(id)
-    if (!CALM_ID.test(item.id) && !item.hasAttribute("urgent"))
-      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and follow-up todos`)
+    const todo = TODO_ID.test(item.id) && !item.hasAttribute("limit")
+    if (!CALM_ID.test(item.id) && !todo)
+      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and todos (not a limit)`)
+    const red = item.hasAttribute("urgent") && !item.hasAttribute("calm") && !item.hasAttribute("reviewed")
+    if (todo && !calm && !red) {
+      Markup.set<"epic-item">(item, { urgent: true, calm: undefined, reviewed: undefined })
+      this.stamp(item)
+      return "urgent"
+    }
+    if (todo && calm && !item.hasAttribute("urgent")) return undefined
     if (item.hasAttribute("calm") === calm) return undefined
     Markup.set(item, { calm: calm || undefined })
     this.stamp(item)

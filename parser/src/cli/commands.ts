@@ -79,6 +79,11 @@ export default function languageCommands(spell: Command): void {
     .option("--no-browser", "never open a browser:  just skip what needs one")
     .option("--seed <n>", SEED_HELP, Number)
     .option("--target <name>", "run it as `ts` or `py` compiles it -- a Python app that draws is served on Quart")
+    .option(
+      "--deployment <name>",
+      'which deployment of each place to run on, as the project\'s file lists them under "places":  dev, staging, ' +
+        "production -- default SPELL_DEPLOYMENT, else each place as its line says"
+    )
     .addHelpText("after", PROJECT_HELP)
     .action((project: string | undefined, _options, command: Command) => language("run", listOf(project), command))
 
@@ -287,6 +292,24 @@ export default function languageCommands(spell: Command): void {
     )
     .option("--docs <address>", "where its docs are, over those it finds by itself")
     .option(
+      "--token-from <address>",
+      "where a short-lived token is made from its key, which is then what's sent:  the key holds <key id>:<secret>, " +
+        'and a brace in the address is the key id, e.g. "https://auth.example.com/api-keys/{key id}/token";  ' +
+        "writes the line that says so"
+    )
+    .option(
+      "--no-examples",
+      "keep its real rows off the project:  no real value in its description, the rows read kept in " +
+        '~/.spell/places/<name>;  writes "its data is private", which every later update keeps to'
+    )
+    .option("--examples-into <folder>", "as --no-examples, its rows kept in this folder instead")
+    .option(
+      "--spec <address>",
+      "its OpenAPI description, an address or a file, in JSON:  read whole as the source -- every list, field, write " +
+        "and action route from its schemas, with no cap -- each unverified until spell place verify tries it;  " +
+        'NetBox\'s is "https://demo.netbox.dev/api/schema/?format=json"'
+    )
+    .option(
       "--collections <paths>",
       "its collections' paths, comma-separated, for a source that doesn't list them;  name=path names one, and a " +
         'name in braces is found by name, with no list:  "wiki pages=/page/summary/{name}";  one asked with a search ' +
@@ -359,6 +382,26 @@ export default function languageCommands(spell: Command): void {
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((file: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))
+    )
+
+  place
+    .command("verify")
+    .description(
+      "try the place a .spell file reaches against a running server:  each list, and one thing of it by its id, " +
+        "read for real;  each collection's state goes in <Name>.api.json5 -- verified with its rows, or failed with " +
+        "its status and why, with when and on which deployment -- and each type's line says this type is verified " +
+        "or failed.  A list no schema typed gets its fields from what it read.  Never writes, but with --try-writes.  " +
+        "Exits 1 if anything failed"
+    )
+    .argument("<file>", "the place's .spell file, e.g. NetBox.api.spell")
+    .option(
+      "--deployment <name>",
+      "which of the place's deployments, as the project's file lists them under \"places\":  dev, staging, " +
+        "production -- default SPELL_DEPLOYMENT, else the first listed, else the place's own address"
+    )
+    .option("--try-writes", "try a write of each kind too:  never on a deployment marked read only")
+    .action((file: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeIngest")).placeVerify(file, command.optsWithGlobals()))
     )
 
   place

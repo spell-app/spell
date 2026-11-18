@@ -275,6 +275,21 @@ One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 202
 - **Not the same word:**  spell's own `meta`, in a spell program, is Command-or-Control (epic `elemental-spell` Q31):
   it's the language's word, not Spell UI's attribute.
 
+## Places
+
+### deployment
+
+- **Say:**  deployment, for one of a place's copies on its own address, with its own key:  dev, staging, production;
+  picked with `SPELL_DEPLOYMENT` or `--deployment`, listed under `places` in a project's file.
+- **Not:**  server (a place's kind, the place server, the page server), environment (environment variables).
+- **Decided:**  Owen, 2026-11-17, epic `data` Q53 (C), for P49 · OpenAPI Ingest.
+
+### verify
+
+- **Say:**  verify, verified, failed, unverified, for trying a place against its running server (`spell place verify`).
+- **Not:**  check, which stays the word for asking what changed (`check it every 30 seconds`).
+- **Decided:**  Owen, 2026-11-17, epic `data` Q54 (B).
+
 ## Spell's own projects
 
 The `@spell` space's built-in projects, and the tests that read them (epic `content` P2, its T3).

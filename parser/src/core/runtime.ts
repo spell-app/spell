@@ -32,6 +32,24 @@ export class SpellRuntime extends Eventful() {
    * - A page never sets it:  nothing in a browser holds a key, so a place that needs one refuses there (`WebPlace`).
    */
   keyFrom?: (name: string) => string | undefined
+  /**
+   * The deployment of each place picked for this run, by the place's name (epic `data` P49, Q49, Q53):
+   * a runner reads the project's file's `places` and `SPELL_DEPLOYMENT`, so the program's Spell names none.
+   * - A place in it goes to that address, with that key, read only or not;  any other, as its line says.
+   */
+  deployments?: Readonly<Record<string, PlaceDeployment>>
+}
+
+/** One deployment of a place, as the project's file lists it:  its address, its key's name, read only or not. */
+export type PlaceDeployment = {
+  /** Its address, a path prefix and all. */
+  at: string
+  /** The NAME of its key, when it isn't the place's own. */
+  key?: string
+  /** Where its token is made, when it isn't the place's own. */
+  tokenFrom?: string
+  /** It takes no writes. */
+  readOnly?: boolean
 }
 
 /**

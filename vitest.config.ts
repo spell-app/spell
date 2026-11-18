@@ -42,6 +42,7 @@ const UTIL_NODE = ["spell/**/*.test.ts", "reactive/**/*.test.ts", "node/**/*.tes
 /** The web places' tests (`spell/places`), in node:  they run against a real local server. */
 const PLACES_NODE = [
   "RestPlace.test.ts",
+  "PlaceToken.test.ts",
   "GraphPlace.test.ts",
   "SheetPlace.test.ts",
   "Workbook.test.ts",

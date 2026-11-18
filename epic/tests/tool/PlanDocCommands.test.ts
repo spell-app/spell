@@ -335,14 +335,44 @@ describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent
     expect(Object.keys(ReviewInbox.read(inbox).working)).toEqual([three.toLowerCase()])
   })
 
-  test("refuses no id, an id the doc doesn't have, or an item that's never urgent, writing nothing", async () => {
+  test("refuses no id, an id the doc doesn't have, or an item that's never urgent (a limit, a question), writing nothing", async () => {
     const owner = commands()
-    await owner.run(["add", "x", "todo", "A todo"])
+    await owner.run(["add", "x", "todo", "A limit", "--limit"])
+    await owner.run(["add", "x", "question", "Which?"])
     const doc = readFileSync(file, "utf8")
     expect(await owner.run(["calm", "x"])).toBe(1)
     expect(await owner.run(["calm", "x", "j99"])).toBe(1)
-    expect(await owner.run(["calm", "x", printed[0]])).toBe(1)
+    expect(await owner.run(["calm", "x", printed[0], "--loud"])).toBe(1)
+    expect(await owner.run(["calm", "x", printed[1], "--loud"])).toBe(1)
     expect(readFileSync(file, "utf8")).toBe(doc)
+  })
+
+  test("a plain todo flagged red as a reminder (T94):  --loud makes it urgent, red even once reviewed;  --calm takes it back", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "todo", "Rethink id and name"])
+    const [todo] = printed
+    printed = []
+    expect(await owner.run(["calm", "x", todo])).toBe(0)
+    expect(printed).toEqual([`${todo} not urgent already:  Rethink id and name`])
+    await FILES.edit(file, (plan) => plan.review(todo))
+    expect(await owner.run(["calm", "x", todo, "--loud"])).toBe(0)
+    const loud = FILES.read(file)
+    expect(loud.item(todo).hasAttribute("urgent")).toBe(true)
+    expect(loud.item(todo).hasAttribute("reviewed")).toBe(false)
+    expect(loud.itemState(loud.item(todo))).toBe("attention")
+    expect(await owner.run(["calm", "x", todo, "--loud"])).toBe(0)
+    expect(printed.at(-1)).toBe(`${todo} urgent already:  Rethink id and name`)
+    expect(await owner.run(["calm", "x", todo])).toBe(0)
+    const calm = FILES.read(file)
+    expect(calm.itemState(calm.item(todo))).toBe("open")
+  })
+
+  test("add #T --loud (T94):  a new todo red at once;  --loud on another kind is refused", async () => {
+    const owner = commands()
+    expect(await owner.run(["add", "x", "todo", "Think tomorrow", "--loud"])).toBe(0)
+    const plan = FILES.read(file)
+    expect(plan.itemState(plan.item(printed[0]))).toBe("attention")
+    expect(await owner.run(["add", "x", "issue", "An issue", "--loud"])).toBe(1)
   })
 })
 
