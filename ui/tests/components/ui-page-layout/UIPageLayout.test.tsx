@@ -241,7 +241,7 @@ describe("<ui-page-layout>", () => {
       `<div slot="right">Contents</div><p>The page</p>`
 
     test('wide, `toggleSidebar("right")` hides it (`right="hidden"`) and shows it again;  its button says so', async () => {
-      const layout = await pageLayout(RIGHT)
+      const layout = await pageLayout(RIGHT, { width: 1200 })
       const button = layout.querySelector("ui-site-nav-button")!
       await ShadowTree.settle(button)
       const toggled = vi.fn()
@@ -271,16 +271,35 @@ describe("<ui-page-layout>", () => {
       const layout = await pageLayout(RIGHT, { width: 360 })
       await expect.poll(() => layout.matches(":state(narrow)")).toBe(true)
       expect(layout.matches(":state(right-closable)")).toBe(true)
-      expect(getComputedStyle(box(layout, "right")!).visibility).toBe("hidden")
-      expect(getComputedStyle(box(layout, "right")!).position).toBe("absolute")
+      const card = () => box(layout, "right")!.querySelector("slot")!
+      expect(layout.matches(":state(sides-narrow)")).toBe(true)
+      expect(getComputedStyle(card()).visibility).toBe("hidden")
+      expect(getComputedStyle(card()).position).toBe("absolute")
+      // no room of its own in the row:  the page keeps it
+      expect(box(layout, "right")!.getBoundingClientRect().width).toBe(0)
       layout.toggleSidebar("right")
       await ShadowTree.settle(layout)
       expect(layout.matches(":state(right-open)")).toBe(true)
       expect(layout.hasAttribute("right")).toBe(false)
-      await expect.poll(() => getComputedStyle(box(layout, "right")!).visibility).toBe("visible")
+      await expect.poll(() => getComputedStyle(card()).visibility).toBe("visible")
       layout.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
       await ShadowTree.settle(layout)
       expect(layout.matches(":state(right-open)")).toBe(false)
+    })
+
+    test("below 64em, wide enough for the drawer beside the page, the side bar still hides behind its button", async () => {
+      const layout = await pageLayout(RIGHT, { width: 800 })
+      await expect.poll(() => layout.matches(":state(sides-narrow)")).toBe(true)
+      expect(layout.matches(":state(narrow)")).toBe(false)
+      expect(box(layout, "right")!.getBoundingClientRect().width).toBe(0)
+      layout.toggleSidebar("right")
+      await ShadowTree.settle(layout)
+      expect(layout.matches(":state(right-open)")).toBe(true)
+      // wider again:  it closes, back in the row
+      layout.style.width = "1200px"
+      await expect.poll(() => layout.matches(":state(sides-narrow)")).toBe(false)
+      await expect.poll(() => layout.matches(":state(right-open)")).toBe(false)
+      expect(box(layout, "right")!.getBoundingClientRect().width).toBeGreaterThan(0)
     })
 
     test("narrow, a side bar with no button stays in the row", async () => {

@@ -29475,7 +29475,7 @@ export interface UIPageLayoutAttributes {
    */
   "prop:left"?: "hidden"
   /**
-   * `hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.  `toggleSidebar("right")` switches it, and says so with `ui-toggle`.  Narrow, a side bar with such a button is hidden behind it, and slides over the page while open.
+   * `hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.  `toggleSidebar("right")` switches it, and says so with `ui-toggle`.  Below 64em, a side bar with such a button is hidden behind it, and shows over the page while open.
    * - takes:  `hidden`
    */
   right?: "hidden"

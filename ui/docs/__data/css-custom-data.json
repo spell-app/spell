@@ -13523,6 +13523,13 @@
       }
     },
     {
+      "name": ":state(sides-narrow)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  Below 64em of its own box:  a side bar with its button hides behind it, and shows over the page while open."
+      }
+    },
+    {
       "name": ":state(silent)",
       "description": {
         "kind": "markdown",

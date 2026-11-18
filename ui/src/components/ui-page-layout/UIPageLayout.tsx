@@ -83,8 +83,9 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *     icons (epic `mockup` T55:  Spell UI's site, whose navigation has no icons).
  * - The side bars close too (epic `mockup` T55):  `right="hidden"` (or `left`) hides one, wide;
  *   `toggleSidebar("right")`, a `<ui-site-nav-button toggles="right">`'s click, switches it and sends `ui-toggle`.
- *   - Narrow, a side bar with such a button in the layout is hidden behind it, and slides over the page from its
- *     side while open (`:state(right-open)`);  one with no button stays in the row, as before.
+ *   - Below 64em of its own box (`:state(sides-narrow)`), a side bar with such a button in the layout is hidden behind
+ *     it, and shows over the page from its side while open (`:state(right-open)`);  one with no button stays in the
+ *     row, as before.
  * - `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them, over the
  *   page's own ground (Spell UI's docs site's look);  the page's side is no box of its own then.
  * - It finds its navigations and buttons by their English tags (`ui-site-nav`, `ui-site-nav-button`).
@@ -137,6 +138,12 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
    *   so the sheet stays the one truth.
    */
   @E.cssState("narrow") @E.state accessor isNarrow = false
+
+  /**
+   * Below 64em of its own box:  a side bar with its button hides behind it, and shows over the page while open.
+   * - Read from its style, as `isNarrow` is.
+   */
+  @E.cssState("sides-narrow") @E.state accessor isSidesNarrow = false
 
   /** `drawer="hidden"`:  wide, no drawer at all;  its button shows it again. */
   @E.cssState("drawer-hidden")
@@ -357,7 +364,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
    * Its button's `aria-expanded`.
    */
   isSideShown(side: Side): boolean {
-    const isBehindButton = this.isNarrow && this.sidesWithButtons.includes(side)
+    const isBehindButton = this.isSidesNarrow && this.sidesWithButtons.includes(side)
     return isBehindButton ? this.isSideOpen(side) : !this.isSideHidden(side)
   }
 
@@ -367,7 +374,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
    * Script API, on the DOM element too.
    */
   toggleSidebar(side: Side) {
-    if (this.isNarrow && this.sidesWithButtons.includes(side)) {
+    if (this.isSidesNarrow && this.sidesWithButtons.includes(side)) {
       const opens = !this.isSideOpen(side)
       this.closeSidebars()
       this.close()
@@ -526,7 +533,8 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   protected watchWidth() {
     if (isServer) return
     const resized = new ResizeObserver(() => {
-      this.isNarrow = this.isNarrowByStyle()
+      this.isNarrow = this.isNarrowByStyle(NARROW_FLAG)
+      this.isSidesNarrow = this.isNarrowByStyle(SIDES_NARROW_FLAG)
       this.measureMenu()
     })
     resized.observe(this.domElement)
@@ -575,21 +583,27 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   }
 
   /**
-   * Is it narrow, below 40em of its own box?  Its style says (`UIPageLayout.css`'s container query sets
-   * `--_page-layout-narrow` on its grid):  so a layout with no drawer, only side bars, knows too.
+   * Is it narrow:  below 40em of its own box (`flag`, `--_page-layout-narrow`), or below 64em, for its side bars
+   * (`--_page-layout-sides-narrow`)?  Its style says (`UIPageLayout.css`'s container queries set them on its grid):
+   * so a layout with no drawer, only side bars, knows too.
    */
-  private isNarrowByStyle(): boolean {
+  private isNarrowByStyle(flag: string): boolean {
     const box = this.layoutBox
-    return !!box && getComputedStyle(box).getPropertyValue(NARROW_FLAG).trim() === "1"
+    return !!box && getComputedStyle(box).getPropertyValue(flag).trim() === "1"
   }
 
   /** Its grid's box, while drawn. */
   private layoutBox: HTMLElement | undefined
 
-  /** Narrow, it closes as it widens:  wide, the open drawer, or a side bar, would sit over the page. */
+  /** Narrow, it closes as it widens:  wide, the open drawer would sit over the page. */
   @E.onChange("isNarrow", { defer: true })
   protected onNarrowChanged() {
     this.isOpen = false
+  }
+
+  /** A side bar open over the page closes as the layout widens, or narrows. */
+  @E.onChange("isSidesNarrow", { defer: true })
+  protected onSidesNarrowChanged() {
     this.closeSidebars()
   }
 
@@ -761,6 +775,9 @@ const CLOSE_DELAY = 0.15
 
 /** The private custom property its grid has while it's narrow (`UIPageLayout.css`). */
 const NARROW_FLAG = "--_page-layout-narrow"
+
+/** The private custom property its grid has while its side bars hide behind their buttons, below 64em. */
+const SIDES_NARROW_FLAG = "--_page-layout-sides-narrow"
 
 /** The class words of its boxes (`UIPageLayout.css`). */
 const LAYOUT = "layout"

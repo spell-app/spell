@@ -57,8 +57,8 @@ export const pageLayoutVocabulary = {
       values: ["hidden"],
       description:
         '`hidden`:  the right side bar isn\'t shown, until its button (`<ui-site-nav-button toggles="right">`) ' +
-        'shows it again.  `toggleSidebar("right")` switches it, and says so with `ui-toggle`.  Narrow, a side ' +
-        "bar with such a button is hidden behind it, and slides over the page while open."
+        'shows it again.  `toggleSidebar("right")` switches it, and says so with `ui-toggle`.  Below 64em, a ' +
+        "side bar with such a button is hidden behind it, and shows over the page while open."
     },
     {
       name: "floating",
@@ -122,6 +122,11 @@ export const pageLayoutVocabulary = {
         "rests on it."
     },
     { name: "narrow", description: "Below 40em of its own box:  one column, the drawer slid out of the way." },
+    {
+      name: "sides-narrow",
+      description:
+        "Below 64em of its own box:  a side bar with its button hides behind it, and shows over the page while open."
+    },
     { name: "drawer-hidden", description: '`drawer="hidden"`:  no drawer, on a wide page.' },
     { name: "floating", description: "`floating`:  the drawer and the side bars are cards floating over the page." },
     { name: "left-hidden", description: '`left="hidden"`:  no left side bar, on a wide page.' },
