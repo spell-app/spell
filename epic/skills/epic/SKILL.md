@@ -1229,8 +1229,8 @@ want you to just do it").
      - and "Prose":  the blocks are ELEMENTS
        - `<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`
      - never `ui-accordion.spell-code`, or a `<p><b>Net effect:</b></p>` by hand
-   - Add Details (the item's circle-question icon, or a given body's Clarify;  epic `epic-engine` T76):  CLARIFY its
-     text.  Read the item, the code and docs it names, then say plainly what it means, whole:  a new paragraph
+   - Add Details (the (i) button on every item's line, or a given body's Clarify;  epic `epic-engine` T76, T95):
+     CLARIFY its text.  Read the item, the code and docs it names, then say plainly what it means, whole:  a new paragraph
      wherever the context changes (`plan-doc.md`, "Rules").
      - `epic details <name>#<id> --more --file <html>`.
      - Yours REPLACES the unclear text (epic `epic-engine` I301;  2026-11-15:  "When you `clarify` you can remove

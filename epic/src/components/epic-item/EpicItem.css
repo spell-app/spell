@@ -261,6 +261,12 @@
   .extras[hidden] {
     display: none;
   }
+  /* the (i) Clarify button, last on the line (T95):  the same place on every kind, a review button's size */
+  .extras > [part~="clarify"] {
+    flex: none;
+    /* flush with the line's right edge:  the review buttons' -1.34px is for their ring, which it hasn't */
+    margin-inline-end: 1.34px;
+  }
   /* the git icon (T17):  a bare icon, as tall as the review label;  the accent while its commits show */
   .git {
     display: inline-grid;
@@ -359,23 +365,13 @@
     font-size: 0.9em;
     line-height: 1.45;
   }
-  /*
-   * the body's row:  its light details, then the clarify icon's column at their right, top-aligned with the first line
-   * (T76)
-   * - the text stops as far before the icon as it starts after the drawer's left edge (the indent less the drawer's
-   *   inset), so its margins match (Owen, 2026-11-15:  "unbalanced -- make the left and right margins consistent")
-   */
+  /* the body's block:  its light details (the clarify icon at their right, T76, is on the line since T95) */
   .body {
     display: flex;
     align-items: flex-start;
-    gap: calc(var(--_epic-item-indent) - var(--_epic-drawer-inset));
   }
   .body > .flow {
     flex: 1;
-  }
-  .body > [part~="clarify"] {
-    flex: none;
-    margin-block-start: -1px;
   }
   .flow {
     min-width: 0;

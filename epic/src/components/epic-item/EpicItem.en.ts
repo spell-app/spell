@@ -361,7 +361,8 @@ export const epicItemVocabulary = {
     {
       name: "clarify",
       description:
-        "While reviewed:  the `<epic-clarify icon>` at its body's right, which asks Claude to clarify it now (T76)."
+        "While reviewed:  the `<epic-clarify icon>`, the (i) last on its line on every kind, which asks Claude to " +
+        "clarify it now (T76, T95)."
     },
     { name: "label", description: "`Original question` over an answered question's own text." },
     { name: "error", description: "With `source`:  the line saying the part couldn't be loaded." },

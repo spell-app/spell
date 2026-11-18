@@ -83,6 +83,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - handled in a phase (`handled`, epic `epic-engine` P31):  `in P4`, linking the phase;  the item grey
  *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
+ *   - last, while reviewed:  the (i) Clarify button (`<epic-clarify icon>`, epic `epic-engine` T95), the same place
+ *     on every kind;  like the rest of the line's marks, drawn once the line comes near the screen (I333)
  * - `calm`:  an open judgement call or issue not reviewed yet is yellow (`open`), not red (`attention`).
  * - `urgent`:  a todo that asks Owen to act (Make Todo's follow-up, I230):  red until reviewed, as an issue is;
  *   a judgement call or issue Owen wants done (Do this, I232):  red until handled, reviewed or not.
@@ -347,7 +349,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   readonly isOpen = createMemo(() => !!this.isMarkedOpen && this.hasDetails())
 
   /**
-   * Its details' review pieces are drawn:  the clarify icon, the said note, the note box (epic `epic-engine` I333).
+   * Its details' review pieces are drawn:  the said note, the note box (epic `epic-engine` I333).
    * - from the first time it opens, kept from then on:  folded, they'd be hidden anyway
    * - the note's typed text lives in the inbox's client, so a box drawn late shows it all the same
    */
@@ -571,10 +573,6 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           <div class={FLOW}>
             <slot />
           </div>
-          {/* at the body's right, while reviewed:  asks Claude to clarify it now, turning while it does (T76) */}
-          <Show when={this.reviewState.reviewing() && this.detailsDrawn()}>
-            <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
-          </Show>
         </div>
         {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
               it ("under my input", Owen, 2026-10-08, P13), then the box */}
@@ -645,7 +643,10 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     )
   }
 
-  /** The line's own marks and buttons, at its end:  bed, failed, `in P4`, git, `done in P20`, review label or buttons. */
+  /**
+   * The line's own marks and buttons, at its end:  bed, failed, `in P4`, git, `done in P20`, review label or buttons,
+   * then the (i) Clarify button (epic `epic-engine` T95:  on every item, its line, so it's found without opening it).
+   */
   private lineMarks(): JSX.Element {
     return (
       <>
@@ -672,7 +673,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             </span>
           )}
         </Show>
-        <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
+        <Show when={this.reviewState.reviewing()}>
+          {this.reviewControl("buttons", "review-buttons")}
+          {/* last on the line, so the same place on every kind:  asks Claude to clarify it now, turning while it does
+              (T76;  on the line since T95, drawn with the line's marks once near the screen) */}
+          <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
+        </Show>
       </>
     )
   }
@@ -1166,7 +1172,7 @@ export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}
 
 /** Class names inside the shadow root:  the light details' block;  the said note's place in the thread. */
 const FLOW = "flow"
-/** The body's row:  its light details, then the clarify icon at their right (T76). */
+/** The body's block:  its light details (the clarify icon at their right from T76 moved to the line in T95). */
 const BODY = "body"
 const IN_THREAD = "in-thread"
 const THREAD_END = "thread-end"

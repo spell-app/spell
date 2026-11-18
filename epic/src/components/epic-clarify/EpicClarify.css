@@ -16,8 +16,10 @@
   [part~="base"] {
     --_epic-clarify-color: var(--epic-clarify-color, var(--epic-accent, var(--ui-link, LinkText)));
   }
-  /* the link:  a `<button>` (never `<a href="#">`, I289) that reads as a word of the sentence */
-  button.link[part~="base"] {
+  /* the link:  a `<button>` (never `<a href="#">`, I289) that reads as a word of the sentence
+     - never the icon's:  its root class has the noun's words too ("clarify link"), so `.link` matched the icon's button,
+       which drew it in the link's blue, its margin and display the link's (T95) */
+  :host(:not([icon])) button.link[part~="base"] {
     display: inline;
     margin: 0;
     margin-inline-start: 0.4em;
@@ -39,7 +41,9 @@
 }
 
 /*
- * With `icon` (T76):  a small circle-question button at the right of an item's body, muted until hovered
+ * With `icon` (T76, T95):  an (i) button last on an item's line, muted until hovered
+ * - a review button's square (24px, `--epic-review-button-size`), its glyph 16px:  on the 4px grid, centred on the
+ *   line as the review buttons are
  * - while Claude works on it (`:state(turning)`):  its glyph turns as a coin spun on a table, about its upright axis,
  *   then rests a second (Owen, 2026-11-15:  "spin with coin animation while you are thinking";  the review buttons'
  *   turn of I203 / I213, before I279 gave them a ring)
@@ -53,14 +57,19 @@
     --_epic-clarify-muted: var(--epic-clarify-muted, var(--epic-muted, light-dark(#8a8794, #8f8c99)));
     display: inline-grid;
     place-items: center;
+    box-sizing: border-box;
+    width: var(--epic-review-button-size, 24px);
+    height: var(--epic-review-button-size, 24px);
     margin: 0;
-    padding: 2px;
+    padding: 0;
     border: none;
     border-radius: 50%;
     background: none;
     color: var(--_epic-clarify-muted);
     font: inherit;
+    font-size: 16px;
     line-height: 1;
+    cursor: pointer;
     text-decoration: none;
   }
   button[part~="base"]:hover,

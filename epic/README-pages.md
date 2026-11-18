@@ -239,6 +239,9 @@ The command behind each step, and why a finished `wait` is what wakes a session:
   type over it to say something else.
 - An item with no details yet reads "_What it says on the tin._", then Clarify:
   a click asks Claude for its details at once, without waiting for Send.
+- Every item, whatever its kind, has an (i) button last on its line while you review:
+  a click asks Claude to rewrite the item's text more clearly, at once, without waiting for Send.
+  - It turns like a coin while Claude works on it;  click it again to call it off.
 - A request Claude took up on its own, from your words in the chat, is filed already started:
   your words as its body, blue, an Underway card naming the agent on it.
   A picture you pasted with it shows under its words, a thumbnail that opens full size;

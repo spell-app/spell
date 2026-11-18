@@ -524,7 +524,7 @@
     {
       "path": "epic-clarify.html",
       "title": "<epic-clarify>",
-      "summary": "The <epic-clarify> element: Clarify, and the circle-question beside an item's body, asking Claude to clarify it at once.",
+      "summary": "The <epic-clarify> element: Clarify, and the (i) button on every item's line, asking Claude to clarify it at once.",
       "tag": "epic-clarify",
       "sections": [
         {

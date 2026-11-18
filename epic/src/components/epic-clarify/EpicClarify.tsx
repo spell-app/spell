@@ -27,9 +27,11 @@ import clarifyCSS from "./EpicClarify.css?inline"
  *   (epic `epic-engine` I289):  a hash-only link is a jump to the page's top for anything that follows it (a webview's
  *   own link handling, a middle-click, a click before the pack has loaded), and Owen saw the page jump to its top
  * - The click moves nothing:  no focus, no scroll;  the item's icon turning is the feedback (I289)
- * - With `icon` (epic `epic-engine` T76):  a circle-question button at the right of an item's body, which
- *   `<epic-item>` draws while the page is reviewed (Owen, 2026-11-15:  "a circle-question icon which ask for
- *   clarification on the body text, without waiting for send").
+ * - With `icon` (epic `epic-engine` T76):  an (i) button, last on an item's line, which `<epic-item>` draws while the
+ *   page is reviewed, on every kind of item (T95;  Owen, 2026-11-18:  "add (i) clarify button to everything, issues,
+ *   judgement calls, the lot").
+ *   - a circle-question at the right of an item's body, drawn once the item was opened, until T95 (Owen, 2026-11-15:
+ *     "a circle-question icon which ask for clarification on the body text, without waiting for send")
  *   - the same ask as the link:  its item's details asked for now (`ReviewState.clarify()`);  his own ask only (I295)
  *   - kept while Claude works on it, turning like a coin (`turning`);  a click then calls it off, as a busy button's does
  *   - its item:  `of`, as `<epic-review>`'s, since it's drawn in the item's shadow root, where `closest()` can't reach
@@ -119,13 +121,13 @@ export class EpicClarify extends E.UIComponent<typeof epicClarifyVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicClarify extends E.AttributeValues<typeof epicClarifyVocabulary> {}
 
-/** The icon's glyph. */
-const CLARIFY_ICON = "circle question"
+/** The icon's glyph:  Spell UI's info circle, Owen's "(i)" (T95;  a circle-question before). */
+const CLARIFY_ICON = "info circle"
 
 /** The link's class:  a `<button>` drawn as a word of the sentence (`EpicClarify.css`). */
 const LINK = "link"
 
-// its tag, drawn by `<epic-item>` in its shadow root (the icon, T76)
+// its tag, drawn by `<epic-item>` on its line, in its shadow root (the icon, T76, T95)
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {

@@ -656,7 +656,8 @@ As `plan-doc.md`, "Ids":
     - a code accordion holding a `<ui-code>`, or two blocks
     - a note headed `DEFERRED`
 - A rewrite never drops text:  `details --file`, `decide` again, `details --more`, `summarize`.
-  - `details --more` (Add Details, Clarify;  epic `epic-engine` I301):  the HTML REPLACES the item's unclear text, in
+  - `details --more` (Add Details, Clarify:  the (i) button on every item's line, any kind, since epic `epic-engine` T95;
+    I301):  the HTML REPLACES the item's unclear text, in
     an `<epic-more>` headed "More Details" that never folds;  the given "_What it says on the tin._" body goes for good,
     the item's own prose moves into its Original Discussion;  Owen's quoted words (`PlanItem.isOwenQuote()`) and every
     `<epic-*>` card stay

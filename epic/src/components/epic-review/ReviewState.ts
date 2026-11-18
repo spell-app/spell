@@ -247,7 +247,7 @@ export class ReviewState {
   }
 
   /**
-   * Its details asked for now (Clarify, the ? icon;  `ReviewClient.askNow()`), or that ask called off while it's on
+   * Its details asked for now (Clarify, the (i) button;  `ReviewClient.askNow()`), or that ask called off while it's on
    * its way or being answered (`cancel()`).
    * - NOT the Add Details button's `press()`:  that calls off whatever work spins on the item, an agent's at work on
    *   it included (epic `epic-engine` I295);  this calls off only Owen's own ask
