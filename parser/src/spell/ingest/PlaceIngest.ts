@@ -1,5 +1,6 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
+import { tokenServiceMint } from "spell/places/PlaceToken"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -7,6 +8,7 @@ import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 import {
   IngestStopped,
   type CollectionDescription,
+  type FieldDescription,
   type IngestAsk,
   type IngestResult,
   type IngestSettings,
@@ -109,7 +111,7 @@ export class PlaceIngest {
     const existing = (await files.read(file)) ?? ""
     const already = placeLineAt(existing, address)
     if (already) return this.alreadyThere(file, already, existing)
-    const reader = this.readerFor(ask.keySecret, ask.signedIn, ask.keyGoes)
+    const reader = await this.readerFor(ask.keySecret, ask.signedIn, ask.keyGoes, ask.tokenFrom)
     const kind = await this.kindFor(address, ask.kind, reader, ask)
     this.say(`A ${kind}.  Looking at what it holds ...`)
     const look = await lookAtPlace(kind, {
@@ -138,12 +140,16 @@ export class PlaceIngest {
     if (ask.keyGoes) description.about.keyGoes = ask.keyGoes
     if (ask.keySecret && !look.specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
+    if (ask.tokenFrom !== undefined) description.about.tokenFrom = ask.tokenFrom
+    if (ask.dataIsPrivateIn !== undefined)
+      description.about.privateDataIn = ask.dataIsPrivateIn || privateFolderFor(description)
     if (look.specAt) noteFromSpec(description)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
     awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
+    await this.keepPrivate(description, look, file)
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
     if (!look.specAt) await this.readThroughIt(description, reader, ask.keySecret)
@@ -185,7 +191,7 @@ export class PlaceIngest {
     const { files } = this.settings
     const { name, kind, keySecret, keyGoes, signedIn, docsAt, specAt, collectionsAsked, picturesAsked } = old.about
     const address = movedTo === undefined ? old.about.address : addressFrom(movedTo)
-    const reader = this.readerFor(keySecret, signedIn, keyGoes)
+    const reader = await this.readerFor(keySecret, signedIn, keyGoes, old.about.tokenFrom)
     this.say(`Looking again at ${address} ...`)
     // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
     const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
@@ -211,6 +217,8 @@ export class PlaceIngest {
     if (keyGoes) description.about.keyGoes = keyGoes
     if (keySecret && !specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
+    if (old.about.tokenFrom !== undefined) description.about.tokenFrom = old.about.tokenFrom
+    if (old.about.privateDataIn !== undefined) description.about.privateDataIn = old.about.privateDataIn
     if (specAt) noteFromSpec(description)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     await this.notePictures(description, picturesAsked, reader)
@@ -228,6 +236,7 @@ export class PlaceIngest {
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
     }
     if (old.about.triesWrites) await this.noteWrites(description, look, reader)
+    await this.keepPrivate(description, look, file)
     // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
     this.compileLeavingOut(description, file)
     // each in the file's language:  the same line in, the same line out
@@ -297,15 +306,26 @@ export class PlaceIngest {
     )
   }
 
-  /** A reader for this place, with its key and session.  - throws `IngestStopped` for one that isn't there, or has ended */
-  private readerFor(keySecret: string | undefined, signedIn?: string, keyGoes?: KeyGoes): PoliteReader {
+  /**
+   * A reader for this place, with its key and session.
+   * - `tokenFrom`:  the key sent is a token made there from the key (epic `data` P49), the same way a program's is
+   *   (`tokenServiceMint()`).
+   * - throws `IngestStopped` for a key or session that isn't there, or has ended, or a token service that says no
+   */
+  private async readerFor(
+    keySecret: string | undefined,
+    signedIn?: string,
+    keyGoes?: KeyGoes,
+    tokenFrom?: string
+  ): Promise<PoliteReader> {
     const { fetch, sleep, keyNamed, sessionNamed, Socket } = this.settings
-    const key = keySecret ? keyNamed?.(keySecret) : undefined
-    if (keySecret && key === undefined) {
+    const secret = keySecret ? keyNamed?.(keySecret) : undefined
+    if (keySecret && secret === undefined) {
       throw new IngestStopped(
         `the key named ${keySecret} isn't in the environment:  set it, and it's sent, never written down`
       )
     }
+    const key = secret !== undefined && tokenFrom !== undefined ? await tokenMadeFrom(secret, tokenFrom, fetch) : secret
     const session = signedIn ? sessionNamed?.(signedIn) : undefined
     if (signedIn && !session) {
       throw new IngestStopped(`${signedIn} hasn't been signed in to:  spell place sign-in ${signedIn} <address>`)
@@ -395,6 +415,42 @@ export class PlaceIngest {
           if (error instanceof IngestStopped) throw error
           description.notes.push(`${collection}'s "${field}" couldn't be tried:  ${url} didn't answer.`)
         }
+      }
+    }
+  }
+
+  /**
+   * SIDE EFFECT:  a place whose data is private keeps no real value in its description, and the rows it read go in its
+   * folder, one samples file a collection, as `spell place read-page` writes them (epic `data` P49, J249, J259).
+   * - Nothing to write them with:  said, and they're dropped.
+   * - NEVER throws for a file it couldn't write:  said.
+   */
+  private async keepPrivate(description: PlaceDescription, look: PlaceLook, file: string): Promise<void> {
+    const folder = description.about.privateDataIn
+    if (folder === undefined) return
+    for (const collection of Object.values(description.collections)) withoutExamples(collection.fields)
+    const { writeAway } = this.settings.files
+    const read = look.collections.filter(({ rows }) => rows.length)
+    if (!read.length) return
+    if (!writeAway) {
+      description.notes.push(
+        `Its data is private, and nothing here can write its rows to ${folder}:  they're not kept.`
+      )
+      return
+    }
+    const stem = file.slice(file.lastIndexOf("/") + 1).replace(/(?:\.[a-z]{2})?(?:\.api)?\.spell$/, "")
+    const readAt = this.nowISO()
+    for (const { at, rows } of read) {
+      const [name] = Object.entries(description.collections).find(([, each]) => each.at === at) ?? []
+      if (!name) continue
+      const path = `${folder.replace(/\/+$/, "")}/${stem}.${name.replace(/\W+/g, "-")}.samples.json`
+      const page = `${description.about.address}${at}`
+      try {
+        await writeAway(path, `${JSON.stringify({ page, readAt, rows }, null, 2)}\n`)
+      } catch (error) {
+        description.notes.push(
+          `${name}'s rows couldn't be kept in ${path}:  ${error instanceof Error ? error.message : error}`
+        )
       }
     }
   }
@@ -705,6 +761,33 @@ export function descriptionFromDisk({
   // the lines it wrote, each bare:  an older version bulleted them, `- its "url" is text` (epic `language` P46)
   const spell = rest.spell?.map((line) => line.replace(/^(\t*)- /, "$1"))
   return { ...rest, ...(spell ? { spell } : {}), collections: Object.fromEntries(each) } as PlaceDescription
+}
+
+/** Where a private place's rows go when nothing says:  `~/.spell/places/netbox`. */
+function privateFolderFor({ about }: PlaceDescription): string {
+  return `~/.spell/places/${about.name.toLowerCase().replace(/[^\p{L}\d]+/gu, "-")}`
+}
+
+/** SIDE EFFECT:  no field, nor any inside one, keeps a real value. */
+function withoutExamples(fields: Record<string, FieldDescription>): void {
+  for (const field of Object.values(fields)) {
+    delete field.example
+    if (field.inside) withoutExamples(field.inside)
+  }
+}
+
+/**
+ * A token made from `secret` at `tokenFrom`, for a look.
+ * - throws `IngestStopped` when the token service says no, or doesn't answer
+ */
+async function tokenMadeFrom(secret: string, tokenFrom: string, fetch: typeof globalThis.fetch): Promise<string> {
+  try {
+    return (await tokenServiceMint(tokenFrom, fetch)(secret)).token
+  } catch (error) {
+    throw new IngestStopped(
+      `no token could be made at ${tokenFrom}:  ${error instanceof Error ? error.message : error}`
+    )
+  }
 }
 
 /** A read through the Spell, as a collection's state:  verified with the rows it found, or failed with why. */

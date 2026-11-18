@@ -137,3 +137,57 @@ describe("spell place ingest --spec", () => {
     expect(spell).toMatchSnapshot()
   })
 })
+
+describe("a private place, its key a token (epic `data` P49)", () => {
+  const API = "https://acme.test/api"
+  const TOKEN_AT = "https://auth.acme.test/api-keys/{key id}/token"
+
+  /** A source whose list takes only the token, and a token service making it from `k-1:sesame`. */
+  const acmeFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = `${input instanceof Request ? input.url : input}`.replace(/[?#].*$/, "")
+    const headers = new Headers(init?.headers)
+    if (url === "https://auth.acme.test/api-keys/k-1/token" && init?.method === "POST") {
+      const isKey = headers.get("authorization") === `Basic ${btoa("k-1:sesame")}`
+      return isKey ? Response.json({ token: "tok-1", expires_in: 600 }) : new Response("no", { status: 401 })
+    }
+    if (headers.get("authorization") !== "Bearer tok-1") return new Response("no", { status: 401 })
+    if (url === API) return Response.json({ jobs: `${API}/jobs` })
+    if (url === `${API}/jobs`) return Response.json([{ id: 1, name: "The real payroll run" }])
+    return new Response("nope", { status: 404 })
+  }) as typeof globalThis.fetch
+
+  test("its rows go to its folder, never its description;  its token is made from the secret, and said", async () => {
+    const { files, texts, descriptions } = memoryFiles()
+    const away = new Map<string, string>()
+    files.writeAway = async (path, text) => void away.set(path, text)
+    const ingest = new PlaceIngest({
+      fetch: acmeFetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      keyNamed: (name) => (name === "ACME_API_KEY" ? "k-1:sesame" : undefined),
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({
+      address: API,
+      into: "Acme.api.spell",
+      name: "acme",
+      keySecret: "ACME_API_KEY",
+      tokenFrom: TOKEN_AT,
+      dataIsPrivateIn: ""
+    })
+    const description = descriptions.get("Acme.api.json5")!
+    expect(JSON.stringify(description)).not.toContain("payroll")
+    expect(description.about).toMatchObject({ tokenFrom: TOKEN_AT, privateDataIn: "~/.spell/places/acme" })
+    expect([...away.keys()]).toEqual(["~/.spell/places/acme/Acme.jobs.samples.json"])
+    expect(JSON.parse(away.get("~/.spell/places/acme/Acme.jobs.samples.json")!)).toMatchObject({
+      page: `${API}/jobs`,
+      rows: [{ id: 1, name: "The real payroll run" }]
+    })
+    const spell = texts.get("Acme.api.spell")!
+    expect(spell).toContain(`\tits token comes from "${TOKEN_AT}", made with the secret "ACME_API_KEY"`)
+    expect(spell).toContain('\tits data is private, located in "~/.spell/places/acme"')
+    expect(description.collections.jobs!.state).toMatchObject({ is: "verified", rows: 1 })
+  })
+})

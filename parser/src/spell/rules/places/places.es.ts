@@ -26,6 +26,8 @@ import { KeyGoesInAddress } from "./KeyGoesInAddress"
 import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
+import { TokenFrom } from "./TokenFrom"
+import { DataIsPrivate } from "./DataIsPrivate"
 import { KeyWritten } from "./KeyWritten"
 import { ListsUnder } from "./ListsUnder"
 import { LoadThings } from "./LoadThings"
@@ -379,6 +381,53 @@ placesEs.addRule(FieldCalled, {
 })
 placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
+placesEs.addRule(TokenFrom, {
+  syntax: "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'acme es un servidor web en "https://acme.test"\n\tsu token viene de "https://auth.acme.test/api-keys/{key id}/token", hecho con el secreto "ACME_API_KEY"',
+          [
+            "export class Acme extends Place {}",
+            "export const acme = core.place(new Acme(), {",
+            '  name: "acme",',
+            '  kind: "web server",',
+            '  at: "https://acme.test",',
+            '  keyNamed: "ACME_API_KEY",',
+            '  tokenFrom: "https://auth.acme.test/api-keys/{key id}/token",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(DataIsPrivate, {
+  syntax: "{type:subject_its} datos son privados (,? guardados en {path:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'netbox es un servidor web en "https://demo.netbox.dev"\n\tsus datos son privados, guardados en "~/.spell/places/netbox"',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  privateDataIn: "~/.spell/places/netbox",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
 placesEs.addRule(KeyGoesInHeader, {
   syntax: "{type:subject_its} clave va en su cabecera {name:text}",

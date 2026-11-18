@@ -47,6 +47,11 @@ export type IngestFiles = {
   listInProject?(file: string, path: string): Promise<void>
   /** The text of every other Spell file beside this one:  what else may use what it declares. */
   otherSpellBeside(path: string): Promise<string[]>
+  /**
+   * Write a file away from the project, on this machine only (epic `data` P49):  a private place's rows.
+   * - `~` is the home folder;  missing folders are made.  Left out:  nothing is written, and it says so.
+   */
+  writeAway?(path: string, text: string): Promise<void>
   /** The names of what's in the folder on this disk at `path`:  left out, or no such folder, `undefined`.  A data folder's own files say what it holds. */
   namesInFolder?(path: string): Promise<string[] | undefined>
 }
@@ -137,6 +142,16 @@ export type IngestAsk = {
   name?: string
   /** The NAME of the key it needs. */
   keySecret?: string
+  /**
+   * Where a token is made from that key, which is then what's sent (epic `data` P49):
+   * `https://auth.acme.test/api-keys/{key id}/token`, the key holding `<key id>:<secret>`.
+   */
+  tokenFrom?: string
+  /**
+   * Its real rows stay on this machine (epic `data` P49, J249):  no real value goes in its description, and the rows
+   * it reads go in this folder, `spell place read-page`'s samples files.  `""`:  `~/.spell/places/<name>`.
+   */
+  dataIsPrivateIn?: string
   /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
   keyGoes?: KeyGoes
   /** The name of the place whose kept session it reads as:  `spell place sign-in`'s (epic `mockup` P12). */
@@ -589,6 +604,10 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
+    /** Where a token is made from that key:  `its token comes from "..."` (epic `data` P49). */
+    tokenFrom?: string
+    /** Its real rows stay on this machine, in this folder:  `its data is private, located in "..."` (epic `data` P49). */
+    privateDataIn?: string
     /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
     keyGoes?: KeyGoes
     /** The name of the session it's read as, never the session. */

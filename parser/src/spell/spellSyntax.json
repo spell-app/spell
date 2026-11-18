@@ -7724,7 +7724,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 102,
+          "line": 106,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -8197,6 +8197,58 @@
                 },
                 "py": {
                   "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"only_from\": \"attendees\",\n            \"most_each\": [{\"field\": \"shift\", \"most\": 2}, {\"field\": \"event\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"tickets\", \"field\": \"invitations\"},\n            \"joins\": {\"collection\": \"tickets\", \"address\": \"picnic@rs/__attendees\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TokenFrom",
+          "ruleNames": ["token_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/TokenFrom.ts",
+          "line": 15,
+          "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\tits token comes from \"https://auth.acme.test/api-keys/{key id}/token\", made with the secret \"ACME_API_KEY\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\"\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\"\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DataIsPrivate",
+          "ruleNames": ["data_is_private"],
+          "internal": false,
+          "file": "src/spell/rules/places/DataIsPrivate.ts",
+          "line": 13,
+          "purpose": "A place's real rows stay on this machine, out of the project (epic `data` P49, Q55 C).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} data is private (,? located in {path:text})?",
+              "example": "netbox is a web server at \"https://demo.netbox.dev\"\n\tits data is private, located in \"~/.spell/places/netbox\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\"\n})"
+                },
+                "ts": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\"\n})"
+                },
+                "py": {
+                  "code": "class Netbox(Place):\n    pass\n\nnetbox = core.place(\n    Netbox(),\n    {\n        \"name\": \"netbox\",\n        \"kind\": \"web server\",\n        \"at\": \"https://demo.netbox.dev\",\n        \"private_data_in\": \"~/.spell/places/netbox\",\n    },\n)"
                 }
               }
             }

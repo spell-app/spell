@@ -25,6 +25,8 @@ import { KeyGoesInAddress } from "./KeyGoesInAddress"
 import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
+import { TokenFrom } from "./TokenFrom"
+import { DataIsPrivate } from "./DataIsPrivate"
 import { KeyWritten } from "./KeyWritten"
 import { ListsUnder } from "./ListsUnder"
 import { LoadThings } from "./LoadThings"
@@ -419,6 +421,63 @@ places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:mem
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
 places.addRule(KeyIfSet, { syntax: "{type:subject_its} optional key is the secret {name:text}" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
+places.addRule(TokenFrom, {
+  syntax: "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'acme is a web server at "https://acme.test"\n\tits token comes from "https://auth.acme.test/api-keys/{key id}/token", made with the secret "ACME_API_KEY"',
+          [
+            "export class Acme extends Place {}",
+            "export const acme = core.place(new Acme(), {",
+            '  name: "acme",',
+            '  kind: "web server",',
+            '  at: "https://acme.test",',
+            '  keyNamed: "ACME_API_KEY",',
+            '  tokenFrom: "https://auth.acme.test/api-keys/{key id}/token"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(DataIsPrivate, {
+  syntax: "{type:subject_its} data is private (,? located in {path:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'netbox is a web server at "https://demo.netbox.dev"\n\tits data is private, located in "~/.spell/places/netbox"',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  privateDataIn: "~/.spell/places/netbox"',
+            "})"
+          ]
+        ],
+        [
+          'netbox is a web server at "https://demo.netbox.dev"\n\tits data is private',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  privateDataIn: ""',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(KeyGoesInHeader, {
   syntax: "{type:subject_its} key goes in its {name:text} header",

@@ -93,14 +93,21 @@ export function spellPartsFor(
   { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
 ): SpellParts {
-  const { name, kind, address, keySecret, keyIfSet, keyGoes } = about
+  const { name, kind, address, keySecret, keyIfSet, keyGoes, tokenFrom, privateDataIn } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
   const every = shown.map(([, collection]) => collection)
   const placeLines: SpellLine[] = []
   // a data folder's, a file's, a room's key is the server's run token:  no line of a program says it
-  if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
+  if (withKey && keySecret && tokenFrom !== undefined && KINDS_WITH_KEY_LINES.has(kind)) {
+    placeLines.push({ key: "key", text: `its token comes from "${tokenFrom}", made with the secret "${keySecret}"` })
+    if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
+  } else if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
     placeLines.push({ key: "key", text: `its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
+  }
+  // its real rows stay on this machine:  every later ingest, update and verify keeps to it
+  if (privateDataIn !== undefined) {
+    placeLines.push({ key: "private", text: `its data is private, located in "${privateDataIn}"` })
   }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"

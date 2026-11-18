@@ -5,7 +5,8 @@
  * - Node only;  loaded when the command runs, as it loads all of spell.
  * - The read through the Spell runs `core` here, by itself, in this process:  `readThroughSpell()`.
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { homedir } from "node:os"
 import { basename, dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -55,6 +56,12 @@ export type PlaceIngestOptions = {
   docs?: string
   /** `--spec <address>`:  its OpenAPI description, read whole as the source (epic `data` P49). */
   spec?: string
+  /** `--token-from <address>`:  where a token is made from its key, which is then what's sent (epic `data` P49). */
+  tokenFrom?: string
+  /** `--no-examples`:  its data is private, its rows kept in `~/.spell/places/<name>` (epic `data` P49). */
+  examples?: boolean
+  /** `--examples-into <folder>`:  its data is private, its rows kept there. */
+  examplesInto?: string
   collections?: string
   samples?: string
   pictures?: string
@@ -76,18 +83,23 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
     signedIn,
     docs,
     spec,
+    tokenFrom,
     collections,
     samples,
     pictures,
     tryWrites,
-    ai = true
+    ai = true,
+    examples = true,
+    examplesInto
   } = options
+  const dataIsPrivateIn = examplesInto ?? (examples ? undefined : "")
   const keyGoes = keyGoesFrom(options)
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(ai, !!signedIn)
     const result = await ingest.add({
       address,
-      ...withValues({ kind, into, name, keySecret, signedIn, docs, spec }),
+      ...withValues({ kind, into, name, keySecret, signedIn, docs, spec, tokenFrom }),
+      ...(dataIsPrivateIn !== undefined && { dataIsPrivateIn }),
       ...(keyGoes && { keyGoes }),
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
@@ -226,6 +238,11 @@ export function fetchWithFiles(fetch: typeof globalThis.fetch): typeof globalThi
 export const diskFiles: IngestFiles = {
   read: async (path) => (existsSync(path) ? readFileSync(path, "utf8") : undefined),
   write: async (path, text) => writeFileSync(path, text),
+  writeAway: async (path, text) => {
+    const real = path.replace(/^~(?=\/|$)/, homedir())
+    mkdirSync(dirname(real), { recursive: true })
+    writeFileSync(real, text)
+  },
   readDescription: async (path) =>
     existsSync(path) ? (JSON5.parse(readFileSync(path, "utf8")) as PlaceDescriptionOnDisk) : undefined,
   writeDescription: async (path, description) => {

@@ -287,6 +287,18 @@ export default function languageCommands(spell: Command): void {
     )
     .option("--docs <address>", "where its docs are, over those it finds by itself")
     .option(
+      "--token-from <address>",
+      "where a short-lived token is made from its key, which is then what's sent:  the key holds <key id>:<secret>, " +
+        'and a brace in the address is the key id, e.g. "https://auth.example.com/api-keys/{key id}/token";  ' +
+        "writes the line that says so"
+    )
+    .option(
+      "--no-examples",
+      "keep its real rows off the project:  no real value in its description, the rows read kept in " +
+        '~/.spell/places/<name>;  writes "its data is private", which every later update keeps to'
+    )
+    .option("--examples-into <folder>", "as --no-examples, its rows kept in this folder instead")
+    .option(
       "--spec <address>",
       "its OpenAPI description, an address or a file, in JSON:  read whole as the source -- every list, field, write " +
         "and action route from its schemas, with no cap -- each unverified until spell place verify tries it;  " +
