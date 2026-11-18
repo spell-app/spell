@@ -35,6 +35,17 @@ export const PARSER_MESSAGES = {
   /** `- to it:`, nothing but its thing. */
   "action-without-a-name": '"{text}" doesn\'t name an action:  say what it does, as in "to shuffle it"',
   "cancel-outside-an-action": '"{text}" calls off an action:  it goes in one\'s steps, under "to ..." or "after ..."',
+  "hook-names-no-action":
+    '"{text}" runs with an action, but no action above it reads that way:  as in "before completing a job", for "to complete a job"',
+  "error-name-unknown": '"{name}" isn\'t a kind of error:  say one of {names}',
+  "failure-word-outside":
+    '"{text}" goes in the steps for a failure, under "if completing a job fails" or "when any server call fails"',
+  "call-outside-wrapper":
+    '"{text}" goes in an action that wraps a server\'s own:  "to complete a job", its steps around "call the server"',
+  "the-server-outside-api":
+    '"the server" means the place only in its own API file:  here, call it by its name, "call {place}"',
+  "wrapper-never-calls":
+    '"{text}" wraps the server\'s own action, but never calls the server:  say "call the server" where the call goes',
   "after-names-no-action":
     '"{text}" runs after an action, but no action above it reads that way:  as in "after putting a card on a pile", for "to put a card on a pile"',
   /** Two types whose new things make each other, for good. */

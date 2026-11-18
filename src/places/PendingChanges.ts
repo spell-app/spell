@@ -681,6 +681,8 @@ export class PendingChanges {
    * - What it'll change (`Place.planCall()`) is held as one group:  shown, never sent.
    * - The place's answer settles it:  what it made is what shows, made once, however its answer comes.
    * - Refused:  the group's dropped, what it changed goes back, and the one refusal notice shows;  it throws, as a call does.
+   *   - `holdNotice`, handed in:  the notice is handed to it, to show later or not at all (a program's failure steps,
+   *     epic `data` P50), instead of showing now.
    * - No answer:  the group's dropped too;  it throws, as a call does.
    * - A place that can't tell what it'll change:  nothing shows until the answer.
    * - throws what the place threw
@@ -689,7 +691,8 @@ export class PendingChanges {
     name: string,
     input: unknown,
     context: SelectingContext,
-    collection?: string
+    collection?: string,
+    holdNotice?: (error: PlaceError, show: () => void) => void
   ): Promise<unknown> {
     const place = this.places.placeForOrDie(this.placeName)
     const planned = await this.plannedCall(place, name, input)
@@ -704,16 +707,19 @@ export class PendingChanges {
     } catch (error) {
       group.cancel()
       if (error instanceof PlaceError) {
-        this.places.tellWriteFailed({
-          placeName: this.placeName,
-          changes: held,
-          error,
-          retry: () => {
-            this.callShownAtOnce(name, input, context, collection).catch((ignored: unknown) =>
-              console.error(`PendingChanges.callShownAtOnce():  "${name}" failed again`, ignored)
-            )
-          }
-        })
+        const tell = () =>
+          this.places.tellWriteFailed({
+            placeName: this.placeName,
+            changes: held,
+            error,
+            retry: () => {
+              this.callShownAtOnce(name, input, context, collection).catch((ignored: unknown) =>
+                console.error(`PendingChanges.callShownAtOnce():  "${name}" failed again`, ignored)
+              )
+            }
+          })
+        if (holdNotice) holdNotice(error, tell)
+        else tell()
       }
       throw error
     }

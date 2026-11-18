@@ -59,6 +59,7 @@ import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./plac
 import type { PlaceDeployment } from "./runtime"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
+import { failsAsMissing, holdNotice } from "./undoing"
 import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -1639,10 +1640,18 @@ export const savedMethods = defineCoreModule({
   /**
    * Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at "..."` compiles to.
    * - `input`:  what's sent, the recipe, as its row:  left out, nothing is.
+   * - `params`:  the action's other blanks by name, `{ queue: "night" }`, and a `(with ...)` clause's, each its own
+   *   object (epic `data` Q78):  sent beside the row, and filling the address's braces first, `/jobs/{id}/move/{queue}`.
    * - Waits for the place's answer, and answers with it.
+   * - A refusal's notice waits for the action's failure steps:  shown only if none of them caught it (`runActing()`).
    * - throws `PlaceError` if the place says no;  `TypeError` if it takes no named operations
    */
-  async callPlace(placeName: string, name: string, input?: unknown): Promise<unknown> {
+  async callPlace(
+    placeName: string,
+    name: string,
+    input?: unknown,
+    ...params: Record<string, unknown>[]
+  ): Promise<unknown> {
     const program = programPlaces()
     await program.load()
     const behind = program.placesNow!.placeFor(placeName)
@@ -1650,9 +1659,29 @@ export const savedMethods = defineCoreModule({
       throw new TypeError(`core.callPlace():  "${placeName}" takes no named operations, so "${name}" can't reach it`)
     }
     const things = program.thingMakerNow!
-    const sent = input === undefined ? undefined : things.rowSent(input)
+    const row = input === undefined ? undefined : things.rowSent(input)
+    const sent = params.length ? Object.assign({ ...(row as object | undefined) }, ...params) : row
     const { savedIn } = (input as { constructor?: SavedClass } | undefined)?.constructor ?? {}
-    return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection)
+    return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection, holdNotice)
+  },
+
+  /**
+   * One thing of a saved type, by its id, read first if it isn't held:  what `complete job 7151` calls it on
+   * (epic `data` Q77, Q91).
+   * - Held already:  that one, as it is.
+   * - The place has none:  a stand-in, on which every action runs only its failure steps, with the place's
+   *   "not found" (`failsAsMissing()`):  so `if completing a job fails` hears of it, and nothing crashes.
+   * - throws what the place throws, reading it
+   */
+  async savedThingOrMissing<Class extends new () => unknown>(Class: Class, id: unknown): Promise<InstanceType<Class>> {
+    const found = await savedMethods.savedThingWithId(Class, id)
+    if (found) return found
+    const standIn = Object.create(Class.prototype) as InstanceType<Class> & object
+    const { PlaceError } = programPlaces().folderNow!
+    const typeName = Class.name
+    const error = new PlaceError(`There's no ${typeName} ${String(id)}`, { cause: { kind: "not found" } })
+    failsAsMissing(standIn, error)
+    return standIn
   },
 
   /**
