@@ -1834,11 +1834,14 @@ export class ASTPropertyRules extends ASTStatement {
  * - `describes` (required):  `"action"`, `"event"` or `"menu"` (epic `elemental-spell` P10:
  *   `core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"] })`);
  *   or `"after"`, an after hook of an action (epic `language` P56):
- *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`.
- * - `name` (required):  an action's METHOD, by spell's name (`turn_over`), which each writer names its own way;
+ *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`;
+ *   or `"timer"`, steps its things run every so often (epic `language` T159):
+ *   `core.addTimer(Clock, "everySecond", { seconds: 1, until: "everySecondUntil", times: 10 })`.
+ * - `name` (required):  an action's (or a timer's) METHOD, by spell's name (`turn_over`), which each writer names its own way;
  *   an event's name as text (`flipped`).
  * - `description` (required):  its fields by spell's names (`enabled_when`), each writer naming them its own way:
  *   - text, or a list of text, e.g. `title`, `shortcuts`
+ *   - a number, e.g. a timer's `seconds`
  *   - a MEMBER of the class (`{ member: "turn_over_is_enabled" }`), named as the writer names members
  *   - a map of text to text, e.g. an event's `params`
  *   - a list of MEMBERS (`{ members: ["deal", "-", "undo"] }`), each named as the writer names members, `-` kept:
@@ -1847,16 +1850,17 @@ export class ASTPropertyRules extends ASTStatement {
  */
 export type ASTTypeDescriptionProps = Prettify<{
   type: string | ASTTypeExpression
-  describes: "action" | "event" | "menu" | "after"
+  describes: "action" | "event" | "menu" | "after" | "timer"
   name: string
   description: Record<string, ASTDescriptionValue>
   /** An action's title as written (`- titled "Turn Over"`), fill-ins as typed:  for its declaration, never written. */
   title?: string
 }>
 
-/** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
+/** One field of an `ASTTypeDescription`'s description:  text, a number, a list of text, a member, or a map of text. */
 export type ASTDescriptionValue =
   | true
+  | number
   | string
   | string[]
   | { member: string }
@@ -1865,7 +1869,7 @@ export type ASTDescriptionValue =
 
 export class ASTTypeDescription extends ASTStatement {
   declare type: ASTTypeExpression
-  declare describes: "action" | "event" | "menu" | "after"
+  declare describes: "action" | "event" | "menu" | "after" | "timer"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
   declare title?: string
@@ -1875,7 +1879,7 @@ export class ASTTypeDescription extends ASTStatement {
     this.assertType("type", ASTTypeExpression)
     this.assertType("name", "string")
     this.assert(
-      ["action", "event", "menu", "after"].includes(this.describes),
+      ["action", "event", "menu", "after", "timer"].includes(this.describes),
       `ASTTypeDescription: unknown kind '${this.describes}'`
     )
   }

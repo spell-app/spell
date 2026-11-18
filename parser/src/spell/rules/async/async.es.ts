@@ -11,6 +11,7 @@ import { Negatable } from "spell/parser/spell/rules/expressions"
 import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { EveryTimer } from "./EveryTimer"
 import { Meanwhile } from "./Meanwhile"
 import { Pause } from "./Pause"
 import { StartProcess } from "./StartProcess"
@@ -78,6 +79,14 @@ asyncEs.addRule(Pause, {
       ]
     }
   ]
+})
+
+// steps a thing runs every so often while the program runs, in its type's outline (epic `language` T159)
+asyncEs.addRule(EveryTimer, {
+  syntax: "cada {interval:measure_literal} (hasta {until:expression}|{times:number} veces)? :? {statement_body}?"
+})
+asyncEs.addRule(EveryTimer, {
+  syntax: "cada {unit:unit_words} (hasta {until:expression}|{times:number} veces)? :? {statement_body}?"
 })
 
 asyncEs.addRule(AtTheSameTime, {

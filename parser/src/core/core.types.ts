@@ -20,6 +20,7 @@ import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
 import type { waitingMethods } from "./waiting"
+import type { timerMethods } from "./timers"
 import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { dimensionMethods } from "./dimensions"
@@ -110,6 +111,7 @@ export type Core = typeof coreMethods &
   typeof sendingMethods &
   typeof actingMethods &
   typeof waitingMethods &
+  typeof timerMethods &
   typeof abilityMethods &
   typeof dimensionMethods &
   typeof siteMethods &

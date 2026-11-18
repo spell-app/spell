@@ -80,6 +80,9 @@ export class ElementsWriter extends P.JSWriter {
     for (const statement of statements) {
       if (statement instanceof P.ASTStatementGroup && !(statement instanceof P.ASTTryCatchBlock)) {
         kept.push(...this.drawingHalf(statement.statements ?? []))
+      } else if (statement instanceof P.ASTTypeDescription && statement.describes === "timer") {
+        // a timer runs in Python, never on the page:  it'd run its steps twice
+        continue
       } else if (P.isDeclaration(statement) || isDefaults(statement) || statement instanceof P.ASTTypeDescription) {
         kept.push(statement)
       } else if (statement instanceof P.ASTMethodDefinition && statement.methodName) {

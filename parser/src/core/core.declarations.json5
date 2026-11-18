@@ -3336,6 +3336,42 @@
     },
     {
       "kind": "method",
+      "name": "addTimer",
+      "of": "core",
+      "module": "timers",
+      "params": [
+        {
+          "name": "type"
+        },
+        {
+          "name": "method"
+        },
+        {
+          "name": "description"
+        }
+      ],
+      "description": "Each thing of `type` runs its method `method` every `description.seconds`, from when it's made until its program ends:  what `every second` in a type's outline compiles to, after its class."
+    },
+    {
+      "kind": "method",
+      "name": "every",
+      "of": "core",
+      "module": "timers",
+      "params": [
+        {
+          "name": "seconds"
+        },
+        {
+          "name": "run"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "Run `run` every `seconds` while the program runs:  a thing's timer, `every second`."
+    },
+    {
+      "kind": "method",
       "name": "place",
       "of": "core",
       "module": "saved",

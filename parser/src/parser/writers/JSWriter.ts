@@ -69,7 +69,8 @@ const DESCRIBERS = {
   action: "describeAction",
   event: "describeEvent",
   menu: "describeMenu",
-  after: "addAfterHook"
+  after: "addAfterHook",
+  timer: "addTimer"
 } as const
 
 export class JSWriter extends ProgramWriter {
@@ -1637,13 +1638,14 @@ export class JSWriter extends ProgramWriter {
     })
     const description = fields.length ? `{ ${fields.join(", ")} }` : "{}"
     const code = `core.${method}(${this.write(node.type)}, ${name}, ${description})`
-    // an event's and a menu's one line says it;  an action's spell, and an after hook's, is the method just above
-    return node.describes === "action" || node.describes === "after" ? code : this.withSpell(node, code)
+    // an event's and a menu's one line says it;  an action's spell, an after hook's and a timer's, is the method above
+    return node.describes === "event" || node.describes === "menu" ? this.withSpell(node, code) : code
   }
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
     if (value === true) return "true"
+    if (typeof value === "number") return String(value)
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("members" in value && Array.isArray(value.members)) {

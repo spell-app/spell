@@ -553,6 +553,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `"cant_be_undone": "keeps history"` too (`run_unrecorded()`), as `can't be undone` compiles
   - NOT ported:  `"clears history"` and props declared `undoable: false`, which compiled spell never writes
 
+## Timers
+
+- A type's TIMER, `every second` in its outline, its steps under it ([timers.ts](timers.ts), epic `language` T159):
+  - Compiled spell describes it after the class:  `core.addTimer(Clock, "everySecond", { seconds: 1 })`,
+    with `until` (a getter giving the moment it stops) and `times` (how many runs) when the line says them.
+  - Each thing of the class (a sub-class's too) starts its own once it's made:  `noteMade()` tells the timers
+    (`onMade()`), which start it after the code making it has run, as its class's timers are described after it.
+    A copy (`withoutCreate()`) starts none.
+  - `core.every(seconds, run, { until, times })` runs any steps so:  the first run `seconds` from now.
+  - Each run adds no undo step, as an action that `can't be undone`:  nor does an action it calls.
+    A failure is said on the console;  a run still going when the next is due skips that one.
+  - They belong to the run (`core.RUNTIME.timers`):  `resetRuntime()` and `clearRuntime()` stop them.
+    `inBackground`, so `spell run` ends when its program does.
+  - NOT yet:  a recompile that carries things over (`carryOver()`) or an edit taken while running
+    (`loadOverRunning()`) starts no timer for a new `every` line;  a running one carries on, calling the new method.
+- Python's twin is `spell_core.timers`:  asyncio tasks, which wait for a running loop (a page) to start.
+
 ## Sending events
 
 - `core.send(target, type, params?, sender?)` sends an event to ONE thing, and up its chain until a handler takes it

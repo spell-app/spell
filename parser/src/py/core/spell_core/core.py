@@ -35,6 +35,7 @@ from spell_core.sending import SendingMethods
 from spell_core.spell_tests import SpellTestMethods
 from spell_core.text_methods import TextMethods
 from spell_core.thing_methods import ThingMethods
+from spell_core.timers import TimerMethods
 from spell_core.ui_methods import UIMethods
 from spell_core.word_methods import WordMethods
 
@@ -57,6 +58,7 @@ class Core(
     DimensionMethods,
     PlaceMethods,
     UIMethods,
+    TimerMethods,
 ):
     """Everything compiled Python calls on `core`, each part in a module of its own:
 
@@ -69,6 +71,7 @@ class Core(
     - checking a thing's properties, the program's classes, spell's JSON:  `thing_methods.py`
     - text:  `text_methods.py`
     - the running program's events and processes, and pauses:  `runtime_methods.py`, `events.py`
+    - steps a thing runs every so often, `every second`:  `timers.py`
     - drawing things, mounting an app, and the page it's drawn on:  `drawing_methods.py`, `drawing.py`
     - spell's wording of a program's members, for reflection:  `word_methods.py`
     - what it says to the person running the program, in the program's language:  `messages.py`

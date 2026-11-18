@@ -63,6 +63,7 @@ import { describedMethods } from "./described"
 import { sendingMethods, send } from "./sending"
 import { actingMethods } from "./acting"
 import { waitingMethods } from "./waiting"
+import { timerMethods } from "./timers"
 import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
 import { dimensionMethods } from "./dimensions"
@@ -95,6 +96,7 @@ const CORE_MODULES: Record<string, object> = {
   sending: sendingMethods,
   acting: actingMethods,
   waiting: waitingMethods,
+  timers: timerMethods,
   saved: savedMethods,
   abilities: abilityMethods,
   dimensions: dimensionMethods,

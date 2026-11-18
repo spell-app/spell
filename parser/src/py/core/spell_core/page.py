@@ -50,9 +50,14 @@ class PageSession:
     """One page's session with a program:  see the module's docs."""
 
     def __init__(self, names: dict[str, Any]) -> None:
-        """A session with the program whose top level is `names`, as it ended its run (`run_program()`)."""
+        """A session with the program whose top level is `names`, as it ended its run (`run_program()`).
+
+        - SIDE EFFECT:  made on a running loop (a web app's), its timers start (`every second`);
+          else at its first message.
+        """
         self.names = names
         self.writer = StateWriter()
+        core.start_waiting_timers()
 
     @property
     def things(self) -> dict[str, SpellObject]:
@@ -78,6 +83,7 @@ class PageSession:
         - So the patch has all it changed, after any pause in it.
           A pause on the way sends what changed so far, through `core.before_pause`:  see `spell_quart`.
         """
+        core.start_waiting_timers()
         await self.run_async(message)
         core.send_waiting_changes()
         return self.writer.patch()

@@ -162,6 +162,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `{"answer": 1, "value": true}` (`PageAsks`;  spell_quart asks the tab that sent the last message).
   - With none (`spell run`):  printed as javascript prints them, the default answer taken;
     in a terminal, `confirm` and `prompt` read what's typed.
+- TIMERS (`timers.py`, epic `language` T159):  the JavaScript core's `every second`, `core.add_timer()`.
+  - Each an asyncio task, run unrecorded (`run_unrecorded()`):  no undo step.
+  - Made with no loop running (the program loading), it waits in `RUNTIME.timers_waiting` until a page starts it
+    (`PageSession`, `core.start_waiting_timers()`);  `spell run` never starts one, so it ends with its program.
+  - `reset_runtime()` cancels them.
 - UNDO (`undoing.py`, epic `language` P54):  the JavaScript core's history, the same steps and titles.
   - An action described `undone_as` is ONE step:  `core.describe_action()` wraps its method (`declare_action()`).
   - The app's `undo()`, `redo()`, `can_undo`, `undo_title` ...;  its `undo` and `redo` are actions, as javascript's.

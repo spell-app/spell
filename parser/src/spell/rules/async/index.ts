@@ -1,6 +1,6 @@
 /**
- * The `async` rule module:  async control flow and conceptual "processes" -- `await`, `pause for`, and
- * start/stop/check process.
+ * The `async` rule module:  async control flow and conceptual "processes" -- `await`, `pause for`, a type's timers
+ * (`every second`), and start/stop/check process.
  * - One rule class per file;  `async.en.ts` registers them on `_async` (`async.parser.ts`),
  *   and each other language's `async.<lang>.ts` registers the same rules in its own words.
  * - NOTE: those files register them in TIE-BREAK order:
@@ -10,6 +10,7 @@
 export * from "./async.parser"
 export * from "./Await"
 export * from "./Pause"
+export * from "./EveryTimer"
 export * from "./AtTheSameTime"
 export * from "./Meanwhile"
 export * from "./WithoutWaiting"

@@ -1183,6 +1183,16 @@ a line of the built-in types table, a built-in template, or a project's own `one
       know they're in a handler (`inHandler()`), and refuse to parse elsewhere.
   - A WHILE handler, `- while the mouse is down:` (`while_handler`), is a method too, `whileMouseDown()`:
     the page starts it and puts back what it set, through core's `startWhile()` / `endWhile()`.
+  - A TIMER, `every second` and its steps under it (`every_timer`, [EveryTimer](rules/async/EveryTimer.ts);
+    epic `language` T159):  each thing of the type runs them while the program runs, adding no undo step.
+    - How often is a duration, as a place's `check it every` reads one:  `every 5 minutes`, or a unit alone, `every day`.
+    - Then, if it likes, when it stops:  `until its end` (a moment, read again before each run), or `10 times`.
+    - Spanish:  `cada segundo`, `cada 5 minutos hasta su fin`, `cada segundo 10 veces`.
+    - A method named by its words in English, whatever the language (`everySecond()`, `everySecond10Times()`),
+      an `until` getter (`everySecondUntil`), and after the class `core.addTimer(Clock, "everySecond", { seconds: 1 })`
+      (`P.ASTTypeDescription`, `describes: "timer"`):  core's [timers.ts](../core/timers.ts) starts each thing's
+      once it's made, and stops them when the program ends.
+    - A Python program's page draws with no timer:  Python runs them (`PY.ElementsWriter`).
   - `send flipped` (`Send`) inside a template's method sends from `this`, and to `this` when it names no target:
     `parse()` finds the method's scope (`mapItTo === "this"`) into `match.data`.
     - An event whose name is still happening, by the language's `ongoingEventName`
