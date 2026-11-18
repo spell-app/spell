@@ -709,6 +709,9 @@ Until a `/back:  ...` message (or `epic focus status` says off):
          - a question takes `--options` too (`add <name>#Q "..." --options "A:Red | B:Blue"`)
          - pros and cons on an option afterwards:  `epic option edit <name>#J5 A --note "..."`
        - The person flips it from its id chip while reviewing;  `epic calm <name>#<id> [<id>...] [--loud]` from the CLI.
+       - A TODO the person wants red, as a reminder ("a red todo so I can think about it tomorrow"):
+         `epic update <name>#T3 --loud`, or `epic add <name>#T "..." --loud`;  `--calm` takes it back (epic
+         `epic-engine` T94).  A limit is never red.
    - Items added while the phase is active carry it.
      - The phase's "To review" line lists the ones the person hasn't reviewed;  the script writes it on every edit.
      - Never hand-write a "Judgement calls:" line.
@@ -1893,11 +1896,11 @@ add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--reques
 add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
 add <name>#I|#T "title" ... --pasted <n> | --picture <file>...   with the pictures pasted last, or files (T87)
 stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
-add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
+add <name>#T "title" [--limit | --loud]             a todo:  work still to do;  --limit:  a limit to know about;  --loud:  red, a reminder
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
-calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
+calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again (a todo too:  a reminder)
 update <name>#I3 --requested                        an issue or todo filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)

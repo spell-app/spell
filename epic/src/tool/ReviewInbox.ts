@@ -1795,7 +1795,7 @@ const MAX_TITLE = 300
 
 /**
  * The items Owen may call urgent or not (`setUrgency()`):
- * judgement calls, issues and todos (a follow-up's), the kinds red while open and not reviewed.
+ * judgement calls, issues and todos (a follow-up's, or one flagged `--loud`:  T94), the kinds red while open and not reviewed.
  * - `PlanReader.itemState()`, the same rule:  `CALM_ID` in `planDoc.types.ts`, plus `urgent` todos
  */
 const URGENCY_ID = /^[ijt]\d+$/

@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { DrawnState, NO_LIVE_REVIEW } from "spell/epic/components/epic-item/EpicItem.types"
+import { buttonsForItem, DrawnState, NO_LIVE_REVIEW } from "spell/epic/components/epic-item/EpicItem.types"
 
 const NOW = Date.parse("2026-11-15T12:00:00-05:00")
 const TODAY = "2026-11-15T11:00:00-05:00"
@@ -44,5 +44,20 @@ describe("DrawnState.of():  closing at his ✓ or x", () => {
   test("grey (`old`) at once, whatever it was:  red, orange, open", () => {
     for (const state of ["attention", "replied", "open", "requested"])
       expect(DrawnState.of({ id: "i57", state, status: "open", changed: TODAY }, closing, NOW)).toBe("old")
+  })
+})
+
+// epic `epic-engine` T94:  a todo Owen flagged red as a reminder (`epic update <epic>#T3 --loud`)
+describe("DrawnState.of():  a todo flagged red", () => {
+  const todo = { id: "t161", state: "attention", status: "open", changed: TODAY, urgent: true }
+
+  test("draws red, as the tool wrote it, and its id chip may call it not urgent", () => {
+    expect(DrawnState.of(todo, NO_LIVE_REVIEW, NOW)).toBe("attention")
+    expect(DrawnState.canCalm(todo)).toBe(true)
+    expect(DrawnState.of(todo, { ...NO_LIVE_REVIEW, urgency: { calm: true } }, NOW)).toBe("open")
+  })
+
+  test("keeps a todo's review buttons:  plane, revisit, x", () => {
+    expect(buttonsForItem(todo.id, { status: "open" })).toBe("todo")
   })
 })
