@@ -3979,6 +3979,11 @@
           "description": "Tooltip of its fold button while folded."
         },
         {
+          "key": "zoomTip",
+          "text": "Show it full size",
+          "description": "A picture in an edit not applied yet:  its tooltip."
+        },
+        {
           "key": "recommended",
           "text": "Recommended",
           "description": "The thumbs-up after the recommended option's title:  its label and tooltip."

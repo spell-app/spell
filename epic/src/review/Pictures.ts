@@ -4,7 +4,7 @@ import { SHOT_MAX_BYTES } from "./review.types"
  * ### `Pictures`
  * A picture Owen gives a page:  pasted, dropped or chosen, then sent to the page server (`POST shot`) as a PNG.
  * - ONE way for every place that takes one (epic `epic-engine` P51):  a note box (`<epic-review>`), an option's
- *   form (`<epic-option-form>`, P50), a comment's field (`intoWords()`, I267)
+ *   form (`<epic-option-form>`, P50;  in its words since I334), a comment's field (`intoWords()`, I267)
  * - Plain browser DOM, static:  no Solid, no element;  the caller saves it (`ReviewClient.saveShot()`) and says what
  *   went wrong in its own words (`problemOf()`)
  ****************/
@@ -43,28 +43,21 @@ export class Pictures {
    * SIDE EFFECT:  a picture pasted or dropped in `field` is saved (`save`), and its path goes into the words at the
    * cursor, as `![picture](<path>)` (epic `epic-engine` I267):  so it goes wherever the words go -- the comment saved,
    * the Send, the inbox a session reads -- and the thread draws it as a picture (`<epic-thread>`).
+   * - `field`:  a `<textarea>`, or an element drawing one in its shadow roots (`<epic-text-box>`, `<ui-textarea>`):
+   *   the `<textarea>` the paste or drop came from takes the words
    * - text pastes as usual
    * - `save`:  the PNG data URL to its path (a URL path the page can show);  `undefined` when it failed (it said why)
    * - `notify`:  says, in the page's words, why a file can't be taken (`problemOf()`, or a picture it can't read)
    * - in VS Code's side bar the page gets the picture as a paste too (the extension's `ClipboardImage`)
    * - NEVER throws;  answers what stops listening
    */
-  static intoWords(
-    field: HTMLTextAreaElement,
-    { save, notify }: { save: (png: string) => Promise<string | undefined>; notify: (problem: PictureProblem) => void }
-  ): () => void {
+  static intoWords(field: HTMLElement, saver: PictureSaver): () => void {
     const take = (event: ClipboardEvent | DragEvent) => {
       const file = Pictures.fileOf(event)
-      if (!file) return
+      const textarea = Pictures.textareaOf(event, field)
+      if (!file || !textarea) return
       event.preventDefault()
-      const problem = Pictures.problemOf(file)
-      if (problem) return notify(problem)
-      // where the cursor was, so typing meanwhile doesn't move where it lands
-      const at = field.selectionStart ?? field.value.length
-      void Pictures.pngOf(file)
-        .then(save, () => notify("notImage"))
-        .then((path) => path && Pictures.insert(field, at, Pictures.wordsFor(path)))
-        .catch(() => undefined)
+      void Pictures.putInto(textarea, file, saver)
     }
     const over = (event: DragEvent) => {
       if (event.dataTransfer?.types.includes("Files")) event.preventDefault()
@@ -77,6 +70,22 @@ export class Pictures {
       field.removeEventListener("drop", take)
       field.removeEventListener("dragover", over)
     }
+  }
+
+  /**
+   * SIDE EFFECT:  picture `file` saved (`save`), and its words put in `textarea` where the cursor is now, on a line of
+   * their own:  a paste's or a drop's (`intoWords()`), or a file chosen with a button (`<epic-option-form>`).
+   * - NEVER throws:  `notify` says why a file can't be taken;  a failed save said so itself
+   */
+  static async putInto(textarea: HTMLTextAreaElement, file: File, { save, notify }: PictureSaver): Promise<void> {
+    const problem = Pictures.problemOf(file)
+    if (problem) return notify(problem)
+    // where the cursor was, so typing meanwhile doesn't move where it lands
+    const at = textarea.selectionStart ?? textarea.value.length
+    const png = await Pictures.pngOf(file).catch(() => undefined)
+    if (!png) return notify("notImage")
+    const path = await save(png).catch(() => undefined)
+    if (path) Pictures.insert(textarea, at, Pictures.wordsFor(path))
   }
 
   /** How a picture at `path` reads in the words:  `![picture](<path>)`. */
@@ -104,6 +113,13 @@ export class Pictures {
     field.dispatchEvent(new Event("input", { bubbles: true }))
   }
 
+  /** The `<textarea>` a paste or drop on `field` came from:  `field` itself, or one in its shadow roots. */
+  private static textareaOf(event: Event, field: HTMLElement): HTMLTextAreaElement | undefined {
+    if (field instanceof HTMLTextAreaElement) return field
+    const from = event.composedPath()[0]
+    return from instanceof HTMLTextAreaElement ? from : undefined
+  }
+
   /** `file` as a data URL. */
   private static dataUrlOf(file: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -113,6 +129,16 @@ export class Pictures {
       reader.readAsDataURL(file)
     })
   }
+}
+
+/**
+ * What takes a picture into words (`intoWords()`, `putInto()`):
+ * - `save`:  the PNG data URL to its path;  `undefined` when it failed (it said why)
+ * - `notify`:  says, in the page's words, why a file can't be taken
+ */
+export type PictureSaver = {
+  save: (png: string) => Promise<string | undefined>
+  notify: (problem: PictureProblem) => void
 }
 
 /** Why a picture can't be taken, as a key of the page's words. */

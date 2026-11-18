@@ -1,4 +1,4 @@
-import { For, Show, type Accessor } from "solid-js"
+import { Show, type Accessor } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI } from "spell/ui/core"
@@ -378,15 +378,13 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           hidden={this.canFold ? this.fold.hidden() : undefined}
         >
           <Show when={this.pendingEdit?.note} fallback={<slot />}>
-            {(note) => (
-              <For
-                each={note()
-                  .split(/\n{2,}/)
-                  .filter(Boolean)}
-              >
-                {(paragraph) => <p class={NEW_TEXT}>{paragraph}</p>}
-              </For>
-            )}
+            {(note) =>
+              EpicChoices.noteOf(note(), {
+                alt: this.pendingEdit?.title ?? this.title ?? "",
+                tip: this.translationForKey("zoomTip"),
+                paragraphClass: NEW_TEXT
+              })
+            }
           </Show>
           <Show when={this.pickedOn}>
             <p class={DRAFT_LINE}>{this.translationForKey("pickedOn", { date: PlanDates.format(this.pickedOn) })}</p>

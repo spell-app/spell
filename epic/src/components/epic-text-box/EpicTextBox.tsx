@@ -37,6 +37,14 @@ export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
     return this.component?.text ?? this.startValue ?? ""
   }
 
+  /**
+   * Its native `<textarea>`, once drawn:  its `<ui-textarea>`'s, two shadow roots down;  `undefined` before.
+   * - for what needs the field itself:  its cursor, its focus, a picture's words put in (`Pictures.putInto()`)
+   */
+  get textarea(): HTMLTextAreaElement | undefined {
+    return this.shadowRoot?.querySelector(`.${FIELD}`)?.shadowRoot?.querySelector("textarea") ?? undefined
+  }
+
   /** Put `value` in it (a sent answer coming back):  no `input` event, as a `<textarea>`'s `value`. */
   set value(value: string) {
     if (this.component) this.component.text = value

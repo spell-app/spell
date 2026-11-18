@@ -1112,6 +1112,9 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
 - What `epic inbox apply` does with it, in order:
   - the flip (`multiple` set or taken away), removals, edits, then each added option with the next free letter,
     `by="owen"`, its note as `<p>`s, its picture an `<img>`
+  - a picture's words in a note, added or edited (`![picture](tests/q4-20261117-1200.png)`, the option form's since
+    epic `epic-engine` I334):  an `<img>` where they stand;  `shot`, an added option's picture kept apart, is from
+    before I334, still read
   - an edit keeps the earlier text:  `<div slot="was" data-title="<old title>">` holding the old body, one per edit,
     oldest first;  `edited` its day
   - a removal stays:  `removed` its day, `slot="removed"`, out of `chosen`
