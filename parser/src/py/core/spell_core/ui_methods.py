@@ -10,6 +10,7 @@ name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` i
 ```
 
 - What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`;  and `open_printing`;
+  `play`, `stop` and `load_sound` (`play "card slide"`), which the page plays;
   and `show_drawn`, `hide_drawn` (`show "you won"`), which the page carries out.
   - Each takes what the JavaScript core's takes, in the same order, and answers as it does.
   - `alert`, `warn`, `confirm` and `prompt` are `async`:  the Python writer awaits them, as javascript's are.
@@ -78,6 +79,8 @@ class UIMethods:
 
     # the core's runtime, whose queue a modal's call may pass (`let_modal_call_run()`):  `Core`'s
     RUNTIME: Any
+    # the test running now, if any:  `SpellTests`'s;  a test plays no sounds
+    active_test: Any
 
     @property
     def _shown_by(self) -> "dict[str, asyncio.Task[Any] | None]":
@@ -127,6 +130,26 @@ class UIMethods:
         - NEVER throws.
         """
         self._ask_page_soon("openPrinting", [])
+
+    def play(self, sound: str | None) -> None:
+        """Play `sound`, a built-in sound's name or a sound file's address:  compiled from `play "card slide"`.
+
+        - With a page:  the page plays it, as the JavaScript core's `play()` does.  Not awaited.
+        - No page, or while a test runs:  nothing, as the JavaScript core does under node and in a test.
+        - NEVER throws.
+        """
+        if sound and not self.active_test:
+            self._ask_page_soon("play", [sound])
+
+    def stop(self, sound: str | None) -> None:
+        """Stop `sound` and put it back to its start:  compiled from `stop "card slide"`.  As `play()`, but stopping."""
+        if sound:
+            self._ask_page_soon("stop", [sound])
+
+    def load_sound(self, sound: str | None) -> None:
+        """Have the page start loading `sound`, so a later `play` starts at once:  compiled from `load "card slide"`."""
+        if sound:
+            self._ask_page_soon("loadSound", [sound])
 
     async def alert(self, message: object, ok_text: "str | DialogOptions | None" = None) -> None:
         """Show `message` in a dialog, and wait until it's closed:  compiled from `alert "Yo!"`.
