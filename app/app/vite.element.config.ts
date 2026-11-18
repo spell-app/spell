@@ -109,7 +109,8 @@ const PACK = { name: "spell", prefix: "spell-" }
 
 /**
  * Write `spell.pack.js`:  the app's elements as a Spell UI COMPONENT PACK,
- * every family in `src/app/components/`:  `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>`.
+ * every family in `src/app/components/`:  `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>`,
+ * `<spell-reference-page>`.
  * A page with a `<ui-root>` loads it through `<ui-components source>`, as the docs' pages load `epics.pack.js`:
  *
  *     <script type="module" src="/element/spell-ui.js"></script>
@@ -123,7 +124,7 @@ const PACK = { name: "spell", prefix: "spell-" }
  * - Its `catalog` is read from the families' vocabularies by the kit's `RootCatalog`,
  *   as `spell pack build` reads a pack's.
  * - Its `define()` imports each family's ES module beside it (`spell-viewer.js`, `spell-editor.js` ...;
- *   `spell-code.js` and `spell-markdown.js` are `vite.code.config.ts`'s):
+ *   `spell-code.js`, `spell-markdown.js` and `spell-reference-page.js` are `vite.code.config.ts`'s):
  *   NOT one script holding them, as `spell pack build` makes,
  *   because the elements need what a classic script can't have --
  *   CodeMirror and the parser as lazy chunks, `spell-runtime.js` loaded afresh per app.

@@ -1,13 +1,14 @@
-import JSON5 from "json5"
-
 import { snakeCase } from "spell/util"
 import { ourNameFor } from "spell/places/FieldNames"
 import { SAMPLE_STORE } from "spell/places/places.types"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import type { Deployment, PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 import { PlaceNerd, type ErdField } from "spell/parser/spell/ingest/PlaceNerd"
+import {
+  PlaceReferenceSource,
+  type PlaceOnServer
+} from "spell/app/app/components/spell-reference-page/PlaceReferenceSource"
 
 /****************
  * ### `SitePlaces`
@@ -15,7 +16,8 @@ import { PlaceNerd, type ErdField } from "spell/parser/spell/ingest/PlaceNerd"
  * what the site editor's Data tab draws as a NERD and an ERD.
  * - A project's places:  the descriptions its project file lists under `development.apis`
  *   (`StarWars.api.json5`), and those of each project it imports (the Star Wars site's are the Star Wars example's).
- * - Read over the page server, as every project file is (`SP.SpellUrls`):  JSON5, parsed here.
+ * - Read over the page server, as every project file is (`SP.SpellUrls`):  each description through
+ *   `PlaceReferenceSource.placeAt()`, as its reference page reads it.
  * - Each collection's SAMPLE ROWS are the running site's own (epic `mockup` P14, T22):  ONE store, so a row edited
  *   in the Data tab shows when the site runs on its sample, and the other way round.
  *   - That store is the one `useSample()` keeps, in this browser:  `spell-samples:<project>/<place>`, a place's
@@ -45,7 +47,7 @@ export class SitePlaces {
 
   /**
    * The place whose description is at `path`, `@spell/examples/StarWars/StarWars.api.json5`:
-   * what its reference page draws (`<PlaceReference>`, epic `data` P52).
+   * what its reference page draws (`<spell-reference-page>`, epic `data` P52, P53).
    * - Its project is the folder it's in.
    * - `undefined` when it won't load or parse, said in the console.
    * - NEVER throws.
@@ -148,39 +150,9 @@ export class SitePlaces {
     }
   }
 
-  /** The description `file` of project `projectId`;  `undefined` when it won't load or parse. */
-  private static async placeAt(projectId: string, file: string): Promise<SitePlace | undefined> {
-    const path = `${projectId}/${file}`
-    try {
-      const response = await fetch(SP.SpellUrls.fileUrl(path))
-      if (!response.ok) throw new Error(`answered ${response.status}`)
-      const description = JSON5.parse(await response.text()) as PlaceDescriptionOnDisk
-      const deployments = await SitePlaces.deploymentsOf(projectId, description.about.name)
-      return { name: description.about.name, path, description, ...(deployments && { deployments }) }
-    } catch (error) {
-      console.error(`SitePlaces:  couldn't read the place description ${path}`, error)
-      return undefined
-    }
-  }
-
-  /**
-   * Where place `place` runs, as project `projectId`'s file lists it (epic `data` P49):
-   * `"places": { "netbox": { "dev": { "at": "..." } } }`.
-   * - `undefined`:  none listed, or the file won't load (said in the console).
-   */
-  private static async deploymentsOf(
-    projectId: string,
-    place: string
-  ): Promise<Record<string, Deployment> | undefined> {
-    try {
-      const response = await fetch(SP.SpellUrls.fileUrl(`${projectId}/${SP.PROJECT_FILE}`))
-      if (!response.ok) return undefined
-      const project = JSON5.parse(await response.text()) as { places?: Record<string, Record<string, Deployment>> }
-      return project.places?.[place]
-    } catch (error) {
-      console.error(`SitePlaces:  couldn't read ${projectId}'s places`, error)
-      return undefined
-    }
+  /** The description `file` of project `projectId`;  `undefined` when it won't load or parse (`PlaceReferenceSource`). */
+  private static placeAt(projectId: string, file: string): Promise<SitePlace | undefined> {
+    return PlaceReferenceSource.placeAt(`${projectId}/${file}`)
   }
 
   /** A field's example as a table's cell:  a link's last part (`/planets/1/` => `1`), a list's length, else as is. */
@@ -191,17 +163,8 @@ export class SitePlaces {
   }
 }
 
-/** One place a site's data comes from. */
-export type SitePlace = {
-  /** What the program calls it:  `star wars`. */
-  name: string
-  /** Its description's address:  `@spell/examples/StarWars/StarWars.api.json5`. */
-  path: string
-  /** What `spell place ingest` wrote of it. */
-  description: PlaceDescriptionOnDisk
-  /** Where it runs, by name, as its project's file lists them (`dev`, `production`):  left out, none listed. */
-  deployments?: Record<string, Deployment>
-}
+/** One place a site's data comes from:  read over the page server, as its reference page reads it. */
+export type SitePlace = PlaceOnServer
 
 /** A sample row:  values by the source's field names. */
 export type SampleRow = Record<string, unknown>

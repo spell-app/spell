@@ -178,7 +178,8 @@ const tokenRead: { token?: string; changed?: number } = {}
  *   the same names, taken from the PAGE when it has them (a docs page's `SpellUI.packModules`), else from `solid`
  * - `ui`:  `spell-ui`'s barrel, `spell-ui`, which the app imports LAZILY (`loadUI.ts`);
  *   its own lazy chunks are in `ui/`
- * - `families`:  what `<spell-code>` and `<spell-markdown>` import instead of Spell UI's families (`SHARED_FAMILIES`),
+ * - `families`:  what `<spell-code>`, `<spell-markdown>` and `<spell-reference-page>` import instead of Spell UI's
+ *   families (`SHARED_FAMILIES`, `DRAWN_FAMILIES`),
  *   written by `vite.solid.config.ts`:  the PAGE's when it has Spell UI of its own, else `ui`'s
  * - Why:  two Solids (or two `UIComponent`s) on one page fail SILENTLY (`solid-2.md`, "One Solid per page").
  *   Pinned by `element.build.test.ts`.
@@ -206,12 +207,23 @@ export const SHARED_FAMILIES: Readonly<Record<string, readonly string[]>> = {
 }
 
 /**
- * Spell UI's families spell's markdown engine DRAWS with (`<spell-markdown>`'s barrel imports them for that):
+ * Spell UI's families the app's elements DRAW with:  spell's markdown engine's (`<spell-markdown>`'s barrel imports
+ * them for that), and `<spell-reference-page>`'s folds, labels, tables and buttons (epic `data` P53):
  * side effects only, so `spell-ui-shared.js` exports nothing of them.
  * - Where the page has Spell UI of its own, its bundle defines every family (the docs bundle;  a set's page before a
  *   pack's `define()`);  else `spell-ui.js` does, as `spell-ui-shared.js` imports it.
  */
-const DRAWN_FAMILIES = ["ui-checkbox", "ui-divider", "ui-list", "ui-parts", "ui-segment", "ui-table"].map(
+const DRAWN_FAMILIES = [
+  "ui-button",
+  "ui-checkbox",
+  "ui-divider",
+  "ui-label",
+  "ui-list",
+  "ui-parts",
+  "ui-section",
+  "ui-segment",
+  "ui-table"
+].map(
   (family) => `spell/ui/components/${family}`
 )
 

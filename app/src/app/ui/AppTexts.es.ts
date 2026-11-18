@@ -12,6 +12,7 @@
 import type { AppLanguagePack, AppTextPack } from "spell/app/app/ui/AppTexts"
 import { spellViewerEs } from "spell/app/app/components/spell-viewer/SpellViewer.es"
 import { spellEditorEs } from "spell/app/app/components/spell-editor/SpellEditor.es"
+import { spellReferencePageEs } from "spell/app/app/components/spell-reference-page/SpellReferencePage.es"
 
 /** The editor's own texts, in Spanish. */
 const APP_TEXTS_ES: AppTextPack = {
@@ -356,62 +357,6 @@ const APP_TEXTS_ES: AppTextPack = {
   siteDataReference: "Referencia",
   siteDataReferenceTip: "Cada lista, campo y cambio de este lugar, y cuáles se probaron",
   // la página de referencia de un lugar, /place/<su descripción> (epic `data` P52)
-  placeRefLoading: "Leyendo el lugar…",
-  placeRefNotFound:
-    "Spell no encontró la descripción de una fuente de datos en {path}.\nRevisa la dirección, o vuelve a ejecutar spell place ingest para leer su descripción.",
-  placeRefVersion: "Versión {version}",
-  placeRefLooked: "Visto el {date}",
-  placeRefLists: "Listas",
-  placeRefDeployments: "Dónde funciona",
-  placeRefDeploymentsNone: "Tu proyecto no indica otro servidor para ella, así que Spell usa {address}.",
-  placeRefNotes: "Notas",
-  placeRefVerified: "Comprobada",
-  placeRefVerifiedWhy: "Spell la probó en el servidor real, y respondió como dice su descripción.",
-  placeRefFailed: "Falló",
-  placeRefFailedWhy: "Spell la probó en el servidor real, y no respondió como dice su descripción.",
-  placeRefUntyped: "Campos sin tipo",
-  placeRefUntypedWhy:
-    "La descripción no dice qué tipo de información guarda cada campo.\nSpell lo completa cuando lee la fuente de datos.",
-  placeRefDisabled: "Desactivada",
-  placeRefDisabledWhy:
-    "Tu archivo de Spell desactiva esta lista, así que nunca se prueba.\nQuita esa línea para volver a activarla.",
-  placeRefUnverified: "Sin probar",
-  placeRefUnverifiedWhy:
-    "Spell solo ha leído sobre esta lista, y no la ha probado en el servidor real.\nEjecuta spell place verify para probarla.",
-  placeRefTried: "probada el {date}",
-  placeRefTriedOn: "probada en {deployment}, el {date}",
-  placeRefRows: "{count} filas leídas",
-  placeRefFailed401:
-    "El servidor real pidió una clave, el código secreto que deja entrar a Spell.\nAgrégala junto a este servidor en el archivo __project.json5 de tu proyecto, y vuelve a probar con spell place verify.",
-  placeRefFailed403:
-    "El servidor real no aceptó la clave, el código secreto que deja entrar a Spell.\nRevisa la clave en el archivo __project.json5 de tu proyecto, y vuelve a probar con spell place verify.",
-  placeRefFailed404:
-    "Spell no encontró esta lista en el servidor real, en la dirección que tenía.\nRevisa la dirección en la descripción del lugar, y vuelve a probar con spell place verify.",
-  placeRefFailed5xx:
-    "Algo falló en el servidor real, no en tu proyecto.\nEspera unos minutos, y vuelve a probar con spell place verify.",
-  placeRefFailedOther:
-    "La respuesta del servidor real no fue la que Spell esperaba.\nPasa el puntero sobre esta línea para ver qué dijo.",
-  placeRefListLeftOut: "Fuera del Spell:  {why}",
-  placeRefChanges: "Qué puede cambiar",
-  placeRefFields: "Campos",
-  placeRefName: "Nombre",
-  placeRefAddress: "Dirección",
-  placeRefKey: "Clave",
-  placeRefReadOnly: "Solo lectura",
-  placeRefYes: "sí",
-  placeRefChange: "Cambio",
-  placeRefTakes: "Recibe",
-  placeRefState: "Probado",
-  placeRefField: "Campo",
-  placeRefInSpell: "En Spell",
-  placeRefKind: "Guarda",
-  placeRefFieldNotes: "Notas",
-  placeRefIsId: "dice qué fila es cuál",
-  placeRefLinksTo: "enlaza con {target}",
-  placeRefRequired: "obligatorio",
-  placeRefSetByServer: "lo pone el servidor",
-  placeRefOneOf: "uno de {choices}",
-  placeRefLeftOut: "fuera del Spell",
   inspectorNotSavedCode: "Tu programa calcula esto por sí mismo, así que un cambio aquí no se guardará.",
   inspectorNotSavedRunning: "La aplicación lo pone mientras corre, así que este cambio no se guardará.",
   inspectorShowCode: "Mostrar el código",
@@ -969,5 +914,5 @@ const APP_TEXTS_ES: AppTextPack = {
 export const appTextsEs: AppLanguagePack = {
   lang: "es",
   texts: APP_TEXTS_ES,
-  tags: [spellViewerEs, spellEditorEs]
+  tags: [spellViewerEs, spellEditorEs, spellReferencePageEs]
 }

@@ -42,7 +42,8 @@ and in the app's build folder, `app/` at the app folder's root.
     its board of sections and cards, `SiteBoard` and `<SiteBoardView>` (T31);  a site of its routing alone, `X.site.spell`,
     each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`);
     a place's reference page, `/place/<its description>` (`PlaceReference`, epic `data` P52), linked from the Data tab (`SiteData`):
-    its lists by tag, folded, each with how trying it went, its changes and its fields, drawn from the description each time
+    a `<spell-reference-page editable>` (below, `components/`), whose words it saves into the place's Spell file
+    through `editor.applySourceEdits()` (epic `data` P53)
   - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
@@ -435,7 +436,8 @@ and in the app's build folder, `app/` at the app folder's root.
         - an editor's, in what it pushes
       - No words file:  each by its name, `move to pile`.
 - `components/`:  `<spell-viewer>` and `<spell-editor>` (epic `spell-element`, P4);
-  `<spell-code>` and `<spell-markdown>` (epic `repo-split` P2).
+  `<spell-code>` and `<spell-markdown>` (epic `repo-split` P2);
+  `<spell-reference-page>` (epic `data` P53).
   - They're Spell UI components, written as a component pack's families are
     ([the `epic/` folder's AGENTS.md](../../../epic/src/AGENTS.md)).
   - `components/<tag>/` holds:
@@ -498,6 +500,16 @@ and in the app's build folder, `app/` at the app folder's root.
         - it needs only the page's core, so any docs bundle will do
     - Compiled spell's `<markdown>` blocks stay `<ui-markdown>` (marked):
       they're plain text in a drawing (`LayoutSpell.ts`, `MarkdownBlock`).
+- `<spell-reference-page>`:  a REFERENCE PAGE, made from its source each time, with a person's words about each thing
+  (epic `data` P53):  a place's today, from its description (`PlaceReferenceSource`);  the language's and an app's
+  reference later, handing it the same shapes (`ReferenceSource`, in its `SpellReferencePage.types.ts`).
+  - Its parts are tags of their own, and `::part()`s:  `<spell-reference-section>` (a folded section, drawn once
+    opened), `<spell-reference-item>` (a field, a change), `<spell-reference-state>` (how trying it went).
+  - A person's words are `--` lines in the place's Spell file (`PlaceWords`, the parser's):  the place's prose under
+    its line, a type's or a field's on the first lines inside it.
+  - `editable`:  an option-click opens something's words;  the page around saves them (`spell-reference-edit`).
+  - Built by `vite.code.config.ts`, as `<spell-code>` is:  `spell-reference-page.js`;  the Spell UI families it draws
+    with come from the page (`DRAWN_FAMILIES`, `vite.shared.ts`).
 - `app/docs/` is App UI (epic `epic-workflow` P11):  the docs pages of the app's components, a COMPONENT SET.
   - Served at `/components/app/`.
   - Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`).

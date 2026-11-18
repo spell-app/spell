@@ -42,6 +42,7 @@ import {
   spellPartsFor,
   spellLinesOf,
   spellTextOf,
+  type MergeMarks,
   type SpellLine,
   type SpellParts,
   type TypeLines,
@@ -259,7 +260,14 @@ export class PlaceIngest {
     const written = (await files.read(file)) ?? ""
     const text = written
     const others = await files.otherSpellBeside(file)
-    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
+    const merge = mergedSpell(
+      text,
+      before,
+      after,
+      (words, own) => isUsed(words, text, others, own),
+      old.spell,
+      this.marksFor(file)
+    )
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
     if (!specAt) await this.readThroughIt(description, reader, keySecret)
@@ -338,7 +346,14 @@ export class PlaceIngest {
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const text = (await files.read(file)) ?? ""
     const others = await files.otherSpellBeside(file)
-    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
+    const merge = mergedSpell(
+      text,
+      before,
+      after,
+      (words, own) => isUsed(words, text, others, own),
+      old.spell,
+      this.marksFor(file)
+    )
     const warnings = this.checkFileCompiles(text, merge.text, file)
     await files.write(file, merge.text)
     await this.writeDescription(file, descriptionPath, description)
@@ -837,6 +852,11 @@ export class PlaceIngest {
     const { files } = this.settings
     await files.writeDescription(path, descriptionOnDisk(description))
     await files.listInProject?.(file, path)
+  }
+
+  /** The day it looks, and `file`'s language:  the dated marks a later look writes (`mergedSpell()`, epic `data` P53). */
+  private marksFor(file: string): MergeMarks {
+    return { date: this.nowISO().slice(0, 10), lang: SP.Language.forFile(file).lang }
   }
 
   /** What time it is, in ISO:  a test's clock. */
