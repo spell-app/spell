@@ -4,11 +4,12 @@ import { createRouter, defineRoutes, useNavigate, type RouterHistory, type Route
 
 import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
+import { PlaceReferencePage } from "./PlaceReference"
 import { ProjectChooser } from "./ProjectChooser"
 import { SiteEditorRoute } from "./SiteEditorPage"
 import { ProjectPageRoute } from "./SpellEditor"
 import { ThemeEditorPage } from "./ThemeEditorPage"
-import { SITE_PAGE, THEME_PAGE } from "./pages.types"
+import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
  * The app's routes (`@solidjs/router`):  `/edit/` or `/run/`, then an address (decision Q40, epic `people-and-orgs` P4).
@@ -18,6 +19,8 @@ import { SITE_PAGE, THEME_PAGE } from "./pages.types"
  * - `/site`:  every site there is (`<SitesHomePage>`)
  * - `/site/<project>`:  a site's editor, its pages and their addresses (`<SiteEditorPage>`, epic `mockup` P4)
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
+ * - `/place/<description>`:  a place's reference page (`<PlaceReferencePage>`, epic `data` P52), e.g.
+ *   `/place/@spell/examples/StarWars/StarWars.api.json5`
  * - ONE route for both (`ProjectPageRoute`), so switching between them keeps the page.
  * - anything else:  `<ProjectChooser>`
  * - Each page is ONE route:  it stays mounted while only its address changes, e.g.
@@ -31,6 +34,7 @@ export const ROUTES = defineRoutes([
   },
   { path: THEME_PAGE, component: ThemeEditorPage },
   { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
+  { path: `${PLACE_PAGE}/*address`, component: PlaceReferencePage },
   { path: "*", component: HomeRoute }
 ])
 
