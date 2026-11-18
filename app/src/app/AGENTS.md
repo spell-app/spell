@@ -50,6 +50,10 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
+    `solid/SpellConsoleInput.tsx` is the Spell Console's line, under the console's:  a line of Spell typed runs on the
+    running app, its things kept (`editor.runInConsole()`, the runtime's `runLine()`;  read by `SP.parseLine()`, as
+    `spell repl` reads one;  epic `editor` P32);  `solid/ExplainThis.tsx`, the code's right-click Explain This:
+    each line's own hover words (`ui/ExplainedLines.ts`), then Claude Code's summary when it comes (spaces' `ClaudeExplainer`)
   - `layout/`:  how the editor loads its own Spell (`layoutSpell.ts`);  the Spell itself is ONE project of the group `@spell/editor`,
     `spell-editor`, one file, `SpellEditor.spell`:  the app `spell editor`, whose views are the top bar, the panes, the file tabs
     and the menus (P22, P29;  [README-app.md](../../README-app.md), "The editor in Spell");  opened as a project, its app

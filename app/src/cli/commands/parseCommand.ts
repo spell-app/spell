@@ -1,13 +1,13 @@
 import chalk from "chalk"
 
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
 /**
  * `spell parse "<text>"`:  how spell reads a line -- its match tree, then the javascript it compiles to.
  * - Tried as a `statement`, then an `expression` -- or as `--rule <name>`.  Several lines parse as a `block`.
  * - `--in <project>`:  parse inside that project's scope, so its types and phrases are known.
- * - `--json`:  the result as JSON -- see `CLI.ParsedText`.
+ * - `--json`:  the result as JSON -- see `SP.ParsedLine`.
  * - `--tree`:  the SPELL tree instead of the match tree:  what it means, as `<ui-tree-diagram>` draws it
  *   (`P.TreeWriter`).  With `--json`:  just that tree's data;  with `--html`:  a `<ui-tree-diagram>` for a docs page.
  * - Returns the exit code:  `EXIT.ERRORS` if it didn't parse or compile.
@@ -19,7 +19,7 @@ export async function parseCommand(
 ): Promise<number> {
   const [text = ""] = args
   const project = options.in ? await projectFor(session, options.in) : undefined
-  const result = CLI.parseText(text, CLI.lineScope(project), { rule: options.rule })
+  const result = SP.parseLine(text, SP.lineScope(project), { rule: options.rule })
   if (options.tree) {
     if (result.error) session.err(chalk.red(result.error))
     else if (!result.spellTree) session.err(chalk.red("It parses, but makes no spell tree to draw"))

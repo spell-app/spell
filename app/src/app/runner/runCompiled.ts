@@ -52,6 +52,7 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   carryAfterFailure = undefined
   unmountApp()
   core.resetRuntime()
+  consoleValues = {}
   // what the core says, e.g. a test's lines, in the program's language:  English with none
   core.useMessages(options.messages)
   if (!options.keepConsole) core.console.clear()
@@ -153,6 +154,67 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     return url
   }
 }
+
+/**
+ * Run a line of compiled Spell on the running program, as the browser's console runs a line on its page
+ * (the editor's Spell Console, epic `editor` P32;  Q38):  its things are the running ones, kept, and what it changes stays.
+ * - `javascript`:  ONE line's, as `SP.parseLine()` compiles it:  an expression (`solitaire.stock.count`),
+ *   a statement (`solitaire.turnOverTheNextCard()`), or a declaration (`export const x = 3`).
+ * - `names`:  what compiled Spell reads by name besides the program's own:  the runtime's exports, `core` among them.
+ * - It sees, by name:  `names`, what each project the program imports exports, the program's own top-level things,
+ *   then what earlier lines declared (`consoleValues`), the latest first.
+ * - A declaration keeps its value for later lines, until the program starts afresh.
+ * - Answers its value:  an expression's, a declaration's;  `undefined` for a statement.  Waits for one that waits.
+ * - throws what the line throws, or a `SyntaxError` for javascript it can't run
+ */
+export async function runLine(javascript: string, names: Record<string, unknown>): Promise<unknown> {
+  const inScope: Record<string, unknown> = { ...names }
+  for (const it of lastProgram?.imports.values() ?? []) Object.assign(inScope, it.exports)
+  Object.assign(inScope, lastProgram?.exports, consoleValues)
+  const known = Object.keys(inScope).filter((name) => IDENTIFIER.test(name))
+  const run = (body: string) => new AsyncFunction(...known, body)(...known.map((name) => inScope[name]))
+
+  const line = javascript.trim().replace(/;$/, "")
+  const declared = DECLARATION.exec(line)
+  if (declared) {
+    const [, name, value] = declared
+    consoleValues[name!] = await run(`return (${value}\n)`)
+    return consoleValues[name!]
+  }
+  const named = NAMED_DECLARATION.exec(line)
+  if (named) {
+    consoleValues[named[1]!] = await run(`${line.replace(/^export\s+/, "")}\nreturn ${named[1]}`)
+    return undefined
+  }
+  return run(isExpression(line) ? `return (${line}\n)` : line)
+}
+
+/** Is `line` javascript that reads as one expression?  Made into a function, not run, to find out. */
+function isExpression(line: string): boolean {
+  try {
+    new AsyncFunction(`return (${line}\n)`)
+    return true
+  } catch (ignored) {
+    return false
+  }
+}
+
+/** What lines run in the console declared, by name, e.g. `x is 3`'s `x`:  forgotten when the program starts afresh. */
+let consoleValues: Record<string, unknown> = {}
+
+/** The constructor of `async` functions:  a line may wait, e.g. an action that reads a place. */
+const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor as new (
+  ...parameters: string[]
+) => (...values: unknown[]) => Promise<unknown>
+
+/** A name a line can read as a variable. */
+const IDENTIFIER = /^[\p{L}_$][\p{L}\p{N}_$]*$/u
+
+/** A compiled line declaring a value, `export const x = 3`:  its name, then its value's javascript. */
+const DECLARATION = /^(?:export\s+)?(?:const|let|var)\s+([\p{L}_$][\p{L}\p{N}_$]*)\s*=\s*([\s\S]+)$/u
+
+/** A compiled line declaring a function or class by name:  its name. */
+const NAMED_DECLARATION = /^(?:export\s+)?(?:async\s+)?(?:function\*?|class)\s+([\p{L}_$][\p{L}\p{N}_$]*)/u
 
 /**
  * Take an edit to the running program as it runs, keeping every thing and element (epic `editor`, Edit Without Redraw):

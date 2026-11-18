@@ -1007,7 +1007,7 @@ function caddyProxyTo(port: number, settings: string[] = []): string[] {
  *   (`savesInPlace()`):  only this Mac's own editor writes the checkout's files.
  * - Never passed on to this machine's person, from elsewhere on the network (only from this Mac's own addresses,
  *   `thisMac`:  Owen, 2026-11-14, I120, Change This at test.spell.app on this Mac):
- *   - `/api/changes`:  a request into one of this machine's Claude sessions
+ *   - `/api/changes`:  a request into one of this machine's Claude sessions;  `/api/explain`, Claude asked to explain code
  *   - saving a theme into Spell UI's source
  *   - the API's test routes
  * - No editor running:  a plain message once the hold (`caddyProxyTo()`) runs out.
@@ -1059,7 +1059,7 @@ const CLOUD_PAGES = "^(/apps/@.*|/@[A-Za-z0-9_-]+/?)$"
 
 /** What's refused at the editor's address:  see `editorSite()`. */
 const REFUSED_FOR_THE_EDITOR =
-  "/api/changes /api/changes/* /api/home/order /api/test /api/missing /api/not-authorized /api/error"
+  "/api/changes /api/changes/* /api/explain /api/home/order /api/test /api/missing /api/not-authorized /api/error"
 
 /** The answer to what's refused there. */
 const REFUSED_ANSWER = "This is only for this Mac, not this address."

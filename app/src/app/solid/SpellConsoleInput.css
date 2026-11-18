@@ -1,0 +1,46 @@
+/* `<SpellConsoleInput>` (`SpellConsoleInput.tsx`):  the console's line, under its lines, as wide as the console. */
+.SpellConsoleInput {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px 8px 4px 8px;
+  border-top: 1px solid var(--ui-border-color-internal);
+  background: var(--spell-view-background);
+
+  > .prompt {
+    flex: 0 0 auto;
+    line-height: 24px;
+    color: var(--ui-text-color-muted, var(--ui-text-color));
+    font-family: monaco, monospace;
+  }
+
+  > .loading {
+    line-height: 24px;
+    font-size: 11px;
+  }
+
+  /* one line, growing as it wraps:  never the code pane's fill-the-parent height */
+  .ConsoleLineEditor {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    .CodeMirrorEditor,
+    .CodeMirrorEditor > .cm-editor {
+      height: auto;
+    }
+
+    .cm-editor {
+      min-height: 24px;
+      background: transparent;
+
+      &.cm-focused {
+        outline: none;
+      }
+    }
+
+    .cm-gutters {
+      display: none;
+    }
+  }
+}

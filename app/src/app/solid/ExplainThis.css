@@ -1,0 +1,62 @@
+/* `<ExplainThis>` (`ExplainThis.tsx`):  the code on the left, what it does on the right, side by side. */
+.ExplainThis {
+  .sides {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* one under the other on a narrow window */
+  @media (width < 720px) {
+    .sides {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  h4 {
+    margin: 0 0 8px 0;
+  }
+
+  h5 {
+    margin: 16px 0 8px 0;
+  }
+
+  .code ui-code {
+    display: block;
+    max-height: 60vh;
+    overflow: auto;
+  }
+
+  .words {
+    max-height: 60vh;
+    overflow: auto;
+
+    /* Claude's summary on its way, and "no notes":  quiet lines, never an alarm */
+    .asking,
+    .quiet {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px 0;
+      color: var(--ui-text-color-muted, var(--ui-text-color));
+    }
+
+    .lines {
+      margin: 0;
+      padding: 0 0 0 20px;
+
+      > li + li {
+        margin-top: 12px;
+      }
+
+      code {
+        display: block;
+        margin: 0 0 4px 0;
+        white-space: pre-wrap;
+        font-size: 12px;
+        color: var(--ui-text-color-muted, var(--ui-text-color));
+      }
+    }
+  }
+}

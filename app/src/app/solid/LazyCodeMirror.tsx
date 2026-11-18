@@ -5,6 +5,7 @@ import { editorHostNames } from "spell/app/app/layout/editorNames"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import type {
   CodeMirrorEditorProps,
+  ConsoleLineEditorProps,
   CodeSliceProps,
   DiffViewProps,
   FileEditorProps
@@ -44,6 +45,10 @@ export const LazyCodeMirror = {
   /** `<DiffView>`, two texts side by side -- see `spell/app/app/solid/codemirror/DiffView`. */
   DiffView: lazy<Component<DiffViewProps>>(async () => ({
     default: (await loadCodeMirror()).DiffView
+  })),
+  /** `<ConsoleLineEditor>`, the Spell Console's line -- see `spell/app/app/solid/codemirror/ConsoleLineEditor`. */
+  ConsoleLineEditor: lazy<Component<ConsoleLineEditorProps>>(async () => ({
+    default: (await loadCodeMirror()).ConsoleLineEditor
   })),
   /**
    * The module itself, loaded once and connected:  for what isn't a component, e.g. the language service

@@ -1,0 +1,130 @@
+# Publishes Spell's three npm packages (`spell`, `spell-ui`, `spell-epic`), started by hand:
+# Actions tab => "publish" => "Run workflow" on `main`, picking the tag and whether it's a dry run (epic `repo-split` P29).
+# - It runs the same `spell publish` as a laptop does:  build, pack, check, two scratch installs, then `npm publish`
+#   for each, `spell` first, only when every check passed.
+# - No npm token anywhere:  npm's trusted publishing.
+#   Each package names this repo and this file (`publish.yml`) on npmjs.com, and npm checks the identity token GitHub
+#   hands the run (`id-token: write`) against that.
+#   npm adds a provenance statement, so npmjs.com shows which commit and workflow built each version.
+# - The version is the kit's `package.json` `version` at the commit it runs on:  bump and commit it first.
+# - How it's set up, and what's done by hand on npmjs.com:  README/npm.md, "Publishing from GitHub".
+name: publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: the npm dist-tag;  only latest moves what `npm install spell` gets
+        type: choice
+        options: [next, latest]
+        default: next
+      dry-run:
+        description: build, pack, check and try the packages, but publish nothing
+        type: boolean
+        default: false
+
+permissions:
+  # the identity token npm checks, in place of a token
+  id-token: write
+  contents: read
+
+# one publish at a time, never cancelled half-way:  npm never takes the same version twice
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # the declarations, the app's editor, three packages and two scratch installs:  well under the checks' hour
+    timeout-minutes: 60
+    env:
+      TAG: ${{ inputs.tag }}
+      DRY_RUN: ${{ inputs.dry-run }}
+    steps:
+      # a real publish only from `main`;  a dry run from any branch
+      - name: a real publish runs on main
+        if: ${{ !inputs.dry-run && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::a real publish runs on main only, not $GITHUB_REF_NAME;  pick main, or tick dry run"
+          exit 1
+
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+      # trusted publishing needs npm 11.5.1 or newer
+      - run: npm install -g npm@^11.5.1
+      - name: npm is new enough for trusted publishing
+        run: |
+          npm --version
+          node -e 'const [a, b, c] = process.argv[1].split(".").map(Number); process.exit(a > 11 || (a === 11 && (b > 5 || (b === 5 && c >= 1))) ? 0 : 1)' "$(npm --version)"
+
+      - run: yarn install
+      # the epic VS Code extension's package, which spell-epic ships (`epic plugin install` installs it)
+      - run: yarn install
+        working-directory: epic/vscode
+      - run: yarn vscode:package
+        working-directory: epic
+
+      # the scratch install draws a <ui-button> in a real chromium
+      - run: yarn playwright install --with-deps chromium
+      # the scratch install's `epic init` makes a throwaway git repo
+      - run: git config --global user.name CI && git config --global user.email ci@spell.invalid
+
+      # the standing rule:  dependencies are checked before any publish
+      - run: node bin/spell.mjs deps check
+
+      - name: spell publish
+        shell: bash
+        env:
+          NPM_CONFIG_PROVENANCE: "true"
+        run: |
+          args=(--tag "$TAG")
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          node bin/spell.mjs publish "${args[@]}" 2>&1 | tee publish.log
+
+      # under `latest`, the publish turns the root marketplace's `epic` entry to npm's spell-epic:
+      # nobody commits it here, so the run prints it, to commit by hand
+      - name: the marketplace file to commit
+        if: ${{ always() && inputs.tag == 'latest' && !inputs.dry-run }}
+        shell: bash
+        run: |
+          if git diff --quiet -- .claude-plugin/marketplace.json; then
+            echo "the marketplace file is unchanged"
+            exit 0
+          fi
+          git diff -- .claude-plugin/marketplace.json
+          {
+            echo "### .claude-plugin/marketplace.json, to commit on main"
+            echo
+            echo '```json'
+            cat .claude-plugin/marketplace.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cp .claude-plugin/marketplace.json marketplace.json
+
+      - name: what it printed, in the run's summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          [ -f publish.log ] || exit 0
+          {
+            echo "### spell publish --tag $TAG$([ "$DRY_RUN" = "true" ] && echo ' --dry-run')"
+            echo
+            echo '```text'
+            sed 's/\x1b\[[0-9;]*m//g' publish.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: publish-${{ inputs.tag }}${{ inputs.dry-run && '-dry-run' || '' }}
+          path: |
+            publish.log
+            marketplace.json
+            dist-packs/*.tgz
+          if-no-files-found: ignore

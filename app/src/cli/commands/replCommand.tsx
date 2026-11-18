@@ -1,6 +1,7 @@
 import { render } from "ink"
 import { createInterface } from "readline"
 
+import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
 /**
@@ -14,8 +15,8 @@ import { CLI } from "spell/app/cli"
 export async function replCommand(session: CLI.CliSession, args: string[], _options: CLI.GlobalOptions) {
   const [arg] = args
   const project = arg ? await CLI.projectFor(session, arg) : undefined
-  const scope = CLI.lineScope(project)
-  const parse = (text: string) => CLI.parseText(text, scope, { commit: true })
+  const scope = SP.lineScope(project)
+  const parse = (text: string) => SP.parseLine(text, scope, { commit: true })
 
   if (session.isInteractive) {
     const title = `spell repl -- ${project ? `in ${project.projectId}` : "spell's own rules"}`

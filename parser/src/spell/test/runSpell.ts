@@ -45,13 +45,15 @@ export function runSpell(lines: string[]): (names: string) => Record<string, unk
  */
 export function runSpellFiles(
   sources: Array<{ path: string; contents: string }>,
-  { registered = false }: RunOptions = {}
+  { registered = false, debugging = false }: RunOptions = {}
 ): (names: string) => Record<string, unknown> {
-  const { files } = parseSpellProject(sources)
+  const { scope, files } = parseSpellProject(sources)
   const errors = files.flatMap((file) => file.errors)
   if (errors.length) throw new Error(`parse errors:\n${JSON.stringify(errors, null, 2)}`)
   const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const code = SP.SpellProject.combineCompiled(parts)
+  // a debugging build's lines say where they are by file and line:  see `P.DebugSteps`
+  const options = debugging ? { debugging: { placeOf: SP.SpellProject.debugPlaceOf } } : undefined
+  const code = SP.SpellProject.combineCompiled(parts, P.JSWriter.instance, "", debugging ? scope : undefined, options)
     .split("\n")
     .filter((line) => !line.startsWith("import "))
     .join("\n")
@@ -82,4 +84,6 @@ export function runSpellFiles(
 export type RunOptions = {
   /** `true`:  its things register in `core.things`, as a running program's do, e.g. for `every pile`.  Default:  not. */
   registered?: boolean
+  /** `true`:  its debugging build, each line of an action asking `core._stepper` first (`P.DebugSteps`).  Default:  not. */
+  debugging?: boolean
 }

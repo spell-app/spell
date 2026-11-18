@@ -6,12 +6,14 @@ import { editor, runtimeConsole } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Actions, ErrorBoundary, MenuHeader, PanelMenu, Submenu, tracked } from "spell/app/app/solid"
 import { ConsoleInspectorContext, ConsoleLines, type ConsoleInspector } from "./ConsoleLines"
+import { SpellConsoleInput } from "./SpellConsoleInput"
 
 import "./ConsoleViewer.css"
 
 /****************
  * ### `<ConsoleRoot>`
- * Root element to show the `<ConsoleViewer/>` in `SpellEditor`.
+ * Root element to show the `<ConsoleViewer/>` in `SpellEditor`:  its toolbar, its lines, and under them the
+ * Spell Console's line, where a line of Spell typed runs on the running app (`<SpellConsoleInput>`, epic `editor` P32).
  ****************/
 export function ConsoleRoot(props: ConsoleRootProps) {
   return (
@@ -20,6 +22,9 @@ export function ConsoleRoot(props: ConsoleRootProps) {
         <ConsoleToolbar />
       </Show>
       <ConsoleViewer scrolling={props.scrolling ?? true} />
+      <Show when={props.showInput ?? true}>
+        <SpellConsoleInput />
+      </Show>
     </div>
   )
 }
@@ -30,6 +35,8 @@ export type ConsoleRootProps = {
   showToolbar?: boolean
   /** Pass through to `<ConsoleViewer>`.  Default:  `true`. */
   scrolling?: boolean
+  /** Show the Spell Console's line under the lines (`<SpellConsoleInput>`).  Default:  `true`. */
+  showInput?: boolean
 }
 
 /****************
