@@ -701,6 +701,15 @@ export class Solitario extends App {
           <test-project-columna id="C6" />
           <test-project-columna id="C7" />
         </es-contenedor>
+        <es-modal id="ganaste" encabezado="ganaste">
+          <ui-content>
+            <es-texto tamano="grande">¡Felicidades!</es-texto>
+            <es-texto>{"Tus puntos:  "}{this.puntuación}</es-texto>
+          </ui-content>
+          <ui-actions>
+            {core.drawAction(this, "reiniciarElJuego", { title: "Juego nuevo", answer: "reiniciar el juego", "in-dialog": true })}
+          </ui-actions>
+        </es-modal>
         {core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"])}
       </>
     )
@@ -841,10 +850,7 @@ export class Solitario extends App {
   }
 
   async onPuntuaciónChange(event: PuntuaciónChangeEvent) {
-    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) {
-      await core.alert("¡Ganaste!", "Juego nuevo")
-      await this.reiniciarElJuego()
-    }
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) await core.showDrawn("ganaste")
   }
 }
 

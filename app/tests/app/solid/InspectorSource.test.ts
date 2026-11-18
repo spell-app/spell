@@ -43,7 +43,11 @@ describe("eventsDeclared()", () => {
   test("a card:  its abilities, then its events, as written, each with its code", () => {
     expect(eventsInSource(["Card"], SOLITAIRE)).toEqual([
       { kind: "ability", words: "draggable", code: "" },
-      { kind: "event", words: "on click", code: "if it is face up or its pile is solitaire's stock\n\tplay the card" }
+      {
+        kind: "event",
+        words: "when clicked",
+        code: "if it is face up or its pile is solitaire's stock\n\tplay the card"
+      }
     ])
   })
 
@@ -256,11 +260,11 @@ describe("newEventIn()", () => {
   const withWritten = (text: string, written: { at: number; code: string }) =>
     text.slice(0, written.at) + written.code + text.slice(written.at)
 
-  test("under Solitaire's `a card -- ...` header, as written today:  no colon, its empty body under it", () => {
+  test("under Solitaire's `a card` header, its description inside it, as written today:  no colon, its empty body under it", () => {
     const written = newEventIn(["card"], files, "on double click")!
     expect(written.code).toBe("\ton double click\n\t\t\n")
     expect(solitaire.slice(0, written.at)).toMatch(
-      /\na card\t+-- play the card on click[^\n]*\n\ton click\n[\s\S]*play the card\n$/
+      /\na card\n\t-- play the card when clicked[^\n]*\n\twhen clicked\n[\s\S]*play the card\n$/
     )
   })
 
@@ -297,7 +301,7 @@ describe("newEventIn()", () => {
       const place = placeOfDeclaredEvent({ words }, ["Solitaire"], places, read)!
       return lines.slice(place.from - 1, place.to)
     }
-    expect(shown("when the score changes").at(-1)).toBe("\t\t\trestart the game")
+    expect(shown("when the score changes").at(-1)).toBe('\t\t\tshow "you won"')
     expect(shown("on mouse down")).toEqual(["\t\t"])
     expect(eventsDeclared(["Solitaire"], places, read).at(-1)).toEqual({
       kind: "event",

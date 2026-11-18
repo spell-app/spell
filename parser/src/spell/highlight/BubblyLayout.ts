@@ -596,6 +596,9 @@ export class BubblyLayout {
     if (shape) return shape
     if (this.pronouns.has(word.toLowerCase()) && QUOTED_NAME_AFTER.test(words.slice(word.length)))
       return { rule: QUOTED_PROPERTY_RULE, band: "property" }
+    // another type's, declared in a type's body:  `a card "is on top" if ...`, that type in another file
+    if (this.smallWords.has(word.toLowerCase()) && TYPE_THEN_QUOTED_NAME.test(words.slice(word.length)))
+      return { rule: QUOTED_PROPERTY_RULE, band: "property" }
     if (!line.children.length) return undefined
     const reopen = this.parser.rules[REOPEN_TYPE_RULE]
     const articles = reopen instanceof P.Group ? reopen.rules : reopen ? [reopen] : []
@@ -1173,6 +1176,9 @@ const QUOTED_PROPERTY_RULE = "quoted_type_expression"
 
 /** A quoted name after a line's first word:  ` "can go up" if ...`. */
 const QUOTED_NAME_AFTER = /^\s+"[^"]+"/
+
+/** A type's name, then a quoted name, after an article:  ` card "is on top" if ...`. */
+const TYPE_THEN_QUOTED_NAME = /^\s+[\p{L}][\p{L}-]*\s+"[^"]+"/u
 
 /** An article and a name, nothing else:  `a card`, `a two sided view`. */
 const TYPE_NAME_ALONE = /^[\p{L}]+( +[\p{L}]+)+$/u

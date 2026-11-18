@@ -20,7 +20,7 @@ describe("Python on asyncio", () => {
   })
 
   test("a method that calls one that waits waits too, and awaits it", () => {
-    expect(cards).toContain("    async def restart_the_game(self) -> None:")
+    expect(cards).toContain("    async def deal_the_cards(self) -> None:")
     expect(cards).toContain("        await self.turn_over_the_next_card()")
   })
 
@@ -34,7 +34,7 @@ describe("Python on asyncio", () => {
   // waits since `move a card to a pile` is Pile.spell's, epic `language` P56)
   test("a handler that calls one that waits is `async def` too", () => {
     expect(cards).toMatch(
-      /\n {4}async def on_click\(self, event: ClickEvent\) -> None:\n.*\n {12}await self\.play\(\)\n/
+      /\n {4}async def on_click\(self, event: ClickEvent\) -> None:\n(?:.*\n){1,3}? {12}await self\.play\(\)\n/
     )
   })
 

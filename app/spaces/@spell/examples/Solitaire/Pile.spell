@@ -1,16 +1,17 @@
 a "pile" is a viewable, droppable list of cards
-	-- A pile of cards, e.g. in a game like solitaire
-	-- A card can only be in one pile at a time
+	-- A pile of cards, e.g. in a game like solitaire.
+	-- A card can only be in one pile at a time.
 	its "layout" is one of stacked or vertical
-		// How its cards lie:  on top of each other, or down a column -- styles.css
-	its "color" is
+		-- stacked = on top of each other
+		-- vertical = spread down in a column
+	a pile's "color" is
 		"none" if it is empty
 		the color of its last card otherwise
-	its "value" is
+	a pile's "value" is
 		0 if it is empty
 		otherwise the value of its last card
 	its "shorthand" is
-		// Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓
+		-- Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓
 		set summary to its id + ":"
 		for card in the pile
 			set summary to summary + " " + the shorthand of the card
@@ -20,18 +21,23 @@ a "pile" is a viewable, droppable list of cards
 		move the card to the pile
 
 	to move a card to a pile
-		// The card, and every card on it, onto the pile, if the piles' rules let it go and take it
-		// - refused, nothing moves, and there's nothing to undo
-		// - a game adds its own steps after it:  `after moving a card to a pile`
-		cancel if the card's pile cannot give it up
-			or the pile cannot take it
-		for card in cards in the card's pile starting with the card
+		-- Move the card, and every card on top of it, onto the pile.
+		-- The card's current pile can refuse to let go of it.
+		-- The new pile may refuse to take it.
+		-- If either of those is the case, the card doesn't move.
+		-- A game can add its own steps after it:
+			-- see `after moving a card to a pile` in Solitaire.spell
+		cancel if the card's pile cannot give the card up
+			or the pile cannot take the card
+		for each card in cards in the card's pile starting with the card
 			add it to the pile
 
 a card
-	// a card is in one pile at a time:  moving it to another pile takes it off this one
+	-- A card can be in only one pile at a time:  moving it to another pile removes it.
 	belongs to one pile
-	it "is on top of its pile" if it is the top card of its pile		-- the card the next one goes on
+	-- OWEN: was `is on top of its pile`;  `is on bottom` is new, for auto play's king line
+	a card "is on top" if it is the top card of its pile
+	a card "is on bottom" if it is the first card of its pile
 
 to test piles
 	set the stock to a new pile with id "stock"
@@ -43,7 +49,7 @@ to test piles
 	stock's value should be 7
 	stock's shorthand should be "stock: Q♠↑ 7♥↓"
 
-	// a card is in one pile at a time
+	-- a card is in one pile at a time
 	set the discards to a new pile with id "discards"
 	get the top card of the stock
 	add it to the discards
