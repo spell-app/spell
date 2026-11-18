@@ -776,6 +776,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TimeOfDay",
+          "ruleNames": ["time_of_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeOfDay.ts",
+          "line": 13,
+          "purpose": "Noon or midnight today, as a date -- `if now is after noon`, `antes de la medianoche` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? ((noon:mediodía|mediodia)|(midnight:medianoche))",
+              "example": "mediodía",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(12)"
+                },
+                "ts": {
+                  "code": "core.todayAt(12)"
+                },
+                "py": {
+                  "code": "core.today_at(12)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TimeLiteral",
+          "ruleNames": ["time_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeLiteral.ts",
+          "line": 23,
+          "purpose": "A time today, written as people write it -- `9am`, `9:30am`, `9 am`, `9:30 PM`, any case; `if now is after 9am` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{number} (: {number})? (am|pm)?",
+              "example": "9am",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(9)"
+                },
+                "ts": {
+                  "code": "core.todayAt(9)"
+                },
+                "py": {
+                  "code": "core.today_at(9)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "DaysUntil",
           "ruleNames": ["days_until"],
           "internal": false,
@@ -1588,11 +1640,11 @@
           "ruleNames": ["as_a_duration"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsADuration.ts",
-          "line": 21,
+          "line": 25,
           "purpose": "How long ago a date was, or how long until it is, as text -- `its added as a duration`, `30 minutes ago`, `in 2 days`, `tomorrow` (epic `language` P63).",
           "syntaxes": [
             {
-              "syntax": "como (una)? (duración|duracion) {style:duration_style}? (en {unit:unit_words})?",
+              "syntax": "como (una)? (duración|duracion) {style:duration_style}? (en [units:{unit:duration_unit} (,|y)])?",
               "example": "due como duración",
               "outputs": {
                 "js": {
@@ -1696,7 +1748,7 @@
           "purpose": "Is a date today, tomorrow or yesterday, whatever its time -- `if its due is tomorrow` (epic `language` P63).",
           "syntaxes": [
             {
-              "syntax": "{operator:is_or_is_not} ((today:hoy)|(yesterday:ayer))",
+              "syntax": "{operator:is_or_is_not} ((today:hoy)|(tomorrow:mañana|manana)|(yesterday:ayer))",
               "example": "due es hoy",
               "outputs": {
                 "js": {
@@ -1707,6 +1759,32 @@
                 },
                 "py": {
                   "code": "core.is_days_from_today(due, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayPart",
+          "ruleNames": ["is_day_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayPart.ts",
+          "line": 16,
+          "purpose": "Is a date's time in a part of its day -- `if now is in the morning`, `if its due is at night`, Spanish `si ahora es por la mañana` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:esta|este)|(por|en|de|a) (la|el)?|la|el|al) {part:day_part}",
+              "example": "due es la mañana",
+              "outputs": {
+                "js": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "ts": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "py": {
+                  "code": "core.is_day_part(due, \"morning\")"
                 }
               }
             }
@@ -1959,7 +2037,9 @@
             "date_or_time",
             "date_style",
             "duration_style",
+            "duration_unit",
             "duration_part_name",
+            "day_part",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -2031,7 +2111,13 @@
               "syntax": "((short:corta)|(long:larga))"
             },
             {
+              "syntax": "((year:años|año|anos|ano)|(month:meses|mes)|(week:semanas|semana)|(day:días|dias|día|dia)|(hour:horas|hora)|(minute:minutos|minuto)|(second:segundos|segundo))"
+            },
+            {
               "syntax": "((days:días|dias)|(hours:horas)|(minutes:minutos)|(seconds:segundos))"
+            },
+            {
+              "syntax": "((morning:mañana|manana)|(afternoon:tarde)|(earlyEvening:atardecer)|(evening:anochecer)|(lateEvening:primera hora de la noche)|(night:noche))"
             },
             {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"

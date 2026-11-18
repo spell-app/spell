@@ -24,12 +24,15 @@ import { DaysUntil } from "./DaysUntil"
 import { DurationPart } from "./DurationPart"
 import { IsBeforeOrAfter } from "./IsBeforeOrAfter"
 import { IsDayFromToday } from "./IsDayFromToday"
+import { IsDayPart } from "./IsDayPart"
 import { IsMeridiem } from "./IsMeridiem"
 import { IsSameDayAs } from "./IsSameDayAs"
 import { IsWeekendDay } from "./IsWeekendDay"
 import { NextWeekend } from "./NextWeekend"
 import { StartOfTheDay } from "./StartOfTheDay"
 import { TheDate } from "./TheDate"
+import { TimeLiteral } from "./TimeLiteral"
+import { TimeOfDay } from "./TimeOfDay"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -783,9 +786,20 @@ expressions.addRule(IsMeridiem, {
 expressions.addRule(Wording.specialize({ ruleName: "duration_style", meanings: ["short", "long"] }), {
   syntax: "((short:short)|(long:long))"
 })
+// A unit a duration is said in:  `as a duration in months and days` (J253)
+expressions.addRule(
+  Wording.specialize({
+    ruleName: "duration_unit",
+    meanings: ["year", "month", "week", "day", "hour", "minute", "second"]
+  }),
+  {
+    syntax:
+      "((year:years|year|yrs|yr)|(month:months|month)|(week:weeks|week)|(day:days|day)|(hour:hours|hour|hrs|hr)|(minute:minutes|minute|mins|min)|(second:seconds|second|secs|sec))"
+  }
+)
 expressions.addRule(AsADuration, {
   roles: { match: "value" },
-  syntax: "as (a|an)? {style:duration_style}? duration (in {unit:unit_words})?",
+  syntax: "as (a|an)? {style:duration_style}? duration (in [units:{unit:duration_unit} (,|and)])?",
   tests: [
     {
       compileAs: "expression",
@@ -795,6 +809,9 @@ expressions.addRule(AsADuration, {
         ["due as a short duration", 'core.timeFromNow(due, "short")'],
         ["due as a long duration", 'core.timeFromNow(due, "long")'],
         ["due as a duration in days", 'core.timeFromNow(due, "normal", "day")'],
+        ["due as a duration in months and days", 'core.timeFromNow(due, "normal", ["month", "day"])'],
+        ["due as a duration in days and months", 'core.timeFromNow(due, "normal", ["month", "day"])'],
+        ["5400 as a duration in minutes, hours", 'core.durationText(5400, "normal", ["hour", "minute"])'],
         ["90 seconds as a duration", "core.durationText(90)"],
         ["(due - now) as a short duration", 'core.durationText(core.secondsBetween(due, core.now()), "short")']
       ]
@@ -865,6 +882,64 @@ expressions.addRule(IsDayFromToday, {
         ["due is today", "core.isDaysFromToday(due, 0)"],
         ["due is tomorrow", "core.isDaysFromToday(due, 1)"],
         ["due isn't yesterday", "!core.isDaysFromToday(due, -1)"]
+      ]
+    }
+  ]
+})
+// Noon and midnight today, and a time as people write it (J252)
+expressions.addRule(TimeOfDay, {
+  syntax: "((noon:noon)|(midnight:midnight))",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["noon", "core.todayAt(12)"],
+        ["midnight", "core.todayAt(0)"]
+      ]
+    }
+  ]
+})
+expressions.addRule(TimeLiteral.specialize({ ruleName: "time_literal" }), {
+  // its own `parse()` reads it:  this is for people, and the syntax files
+  syntax: "{number} (: {number})? (am|pm)",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["9am", "core.todayAt(9)"],
+        ["9 am", "core.todayAt(9)"],
+        ["9:30am", "core.todayAt(9, 30)"],
+        ["9:30 PM", "core.todayAt(21, 30)"],
+        ["12am", "core.todayAt(0)"],
+        ["12pm", "core.todayAt(12)"],
+        ["now is after 9am", "core.isAfter(core.now(), core.todayAt(9))"]
+      ]
+    }
+  ]
+})
+// A part of the day:  `if now is in the morning`
+expressions.addRule(
+  Wording.specialize({
+    ruleName: "day_part",
+    meanings: ["morning", "afternoon", "earlyEvening", "evening", "lateEvening", "night"]
+  }),
+  {
+    syntax:
+      "((earlyEvening:early evening)|(lateEvening:late evening)|(morning:morning)|(afternoon:afternoon)|(evening:evening)|(night:night))"
+  }
+)
+expressions.addRule(IsDayPart, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not} ((today:this)|in the|at) {part:day_part}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["due is in the morning", 'core.isDayPart(due, "morning")'],
+        ["due is not in the late evening", '!core.isDayPart(due, "lateEvening")'],
+        ["due is at night", 'core.isDayPart(due, "night")'],
+        ["due is this afternoon", 'core.isDayPart(due, "afternoon", "today")']
       ]
     }
   ]

@@ -668,6 +668,13 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   - suffixes:  `as two digits` / `with a leading zero` (`as_two_digits`), `is PM` (`is_meridiem`), `as a duration`
     (`as_a_duration`, its `short` / `long` and `in <unit>`), `is a weekend day`, `is before` / `is after`,
     `is the same day as`, `is today` / `is tomorrow` / `is yesterday`
+  - `as a duration in months and days` (J253):  its units are `duration_unit`'s words, a list joined by `and` or
+    commas, said biggest first whatever their order;  years, months, weeks, days, hours, minutes, seconds
+  - `is in the morning`, `is at night`, `is this afternoon` (`is_day_part`, J252):  `day_part`'s words, Owen's hours in
+    core's `DAY_PARTS`
+    - Spanish's part needs its `la` or `por`:  `es la mañana`, `es por la mañana`;  `es mañana` is tomorrow
+  - times today (J252):  `noon`, `midnight` (`time_of_day`);  `9am`, `9:30 PM` (`time_literal`, its own `parse()`:
+    the `:` touches its numbers);  Spanish's `21:30` too
   - operands:  `the next weekend`, `the days until` / `since`, `the start of the day of`, `the days in the month of`,
     `the hours of <a duration>` (`duration_part`:  only of a measured duration)
   - `the time zone`, `the short time zone`, `the long time zone`:  `the_date`'s
@@ -899,6 +906,13 @@ A kind that says so is saved in a file of its own.
     - The statement takes a nested body only when it matched (`takesNestedBody()`).
   - Inline body:  after its sequence matches, `parse()` parses the rest of the line in `nestedScope`.
     - It does NOT change scope:  this runs for every candidate, winners AND losers.
+    - A comma works as `:` does after a block opener (epic `language` J269):  its syntax says `(:|,)?`,
+      `if the result is ok, set the name of the baby to it`.
+      - Only before a `{statement_body}`:  never after a definition (`... is :? {expression_body}`)
+        or a list's header (`where:`), where a comma still means a list.
+      - A line that read with words left over, holding a comma, is read again at each comma, left to right
+        (`parseAtComma()`):  the words up to it whole as the opener, the rest whole as its statement.
+        So `if its rank is one of 1, 2, 3, print it` keeps its list, though the list first read on over `print`.
   - The inline statement OR nested block is recorded as `match.data.body`.
     - Read it with `rule.getBody(match)`, NEVER by group name.
   - Anything that parses a `"statement"` on its own, and keeps it, MUST commit it:
