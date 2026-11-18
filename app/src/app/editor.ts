@@ -950,6 +950,35 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * Run a line of Spell typed into the console on the running app, as the browser's console runs a line on its page
+   * (the Spell Console, epic `editor` P32;  Q38):  the app's things are the running ones, kept, and what it changes stays.
+   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope:
+   *   its types, things and actions are known, and what earlier lines declared (`x is 3`, then `x + 4`).
+   * - Logged on the program's console:  the line as typed, then its value, or why not, in red.
+   * - Nothing running yet:  Spell's own rules alone, and only the runtime's names.
+   * - NEVER throws:  what goes wrong is the console's red line, and the app keeps running.
+   */
+  async runInConsole(text: string): Promise<void> {
+    const line = text.trim()
+    if (!line) return
+    const runtime = await editor.loadRuntime()
+    const output = runtime.core.console
+    output.typed(line)
+    const parsed = SP.parseLine(line, consoleScopeFor(editor.project), { commit: true })
+    if (parsed.error !== undefined || parsed.compiled === undefined) {
+      // nothing read at all:  the parser's "Doesn't parse as statement or expression" is its own words, not a reader's
+      const notRead = !parsed.tree.length && parsed.error !== undefined
+      output.error(notRead ? appTexts.text("consoleLineNotRead") : (parsed.error ?? appTexts.text("consoleLineNotRun")))
+      return
+    }
+    try {
+      output.answer(await runtime.runLine(parsed.compiled))
+    } catch (error) {
+      output.error(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  /**
    * Set where the running app draws:  `<AppRoot>` hands it over, as a ref.
    * - NOT spell state.
    * - A new place while a program's compiled, e.g. moving from Edit to Run:  the program starts again there,
@@ -981,35 +1010,6 @@ export class EditorStore extends Observable {
   ////////////////
   // ## The Reference, and the Inspector's words
   ////////////////
-
-  /**
-   * Run a line of Spell typed into the console on the running app, as the browser's console runs a line on its page
-   * (the Spell Console, epic `editor` P32;  Q38):  the app's things are the running ones, kept, and what it changes stays.
-   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope:
-   *   its types, things and actions are known, and what earlier lines declared (`x is 3`, then `x + 4`).
-   * - Logged on the program's console:  the line as typed, then its value, or why not, in red.
-   * - Nothing running yet:  Spell's own rules alone, and only the runtime's names.
-   * - NEVER throws:  what goes wrong is the console's red line, and the app keeps running.
-   */
-  async runInConsole(text: string): Promise<void> {
-    const line = text.trim()
-    if (!line) return
-    const runtime = await editor.loadRuntime()
-    const output = runtime.core.console
-    output.typed(line)
-    const parsed = SP.parseLine(line, consoleScopeFor(editor.project), { commit: true })
-    if (parsed.error !== undefined || parsed.compiled === undefined) {
-      // nothing read at all:  the parser's "Doesn't parse as statement or expression" is its own words, not a reader's
-      const notRead = !parsed.tree.length && parsed.error !== undefined
-      output.error(notRead ? appTexts.text("consoleLineNotRead") : (parsed.error ?? appTexts.text("consoleLineNotRun")))
-      return
-    }
-    try {
-      output.answer(await runtime.runLine(parsed.compiled))
-    } catch (error) {
-      output.error(error instanceof Error ? error.message : String(error))
-    }
-  }
 
   /**
    * Scope tree of current `project`, for the Reference tab and the add menu's This app -- see `LSP.ScopeExplorer`.
