@@ -111,10 +111,11 @@ export class AfterHook extends ToDoSomething {
     const file = fileOf(scope)
     if (!file) return { level: "app" }
     if (API_FILE.test(file.path ?? "")) return { level: "api" }
-    // a page declared in this file:  the project's types are every file's
-    const page = file.types
-      ?.get()
-      .find((type) => type.isA(PAGE_TYPE) && (type.alonePage === file.path || fileOf(type.declaredBy?.scope) === file))
+    // a page declared in this file:  the project's types are every file's;  `scan()`, so an edit to another type
+    // doesn't read this file again (`P.Outline`)
+    const isPageHere = (type: P.TypeScope) =>
+      type.isA(PAGE_TYPE) && (type.alonePage === file.path || fileOf(type.declaredBy?.scope) === file)
+    const page = file.types?.scan(isPageHere).find(isPageHere)
     return page ? { level: "page", page: page.name } : { level: "app" }
   }
 

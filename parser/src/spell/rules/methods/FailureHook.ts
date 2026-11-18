@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { AfterHook, type HookMoment } from "./AfterHook"
@@ -33,6 +34,9 @@ export class FailureHook extends AfterHook {
   @proto static priority = Priority.aboveDeclaration
   // words naming no action are left to the `if`:  `if the download fails`
   @proto static refusesWhenNoAction = false
+  // no band:  a line starting `if` draws as a control line, read alone too (`BubblyLayout.shapeOf()`)
+  declare roles: SP.BubblyRuleRoles
+  @proto static roles: SP.BubblyRuleRoles = {}
 
   /** Its steps see `the error`. */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {

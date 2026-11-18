@@ -1624,7 +1624,6 @@ places.addRule(ErrorIs, { syntax: "the error is {name:text}" })
 places.addRule(Nevermind, { syntax: "(nevermind|never mind)" })
 places.addRule(PassTheError, { syntax: "pass the error" })
 places.addRule(AnyServerCallFails, {
-  roles: { band: "action" },
   syntax: "(when|if) any server call fails :? {statement_body}?",
   tests: [
     {

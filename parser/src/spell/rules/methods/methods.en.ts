@@ -2195,7 +2195,6 @@ methods.addRule(WhileHook, {
   ]
 })
 methods.addRule(FailureHook, {
-  roles: { band: "action", signature: "declaration" },
   syntax: "(if|when) {signature:method_signature} fails :? {statement_body}?",
   tests: [
     {

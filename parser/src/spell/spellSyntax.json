@@ -11013,7 +11013,7 @@
           "ruleNames": ["failure_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/FailureHook.ts",
-          "line": 30,
+          "line": 31,
           "purpose": "Steps that run when an action fails, from any file (epic `data` P50, Q82, Q87-Q89).",
           "syntaxes": [
             {
