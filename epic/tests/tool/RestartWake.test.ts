@@ -90,7 +90,13 @@ test("the hook:  a line goes to stderr with exit 2 (asyncRewake wakes the sessio
     spawnSync(process.execPath, [HOOK], {
       input: JSON.stringify({ cwd, source: "resume" }),
       encoding: "utf8",
-      env: { ...process.env, SPELL_EPIC_HOME: epicHome, CLAUDE_CONFIG_DIR: claudeHome }
+      // attended, as a panel session:  run inside `claude -p` (an agent's tests), the hook would stand down (I319)
+      env: {
+        ...process.env,
+        SPELL_EPIC_HOME: epicHome,
+        CLAUDE_CONFIG_DIR: claudeHome,
+        CLAUDE_CODE_SESSION_ATTENDED: "1"
+      }
     })
   const quiet = run(big)
   expect([quiet.status, quiet.stderr]).toEqual([0, ""])
