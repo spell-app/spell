@@ -24,6 +24,8 @@
     "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
     "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
+    "duration-ago": "{time} ago",
+    "duration-from-now": "in {time}",
     "write-retry": "Retry",
     "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
     "room-reload": "Reload",

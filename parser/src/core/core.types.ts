@@ -2,6 +2,7 @@ import type { coreMethods } from "./core"
 import type { collectionCoreMethods } from "./collection-core"
 import type { collectionOtherMethods } from "./collection-other"
 import type { stringMethods } from "./string"
+import type { dateMethods } from "./dates"
 import type { uiMethods } from "./ui"
 import type { drawingMethods } from "./drawing"
 import type { elementsMethods } from "./elements"
@@ -93,6 +94,7 @@ export type Core = typeof coreMethods &
   typeof collectionCoreMethods &
   typeof collectionOtherMethods &
   typeof stringMethods &
+  typeof dateMethods &
   typeof uiMethods &
   typeof drawingMethods &
   typeof elementsMethods &
@@ -270,6 +272,8 @@ export const CORE_MESSAGES = {
   "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
   "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
+  "duration-ago": "{time} ago",
+  "duration-from-now": "in {time}",
   "write-retry": "Retry",
   "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
   "room-reload": "Reload",

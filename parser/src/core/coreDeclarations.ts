@@ -46,6 +46,7 @@ import { coreMethods } from "./core"
 import { collectionCoreMethods } from "./collection-core"
 import { collectionOtherMethods } from "./collection-other"
 import { stringMethods } from "./string"
+import { dateMethods } from "./dates"
 import { uiMethods } from "./ui"
 import { drawingMethods } from "./drawing"
 import { elementsMethods } from "./elements"
@@ -79,6 +80,7 @@ const CORE_MODULES: Record<string, object> = {
   "collection-core": collectionCoreMethods,
   "collection-other": collectionOtherMethods,
   string: stringMethods,
+  dates: dateMethods,
   ui: uiMethods,
   drawing: drawingMethods,
   elements: elementsMethods,
