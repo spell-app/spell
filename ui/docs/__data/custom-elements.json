@@ -23340,6 +23340,14 @@
               "fieldName": "inverted"
             },
             {
+              "name": "transparent",
+              "description": "See-through:  no box, no shadow, no padding, drawn as written.  Its text keeps its colour (`appearance=\"basic\"` turns it light).  In Spell, a modal naming none of its parts is laid out for you, unless it says `transparent`.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "transparent"
+            },
+            {
               "name": "fullscreen",
               "description": "Nearly the whole viewport wide.",
               "type": {

@@ -57,8 +57,8 @@ const CANONICAL: Record<string, string> = {
 
 /** `<ui-modal>`'s and `<ui-popup>`'s attributes in the test pack, by language:  its own name => as written (epic `language` P61). */
 const MODAL_NAMES: Record<string, Record<string, string>> = {
-  en: { heading: "heading" },
-  es: { heading: "encabezado" }
+  en: { heading: "heading", transparent: "transparent" },
+  es: { heading: "encabezado", transparent: "transparente" }
 }
 
 /** `<ui-button>`'s attributes in the test pack, by language:  as written => its own name. */

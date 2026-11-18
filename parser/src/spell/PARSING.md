@@ -1771,9 +1771,10 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       its click has run the action, as a dialog's own buttons do (`in-dialog`:  the core closes it, `closeDialogOf()`);
       `keep-open` (Spanish's `mantener-abierto`, `LanguageWords.keepOpenAttribute`) leaves it open.
     - Anywhere else in it (its content, a menu's row), an action runs and the modal stays.
-    - A modal naming none of its parts, with an `<action>` at its top, is laid out for you (`dialogChildren()`):  what it
-      holds in `<ui-content>`, those `<action>`s after it in `<ui-actions>`, so they're its actions and close it.
-      One with no action there keeps its drawing as written (StarWars' crawl places its words over the modal itself).
+    - A modal naming none of its parts is ALWAYS laid out for you (`dialogChildren()`;  epic `language` J245):  what it
+      holds in `<ui-content>`, the `<action>`s at its top after it in `<ui-actions>`, so they're its actions and close it.
+      `<modal transparent>` (Spanish's `transparente`) keeps its drawing as written, see-through, with no box or padding
+      (StarWars' crawl places its words over the modal itself).
     - A button's ANSWER, a bare word on it (`LanguageWords.answerWords`):  `<action ok />`, `<action "save the thing" ok />`,
       `<action cancel />` (Spanish's `aceptar`, `cancelar`), compiled as the core's `answer="ok"`.
       - With no quoted word, the word names the action:  the program's `ok` if it has one;  if not, the button just

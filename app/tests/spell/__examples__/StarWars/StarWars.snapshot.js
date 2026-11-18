@@ -411,6 +411,7 @@ export class Film extends Thing {
   drawCrawl() {
     return h("ui-modal", {
       class: "crawl",
+      transparent: true,
       visible: true,
       overlay: true,
       fullscreen: true,

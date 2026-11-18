@@ -31,12 +31,46 @@ describe("a named modal, menu or popup, and show / hide by its name", () => {
     const file = parsed(game('<modal "you won">', "\t<text>Well done</>", "</>"))
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('h("ui-modal", { id: "you-won", heading: "you won" },')
-    // with no action to put in a bottom row, it keeps its drawing as written (T155)
-    expect(file.compiled).toContain('h("ui-modal", { id: "you-won", heading: "you won" }, h("ui-text", "Well done"))')
+    // naming none of its parts, it's laid out for you, even with no action (J245)
+    expect(file.compiled).toContain(
+      'h("ui-modal", { id: "you-won", heading: "you won" }, h("ui-content", h("ui-text", "Well done")))'
+    )
     // `show` waits until it closes, `hide` never does (T155)
     expect(file.compiled).toContain('await core.showDrawn("you won")')
     expect(file.compiled).toContain('core.hideDrawn("you won")')
     expect(file.compiled).not.toContain('await core.hideDrawn("you won")')
+  })
+
+  test("`transparent` keeps its drawing as written, its action where it is (J245)", () => {
+    const file = parsed([
+      "game is an app",
+      "\tto draw game",
+      '\t\t<modal "you won" transparent>',
+      "\t\t\t<text>Well done</>",
+      '\t\t\t<action "deal" title="New game" />',
+      "\t\t</>",
+      "\tto deal",
+      "\t\tprint 1"
+    ])
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toMatch(
+      /h\("ui-modal", \{ transparent: true, id: "you-won", heading: "you won" \},\s+h\("ui-text"/
+    )
+    expect(file.compiled).not.toContain("ui-content")
+    expect(file.compiled).not.toContain("ui-actions")
+    expect(file.compiled).not.toContain("in-dialog")
+  })
+
+  test("Spanish:  laid out for you, unless it says `transparente` (J245)", () => {
+    const juego = (modal: string) =>
+      parsed(
+        ["juego es una aplicación", "\tpara dibujar eso", `\t\t${modal}`, "\t\t\t<texto>Bien</>", "\t\t</>"],
+        "/Juego.es.spell"
+      )
+    expect(juego('<modal "ganaste">').compiled).toContain("ui-content")
+    const transparent = juego('<modal "ganaste" transparente>')
+    expect(transparent.errors).toEqual([])
+    expect(transparent.compiled).not.toContain("ui-content")
   })
 
   test("a heading it says itself wins;  its id is still its name", () => {

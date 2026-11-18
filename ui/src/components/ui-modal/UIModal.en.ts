@@ -47,6 +47,15 @@ export const modalVocabulary = {
       description: "The look:  `basic`, no box:  light text straight on the dimmer.  Old name:  `basic`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "The dark scheme." },
+    {
+      name: "transparent",
+      group: "appearance",
+      kind: "keyOnly",
+      description:
+        "See-through:  no box, no shadow, no padding, drawn as written.  Its text keeps its colour " +
+        "(`appearance=\"basic\"` turns it light).  In Spell, a modal naming none of its parts is laid out " +
+        "for you, unless it says `transparent`."
+    },
     { name: "fullscreen", group: "appearance", kind: "keyOnly", description: "Nearly the whole viewport wide." },
     {
       name: "overlay",

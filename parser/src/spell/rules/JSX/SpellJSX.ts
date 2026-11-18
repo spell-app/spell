@@ -61,6 +61,8 @@ const DIALOG_PART_TAGS = ["ui-header", "ui-content", "ui-description", "ui-actio
 /** Where a modal's drawing goes, when it names none of its parts:  its content, then its actions' buttons. */
 const DIALOG_CONTENT_TAG = "ui-content"
 const DIALOG_ACTIONS_TAG = "ui-actions"
+/** A modal's attribute saying it's drawn as written, see-through:  `<modal transparent>` (epic `language` J245). */
+const DIALOG_TRANSPARENT_ATTRIBUTE = "transparent"
 const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
   "ui-modal": { title: "heading" },
   "ui-menu": {},
@@ -230,7 +232,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     // a Spell UI menu or toolbar, in any language:  its actions and dividers are its rows (epic `editor` P29)
     if (SpellJSX.isMenu(scope, match.data.tagName)) SpellJSX.markMenuRows(scope, match)
     // a modal:  its actions close it, and what it holds goes in its parts (epic `language` T155)
-    if (SpellJSX.canonicalTagOf(scope, match.data.tagName) === DIALOG_TAG) SpellJSX.markDialog(scope, match)
+    if (SpellJSX.canonicalTagOf(scope, match.data.tagName) === DIALOG_TAG) SpellJSX.markDialog(scope, match, element)
     // a modal, menu or popup its quoted word names, `<modal "you won">` (P61):  never one of the project's own views
     if (element.quotedWord && !match.data.view && !match.data.laterView) {
       match.data.named = SpellJSX.namedTagTitle(scope, match.data.tagName)
@@ -822,9 +824,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * A modal's drawing (epic `language` T155;  Owen, 2026-11-17:  "only for buttons in the modal's actions section"):
-   * - naming none of its parts (`DIALOG_PART_TAGS`), nor an if-chain at its top, and holding an `<action>` at its top:
-   *   laid out in them as it compiles (`dialogChildren()`), each `<action>` at its top going to its actions;
-   *   one with no action there keeps its drawing as written (StarWars' crawl)
+   * - naming none of its parts (`DIALOG_PART_TAGS`), nor an if-chain at its top:  ALWAYS laid out in them as it
+   *   compiles (`dialogChildren()`), each `<action>` at its top going to its actions (epic `language` J245)
+   *   - `transparent` (Spanish's `transparente`) opts out:  drawn as written, see-through (StarWars' crawl)
    * - each `<action "...">` in its ACTIONS, the row of buttons at its bottom, closes it once its click has run the
    *   action, as a dialog's own buttons do (`action_button`'s `inDialog`):
    *   - written in its `<actions>` (Spell UI's `<ui-actions>`, Spanish's `<acciones>`), however deep;
@@ -832,7 +834,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    *   - not one that says `keep-open` (Spanish's `mantener-abierto`), nor a menu's row
    *   - an action anywhere else in it (its content) runs, and leaves it open
    */
-  private static markDialog(scope: P.Scope, dialog: P.MatchFor<SpellJSX>) {
+  private static markDialog(scope: P.Scope, dialog: P.MatchFor<SpellJSX>, element: P.JSXElementToken) {
     const closes = (action: P.MatchFor<ActionButton>) => {
       if (!action.data.inMenu && action.data.keepOpenAt === undefined) action.data.inDialog = true
     }
@@ -850,12 +852,26 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       if (child.data.chain || DIALOG_PART_TAGS.includes(tag)) laidOut = true
       if (tag === DIALOG_ACTIONS_TAG) markAll(child)
     }
-    // laid out for you only with a button to put in its bottom row:  one with none keeps its drawing as written,
-    // as StarWars' crawl, whose words are placed over the modal itself
+    // `<modal transparent>` keeps its drawing as written, as StarWars' crawl, whose words are placed over the page
+    if (laidOut || SpellJSX.isTransparent(scope, dialog.data.tagName ?? element.tagName, element)) return
     const actions = children.filter((child): child is P.MatchFor<ActionButton> => !!child?.is(ActionButton))
-    if (laidOut || !actions.length) return
     dialog.data.dialogParts = true
     for (const action of actions) closes(action)
+  }
+
+  /**
+   * Does `element`, a modal drawn as `tag` (`ui-modal`, `es-modal`), say `transparent` (Spanish's `transparente`, the pack's name for it):
+   * drawn as written, with no box around it (epic `language` J245)?
+   */
+  private static isTransparent(scope: P.Scope, tag: string, element: P.JSXElementToken): boolean {
+    const local = SP.ComponentPacks.attributeNameFor(
+      tag,
+      DIALOG_TRANSPARENT_ATTRIBUTE,
+      SP.Language.of(scope).lang,
+      SpellJSX.packsFor(scope)
+    )
+    const names = [DIALOG_TRANSPARENT_ATTRIBUTE, local]
+    return !!element.attributes?.some((attribute) => names.includes(attribute.name))
   }
 
   /**

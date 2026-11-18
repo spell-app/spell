@@ -871,6 +871,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "appearance",
       "inverted",
+      "transparent",
       "fullscreen",
       "overlay",
       "scrolling",
