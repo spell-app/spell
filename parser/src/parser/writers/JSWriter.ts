@@ -1138,6 +1138,8 @@ export class JSWriter extends ProgramWriter {
    */
   ASTStatementGroup(node: P.ASTStatementGroup): string {
     const lines: string[] = []
+    const owner = this.debugSteps?.ownerOf(node)
+    const frame = owner && this.debugSteps!.frameOf(owner)
     // where the doc comment right above the next statement starts, in `lines`
     let docStart = 0
     for (const statement of flattened(node)) {
@@ -1158,6 +1160,9 @@ export class JSWriter extends ProgramWriter {
         if (prefix) lines.splice(docStart, 0, prefix)
       }
       this.statements.add(statement)
+      // a debugging build's step, a line of a function that stops:  see `P.DebugSteps`
+      const step = frame ? this.debugStepBefore(statement, frame) : ""
+      if (step) lines.push(step)
       const written = String(this.write(statement))
       const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
       // a line above it could run into it -- see `jsText.statement()`
@@ -1183,25 +1188,72 @@ export class JSWriter extends ProgramWriter {
     while (statements.at(-1) instanceof P.ASTBlankLine) statements.pop()
     for (const statement of statements) this.statements.add(statement)
     this.noteCheckedElses(statements)
-    const children = this.inBlock(() =>
-      elseOnItsLine(
-        statements
-          // the first starts the block;  each after it could run into the one above -- see `jsText.statement()`
-          .map((statement, index) => {
-            const written = String(this.write(statement))
-            // a step that waits, in a `create()` that can't:  see `WriterProject.heldSteps`
-            const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
-            return index ? jsText.statement(code) : code
-          })
-          .join(jsText.NEWLINE)
-      )
-    )
+    // a debugging build's:  the function these lines are of, when they stop -- see `P.DebugSteps`
+    const owner = this.debugSteps?.ownerOf(node)
+    const frame = owner && this.debugSteps!.frameOf(owner)
+    const children = this.inBlock(() => {
+      const lines = statements
+        // the first starts the block;  each after it could run into the one above -- see `jsText.statement()`
+        .map((statement, index) => {
+          // before it's written:  the values set so far, not its own
+          const step = frame ? this.debugStepBefore(statement, frame) : ""
+          const written = String(this.write(statement))
+          // a step that waits, in a `create()` that can't:  see `WriterProject.heldSteps`
+          const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
+          if (step) return `${step}${jsText.NEWLINE}${jsText.statement(code)}`
+          return index ? jsText.statement(code) : code
+        })
+      if (frame && frame === owner && node === owner.body && this.debugSteps!.opensFrame(owner)) {
+        lines.unshift(this.debugFrameOpening(owner))
+      }
+      return elseOnItsLine(lines.join(jsText.NEWLINE))
+    })
     if (!children) return jsText.EMPTY_BLOCK
     // a comment last, on one line, would swallow the closing brace
     const endsInComment =
       statements.at(-1) instanceof P.ASTComment || statements.at(-1) instanceof P.ASTExpressionWithComment
     if (!node.wrap && !endsInComment && !children.includes(jsText.NEWLINE)) return `{ ${children} }`
     return `{\n${jsText.indented(children)}\n}`
+  }
+
+  /**
+   * A debugging build's step before `statement`, a line of a function whose frame is `frame`'s:
+   * `if (frame$.at(12, () => ({ "end pile": endPile }))) await frame$.held()`;  `""` for a line it doesn't stop on.
+   * - Its line, from 0;  the values its function has set so far, by spell's names, read only if it's looked at.
+   * - See `P.DebugSteps`.
+   */
+  protected debugStepBefore(statement: P.ASTNode, frame: P.ASTMethodDefinition): string {
+    const steps = this.debugSteps
+    if (!steps?.stepsOn(statement)) return ""
+    const { line } = steps.placeOf(statement)!
+    const inputs = new Set((frame.args ?? []).map((arg) => arg.name))
+    const values = new Map<string, string>()
+    for (const locals of this.locals.slice(1)) {
+      for (const name of locals.keys()) {
+        if (!name.startsWith("\0") && !inputs.has(name)) values.set(name, this.nameOf(name, "variable"))
+      }
+    }
+    const frameName = P.DebugSteps.FRAME
+    const read = values.size ? `, () => (${this.debugValues(values)})` : ""
+    return `if (${frameName}.at(${line}${read})) await ${frameName}.held()`
+  }
+
+  /**
+   * A debugging build's opening line of `method`, a function that waits:  its frame, from where it's declared,
+   * with its thing and its inputs -- `const frame$ = core._stepper.frame("/Pile.spell", 21, this, () => ({ pile }))`.
+   */
+  protected debugFrameOpening(method: P.ASTMethodDefinition): string {
+    const place = this.debugSteps!.placeOf(method) ?? this.debugSteps!.placeOf(method.body)
+    const inputs = new Map((method.args ?? []).map((arg) => [arg.name, this.variableName(arg)] as const))
+    const read = inputs.size ? `, () => (${this.debugValues(inputs)})` : ""
+    const where = `${this.quoted(place?.path ?? "")}, ${place?.line ?? -1}`
+    return `const ${P.DebugSteps.FRAME} = core._stepper.frame(${where}, this${read})`
+  }
+
+  /** `{ "end pile": endPile }`:  each of `values`, its spell name to the variable that holds it. */
+  private debugValues(values: Map<string, string>): string {
+    const entries = [...values].map(([name, variable]) => `${this.quoted(name)}: ${variable}`)
+    return `{ ${entries.join(", ")} }`
   }
 
   ASTTryCatchBlock(node: P.ASTTryCatchBlock): string {

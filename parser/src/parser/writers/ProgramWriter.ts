@@ -16,6 +16,7 @@ import {
   unwrapped
 } from "./jsShapes"
 import { WriterProject, forEachNode, typeCaseOf, type ProgramPlace } from "./WriterProject"
+import { DebugSteps } from "./DebugSteps"
 import { type Naming, type NameKind } from "./Naming"
 
 /**
@@ -112,6 +113,9 @@ export abstract class ProgramWriter extends Writer {
   /** The project's own types another project may extend:  see `P.WriterOptions.extendable`, `makesByName()`. */
   extendable: string[] | true | undefined
 
+  /** Where a debugging build's lines stop:  none in any other build -- see `P.WriterOptions.debugging`. */
+  debugSteps: DebugSteps | undefined
+
   /**
    * Is a new `typeName` made by name, as the running program's class (`core.classToMake()`), not as ours?
    * - Only one of our own classes, which the project lets others extend (`extendable`).
@@ -151,8 +155,11 @@ export abstract class ProgramWriter extends Writer {
     writer.project.findWaiting(files, scope, {
       canWait: (name, isGetter) => writer.canWait(name, isGetter),
       coreCallWaits: (call) => writer.coreCallWaits(call),
-      readsThroughSolid: writer.readsThroughSolid
+      readsThroughSolid: writer.readsThroughSolid,
+      actionsWait: !!options?.debugging
     })
+    // a debugging build's:  where its lines stop, once what waits is known
+    if (options?.debugging) writer.debugSteps = new DebugSteps(files, options.debugging)
     writer.reads = P.ReadGathering.of(files, writer.project, { scope })
     for (const note of writer.reads?.notes ?? []) options?.noteForAuthor?.(note)
     return writer
