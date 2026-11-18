@@ -59,9 +59,7 @@ describe("P.DebugSteps:  a debugging build", () => {
   })
 
   test("each frame is done however its function ends", () => {
-    expect(debugging).toContain(
-      ["      return 5", "    } finally {", "      frame$.done()", "    }", "  }"].join("\n")
-    )
+    expect(debugging).toContain(["      return 5", "    } finally {", "      frame$.done()", "    }", "  }"].join("\n"))
   })
 
   test("a getter and a question answer at once:  no steps, no waiting", () => {

@@ -4,10 +4,12 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `UI.<lang>.ts` (epic `spanish`).
  */
+import { P } from "spell/parser/parser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { UI } from "./UI.parser"
 import { Alert } from "./Alert"
+import { AnswerWord } from "./AnswerWord"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
 import { UIDefaults } from "./UIDefaults"
@@ -17,7 +19,7 @@ import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
 import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
-import { ShowDrawn } from "./ShowDrawn"
+import { ShowDrawn, ShowDrawnWith } from "./ShowDrawn"
 import { TheResult } from "./TheResult"
 import { WithoutClosing } from "./WithoutClosing"
 import { PlaySound } from "./PlaySound"
@@ -136,6 +138,19 @@ UI.addRule(ShowDrawn, {
   ]
 })
 
+UI.addRule(ShowDrawnWith, {
+  syntax: "show {name:text} with {thing:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        ;(scope as P.RootScope).variables.add("card")
+      },
+      tests: [[`show "edit card" with card`, [`const it = card`, `await core.showDrawn("edit card", it)`]]]
+    }
+  ]
+})
+
 UI.addRule(WithoutClosing, {
   syntax: "{call:statement} without closing",
   tests: [{ compileAs: "statement", tests: [[`print 1 without closing`, ["core.keepOpen()", "core.console.log(1)"]]] }]
@@ -160,10 +175,16 @@ UI.addRule(TheResult, {
         [`the result`, `core.result()`],
         [`the result is ok`, `(core.resultIs("ok"))`],
         [`the result is not cancel`, `(!core.resultIs("cancel"))`],
-        [`the result is "Save the Thing"`, `(core.resultIs("Save the Thing"))`]
+        [`the result is "Save the Thing"`, `(core.resultIs("Save the Thing"))`],
+        [`the result is discard`, `(core.resultIs("discard"))`]
       ]
     }
   ]
+})
+
+UI.addRule(AnswerWord, {
+  roles: { match: "written value" },
+  tests: [{ compileAs: "expression", tests: [[`the result is not discard`, `(!core.resultIs("discard"))`]] }]
 })
 
 UI.addRule(OpenPrinting, {
@@ -315,8 +336,8 @@ UI.addRule(Prompt, {
     {
       compileAs: "statement",
       tests: [
-        [`prompt "Name for the new baby?"`, `await core.prompt("Name for the new baby?")`],
-        [`prompt "File name:" with "Untitled"`, `await core.prompt("File name:", "Untitled")`]
+        [`prompt "Name for the new baby?"`, `const it = await core.prompt("Name for the new baby?")`],
+        [`prompt "File name:" with "Untitled"`, `const it = await core.prompt("File name:", "Untitled")`]
       ]
     }
   ]

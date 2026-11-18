@@ -134,7 +134,7 @@ eventsEs.addRule(InputState.specialize({ reads: "thingUnderMouse", datatype: "th
 })
 
 eventsEs.addRule(On, {
-  syntax: "al evento? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+  syntax: "al evento? {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -177,7 +177,7 @@ eventsEs.addRule(On, {
 
 // `al card click con una card`:  an event's name of several words, the same event as `card-click` -- see `event_words`
 eventsEs.addRule(On, {
-  syntax: "al evento? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+  syntax: "al evento? {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -211,7 +211,7 @@ eventsEs.addRule(
   }
 )
 eventsEs.addRule(On, {
-  syntax: "cuando {passive:passive_event} :? {statement_body}?",
+  syntax: "cuando {passive:passive_event} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -298,7 +298,7 @@ eventsEs.addRule(On, {
 // `- al cambiar (su) puntuación:`, el evento `puntuación-change`
 eventsEs.addRule(ChangedProperty)
 eventsEs.addRule(ON_CHANGE, {
-  syntax: "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) :? {statement_body}?",
+  syntax: "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -338,12 +338,12 @@ eventsEs.addRule(ON_CHANGE, {
   ]
 })
 eventsEs.addRule(ON_CHANGE, {
-  syntax: "al cambiar (su|sus|el|la)? {changed:changed_property} :? {statement_body}?"
+  syntax: "al cambiar (su|sus|el|la)? {changed:changed_property} (:|,)? {statement_body}?"
 })
 
 // una cosa guardada cambia (épica `data` P13):  por encima de un evento de las mismas palabras, que nadie enviaría
 eventsEs.addRule(WhenThingChanges, {
-  syntax: "cuando cambia (un|una) {type:known_type} :? {statement_body}?",
+  syntax: "cuando cambia (un|una) {type:known_type} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -365,18 +365,18 @@ eventsEs.addRule(WhenThingChanges, {
     }
   ]
 })
-eventsEs.addRule(WhenSomeoneElseChanges, { syntax: "cuando otra persona (lo|la) cambia :? {statement_body}?" })
+eventsEs.addRule(WhenSomeoneElseChanges, { syntax: "cuando otra persona (lo|la) cambia (:|,)? {statement_body}?" })
 
 // `cuando volteada:`, lo mismo que `al volteada:` (Q42)
-eventsEs.addRule(On, { syntax: "cuando {eventName:keyword} {props:with_props_arg}? :? {statement_body}?" })
-eventsEs.addRule(On, { syntax: "cuando {eventName:event_words} {props:with_props_arg}? :? {statement_body}?" })
+eventsEs.addRule(On, { syntax: "cuando {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?" })
+eventsEs.addRule(On, { syntax: "cuando {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?" })
 
 // `- mientras el ratón está presionado:` (Q51, Q52 A)
 eventsEs.addRule(WhileHandler.specialize({ handler: "while_mouse_down" }), {
-  syntax: "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? :? {statement_body}?"
+  syntax: "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? (:|,)? {statement_body}?"
 })
 eventsEs.addRule(WhileHandler.specialize({ handler: "while_mouse_over" }), {
-  syntax: "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) :? {statement_body}?"
+  syntax: "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) (:|,)? {statement_body}?"
 })
 
 // an event a template's things send, and what comes with it (epic `elemental-spell` P5):

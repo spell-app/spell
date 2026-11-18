@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { CalendarSettings } from "spell/util/measures/CalendarSettings"
 import { core } from "spell/parser/core"
+import { PY } from "spell/parser/py"
 import { spanishMessages } from "spell/parser/spell/languages/es/messages"
 import { parseSpellProject, runSpell, runSpellFiles } from "spell/parser/spell/test"
 
@@ -29,6 +30,12 @@ function valorDe(expression: string): unknown {
 function compiled(lines: string[], path = "/Test.spell") {
   const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
   return { js: `${file!.compiled}`, errors: file!.errors.map((error) => `${error}`) }
+}
+
+/** `lines` compiled to Python. */
+function compiledPython(lines: string[]) {
+  const [file] = parseSpellProject([{ path: "/Test.spell", contents: lines.join("\n") }]).files
+  return { python: String(PY.PyWriter.instance.writeMatch(file!.match!)) }
 }
 
 const NOTE = ["a note is a thing:", "\t- it has a due as date", "the note is a new note"]
@@ -222,6 +229,65 @@ describe("in Spanish (epic `language` P63)", () => {
     ["los días del mes de ahora", 30]
   ])("%s => %j", (expression, expected) => {
     expect(valorDe(expression)).toBe(expected)
+  })
+})
+
+describe("times of day, parts of the day, and durations in several units (epic `language` J252, J253)", () => {
+  test.each([
+    ["now is after 9am", true],
+    ["now is before 9:30 PM", true],
+    ["now is after 9:30pm", false],
+    ["9:30 PM as a long time", "9:30:00 PM"],
+    ["9 am as a long time", "9:00:00 AM"],
+    ["12am as a long time", "12:00:00 AM"],
+    ["noon as a long time", "12:00:00 PM"],
+    ["midnight as a long time", "12:00:00 AM"],
+    ["now is after noon", true],
+    ["now is in the morning", false],
+    ["now is in the evening", false],
+    ["now is in the late evening", true],
+    ["now is at night", true],
+    ["now is not in the afternoon", true],
+    ["now is this late evening", true],
+    ["now - 1 day is this late evening", false],
+    ["9am is in the morning", true],
+    ["noon is in the afternoon", true],
+    ["5pm is in the early evening", true],
+    ["5pm is in the evening", true],
+    ["midnight is at night", true],
+    ["now + 64 days as a duration in months and days", "in 2 months, 3 days"],
+    ["now + 64 days as a duration in days and months", "in 2 months, 3 days"],
+    ["now - 90 minutes as a duration in hours and minutes", "1 hour, 30 minutes ago"],
+    ["90 minutes as a duration in hours and minutes", "1 hour, 30 minutes"],
+    ["(now + 3 hours) - now as a duration in hours, minutes and seconds", "3 hours"]
+  ])("%s => %j", (expression, expected) => {
+    expect(valueOf(expression)).toBe(expected)
+  })
+
+  test("a time is today's:  its date is now's", () => {
+    const time = valueOf("9:30am") as Date
+    expect([time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()]).toEqual([17, 9, 30, 0])
+  })
+
+  test("in Spanish:  `es mañana` is tomorrow, `es la mañana` the morning;  a 24-hour time", () => {
+    expect(valorDe("ahora + 1 día es mañana")).toBe(true)
+    expect(valorDe("ahora es mañana")).toBe(false)
+    expect(valorDe("ahora es la mañana")).toBe(false)
+    expect(valorDe("ahora - 12 horas es por la mañana")).toBe(true)
+    expect(valorDe("ahora es de noche")).toBe(true)
+    expect(valorDe("ahora es a primera hora de la noche")).toBe(true)
+    expect(valorDe("ahora es esta noche")).toBe(true)
+    expect(valorDe("ahora es después de 9:05")).toBe(true)
+    expect(valorDe("ahora es antes de 21:30")).toBe(true)
+    expect(valorDe("ahora es antes del mediodía")).toBe(false)
+    expect(valorDe("ahora + 64 días como duración en meses y días")).toBe("dentro de 2 meses y 3 días")
+  })
+
+  test("Python:  by Python's names", () => {
+    const { python } = compiledPython(["set x to 9:30 PM", "set y to now is in the morning", "set z to noon"])
+    expect(python).toContain("core.today_at(21, 30)")
+    expect(python).toContain('core.is_day_part(core.now(), "morning")')
+    expect(python).toContain("core.today_at(12)")
   })
 })
 

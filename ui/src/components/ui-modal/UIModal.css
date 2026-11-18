@@ -485,6 +485,17 @@
     color: var(--ui-text-inverted-color);
   }
 
+  /* ## Transparent:  see-through, drawn as written:  no box, shadow or padding;  its text keeps its colour. */
+  .ui.transparent.modal {
+    --_ui-modal-background: transparent;
+    --_ui-modal-header-background: transparent;
+    --_ui-modal-content-background: transparent;
+    --_ui-modal-actions-background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
   /* ## Inverted:  the dark scheme;  parts re-resolve their tokens from it. */
   .ui.inverted.modal {
     --ui-inverted: 1;

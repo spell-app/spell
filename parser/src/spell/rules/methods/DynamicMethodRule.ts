@@ -215,7 +215,38 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
    * - `props` (from a `with_props_arg`) is always appended as the LAST arg -- see the NOTE below on the
    *   required-args assumption this depends on.
    */
-  getAST(match: P.MatchFor<this>): P.ASTMethodInvocation | P.ASTScopedMethodInvocation {
+  getAST(match: P.MatchFor<this>): P.ASTMethodInvocation | P.ASTScopedMethodInvocation | P.ASTCoreMethodInvocation {
+    const call = this.callAST(match)
+    // run as a statement on its own line, what it gives back is `the result` (epic `language` P64, Q70)
+    if (match.data.runAsStatement && match.data.method && DynamicMethodRule.givesBack(match.data.method)) {
+      return new P.ASTCoreMethodInvocation(match, { methodName: "answered", args: [call] })
+    }
+    return call
+  }
+
+  /**
+   * Does `method`, run as a statement, give back a value, so `the result` is it (epic `language` P64, Q70)?
+   * - Its `return`s, or its last line's value (I47):  `deal the cards`, then `if the result is ...`.
+   * - NOT an action that gives back nothing, nor one whose only yes / no is whether it was cancelled
+   *   (`cancel`, P56:  `if put the card on the pile`), nor a test, nor one with no steps of its own (a server's).
+   * - Read from another file's declarations, a yes / no:  no, as it may be only whether it was cancelled.
+   * - A lookup:  call it once the whole program has parsed, as `getAST()` is.
+   */
+  private static givesBack(method: P.ScopeMethod): boolean {
+    const { returns, declaredBy } = method
+    if (returns === "nothing") return false
+    if (returns !== undefined && returns !== "choice") return true
+    // read from another file's declarations:  a yes / no may be only whether it was cancelled, so it's not counted
+    if (!declaredBy || !(declaredBy.rule instanceof MethodDefinition)) return false
+    // no steps of its own, e.g. a server's operation (`to complete a job is at "/jobs/{id}/complete"`)
+    if (!declaredBy.rule.getBody(declaredBy)) return false
+    const given = declaredBy.rule.getReturnedDatatype(declaredBy)
+    // `undefined`:  values of more than one kind, or none known -- but a test's or a drawing's lines give back nothing
+    return given !== "nothing" && (given !== undefined || declaredBy.rule.returnsLastLine(declaredBy))
+  }
+
+  /** `getAST()`'s call itself:  a loose function's, or a thing's method's. */
+  private callAST(match: P.MatchFor<this>): P.ASTMethodInvocation | P.ASTScopedMethodInvocation {
     const { methodName } = this
     const { thisArg, callArgs, props } = match.groups
     const { onlyOne } = match.data
@@ -241,6 +272,8 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
 type DynamicMethodData = {
   /** Record of the method it calls, found while parsing -- `undefined` if none known. */
   method?: P.ScopeMethod
+  /** It runs as a statement, on its own line or as an inline body (`SpellStatement.noteRunAsStatement()`, P64). */
+  runAsStatement?: boolean
   /**
    * A call with its receiver left out, on a one-of-a-kind app:  that app's variable, e.g. `solitaire`.  See `parse()`.
    * - In a template's test:  the test's own thing, `it` (`P.MethodScope.thingName`).

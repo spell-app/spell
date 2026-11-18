@@ -20,6 +20,38 @@ const PART_SECONDS = { days: 86_400, hours: 3600, minutes: 60, seconds: 1 } as c
 /** A part of a duration:  `days`, `hours`, `minutes` or `seconds`. */
 export type DurationPart = keyof typeof PART_SECONDS
 
+/**
+ * Each unit a duration may be said in, `as a duration in months and days` (epic `language` J253), biggest first =>
+ * its seconds in a duration that's only a number of seconds.
+ * - A month is 30 days there, and a year 365:  from a DATE they're the calendar's, `in 1 month, 3 days`.
+ */
+const SAID_UNIT_SECONDS: Readonly<Record<string, number>> = {
+  year: 365 * 86_400,
+  month: 30 * 86_400,
+  week: 7 * 86_400,
+  day: 86_400,
+  hour: 3600,
+  minute: 60,
+  second: 1
+}
+/** The units that follow the calendar from a date:  a month is 28 to 31 days, a year 365 or 366. */
+const CALENDAR_MONTHS: Readonly<Record<string, number>> = { year: 12, month: 1 }
+
+/**
+ * The parts of a day, by name => the hour each starts and the hour it ends, 0 to 24 (epic `language` J252, Owen's):
+ * - `evening` holds `early evening`;  `night` runs past midnight, 9 PM to 5 AM.
+ */
+const DAY_PARTS: Readonly<Record<DayPart, readonly [number, number]>> = {
+  morning: [5, 12],
+  afternoon: [12, 17],
+  earlyEvening: [17, 19],
+  evening: [17, 21],
+  lateEvening: [21, 24],
+  night: [21, 5]
+}
+/** A part of a day:  `if now is in the morning`. */
+export type DayPart = "morning" | "afternoon" | "earlyEvening" | "evening" | "lateEvening" | "night"
+
 /** How a date or a duration is said as text:  `as a duration`, `as a short duration`, `as a long duration`. */
 export type DurationStyle = "normal" | "short" | "long"
 
@@ -126,6 +158,27 @@ export const dateMethods = defineCoreModule({
   },
 
   ////////////////
+  // ## Times of day (epic `language` J252)
+  ////////////////
+
+  /** Today at `hour` and `minute`, 0 seconds:  `noon` is `todayAt(12)`, `9:30pm` `todayAt(21, 30)`. */
+  todayAt(hour: number, minute: number = 0): Date {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute)
+  },
+  /**
+   * Is `date`'s time in part `part` of its day:  `if now is in the morning` -- `DAY_PARTS` has their hours.
+   * - `day`:  `"today"`, only if `date` is today too -- `if its due is this morning`.
+   */
+  isDayPart(date: unknown, part: DayPart, day: "any day" | "today" = "any day"): boolean {
+    if (!isDate(date) || !(part in DAY_PARTS)) return false
+    if (day === "today" && !dateMethods.isDaysFromToday(date, 0)) return false
+    const [starts, ends] = DAY_PARTS[part]
+    const hour = date.getHours()
+    return starts < ends ? hour >= starts && hour < ends : hour >= starts || hour < ends
+  },
+
+  ////////////////
   // ## The time zone
   ////////////////
 
@@ -169,13 +222,23 @@ export const dateMethods = defineCoreModule({
    *   `yesterday`, `in 2 days`
    * - `short`:  rounded to the scale, one part:  `1 day ago` for 23 hours 46 minutes, `in 2 weeks`, `in 3 months`
    * - `long`:  every part, exact to the second:  `23 hours, 46 minutes and 35 seconds ago`
-   * - `unit`:  in that unit, rounded:  `in 3 days`, `tomorrow` (a duration unit's id:  `day`, `hour` ...)
-   * - Weeks, months and years are only words here:  a month has no fixed length, so it's never a duration's unit.
+   * - `unit`:  in that unit, rounded:  `in 3 days`, `tomorrow` (a unit's id:  `month`, `day`, `hour` ...)
+   *   - several, biggest first:  `in 1 month, 3 days` (`as a duration in months and days`, epic `language` J253)
+   *   - months and years by the calendar:  November 17 to January 20 is 2 months, 3 days
    */
-  timeFromNow(date: unknown, style: DurationStyle = "normal", unit?: string): unknown {
+  timeFromNow(date: unknown, style: DurationStyle = "normal", unit?: string | string[]): unknown {
     if (!isDate(date)) return date
     const seconds = (date.getTime() - Date.now()) / 1000
-    if (unit) return relativeIn(seconds, unit)
+    const units = typeof unit === "string" ? [unit] : unit
+    if (units?.length === 1 && !(units[0]! in CALENDAR_MONTHS)) return relativeIn(seconds, units[0]!)
+    if (units?.length) {
+      const parts = calendarParts(new Date(), date, units)
+      if (!parts.length) return relativeIn(seconds, "second")
+      if (parts.length > 1) return saidIn(parts, seconds < 0, true)
+      // one unit, a month or a year:  `next month`, `in 3 months`
+      const [[said, amount]] = parts as [[string, number]]
+      return relative(seconds < 0 ? -amount : amount, said as Intl.RelativeTimeFormatUnit)
+    }
     if (style === "short" || Math.abs(seconds) >= 26 * PART_SECONDS.days) return roughlyFromNow(date, seconds)
     const parts = partsOf(Math.abs(seconds), style === "long" ? 4 : 2)
     if (parts.length < 2) return roughlyFromNow(date, seconds)
@@ -187,16 +250,14 @@ export const dateMethods = defineCoreModule({
    * A duration said as text:  `(its due - now) as a duration`, `2 days, 3 hours`.
    * - `seconds`:  how long, in seconds -- the compiler converts a measure in another unit first.
    * - `normal`, its two biggest parts;  `short`, one part, rounded;  `long`, every part to the second;
-   *   `unit`, in that unit (`in days`:  `3 days`).
+   *   `unit`, in that unit (`in days`:  `3 days`), or several, biggest first (`in hours and minutes`:  `1 hour, 30
+   *   minutes`;  epic `language` J253) -- a month 30 days, a year 365.
    */
-  durationText(seconds: unknown, style: DurationStyle = "normal", unit?: string): unknown {
+  durationText(seconds: unknown, style: DurationStyle = "normal", unit?: string | string[]): unknown {
     if (typeof seconds !== "number" || !Number.isFinite(seconds)) return seconds
     const sign = seconds < 0 ? "-" : ""
-    if (unit) {
-      const part = `${unit}s` as DurationPart
-      const amount = Math.round(Math.abs(seconds) / (UNIT_SECONDS[unit] ?? 1))
-      return sign + durationWords([[part in PART_SECONDS ? part : "seconds", amount]])
-    }
+    const units = typeof unit === "string" ? [unit] : unit
+    if (units?.some((each) => each in SAID_UNIT_SECONDS)) return sign + saidIn(fixedParts(Math.abs(seconds), units))
     const parts = partsOf(Math.abs(seconds), style === "long" ? 4 : style === "short" ? 1 : 2)
     return sign + durationWords(parts.length ? parts : [["seconds", 0]])
   },
@@ -395,7 +456,7 @@ function partsOf(seconds: number, count: number): Array<[DurationPart, number]> 
 }
 
 /** `parts` in words, in the program's language:  `1 day, 2 hours`, Spanish `1 día y 2 horas`. */
-function durationWords(parts: Array<[DurationPart, number]>): string {
+function durationWords(parts: Array<[string, number]>): string {
   const DurationFormat = (Intl as unknown as { DurationFormat?: DurationFormatClass }).DurationFormat
   const duration = Object.fromEntries(parts)
   if (DurationFormat) return spaced(new DurationFormat(core.message("language"), { style: "long" }).format(duration))
@@ -416,12 +477,93 @@ type DurationFormatClass = new (
   options: { style: "long" | "short" | "narrow" }
 ) => { format(duration: Record<string, number>): string }
 
+/**
+ * `seconds` cut into `units` (their ids, any order), biggest first, the last rounded:  `1 hour, 30 minutes`.
+ * - Each unit its fixed size, `SAID_UNIT_SECONDS`:  a month 30 days, a year 365.
+ */
+function fixedParts(seconds: number, units: string[]): Array<[string, number]> {
+  const sizes = sortedUnits(units).map((unit) => [unit, SAID_UNIT_SECONDS[unit] ?? 1] as const)
+  const smallest = sizes.at(-1)![1]
+  let left = Math.round(seconds / smallest) * smallest
+  return sizes.map(([unit, size]) => {
+    const amount = Math.floor(left / size)
+    left -= amount * size
+    return [unit, amount]
+  })
+}
+
+/**
+ * The time between `from` and `to`, either way round, cut into `units`, biggest first, the last rounded:
+ * November 17 to January 20 in months and days is `2 months, 3 days`.
+ * - Months and years by the calendar, a month on from January 31 its last day, February 28;  the rest fixed.
+ */
+function calendarParts(from: Date, to: Date, units: string[]): Array<[string, number]> {
+  const [earlier, later] = from <= to ? [from, to] : [to, from]
+  const sorted = sortedUnits(units)
+  const parts: Array<[string, number]> = []
+  let at = earlier
+  for (const [index, unit] of sorted.entries()) {
+    const months = CALENDAR_MONTHS[unit]
+    if (!months) {
+      // the rest are fixed:  cut what's left as a number of seconds
+      return [...parts, ...fixedParts((later.getTime() - at.getTime()) / 1000, sorted.slice(index))]
+    }
+    let amount = Math.floor(monthsBetween(at, later) / months)
+    // the last unit rounds:  half way to the next one or more counts it
+    if (index === sorted.length - 1) {
+      const reached = plusMonths(at, amount * months).getTime()
+      const next = plusMonths(at, (amount + 1) * months).getTime()
+      if (later.getTime() - reached >= (next - reached) / 2) amount++
+    }
+    parts.push([unit, amount])
+    at = plusMonths(at, amount * months)
+  }
+  return parts
+}
+
+/** `units`' ids, each once, biggest first:  `["day", "month"]` is `["month", "day"]`. */
+function sortedUnits(units: string[]): string[] {
+  return Object.keys(SAID_UNIT_SECONDS).filter((unit) => units.includes(unit))
+}
+
+/** `date` moved on `months` months, its day kept, or its month's last:  a month after January 31 is February 28. */
+function plusMonths(date: Date, months: number): Date {
+  const month = date.getMonth() + months
+  const last = new Date(date.getFullYear(), month + 1, 0).getDate()
+  const moved = new Date(date.getTime())
+  moved.setFullYear(date.getFullYear(), month, Math.min(date.getDate(), last))
+  return moved
+}
+
+/** How many whole months from `earlier` to `later`, by the calendar (`plusMonths()`). */
+function monthsBetween(earlier: Date, later: Date): number {
+  let months = (later.getFullYear() - earlier.getFullYear()) * 12 + later.getMonth() - earlier.getMonth()
+  while (months > 0 && plusMonths(earlier, months) > later) months--
+  return Math.max(months, 0)
+}
+
+/**
+ * `parts` said:  `1 month, 3 days`;  from a date (`fromDate`), how long ago or until, `in 1 month, 3 days`.
+ * - Parts that are 0 aren't said;  all 0 is the last unit's, `0 days`, `today`.
+ */
+function saidIn(parts: Array<[string, number]>, ago = false, fromDate = false): string {
+  const said = parts.filter(([, amount]) => amount)
+  if (!said.length) {
+    const unit = parts.at(-1)![0]
+    if (fromDate) return relative(0, unit as Intl.RelativeTimeFormatUnit)
+    return spaced(
+      new Intl.NumberFormat(core.message("language"), { style: "unit", unit, unitDisplay: "long" }).format(0)
+    )
+  }
+  const words = durationWords(said.map(([unit, amount]) => [`${unit}s`, amount]))
+  if (!fromDate) return words
+  return core.message(ago ? "duration-ago" : "duration-from-now", { time: words })
+}
+
 /** `seconds` from now, in `unit`, rounded:  `in 3 days`, `tomorrow`. */
 function relativeIn(seconds: number, unit: string): string {
-  const size = UNIT_SECONDS[unit] ?? 1
-  const word = (
-    unit in UNIT_SECONDS && unit !== "millisecond" && unit !== "tick" ? unit : "second"
-  ) as Intl.RelativeTimeFormatUnit
+  const size = SAID_UNIT_SECONDS[unit] ?? UNIT_SECONDS[unit] ?? 1
+  const word = (unit in SAID_UNIT_SECONDS ? unit : "second") as Intl.RelativeTimeFormatUnit
   return relative(Math.round(seconds / size), word)
 }
 

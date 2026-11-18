@@ -125,9 +125,9 @@ describe("expectedAfter()", () => {
       expect(new Set(describeAll(expected("a deck is a").own))).toContain("{superType:type}")
     })
 
-    test("`if c` => `then` or `:`, and operators only as continuations", () => {
+    test("`if c` => `then`, `:` or `,`, and operators only as continuations", () => {
       const { own, continues } = expected("if c")
-      expect(describeAll(own)).toEqual(["(then|:)?"])
+      expect(describeAll(own)).toEqual(["(then|:|,)?"])
       expect(describeAll(continues)).toContain("+{rhsChain:expression_suffix}*")
     })
 

@@ -205,6 +205,12 @@ export type JSXMatchData = {
    * what it holds goes in its content part, its actions' buttons in its actions part (`SpellJSX.dialogChildren()`).
    */
   dialogParts?: boolean
+  /**
+   * (`jsxElement`) A modal named by its quoted word, `<modal "edit card">`:  that name.
+   * Inside it, `it` is what it's shown with (`show "edit card" with the card`, epic `language` P64):
+   * its children compile inside `core.drawShown()` (`SpellJSX.shownInScope()`).
+   */
+  shownIn?: string
   /** (`jsxElement`) Its right-click menu's attribute in the language's own word, `menú-contextual`:  written as `context-menu` (T156). */
   contextMenuAttribute?: P.JSXAttributeToken
   /** (`jsxElement`) A chain branch's kind, `<if ...>` ... -- see `SpellJSX`, "An if-chain inside markup". */

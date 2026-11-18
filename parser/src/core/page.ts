@@ -111,16 +111,26 @@ function isQuestion(frame: unknown): frame is PageQuestion {
 
 /**
  * Show `question` as the core shows it here (`core.confirm()` ...), then send its answer:  `null` for none.
+ * - A thing among its arguments, by its id (`{ "$id": "3" }`), is the page's copy of it.
  * - NEVER throws:  one the page can't show is said in the console, and answered `null`.
  */
 async function answerQuestion({ ui, args, asks }: PageQuestion, send: (message: PageMessage) => void): Promise<void> {
   let value: unknown
   try {
-    value = await (core[ui] as (...args: unknown[]) => unknown)(...args)
+    // a thing it names, by its id:  the page's own copy, `show "edit card" with the card` (epic `language` P64)
+    const things = args.map((arg) => (isThingId(arg) ? (current?.mirror.thingWithId(arg[ID_KEY]) ?? arg) : arg))
+    value = await (core[ui] as (...args: unknown[]) => unknown)(...things)
   } catch (error) {
     logError(`the page couldn't show the program's ${ui}:  ${String(error)}`, error)
   }
   send({ answer: asks, value: value ?? null })
+}
+
+/** Is `value` a thing named by its id, `{ "$id": "3" }`, as a question's argument names one? */
+function isThingId(value: unknown): value is { [ID_KEY]: string } {
+  if (typeof value !== "object" || value === null) return false
+  const keys = Object.keys(value)
+  return keys.length === 1 && keys[0] === ID_KEY && typeof (value as Record<string, unknown>)[ID_KEY] === "string"
 }
 
 /** The program's undo history, as its last state or patch said:  `REMOTE.history`. */

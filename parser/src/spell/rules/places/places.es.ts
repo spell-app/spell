@@ -1246,8 +1246,8 @@ placesEs.addRule(TypeVerified, {
   ]
 })
 
-placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
-placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })
+placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) (:|,)? {statement_body}?" })
+placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) (:|,)? {statement_body}?" })
 placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })
 placesEs.addRule(ShowThemPaged, { syntax: "mostrarlos en (páginas|paginas)" })
 placesEs.addRule(ShowThemAll, { syntax: "mostrarlos todos" })
@@ -1265,10 +1265,10 @@ placesEs.addRule(ShowThemAtATime, {
 })
 placesEs.addRule(ShowThemIn, { syntax: "mostrarlos en :? {statement_body}?" })
 placesEs.addRule(ShowItAllIn, { syntax: "mostrar todo en :? {statement_body}?" })
-placesEs.addRule(IfThatFails, { syntax: "si falla :? {statement_body}?" })
+placesEs.addRule(IfThatFails, { syntax: "si falla (:|,)? {statement_body}?" })
 
 placesEs.addRule(InOneGo, {
-  syntax: "de una vez :? {statement_body}?",
+  syntax: "de una vez (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "statement",
@@ -1480,7 +1480,7 @@ placesEs.addRule(ErrorIs, { syntax: "el error es {name:text}" })
 placesEs.addRule(Nevermind, { syntax: "no importa" })
 placesEs.addRule(PassTheError, { syntax: "pasar el error" })
 placesEs.addRule(AnyServerCallFails, {
-  syntax: "(cuando|si) falla cualquier llamada al servidor :? {statement_body}?",
+  syntax: "(cuando|si) falla cualquier llamada al servidor (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

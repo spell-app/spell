@@ -1124,6 +1124,7 @@ export const HELP_TABLE: Readonly<
       size: "Width, `mini` ...",
       appearance: "The look: `basic`, no box: light text straight on the dimmer.",
       inverted: "The dark scheme.",
+      transparent: "See-through: no box, no shadow, no padding, drawn as written.",
       fullscreen: "Nearly the whole viewport wide.",
       overlay: "With `fullscreen`: covers the whole viewport, edge to edge (`overlay fullscreen`).",
       scrolling: "Scrolls inside itself when taller than the viewport.",

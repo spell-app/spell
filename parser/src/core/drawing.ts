@@ -35,7 +35,7 @@ import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
-import { closeDialogOf, listenForTableEdits, listenForUndoKeys } from "./ui"
+import { closeDialogOf, listenForTableEdits, listenForUndoKeys, shownIn } from "./ui"
 import { standInFor } from "./waiting"
 
 /**
@@ -172,6 +172,22 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * What a modal named by its quoted word draws (`<modal "edit card">`, epic `language` P64):
+   * `draw(it)`, `it` the thing it was last shown with, `show "edit card" with the card` (`core.shownIn()`).
+   * - Never shown with anything, `it` is `thing`, whose drawing it's in:  `<modal "you won">` draws as it always did.
+   * - Drawn again when it's shown with something else;  otherwise once, as the rest of the drawing is.
+   * - It draws the thing ITSELF, not a copy:  what's changed in it stays changed, whichever button closes it.
+   * - Compiled from the modal's contents:  `core.drawShown("edit card", this, (it) => [...])`.
+   */
+  drawShown(name: string, thing: unknown, draw: (it: unknown) => Drawing): Drawing {
+    return createMemo(() => {
+      const shown = shownIn(name)
+      // what it draws is its own, as a drawing's is:  only being shown with something else draws it again
+      return untrack(() => untrackCells(() => madeOnce(draw(shown === undefined ? thing : shown))))
+    }) as unknown as Drawing
+  },
+
+  /**
    * A button for ONE of the program's actions, `name` (`autoPlay`), on `thing` or up its chain (`core.actionOf()`):
    * what `<action "auto play"/>` draws (epic `language`, Owen 2026-11-13).
    * - A `<ui-button>`, which the action gives, LIVE, as a menu's item reads it:
@@ -189,10 +205,13 @@ export const drawingMethods = defineCoreModule({
    *   - `in-menu`:  a Spell UI menu holds it, so it's a menu's ROW (epic `editor` P29), not a button:  see below
    *   - `in-dialog`:  a modal's actions hold it (epic `language` T155), so its click closes the modal once the action
    *     has run, as a dialog's own buttons do -- unless the action said `... without closing` (`closeDialogOf()`)
-   *   - `answer`:  what `the result` is once its click has closed the modal, `ok` or `cancel` (`<action ok />`);
+   *   - `answer`:  what `the result` is once its click has closed the modal, `ok` or `cancel` (`<action ok />`),
+   *     or the button's own word (`<action discard />`, P64);
    *     the compiler gives a modal's button with neither its action's name, `save the thing`
    * - `<action ok />` with no action of that name (`answer`, nothing up the chain):  a button that just closes the modal,
    *   labelled in the program's language, OK or Cancel (`dialog-ok`, `dialog-cancel`), its `title` instead if it has one.
+   *   - A button's own answer the same (`<action discard title="Discard your changes" />`, epic `language` P64):
+   *     labelled by its `title`, else its word, `Discard`.
    * - An action nobody up the chain has:  a disabled button (or row) of its name, and a warning;
    *   the compiler said so already.
    * - Knows nothing of Spell UI but its tags:  the page draws them.
@@ -210,10 +229,10 @@ export const drawingMethods = defineCoreModule({
     // a `title` the tag gives is what it shows, over the action's own:  `<action "restart the game" title="Restart"/>`
     const action =
       found && typeof title === "string" ? (Object.create(found, { title: { value: title } }) as typeof found) : found
-    // `<action ok />` with no action of that name:  it just closes the modal (epic `language` T155)
-    if (!action && (answer === OK || answer === CANCEL) && !inMenu) {
+    // `<action ok />`, `<action discard />` with no action of that name:  it just closes the modal (epic `language` T155, P64)
+    if (!action && typeof answer === "string" && answer && !inMenu) {
       const closes = (event: Event) => closeDialogOf(event, answer)
-      const text = children.length ? children : [title ?? core.message(answer === OK ? "dialog-ok" : "dialog-cancel")]
+      const text = children.length ? children : [title ?? answerLabelOf(answer)]
       return h(BUTTON_TAG, { onClick: closes, ...given }, ...text) as unknown as Drawing
     }
     if (!action) {
@@ -807,6 +826,16 @@ const CONTEXT_MENU_TAG = "spell-context-menu"
  * - `ActionMenus.showContextMenu()`, the app's, reads it.
  */
 export type ContextMenuElement = { menuItems?: () => MenuItem[] }
+
+/**
+ * What a button that just closes a modal says, by its `answer`:  OK or Cancel in the program's language
+ * (`dialog-ok`, `dialog-cancel`);  a button's own word with its first letter capitalised, `Discard` (epic `language` P64).
+ */
+function answerLabelOf(answer: string): string {
+  if (answer === OK) return core.message("dialog-ok")
+  if (answer === CANCEL) return core.message("dialog-cancel")
+  return initialCaps(answer)
+}
 
 /** `<action>`'s own attribute:  its button shows only its icon. */
 const ICON_ONLY = "icon-only"

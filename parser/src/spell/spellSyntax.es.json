@@ -776,6 +776,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TimeOfDay",
+          "ruleNames": ["time_of_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeOfDay.ts",
+          "line": 13,
+          "purpose": "Noon or midnight today, as a date -- `if now is after noon`, `antes de la medianoche` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? ((noon:mediodía|mediodia)|(midnight:medianoche))",
+              "example": "mediodía",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(12)"
+                },
+                "ts": {
+                  "code": "core.todayAt(12)"
+                },
+                "py": {
+                  "code": "core.today_at(12)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TimeLiteral",
+          "ruleNames": ["time_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeLiteral.ts",
+          "line": 23,
+          "purpose": "A time today, written as people write it -- `9am`, `9:30am`, `9 am`, `9:30 PM`, any case; `if now is after 9am` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{number} (: {number})? (am|pm)?",
+              "example": "9am",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(9)"
+                },
+                "ts": {
+                  "code": "core.todayAt(9)"
+                },
+                "py": {
+                  "code": "core.today_at(9)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "DaysUntil",
           "ruleNames": ["days_until"],
           "internal": false,
@@ -1588,11 +1640,11 @@
           "ruleNames": ["as_a_duration"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsADuration.ts",
-          "line": 21,
+          "line": 25,
           "purpose": "How long ago a date was, or how long until it is, as text -- `its added as a duration`, `30 minutes ago`, `in 2 days`, `tomorrow` (epic `language` P63).",
           "syntaxes": [
             {
-              "syntax": "como (una)? (duración|duracion) {style:duration_style}? (en {unit:unit_words})?",
+              "syntax": "como (una)? (duración|duracion) {style:duration_style}? (en [units:{unit:duration_unit} (,|y)])?",
               "example": "due como duración",
               "outputs": {
                 "js": {
@@ -1696,7 +1748,7 @@
           "purpose": "Is a date today, tomorrow or yesterday, whatever its time -- `if its due is tomorrow` (epic `language` P63).",
           "syntaxes": [
             {
-              "syntax": "{operator:is_or_is_not} ((today:hoy)|(yesterday:ayer))",
+              "syntax": "{operator:is_or_is_not} ((today:hoy)|(tomorrow:mañana|manana)|(yesterday:ayer))",
               "example": "due es hoy",
               "outputs": {
                 "js": {
@@ -1707,6 +1759,32 @@
                 },
                 "py": {
                   "code": "core.is_days_from_today(due, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayPart",
+          "ruleNames": ["is_day_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayPart.ts",
+          "line": 16,
+          "purpose": "Is a date's time in a part of its day -- `if now is in the morning`, `if its due is at night`, Spanish `si ahora es por la mañana` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:esta|este)|(por|en|de|a) (la|el)?|la|el|al) {part:day_part}",
+              "example": "due es la mañana",
+              "outputs": {
+                "js": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "ts": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "py": {
+                  "code": "core.is_day_part(due, \"morning\")"
                 }
               }
             }
@@ -1959,7 +2037,9 @@
             "date_or_time",
             "date_style",
             "duration_style",
+            "duration_unit",
             "duration_part_name",
+            "day_part",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -2031,7 +2111,13 @@
               "syntax": "((short:corta)|(long:larga))"
             },
             {
+              "syntax": "((year:años|año|anos|ano)|(month:meses|mes)|(week:semanas|semana)|(day:días|dias|día|dia)|(hour:horas|hora)|(minute:minutos|minuto)|(second:segundos|segundo))"
+            },
+            {
               "syntax": "((days:días|dias)|(hours:horas)|(minutes:minutos)|(seconds:segundos))"
+            },
+            {
+              "syntax": "((morning:mañana|manana)|(afternoon:tarde)|(earlyEvening:atardecer)|(evening:anochecer)|(lateEvening:primera hora de la noche)|(night:noche))"
             },
             {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"
@@ -3155,7 +3241,7 @@
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
-              "syntax": "al evento? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "al evento? {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "al card-click",
               "outputs": {
                 "js": {
@@ -3170,7 +3256,7 @@
               }
             },
             {
-              "syntax": "al evento? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "al evento? {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "al card click",
               "outputs": {
                 "js": {
@@ -3185,7 +3271,7 @@
               }
             },
             {
-              "syntax": "cuando {passive:passive_event} :? {statement_body}?",
+              "syntax": "cuando {passive:passive_event} (:|,)? {statement_body}?",
               "example": "una carta es una vista donde:\n\t- cuando se pulsa dos veces imprimir 1",
               "outputs": {
                 "js": {
@@ -3200,7 +3286,7 @@
               }
             },
             {
-              "syntax": "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) :? {statement_body}?",
+              "syntax": "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) (:|,)? {statement_body}?",
               "example": "un juego es una cosa donde:\n\t- su \"puntuación\" es un número\n\t- cuando su puntuación cambia imprimir su puntuación",
               "outputs": {
                 "js": {
@@ -3215,13 +3301,13 @@
               }
             },
             {
-              "syntax": "al cambiar (su|sus|el|la)? {changed:changed_property} :? {statement_body}?"
+              "syntax": "al cambiar (su|sus|el|la)? {changed:changed_property} (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cuando {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "cuando {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cuando {eventName:event_words} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "cuando {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3235,7 +3321,7 @@
           "purpose": "Run this when any thing of a saved type changes, whoever changed it, this page included (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "cuando cambia (un|una) {type:known_type} :? {statement_body}?",
+              "syntax": "cuando cambia (un|una) {type:known_type} (:|,)? {statement_body}?",
               "example": "cuando cambia una receta:\n\timprimir el título de la receta",
               "outputs": {
                 "js": {
@@ -3333,7 +3419,7 @@
           "purpose": "Run this when someone other than this page changes this thing (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "cuando otra persona (lo|la) cambia :? {statement_body}?"
+              "syntax": "cuando otra persona (lo|la) cambia (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3347,10 +3433,10 @@
           "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
           "syntaxes": [
             {
-              "syntax": "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? :? {statement_body}?"
+              "syntax": "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) :? {statement_body}?"
+              "syntax": "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -4017,7 +4103,7 @@
           "purpose": "Repeat an action `N` times, e.g. `repeat 3 times: print the number`.",
           "syntaxes": [
             {
-              "syntax": "repetir {number:expression} (vez|veces) :? {statement_body}?",
+              "syntax": "repetir {number:expression} (vez|veces) (:|,)? {statement_body}?",
               "example": "repetir 1 vez:",
               "outputs": {
                 "js": {
@@ -4043,7 +4129,7 @@
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {item:singular_identifier} ((y|e|,) {position:singular_identifier})? (en|de|del) {list:expression} :? {statement_body}?",
+              "syntax": "(para|por) cada? {item:singular_identifier} ((y|e|,) {position:singular_identifier})? (en|de|del) {list:expression} (:|,)? {statement_body}?",
               "example": "para cada card en deck:",
               "outputs": {
                 "js": {
@@ -4058,7 +4144,7 @@
               }
             },
             {
-              "syntax": "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
+              "syntax": "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} (:|,)? {statement_body}?",
               "example": "para cada rango de carta en rangos de carta: imprimir rango de carta",
               "outputs": {
                 "js": {
@@ -4084,7 +4170,7 @@
           "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {list:each_item_where} :? {statement_body}?",
+              "syntax": "(para|por) cada? {list:each_item_where} (:|,)? {statement_body}?",
               "example": "para cada carta del mazo que no está en la reserva: imprimir eso",
               "outputs": {
                 "js": {
@@ -4110,10 +4196,10 @@
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {list:expression} :? {statement_body}?"
+              "syntax": "(para|por) cada? {list:expression} (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(para|por) {list:each_thing} :? {statement_body}?",
+              "syntax": "(para|por) {list:each_thing} (:|,)? {statement_body}?",
               "example": "para cada columna: imprimir eso",
               "outputs": {
                 "js": {
@@ -4870,7 +4956,7 @@
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
+              "syntax": "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} (:|,)? {statement_body}?",
               "example": "para cada number de 1 a 10:",
               "outputs": {
                 "js": {
@@ -4940,6 +5026,31 @@
                 },
                 "py": {
                   "code": "core.result()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "AnswerWord",
+          "ruleNames": ["answer_word"],
+          "internal": false,
+          "file": "src/spell/rules/UI/AnswerWord.ts",
+          "line": 17,
+          "purpose": "A button's own answer, a bare word, compared with `the result` (epic `language` P64).",
+          "syntaxes": [
+            {
+              "example": "el resultado no es descartar",
+              "outputs": {
+                "js": {
+                  "code": "(!core.resultIs(\"descartar\"))"
+                },
+                "ts": {
+                  "code": "(!core.resultIs(\"descartar\"))"
+                },
+                "py": {
+                  "code": "(not core.result_is(\"descartar\"))"
                 }
               }
             }
@@ -5055,7 +5166,7 @@
           "ruleNames": ["show_drawn"],
           "internal": false,
           "file": "src/spell/rules/UI/ShowDrawn.ts",
-          "line": 18,
+          "line": 25,
           "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
           "syntaxes": [
             {
@@ -5070,6 +5181,32 @@
                 },
                 "py": {
                   "code": "await core.show_drawn(\"ganaste\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "ShowDrawnWith",
+          "ruleNames": ["show_drawn_with"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 58,
+          "purpose": "`show \"edit card\" with the card` -- `show_drawn`, shown with a thing (epic `language` P64).",
+          "syntaxes": [
+            {
+              "syntax": "mostrar {name:text} con {thing:expression}",
+              "example": "mostrar \"editar carta\" con carta",
+              "outputs": {
+                "js": {
+                  "code": "const it = carta\nawait core.showDrawn(\"editar carta\", it)"
+                },
+                "ts": {
+                  "code": "const it = carta\nawait core.showDrawn(\"editar carta\", it)"
+                },
+                "py": {
+                  "code": "it = carta\nasyncio.run(core.show_drawn(\"editar carta\", it))"
                 }
               }
             }
@@ -5330,21 +5467,21 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "line": 19,
+          "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
               "syntax": "preguntar {message:expression} (con {defaultValue:expression})?",
               "example": "preguntar \"¿Nombre para el bebé?\"",
               "outputs": {
                 "js": {
-                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "const it = await core.prompt(\"¿Nombre para el bebé?\")"
                 },
                 "ts": {
-                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "const it = await core.prompt(\"¿Nombre para el bebé?\")"
                 },
                 "py": {
-                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "it = await core.prompt(\"¿Nombre para el bebé?\")"
                 }
               }
             }
@@ -7540,22 +7677,22 @@
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
+              "syntax": "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras algo se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
+              "syntax": "mientras algo se {over:drag_moment} (él|ella|ello) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -7815,10 +7952,10 @@
           "purpose": "RETIRED words for waiting, as spell waits by itself (epic `language` P13, Q9): `await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
-              "syntax": "esperar a? :? {expression:operand}?"
+              "syntax": "esperar a? (:|,)? {expression:operand}?"
             },
             {
-              "syntax": "esperar a? :? {expression}?",
+              "syntax": "esperar a? (:|,)? {expression}?",
               "example": "esperar",
               "outputs": {
                 "js": {
@@ -7896,7 +8033,7 @@
           "purpose": "Runs its lines together, and carries on once they've all ended.",
           "syntaxes": [
             {
-              "syntax": "al mismo tiempo :? {statement_body}?",
+              "syntax": "al mismo tiempo (:|,)? {statement_body}?",
               "example": "para do something\n\tal mismo tiempo:\n\t\timprimir 1\n\t\timprimir 2",
               "outputs": {
                 "js": {
@@ -7922,7 +8059,7 @@
           "purpose": "Starts something and carries on, with no waiting for it: `meanwhile deal the cards`.",
           "syntaxes": [
             {
-              "syntax": "mientras tanto :? {statement_body}?",
+              "syntax": "mientras tanto (:|,)? {statement_body}?",
               "example": "para do something\n\tmientras tanto imprimir 1",
               "outputs": {
                 "js": {
@@ -8000,10 +8137,10 @@
           "purpose": "Steps a thing or an app runs again and again while its program runs, e.g. a clock's `every second`, then `set its time to now` under it (epic `language` T159; Owen, 2026-11-17).",
           "syntaxes": [
             {
-              "syntax": "cada {interval:measure_literal} (hasta {until:expression}|{times:number} veces)? :? {statement_body}?"
+              "syntax": "cada {interval:measure_literal} (hasta {until:expression}|{times:number} veces)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cada {unit:unit_words} (hasta {until:expression}|{times:number} veces)? :? {statement_body}?"
+              "syntax": "cada {unit:unit_words} (hasta {until:expression}|{times:number} veces)? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9200,7 +9337,7 @@
           "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "de una vez :? {statement_body}?",
+              "syntax": "de una vez (:|,)? {statement_body}?",
               "example": "de una vez: imprimir 1",
               "outputs": {
                 "js": {
@@ -9252,7 +9389,7 @@
           "purpose": "The app's own steps for every server action that fails, run last (epic `data` P50, Q90, Q93).",
           "syntaxes": [
             {
-              "syntax": "(cuando|si) falla cualquier llamada al servidor :? {statement_body}?",
+              "syntax": "(cuando|si) falla cualquier llamada al servidor (:|,)? {statement_body}?",
               "example": "cuando falla cualquier llamada al servidor\n\tsi el error es \"sin autorizar\"\n\t\timprimir \"inicia sesión\"\n\tsi no\n\t\tno hacer nada",
               "outputs": {
                 "js": {
@@ -9711,7 +9848,7 @@
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "mientras (espera|carga) :? {statement_body}?"
+              "syntax": "mientras (espera|carga) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9725,7 +9862,7 @@
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "si no hay (ninguno|ninguna|nada) :? {statement_body}?"
+              "syntax": "si no hay (ninguno|ninguna|nada) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9809,7 +9946,7 @@
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "si falla :? {statement_body}?"
+              "syntax": "si falla (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -10218,7 +10355,7 @@
           "ruleNames": ["action_button"],
           "internal": false,
           "file": "src/spell/rules/JSX/ActionButton.ts",
-          "line": 70,
+          "line": 73,
           "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
           "syntaxes": [
             {
@@ -10268,7 +10405,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 113,
+          "line": 121,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -10809,7 +10946,7 @@
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
-              "syntax": "(si no|sino|de lo contrario) si {condition:expression} (entonces|:)? {statement_body}?",
+              "syntax": "(si no|sino|de lo contrario) si {condition:expression} (entonces|:|,)? {statement_body}?",
               "example": "si no si x",
               "outputs": {
                 "js": {
@@ -10835,7 +10972,7 @@
           "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
-              "syntax": "(si no|sino|de lo contrario) :? {statement_body}?",
+              "syntax": "(si no|sino|de lo contrario) (:|,)? {statement_body}?",
               "example": "si no",
               "outputs": {
                 "js": {
@@ -10861,7 +10998,7 @@
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
-              "syntax": "si {condition:expression} (entonces|:)? {statement_body}?",
+              "syntax": "si {condition:expression} (entonces|:|,)? {statement_body}?",
               "example": "si x",
               "outputs": {
                 "js": {
@@ -11161,7 +11298,7 @@
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {
-              "syntax": "al {signature:method_signature} :? {statement_body}?",
+              "syntax": "al {signature:method_signature} (:|,)? {statement_body}?",
               "example": "una tarea es una cosa donde:\n\t- al crearla (con título como texto, hecha como una opción):\n\t\timprimir el título",
               "outputs": {
                 "js": {
@@ -11302,7 +11439,7 @@
           "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
           "syntaxes": [
             {
-              "syntax": "(después|despues) de {signature:method_signature} :? {statement_body}?",
+              "syntax": "(después|despues) de {signature:method_signature} (:|,)? {statement_body}?",
               "example": "una carta es una cosa\nuna pila es una lista de cartas\npara poner una carta en una pila\n\tagregar la carta a la pila\ndespués de poner una carta en una pila\n\timprimir la carta",
               "outputs": {
                 "js": {
@@ -11328,7 +11465,7 @@
           "purpose": "Steps that run before an action's own, from any file (epic `data` P50, Q81).",
           "syntaxes": [
             {
-              "syntax": "antes de {signature:method_signature} :? {statement_body}?",
+              "syntax": "antes de {signature:method_signature} (:|,)? {statement_body}?",
               "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nantes de completar un trabajo\n\tcancelar si el estado del trabajo es \"hecho\"",
               "outputs": {
                 "js": {
@@ -11354,7 +11491,7 @@
           "purpose": "Steps that run as an action starts, whose changes are put back when it ends, worked or failed (epic `data` P50, Q94).",
           "syntaxes": [
             {
-              "syntax": "mientras se {signature:method_signature} :? {statement_body}?",
+              "syntax": "mientras se {signature:method_signature} (:|,)? {statement_body}?",
               "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nmientras se completa un trabajo\n\tponer el estado del trabajo a \"ocupado\"",
               "outputs": {
                 "js": {
@@ -11380,7 +11517,7 @@
           "purpose": "Steps that run when an action fails, from any file (epic `data` P50, Q82, Q87-Q89).",
           "syntaxes": [
             {
-              "syntax": "(si|cuando) falla al {signature:method_signature} :? {statement_body}?",
+              "syntax": "(si|cuando) falla al {signature:method_signature} (:|,)? {statement_body}?",
               "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nsi falla al completar un trabajo\n\tsi el error es \"no encontrado\"\n\t\tno importa\n\tsi no si el error es \"sin conexión\"\n\t\tpasar el error",
               "outputs": {
                 "js": {

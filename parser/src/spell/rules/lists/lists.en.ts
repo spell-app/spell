@@ -1289,7 +1289,7 @@ lists.addRule(ListShuffle, {
 })
 
 lists.addRule(RepeatNTimes, {
-  syntax: "repeat {number:expression} (time|times) :? {statement_body}?",
+  syntax: "repeat {number:expression} (time|times) (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1324,7 +1324,7 @@ lists.addRule(RepeatNTimes, {
 
 lists.addRule(ListIteration, {
   syntax:
-    "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
+    "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1392,7 +1392,7 @@ lists.addRule(ListIteration, {
 
 // over the items which meet a condition (epic `language` T133):  `for each card in the deck which is not in the stock`
 lists.addRule(ListIterationWhere, {
-  syntax: "for (each|every)? {list:each_item_where} :? {statement_body}?",
+  syntax: "for (each|every)? {list:each_item_where} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1520,11 +1520,11 @@ lists.addRule(PluralCallStatement, {
 })
 
 // the item named for the list:  `for films`
-lists.addRule(ListIterationNamedForList, { syntax: "for each? {list:expression} :? {statement_body}?" })
+lists.addRule(ListIterationNamedForList, { syntax: "for each? {list:expression} (:|,)? {statement_body}?" })
 
 // every thing of a type, the item named for it (epic `language` T128):  `for each column`, Solitaire's seven
 lists.addRule(ListIterationNamedForList, {
-  syntax: "for {list:each_thing} :? {statement_body}?",
+  syntax: "for {list:each_thing} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1554,7 +1554,7 @@ lists.addRule(ListIterationNamedForList, {
 
 // the item named for a value kind of several words (epic `spanish` P22)
 lists.addRule(ListIteration, {
-  syntax: "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+  syntax: "for (each|every)? {item:kind_name} (in|of) {list:expression} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1578,7 +1578,7 @@ lists.addRule(ListIteration, {
 })
 
 lists.addRule(ListRangeIteration, {
-  syntax: "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+  syntax: "for each? {item:identifier} from {start:expression} down? to {end:expression} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

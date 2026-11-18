@@ -3,7 +3,7 @@
 
 a film
 	to draw its crawl
-		<modal class="crawl" visible overlay fullscreen on-ui-closed={end it} aria-label={"The opening of " + its title}>
+		<modal class="crawl" transparent visible overlay fullscreen on-ui-closed={end it} aria-label={"The opening of " + its title}>
 			<text class="long-ago" size="big">A long time ago in a galaxy far, far away....</text>
 			<segment class="stage" appearance="basic">
 				<segment class="words" appearance="basic">

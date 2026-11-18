@@ -1723,6 +1723,41 @@
     },
     {
       "kind": "method",
+      "name": "todayAt",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "hour"
+        },
+        {
+          "name": "minute"
+        }
+      ],
+      "section": "Times of day (epic language J252)",
+      "description": "Today at `hour` and `minute`, 0 seconds:  `noon` is `todayAt(12)`, `9:30pm` `todayAt(21, 30)`."
+    },
+    {
+      "kind": "method",
+      "name": "isDayPart",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "part"
+        },
+        {
+          "name": "day"
+        }
+      ],
+      "section": "Times of day (epic language J252)",
+      "description": "Is `date`'s time in part `part` of its day:  `if now is in the morning` -- `DAY_PARTS` has their hours."
+    },
+    {
+      "kind": "method",
       "name": "timeZone",
       "of": "core",
       "module": "dates",
@@ -2197,7 +2232,7 @@
         }
       ],
       "section": "Talking to the person",
-      "description": "Ask for some text in a dialog:  what was typed, or `undefined` if cancelled."
+      "description": "Ask for some text in a dialog:  what was typed -- compiled from `prompt \"Name?\" with \"Untitled\"` (`await`ed), `value` its starting text, into a new `it` (spell's `prompt` rule)."
     },
     {
       "kind": "method",
@@ -2207,6 +2242,9 @@
       "params": [
         {
           "name": "name"
+        },
+        {
+          "name": "thing"
         }
       ],
       "section": "Drawn things, by name",
@@ -2243,6 +2281,19 @@
       "module": "ui",
       "section": "Drawn things, by name",
       "description": "What closed the last dialog:  what `the result` compiles to (epic `language` T155)."
+    },
+    {
+      "kind": "method",
+      "name": "answered",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "section": "Drawn things, by name",
+      "description": "`the result` is `value` from now on, and give it back:  what an action that gives back a value compiles to, run as a statement on its own line (epic `language` P64, Q70)."
     },
     {
       "kind": "method",
@@ -2353,6 +2404,25 @@
       ],
       "section": "Drawing things",
       "description": "A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4)."
+    },
+    {
+      "kind": "method",
+      "name": "drawShown",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "thing"
+        },
+        {
+          "name": "draw"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "What a modal named by its quoted word draws (`<modal \"edit card\">`, epic `language` P64): `draw(it)`, `it` the thing it was last shown with, `show \"edit card\" with the card` (`core.shownIn()`)."
     },
     {
       "kind": "method",

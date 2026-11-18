@@ -18,7 +18,7 @@ import { StopProcess } from "./StopProcess"
 import { WithoutWaiting } from "./WithoutWaiting"
 
 _async.addRule(Await, {
-  syntax: "(await|wait for) :? {expression}?",
+  syntax: "(await|wait for) (:|,)? {expression}?",
   tests: [
     {
       compileAs: "statement",
@@ -79,14 +79,14 @@ _async.addRule(Pause, {
 
 // steps a thing runs every so often while the program runs, in its type's outline (epic `language` T159)
 _async.addRule(EveryTimer, {
-  syntax: "every {interval:measure_literal} (until {until:expression}|{times:number} times)? :? {statement_body}?"
+  syntax: "every {interval:measure_literal} (until {until:expression}|{times:number} times)? (:|,)? {statement_body}?"
 })
 _async.addRule(EveryTimer, {
-  syntax: "every {unit:unit_words} (until {until:expression}|{times:number} times)? :? {statement_body}?"
+  syntax: "every {unit:unit_words} (until {until:expression}|{times:number} times)? (:|,)? {statement_body}?"
 })
 
 _async.addRule(AtTheSameTime, {
-  syntax: "at the same time :? {statement_body}?",
+  syntax: "at the same time (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -107,7 +107,7 @@ _async.addRule(AtTheSameTime, {
 })
 
 _async.addRule(Meanwhile, {
-  syntax: "meanwhile :? {statement_body}?",
+  syntax: "meanwhile (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

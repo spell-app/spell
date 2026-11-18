@@ -44,6 +44,33 @@ UNIT_SECONDS: dict[str, float] = {
     "day": 86_400,
 }
 
+# Each unit a duration may be said in, `as a duration in months and days` (epic `language` J253), biggest first =>
+# its seconds in a duration that's only a number of seconds:  a month 30 days, a year 365.
+# From a DATE, months and years are the calendar's:  `in 1 month, 3 days`.
+SAID_UNIT_SECONDS: dict[str, int] = {
+    "year": 365 * 86_400,
+    "month": 30 * 86_400,
+    "week": 7 * 86_400,
+    "day": 86_400,
+    "hour": 3600,
+    "minute": 60,
+    "second": 1,
+}
+
+# The units that follow the calendar from a date, in months:  a month is 28 to 31 days, a year 365 or 366.
+_CALENDAR_MONTHS: dict[str, int] = {"year": 12, "month": 1}
+
+# The parts of a day, by name => the hour each starts and the hour it ends, 0 to 24 (epic `language` J252, Owen's):
+# `evening` holds `early evening`;  `night` runs past midnight, 9 PM to 5 AM.
+DAY_PARTS: dict[str, tuple[int, int]] = {
+    "morning": (5, 12),
+    "afternoon": (12, 17),
+    "earlyEvening": (17, 19),
+    "evening": (17, 21),
+    "lateEvening": (21, 24),
+    "night": (21, 5),
+}
+
 # A day alone, `2026-12-25`:  that day's midnight where it's read, not UTC's.
 _DAY_ALONE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -138,6 +165,27 @@ class DateMethods:
         return is_date(when) and local_time(when).hour >= 12
 
     ################
+    # ## Times of day (epic `language` J252)
+    ################
+
+    def today_at(self, hour: int, minute: int = 0) -> datetime:
+        """Today at `hour` and `minute`, 0 seconds:  `noon` is `today_at(12)`, `9:30pm` `today_at(21, 30)`."""
+        return start_of(local_time(self.now())).replace(hour=hour, minute=minute)
+
+    def is_day_part(self, when: object, part: str, day: Literal["any day", "today"] = "any day") -> bool:
+        """Is `when`'s time in part `part` of its day:  `if now is in the morning` -- `DAY_PARTS` has their hours.
+
+        - `day`:  `"today"`, only if `when` is today too -- `if its due is this morning`.
+        """
+        if not is_date(when) or part not in DAY_PARTS:
+            return False
+        if day == "today" and self._days_from_today(when) != 0:
+            return False
+        starts, ends = DAY_PARTS[part]
+        hour = local_time(when).hour
+        return starts <= hour < ends if starts < ends else hour >= starts or hour < ends
+
+    ################
     # ## The time zone
     ################
 
@@ -177,22 +225,35 @@ class DateMethods:
     # ## How long ago, or from now
     ################
 
-    def time_from_now(self, when: object, style: DurationStyle = "normal", unit: str | None = None) -> object:
+    def time_from_now(
+        self, when: object, style: DurationStyle = "normal", unit: str | list[str] | None = None
+    ) -> object:
         """`when` said as how long ago it was or how long until it is:  `<date> as a duration`.
 
         - `normal`:  its two biggest parts, `in 2 days, 3 hours`, `30 minutes ago`;  one part alone as `tomorrow`,
           `yesterday`, `in 2 days`
         - `short`:  rounded to the scale, one part:  `1 day ago` for 23 hours 46 minutes, `in 2 weeks`, `in 3 months`
         - `long`:  every part, exact to the second:  `23 hours, 46 minutes, 35 seconds ago`
-        - `unit`:  in that unit, rounded:  `in 3 days`, `tomorrow` (a duration unit's id:  `day`, `hour` ...)
-        - Weeks, months and years are only words here:  a month has no fixed length, so it's never a duration's unit.
+        - `unit`:  in that unit, rounded:  `in 3 days`, `tomorrow` (a unit's id:  `month`, `day`, `hour` ...)
+          - several, biggest first:  `in 1 month, 3 days` (`as a duration in months and days`, epic `language` J253)
+          - months and years by the calendar:  November 17 to January 20 is 2 months, 3 days
         """
         if not is_date(when):
             return when
         lang = self._language()
         seconds = (instant(when) - instant(self.now())).total_seconds()
-        if unit:
-            return _relative_in(seconds, unit, lang)
+        units = [unit] if isinstance(unit, str) else unit
+        if units and len(units) == 1 and units[0] not in _CALENDAR_MONTHS:
+            return _relative_in(seconds, units[0], lang)
+        if units:
+            parts = calendar_parts(local_time(self.now()), local_time(when), units)
+            if not parts:
+                return _relative_in(seconds, "second", lang)
+            if len(parts) > 1:
+                return self._said_in(parts, ago=seconds < 0)
+            # one unit, a month or a year:  `next month`, `in 3 months`
+            said, amount = parts[0]
+            return relative(-amount if seconds < 0 else amount, said, lang)
         if style == "short" or abs(seconds) >= 26 * PART_SECONDS["days"]:
             return self._roughly_from_now(local_time(when), seconds)
         parts = parts_of(abs(seconds), 4 if style == "long" else 2)
@@ -201,22 +262,24 @@ class DateMethods:
         key = "duration-ago" if seconds < 0 else "duration-from-now"
         return self.message(key, time=duration_words(parts, lang))
 
-    def duration_text(self, seconds: object, style: DurationStyle = "normal", unit: str | None = None) -> object:
+    def duration_text(
+        self, seconds: object, style: DurationStyle = "normal", unit: str | list[str] | None = None
+    ) -> object:
         """A duration said as text:  `(its due - now) as a duration`, `2 days, 3 hours`.
 
         - `seconds`:  how long, in seconds -- the compiler converts a measure in another unit first.
         - `normal`, its two biggest parts;  `short`, one part, rounded;  `long`, every part to the second;
-          `unit`, in that unit (`in days`:  `3 days`).
+          `unit`, in that unit (`in days`:  `3 days`), or several, biggest first (`in hours and minutes`:
+          `1 hour, 30 minutes`;  epic `language` J253) -- a month 30 days, a year 365.
         """
         if not _is_number(seconds):
             return seconds
         lang = self._language()
         sign = "-" if seconds < 0 else ""
         away = abs(seconds)
-        if unit:
-            part = f"{unit}s"
-            amount = js_round(away / UNIT_SECONDS.get(unit, 1))
-            return sign + duration_words([(part if part in PART_SECONDS else "seconds", amount)], lang)
+        units = [unit] if isinstance(unit, str) else unit
+        if units and any(each in SAID_UNIT_SECONDS for each in units):
+            return sign + self._said_in(fixed_parts(away, units))
         parts = parts_of(away, 4 if style == "long" else 1 if style == "short" else 2)
         return sign + duration_words(parts or [("seconds", 0)], lang)
 
@@ -369,6 +432,21 @@ class DateMethods:
         """Whole days from today's midnight to `when`'s."""
         return days_between(start_of(local_time(self.now())), start_of(local_time(when)))
 
+    def _said_in(self, parts: list[tuple[str, int]], *, ago: bool | None = None) -> str:
+        """`parts` said:  `1 month, 3 days`;  from a date (`ago` given), how long ago or until, `in 1 month, 3 days`.
+
+        - Parts that are 0 aren't said;  all 0 is the last unit's, `0 days`, `today`.
+        """
+        lang = self._language()
+        said = [(unit, amount) for unit, amount in parts if amount]
+        if not said:
+            unit = parts[-1][0]
+            return relative(0, unit, lang) if ago is not None else _amount_of(0, unit, _words_of(lang))
+        words = duration_words([(f"{unit}s", amount) for unit, amount in said], lang)
+        if ago is None:
+            return words
+        return self.message("duration-ago" if ago else "duration-from-now", time=words)
+
     def _roughly_from_now(self, when: datetime, seconds: float) -> str:
         """`when`, `seconds` from now, rounded to its scale, as Moment.js rounds.
 
@@ -488,6 +566,70 @@ def parts_of(seconds: float, count: int) -> list[tuple[str, int]]:
     # what rounded away to nothing at the end isn't said:  `1 day`, not `1 day, 0 hours`
     while len(parts) > 1 and parts[-1][1] == 0:
         parts.pop()
+    return parts
+
+
+def _sorted_units(units: list[str]) -> list[str]:
+    """`units`' ids, each once, biggest first:  `["day", "month"]` is `["month", "day"]`."""
+    return [unit for unit in SAID_UNIT_SECONDS if unit in units]
+
+
+def fixed_parts(seconds: float, units: list[str]) -> list[tuple[str, int]]:
+    """`seconds` cut into `units` (their ids, any order), biggest first, the last rounded:  `1 hour, 30 minutes`.
+
+    - Each unit its fixed size, `SAID_UNIT_SECONDS`:  a month 30 days, a year 365.
+    """
+    sizes = [(unit, SAID_UNIT_SECONDS[unit]) for unit in _sorted_units(units)]
+    smallest = sizes[-1][1]
+    left = js_round(seconds / smallest) * smallest
+    parts: list[tuple[str, int]] = []
+    for unit, size in sizes:
+        amount = left // size
+        left -= amount * size
+        parts.append((unit, amount))
+    return parts
+
+
+def plus_months(when: datetime, months: int) -> datetime:
+    """`when` moved on `months` months, its day kept, or its month's last:  a month after January 31 is February 28."""
+    year, month = divmod(when.month - 1 + months, 12)
+    year += when.year
+    last = calendar.monthrange(year, month + 1)[1]
+    return when.replace(year=year, month=month + 1, day=min(when.day, last))
+
+
+def months_between(earlier: datetime, later: datetime) -> int:
+    """How many whole months from `earlier` to `later`, by the calendar (`plus_months()`)."""
+    months = (later.year - earlier.year) * 12 + later.month - earlier.month
+    while months > 0 and plus_months(earlier, months) > later:
+        months -= 1
+    return max(months, 0)
+
+
+def calendar_parts(start: datetime, end: datetime, units: list[str]) -> list[tuple[str, int]]:
+    """The time between `start` and `end`, either way round, cut into `units`, biggest first, the last rounded.
+
+    - November 17 to January 20 in months and days is `2 months, 3 days`.
+    - Months and years by the calendar, a month on from January 31 its last day, February 28;  the rest fixed.
+    """
+    earlier, later = (start, end) if start <= end else (end, start)
+    ordered = _sorted_units(units)
+    parts: list[tuple[str, int]] = []
+    at = earlier
+    for index, unit in enumerate(ordered):
+        months = _CALENDAR_MONTHS.get(unit)
+        if not months:
+            # the rest are fixed:  cut what's left as a number of seconds
+            return parts + fixed_parts((later - at).total_seconds(), ordered[index:])
+        amount = months_between(at, later) // months
+        # the last unit rounds:  half way to the next one or more counts it
+        if index == len(ordered) - 1:
+            reached = plus_months(at, amount * months)
+            following = plus_months(at, (amount + 1) * months)
+            if (later - reached).total_seconds() >= (following - reached).total_seconds() / 2:
+                amount += 1
+        parts.append((unit, amount))
+        at = plus_months(at, amount * months)
     return parts
 
 
@@ -670,8 +812,8 @@ def relative(amount: int, unit: str, lang: str) -> str:
 
 def _relative_in(seconds: float, unit: str, lang: str) -> str:
     """`seconds` from now, in `unit`, rounded:  `in 3 days`, `tomorrow`."""
-    size = UNIT_SECONDS.get(unit, 1)
-    word = unit if unit in UNIT_SECONDS and unit not in ("millisecond", "tick") else "second"
+    size = SAID_UNIT_SECONDS.get(unit) or UNIT_SECONDS.get(unit, 1)
+    word = unit if unit in SAID_UNIT_SECONDS else "second"
     return relative(js_round(seconds / size), word, lang)
 
 

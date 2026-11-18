@@ -17,7 +17,7 @@ import { StatementIf } from "./StatementIf"
 import { ReturnOtherwise } from "./ReturnOtherwise"
 
 _if_.addRule(If, {
-  syntax: "if {condition:expression} (then|:)? {statement_body}?",
+  syntax: "if {condition:expression} (then|:|,)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line if statements",
@@ -31,7 +31,9 @@ _if_.addRule(If, {
         ["if a:", "if (a) {}"],
         ["if a then b = 1", "if (a) { const b = 1 }", "if (a) { const b: number = 1 }"],
         ["if a: b = 1", "if (a) { const b = 1 }", "if (a) { const b: number = 1 }"],
-        ["if a : b = 1", "if (a) { const b = 1 }", "if (a) { const b: number = 1 }"]
+        ["if a : b = 1", "if (a) { const b = 1 }", "if (a) { const b: number = 1 }"],
+        // a comma works as `:` does (epic `language` J269)
+        ["if a, b = 1", "if (a) { const b = 1 }", "if (a) { const b: number = 1 }"]
       ]
     },
     {
@@ -97,7 +99,7 @@ _if_.addRule(If, {
 })
 
 _if_.addRule(ElseIf, {
-  syntax: "(otherwise|else) if {condition:expression} (then|:)? {statement_body}?",
+  syntax: "(otherwise|else) if {condition:expression} (then|:|,)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line else_if statements",
@@ -112,7 +114,8 @@ _if_.addRule(ElseIf, {
         ["else if a then", "else if (a) {}"],
         ["else if a b = 1", "else if (a) { const b = 1 }", "else if (a) { const b: number = 1 }"],
         ["else if a: b = 1", "else if (a) { const b = 1 }", "else if (a) { const b: number = 1 }"],
-        ["else if a then b = 1", "else if (a) { const b = 1 }", "else if (a) { const b: number = 1 }"]
+        ["else if a then b = 1", "else if (a) { const b = 1 }", "else if (a) { const b: number = 1 }"],
+        ["otherwise if a, b = 1", "else if (a) { const b = 1 }", "else if (a) { const b: number = 1 }"]
       ]
     },
     {
@@ -164,7 +167,7 @@ _if_.addRule(ElseIf, {
 })
 
 _if_.addRule(Else, {
-  syntax: "(otherwise|else) :? {statement_body}?",
+  syntax: "(otherwise|else) (:|,)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line else statements",
@@ -176,7 +179,8 @@ _if_.addRule(Else, {
         ["else: b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
         ["otherwise: b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
         ["else b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
-        ["otherwise b = 1", "else { const b = 1 }", "else { const b: number = 1 }"]
+        ["otherwise b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
+        ["otherwise, b = 1", "else { const b = 1 }", "else { const b: number = 1 }"]
       ]
     },
     {

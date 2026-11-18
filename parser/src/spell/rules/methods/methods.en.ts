@@ -1422,7 +1422,7 @@ methods.addRule(QuotedTypeExpression, {
 // also `- when created:` and `- when creating it:` (epic `spanish` P28)
 methods.addRule(CreateHook, {
   roles: { band: "action", signature: "declaration" },
-  syntax: "when {signature:method_signature} :? {statement_body}?",
+  syntax: "when {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1989,7 +1989,7 @@ methods.addRule(CancelThisAction, {
 
 methods.addRule(AfterHook, {
   roles: { band: "action", signature: "declaration" },
-  syntax: "after {signature:method_signature} :? {statement_body}?",
+  syntax: "after {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -2082,7 +2082,7 @@ methods.addRule(AfterHook, {
 // the steps around an action (epic `data` P50):  before it, while it runs, and when it fails
 methods.addRule(BeforeHook, {
   roles: { band: "action", signature: "declaration" },
-  syntax: "before {signature:method_signature} :? {statement_body}?",
+  syntax: "before {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -2139,7 +2139,7 @@ methods.addRule(BeforeHook, {
 })
 methods.addRule(WhileHook, {
   roles: { band: "action", signature: "declaration" },
-  syntax: "while {signature:method_signature} :? {statement_body}?",
+  syntax: "while {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -2195,7 +2195,7 @@ methods.addRule(WhileHook, {
   ]
 })
 methods.addRule(FailureHook, {
-  syntax: "(if|when) {signature:method_signature} fails :? {statement_body}?",
+  syntax: "(if|when) {signature:method_signature} fails (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

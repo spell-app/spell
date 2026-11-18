@@ -27360,6 +27360,16 @@ export interface UIModalAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
+   * See-through:  no box, no shadow, no padding, drawn as written.  Its text keeps its colour (`appearance="basic"` turns it light).  In Spell, a modal naming none of its parts is laid out for you, unless it says `transparent`.
+   * - takes:  flag (present / absent)
+   */
+  transparent?: boolean | ""
+  /**
+   * `transparent`, as the DOM element's property.
+   * @deprecated write `transparent` -- `prop:` stays only for compiled spell
+   */
+  "prop:transparent"?: boolean | ""
+  /**
    * Nearly the whole viewport wide.
    * - takes:  flag (present / absent)
    */

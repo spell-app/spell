@@ -21,6 +21,13 @@ export class SpellKeywords {
    * - Keyed by rule:  a project's parser shares its pack's keyword rules, so a parse's match points at these.
    */
   private readonly fixesByRule = new Map<P.Rule, Map<string, string>>()
+  /**
+   * Words some keyword rule of the pack writes on their own, with no accented partner beside them:  `si` (`if`),
+   * `esta` (`esta mañana`).
+   * - Completion never relabels one to its accented partner:  it can't know which is meant.
+   * - A parse can:  `accentFixFor()` still fixes `esta` => `está` where the rule that matched pairs them.
+   */
+  private readonly standalone = new Set<string>()
 
   constructor(language: SP.Language) {
     this.language = language
@@ -65,11 +72,14 @@ export class SpellKeywords {
    *   `esta` and `está` are both offered as `está`, found by `esta`,
    *   so typing `esta` and accepting the suggestion writes `está` (epic `spanish` I7).
    * - Any of the pack's keyword rules:  completion offers words, not a parse's matches -- see `accentFixFor()`.
-   * - Never a word the pack also has on its own:  `si` (`if`) is offered as `si`, never `sí`.
+   * - Never a word the pack also has on its own:  `si` (`if`) is offered as `si`, never `sí`;
+   *   unless its accented partner is `offered` at the same place too, so `esta` there is only its stand-in:
+   *   `esta` (`esta mañana`) after `es`, but ONE `está` after `si la carta`.
    */
-  completionSpelling(word: string): { label: string; filterText?: string } {
+  completionSpelling(word: string, offered?: ReadonlySet<string>): { label: string; filterText?: string } {
     this.accentedWords ??= new Map([...this.fixesByRule.values()].flatMap((pairs) => [...pairs]))
-    const accented = this.accentedWords.get(word)
+    const partner = this.accentedWords.get(word)
+    const accented = partner && (!this.standalone.has(word) || offered?.has(partner)) ? partner : undefined
     if (accented) return { label: accented, filterText: word }
     const plain = withoutAccents(word, KEEP_LETTERS)
     return plain !== word && this.accentedWords.get(plain) === word
@@ -120,8 +130,9 @@ export class SpellKeywords {
    * - A word pairs with its accented form when both are alternatives in ONE place:
    *   - in a keyword's own list, `(número|numero)`, or one place of a phrase, `la (posición|posicion) de`
    *   - as two alternative phrases, accents apart, `(más grande|mas grande)`
-   * - A word written anywhere WITHOUT its accented partner beside it is a keyword in its own right, e.g. `si`:
-   *   never fixed, anywhere.
+   * - A word written WITHOUT its accented partner beside it is a keyword in its own right, e.g. `si`:
+   *   never fixed in that rule, and never relabelled by completion (`standalone`);
+   *   a rule that pairs it (`(está|esta) vacía`) still fixes it, as a parse says which rule matched.
    */
   private findAccentFixes() {
     const rules = this.keywordRules()
@@ -143,20 +154,24 @@ export class SpellKeywords {
       }
     }
     // each place's alternatives, and which words stand on their own
-    const standalone = new Set<string>()
+    const standaloneIn = new Map<P.Rule, Set<string>>()
     const fixes = new Map<P.Rule, Map<string, string>>()
     for (const rule of rules) {
       for (const alternatives of placesOf(rule)) {
         for (const word of alternatives) {
           const accented = alternatives.find((it) => it !== word && withoutAccents(it, KEEP_LETTERS) === word)
           if (accented) addFix(fixes, rule, word, accented)
-          else if (!phrasePairs.get(rule)?.has(word)) standalone.add(word)
+          else if (!phrasePairs.get(rule)?.has(word)) {
+            this.standalone.add(word)
+            if (!standaloneIn.has(rule)) standaloneIn.set(rule, new Set())
+            standaloneIn.get(rule)!.add(word)
+          }
         }
       }
     }
     for (const [rule, pairs] of phrasePairs) for (const [word, accented] of pairs) addFix(fixes, rule, word, accented)
     for (const [rule, pairs] of fixes) {
-      for (const word of pairs.keys()) if (standalone.has(word)) pairs.delete(word)
+      for (const word of pairs.keys()) if (standaloneIn.get(rule)?.has(word)) pairs.delete(word)
       if (pairs.size) this.fixesByRule.set(rule, pairs)
     }
   }

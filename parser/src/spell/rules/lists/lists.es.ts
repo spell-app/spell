@@ -1180,7 +1180,7 @@ listsEs.addRule(ListShuffle, {
 
 // The count is `número` here:  `repetir 3 veces: imprimir el número`
 listsEs.addRule(RepeatNTimes.specialize({ counterName: "número" }), {
-  syntax: "repetir {number:expression} (vez|veces) :? {statement_body}?",
+  syntax: "repetir {number:expression} (vez|veces) (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1215,7 +1215,7 @@ listsEs.addRule(RepeatNTimes.specialize({ counterName: "número" }), {
 
 listsEs.addRule(ListIteration, {
   syntax:
-    "(para|por) cada? {item:singular_identifier} ((y|e|,) {position:singular_identifier})? (en|de|del) {list:expression} :? {statement_body}?",
+    "(para|por) cada? {item:singular_identifier} ((y|e|,) {position:singular_identifier})? (en|de|del) {list:expression} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1270,7 +1270,7 @@ listsEs.addRule(ListIteration, {
 // a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
 // sobre los elementos que cumplen una condición (epic `language` T133):  `para cada carta del mazo que no está en la reserva`
 listsEs.addRule(ListIterationWhere, {
-  syntax: "(para|por) cada? {list:each_item_where} :? {statement_body}?",
+  syntax: "(para|por) cada? {list:each_item_where} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1356,11 +1356,11 @@ listsEs.addRule(PluralCallStatement, {
 })
 
 // el elemento nombrado por la lista:  `para películas`
-listsEs.addRule(ListIterationNamedForList, { syntax: "(para|por) cada? {list:expression} :? {statement_body}?" })
+listsEs.addRule(ListIterationNamedForList, { syntax: "(para|por) cada? {list:expression} (:|,)? {statement_body}?" })
 
 // cada cosa de un tipo, el elemento nombrado por él (epic `language` T128):  `para cada columna`
 listsEs.addRule(ListIterationNamedForList, {
-  syntax: "(para|por) {list:each_thing} :? {statement_body}?",
+  syntax: "(para|por) {list:each_thing} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1385,7 +1385,7 @@ listsEs.addRule(ListIterationNamedForList, {
 
 // the item named for a value kind of several words (epic `spanish` P22)
 listsEs.addRule(ListIteration, {
-  syntax: "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
+  syntax: "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1410,7 +1410,7 @@ listsEs.addRule(ListIteration, {
 
 listsEs.addRule(ListRangeIteration, {
   syntax:
-    "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
+    "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

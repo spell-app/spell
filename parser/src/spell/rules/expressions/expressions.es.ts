@@ -25,12 +25,15 @@ import { DaysUntil } from "./DaysUntil"
 import { DurationPart } from "./DurationPart"
 import { IsBeforeOrAfter } from "./IsBeforeOrAfter"
 import { IsDayFromToday } from "./IsDayFromToday"
+import { IsDayPart } from "./IsDayPart"
 import { IsMeridiem } from "./IsMeridiem"
 import { IsSameDayAs } from "./IsSameDayAs"
 import { IsWeekendDay } from "./IsWeekendDay"
 import { NextWeekend } from "./NextWeekend"
 import { StartOfTheDay } from "./StartOfTheDay"
 import { TheDate } from "./TheDate"
+import { TimeLiteral } from "./TimeLiteral"
+import { TimeOfDay } from "./TimeOfDay"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -744,8 +747,19 @@ expressionsEs.addRule(IsMeridiem, {
 expressionsEs.addRule(Wording.specialize({ ruleName: "duration_style", meanings: ["short", "long"] }), {
   syntax: "((short:corta)|(long:larga))"
 })
+// Una unidad en que se dice una duración:  `como duración en meses y días` (J253)
+expressionsEs.addRule(
+  Wording.specialize({
+    ruleName: "duration_unit",
+    meanings: ["year", "month", "week", "day", "hour", "minute", "second"]
+  }),
+  {
+    syntax:
+      "((year:años|año|anos|ano)|(month:meses|mes)|(week:semanas|semana)|(day:días|dias|día|dia)|(hour:horas|hora)|(minute:minutos|minuto)|(second:segundos|segundo))"
+  }
+)
 expressionsEs.addRule(AsADuration, {
-  syntax: "como (una)? (duración|duracion) {style:duration_style}? (en {unit:unit_words})?",
+  syntax: "como (una)? (duración|duracion) {style:duration_style}? (en [units:{unit:duration_unit} (,|y)])?",
   tests: [
     {
       compileAs: "expression",
@@ -753,7 +767,8 @@ expressionsEs.addRule(AsADuration, {
       tests: [
         ["due como duración", "core.timeFromNow(due)"],
         ["due como una duración corta", 'core.timeFromNow(due, "short")'],
-        ["due como duración en días", 'core.timeFromNow(due, "normal", "day")']
+        ["due como duración en días", 'core.timeFromNow(due, "normal", "day")'],
+        ["due como duración en días y meses", 'core.timeFromNow(due, "normal", ["month", "day"])']
       ]
     }
   ]
@@ -811,16 +826,74 @@ expressionsEs.addRule(IsSameDayAs, {
     }
   ]
 })
-// NOTE:  no `mañana`:  it's tomorrow AND morning (`9 de la mañana`), so `es mañana` reads two ways (J item, P63)
+// `es mañana` is tomorrow;  `es la mañana`, `es por la mañana`, the morning (`is_day_part`, Owen's J252)
 expressionsEs.addRule(IsDayFromToday, {
-  syntax: "{operator:is_or_is_not} ((today:hoy)|(yesterday:ayer))",
+  syntax: "{operator:is_or_is_not} ((today:hoy)|(tomorrow:mañana|manana)|(yesterday:ayer))",
   tests: [
     {
       compileAs: "expression",
       beforeEach: addDue,
       tests: [
         ["due es hoy", "core.isDaysFromToday(due, 0)"],
+        ["due es mañana", "core.isDaysFromToday(due, 1)"],
         ["due es ayer", "core.isDaysFromToday(due, -1)"]
+      ]
+    }
+  ]
+})
+// El mediodía y la medianoche de hoy, y una hora escrita como se escribe (J252)
+expressionsEs.addRule(TimeOfDay, {
+  syntax: "(el|la)? ((noon:mediodía|mediodia)|(midnight:medianoche))",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["mediodía", "core.todayAt(12)"],
+        ["la medianoche", "core.todayAt(0)"],
+        ["ahora es antes del mediodía", "core.isBefore(core.now(), core.todayAt(12))"]
+      ]
+    }
+  ]
+})
+expressionsEs.addRule(TimeLiteral.specialize({ ruleName: "time_literal", clock24: true }), {
+  // its own `parse()` reads it:  this is for people, and the syntax files
+  syntax: "{number} (: {number})? (am|pm)?",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["9am", "core.todayAt(9)"],
+        ["9:30 pm", "core.todayAt(21, 30)"],
+        ["21:30", "core.todayAt(21, 30)"],
+        ["ahora es después de 9:05", "core.isAfter(core.now(), core.todayAt(9, 5))"]
+      ]
+    }
+  ]
+})
+// Una parte del día:  `si ahora es por la mañana`;  la parte lleva su `la`, que `es mañana` es mañana
+expressionsEs.addRule(
+  Wording.specialize({
+    ruleName: "day_part",
+    meanings: ["morning", "afternoon", "earlyEvening", "evening", "lateEvening", "night"]
+  }),
+  {
+    syntax:
+      "((morning:mañana|manana)|(afternoon:tarde)|(earlyEvening:atardecer)|(evening:anochecer)|(lateEvening:primera hora de la noche)|(night:noche))"
+  }
+)
+expressionsEs.addRule(IsDayPart, {
+  syntax: "{operator:is_or_is_not} ((today:esta|este)|(por|en|de|a) (la|el)?|la|el|al) {part:day_part}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["due es la mañana", 'core.isDayPart(due, "morning")'],
+        ["due es por la tarde", 'core.isDayPart(due, "afternoon")'],
+        ["due es de noche", 'core.isDayPart(due, "night")'],
+        ["due es al atardecer", 'core.isDayPart(due, "earlyEvening")'],
+        ["due es a primera hora de la noche", 'core.isDayPart(due, "lateEvening")'],
+        ["due es esta mañana", 'core.isDayPart(due, "morning", "today")']
       ]
     }
   ]

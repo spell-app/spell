@@ -117,7 +117,7 @@ export class Card extends TwoSidedView {
 
   /** play the card when clicked if it is a legal move */
   async onClick(event: ClickEvent) {
-    if (this.isFaceDirection("up") || this.pile === solitaire.stock) await this.play()
+    if (this.isFaceDirection("up") || this.pile === solitaire.stock) core.answered(await this.play())
   }
 
   static draggable = true
@@ -818,7 +818,7 @@ export class Solitaire extends App {
       const pile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, card) && pile !== card.lastPile).firstItem
 
       if (pile !== undefined) {
-        await card.play()
+        core.answered(await card.play())
         // wait a bit so it doesn't play too fast
         await core.pauseFor(500, "msec")
         await this.autoPlay()

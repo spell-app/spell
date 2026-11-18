@@ -101,7 +101,7 @@ export class Carta extends TwoSidedView {
   }
 
   async onClick(event) {
-    if (this.isFaceDirection("up") || this.pila === solitario.reserva) await this.jugar()
+    if (this.isFaceDirection("up") || this.pila === solitario.reserva) core.answered(await this.jugar())
   }
 
   static draggable = true
@@ -655,7 +655,7 @@ export class Solitario extends App {
       const fundación = core.filter(core.everyThing(Fundación), (pila) => pila.palo === candidata.palo).firstItem
       if (core.canTake(fundación, candidata)) {
         huboCambios = true
-        await candidata.jugar()
+        core.answered(await candidata.jugar())
         await core.pauseFor(100, "msec")
       }
     })

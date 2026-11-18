@@ -59,7 +59,13 @@ class PageSession:
         """
         self.names = names
         self.writer = StateWriter()
+        # a thing a question names, `show "edit card" with the card`, goes by its id, as the page knows it (P64)
+        core.refer_to_thing = self.reference_to
         core.start_waiting_timers()
+
+    def reference_to(self, thing: object) -> object:
+        """`thing` as a question to the page names it:  by its id, `{"$id": "3"}`, if it's one of the program's."""
+        return {ID_KEY: self.writer.id_of(thing)} if isinstance(thing, SpellObject) else thing
 
     @property
     def things(self) -> dict[str, SpellObject]:

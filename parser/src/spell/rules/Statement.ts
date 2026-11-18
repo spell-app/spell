@@ -301,7 +301,43 @@ export class SpellStatement<
     const inlineAs = this.bodySpec?.inlineAs
     if (inlineAs && unparsed.length) this.parseInlineStatement(statement, unparsed, inlineAs)
 
+    if (inlineAs === "statement" && statement.length < tokens.length) {
+      return this.parseAtComma(scope, tokens) ?? statement
+    }
     return statement
+  }
+
+  /**
+   * `tokens`, a block opener whose words ran on past its comma, read again with its comma ending it
+   * (epic `language` J269):  `if its rank is one of 1, 2, 3, print it`.
+   * - The opener's own words may hold commas (`one of 1, 2, 3`), and a list reads on over a word (`print`):
+   *   so the first parse took `print` into the list, and couldn't read `it`.
+   * - Each comma, left to right:  the words up to it read WHOLE as the opener, its syntax taking the comma
+   *   (`(:|,)?`), and every word after it reads as its statement.
+   * - The first that fits;  none:  `undefined`, and the first parse stands, its error and all.
+   * - Only after a first parse that left words over:  a line that reads whole never comes here.
+   */
+  private parseAtComma(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    for (let index = 1; index < tokens.length - 1; index++) {
+      if (tokens[index]!.value !== ",") continue
+      const opener = super.parse(scope, tokens.slice(0, index + 1))
+      if (opener?.length !== index + 1) continue
+      const body = this.parseInlineStatement(opener, tokens.slice(index + 1), "statement")
+      if (body && opener.length === tokens.length) return opener
+    }
+    return undefined
+  }
+
+  /**
+   * SIDE EFFECT:  `match`, a call that gives back a value (`givesValue`), runs as a statement, not as a value:
+   * on its own line, or as an inline body (`if ..., deal the cards`).
+   * - So what it gives back is `the result` (epic `language` P64, Q70):  `match.data.runAsStatement`.
+   * - Anything else:  nothing.
+   */
+  static noteRunAsStatement(match: P.Match): void {
+    if (match.rule instanceof SpellStatement && match.rule.givesValue) {
+      ;(match.data as { runAsStatement?: boolean }).runAsStatement = true
+    }
   }
 
   /**
@@ -322,6 +358,7 @@ export class SpellStatement<
     )
     const inlineStatement = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
     if (inlineStatement) {
+      if (parseAs === "statement") SpellStatement.noteRunAsStatement(inlineStatement)
       statement.addMatch(inlineStatement, "body")
       // the subjects `withWhichSubject()` put back aren't on the line:  we're as long as the words we read
       if (tokens !== unparsed) {
@@ -618,6 +655,8 @@ export class SpellStatement<
     if (lineStatement && !asks) {
       if (!(lineStatement.rule instanceof SpellStatement) || !lineStatement.rule.givesValue) return undefined
       block.data.returnsLast = lineStatement
+      // its value goes where it's written, as the body's:  `the result` stays as it was (epic `language` Q70)
+      delete (lineStatement.data as { runAsStatement?: boolean }).runAsStatement
       return block
     }
     // a line nothing read:  read as an expression, the whole of it

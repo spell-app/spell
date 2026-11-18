@@ -6,10 +6,12 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  * - A keyword with a written accent is accepted without it too:  `(información|informacion)`.
  */
+import { P } from "spell/parser/parser"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { Alert } from "./Alert"
+import { AnswerWord } from "./AnswerWord"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
 import { UIDefaults } from "./UIDefaults"
@@ -19,7 +21,7 @@ import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
 import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
-import { ShowDrawn } from "./ShowDrawn"
+import { ShowDrawn, ShowDrawnWith } from "./ShowDrawn"
 import { TheResult } from "./TheResult"
 import { WithoutClosing } from "./WithoutClosing"
 import { PlaySound } from "./PlaySound"
@@ -145,6 +147,19 @@ UIEs.addRule(ShowDrawn, {
   ]
 })
 
+UIEs.addRule(ShowDrawnWith, {
+  syntax: "mostrar {name:text} con {thing:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        ;(scope as P.RootScope).variables.add("carta")
+      },
+      tests: [[`mostrar "editar carta" con carta`, [`const it = carta`, `await core.showDrawn("editar carta", it)`]]]
+    }
+  ]
+})
+
 UIEs.addRule(WithoutClosing, {
   syntax: "{call:statement} sin cerrar",
   tests: [{ compileAs: "statement", tests: [[`imprimir 1 sin cerrar`, ["core.keepOpen()", "core.console.log(1)"]]] }]
@@ -168,10 +183,16 @@ UIEs.addRule(TheResult, {
       tests: [
         [`el resultado`, `core.result()`],
         [`el resultado es aceptar`, `(core.resultIs("ok"))`],
-        [`el resultado no es cancelar`, `(!core.resultIs("cancel"))`]
+        [`el resultado no es cancelar`, `(!core.resultIs("cancel"))`],
+        [`el resultado es descartar`, `(core.resultIs("descartar"))`]
       ]
     }
   ]
+})
+
+UIEs.addRule(AnswerWord, {
+  roles: { match: "written value" },
+  tests: [{ compileAs: "expression", tests: [[`el resultado no es descartar`, `(!core.resultIs("descartar"))`]] }]
 })
 
 UIEs.addRule(OpenPrinting, {
@@ -337,8 +358,11 @@ UIEs.addRule(Prompt, {
     {
       compileAs: "statement",
       tests: [
-        [`preguntar "¿Nombre para el bebé?"`, `await core.prompt("¿Nombre para el bebé?")`],
-        [`preguntar "Nombre del archivo:" con "Sin título"`, `await core.prompt("Nombre del archivo:", "Sin título")`]
+        [`preguntar "¿Nombre para el bebé?"`, `const it = await core.prompt("¿Nombre para el bebé?")`],
+        [
+          `preguntar "Nombre del archivo:" con "Sin título"`,
+          `const it = await core.prompt("Nombre del archivo:", "Sin título")`
+        ]
       ]
     }
   ]

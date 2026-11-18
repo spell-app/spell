@@ -403,6 +403,212 @@
       "region": "US",
       "expected": 29
     },
-    { "method": "dateFrom", "args": ["2026-12-25"], "lang": "en", "region": "US", "expected": "2026-12-25T00:00:00" }
+    { "method": "dateFrom", "args": ["2026-12-25"], "lang": "en", "region": "US", "expected": "2026-12-25T00:00:00" },
+    { "method": "todayAt", "args": [9, 30], "lang": "en", "region": "US", "expected": "2026-11-17T09:30:00" },
+    { "method": "todayAt", "args": [12], "lang": "en", "region": "US", "expected": "2026-11-17T12:00:00" },
+    { "method": "todayAt", "args": [0], "lang": "en", "region": "US", "expected": "2026-11-17T00:00:00" },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T05:00:00" }, "morning"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T12:00:00" }, "morning"],
+      "lang": "en",
+      "region": "US",
+      "expected": false
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T12:00:00" }, "afternoon"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T17:00:00" }, "afternoon"],
+      "lang": "en",
+      "region": "US",
+      "expected": false
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T18:30:00" }, "earlyEvening"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T18:30:00" }, "evening"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T20:30:00" }, "earlyEvening"],
+      "lang": "en",
+      "region": "US",
+      "expected": false
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T22:00:00" }, "lateEvening"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T22:00:00" }, "night"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-18T02:00:00" }, "night"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-18T05:00:00" }, "night"],
+      "lang": "en",
+      "region": "US",
+      "expected": false
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-17T09:00:00" }, "morning", "today"],
+      "lang": "en",
+      "region": "US",
+      "expected": true
+    },
+    {
+      "method": "isDayPart",
+      "args": [{ "date": "2026-11-16T09:00:00" }, "morning", "today"],
+      "lang": "en",
+      "region": "US",
+      "expected": false
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2027-01-20T21:05:07" }, "normal", ["month", "day"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "in 2 months, 3 days"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2027-01-20T21:05:07" }, "normal", ["day", "month"]],
+      "lang": "es",
+      "region": "ES",
+      "expected": "dentro de 2 meses y 3 días"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2026-09-14T21:05:07" }, "normal", ["month", "day"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "2 months, 3 days ago"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2028-01-20T21:05:07" }, "normal", ["year", "month", "day"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "in 1 year, 2 months, 3 days"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2026-11-17T23:35:07" }, "normal", ["hour", "minute"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "in 2 hours, 30 minutes"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2026-11-17T21:05:10" }, "normal", ["month", "day"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "today"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2027-01-17T21:05:07" }, "normal", "month"],
+      "lang": "en",
+      "region": "US",
+      "expected": "in 2 months"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2026-12-17T21:05:07" }, "normal", "month"],
+      "lang": "en",
+      "region": "US",
+      "expected": "next month"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2027-01-05T21:05:07" }, "normal", "month"],
+      "lang": "en",
+      "region": "US",
+      "expected": "in 2 months"
+    },
+    {
+      "method": "timeFromNow",
+      "args": [{ "date": "2026-12-01T21:05:07" }, "normal", "week"],
+      "lang": "en",
+      "region": "US",
+      "expected": "in 2 weeks"
+    },
+    {
+      "method": "durationText",
+      "args": [5400, "normal", ["hour", "minute"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "1 hour, 30 minutes"
+    },
+    {
+      "method": "durationText",
+      "args": [5400, "normal", ["minute", "hour"]],
+      "lang": "es",
+      "region": "ES",
+      "expected": "1 hora y 30 minutos"
+    },
+    {
+      "method": "durationText",
+      "args": [3888000, "normal", ["month", "day"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "1 month, 15 days"
+    },
+    {
+      "method": "durationText",
+      "args": [10790, "normal", ["hour", "minute"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "3 hours"
+    },
+    {
+      "method": "durationText",
+      "args": [20, "normal", ["hour", "minute"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "0 minutes"
+    },
+    {
+      "method": "durationText",
+      "args": [-5400, "normal", ["hour", "minute"]],
+      "lang": "en",
+      "region": "US",
+      "expected": "-1 hour, 30 minutes"
+    }
   ]
 }

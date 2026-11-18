@@ -1337,7 +1337,7 @@ methodsEs.addRule(QuotedTypeExpression, {
 // what runs as a thing is made, in its type's outline:  `- al crear una tarea (con ...):` (epic `language`),
 // also `- al crearla:`, `- al crear:` and `- al crear la:` (epic `spanish` P28)
 methodsEs.addRule(CreateHook, {
-  syntax: "al {signature:method_signature} :? {statement_body}?",
+  syntax: "al {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1819,7 +1819,7 @@ methodsEs.addRule(CancelThisAction, {
 })
 
 methodsEs.addRule(AfterHook, {
-  syntax: "(después|despues) de {signature:method_signature} :? {statement_body}?",
+  syntax: "(después|despues) de {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1874,7 +1874,7 @@ methodsEs.addRule(AfterHook, {
 
 // los pasos alrededor de una acción (epic `data` P50):  antes, mientras se hace, y cuando falla
 methodsEs.addRule(BeforeHook, {
-  syntax: "antes de {signature:method_signature} :? {statement_body}?",
+  syntax: "antes de {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1929,7 +1929,7 @@ methodsEs.addRule(BeforeHook, {
   ]
 })
 methodsEs.addRule(WhileHook, {
-  syntax: "mientras se {signature:method_signature} :? {statement_body}?",
+  syntax: "mientras se {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1984,7 +1984,7 @@ methodsEs.addRule(WhileHook, {
   ]
 })
 methodsEs.addRule(FailureHook, {
-  syntax: "(si|cuando) falla al {signature:method_signature} :? {statement_body}?",
+  syntax: "(si|cuando) falla al {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

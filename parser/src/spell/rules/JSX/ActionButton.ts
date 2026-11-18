@@ -62,6 +62,9 @@ import { SpellJSX } from "./SpellJSX"
  *   `<action cancel />`, `<action "nevermind" cancel />` (Spanish's `aceptar`, `cancelar`).
  *   - It's what `the result` is once its click has closed the modal:  `ok` or `cancel`;
  *     a button with neither gives its action's name.
+ *   - Or its own word, first and bare on a tag with no quoted word (P64):  `<action discard title="Discard your changes" />`,
+ *     then `if the result is discard`.  It just closes the modal, labelled by its `title` (else `Discard`),
+ *     unless the program has an action of that name, which it runs first, as `<action ok />` does (`answerOf()`).
  *   - Compiled as the core's own `answer="ok"`.
  *   - With no quoted word, the word names its action:  `<action ok />` runs the program's `ok`, if it has one;
  *     if not, it just closes, labelled OK in the page's language (`core.drawAction()`), and is never refused.
@@ -230,17 +233,22 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
   }
 
   /**
-   * The answer `element`'s button gives, by a bare word it says (epic `language` T155):
+   * The answer `element`'s button gives, by a bare word it says (epic `language` T155, P64):
    * `ok` in `<action ok />` and `<action "save the thing" ok />`, `cancel` in `<action cancel />` --
-   * `undefined` if it says neither.
+   * `undefined` if it says none.
    * - Its language's words (`SP.LanguageWords.answerWords`:  Spanish's `aceptar`, `cancelar`), and English's in every
    *   language;  case and accents never matter.
+   * - Or a button's OWN word, `discard` in `<action discard title="Discard your changes" />` (P64;  Owen, 2026-11-17):
+   *   - only with no quoted word, and only as its FIRST attribute, bare, before any other
+   *   - not `<action>`'s own (`keep-open`, `icon-only`, in any language), nor one Spell UI's button or menu row
+   *     takes bare (`disabled`, `basic` ...:  `bareAttributesOf()`)
+   *   - so `<action disabled>Cut</action>` stays Spell UI's menu row, as before
    * - `word`:  as written, the name of the action `<action ok />` runs, if the program has one.
    */
   private static answerOf(
     scope: P.Scope,
     element: P.JSXElementToken
-  ): { answer: SP.DialogAnswer; at: number; word: string } | undefined {
+  ): { answer: string; at: number; word: string } | undefined {
     const words = { ...ANSWER_WORDS, ...SP.Language.of(scope).words.answerWords }
     const read = (name: string) =>
       Object.entries(words).find(([word]) => withoutAccents(word).toLowerCase() === withoutAccents(name).toLowerCase())
@@ -251,7 +259,30 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
       const found = read(attribute.name)
       if (found) return { answer: found[1], at, word: attribute.name }
     }
-    return undefined
+    const [first] = attributes
+    if (element.quotedWord || !(first instanceof P.JSXAttributeToken) || first.value !== undefined) return undefined
+    if (!ActionButton.isOwnAnswer(scope, first.name)) return undefined
+    return { answer: first.name, at: 0, word: first.name }
+  }
+
+  /** Could bare `word`, first on an `<action>` with no quoted word, be its own answer?  See `answerOf()`. */
+  private static isOwnAnswer(scope: P.Scope, word: string): boolean {
+    if (!P.ALPHANUMERIC_WORD_WITH_DASHES.test(word)) return false
+    const { words } = SP.Language.of(scope)
+    const own = [KEEP_OPEN, ICON_ONLY, words.keepOpenAttribute, words.iconOnlyAttribute].map((it) => withoutAccents(it))
+    if (own.includes(withoutAccents(word))) return false
+    return !ActionButton.bareAttributesOf(scope).has(withoutAccents(word).toLowerCase())
+  }
+
+  /**
+   * The attributes Spell UI's button and menu row take bare (`disabled`, `basic`, `fluid` ...), as `scope`'s language
+   * writes them, without accents:  what an `<action>`'s first bare word can't be its answer for (`answerOf()`).
+   * - Empty while no pack can say (spell-parser's own tests).
+   */
+  private static bareAttributesOf(scope: P.Scope): Set<string> {
+    const help = SP.ComponentPacks.help(SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+    const bare = [BUTTON_TAG, MENU_ROW_TAG].flatMap((tag) => help?.attributesOf(tag)?.filter((it) => it.bare) ?? [])
+    return new Set(bare.map((attribute) => withoutAccents(attribute.name).toLowerCase()))
   }
 
   /** The core's own attribute for a button's answer:  `answer="ok"`, `answer="save the thing"` (`core.drawAction()`). */
@@ -307,8 +338,11 @@ type ActionButtonData = JSXMatchData & {
   inDialog?: boolean
   /** Which of its attributes is `keep-open`:  in a modal's actions, it leaves the modal open (T155). */
   keepOpenAt?: number
-  /** The answer it gives, `ok` or `cancel`, by its word (`<action ok />`):  what `the result` is once it closes (T155). */
-  answer?: SP.DialogAnswer
+  /**
+   * The answer it gives by its word, `ok` or `cancel` (`<action ok />`, T155), or its own (`<action discard />`, P64):
+   * what `the result` is once it closes.
+   */
+  answer?: string
   /** Which of its attributes is that word. */
   answerAt?: number
   /** Its action as written, its quoted word or its answer's word:  `save the thing`, `ok`. */
@@ -333,6 +367,9 @@ const NOT_ACTIONS = /^(draw|create|test)(_|$)/
 
 /** What an action's button is:  Spell UI's, which the core draws (`core.drawAction()`). */
 const BUTTON_TAG = "ui-button"
+
+/** What a menu's row is:  Spell UI's action, which the core draws for one in a menu (`core.drawAction()`). */
+const MENU_ROW_TAG = "ui-action"
 
 /** `<action>`'s own attribute in a modal's actions, English's word:  its click leaves the modal open (T155). */
 const KEEP_OPEN = "keep-open"

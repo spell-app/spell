@@ -130,7 +130,7 @@ class Card(TwoSidedView):
     async def on_click(self, event: ClickEvent) -> None:
         """play the card when clicked if it is a legal move"""
         if self.is_face_direction("up") or self.pile == solitaire.stock:
-            await self.play()
+            core.answered(await self.play())
 
     draggable = True
 
@@ -706,7 +706,7 @@ class Solitaire(App):
             ).first_item
 
             if pile is not None:
-                await card.play()
+                core.answered(await card.play())
                 # wait a bit so it doesn't play too fast
                 await core.pause_for(500, "msec")
                 await self.auto_play()

@@ -87,6 +87,18 @@ class UIMethods:
             found = self.__dict__["_shown_by_tasks"] = {}
         return found
 
+    @property
+    def _shown_things(self) -> dict[str, object]:
+        """What each modal was last shown with, by its id:  `show_drawn()`'s `thing`, one dict per core."""
+        found = self.__dict__.get("_shown_things_by_id")
+        if found is None:
+            found = self.__dict__["_shown_things_by_id"] = {}
+        return found
+
+    # How a thing goes to the page in a question, `show "edit card" with the card`:  by its id, `{"$id": "3"}`.
+    # - The page's session sets it (`PageSession`);  `None`:  as it is.
+    refer_to_thing: Callable[[object], object] | None = None
+
     # Read an answer typed at a terminal, for `confirm` and `prompt` with no page:  `None` to take the default.
     # - A test sets its own.
     answer_typed: Callable[[str], str | None] | None = None
@@ -162,11 +174,12 @@ class UIMethods:
         self._result = OK if yes else CANCEL
         return yes
 
-    async def prompt(self, message: object, value: str | None = None) -> str | None:
-        """Ask for some text in a dialog:  what was typed, or `None` if cancelled.
+    async def prompt(self, message: object, value: str | None = None) -> str:
+        """Ask for some text in a dialog:  what was typed, empty text if cancelled -- into a new `it`.
 
-        - Compiled from `prompt "Name?" with "Untitled"`, `value` its starting text.
-        - No page:  `value`, printed with the question;  in a terminal, what's typed, `value` if nothing is.
+        - Compiled from `prompt "Name?" with "Untitled"`, `value` its starting text:  `it = await core.prompt(...)`.
+        - HyperTalk's way (epic `language` P64):  `the result` is the button that closed it, `ok` or `cancel`.
+        - No page:  `value`, printed with the question;  in a terminal, what's typed, `value` if nothing is.  `ok`.
         """
         if self.ask_page is None:
             typed = self._typed(f"{message} ({value or ''}) ")
@@ -175,14 +188,13 @@ class UIMethods:
                 answer = value
             else:
                 answer = typed.rstrip("\n") or value
-            self._result = answer
-            return answer
+            self._result = OK
+            return answer or ""
         asked = await self.ask_page("prompt", _args(message, value))
-        answer = None if asked is None else str(asked)
-        self._result = CANCEL if answer is None else answer
-        return answer
+        self._result = CANCEL if asked is None else OK
+        return "" if asked is None else str(asked)
 
-    async def show_drawn(self, name: str) -> object:
+    async def show_drawn(self, name: str, thing: object = None) -> object:
         """Show what the program drew and named `name`, and wait until it closes:  compiled from `show "you won"`.
 
         - Named by the quoted word on its tag, `<modal "you won">`:  the PAGE draws it, so the page shows it,
@@ -192,17 +204,22 @@ class UIMethods:
           `ok` or `cancel` from a button that says so, else that button's action's name;  `cancel` for Escape.
           Anything else the page shows answers at once, with nothing.
         - `show "you won" without waiting` doesn't wait for it:  it runs beside the program.
+        - `thing`:  what it's shown with, `show "edit card" with the card` (epic `language` P64), which the modal draws
+          and edits itself (`draw_shown()`):  the page is sent it by its id (`refer_to_thing`), and draws it.
         - While it waits inside an action, a modal's button's call still runs (`let_modal_call_run()`), rather than
           waiting behind it for good.
         - No page:  nothing, at once.
         - NEVER throws:  one the page can't show is said on the console.
         """
+        if thing is not None:
+            self._shown_things[_drawn_id(name)] = thing
         if self.ask_page is None or not _is_loop_running():
             return None
         task = asyncio.current_task()
         self._shown_by[_drawn_id(name)] = task
+        shown_with = [] if thing is None else [self.refer_to_thing(thing) if self.refer_to_thing else thing]
         try:
-            answer = await self._ask_or_say("showDrawn", [str(name)])
+            answer = await self._ask_or_say("showDrawn", [str(name), *shown_with])
         finally:
             if self._shown_by.get(_drawn_id(name)) is task:
                 del self._shown_by[_drawn_id(name)]
@@ -218,6 +235,10 @@ class UIMethods:
         - Not waited for.
         """
         self._ask_page_soon("hideDrawn", [str(name)] if answer is None else [str(name), answer])
+
+    def shown_in(self, name: str) -> object:
+        """What modal `name` was last shown with, `show "edit card" with the card`:  `None` if it never was (P64)."""
+        return self._shown_things.get(_drawn_id(name))
 
     def keep_open(self) -> None:
         """Leave the modal open after the call running now:  compiled from `... without closing` (epic `language` T155).
@@ -235,11 +256,21 @@ class UIMethods:
     def result(self) -> object:
         """What closed the last dialog:  compiled from `the result` (epic `language` T155).
 
-        - A modal's:  `ok`, `cancel`, or its button's action's name;  `alert`, `warn`:  `ok`;
-          `confirm`:  `ok` or `cancel`;  `prompt`:  the text typed, or `cancel`.
+        - A modal's:  `ok`, `cancel`, or its button's answer;  `alert`, `warn`:  `ok`;
+          `confirm`, `prompt`:  `ok` or `cancel` (`prompt`'s text is `it`, epic `language` P64).
+        - What an action gives back, run as a statement (`answered()`, P64).
         - `None` before any has closed.
         """
         return self._result
+
+    def answered(self, value: object) -> object:
+        """`the result` is `value` from now on, and give it back:  an action that gives back a value, run as a statement
+        on its own line (epic `language` P64, Q70):  `deal the cards` => `core.answered(await self.deal_the_cards())`.
+
+        - Used as a value (`set x to the score of the game`), a call isn't wrapped:  `the result` stays as it was.
+        """
+        self._result = value
+        return value
 
     def result_is(self, value: object) -> bool:
         """Is the last dialog's answer `value`:  compiled from `the result is ok`.  Text with no regard to case."""

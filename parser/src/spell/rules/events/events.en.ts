@@ -144,7 +144,7 @@ events.addRule(InputState.specialize({ reads: "thingUnderMouse", datatype: "thin
 
 events.addRule(On, {
   roles: { band: "action" },
-  syntax: "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+  syntax: "on event? {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -187,7 +187,7 @@ events.addRule(On, {
 
 // `on card click with a card`:  an event's name of several words, the same event as `card-click` -- see `event_words`
 events.addRule(On, {
-  syntax: "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+  syntax: "on event? {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?",
   tests: [
     { compileAs: "block", tests: [["on card click", 'on("card-click")']] },
     {
@@ -296,7 +296,7 @@ events.addRule(
   }
 )
 events.addRule(On, {
-  syntax: "when {passive:passive_event} :? {statement_body}?",
+  syntax: "when {passive:passive_event} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -363,7 +363,7 @@ events.addRule(On, {
 events.addRule(ChangedProperty)
 events.addRule(ON_CHANGE, {
   syntax:
-    "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) :? {statement_body}?",
+    "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -425,7 +425,7 @@ events.addRule(ON_CHANGE, {
 
 // a saved thing changing (epic `data` P13):  above an event of the same words, which nobody would send
 events.addRule(WhenThingChanges, {
-  syntax: "when (a|an) {type:known_type} changes :? {statement_body}?",
+  syntax: "when (a|an) {type:known_type} changes (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -447,19 +447,19 @@ events.addRule(WhenThingChanges, {
     }
   ]
 })
-events.addRule(WhenSomeoneElseChanges, { syntax: "when someone else changes it :? {statement_body}?" })
+events.addRule(WhenSomeoneElseChanges, { syntax: "when someone else changes it (:|,)? {statement_body}?" })
 
 // `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);
 // `when creating a deck` (and `when created`) stays the creation hook, which wins on the same words (`priority`)
-events.addRule(On, { syntax: "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?" })
-events.addRule(On, { syntax: "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?" })
+events.addRule(On, { syntax: "when {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?" })
+events.addRule(On, { syntax: "when {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?" })
 
 // `- while the mouse is down:`:  steps that hold while it's pressed on the thing, put back after (Q51, Q52 A)
 events.addRule(WhileHandler.specialize({ handler: "while_mouse_down" }), {
-  syntax: "while the mouse is down (on it)? :? {statement_body}?"
+  syntax: "while the mouse is down (on it)? (:|,)? {statement_body}?"
 })
 events.addRule(WhileHandler.specialize({ handler: "while_mouse_over" }), {
-  syntax: "while the mouse is over it :? {statement_body}?"
+  syntax: "while the mouse is over it (:|,)? {statement_body}?"
 })
 
 // an event a template's things send, and what comes with it (epic `elemental-spell` P5):
