@@ -4,7 +4,8 @@ import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 // Import directly to avoid circular import
-import { MethodDefinition } from "spell/parser/spell/rules/methods/MethodDefinition"
+import { CANT_BE_UNDONE, MethodDefinition } from "spell/parser/spell/rules/methods/MethodDefinition"
+import type { ActionDetails } from "spell/parser/spell/rules/methods/ActionDetail"
 import type { MethodSignatureData } from "spell/parser/spell/rules/methods/methods.shared"
 import { PLACE_KIND_ABILITIES } from "./places.shared"
 import { textIn } from "./PlaceDetail"
@@ -39,6 +40,10 @@ export class OperationAt extends MethodDefinition<"signature|path", OperationDat
   @proto static alias = "statement"
   @proto static priority = Priority.declaration
   @proto static inlineInitialType = true
+  // a real action (epic `data` I101):  described on its type, so its hooks run, `cancel` calls it off, the Inspector lists it
+  @proto static undoableByDefault = true
+  // when it fails, `when any server call fails` hears of it (epic `data` Q93)
+  @proto static callsServer = true
 
   /** Says which place it's under, or warns that it's under none. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
@@ -69,6 +74,11 @@ export class OperationAt extends MethodDefinition<"signature|path", OperationDat
     return signature.types.some((type) => !type.isSimple) ? super.processSignature(groups, signature, scope) : signature
   }
 
+  /** What the server did can't be taken back here:  a server's action can't be undone, whatever it says. */
+  protected undoOfAction(_details: ActionDetails, _isAction: boolean, _title: string): P.ASTActionUndo {
+    return { cantBeUndone: CANT_BE_UNDONE }
+  }
+
   /** The operation this line names, and its address. */
   static operationOf(match: P.Match): { name: string; at: string } | undefined {
     const { placeName, signature } = match.data as Partial<OperationData> & { signature?: MethodSignatureData }
@@ -86,23 +96,36 @@ export class OperationAt extends MethodDefinition<"signature|path", OperationDat
 
   /**
    * The call:  `core.callPlace("family_cookbook", "publish", this)`.
-   * - What's sent:  the thing it's a method of, else its first `(argument)`, else nothing.
+   * - What's sent:  the thing it's a method of, else nothing;  then its other blanks by name (epic `data` Q78):
+   *   `to move a job to (queue as text)` sends `{ queue }`, filling `{queue}` in its address.
+   *   - A `(with reason as text)` sends what the call says, `{ reason }` (`WithPropsArg`).
+   * - The operation by its method's name, as `core.place()`'s `operations` has it:  `moveToQueue`.
    * - Under no place:  nothing to call.
    */
   protected bodyAST(match: P.MatchFor<this>): P.ASTStatement | undefined {
     const { placeName } = match.data as Partial<OperationData>
     if (!placeName) return undefined
-    const { methodName = "", instanceType, args } = this.getSignature(match)!
+    const { methodName = "", instanceType, args, props } = this.getSignature(match)!
     const text = (value: string) => new P.ASTStringLiteral(match, { value: JSON.stringify(value) })
-    const sent = instanceType ? new P.ASTSelfLiteral(match) : args[0]
+    const operation = new P.ASTMemberNameLiteral(match, { name: methodName })
+    const sent = instanceType ? new P.ASTSelfLiteral(match) : new P.ASTNothingLiteral(match)
+    const named = args.map((arg) => (arg as P.ASTVariableExpression).name).filter((name) => name !== PROPS)
+    const params: P.ASTExpression[] = []
+    if (named.length) {
+      const properties = named.map((name) => new P.ASTObjectLiteralProperty(match, { property: name }))
+      params.push(new P.ASTObjectLiteral(match, { properties }))
+    }
+    if (props) params.push(new P.ASTVariableExpression(match, { name: PROPS }))
+    const callArgs: P.ASTExpression[] = [text(placeName), operation]
+    if (instanceType || params.length) callArgs.push(sent, ...params)
     return new P.ASTReturnStatement(match, {
-      value: new P.ASTCoreMethodInvocation(match, {
-        methodName: "callPlace",
-        args: [text(placeName), text(methodName), ...(sent ? [sent as P.ASTExpression] : [])]
-      })
+      value: new P.ASTCoreMethodInvocation(match, { methodName: "callPlace", args: callArgs })
     })
   }
 }
+
+/** What a `(with ...)` clause's values come in as:  `WithPropsArg`'s. */
+const PROPS = "props"
 
 /** What `operation_at` notes while parsing. */
 type OperationData = {

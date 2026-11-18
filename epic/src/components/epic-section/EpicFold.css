@@ -232,6 +232,12 @@
     /* its entries' ticks:  a column kept for the check, ticked or not */
     --ui-dropdown-icon-column: 1;
   }
+  /* its spot before it's drawn (`renderGear()`, I333):  the button's size, so nothing moves as it comes */
+  .gear-spot {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+  }
   .gear::part(icon) {
     display: none;
   }

@@ -391,6 +391,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorDataWhyNotFull: "Completo:  {place} no tiene sitio para esto.",
   inspectorDataWhyNotNotListed: "Solo lectura:\nsolo se apuntan aquí las personas que lista {place}.",
   inspectorDataWhyNotUsedUp: "Agotadas:\nya pediste a {place} todas las invitaciones que tienes.",
+  inspectorDataWhyNotSignedOut: "Solo lectura:\nno iniciaste sesión en {place}.  Inicia sesión para cambiar esto.",
   inspectorDataWorkedOutFrom: "Se calcula con lo que lee en {places}:\ncambia eso en su lugar.",
   inspectorDataSourceReal: "Datos reales, guardados en {place}:\nlo que cambies aquí se guarda allí.",
   inspectorDataSourceReadOnly:

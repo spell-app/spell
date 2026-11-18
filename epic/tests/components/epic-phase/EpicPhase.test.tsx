@@ -22,6 +22,8 @@ import "spell/ui/components/ui-zoom"
 
 /** `host`'s gear (I166), drawn. */
 async function gearOf(host: Element): Promise<E.DOMElement> {
+  // drawn once it comes near the screen (`NearScreen`, epic `epic-engine` I333)
+  await vi.waitFor(() => expect(host.shadowRoot!.querySelector('[part~="gear"]')).not.toBeNull())
   const gear = host.shadowRoot!.querySelector<E.DOMElement>('[part~="gear"]')!
   await gear.ready
   return gear

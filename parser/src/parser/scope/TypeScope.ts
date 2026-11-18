@@ -162,6 +162,13 @@ export class TypeScope extends BlockScope {
   /** `- it keeps no times`:  it has no `created` or `modified` (epic `data` T57).  Journaled:  see `declareKeepsNoTimes()`. */
   declare keepsNoTimes?: boolean
   /**
+   * What its place lets be done to its things, by its line (epic `data` P49):  `enabled operations are read, add`,
+   * each as compiled code names it (`read`, `add`, `change`, `delete`, `all`, an action's method);
+   * `all operations are disabled` is none.
+   * - Left out:  every one.  Journaled:  see `declareEnabledOperations()`.
+   */
+  declare enabledOperations?: readonly string[]
+  /**
    * Its records are published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10):
    * `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address.
    * - What the language's round-trip warnings watch.
@@ -275,6 +282,11 @@ export class TypeScope extends BlockScope {
   /** SIDE EFFECT:  we do without `created` and `modified` -- see `keepsNoTimes`.  Journaled. */
   declareKeepsNoTimes(declaredBy: P.Match): void {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { keepsNoTimes: true })
+  }
+
+  /** SIDE EFFECT:  our place lets only these be done to our things -- see `enabledOperations`.  Journaled. */
+  declareEnabledOperations(enabledOperations: readonly string[], declaredBy: P.Match): void {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { enabledOperations })
   }
 
   /** SIDE EFFECT:  our records are published, as `published` says -- see `published`.  Journaled. */

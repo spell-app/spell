@@ -50,10 +50,14 @@ export type PlaceDetails = {
       askedBy?: string[]
       /** How this one is searched, at its own address:  `users are searched with "q" at "/search/users"`. */
       searches?: { param: string; fields: string[]; at?: string }
+      /** What it lets be done to all of them, by the line under its own:  `enabled operations are read, add` (epic `data` P49). */
+      operations?: string[]
     }
   >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
+  /** Where its key's token is made, from the secret `keyNamed`:  `its token comes from "..."` (epic `data` P49). */
+  tokenFrom?: string
   /** It goes without its key where nothing holds it, a browser:  `its optional key is the secret "GITHUB_TOKEN"`. */
   keyIfSet?: boolean
   /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
@@ -218,19 +222,33 @@ export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
   const { AtProtoPlace, GraphPlace, RestPlace } = making.folder
   const { collection, Class } = making
   if (behind instanceof RestPlace) behind.addFields(collection, storedAsIn(Class))
+  limitOperations(behind, making)
   // a record has no decimals:  a number field is kept as text, as its Lexicon says (epic `atmosphere` P10)
   if (behind instanceof AtProtoPlace) behind.addDecimals(collection, fieldsOfKind(Class, "number"))
   if (!(behind instanceof GraphPlace)) return
   behind.addCollection(collection, graphCollections(making)[collection]!)
 }
 
+/**
+ * SIDE EFFECT:  a web server's collection takes only what its lines enable (epic `data` P49):
+ * the switch under its `live at` line, then its thing's own `enabled operations are ...`, each narrowing.
+ * - Any other kind:  nothing.
+ */
+export function limitOperations(behind: PlaceBehind, { folder, collection, Class, details }: PlaceMaking): void {
+  if (!(behind instanceof folder.RestPlace)) return
+  const switched = details.collections?.[collection]?.operations
+  const own = (Class as { savedIn?: { operations?: readonly string[] } }).savedIn?.operations
+  if (switched) behind.limitOperations(collection, switched)
+  if (own) behind.limitOperations(collection, own)
+}
+
 /** Each kind's word, and how its place is made. */
 const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) => PlaceBehind> = {
-  "web server": ({ details, collection, Class, keyFrom, deviceCopy }, { RestPlace, nameStyleLike }) =>
-    new RestPlace({
+  "web server": ({ details, collection, Class, keyFrom, deviceCopy }, folder) =>
+    new folder.RestPlace({
       url: details.at!,
       collections: restCollections(details, collection, storedAsIn(Class)),
-      ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
+      ...(details.namesLike !== undefined && { namesLike: folder.nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
       ...restLinesForEveryCollection(details),
       ...restAbilitiesIn(details),
@@ -239,14 +257,14 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(deviceCopy && { deviceCopy }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
-      ...keyLinesOf(details, keyFrom)
+      ...keyLinesOf(details, keyFrom, folder)
     }),
-  "graphql server": (making, { GraphPlace }) =>
-    new GraphPlace({
+  "graphql server": (making, folder) =>
+    new folder.GraphPlace({
       url: making.details.at!,
       collections: graphCollections(making),
       ...(making.details.versionsIn !== undefined && { versions: { field: making.details.versionsIn } }),
-      ...keyLinesOf(making.details, making.keyFrom)
+      ...keyLinesOf(making.details, making.keyFrom, folder)
     }),
   "data folder": ({ details, deviceCopy }, places) => {
     const {
@@ -394,10 +412,23 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
 }
 
-/** What a place's lines say of its key, for a place on a server:  nothing without one named. */
-function keyLinesOf({ keyNamed, keyIfSet, keyGoes }: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]) {
+/**
+ * What a place's lines say of its key, for a place on a server:  nothing without one named.
+ * - `its token comes from "...", made with the secret "..."` (epic `data` P49):  the key sent is a token made from the
+ *   secret, kept, and made again before it runs out (`PlaceToken`).
+ */
+function keyLinesOf(
+  { keyNamed, keyIfSet, keyGoes, tokenFrom }: PlaceDetails,
+  keyFrom: PlaceMaking["keyFrom"],
+  folder: typeof PlacesFolder
+) {
   if (keyNamed === undefined) return {}
-  return { keyNamed, ...(keyFrom && { keyFrom }), ...(keyIfSet && { keyIfSet }), ...(keyGoes && { keyGoes }) }
+  const token =
+    keyFrom && tokenFrom !== undefined
+      ? new folder.PlaceToken({ keyNamed, keyFrom, mint: folder.tokenServiceMint(tokenFrom) })
+      : undefined
+  const sent = token ? token.current : keyFrom
+  return { keyNamed, ...(sent && { keyFrom: sent }), ...(keyIfSet && { keyIfSet }), ...(keyGoes && { keyGoes }) }
 }
 
 /**

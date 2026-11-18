@@ -1678,6 +1678,8 @@
             "clock_zone",
             "size_unit",
             "numbers_or_names",
+            "operation_word",
+            "verify_state",
             "there_are_how_many",
             "site_top_bar",
             "site_main_layout",
@@ -1806,6 +1808,12 @@
             },
             {
               "syntax": "((numbers:los números)|(names:los nombres))"
+            },
+            {
+              "syntax": "((read:leer)|(add:añadir)|(change:cambiar)|(delete:borrar)|(all:todas))"
+            },
+            {
+              "syntax": "((verified:verificado)|(failed:falló|fallido)|(unverified:sin verificar))"
             },
             {
               "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
@@ -7679,7 +7687,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 100,
+          "line": 106,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7733,6 +7741,46 @@
             }
           ],
           "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ThingById",
+          "ruleNames": ["thing_by_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThingById.ts",
+          "line": 19,
+          "purpose": "One thing of a saved type, by its id, a number (epic `data` P50, Q77, Q91).",
+          "syntaxes": [
+            {
+              "syntax": "{type:known_type} {id:number}",
+              "example": "una tarea es una cosa\ntrabajo es un servidor web en \"https://jobs.test\":\n\t- para completar una tarea está en \"/tareas/{id}/completar\"\nuna tarea:\n\t- se guarda en trabajo\npara terminar\n\tcompletar tarea 7151",
+              "outputs": {
+                "js": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})\nexport async function terminar() {\n  return core.asAction({ undoneAs: \"Terminar\" }, async () => await (await core.savedThingOrMissing(Tarea, 7151)).completar())\n}"
+                },
+                "ts": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})\nexport async function terminar() {\n  return core.asAction({ undoneAs: \"Terminar\" }, async () => await (await core.savedThingOrMissing(Tarea, 7151)).completar())\n}"
+                },
+                "py": {
+                  "code": "class Tarea(Thing):\n    async def completar(self) -> Any:\n        return await core.call_place(\"trabajo\", \"completar\", self)\n\n    saved_in = {\"place\": \"trabajo\", \"collection\": \"tareas\", \"times\": [\"created\", \"modified\"]}\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")\n\ncore.describe_action(Tarea, \"completar\", {\"title\": \"Completar Tarea\", \"calls_server\": True, \"cant_be_undone\": \"keeps history\"})\n\nclass Trabajo(Place):\n    pass\n\ntrabajo = core.place(\n    Trabajo(),\n    {\n        \"name\": \"trabajo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jobs.test\",\n        \"operations\": {\"completar\": \"/tareas/{id}/completar\"},\n        \"unclear_numbers\": \",\",\n    },\n)\n\n@core.as_action({\"undone_as\": \"Terminar\"})\nasync def terminar() -> Any:\n    return await (await core.saved_thing_or_missing(Tarea, 7151)).completar()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ErrorIs",
+          "ruleNames": ["error_is"],
+          "internal": false,
+          "file": "src/spell/rules/places/ErrorIs.ts",
+          "line": 19,
+          "purpose": "Does what went wrong have this name, in Spell's words (epic `data` P50, Q95)?",
+          "syntaxes": [
+            {
+              "syntax": "el error es {name:text}"
+            }
+          ],
+          "aliases": ["expression"]
         },
         {
           "className": "ThingWithId",
@@ -8159,6 +8207,58 @@
           "aliases": ["statement"]
         },
         {
+          "className": "TokenFrom",
+          "ruleNames": ["token_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/TokenFrom.ts",
+          "line": 15,
+          "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}",
+              "example": "acme es un servidor web en \"https://acme.test\"\n\tsu token viene de \"https://auth.acme.test/api-keys/{key id}/token\", hecho con el secreto \"ACME_API_KEY\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DataIsPrivate",
+          "ruleNames": ["data_is_private"],
+          "internal": false,
+          "file": "src/spell/rules/places/DataIsPrivate.ts",
+          "line": 13,
+          "purpose": "A place's real rows stay on this machine, out of the project (epic `data` P49, Q55 C).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} datos son privados (,? guardados en {path:text})?",
+              "example": "netbox es un servidor web en \"https://demo.netbox.dev\"\n\tsus datos son privados, guardados en \"~/.spell/places/netbox\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Netbox(Place):\n    pass\n\nnetbox = core.place(\n    Netbox(),\n    {\n        \"name\": \"netbox\",\n        \"kind\": \"web server\",\n        \"at\": \"https://demo.netbox.dev\",\n        \"private_data_in\": \"~/.spell/places/netbox\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeyGoesInHeader",
           "ruleNames": ["key_goes_in_header"],
           "internal": false,
@@ -8570,6 +8670,98 @@
           "aliases": ["statement"]
         },
         {
+          "className": "OperationName",
+          "ruleNames": ["operation_name"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationName.ts",
+          "line": 10,
+          "purpose": "One operation a place may let be done, in an `enabled operations are ...` line (epic `data` P49).",
+          "syntaxes": [
+            {
+              "example": "añadir",
+              "outputs": {
+                "js": {
+                  "code": "añadir"
+                },
+                "ts": {
+                  "code": "añadir"
+                },
+                "py": {
+                  "error": "writes itself, in javascript:  no Python writer"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "EnabledOperations",
+          "ruleNames": ["enabled_operations"],
+          "internal": false,
+          "file": "src/spell/rules/places/EnabledOperations.ts",
+          "line": 36,
+          "purpose": "What a place lets be done to a type's things (epic `data` P49, Q47 / J264 D, Q57-Q63).",
+          "syntaxes": [
+            {
+              "syntax": "(las)? operaciones activas (son)? :? {operations:operation_names}",
+              "example": "un \"trabajo\" es una cosa\n\tvive en netbox\n\toperaciones activas: añadir, cambiar, completar",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"completar\"\n    ], select: [] }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"completar\"\n    ], select: [] }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"trabajos\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [\"add\", \"change\", \"completar\"],\n    }\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")"
+                }
+              }
+            },
+            {
+              "syntax": "todas las operaciones están desactivadas",
+              "example": "una \"sesión\" es una cosa\n\tvive en netbox\n\ttodas las operaciones están desactivadas",
+              "outputs": {
+                "js": {
+                  "code": "export class Sesión extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"sesiones\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Sesión extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"sesiones\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}"
+                },
+                "py": {
+                  "code": "class Sesión(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"sesiones\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [],\n    }\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TypeVerified",
+          "ruleNames": ["type_verified"],
+          "internal": false,
+          "file": "src/spell/rules/places/TypeVerified.ts",
+          "line": 15,
+          "purpose": "Whether a type read from an API's description was tried against a running server (epic `data` P49, Q56 C, Q62 B).",
+          "syntaxes": [
+            {
+              "syntax": "este? tipo (está|es)? {state:verify_state}",
+              "example": "un \"trabajo\" es una cosa\n\tvive en netbox\n\teste tipo está verificado",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    saved_in = {\"place\": \"netbox\", \"collection\": \"trabajos\", \"times\": [\"created\", \"modified\"]}\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ShowThemAtATime",
           "ruleNames": ["show_them_at_a_time"],
           "internal": false,
@@ -8615,6 +8807,58 @@
                 },
                 "py": {
                   "code": "await core.in_one_go(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WrapperAction",
+          "ruleNames": ["wrapper_action"],
+          "internal": false,
+          "file": "src/spell/rules/places/WrapperAction.ts",
+          "line": 32,
+          "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
+          "syntaxes": [
+            {
+              "syntax": "para {signature:method_signature} :? {statement_body}?",
+              "example": "una tarea es una cosa\ntrabajo es un servidor web en \"https://jobs.test\":\n\t- para completar una tarea está en \"/tareas/{id}/completar\"\nuna tarea:\n\t- se guarda en trabajo\npara completar una tarea\n\timprimir \"antes\"\n\tllamar a trabajo",
+              "outputs": {
+                "js": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  async aroundCompletar(serverCall) {\n    core.console.log(\"antes\")\n    await serverCall()\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\ncore.addActionHook(Tarea, \"completar\", { moment: \"around\", hook: \"aroundCompletar\", level: \"app\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  async aroundCompletar(serverCall: any ) {\n    core.console.log(\"antes\")\n    await serverCall()\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\ncore.addActionHook(Tarea, \"completar\", { moment: \"around\", hook: \"aroundCompletar\", level: \"app\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Tarea(Thing):\n    async def completar(self) -> Any:\n        return await core.call_place(\"trabajo\", \"completar\", self)\n\n    async def around_completar(self, server_call: Any) -> None:\n        print(\"antes\")\n        server_call()\n\n    saved_in = {\"place\": \"trabajo\", \"collection\": \"tareas\", \"times\": [\"created\", \"modified\"]}\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")\n\ncore.describe_action(Tarea, \"completar\", {\"title\": \"Completar Tarea\", \"calls_server\": True, \"cant_be_undone\": \"keeps history\"})\ncore.add_action_hook(Tarea, \"completar\", {\"moment\": \"around\", \"hook\": \"around_completar\", \"level\": \"app\"})\n\nclass Trabajo(Place):\n    pass\n\ntrabajo = core.place(\n    Trabajo(),\n    {\n        \"name\": \"trabajo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jobs.test\",\n        \"operations\": {\"completar\": \"/tareas/{id}/completar\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AnyServerCallFails",
+          "ruleNames": ["any_server_call_fails"],
+          "internal": false,
+          "file": "src/spell/rules/places/AnyServerCallFails.ts",
+          "line": 26,
+          "purpose": "The app's own steps for every server action that fails, run last (epic `data` P50, Q90, Q93).",
+          "syntaxes": [
+            {
+              "syntax": "(cuando|si) falla cualquier llamada al servidor :? {statement_body}?",
+              "example": "cuando falla cualquier llamada al servidor\n\tsi el error es \"sin autorizar\"\n\t\timprimir \"inicia sesión\"\n\tsi no\n\t\tno hacer nada",
+              "outputs": {
+                "js": {
+                  "code": "core.addServerFailureStep((error) => {\n  if (core.errorIs(error, \"not authorized\")) core.console.log(\"inicia sesión\")\n  else core.doNothing()\n})"
+                },
+                "ts": {
+                  "code": "core.addServerFailureStep((error) => {\n  if (core.errorIs(error, \"not authorized\")) core.console.log(\"inicia sesión\")\n  else core.doNothing()\n})"
+                },
+                "py": {
+                  "code": "def _each_1(error: Any) -> None:\n    if core.error_is(error, \"not authorized\"):\n        print(\"inicia sesión\")\n    else:\n        core.do_nothing()\n\ncore.add_server_failure_step(_each_1)"
                 }
               }
             }
@@ -8724,11 +8968,11 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 12,
+          "line": 15,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
-              "syntax": "(el|la|los|las) {collection:plural_type} están en {path:text}"
+              "syntax": "(el|la|los|las) {collection:plural_type} están en {path:text} {nested_statements}?"
             },
             {
               "syntax": "(el|la|los|las) {collection:plural_type} se encuentran en {path:text}"
@@ -9008,7 +9252,7 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 38,
+          "line": 39,
           "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
@@ -9022,7 +9266,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
@@ -9223,6 +9467,48 @@
           "aliases": ["statement"]
         },
         {
+          "className": "CallTheServer",
+          "ruleNames": ["call_the_server"],
+          "internal": false,
+          "file": "src/spell/rules/places/WrapperAction.ts",
+          "line": 99,
+          "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
+          "syntaxes": [
+            {
+              "syntax": "llamar (al servidor|a {place:identifier})"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Nevermind",
+          "ruleNames": ["nevermind"],
+          "internal": false,
+          "file": "src/spell/rules/places/FailureWords.ts",
+          "line": 17,
+          "purpose": "In a failure step, the error is caught, and nothing more is done (epic `data` P50, Q88).",
+          "syntaxes": [
+            {
+              "syntax": "no importa"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PassTheError",
+          "ruleNames": ["pass_the_error"],
+          "internal": false,
+          "file": "src/spell/rules/places/FailureWords.ts",
+          "line": 37,
+          "purpose": "In a failure step, send the error on, to the next step and in the end Spell's notice (epic `data` P50, Q87), as `pass event` does an event.",
+          "syntaxes": [
+            {
+              "syntax": "pasar el error"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "HelpfulWord",
           "ruleNames": ["helpful_word"],
           "internal": false,
@@ -9269,6 +9555,20 @@
           "syntaxes": [
             {
               "syntax": "[{identifier} (,|y|e)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "OperationNames",
+          "ruleNames": ["operation_names"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationNames.ts",
+          "line": 9,
+          "purpose": "The operations an `enabled operations are ...` line names, e.g. `add, change and delete` (epic `data` P49).",
+          "syntaxes": [
+            {
+              "syntax": "[{operation_name} (,|y|e|o|u)]"
             }
           ],
           "aliases": []
@@ -10609,6 +10909,84 @@
                 },
                 "py": {
                   "code": "class Carta(Thing):\n    def poner_en_pila(self, pila: Pila) -> None:\n        pila.append(self)\n\n    def after_poner_en_pila(self, pila: Pila) -> None:\n        core.console.log(self)\n\ncore.describe_action(Carta, \"poner_en_pila\", {\"title\": \"Poner Carta en Pila\", \"undone_as\": \"Poner Carta en Pila\"})\ncore.add_after_hook(Carta, \"poner_en_pila\", {\"hook\": \"after_poner_en_pila\"})\n\nclass Pila(List):\n    item_type = Carta"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "BeforeHook",
+          "ruleNames": ["before_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/BeforeHook.ts",
+          "line": 15,
+          "purpose": "Steps that run before an action's own, from any file (epic `data` P50, Q81).",
+          "syntaxes": [
+            {
+              "syntax": "antes de {signature:method_signature} :? {statement_body}?",
+              "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nantes de completar un trabajo\n\tcancelar si el estado del trabajo es \"hecho\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static { this.declareProp(\"estado\", { type: \"text\" }) }\n  get estado() { return this.getProp(\"estado\") }\n  set estado(value) { this.setProp(\"estado\", value) }\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  beforeCompletar() {\n    if (this.estado === \"hecho\") core.cancel()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"before\", hook: \"beforeCompletar\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  @prop({ type: \"text\" })\n  accessor estado!: string\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  beforeCompletar() {\n    if (this.estado === \"hecho\") core.cancel()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"before\", hook: \"beforeCompletar\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def before_completar(self) -> None:\n        if self.estado == \"hecho\":\n            core.cancel()\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"before\", \"hook\": \"before_completar\", \"level\": \"app\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhileHook",
+          "ruleNames": ["while_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/WhileHook.ts",
+          "line": 17,
+          "purpose": "Steps that run as an action starts, whose changes are put back when it ends, worked or failed (epic `data` P50, Q94).",
+          "syntaxes": [
+            {
+              "syntax": "mientras se {signature:method_signature} :? {statement_body}?",
+              "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nmientras se completa un trabajo\n\tponer el estado del trabajo a \"ocupado\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static { this.declareProp(\"estado\", { type: \"text\" }) }\n  get estado() { return this.getProp(\"estado\") }\n  set estado(value) { this.setProp(\"estado\", value) }\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  whileCompletar() {\n    this.estado = \"ocupado\"\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"while\", hook: \"whileCompletar\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  @prop({ type: \"text\" })\n  accessor estado!: string\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  whileCompletar() {\n    this.estado = \"ocupado\"\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"while\", hook: \"whileCompletar\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def while_completar(self) -> None:\n        self.estado = \"ocupado\"\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"while\", \"hook\": \"while_completar\", \"level\": \"app\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FailureHook",
+          "ruleNames": ["failure_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/FailureHook.ts",
+          "line": 31,
+          "purpose": "Steps that run when an action fails, from any file (epic `data` P50, Q82, Q87-Q89).",
+          "syntaxes": [
+            {
+              "syntax": "(si|cuando) falla al {signature:method_signature} :? {statement_body}?",
+              "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nsi falla al completar un trabajo\n\tsi el error es \"no encontrado\"\n\t\tno importa\n\tsi no si el error es \"sin conexión\"\n\t\tpasar el error",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static { this.declareProp(\"estado\", { type: \"text\" }) }\n  get estado() { return this.getProp(\"estado\") }\n  set estado(value) { this.setProp(\"estado\", value) }\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  failedCompletar(error) {\n    if (core.errorIs(error, \"not found\")) return\n    else if (core.errorIs(error, \"offline\")) return core.passTheError()\n    return core.passTheError()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"failed\", hook: \"failedCompletar\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  @prop({ type: \"text\" })\n  accessor estado!: string\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  failedCompletar(error: any ) {\n    if (core.errorIs(error, \"not found\")) return\n    else if (core.errorIs(error, \"offline\")) return core.passTheError()\n    return core.passTheError()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"failed\", hook: \"failedCompletar\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def failed_completar(self, error: Any) -> Any:\n        if core.error_is(error, \"not found\"):\n            return\n        elif core.error_is(error, \"offline\"):\n            return core.pass_the_error()\n        return core.pass_the_error()\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"failed\", \"hook\": \"failed_completar\", \"level\": \"app\"})"
                 }
               }
             }

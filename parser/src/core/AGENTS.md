@@ -438,6 +438,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - letters are graphemes
   - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
     (`spell space lexicon read`).
+    Its lines come from the ONE writer of a schema's field as Spell, [schemaWords.ts](schemaWords.ts) (epic `data` P49),
+    which `spell place ingest` writes an OpenAPI description's fields with too:  a leaf, importing nothing.
     What Spell can't hold yet is left out, and said.
   - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):
@@ -547,6 +549,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Described `cancels: true` (`core.describeAction()`, `core.asAction()`):  an action that never cancels costs nothing more.
 - After hooks, `after moving a card to a pile`, from any file:  `core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })`.
   - Each runs at the end of its action, inside its undo step, in the order added;  skipped when it's called off.
+- The other steps around an action (epic `data` P50), `core.addActionHook(Job, "complete", { moment, hook, level, page })`:
+  - `before`, `while` (what it changes put back when the action ends), `after`, `failed` (given the error), and
+    `around` (a second `to complete a job`, given what it wraps)
+  - by the file each is in, its `level`:  before, while and around from a page's file in to the `.api.spell` file's,
+    after and failure steps the other way;  a page's before and while steps only while one of it is made
+  - a failure step gives back `core.passTheError()` to send it on;  anything else caught it
+  - a server's action (`callsServer`) then runs `core.addServerFailureStep()`'s, last;  a refusal's notice, held till
+    then (`holdNotice()`), shows only for what nobody caught, and the error goes on to the caller
+  - `core.errorIs(error, "not found")`:  the error by Spell's names, from what places and the network throw
+  - `core.savedThingOrMissing(Job, 7151)`:  a missing id's stand-in runs only its failure steps, with "not found"
+  - all in `runActing()` ([undoing.ts](undoing.ts));  not in Python's core yet (`not_ported_yet.json5`)
 - A thing that belongs to one list remembers the one it was in before its latest move:  `Pile.lastOwnerOf(card)`,
   compiled spell's `the card's last pile` -- part of the undo step, put back by undo and by a cancel (`noteKept()`).
 - Python's core has the same history, `undoing.py` (epic `language` P54):

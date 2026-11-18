@@ -3,6 +3,7 @@ import { createSign } from "node:crypto"
 import { Api } from "spell/util/Api"
 import { ApiError } from "spell/util/fetching"
 import { PlaceError } from "spell/places/places.types"
+import { PlaceToken, type MintedToken } from "spell/places/PlaceToken"
 
 import type { PlaceKeys } from "./PlaceKeys"
 
@@ -11,9 +12,6 @@ const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
 /** How long a signed request for a token lasts, in seconds:  Google's most. */
 const ASSERTION_SECONDS = 3600
-
-/** A token this close to its end is replaced:  it may run out on the way. */
-const EARLY_MS = 60_000
 
 /** What Google calls this way of asking for a token. */
 const JWT_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer"
@@ -33,7 +31,8 @@ type ServiceAccount = {
  * The short-lived token Google wants on each request, from a service account's key held in `PlaceKeys` (epic `data` P7).
  * - Google's OAuth 2.0 for server to server applications:  a request signed with the account's key, for a token good for an hour.
  *   - SEE:  https://developers.google.com/identity/protocols/oauth2/service-account
- * - Kept until a minute before it runs out.
+ * - Kept until a minute before it runs out, by the one token keeper every place shares (`PlaceToken`):  this is
+ *   only Google's way to make one, handed to it (epic `data` P49, J255).
  * - The key named holds the WHOLE key file, as JSON, as Google gives it.
  * - The token, and the private key inside the file, are secrets too:  each goes into `PlaceKeys`, so they're scrubbed from
  *   every answer like the key itself.
@@ -46,16 +45,18 @@ export class GoogleToken {
   private readonly keys: PlaceKeys
   /** Sends the request for a token. */
   private readonly api = new Api()
-  /** The token, once there is one. */
-  private token: string | undefined
-  /** When to stop using it. */
-  private goodUntil = 0
-  /** The request for one under way:  everyone waits for this one. */
-  private asking: Promise<string> | undefined
+  /** Keeps the token, and makes another before it runs out. */
+  private readonly token: PlaceToken
 
   constructor({ keyNamed, keys }: GoogleTokenProps) {
     this.keyNamed = keyNamed
     this.keys = keys
+    this.token = new PlaceToken({
+      keyNamed,
+      keyFrom: keys.keyNamed,
+      mint: () => this.ask(),
+      hold: (label, secret) => keys.hold(label, secret)
+    })
   }
 
   /** The address a sheet has to be shared with:  `undefined` while the key isn't there, or can't be read. */
@@ -71,13 +72,10 @@ export class GoogleToken {
    * A token good for now.
    * - throws `PlaceError` `"refused"` for a key that isn't set, can't be read, or that Google turns down;  anything else for no answer
    */
-  current = async (): Promise<string> => {
-    if (this.token && Date.now() < this.goodUntil) return this.token
-    return (this.asking ??= this.ask().finally(() => (this.asking = undefined)))
-  }
+  current = (): Promise<string> => this.token.current()
 
   /** Ask Google for a new one. */
-  private async ask(): Promise<string> {
+  private async ask(): Promise<MintedToken> {
     const account = this.account()
     const body = new URLSearchParams({ grant_type: JWT_GRANT, assertion: this.signedRequest(account) })
     try {
@@ -88,10 +86,7 @@ export class GoogleToken {
         data: body,
         responseType: "json"
       })
-      this.keys.hold(`${this.keyNamed}'s token`, token)
-      this.token = token
-      this.goodUntil = Date.now() + seconds * 1000 - EARLY_MS
-      return token
+      return { token, seconds }
     } catch (error) {
       if (error instanceof ApiError && error.status !== undefined && error.status < 500) {
         throw this.refusal(`Google turned down the key named "${this.keyNamed}" (${error.status})`)

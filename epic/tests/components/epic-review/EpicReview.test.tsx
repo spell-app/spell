@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import type { E } from "spell/ui/core"
+import { nextFrame } from "spell/util/dom"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
@@ -150,10 +151,15 @@ function deep(host: Element) {
   }
 }
 
-/** Render `html`, settled. */
+/**
+ * Render `html`, settled:  an item's line buttons drawn too, once its line has come near the screen (`NearScreen`, a
+ * frame later;  epic `epic-engine` I333).
+ */
 async function render(html: string) {
   const host = await ElementFixture.render<E.DOMElement & { open: boolean }>(html)
   await ElementFixture.settle()
+  await nextFrame(3)
+  await ElementFixture.tick()
   return host
 }
 

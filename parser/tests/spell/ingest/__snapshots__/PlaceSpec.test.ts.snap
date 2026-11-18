@@ -1,0 +1,177 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`spell place ingest --spec > writes the whole place from the description, each list unverified, reading nothing else 1`] = `
+"netbox is a web server at "https://demo.netbox.dev"
+	check it every 30 seconds
+	it writes names like "display_url"
+	background tasks live at "/api/core/background-tasks/"
+	data sources live at "/api/core/data-sources/"
+	jobs live at "/api/core/jobs/"
+	contacts live at "/api/tenancy/contacts/"
+	tenant groups live at "/api/tenancy/tenant-groups/"
+	tenants live at "/api/tenancy/tenants/"
+	to enqueue a background task is at "/api/core/background-tasks/{id}/enqueue/"
+	to requeue a background task is at "/api/core/background-tasks/{id}/requeue/"
+	to stop a background task is at "/api/core/background-tasks/{id}/stop/"
+	to sync a data source is at "/api/core/data-sources/{id}/sync/"
+	a data source's modified is its "last updated"
+	a contact's modified is its "last updated"
+	a tenant group's modified is its "last updated"
+	a tenant's modified is its "last updated"
+
+a "background task" is a thing
+	it lives in netbox
+	this type is unverified
+	enabled operations are read, delete, enqueue, requeue, stop
+
+a "data source" is a thing
+	it lives in netbox
+	this type is unverified
+	its "url" is text  // an address
+	its "display url" is text  // an address
+	its "display" is text
+	its "name" is required text, with maximum length 100
+	its "kind" is a kind, stored as "type"
+	its "source url" is required text, with maximum length 200
+	its "enabled" is yes or no
+	its "status" is a status
+	its "description" is text, with maximum length 200
+	its "sync interval" is a number
+	its "ignore rules" is text
+	its "owner" is an owner
+	its "comments" is text
+	its "tags" is a list of tags
+	its "created" is a date
+	its "last updated" is a date
+	its "last synced" is a date
+	its "file count" is a number
+
+a "job" is a thing
+	it lives in netbox
+	this type is unverified
+	enabled operations are read
+	its "url" is text  // an address
+	its "display url" is text  // an address
+	its "display" is text
+	its "object type" is text
+	its "object id" is a number
+	its "name" is required text, with maximum length 200
+	its "status" is a status
+	its "created" is a date
+	its "scheduled" is a date
+	its "interval" is a number
+	its "started" is a date
+	its "completed" is a date
+	its "execution time" is text
+	its "user" is a user
+	its "error" is text
+	its "job id" is required text
+	its "queue name" is text, with maximum length 100
+	its "notifications" is a notification
+
+a "contact" is a thing
+	it lives in netbox
+	this type is unverified
+	its "url" is text  // an address
+	its "display url" is text  // an address
+	its "display" is text
+	its "groups" is a list of groups
+	its "name" is required text, with maximum length 100
+	its "title" is text, with maximum length 100
+	its "phone" is text, with maximum length 50
+	its "address" is text, with maximum length 200
+	its "description" is text, with maximum length 200
+	its "owner" is an owner
+	its "comments" is text
+	its "tags" is a list of tags
+	its "created" is a date
+	its "last updated" is a date
+
+a "tenant group" is a thing
+	it lives in netbox
+	this type is unverified
+	its "url" is text  // an address
+	its "display url" is text  // an address
+	its "display" is text
+	its "name" is required text, with maximum length 100
+	its "slug" is required text, with maximum length 100
+	its "parent" is a tenant group
+	its "description" is text, with maximum length 200
+	its "tags" is a list of tags
+	its "created" is a date
+	its "last updated" is a date
+	its "tenant count" is a number
+	its "owner" is an owner
+	its "comments" is text
+	its "depth" is a number
+
+a "tenant" is a thing
+	it lives in netbox
+	this type is unverified
+	its "url" is text  // an address
+	its "display url" is text  // an address
+	its "display" is text
+	its "name" is required text, with maximum length 100
+	its "slug" is required text, with maximum length 100
+	its "group" is a tenant group
+	its "description" is text, with maximum length 200
+	its "owner" is an owner
+	its "comments" is text
+	its "tags" is a list of tags
+	its "created" is a date
+	its "last updated" is a date
+	its "circuit count" is a number
+	its "device count" is a number
+	its "ipaddress count" is a number
+	its "prefix count" is a number
+	its "rack count" is a number
+	its "site count" is a number
+	its "virtualmachine count" is a number
+	its "vlan count" is a number
+	its "vrf count" is a number
+	its "cluster count" is a number
+
+a "kind" is a thing
+	its "label" is text
+
+a "status" is a thing
+	its "value" is text
+	its "label" is text
+
+an "owner" is a thing
+	its "number" is a number, stored as "id"
+	its "url" is text  // an address
+	its "display" is text
+	its "name" is text
+	its "description" is text
+
+a "tag" is a thing
+	its "number" is a number, stored as "id"
+	its "url" is text  // an address
+	its "display url" is text  // an address
+	its "display" is text
+	its "name" is text
+	its "slug" is text
+	its "color" is text
+
+a "user" is a thing
+	its "number" is a number, stored as "id"
+	its "url" is text  // an address
+	its "display" is text
+	its "username" is text
+
+a "notification" is a thing
+	its "value" is text
+	its "label" is text
+
+a "group" is a thing
+	its "number" is a number, stored as "id"
+	its "url" is text  // an address
+	its "display" is text
+	its "name" is text
+	its "slug" is text
+	its "description" is text
+	its "contact count" is a number
+	its "depth" is a number
+"
+`;

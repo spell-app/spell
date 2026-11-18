@@ -4,7 +4,11 @@
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
-  "repository": "https://github.com/spell-app/spell-epic",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spell-app/spell.git",
+    "directory": "epic"
+  },
   "bin": {
     "epic": "bin/epic"
   },
@@ -106,13 +110,13 @@
       "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js": "/_epic/assets/highlight.min.js"
     }
   },
+  "spell": {
+    "commands": "./src/cli/commands.ts"
+  },
   "spellPack": {
     "name": "epics",
     "prefix": "epic-",
     "dir": "src"
-  },
-  "spell": {
-    "commands": "./src/cli/commands.ts"
   },
   "spellPublish": {
     "exclude": [

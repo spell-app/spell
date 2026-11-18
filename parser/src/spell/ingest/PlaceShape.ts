@@ -80,6 +80,7 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
     return { rows: each.rows, collection }
   })
   for (const collection of Object.values(collections)) findLinks(collection, collections, look.address)
+  for (const collection of Object.values(collections)) linkBySchema(collection.fields, collections)
   for (const { rows, collection } of described) findIdLinks(rows, collection, collections)
   noteListsUnder(look, collections, name)
   return {
@@ -91,7 +92,8 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
       fingerprint: "",
       ...(look.version && { version: look.version }),
       readBy: "nobody:  worked out from what came back",
-      ...(look.docsAt && { docsAt: look.docsAt })
+      ...(look.docsAt && { docsAt: look.docsAt }),
+      ...(look.specAt && { specAt: look.specAt })
     },
     canDo: canDoFrom(look, kind),
     collections,
@@ -134,7 +136,8 @@ export function checkSecondsWithin(headers: Record<string, string>, collections:
 
 /** One collection's description. */
 function describeCollection(look: CollectionLook, type: string): CollectionDescription {
-  const fields = fieldsOf(look.rows)
+  // a schema says its fields:  read from the description, not guessed from rows (epic `data` P49)
+  const fields = look.fields ?? fieldsOf(look.rows)
   const id = look.idAt ?? (look.samples && nameFieldOf(look.rows, look.samples)) ?? idFieldOf(look.rows, fields)
   // an `id` that isn't its id (it's known by its address) is a number it has, as every thing has an id already:
   // PokéAPI's pikachu is number 25
@@ -157,6 +160,14 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.searchedOnly && { searchedOnly: true }),
     ...(look.searchedFor !== undefined && { searchedFor: look.searchedFor }),
     ...(look.askedBy && { askedBy: look.askedBy }),
+    ...(look.schemaAt !== undefined && { schemaAt: look.schemaAt }),
+    ...(look.tag !== undefined && { tag: look.tag }),
+    ...(look.operations && { operations: look.operations }),
+    // from the description only:  `spell place verify` tries it
+    // no field said:  `untyped`, as a read fills it
+    ...(look.fields && {
+      state: { is: Object.keys(look.fields).length ? ("unverified" as const) : ("untyped" as const) }
+    }),
     fields
   }
 }
@@ -526,6 +537,34 @@ function findLinks(
       return at && link.startsWith(under) && /^[^/]+\/?$/.test(link.slice(under.length))
     })
     if (target) field.linksTo = target[0]
+  }
+}
+
+/** A schema's name, without the word an API puts before a short copy of one:  `BriefTenantGroup` => `TenantGroup`. */
+const SHORT_COPY = /^(#\/components\/schemas\/)(?:Brief|Nested)(?=[A-Z])/
+
+/**
+ * SIDE EFFECT:  a field holding a short copy of another collection's thing, by its schema, links to that collection
+ * (epic `data` P49):  NetBox's tenant's `group`, a `BriefTenantGroup`, is a tenant group, read by its address.
+ * - Its id and address come with it, as PokéAPI's `{ name, url }` do:  held as a named link.
+ */
+function linkBySchema(
+  fields: Record<string, FieldDescription>,
+  collections: Readonly<Record<string, CollectionDescription>>,
+  depth = 0
+): void {
+  for (const field of Object.values(fields)) {
+    if (!field.inside || field.isItsOwner) continue
+    const schema = field.schemaAt?.replace(SHORT_COPY, "$1")
+    const target = schema && Object.entries(collections).find(([, { schemaAt }]) => schemaAt === schema)
+    if (!target || !("url" in field.inside)) {
+      if (depth < 2) linkBySchema(field.inside, collections, depth + 1)
+      continue
+    }
+    const { isListInside } = field
+    delete field.inside
+    delete field.isListInside
+    Object.assign(field, { type: isListInside ? "list of links" : "link", linksTo: target[0], isNamedLink: true })
   }
 }
 

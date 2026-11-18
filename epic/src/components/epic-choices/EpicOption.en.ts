@@ -180,6 +180,7 @@ export const epicOptionVocabulary = {
   texts: [
     { key: "foldTip", text: "Fold option {letter}", description: "Tooltip of its fold button while open." },
     { key: "unfoldTip", text: "Unfold option {letter}", description: "Tooltip of its fold button while folded." },
+    { key: "zoomTip", text: "Show it full size", description: "A picture in an edit not applied yet:  its tooltip." },
 
     {
       key: "recommended",

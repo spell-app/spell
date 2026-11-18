@@ -224,6 +224,13 @@ export class IfThereAreNone extends ReadRider {
 export class IfThatFails extends ReadRider {
   @proto static kind: RiderKind = "failed"
 
+  /** In an action, its steps see `the error` (epic `data` P50):  `if the error is "offline"`. */
+  getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
+    const scope = super.getNestedScopeForMatch(match)
+    if (!DrawIt.drawingIn(match.scope)) scope.variables?.add({ name: CAUGHT_ERROR })
+    return scope
+  }
+
   /** SIDE EFFECT:  notes it's in an action, which needs a line above it. */
   protected parseInAction(match: P.Match): boolean {
     const refusal = SP.Language.of(match.scope).parserMessage("rider-needs-a-line-above")

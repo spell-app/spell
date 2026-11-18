@@ -200,6 +200,24 @@ describe("apply (`PlanDoc.applyMark()`)", () => {
     expect(problems(doc)).toEqual([])
   })
 
+  test("a picture in an option's note (I334):  its words an `<img>`;  any other path stays words", () => {
+    const doc = plan()
+    doc.applyMark({
+      id: "q1",
+      action: "pick",
+      added: [{ key: "+1", title: "Faster <builds>", note: "one\n![picture](tests/q1-20261117-1200.png)\n\ntwo" }],
+      edited: [{ letter: "B", title: "Unfold all", note: "see ![picture](/elsewhere.png)" }]
+    })
+    const set = setOf(doc, "q1")
+    expect(set.querySelector('epic-option[letter="D"]')!.innerHTML).toBe(
+      '<p>one<br><img src="tests/q1-20261117-1200.png" alt="Faster <builds>"></p><p>two</p>'
+    )
+    expect(set.querySelector('epic-option[letter="B"]')!.innerHTML).toMatch(
+      /^<p>see !\[picture\]\(\/elsewhere\.png\)<\/p>/
+    )
+    expect(problems(doc)).toEqual([])
+  })
+
   test("a pick-one set keeps the newest pick;  the flip;  a change with no pick leaves the question open", () => {
     const doc = plan()
     expect(doc.applyMark({ id: "q2", action: "pick", multiple: true }).did).toBe("now pick any")

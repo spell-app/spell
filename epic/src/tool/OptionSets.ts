@@ -11,6 +11,7 @@ import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
 import {
   ADDED_KEY,
+  OPTION_SHOT,
   STANDING_ID,
   type AddedOption,
   type EditedOption,
@@ -381,13 +382,13 @@ export class OptionSets {
     const edits = (mark.edited ?? []).map(({ letter, title, note }: EditedOption) => {
       this.editOption(this.liveOption(set, letter), {
         title,
-        html: note === undefined ? undefined : PlanMarkup.paragraphs(note)
+        html: note === undefined ? undefined : typedHTML(note, title)
       })
       return letter
     })
     const keys = new Map<string, string>()
     const adds = (mark.added ?? []).map(({ key, title, note, shot }: AddedOption) => {
-      const letter = this.addOption(set, { title, html: PlanMarkup.paragraphs(note) || undefined, shot, by: "owen" })
+      const letter = this.addOption(set, { title, html: typedHTML(note, title) || undefined, shot, by: "owen" })
       keys.set(key, letter)
       return `${letter} · ${title}`
     })
@@ -621,6 +622,20 @@ function nextLetter(set: Element, count: number): string | undefined {
 }
 
 /** A note from the command line as HTML:  as it is when it starts with a tag, else plain text's paragraphs. */
+/**
+ * A note Owen typed in an option's form, as HTML:  `PlanMarkup.paragraphs()`, and a picture's words in it
+ * (`![picture](tests/q52-20261029-1432.png)`, epic `epic-engine` I334) an `<img>`, its `alt` the option's `title`.
+ * - only an option's picture, saved beside the page (`OPTION_SHOT`):  any other path stays words
+ * - `""` for no note
+ */
+function typedHTML(note: string | undefined, title: string): string {
+  const alt = PlanMarkup.attribute(title)
+  return PlanMarkup.paragraphs(note).replace(TYPED_PICTURE, (_, path: string) => `<img src="${path}" alt="${alt}">`)
+}
+
+/** A picture's words in a typed note (`Pictures.wordsFor()`), its path an option's picture (`OPTION_SHOT`). */
+const TYPED_PICTURE = new RegExp(`!\\[picture\\]\\((${OPTION_SHOT.source.slice(1, -1)})\\)`, "g")
+
 function noteHTML(note: string | undefined): string | undefined {
   if (note === undefined || !note.trim()) return undefined
   return note.trim().startsWith("<") ? note : PlanMarkup.paragraphs(note)

@@ -57,6 +57,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `wholeRows`:  each key's value is a whole row, as JSON, for things:  `family cookbook is this device`.
   - `RestPlace` and `GraphPlace`, on `WebPlace`:  a server, from a mapping of its paths and field names, on `Api`.
     - `WebPlace` turns an answer into what the engine needs:  not found, refused, or no answer (a 5xx, a 429:  it resends).
+      - A 401 is refused `whyNot: "signed out"`:  a program's failure step names it "not authorized" (epic `data` P50).
+      - A server's action's refusal notice can be held (`PendingChanges.callShownAtOnce()`'s `holdNotice`):
+        the program's failure steps decide whether it shows.
     - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
       unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
       With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
@@ -66,11 +69,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       a few seconds waited for;  longer, `TooSoonError` says when, and a drawing tries again then.
     - What a web server can do is what its lines say (`restAbilitiesIn()`, in the parser's core;  epic `data` I35):
       paging by a count and a position, filtering, sorting, naming the fields it gives, being read only.
-    - `RestPlace`:  named operations (`operations`, `call()`), each a `POST`;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
+    - `RestPlace`:  named operations (`operations`, `call()`), each a `POST` unless it says its method, its braces
+      filled from the thing sent (epic `data` P49);  each collection's enabled operations (`limitOperations()`, a
+      thing's `enabled operations are ...` and its collection's switch), refused before they're sent, and
+      `canWrite()` per collection;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping;
       versions, if a line names their field (`versions: { field }`, sent back in an update's `input`;  epic `data` T19).
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
-    - `keyFrom` can wait, for a key that's a token made from another (`GoogleToken`).
+    - `keyFrom` can wait, for a key that's a token made from another:  [PlaceToken](PlaceToken.ts), the ONE token
+      keeper (epic `data` P49), made again a minute before it runs out;  how a token is made is handed in, a token
+      service's (`tokenServiceMint()`, `its token comes from "..."`) or Google's (`GoogleToken`).
   - [DeviceCopy](DeviceCopy.ts):  a copy, in the browser's database, of every answer a web place gives,
     only for a place whose line says `- keep a copy on this device` (epic `data` P36).
     - Fresh until the place's next check:  `WebPlace` answers from it with no request;  stale, at once, reading the

@@ -346,12 +346,12 @@ export class EpicProgram {
 
     this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, T todo, M manual test, D decision)")
       .usage(
-        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm] [--requested]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
+        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm] [--requested]  |  <epic>#T "Title" [--limit | --loud]  |  <epic>#M "Title" --step <html> ...'
       )
       .addHelpText("after", ADD_HELP)
     this.page(
       epic.command("calm"),
-      "items not urgent (yellow), as the page's id chip does;  --loud:  urgent (red) again",
+      "items not urgent (yellow), as the page's id chip does;  --loud:  urgent (red) again, a todo too (a reminder)",
       "epic calm seo#J3 J4"
     ).usage("<epic>#J3 [J4 ...] [--loud]")
     this.page(
@@ -1311,7 +1311,7 @@ A phase (seo#P3):
   --title "New name" [--html]                             rename it:  links that say the old name follow
 An item (seo#J3):
   --title "New title" [--html]                            retitle it:  at most 30 plain words, read cold, as add's
-  --calm  /  --loud                                       not urgent  /  urgent (red)
+  --calm  /  --loud                                       not urgent  /  urgent (red);  a todo too, red as a reminder
   --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
                                                           on its line, a Noted card linking it, left open)  /  not;
                                                           closing it takes the mark off too

@@ -105,6 +105,8 @@ After a restart, agents it started are gone:  start each again from its task, as
    - a choice made without the person:  `epic add <epic>#J "<title>" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
+   - a todo the person wants red, as a reminder:  `epic add <epic>#T "title" --loud`, or `epic update <epic>#T3 --loud`
+     on one already there;  `--calm` takes it back (epic `epic-engine` T94)
    - something only the person can check:  `epic add <epic>#M "title" --step "..." --should "..."`
    - an item you're working on:  `epic inbox working <epic>#I3 on`, `off` when done
    - every item's details:  a new `<p>` wherever the context changes

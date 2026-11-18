@@ -3,7 +3,11 @@
   "version": "0.8.10",
   "description": "Beautiful, themeable, accessible components that load themselves on demand, for use in plain HTML or any framework",
   "license": "MIT",
-  "repository": "https://github.com/spell-app/spell-ui",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spell-app/spell.git",
+    "directory": "ui"
+  },
   "type": "module",
   "sideEffects": [
     "**/*.css",

@@ -166,6 +166,11 @@ export type RunOptions = GlobalOptions &
   SeedOptions & {
     browser?: boolean
     target?: string
+    /**
+     * Which deployment of each place to run on, by its name in the project's file (epic `data` P49):
+     * `production`.  Left out:  `SPELL_DEPLOYMENT`, else each place as its line says.
+     */
+    deployment?: string
   }
 
 /**

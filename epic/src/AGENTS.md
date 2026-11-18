@@ -201,8 +201,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `<epic-section kind="tests">`'s Start testing (epic `epic-engine` P51):  the request for now (`prepareTests()`)
         and, with `all`, the epics left to test (`openTests()`)
       - `<epic-review>`'s note pictures (P51):  saved beside the page (`saveShot()`), put in the note's mark
-        (`attachShot()`);  `Pictures`, beside the client, reads a paste or a drop and turns any image into a PNG,
-        for `<epic-option-form>` too
+        (`attachShot()`);  `Pictures`, beside the client, reads a paste or a drop and turns any image into a PNG
+      - an OPTION's form, `<epic-option-form>` (epic `epic-engine` I334):  ONE growing box, its first line the title,
+        the rest the note;  a picture pasted, dropped or chosen (its small picture button) is saved under the set's id
+        (`saveShot()`) and its words go into the note, as a comment's (`Pictures.intoWords()`, below);
+        `inbox apply` writes them as an `<img>` (`OptionSets`);  an added option's old `shot` is still read
       - a COMMENT's field, the pane's and a thread's reply (epic `epic-engine` I267):  `Pictures.intoWords()` saves a pasted
         or dropped picture beside the page (the comments route's `POST picture`) and writes `![picture](<path>)` into the
         words, so it goes wherever they go;  `<epic-thread>` draws it as a thumbnail, a click opening it full size

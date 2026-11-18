@@ -28,6 +28,17 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
   "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
   "cancel-outside-an-action": '"{text}" cancela una acción:  va en sus pasos, bajo "para ..." o "después de ..."',
+  "hook-names-no-action":
+    '"{text}" se ejecuta con una acción, pero ninguna acción antes se lee así:  como en "antes de completar un trabajo", para "para completar un trabajo"',
+  "error-name-unknown": '"{name}" no es un tipo de error:  di uno de {names}',
+  "failure-word-outside":
+    '"{text}" va en los pasos para un fallo, bajo "si falla al completar un trabajo" o "cuando falla cualquier llamada al servidor"',
+  "call-outside-wrapper":
+    '"{text}" va en una acción que envuelve la del servidor:  "para completar un trabajo", sus pasos alrededor de "llamar al servidor"',
+  "the-server-outside-api":
+    '"el servidor" es el lugar solo en su propio archivo de API:  aquí, llámalo por su nombre, "llamar a {place}"',
+  "wrapper-never-calls":
+    '"{text}" envuelve la acción del servidor, pero nunca llama al servidor:  di "llamar al servidor" donde va la llamada',
   "after-names-no-action":
     '"{text}" se ejecuta después de una acción, pero ninguna acción antes se lee así:  como en "después de poner una carta en una pila", para "para poner una carta en una pila"',
   "made-from-each-other":

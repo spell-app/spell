@@ -54,10 +54,12 @@ import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import { nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
-import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
+import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
+import type { PlaceDeployment } from "./runtime"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
+import { failsAsMissing, holdNotice } from "./undoing"
 import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -82,6 +84,8 @@ export type SavedIn = {
   select?: readonly string[]
   /** Which of Spell's two times it keeps, as rows name them:  stamped as it's saved.  Left out:  neither (epic `data` T57). */
   times?: readonly string[]
+  /** What its place lets be done to its things:  `enabled operations are add, change`.  Left out:  every one (epic `data` P49). */
+  operations?: readonly string[]
 }
 
 /** What a rider says to draw:  see `core.drawRead()`. */
@@ -164,6 +168,21 @@ const ASYNC_FUNCTION = "AsyncFunction"
 
 /** Each run's places:  a new run has its own. */
 const PROGRAMS = new WeakMap<object, ProgramPlaces>()
+
+/**
+ * `details`, on the deployment picked for this run, when there is one (epic `data` P49):  its address, its key, and
+ * read only when it says.
+ */
+function deployedTo(details: PlaceDetails, deployment: PlaceDeployment | undefined): PlaceDetails {
+  if (!deployment) return details
+  return {
+    ...details,
+    at: deployment.at,
+    ...(deployment.key !== undefined && { keyNamed: deployment.key }),
+    ...(deployment.tokenFrom !== undefined && { tokenFrom: deployment.tokenFrom }),
+    ...(deployment.readOnly && { readOnly: true })
+  }
+}
 
 /** Where this run finds a place's key, when it runs on a server side:  `SpellRuntime.keyFrom`. */
 function keyFinder(): { keyFrom?: (name: string) => string | undefined } {
@@ -315,7 +334,7 @@ class ProgramPlaces {
       )
     }
     const { place: name } = savedIn
-    const details = declared.details
+    const details = deployedTo(declared.details, core.RUNTIME?.deployments?.[name])
     // what a line under it calls the collection there:  a web server's and a graphql server's is an address, read by their own mapping
     const mapped = details.collections?.[savedIn.collection]?.at
     const collection =
@@ -339,6 +358,7 @@ class ProgramPlaces {
     if (!behind) {
       const { thing } = declared
       behind = details.kind ? placeBehind(making) : (thing.makePlace(details, this.folder) as PlaceBehind)
+      limitOperations(behind, making)
       this.places!.add(name, behind)
     } else if (details.kind) knowCollection(behind, making)
     this.startSignIn(name, behind)
@@ -1620,10 +1640,18 @@ export const savedMethods = defineCoreModule({
   /**
    * Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at "..."` compiles to.
    * - `input`:  what's sent, the recipe, as its row:  left out, nothing is.
+   * - `params`:  the action's other blanks by name, `{ queue: "night" }`, and a `(with ...)` clause's, each its own
+   *   object (epic `data` Q78):  sent beside the row, and filling the address's braces first, `/jobs/{id}/move/{queue}`.
    * - Waits for the place's answer, and answers with it.
+   * - A refusal's notice waits for the action's failure steps:  shown only if none of them caught it (`runActing()`).
    * - throws `PlaceError` if the place says no;  `TypeError` if it takes no named operations
    */
-  async callPlace(placeName: string, name: string, input?: unknown): Promise<unknown> {
+  async callPlace(
+    placeName: string,
+    name: string,
+    input?: unknown,
+    ...params: Record<string, unknown>[]
+  ): Promise<unknown> {
     const program = programPlaces()
     await program.load()
     const behind = program.placesNow!.placeFor(placeName)
@@ -1631,9 +1659,29 @@ export const savedMethods = defineCoreModule({
       throw new TypeError(`core.callPlace():  "${placeName}" takes no named operations, so "${name}" can't reach it`)
     }
     const things = program.thingMakerNow!
-    const sent = input === undefined ? undefined : things.rowSent(input)
+    const row = input === undefined ? undefined : things.rowSent(input)
+    const sent = params.length ? Object.assign({ ...(row as object | undefined) }, ...params) : row
     const { savedIn } = (input as { constructor?: SavedClass } | undefined)?.constructor ?? {}
-    return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection)
+    return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection, holdNotice)
+  },
+
+  /**
+   * One thing of a saved type, by its id, read first if it isn't held:  what `complete job 7151` calls it on
+   * (epic `data` Q77, Q91).
+   * - Held already:  that one, as it is.
+   * - The place has none:  a stand-in, on which every action runs only its failure steps, with the place's
+   *   "not found" (`failsAsMissing()`):  so `if completing a job fails` hears of it, and nothing crashes.
+   * - throws what the place throws, reading it
+   */
+  async savedThingOrMissing<Class extends new () => unknown>(Class: Class, id: unknown): Promise<InstanceType<Class>> {
+    const found = await savedMethods.savedThingWithId(Class, id)
+    if (found) return found
+    const standIn = Object.create(Class.prototype) as InstanceType<Class> & object
+    const { PlaceError } = programPlaces().folderNow!
+    const typeName = Class.name
+    const error = new PlaceError(`There's no ${typeName} ${String(id)}`, { cause: { kind: "not found" } })
+    failsAsMissing(standIn, error)
+    return standIn
   },
 
   /**
