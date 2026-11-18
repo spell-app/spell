@@ -121,7 +121,7 @@ const PLUGIN = ViewPlugin.fromClass(CodeMirrorValues)
  */
 function hostFor(view: EditorView, followers: Set<(change: "edit" | "scroll") => void>): ValuePopupHost {
   return {
-    valueAt: (end) => caretValueOf(view, end),
+    valueAt: (end, after) => caretValueOf(view, end, after),
     wordsAt: () => {
       const { state } = view
       const answer = state.facet(VALUES_AT)?.(state, state.selection.main.head)
@@ -155,11 +155,11 @@ function hostFor(view: EditorView, followers: Set<(change: "edit" | "scroll") =>
 }
 
 /** The quoted value at `view`'s caret, as `ValuePopups` takes it (`LSP.SpellTyping.quotedValueAt()`). */
-function caretValueOf(view: EditorView, end: LSP.QuotedValueEnd): CaretValue | undefined {
+function caretValueOf(view: EditorView, end: LSP.QuotedValueEnd, after?: LSP.QuotedValueAfter): CaretValue | undefined {
   const { state } = view
   const caret = state.selection.main.head
   const line = state.doc.lineAt(caret)
-  const found = LSP.SpellTyping.quotedValueAt(line.text, caret - line.from, end)
+  const found = LSP.SpellTyping.quotedValueAt(line.text, caret - line.from, end, after)
   if (!found) return undefined
   const from = line.from + found.from
   const to = line.from + found.to

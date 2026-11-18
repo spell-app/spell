@@ -208,15 +208,19 @@ export class ValuePopups {
    */
   static pick(host: ValuePopupHost, picker: SP.ComponentValuePicker, values: readonly string[]): void {
     PickerPopup.current?.close()
-    const value = host.valueAt("closing-quote-or-caret")
+    // a sound's name is quoted after `play`, not an attribute's value
+    const value = host.valueAt("closing-quote-or-caret", picker.kind === "sound" ? "word" : "attribute")
     if (value) PickerPopup.current = new PickerPopup(host, value, picker, values)
   }
 }
 
 /** What a code editor gives `ValuePopups`:  the value at its caret, its words, and its keys. */
 export type ValuePopupHost = {
-  /** the quoted value the caret is in, if any (`LSP.SpellTyping.quotedValueAt()` on the caret's line) */
-  valueAt(end: LSP.QuotedValueEnd): CaretValue | undefined
+  /**
+   * the quoted value the caret is in, if any (`LSP.SpellTyping.quotedValueAt()` on the caret's line)
+   * - `after`:  an attribute's value (the default), or text quoted after a word, the sound picker's `play "x"`
+   */
+  valueAt(end: LSP.QuotedValueEnd, after?: LSP.QuotedValueAfter): CaretValue | undefined
   /** the words the value at the caret takes, as the suggestion list's are (`attributeValuesAt()`) */
   wordsAt(): Promise<readonly string[] | undefined> | readonly string[] | undefined
   /**

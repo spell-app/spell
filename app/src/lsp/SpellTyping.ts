@@ -138,9 +138,17 @@ export class SpellTyping {
    * - `end`:
    *   - `closing-quote` (the default):  only a value whose closing quote is written
    *   - `closing-quote-or-caret`:  one still being typed, with no closing quote yet, runs to the caret
+   * - `after`:
+   *   - `attribute` (the default):  an attribute's value, `spacing="xs"`
+   *   - `word`:  text quoted after a word and a space, `play "card slide"`:  the sound picker's (epic `mockup` P28)
    */
-  static quotedValueAt(line: string, column: number, end: QuotedValueEnd = "closing-quote"): QuotedValue | undefined {
-    const open = ATTRIBUTE_VALUE_OPEN.exec(line.slice(0, column))
+  static quotedValueAt(
+    line: string,
+    column: number,
+    end: QuotedValueEnd = "closing-quote",
+    after: QuotedValueAfter = "attribute"
+  ): QuotedValue | undefined {
+    const open = (after === "word" ? WORD_VALUE_OPEN : ATTRIBUTE_VALUE_OPEN).exec(line.slice(0, column))
     if (!open) return undefined
     const from = line.indexOf('"', open.index) + 1
     const close = line.indexOf('"', column)
@@ -540,8 +548,14 @@ export type QuotedValue = {
 /** Where a quoted value ends, for `SpellTyping.quotedValueAt()`:  at its closing quote only, or at the caret too. */
 export type QuotedValueEnd = "closing-quote" | "closing-quote-or-caret"
 
+/** What a quoted value follows, for `SpellTyping.quotedValueAt()`:  an attribute's name and `=`, or a word and a space. */
+export type QuotedValueAfter = "attribute" | "word"
+
 /** An attribute's name and its opening quote, then its value up to the caret:  `spacing="x`. */
 const ATTRIBUTE_VALUE_OPEN = /[\p{L}\p{M}\d-]="[^"]*$/u
+
+/** A word, a space and an opening quote, then the text up to the caret:  `play "card s`. */
+const WORD_VALUE_OPEN = /[\p{L}\p{M}]\s+"[^"]*$/u
 
 /** How far back `SpellTyping.tagOpenAt()` looks for the tag's start:  a tag's attributes span a few lines at most. */
 const TAG_LINES_BACK = 20
