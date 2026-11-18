@@ -102,11 +102,13 @@ export class Piece extends View {
     if (jumped) {
       const middle = board.theSquareAtRowAndColumnOnBoard((start.row + square.row) / 2, (start.column + square.column) / 2)
       core.clear(middle)
-    }
+      core.play("piece take")
+    } else core.play("piece down")
     square.append(this)
     board.pickedPiece = undefined
     if (!this.isAKing && square.row === this.farRow) {
       this.rank = "king"
+      core.play("level up")
       board.endTheTurnOnBoard()
     } else if (jumped && this.hasAJump) board.jumper = this
     else board.endTheTurnOnBoard()

@@ -8,7 +8,7 @@
     {
       "type": "Calculator",
       "superType": "App",
-      "defined": "/Calculator.spell:204-4196"
+      "defined": "/Calculator.spell:204-4248"
     },
     {
       "property": "input",
@@ -73,7 +73,7 @@
       "kind": "method",
       "name": "clear it",
       "returns": "nothing",
-      "defined": "/Calculator.spell:1234-1319"
+      "defined": "/Calculator.spell:1234-1332"
     },
     {
       "syntax": "finish {thisArg:expression}",
@@ -88,7 +88,7 @@
       "kind": "method",
       "name": "finish it",
       "returns": "nothing",
-      "defined": "/Calculator.spell:1321-1534"
+      "defined": "/Calculator.spell:1334-1560"
     },
     {
       "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
@@ -109,7 +109,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Calculator.spell:1536-1974"
+      "defined": "/Calculator.spell:1562-2013"
     },
     {
       "syntax": "apply {callArgs:expression} (of {thisArg:expression})?",
@@ -130,7 +130,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Calculator.spell:1976-2176"
+      "defined": "/Calculator.spell:2015-2228"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -144,7 +144,7 @@
       "group": "Drawing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Calculator.spell:2196-3893"
+      "defined": "/Calculator.spell:2248-3945"
     },
     {
       "syntax": "test two sums in a row",
@@ -153,7 +153,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "two sums in a row",
-      "defined": "/Calculator.spell:3896-4196"
+      "defined": "/Calculator.spell:3948-4248"
     }
   ],
   "codeLines": [
@@ -166,10 +166,10 @@
     44,
     50,
     55,
-    63,
-    72,
-    82,
-    89,
-    238
+    64,
+    74,
+    85,
+    93,
+    242
   ]
 }
