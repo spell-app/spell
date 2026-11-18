@@ -202,7 +202,7 @@ describe("adding a source", () => {
       writtenAsText: true,
       noNumberWords: ["unknown"]
     })
-    expect(description.collections.people!.readThrough).toEqual({ rows: 2 })
+    expect(description.collections.people!.state).toMatchObject({ is: "verified", rows: 2 })
     expect(description.canDo.write).toMatch(/read only/)
     expect(description.spellCantSay.join("\n")).not.toMatch(/people\.homeworld/)
     expect(description.spellCantSay.join("\n")).toMatch(/A link to somewhere else:  .*people\.films/)
@@ -248,7 +248,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its id is its "url"`)
     const moves = descriptions.get("/M.json5")!.collections.moves!
     expect(moves).toMatchObject({ rowsSeen: 3, rowsItSays: 900, paging: "next field" })
-    expect(moves.readThrough).toEqual({ rows: 1 })
+    expect(moves.state).toMatchObject({ is: "verified", rows: 1 })
   })
 
   test("a list led to another address answers from there:  its line says so, one request a read, not two", async () => {
@@ -327,7 +327,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "kind" is text, stored as "type"`)
     expect(spell).toContain(`its "number" is a number, stored as "id"`)
     const pages = descriptions.get("/W.json5")!.collections.wiki_pages!
-    expect(pages).toMatchObject({ samples: ["Tatooine", "Hoth"], readThrough: { rows: 1 } })
+    expect(pages).toMatchObject({ samples: ["Tatooine", "Hoth"], state: { is: "verified", rows: 1 } })
   })
 
   test("Open Library's way (epic `data` P29):  books only by a search, authors linked by their ids, covers on another server", async () => {
@@ -367,8 +367,12 @@ describe("adding a source", () => {
     expect(spell).toContain(`a book's "cover i" is a picture at "${COVERS}"`)
     expect(spell).toContain(`its "cover i" is text  // a picture's address`)
     const { collections, about } = descriptions.get("/L.json5")!
-    expect(collections.books).toMatchObject({ searchedOnly: true, searchedFor: "dune", readThrough: { rows: 2 } })
-    expect(collections.authors).toMatchObject({ samples: ["OL1A"], readThrough: { rows: 1 } })
+    expect(collections.books).toMatchObject({
+      searchedOnly: true,
+      searchedFor: "dune",
+      state: { is: "verified", rows: 2 }
+    })
+    expect(collections.authors).toMatchObject({ samples: ["OL1A"], state: { is: "verified", rows: 1 } })
     expect(about.picturesAsked).toEqual([`cover_i=${COVERS}`])
     // the read through searched, as a program has to
     expect(asked.filter((url) => url.startsWith(`${API}/search.json`))).toEqual([
@@ -416,8 +420,8 @@ describe("adding a source", () => {
     expect(spell).toContain(`repositories are searched with "q" at "/search/repositories"`)
     expect(spell).not.toContain(`repositories are searched at`)
     const { collections } = descriptions.get("/G.json5")!
-    expect(collections.repositories).toMatchObject({ searchedOnly: true, readThrough: { rows: 2 } })
-    expect(collections.users).toMatchObject({ readThrough: { rows: 1 } })
+    expect(collections.repositories).toMatchObject({ searchedOnly: true, state: { is: "verified", rows: 2 } })
+    expect(collections.users).toMatchObject({ state: { is: "verified", rows: 1 } })
     // the read through searched all of each repository, as a program's `matching` does
     expect(asked).toContain(`${GH}/search/repositories?q=solid`)
   })
@@ -464,7 +468,7 @@ describe("adding a source", () => {
     const { collections, spellCantSay } = descriptions.get("/W.json5")!
     expect(collections.forecasts).toMatchObject({
       askedBy: { latitude: "52.52", longitude: "13.41" },
-      readThrough: { rows: 1 }
+      state: { is: "verified", rows: 1 }
     })
     expect(collections.forecasts!.fields.hourly).toMatchObject({ words: "hours", isSideBySide: true })
     expect(spellCantSay.join("\n")).not.toMatch(/hourly_units/)
@@ -523,7 +527,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "ccn3" is text`)
     expect(spell).toContain(`its "root" is text`)
     const { collections } = descriptions.get("/C.json5")!
-    expect(collections.countries).toMatchObject({ paging: "none", readThrough: { rows: 3 } })
+    expect(collections.countries).toMatchObject({ paging: "none", state: { is: "verified", rows: 3 } })
     expect(collections.countries!.fields.currencies).toMatchObject({ isListInside: true, isByCode: true })
   })
 
@@ -868,7 +872,7 @@ describe("a key", () => {
     const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")
-    expect(description.collections.stuff_things!.readThrough).toEqual({ rows: 1 })
+    expect(description.collections.stuff_things!.state).toMatchObject({ is: "verified", rows: 1 })
   })
 
   test("that isn't in the environment stops;  a source that wants one says to name one", async () => {
@@ -1310,7 +1314,7 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
     expect(description.about).toMatchObject({ kind: "web server", address: servers.url })
     expect(spell).toContain(`recipes live at "/recipes"`)
     expect(spell).toContain(`its version is its "version"`)
-    expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
+    expect(description.collections.recipes!.state!.rows).toBeGreaterThan(0)
   })
 
   test("a graphql server:  its schema says what it holds, and its mutations are never sent", async () => {
@@ -1323,7 +1327,7 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
     expect(description.about.kind).toBe("graphql server")
     expect(spell).toContain(`a "recipe" is a thing`)
     expect(description.canDo.write).toMatch(/addRecipe, changeRecipe, removeRecipe.*Never tried/)
-    expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
+    expect(description.collections.recipes!.state!.rows).toBeGreaterThan(0)
   })
 
   test("a CSV:  its header row says its fields, and its address its kind", async () => {
@@ -1333,6 +1337,6 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
     expect(spell).toContain(`its id is its "id"`)
     expect(spell).toContain(`its "servings" is a number`)
     expect(description.canDo.write).toMatch(/read only/)
-    expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
+    expect(description.collections.recipes!.state!.rows).toBeGreaterThan(0)
   })
 })

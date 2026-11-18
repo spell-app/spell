@@ -24,6 +24,9 @@ const MOST_BYTES_AN_ANSWER = 2_000_000
 /** The most bytes one look reads, in all. */
 const MOST_BYTES = 12_000_000
 
+/** The most bytes an API's description may be, read whole once (epic `data` P49):  NetBox's is 15 MB. */
+const MOST_DESCRIPTION_BYTES = 60_000_000
+
 /** How long it waits between requests. */
 const GAP_MS = 250
 
@@ -178,6 +181,26 @@ export class PoliteReader {
   }
 
   /**
+   * `GET` an API's description, read whole however big (epic `data` P49):  up to `MOST_DESCRIPTION_BYTES`, counted
+   * against nothing else.
+   * - As `read()` otherwise
+   */
+  async readDescription(url: string): Promise<ReadAnswer> {
+    const before = this.bytes
+    try {
+      return await this.answerTo(
+        url,
+        { headers: { accept: "application/json" } },
+        "only reads",
+        "text",
+        MOST_DESCRIPTION_BYTES
+      )
+    } finally {
+      this.bytes = before
+    }
+  }
+
+  /**
    * A `fetch` for a program to run on:  the same manners, the same limits, and it can't write.
    * - An answer that isn't text (an Excel workbook) is handed on as its bytes;  text has the key taken out, as `read()`'s.
    * - throws `IngestStopped` for a write, and past the limits
@@ -255,7 +278,8 @@ export class PoliteReader {
     url: string,
     init: RequestInit,
     writes: "only reads" | "may write" = "only reads",
-    body: "text" | "bytes too" = "text"
+    body: "text" | "bytes too" = "text",
+    most = MOST_BYTES_AN_ANSWER
   ): Promise<ReadAnswer> {
     const method = (init.method ?? "GET").toUpperCase()
     const isPlaceServerRead = this.readsPlaceServer && method === "POST" && PLACE_SERVER_READS.test(pathOf(url))
@@ -284,7 +308,7 @@ export class PoliteReader {
         await this.sleep(backoffFor(attempt))
         continue
       }
-      const { bytes, isCut } = await this.bytesOf(response)
+      const { bytes, isCut } = await this.bytesOf(response, most)
       const landed = addressWithoutKey(landedAt ?? (response.url || url), this.keyGoes)
       const text = this.withoutKey(new TextDecoder().decode(bytes))
       return {
@@ -366,7 +390,7 @@ export class PoliteReader {
   }
 
   /** An answer's bytes, up to the most it reads:  it stops reading there. */
-  private async bytesOf(response: Response): Promise<{ bytes: Uint8Array; isCut: boolean }> {
+  private async bytesOf(response: Response, most: number): Promise<{ bytes: Uint8Array; isCut: boolean }> {
     const reader = response.body?.getReader()
     if (!reader) return { bytes: new Uint8Array(), isCut: false }
     const chunks: Uint8Array[] = []
@@ -378,7 +402,7 @@ export class PoliteReader {
       read += value.length
       this.bytes += value.length
       chunks.push(value)
-      if (read > MOST_BYTES_AN_ANSWER) {
+      if (read > most) {
         await reader.cancel()
         isCut = true
         break
@@ -390,7 +414,7 @@ export class PoliteReader {
       bytes.set(chunk, at)
       at += chunk.length
     }
-    return { bytes: isCut ? bytes.slice(0, MOST_BYTES_AN_ANSWER) : bytes, isCut }
+    return { bytes: isCut ? bytes.slice(0, most) : bytes, isCut }
   }
 
   /** `headers`, with the key's value taken out:  a next page's `Link` can say a key that went in the address. */

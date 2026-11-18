@@ -80,7 +80,7 @@ describe("a place server's kinds, and a room", { timeout: 30_000 }, () => {
     expect(spell).toContain(`check it every 30 seconds`)
     // a run's token is no line of a program
     expect(texts.get("/Folder.spell")).not.toContain("key")
-    expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
+    expect(description.collections.recipes!.state!.rows).toBeGreaterThan(0)
   })
 
   test("the place server says what kind it holds", async () => {
@@ -94,7 +94,7 @@ describe("a place server's kinds, and a room", { timeout: 30_000 }, () => {
     })
     expect(description.about.kind).toBe("file")
     expect(description.about.name).toBe("book file")
-    expect(description.collections.recipes!.readThrough!.rows).toBe(1)
+    expect(description.collections.recipes!.state!.rows).toBe(1)
   })
 
   test("a file names no collections:  it stops, saying so", async () => {
@@ -113,7 +113,7 @@ describe("a place server's kinds, and a room", { timeout: 30_000 }, () => {
     expect(spell).toContain(`a "recipe" is a thing`)
     expect(spell).toContain(`its "title" is text`)
     expect(description.canDo.live).toMatch(/says what changed/)
-    expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
+    expect(description.collections.recipes!.state!.rows).toBeGreaterThan(0)
   })
 })
 
@@ -148,7 +148,7 @@ describe("an airtable", { timeout: 30_000 }, () => {
     expect(spell).toContain(`its key is the secret "AIRTABLE"`)
     expect(spell).toContain(`recipes live at "Recipes"`)
     expect(spell).toContain(`its "dish name" is text`)
-    expect(description.collections.recipes!.readThrough).toEqual({ rows: 2, readByTheLook: true })
+    expect(description.collections.recipes!.state).toMatchObject({ is: "verified", rows: 2, readByTheLook: true })
     expect(description.notes.join("\n")).toMatch(/works out Doubled itself/)
     expect(description.notes.join("\n")).toMatch(/wasn't read through the Spell/)
   })
@@ -185,6 +185,6 @@ describe("an atmosphere account", { timeout: 30_000 }, () => {
     expect(spell).toContain(`recipes live at "com.example.recipe"`)
     expect(spell).toContain(`its "title" is text`)
     expect(spell).not.toContain("$type")
-    expect(description.collections.recipes!.readThrough!.rows).toBe(2)
+    expect(description.collections.recipes!.state!.rows).toBe(2)
   })
 })

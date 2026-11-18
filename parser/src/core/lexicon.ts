@@ -26,6 +26,7 @@
 import { lowerFirst, schemaOf, type PropInfo, type PropRule } from "spell/util"
 
 import { kindOf, type Kind } from "./checking"
+import { fieldLineOf, LIST_ITEMS, oneOfWords, type SchemaField } from "./schemaWords"
 
 /** The Lexicon language's version, every document's `lexicon`. */
 export const LEXICON_VERSION = 1
@@ -277,9 +278,9 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
       notes.push(`"${key}" is ${field.type} in the Lexicon:  Spell can't hold one yet, so it's left out`)
       continue
     }
-    const { said, inline } = spellLineOf(kind, field, required.has(key))
-    lines.push(`\tits "${words}" is ${said}`)
-    rules.push(...spellRulesOf(words, field, required.has(key), inline))
+    const written = fieldLineOf(words, schemaFieldOf(kind, field, required.has(key)))
+    lines.push(`\t${written.line}`)
+    rules.push(...written.rules.map((rule) => `\t${rule}`))
     if (field.type === "string" && field.maxLength !== undefined) {
       notes.push(`"${key}" holds at most ${field.maxLength} bytes:  Spell says lengths in letters`)
     }
@@ -314,68 +315,18 @@ function spellKindOf(field: LexiconField): string | undefined {
   return undefined
 }
 
-/** What a list of each kind is called. */
-const LIST_ITEMS: Record<string, string> = {
-  text: "text",
-  "a date": "dates",
-  "a number": "numbers",
-  "an integer": "integers",
-  "yes or no": "choices"
-}
-
-/** What a field's line says itself, rather than on a rule line of its own. */
-type SaidInline = {
-  /** `required`, in its kind:  `a required date`. */
-  required?: boolean
-  /** Its length, after it:  `, with maximum length 1`. */
-  length?: "minGraphemes" | "maxGraphemes"
-}
-
-/**
- * What a field's line says after `is`, its kind and what it says with it:
- * `required text, with maximum length 1`, `a required date`.
- * - `required` goes in a plain kind only (`text`, `a date`, `a number`, `an integer`):
- *   the language has it there, and not in `one of ...`, `yes or no` or a list, whose rule line says it instead.
- * - One length goes on the line, the most if it has both;  the other is a rule line.
- */
-function spellLineOf(kind: string, field: LexiconField, isRequired: boolean): { said: string; inline: SaidInline } {
-  const inline: SaidInline = {}
-  let said = kind
-  if (isRequired && REQUIRED_KINDS.has(kind)) {
-    said = kind.replace(/^(an? )?/, (article) => (article ? "a required " : "required "))
-    inline.required = true
+/** `field` as the one writer of type lines takes it (`fieldLineOf()`):  Lexicon's lengths in graphemes are letters. */
+function schemaFieldOf(kind: string, field: LexiconField, isRequired: boolean): SchemaField {
+  const isText = field.type === "string"
+  return {
+    kind,
+    ...(isRequired && { isRequired }),
+    ...(isText && field.minGraphemes !== undefined && { minLetters: field.minGraphemes }),
+    ...(isText && field.maxGraphemes !== undefined && { maxLetters: field.maxGraphemes }),
+    ...(field.minimum !== undefined && { minimum: field.minimum }),
+    ...(field.maximum !== undefined && { maximum: field.maximum }),
+    ...(field.format === "uri" && { isUrl: true })
   }
-  if (field.type === "string" && field.maxGraphemes !== undefined) {
-    said += `, with maximum length ${field.maxGraphemes}`
-    inline.length = "maxGraphemes"
-  } else if (field.type === "string" && field.minGraphemes !== undefined) {
-    said += `, with minimum length ${field.minGraphemes}`
-    inline.length = "minGraphemes"
-  }
-  return { said, inline }
-}
-
-/** The kinds `required` goes in:  `required text`, `a required date`. */
-const REQUIRED_KINDS = new Set(["text", "a date", "a number", "an integer"])
-
-/** The rule lines `field` asks for, on the property called `words`:  what its line didn't say (`inline`). */
-function spellRulesOf(words: string, field: LexiconField, isRequired: boolean, inline: SaidInline): string[] {
-  const rules: string[] = []
-  const must = (rule: string) => rules.push(`\tits ${words} must ${rule}`)
-  if (isRequired && !inline.required) must("not be empty")
-  const letters = (count: number) => `${count} letter${count === 1 ? "" : "s"}`
-  if (field.minGraphemes !== undefined && inline.length !== "minGraphemes") {
-    must(`be at least ${letters(field.minGraphemes)} long`)
-  }
-  if (field.maxGraphemes !== undefined && inline.length !== "maxGraphemes") {
-    must(`be at most ${letters(field.maxGraphemes)} long`)
-  }
-  if (field.format === "uri") must("be a url")
-  const { minimum, maximum } = field
-  if (minimum !== undefined && maximum !== undefined) must(`be between ${minimum} and ${maximum}`)
-  else if (minimum !== undefined) must(`be at least ${minimum}`)
-  else if (maximum !== undefined) must(`be at most ${maximum}`)
-  return rules
 }
 
 ////////////////
@@ -392,16 +343,6 @@ function wordsOf(name: string): string {
     .replace(/[_-]+/g, " ")
     .toLowerCase()
     .trim()
-}
-
-/**
- * A Lexicon's legal values as Spell says them, `one of happy, sad or grumpy`:  words, each as written.
- * - `undefined` when one isn't a plain word Spell would read back the same (`"12:30"`, `"a b"`).
- */
-function oneOfWords(values: readonly unknown[]): string | undefined {
-  const words = values.map((value) => `${value as string}`)
-  if (!words.every((word) => /^[a-z][a-z0-9-]*$/i.test(word))) return undefined
-  return `one of ${words.length > 1 ? `${words.slice(0, -1).join(", ")} or ${words.at(-1)}` : words[0]}`
 }
 
 /**
