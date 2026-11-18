@@ -4,7 +4,8 @@ import { join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
-import { PlaceIngest, descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceIngest"
+import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import { PlaceSpec, type OpenApiDocument } from "spell/parser/spell/ingest/PlaceSpec"
 import type { Deployment, IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
 

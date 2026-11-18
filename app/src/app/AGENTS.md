@@ -40,7 +40,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - `pages/`:  the pages and the router;  among them a site's editor, `/site/<project>` (`SiteEditorPage`, epic
     `mockup` P4), which changes the site's file through `SiteWrites`;  a page's stories, `PageStories` (P6);
     its board of sections and cards, `SiteBoard` and `<SiteBoardView>` (T31);  a site of its routing alone, `X.site.spell`,
-    each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`)
+    each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`);
+    a place's reference page, `/place/<its description>` (`PlaceReference`, epic `data` P52), linked from the Data tab (`SiteData`):
+    its lists by tag, folded, each with how trying it went, its changes and its fields, drawn from the description each time
   - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)

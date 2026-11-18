@@ -7,7 +7,8 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
-import { PlaceIngest, descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceIngest"
+import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import { PoliteReader, READER_NAME } from "spell/parser/spell/ingest/PoliteReader"
 import {
   IngestStopped,
