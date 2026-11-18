@@ -1699,10 +1699,42 @@
       "params": [
         {
           "name": "name"
+        },
+        {
+          "name": "answer"
         }
       ],
       "section": "Drawn things, by name",
       "description": "Hide what the program drew and named `name`:  what `hide \"you won\"` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "keepOpen",
+      "of": "core",
+      "module": "ui",
+      "section": "Drawn things, by name",
+      "description": "Leave the modal open after the action that's running now:  what `... without closing` compiles to, before its statement (epic `language` T155)."
+    },
+    {
+      "kind": "method",
+      "name": "result",
+      "of": "core",
+      "module": "ui",
+      "section": "Drawn things, by name",
+      "description": "What closed the last dialog:  what `the result` compiles to (epic `language` T155)."
+    },
+    {
+      "kind": "method",
+      "name": "resultIs",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "section": "Drawn things, by name",
+      "description": "Is the last dialog's answer `value`:  what `the result is ok` compiles to (epic `language` T155)."
     },
     {
       "kind": "method",

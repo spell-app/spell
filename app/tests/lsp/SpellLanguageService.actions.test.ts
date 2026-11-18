@@ -40,7 +40,7 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
   test("an action's quoted word offers the program's actions:  the game's first, then undo and redo", async () => {
     const items = await solitaire.typed('<action "', CLOSED)
     const words = labels(items)
-    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "turn over the next card"]))
+    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "deal the cards", "turn over the next card"]))
     // in its order:  the game's own, then the app's, then the other types'
     // - Solitaire's other types have none a button may run:  a card's `play` answers yes or no since its
     //   `move a card to a pile` may cancel (epic `language` P56)
@@ -73,13 +73,13 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
     // as the editor has it before the tag's end lands:  the quote left open, or closed with the caret inside
     for (const afterCaret of ["", '"']) {
       const words = labels(await solitaire.typed('<action "', afterCaret))
-      expect(words, afterCaret).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "undo"]))
+      expect(words, afterCaret).toEqual(expect.arrayContaining(["auto play", "cheat", "deal the cards", "undo"]))
     }
   })
 
   test("...and with another tag left half typed on the line above", async () => {
     const words = labels(await solitaire.typedBelow("<text", '<action "', CLOSED))
-    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "undo"]))
+    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "deal the cards", "undo"]))
   })
 
   test("a quoted word on any other tag offers no actions", async () => {

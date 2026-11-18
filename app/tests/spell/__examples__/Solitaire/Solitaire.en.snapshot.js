@@ -14,9 +14,10 @@ export const words = {
       symbol: "symbol",
       shorthand: "shorthand",
       moveToPile: "move a card to a pile",
-      isOnTopOfItsPile: "is on top of its pile",
+      isOnTop: "is on top",
+      isOnBottom: "is on bottom",
       play: "play a card",
-      thePointsForCardOnPile: "the points for (a card) on (a pile)",
+      thePointsForCardOnPile: "the points for a card on a pile",
       pile: "pile"
     },
     CardImage: {
@@ -68,22 +69,22 @@ export const words = {
       C5: "C5",
       C6: "C6",
       C7: "C7",
-      restartTheGame: "restart the game",
+      dealTheCards: "deal the cards",
       turnOverTheNextCard: "turn over the next card",
-      resetTheStock: "reset the stock",
+      resetTheStockPile: "reset the stock pile",
       autoPlay: "auto play",
       cheat: "cheat"
     }
   },
   groups: {
     Card: [
-      { name: "Card Rank & Suit", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "suit", "color"] },
-      { name: "Aliases", description: "Spell for identifying cards", members: ["isAFaceCard", "isANumberCard", "isTheRankOfSuit"] },
+      { name: "Card Rank & Suit", description: "A standard playing card with rank, suit and color. You can drag cards around and drop them on piles if the game allows.", members: ["rank", "suit", "color"] },
+      { name: "Aliases", members: ["isAFaceCard", "isANumberCard", "isTheRankOfSuit"] },
       { name: "Names", description: "identifying a card", members: ["name", "value", "symbol", "shorthand"] },
       { name: "Game Play", members: ["play", "thePointsForCardOnPile"] }
     ],
     Solitaire: [
-      { name: "Dealing & the Stock Pile", members: ["restartTheGame", "turnOverTheNextCard", "resetTheStock"] },
+      { name: "Dealing & the Stock Pile", members: ["dealTheCards", "turnOverTheNextCard", "resetTheStockPile"] },
       { name: "Game Play", members: ["autoPlay", "cheat"] }
     ]
   }

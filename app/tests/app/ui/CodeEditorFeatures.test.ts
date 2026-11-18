@@ -33,11 +33,11 @@ describe("CodeEditorFeatures", () => {
     }
 
     test("an action:  its head, every call, ABOVE its head too, and every button naming it", async () => {
-      const callAbove = text.indexOf("\t\trestart the game\n")
-      expect(callAbove).toBeLessThan(text.indexOf('to "restart the game"'))
-      const after = await renamed('to "restart the game"', "restart the game", "start again")
+      const callAbove = text.indexOf("\t\tdeal the cards\n")
+      expect(callAbove).toBeLessThan(text.indexOf('to "deal the cards"'))
+      const after = await renamed('to "deal the cards"', "deal the cards", "start again")
       expect(after).toContain('to "start again" with shortcut "R"')
-      expect(after).not.toMatch(/restart the game/)
+      expect(after).not.toMatch(/deal the cards/)
       expect(after.slice(0, after.indexOf('to "start again"'))).toMatch(/^\t\tstart again$/m)
     })
 

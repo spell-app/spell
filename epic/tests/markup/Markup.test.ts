@@ -95,7 +95,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-link": { saga: "drawable-spell", epic: "python-target", item: "M1" },
   "epic-mark": { item: "i126", link: true },
   "epic-clarify": {},
-  "epic-picture": {},
+  "epic-picture": { label: "IMG2", removable: true },
   "epic-actions": { headRow: true },
   "epic-change": { id: "ch3", item: "q16", at: "2026-10-24 15:10", answer: "One list", accepted: "2026-10-24 19:02" },
   "epic-review": { of: "q7", shows: "note", buttons: "todo", label: "Q7", tip: "reviewed 10/7/26", underLine: true },
@@ -109,6 +109,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     for: "q1",
     submit: "Add"
   },
+  "epic-kickoff": {},
   "epic-agents": {},
   "epic-ask": { name: "q1", multiple: true, selectAll: true, filter: true, moreDetails: true },
   "epic-text-box": { type: "comment", for: "q1-B", placeholder: "Comment on B", label: "Comment on B · Blue" },

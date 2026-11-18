@@ -9,6 +9,8 @@
     "cant-draw": "⚠ {type} can't draw",
     "waiting": "…",
     "confirm-default": "{question} (yes)",
+    "dialog-ok": "OK",
+    "dialog-cancel": "Cancel",
     "drop-event": "{thing}-drop",
     "undo": "Undo",
     "undo-step": "Undo {step}",

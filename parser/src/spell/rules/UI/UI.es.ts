@@ -20,6 +20,8 @@ import { ScrollToTop } from "./ScrollToTop"
 import { OpenPrinting } from "./OpenPrinting"
 import { ShowDatesAs } from "./ShowDatesAs"
 import { ShowDrawn } from "./ShowDrawn"
+import { TheResult } from "./TheResult"
+import { WithoutClosing } from "./WithoutClosing"
 import { PlaySound } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
@@ -136,8 +138,37 @@ UIEs.addRule(ShowDrawn, {
     {
       compileAs: "statement",
       tests: [
-        [`mostrar "ganaste"`, `core.showDrawn("ganaste")`],
+        [`mostrar "ganaste"`, `await core.showDrawn("ganaste")`],
         [`ocultar "ganaste"`, `core.hideDrawn("ganaste")`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(WithoutClosing, {
+  syntax: "{call:statement} sin cerrar",
+  tests: [{ compileAs: "statement", tests: [[`imprimir 1 sin cerrar`, ["core.keepOpen()", "core.console.log(1)"]]] }]
+})
+
+UIEs.addRule(WithoutClosing, {
+  syntax: "{call:statement} sin cerrar el modal",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [[`imprimir 1 sin cerrar el modal`, ["core.keepOpen()", "core.console.log(1)"]]]
+    }
+  ]
+})
+
+UIEs.addRule(TheResult, {
+  syntax: "el resultado",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`el resultado`, `core.result()`],
+        [`el resultado es aceptar`, `(core.resultIs("ok"))`],
+        [`el resultado no es cancelar`, `(!core.resultIs("cancel"))`]
       ]
     }
   ]

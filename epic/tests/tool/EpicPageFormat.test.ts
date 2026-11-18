@@ -93,7 +93,8 @@ describe("EpicPageFormat", () => {
 
   test("an attribute's words are never taken for an attribute (`was`)", () => {
     const html = `<epic-page><epic-change id="ch1" was="it was accepted here"></epic-change></epic-page>`
-    expect([...ReviewInbox.itemIds(html)]).toEqual(["ch1"])
+    // no phases:  the kickoff box takes a mark too (epic `epic-engine` P75)
+    expect([...ReviewInbox.itemIds(html)]).toEqual(["kickoff", "ch1"])
   })
 
   test("a list reads no body:  the parts can be broken, or missing altogether", async () => {

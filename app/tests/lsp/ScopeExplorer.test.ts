@@ -23,7 +23,7 @@ const SUIT = 'its "suit" is one of'
 /** The card's shorthand, whose comment above it is its docstring. */
 const STATE_DESCRIPTION = "Its shorthand:  Q♠↓ is the queen of spades, face down"
 /** The `##` heading in the game's file that its kinds of pile are under, e.g. a foundation's `suit`:  their section. */
-const PILES_HEADING = "The piles"
+const PILES_HEADING = "Different kinds of piles"
 
 /** A project whose folders each hold a `Usage.spell`, as a language server sees it (epic `notebook` P10). */
 describe("ScopeExplorer of a project with sub-folders", () => {
@@ -115,7 +115,7 @@ describe("ScopeExplorer", () => {
     // the card's moves are declared in the game's file, in the game's own outline:  above its first `##` heading
     expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spell$/)
     expect(member("play a card").section).toBeUndefined()
-    expect(member("the points for (a card) on (a pile)").section).toBeUndefined()
+    expect(member("the points for a card on a pile").section).toBeUndefined()
     // the card's own file has no `##` heading
     expect(member("suit").section).toBeUndefined()
     // a foundation's suit is under the game's `## The piles`

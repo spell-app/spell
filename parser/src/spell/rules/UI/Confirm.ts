@@ -10,7 +10,7 @@ import { dialogArguments } from "./UI.shared"
  * - The same clauses as `alert`'s (`dialogArguments()`), and a cancel button's words.
  * - Returns a promise which `resolve()`s when they `ok`, `reject()`s if they `cancel`.
  * - NOTE: we'll `await` the promise!
- * - TODO: `the result = await ...` ?
+ * - What closed it is `the result` after (`core.result()`, epic `language` T155).
  */
 export class Confirm extends SpellStatement<"message|title?|size?|okButton?|cancelButton?"> {
   @proto static alias = "statement"

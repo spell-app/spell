@@ -38,6 +38,8 @@ export const words = {
     "cant-draw": "⚠ {type} no se puede dibujar",
     waiting: "…",
     "confirm-default": "{question} (sí)",
+    "dialog-ok": "Aceptar",
+    "dialog-cancel": "Cancelar",
     "drop-event": "soltar-{thing}",
     undo: "Deshacer",
     "undo-step": "Deshacer {step}",

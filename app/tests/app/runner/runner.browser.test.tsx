@@ -823,6 +823,33 @@ card.turnOver()
     expect(consoleText()).not.toContain("failed")
   })
 
+  test('`Solitaire`\'s "you won" modal:  New game deals again, then closes it (epic `language` T155)', async () => {
+    const host = await mount(await solitaireSource())
+    const columns = () => [...host.querySelectorAll<HTMLElement>("test-project-column")]
+    const stock = () => host.querySelector<HTMLElement>("test-project-stock-pile")!
+    const discards = () => host.querySelector<HTMLElement>("test-project-discard-pile")!
+    await waitFor(() => columns()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
+    await ElementFixture.settle(host)
+    // a card played from the stock, so a new deal shows:  the discards back to one card
+    ;(stock().lastElementChild as HTMLElement).shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
+    await waitFor(() => discards().children.length === 2)
+    // the modal, shown as `show "you won"` shows it
+    const modal = host.querySelector("#you-won") as HTMLElement & { visible: boolean; ready: Promise<void> }
+    await modal.ready
+    modal.visible = true
+    const newGame = [...modal.querySelectorAll<HTMLElement & { ready: Promise<void> }>("ui-button")].find(
+      (button) => button.textContent === "New game"
+    )!
+    await newGame.ready
+    newGame.shadowRoot!.querySelector("button")!.click()
+    // it deals, then closes:  open while the cards go back
+    expect(modal.visible).toBe(true)
+    await waitFor(() => !modal.visible, 10_000)
+    expect(discards().children.length).toBe(1)
+    expect(columns().map((pile) => pile.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(consoleText()).not.toContain("failed")
+  })
+
   test("`Solitaire` played, then a line at its top level edited, in a runner with no way to say Restart:  the game's kept (epic `editor`)", async () => {
     const solitaire = await solitaireSource()
     const { host, setSource } = await mountSettable(solitaire)

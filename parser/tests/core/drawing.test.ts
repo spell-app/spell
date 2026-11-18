@@ -193,6 +193,33 @@ describe("@drawn", () => {
     expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
   })
 
+  test('<modal><action "..."/></modal>:  its button closes the modal once its click has run (language T155)', () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    const game = new Game()
+    draw(() => core.drawAction(game, "restartTheGame", { class: "Big", answer: "ok", "in-dialog": true }))
+    const button = element.querySelector("ui-button")
+    expect(button?.getAttribute("class")).toBe("Big")
+    expect(button?.hasAttribute("in-dialog")).toBe(false)
+    expect(button?.hasAttribute("answer")).toBe(false)
+  })
+
+  test("<action ok />, <action cancel /> with no action of that name:  a button labelled OK or Cancel (language T155)", () => {
+    const game = new Thing()
+    draw(
+      () =>
+        [
+          core.drawAction(game, "ok", { answer: "ok", "in-dialog": true }),
+          core.drawAction(game, "cancel", { answer: "cancel", "in-dialog": true })
+        ] as unknown as Drawing
+    )
+    const buttons = [...element.querySelectorAll("ui-button")]
+    expect(buttons.map((button) => button.textContent)).toEqual(["OK", "Cancel"])
+    expect(buttons.some((button) => button.hasAttribute("disabled"))).toBe(false)
+  })
+
   test('<context-menu "game menu" />, context-menu="game menu":  a menu drawn with that name, reused (language T156)', () => {
     class Game extends Thing {
       restartTheGame(): void {}

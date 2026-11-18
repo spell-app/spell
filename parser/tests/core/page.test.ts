@@ -1,5 +1,7 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 
+import { parseHTML } from "linkedom"
+
 import { observe } from "spell/util"
 import {
   App,
@@ -8,9 +10,11 @@ import {
   frameSummary,
   logError,
   logFrame,
+  sendCall,
   startPage,
   type PageMessage
 } from "spell/parser/core"
+import { closeDialogOf } from "spell/parser/core/ui"
 
 /**
  * A page's frames, as its console shows them (`page.ts`, `logFrame()`):  one folded line each,
@@ -255,11 +259,35 @@ describe("startPage():  the program's dialogs and toasts", () => {
     }
   })
 
+  test("a modal's button:  its call says what it closes, for the program to hide once it has run (epic `language` T155)", () => {
+    const sent: PageMessage[] = []
+    core.resetRuntime()
+    startPage({ modules: [], state: {}, send: (message) => sent.push(message) })
+    const html = parseHTML(
+      '<!doctype html><html><body><ui-modal id="you-won"><ui-button></ui-button></ui-modal></body></html>'
+    )
+    try {
+      const run = () => (sendCall("deal_the_cards", []), true)
+      closeDialogOf(html.document.querySelector("ui-button"), "deal the cards", {
+        thing: {},
+        name: "dealTheCards",
+        run
+      })
+      sendCall("cheat", [])
+      expect(sent).toEqual([
+        { call: "deal_the_cards", args: [], closes: { name: "you-won", answer: "deal the cards" } },
+        { call: "cheat", args: [] }
+      ])
+    } finally {
+      core.remote = undefined
+    }
+  })
+
   test("show / hide by name:  the page shows what it drew, then answers (epic `language` P61)", async () => {
     const sent: PageMessage[] = []
     core.resetRuntime()
     const page = startPage({ modules: [], state: {}, send: (message) => sent.push(message) })
-    const show = vi.spyOn(core, "showDrawn").mockImplementation(() => {})
+    const show = vi.spyOn(core, "showDrawn").mockImplementation(async () => undefined)
     const hide = vi.spyOn(core, "hideDrawn").mockImplementation(() => {})
     try {
       page.receive({ ui: "showDrawn", args: ["you won"], asks: 1 })

@@ -48,6 +48,13 @@ const VIEW_ID_ATTRIBUTE = "id"
  */
 /** The attribute naming the menu a right click on an element shows, as the page reads it:  `context-menu="game menu"`. */
 const CONTEXT_MENU_ATTRIBUTE = "context-menu"
+/** Spell UI's modal:  its actions close it, and what it holds goes in its parts (epic `language` T155). */
+const DIALOG_TAG = "ui-modal"
+/** The parts a modal lays out (`ownsParts`):  a drawing that names one lays its modal out itself. */
+const DIALOG_PART_TAGS = ["ui-header", "ui-content", "ui-description", "ui-actions"]
+/** Where a modal's drawing goes, when it names none of its parts:  its content, then its actions' buttons. */
+const DIALOG_CONTENT_TAG = "ui-content"
+const DIALOG_ACTIONS_TAG = "ui-actions"
 const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
   "ui-modal": { title: "heading" },
   "ui-menu": {},
@@ -210,6 +217,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
     // a Spell UI menu or toolbar, in any language:  its actions and dividers are its rows (epic `editor` P29)
     if (SpellJSX.isMenu(scope, match.data.tagName)) SpellJSX.markMenuRows(scope, match)
+    // a modal:  its actions close it, and what it holds goes in its parts (epic `language` T155)
+    if (SpellJSX.canonicalTagOf(scope, match.data.tagName) === DIALOG_TAG) SpellJSX.markDialog(scope, match)
     // a modal, menu or popup its quoted word names, `<modal "you won">` (P61):  never one of the project's own views
     if (element.quotedWord && !match.data.view && !match.data.laterView) {
       match.data.named = SpellJSX.namedTagTitle(scope, match.data.tagName)
@@ -475,7 +484,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
     if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
-    const children = this.childASTs(match)
+    const children = match.data.dialogParts ? SpellJSX.dialogChildren(match) : this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
@@ -750,6 +759,67 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
+   * A modal's drawing (epic `language` T155;  Owen, 2026-11-17:  "only for buttons in the modal's actions section"):
+   * - naming none of its parts (`DIALOG_PART_TAGS`), nor an if-chain at its top, and holding an `<action>` at its top:
+   *   laid out in them as it compiles (`dialogChildren()`), each `<action>` at its top going to its actions;
+   *   one with no action there keeps its drawing as written (StarWars' crawl)
+   * - each `<action "...">` in its ACTIONS, the row of buttons at its bottom, closes it once its click has run the
+   *   action, as a dialog's own buttons do (`action_button`'s `inDialog`):
+   *   - written in its `<actions>` (Spell UI's `<ui-actions>`, Spanish's `<acciones>`), however deep;
+   *     or at its top, when it's laid out for you
+   *   - not one that says `keep-open` (Spanish's `mantener-abierto`), nor a menu's row
+   *   - an action anywhere else in it (its content) runs, and leaves it open
+   */
+  private static markDialog(scope: P.Scope, dialog: P.MatchFor<SpellJSX>) {
+    const closes = (action: P.MatchFor<ActionButton>) => {
+      if (!action.data.inMenu && action.data.keepOpenAt === undefined) action.data.inDialog = true
+    }
+    const markAll = (holder: P.Match) => {
+      for (const child of (holder.data as JSXMatchData).children ?? []) {
+        if (child?.is(ActionButton)) closes(child)
+        else if (child?.is(SpellJSX) && !SpellJSX.isMenu(scope, child.data.tagName)) markAll(child)
+      }
+    }
+    const children = dialog.data.children ?? []
+    let laidOut = false
+    for (const child of children) {
+      if (!child?.is(SpellJSX)) continue
+      const tag = SpellJSX.canonicalTagOf(scope, child.data.tagName) ?? ""
+      if (child.data.chain || DIALOG_PART_TAGS.includes(tag)) laidOut = true
+      if (tag === DIALOG_ACTIONS_TAG) markAll(child)
+    }
+    // laid out for you only with a button to put in its bottom row:  one with none keeps its drawing as written,
+    // as StarWars' crawl, whose words are placed over the modal itself
+    const actions = children.filter((child): child is P.MatchFor<ActionButton> => !!child?.is(ActionButton))
+    if (laidOut || !actions.length) return
+    dialog.data.dialogParts = true
+    for (const action of actions) closes(action)
+  }
+
+  /**
+   * A modal's children, laid out in its parts:  what it holds in `<ui-content>`, the `<action>`s at its top after, in
+   * `<ui-actions>` -- so it's drawn as a modal is, with room around it, its buttons on their own line, closing it.
+   * - Spell UI's English tags in every language, as an action's `<ui-button>` is:  they're the page's own, not written.
+   */
+  private static dialogChildren(match: P.MatchFor<SpellJSX>): P.ASTJSXElementProps["children"] {
+    const actions: P.ASTJSXElementProps["children"] = []
+    const content: P.ASTJSXElementProps["children"] = []
+    for (const child of match.data.children ?? []) {
+      if (SpellJSX.drawsNothing(child)) continue
+      const ast = SpellJSX.childAST(child)
+      if (ast) (child?.is(ActionButton) ? actions : content).push(ast)
+    }
+    const part = (tagName: string, children: P.ASTJSXElementProps["children"]) =>
+      new P.ASTJSXElement(match, { tagName, attrs: [], children })
+    // blank text alone isn't content
+    const hasContent = content.some((ast) => !(ast instanceof P.ASTJSXText) || ast.value.trim())
+    return [
+      ...(hasContent ? [part(DIALOG_CONTENT_TAG, content)] : []),
+      ...(actions.length ? [part(DIALOG_ACTIONS_TAG, actions)] : [])
+    ]
+  }
+
+  /**
    * `context-menu="game menu"` on an element (Spanish's `menú-contextual="..."`):  a right click on it shows the menu of
    * that name, a template's (`its "game menu" is a menu of ...`) or one the program drew, `<menu "game menu">`
    * (epic `language` T156;  Owen, 2026-11-17).
@@ -769,6 +839,13 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const menu = attribute.value.innerText.trim()
     const message = SP.Language.of(scope).parserMessage("unknown-menu-attribute", { attribute: attribute.name, menu })
     SP.SpellWarnings.refuseIf(match, message, () => !hasMenuNamed(scope, menu))
+  }
+
+  /** The pack's own (English) tag `tag` stands for in `scope`'s language:  `es-modal` => `ui-modal`;  itself if none. */
+  private static canonicalTagOf(scope: P.Scope, tag: string | undefined): string | undefined {
+    if (!tag) return undefined
+    const lang = SP.Language.of(scope).lang
+    return SP.ComponentPacks.canonicalTagFor(tag, lang, SpellJSX.packsFor(scope)) ?? tag
   }
 
   /**

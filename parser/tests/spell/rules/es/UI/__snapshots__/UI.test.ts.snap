@@ -13,5 +13,6 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "show_drawn": "hide?|name",
   "stop_sound": "sound",
   "warn": "message|title?|size?|okButton?",
+  "without_closing": "call",
 }
 `;

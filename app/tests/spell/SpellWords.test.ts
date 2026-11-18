@@ -25,7 +25,7 @@ describe("SpellWords", () => {
     ])
     expect(words.types.Solitaire).toMatchObject({
       turnOverTheNextCard: "turn over the next card",
-      restartTheGame: "restart the game",
+      dealTheCards: "deal the cards",
       autoPlay: "auto play",
       draw: "draw solitaire"
     })

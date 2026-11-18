@@ -601,6 +601,13 @@ describe("SP.BubblyLayout", () => {
     }
   })
 
+  it("laid out alone, another type's question declared in a type's body is its band:  `a card \"is on top\" if ...`", () => {
+    // the card type in another file, as Solitaire's Pile.spell has it (Owen's draft, epic `language` T155)
+    const PILE = `a "pile" is a list of things\n\ta card "is on top" if it is the top card of its pile\n`
+    const blocks = blocksOf(SP.BubblyLayout.of(PILE).nodes)
+    expect(blocks.map((block) => block.partOfSpeech)).toEqual(["thing", "property"])
+  })
+
   it("reads a project's file from its project's own parse:  names from its other files, as the compiler sees them", () => {
     const CARD_FILE = `a "card" is a view\n\tits "rank" is one of ace, king\n`
     const DECK_FILE = `a "deck" is a list of cards\n\twhen creating a deck\n\t\tfor rank in card ranks\n\t\t\tadd rank to the deck\n`

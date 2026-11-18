@@ -21,6 +21,7 @@ import { epicLinkVocabulary } from "spell/epic/components/epic-link/EpicLink.en"
 import { epicMarkVocabulary } from "spell/epic/components/epic-mark/EpicMark.en"
 import { epicClarifyVocabulary } from "spell/epic/components/epic-clarify/EpicClarify.en"
 import { epicPictureVocabulary } from "spell/epic/components/epic-picture/EpicPicture.en"
+import { epicKickoffVocabulary } from "spell/epic/components/epic-kickoff/EpicKickoff.en"
 import { epicCardVocabulary } from "spell/epic/components/epic-list/EpicCard.en"
 import { epicListVocabulary } from "spell/epic/components/epic-list/EpicList.en"
 import { epicSortVocabulary } from "spell/epic/components/epic-list/EpicSort.en"
@@ -141,6 +142,8 @@ export class Definitions {
     "epic-stage-button": epicStageButtonVocabulary,
     "epic-new-item": epicNewItemVocabulary,
     "epic-option-form": epicOptionFormVocabulary,
+    // the kickoff box (epic `epic-engine` P75):  drawn by `<epic-overview>` on a new epic's page, never written
+    "epic-kickoff": epicKickoffVocabulary,
     "epic-agents": epicAgentsVocabulary,
     "epic-thread-message": epicThreadMessageVocabulary,
     // what the docs runtime's comments draw on every page that takes comments (epic `epic-engine` P3)
