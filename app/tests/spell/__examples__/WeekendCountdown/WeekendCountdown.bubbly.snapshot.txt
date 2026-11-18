@@ -1,0 +1,36 @@
+==== /WeekendCountdown.spell
+⟪# Weekend Countdown⟫
+⟦// How long until the weekend:  days, hours, minutes and seconds, ticking down every second.⟧
+
+[thing create_one_of_a_kind L0]
+| «weekend countdown» is an **app**
+|   [property define_property_has L1]
+|   | its «"time"» is a **date**
+|   |   ⟦// This moment:  set again every second, so the countdown redraws⟧
+|   every second
+|     set its **time** to now    ‾value(its time) ‾value(now)
+|   [property quoted_type_expression L1]
+|   | it «"is the weekend"» if its **time** is a weekend day    ‾question(its time is a weekend day)
+|   |   ⟦// Saturday and Sunday in most places:  the person's region says⟧
+|   [property property_value_getter L1]
+|   | its «"time left"» is the next weekend - its **time**
+|   |   ⟦// A duration:  2 days, 3 hours, 4 minutes and 5 seconds⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// The days, hours, minutes and seconds left, side by side;  on the weekend, a cheer instead⟧
+|   |   <⟨container⟩ width=«"32em"»>
+|   |     <⟨segment⟩ padding=«"lg"»>
+|   |       <⟨if⟩ it is the weekend>
+|   |         <⟨header⟩>It's the weekend!</⟨header⟩>
+|   |       <⟨else⟩>
+|   |         <⟨text⟩ color=«"grey"»>Weekend starts in</⟨text⟩>
+|   |         <⟨statistics⟩ equal size=«"small"»>
+|   |           <⟨statistic⟩ value={the days of its **time left**} label=«"Days"» />    code({the days of its time left})
+|   |           <⟨statistic⟩ value={the hours of its **time left** as two digits} label=«"Hr"» />    code({the hours of its time left as two digits})
+|   |           <⟨statistic⟩ value={the minutes of its **time left** as two digits} label=«"Min"» />    code({the minutes of its time left as two digits})
+|   |           <⟨statistic⟩ value={the seconds of its **time left** as two digits} label=«"Sec"» />    code({the seconds of its time left as two digits})
+|   |         </⟨statistics⟩>
+|   |       </⟨if⟩>
+|   |     </⟨segment⟩>
+|   |   </⟨container⟩>
