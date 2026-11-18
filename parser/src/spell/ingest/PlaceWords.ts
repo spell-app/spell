@@ -84,7 +84,7 @@ export class PlaceWords {
    *   person may take a line out (a later look keeps it out), but its words can't be written either
    * - `orphaned`:  a person's words whose thing the description no longer has:  nothing left for them to explain
    * - `wordless`:  how many lists and fields have no words yet, of how many:  not a fault, a count
-   * - A list or field the Spell leaves out on purpose (`leftOut`) is never stale.
+   * - A list or field the Spell leaves out on purpose (`leftOut`), or a row's id, is never counted.
    */
   static check(text: string, description: Pick<PlaceDescription, "collections">): WordsCheck {
     const found = PlaceWords.of(text)
@@ -106,8 +106,9 @@ export class PlaceWords {
       }
       if (!type.words) check.wordless.lists++
       const fields = new Set<string>()
-      for (const field of Object.values(collection.fields)) {
-        if (field.leftOut) continue
+      for (const [name, field] of Object.entries(collection.fields)) {
+        // a row's id is Spell's own, never a line of its type
+        if (field.leftOut || name === (collection.idField ?? "id")) continue
         fields.add(field.words)
         const line = type.fields[field.words]
         if (!line) {

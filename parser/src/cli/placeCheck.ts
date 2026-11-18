@@ -38,7 +38,9 @@ export function placeCheck(files: readonly string[]): number {
     for (const problem of problems) process.stdout.write(`  ${problem}\n`)
     if (check.stale.length) process.stdout.write("  Run spell place update to write what's missing.\n")
     if (check.unwritten.length) {
-      process.stdout.write(`  Not in the Spell, so they have no words:  ${check.unwritten.join(", ")}\n`)
+      const some = check.unwritten.slice(0, MOST_NAMED).join(", ")
+      const more = check.unwritten.length > MOST_NAMED ? `, and ${check.unwritten.length - MOST_NAMED} more` : ""
+      process.stdout.write(`  Not in the Spell, so they have no words:  ${some}${more}\n`)
     }
   }
   return failed ? 1 : 0
@@ -61,6 +63,9 @@ function readJSON5(file: string): PlaceDescriptionOnDisk {
     throw new CLI.CliError(`spell place check:  can't read ${file}:  ${(error as Error).message}`)
   }
 }
+
+/** The most fields the Spell leaves out it names. */
+const MOST_NAMED = 10
 
 /** A place's Spell file's ending. */
 const SPELL_FILE = /\.spell$/
