@@ -10962,6 +10962,401 @@
       "href": "ui-diagram.html#ui-diagram-node"
     },
     {
+      "tag": "ui-dial",
+      "name": "Dial",
+      "folder": "ui-dial",
+      "topics": [
+        "inputs",
+        "forms",
+        "controls",
+        "modules"
+      ],
+      "aka": [
+        "knob",
+        "rotary knob",
+        "radial slider",
+        "circular slider",
+        "gauge",
+        "arc slider"
+      ],
+      "description": "A dial lets people pick a number by turning it, with its value in the middle and its label under it.",
+      "noun": "dial",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "The words under the dial;  also its name for screen readers, unless `aria-label` or a `<label for>` names it."
+        },
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Size of the whole dial, `mini` ... `massive`."
+        },
+        {
+          "name": "color",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "Hue of the arc and the handle;  uncoloured, the theme's primary colour."
+        },
+        {
+          "name": "ticks",
+          "kind": "string",
+          "description": "Dots round the inside of the ring:  `ticks` alone draws 9 (8 gaps), `ticks=\"10\"` that many gaps.  Only a look:  values still snap to `step`."
+        },
+        {
+          "name": "unit",
+          "kind": "string",
+          "description": "Written right after the number:  `unit=\"%\"` shows `98%`, `unit=\" px\"` shows `16 px`."
+        },
+        {
+          "name": "disabled",
+          "kind": "keyOnly",
+          "description": "Can't be used:  dimmed, not focusable, left out of the form."
+        },
+        {
+          "name": "readonly",
+          "kind": "keyOnly",
+          "property": "readOnly",
+          "description": "Shows its value but can't be changed;  still focusable and submitted."
+        },
+        {
+          "name": "min",
+          "kind": "number",
+          "default": 0,
+          "description": "Lowest value, at the ring's start."
+        },
+        {
+          "name": "max",
+          "kind": "number",
+          "default": 100,
+          "description": "Highest value, at the ring's end."
+        },
+        {
+          "name": "step",
+          "kind": "number",
+          "default": 1,
+          "description": "Values snap to multiples of it from `min`;  `0`:  any."
+        },
+        {
+          "name": "value",
+          "kind": "number",
+          "reflect": false,
+          "description": "The value, default `min`.  Attribute:  the starting (and reset) value;  property:  the live one."
+        },
+        {
+          "name": "name",
+          "kind": "string",
+          "description": "Form field name."
+        },
+        {
+          "name": "parameter",
+          "kind": "string",
+          "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out."
+        },
+        {
+          "name": "required",
+          "kind": "boolean",
+          "description": "Form validation:  a value must be chosen, by the page (`value`) or by turning the dial.  Unset, the handle rests at `min` but counts as no value (`valueMissing`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-moved",
+          "detail": "{ value: number, originalEvent?: Event }",
+          "description": "The handle moved (each drag step, key or wheel turn).  A handler that re-sets `value` wins."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: number, originalEvent?: Event }",
+          "description": "A change was committed:  on a key or wheel turn, or when a drag ends somewhere new."
+        }
+      ],
+      "parts": [
+        {
+          "name": "dial",
+          "description": "The root box:  the ring, then the label."
+        },
+        {
+          "name": "control",
+          "description": "The round control itself (`role=slider`), which takes focus."
+        },
+        {
+          "name": "track",
+          "description": "The empty ring."
+        },
+        {
+          "name": "track-fill",
+          "description": "The coloured arc, from the start to the value."
+        },
+        {
+          "name": "handle",
+          "description": "The round handle, at the arc's end."
+        },
+        {
+          "name": "disc",
+          "description": "The disc in the middle."
+        },
+        {
+          "name": "ticks",
+          "description": "The tick dots (`ticks`)."
+        },
+        {
+          "name": "value",
+          "description": "The value, written in the disc."
+        },
+        {
+          "name": "label",
+          "description": "The words under the dial (`label`)."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "Can't be used."
+        },
+        {
+          "name": "dragging",
+          "description": "The handle is being dragged."
+        },
+        {
+          "name": "invalid",
+          "description": "Fails validation (`required`), once a person has interacted."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-dial",
+      "main": true,
+      "page": true,
+      "href": "ui-dial.html"
+    },
+    {
       "tag": "ui-dimension",
       "name": "Dimension",
       "folder": "ui-dimension",
@@ -57620,6 +58015,89 @@
           "name": "--ui-diagram-legend-background",
           "default": "var(--ui-surface-muted)",
           "type": "color"
+        }
+      ]
+    },
+    "ui-dial": {
+      "folder": "ui-dial",
+      "mainTag": "ui-dial",
+      "title": "Dial",
+      "summary": "A dial lets people pick a number by turning it, with its value in the middle and its label under it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-dial"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-dial-size",
+          "default": "10em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-track-width",
+          "default": "4.5",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-track-color",
+          "default": "oklch(from var(--ui-ink) l c h / 0.16)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-fill-color",
+          "default": "var(--ui-primary)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-disc-color",
+          "default": "oklch(from var(--ui-ink) l c h / 0.07)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-tick-color",
+          "default": "oklch(from var(--ui-ink) l c h / 0.4)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-value-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-value-font-size",
+          "default": "15cqi",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-value-font-weight",
+          "default": "400",
+          "type": "number"
+        },
+        {
+          "name": "--ui-dial-label-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-label-gap",
+          "default": "0.75em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-focus-width",
+          "default": "2",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-focus-color",
+          "default": "var(--ui-focus-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-disabled-opacity",
+          "default": "0.45",
+          "type": "number"
         }
       ]
     },

@@ -717,6 +717,11 @@
       "types": "./ui/dist-types/src/components/ui-site-nav-button/index.d.ts",
       "default": "./ui/src/components/ui-site-nav-button/index.ts"
     },
+    "./ui/components/ui-dial": {
+      "spell-source": "./ui/src/components/ui-dial/index.ts",
+      "types": "./ui/dist-types/src/components/ui-dial/index.d.ts",
+      "default": "./ui/src/components/ui-dial/index.ts"
+    },
     "./ui/components/ui-device": {
       "spell-source": "./ui/src/components/ui-device/index.ts",
       "types": "./ui/dist-types/src/components/ui-device/index.d.ts",

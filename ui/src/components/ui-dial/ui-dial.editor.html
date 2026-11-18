@@ -1,0 +1,29 @@
+<!-- <ui-dial>'s property editor layout:  move, pair (<ui-fields>) or leave out (data-omit) its properties.  How:  Spell UI's AGENTS.md, "Property editor layouts". -->
+<ui-property-editor schema="ui-dial" data-omit="">
+  <ui-property-group label="Name" data-group="name">
+    <ui-property name="label"></ui-property>
+    <ui-property name="name"></ui-property>
+  </ui-property-group>
+  <ui-property-group label="Appearance" data-group="appearance">
+    <ui-property name="size"></ui-property>
+    <ui-property name="color"></ui-property>
+    <ui-fields>
+      <ui-property name="ticks"></ui-property>
+      <ui-property name="unit"></ui-property>
+    </ui-fields>
+  </ui-property-group>
+  <ui-property-group label="States" data-group="states">
+    <ui-property name="disabled"></ui-property>
+  </ui-property-group>
+  <ui-property-group label="Form" data-group="form">
+    <ui-property name="readonly"></ui-property>
+    <ui-fields>
+      <ui-property name="min"></ui-property>
+      <ui-property name="max"></ui-property>
+      <ui-property name="step"></ui-property>
+    </ui-fields>
+    <ui-property name="value"></ui-property>
+    <ui-property name="parameter"></ui-property>
+    <ui-property name="required"></ui-property>
+  </ui-property-group>
+</ui-property-editor>

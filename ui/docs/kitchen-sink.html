@@ -2003,6 +2003,30 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="modules-dial" label="Dial" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A dial lets people pick a number by turning it, with its value in the middle and its label under it.
+                  <a href="ui-dial.html">Dial page</a>
+                </p>
+                <div class="ui-cluster" style="gap: 48px">
+                  <ui-dial
+                    label="Weight"
+                    color="orange"
+                    min="100"
+                    max="900"
+                    value="777"
+                    ticks
+                    style="--ui-dial-value-font-weight: 777"
+                  ></ui-dial>
+                  <ui-dial label="Roundness" color="teal" value="50"></ui-dial>
+                  <ui-dial label="Size" color="blue" max="250" value="104"></ui-dial>
+                  <ui-dial label="Line height" color="red" min="80" max="200" value="98" unit="%"></ui-dial>
+                  <ui-dial label="Spacing" color="yellow" min="-20" max="50" value="0" unit="%"></ui-dial>
+                </div>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="modules-dimmer" label="Dimmer" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">

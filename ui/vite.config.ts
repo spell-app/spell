@@ -112,6 +112,7 @@ export const COMPONENTS = [
   "ui-site-nav-button",
   "ui-page-layout",
   "ui-device",
+  "ui-dial",
   "ui-toolbar",
   "ui-app-menu",
   "ui-action",

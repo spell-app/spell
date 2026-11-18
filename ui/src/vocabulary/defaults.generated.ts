@@ -385,6 +385,22 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "name", kind: "string", group: "content" },
     { name: "resizable", kind: "string", group: "behaviour" }
   ],
+  "ui-dial": [
+    { name: "label", kind: "string", group: "name" },
+    { name: "size", kind: "size", group: "appearance" },
+    { name: "color", kind: "color", group: "appearance" },
+    { name: "ticks", kind: "string", group: "appearance" },
+    { name: "unit", kind: "string", group: "appearance" },
+    { name: "disabled", kind: "keyOnly", group: "states" },
+    { name: "readonly", kind: "keyOnly", group: "form" },
+    { name: "min", kind: "number", group: "form" },
+    { name: "max", kind: "number", group: "form" },
+    { name: "step", kind: "number", group: "form" },
+    { name: "value", kind: "number", group: "form" },
+    { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
+    { name: "required", kind: "boolean", group: "form" }
+  ],
   "ui-dimension": [
     { name: "value", kind: "number", group: "content" },
     { name: "dimension", kind: "string", group: "content" },

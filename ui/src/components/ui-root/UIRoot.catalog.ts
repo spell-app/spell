@@ -336,6 +336,27 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["spec", "columns", "remember", "fixed"]
   },
   "ui-diagram-node": { folder: "ui-diagram", attributes: ["name", "resizable"] },
+  "ui-dial": {
+    folder: "ui-dial",
+    skeleton: { display: "inline", width: "10em", height: "11.5em" },
+    attributes: [
+      "label",
+      "size",
+      "color",
+      "ticks",
+      "unit",
+      "disabled",
+      "readonly",
+      "min",
+      "max",
+      "step",
+      "value",
+      "name",
+      "parameter",
+      "required"
+    ],
+    formControl: true
+  },
   "ui-dimension": {
     folder: "ui-dimension",
     skeleton: { display: "inline", width: "4em", height: "1em" },

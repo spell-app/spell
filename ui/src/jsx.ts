@@ -12042,6 +12042,461 @@ export interface UIDiagramNodeAttributes {
 export interface UIDiagramNodeJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIDiagramNodeAttributes>, UIDiagramNodeAttributes {}
 
+/** `<ui-dial>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIDialEventMap {
+  /**
+   * `ui-moved`:  The handle moved (each drag step, key or wheel turn).  A handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: number, originalEvent?: Event }`
+   */
+  "ui-moved": CustomEvent<{ value: number; originalEvent?: Event }>
+  /**
+   * `ui-changed`:  A change was committed:  on a key or wheel turn, or when a drag ends somewhere new.
+   * - `event.detail`:  `{ value: number, originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{ value: number; originalEvent?: Event }>
+}
+
+/** `<ui-dial>`'s own attributes, from its vocabulary. */
+export interface UIDialAttributes {
+  /**
+   * The words under the dial;  also its name for screen readers, unless `aria-label` or a `<label for>` names it.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * Size of the whole dial, `mini` ... `massive`.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * Hue of the arc and the handle;  uncoloured, the theme's primary colour.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  color?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Dots round the inside of the ring:  `ticks` alone draws 9 (8 gaps), `ticks="10"` that many gaps.  Only a look:  values still snap to `step`.
+   * - takes:  text
+   */
+  ticks?: string
+  /**
+   * `ticks`, as the DOM element's property.
+   * @deprecated write `ticks` -- `prop:` stays only for compiled spell
+   */
+  "prop:ticks"?: string
+  /**
+   * Written right after the number:  `unit="%"` shows `98%`, `unit=" px"` shows `16 px`.
+   * - takes:  text
+   */
+  unit?: string
+  /**
+   * `unit`, as the DOM element's property.
+   * @deprecated write `unit` -- `prop:` stays only for compiled spell
+   */
+  "prop:unit"?: string
+  /**
+   * Can't be used:  dimmed, not focusable, left out of the form.
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Shows its value but can't be changed;  still focusable and submitted.
+   * - takes:  flag (present / absent)
+   */
+  readonly?: boolean | ""
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
+  "prop:readOnly"?: boolean | ""
+  /**
+   * Lowest value, at the ring's start.
+   * - takes:  number
+   * - default:  `0`
+   */
+  min?: number | `${number}`
+  /**
+   * `min`, as the DOM element's property.
+   * @deprecated write `min` -- `prop:` stays only for compiled spell
+   */
+  "prop:min"?: number | `${number}`
+  /**
+   * Highest value, at the ring's end.
+   * - takes:  number
+   * - default:  `100`
+   */
+  max?: number | `${number}`
+  /**
+   * `max`, as the DOM element's property.
+   * @deprecated write `max` -- `prop:` stays only for compiled spell
+   */
+  "prop:max"?: number | `${number}`
+  /**
+   * Values snap to multiples of it from `min`;  `0`:  any.
+   * - takes:  number
+   * - default:  `1`
+   */
+  step?: number | `${number}`
+  /**
+   * `step`, as the DOM element's property.
+   * @deprecated write `step` -- `prop:` stays only for compiled spell
+   */
+  "prop:step"?: number | `${number}`
+  /**
+   * The value, default `min`.  Attribute:  the starting (and reset) value;  property:  the live one.
+   * - takes:  number
+   */
+  value?: number | `${number}`
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: number | `${number}`
+  /**
+   * Form field name.
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * Keep the value in the page's address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out.
+   * - takes:  text
+   */
+  parameter?: string
+  /**
+   * `parameter`, as the DOM element's property.
+   * @deprecated write `parameter` -- `prop:` stays only for compiled spell
+   */
+  "prop:parameter"?: string
+  /**
+   * Form validation:  a value must be chosen, by the page (`value`) or by turning the dial.  Unset, the handle rests at `min` but counts as no value (`valueMissing`).
+   * - takes:  flag (present / absent)
+   */
+  required?: boolean | ""
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
+  "prop:required"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-moved`:  The handle moved (each drag step, key or wheel turn).  A handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: number, originalEvent?: Event }`
+   */
+  "on-ui-moved"?: (event: UIDialEventMap["ui-moved"]) => void
+  /**
+   * `ui-changed`:  A change was committed:  on a key or wheel turn, or when a drag ends somewhere new.
+   * - `event.detail`:  `{ value: number, originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UIDialEventMap["ui-changed"]) => void
+}
+
+/** `<ui-dial>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIDialJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIDialEventMap>>, keyof UIDialAttributes>, UIDialAttributes {}
+
 /** `<ui-dimension>`'s own attributes, from its vocabulary. */
 export interface UIDimensionAttributes {
   /**
@@ -57468,6 +57923,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-diagram-node": UIDiagramNodeJSXAttributes
       /**
+       * `<ui-dial>`:  A dial lets people pick a number by turning it, with its value in the middle and its label under it.
+       * - also known as:  knob, rotary knob, radial slider, circular slider, gauge, arc slider
+       * - events:  `ui-moved`, `ui-changed`
+       */
+      "ui-dial": UIDialJSXAttributes
+      /**
        * `<ui-dimension>`:  A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.
        * - also known as:  measure, measurement, unit, number with units, length, weight, temperature, percent, percentage
        */
@@ -58365,6 +58826,7 @@ export interface UIEventMap {
   "ui-closed": CustomEvent<unknown>
   "ui-node-clicked": CustomEvent<unknown>
   "ui-node-moved": CustomEvent<unknown>
+  "ui-moved": CustomEvent<unknown>
   "ui-searched": CustomEvent<unknown>
   "ui-added": CustomEvent<unknown>
   "ui-removed": CustomEvent<unknown>
@@ -58391,7 +58853,6 @@ export interface UIEventMap {
   "ui-animated": CustomEvent<unknown>
   "ui-navigating": CustomEvent<unknown>
   "ui-starred": CustomEvent<unknown>
-  "ui-moved": CustomEvent<unknown>
   "ui-stuck": CustomEvent<unknown>
   "ui-unstuck": CustomEvent<unknown>
   "ui-editing": CustomEvent<unknown>
@@ -58443,6 +58904,7 @@ declare global {
     "ui-device": UIHTMLElement<UIDeviceEventMap>
     "ui-diagram": UIHTMLElement<UIDiagramEventMap>
     "ui-diagram-node": HTMLElement
+    "ui-dial": UIHTMLElement<UIDialEventMap>
     "ui-dimension": HTMLElement
     "ui-dimmer": UIHTMLElement<UIDimmerEventMap>
     "ui-divider": HTMLElement

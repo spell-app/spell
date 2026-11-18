@@ -37,6 +37,7 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-device": "structure",
   "ui-diagram": "structure",
   "ui-diagram-node": "structure",
+  "ui-dial": "action",
   "ui-dimension": "property",
   "ui-dimmer": "structure",
   "ui-divider": "plain",

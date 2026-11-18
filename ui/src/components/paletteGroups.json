@@ -98,6 +98,7 @@
         "ui-dropdown",
         "ui-textarea",
         "ui-slider",
+        "ui-dial",
         "ui-search",
         "ui-icon-picker",
         "ui-color-chip",

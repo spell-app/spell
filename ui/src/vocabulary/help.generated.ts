@@ -461,6 +461,28 @@ export const HELP_TABLE: Readonly<
         "People can drag its corner to resize it, and the box and its lines follow: bare or `both`, `horizontally` or `vertically`."
     }
   },
+  "ui-dial": {
+    description: "A dial lets people pick a number by turning it, with its value in the middle and its label under it.",
+    empty: true,
+    attributes: {
+      label:
+        "The words under the dial; also its name for screen readers, unless `aria-label` or a `<label for>` names it.",
+      size: "Size of the whole dial, `mini` ...",
+      color: "Hue of the arc and the handle; uncoloured, the theme's primary colour.",
+      ticks: 'Dots round the inside of the ring: `ticks` alone draws 9 (8 gaps), `ticks="10"` that many gaps.',
+      unit: 'Written right after the number: `unit="%"` shows `98%`, `unit=" px"` shows `16 px`.',
+      disabled: "Can't be used: dimmed, not focusable, left out of the form.",
+      readonly: "Shows its value but can't be changed; still focusable and submitted.",
+      min: "Lowest value, at the ring's start.",
+      max: "Highest value, at the ring's end.",
+      step: "Values snap to multiples of it from `min`; `0`: any.",
+      value: "The value, default `min`.",
+      name: "Form field name.",
+      parameter:
+        'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`): each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.',
+      required: "Form validation: a value must be chosen, by the page (`value`) or by turning the dial."
+    }
+  },
   "ui-dimension": {
     description: "A dimension shows one measure in the reader's own units: 5 ft 8 in in the US, 172 cm elsewhere.",
     empty: true,
