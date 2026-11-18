@@ -148,6 +148,17 @@ describe("core._stepper:  a debugging build's program, stopped and stepped", () 
     expect(stepper.stopped).toBeUndefined()
   })
 
+  test("a program started afresh forgets what was held of the last run, and keeps the breakpoints", async () => {
+    const it = game()
+    stepper.setBreakpoints("/Game.spell", [9])
+    const stopped = nextStop()
+    void moveTheQueen(it)
+    await stopped
+    core.resetRuntime()
+    expect(stepper.stopped).toBeUndefined()
+    expect(stepper.breakpointsIn("/Game.spell")).toEqual([9])
+  })
+
   test("reset lets whatever's held go on, and forgets the breakpoints", async () => {
     const it = game()
     stepper.setBreakpoints("/Game.spell", [9])

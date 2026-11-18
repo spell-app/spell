@@ -188,6 +188,18 @@ export class Stepper {
     if (held.length) this.tell()
   }
 
+  /**
+   * Forget whatever's held, never letting it go on, and the stepping;  keep the breakpoints:
+   * for a program started afresh (`core.resetRuntime()`), whose old actions must not run on into the new one.
+   */
+  forgetHeld(): void {
+    this.mode = "run"
+    this.from = undefined
+    this.current = undefined
+    const held = this.held.splice(0)
+    if (held.length) this.tell()
+  }
+
   /** Hear each stop and go on;  returns what stops hearing. */
   onChange(listener: StepperListener): () => void {
     this.listeners.add(listener)
