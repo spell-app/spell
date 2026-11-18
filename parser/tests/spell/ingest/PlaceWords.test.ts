@@ -170,3 +170,47 @@ describe("mergedSpell(), a person's words", () => {
     expect(mergedSpell(NETBOX, BEFORE, after, unused).text).not.toMatch(/NEW as of 2026-11-19/)
   })
 })
+
+describe("PlaceWords.check(), for spell place check", () => {
+  /** A description of NetBox's jobs, its fields by the source's names. */
+  const descriptionWith = (fields: Record<string, { words: string; leftOut?: string }>, more = {}) =>
+    ({
+      collections: {
+        jobs: { type: "job", at: "/api/jobs", fields },
+        ...more
+      }
+    }) as unknown as Parameters<typeof PlaceWords.check>[1]
+
+  it("matches:  every list has its type, and counts the words", () => {
+    const check = PlaceWords.check(
+      NETBOX,
+      descriptionWith({ status: { words: "status" }, user: { words: "user" }, queue: { words: "queue" } })
+    )
+    expect(check.stale).toEqual([])
+    expect(check.orphaned).toEqual([])
+    expect(check.wordless).toEqual({ lists: 0, fields: 2, ofLists: 1, ofFields: 3 })
+  })
+
+  it("fails on a list with no type, and on words about a field that's gone", () => {
+    const check = PlaceWords.check(
+      NETBOX,
+      descriptionWith(
+        { user: { words: "user" }, queue: { words: "queue" }, error: { words: "error" } },
+        { devices: { type: "device", at: "/api/devices", fields: {} } }
+      )
+    )
+    expect(check.stale).toEqual(['The list devices has no type in the Spell:  a "device".'])
+    expect(check.orphaned).toEqual([
+      'Words for "status" of jobs, which the source no longer has:  completed is the only finished one.'
+    ])
+    expect(check.unwritten).toEqual(["jobs.error"])
+  })
+
+  it("never counts what the Spell leaves out on purpose", () => {
+    const check = PlaceWords.check(
+      NETBOX,
+      descriptionWith({ status: { words: "status" }, hidden: { words: "hidden", leftOut: "no words for it" } })
+    )
+    expect(check.unwritten).toEqual([])
+  })
+})

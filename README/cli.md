@@ -895,6 +895,16 @@ it says what changed, updates both, keeps every line you wrote or changed,
 says what it couldn't change for you, and exits 1 if there's any.
 `--no-ai` works the same as the ingest's.
 
+- Your words about the place, its types and its fields are `--` lines in its Spell file:
+  the place's own under its line, a type's or a field's on the first line inside it.
+  Each look keeps them with their line;  a line that's gone takes its words with it, and says so.
+- What it finds new, or can no longer find, gets a dated line:
+  `-- NEW as of 2026-11-18`, `-- APPARENTLY DELETED as of 2026-11-18`.
+
+`spell place check <file...>` checks that each place's Spell file matches its description,
+as its reference page shows it:
+it exits 1 on a list the Spell has no type for, or on words about something the source no longer has.
+
 `spell place nerd <file>` draws the place's NERD, the shape of its data, from the description beside the file:
 a box per collection showing only its links, solid for what it holds, dashed for what it refers to.
 

@@ -1,3 +1,5 @@
+import type { PlaceDescription } from "./ingest.types"
+
 /****************
  * ### `PlaceWords`
  * A person's words in a place's Spell file, `<Name>.api.spell`:  what its reference page shows beside what the ingest
@@ -72,6 +74,61 @@ export class PlaceWords {
   /** `text` with `edit` made. */
   static applied(text: string, edit: WordsEdit): string {
     return text.slice(0, edit.start) + edit.newText + text.slice(edit.end)
+  }
+
+  /**
+   * How a place's Spell file `text` and its `description` agree, for `spell place check` (epic `data` P53):
+   * - `stale`:  a list the description has and the file has no type for:  a reference page would show it, the Spell
+   *   can't read it;  `spell place update` writes it
+   * - `unwritten`:  fields the description has and the file has no line for, by `<list>.<field>`:  not a fault, as a
+   *   person may take a line out (a later look keeps it out), but its words can't be written either
+   * - `orphaned`:  a person's words whose thing the description no longer has:  nothing left for them to explain
+   * - `wordless`:  how many lists and fields have no words yet, of how many:  not a fault, a count
+   * - A list or field the Spell leaves out on purpose (`leftOut`) is never stale.
+   */
+  static check(text: string, description: Pick<PlaceDescription, "collections">): WordsCheck {
+    const found = PlaceWords.of(text)
+    const check: WordsCheck = {
+      stale: [],
+      orphaned: [],
+      unwritten: [],
+      wordless: { lists: 0, fields: 0, ofLists: 0, ofFields: 0 }
+    }
+    const types = new Set<string>()
+    for (const [key, collection] of Object.entries(description.collections)) {
+      if (collection.leftOut) continue
+      types.add(collection.type)
+      const type = found.types[collection.type]
+      check.wordless.ofLists++
+      if (!type) {
+        check.stale.push(`The list ${key} has no type in the Spell:  a "${collection.type}".`)
+        continue
+      }
+      if (!type.words) check.wordless.lists++
+      const fields = new Set<string>()
+      for (const field of Object.values(collection.fields)) {
+        if (field.leftOut) continue
+        fields.add(field.words)
+        const line = type.fields[field.words]
+        if (!line) {
+          check.unwritten.push(`${key}.${field.words}`)
+          continue
+        }
+        check.wordless.ofFields++
+        if (!line.words) check.wordless.fields++
+      }
+      for (const [field, words] of Object.entries(type.fields)) {
+        if (words.words && !fields.has(field)) {
+          check.orphaned.push(`Words for "${field}" of ${key}, which the source no longer has:  ${words.words}`)
+        }
+      }
+    }
+    for (const [type, words] of Object.entries(found.types)) {
+      if (words.words && !types.has(type)) {
+        check.orphaned.push(`Words for the type "${type}", which the source no longer has:  ${words.words}`)
+      }
+    }
+    return check
   }
 
   /** The mark the ingest writes in `lang`:  `NEW as of 2026-11-18`. */
@@ -154,6 +211,18 @@ export type ThingWords = {
   wordLines: string[]
   /** Its lines' indent:  a tab under the place and a type, two under a field. */
   indent: string
+}
+
+/** What `PlaceWords.check()` found. */
+export type WordsCheck = {
+  /** What the description has that the Spell doesn't, in words for people. */
+  stale: string[]
+  /** A person's words whose thing is gone, in words for people. */
+  orphaned: string[]
+  /** Fields the description has and the Spell has no line for:  `people.url`. */
+  unwritten: string[]
+  /** How many lists and fields in the Spell have no words yet, of how many. */
+  wordless: { lists: number; fields: number; ofLists: number; ofFields: number }
 }
 
 /** One of the ingest's dated marks:  `-- NEW as of 2026-11-18`. */
