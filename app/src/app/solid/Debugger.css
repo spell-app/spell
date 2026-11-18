@@ -1,0 +1,113 @@
+/*
+ * The step debugger, above the code (`<Debugger>`, epic `editor` P33):
+ * its bar, then the stopped action's thing, inputs, values and callers, in columns that wrap.
+ */
+.Debugger {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+  border-block-end: 1px solid var(--ui-border-color, light-dark(#e3e3e8, #2e2d36));
+  background: var(--spell-stopped-line, light-dark(rgb(255 197 61 / 0.12), rgb(255 197 61 / 0.08)));
+  font-size: 13px;
+  /* its own height, up to half the column:  the code below takes the rest */
+  flex: none;
+  max-height: 50%;
+  overflow: auto;
+
+  h5 {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+}
+
+.DebuggerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.DebuggerSays {
+  white-space: pre-line;
+}
+.DebuggerButtons {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.DebuggerValues {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
+.DebuggerRows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  margin: 0;
+
+  dt {
+    opacity: 0.7;
+  }
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  dd.error {
+    color: var(--ui-red-text, #c8102e);
+  }
+}
+.DebuggerNothing {
+  margin: 0;
+  opacity: 0.5;
+}
+
+/* a thing:  a link that inspects it */
+.DebuggerThing {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-primary, #2f6fd6);
+  font: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+.DebuggerThing:hover {
+  text-decoration: underline;
+}
+
+.DebuggerStack {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  li:hover {
+    background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.06));
+  }
+  li.picked {
+    background: light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.1));
+  }
+  code {
+    font-family: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+.DebuggerWhere {
+  flex: none;
+  opacity: 0.6;
+}

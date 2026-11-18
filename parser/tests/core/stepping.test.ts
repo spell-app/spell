@@ -124,6 +124,30 @@ describe("core._stepper:  a debugging build's program, stopped and stepped", () 
     await moved
   })
 
+  test("stepping over an action's last line goes on in the one that called it;  out of the first, it runs on", async () => {
+    const it = game()
+    stepper.setBreakpoints("/Game.spell", [12])
+    let stopped = nextStop()
+    const moved = moveTheQueen(it)
+    const last = await stopped
+    expect(last.declaredAt).toBe(10)
+
+    // over its last line:  back in the move, on the line after the one that asked for the points
+    stopped = nextStop()
+    stepper.stepOver()
+    const back = await stopped
+    expect(back.declaredAt).toBe(6)
+    expect(back.line).toBe(8)
+
+    // out of the move, which nothing called:  it runs on, and nothing's left stepping
+    stepper.stepOut()
+    await moved
+    expect(stepper.stopped).toBeUndefined()
+    stepper.setBreakpoints("/Game.spell", [])
+    await moveTheQueen(game())
+    expect(stepper.stopped).toBeUndefined()
+  })
+
   test("reset lets whatever's held go on, and forgets the breakpoints", async () => {
     const it = game()
     stepper.setBreakpoints("/Game.spell", [9])

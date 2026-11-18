@@ -886,7 +886,23 @@ const APP_TEXTS_ES: AppTextPack = {
   cmPeekClose: "Cerrar (Esc)",
   // una dirección web en el código
   codeLinkTipMac: "⌘-clic para abrir",
-  codeLinkTip: "Ctrl-clic para abrir"
+  codeLinkTip: "Ctrl-clic para abrir",
+  // el depurador paso a paso
+  debugContinue: "Continuar:  seguir hasta el próximo punto rojo",
+  debugStepOver: "Siguiente línea:  ejecutar esta línea y detenerse en la siguiente",
+  debugStepInto: "Entrar:  entrar en la acción que ejecuta esta línea",
+  debugStepOut: "Salir:  terminar esta acción y detenerse en la línea que la ejecutó",
+  debugStop: "Dejar de depurar:  la aplicación sigue como siempre, sin detenerse en los puntos rojos",
+  debugRunning:
+    "Depurando:  la aplicación se detiene en una línea con un punto rojo en el margen izquierdo del código.\nHaz clic en el margen para añadir un punto;  haz clic en un punto para quitarlo.",
+  debugStoppedAt:
+    "Detenida en la línea {line} de {file}.\nLa aplicación espera:  pulsa un botón de arriba para seguir.",
+  debugThing: "La cosa de la que trata",
+  debugInputs: "Lo que recibió",
+  debugValues: "Lo que ha guardado hasta ahora",
+  debugCalledFrom: "Cómo llegó aquí",
+  debugNothing: "Nada todavía",
+  debugValueOf: "un {type}"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

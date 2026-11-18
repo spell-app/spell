@@ -10,16 +10,21 @@ import type { DebugOptions } from "./writers.types"
  *
  * ```js
  * async moveToPile(pile) {
- *   const frame$ = core._stepper.frame("/@spell/examples/Solitaire/Pile.spell", 21, this, () => ({ pile }))
- *   if (frame$.at(25, () => ({}))) await frame$.held()
- *   if (!core.canGiveUp(this.pile, this) || !core.canTake(pile, this)) core.cancel()
- *   if (frame$.at(27, () => ({}))) await frame$.held()
- *   ...
+ *   const frame$ = core._stepper.frame("/@spell/examples/Solitaire/Pile.spell", 21, this, () => ({ "pile": pile }))
+ *   try {
+ *     if (frame$.at(25)) await frame$.held()
+ *     if (!core.canGiveUp(this.pile, this) || !core.canTake(pile, this)) core.cancel()
+ *     if (frame$.at(27)) await frame$.held()
+ *     ...
+ *   } finally {
+ *     frame$.done()
+ *   }
  * ```
  *
  * - A debugging build is `P.WriterOptions.debugging`:  every action and handler waits there
  *   (`P.WriterProject.findWaiting()`'s `actionsWait`), so a step can hold it.
- * - Each function that waits opens a FRAME as it starts:  its file, the line it's declared on, its thing and its inputs.
+ * - Each function that waits opens a FRAME as it starts:  its file, the line it's declared on, its thing and its inputs;
+ *   it's done however the function ends, so stepping over or out of its last line goes on in the one that called it.
  *   - A loop's function inside one shares its frame:  its lines are that function's lines.
  * - Each line first tells its frame where it is, with the values its function has set so far (`at()`);
  *   it waits (`held()`) only when the debugger says stop, so a line that isn't stopped on costs no turn.

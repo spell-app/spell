@@ -2,6 +2,7 @@ import { createSignal, onSettled } from "solid-js"
 
 import { UI } from "spell/ui/core"
 import { editor } from "spell/app/app/editor"
+import { debugging } from "spell/app/app/Debugging"
 import { ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
 import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spell/app/app/ui/ui.types"
 
@@ -51,7 +52,12 @@ export const EDITOR_HOTKEYS = {
   pasteParts: { shortcut: "mod+V", run: () => partsAction("paste"), outsideCode: true },
   duplicateParts: { shortcut: "mod+D", run: () => partsAction("duplicate"), outsideCode: true },
   deleteParts: { shortcut: "Backspace", run: () => partsAction("remove"), outsideCode: true },
-  deletePartsForward: { shortcut: "Delete", run: () => partsAction("remove"), outsideCode: true }
+  deletePartsForward: { shortcut: "Delete", run: () => partsAction("remove"), outsideCode: true },
+  // the step debugger's, VS Code's keys (epic `editor` P33):  only while the app's stopped, else the key goes on
+  debugContinue: { shortcut: "F5", run: () => debugging.goOn() },
+  debugStepOver: { shortcut: "F10", run: () => debugging.stepOver() },
+  debugStepInto: { shortcut: "F11", run: () => debugging.stepInto() },
+  debugStepOut: { shortcut: "shift+F11", run: () => debugging.stepOut() }
 } as const satisfies Record<string, Hotkey>
 
 /** One of the editor's shortcuts, by name. */

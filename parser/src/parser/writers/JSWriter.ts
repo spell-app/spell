@@ -1140,6 +1140,7 @@ export class JSWriter extends ProgramWriter {
     const lines: string[] = []
     const owner = this.debugSteps?.ownerOf(node)
     const frame = owner && this.debugSteps!.frameOf(owner)
+    let stepLine: number | undefined
     // where the doc comment right above the next statement starts, in `lines`
     let docStart = 0
     for (const statement of flattened(node)) {
@@ -1161,8 +1162,12 @@ export class JSWriter extends ProgramWriter {
       }
       this.statements.add(statement)
       // a debugging build's step, a line of a function that stops:  see `P.DebugSteps`
-      const step = frame ? this.debugStepBefore(statement, frame) : ""
-      if (step) lines.push(step)
+      const line = frame && this.debugLineOf(statement)
+      const step = line !== undefined && line !== stepLine ? this.debugStepBefore(statement, frame!) : ""
+      if (step) {
+        stepLine = line
+        lines.push(step)
+      }
       const written = String(this.write(statement))
       const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
       // a line above it could run into it -- see `jsText.statement()`
@@ -1192,21 +1197,31 @@ export class JSWriter extends ProgramWriter {
     const owner = this.debugSteps?.ownerOf(node)
     const frame = owner && this.debugSteps!.frameOf(owner)
     const children = this.inBlock(() => {
+      // the line the last step was on:  two statements of one line are one step
+      let stepLine: number | undefined
       const lines = statements
         // the first starts the block;  each after it could run into the one above -- see `jsText.statement()`
         .map((statement, index) => {
           // before it's written:  the values set so far, not its own
-          const step = frame ? this.debugStepBefore(statement, frame) : ""
+          const line = frame && this.debugLineOf(statement)
+          const step = line !== undefined && line !== stepLine ? this.debugStepBefore(statement, frame!) : ""
+          if (step) stepLine = line
           const written = String(this.write(statement))
           // a step that waits, in a `create()` that can't:  see `WriterProject.heldSteps`
           const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
           if (step) return `${step}${jsText.NEWLINE}${jsText.statement(code)}`
           return index ? jsText.statement(code) : code
         })
+      const body = elseOnItsLine(lines.join(jsText.NEWLINE))
+      // a function's own frame:  opened as it starts, and done however it ends -- see `P.DebugSteps`
       if (frame && frame === owner && node === owner.body && this.debugSteps!.opensFrame(owner)) {
-        lines.unshift(this.debugFrameOpening(owner))
+        const done = `${P.DebugSteps.FRAME}.done()`
+        return [
+          this.debugFrameOpening(owner),
+          `try {\n${jsText.indented(body)}\n} finally {\n${jsText.indented(done)}\n}`
+        ].join(jsText.NEWLINE)
       }
-      return elseOnItsLine(lines.join(jsText.NEWLINE))
+      return body
     })
     if (!children) return jsText.EMPTY_BLOCK
     // a comment last, on one line, would swallow the closing brace
@@ -1223,9 +1238,8 @@ export class JSWriter extends ProgramWriter {
    * - See `P.DebugSteps`.
    */
   protected debugStepBefore(statement: P.ASTNode, frame: P.ASTMethodDefinition): string {
-    const steps = this.debugSteps
-    if (!steps?.stepsOn(statement)) return ""
-    const { line } = steps.placeOf(statement)!
+    const line = this.debugLineOf(statement)
+    if (line === undefined) return ""
     const inputs = new Set((frame.args ?? []).map((arg) => arg.name))
     const values = new Map<string, string>()
     for (const locals of this.locals.slice(1)) {
@@ -1236,6 +1250,12 @@ export class JSWriter extends ProgramWriter {
     const frameName = P.DebugSteps.FRAME
     const read = values.size ? `, () => (${this.debugValues(values)})` : ""
     return `if (${frameName}.at(${line}${read})) await ${frameName}.held()`
+  }
+
+  /** The line a debugging build steps on before `statement`, from 0:  none, it isn't one to step on. */
+  protected debugLineOf(statement: P.ASTNode): number | undefined {
+    const steps = this.debugSteps
+    return steps?.stepsOn(statement) ? steps.placeOf(statement)!.line : undefined
   }
 
   /**

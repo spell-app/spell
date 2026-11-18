@@ -26,6 +26,7 @@ import { wordsOfLanguages } from "spell/app/app/runner/words"
 // By file:  the runner barrel brings the runners themselves
 import { loadRuntime } from "spell/app/app/runner/loadRuntime"
 import { EditorHistory } from "spell/app/app/EditorHistory"
+import { debugging } from "spell/app/app/Debugging"
 import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
@@ -815,7 +816,9 @@ export class EditorStore extends Observable {
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(lang)
     }
-    const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
+    // while debugging, its debugging build, where each line of an action may stop (epic `editor` P33)
+    const built = debugging.buildFor(project, compiled)
+    const sourceMap = built?.map ?? project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
     // the page may have gone while its language loaded:  it starts afresh when one shows it again
     if (!isShowingApp(project)) {
       editor.startAfresh = true
@@ -823,7 +826,7 @@ export class EditorStore extends Observable {
       return
     }
     const place = appRoot
-    const run = runtime.runApp(compiled, {
+    const run = runtime.runApp(built?.code ?? compiled, {
       appRoot: place,
       coreUrl: runtimeUrl(),
       keepConsole: true,

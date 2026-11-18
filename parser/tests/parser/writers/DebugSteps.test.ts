@@ -47,13 +47,20 @@ describe("P.DebugSteps:  a debugging build", () => {
   test("each line asks first, with the values set so far;  a call of an action that now waits is awaited", () => {
     expect(debugging).toContain(
       [
-        "    if (frame$.at(12)) await frame$.held()",
-        "    if (this.isHigh) core.cancel()",
-        "    if (frame$.at(13)) await frame$.held()",
-        "    const points = await this.thePointsForCard()",
-        `    if (frame$.at(14, () => ({ "points": points }))) await frame$.held()`,
-        "    pile.append(this)"
+        "    try {",
+        "      if (frame$.at(12)) await frame$.held()",
+        "      if (this.isHigh) core.cancel()",
+        "      if (frame$.at(13)) await frame$.held()",
+        "      const points = await this.thePointsForCard()",
+        `      if (frame$.at(14, () => ({ "points": points }))) await frame$.held()`,
+        "      pile.append(this)"
       ].join("\n")
+    )
+  })
+
+  test("each frame is done however its function ends", () => {
+    expect(debugging).toContain(
+      ["      return 5", "    } finally {", "      frame$.done()", "    }", "  }"].join("\n")
     )
   })
 
@@ -63,11 +70,13 @@ describe("P.DebugSteps:  a debugging build", () => {
   })
 
   test("past its steps and waiting, the same code as shipped", () => {
-    const withoutSteps = debugging
-      .split("\n")
-      .filter((line) => !line.includes("frame$"))
-      .join("\n")
-      .replace(/async |await /g, "")
-    expect(withoutSteps).toBe(shipped.replace(/async |await /g, ""))
+    const bare = (code: string) =>
+      code
+        .split("\n")
+        .filter((line) => !/frame\$|^\s*(try \{|\} finally \{|\})$/.test(line))
+        .map((line) => line.trim())
+        .join("\n")
+        .replace(/async |await /g, "")
+    expect(bare(debugging)).toBe(bare(shipped))
   })
 })

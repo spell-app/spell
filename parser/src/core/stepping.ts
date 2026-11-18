@@ -5,8 +5,13 @@
  *   writes a step before each of its lines:
  *
  *   ```js
- *   const frame$ = core._stepper.frame("/Pile.spell", 21, this, () => ({ pile }))
- *   if (frame$.at(25, () => ({ points }))) await frame$.held()
+ *   const frame$ = core._stepper.frame("/Pile.spell", 21, this, () => ({ "pile": pile }))
+ *   try {
+ *     if (frame$.at(25, () => ({ "points": points }))) await frame$.held()
+ *     ...
+ *   } finally {
+ *     frame$.done()
+ *   }
  *   ```
  *
  * - So a program stopped on a line is only WAITING:  the page around it, the editor, goes on.
@@ -87,6 +92,11 @@ export class DebugFrame {
   /** Wait here until the stepper says go on:  after `at()` said stop. */
   held(): Promise<void> {
     return this.stepper.hold(this)
+  }
+
+  /** Its function has ended, however it ended:  what a debugging build's function says last. */
+  done(): void {
+    this.stepper.ended(this)
   }
 }
 
@@ -197,6 +207,20 @@ export class Stepper {
     if (mode === "over") return !from || frame === from || !frame.isWithin(from)
     if (mode === "out") return !from || !frame.isWithin(from)
     return false
+  }
+
+  /**
+   * `frame`'s function has ended:  what's called next is called from the one that called it.
+   * - Stepping over or out of it, its caller's next line stops;  with no caller, the program runs on.
+   */
+  ended(frame: DebugFrame): void {
+    if (this.current === frame) this.current = frame.caller
+    if (this.mode === "run" || !this.from || !this.from.isWithin(frame)) return
+    if (this.mode === "into") return
+    const { caller } = frame
+    this.from = caller
+    if (caller) this.mode = "over"
+    else this.mode = "run"
   }
 
   /** Hold `frame` until it's let go:  shown at once, unless another is shown already. */
