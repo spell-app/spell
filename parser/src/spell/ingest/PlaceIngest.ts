@@ -314,6 +314,8 @@ export class PlaceIngest {
     const read: CollectionLook[] = []
     for (const [name, collection] of Object.entries(description.collections)) {
       if (collection.leftOut || collection.state?.is === "disabled" || !isListed(collection)) continue
+      // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
+      reader.startAgain()
       const was = collection.state?.is
       const { state, rows } = await this.verifyCollection(address, collection, reader, deployment?.name)
       collection.state = state
@@ -964,7 +966,7 @@ function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription)
 function detailOf(text: string): string {
   const body = jsonOf(text) as { detail?: unknown; error?: unknown; message?: unknown } | undefined
   const said = body?.detail ?? body?.error ?? body?.message
-  return typeof said === "string" ? `:  ${said.slice(0, 200)}` : ""
+  return typeof said === "string" ? `:  ${said.slice(0, 200).replace(/\.+$/, "")}` : ""
 }
 
 /** What its answer says of its going away, `Deprecation`, `Sunset` and its successor (J251):  `undefined` for nothing. */
