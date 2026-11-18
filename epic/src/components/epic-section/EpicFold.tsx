@@ -11,6 +11,7 @@ import { SHOW_NOTE, stopIfOwn } from "spell/epic/components/epic-review/EpicRevi
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
 import { CONTROLS, DEEP_TIPS, Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
 import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
+import { NearScreen } from "spell/epic/components/epic-item/NearScreen"
 
 import {
   BODY,
@@ -524,8 +525,22 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
    *   entries are a LIST the subclass builds (`GearEntry`), so a new setting is one more entry
    * - its `part`:  `gear`;  its look:  `EpicFold.css` (`.gear`)
    * - a click on it never folds the row (`TITLE_ROW_CONTROLS`)
+   * - drawn once its row comes near the screen (`isGearNear`;  epic `epic-engine` I333):  till then an empty spot of
+   *   its size, so nothing moves as it comes;  75 phases' menus, most of them folded away, were ~1,000 elements
    */
   protected renderGear(gear: GearPieces): JSX.Element {
+    return (
+      <Show
+        when={this.isGearNear}
+        fallback={<span class={[GEAR, GEAR_SPOT]} ref={(spot: HTMLSpanElement) => (this.gearSpot = spot)} />}
+      >
+        {this.gearMenu(gear)}
+      </Show>
+    )
+  }
+
+  /** The gear's menu itself (`renderGear()`). */
+  private gearMenu(gear: GearPieces): JSX.Element {
     return (
       <ui-dropdown
         class={GEAR}
@@ -586,6 +601,19 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   ////////////////
   // ## Links
   ////////////////
+
+  /** Its gear has come near the screen:  drawn from then on (`renderGear()`). */
+  @E.state accessor isGearNear = false
+
+  /** Its gear's empty spot, before it's drawn:  what comes near the screen (`renderGear()`). */
+  private gearSpot: HTMLElement | undefined
+
+  /** While connected and its gear not drawn yet, watch its spot come near the screen (`isGearNear`). */
+  @E.whileConnected
+  protected watchGearNear() {
+    if (this.isGearNear || !this.gearSpot) return undefined
+    return NearScreen.once(this.gearSpot, () => (this.isGearNear = true))
+  }
 
   /** The address's own `#hash` was followed:  a fold that moves doesn't open for it again as it reconnects. */
   private hasFollowedHash = false
@@ -666,6 +694,8 @@ export type GearEntry = {
  * read as missing icons)
  */
 const GEAR = "gear"
+/** Class of a gear's empty spot, before it's drawn:  its size (`renderGear()`). */
+const GEAR_SPOT = "gear-spot"
 const GEAR_TICKED = "check"
 const GEAR_UNTICKED = ""
 

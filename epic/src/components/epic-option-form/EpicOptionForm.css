@@ -10,7 +10,6 @@
 
 @layer ui.components.epic-option-form {
   :host {
-    --_epic-form-muted: var(--epic-muted, var(--ui-text-muted, GrayText));
     --_epic-form-ink: var(--ui-text-color, CanvasText);
     --_epic-form-paper: var(--ui-background, Canvas);
     --_epic-form-rule: var(--epic-rule, var(--ui-border-color, GrayText));
@@ -28,11 +27,11 @@
     display: none;
   }
 
-  /* the form:  its heading, the title, the note (it grows), the picture, then Save and Cancel */
+  /* the form:  its heading, its one box (it grows:  the title, then the note), then Save, Cancel and the picture button */
   .option-form {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     box-sizing: border-box;
     width: 100%;
     padding: 8px;
@@ -46,57 +45,19 @@
     font-weight: 600;
     font-size: 0.9em;
   }
-  .title-input {
-    box-sizing: border-box;
-    min-width: 0;
-    padding: 4px 6px;
-    border: 1px solid var(--_epic-form-rule);
-    border-radius: 6px;
-    background: var(--_epic-form-paper);
-    color: var(--_epic-form-ink);
-    font: inherit;
-    font-weight: 600;
-    line-height: 1.4;
-  }
-  .title-input:focus-visible {
-    outline: 2px solid var(--_epic-form-focus);
-    outline-offset: 0;
-  }
-
-  /* the picture's area:  a dashed drop zone;  its thumbnail once there is one */
-  .picture {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    min-height: 32px;
-    padding: 4px 8px;
-    border: 1px dashed var(--_epic-form-rule);
-    border-radius: 6px;
-    color: var(--_epic-form-muted);
-    font-size: 0.9em;
-  }
-  .thumb {
-    display: block;
-    max-width: min(160px, 100%);
-    max-height: 96px;
-    border: 1px solid var(--_epic-form-rule);
-    border-radius: 4px;
-  }
-
   .actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
   .actions button {
     display: inline-flex;
     flex: none;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     height: 28px;
-    padding: 0 10px;
+    padding: 0 12px;
     border: 0;
     border-radius: 999px;
     background: var(--_epic-form-paper);
@@ -119,6 +80,13 @@
   .actions button:focus-visible {
     outline: 2px solid var(--_epic-form-focus);
     outline-offset: 1px;
+  }
+  /* the picture button, round, as tall as Save, at the row's far end */
+  .actions button.choose {
+    justify-content: center;
+    width: 28px;
+    margin-inline-start: auto;
+    padding: 0;
   }
   .actions ui-icon::part(icon) {
     width: auto;
