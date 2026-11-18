@@ -20,6 +20,7 @@ from typing import Any, ClassVar
 import pytest
 
 from spell_core import Core, Place, PlaceError, Thing, h, prop
+from spell_core.calendar_settings import CalendarSettings
 from spell_core.core import using_core
 from spell_core.place_kinds import ServerPlace, device_file_for, place_behind
 from spell_core.places import javascript_name, python_name
@@ -389,12 +390,14 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.with_commas(1234567) == "1,234,567"
     assert program.with_commas(1234.56789) == "1,234.568"
     assert program.with_commas("x") == "x"
+    # a person in the US (else the environment's locale's region), and a year that isn't this one:  `11/7/25`
+    CalendarSettings.use(region="US")
     assert program.date_shown(date(1977, 5, 25)) == "May 25, 1977"
     # HyperTalk's date words, the twins of string.ts's
-    morning = datetime(2026, 11, 7, 9, 14, 42)
-    assert program.short_date(morning) == "11/7/26"
-    assert program.long_date(morning) == "Saturday, November 7, 2026"
-    assert program.abbreviated_date(morning) == "Sat, Nov 7, 2026"
+    morning = datetime(2025, 11, 7, 9, 14, 42)
+    assert program.short_date(morning) == "11/7/25"
+    assert program.long_date(morning) == "Friday, November 7, 2025"
+    assert program.abbreviated_date(morning) == "Fri, Nov 7, 2025"
     assert program.short_time(morning) == "9:14 AM"
     assert program.long_time(datetime(2026, 11, 7, 0, 5, 3)) == "12:05:03 AM"
     assert program.short_time(date(2026, 11, 7)) == "12:00 AM"
@@ -404,10 +407,10 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.joined("a", None, " ") == "a "
     assert isinstance(program.now(), datetime)
     assert program.date_as(datetime(2026, 11, 7, 17, 14, 42, tzinfo=UTC), "timestamp") == "2026-11-07T17:14:42.000Z"
-    assert program.date_as(morning, "date and time") == "Nov 7, 2026, 9:14 AM"
-    assert program.date_as(morning, "nonsense") == "November 7, 2026"
+    assert program.date_as(morning, "date and time") == "Nov 7, 2025, 9:14 AM"
+    assert program.date_as(morning, "nonsense") == "November 7, 2025"
     program.show_dates_as("short")
-    assert program.date_shown(morning) == "11/7/26"
+    assert program.date_shown(morning) == "11/7/25"
     program.show_dates_as("plain")
     assert program.total_of([1, 2.5, "x", True]) == 3.5
     assert program.first_few([1, 2, 3], 2) == [1, 2]

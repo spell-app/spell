@@ -121,6 +121,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       level, as javascript's does.
     - An app's id is its name, lower kebab case (`AppIdProp`, `solitaire`);  `discard pile` finds a member's
       `discard-pile` (language T147).
+- DATES (epic `language` P63):  [date_methods.py](core/spell_core/date_methods.py), the twin of the JavaScript core's
+  `dates.ts`, and the date styles in `text_methods.py`, of `string.ts`'s.
+  - Names in the program's language, formats the person's way:  [calendar_settings.py](core/spell_core/calendar_settings.py),
+    the twin of the kit's `CalendarSettings`.
+    - The region from the environment's locale (`LANG=en_US.UTF-8`), else `US`;  `CalendarSettings.use(region=...)` says
+      it, in a test.
+    - Each region's first day, clock and weekend from a small table, `REGIONS`, copied from `Intl.Locale`.
+  - Python has no `Intl`:  the words are written out, English and Spanish, as `Intl` says them;  another language is
+    said in English.
+  - Both cores say [dates.expected.json5](../../tests/core/dates.expected.json5)'s cases, at a fixed moment:
+    a test stops the clock by replacing `core.now()`, which every date method reads.
 - PLACES (epic `data` P40):  a type saved in a place, as the JavaScript core's `saved.ts` has it
   ([places.py](core/spell_core/places.py)), for four kinds ([place_kinds.py](core/spell_core/place_kinds.py)):
   - a database on this device:  one JSON file beside the compiled program, `<Program>.device.json`

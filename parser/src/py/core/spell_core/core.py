@@ -21,6 +21,7 @@ from typing import Any, cast
 
 from spell_core.collection_methods import CollectionMethods
 from spell_core.console import SpellConsole
+from spell_core.date_methods import DateMethods
 from spell_core.described import DescribedMethods
 from spell_core.dimensions import DimensionMethods
 from spell_core.drawing_methods import DrawingMethods
@@ -48,6 +49,7 @@ class Core(
     CollectionMethods,
     ThingMethods,
     TextMethods,
+    DateMethods,
     RuntimeMethods,
     SendingMethods,
     WordMethods,
@@ -70,6 +72,7 @@ class Core(
     - list words for plain lists, dicts and unknown values:  `collection_methods.py`
     - checking a thing's properties, the program's classes, spell's JSON:  `thing_methods.py`
     - text:  `text_methods.py`
+    - dates:  their parts, said the person's way, how long ago, working with them:  `date_methods.py`
     - the running program's events and processes, and pauses:  `runtime_methods.py`, `events.py`
     - steps a thing runs every so often, `every second`:  `timers.py`
     - drawing things, mounting an app, and the page it's drawn on:  `drawing_methods.py`, `drawing.py`
