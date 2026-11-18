@@ -2607,9 +2607,9 @@ export class Forecast extends Thing {
   drawHourTable() {
     return core.drawRead(() => this.hours, (hour: Hour) => <>
       <ui-cell data-column="Day">
-        <span hidden={hour.time.getHours() === 0 ? undefined : "until-found"}>{core.dateShown(hour.time)}</span>
+        <span hidden={core.hourOf(hour.time) === 0 ? undefined : "until-found"}>{core.dateShown(hour.time)}</span>
       </ui-cell>
-      <ui-cell data-column="Hour" align="right">{hour.time.getHours()}:00</ui-cell>
+      <ui-cell data-column="Hour" align="right">{core.hourOf(hour.time)}:00</ui-cell>
       <ui-cell data-column="Temperature" align="right">
         {core.measureShown(hour.temperature, "Temperature", "celsius")}
       </ui-cell>

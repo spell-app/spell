@@ -35,6 +35,8 @@ export const words = {
     "write-refused-not-listed": "No se pudo guardar tu cambio en {thing}:  solo se apuntan aquí las personas de su lista",
     "write-refused-used-up": "No se pudo guardar tu cambio en {thing}:  ya pediste todas las invitaciones que tienes",
     language: "es",
+    "duration-ago": "hace {time}",
+    "duration-from-now": "dentro de {time}",
     "write-retry": "Reintentar",
     "room-out-of-date": "Esta página está desactualizada.  Lo que cambiaste se conserva:  recarga para seguir.",
     "room-reload": "Recargar",
