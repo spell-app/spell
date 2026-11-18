@@ -68,7 +68,12 @@ export class PluginPackage extends PublishedPackage {
     return this.built
   }
 
-  /** The published `package.json`:  `spell-epic`, its `epic` bin, depending on `spell` at the one version. */
+  /**
+   * The published `package.json`:  `spell-epic`, its `epic` bin, depending on `spell` at the one version.
+   * - its `repository`:  the folder manifest's, the kit's repo and its `epic` folder;  a publish from GitHub Actions
+   *   (npm's trusted publishing, with provenance) is refused unless it names the repo that built it (epic
+   *   `repo-split` P29)
+   */
   override manifest(): Record<string, unknown> {
     const source = this.repo.manifest
     return {
@@ -77,6 +82,7 @@ export class PluginPackage extends PublishedPackage {
       description:
         "The epic plugin for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command",
       license: source.license,
+      repository: source.repository,
       type: "module",
       bin: { epic: "./bin/epic" },
       files: readdirSync(this.stageDir).filter((entry) => entry !== "package.json"),
