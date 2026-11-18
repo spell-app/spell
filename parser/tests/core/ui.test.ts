@@ -88,6 +88,28 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
     expect(warn).toHaveBeenCalledTimes(1)
     expect(String(warn.mock.calls[0]![0])).toContain("five.ogg")
   })
+
+  test("a built-in sound's name plays its file, as the page's Spell UI says where it is (epic `mockup` P28)", () => {
+    vi.stubGlobal("Audio", FakeAudio)
+    const key = Symbol.for("spell-ui:runtime")
+    const sounds = { url: (name: string) => (name === "card slide" ? "https://example.com/card-slide.ogg" : undefined) }
+    ;(globalThis as Record<symbol, unknown>)[key] = { sounds }
+    onTestFinished(() => delete (globalThis as Record<symbol, unknown>)[key])
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    core.play("card slide")
+    expect(FakeAudio.made[0]).toMatchObject({ src: "https://example.com/card-slide.ogg", plays: 1 })
+    core.play("no such sound")
+    expect(FakeAudio.made).toHaveLength(1)
+    expect(String(warn.mock.calls[0]![0])).toContain("no sound called")
+  })
+
+  test("a built-in sound's name on a page without Spell UI:  said, nothing plays, and a later play tries again", () => {
+    vi.stubGlobal("Audio", FakeAudio)
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    core.play("win")
+    expect(FakeAudio.made).toHaveLength(0)
+    expect(String(warn.mock.calls[0]![0])).toContain("needs Spell UI")
+  })
 })
 
 describe("core.alert() / warn() / confirm():  the dialog the page's Spell UI is asked for (epic `language` T143-T145)", () => {

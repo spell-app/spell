@@ -691,6 +691,8 @@ type PageUI = {
     confirm(options: PageDialog): Promise<boolean>
     prompt(options: { message: string; value?: string }): Promise<string | undefined>
   }
+  /** Spell's built-in sounds:  `UI.sounds`;  `url()` is where the one of that name is, `undefined` for none */
+  sounds?: { url(name: string): string | undefined }
   /** the page's keyboard shortcuts:  `UI.keyboard`;  `register()` answers how to stop */
   keyboard: {
     register(registration: {
@@ -812,20 +814,48 @@ function pageUI(): PageUI | undefined {
 /** Spell UI's `RUNTIME_KEY`:  a copy, as core never imports `ui`. */
 const UI_RUNTIME_KEY = Symbol.for("spell-ui:runtime")
 
-/** Each sound file's player, by its address:  `core.play()` and `core.stop()`'s. */
+/**
+ * Each sound's player, by what the program named it:  an address, or a built-in sound's name.
+ * - `core.play()` and `core.stop()`'s.
+ */
 const soundPlayers = new Map<string, HTMLAudioElement>()
 
 /**
+ * Where `sound` is:  a built-in sound's file for its name (`card slide`), else `sound` itself, an address.
+ * - A name is plain words:  no `/`, no `.` (an address always has one, `cry.ogg`).
+ * - Spell UI knows the built-in sounds (`UI.sounds`), as core never imports it.
+ * - `undefined` for a name Spell has no sound for, or while the page has no Spell UI yet:
+ *   said on the program's console, and nothing plays.
+ */
+function soundAddressFor(sound: string): string | undefined {
+  if (!SOUND_NAME.test(sound)) return sound
+  const ui = pageUI()
+  const address = ui?.sounds?.url(sound)
+  if (!address) {
+    core.console.warn(
+      ui ? `play:  Spell has no sound called "${sound}"` : `play:  "${sound}" needs Spell UI on the page`
+    )
+  }
+  return address
+}
+
+/** A built-in sound's name, not an address:  plain words, no `/` or `.`. */
+const SOUND_NAME = /^[^/.]+$/
+
+/**
  * `sound`'s player, made the first time it's asked for, and loading from then on.
- * - `undefined` for no address, or where there's no `Audio` (node).
+ * - `undefined` for no address, a name that isn't a built-in sound's (`soundAddressFor()`),
+ *   or where there's no `Audio` (node).
  */
 function soundPlayerFor(sound: string | undefined): HTMLAudioElement | undefined {
   if (!sound || typeof Audio === "undefined") return undefined
   let player = soundPlayers.get(sound)
   if (!player) {
+    const address = soundAddressFor(sound)
+    if (!address) return undefined
     player = new Audio()
     player.preload = "auto"
-    player.src = sound
+    player.src = address
     soundPlayers.set(sound, player)
   }
   return player

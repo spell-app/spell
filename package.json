@@ -812,6 +812,11 @@
       "types": "./ui/dist-types/src/property/index.d.ts",
       "default": "./ui/src/property/index.ts"
     },
+    "./ui/sounds": {
+      "spell-source": "./ui/src/sounds/index.ts",
+      "types": "./ui/dist-types/src/sounds/index.d.ts",
+      "default": "./ui/src/sounds/index.ts"
+    },
     "./ui/runtime": {
       "spell-source": "./ui/src/runtime/index.ts",
       "types": "./ui/dist-types/src/runtime/index.d.ts",
