@@ -1,4 +1,5 @@
 import { core } from "./core"
+import { formatted } from "./dates"
 import { defineCoreModule } from "./core.types"
 
 /** Assembled `core` string-utility methods. */
@@ -48,11 +49,13 @@ export const stringMethods = defineCoreModule({
   },
   /**
    * `date` said as `style`, e.g. `dateAs(date, "short")` is `11/7/26`:  `its time as a short date`.
-   * - The styles, HyperTalk's and two more (`DATE_STYLES`):
+   * - The styles, HyperTalk's and two more (`DATE_STYLES`), each as in the US:
    *   - `plain`:  `November 7, 2026`, what a program shows unless it says otherwise
-   *   - `short`:  `11/7/26`;  `long`:  `Saturday, November 7, 2026`;  `abbreviated`:  `Sat, Nov 7, 2026`
+   *   - `short`:  `11/7/26`, `11/7` this year;  `long`:  `Saturday, November 7, 2026`;  `abbreviated`:  `Sat, Nov 7, 2026`
    *   - `short time`:  `9:14 AM`;  `long time`:  `9:14:42 AM`
    *   - `date and time`:  `Nov 7, 2026, 9:14 AM`
+   * - Said in the program's language, the order of its parts the person's region's, its time on their clock:
+   *   Spain's `7/11/26`, `9:14`, `sábado, 7 de noviembre de 2026` (`dates.ts`, epic `language` P63).
    *   - `timestamp`:  `2026-11-07T17:14:42.000Z`, ISO 8601, in UTC:  what a program sends and saves
    *   - `reader`:  as the reader's own browser says a date, `Nov 7, 2026` in the US, `7 nov 2026` in Spain
    * - Nothing, or anything that isn't a date, stays as it is;  a style it doesn't know is `plain`.
@@ -148,17 +151,34 @@ export const stringMethods = defineCoreModule({
 })
 Object.assign(core, stringMethods)
 
-/** How a date says itself in each style -- see `dateAs()`. */
+/**
+ * How a date says itself in each style -- see `dateAs()`.
+ * - Each in the program's language, the person's region and their clock (`formatted()`, `core.clockOptions()`,
+ *   epic `language` P63):  `11/17` in the US, `17/11` in Spain;  `9:05 PM`, or `21:05` on a 24-hour clock.
+ */
 const DATE_STYLES = {
-  plain: (date: Date) => date.toLocaleDateString("en-US", { dateStyle: "long" }),
-  short: (date: Date) => `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`,
-  long: (date: Date) => date.toLocaleDateString("en-US", { dateStyle: "full" }),
-  abbreviated: (date: Date) =>
-    date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }),
-  "short time": (date: Date) => clockTime(date, "minutes"),
-  "long time": (date: Date) => clockTime(date, "seconds"),
+  plain: (date: Date) => formatted(date, { dateStyle: "long" }),
+  // the year only when it isn't this year
+  short: (date: Date) =>
+    formatted(date, {
+      month: "numeric",
+      day: "numeric",
+      ...(date.getFullYear() === new Date().getFullYear() ? {} : { year: "2-digit" })
+    }),
+  long: (date: Date) => formatted(date, { dateStyle: "full" }),
+  abbreviated: (date: Date) => formatted(date, { weekday: "short", month: "short", day: "numeric", year: "numeric" }),
+  "short time": (date: Date) => formatted(date, { hour: "numeric", minute: "2-digit", ...core.clockOptions() }),
+  "long time": (date: Date) =>
+    formatted(date, { hour: "numeric", minute: "2-digit", second: "2-digit", ...core.clockOptions() }),
   "date and time": (date: Date) =>
-    `${date.toLocaleDateString("en-US", { dateStyle: "medium" })}, ${clockTime(date, "minutes")}`,
+    formatted(date, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      ...core.clockOptions()
+    }),
   timestamp: (date: Date) => date.toISOString(),
   reader: (date: Date) => date.toLocaleDateString(undefined, { dateStyle: "medium" })
 } satisfies Record<string, (date: Date) => string>
@@ -173,17 +193,6 @@ let shownDates: DateStyle = "plain"
 function joinable(value: unknown): string {
   if (value == null) return ""
   return `${stringMethods.dateShown(value) as string}`
-}
-
-/**
- * `date`'s time on a 12-hour clock:  `9:14 AM`, or `9:14:42 AM` to the second.
- * - Written out, not `toLocaleTimeString()`:  that puts a narrow no-break space before `AM`, which Python's twin doesn't.
- */
-function clockTime(date: Date, to: "minutes" | "seconds"): string {
-  const hours = date.getHours()
-  const pad = (n: number) => String(n).padStart(2, "0")
-  const seconds = to === "seconds" ? `:${pad(date.getSeconds())}` : ""
-  return `${hours % 12 || 12}:${pad(date.getMinutes())}${seconds} ${hours < 12 ? "AM" : "PM"}`
 }
 
 /** A word's first letter, after the start or anything but a letter, digit, `_` or apostrophe (Python's twin:  `[^\w'’]`). */

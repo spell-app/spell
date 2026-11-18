@@ -12,7 +12,10 @@ core.upper_case(core.get_item_at(self.rank, 0))   # "Q" for "queen";  "" for no 
 import re
 from collections.abc import Callable
 from datetime import UTC, date, datetime
+from typing import TYPE_CHECKING
 
+from spell_core.calendar_settings import CalendarSettings
+from spell_core.date_methods import clock_time, day_words, local_time, numeric_day
 from spell_core.js_text import js_string
 
 # A word's first letter, after the start or anything but a letter, digit, `_` or apostrophe (the twin of string.ts's)
@@ -39,11 +42,17 @@ class TextMethods:
     def date_as(self, date_value: object, style: str) -> object:
         """`date_value` said as `style`, e.g. `11/7/26` for `short`:  the twin of string.ts's `dateAs()`.
 
+        - Said in the program's language, the order of its parts the person's region's, its time on their clock:
+          Spain's `7/11/26`, `9:14`, `sábado, 7 de noviembre de 2026` (`date_methods.py`, epic `language` P63).
+        - In the local time, as javascript's:  a date alone is its midnight.
         - Anything that isn't a date stays as it is;  a style it doesn't know is `plain`.
         """
         if not isinstance(date_value, datetime | date):
             return date_value
-        return _DATE_STYLES.get(style, _DATE_STYLES["plain"])(date_value)
+        if style == "timestamp":
+            return _timestamp(date_value)
+        said = _DATE_STYLES.get(style, _DATE_STYLES["plain"])
+        return said(local_time(date_value), self.message("language"), local_time(self.now()))
 
     def now(self) -> datetime:
         """This moment, as a date:  what spell's `now` compiles to."""
@@ -61,7 +70,7 @@ class TextMethods:
         return "" if value is None else js_string(self.date_shown(value))
 
     def short_date(self, date_value: object) -> object:
-        """A date's day, short:  `11/7/26` -- HyperTalk's `the short date`."""
+        """A date's day, short:  `11/7/25`, `11/7` this year, Spain's `7/11/25` -- HyperTalk's `the short date`."""
         return self.date_as(date_value, "short")
 
     def long_date(self, date_value: object) -> object:
@@ -73,7 +82,10 @@ class TextMethods:
         return self.date_as(date_value, "abbreviated")
 
     def short_time(self, date_value: object) -> object:
-        """A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`.  A day alone is midnight."""
+        """A date's time of day:  `9:14 AM`, or `9:14` on a 24-hour clock -- HyperTalk's `the short time`.
+
+        - A day alone is midnight.
+        """
         return self.date_as(date_value, "short time")
 
     def long_time(self, date_value: object) -> object:
@@ -126,15 +138,11 @@ class TextMethods:
             return ""
         return chr(int(point))
 
+    if TYPE_CHECKING:
 
-def _clock_time(when: date, *, seconds: bool) -> str:
-    """`when`'s time on a 12-hour clock, `9:14 AM` (`9:14:42 AM` with `seconds`):  a day alone is midnight.
-
-    - The twin of string.ts's `clockTime()`.
-    """
-    hour, minute, second = (when.hour, when.minute, when.second) if isinstance(when, datetime) else (0, 0, 0)
-    shown = f"{hour % 12 or 12}:{minute:02}" + (f":{second:02}" if seconds else "")
-    return f"{shown} {'AM' if hour < 12 else 'PM'}"
+        def message(self, key: str, **values: object) -> str:
+            """`MessageMethods`'s:  message `key` in the program's language."""
+            ...
 
 
 def _timestamp(when: date) -> str:
@@ -147,15 +155,23 @@ def _timestamp(when: date) -> str:
     return f"{utc:%Y-%m-%dT%H:%M:%S}.{utc.microsecond // 1000:03}Z"
 
 
-# How a date says itself in each style:  the twin of string.ts's `DATE_STYLES`
-_DATE_STYLES: dict[str, Callable[[date], str]] = {
-    "plain": lambda when: f"{when:%B} {when.day}, {when.year}",
-    "short": lambda when: f"{when.month}/{when.day}/{when:%y}",
-    "long": lambda when: f"{when:%A}, {when:%B} {when.day}, {when.year}",
-    "abbreviated": lambda when: f"{when:%a}, {when:%b} {when.day}, {when.year}",
-    "short time": lambda when: _clock_time(when, seconds=False),
-    "long time": lambda when: _clock_time(when, seconds=True),
-    "date and time": lambda when: f"{when:%b} {when.day}, {when.year}, {_clock_time(when, seconds=False)}",
-    "timestamp": _timestamp,
-    "reader": lambda when: f"{when:%x}",
+# How a date says itself in each style, given it in the local time, the program's language and now:
+# the twin of string.ts's `DATE_STYLES`
+# - Each in the program's language, the person's region and their clock (`date_methods.py`, epic `language` P63):
+#   `11/17` in the US, `17/11` in Spain;  `9:05 PM`, or `21:05` on a 24-hour clock.
+# - `timestamp`, in UTC, is `_timestamp()`:  `date_as()` says it before reading the date as local time.
+_DATE_STYLES: dict[str, Callable[[datetime, str, datetime], str]] = {
+    "plain": lambda when, lang, now: day_words(when, lang, "long"),
+    # the year only when it isn't this year
+    "short": lambda when, lang, now: numeric_day(when, lang, with_year=when.year != now.year),
+    "long": lambda when, lang, now: day_words(when, lang, "long", "long"),
+    "abbreviated": lambda when, lang, now: day_words(when, lang, "short", "short"),
+    "short time": lambda when, lang, now: clock_time(when, lang, seconds=False),
+    "long time": lambda when, lang, now: clock_time(when, lang, seconds=True),
+    "date and time": lambda when, lang, now: (
+        f"{day_words(when, lang, 'short')}, {clock_time(when, lang, seconds=False)}"
+    ),
+    "timestamp": lambda when, lang, now: _timestamp(when),
+    # as the reader's own language says a date:  `Nov 7, 2026` in the US, `7 nov 2026` in Spain
+    "reader": lambda when, lang, now: day_words(when, CalendarSettings.language(), "short"),
 }

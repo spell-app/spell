@@ -653,6 +653,35 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
 - A project's declarations carry a dimension's `units` and a property's `measure` (T34):  an importer reads a library's
   own dimension as its own.
 
+## Dates and times:  `the minute of now as two digits` (epic `language` P63)
+
+- A date's PARTS and NAMES are members of the built-in `date` type (`datePart()` in [builtinTypes.ts](builtinTypes.ts)),
+  each read through the core, `core.minuteOf({it})`:
+  - numbers, no leading zero:  `year`, `short year`, `month number`, `day`, `hour` (0-23 always), `minute`, `second`,
+    `week` (ISO's), `weekday number` (1-7 from the person's first day of the week)
+  - names, in the program's language:  `month`, `short month`, `weekday`, `short weekday`, `AM or PM`
+  - aliases, each its own member:  the plurals (`the seconds of now`), `day of the week`, `AMPM`, `meridiem`, `meridian`;
+    member words are read in any case
+  - Spanish's words:  its `builtInMembers` (`el número del mes`, `el día de la semana`)
+  - On a date the type is known, so `the second of now` is its second;  `the second of the deck` is still an item.
+- Rules in [expressions/](rules/expressions/):
+  - suffixes:  `as two digits` / `with a leading zero` (`as_two_digits`), `is PM` (`is_meridiem`), `as a duration`
+    (`as_a_duration`, its `short` / `long` and `in <unit>`), `is a weekend day`, `is before` / `is after`,
+    `is the same day as`, `is today` / `is tomorrow` / `is yesterday`
+  - operands:  `the next weekend`, `the days until` / `since`, `the start of the day of`, `the days in the month of`,
+    `the hours of <a duration>` (`duration_part`:  only of a measured duration)
+  - `the time zone`, `the short time zone`, `the long time zone`:  `the_date`'s
+  - `"2026-12-25" as a date`, `the weekday of now as a number`:  `as_a_type`'s
+- Date arithmetic is `+` and `-`'s ([dateMath.ts](rules/math/dateMath.ts)):  a date and a MEASURED duration move the date,
+  `core.addToDate(date, 2, "day")`;  a date minus a date is the seconds between them.
+- A date minus a date MEASURES a duration (`SP.SECONDS`), so its parts and `as a duration` know it:
+  - `SP.measureOf()` asks a rule's `getMeasure()` when the match has none of its own:  a chain of one precedence asks its
+    last suffix (`resultMeasure()`), parentheses and variables pass theirs on
+  - a variable `set` to one, and a property whose inline value is one (`its "time left" is the next weekend - now`),
+    keep it
+- What they compile to, and the region's formats:  core's [dates.ts](../core/dates.ts), "Overview" in
+  [core's AGENTS.md](../core/AGENTS.md).
+
 ## Membership:  `a card belongs to one pile`
 
 - [`belongs_to_one`](rules/classes/BelongsToOne.ts):  `a card belongs to one pile`.
@@ -1183,6 +1212,16 @@ a line of the built-in types table, a built-in template, or a project's own `one
       know they're in a handler (`inHandler()`), and refuse to parse elsewhere.
   - A WHILE handler, `- while the mouse is down:` (`while_handler`), is a method too, `whileMouseDown()`:
     the page starts it and puts back what it set, through core's `startWhile()` / `endWhile()`.
+  - A TIMER, `every second` and its steps under it (`every_timer`, [EveryTimer](rules/async/EveryTimer.ts);
+    epic `language` T159):  each thing of the type runs them while the program runs, adding no undo step.
+    - How often is a duration, as a place's `check it every` reads one:  `every 5 minutes`, or a unit alone, `every day`.
+    - Then, if it likes, when it stops:  `until its end` (a moment, read again before each run), or `10 times`.
+    - Spanish:  `cada segundo`, `cada 5 minutos hasta su fin`, `cada segundo 10 veces`.
+    - A method named by its words in English, whatever the language (`everySecond()`, `everySecond10Times()`),
+      an `until` getter (`everySecondUntil`), and after the class `core.addTimer(Clock, "everySecond", { seconds: 1 })`
+      (`P.ASTTypeDescription`, `describes: "timer"`):  core's [timers.ts](../core/timers.ts) starts each thing's
+      once it's made, and stops them when the program ends.
+    - A Python program's page draws with no timer:  Python runs them (`PY.ElementsWriter`).
   - `send flipped` (`Send`) inside a template's method sends from `this`, and to `this` when it names no target:
     `parse()` finds the method's scope (`mapItTo === "this"`) into `match.data`.
     - An event whose name is still happening, by the language's `ongoingEventName`

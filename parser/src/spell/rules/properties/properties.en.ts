@@ -221,8 +221,8 @@ properties.addRule(PropertyExpression, {
       tests: [
         ["the length of the name", "name.length"],
         ["the length of the deck", "core.itemCountOf(deck)"],
-        ["the year of the due", "due.getFullYear()"],
-        ["the hour of the due", "due.getHours()"],
+        ["the year of the due", "core.yearOf(due)"],
+        ["the hour of the due", "core.hourOf(due)"],
         ["the short date of the due", "core.shortDate(due)"],
         ["the long time of the due", "core.longTime(due)"],
         { title: "unknown type:  a loose read, as before", input: "the length of bar", js: "bar.length" }

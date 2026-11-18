@@ -10,6 +10,7 @@ import { _async } from "./async.parser"
 import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { EveryTimer } from "./EveryTimer"
 import { Meanwhile } from "./Meanwhile"
 import { Pause } from "./Pause"
 import { StartProcess } from "./StartProcess"
@@ -74,6 +75,14 @@ _async.addRule(Pause, {
       ]
     }
   ]
+})
+
+// steps a thing runs every so often while the program runs, in its type's outline (epic `language` T159)
+_async.addRule(EveryTimer, {
+  syntax: "every {interval:measure_literal} (until {until:expression}|{times:number} times)? :? {statement_body}?"
+})
+_async.addRule(EveryTimer, {
+  syntax: "every {unit:unit_words} (until {until:expression}|{times:number} times)? :? {statement_body}?"
 })
 
 _async.addRule(AtTheSameTime, {

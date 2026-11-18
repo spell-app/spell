@@ -415,6 +415,7 @@ class SpellObject:
         - A change to a property after this is one its `when <property> changes` handler hears.
         - A `create()` that waits (`async def`) runs to its end here too, its pauses not waiting:
           `core.run_at_once()`.
+        - Then its timers start, `every second` (`core.start_timers_of()`):  not a copy's.
         """
         program_core().note_made(self)
         self._props: dict[str, object] = {}
@@ -426,6 +427,7 @@ class SpellObject:
             started = self.create()
             if inspect.iscoroutine(started):
                 program_core().run_at_once(started)
+            program_core().start_timers_of(self)
         self.__dict__["_is_made"] = True
 
     def __init_subclass__(cls, **kwargs: Any) -> None:

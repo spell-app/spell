@@ -3057,11 +3057,11 @@ export class Forecast extends Thing {
   drawHourTable() {
     return core.drawRead(() => this.hours, (hour) => [
       h("ui-cell", { "data-column": "Day" },
-        h("span", { hidden: () => hour.time.getHours() === 0 ? undefined : "until-found" },
+        h("span", { hidden: () => core.hourOf(hour.time) === 0 ? undefined : "until-found" },
           () => core.dateShown(hour.time)
         )
       ),
-      h("ui-cell", { "data-column": "Hour", align: "right" }, () => hour.time.getHours(), ":00"),
+      h("ui-cell", { "data-column": "Hour", align: "right" }, () => core.hourOf(hour.time), ":00"),
       h("ui-cell", { "data-column": "Temperature", align: "right" },
         () => core.measureShown(hour.temperature, "Temperature", "celsius")
       ),

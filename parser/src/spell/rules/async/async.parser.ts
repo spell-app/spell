@@ -7,6 +7,6 @@
 import { SpellParser } from "spell/parser/spell/SpellParser"
 
 /**
- * Rule module for async/process rules (`await`, `pause`, `start_process`, `stop_process`, `check_process`).
+ * Rule module for async/process rules (`await`, `pause`, `every_timer`, `start_process`, `stop_process`, `check_process`).
  */
 export const _async = new SpellParser({ module: "async" })
