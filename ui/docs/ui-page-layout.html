@@ -139,7 +139,7 @@
                   - `drawer="compact"` shows only the drawer's icons:  the layout sets `collapsed` on each `<ui-site-nav>` in it.
                   - `toggleDrawer()`, what a `<ui-site-nav-button>` calls:  narrow, slides the drawer in or out;  wide, switches `drawer` and sends `ui-toggle`, `{ region, newState, oldState }`, each `compact` or `full`;  to `full` a frame later, so the column widens from where it was.  The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
                   - `drawer-hides`:  its button hides the whole drawer (`drawer="hidden"`) and shows it again, never its icons only:  for a navigation with no icons.
-                  - `right="hidden"` (or `left`) hides a side bar;  `toggleSidebar("right")`, what a `<ui-site-nav-button toggles="right">` calls, switches it and sends `ui-toggle` with `region: "right"`, `hidden` or `shown`.  Narrow, a side bar with such a button hides behind it, and slides over the page while it's open.
+                  - `right="hidden"` (or `left`) hides a side bar;  `toggleSidebar("right")`, what a `<ui-site-nav-button toggles="right">` calls, switches it and sends `ui-toggle` with `region: "right"`, `hidden` or `shown`.  Below 64em of its own box, a side bar with such a button hides behind it, and slides over the page while it's open:  a middling width keeps the page's room.
                   - `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them, over the page's own ground;  a `<ui-toc>` in a side bar is headed by a band, as the editor's panels are.
                 </script>
               </ui-markdown>

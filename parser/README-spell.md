@@ -750,6 +750,7 @@ _From the Counter example:  each click of its button plays a click._
 - It compiles to `core.play("click")`, and starts in the same moment:
   so in a click's action, a browser that only lets a click start a sound (Safari, phones) plays it.
 - The built-in sounds are Ogg files, which Safari plays only from version 18.4.
+- A program compiled to Python plays them too:  its page plays each one as the program asks.
 - While a test runs, nothing plays:  Counter's `to test counting` counts up twice as the program loads.
 - The editor lists the names as you type `play "`;  its first row, "Pick a sound…", opens the sound picker,
   where ▶ plays each one before you pick it.

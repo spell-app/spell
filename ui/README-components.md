@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-89 families, 141 tags;  3 families in progress.
+92 families, 144 tags;  3 families in progress.
 
 ### Elements
 
@@ -300,6 +300,7 @@ Elements with behaviour:  they open, pick, move.
 |  | [Calendar](docs/ui-calendar.html) | `<ui-calendar>` | A calendar lets a person pick a date, a time, or both. | date picker, datepicker, time picker, datetime |
 | <img src="docs/images/components/ui-checkbox.png" alt="Checkbox, its first example" width="200" height="30"> | [Checkbox](docs/ui-checkbox.html) | `<ui-checkbox>` [`<ui-radio>`](docs/ui-radio.html) | A checkbox lets people choose a value from a small set of options, often on or off. | check box, toggle, switch, tick box |
 |  | [Components](docs/ui-components.html) | `<ui-components>` | Components name a pack of another package's elements, which the root around them loads on demand, once per page. | component pack, plugin, extension, custom elements |
+|  | [Dial](docs/ui-dial.html) | `<ui-dial>` | A dial lets people pick a number by turning it, with its value in the middle and its label under it. | knob, rotary knob, radial slider, circular slider |
 |  | [Dimmer](docs/ui-dimmer.html) | `<ui-dimmer>` | A dimmer hides distractions to focus attention on particular content. | overlay, backdrop, scrim, mask |
 | <img src="docs/images/components/ui-dropdown.png" alt="Dropdown, its first example" width="64" height="26"> | [Dropdown](docs/ui-dropdown.html) | `<ui-dropdown>` | A dropdown lets people choose a value from a series of options. | select, combobox, picker, autocomplete |
 | <img src="docs/images/components/ui-embed.png" alt="Embed, its first example" width="171" height="96"> | [Embed](docs/ui-embed.html) | `<ui-embed>` | An embed displays content from other websites, like YouTube videos, loaded only when asked for. | iframe, video, youtube, vimeo |
@@ -339,6 +340,7 @@ Elements with no Fomantic counterpart.
 |  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 |  | [App menu](docs/ui-app-menu.html) | `<ui-app-menu>` | An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or sidebar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.  It takes every `<ui-menu>` attribute. | app bar, top bar, title bar, header bar |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
+|  | [Device](docs/ui-device.html) | `<ui-device>` | A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge. | device frame, phone frame, mockup, device mockup |
 |  | [Dimension](docs/ui-dimension.html) | `<ui-dimension>` | A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere. | measure, measurement, unit, number with units |
 |  | [Example](docs/ui-example.html) | `<ui-example>` | An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
@@ -352,8 +354,9 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Sides](docs/ui-sides.html) | `<ui-sides>` | Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side. | margin, padding, box model, spacing |
 |  | [Site breadcrumbs](docs/ui-site-breadcrumbs.html) | `<ui-site-breadcrumbs>` | Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page (Hardware › Systems), each page above a link. | breadcrumb trail, you are here, location, page path |
+|  | [Site links](docs/ui-site-links.html) | `<ui-site-links>` | Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it. | page links, page actions, report a bug, original page |
 |  | [Site nav](docs/ui-site-nav.html) | `<ui-site-nav>` | A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page. | site navigation, side navigation, sidebar menu, nav menu |
-|  | [Site nav button](docs/ui-site-nav-button.html) | `<ui-site-nav-button>` | A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu. | side bar button, drawer button, hamburger, menu button |
+|  | [Site nav button](docs/ui-site-nav-button.html) | `<ui-site-nav-button>` | A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu. | side bar button, drawer button, hamburger, menu button |
 |  | [Site tabs](docs/ui-site-tabs.html) | `<ui-site-tabs>` | Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link. | page tabs, section tabs, sub navigation, secondary navigation |
 |  | [Space](docs/ui-space.html) | `<ui-space>` | A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, it takes the room left in its row or column.  It has no look of its own. | spacer, gap, line break, br |
 |  | [Split Panel](docs/ui-split-panel.html) | `<ui-split-panel>` | A split panel lays its children out side by side or one above the other, with bars to resize them. | split view, split pane, resizable panes, panes |
@@ -373,7 +376,7 @@ Elements with no Fomantic counterpart.
 | Docs index | `<ui-docs-index>` | A site index draws a card for each of a site's pages, grouped by the pages' tags, with a search field above them. | site index, site map, component index, table of contents |
 | Docs inspector | `<ui-docs-inspector>` | An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change. | inspector, element inspector, devtools, live properties |
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
-| Docs palette | `<ui-docs-palette>` | A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save. | palette groups, palette editor, component groups, palette table |
+| Docs palette | `<ui-docs-palette>` | A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save. | palette groups, palette editor, component groups, palette table |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |
 | Docs theme bench | `<ui-docs-theme-bench>` | A theme bench shows the theme editor full width, previewing Spell's real pages side by side in the theme being made:  the editor, an epic page, Spell UI's docs and a notebook. | theme bench, theme workbench, look tuner, token tuner |
 | Docs tokens | `<ui-docs-tokens>` | A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview. | css variables, custom properties, design tokens, theme tokens |
