@@ -10,6 +10,9 @@ copied unchanged as Kenney made them (Ogg Vorbis).  Each file is renamed for the
   Credit (Kenney or www.kenney.nl) would be nice but is not mandatory."
 - Downloaded 2026-11-17 (epic `mockup` P28).
 
+Credit, gladly given though CC0 asks for none:  **sounds by Kenney, [www.kenney.nl](https://www.kenney.nl), CC0.**
+Spell's docs say so too, where they show the sounds (Spell UI's `README-runtime.md`, "Sounds").
+
 ## The packs
 
 | Pack | Where | Sounds picked |

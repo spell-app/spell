@@ -203,7 +203,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, `play` and `stop` a sound, styles | 15 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, `play` and `stop` a sound (a file, or [one of Spell's own](#sounds)), styles | 15 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 77 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -731,6 +731,31 @@ A thing hears an event when its handler says so, and sends one with `send`:
   `cuando se pulsa con el botón derecho` is `right click`, `cuando se mantiene pulsada` is `long press`.
 
 </details>
+
+### Sounds
+
+```spell
+to count up
+	set the count to the count + 1
+	play "click"
+```
+
+_From the Counter example:  each click of its button plays a click._
+
+`play` plays a sound;  `stop` stops it, and `load` gets it ready, so a later `play` starts at once.
+- What it plays:  one of Spell's 139 built-in sounds, by its name (`"card slide"`, `"win"`), or a sound file's address.
+  - A name is plain words, no `/` or `.`;  an address always has one (`"cry.ogg"`).
+  - Each sound has an English name and a Spanish one:  `reproducir "deslizar carta"`.
+  - A name Spell has no sound for plays nothing, and the program's console says so.
+- It compiles to `core.play("click")`, and starts in the same moment:
+  so in a click's action, a browser that only lets a click start a sound (Safari, phones) plays it.
+- The built-in sounds are Ogg files, which Safari plays only from version 18.4.
+- While a test runs, nothing plays:  Counter's `to test counting` counts up twice as the program loads.
+- The editor lists the names as you type `play "`;  its first row, "Pick a sound…", opens the sound picker,
+  where ▶ plays each one before you pick it.
+- The examples that play them:  Solitaire and Solitario, Checkers, Counter, Calculator and Calculadora.
+- The sounds are [Kenney](https://kenney.nl)'s, from seven of his free packs, CC0:
+  [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#sounds) says more.
 
 ### Tests, in English
 
