@@ -11,6 +11,7 @@ import { Markup } from "spell/epic/markup"
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
+  CardText,
   OPEN_KINDS,
   PlanDocError,
   REVIEW_SECTIONS,
@@ -936,18 +937,26 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - `inbox apply` writes these itself for picks, todos and new items (Q19)
    *   - `done --filed "<what>"`, the older spelling, means `noted` too:  what was filed is a record
-   * - reading, summary:  HTML, as `updated` takes (plain text works as it is)
+   * - reading, summary:  HTML, as `updated` takes (plain text works as it is), or `--file <html>` for a long one
+   *   - in short paragraphs or bullets (`CardText`, I339):  a blank line starts a paragraph, `- ` lines are bullets;
+   *     a paragraph or bullet over `CardText.MOST_WORDS` words is refused
    * - `promised`:  `/epic tidy`'s:  the item waits on finished work and the promised thing never came
    *   (`PlanDoc.promiseUnkept()`):  its card starts `Promised, not delivered:`, and it's back on Owen's list
    * - `--quiet`, on a noted card:  the item's change stamp left alone (`/epic tidy`'s doubtful items)
    * - NOT logged:  the mark it answers already is (`inbox apply`, `details`)
    */
-  private async status(file: string, [id, state, text]: string[], flags: Flags): Promise<void> {
+  private async status(file: string, [id, state, given]: string[], flags: Flags): Promise<void> {
     const quiet = Boolean(flags.quiet)
     if (quiet && state !== "noted") throw new PlanDocError("--quiet goes with a noted card")
     need(id, "an item id")
     const filed = flags.filed
     if (filed === true) throw new PlanDocError(`--filed needs what was filed ("Chose B · Keep one file per template")`)
+    // a long card from a file (I339);  either way, in short paragraphs or bullets (`CardText`)
+    const fromFile = stringFlag(flags.file)
+    if (fromFile !== undefined && given !== undefined) throw new PlanDocError("the card's text, or --file:  not both")
+    const text = fromFile === undefined ? given : readFileSync(fromFile, "utf8")
+    for (const words of [text, typeof filed === "string" ? filed : undefined])
+      if (words !== undefined) CardText.check(CardText.structured(words))
     let title: string
     let said = state
     if (state === "underway")

@@ -589,6 +589,49 @@ describe("PlanDocCommands:  short titles", () => {
   })
 })
 
+// epic `epic-engine` I339:  a status card in short paragraphs or bullets, one idea each
+describe("PlanDocCommands:  card text", () => {
+  const RUN_ON = Array.from({ length: 60 }, (_, n) => `word${n}`).join(" ")
+
+  /** The blocks of item `id`'s last status card, as tag:text. */
+  function cardBlocks(id: string): string[] {
+    const card = Array.from(FILES.read(file).item(id).querySelectorAll(":scope > epic-status")).at(-1)!
+    return Array.from(card.children, (block) => `${block.localName}:${block.textContent!.replace(/\s+/g, " ").trim()}`)
+  }
+
+  test("a blank line starts a paragraph, '- ' lines are bullets, a shell's \\n counts", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("issue", "Cards run on"))
+    const text = "Fixed the cards.\\n\\nWhat changed:\\n- paragraphs\\n- bullets"
+    expect(await commands().run(["status", "x", "i1", "fixed", text])).toBe(0)
+    const blocks = FILES.read(file).item("i1").querySelector(":scope > epic-status")!
+    expect(Array.from(blocks.children, (block) => block.localName)).toEqual(["p", "p", "ul"])
+    expect(blocks.querySelectorAll("li")).toHaveLength(2)
+  })
+
+  test("a run-in '(1) … (2) …' becomes a numbered list under its lead", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("issue", "Run-in list"))
+    expect(await commands().run(["status", "x", "i1", "fixed", "Merged. (1) names fixed (2) lines found"])).toBe(0)
+    expect(cardBlocks("i1")).toEqual(["p:Merged.", "ol:names fixed lines found"])
+  })
+
+  test("one paragraph over 50 words is refused, saying how to break it up;  writing nothing", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("issue", "Too dense"))
+    const before = readFileSync(file, "utf8")
+    expect(await commands().run(["status", "x", "i1", "fixed", RUN_ON])).toBe(1)
+    expect(warned[0]).toMatch(/break this card up:  a paragraph of 60 words runs on \(the most is 50\)/)
+    expect(warned[0]).toContain("the full story goes in the item's body")
+    expect(readFileSync(file, "utf8")).toBe(before)
+  })
+
+  test("--file takes a long card, in blocks of its own", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("issue", "From a file"))
+    const card = join(root, "card.html")
+    writeFileSync(card, "<p>Done.</p><ul><li>one</li><li>two</li></ul>")
+    expect(await commands().run(["status", "x", "i1", "fixed", "--file", card])).toBe(0)
+    expect(cardBlocks("i1")).toEqual(["p:Done.", "ul:one two"])
+  })
+})
+
 describe("PlanDocCommands rename:  a phase's or an item's title (epic `epic-workflow`)", () => {
   test("retitles it, rewrites the links saying the old title, prints and logs what it did", async () => {
     const owner = commands()

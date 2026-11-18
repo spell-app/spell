@@ -154,6 +154,9 @@ Then, for what it printed:
    Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
    `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange, for the person to review;
    their Approve closes it.  Never `epic close` it yourself.
+   Every card (underway, done, fixed, noted):  a short lead sentence saying what happened, then short paragraphs or
+   `- ` bullets, one idea each (`\n\n` between);  code names and numbers only where the reader needs them;
+   the full story goes in the item's body (`epic details --append`).  The tool refuses a paragraph over 50 words.
    A revisit left "to talk over" (a pick "B, but ...", a picture, their comments in its text):  answer its note into
    the item, as above, then `epic inbox clear <epic>#J3`.
    A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.

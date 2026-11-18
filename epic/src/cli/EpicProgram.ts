@@ -1326,6 +1326,10 @@ word after the target, never with fields:
                                                           until Approve closes it;  a Do this's done means this too
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
+  A card's text:  a short lead sentence, then short paragraphs or bullets, one idea each:
+    a blank line (or "\\n\\n") starts a paragraph, "- " lines are bullets;  a paragraph or
+    bullet over 50 words is refused;  --file <html> for a long one;  the full story goes in
+    the item's body (epic details <epic>#<id> --append)
 
 Examples:
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
@@ -1334,6 +1338,7 @@ Examples:
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"
+  epic update seo#I3 done "Sitemap written on build\\n\\n- one per locale\\n- 2 tests added"
   epic update seo#I3 fixed "Writes the file on build now"
   epic update seo#J3 noted "Answered his note:  options A and B"`
 

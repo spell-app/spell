@@ -38,6 +38,7 @@ import {
   OLD_DECISION,
   PHASE_FIELDS,
   PHASE_STATUSES,
+  CardText,
   PlanDocError,
   QUESTION_ID,
   REVIEW_AS,
@@ -2196,7 +2197,8 @@ export class PlanDoc extends PlanReader {
    *     (a pick, a todo made or queued, a new item made:  `inbox apply`;  `noteStatus()`)
    *   - `done`, a card born done:  work Claude did, with no underway card first
    * - `reading`:  inline HTML (wrapped in a `<p>`) or blocks (`<p>`, `<ul>` ...);
-   *   plain text goes as it is (`&lt;` for a `<`)
+   *   plain text goes as it is (`&lt;` for a `<`), shaped by `CardText.structured()`:  a blank line a new paragraph,
+   *   `- ` lines bullets (I339)
    * - slotted, so never ordered (`Markup.place()`):  appended;  drawn under Owen's marked note, above the note box
    * - an item is stamped (`changed`), not flagged UPDATE:  a record of a mark, not a change to the item
    * - `quiet`:  not stamped either (`/epic tidy`'s doubtful items)
@@ -2498,7 +2500,7 @@ export class PlanDoc extends PlanReader {
   private statusBlocks(html: string): Element[] {
     const blocks: Element[] = []
     let paragraph: Element | undefined
-    for (const node of this.incoming(html)) {
+    for (const node of this.incoming(CardText.structured(html))) {
       if (PlanMarkup.isElement(node) && STATUS_BLOCKS.test(node.localName)) {
         blocks.push(node)
         paragraph = undefined

@@ -319,18 +319,22 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
   return runs
 }
 
+/** The flags a card takes:  `cardArgs()` passes them through. */
+const CARD_FLAGS = ["--filed", "--quiet", "--file"]
+
 /**
  * `epic update seo#J3 underway "<reading>"` (`done ["<summary>"]`, `noted "<what>"`) as the tool's `status` takes it:
  * `status seo J3 underway "<reading>"`.
  * - the id as typed (`J3`, `o3`, `P3`, `summary`):  the tool finds the item, section, phase or summary
- * - `--filed "<what>"` after `done` (the older spelling of `noted`) goes through;  any other flag is a field
+ * - `--filed "<what>"` after `done` (the older spelling of `noted`), `--quiet` and `--file <html>` (a long card, I339)
+ *   go through;  any other flag is a field
  * - throws `EpicCommandError` for no id, or a field beside the card
  */
 function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: string): string[] {
   if (ref === undefined)
     throw new EpicCommandError(`update ${epic} ${state}:  which item?  epic update ${epic}#J3${CARD_EXAMPLES[state]}`)
   const rest = args.slice(at + 1)
-  const fields = rest.filter((arg) => arg.startsWith("--") && arg !== "--filed" && arg !== "--quiet")
+  const fields = rest.filter((arg) => arg.startsWith("--") && !CARD_FLAGS.includes(arg))
   if (fields.length)
     throw new EpicCommandError(
       `update:  a card (${state}) or fields (${fields.join(", ")}), not both:  ` +

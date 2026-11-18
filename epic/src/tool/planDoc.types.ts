@@ -81,6 +81,138 @@ export class ShortTitle {
 }
 
 ////////////////
+// ## Status cards
+////////////////
+
+/****************
+ * ### `CardText`
+ * The rule for a status card's text:  a short lead sentence, then short paragraphs or bullets, one idea each.
+ * - Owen, 2026-11-18 (epic `epic-engine` I339), of a Done card that was one 150-word paragraph with
+ *   "(1) … (2) … (3) …" run in:  "please stop doing this.  Break into paragraphs"
+ * - `structured()`:  plain text written as text, shaped into blocks (`PlanDoc.addStatus()` reads every card through it)
+ *   - a blank line starts a new paragraph
+ *   - lines starting `- ` are bullets;  lines starting `1. ` or `1) ` a numbered list
+ *   - "(1) … (2) …" run into a paragraph:  a numbered list, its lead before it (J of I339:  turned, not refused)
+ *   - a literal `\n` (a shell's `"...\n..."`) is a line break, when the text has no real one
+ *   - HTML with blocks of its own (`<p>`, `<ul>` ...) is left as it is
+ * - `check()`:  `epic update ... underway | done | fixed | noted | promised` refuses a paragraph or bullet over
+ *   `MOST_WORDS`;  cards already on pages stay as they are
+ * - pure
+ ****************/
+export class CardText {
+  /** The most words in one paragraph or bullet of a card (J of I339). */
+  static readonly MOST_WORDS = 50
+
+  /** A tag that stands as a block:  text holding one was shaped by its writer. */
+  static readonly BLOCK_TAG = /<(p|ul|ol|dl|div|blockquote|pre|table|li)[\s>]/i
+
+  /** A bullet line:  `- `, `* ` or `• `. */
+  static readonly BULLET = /^\s*[-*•]\s+/
+
+  /** A numbered line:  `1. `, `2) `. */
+  static readonly NUMBERED = /^\s*\d{1,2}[.)]\s+/
+
+  /** An inline number, `(1) `, `(2) ` ...:  where a run-in list's entries start. */
+  static readonly RUN_IN = /\s*\((\d{1,2})\)\s+/g
+
+  /** Every tag that ends one block and starts the next, for counting words a block. */
+  static readonly BLOCK_BREAK = /<\/?(p|ul|ol|li|dl|dt|dd|div|blockquote|pre|table|tr|td|th|br)\b[^>]*>/gi
+
+  /**
+   * `text` (HTML, or plain text with line breaks) as blocks of HTML:  paragraphs, bullets, numbered lists.
+   * - unchanged when it's one line with no run-in list, or holds block tags of its own
+   */
+  static structured(text: string): string {
+    if (CardText.BLOCK_TAG.test(text)) return text
+    const lines = text.includes("\n") ? text : text.replaceAll("\\n", "\n")
+    const paragraphs = lines.split(/\n[ \t]*\n/).map((each) => each.trim())
+    if (paragraphs.length === 1 && !lines.includes("\n") && !CardText.hasRunIn(lines)) return text
+    return paragraphs
+      .filter(Boolean)
+      .map((paragraph) => CardText.blocksOf(paragraph))
+      .join("\n")
+  }
+
+  /**
+   * Why `html` (as `structured()` gives it) is too dense for a card, or `undefined` when it isn't:
+   * a paragraph or bullet over `MOST_WORDS` words.
+   */
+  static problemOf(html: string): string | undefined {
+    const blocks = html.split(CardText.BLOCK_BREAK).map((block) => block.replace(/<[^>]*>/g, " "))
+    const longest = Math.max(0, ...blocks.map((block) => block.split(/\s+/).filter(Boolean).length))
+    if (longest > CardText.MOST_WORDS)
+      return `a paragraph of ${longest} words runs on (the most is ${CardText.MOST_WORDS})`
+    return undefined
+  }
+
+  /**
+   * Throw when `html` is too dense for a card (`problemOf()`), asking for it in short paragraphs.
+   * - throws `PlanDocError`
+   */
+  static check(html: string): void {
+    const problem = CardText.problemOf(html)
+    if (!problem) return
+    throw new PlanDocError(
+      `break this card up:  ${problem}.\n` +
+        `- a short lead sentence saying what happened, then short paragraphs or bullets, one idea each\n` +
+        `- a blank line starts a paragraph;  lines starting "- " are bullets ("\\n" works in a shell's quotes);  ` +
+        `--file <html> for a long one\n` +
+        `- code names and numbers only where the reader needs them\n` +
+        `- the full story goes in the item's body:  epic details <epic>#<id> --append --file <html>`
+    )
+  }
+
+  /** One paragraph's lines as blocks:  bullets and numbered lines as lists, the rest as `<p>`s. */
+  private static blocksOf(paragraph: string): string {
+    const blocks: string[] = []
+    let prose: string[] = []
+    let list: { tag: "ul" | "ol"; items: string[] } | undefined
+    const endProse = () => {
+      if (prose.length) blocks.push(...CardText.proseBlocks(prose.join(" ")))
+      prose = []
+    }
+    const endList = () => {
+      if (list) blocks.push(CardText.list(list.tag, list.items))
+      list = undefined
+    }
+    for (const line of paragraph.split("\n")) {
+      const tag = CardText.BULLET.test(line) ? "ul" : CardText.NUMBERED.test(line) ? "ol" : undefined
+      if (tag) {
+        endProse()
+        if (list?.tag !== tag) endList()
+        list ??= { tag, items: [] }
+        list.items.push(line.replace(tag === "ul" ? CardText.BULLET : CardText.NUMBERED, ""))
+      } else if (list && /^\s+\S/.test(line)) list.items[list.items.length - 1] += ` ${line.trim()}`
+      else {
+        endList()
+        if (line.trim()) prose.push(line.trim())
+      }
+    }
+    endProse()
+    endList()
+    return blocks.join("\n")
+  }
+
+  /** Prose as a `<p>`;  a run-in list (`(1) … (2) …`) as its lead's `<p>`, then an `<ol>`. */
+  private static proseBlocks(prose: string): string[] {
+    if (!CardText.hasRunIn(prose)) return [`<p>${prose}</p>`]
+    const [lead, ...items] = prose.split(CardText.RUN_IN).filter((_, n) => n % 2 === 0)
+    return [...(lead?.trim() ? [`<p>${lead.trim()}</p>`] : []), CardText.list("ol", items)]
+  }
+
+  /** Whether `text` runs a numbered list in:  a `(1) ` and a `(2) ` after it. */
+  private static hasRunIn(text: string): boolean {
+    const one = text.search(/\(1\)\s/)
+    return one >= 0 && text.indexOf("(2) ", one) > one
+  }
+
+  /** `items` as a `<ul>` or `<ol>`. */
+  private static list(tag: "ul" | "ol", items: string[]): string {
+    return `<${tag}>${items.map((item) => `<li>${item.trim()}</li>`).join("")}</${tag}>`
+  }
+}
+
+////////////////
 // ## Page
 ////////////////
 

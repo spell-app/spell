@@ -779,6 +779,13 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
 </epic-status>
 ```
 
+- A card's text (epic `epic-engine` I339;  2026-11-18, of a 150-word Done card:  "please stop doing this.  Break into
+  paragraphs"):  a short lead sentence saying what happened, then short paragraphs or bullets, one idea each;
+  code names and numbers only where the reader needs them;  the full story goes in the item's body.
+  - written as text, `CardText` (`planDoc.types.ts`) shapes it:  a blank line (or a shell's `\n\n`) starts a
+    paragraph, `- ` lines are bullets, `1. ` lines and a run-in `(1) … (2) …` a numbered list
+  - `epic update` refuses a paragraph or bullet over 50 words (`CardText.MOST_WORDS`);  `--file <html>` for a long card
+  - cards already on pages stay as they are
 - Drawn, a band:
   - on its left, the kind:
     - `Claude • Underway`:  blue fill

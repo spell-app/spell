@@ -120,6 +120,9 @@ The task, word for word:
 - In an epic, once your work is done and checked, merge it into `main` YOURSELF, at once, when it merges cleanly:
   commit by path, `epic worktree merge-main --as <full name>`, unit tests, `epic merge <epic>`, mark the item fixed;  it
   can't, say why in your report and on the item (the same section;  under `/bedtime` too).
+- The item's card (`fixed "..."`, `done "..."`):  a short lead sentence saying what happened, then short paragraphs or
+  `- ` bullets, one idea each (`\n\n` between);  code names and numbers only where the reader needs them;
+  the full story goes in the item's body (`epic details <epic>#<id> --append`).
 - Your LAST message is your report, short:  what changed (files), where to look, checks run with numbers, judgement
   calls (ids), and anything that needs the person, a question last.  Don't run `epic agents done` for yourself:  the
   session does.

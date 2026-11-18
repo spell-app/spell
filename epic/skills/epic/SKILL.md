@@ -1113,6 +1113,9 @@ epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     the item FINISHED:  that card green (Done);  an open issue / todo closes
 epic update <name>#<id> noted "<what>"         a STEP done (choice recorded, answer written):  an outlined Noted card
+                                           a card:  a short lead sentence, then short paragraphs or "- " bullets, one idea
+                                           each ("\n\n" between);  code names and numbers only where the reader needs them;
+                                           the full story in the item's body (details --append);  --file for a long one
 epic details <name>#<id> --file f --more | --append   More Details in place of the unclear text (Add Details) / a reply
 epic summarize <name>#<id> --file f        condense an item:  f replaces what it shows, the rest folded away (13.)
 epic inbox done <name>#<id>  /  clear      an item's request finished  /  marks dropped after a talk
