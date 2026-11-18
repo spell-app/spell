@@ -20,6 +20,7 @@ import { AnswerThread } from "./AnswerThread"
 import { EpicBodies } from "./EpicBodies"
 import { epicItemVocabulary } from "./EpicItem.en"
 import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
+import { NearScreen } from "./NearScreen"
 import {
   BED_ICON,
   CANCELED,
@@ -186,6 +187,14 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   /** Its line sits right under the section titles stuck above it, scrolled there:  its top corners square (`watchScroll()`). */
   @E.state accessor isUnderTitle = false
 
+  /**
+   * Its line has come near the screen (`NearScreen`), or been pointed at or focused:  its review buttons draw from then
+   * on (epic `epic-engine` I333).
+   * - an item in a folded section or filtered out draws no box, so it never comes near until it's shown
+   * - why:  every item drawing its buttons up front made epic-engine's page 190,000 nodes and ~490 MB
+   */
+  @E.state accessor hasBeenNear = false
+
   /** The git icon's glyph. */
   readonly gitGlyph = new E.IconGlyph({ owner: this, name: () => "git" })
 
@@ -336,6 +345,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /** Unfolded. */
   readonly isOpen = createMemo(() => !!this.isMarkedOpen && this.hasDetails())
+
+  /**
+   * Its details' review pieces are drawn:  the clarify icon, the said note, the note box (epic `epic-engine` I333).
+   * - from the first time it opens, kept from then on:  folded, they'd be hidden anyway
+   * - the note's typed text lives in the inbox's client, so a box drawn late shows it all the same
+   */
+  readonly detailsDrawn = createMemo((was?: boolean) => !!was || this.isOpen())
 
   /**
    * Its note box is open under its line (an item without details, Revisit pressed).
@@ -510,7 +526,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       // an EMPTY title:  the DOM element's `title` would otherwise be a tooltip over all of it (T8)
       <div class={this.rootClass} part={this.partForName("base")} title="">
         {this.renderLine()}
-        <Show when={this.reviewState.reviewing() && !this.hasDetails()}>
+        <Show
+          when={this.reviewState.reviewing() && !this.hasDetails() && (this.hasSaid() || this.reviewState.boxOpen())}
+        >
           <div class={UNDER_LINE}>
             {this.saidNote()}
             <Show when={this.reviewState.boxOpen()}>{this.noteBox()}</Show>
@@ -523,15 +541,18 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           hidden={!this.isOpen() || this.veiled() ? "until-found" : undefined}
           style={this.showCommits ? { [COMMITS_PROPERTY]: "block" } : undefined}
         >
-          <Show when={this.failureText()}>
-            <p class={NOTE} part={this.partForName("error")}>
-              {this.failureText()}
-            </p>
-          </Show>
-          <Show when={this.textLabel()}>
-            <div class={LABEL} part={this.partForName("label")}>
-              {this.textLabel()}
-            </div>
+          {/* drawn from its first unfolding (`detailsDrawn`):  hidden till then anyway (I333) */}
+          <Show when={this.detailsDrawn()}>
+            <Show when={this.failureText()}>
+              <p class={NOTE} part={this.partForName("error")}>
+                {this.failureText()}
+              </p>
+            </Show>
+            <Show when={this.textLabel()}>
+              <div class={LABEL} part={this.partForName("label")}>
+                {this.textLabel()}
+              </div>
+            </Show>
           </Show>
           {/* the light details in a block of their own:  the details are a column, so a drive-by's status line
               can go first (its `order`), and the prose's margins still collapse in here */}
@@ -540,15 +561,15 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               <slot />
             </div>
             {/* at the body's right, while reviewed:  asks Claude to clarify it now, turning while it does (T76) */}
-            <Show when={this.reviewState.reviewing()}>
+            <Show when={this.reviewState.reviewing() && this.detailsDrawn()}>
               <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
             </Show>
           </div>
           {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
               it ("under my input", Owen, 2026-10-08, P13), then the box */}
-          <Show when={this.reviewState.reviewing() && this.hasDetails()}>{this.saidNote()}</Show>
+          <Show when={this.reviewState.reviewing() && this.hasDetails() && this.detailsDrawn()}>{this.saidNote()}</Show>
           <slot name={this.slotForName(STATUS_SLOT)} />
-          <Show when={this.reviewState.reviewing() && this.hasDetails()}>{this.noteBox()}</Show>
+          <Show when={this.reviewState.reviewing() && this.hasDetails() && this.detailsDrawn()}>{this.noteBox()}</Show>
         </div>
       </div>
     )
@@ -561,6 +582,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         ref={[(element: HTMLDivElement) => (this.lineBox = element), Fold.band(this.opener)]}
         class={LINE}
         part={this.partForName("line")}
+        onPointerEnter={this.drawNear}
+        onFocusIn={this.drawNear}
       >
         <span class={[CELL, FOLD]}>
           <Show when={this.foldable()}>{Fold.button(this.opener, this.foldButton)}</Show>
@@ -605,32 +628,42 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         <span class={[CELL, EXTRAS]} part={this.partForName("actions")} hidden={!this.hasExtras()}>
           {/* the page's own buttons first, then the item's (`CONTROLS`:  a click on one never folds) */}
           <slot name={this.slotForName("actions")} />
-          <Show when={this.overnight}>
-            <span
-              class={OVERNIGHT}
-              part={this.partForName("overnight")}
-              role="img"
-              aria-label={this.translationForKey("madeOvernight")}
-              title={this.translationForKey("madeOvernight")}
-            >
-              {this.bedGlyph.svg}
-            </span>
-          </Show>
-          <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
-          <Show when={this.phasePill}>{this.handledMark()}</Show>
-          <Show when={this.hasCommits()}>{this.gitButton()}</Show>
-          {/* where the plane was:  a finished item's phase (J231) */}
-          <Show when={this.donePill}>{this.doneMark()}</Show>
-          <Show when={!this.reviewState.reviewing() && this.review()}>
-            {(review) => (
-              <span class={[REVIEW, review().look]} part={this.partForName("review")} title={review().tip}>
-                {review().words}
-              </span>
-            )}
-          </Show>
-          <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
+          {/* the rest once it's near the screen (`hasBeenNear`):  folded away, a Show apiece cost 2 nodes an item (I333) */}
+          <Show when={this.hasBeenNear}>{this.lineMarks()}</Show>
         </span>
       </div>
+    )
+  }
+
+  /** The line's own marks and buttons, at its end:  bed, failed, `in P4`, git, `done in P20`, review label or buttons. */
+  private lineMarks(): JSX.Element {
+    return (
+      <>
+        <Show when={this.overnight}>
+          <span
+            class={OVERNIGHT}
+            part={this.partForName("overnight")}
+            role="img"
+            aria-label={this.translationForKey("madeOvernight")}
+            title={this.translationForKey("madeOvernight")}
+          >
+            {this.bedGlyph.svg}
+          </span>
+        </Show>
+        <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
+        <Show when={this.phasePill}>{this.handledMark()}</Show>
+        <Show when={this.hasCommits()}>{this.gitButton()}</Show>
+        {/* where the plane was:  a finished item's phase (J231) */}
+        <Show when={this.donePill}>{this.doneMark()}</Show>
+        <Show when={!this.reviewState.reviewing() && this.review()}>
+          {(review) => (
+            <span class={[REVIEW, review().look]} part={this.partForName("review")} title={review().tip}>
+              {review().words}
+            </span>
+          )}
+        </Show>
+        <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
+      </>
     )
   }
 
@@ -1024,6 +1057,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     let pending = false
     const measure = () => {
       pending = false
+      // folded, its line doesn't stick:  no style read (814 items read theirs every frame, I333)
+      if (!this.isOpen()) {
+        this.isUnderTitle = false
+        return
+      }
       const line = this.lineBox
       const rounded = getComputedStyle(this.domElement).getPropertyValue("--epic-item-top-radius").trim()
       if (!line || !rounded) {
@@ -1035,13 +1073,26 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.isUnderTitle = box.top <= stack + 1 && box.bottom > stack
     }
     const onScroll = () => {
-      if (pending) return
+      if (pending || (!this.isOpen() && !this.isUnderTitle)) return
       pending = true
       E.beforeNextPaint(measure)
     }
     window.addEventListener("scroll", onScroll, { passive: true, signal: listeners.signal })
     onScroll()
     return () => listeners.abort()
+  }
+
+  /** While connected and not yet near the screen, watch for it to come near (`hasBeenNear`). */
+  @E.whileConnected
+  protected watchNear() {
+    if (this.hasBeenNear) return undefined
+    return NearScreen.once(this.lineBox ?? this.domElement, this.drawNear)
+  }
+
+  /** Its line came near the screen, or was pointed at or focused:  its review buttons draw (`hasBeenNear`). */
+  @E.untracked
+  private readonly drawNear = () => {
+    if (!this.hasBeenNear) this.hasBeenNear = true
   }
 
   /** The address's own `#hash` was followed:  an item that moves doesn't open for it again as it reconnects. */
