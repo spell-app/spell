@@ -48,6 +48,12 @@ export type IngestFiles = {
   /** The text of every other Spell file beside this one:  what else may use what it declares. */
   otherSpellBeside(path: string): Promise<string[]>
   /**
+   * Each deployment of the place named `place`, listed in the project's file of the Spell file `file` (epic `data` P49, Q49):
+   * `"places": { "netbox": { "dev": { "at": "...", "key": "NETBOX_DEV_KEY" }, "production": { ..., "readOnly": true } } }`.
+   * - Left out, or none listed:  `undefined`.
+   */
+  deploymentsOf?(file: string, place: string): Promise<Record<string, Deployment> | undefined>
+  /**
    * Write a file away from the project, on this machine only (epic `data` P49):  a private place's rows.
    * - `~` is the home folder;  missing folders are made.  Left out:  nothing is written, and it says so.
    */
@@ -185,6 +191,29 @@ export type IngestAsk = {
    * for a server that keeps nothing, as JSONPlaceholder keeps nothing, or one you don't mind writing to.
    * - Left out, it never writes.
    */
+  triesWrites?: boolean
+}
+
+/**
+ * One deployment of a place:  dev, staging, production (epic `data` P49, Q49, Q53), as the project's file lists it.
+ * - The program's Spell names none:  it's picked when running (`SPELL_DEPLOYMENT`, `--deployment`).
+ */
+export type Deployment = {
+  /** Its address, a path prefix and all:  `https://staging.acme.test/service/v1`. */
+  at: string
+  /** The NAME of its key, when it isn't the place's own. */
+  key?: string
+  /** Where its token is made, when it isn't the place's own. */
+  tokenFrom?: string
+  /** It takes no writes:  `--try-writes` and `spell place verify` refuse to write there. */
+  readOnly?: boolean
+}
+
+/** What `PlaceIngest.verify()` is asked. */
+export type VerifyAsk = {
+  /** The deployment to try it on, by its name in the project's file:  left out, the first listed, else its own address. */
+  deployment?: string
+  /** It may try a write of each kind:  never on a read only deployment. */
   triesWrites?: boolean
 }
 

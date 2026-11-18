@@ -20,6 +20,7 @@ import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
   IngestStopped,
   type AskSomeone,
+  type Deployment,
   type IngestFiles,
   type IngestResult,
   type PlaceDescription,
@@ -146,6 +147,37 @@ export async function placeUpdate(
 }
 
 /**
+ * `spell place verify <file>`:  try the place described beside it against a running server (epic `data` P49).
+ * Its exit code.
+ * - The deployment:  `--deployment`, else `SPELL_DEPLOYMENT`, else the first the project's file lists.
+ * - `EXIT.ERRORS` when anything failed, or it couldn't change a line for someone.
+ * - throws `CliError` for whatever stopped it, having written nothing
+ */
+export async function placeVerify(
+  file: string,
+  { deployment = process.env.SPELL_DEPLOYMENT || undefined, tryWrites }: { deployment?: string; tryWrites?: boolean }
+): Promise<number> {
+  return stoppedAsCliError(async () => {
+    const ingest = await ingestFor(false, describesSession(file))
+    const result = await ingest.verify(file, {
+      ...(deployment && { deployment }),
+      ...(tryWrites && { triesWrites: true })
+    })
+    const { description, descriptionPath, changes, couldntChange } = result
+    CLI.out(`Verified ${description.about.name}, for ${file}.  Its description:  ${descriptionPath}`)
+    printList("What changed:", changes.length ? changes : ["Nothing."])
+    if (couldntChange.length) printList("What it couldn't change for you:", couldntChange)
+    const failed = Object.entries(description.collections).filter(([, { state }]) => state?.is === "failed")
+    if (failed.length)
+      printList(
+        "What failed:",
+        failed.map(([name, { state }]) => `${name}:  ${state!.reason}`)
+      )
+    return failed.length || couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+  })
+}
+
+/**
  * The steps, with the terminal and the disk:  asking an agent unless `ai` is off.
  * - `usesSession`:  loads the kept sessions, only then (the server's places are a lot to load).
  */
@@ -261,6 +293,14 @@ export const diskFiles: IngestFiles = {
     if (apis.some((each) => basename(each) === named)) return
     project.development = { ...project.development, apis: [...apis, named] }
     writeFileSync(projectFile, json5Edited(text, project))
+  },
+  deploymentsOf: async (file, place) => {
+    const projectFile = join(dirname(file), PROJECT_FILE)
+    if (!existsSync(projectFile)) return undefined
+    const project = JSON5.parse(readFileSync(projectFile, "utf8")) as {
+      places?: Record<string, Record<string, Deployment>>
+    }
+    return project.places?.[place]
   },
   otherSpellBeside: async (path) =>
     filesBeside(path)

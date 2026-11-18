@@ -35,6 +35,7 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "sign-in",
       "read-page",
       "update",
+      "verify",
       "nerd"
     ])
   })

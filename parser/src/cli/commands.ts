@@ -380,6 +380,26 @@ export default function languageCommands(spell: Command): void {
     )
 
   place
+    .command("verify")
+    .description(
+      "try the place a .spell file reaches against a running server:  each list, and one thing of it by its id, " +
+        "read for real;  each collection's state goes in <Name>.api.json5 -- verified with its rows, or failed with " +
+        "its status and why, with when and on which deployment -- and each type's line says this type is verified " +
+        "or failed.  A list no schema typed gets its fields from what it read.  Never writes, but with --try-writes.  " +
+        "Exits 1 if anything failed"
+    )
+    .argument("<file>", "the place's .spell file, e.g. NetBox.api.spell")
+    .option(
+      "--deployment <name>",
+      "which of the place's deployments, as the project's file lists them under \"places\":  dev, staging, " +
+        "production -- default SPELL_DEPLOYMENT, else the first listed, else the place's own address"
+    )
+    .option("--try-writes", "try a write of each kind too:  never on a deployment marked read only")
+    .action((file: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeIngest")).placeVerify(file, command.optsWithGlobals()))
+    )
+
+  place
     .command("nerd")
     .description(
       "draw a place's NERD, the shape of its data, by the NERD skill's rules:  a box per collection with only its " +
