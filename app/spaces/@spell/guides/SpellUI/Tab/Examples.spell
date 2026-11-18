@@ -3,16 +3,6 @@
 		Tab
 		<header>A tab is a hidden section of content activated by a menu.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#basic-examples">Basic Examples</>
-			<item link="#remote-examples">Remote Examples</>
-			<item link="#history-examples">History Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

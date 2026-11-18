@@ -3,18 +3,6 @@
 		Transition
 		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#transitions">Transitions</>
-			<item link="#static-animations">Static Animations</>
-			<item link="#visibility">Visibility</>
-			<item link="#specifying-a-direction">Specifying a direction</>
-			<item link="#automatic-direction">Automatic Direction</>
-			<item link="#grouped-transitions">Grouped Transitions</>
-			<item link="#looping">Looping</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

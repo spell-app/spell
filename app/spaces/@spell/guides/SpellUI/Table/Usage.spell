@@ -3,19 +3,6 @@
 		Table
 		<header>A table displays a collection of data grouped into rows.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#rows-and-cells">Rows and cells</>
-			<item link="#using-it">Using it</>
-			<item link="#stacking">Stacking</>
-			<item link="#sorting">Sorting</>
-			<item link="#events">Events</>
-			<item link="#data-mode">Data mode</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  rows and cells, the native table, stacking, sorting, data mode, keyboard, accessibility, frameworks. -->
 	<section label="Rows and cells">

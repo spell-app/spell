@@ -1,6 +1,7 @@
 /*
  * `<ui-site-tabs>` (`UISiteTabs.tsx`):  the shown page's family as a row of tabs, drawn with a segmented `<ui-toolbar>`.
  * - The tabs' look is the menu's own (`--ui-menu-segmented-*`, `::part(tabs)` for its box).
+ * - `appearance="header"` (`:state(header)`):  the editor's Run | Edit switch, centred on the app menu's bar.
  * - The row never wraps:  when the tabs don't fit, the toolbar's row scrolls sideways, with its `‹` / `›` keys.
  */
 @layer ui.components {
@@ -11,6 +12,12 @@
 
   :host(:state(empty)) {
     display: none;
+  }
+
+  /* `appearance="header"`:  the switch on an app menu's middle, centred on the bar's height */
+  :host(:state(header):not(:state(empty))) {
+    display: flex;
+    align-items: center;
   }
 
   /* an equal share of the row, never squeezed below its words:  words that don't fit push the row to scroll */

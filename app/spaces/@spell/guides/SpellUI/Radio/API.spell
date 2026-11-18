@@ -3,15 +3,6 @@
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#attributes">Attributes</>
-			<item link="#events">Events</>
-			<item link="#slots">Slots</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-		</>
-	</>
 
 	<!-- API:  `<ui-radio>`'s tables (`docs/__data/components.json5`);  the whole family's are on the checkbox page. -->
 	<section label="Attributes">

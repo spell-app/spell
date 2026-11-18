@@ -3,13 +3,6 @@
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  building a skeleton, swapping it for content, accessibility. -->
 	<section label="Using it">

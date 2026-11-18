@@ -3,11 +3,6 @@
 		JSON data
 		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-		</>
-	</>
 
 	<!-- EXAMPLES:  it draws nothing, so each example shows it read by a tree diagram. -->
 	<section label="Types">

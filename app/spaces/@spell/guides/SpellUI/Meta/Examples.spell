@@ -3,11 +3,6 @@
 		Meta
 		<header>A meta holds metadata about the content, such as a date or a category.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-meta>` in each owner that gives it a look (from the owners' own pages and

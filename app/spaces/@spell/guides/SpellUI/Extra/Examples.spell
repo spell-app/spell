@@ -3,11 +3,6 @@
 		Extra
 		<header>Extra content is set apart from the main content, such as a card's footer.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-extra>` in each owner that gives it a look (from the owners' own pages and

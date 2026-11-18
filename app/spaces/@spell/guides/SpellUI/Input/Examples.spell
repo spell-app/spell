@@ -3,13 +3,6 @@
 		Input
 		<header>An input is a field used to elicit a response from a user.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's input page, section by section, in its order (Types, States, Variations), plus our native

@@ -3,14 +3,6 @@
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#name-sets-and-loading">Name sets and loading</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<section label="Using it">
 		<markdown>

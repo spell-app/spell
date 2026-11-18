@@ -4,16 +4,6 @@
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
               site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#variations">Variations</>
-			<item link="#states">States</>
-			<item link="#behaviour">Behaviour</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  Fomantic's modal page, section by section, in its order (Types, Content, Variations, States), then its
 		Examples tab (Behaviour).  Every modal opens from a button through an invoker command (`commandfor` +

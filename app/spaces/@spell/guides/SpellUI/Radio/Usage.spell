@@ -3,17 +3,6 @@
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#radio-groups">Radio groups</>
-			<item link="#forms">Forms</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  groups, forms, `selected` / `checked`, events, keyboard, accessibility, frameworks. -->
 	<section label="Using it">

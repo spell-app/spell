@@ -3,14 +3,6 @@
 		Feed
 		<header>A feed presents user activity chronologically.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's feed page, section by section, in its order (Types, Content, States, Variations).

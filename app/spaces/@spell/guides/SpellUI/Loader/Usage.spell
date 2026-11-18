@@ -3,13 +3,6 @@
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  showing and hiding a loader, where it sits, accessibility. -->
 	<section label="Using it">

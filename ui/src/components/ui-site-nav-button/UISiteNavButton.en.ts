@@ -33,6 +33,8 @@ export const siteNavButtonVocabulary = {
       kind: "valueOnly",
       values: ["drawer", "left", "right"],
       default: "drawer",
+      // no class words:  `right` is Fomantic's own word for an item pushed to a menu's end
+      classes: { drawer: "", left: "", right: "" },
       description:
         "What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  " +
         "With one for a side bar, a narrow layout hides that side bar behind it."

@@ -3,17 +3,6 @@
 		Calendar
 		<header>A calendar lets a user pick a date, a time, or both.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-			<item link="#states">States</>
-			<item link="#examples">Examples</>
-			<item link="#coupling">Coupling</>
-			<item link="#disabling-specific-days">Disabling specific Days</>
-			<item link="#highlighting-specific-days">Highlighting specific Days</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's calendar page, section by section, in its order (Types, Variations, States, then its Examples

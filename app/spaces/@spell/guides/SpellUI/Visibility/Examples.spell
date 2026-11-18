@@ -39,14 +39,6 @@ an "endless list" is a view:
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
 	</>
 
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#usage">Usage</>
-			<item link="#callbacks">Callbacks</>
-			<item link="#examples">Examples</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.

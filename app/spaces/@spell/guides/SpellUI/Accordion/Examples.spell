@@ -3,14 +3,6 @@
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#examples">Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's accordion page, section by section, in its order (Types, Variations, Examples), plus our
