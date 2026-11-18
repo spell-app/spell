@@ -694,9 +694,13 @@ export function typeWordsFor(name: string, placeName: string): string {
   return isSpellsOwnType(type) ? `${placeName} ${type}` : type
 }
 
-/** Is this one of the types Spell has by itself, which a program can't declare:  `letter`, `date`, `view`? */
+/**
+ * Is this one of the types Spell has by itself, which a program can't declare:  `letter`, `date`, `view`?
+ * - Its measures too (epic `data` I106):  `speed`, `length`, as `a "speed" is a thing` would add to Spell's Speed.
+ */
 export function isSpellsOwnType(words: string): boolean {
-  return /^\p{Ll}/u.test(`${SP.typeName(words)}`)
+  const name = `${SP.typeName(words)}`
+  return /^\p{Ll}/u.test(name) || !!SP.SpellParser.rootScope.getType(name)
 }
 
 /**
