@@ -2,7 +2,6 @@ import { For, Show, createMemo, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 import type { RouteSectionProps } from "@solidjs/router"
 
-import type { TableColumn } from "spell/ui/components/components.types"
 import type {
   CollectionDescription,
   FieldDescription,
@@ -155,7 +154,7 @@ function Deployments(props: { place: SitePlace; description: PlaceDescription })
         <p class="quiet">{appTexts.text("placeRefDeploymentsNone", { address: props.description.about.address })}</p>
       }
     >
-      <ui-table celled="" unstackable="" size="small" column-defs={DEPLOYMENT_COLUMNS()} rows={rows()} />
+      <ReferenceTable columns={DEPLOYMENT_COLUMNS()} rows={rows()} />
     </Show>
   )
 }
@@ -163,33 +162,39 @@ function Deployments(props: { place: SitePlace; description: PlaceDescription })
 /****************
  * ### `<CollectionReference>`
  * One list of a place, folded:  its name, how trying it went, its address;  opened, what it can change and its fields.
+ * - What it can change and its fields are folds of their own, folded to start, their row counts their badges.
  ****************/
 function CollectionReference(props: { collection: NamedCollection }) {
   const described = () => props.collection.described
+  const operations = () => operationRows(described().operations ?? {})
+  const fields = () => fieldRows(described())
   return (
     <Fold
       level="4"
+      class="list"
       label={props.collection.key}
       hint={`GET ${described().at}`}
-      badgeLabel={<StateLabel state={described().state} />}
+      badgeLabel={<StateLabel slot="badge" state={described().state} />}
     >
       <Show when={described().about}>{(about) => <p>{about()}</p>}</Show>
-      <Show when={described().state}>{(state) => <p class="quiet">{stateLine(state())}</p>}</Show>
+      <Show when={described().state}>
+        {(state) => (
+          <p class="quiet" title={state().reason ?? ""}>
+            {stateLine(state())}
+          </p>
+        )}
+      </Show>
       <Show when={described().leftOut}>
         {(why) => <p class="quiet">{appTexts.text("placeRefListLeftOut", { why: why() })}</p>}
       </Show>
-      <Show when={Object.keys(described().operations ?? {}).length}>
-        <h4>{appTexts.text("placeRefChanges")}</h4>
-        <ui-table
-          celled=""
-          unstackable=""
-          size="small"
-          column-defs={OPERATION_COLUMNS()}
-          rows={operationRows(described().operations ?? {})}
-        />
+      <Show when={operations().length}>
+        <Fold level="5" label={appTexts.text("placeRefChanges")} badge={String(operations().length)}>
+          <ReferenceTable columns={OPERATION_COLUMNS()} rows={operations()} />
+        </Fold>
       </Show>
-      <h4>{appTexts.text("placeRefFields")}</h4>
-      <ui-table celled="" unstackable="" size="small" column-defs={FIELD_COLUMNS()} rows={fieldRows(described())} />
+      <Fold level="5" label={appTexts.text("placeRefFields")} badge={String(fields().length)}>
+        <ReferenceTable columns={FIELD_COLUMNS()} rows={fields()} />
+      </Fold>
     </Fold>
   )
 }
@@ -197,12 +202,12 @@ function CollectionReference(props: { collection: NamedCollection }) {
 /** A list's key and its description, whole. */
 type NamedCollection = { key: string; described: CollectionDescription }
 
-/** How trying a list or a change went, as a label:  its words, its colour, why in its tooltip. */
-function StateLabel(props: { state: PlaceState | undefined }) {
+/** How trying a list or a change went, as a mini label:  its words, its colour, why in its tooltip. */
+function StateLabel(props: { state: PlaceState | undefined; slot?: "badge" }) {
   const look = () => STATE_LOOKS[props.state?.is ?? "unverified"]
   return (
     <ui-label
-      slot="badge"
+      slot={props.slot}
       size="mini"
       color={look().color}
       title={props.state ? stateLine(props.state) : appTexts.text(look().why)}
@@ -210,6 +215,47 @@ function StateLabel(props: { state: PlaceState | undefined }) {
       {appTexts.text(look().words)}
     </ui-label>
   )
+}
+
+/****************
+ * ### `<ReferenceTable>`
+ * One of the reference's tables:  its columns, a row per thing, each cell drawn by its column.
+ * - A native table in `<ui-table>`, so a cell can hold more than text:  an address in the code face, a state's label.
+ * - Never squeezed:  on a phone it scrolls sideways (`PlaceReference.css`).
+ ****************/
+function ReferenceTable<Row>(props: { columns: ReferenceColumn<Row>[]; rows: Row[] }) {
+  return (
+    <ui-table class="ReferenceTable" celled="" unstackable="" size="small">
+      <table>
+        <thead>
+          <tr>
+            <For each={props.columns}>{(column) => <th>{column.header}</th>}</For>
+          </tr>
+        </thead>
+        <tbody>
+          <For each={props.rows}>
+            {(row) => (
+              <tr>
+                <For each={props.columns}>
+                  {(column) => <td class={column.oneLine ? ["single", "line"] : undefined}>{column.cell(row)}</td>}
+                </For>
+              </tr>
+            )}
+          </For>
+        </tbody>
+      </table>
+    </ui-table>
+  )
+}
+
+/** One column of a `<ReferenceTable>`. */
+type ReferenceColumn<Row> = {
+  /** Its header, in the page's language. */
+  header: string
+  /** What a row shows in it. */
+  cell: (row: Row) => JSX.Element
+  /** Its cells never wrap:  Fomantic's `single line`. */
+  oneLine?: boolean
 }
 
 /****************
@@ -221,7 +267,7 @@ function Fold(props: FoldProps) {
   const [opened, setOpened] = createSignal(false)
   return (
     <ui-section
-      class="Fold"
+      class={["Fold", props.class, { stated: !!props.badgeLabel }]}
       collapsible=""
       open="false"
       level={props.level ?? "3"}
@@ -243,7 +289,9 @@ type FoldProps = {
   /** Its title. */
   label: string
   /** Its heading's level.  Default:  `3`. */
-  level?: "3" | "4"
+  level?: "3" | "4" | "5"
+  /** A class of its own, besides `Fold`:  `list`, a list's fold, whose hint is its address. */
+  class?: string
   /** A line under its title. */
   hint?: string
   /** A count after its title. */
@@ -274,28 +322,37 @@ const STATE_LOOKS: Record<
 }
 
 /** The deployments' columns, in the page's language. */
-const DEPLOYMENT_COLUMNS = (): TableColumn[] => [
-  { key: "name", header: appTexts.text("placeRefName") },
-  { key: "at", header: appTexts.text("placeRefAddress") },
-  { key: "key", header: appTexts.text("placeRefKey") },
-  { key: "readOnly", header: appTexts.text("placeRefReadOnly") }
+const DEPLOYMENT_COLUMNS = (): ReferenceColumn<DeploymentRow>[] => [
+  { header: appTexts.text("placeRefName"), cell: (row) => row.name },
+  { header: appTexts.text("placeRefAddress"), cell: (row) => <code>{row.at}</code>, oneLine: true },
+  { header: appTexts.text("placeRefKey"), cell: (row) => row.key },
+  { header: appTexts.text("placeRefReadOnly"), cell: (row) => row.readOnly }
 ]
+
+/** A deployment, as a row of its table. */
+type DeploymentRow = { name: string; at: string; key: string; readOnly: string }
 
 /** A list's changes' columns. */
-const OPERATION_COLUMNS = (): TableColumn[] => [
-  { key: "name", header: appTexts.text("placeRefChange") },
-  { key: "route", header: appTexts.text("placeRefAddress") },
-  { key: "takes", header: appTexts.text("placeRefTakes") },
-  { key: "state", header: appTexts.text("placeRefState") }
+const OPERATION_COLUMNS = (): ReferenceColumn<OperationRow>[] => [
+  { header: appTexts.text("placeRefChange"), cell: (row) => row.name, oneLine: true },
+  { header: appTexts.text("placeRefAddress"), cell: (row) => <code>{row.route}</code>, oneLine: true },
+  { header: appTexts.text("placeRefTakes"), cell: (row) => row.takes },
+  { header: appTexts.text("placeRefState"), cell: (row) => <StateLabel state={row.state} />, oneLine: true }
 ]
 
+/** A list's change, as a row of its table. */
+type OperationRow = { name: string; route: string; takes: string; state: PlaceState | undefined }
+
 /** A list's fields' columns. */
-const FIELD_COLUMNS = (): TableColumn[] => [
-  { key: "key", header: appTexts.text("placeRefField") },
-  { key: "words", header: appTexts.text("placeRefInSpell") },
-  { key: "kind", header: appTexts.text("placeRefKind") },
-  { key: "notes", header: appTexts.text("placeRefFieldNotes") }
+const FIELD_COLUMNS = (): ReferenceColumn<FieldRow>[] => [
+  { header: appTexts.text("placeRefField"), cell: (row) => row.key },
+  { header: appTexts.text("placeRefInSpell"), cell: (row) => row.words },
+  { header: appTexts.text("placeRefKind"), cell: (row) => row.kind },
+  { header: appTexts.text("placeRefFieldNotes"), cell: (row) => row.notes }
 ]
+
+/** A list's field, as a row of its table. */
+type FieldRow = { key: string; words: string; kind: string; notes: string }
 
 /** The place's lists, a group per tag, the tags in order;  a place with none, one group, "Lists". */
 function tagsOf(description: PlaceDescription): { name: string; collections: NamedCollection[] }[] {
@@ -320,10 +377,12 @@ function stateCounts(description: PlaceDescription): Partial<Record<PlaceState["
 }
 
 /**
- * A list's or a change's state, in a line:  how it went, when it was tried and where, and what it answered.
- * - `Verified, tried on dev, Nov 17, 2026, 9:31 PM:  3 rows read`
- * - `Failed, tried Nov 17, 2026, 9:32 PM:  it answered 403 ...`
- * - never tried:  why, `Not tried yet:  known from its description only ...`
+ * A list's or a change's state, in short lines (shown with `pre-line`):  how it went, when and where it was tried;
+ * then what happened.
+ * - `Verified, tried on dev, Nov 17, 2026, 9:31 PM` / `3 rows read`
+ * - `Failed, tried Nov 17, 2026, 9:32 PM` / what its answer means, in plain words, and what to do next
+ *   (`failureWords()`);  the answer itself is the line's tooltip
+ * - never tried:  why, `Not tried yet` / `Spell only knows it from its description ...`
  */
 function stateLine(state: PlaceState): string {
   const look = STATE_LOOKS[state.is]
@@ -336,29 +395,43 @@ function stateLine(state: PlaceState): string {
     line += `, ${tried}`
   }
   const said =
-    state.reason ??
-    (state.is === "verified" && state.rows !== undefined
-      ? appTexts.text("placeRefRows", { count: String(state.rows) })
-      : state.at
-        ? undefined
-        : appTexts.text(look.why))
-  return said ? `${line}:  ${said}` : line
+    state.is === "failed"
+      ? failureWords(state)
+      : state.is === "verified" && state.rows !== undefined
+        ? appTexts.text("placeRefRows", { count: String(state.rows) })
+        : state.at
+          ? state.reason
+          : appTexts.text(look.why)
+  return said ? `${line}\n${said}` : line
+}
+
+/**
+ * What a failed try's answer means, in plain words, with what to do next:  by its status, 401, 403, 404 or 5xx;
+ * any other, or none, its own reason, as the try wrote it.
+ */
+function failureWords(state: PlaceState): string | undefined {
+  const status = state.status
+  if (status === 401) return appTexts.text("placeRefFailed401")
+  if (status === 403) return appTexts.text("placeRefFailed403")
+  if (status === 404) return appTexts.text("placeRefFailed404")
+  if (status !== undefined && status >= 500) return appTexts.text("placeRefFailed5xx")
+  return status === undefined ? state.reason : appTexts.text("placeRefFailedOther")
 }
 
 /** A list's changes as table rows:  each one's name, method and address, what it takes, how trying it went. */
-function operationRows(operations: Record<string, OperationDescription>) {
+function operationRows(operations: Record<string, OperationDescription>): OperationRow[] {
   return Object.entries(operations).map(([name, operation]) => ({
     name,
     route: `${operation.method} ${operation.at}`,
     takes: Object.entries(operation.params ?? {})
       .map(([param, kind]) => `${param} (${kind})`)
       .join(", "),
-    state: appTexts.text(STATE_LOOKS[operation.state?.is ?? "unverified"].words)
+    state: operation.state
   }))
 }
 
 /** A list's fields as table rows:  the source's name, Spell's, its kind, and what else its description says. */
-function fieldRows({ fields, idField }: CollectionDescription) {
+function fieldRows({ fields, idField }: CollectionDescription): FieldRow[] {
   return Object.entries(fields).map(([key, field]) => ({
     key,
     words: field.words,

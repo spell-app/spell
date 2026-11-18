@@ -382,6 +382,16 @@ export const APP_TEXTS = {
   placeRefTried: "tried {date}",
   placeRefTriedOn: "tried on {deployment}, {date}",
   placeRefRows: "{count} rows read",
+  placeRefFailed401:
+    "The real server asked for a key, the secret code that lets Spell in.\nAdd it beside this server in your project's __project.json5 file, then try again with spell place verify.",
+  placeRefFailed403:
+    "The real server didn't accept the key, the secret code that lets Spell in.\nCheck the key in your project's __project.json5 file, then try again with spell place verify.",
+  placeRefFailed404:
+    "Spell couldn't find this list on the real server, at the address it was given.\nCheck the address in the place's description, then try again with spell place verify.",
+  placeRefFailed5xx:
+    "Something went wrong on the real server, not in your project.\nWait a few minutes, then try again with spell place verify.",
+  placeRefFailedOther:
+    "The real server's answer wasn't what Spell expected.\nHover over this line to see what it said.",
   placeRefListLeftOut: "Left out of the Spell:  {why}",
   placeRefChanges: "What it can change",
   placeRefFields: "Fields",

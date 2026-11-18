@@ -104,7 +104,7 @@ async function mount(path = PATH): Promise<HTMLElement> {
   return host
 }
 
-/** The section titled `label`, opened, once what's in it has drawn. */
+/** The section titled `label` in `host`, opened, once what's in it has drawn. */
 async function opened(host: HTMLElement, label: string): Promise<HTMLElement> {
   const section = [...host.querySelectorAll<HTMLElement & { open: boolean }>("ui-section")].find(
     (each) => each.getAttribute("label") === label
@@ -115,9 +115,11 @@ async function opened(host: HTMLElement, label: string): Promise<HTMLElement> {
   return section
 }
 
-/** A table's rows, as it was handed them. */
-function rowsOf(table: Element | null): Record<string, unknown>[] {
-  return (table as (Element & { rows: Record<string, unknown>[] }) | null)?.rows ?? []
+/** A table's rows, each its cells' text. */
+function rowsOf(table: Element | null): string[][] {
+  return [...(table?.querySelectorAll("tbody tr") ?? [])].map((row) =>
+    [...row.querySelectorAll("td")].map((cell) => cell.textContent ?? "")
+  )
 }
 
 describe("<PlaceReference>", () => {
@@ -169,20 +171,37 @@ describe("<PlaceReference>", () => {
     const host = await mount()
     await opened(host, "core")
     const jobs = await opened(host, "jobs")
-    expect(jobs.textContent).toContain("it answered 403")
-    expect(rowsOf(jobs.querySelector("ui-table"))).toEqual([
-      { name: "enqueue", route: "POST /core/jobs/{id}/enqueue/", takes: "id (number)", state: "Not tried yet" }
+    // a failure in plain words, with what to do next;  the answer itself in its tooltip
+    const failure = [...jobs.querySelectorAll("p.quiet")].find(
+      (line) => line.getAttribute("title") === "it answered 403"
+    )!
+    expect(failure.textContent).toMatch(/^Failed, tried .*\nThe real server didn't accept the key/)
+    // what it can change and its fields:  folds of their own, folded, their row counts their badges
+    const inner = [...jobs.querySelectorAll("ui-section")]
+    expect(inner.map((fold) => [fold.getAttribute("label"), fold.getAttribute("badge")])).toEqual([
+      ["What it can change", "1"],
+      ["Fields", "1"]
     ])
+    expect(jobs.querySelector("ui-table")).toBeNull()
+    const changes = await opened(host, "What it can change")
+    expect(rowsOf(changes.querySelector("ui-table"))).toEqual([
+      ["enqueue", "POST /core/jobs/{id}/enqueue/", "id (number)", "Not tried yet"]
+    ])
+    // the address in the code face, the state a mini label, and neither wraps
+    const cells = changes.querySelectorAll("tbody td")
+    expect(cells[1]!.querySelector("code")).not.toBeNull()
+    expect(cells[3]!.querySelector("ui-label[size=mini]")).not.toBeNull()
+    expect(getComputedStyle(cells[1]!).whiteSpace).toBe("nowrap")
     await opened(host, "tenancy")
     const tenants = await opened(host, "tenants")
     expect(tenants.querySelector("ui-label[slot=badge]")!.getAttribute("title")).toMatch(
-      /^Verified, tried on dev, .*:  3 rows read$/
+      /^Verified, tried on dev, .*\n3 rows read$/
     )
-    const [, fields] = tenants.querySelectorAll("ui-table")
-    expect(rowsOf(fields)).toEqual([
-      { key: "id", words: "id", kind: "number", notes: "says which row is which;  set by the server" },
-      { key: "name", words: "name", kind: "text", notes: "required" },
-      { key: "status", words: "status", kind: "text", notes: "one of active, retired" }
+    const fields = await opened(tenants, "Fields")
+    expect(rowsOf(fields.querySelector("ui-table"))).toEqual([
+      ["id", "id", "number", "says which row is which;  set by the server"],
+      ["name", "name", "text", "required"],
+      ["status", "status", "text", "one of active, retired"]
     ])
   })
 
@@ -191,8 +210,8 @@ describe("<PlaceReference>", () => {
     const host = await mount()
     const where = await opened(host, "Where it runs")
     expect(rowsOf(where.querySelector("ui-table"))).toEqual([
-      { name: "dev", at: "https://dev.acme.test/api", key: "ACME_DEV_KEY", readOnly: "" },
-      { name: "production", at: "https://acme.test/api", key: "", readOnly: "yes" }
+      ["dev", "https://dev.acme.test/api", "ACME_DEV_KEY", ""],
+      ["production", "https://acme.test/api", "", "yes"]
     ])
   })
 
