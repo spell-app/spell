@@ -506,6 +506,12 @@ export type FieldDescription = {
    * - NOT `$ref`, which is Spell's own reference key in saved data.
    */
   schemaAt?: string
+  /**
+   * Where the schema of what its `inside` holds is, when that's a schema of its own (epic `data` I106):
+   * NetBox's module bay's `module_bay_types`, each a `#/components/schemas/BriefModuleBayType`.
+   * - Names the type inside, `module bay type summary`:  never the owner's name and the field's.
+   */
+  insideSchemaAt?: string
 }
 
 /**

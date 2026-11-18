@@ -301,6 +301,7 @@ export class PlaceSpec {
       type: "inside",
       ...said,
       inside: this.fieldsOf(inside, ref ?? `${at}/items`, depth + 1, next),
+      ...(ref && LOCAL_REF.test(ref) && { insideSchemaAt: ref }),
       ...(isList && { isListInside: true })
     }
   }

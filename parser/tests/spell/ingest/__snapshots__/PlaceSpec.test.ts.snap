@@ -38,9 +38,9 @@ a "data source" is a thing
 	its "description" is text, with maximum length 200
 	its "sync interval" is a number
 	its "ignore rules" is text
-	its "owner" is an owner
+	its "owner" is an owner summary
 	its "comments" is text
-	its "tags" is a list of tags
+	its "tags" is a list of tag summaries
 	its "created" is a date
 	its "last updated" is a date
 	its "last synced" is a date
@@ -63,7 +63,7 @@ a "job" is a thing
 	its "started" is a date
 	its "completed" is a date
 	its "execution time" is text
-	its "user" is a user
+	its "user" is a user summary
 	its "error" is text
 	its "job id" is required text
 	its "queue name" is text, with maximum length 100
@@ -75,15 +75,15 @@ a "contact" is a thing
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text
-	its "groups" is a list of groups
+	its "groups" is a list of contact group summaries
 	its "name" is required text, with maximum length 100
 	its "title" is text, with maximum length 100
 	its "phone" is text, with maximum length 50
 	its "address" is text, with maximum length 200
 	its "description" is text, with maximum length 200
-	its "owner" is an owner
+	its "owner" is an owner summary
 	its "comments" is text
-	its "tags" is a list of tags
+	its "tags" is a list of tag summaries
 	its "created" is a date
 	its "last updated" is a date
 
@@ -97,11 +97,11 @@ a "tenant group" is a thing
 	its "slug" is required text, with maximum length 100
 	its "parent" is a tenant group
 	its "description" is text, with maximum length 200
-	its "tags" is a list of tags
+	its "tags" is a list of tag summaries
 	its "created" is a date
 	its "last updated" is a date
 	its "tenant count" is a number
-	its "owner" is an owner
+	its "owner" is an owner summary
 	its "comments" is text
 	its "depth" is a number
 
@@ -115,9 +115,9 @@ a "tenant" is a thing
 	its "slug" is required text, with maximum length 100
 	its "group" is a tenant group
 	its "description" is text, with maximum length 200
-	its "owner" is an owner
+	its "owner" is an owner summary
 	its "comments" is text
-	its "tags" is a list of tags
+	its "tags" is a list of tag summaries
 	its "created" is a date
 	its "last updated" is a date
 	its "circuit count" is a number
@@ -138,14 +138,14 @@ a "status" is a thing
 	its "value" is text
 	its "label" is text
 
-an "owner" is a thing
+an "owner summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display" is text
 	its "name" is text
 	its "description" is text
 
-a "tag" is a thing
+a "tag summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display url" is text  // an address
@@ -154,7 +154,7 @@ a "tag" is a thing
 	its "slug" is text
 	its "color" is text
 
-a "user" is a thing
+a "user summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display" is text
@@ -164,7 +164,7 @@ a "notification" is a thing
 	its "value" is text
 	its "label" is text
 
-a "group" is a thing
+a "contact group summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display" is text
