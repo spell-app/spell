@@ -957,6 +957,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "size", kind: "size", group: "appearance" },
     { name: "appearance", kind: "multiple", group: "appearance", values: ["basic"] },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
+    { name: "transparent", kind: "keyOnly", group: "appearance" },
     { name: "fullscreen", kind: "keyOnly", group: "appearance" },
     { name: "overlay", kind: "keyOnly", group: "appearance" },
     { name: "scrolling", kind: "keyOnly", group: "layout" },

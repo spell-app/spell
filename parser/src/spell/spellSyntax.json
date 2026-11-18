@@ -608,7 +608,7 @@
           "ruleNames": ["parenthesized_expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/ParenthesizedExpression.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "`(expression)` -- parenthesized sub-expression.",
           "syntaxes": [
             {
@@ -660,7 +660,7 @@
           "ruleNames": ["the_date"],
           "internal": false,
           "file": "src/spell/rules/expressions/TheDate.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
           "syntaxes": [
             {
@@ -701,6 +701,188 @@
                 },
                 "py": {
                   "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DurationPart",
+          "ruleNames": ["duration_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DurationPart.ts",
+          "line": 17,
+          "purpose": "One part of a duration, a whole number -- `the hours of its time left`, for a countdown (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the {part:duration_part_name} of {expression:operand}",
+              "example": "the hours of 5400 seconds",
+              "outputs": {
+                "js": {
+                  "code": "core.durationPartOf(5400, \"hours\")"
+                },
+                "ts": {
+                  "code": "core.durationPartOf(5400, \"hours\")"
+                },
+                "py": {
+                  "code": "core.duration_part_of(5400, \"hours\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "NextWeekend",
+          "ruleNames": ["next_weekend"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/NextWeekend.ts",
+          "line": 14,
+          "purpose": "When the next weekend starts, a date -- `the next weekend - now` is how long until it (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the next weekend",
+              "example": "the next weekend",
+              "outputs": {
+                "js": {
+                  "code": "core.nextWeekend()"
+                },
+                "ts": {
+                  "code": "core.nextWeekend()"
+                },
+                "py": {
+                  "code": "core.next_weekend()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TimeOfDay",
+          "ruleNames": ["time_of_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeOfDay.ts",
+          "line": 13,
+          "purpose": "Noon or midnight today, as a date -- `if now is after noon`, `antes de la medianoche` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "((noon:noon)|(midnight:midnight))",
+              "example": "noon",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(12)"
+                },
+                "ts": {
+                  "code": "core.todayAt(12)"
+                },
+                "py": {
+                  "code": "core.today_at(12)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TimeLiteral",
+          "ruleNames": ["time_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeLiteral.ts",
+          "line": 23,
+          "purpose": "A time today, written as people write it -- `9am`, `9:30am`, `9 am`, `9:30 PM`, any case; `if now is after 9am` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{number} (: {number})? (am|pm)",
+              "example": "9am",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(9)"
+                },
+                "ts": {
+                  "code": "core.todayAt(9)"
+                },
+                "py": {
+                  "code": "core.today_at(9)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DaysUntil",
+          "ruleNames": ["days_until"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DaysUntil.ts",
+          "line": 13,
+          "purpose": "How many days until a date, or since one, counting midnights -- `the days until its due`, `the days since its added` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the days ((until:until)|(since:since)) {expression:operand}",
+              "example": "the days until due",
+              "outputs": {
+                "js": {
+                  "code": "core.daysUntil(due)"
+                },
+                "ts": {
+                  "code": "core.daysUntil(due)"
+                },
+                "py": {
+                  "code": "core.days_until(due)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "StartOfTheDay",
+          "ruleNames": ["start_of_the_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/StartOfTheDay.ts",
+          "line": 12,
+          "purpose": "The moment a date's day starts or ends -- `the start of the day of now` (midnight), `the end of the day of its due` (11:59:59 PM) (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the ((start:start)|(end:end)) of the day of {expression:operand}",
+              "example": "the start of the day of now",
+              "outputs": {
+                "js": {
+                  "code": "core.startOfDay(core.now())"
+                },
+                "ts": {
+                  "code": "core.startOfDay(core.now())"
+                },
+                "py": {
+                  "code": "core.start_of_day(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DaysInTheMonth",
+          "ruleNames": ["days_in_the_month"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DaysInTheMonth.ts",
+          "line": 12,
+          "purpose": "How many days a date's month has, 28 to 31 -- `the days in the month of now`, for a calendar (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "the days in the month of {expression:operand}",
+              "example": "the days in the month of now",
+              "outputs": {
+                "js": {
+                  "code": "core.daysInMonth(core.now())"
+                },
+                "ts": {
+                  "code": "core.daysInMonth(core.now())"
+                },
+                "py": {
+                  "code": "core.days_in_month(core.now())"
                 }
               }
             }
@@ -1386,6 +1568,214 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "AsTwoDigits",
+          "ruleNames": ["as_two_digits"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsTwoDigits.ts",
+          "line": 12,
+          "purpose": "A whole number in two digits, as text, for a clock or a countdown: `the minute of now as two digits` is `05` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "(as two digits|with a leading zero)",
+              "example": "the minute of now as two digits",
+              "outputs": {
+                "js": {
+                  "code": "core.twoDigits(core.minuteOf(core.now()))"
+                },
+                "ts": {
+                  "code": "core.twoDigits(core.minuteOf(core.now()))"
+                },
+                "py": {
+                  "code": "core.two_digits(core.minute_of(core.now()))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsMeridiem",
+          "ruleNames": ["is_meridiem"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsMeridiem.ts",
+          "line": 11,
+          "purpose": "Is a date's time before noon or after -- `if now is PM`, `if its start is AM` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((am:am|AM|Am)|(pm:pm|PM|Pm))",
+              "example": "now is PM",
+              "outputs": {
+                "js": {
+                  "code": "core.isPM(core.now())"
+                },
+                "ts": {
+                  "code": "core.isPM(core.now())"
+                },
+                "py": {
+                  "code": "core.is_pm(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADuration",
+          "ruleNames": ["as_a_duration"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADuration.ts",
+          "line": 25,
+          "purpose": "How long ago a date was, or how long until it is, as text -- `its added as a duration`, `30 minutes ago`, `in 2 days`, `tomorrow` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "as (a|an)? {style:duration_style}? duration (in [units:{unit:duration_unit} (,|and)])?",
+              "example": "due as a duration",
+              "outputs": {
+                "js": {
+                  "code": "core.timeFromNow(due)"
+                },
+                "ts": {
+                  "code": "core.timeFromNow(due)"
+                },
+                "py": {
+                  "code": "core.time_from_now(due)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsWeekendDay",
+          "ruleNames": ["is_weekend_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsWeekendDay.ts",
+          "line": 11,
+          "purpose": "Is a date on the weekend -- `if now is a weekend day` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} a weekend day",
+              "example": "now is a weekend day",
+              "outputs": {
+                "js": {
+                  "code": "core.isWeekendDay(core.now())"
+                },
+                "ts": {
+                  "code": "core.isWeekendDay(core.now())"
+                },
+                "py": {
+                  "code": "core.is_weekend_day(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsBeforeOrAfter",
+          "ruleNames": ["is_before_or_after"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsBeforeOrAfter.ts",
+          "line": 14,
+          "purpose": "Is one date earlier or later than another -- `if its due is before now`, `if its start is after its end` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((before:before)|(after:after)) {expression:operand}",
+              "example": "due is before now",
+              "outputs": {
+                "js": {
+                  "code": "core.isBefore(due, core.now())"
+                },
+                "ts": {
+                  "code": "core.isBefore(due, core.now())"
+                },
+                "py": {
+                  "code": "core.is_before(due, core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsSameDayAs",
+          "ruleNames": ["is_same_day_as"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsSameDayAs.ts",
+          "line": 11,
+          "purpose": "Are two dates on the same day, whatever their times -- `if its due is the same day as now` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} the same day as {expression:operand}",
+              "example": "due is the same day as now",
+              "outputs": {
+                "js": {
+                  "code": "core.isSameDay(due, core.now())"
+                },
+                "ts": {
+                  "code": "core.isSameDay(due, core.now())"
+                },
+                "py": {
+                  "code": "core.is_same_day(due, core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayFromToday",
+          "ruleNames": ["is_day_from_today"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayFromToday.ts",
+          "line": 11,
+          "purpose": "Is a date today, tomorrow or yesterday, whatever its time -- `if its due is tomorrow` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:today)|(tomorrow:tomorrow)|(yesterday:yesterday))",
+              "example": "due is today",
+              "outputs": {
+                "js": {
+                  "code": "core.isDaysFromToday(due, 0)"
+                },
+                "ts": {
+                  "code": "core.isDaysFromToday(due, 0)"
+                },
+                "py": {
+                  "code": "core.is_days_from_today(due, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayPart",
+          "ruleNames": ["is_day_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayPart.ts",
+          "line": 16,
+          "purpose": "Is a date's time in a part of its day -- `if now is in the morning`, `if its due is at night`, Spanish `si ahora es por la mañana` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:this)|in the|at) {part:day_part}",
+              "example": "due is in the morning",
+              "outputs": {
+                "js": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "ts": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "py": {
+                  "code": "core.is_day_part(due, \"morning\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1468,11 +1858,11 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
-              "syntax": "as (a|an) (type:string|number|fraction|integer)",
+              "syntax": "as (a|an) (type:string|number|fraction|integer|date)",
               "example": "1 as a string",
               "outputs": {
                 "js": {
@@ -1629,6 +2019,10 @@
             "date_form",
             "date_or_time",
             "date_style",
+            "duration_style",
+            "duration_unit",
+            "duration_part_name",
+            "day_part",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1661,6 +2055,8 @@
             "clock_zone",
             "size_unit",
             "numbers_or_names",
+            "operation_word",
+            "verify_state",
             "there_are_how_many",
             "site_top_bar",
             "site_main_layout",
@@ -1689,10 +2085,22 @@
               "syntax": "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
             },
             {
-              "syntax": "((date:date)|(time:time)|(timestamp:timestamp))"
+              "syntax": "((date:date)|(time_zone:time zone)|(time:time)|(timestamp:timestamp))"
             },
             {
               "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(date_and_time:date and time)|(timestamp:timestamp))"
+            },
+            {
+              "syntax": "((short:short)|(long:long))"
+            },
+            {
+              "syntax": "((year:years|year|yrs|yr)|(month:months|month)|(week:weeks|week)|(day:days|day)|(hour:hours|hour|hrs|hr)|(minute:minutes|minute|mins|min)|(second:seconds|second|secs|sec))"
+            },
+            {
+              "syntax": "((days:days)|(hours:hours)|(minutes:minutes)|(seconds:seconds))"
+            },
+            {
+              "syntax": "((earlyEvening:early evening)|(lateEvening:late evening)|(morning:morning)|(afternoon:afternoon)|(evening:evening)|(night:night))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
@@ -1789,6 +2197,12 @@
             },
             {
               "syntax": "((numbers:numbers)|(names:names))"
+            },
+            {
+              "syntax": "((read:read)|(add:add)|(change:change)|(delete:delete)|(all:all))"
+            },
+            {
+              "syntax": "((verified:verified)|(failed:failed)|(unverified:unverified))"
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
@@ -2056,7 +2470,7 @@
           "ruleNames": ["plus"],
           "internal": false,
           "file": "src/spell/rules/math/Plus.ts",
-          "line": 8,
+          "line": 9,
           "purpose": "`plus` / `+`, e.g. `price + tax` -- `Precedence.sum`: tighter than comparisons, looser than `*` `/`.",
           "syntaxes": [
             {
@@ -2082,7 +2496,7 @@
           "ruleNames": ["minus"],
           "internal": false,
           "file": "src/spell/rules/math/Minus.ts",
-          "line": 10,
+          "line": 14,
           "purpose": "`minus` / `-`, e.g. `price - tax`.",
           "syntaxes": [
             {
@@ -2829,7 +3243,7 @@
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
-              "syntax": "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "on event? {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "on card-click",
               "outputs": {
                 "js": {
@@ -2844,7 +3258,7 @@
               }
             },
             {
-              "syntax": "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "on event? {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "on card click",
               "outputs": {
                 "js": {
@@ -2859,7 +3273,7 @@
               }
             },
             {
-              "syntax": "when {passive:passive_event} :? {statement_body}?",
+              "syntax": "when {passive:passive_event} (:|,)? {statement_body}?",
               "example": "a card is a view where:\n\t- when double clicked print 1\n\t- when the drag is cancelled print 2",
               "outputs": {
                 "js": {
@@ -2874,7 +3288,7 @@
               }
             },
             {
-              "syntax": "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) :? {statement_body}?",
+              "syntax": "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) (:|,)? {statement_body}?",
               "example": "a game is a thing where:\n\t- its \"high score\" is a number\n\t- its \"hint\" is text\n\t- when its high score changes:\n\t\tset its hint to \"Best yet!\"\n\t- on hint change print its hint",
               "outputs": {
                 "js": {
@@ -2889,10 +3303,10 @@
               }
             },
             {
-              "syntax": "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "when {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "when {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -2906,7 +3320,7 @@
           "purpose": "Run this when any thing of a saved type changes, whoever changed it, this page included (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "when (a|an) {type:known_type} changes :? {statement_body}?",
+              "syntax": "when (a|an) {type:known_type} changes (:|,)? {statement_body}?",
               "example": "when a recipe changes:\n\tprint the title of the recipe",
               "outputs": {
                 "js": {
@@ -3004,7 +3418,7 @@
           "purpose": "Run this when someone other than this page changes this thing (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "when someone else changes it :? {statement_body}?"
+              "syntax": "when someone else changes it (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3018,10 +3432,10 @@
           "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
           "syntaxes": [
             {
-              "syntax": "while the mouse is down (on it)? :? {statement_body}?"
+              "syntax": "while the mouse is down (on it)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while the mouse is over it :? {statement_body}?"
+              "syntax": "while the mouse is over it (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3689,7 +4103,7 @@
           "purpose": "Repeat an action `N` times, e.g. `repeat 3 times: print the number`.",
           "syntaxes": [
             {
-              "syntax": "repeat {number:expression} (time|times) :? {statement_body}?",
+              "syntax": "repeat {number:expression} (time|times) (:|,)? {statement_body}?",
               "example": "repeat 1 time:",
               "outputs": {
                 "js": {
@@ -3715,7 +4129,7 @@
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
-              "syntax": "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
+              "syntax": "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} (:|,)? {statement_body}?",
               "example": "for each card in deck:",
               "outputs": {
                 "js": {
@@ -3730,7 +4144,7 @@
               }
             },
             {
-              "syntax": "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+              "syntax": "for (each|every)? {item:kind_name} (in|of) {list:expression} (:|,)? {statement_body}?",
               "example": "for each card rank in card ranks: print card rank",
               "outputs": {
                 "js": {
@@ -3756,7 +4170,7 @@
           "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
           "syntaxes": [
             {
-              "syntax": "for (each|every)? {list:each_item_where} :? {statement_body}?",
+              "syntax": "for (each|every)? {list:each_item_where} (:|,)? {statement_body}?",
               "example": "for each card in deck which is not in stock: print it",
               "outputs": {
                 "js": {
@@ -3782,10 +4196,10 @@
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
-              "syntax": "for each? {list:expression} :? {statement_body}?"
+              "syntax": "for each? {list:expression} (:|,)? {statement_body}?"
             },
             {
-              "syntax": "for {list:each_thing} :? {statement_body}?",
+              "syntax": "for {list:each_thing} (:|,)? {statement_body}?",
               "example": "for each column: print it",
               "outputs": {
                 "js": {
@@ -4542,7 +4956,7 @@
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
-              "syntax": "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+              "syntax": "for each? {item:identifier} from {start:expression} down? to {end:expression} (:|,)? {statement_body}?",
               "example": "for each number from 1 to 10:",
               "outputs": {
                 "js": {
@@ -4592,6 +5006,57 @@
     {
       "module": "UI",
       "rules": [
+        {
+          "className": "TheResult",
+          "ruleNames": ["the_result"],
+          "internal": false,
+          "file": "src/spell/rules/UI/TheResult.ts",
+          "line": 18,
+          "purpose": "What closed the last dialog, e.g. which button closed a modal (epic `language` T155).",
+          "syntaxes": [
+            {
+              "syntax": "the result",
+              "example": "the result",
+              "outputs": {
+                "js": {
+                  "code": "core.result()"
+                },
+                "ts": {
+                  "code": "core.result()"
+                },
+                "py": {
+                  "code": "core.result()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "AnswerWord",
+          "ruleNames": ["answer_word"],
+          "internal": false,
+          "file": "src/spell/rules/UI/AnswerWord.ts",
+          "line": 17,
+          "purpose": "A button's own answer, a bare word, compared with `the result` (epic `language` P64).",
+          "syntaxes": [
+            {
+              "example": "the result is not discard",
+              "outputs": {
+                "js": {
+                  "code": "(!core.resultIs(\"discard\"))"
+                },
+                "ts": {
+                  "code": "(!core.resultIs(\"discard\"))"
+                },
+                "py": {
+                  "code": "(not core.result_is(\"discard\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
         {
           "className": "OpenPrinting",
           "ruleNames": ["open_printing"],
@@ -4701,7 +5166,7 @@
           "ruleNames": ["show_drawn"],
           "internal": false,
           "file": "src/spell/rules/UI/ShowDrawn.ts",
-          "line": 15,
+          "line": 25,
           "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
           "syntaxes": [
             {
@@ -4709,13 +5174,80 @@
               "example": "show \"you won\"",
               "outputs": {
                 "js": {
-                  "code": "core.showDrawn(\"you won\")"
+                  "code": "await core.showDrawn(\"you won\")"
                 },
                 "ts": {
-                  "code": "core.showDrawn(\"you won\")"
+                  "code": "await core.showDrawn(\"you won\")"
                 },
                 "py": {
-                  "code": "core.show_drawn(\"you won\")"
+                  "code": "await core.show_drawn(\"you won\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "ShowDrawnWith",
+          "ruleNames": ["show_drawn_with"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 58,
+          "purpose": "`show \"edit card\" with the card` -- `show_drawn`, shown with a thing (epic `language` P64).",
+          "syntaxes": [
+            {
+              "syntax": "show {name:text} with {thing:expression}",
+              "example": "show \"edit card\" with card",
+              "outputs": {
+                "js": {
+                  "code": "const it = card\nawait core.showDrawn(\"edit card\", it)"
+                },
+                "ts": {
+                  "code": "const it = card\nawait core.showDrawn(\"edit card\", it)"
+                },
+                "py": {
+                  "code": "it = card\nasyncio.run(core.show_drawn(\"edit card\", it))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "WithoutClosing",
+          "ruleNames": ["without_closing"],
+          "internal": false,
+          "file": "src/spell/rules/UI/WithoutClosing.ts",
+          "line": 19,
+          "purpose": "Runs a statement, and leaves the modal open after the action it's in: `deal the cards without closing`, `deal the cards without closing the modal` (epic `language` T155).",
+          "syntaxes": [
+            {
+              "syntax": "{call:statement} without closing",
+              "example": "print 1 without closing",
+              "outputs": {
+                "js": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "ts": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "py": {
+                  "code": "core.keep_open()\nprint(1)"
+                }
+              }
+            },
+            {
+              "syntax": "{call:statement} without closing the modal",
+              "example": "print 1 without closing the modal",
+              "outputs": {
+                "js": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "ts": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "py": {
+                  "code": "core.keep_open()\nprint(1)"
                 }
               }
             }
@@ -4935,21 +5467,21 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "line": 19,
+          "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
               "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
               "example": "prompt \"Name for the new baby?\"",
               "outputs": {
                 "js": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
+                  "code": "const it = await core.prompt(\"Name for the new baby?\")"
                 },
                 "ts": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
+                  "code": "const it = await core.prompt(\"Name for the new baby?\")"
                 },
                 "py": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
+                  "code": "it = await core.prompt(\"Name for the new baby?\")"
                 }
               }
             }
@@ -6535,7 +7067,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 51,
+          "line": 52,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -7162,22 +7694,22 @@
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
+              "syntax": "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
+              "syntax": "(on|when) {item:known_type} is? {moment:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?"
+              "syntax": "(on|when) something is? {moment:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while (a|an) {item:type} is? {over:drag_moment} it? :? {statement_body}?"
+              "syntax": "while (a|an) {item:type} is? {over:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while {item:known_type} is? {over:drag_moment} it? :? {statement_body}?"
+              "syntax": "while {item:known_type} is? {over:drag_moment} it? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "while something is? {over:drag_moment} it? :? {statement_body}?"
+              "syntax": "while something is? {over:drag_moment} it? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -7457,10 +7989,10 @@
           "purpose": "RETIRED words for waiting, as spell waits by itself (epic `language` P13, Q9): `await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
-              "syntax": "(await|wait for) :? {expression:operand}?"
+              "syntax": "(await|wait for) (:|,)? {expression:operand}?"
             },
             {
-              "syntax": "(await|wait for) :? {expression}?",
+              "syntax": "(await|wait for) (:|,)? {expression}?",
               "example": "await",
               "outputs": {
                 "js": {
@@ -7538,7 +8070,7 @@
           "purpose": "Runs its lines together, and carries on once they've all ended.",
           "syntaxes": [
             {
-              "syntax": "at the same time :? {statement_body}?",
+              "syntax": "at the same time (:|,)? {statement_body}?",
               "example": "to do something\n\tat the same time:\n\t\tprint 1\n\t\tprint 2",
               "outputs": {
                 "js": {
@@ -7564,7 +8096,7 @@
           "purpose": "Starts something and carries on, with no waiting for it: `meanwhile deal the cards`.",
           "syntaxes": [
             {
-              "syntax": "meanwhile :? {statement_body}?",
+              "syntax": "meanwhile (:|,)? {statement_body}?",
               "example": "to do something\n\tmeanwhile print 1",
               "outputs": {
                 "js": {
@@ -7629,6 +8161,23 @@
                   "code": "core.stop_process(\"dealing\")"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EveryTimer",
+          "ruleNames": ["every_timer"],
+          "internal": false,
+          "file": "src/spell/rules/async/EveryTimer.ts",
+          "line": 28,
+          "purpose": "Steps a thing or an app runs again and again while its program runs, e.g. a clock's `every second`, then `set its time to now` under it (epic `language` T159; Owen, 2026-11-17).",
+          "syntaxes": [
+            {
+              "syntax": "every {interval:measure_literal} (until {until:expression}|{times:number} times)? (:|,)? {statement_body}?"
+            },
+            {
+              "syntax": "every {unit:unit_words} (until {until:expression}|{times:number} times)? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -7716,7 +8265,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 100,
+          "line": 106,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7770,6 +8319,46 @@
             }
           ],
           "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ThingById",
+          "ruleNames": ["thing_by_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThingById.ts",
+          "line": 19,
+          "purpose": "One thing of a saved type, by its id, a number (epic `data` P50, Q77, Q91).",
+          "syntaxes": [
+            {
+              "syntax": "{type:known_type} {id:number}",
+              "example": "a job is a thing\nwork is a web server at \"https://jobs.test\":\n\t- to complete a job is at \"/jobs/{id}/complete\"\na job:\n\t- it lives in work\nto finish\n\tcomplete job 7151",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  async complete() {\n    return await core.callPlace(\"work\", \"complete\", this)\n  }\n\n  static savedIn = {\n    place: \"work\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"]\n  }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", callsServer: true, cantBeUndone: \"keeps history\" })\nexport class Work extends Place {}\nexport const work = core.place(new Work(), {\n  name: \"work\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { complete: \"/jobs/{id}/complete\" }\n})\nexport async function finish() {\n  return core.asAction({ undoneAs: \"Finish\" }, async () => await (await core.savedThingOrMissing(Job, 7151)).complete())\n}"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  async complete() {\n    return await core.callPlace(\"work\", \"complete\", this)\n  }\n\n  static savedIn = {\n    place: \"work\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"]\n  }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", callsServer: true, cantBeUndone: \"keeps history\" })\nexport class Work extends Place {}\nexport const work = core.place(new Work(), {\n  name: \"work\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { complete: \"/jobs/{id}/complete\" }\n})\nexport async function finish() {\n  return core.asAction({ undoneAs: \"Finish\" }, async () => await (await core.savedThingOrMissing(Job, 7151)).complete())\n}"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    async def complete(self) -> Any:\n        return await core.call_place(\"work\", \"complete\", self)\n\n    saved_in = {\"place\": \"work\", \"collection\": \"jobs\", \"times\": [\"created\", \"modified\"]}\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")\n\ncore.describe_action(Job, \"complete\", {\"title\": \"Complete Job\", \"calls_server\": True, \"cant_be_undone\": \"keeps history\"})\n\nclass Work(Place):\n    pass\n\nwork = core.place(\n    Work(),\n    {\n        \"name\": \"work\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jobs.test\",\n        \"operations\": {\"complete\": \"/jobs/{id}/complete\"},\n    },\n)\n\n@core.as_action({\"undone_as\": \"Finish\"})\nasync def finish() -> Any:\n    return await (await core.saved_thing_or_missing(Job, 7151)).complete()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ErrorIs",
+          "ruleNames": ["error_is"],
+          "internal": false,
+          "file": "src/spell/rules/places/ErrorIs.ts",
+          "line": 19,
+          "purpose": "Does what went wrong have this name, in Spell's words (epic `data` P50, Q95)?",
+          "syntaxes": [
+            {
+              "syntax": "the error is {name:text}"
+            }
+          ],
+          "aliases": ["expression"]
         },
         {
           "className": "ThingWithId",
@@ -8196,6 +8785,58 @@
           "aliases": ["statement"]
         },
         {
+          "className": "TokenFrom",
+          "ruleNames": ["token_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/TokenFrom.ts",
+          "line": 15,
+          "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\tits token comes from \"https://auth.acme.test/api-keys/{key id}/token\", made with the secret \"ACME_API_KEY\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\"\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\"\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DataIsPrivate",
+          "ruleNames": ["data_is_private"],
+          "internal": false,
+          "file": "src/spell/rules/places/DataIsPrivate.ts",
+          "line": 13,
+          "purpose": "A place's real rows stay on this machine, out of the project (epic `data` P49, Q55 C).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} data is private (,? located in {path:text})?",
+              "example": "netbox is a web server at \"https://demo.netbox.dev\"\n\tits data is private, located in \"~/.spell/places/netbox\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\"\n})"
+                },
+                "ts": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\"\n})"
+                },
+                "py": {
+                  "code": "class Netbox(Place):\n    pass\n\nnetbox = core.place(\n    Netbox(),\n    {\n        \"name\": \"netbox\",\n        \"kind\": \"web server\",\n        \"at\": \"https://demo.netbox.dev\",\n        \"private_data_in\": \"~/.spell/places/netbox\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeyGoesInHeader",
           "ruleNames": ["key_goes_in_header"],
           "internal": false,
@@ -8607,6 +9248,98 @@
           "aliases": ["statement"]
         },
         {
+          "className": "OperationName",
+          "ruleNames": ["operation_name"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationName.ts",
+          "line": 10,
+          "purpose": "One operation a place may let be done, in an `enabled operations are ...` line (epic `data` P49).",
+          "syntaxes": [
+            {
+              "example": "add",
+              "outputs": {
+                "js": {
+                  "code": "add"
+                },
+                "ts": {
+                  "code": "add"
+                },
+                "py": {
+                  "error": "writes itself, in javascript:  no Python writer"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "EnabledOperations",
+          "ruleNames": ["enabled_operations"],
+          "internal": false,
+          "file": "src/spell/rules/places/EnabledOperations.ts",
+          "line": 36,
+          "purpose": "What a place lets be done to a type's things (epic `data` P49, Q47 / J264 D, Q57-Q63).",
+          "syntaxes": [
+            {
+              "syntax": "enabled operations? are? :? {operations:operation_names}",
+              "example": "a \"job\" is a thing\n\tit lives in netbox\n\tenabled operations are add, change, complete",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"complete\"\n    ], select: [] }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"complete\"\n    ], select: [] }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"jobs\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [\"add\", \"change\", \"complete\"],\n    }\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")"
+                }
+              }
+            },
+            {
+              "syntax": "all operations are disabled",
+              "example": "a \"job session\" is a thing\n\tit lives in netbox\n\tall operations are disabled",
+              "outputs": {
+                "js": {
+                  "code": "export class JobSession extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"job_sessions\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class JobSession extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"job_sessions\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}"
+                },
+                "py": {
+                  "code": "class JobSession(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"job_sessions\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [],\n    }\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TypeVerified",
+          "ruleNames": ["type_verified"],
+          "internal": false,
+          "file": "src/spell/rules/places/TypeVerified.ts",
+          "line": 15,
+          "purpose": "Whether a type read from an API's description was tried against a running server (epic `data` P49, Q56 C, Q62 B).",
+          "syntaxes": [
+            {
+              "syntax": "this? type is? {state:verify_state}",
+              "example": "a \"job\" is a thing\n\tit lives in netbox\n\tthis type is verified",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    saved_in = {\"place\": \"netbox\", \"collection\": \"jobs\", \"times\": [\"created\", \"modified\"]}\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ShowThemAtATime",
           "ruleNames": ["show_them_at_a_time"],
           "internal": false,
@@ -8641,7 +9374,7 @@
           "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "in one go :? {statement_body}?",
+              "syntax": "in one go (:|,)? {statement_body}?",
               "example": "in one go: print 1",
               "outputs": {
                 "js": {
@@ -8652,6 +9385,58 @@
                 },
                 "py": {
                   "code": "await core.in_one_go(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WrapperAction",
+          "ruleNames": ["wrapper_action"],
+          "internal": false,
+          "file": "src/spell/rules/places/WrapperAction.ts",
+          "line": 32,
+          "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
+          "syntaxes": [
+            {
+              "syntax": "to {signature:method_signature} :? {statement_body}?",
+              "example": "a job is a thing\nwork is a web server at \"https://jobs.test\":\n\t- to complete a job is at \"/jobs/{id}/complete\"\na job:\n\t- it lives in work\nto complete a job\n\tprint \"about to\"\n\tcall work\n\tprint \"done\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  async complete() {\n    return await core.callPlace(\"work\", \"complete\", this)\n  }\n\n  async aroundComplete(serverCall) {\n    core.console.log(\"about to\")\n    await serverCall()\n    core.console.log(\"done\")\n  }\n\n  static savedIn = {\n    place: \"work\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"]\n  }\n\n  static { this.declareProp(\"created\", { type: \"date\" }) }\n  get created() { return this.getProp(\"created\") }\n  set created(value) { this.setProp(\"created\", value) }\n\n  static { this.declareProp(\"modified\", { type: \"date\" }) }\n  get modified() { return this.getProp(\"modified\") }\n  set modified(value) { this.setProp(\"modified\", value) }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", callsServer: true, cantBeUndone: \"keeps history\" })\ncore.addActionHook(Job, \"complete\", { moment: \"around\", hook: \"aroundComplete\", level: \"app\" })\nexport class Work extends Place {}\nexport const work = core.place(new Work(), {\n  name: \"work\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { complete: \"/jobs/{id}/complete\" }\n})"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  async complete() {\n    return await core.callPlace(\"work\", \"complete\", this)\n  }\n\n  async aroundComplete(serverCall: any ) {\n    core.console.log(\"about to\")\n    await serverCall()\n    core.console.log(\"done\")\n  }\n\n  static savedIn = {\n    place: \"work\",\n    collection: \"jobs\",\n    times: [\"created\", \"modified\"]\n  }\n\n  @prop({ type: \"date\" })\n  accessor created!: any\n\n  @prop({ type: \"date\" })\n  accessor modified!: any\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", callsServer: true, cantBeUndone: \"keeps history\" })\ncore.addActionHook(Job, \"complete\", { moment: \"around\", hook: \"aroundComplete\", level: \"app\" })\nexport class Work extends Place {}\nexport const work = core.place(new Work(), {\n  name: \"work\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { complete: \"/jobs/{id}/complete\" }\n})"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    async def complete(self) -> Any:\n        return await core.call_place(\"work\", \"complete\", self)\n\n    async def around_complete(self, server_call: Any) -> None:\n        print(\"about to\")\n        server_call()\n        print(\"done\")\n\n    saved_in = {\"place\": \"work\", \"collection\": \"jobs\", \"times\": [\"created\", \"modified\"]}\n\n    created = prop(type=\"date\")\n\n    modified = prop(type=\"date\")\n\ncore.describe_action(Job, \"complete\", {\"title\": \"Complete Job\", \"calls_server\": True, \"cant_be_undone\": \"keeps history\"})\ncore.add_action_hook(Job, \"complete\", {\"moment\": \"around\", \"hook\": \"around_complete\", \"level\": \"app\"})\n\nclass Work(Place):\n    pass\n\nwork = core.place(\n    Work(),\n    {\n        \"name\": \"work\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jobs.test\",\n        \"operations\": {\"complete\": \"/jobs/{id}/complete\"},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AnyServerCallFails",
+          "ruleNames": ["any_server_call_fails"],
+          "internal": false,
+          "file": "src/spell/rules/places/AnyServerCallFails.ts",
+          "line": 26,
+          "purpose": "The app's own steps for every server action that fails, run last (epic `data` P50, Q90, Q93).",
+          "syntaxes": [
+            {
+              "syntax": "(when|if) any server call fails (:|,)? {statement_body}?",
+              "example": "when any server call fails\n\tif the error is \"not authorized\"\n\t\tprint \"sign in\"\n\totherwise if the error is \"limit\"\n\t\tpass the error\n\totherwise\n\t\tdo nothing",
+              "outputs": {
+                "js": {
+                  "code": "core.addServerFailureStep((error) => {\n  if (core.errorIs(error, \"not authorized\")) core.console.log(\"sign in\")\n  else if (core.errorIs(error, \"limit\")) return core.passTheError()\n  else core.doNothing()\n})"
+                },
+                "ts": {
+                  "code": "core.addServerFailureStep((error) => {\n  if (core.errorIs(error, \"not authorized\")) core.console.log(\"sign in\")\n  else if (core.errorIs(error, \"limit\")) return core.passTheError()\n  else core.doNothing()\n})"
+                },
+                "py": {
+                  "code": "def _each_1(error: Any) -> Any:\n    if core.error_is(error, \"not authorized\"):\n        print(\"sign in\")\n    elif core.error_is(error, \"limit\"):\n        return core.pass_the_error()\n    else:\n        core.do_nothing()\n\ncore.add_server_failure_step(_each_1)"
                 }
               }
             }
@@ -8761,11 +9546,11 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 12,
+          "line": 15,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
-              "syntax": "{collection:plural_type} live at {path:text}"
+              "syntax": "{collection:plural_type} live at {path:text} {nested_statements}?"
             },
             {
               "syntax": "{collection:plural_type} are found at {path:text}"
@@ -9045,7 +9830,7 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 38,
+          "line": 39,
           "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
@@ -9059,7 +9844,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
@@ -9100,7 +9885,7 @@
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "while (waiting|loading) :? {statement_body}?"
+              "syntax": "while (waiting|loading) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9114,7 +9899,7 @@
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "if there are none :? {statement_body}?"
+              "syntax": "if there are none (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9198,7 +9983,7 @@
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "if that fails :? {statement_body}?"
+              "syntax": "if that fails (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9260,6 +10045,48 @@
           "aliases": ["statement"]
         },
         {
+          "className": "CallTheServer",
+          "ruleNames": ["call_the_server"],
+          "internal": false,
+          "file": "src/spell/rules/places/WrapperAction.ts",
+          "line": 99,
+          "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
+          "syntaxes": [
+            {
+              "syntax": "call (the server|{place:identifier})"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Nevermind",
+          "ruleNames": ["nevermind"],
+          "internal": false,
+          "file": "src/spell/rules/places/FailureWords.ts",
+          "line": 17,
+          "purpose": "In a failure step, the error is caught, and nothing more is done (epic `data` P50, Q88).",
+          "syntaxes": [
+            {
+              "syntax": "(nevermind|never mind)"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PassTheError",
+          "ruleNames": ["pass_the_error"],
+          "internal": false,
+          "file": "src/spell/rules/places/FailureWords.ts",
+          "line": 37,
+          "purpose": "In a failure step, send the error on, to the next step and in the end Spell's notice (epic `data` P50, Q87), as `pass event` does an event.",
+          "syntaxes": [
+            {
+              "syntax": "pass the error"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "HelpfulWord",
           "ruleNames": ["helpful_word"],
           "internal": false,
@@ -9306,6 +10133,20 @@
           "syntaxes": [
             {
               "syntax": "[{identifier} (,|and)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "OperationNames",
+          "ruleNames": ["operation_names"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationNames.ts",
+          "line": 9,
+          "purpose": "The operations an `enabled operations are ...` line names, e.g. `add, change and delete` (epic `data` P49).",
+          "syntaxes": [
+            {
+              "syntax": "[{operation_name} (,|and|or)]"
             }
           ],
           "aliases": []
@@ -9551,7 +10392,7 @@
           "ruleNames": ["action_button"],
           "internal": false,
           "file": "src/spell/rules/JSX/ActionButton.ts",
-          "line": 52,
+          "line": 73,
           "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
           "syntaxes": [
             {
@@ -9601,7 +10442,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 106,
+          "line": 121,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -10146,7 +10987,7 @@
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
-              "syntax": "if {condition:expression} (then|:)? {statement_body}?",
+              "syntax": "if {condition:expression} (then|:|,)? {statement_body}?",
               "example": "if a",
               "outputs": {
                 "js": {
@@ -10172,7 +11013,7 @@
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
-              "syntax": "(otherwise|else) if {condition:expression} (then|:)? {statement_body}?",
+              "syntax": "(otherwise|else) if {condition:expression} (then|:|,)? {statement_body}?",
               "example": "otherwise if a",
               "outputs": {
                 "js": {
@@ -10198,7 +11039,7 @@
           "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
-              "syntax": "(otherwise|else) :? {statement_body}?",
+              "syntax": "(otherwise|else) (:|,)? {statement_body}?",
               "example": "otherwise",
               "outputs": {
                 "js": {
@@ -10498,7 +11339,7 @@
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {
-              "syntax": "when {signature:method_signature} :? {statement_body}?",
+              "syntax": "when {signature:method_signature} (:|,)? {statement_body}?",
               "example": "a task is a thing where:\n\t- when created (with title as text, done as a choice):\n\t\tprint the title",
               "outputs": {
                 "js": {
@@ -10639,7 +11480,7 @@
           "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
           "syntaxes": [
             {
-              "syntax": "after {signature:method_signature} :? {statement_body}?",
+              "syntax": "after {signature:method_signature} (:|,)? {statement_body}?",
               "example": "a card is a thing\na pile is a list of cards\nto put a card on a pile\n\tadd the card to the pile\nafter putting a card on a pile\n\tprint the card\nafter putting a card on a pile\n\tprint the pile",
               "outputs": {
                 "js": {
@@ -10650,6 +11491,84 @@
                 },
                 "py": {
                   "code": "class Card(Thing):\n    def put_on_pile(self, pile: Pile) -> None:\n        pile.append(self)\n\n    def after_put_on_pile(self, pile: Pile) -> None:\n        core.console.log(self)\n\n    def after_put_on_pile_2(self, pile: Pile) -> None:\n        core.console.log(pile)\n\ncore.describe_action(Card, \"put_on_pile\", {\"title\": \"Put Card on Pile\", \"undone_as\": \"Put Card on Pile\"})\ncore.add_after_hook(Card, \"put_on_pile\", {\"hook\": \"after_put_on_pile\"})\ncore.add_after_hook(Card, \"put_on_pile\", {\"hook\": \"after_put_on_pile_2\"})\n\nclass Pile(List):\n    item_type = Card"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "BeforeHook",
+          "ruleNames": ["before_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/BeforeHook.ts",
+          "line": 15,
+          "purpose": "Steps that run before an action's own, from any file (epic `data` P50, Q81).",
+          "syntaxes": [
+            {
+              "syntax": "before {signature:method_signature} (:|,)? {statement_body}?",
+              "example": "a job is a thing\n\tits \"status\" is text\nto complete a job\n\tset the job's status to \"done\"\nbefore completing a job\n\tcancel if the job's status is \"done\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static { this.declareProp(\"status\", { type: \"text\" }) }\n  get status() { return this.getProp(\"status\") }\n  set status(value) { this.setProp(\"status\", value) }\n\n  complete() {\n    this.status = \"done\"\n  }\n\n  beforeComplete() {\n    if (this.status === \"done\") core.cancel()\n  }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", undoneAs: \"Complete Job\" })\ncore.addActionHook(Job, \"complete\", { moment: \"before\", hook: \"beforeComplete\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  @prop({ type: \"text\" })\n  accessor status!: string\n\n  complete() {\n    this.status = \"done\"\n  }\n\n  beforeComplete() {\n    if (this.status === \"done\") core.cancel()\n  }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", undoneAs: \"Complete Job\" })\ncore.addActionHook(Job, \"complete\", { moment: \"before\", hook: \"beforeComplete\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    status = prop(type=\"text\")\n\n    def complete(self) -> None:\n        self.status = \"done\"\n\n    def before_complete(self) -> None:\n        if self.status == \"done\":\n            core.cancel()\n\ncore.describe_action(Job, \"complete\", {\"title\": \"Complete Job\", \"undone_as\": \"Complete Job\"})\ncore.add_action_hook(Job, \"complete\", {\"moment\": \"before\", \"hook\": \"before_complete\", \"level\": \"app\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhileHook",
+          "ruleNames": ["while_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/WhileHook.ts",
+          "line": 17,
+          "purpose": "Steps that run as an action starts, whose changes are put back when it ends, worked or failed (epic `data` P50, Q94).",
+          "syntaxes": [
+            {
+              "syntax": "while {signature:method_signature} (:|,)? {statement_body}?",
+              "example": "a job is a thing\n\tits \"status\" is text\nto complete a job\n\tset the job's status to \"done\"\nwhile completing a job\n\tset the job's status to \"busy\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static { this.declareProp(\"status\", { type: \"text\" }) }\n  get status() { return this.getProp(\"status\") }\n  set status(value) { this.setProp(\"status\", value) }\n\n  complete() {\n    this.status = \"done\"\n  }\n\n  whileComplete() {\n    this.status = \"busy\"\n  }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", undoneAs: \"Complete Job\" })\ncore.addActionHook(Job, \"complete\", { moment: \"while\", hook: \"whileComplete\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  @prop({ type: \"text\" })\n  accessor status!: string\n\n  complete() {\n    this.status = \"done\"\n  }\n\n  whileComplete() {\n    this.status = \"busy\"\n  }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", undoneAs: \"Complete Job\" })\ncore.addActionHook(Job, \"complete\", { moment: \"while\", hook: \"whileComplete\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    status = prop(type=\"text\")\n\n    def complete(self) -> None:\n        self.status = \"done\"\n\n    def while_complete(self) -> None:\n        self.status = \"busy\"\n\ncore.describe_action(Job, \"complete\", {\"title\": \"Complete Job\", \"undone_as\": \"Complete Job\"})\ncore.add_action_hook(Job, \"complete\", {\"moment\": \"while\", \"hook\": \"while_complete\", \"level\": \"app\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FailureHook",
+          "ruleNames": ["failure_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/FailureHook.ts",
+          "line": 31,
+          "purpose": "Steps that run when an action fails, from any file (epic `data` P50, Q82, Q87-Q89).",
+          "syntaxes": [
+            {
+              "syntax": "(if|when) {signature:method_signature} fails (:|,)? {statement_body}?",
+              "example": "a job is a thing\n\tits \"status\" is text\nto complete a job\n\tset the job's status to \"done\"\nif completing a job fails\n\tif the error is \"not found\"\n\t\tnevermind\n\totherwise if the error is \"offline\"\n\t\tpass the error",
+              "outputs": {
+                "js": {
+                  "code": "export class Job extends Thing {\n  static { this.declareProp(\"status\", { type: \"text\" }) }\n  get status() { return this.getProp(\"status\") }\n  set status(value) { this.setProp(\"status\", value) }\n\n  complete() {\n    this.status = \"done\"\n  }\n\n  failedComplete(error) {\n    if (core.errorIs(error, \"not found\")) return\n    else if (core.errorIs(error, \"offline\")) return core.passTheError()\n    return core.passTheError()\n  }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", undoneAs: \"Complete Job\" })\ncore.addActionHook(Job, \"complete\", { moment: \"failed\", hook: \"failedComplete\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Job extends Thing {\n  @prop({ type: \"text\" })\n  accessor status!: string\n\n  complete() {\n    this.status = \"done\"\n  }\n\n  failedComplete(error: any ) {\n    if (core.errorIs(error, \"not found\")) return\n    else if (core.errorIs(error, \"offline\")) return core.passTheError()\n    return core.passTheError()\n  }\n}\ncore.describeAction(Job, \"complete\", { title: \"Complete Job\", undoneAs: \"Complete Job\" })\ncore.addActionHook(Job, \"complete\", { moment: \"failed\", hook: \"failedComplete\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Job(Thing):\n    status = prop(type=\"text\")\n\n    def complete(self) -> None:\n        self.status = \"done\"\n\n    def failed_complete(self, error: Any) -> Any:\n        if core.error_is(error, \"not found\"):\n            return\n        elif core.error_is(error, \"offline\"):\n            return core.pass_the_error()\n        return core.pass_the_error()\n\ncore.describe_action(Job, \"complete\", {\"title\": \"Complete Job\", \"undone_as\": \"Complete Job\"})\ncore.add_action_hook(Job, \"complete\", {\"moment\": \"failed\", \"hook\": \"failed_complete\", \"level\": \"app\"})"
                 }
               }
             }

@@ -193,6 +193,66 @@ describe("@drawn", () => {
     expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
   })
 
+  test('<modal><action "..."/></modal>:  its button closes the modal once its click has run (language T155)', () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    const game = new Game()
+    draw(() => core.drawAction(game, "restartTheGame", { class: "Big", answer: "ok", "in-dialog": true }))
+    const button = element.querySelector("ui-button")
+    expect(button?.getAttribute("class")).toBe("Big")
+    expect(button?.hasAttribute("in-dialog")).toBe(false)
+    expect(button?.hasAttribute("answer")).toBe(false)
+  })
+
+  test("<action ok />, <action cancel /> with no action of that name:  a button labelled OK or Cancel (language T155)", () => {
+    const game = new Thing()
+    draw(
+      () =>
+        [
+          core.drawAction(game, "ok", { answer: "ok", "in-dialog": true }),
+          core.drawAction(game, "cancel", { answer: "cancel", "in-dialog": true })
+        ] as unknown as Drawing
+    )
+    const buttons = [...element.querySelectorAll("ui-button")]
+    expect(buttons.map((button) => button.textContent)).toEqual(["OK", "Cancel"])
+    expect(buttons.some((button) => button.hasAttribute("disabled"))).toBe(false)
+  })
+
+  test("<action discard /> with no action of that name:  a button labelled by its title, else its word (language P64)", () => {
+    const game = new Thing()
+    draw(
+      () =>
+        [
+          core.drawAction(game, "discard", { answer: "discard", "in-dialog": true }),
+          core.drawAction(game, "discard", { answer: "discard", title: "Discard your changes", "in-dialog": true })
+        ] as unknown as Drawing
+    )
+    const buttons = [...element.querySelectorAll("ui-button")]
+    expect(buttons.map((button) => button.textContent)).toEqual(["Discard", "Discard your changes"])
+    expect(buttons.some((button) => button.hasAttribute("disabled"))).toBe(false)
+  })
+
+  test('<modal "edit card">:  draws what it was shown with, the thing itself;  never shown, the drawing\'s (language P64)', () => {
+    core.resetRuntime()
+    const game = new Card({ rank: "king" })
+    const card = new Card({ rank: "ace" })
+    const shown = (it: unknown) => h("ui-text", () => (it as Card).rank) as unknown as Drawing
+    draw(() => h("ui-modal", { id: "edit-card" }, () => core.drawShown("edit card", game, shown)) as unknown as Drawing)
+    expect(element.querySelector("ui-text")?.textContent).toBe("king")
+    // as Spell UI's `<ui-modal>` has it
+    ;(element.querySelector("ui-modal") as unknown as { visible: boolean }).visible = false
+    void core.showDrawn("edit card", card)
+    core.flush()
+    expect(element.querySelector("ui-text")?.textContent).toBe("ace")
+    // the thing itself:  a change to it shows, as it would anywhere it's drawn
+    card.rank = 2
+    core.flush()
+    expect(element.querySelector("ui-text")?.textContent).toBe("2")
+    core.hideDrawn("edit card")
+  })
+
   test('<context-menu "game menu" />, context-menu="game menu":  a menu drawn with that name, reused (language T156)', () => {
     class Game extends Thing {
       restartTheGame(): void {}

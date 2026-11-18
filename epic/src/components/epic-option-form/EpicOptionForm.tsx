@@ -3,7 +3,8 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { Pictures, ReviewClient } from "spell/epic/review"
+import { Pictures, ReviewClient, type PictureSaver } from "spell/epic/review"
+import { PictureWords } from "spell/epic/components/epic-picture/PictureWords"
 import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/EpicTextBox"
 
 import { epicOptionFormVocabulary } from "./EpicOptionForm.en"
@@ -18,13 +19,21 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   pencil), in their shadow roots, while the page is reviewed.
  * - In a person's violet (their voice), in its order:
  *   - its heading (`New choice`, `Edit B`)
- *   - the title, which takes the focus as it's drawn
- *   - a note that grows as it's typed (`<epic-text-box type="note">`)
- *   - a picture:  pasted while the form has the focus, dropped on its area, or chosen;  saved through the page server
- *     at once (`ReviewClient.saveShot()`, `POST shot`, under the set's mark id `for`), shown meanwhile
- *   - Save (Ctrl / Cmd + Enter, or Enter in the title) and Cancel (Escape)
- * - It saves nothing itself:  `epic-option-saved` hands the element drawing it the title, note and picture's path,
- *   which go into the set's mark (`SetChange`);  `epic-option-canceled` closes it.
+ *   - ONE box that grows as it's typed (`<epic-text-box type="note">`;  epic `epic-engine` I334, Owen:  "Change this to
+ *     be a single textarea"), which takes the focus as it's drawn:
+ *     - its first line is the option's title, the rest its note
+ *     - every picture pasted or dropped in it is saved through the page server at once (`ReviewClient.saveShot()`,
+ *       `POST shot`, under the set's mark id `for`), and its words go in at the cursor, labelled, `![IMG2](<path>)`
+ *       (`Pictures.intoWords()`, as a comment's field takes them;  several since epic `epic-engine` P75);  the note
+ *       carries them from there
+ *     - under it, a strip of their labelled thumbnails, each with its x:  the form is never sent, so taking one out
+ *       renumbers the later ones, in the words that name them too (P75's choice B)
+ *   - Save (Ctrl / Cmd + Enter), Cancel (Escape), and a small picture button, for a file the page can't be handed
+ *     by a paste or a drop (VS Code's side bar never lets a dragged file reach the page)
+ * - It saves nothing itself:  `epic-option-saved` hands the element drawing it the title and the note, which go into
+ *   the set's mark (`SetChange`);  `epic-option-canceled` closes it.
+ * - An added option from before I334 kept its picture apart (`shot`):  the form starts with its words at the note's
+ *   end, so a save carries it in the note.
  * - Position in the import graph:  the review client and `<epic-text-box>`'s DOM element (a type);  never the choices
  *   family, which draws it.
  ****************/
@@ -32,34 +41,36 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
   @E.proto static vocabulary = epicOptionFormVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { "epic-tooltip": tooltipCSS, "epic-option-form": formCSS },
-    // the form's fields take the focus themselves
+    // the form's box takes the focus itself
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
-  /** The picture shown:  a pasted one's data URL while it saves, else its saved path (`shot` to start). */
-  @E.state accessor shown: string | undefined = undefined
-
-  /** The picture's saved path, from the epic page's folder;  `undefined` while none is (or it's saving). */
-  @E.state accessor savedShot: string | undefined = undefined
+  /** How many pictures are being saved:  Save waits for them. */
+  @E.state accessor savingCount = 0
 
   /** A picture is being saved:  Save waits. */
   @E.cssState("saving")
-  @E.state
-  accessor isSaving = false
+  get isSaving(): boolean {
+    return this.savingCount > 0
+  }
 
-  /** The form's fields, as drawn. */
-  private titleInput: HTMLInputElement | undefined
-  private noteInput: DOMTextBoxElement | undefined
+  /** The form's one box, as drawn. */
+  private wordsBox: DOMTextBoxElement | undefined
 
-  /** While connected:  the picture it starts with, and pastes on the page while the form has the focus. */
+  /** The box's words as typed:  what its strip of pictures follows. */
+  @E.state accessor words = ""
+
+  /**
+   * While connected:  a picture pasted or dropped in its box goes into its words (heard on the element:  both events
+   * cross shadow roots);  the box takes the focus.
+   */
   @E.whileConnected
   protected startForm() {
-    this.savedShot ??= this.shot || undefined
-    this.shown ??= this.savedShot
-    const listeners = new AbortController()
-    document.addEventListener("paste", this.onPaste, { signal: listeners.signal })
-    E.afterSolidUpdate(() => this.titleInput?.focus({ preventScroll: true }))
-    return () => listeners.abort()
+    const stop = Pictures.intoWords(this.domElement, this.pictureSaver, { renumber: true })
+    E.afterSolidUpdate(() => {
+      if (this.wordsBox) void this.focusBox(this.wordsBox)
+    })
+    return stop
   }
 
   render(): JSX.Element {
@@ -67,7 +78,7 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
       <form
         class="option-form"
         part={this.partForName("base")}
-        aria-label={this.heading ?? this.translationForKey("title")}
+        aria-label={this.heading ?? this.translationForKey("words")}
         onSubmit={(event) => {
           event.preventDefault()
           this.save()
@@ -79,30 +90,22 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
             {this.heading}
           </span>
         </Show>
-        <input
-          ref={(element) => {
-            this.titleInput = element
-            element.value = this.optionTitle ?? ""
-          }}
-          class="title-input"
-          part={this.partForName("title")}
-          type="text"
-          maxlength="300"
-          placeholder={this.translationForKey("title")}
-          aria-label={this.translationForKey("title")}
-        />
         <epic-text-box
           ref={(element: HTMLElement) => {
-            this.noteInput = element as DOMTextBoxElement
-            this.noteInput.value = this.note ?? ""
+            this.wordsBox = element as DOMTextBoxElement
+            this.wordsBox.value = this.startWords
+            this.words = this.startWords
           }}
-          part={this.partForName("note")}
+          part={this.partForName("words")}
           type="note"
           max-height="40vh"
-          placeholder={this.translationForKey("note")}
-          label={this.translationForKey("note")}
+          placeholder={this.translationForKey("words")}
+          label={this.translationForKey("wordsLabel")}
         />
-        {this.picture()}
+        {PictureWords.stripOf(
+          () => this.words,
+          (label) => this.removePicture(label)
+        )}
         <span class="actions" part={this.partForName("actions")}>
           <button type="submit" data-color="green" disabled={this.isSaving} title={this.translationForKey("saveTip")}>
             <ui-icon name="check" />
@@ -111,96 +114,95 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
           <button type="button" title={this.translationForKey("cancelTip")} onClick={() => this.cancel()}>
             {this.translationForKey("cancel")}
           </button>
+          {/* VS Code's side bar never lets a dragged file reach the page:  a chooser does */}
+          <button
+            type="button"
+            class="choose"
+            part={this.partForName("choose")}
+            aria-label={this.translationForKey("choose")}
+            title={this.translationForKey("choose")}
+            onClick={(event: MouseEvent) =>
+              (event.currentTarget as HTMLElement).parentElement
+                ?.querySelector<HTMLInputElement>("input[type=file]")
+                ?.click()
+            }
+          >
+            <ui-icon name="file image" />
+          </button>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            onChange={(event: Event) => this.onChoose(event.currentTarget as HTMLInputElement)}
+          />
         </span>
       </form>
     )
   }
 
-  /** The picture's area:  where to paste, drop or choose one;  its thumbnail once there is one, with a ×. */
-  private picture(): JSX.Element {
-    return (
-      <div
-        class="picture"
-        part={this.partForName("picture")}
-        role="group"
-        aria-label={this.translationForKey("paste")}
-        onDragOver={(event: DragEvent) => event.preventDefault()}
-        onDrop={(event: DragEvent) => this.onDrop(event)}
-      >
-        <Show
-          when={this.shown}
-          fallback={
-            <>
-              <span class="words">{this.translationForKey("paste")}</span>
-              {/* VS Code's side bar never lets a dragged file reach the page:  a chooser does */}
-              <ui-button
-                appearance="basic"
-                size="mini"
-                icon="file image"
-                onClick={(event: MouseEvent) =>
-                  (event.currentTarget as HTMLElement).parentElement?.querySelector("input")?.click()
-                }
-              >
-                {this.translationForKey("choose")}
-              </ui-button>
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(event: Event) => this.onChoose(event.currentTarget as HTMLInputElement)}
-              />
-            </>
-          }
-        >
-          {(src) => (
-            <>
-              <img class="thumb" src={src()} alt="" />
-              <Show when={this.isSaving}>
-                <span class="words">{this.translationForKey("saving")}</span>
-              </Show>
-              <ui-button
-                appearance="circular basic"
-                size="mini"
-                icon="xmark"
-                aria-label={this.translationForKey("removeShot")}
-                title={this.translationForKey("removeShot")}
-                onClick={() => this.removeShot()}
-              />
-            </>
-          )}
-        </Show>
-      </div>
-    )
+  /**
+   * What the box starts with:  the title, then the note on the lines under it;  an old added option's picture
+   * (`shot`, from before I334) as its words at the end.
+   */
+  private get startWords(): string {
+    const typed = this.note?.trim() ?? ""
+    const shot = this.shot ? Pictures.wordsFor(this.shot, Pictures.nextLabel(typed)) : ""
+    const note = [typed, shot].filter(Boolean).join("\n\n")
+    return [this.optionTitle?.trim() ?? "", note].filter(Boolean).join("\n")
+  }
+
+  /** A key typed, or a picture put in:  the strip follows the box's native field, which changes first. */
+  @E.on("input")
+  protected onTyped() {
+    this.words = this.wordsBox?.textarea?.value ?? this.wordsBox?.value ?? ""
+  }
+
+  /** Its box's field takes the focus, once the box and its `<ui-textarea>` have drawn.  NEVER rejects. */
+  private async focusBox(box: DOMTextBoxElement) {
+    await box.ready.catch(() => undefined)
+    const field = box.shadowRoot?.querySelector<HTMLElement & { ready?: Promise<void> }>(FIELD_TAG)
+    await field?.ready?.catch(() => undefined)
+    box.textarea?.focus({ preventScroll: true })
   }
 
   ////////////////
   // ## Events
   ////////////////
 
-  /** Enter in the title, or Ctrl / Cmd + Enter:  save;  Escape:  cancel. */
+  /** Ctrl / Cmd + Enter:  save;  Escape:  cancel.  Enter alone types a new line:  the note's. */
   @E.untracked
   private onKey(event: KeyboardEvent) {
     if (event.key === "Escape") {
       event.stopPropagation()
       this.cancel()
-    } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey || event.target === this.titleInput)) {
+    } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault()
       this.save()
     }
   }
 
-  /** Save:  a title is needed;  `epic-option-saved` hands over what's typed. */
+  /**
+   * Save:  the box's first line is the title (one is needed, and not a picture), the rest the note;
+   * `epic-option-saved` hands them over.
+   */
   @E.untracked
   private save() {
     if (this.isSaving) return
-    const title = this.titleInput?.value.trim() ?? ""
-    if (!title) {
-      this.titleInput?.focus()
-      ReviewClient.forPage().notify(this.translationForKey("needsTitle"))
+    const [firstLine = "", ...rest] = (this.wordsBox?.value ?? "").trim().split("\n")
+    const title = firstLine.trim()
+    const problem =
+      !title || Pictures.piecesOf(title).some((piece) => typeof piece !== "string")
+        ? "needsTitle"
+        : title.length > TITLE_MAX
+          ? "titleTooLong"
+          : undefined
+    if (problem) {
+      this.wordsBox?.textarea?.focus()
+      ReviewClient.forPage().notify(this.translationForKey(problem))
       return
     }
-    const note = this.noteInput?.value.trim() ?? ""
-    this.send("epic-option-saved", { title, note, ...(this.savedShot && { shot: this.savedShot }) })
+    this.send("epic-option-saved", { title, note: rest.join("\n").trim() })
   }
 
   /** Cancel:  `epic-option-canceled`;  the element drawing it closes it. */
@@ -209,64 +211,52 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
     this.send("epic-option-canceled", {})
   }
 
-  /** A paste on the page while the form has the focus:  an image in it is the option's picture. */
-  private readonly onPaste = (event: ClipboardEvent) => {
-    if (!this.domElement.matches(":focus-within")) return
-    const file = Pictures.fileOf(event)
-    if (!file) return
-    event.preventDefault()
-    void this.takeShot(file)
-  }
-
-  /** A file chosen with the picture's chooser. */
+  /** Files chosen with the picture button:  saved, their words where the box's cursor is, in order. */
   @E.untracked
   private onChoose(input: HTMLInputElement) {
-    const file = input.files?.[0]
+    const files = Array.from(input.files ?? [])
     input.value = ""
-    if (file) void this.takeShot(file)
-  }
-
-  /** A file dropped on the picture's area. */
-  @E.untracked
-  private onDrop(event: DragEvent) {
-    event.preventDefault()
-    const file = Pictures.fileOf(event)
-    if (file) void this.takeShot(file)
+    const textarea = this.wordsBox?.textarea
+    if (files.length && textarea) void Pictures.putAllInto(textarea, files, this.pictureSaver)
   }
 
   /**
-   * Take `file` as the option's picture:  shown at once, saved through the page server (`POST shot`);  its path is
-   * what Save hands over.
-   * - not an image, or over 8 MB:  a notice says so
-   * - NEVER throws:  a failed save is the client's own notice, and the picture goes
+   * A picture's x in the strip:  its words taken out of the box, the later labels moved down one (the form is never
+   * sent:  P75's choice B);  the box's field says it changed, as a key would.
    */
   @E.untracked
-  private async takeShot(file: File) {
-    const client = ReviewClient.forPage()
-    const problem = Pictures.problemOf(file)
-    if (problem) return client.notify(this.translationForKey(problem))
-    const png = await Pictures.pngOf(file).catch(() => undefined)
-    if (!png) return
-    this.shown = png
-    this.savedShot = undefined
-    this.isSaving = true
-    const shot = await client.saveShot(this.for ?? "", png)
-    this.isSaving = false
-    if (this.shown !== png) return
-    this.savedShot = shot
-    if (!shot) this.shown = undefined
+  private removePicture(label: string) {
+    const textarea = this.wordsBox?.textarea
+    if (!textarea) return
+    textarea.value = Pictures.without(textarea.value, label, { renumber: true })
+    textarea.dispatchEvent(new Event("input", { bubbles: true, composed: true }))
   }
 
-  /** The picture's ×:  no picture. */
-  @E.untracked
-  private removeShot() {
-    this.shown = undefined
-    this.savedShot = undefined
+  /**
+   * How the box's pictures are saved:  beside the epic page, under the set's mark id (`POST shot`), so the path is an
+   * option's picture (`tests/q52-20261029-1432.png`), what `inbox apply` takes;  Save waits meanwhile.
+   */
+  private readonly pictureSaver: PictureSaver = {
+    save: async (png) => {
+      this.savingCount++
+      try {
+        return await ReviewClient.forPage().saveShot(this.for ?? "", png)
+      } finally {
+        this.savingCount--
+      }
+    },
+    notify: (problem) => ReviewClient.forPage().notify(this.translationForKey(problem))
   }
 }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicOptionForm extends E.AttributeValues<typeof epicOptionFormVocabulary> {}
 
-/** What `epic-option-saved` hands over. */
-export type OptionFormSaved = { title: string; note: string; shot?: string }
+/** What `epic-option-saved` hands over:  the box's first line, and the rest (a picture's words in it). */
+export type OptionFormSaved = { title: string; note: string }
+
+/** The longest title the inbox takes (`ReviewInbox`'s `MAX_TITLE`). */
+const TITLE_MAX = 300
+
+/** The tag of `<epic-text-box>`'s field. */
+const FIELD_TAG = "ui-textarea"

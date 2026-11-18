@@ -212,7 +212,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
 | `spell deps [check]` | fails on a deprecated package, or a critical or high advisory not on `deps-known-open.json5`;  runs by itself before a push to `main` |
-| `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing |
+| `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing;  a real one runs in the publish workflow, started from GitHub's Actions tab, with no npm token |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
 | `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, which the published `spell` ships too, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
@@ -298,7 +298,9 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     - whole, every package and the add-ons:  a node import, a Vite page that draws a `<ui-button>`, `npx spell help`,
       a command that needs an add-on, `npx epic --help`, and the epic server again
   - Without `--dry-run`, and only when every check passed:  `npm publish --tag <tag>` for each, lowest first.
-  - Logging in with a token, the tags, and what trips people up:  [Publishing to npm](npm.md).
+  - Where a real publish runs:  the publish workflow (`.github/workflows/publish.yml`), started by hand from GitHub's
+    Actions tab;  npm trusts it by name, so it needs no token (epic `repo-split` P29).
+  - Publishing from GitHub, the tags, and what trips people up:  [Publishing to npm](npm.md).
   - The tag is `next` unless you say otherwise:  `npm install spell@next` gets the new version,
     while `latest` stays where it was.
     Only `--tag latest` moves `latest`;  or, for a version already out under `next`,
@@ -1457,7 +1459,7 @@ They're named in the command line's goals and the commands page's roadmap.
 - [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md):  every `epic` verb, in full
 - [spell-parser's README](https://github.com/spell-app/spell/blob/main/parser/README.md):  the language these commands read
 - [README/development.md](development.md):  the checks, the tests and the worktrees around them
-- [README/npm.md](npm.md):  publishing to npm, from logging in to moving `latest`
+- [README/npm.md](npm.md):  publishing to npm, from the publish workflow to moving `latest`
 
 <details>
 <summary>More in the docs site</summary>

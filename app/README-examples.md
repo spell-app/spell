@@ -835,13 +835,14 @@ The last column says where to borrow from;  where a part isn't in the language y
 | Memory | cards face up and face down in a grid | Solitaire's `Card`, `Deck` and `Pile`, copied in or imported from it;  a grid that's a view |
 | A collection catalogue | movies, baseball cards:  items with categories, and filter buttons | `one of ...` kinds and Task List's filter;  `it is saved in its own file`, as the people library's person is |
 | A sign-up sheet | people and a list of slots, in a form | `@spell/library/people` and Task List's forms, and Lista de tareas' property editor;  🌱 a natural first program to share, once editing together arrives |
-| A text adventure | rooms as things, and each way out a button | Task List's clicks, and `print`;  **not yet** typed commands (below) |
+| A text adventure | rooms as things, and each way out a button | Task List's clicks, and `print`;  typed commands, `prompt` (below) |
 
-**Not yet:  reading what someone types.**
-`prompt "Where now?"` shows a dialog in the editor, but the program can't read the answer:
-it compiles to `await core.prompt(...)`, and what was typed is dropped.
-- In a terminal, `prompt` only prints its question;  Python's runtime hasn't ported it.
-- `choose one of ... with prompt`, the natural way to pick a room, is written down in the prompt rule and commented out:
+**Reading what someone types:  `prompt`, then `it`.**
+`prompt "Where now?"` shows a dialog, and the text typed is `it` on the lines after:
+`if the result is ok then go to it`.
+- `the result` is the button that closed it, `ok` or `cancel`;  `it` is empty text after a cancel.
+- In a terminal with no page, `prompt` prints its question and takes its starting text.
+- **Not yet:**  `choose one of ... with prompt`, the natural way to pick a room:
   `spell lint` answers "Don't understand".
 
 Start one, and it runs at once:

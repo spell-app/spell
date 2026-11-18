@@ -61,6 +61,9 @@ class DrawingMethods:
     # the element an app mounts into, if the host says;  else `#spell-app-root` on the page (`app_element()`)
     app_root: Element | None = None
 
+    # what a modal was last shown with, `show "edit card" with the card`:  `UIMethods`'s
+    shown_in: Callable[[str], object]
+
     def reset_page(self) -> None:
         """SIDE EFFECT:  start a new, empty page:  nothing drawn, no styles."""
         self.page = Page()
@@ -210,6 +213,17 @@ class DrawingMethods:
         """
         self.page.defaults[file] = defaults
 
+    def draw_shown(self, name: str, thing: object, draw: Callable[[object], object]) -> object:
+        """What a modal named by its quoted word draws, `<modal "edit card">`:  `draw(it)` (epic `language` P64).
+
+        - `it`:  what it was last shown with, `show "edit card" with the card` (`shown_in()`);  never shown with
+          anything, `thing`, whose drawing it's in.
+        - The twin of the JavaScript core's `drawShown()`, which a page draws it with, live:
+          here it's drawn as the page is written, once.
+        """
+        shown = self.shown_in(name)
+        return draw(thing if shown is None else shown)
+
     def draw_action(
         self, thing: object, name: str, props: dict[str, object] | None = None, *children: object
     ) -> Element:
@@ -226,10 +240,18 @@ class DrawingMethods:
         - `in-menu`, the core's own:  a Spell UI menu or toolbar holds it, so it's the menu's ROW, `<ui-action>`,
           its key in Spell UI's words (`meta+Z` => `mod+Z`);  the page's drawing half hands it the action, live;
           `icon-only` goes on to it, Spell UI's own (its icon alone).
+        - `in-dialog` and `answer`, the core's own:  a modal's actions hold it, so its click closes the modal once its
+          action has run, with that answer (epic `language` T155).  The page's drawing half does that;  here they go no
+          further.
+        - `<action ok />` with no action of that name (`answer` `ok` or `cancel`):  a button that just closes,
+          labelled in the program's language, OK or Cancel.  A button's own answer the same
+          (`<action discard title="Discard your changes" />`, epic `language` P64):  its `title`, else `Discard`.
         """
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)
         in_menu = given.pop(IN_MENU, False)
+        given.pop(IN_DIALOG, None)
+        answer = given.pop(ANSWER, None)
         # a `title` the tag gives is what it shows, over the action's own:
         # `<action "restart the game" title="Restart"/>`
         given_title = given.pop("title", None)
@@ -242,6 +264,9 @@ class DrawingMethods:
                 title = given_title
             enabled_when = description.get("enabled_when")
             is_enabled = bool(getattr(holder, enabled_when)) if enabled_when else True
+        elif isinstance(answer, str) and answer and not in_menu:
+            label = given_title if isinstance(given_title, str) else self._answer_label(answer)
+            return h(BUTTON_TAG, given, *(children or (label,)))
         else:
             shown = given_title if isinstance(given_title, str) else name
             return h(MENU_ROW_TAG if in_menu else BUTTON_TAG, {"disabled": True, **given}, *(children or (shown,)))
@@ -260,6 +285,14 @@ class DrawingMethods:
             own["aria-label"] = title
         text = children if icon_only or children else (title,)
         return h(BUTTON_TAG, {**own, **given}, *text)
+
+    def _answer_label(self, answer: str) -> str:
+        """What a button that just closes a modal says:  OK or Cancel in the program's language;  a button's own
+        word with each word's first letter a capital, `Discard` (epic `language` P64).
+        """
+        if answer in (OK, CANCEL):
+            return self.message(f"dialog-{answer}")
+        return " ".join(word[:1].upper() + word[1:] for word in answer.split(" "))
 
     def draw_context_menu(self, thing: object, names: list[object]) -> Element:
         """The right-click menu of the element around it, `<context-menu>`:  a hidden `<spell-context-menu>`.
@@ -294,6 +327,16 @@ ICON_ONLY = "icon-only"
 
 # `<action>`'s mark that a Spell UI menu or toolbar holds it:  it's the menu's row
 IN_MENU = "in-menu"
+
+# `<action>`'s mark that a modal's actions hold it:  its click closes the modal too
+IN_DIALOG = "in-dialog"
+
+# `<action>`'s answer, the core's own:  `answer="ok"`, what `the result` is once its click closed the modal
+ANSWER = "answer"
+
+# The answers a modal's button may say it gives, `<action ok />`
+OK = "ok"
+CANCEL = "cancel"
 
 # What `<action>` draws in a menu:  Spell UI's menu row, which the page defines
 MENU_ROW_TAG = "ui-action"

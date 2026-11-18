@@ -1,0 +1,56 @@
+/*
+ * The step debugger in a Spell file's editor (`CodeMirrorDebug`, epic `editor` P33):
+ * - the margin left of the fold arrows, where a click puts a breakpoint:  a red dot, a faint one under the mouse
+ * - the line the program's stopped on:  a yellow band across it, an arrow in the margin
+ */
+.cm-editor .cm-breakpointGutter {
+  width: 16px;
+  cursor: pointer;
+
+  .cm-gutterElement {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  /* where a click would put one */
+  .cm-gutterElement:hover:not(:has(.cm-breakpoint))::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--spell-breakpoint, #e5484d);
+    opacity: 0.3;
+  }
+}
+
+.cm-breakpoint,
+.cm-breakpointRoom {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
+.cm-breakpoint {
+  border-radius: 50%;
+  background: var(--spell-breakpoint, #e5484d);
+}
+
+/* the stopped line's arrow, over its dot */
+.cm-gutterElement.cm-debugStoppedGutter {
+  position: relative;
+
+  .cm-breakpoint {
+    display: none;
+  }
+}
+.cm-debugStoppedArrow {
+  width: 0;
+  height: 0;
+  border-block: 5px solid transparent;
+  border-inline-start: 8px solid var(--spell-stopped-arrow, light-dark(#c98a00, #ffc53d));
+}
+
+.cm-editor .cm-line.cm-debugStopped {
+  background: var(--spell-stopped-line, light-dark(rgb(255 197 61 / 0.32), rgb(255 197 61 / 0.2)));
+  box-shadow: inset 3px 0 0 var(--spell-stopped-arrow, light-dark(#c98a00, #ffc53d));
+}

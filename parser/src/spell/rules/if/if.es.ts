@@ -27,7 +27,7 @@ import { ReturnOtherwise } from "./ReturnOtherwise"
 export const ifEs = new SpellParser({ module: "if" })
 
 ifEs.addRule(ElseIf, {
-  syntax: "(si no|sino|de lo contrario) si {condition:expression} (entonces|:)? {statement_body}?",
+  syntax: "(si no|sino|de lo contrario) si {condition:expression} (entonces|:|,)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line else_if statements",
@@ -99,7 +99,7 @@ ifEs.addRule(ElseIf, {
 })
 
 ifEs.addRule(Else, {
-  syntax: "(si no|sino|de lo contrario) :? {statement_body}?",
+  syntax: "(si no|sino|de lo contrario) (:|,)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line else statements",
@@ -160,7 +160,7 @@ ifEs.addRule(Else, {
 
 // packs: ok -- `si no` is `else` AND `if no`:  `else` must come first
 ifEs.addRule(If, {
-  syntax: "si {condition:expression} (entonces|:)? {statement_body}?",
+  syntax: "si {condition:expression} (entonces|:|,)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line if statements",

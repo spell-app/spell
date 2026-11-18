@@ -103,19 +103,25 @@ describe("<epic-thread>", () => {
   })
 
   // epic `epic-engine` I267
-  test('a picture pasted in Owen\'s words:  its thumbnail in the paragraph, "(picture)" in the header', async () => {
+  test('pictures pasted in Owen\'s words:  labelled thumbnails in the paragraph, "(picture)" in the header', async () => {
     const host = await thread(
-      comment({ text: "Look:\n![picture](/guides/pictures/x-20261114-0102.png)\nsee?" }),
+      comment({
+        text: "Look:\n![IMG1](/guides/pictures/x-20261114-0102.png)\nsee?\n![picture](/guides/pictures/y.png)"
+      }),
       "open"
     )
-    const image = host.shadowRoot!.querySelector<HTMLImageElement>("epic-thread-message img.picture")
+    // an old picture's words, from before P75, are counted in their place:  IMG2
+    const pictures = [...host.shadowRoot!.querySelectorAll("epic-thread-message epic-picture")]
     expect({
-      src: image?.getAttribute("src"),
+      pictures: pictures.map((each) => [each.getAttribute("label"), each.querySelector("img")?.getAttribute("src")]),
       headline: part(host, "headline").textContent,
       words: messages(host)[0]!.words
     }).toEqual({
-      src: "/guides/pictures/x-20261114-0102.png",
-      headline: "“Look: (picture) see?”",
+      pictures: [
+        ["IMG1", "/guides/pictures/x-20261114-0102.png"],
+        ["IMG2", "/guides/pictures/y.png"]
+      ],
+      headline: "“Look: (picture) see? (picture)”",
       words: "Look:see?"
     })
   })

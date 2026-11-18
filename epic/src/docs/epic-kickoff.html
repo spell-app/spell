@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-kickoff</title>
+    <meta
+      name="description"
+      content="The &lt;epic-kickoff&gt; element: the box at the top of a new epic's Overview, where you type what the epic should do, pictures and all."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-kickoff&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-kickoff&gt;
+            <ui-header>The &lt;epic-kickoff&gt; element: the box at the top of a new epic's Overview, where you type what the epic should do, pictures and all.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            A new epic starts on its page, not in the chat. <code>/epic &lt;name&gt;</code> opens an almost empty epic
+            page, and the kickoff box sits at the top of its Overview: you type what the epic should do, as long as you
+            like, and paste or drop pictures into it.
+          </p>
+          <p>
+            The page's Send hands it to Claude. It becomes the Kickoff prompt, pictures and all, and the session plans
+            from it, as it plans from a prompt typed after the name in the chat.
+          </p>
+          <p class="meta">
+            For anyone starting an epic.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P75), its own
+            <a href="/epic/src/components/epic-kickoff/" target="src-spell-epic-src-components-epic-kickoff"><code title="epic/src/components/epic-kickoff/">epic-kickoff</code></a> family.<br />
+            Its vocabulary: <a href="/epic/src/components/epic-kickoff/EpicKickoff.en.ts" target="src-spell-epic-src-components-epic-kickoff-epickickoff-en-ts"><code title="epic/src/components/epic-kickoff/EpicKickoff.en.ts">EpicKickoff.en.ts</code></a><br />
+            Its component: <a href="/epic/src/components/epic-kickoff/EpicKickoff.tsx" target="src-spell-epic-src-components-epic-kickoff-epickickoff-tsx"><code title="epic/src/components/epic-kickoff/EpicKickoff.tsx">EpicKickoff.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              <code>&lt;epic-overview&gt;</code> draws it, in its own shadow root, only on an epic page being reviewed
+              that has no Kickoff prompt and no phases yet. So this page shows it alone, as the Overview would.
+            </p>
+            <div>
+              <epic-kickoff></epic-kickoff>
+            </div>
+          </ui-section>
+
+          <ui-section id="2-behaviour" label="2. Behaviour" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="hand pointer"></ui-icon>
+            <ul>
+              <li>One box that grows as you type, up to a third of the window.</li>
+              <li>
+                Pictures: paste or drop several at once, or choose them with the small picture button (VS Code's side bar
+                lets no file be dragged in). Each is saved beside the page, in its <code>pictures/</code> folder, and
+                written into your words on a line of its own, labelled: <code>![IMG2](pictures/kickoff-...png)</code>.
+              </li>
+              <li>A strip under the box shows them, each with its label and an x.</li>
+              <li>
+                The x takes the picture out, and the later labels move down one, in the words that name them too: IMG3
+                becomes IMG2. Deleting a picture's whole line by hand does the same.
+              </li>
+              <li>
+                Saved as you type, ten seconds after the last key, and at once when a picture comes or goes, the box
+                loses the focus, or the page closes: a <code>kickoff</code> mark in the review inbox.
+              </li>
+              <li>
+                The header's Send hands it over. <code>epic inbox apply</code> writes it as the Kickoff prompt, its
+                pictures labelled, and the box gives way to it.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-markup" label="3. Markup" sticky="stack" collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ul>
+              <li>Never written in a page: <code>&lt;epic-overview&gt;</code> draws it.</li>
+              <li>No attributes, slots or events of its own.</li>
+            </ul>
+            <ui-section id="epic-kickoff-parts" label="Parts" sticky="stack" collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr><th>Name</th><th>What it is</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>base</code></td><td>The box around it: your violet card.</td></tr>
+                    <tr><td><code>lead</code></td><td>Its first line: What should this epic do?</td></tr>
+                    <tr><td><code>words</code></td><td>Its one box, which grows as it's typed.</td></tr>
+                    <tr><td><code>hint</code></td><td>How pictures are named, and what Send does.</td></tr>
+                    <tr><td><code>choose</code></td><td>The picture button.</td></tr>
+                    <tr><td><code>saved</code></td><td>When it was last saved, or why not.</td></tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-11-17 against branch <code>epic-engine</code> (P75).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

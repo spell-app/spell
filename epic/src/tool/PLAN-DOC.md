@@ -430,7 +430,7 @@ As `plan-doc.md`, "Ids":
     | `requested` | light orange | an issue or todo filed from the person's own words (`requested`;  a todo since epic `epic-engine` T88), closed done, not reviewed:  their turn to see it (P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
-    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
+    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up, or a todo flagged red as a reminder:  `epic update <epic>#T3 --loud`, `epic add <epic>#T ... --loud`;  epic `epic-engine` T94) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
     | `handed`    | blue, outlined | a judgement call or issue the person pressed Do this on (`urgent`), Claude hasn't started (epic `epic-engine` P63) |
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
@@ -458,12 +458,20 @@ As `plan-doc.md`, "Ids":
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
-    - A note's PICTURE (epic `epic-engine` P51):  any note box takes one, pasted (⌘V), dropped, or chosen with its
-      picture button.
-      - saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and shown under the words
-      - it rides in the mark as `shot` (revisit, todo, next, drop and skip take one);  a picture alone is a revisit
-      - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's,
-        next's or drop's picture in the person's kept reply
+    - A note's PICTURES (epic `epic-engine` P51;  several, in its words, since P75):  any note box takes them,
+      pasted (⌘V), dropped, or chosen with its picture button.
+      - each saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and written into the note's words,
+        labelled:  `![IMG2](tests/<id>-<stamp>.png)`;  a strip of them under the words, each with its ✕
+      - they ride in the mark's `note`;  a picture alone is a revisit
+      - `epic inbox wait` prints `IMG2:  <its file>` under the note;  `inbox apply` keeps a skip's, next's or drop's
+        note in the person's kept reply, each picture an `<epic-picture label="IMG2">`
+      - labels renumber only while the note isn't sent (P75's choice B)
+      - a mark from before P75 carries its one picture apart, as `shot`:  still read, printed
+        `screenshot:  tests/...png`
+    - The KICKOFF BOX (epic `epic-engine` P75):  a new epic's page with no prompt and no phases takes a `kickoff`
+      mark, `{ action: "kickoff", note }`, under its own key, `kickoff`;  `inbox apply` writes it as the Kickoff prompt
+      (`setPrompt()`, its pictures labelled `<epic-picture>`s), logged "Kickoff prompt written from the page";  a page
+      with phases drops it
   - `limit`:  a todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn
     calmer, never offered for the next phase, with an item's buttons (Approve, Revisit, Make Todo).
     - a todo without it is WORK still to do:  the plane, Revisit, the x (below)
@@ -825,7 +833,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 
 | colour | means                                    | where                                                                  |
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
-| red    | needs the person                               | `attention` chips;  the rail's count (only what needs them)             |
+| red    | needs the person                               | `attention` chips;  the rail's count (only what needs them);  a todo the person flagged red as a reminder (`--loud`, T94), its buttons still a todo's (plane, revisit, x) |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
@@ -1112,6 +1120,9 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
 - What `epic inbox apply` does with it, in order:
   - the flip (`multiple` set or taken away), removals, edits, then each added option with the next free letter,
     `by="owen"`, its note as `<p>`s, its picture an `<img>`
+  - a picture's words in a note, added or edited (`![picture](tests/q4-20261117-1200.png)`, the option form's since
+    epic `epic-engine` I334):  an `<img>` where they stand;  `shot`, an added option's picture kept apart, is from
+    before I334, still read
   - an edit keeps the earlier text:  `<div slot="was" data-title="<old title>">` holding the old body, one per edit,
     oldest first;  `edited` its day
   - a removal stays:  `removed` its day, `slot="removed"`, out of `chosen`

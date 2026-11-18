@@ -39,6 +39,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Its words for the parser:  spell's `loadBuiltInTemplates()`, from the declarations the same run writes.
   - The generator is spell's ([builtInTemplateFiles.ts](../spell/node/builtInTemplateFiles.ts)):  core never imports
     spell, the templates are data here.
+- Dates are [dates.ts](dates.ts)'s (epic `language` P63):  a date's parts and names, the time zone, two digits, how
+  long ago, working with dates;  and [string.ts](string.ts)'s formats (`short date` ...).
+  - Names in the PROGRAM's language (`core.message("language")`);  formats in the PERSON's region, first day of the
+    week and clock:  the kit's `CalendarSettings` (`spell/util/measures/CalendarSettings`), their choice else their
+    region's.  `Intl` does every word.
+  - A duration is a number of seconds there:  the compiler converts a measure in another unit first.
 - [dimensions/](dimensions/) holds spell's built-in DIMENSIONS, kinds of measure and their units, written in spell:
   [dimensions.spell](dimensions/dimensions.spell) and its Spanish twin (epic `language` P23).
   - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
@@ -54,6 +60,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Negative positions count from the end either way:  `-1` is the last item.
 - The console sends a DUMP (a thing, a spell list ...) through `core.console.printDump()`:
   the page's console by default, stderr under `spell run`.
+- The step debugger's runtime half is [stepping.ts](stepping.ts) (epic `editor` P33):  `core._stepper`, ONE `Stepper`
+  per runtime copy, what a debugging build's lines ask (`P.DebugSteps`) and the editor drives.
+  - It holds a line by making its action wait:  breakpoints by file and line, Continue, Step Over / Into / Out,
+    and each frame's thing, inputs, values so far and callers.
+  - The `_` keeps it out of the core contract:  only the editor's runtime steps, so Python's core has none.
+  - `resetRuntime()` forgets what it held of the last run.
 - Depends only on `spell/util`.
   NEVER import `spell/parser/spell` / `spell/parser/parser`, or anything above.
 - Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
@@ -432,6 +444,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - letters are graphemes
   - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
     (`spell space lexicon read`).
+    Its lines come from the ONE writer of a schema's field as Spell, [schemaWords.ts](schemaWords.ts) (epic `data` P49),
+    which `spell place ingest` writes an OpenAPI description's fields with too:  a leaf, importing nothing.
     What Spell can't hold yet is left out, and said.
   - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):
@@ -541,6 +555,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Described `cancels: true` (`core.describeAction()`, `core.asAction()`):  an action that never cancels costs nothing more.
 - After hooks, `after moving a card to a pile`, from any file:  `core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })`.
   - Each runs at the end of its action, inside its undo step, in the order added;  skipped when it's called off.
+- The other steps around an action (epic `data` P50), `core.addActionHook(Job, "complete", { moment, hook, level, page })`:
+  - `before`, `while` (what it changes put back when the action ends), `after`, `failed` (given the error), and
+    `around` (a second `to complete a job`, given what it wraps)
+  - by the file each is in, its `level`:  before, while and around from a page's file in to the `.api.spell` file's,
+    after and failure steps the other way;  a page's before and while steps only while one of it is made
+  - a failure step gives back `core.passTheError()` to send it on;  anything else caught it
+  - a server's action (`callsServer`) then runs `core.addServerFailureStep()`'s, last;  a refusal's notice, held till
+    then (`holdNotice()`), shows only for what nobody caught, and the error goes on to the caller
+  - `core.errorIs(error, "not found")`:  the error by Spell's names, from what places and the network throw
+  - `core.savedThingOrMissing(Job, 7151)`:  a missing id's stand-in runs only its failure steps, with "not found"
+  - all in `runActing()` ([undoing.ts](undoing.ts));  not in Python's core yet (`not_ported_yet.json5`)
 - A thing that belongs to one list remembers the one it was in before its latest move:  `Pile.lastOwnerOf(card)`,
   compiled spell's `the card's last pile` -- part of the undo step, put back by undo and by a cancel (`noteKept()`).
 - Python's core has the same history, `undoing.py` (epic `language` P54):
@@ -550,6 +575,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - both cores play the moves in `undoing.expected.json5` (below)
   - `"cant_be_undone": "keeps history"` too (`run_unrecorded()`), as `can't be undone` compiles
   - NOT ported:  `"clears history"` and props declared `undoable: false`, which compiled spell never writes
+
+## Timers
+
+- A type's TIMER, `every second` in its outline, its steps under it ([timers.ts](timers.ts), epic `language` T159):
+  - Compiled spell describes it after the class:  `core.addTimer(Clock, "everySecond", { seconds: 1 })`,
+    with `until` (a getter giving the moment it stops) and `times` (how many runs) when the line says them.
+  - Each thing of the class (a sub-class's too) starts its own once it's made:  `noteMade()` tells the timers
+    (`onMade()`), which start it after the code making it has run, as its class's timers are described after it.
+    A copy (`withoutCreate()`) starts none.
+  - `core.every(seconds, run, { until, times })` runs any steps so:  the first run `seconds` from now.
+  - Each run adds no undo step, as an action that `can't be undone`:  nor does an action it calls.
+    A failure is said on the console;  a run still going when the next is due skips that one.
+  - They belong to the run (`core.RUNTIME.timers`):  `resetRuntime()` and `clearRuntime()` stop them.
+    `inBackground`, so `spell run` ends when its program does.
+  - NOT yet:  a recompile that carries things over (`carryOver()`) or an edit taken while running
+    (`loadOverRunning()`) starts no timer for a new `every` line;  a running one carries on, calling the new method.
+- Python's twin is `spell_core.timers`:  asyncio tasks, which wait for a running loop (a page) to start.
 
 ## Sending events
 
@@ -574,14 +616,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
-  - The six files both cores read stay in the JavaScript core:
-    its method list here, the five expected files with its tests (`tests/core/`):
+  - The seven files both cores read stay in the JavaScript core:
+    its method list here, the six expected files with its tests (`tests/core/`):
     - [core.declarations.json5](core.declarations.json5)
     - [messages.expected.json5](../../tests/core/messages.expected.json5)
     - [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
     - [stateById.expected.json5](../../tests/core/stateById.expected.json5)
     - [savedById.expected.json5](../../tests/core/savedById.expected.json5)
     - [undoing.expected.json5](../../tests/core/undoing.expected.json5):  a game's moves, undone and redone
+    - [dates.expected.json5](../../tests/core/dates.expected.json5):  dates' parts, names and formats, by language and region
 
 ## Decorators
 

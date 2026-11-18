@@ -159,8 +159,8 @@
       path: "type:List/method:for each (item) in (a list)",
       description: "Do something with each item in turn, e.g. `for each card in the deck`.\n- Its position too, counting from 1:  `for card and index in the deck`.",
       rules: [
-        { name: "list_iteration", syntax: "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?" },
-        { name: "list_iteration", syntax: "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?" }
+        { name: "list_iteration", syntax: "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} (:|,)? {statement_body}?" },
+        { name: "list_iteration", syntax: "for (each|every)? {item:kind_name} (in|of) {list:expression} (:|,)? {statement_body}?" }
       ]
     },
     {
@@ -369,7 +369,7 @@
     },
     {
       path: "type:Date",
-      description: "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.\n- Its parts are numbers:  `the year of the due date of the todo`.\n- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.\n- Joined to text with `+`, it says itself as a drawing does:  `\"due \" + its due date` is `due November 7, 2026`."
+      description: "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.\n- Its parts are numbers, with no leading zero:  `the year of the due date of the todo`, `the minute of now`;\n  `the minute of now as two digits` is `05`.\n- Its names are in the program's language:  `the month of now` is `November`, `the weekday of now` `Tuesday`.\n- Said as HyperTalk says it:  `the short date of it`, `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.\n  - The person's region says the order:  `11/17` in the US, `17/11` in Spain;  a short date has its year when it isn't this year.\n  - Times show on the person's clock, 12- or 24-hour;  `the hour of` is always 0 to 23.\n- Joined to text with `+`, it says itself as a drawing does:  `\"due \" + its due date` is `due November 7, 2026`.\n- `now + 2 days`, `its due - 1 hour`;  `its due - now` is a duration.\n- `its due as a duration`:  `in 2 days`, `3 hours ago`, `tomorrow`;  `as a short duration`, `as a long duration`."
     },
     {
       path: "type:Date/property:year",
@@ -377,20 +377,140 @@
       description: "Its year, e.g. `2026`."
     },
     {
+      path: "type:Date/property:years",
+      detail: "number",
+      description: "The same as its `year`."
+    },
+    {
+      path: "type:Date/property:short_year",
+      name: "short year",
+      detail: "number",
+      description: "Its year's last two digits, a number:  `26` for 2026, `5` for 2005."
+    },
+    {
+      path: "type:Date/property:month",
+      detail: "text",
+      description: "Its month's name, in the program's language:  `November`."
+    },
+    {
+      path: "type:Date/property:short_month",
+      name: "short month",
+      detail: "text",
+      description: "Its month's name cut short:  `Nov`."
+    },
+    {
+      path: "type:Date/property:month_number",
+      name: "month number",
+      detail: "number",
+      description: "Its month as a number, January is 1:  `11`."
+    },
+    {
       path: "type:Date/property:day",
       detail: "number",
       description: "Its day of the month, from 1 to 31."
     },
     {
+      path: "type:Date/property:days",
+      detail: "number",
+      description: "The same as its `day`."
+    },
+    {
       path: "type:Date/property:hour",
       detail: "number",
-      description: "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
+      description: "Its hour of the day, from 0 to 23, whatever clock the person reads:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
+    },
+    {
+      path: "type:Date/property:hours",
+      detail: "number",
+      description: "The same as its `hour`."
+    },
+    {
+      path: "type:Date/property:minute",
+      detail: "number",
+      description: "Its minute, from 0 to 59:  `the minute of now`."
+    },
+    {
+      path: "type:Date/property:minutes",
+      detail: "number",
+      description: "The same as its `minute`."
+    },
+    {
+      path: "type:Date/property:second",
+      detail: "number",
+      description: "Its second, from 0 to 59:  `the second of now` -- on a date it's the date's part, never the 2nd item."
+    },
+    {
+      path: "type:Date/property:seconds",
+      detail: "number",
+      description: "The same as its `second`."
+    },
+    {
+      path: "type:Date/property:week",
+      detail: "number",
+      description: "Its week of the year, ISO's way, the same for everyone:  1 to 53."
+    },
+    {
+      path: "type:Date/property:weekday",
+      detail: "text",
+      description: "Its day of the week's name, in the program's language:  `Tuesday`.  `as a number` gives its weekday number."
+    },
+    {
+      path: "type:Date/property:day_of_the_week",
+      name: "day of the week",
+      detail: "text",
+      description: "The same as its `weekday`."
+    },
+    {
+      path: "type:Date/property:short_weekday",
+      name: "short weekday",
+      detail: "text",
+      description: "Its day of the week's name cut short:  `Tue`."
+    },
+    {
+      path: "type:Date/property:short_day_of_the_week",
+      name: "short day of the week",
+      detail: "text",
+      description: "The same as its `short weekday`."
+    },
+    {
+      path: "type:Date/property:weekday_number",
+      name: "weekday number",
+      detail: "number",
+      description: "Its day of the week as a number, 1 to 7, counted from the person's first day of the week:  Tuesday is 3 in the US, 2 in Spain."
+    },
+    {
+      path: "type:Date/property:day_of_the_week_number",
+      name: "day of the week number",
+      detail: "number",
+      description: "The same as its `weekday number`."
+    },
+    {
+      path: "type:Date/property:am_or_pm",
+      name: "AM or PM",
+      detail: "text",
+      description: "Whether it's before noon or after, as the clock says it:  `AM` or `PM`.  `if now is PM` asks it."
+    },
+    {
+      path: "type:Date/property:ampm",
+      name: "AMPM",
+      detail: "text",
+      description: "The same as its `AM or PM`."
+    },
+    {
+      path: "type:Date/property:meridiem",
+      detail: "text",
+      description: "The same as its `AM or PM`."
+    },
+    {
+      path: "type:Date/property:meridian",
+      detail: "text",
+      description: "The same as its `AM or PM`."
     },
     {
       path: "type:Date/property:short_date",
       name: "short date",
       detail: "text",
-      description: "Its day, short, e.g. `11/7/26`:  `the short date of its time`, as HyperTalk's `the short date`."
+      description: "Its day, short, the person's way:  `11/17/25`, Spain's `17/11/25`;  `11/17` this year -- `the short date of its time`, as HyperTalk's `the short date`."
     },
     {
       path: "type:Date/property:long_date",
@@ -408,7 +528,7 @@
       path: "type:Date/property:short_time",
       name: "short time",
       detail: "text",
-      description: "Its time of day, e.g. `9:14 AM`."
+      description: "Its time of day on the person's clock, e.g. `9:14 AM`, or `21:14` on a 24-hour clock."
     },
     {
       path: "type:Date/property:long_time",

@@ -5,17 +5,16 @@ from typing import Any, Literal
 from spell_core import core, List, App, View, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
 
-# A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-# A playing card
-
-
 Rank = Literal["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
 Suit = Literal["clubs", "diamonds", "hearts", "spades"]
 
 
 class Card(TwoSidedView):
+    """A standard playing card with rank, suit and color."""
+
     element_tag = "test-project-card"
 
+    # Ace is low:  ace = 1 ... king = 13
     # - its "rank" is one of ace, 2 ... 10, jack, queen, king
     RANKS = ("ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king")
     rank = prop(one_of=RANKS)
@@ -35,6 +34,8 @@ class Card(TwoSidedView):
             return "red"
         return "black"
 
+    # Spell for identifying cards
+
     @property
     def is_a_face_card(self) -> bool:
         """e.g. "the card is a face card\""""
@@ -45,7 +46,7 @@ class Card(TwoSidedView):
         return not self.is_a_face_card
 
     def is_the_rank_of_suit(self, rank: Rank, suit: Suit) -> bool:
-        """e.g. the card is the two of spades"""
+        """e.g. "the card is the two of spades\""""
         return self.rank == rank and self.suit == suit
 
     @property
@@ -80,9 +81,12 @@ class Card(TwoSidedView):
         return h("test-project-card-image", {"direction": "down", "part": "back"})
 
     def move_to_pile(self, pile: Pile) -> None:
-        """The card, and every card on it, onto the pile, if the piles' rules let it go and take it"""
-        # - refused, nothing moves, and there's nothing to undo
-        # - a game adds its own steps after it:  `after moving a card to a pile`
+        """Move the card, and every card on top of it, onto the pile."""
+        # The card's current pile can refuse to let go of it.
+        # The new pile may refuse to take it.
+        # If either of those is the case, the card doesn't move.
+        # A game can add its own steps after it:
+        # see `after moving a card to a pile` in Solitaire.spell
         assert self.pile is not None
         if (not core.can_give_up(self.pile, self)) or (not core.can_take(pile, self)):
             core.cancel()
@@ -90,10 +94,15 @@ class Card(TwoSidedView):
             pile.append(card)
 
     @property
-    def is_on_top_of_its_pile(self) -> bool:
-        """the card the next one goes on"""
+    def is_on_top(self) -> bool:
+        """OWEN: was `is on top of its pile`;  `is on bottom` is new, for auto play's king line"""
         assert self.pile is not None
         return self == self.pile.last_item
+
+    @property
+    def is_on_bottom(self) -> bool:
+        assert self.pile is not None
+        return self == self.pile.first_item
 
     async def play(self) -> Any:
         if self.pile == solitaire.stock:
@@ -112,7 +121,6 @@ class Card(TwoSidedView):
             it_2.last_item.turn_face_up()
 
     def the_points_for_card_on_pile(self, pile: Pile) -> float:
-        """What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing"""
         if isinstance(pile, Foundation):
             return 10
         if self.last_pile == solitaire.discard_pile:
@@ -120,14 +128,15 @@ class Card(TwoSidedView):
         return 0
 
     async def on_click(self, event: ClickEvent) -> None:
+        """play the card when clicked if it is a legal move"""
         if self.is_face_direction("up") or self.pile == solitaire.stock:
-            await self.play()
+            core.answered(await self.play())
 
     draggable = True
 
     @property
     def pile(self) -> Pile | None:
-        """a card is in one pile at a time:  moving it to another pile takes it off this one"""
+        """A card can be in only one pile at a time:  moving it to another pile removes it."""
         return Pile.owner_of(self)
 
     @property
@@ -138,11 +147,7 @@ class Card(TwoSidedView):
 core.describe_action(Card, "move_to_pile", {"title": "Move Card to Pile", "cancels": True, "undone_as": "Move Card to Pile"})
 core.add_after_hook(Card, "move_to_pile", {"hook": "after_move_to_pile"})
 core.describe_action(Card, "the_points_for_card_on_pile", {"title": "The Points for Card on Pile", "undone_as": "The Points for Card on Pile"})
-# It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
-# On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
-# Ace is low:  ace = 1 ... king = 13
-
-# Spell for identifying cards
+# You can drag cards around and drop them on piles if the game allows.
 
 # identifying a card
 
@@ -313,16 +318,19 @@ Layout = Literal["stacked", "vertical"]
 
 
 class Pile(ViewableList):
-    """A pile of cards, e.g. in a game like solitaire"""
+    """A pile of cards, e.g. in a game like solitaire."""
 
     item_type = Card
     element_tag = "test-project-pile"
 
-    # A card can only be in one pile at a time
-    # How its cards lie:  on top of each other, or down a column -- styles.css
+    # A card can only be in one pile at a time.
+    # stacked = on top of each other
     # - its "layout" is one of stacked or vertical
+    #   -- stacked = on top of each other
+    #   -- vertical = spread down in a column
     LAYOUTS = ("stacked", "vertical")
     layout = prop(one_of=LAYOUTS)
+    # vertical = spread down in a column
 
     @property
     def color(self) -> str:
@@ -400,24 +408,21 @@ def test_piles() -> None:
 
 
 class Deck(ViewableList):
-    """a deck of playing cards"""
+    """A deck of 52 playing cards."""
 
     item_type = Card
     element_tag = "test-project-deck"
 
     async def create(self) -> None:
-        """Create one of each card, ace of clubs first"""
+        """Create one card of each rank and suit, and add it to the deck."""
         for rank in Card.RANKS:
             for suit in Card.SUITS:
                 self.append(Card(rank=rank, suit=suit))
 
     @property
     def shorthand(self) -> str:
-        """its card names, top to bottom"""
-        card_names = List(item_type="text")
-        for card in self:
-            card_names.append(card.shorthand)
-        return f"deck: {card_names}"
+        """Names of all of the cards in the deck, in the shuffled order."""
+        return f"deck: {core.map_to_list(self, lambda card: card.shorthand)}"
 
 
 def test_a_new_deck() -> None:
@@ -453,7 +458,7 @@ def test_a_new_deck() -> None:
 
 
 class StockPile(Pile):
-    """The cards not played yet, face down:  a click turns the next one over, so none can be taken from it"""
+    """The cards not played yet, face down."""
 
     element_tag = "test-project-stock-pile"
 
@@ -515,7 +520,7 @@ class Foundation(Pile):
         )
 
     def can_take(self, card: Card) -> bool:
-        return self.suit == card.suit and self.value == card.value - 1 and card.is_on_top_of_its_pile
+        return self.suit == card.suit and self.value == card.value - 1 and card.is_on_top
 
     droppable = True
 
@@ -541,37 +546,34 @@ class Column(Pile):
 
 
 class Solitaire(App):
-    """See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules"""
+    """A fully playable game in 300 lines of code!"""
 
     element_tag = "test-project-app"
 
     async def create(self) -> None:
+        """See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules"""
         for card in self.deck:
             self.stock.append(card)
-        await self.restart_the_game()
+        await self.deal_the_cards()
 
     def draw(self) -> Element:
+        """Use magical HTML tags to draw the game."""
+        # Parts in purple are "views" which can be used in the program.
         return [
             h(
                 "ui-segment",
                 {"inverted": True, "attach-to": "top"},
                 h(
                     "ui-toolbar",
-                    {
-                        "class": "GameBar",
-                        "appearance": "pills",
-                        "inverted": True,
-                        "size": "small",
-                        "shrinkable": True,
-                    },
+                    {"size": "small", "appearance": "pills", "inverted": True, "shrinkable": True},
                     h("ui-text", {"size": "big", "slot": "title", "heavy": True}, "Spell Solitaire"),
                     core.draw_action(self, "auto_play", {"in-menu": True}),
                     core.draw_action(self, "cheat", {"in-menu": True}),
-                    core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
+                    core.draw_action(self, "deal_the_cards", {"title": "Restart", "in-menu": True}),
                     h("spacer"),
                     core.draw_action(self, "undo", {"icon-only": True, "in-menu": True}),
                     core.draw_action(self, "redo", {"icon-only": True, "in-menu": True}),
-                    h("ui-text", {"slot": "right"}, "Score: ", self.score),
+                    h("ui-text", {"slot": "right"}, h("b", "Score"), ": ", self.score),
                 ),
             ),
             h(
@@ -592,13 +594,30 @@ class Solitaire(App):
                 h("test-project-column", {"id": "C6"}),
                 h("test-project-column", {"id": "C7"}),
             ),
+            h(
+                "ui-modal",
+                {"id": "you-won", "heading": "you won"},
+                h(
+                    "ui-content",
+                    h("ui-text", {"size": "big"}, "Congratulations!"),
+                    h("ui-text", "Your score:  ", self.score),
+                ),
+                h(
+                    "ui-actions",
+                    core.draw_action(
+                        self,
+                        "deal_the_cards",
+                        {"title": "New game", "answer": "deal the cards", "in-dialog": True},
+                    ),
+                ),
+            ),
             core.draw_context_menu(
                 self,
-                ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                ["auto_play", "cheat", "deal_the_cards", "-", "undo", "redo"],
             ),
         ]
 
-    # <deck "deck"hidden />
+    # <deck "deck" hidden />
     deck = prop(init=lambda: Deck(id="deck"), early=True)
     # <number "score" />
     score = prop(type="number")
@@ -629,7 +648,7 @@ class Solitaire(App):
     # <column "C7"/>
     c7 = prop(init=lambda: Column(id="C7"), early=True)
 
-    async def restart_the_game(self) -> None:
+    async def deal_the_cards(self) -> None:
         self.score = 0
         for card in self.deck:
             core.meanwhile(lambda: card.turn_face_down())
@@ -647,18 +666,15 @@ class Solitaire(App):
         await self.turn_over_the_next_card()
 
     async def turn_over_the_next_card(self) -> None:
-        """Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty"""
-        # - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
         if not self.stock:
-            self.reset_the_stock()
+            self.reset_the_stock_pile()
         next_card = self.stock.last_item
         next_card.turn_face_up()
         # as long as its flip takes (styles.css), so it turns over before it moves
         await core.pause_for(300, "msec")
         self.discard_pile.append(next_card)
 
-    def reset_the_stock(self) -> None:
-        """The discard pile, turned over, back into the stock"""
+    def reset_the_stock_pile(self) -> None:
         cards = self.discard_pile.clone()
         cards.reverse()
         for card in cards:
@@ -667,63 +683,70 @@ class Solitaire(App):
             card.turn_face_down()
 
     async def auto_play(self) -> None:
-        """Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column"""
-        async def _each_1(card: Card) -> Any:
-            return await card.play()
+        """Play one card that can go somewhere, then the next, until none can."""
+        candidates = core.merge_lists(
+            [
+                self.discard_pile.filter(lambda card: card.is_on_top),
+                core.pick_from_each(core.every_thing(Column), lambda column: column.last_item),
+                core.pick_from_each(
+                    core.every_thing(Column),
+                    lambda column: column.filter(lambda card: card.is_face_direction("up")).first_item,
+                ),
+            ],
+            List,
+        )
 
-        async def _each_2(card: Card) -> bool:
-            assert card.pile is not None
-            return card == card.pile.last_item and isinstance(core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, card)).first_item, Foundation) and (await card.play())
+        #  Remove kings directly on the board so they don't switch back and forth
+        candidates.remove_where(lambda card: card.rank == "king" and card.is_on_bottom)
 
-        async def _each_3(card: Card) -> bool:
-            assert card.pile is not None
-            return (card.rank != "king" or card != card.pile.first_item) and card == card.pile.filter(lambda card: card.is_face_direction("up")).first_item and (await card.play())
+        for card in candidates:
+            pile = core.filter(
+                core.every_thing(Pile),
+                lambda pile: core.can_take(pile, card) and pile != card.last_pile,
+            ).first_item
 
-        played = (await core.item_where_in_turn(self.discard_pile, _each_1, -1)) or (await core.item_where_in_turn(core.merge_lists(core.every_thing(Column)), _each_2, 0)) or (await core.item_where_in_turn(core.merge_lists(core.every_thing(Column)), _each_3, 0))
-        if played is not None:
-            await core.pause_for(300, "msec")
-            await self.auto_play()
+            if pile is not None:
+                core.answered(await card.play())
+                # wait a bit so it doesn't play too fast
+                await core.pause_for(500, "msec")
+                await self.auto_play()
+                return
 
     def cheat(self) -> None:
-        """Turn up a face-down card from a column, at random, onto the discard pile"""
-        remaining_piles = core.filter(
-            core.every_thing(Column),
-            lambda pile: (pile) and pile.first_item.is_face_direction("down"),
+        """Turn up a face-down card from a column, at random and play on the discard pile."""
+        card = core.random_item_of(
+            core.filter(
+                core.merge_lists(core.every_thing(Column)),
+                lambda card: card.is_face_direction("down"),
+            ),
         )
-        if core.is_empty(remaining_piles):
-            return
-        pile = core.random_item_of(remaining_piles)
-        card = pile.filter(lambda card: card.is_face_direction("down")).random_item()
-        # turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
-        self.discard_pile.append(card)
-        card.turn_face_up()
+        if card is not None:
+            self.discard_pile.append(card)
+            card.turn_face_up()
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
         if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
-            await core.alert("You won!", "New game")
-            await self.restart_the_game()
+            await core.show_drawn("you won")
 
 
 solitaire = Solitaire()
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart the Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart the Game"})
+core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal the Cards", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Deal the Cards"})
 core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over the Next Card", "undone_as": "Turn Card"})
-core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset the Stock", "undone_as": "Reset the Stock"})
+core.describe_action(Solitaire, "reset_the_stock_pile", {"title": "Reset the Stock Pile", "undone_as": "Reset the Stock Pile"})
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
 
-# play the card on click if it is a legal move
-
-##############
-# ## The piles
-##############
+#############################
+# ## Different kinds of piles
+#############################
 # Each kind of pile, what it may take or give up, and how it lies.
-# While one's empty, it shows its placeholder, if it has one.
+# An empty pile shows its placeholder, if it has one.
 
 
 def test_the_moves() -> None:
     with core.test("test the moves"):
-        core.echo_test_action("set the column to a new column with id \"T1\"")
-        column = Column(id="T1")
+        core.echo_test_action("set the column to a new column with id \"Test1\"")
+        column = Column(id="Test1")
         core.echo_test_action(
             "set the king to a new card whose rank is king, suit is spades and direction is up",
         )
@@ -749,8 +772,8 @@ def test_the_moves() -> None:
         core.expect(
             column.shorthand,
             "the shorthand of the column",
-            "T1: K♠↑ Q♥↑",
-            "\"T1: K♠↑ Q♥↑\"",
+            "Test1: K♠↑ Q♥↑",
+            "\"Test1: K♠↑ Q♥↑\"",
         )
         core.expect(
             core.can_give_up(column, queen),
@@ -767,7 +790,7 @@ def test_the_moves() -> None:
             "no",
         )
 
-        # a foundation takes its suit, ace first, then one higher:  each the last card of its pile
+        # a foundation takes its suit, ace first, then one higher
         foundation = Foundation(suit="hearts")
         core.echo_test_action(
             "set the two to a new card whose rank is 2, suit is hearts and direction is up",
@@ -777,8 +800,6 @@ def test_the_moves() -> None:
             "set the ace to a new card whose rank is ace, suit is hearts and direction is up",
         )
         ace = Card(rank="ace", suit="hearts", direction="up")
-        core.echo_test_action("set the column to a new column with id \"T2\"")
-        column = Column(id="T2")
         core.echo_test_action("add the two to the column")
         column.append(two)
         core.echo_test_action("add the ace to the column")
@@ -803,8 +824,6 @@ def test_the_moves() -> None:
             True,
             "yes",
         )
-        core.echo_test_action("add the queen to the column")
-        column.append(queen)
         core.expect(
             core.can_take(foundation, queen),
             "the foundation can take the queen",

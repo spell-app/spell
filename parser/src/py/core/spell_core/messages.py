@@ -23,6 +23,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
 | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
 | `confirm-default` | `confirm` with no page, e.g. `spell run`:  the question and its answer | `question` |
+| `dialog-ok`, `dialog-cancel` | a modal's button that just closes it, `<action ok />`:  the page's | |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo | |
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`) | `step` |
@@ -62,6 +63,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `site-page-waiting` | a page a site lists that isn't made yet:  JS core's | |
 | `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 | `table-edit` | the undo step of an editable table's change:  JS core's | |
+| `language` | the program's language, `en`:  what dates are said in (`date_methods.py`) | |
+| `duration-ago`, `duration-from-now` | a date as how long ago or from now:  `in 2 days, 3 hours` | `time` |
 """
 
 import re
@@ -76,6 +79,8 @@ MESSAGES: dict[str, str] = {
     "cant-draw": "⚠ {type} can't draw",
     "waiting": "…",
     "confirm-default": "{question} (yes)",
+    "dialog-ok": "OK",
+    "dialog-cancel": "Cancel",
     "drop-event": "{thing}-drop",
     "undo": "Undo",
     "undo-step": "Undo {step}",
@@ -91,6 +96,8 @@ MESSAGES: dict[str, str] = {
     "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
     "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
+    "duration-ago": "{time} ago",
+    "duration-from-now": "in {time}",
     "write-retry": "Retry",
     "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
     "room-reload": "Reload",

@@ -26,6 +26,7 @@ import { wordsOfLanguages } from "spell/app/app/runner/words"
 // By file:  the runner barrel brings the runners themselves
 import { loadRuntime } from "spell/app/app/runner/loadRuntime"
 import { EditorHistory } from "spell/app/app/EditorHistory"
+import { debugging } from "spell/app/app/Debugging"
 import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
@@ -235,6 +236,9 @@ export class EditorStore extends Observable {
     const sameProject = editor.project === project
     if (!sameProject) {
       console.info("selecting project", project)
+      // the old app goes at once, never shown while this one loads (I254);  nor run again meanwhile, or drawn back
+      comingProject = project
+      appRuntime?.unmountApp()
       // the one shown goes, if it was a start card's and not kept (epic `mockup` I42):  asked while this one loads
       void editor.leaveProject()
       editor.history.clear()
@@ -244,8 +248,8 @@ export class EditorStore extends Observable {
       // remember this project was selected for projectRoot
       editor.lastProjectForRoot(location.projectRoot, projectPath)
       await project.load(undefined)
-      // Clear application display when switching projects
-      appRuntime?.unmountApp()
+      // another project was picked while this one loaded:  that one shows, not this
+      if (comingProject !== project) return
     }
 
     // Figure out which file to show, using pref if not specified in `path`
@@ -806,7 +810,10 @@ export class EditorStore extends Observable {
     if (!project || !compiled) return
     // the site editor shows no app:  run, it'd draw over the page (epic `mockup` P4)
     if (editor.projectPage === "site") return
+    // no page shows an app (Home), or this project is leaving for another:  it'd draw over what's there (I254)
+    if (!isShowingApp(project)) return
     const runtime = await editor.loadRuntime()
+    if (!isShowingApp(project)) return
     const output = runtime.core.console
     const words = appTexts.groupWords(editor.projectRoot)
     output.group(appTexts.text("consoleExecuting", words))
@@ -825,9 +832,18 @@ export class EditorStore extends Observable {
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(lang)
     }
-    const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
-    const run = runtime.runApp(compiled, {
-      appRoot,
+    // while debugging, its debugging build, where each line of an action may stop (epic `editor` P33)
+    const built = debugging.buildFor(project, compiled)
+    const sourceMap = built?.map ?? project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
+    // the page may have gone while its language loaded:  it starts afresh when one shows it again
+    if (!isShowingApp(project)) {
+      editor.startAfresh = true
+      output.groupEnd()
+      return
+    }
+    const place = appRoot
+    const run = runtime.runApp(built?.code ?? compiled, {
+      appRoot: place,
       coreUrl: runtimeUrl(),
       keepConsole: true,
       keepThings,
@@ -843,6 +859,8 @@ export class EditorStore extends Observable {
     })
     editor.appRun = run
     const error = await run
+    // its page went while it ran:  what it drew there goes with it
+    if (appRoot !== place) unmountAppIn(place)
     editor.programRuns += 1
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
@@ -948,6 +966,35 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * Run a line of Spell typed into the console on the running app, as the browser's console runs a line on its page
+   * (the Spell Console, epic `editor` P32;  Q38):  the app's things are the running ones, kept, and what it changes stays.
+   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope:
+   *   its types, things and actions are known, and what earlier lines declared (`x is 3`, then `x + 4`).
+   * - Logged on the program's console:  the line as typed, then its value, or why not, in red.
+   * - Nothing running yet:  Spell's own rules alone, and only the runtime's names.
+   * - NEVER throws:  what goes wrong is the console's red line, and the app keeps running.
+   */
+  async runInConsole(text: string): Promise<void> {
+    const line = text.trim()
+    if (!line) return
+    const runtime = await editor.loadRuntime()
+    const output = runtime.core.console
+    output.typed(line)
+    const parsed = SP.parseLine(line, consoleScopeFor(editor.project), { commit: true })
+    if (parsed.error !== undefined || parsed.compiled === undefined) {
+      // nothing read at all:  the parser's "Doesn't parse as statement or expression" is its own words, not a reader's
+      const notRead = !parsed.tree.length && parsed.error !== undefined
+      output.error(notRead ? appTexts.text("consoleLineNotRead") : (parsed.error ?? appTexts.text("consoleLineNotRun")))
+      return
+    }
+    try {
+      output.answer(await runtime.runLine(parsed.compiled))
+    } catch (error) {
+      output.error(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  /**
    * Set where the running app draws:  `<AppRoot>` hands it over, as a ref.
    * - NOT spell state.
    * - A new place while a program's compiled, e.g. moving from Edit to Run:  the program starts again there,
@@ -968,9 +1015,12 @@ export class EditorStore extends Observable {
    * - Why "if":  moving between the editor and the runner,
    *   the old page's cleanup may run AFTER the new page's `<AppRoot>` handed its own over,
    *   which must not be forgotten.
+   * - SIDE EFFECT:  takes down the app drawn in `element`, either way:  its drawing, its Solid root, its keys
+   *   (`core.mountApp()`), never left running in an element no page shows (I254).
    */
   releaseAppRoot(element: HTMLElement): void {
     if (appRoot === element) appRoot = undefined
+    unmountAppIn(element)
   }
 
   ////////////////
@@ -2394,6 +2444,25 @@ export type RunningSitePage = {
 let loadingRuntime: Promise<SpellRuntime> | undefined
 /** Where the running app draws -- NOT spell state either.  See `editor.setAppRoot()`. */
 let appRoot: HTMLElement | undefined
+/**
+ * The project picked last (`selectPath()`), on its way in while it loads -- NOT spell state.
+ * - Until it's `editor.project`, the project still shown is leaving:  it doesn't run again (`executeCompiledApp()`).
+ */
+let comingProject: SP.SpellProject | undefined
+
+/**
+ * May `project` run, and draw, now?  Only while a page shows the app (an `<AppRoot>` handed over its place),
+ * and no other project is on its way in (`comingProject`).
+ * - Home has no `<AppRoot>`:  a compile that ends after leaving for it would draw the app over it (I254).
+ */
+function isShowingApp(project: SP.SpellProject): boolean {
+  return !!appRoot && (!comingProject || comingProject === project)
+}
+
+/** Take down the app `core.mountApp()` drew in `element`, if any:  it leaves its unmounting there, as `spellRoot`. */
+function unmountAppIn(element: HTMLElement | undefined): void {
+  ;(element as (HTMLElement & { spellRoot?: { unmount(): void } }) | undefined)?.spellRoot?.unmount()
+}
 /** Scope explorer on the in-page language service, once CodeMirror's loaded -- NOT spell state.  See `editor.setScopeExplorer()`. */
 let scopeExplorer: LSP.ScopeExplorer | undefined
 /**
@@ -2461,6 +2530,23 @@ export function runtimeCore(): SpellRuntime["core"] | undefined {
 export function runtimeConsole(): SpellConsole | undefined {
   return runtimeCore()?.console
 }
+
+/**
+ * The scope the console's lines are read in (`editor.runInConsole()`):  one per parse of the project, so a line's
+ * declarations stay known to the lines after it, while the project's scope is the same.
+ * - A new parse of the project starts a new one:  its types may have changed.
+ */
+function consoleScopeFor(project: SP.SpellProject | undefined): P.Scope {
+  const key = project?.scope ?? NO_PROJECT
+  let scope = consoleScopes.get(key)
+  if (!scope) consoleScopes.set(key, (scope = SP.lineScope(project)))
+  return scope
+}
+
+/** The console's line scopes, by the project scope they're inside:  see `consoleScopeFor()`. */
+const consoleScopes = new WeakMap<object, P.Scope>()
+/** The key of the console's line scope with no project open. */
+const NO_PROJECT = {}
 
 /** Code editor of our `<InputEditor>`, if one's mounted -- NOT spell state, see `editor.getInputEditor()`. */
 let inputEditorInstance: SpellCodeMirror | undefined

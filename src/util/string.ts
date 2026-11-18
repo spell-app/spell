@@ -279,3 +279,30 @@ export function textChecksum(text: string): string {
   }
   return `${(one >>> 0).toString(36)}-${(other >>> 0).toString(36)}`
 }
+
+/**
+ * What makes text Markdown, for `hasMarkdown()`:  any one of them.
+ * - a heading (`# Won`), a list item (`- one`, `1. one`), a quote (`> said`), a fence (```` ``` ````)
+ * - bold or italic (`**big**`, `__big__`, `*so*`, `_so_`), code (`` `x` ``), a link (`[here](/x)`)
+ */
+const MARKDOWN_MARKS = [
+  /^#{1,6}\s/m,
+  /^\s*(?:[-*+]|\d+[.)])\s+\S/m,
+  /^>\s?/m,
+  /^```/m,
+  /(\*\*|__)\S(?:.*?\S)?\1/,
+  /(?<![\w*])\*[^\s*](?:[^*]*[^\s*])?\*(?![\w*])/,
+  /(?<!\w)_[^\s_](?:[^_]*[^\s_])?_(?!\w)/,
+  /`[^`\n]+`/,
+  /\[[^\]\n]+\]\([^)\s]+\)/
+]
+
+/**
+ * Does `text` have Markdown in it:  a heading, a list, a quote, a fence, bold or italic, code, a link?
+ * - So a plain message stays plain text, drawn exactly as before Markdown was asked for:
+ *   Spell UI's dialogs and toasts (`ModalDialogs`, `ToastStack`) draw a `<ui-markdown>` only for one that has some.
+ * - Italic needs a mark against a word on both sides, so `5 * 3 * 2` and `snake_case_name` stay plain.
+ */
+export function hasMarkdown(text: string): boolean {
+  return MARKDOWN_MARKS.some((mark) => mark.test(text))
+}

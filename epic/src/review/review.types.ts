@@ -188,6 +188,12 @@ export type ReviewAction = (typeof REVIEW_ACTIONS)[number]
 export const SUMMARY_ID = "summary"
 
 /**
+ * The kickoff box's key in the inbox (`<epic-kickoff>`, epic `epic-engine` P75).
+ * As `ReviewInbox`'s `KICKOFF_ID`:  a copy, since that module is node-only.
+ */
+export const KICKOFF_ID = "kickoff"
+
+/**
  * The stage button's key in the inbox (`<epic-stage-button>`) (Accept Overview, Accept Phases:  epic `epic-engine` P29).
  * As `ReviewInbox`'s `STAGE_ID`:  a copy, since that module is node-only.
  */

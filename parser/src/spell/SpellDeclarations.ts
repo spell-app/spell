@@ -447,10 +447,11 @@ export class SpellDeclarations {
   private static loadSaved(scope: P.RootScope, names: Set<string>, { type: name, savedIn }: SP.SpellDeclaration) {
     const type = name && names.has(name) ? scope.types.get(name, "LOCAL_ONLY") : undefined
     if (!type || !savedIn) return
-    const { place, placeType: placeTypeName, collection, keepsNoTimes } = savedIn
+    const { place, placeType: placeTypeName, collection, keepsNoTimes, enabledOperations } = savedIn
     const placeType = scope.types.get(placeTypeName, "LOCAL_ONLY") ?? new P.TypeScope(placeTypeName)
     placeType.placeName ??= place
     type.saved = { place, placeType, collection }
+    if (enabledOperations) type.enabledOperations = enabledOperations
     if (keepsNoTimes) return
     for (const word of Object.values(SP.Language.of(scope).words.savedTimeWords)) {
       if (!type.variables.get(word, "LOCAL_ONLY"))
@@ -1096,13 +1097,14 @@ const PROP_ORDER = [
 ]
 
 /** Where `type` itself is saved, for its declaration:  `undefined` for a type kept in memory, or one inheriting it. */
-function savedDeclaration({ saved, keepsNoTimes }: P.TypeScope): SP.DeclaredSaved | undefined {
+function savedDeclaration({ saved, keepsNoTimes, enabledOperations }: P.TypeScope): SP.DeclaredSaved | undefined {
   return (
     saved && {
       place: saved.place,
       placeType: saved.placeType.name,
       collection: saved.collection,
-      ...(keepsNoTimes && { keepsNoTimes })
+      ...(keepsNoTimes && { keepsNoTimes }),
+      ...(enabledOperations && { enabledOperations: [...enabledOperations] })
     }
   )
 }

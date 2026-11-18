@@ -1905,8 +1905,9 @@ export class SpellLanguageService {
   private keywordItems(file: SP.SpellFile, words: Iterable<string>, detail: string): CompletionItem[] {
     const keywords = LSP.SpellKeywords.of(file.language)
     const items = new Map<string, CompletionItem>()
-    for (const word of words) {
-      const spelling = keywords.completionSpelling(word)
+    const offered = new Set(words)
+    for (const word of offered) {
+      const spelling = keywords.completionSpelling(word, offered)
       if (!items.has(spelling.label))
         items.set(spelling.label, { ...spelling, kind: CompletionItemKind.Keyword, detail })
     }

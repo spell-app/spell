@@ -40,7 +40,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - `pages/`:  the pages and the router;  among them a site's editor, `/site/<project>` (`SiteEditorPage`, epic
     `mockup` P4), which changes the site's file through `SiteWrites`;  a page's stories, `PageStories` (P6);
     its board of sections and cards, `SiteBoard` and `<SiteBoardView>` (T31);  a site of its routing alone, `X.site.spell`,
-    each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`)
+    each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`);
+    a place's reference page, `/place/<its description>` (`PlaceReference`, epic `data` P52), linked from the Data tab (`SiteData`):
+    its lists by tag, folded, each with how trying it went, its changes and its fields, drawn from the description each time
   - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
@@ -50,6 +52,10 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
+    `solid/SpellConsoleInput.tsx` is the Spell Console's line, under the console's:  a line of Spell typed runs on the
+    running app, its things kept (`editor.runInConsole()`, the runtime's `runLine()`;  read by `SP.parseLine()`, as
+    `spell repl` reads one;  epic `editor` P32);  `solid/ExplainThis.tsx`, the code's right-click Explain This:
+    each line's own hover words (`ui/ExplainedLines.ts`), then Claude Code's summary when it comes (spaces' `ClaudeExplainer`)
   - `layout/`:  how the editor loads its own Spell (`layoutSpell.ts`);  the Spell itself is ONE project of the group `@spell/editor`,
     `spell-editor`, one file, `SpellEditor.spell`:  the app `spell editor`, whose views are the top bar, the panes, the file tabs
     and the menus (P22, P29;  [README-app.md](../../README-app.md), "The editor in Spell");  opened as a project, its app

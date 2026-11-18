@@ -66,6 +66,18 @@ describe("the Codex manifest (epic `epic-friend` P12)", () => {
   })
 })
 
+describe("the published package.json (epic `repo-split` P29)", () => {
+  test("names the kit's repo and its epic folder:  a publish with provenance is refused without it", async () => {
+    const stage = join(ROOT, "stage-manifest")
+    await new PluginPackage(epicRepo(), stage, "9.9.9", {}, {}).stage()
+    expect(JSON.parse(readFileSync(join(stage, "package.json"), "utf8")).repository).toEqual({
+      type: "git",
+      url: "git+https://github.com/spell-app/spell.git",
+      directory: "epic"
+    })
+  })
+})
+
 describe("sourceToNpm()", () => {
   test("the root marketplace's epic entry:  ./epic turned to the npm package;  again, nothing", () => {
     mkdirSync(join(ROOT, "kit", ".claude-plugin"), { recursive: true })

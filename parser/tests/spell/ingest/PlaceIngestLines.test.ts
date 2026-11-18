@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
-import { PlaceIngest, descriptionFromDisk } from "spell/parser/spell/ingest/PlaceIngest"
+import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { descriptionFromDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import type { IngestFiles, PlaceDescription, PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 
 /**
@@ -103,7 +104,7 @@ describe("what a server does when it's asked (T162)", () => {
     expect(spell).toContain(`it gives only the fields named in "fields"`)
     expect(spell).toContain(`it is read only`)
     expect(description.spellCantSay.join("\n")).not.toMatch(/filter or sort|read only/)
-    expect(description.collections.recipes!.readThrough!.rows).toBe(3)
+    expect(description.collections.recipes!.state!.rows).toBe(3)
   })
 
   test("a server that ignores what it's asked has none of those lines", async () => {

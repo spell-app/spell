@@ -33,7 +33,8 @@ export const epicOverviewVocabulary = {
   description:
     "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then " +
     "the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row " +
-    "(Make Todo, Revisit), keyed `summary` in the review inbox.",
+    "(Make Todo, Revisit), keyed `summary` in the review inbox.  A new epic's, with no prompt and no phases yet, " +
+    "draws the kickoff box first (`<epic-kickoff>`, epic `epic-engine` P75):  you type what the epic should do there.",
   attributes: [
     {
       name: "id",
@@ -80,6 +81,13 @@ export const epicOverviewVocabulary = {
         "An older doc's folded Kickoff prompt:  a `<details>` around the `prompt` slot (`<epic-prompt>` draws its own)."
     },
     { name: "estimate", description: "The estimate line." },
+    {
+      name: "kickoff",
+      description:
+        "The kickoff box (`<epic-kickoff>`, epic `epic-engine` P75), first in its body:  only while the page is " +
+        "reviewed and the epic has no Kickoff prompt and no phases.  What the epic should do, typed on its page, " +
+        "pictures and all;  Send makes it the Kickoff prompt."
+    },
     {
       name: "stage-button",
       description:

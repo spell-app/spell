@@ -32,6 +32,32 @@ export class SpellRuntime extends Eventful() {
    * - A page never sets it:  nothing in a browser holds a key, so a place that needs one refuses there (`WebPlace`).
    */
   keyFrom?: (name: string) => string | undefined
+  /**
+   * The deployment of each place picked for this run, by the place's name (epic `data` P49, Q49, Q53):
+   * a runner reads the project's file's `places` and `SPELL_DEPLOYMENT`, so the program's Spell names none.
+   * - A place in it goes to that address, with that key, read only or not;  any other, as its line says.
+   */
+  deployments?: Readonly<Record<string, PlaceDeployment>>
+  /** What stops each of this run's timers, `every second` (`timers.ts`, epic `language` T159):  each takes itself out. */
+  readonly timers = new Set<() => void>()
+
+  /** SIDE EFFECT:  every timer of this run stops:  the program has ended, or is starting again. */
+  stopTimers(): void {
+    for (const stop of [...this.timers]) stop()
+    this.timers.clear()
+  }
+}
+
+/** One deployment of a place, as the project's file lists it:  its address, its key's name, read only or not. */
+export type PlaceDeployment = {
+  /** Its address, a path prefix and all. */
+  at: string
+  /** The NAME of its key, when it isn't the place's own. */
+  key?: string
+  /** Where its token is made, when it isn't the place's own. */
+  tokenFrom?: string
+  /** It takes no writes. */
+  readOnly?: boolean
 }
 
 /**
@@ -142,11 +168,17 @@ export const runtimeMethods = defineCoreModule({
    * Reset `core.RUNTIME`, e.g. when a project starts or a test is run.
    * Returns the new runtime.
    * - The new one's undo history is empty, and it remembers nothing until `core.remember()`.
-   * - SIDE EFFECT:  forgets the last run's things too -- see `core.things`.
+   * - SIDE EFFECT:  forgets the last run's things too -- see `core.things`;
+   *   and what the step debugger holds of it (`core._stepper`, `stepping.ts`).
+   * - SIDE EFFECT:  the last run's timers stop (`every second`, `timers.ts`).
    */
   resetRuntime(): SpellRuntimeState {
     if (core.DEBUG_RUNTIME) console.info("Resetting core.RUNTIME")
+    core.RUNTIME?.stopTimers()
     core.things.clear()
+    // an action the step debugger holds belongs to the last run:  it never goes on into this one
+    const { _stepper: stepper } = core as { _stepper?: { forgetHeld(): void } }
+    stepper?.forgetHeld()
     core.RUNTIME = new SpellRuntime() as SpellRuntimeState
     return core.RUNTIME
   },
@@ -166,9 +198,13 @@ export const runtimeMethods = defineCoreModule({
     runtime.remembered = await RememberedValues.open(name, place)
   },
 
-  /** Clear `core.RUNTIME`:  unset again, as before the first `resetRuntime()` -- see `RUNTIME`. */
+  /**
+   * Clear `core.RUNTIME`:  unset again, as before the first `resetRuntime()` -- see `RUNTIME`.
+   * - SIDE EFFECT:  its timers stop (`every second`, `timers.ts`):  the program has ended.
+   */
   clearRuntime(): void {
     if (core.DEBUG_RUNTIME) console.info("Clearing core.RUNTIME")
+    core.RUNTIME?.stopTimers()
     core.RUNTIME = undefined as unknown as SpellRuntimeState
   },
 

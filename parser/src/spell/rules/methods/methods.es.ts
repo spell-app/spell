@@ -17,6 +17,9 @@ import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
 import { ActionDetail } from "./ActionDetail"
 import { AfterHook } from "./AfterHook"
+import { BeforeHook } from "./BeforeHook"
+import { FailureHook } from "./FailureHook"
+import { WhileHook } from "./WhileHook"
 import { CancelThisAction } from "./CancelThisAction"
 import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
@@ -1334,7 +1337,7 @@ methodsEs.addRule(QuotedTypeExpression, {
 // what runs as a thing is made, in its type's outline:  `- al crear una tarea (con ...):` (epic `language`),
 // also `- al crearla:`, `- al crear:` and `- al crear la:` (epic `spanish` P28)
 methodsEs.addRule(CreateHook, {
-  syntax: "al {signature:method_signature} :? {statement_body}?",
+  syntax: "al {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1816,7 +1819,7 @@ methodsEs.addRule(CancelThisAction, {
 })
 
 methodsEs.addRule(AfterHook, {
-  syntax: "(después|despues) de {signature:method_signature} :? {statement_body}?",
+  syntax: "(después|despues) de {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1862,6 +1865,180 @@ methodsEs.addRule(AfterHook, {
             "export class Pila extends List<Carta> {",
             "  static instanceType = Carta",
             "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// los pasos alrededor de una acción (epic `data` P50):  antes, mientras se hace, y cuando falla
+methodsEs.addRule(BeforeHook, {
+  syntax: "antes de {signature:method_signature} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "un trabajo es una cosa",
+            '\tsu "estado" es texto',
+            "para completar un trabajo",
+            '\tponer el estado del trabajo a "hecho"',
+            "antes de completar un trabajo",
+            '\tcancelar si el estado del trabajo es "hecho"'
+          ],
+          js: [
+            "export class Trabajo extends Thing {",
+            '  // su "estado" es texto',
+            '  static { this.declareProp("estado", { type: "text" }) }',
+            '  get estado() { return this.getProp("estado") }',
+            '  set estado(value) { this.setProp("estado", value) }',
+            "",
+            "  completar() {",
+            '    this.estado = "hecho"',
+            "  }",
+            "",
+            "  beforeCompletar() {",
+            '    if (this.estado === "hecho") core.cancel()',
+            "  }",
+            "}",
+            'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
+            'core.addActionHook(Trabajo, "completar", { moment: "before", hook: "beforeCompletar", level: "app" })'
+          ],
+          ts: [
+            "export class Trabajo extends Thing {",
+            '  // su "estado" es texto',
+            '  @prop({ type: "text" })',
+            "  accessor estado!: string",
+            "",
+            "  completar() {",
+            '    this.estado = "hecho"',
+            "  }",
+            "",
+            "  beforeCompletar() {",
+            '    if (this.estado === "hecho") core.cancel()',
+            "  }",
+            "}",
+            'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
+            'core.addActionHook(Trabajo, "completar", { moment: "before", hook: "beforeCompletar", level: "app" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+methodsEs.addRule(WhileHook, {
+  syntax: "mientras se {signature:method_signature} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "un trabajo es una cosa",
+            '\tsu "estado" es texto',
+            "para completar un trabajo",
+            '\tponer el estado del trabajo a "hecho"',
+            "mientras se completa un trabajo",
+            '\tponer el estado del trabajo a "ocupado"'
+          ],
+          js: [
+            "export class Trabajo extends Thing {",
+            '  // su "estado" es texto',
+            '  static { this.declareProp("estado", { type: "text" }) }',
+            '  get estado() { return this.getProp("estado") }',
+            '  set estado(value) { this.setProp("estado", value) }',
+            "",
+            "  completar() {",
+            '    this.estado = "hecho"',
+            "  }",
+            "",
+            "  whileCompletar() {",
+            '    this.estado = "ocupado"',
+            "  }",
+            "}",
+            'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
+            'core.addActionHook(Trabajo, "completar", { moment: "while", hook: "whileCompletar", level: "app" })'
+          ],
+          ts: [
+            "export class Trabajo extends Thing {",
+            '  // su "estado" es texto',
+            '  @prop({ type: "text" })',
+            "  accessor estado!: string",
+            "",
+            "  completar() {",
+            '    this.estado = "hecho"',
+            "  }",
+            "",
+            "  whileCompletar() {",
+            '    this.estado = "ocupado"',
+            "  }",
+            "}",
+            'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
+            'core.addActionHook(Trabajo, "completar", { moment: "while", hook: "whileCompletar", level: "app" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+methodsEs.addRule(FailureHook, {
+  syntax: "(si|cuando) falla al {signature:method_signature} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "un trabajo es una cosa",
+            '\tsu "estado" es texto',
+            "para completar un trabajo",
+            '\tponer el estado del trabajo a "hecho"',
+            "si falla al completar un trabajo",
+            '\tsi el error es "no encontrado"',
+            "\t\tno importa",
+            '\tsi no si el error es "sin conexión"',
+            "\t\tpasar el error"
+          ],
+          js: [
+            "export class Trabajo extends Thing {",
+            '  // su "estado" es texto',
+            '  static { this.declareProp("estado", { type: "text" }) }',
+            '  get estado() { return this.getProp("estado") }',
+            '  set estado(value) { this.setProp("estado", value) }',
+            "",
+            "  completar() {",
+            '    this.estado = "hecho"',
+            "  }",
+            "",
+            "  failedCompletar(error) {",
+            '    if (core.errorIs(error, "not found")) return',
+            '    else if (core.errorIs(error, "offline")) return core.passTheError()',
+            "    return core.passTheError()",
+            "  }",
+            "}",
+            'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
+            'core.addActionHook(Trabajo, "completar", { moment: "failed", hook: "failedCompletar", level: "app" })'
+          ],
+          ts: [
+            "export class Trabajo extends Thing {",
+            '  // su "estado" es texto',
+            '  @prop({ type: "text" })',
+            "  accessor estado!: string",
+            "",
+            "  completar() {",
+            '    this.estado = "hecho"',
+            "  }",
+            "",
+            "  failedCompletar(error: any /* spell: type unknown */) {",
+            '    if (core.errorIs(error, "not found")) return',
+            '    else if (core.errorIs(error, "offline")) return core.passTheError()',
+            "    return core.passTheError()",
+            "  }",
+            "}",
+            'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
+            'core.addActionHook(Trabajo, "completar", { moment: "failed", hook: "failedCompletar", level: "app" })'
           ]
         }
       ]

@@ -118,6 +118,17 @@ export const englishWords: SP.LanguageWords = {
     return verbs
   },
 
+  errorNames: {
+    "not found": "not found",
+    "not authorized": "not authorized",
+    "not permitted": "not permitted",
+    "out of date": "out of date",
+    "server not found": "server not found",
+    limit: "limit",
+    offline: "offline",
+    anything: "anything"
+  },
+
   danglingWords: new Set([
     "of",
     "to",
@@ -156,6 +167,10 @@ export const englishWords: SP.LanguageWords = {
   appActions: { undo: "undo", redo: "redo" },
   // `<action>`'s own attribute:  a button showing only its icon (`action_button`, epic `language` P53)
   iconOnlyAttribute: "icon-only",
+  // `<action>`'s own attribute in a modal's actions:  its click leaves the modal open (epic `language` T155)
+  keepOpenAttribute: "keep-open",
+  // the words a modal's button answers with, `<action ok />`, and `the result` is compared to (epic `language` T155)
+  answerWords: { ok: "ok", cancel: "cancel" },
   // an example on a page, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language

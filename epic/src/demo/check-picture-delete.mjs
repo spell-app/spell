@@ -15,7 +15,14 @@
  *   - clicked again and left:  6 seconds on, the item's part holds one picture, the log says so, its file is gone,
  *     the other's isn't;  the page's live update shows one picture
  *   - no page errors
- * - screenshots:  `picture-item.png` (both pictures, the trash), `picture-deleted.png` (after the delete) in outDir
+ *   - each picture labelled (epic `epic-engine` P75):  IMG1, IMG2, a chip on its corner;  after the delete the other
+ *     keeps IMG2 (a gap:  P75's choice B)
+ * - and the KICKOFF BOX (P75), on a second scratch epic, `kickoff-box`, with no prompt and no phases:
+ *   - its Overview shows the box;  three pictures dropped in it are IMG1-IMG3 in its strip, saved as a `kickoff` mark
+ *   - IMG2's x leaves IMG1 and IMG2 (the third renamed), in the words that name it too
+ *   - Send, then the tool's `inbox apply`:  the Kickoff prompt, its two pictures labelled;  the box gone
+ * - screenshots:  `picture-item.png` (both pictures, the trash), `picture-deleted.png` (after the delete),
+ *   `kickoff-box.png` (three pictures in the box), `kickoff-prompt.png` (the prompt it made) in outDir
  * - exits 1 on any miss
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
@@ -45,7 +52,12 @@ const { PlanDocCommands } = await import("spell/epic/tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("spell/epic/tool/PlanDocFiles.ts")
 const { ItemPictures } = await import("spell/epic/tool/ItemPictures.ts")
 
+const { ReviewInbox } = await import("spell/epic/tool/ReviewInbox.ts")
+
 const NAME = "picture-delete"
+const KICKOFF = "kickoff-box"
+const KICKOFF_FOLDER = join(HERE, "shots", NAME, "epics", KICKOFF)
+const KICKOFF_FILE = join(KICKOFF_FOLDER, `${KICKOFF}.plan.html`)
 const CONTENT = join(HERE, "shots", NAME)
 const FOLDER = join(CONTENT, "epics", NAME)
 const FILE = join(FOLDER, `${NAME}.plan.html`)
@@ -84,6 +96,12 @@ const added = await files.edit(FILE, (plan) =>
 ItemPictures.save(FILE, added.pictures)
 check(added.id === "i1" && added.pictures.length === 2, "the epic tool added I1 with two pictures")
 await files.writeDoc(FILE, files.read(FILE), true)
+// the kickoff box's epic:  the fixture with no prompt and no phases, a new epic's page
+mkdirSync(KICKOFF_FOLDER, { recursive: true })
+const fresh = PlanDoc.parse(fixture.replace('epic="demo"', `epic="${KICKOFF}"`))
+for (const phase of fresh.document.querySelectorAll("epic-phase")) phase.remove()
+fresh.setPrompt("")
+writeFileSync(KICKOFF_FILE, fresh.toString())
 const shown = () =>
   Array.from(files.read(FILE).findItem("i1").querySelectorAll("epic-picture > img"), (img) => img.getAttribute("src"))
 const [first, second] = shown()
@@ -135,6 +153,14 @@ try {
     state.every((each) => each.trash && each.title === "Delete this picture, and its file"),
     "a trash on each picture, its tooltip a title"
   )
+  const labels = () =>
+    page.evaluate(() =>
+      Array.from(document.querySelectorAll("epic-item#i1 epic-picture"), (picture) => {
+        const chip = picture.shadowRoot?.querySelector('[part~="label"]')
+        return chip && getComputedStyle(picture).display !== "none" ? chip.textContent : null
+      }).filter(Boolean)
+    )
+  check(JSON.stringify(await labels()) === '["IMG1","IMG2"]', `labelled IMG1, IMG2 (${await labels()})`)
   check(
     state.every((each) => each.width > 0 && each.width <= 320),
     `thumbnails, no wider than 320px (${state.map((each) => Math.round(each.width)).join(", ")})`
@@ -174,7 +200,7 @@ try {
   check(posted.some((path) => path.endsWith("/delete-picture")), "left alone:  the delete posted after its Undo's time")
   check(JSON.stringify(shown()) === JSON.stringify([second]), "the item's part holds the other picture alone")
   check(!existsSync(fileOf(first)) && existsSync(fileOf(second)), "its file deleted, the other's kept")
-  check(/picture deleted from the page/.test(files.read(FILE).section("log").textContent), "the log says so")
+  check(/picture IMG1 deleted from the page/.test(files.read(FILE).section("log").textContent), "the log says so")
   await page
     .waitForFunction(() => document.querySelectorAll("epic-item#i1 epic-picture").length === 1, null, {
       timeout: 10000
@@ -184,7 +210,105 @@ try {
     (await page.evaluate(() => document.querySelectorAll("epic-item#i1 epic-picture").length)) === 1,
     "the page's live update shows one picture"
   )
+  check(JSON.stringify(await labels()) === '["IMG2"]', `the other keeps IMG2, a gap (${await labels()})`)
   await page.screenshot({ path: join(outDir, "picture-deleted.png") })
+
+  ////////////////
+  // ## The kickoff box (P75)
+  ////////////////
+
+  await page.goto(`${server.base}/epics/${KICKOFF}/${KICKOFF}.plan.html`)
+  const kickoffField = () =>
+    page.waitForFunction(
+      () =>
+        document
+          .querySelector("epic-overview")
+          ?.shadowRoot?.querySelector("epic-kickoff")
+          ?.shadowRoot?.querySelector("epic-text-box")?.textarea,
+      null,
+      { timeout: 15000 }
+    )
+  await kickoffField()
+  check(true, "a new epic's Overview shows the kickoff box")
+  const png = readFileSync(PICTURE).toString("base64")
+  await page.evaluate(async (base64) => {
+    const kickoff = document.querySelector("epic-overview").shadowRoot.querySelector("epic-kickoff")
+    const field = kickoff.shadowRoot.querySelector("epic-text-box").textarea
+    field.value = "A popup that stays clear of its button, like IMG3."
+    field.setSelectionRange(field.value.length, field.value.length)
+    field.dispatchEvent(new Event("input", { bubbles: true, composed: true }))
+    const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0))
+    const dropped = new DataTransfer()
+    for (const name of ["one.png", "two.png", "three.png"]) dropped.items.add(new File([bytes], name, { type: "image/png" }))
+    field.dispatchEvent(new DragEvent("drop", { dataTransfer: dropped, bubbles: true, composed: true, cancelable: true }))
+  }, png)
+  const strip = () =>
+    page.evaluate(() =>
+      Array.from(
+        document
+          .querySelector("epic-overview")
+          .shadowRoot.querySelector("epic-kickoff")
+          .shadowRoot.querySelectorAll(".pictures epic-picture"),
+        (picture) => picture.getAttribute("label")
+      )
+    )
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector("epic-overview")
+        .shadowRoot.querySelector("epic-kickoff")
+        .shadowRoot.querySelectorAll(".pictures epic-picture").length === 3,
+    null,
+    { timeout: 15000 }
+  )
+  check(JSON.stringify(await strip()) === '["IMG1","IMG2","IMG3"]', `three pictures dropped:  ${await strip()}`)
+  const kickoffMark = () => ReviewInbox.read(ReviewInbox.pathFor(KICKOFF_FILE)).marks.kickoff
+  await page.waitForTimeout(1500)
+  check(
+    kickoffMark()?.action === "kickoff" && (kickoffMark()?.note.match(/!\[IMG\d\]\(pictures\/kickoff-/g) ?? []).length === 3,
+    "saved as a kickoff mark, its three pictures in pictures/"
+  )
+  await page.screenshot({ path: join(outDir, "kickoff-box.png") })
+  await page.evaluate(() => {
+    const picture = document
+      .querySelector("epic-overview")
+      .shadowRoot.querySelector("epic-kickoff")
+      .shadowRoot.querySelectorAll(".pictures epic-picture")[1]
+    const x = picture.shadowRoot.querySelector('[part~="remove"]')
+    ;(x.shadowRoot?.querySelector("button") ?? x).click()
+  })
+  await page.waitForTimeout(1500)
+  check(JSON.stringify(await strip()) === '["IMG1","IMG2"]', `IMG2's x leaves IMG1 and IMG2:  ${await strip()}`)
+  check(/like IMG2\./.test(kickoffMark()?.note ?? ""), "the words that named IMG3 now name IMG2")
+  // Send:  the header's plane, as the person presses it
+  await page.locator('epic-send-buttons [part~="send"]').first().click()
+  await page.waitForTimeout(1500)
+  check(!!ReviewInbox.read(ReviewInbox.pathFor(KICKOFF_FILE)).sent, "Send:  the inbox sent")
+  // Claude's side:  `epic inbox apply`
+  const apply = new PlanDocCommands({ files: new PlanDocFiles({ root: CONTENT }) })
+  apply.print = () => undefined
+  await apply.inbox.run(KICKOFF, KICKOFF_FILE, ["apply"], {})
+  const prompt = files.read(KICKOFF_FILE).document.querySelector("epic-overview > epic-prompt")
+  const promptLabels = Array.from(prompt?.querySelectorAll("epic-picture") ?? [], (each) => each.getAttribute("label"))
+  check(JSON.stringify(promptLabels) === '["IMG1","IMG2"]', `inbox apply:  the Kickoff prompt, IMG1 and IMG2 (${promptLabels})`)
+  await page.reload()
+  await page
+    .waitForFunction(() => document.querySelectorAll("epic-prompt epic-picture").length === 2, null, { timeout: 15000 })
+    .catch(() => undefined)
+  const after = await page.evaluate(() => ({
+    pictures: document.querySelectorAll("epic-prompt epic-picture").length,
+    box: !!document.querySelector("epic-overview")?.shadowRoot?.querySelector("epic-kickoff")
+  }))
+  check(after.pictures === 2 && !after.box, `the page:  the prompt's two pictures, no box (${JSON.stringify(after)})`)
+  await page.evaluate(() => {
+    // the Overview folded again (epic pages open folded):  unfolded for the picture, as a click would
+    document.querySelector("epic-overview")?.setAttribute("open", "")
+    const prompt = document.querySelector("epic-prompt")
+    prompt?.shadowRoot?.querySelector("details")?.setAttribute("open", "")
+    prompt?.scrollIntoView()
+  })
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: join(outDir, "kickoff-prompt.png") })
   check(!logs.some((line) => line.startsWith("pageerror")), `no page errors${logs.length ? `:  ${logs.join(" | ")}` : ""}`)
 } catch (error) {
   misses.push(`threw:  ${error.stack ?? error}`)

@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { InfixOperatorSuffix, type OperatorOperands, Precedence } from "spell/parser/spell/rules/expressions"
+import { dateMathAST, dateMathDatatype } from "./dateMath"
 
 /**
  * `plus` rule:  `plus` / `+`, e.g. `price + tax` -- `Precedence.sum`:  tighter than comparisons, looser than `*` `/`.
@@ -21,6 +22,8 @@ export class Plus extends InfixOperatorSuffix {
     rhs: P.Datatype | undefined
   ): P.Datatype | undefined {
     if (Plus.isTextual(lhs) || Plus.isTextual(rhs)) return "text"
+    const date = dateMathDatatype("plus", lhs, rhs)
+    if (date) return date
     if (Plus.isNumeric(lhs) && Plus.isNumeric(rhs)) return "number"
     return undefined
   }
@@ -33,8 +36,11 @@ export class Plus extends InfixOperatorSuffix {
    * `lhs + rhs`, a date on either side said as a drawing says it (`core.dateShown()`):
    * `"at " + its time` => `at November 7, 2026`, never a `Date`'s own text.
    * - Its parts say it other ways:  `"at " + the short time of its time`.
+   * - A date plus a duration is a later date:  `now + 2 days` (`dateMathAST()`).
    */
   compileASTExpression(match: P.MatchFor<this>, { lhs, operator, rhs }: OperatorOperands): P.ASTNode {
+    const moved = dateMathAST(match, "plus", lhs, rhs)
+    if (moved) return moved
     return super.compileASTExpression(match, { lhs: Plus.dateShown(lhs), operator, rhs: Plus.dateShown(rhs) })
   }
 

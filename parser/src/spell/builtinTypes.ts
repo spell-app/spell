@@ -37,7 +37,6 @@ const ID_DOCSTRING = md(
  * - TODO:  members still to add:
  *   - `number`'s `absolute value` and `round`:  their rules (`math/`) compile to `core` methods
  *     which don't exist yet
- *   - a `date`'s `month` (javascript counts months from 0)
  *   - a text's `words`
  */
 export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
@@ -592,40 +591,72 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     name: "date",
     docstring: md(
       "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.",
-      "- Its parts are numbers:  `the year of the due date of the todo`.",
-      "- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.",
-      '- Joined to text with `+`, it says itself as a drawing does:  `"due " + its due date` is `due November 7, 2026`.'
+      "- Its parts are numbers, with no leading zero:  `the year of the due date of the todo`, `the minute of now`;",
+      "  `the minute of now as two digits` is `05`.",
+      "- Its names are in the program's language:  `the month of now` is `November`, `the weekday of now` `Tuesday`.",
+      "- Said as HyperTalk says it:  `the short date of it`, `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.",
+      "  - The person's region says the order:  `11/17` in the US, `17/11` in Spain;  a short date has its year when it isn't this year.",
+      "  - Times show on the person's clock, 12- or 24-hour;  `the hour of` is always 0 to 23.",
+      '- Joined to text with `+`, it says itself as a drawing does:  `"due " + its due date` is `due November 7, 2026`.',
+      "- `now + 2 days`, `its due - 1 hour`;  `its due - now` is a duration.",
+      "- `its due as a duration`:  `in 2 days`, `3 hours ago`, `tomorrow`;  `as a short duration`, `as a long duration`."
     ),
     members: [
-      {
-        words: "year",
-        kind: "property",
-        datatype: "number",
-        readAs: "{it}.getFullYear()",
-        docstring: md("Its year, e.g. `2026`.")
-      },
-      {
-        words: "day",
-        kind: "property",
-        datatype: "number",
-        readAs: "{it}.getDate()",
-        docstring: md("Its day of the month, from 1 to 31.")
-      },
-      {
-        words: "hour",
-        kind: "property",
-        datatype: "number",
-        readAs: "{it}.getHours()",
-        docstring: md(
-          "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
-        )
-      },
+      ...datePart("year", "yearOf", "Its year, e.g. `2026`.", ["years"]),
+      ...datePart("short year", "shortYearOf", "Its year's last two digits, a number:  `26` for 2026, `5` for 2005."),
+      ...datePart("month", "monthOf", "Its month's name, in the program's language:  `November`.", [], "text"),
+      ...datePart("short month", "shortMonthOf", "Its month's name cut short:  `Nov`.", [], "text"),
+      ...datePart("month number", "monthNumberOf", "Its month as a number, January is 1:  `11`."),
+      ...datePart("day", "dayOf", "Its day of the month, from 1 to 31.", ["days"]),
+      ...datePart(
+        "hour",
+        "hourOf",
+        "Its hour of the day, from 0 to 23, whatever clock the person reads:  an hour of a forecast, `the hour of its time` (epic `data` P33).",
+        ["hours"]
+      ),
+      ...datePart("minute", "minuteOf", "Its minute, from 0 to 59:  `the minute of now`.", ["minutes"]),
+      ...datePart(
+        "second",
+        "secondOf",
+        "Its second, from 0 to 59:  `the second of now` -- on a date it's the date's part, never the 2nd item.",
+        ["seconds"]
+      ),
+      ...datePart("week", "weekOf", "Its week of the year, ISO's way, the same for everyone:  1 to 53."),
+      ...datePart(
+        "weekday",
+        "weekdayOf",
+        "Its day of the week's name, in the program's language:  `Tuesday`.  `as a number` gives its weekday number.",
+        ["day of the week"],
+        "text"
+      ),
+      ...datePart(
+        "short weekday",
+        "shortWeekdayOf",
+        "Its day of the week's name cut short:  `Tue`.",
+        ["short day of the week"],
+        "text"
+      ),
+      ...datePart(
+        "weekday number",
+        "weekdayNumberOf",
+        "Its day of the week as a number, 1 to 7, counted from the person's first day of the week:  Tuesday is 3 in the US, 2 in Spain.",
+        ["day of the week number"]
+      ),
+      ...datePart(
+        "AM or PM",
+        "meridiemOf",
+        "Whether it's before noon or after, as the clock says it:  `AM` or `PM`.  `if now is PM` asks it.",
+        ["AMPM", "meridiem", "meridian"],
+        "text"
+      ),
       {
         words: "short date",
         kind: "property",
         datatype: "text",
         readAs: "core.shortDate({it})",
-        docstring: md("Its day, short, e.g. `11/7/26`:  `the short date of its time`, as HyperTalk's `the short date`.")
+        docstring: md(
+          "Its day, short, the person's way:  `11/17/25`, Spain's `17/11/25`;  `11/17` this year -- `the short date of its time`, as HyperTalk's `the short date`."
+        )
       },
       {
         words: "long date",
@@ -646,7 +677,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         kind: "property",
         datatype: "text",
         readAs: "core.shortTime({it})",
-        docstring: md("Its time of day, e.g. `9:14 AM`.")
+        docstring: md("Its time of day on the person's clock, e.g. `9:14 AM`, or `21:14` on a 24-hour clock.")
       },
       {
         words: "long time",
@@ -981,4 +1012,26 @@ export function builtInStoredMember(
 /** Markdown `lines` as one string -- so a long doc reads as lines here. */
 function md(...lines: string[]): string {
   return lines.join("\n")
+}
+
+/**
+ * A date's part (epic `language` P63):  member `words`, read through the core's `method` (`core.minuteOf({it})`), and
+ * one more member for each of its `aliases`, the same read:  `minutes`, `day of the week`.
+ * - Every one is case-insensitive, as member words are:  `the AMPM of now`, `the ampm of now`.
+ */
+function datePart(
+  words: string,
+  method: string,
+  docstring: string,
+  aliases: string[] = [],
+  datatype: P.Datatype = "number"
+): SP.BuiltInMember[] {
+  const member = (said: string, docs: string): SP.BuiltInMember => ({
+    words: said,
+    kind: "property",
+    datatype,
+    readAs: `core.${method}({it})`,
+    docstring: md(docs)
+  })
+  return [member(words, docstring), ...aliases.map((alias) => member(alias, `The same as its \`${words}\`.`))]
 }

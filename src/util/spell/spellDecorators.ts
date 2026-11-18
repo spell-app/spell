@@ -93,5 +93,10 @@ export function withoutCreate<T>(make: () => T): T {
   }
 }
 
+/** Is a copy being made, inside `withoutCreate()`?  e.g. so a copy starts no timers of its own. */
+export function isMakingCopy(): boolean {
+  return copying > 0
+}
+
 /** How many `withoutCreate()` calls are running -- see `runsCreate()`. */
 let copying = 0

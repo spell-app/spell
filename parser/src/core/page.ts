@@ -38,11 +38,12 @@ import { App } from "./classes/App"
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
 import { HISTORY_KEY, ID_KEY, StateMirror } from "./state"
+import { closingCallNow } from "./ui"
 import type { ShownHistory } from "./undoing"
 
 /** What a page sends:  a call, an event, or its answer to a question -- see the file's docs. */
 export type PageMessage =
-  | { call: string; on?: PageMessageThing; args: unknown[] }
+  | { call: string; on?: PageMessageThing; args: unknown[]; closes?: { name: string; answer: unknown } }
   | { trigger: string; target?: PageMessageThing | PageMessageThing[]; details: Record<string, unknown> }
   | { answer: number; value: unknown }
 
@@ -110,16 +111,26 @@ function isQuestion(frame: unknown): frame is PageQuestion {
 
 /**
  * Show `question` as the core shows it here (`core.confirm()` ...), then send its answer:  `null` for none.
+ * - A thing among its arguments, by its id (`{ "$id": "3" }`), is the page's copy of it.
  * - NEVER throws:  one the page can't show is said in the console, and answered `null`.
  */
 async function answerQuestion({ ui, args, asks }: PageQuestion, send: (message: PageMessage) => void): Promise<void> {
   let value: unknown
   try {
-    value = await (core[ui] as (...args: unknown[]) => unknown)(...args)
+    // a thing it names, by its id:  the page's own copy, `show "edit card" with the card` (epic `language` P64)
+    const things = args.map((arg) => (isThingId(arg) ? (current?.mirror.thingWithId(arg[ID_KEY]) ?? arg) : arg))
+    value = await (core[ui] as (...args: unknown[]) => unknown)(...things)
   } catch (error) {
     logError(`the page couldn't show the program's ${ui}:  ${String(error)}`, error)
   }
   send({ answer: asks, value: value ?? null })
+}
+
+/** Is `value` a thing named by its id, `{ "$id": "3" }`, as a question's argument names one? */
+function isThingId(value: unknown): value is { [ID_KEY]: string } {
+  if (typeof value !== "object" || value === null) return false
+  const keys = Object.keys(value)
+  return keys.length === 1 && keys[0] === ID_KEY && typeof (value as Record<string, unknown>)[ID_KEY] === "string"
 }
 
 /** The program's undo history, as its last state or patch said:  `REMOTE.history`. */
@@ -175,13 +186,21 @@ const REMOTE: RemoteProgram = {
 /**
  * SIDE EFFECT:  ask the program to run its `name`, e.g. `play_from_the_stock_pile`, with `args`:
  * a thing's method when it's `on` one.
+ * - Sent by a modal's button (`core.drawAction()`'s `in-dialog`):  with what it `closes`, the modal's name and the
+ *   button's answer, `{ "call": "deal_the_cards", "closes": { "name": "you-won", "answer": "ok" } }` (epic `language` T155).
  * - What a stand-in in `<Project>.elements.spell.js` calls, and a handler's call of a thing's method.
  */
 export function sendCall(name: string, args: unknown[], on?: Thing | List): void {
   if (!current) return
   const { mirror, send } = current
-  const message: PageMessage = { call: name, args: args.map((arg) => byReference(arg, mirror)) as unknown[] }
+  const message: Extract<PageMessage, { call: string }> = {
+    call: name,
+    args: args.map((arg) => byReference(arg, mirror)) as unknown[]
+  }
   if (on) message.on = byReference(on, mirror) as PageMessageThing
+  // a modal's button:  the program hides the modal once the call has run, with the button's answer (epic `language` T155)
+  const closes = closingCallNow()
+  if (closes) message.closes = closes
   send(message)
 }
 

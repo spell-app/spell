@@ -157,6 +157,16 @@ written:
   prompt, with a copy button.
 - Why: `/epic` writes this stub doc BEFORE planning, so the prompt survives a hung or lost session.
 - It goes when the first phase is added (`add-phase`): the plan exists.
+- It shows only once there's a prompt to copy (epic `epic-engine` P75).
+
+A NEW epic with no prompt (`/epic <name>` alone) starts in its KICKOFF BOX (`<epic-kickoff>`, P75), drawn first in the
+Overview while there's no prompt and no phases, the page reviewed:
+
+- A growing box the person types what the epic should do into, taking several pictures (labelled, as a note box's,
+  below), saved as typed as a `kickoff` mark (its key, `kickoff`);  pictures go to the page's `pictures/`.
+- Send hands it over;  `epic inbox apply` writes it as the Kickoff prompt (`epic prompt`'s step), each picture an
+  `<epic-picture label="IMG1">`, and logs it;  the box gives way to the quoted prompt.
+- A prompt typed after the name in the chat still works: the page shows it, and no box.
 
 ## Sections (ids are fixed)
 
@@ -662,10 +672,19 @@ with the page's own marks, sent with Send like any other:
 - A test Claude checked itself and saw pass, Claude MAY close, with a Done card saying how and the picture
   (Q58): the one exception to "a manual test is the person's to close".
 
-A PICTURE in any note box: pasted (⌘V), dropped, or chosen with the box's picture button;  saved beside the page
-(`tests/m3-20261029-1432.png`, `POST shot`, any item's id), shown under the words (a click: full size), its ✕ takes it
-out. It rides in the note's mark as `shot`;  a picture alone is a revisit. `epic inbox <name>` and `wait` print
-`screenshot: tests/...png` under the mark.
+PICTURES in any note box (several since epic `epic-engine` P75): pasted (⌘V), dropped, or chosen with the box's
+picture button;  each saved beside the page (`tests/m3-20261029-1432.png`, `POST shot`, any item's id) and written into
+the note's words, LABELLED: `![IMG2](tests/m3-...png)`. A strip under the words shows them, each with its label and its
+✕;  a picture alone is a revisit. `epic inbox <name>` and `wait` print `IMG2: <its file>` under the note, so "IMG2" in
+the person's words points at a file.
+
+- Labels count within one box (a note, a comment, an option's form, the kickoff box);  an item's own pictures
+  (`epic add --pasted`, `--picture`) are `<epic-picture label="IMG1">`, in order.
+- Renumbered only while typed (P75's choice B): a ✕ (or a picture's whole link deleted) before the box is sent moves
+  the later labels down one, in the words that name them too ("IMG3 is wrong" becomes "IMG2 is wrong"). Once sent, a
+  delete leaves a gap (IMG1, IMG3), so what was said about IMG3 stays true;  an item's trash renumbers nothing.
+- A mark's one picture from before P75 rides apart, as `shot`: still shown, its ✕ takes it out, printed as
+  `screenshot: tests/...png`.
 
 START TESTING, the Manual tests section's button (on its title, while reviewed and a test is open):
 

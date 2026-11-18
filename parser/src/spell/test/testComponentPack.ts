@@ -50,13 +50,15 @@ const CANONICAL: Record<string, string> = {
   "es-barra-herramientas": "ui-toolbar",
   "es-modal": "ui-modal",
   "es-menu": "ui-menu",
-  "es-emergente": "ui-popup"
+  "es-emergente": "ui-popup",
+  "es-contenido": "ui-content",
+  "es-acciones": "ui-actions"
 }
 
 /** `<ui-modal>`'s and `<ui-popup>`'s attributes in the test pack, by language:  its own name => as written (epic `language` P61). */
 const MODAL_NAMES: Record<string, Record<string, string>> = {
-  en: { heading: "heading" },
-  es: { heading: "encabezado" }
+  en: { heading: "heading", transparent: "transparent" },
+  es: { heading: "encabezado", transparent: "transparente" }
 }
 
 /** `<ui-button>`'s attributes in the test pack, by language:  as written => its own name. */
@@ -89,7 +91,9 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     modal: "ui-modal",
     menu: "ui-menu",
     popup: "ui-popup",
-    divider: "ui-divider"
+    divider: "ui-divider",
+    content: "ui-content",
+    actions: "ui-actions"
   },
   es: {
     texto: "es-texto",
@@ -105,6 +109,8 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     modal: "es-modal",
     menu: "es-menu",
     emergente: "es-emergente",
-    divisor: "es-divisor"
+    divisor: "es-divisor",
+    contenido: "es-contenido",
+    acciones: "es-acciones"
   }
 }

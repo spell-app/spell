@@ -11,7 +11,9 @@ exports[`testing spell module UI > rule group specs > match snapshot -- if this 
   "prompt": "message|defaultValue?",
   "show_dates_as": "style",
   "show_drawn": "hide?|name",
+  "show_drawn_with": "name|thing",
   "stop_sound": "sound",
   "warn": "message|title?|size?|okButton?",
+  "without_closing": "call",
 }
 `;

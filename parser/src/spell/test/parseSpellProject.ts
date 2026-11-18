@@ -85,6 +85,8 @@ export function compiledSpellProject(
     parentScope?: P.Scope
     languages?: string[]
     sourceMap?: boolean
+    /** A debugging build's, where each line may stop:  `P.WriterOptions.debugging`, see `P.DebugSteps`. */
+    debugging?: boolean
   } = {}
 ) {
   const { scope, files: parsed } = parseSpellProject(files, { parentScope: options.parentScope })
@@ -96,7 +98,10 @@ export function compiledSpellProject(
   // - none with no imports, so a built-in template's code lines (`codeLines`) count from its first class
   const header = scope.parentScope instanceof P.ImportScope ? SP.SpellProject.importHeaderFor(scope) : ""
   // what its project file says that changes the code, e.g. its `exports` made by name (`writerOptionsFor()`)
-  const writerOptions = SP.SpellProject.writerOptionsFor(options)
+  const writerOptions = {
+    ...SP.SpellProject.writerOptionsFor(options),
+    ...(options.debugging && { debugging: { placeOf: SP.SpellProject.debugPlaceOf } })
+  }
   const combine = () => SP.SpellProject.combineCompiled(parts, P.JSWriter.instance, header, scope, writerOptions)
   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
   const languages = [...new Set(languagesOf(files).map((language) => language.lang))]

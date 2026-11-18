@@ -101,6 +101,24 @@ export const spanishWords: SP.LanguageWords = {
   // `después de poner una carta en una pila`:  the verb as an action says it
   verbsForDoing: (doing) => [doing],
 
+  // `mientras se completa un trabajo`:  `completa` => `completar`;  `abre` => `abrer`, `abrir`
+  verbsForDuring: (word) => {
+    if (/a$/i.test(word)) return [`${word}r`]
+    if (/e$/i.test(word)) return [`${word.slice(0, -1)}er`, `${word.slice(0, -1)}ir`, `${word}r`]
+    return [word]
+  },
+
+  errorNames: {
+    "no encontrado": "not found",
+    "sin autorizar": "not authorized",
+    "no permitido": "not permitted",
+    desactualizado: "out of date",
+    "servidor no encontrado": "server not found",
+    límite: "limit",
+    "sin conexión": "offline",
+    cualquiera: "anything"
+  },
+
   danglingWords: new Set([
     "de",
     "del",
@@ -152,6 +170,10 @@ export const spanishWords: SP.LanguageWords = {
   appActions: { deshacer: "undo", rehacer: "redo" },
   // el atributo propio de `<acción>`:  un botón que solo muestra su icono (`action_button`, épica `language` P53)
   iconOnlyAttribute: "solo-icono",
+  // el atributo propio de `<acción>` en las acciones de un modal:  su clic deja el modal abierto (épica `language` T155)
+  keepOpenAttribute: "mantener-abierto",
+  // las palabras con que responde un botón de un modal, `<acción aceptar />`, y con que se compara `el resultado` (épica `language` T155)
+  answerWords: { aceptar: "ok", cancelar: "cancel" },
   // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
   quotedNameTags: { panel: "etiqueta" },
@@ -310,8 +332,26 @@ export const spanishWords: SP.LanguageWords = {
     characters: ["caracteres"],
     letters: ["letras"],
     year: ["año", "ano"],
+    years: ["años", "anos"],
     day: ["día", "dia"],
+    days: ["días", "dias"],
     hour: ["hora"],
+    hours: ["horas"],
+    // las partes de una fecha (épica `language` P63)
+    "short year": ["año corto", "ano corto"],
+    month: ["mes"],
+    "short month": ["mes corto"],
+    "month number": ["número del mes", "numero del mes"],
+    minute: ["minuto"],
+    minutes: ["minutos"],
+    second: ["segundo"],
+    seconds: ["segundos"],
+    week: ["semana"],
+    weekday: ["día de la semana", "dia de la semana"],
+    "short weekday": ["día de la semana corto", "dia de la semana corto"],
+    "weekday number": ["número del día de la semana", "numero del dia de la semana"],
+    "AM or PM": ["am o pm"],
+    AMPM: ["ampm"],
     "short date": ["fecha corta"],
     "long date": ["fecha larga"],
     "abbreviated date": ["fecha abreviada"],

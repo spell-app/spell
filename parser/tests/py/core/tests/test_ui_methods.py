@@ -56,7 +56,7 @@ def test_confirm_says_yes_and_prints_so() -> None:
 def test_prompt_answers_its_starting_text() -> None:
     a_core, out = printing()
     assert asyncio.run(a_core.prompt("Your name?", "Ann")) == "Ann"
-    assert asyncio.run(a_core.prompt("Your age?")) is None
+    assert asyncio.run(a_core.prompt("Your age?")) == ""
     assert out.getvalue() == "Your name? (Ann)\nYour age? ()\n"
 
 
@@ -123,9 +123,10 @@ def test_a_dialog_with_options_and_no_page_prints_its_message() -> None:
     assert out.getvalue() == "You won!\n"
 
 
-def test_a_prompt_cancelled_on_the_page_answers_none() -> None:
+def test_a_prompt_cancelled_on_the_page_answers_empty_text_and_the_result_is_cancel() -> None:
     a_core, _ = asking({"prompt": None})
-    assert asyncio.run(a_core.prompt("Your name?")) is None
+    assert asyncio.run(a_core.prompt("Your name?")) == ""
+    assert a_core.result() == "cancel"
 
 
 def test_a_toast_on_the_page_goes_on_by_itself_and_and_wait_waits_for_it() -> None:
@@ -154,21 +155,60 @@ def test_a_toast_the_page_cant_show_is_said_on_the_console() -> None:
     assert "notify:  the page can't show it" in out.getvalue()
 
 
-def test_show_and_hide_by_name_ask_the_page_not_waiting() -> None:
-    a_core, asked = asking({})
+def test_show_waits_for_the_page_to_answer_and_hide_does_not() -> None:
+    # epic `language` T155:  `show` waits until the modal closes;  its answer is `the result`
+    a_core, asked = asking({"showDrawn": "deal the cards"})
 
     async def run() -> None:
-        a_core.show_drawn("you won")
+        assert await a_core.show_drawn("you won") == "deal the cards"
         a_core.hide_drawn("you won")
+        a_core.hide_drawn("you-won", "ok")
         await asyncio.sleep(0)
 
     asyncio.run(run())
-    assert asked == [("showDrawn", ["you won"]), ("hideDrawn", ["you won"])]
+    assert asked == [("showDrawn", ["you won"]), ("hideDrawn", ["you won"]), ("hideDrawn", ["you-won", "ok"])]
+    assert a_core.result() == "deal the cards"
+    assert a_core.result_is("Deal The Cards")
+    assert not a_core.result_is("ok")
+
+
+def test_the_result_after_alert_confirm_and_prompt() -> None:
+    a_core, _ = asking({"confirm": False, "prompt": None})
+
+    async def run() -> None:
+        await a_core.alert("You won!")
+        assert a_core.result() == "ok"
+        await a_core.confirm("Deal again?")
+        assert a_core.result() == "cancel"
+        await a_core.prompt("Name?")
+        assert a_core.result() == "cancel"
+
+    asyncio.run(run())
+
+
+def test_a_prompt_typed_into_answers_ok_and_its_text_is_the_value() -> None:
+    a_core, _ = asking({"prompt": "Bob"})
+    assert asyncio.run(a_core.prompt("Name?")) == "Bob"
+    assert a_core.result() == "ok"
+
+
+def test_answered_keeps_an_actions_value_as_the_result_and_gives_it_back() -> None:
+    a_core, _ = printing()
+    assert a_core.answered(3) == 3
+    assert a_core.result() == 3
+    assert a_core.result_is(3)
+
+
+def test_keep_open_is_asked_once() -> None:
+    a_core, _ = printing()
+    a_core.keep_open()
+    assert a_core.take_kept_open()
+    assert not a_core.take_kept_open()
 
 
 def test_show_by_name_with_no_page_does_nothing() -> None:
     a_core, out = printing()
-    a_core.show_drawn("you won")
+    assert asyncio.run(a_core.show_drawn("you won")) is None
     a_core.hide_drawn("you won")
     assert out.getvalue() == ""
 
@@ -215,3 +255,22 @@ def test_compiled_python_finds_each_on_core(method: str) -> None:
     from spell_core import core
 
     assert callable(getattr(core, method))
+
+
+def test_show_with_a_thing_draws_it_in_the_modal_and_sends_it_to_the_page_by_its_id() -> None:
+    # language P64:  `show "edit card" with the card`
+    a_core, asked = asking({"showDrawn": "ok"})
+    card = object()
+    a_core.refer_to_thing = lambda thing: {"$id": "3"}
+    assert a_core.draw_shown("edit card", "game", lambda it: it) == "game"
+    assert asyncio.run(a_core.show_drawn("edit card", card)) == "ok"
+    assert asked == [("showDrawn", ["edit card", {"$id": "3"}])]
+    assert a_core.shown_in("edit card") is card
+    assert a_core.draw_shown("edit card", "game", lambda it: it) is card
+
+
+def test_show_with_a_thing_and_no_page_still_draws_it() -> None:
+    a_core, _ = printing()
+    card = object()
+    assert asyncio.run(a_core.show_drawn("edit card", card)) is None
+    assert a_core.draw_shown("edit card", "game", lambda it: it) is card

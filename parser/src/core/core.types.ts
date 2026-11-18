@@ -2,6 +2,7 @@ import type { coreMethods } from "./core"
 import type { collectionCoreMethods } from "./collection-core"
 import type { collectionOtherMethods } from "./collection-other"
 import type { stringMethods } from "./string"
+import type { dateMethods } from "./dates"
 import type { uiMethods } from "./ui"
 import type { drawingMethods } from "./drawing"
 import type { elementsMethods } from "./elements"
@@ -20,6 +21,7 @@ import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
 import type { waitingMethods } from "./waiting"
+import type { timerMethods } from "./timers"
 import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { dimensionMethods } from "./dimensions"
@@ -92,6 +94,7 @@ export type Core = typeof coreMethods &
   typeof collectionCoreMethods &
   typeof collectionOtherMethods &
   typeof stringMethods &
+  typeof dateMethods &
   typeof uiMethods &
   typeof drawingMethods &
   typeof elementsMethods &
@@ -110,6 +113,7 @@ export type Core = typeof coreMethods &
   typeof sendingMethods &
   typeof actingMethods &
   typeof waitingMethods &
+  typeof timerMethods &
   typeof abilityMethods &
   typeof dimensionMethods &
   typeof siteMethods &
@@ -193,6 +197,7 @@ export type TestCheck = {
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
  * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
+ * | `dialog-ok`, `dialog-cancel` | a modal's button that just closes it, `<action ok />` (epic `language` T155) | |
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
@@ -253,6 +258,8 @@ export const CORE_MESSAGES = {
   "cant-draw": "⚠ {type} can't draw",
   waiting: "…",
   "confirm-default": "{question} (yes)",
+  "dialog-ok": "OK",
+  "dialog-cancel": "Cancel",
   "drop-event": "{thing}-drop",
   undo: "Undo",
   "undo-step": "Undo {step}",
@@ -268,6 +275,8 @@ export const CORE_MESSAGES = {
   "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
   "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
+  "duration-ago": "{time} ago",
+  "duration-from-now": "in {time}",
   "write-retry": "Retry",
   "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
   "room-reload": "Reload",

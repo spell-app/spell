@@ -18,6 +18,8 @@ import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/
 import { ThreadFacts } from "spell/epic/comments"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
+// the words' pictures alone:  the review barrel is the browser client's
+import { Pictures } from "spell/epic/review/Pictures"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
@@ -94,7 +96,7 @@ import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { HandedOnFixes, Migrations } from "./migrations"
 import { OptionSets } from "./OptionSets"
-import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick } from "./ReviewInbox"
+import { CHANGE_ID, KICKOFF_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -1289,13 +1291,23 @@ export class PlanDoc extends PlanReader {
   /**
    * Item `id` is urgent (`calm` false) or not (`calm` true):  Owen's click on its id chip, applied (`epic inbox
    * apply`);  returns what it did, for the log (`not urgent`), or `undefined` when it already was.
-   * - only a judgement call, an issue, or a todo that asks Owen to act (`urgent`, I230):
-   *   throws for any other item, or an id the doc doesn't have
+   * - only a judgement call, an issue, or a todo (not a limit):  throws for any other item, or an id the doc doesn't have
+   * - a todo made urgent (`calm` false) is marked `urgent`, red until Owen reviews it, as a follow-up is (I230):
+   *   a reminder he flags for himself (epic `epic-engine` T94, r77:  "make a red todo so I can think about it
+   *   tomorrow");  its old review mark goes, so it's red now;  `calm` takes it back to yellow
    */
   setCalm(id: string, calm: boolean): string | undefined {
     const item = this.item(id)
-    if (!CALM_ID.test(item.id) && !item.hasAttribute("urgent"))
-      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and follow-up todos`)
+    const todo = TODO_ID.test(item.id) && !item.hasAttribute("limit")
+    if (!CALM_ID.test(item.id) && !todo)
+      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and todos (not a limit)`)
+    const red = item.hasAttribute("urgent") && !item.hasAttribute("calm") && !item.hasAttribute("reviewed")
+    if (todo && !calm && !red) {
+      Markup.set<"epic-item">(item, { urgent: true, calm: undefined, reviewed: undefined })
+      this.stamp(item)
+      return "urgent"
+    }
+    if (todo && calm && !item.hasAttribute("urgent")) return undefined
     if (item.hasAttribute("calm") === calm) return undefined
     Markup.set(item, { calm: calm || undefined })
     this.stamp(item)
@@ -1495,6 +1507,7 @@ export class PlanDoc extends PlanReader {
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
+    if (String(mark.id).toLowerCase() === KICKOFF_ID) return this.applyKickoff(mark)
     if (String(mark.id).toLowerCase() === AWAY_ID) return this.applyRead(mark)
     if (String(mark.id).toLowerCase().startsWith(`${AWAY_ID}:`)) return this.applyReadLine(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
@@ -2074,7 +2087,8 @@ export class PlanDoc extends PlanReader {
     const host = this.reviewPart(id)?.element ?? this.item(id)
     const replies = Array.from(host.querySelectorAll(":scope > epic-reply"))
     if (replies.some(isSame)) return
-    const said = note ? `<p>${PlanMarkup.text(note)}</p>` : ""
+    // its pictures' words (epic `epic-engine` P75) each a labelled `<epic-picture>`
+    const said = note ? `<p>${withPictures(PlanMarkup.text(note), note)}</p>` : ""
     const alt = AuthorWords.screenshot(PlanMarkup.text(this.person))
     const image = shot ? `<p><img src="${PlanMarkup.text(shot)}" alt="${alt}"></p>` : ""
     const reply = this.make("epic-reply", { from: this.person, at: stamp, re: how }, `${said}${image}`)
@@ -2091,7 +2105,7 @@ export class PlanDoc extends PlanReader {
       return (
         !ThreadFacts.isAgents(reply) &&
         reply.getAttribute("at") === stamp &&
-        reply.querySelector(":scope > p")?.textContent === note
+        reply.querySelector(":scope > p")?.textContent === note.replace(PROMPT_PICTURE, "")
       )
     }
   }
@@ -3106,6 +3120,23 @@ export class PlanDoc extends PlanReader {
     else Markup.place(overview, made)
   }
 
+  /**
+   * The kickoff box's words, sent from the page (epic `epic-engine` P75):  the Kickoff prompt, as `epic prompt` writes
+   * one (`setPrompt()`), its pictures labelled where they were written;  logged.
+   * - a page with phases already:  left, the plan is past its kickoff
+   */
+  private applyKickoff({ action, note }: PlanMark): MarkResult {
+    if (action !== "kickoff" || !note?.trim())
+      return { applied: false, left: "KICKOFF:  takes a kickoff prompt's words" }
+    if (this.phases.length)
+      return { applied: false, gone: true, left: "KICKOFF:  the plan has phases already:  dropped" }
+    this.setPrompt(note)
+    const count = Pictures.picturesOf(note).length
+    const did = `Kickoff prompt written from the page${count ? `, ${count} picture${count === 1 ? "" : "s"}` : ""}`
+    this.log(did)
+    return { applied: true, did }
+  }
+
   ////////////////
   // ## Checking
   ////////////////
@@ -3911,8 +3942,25 @@ const NEED_PARTS: readonly { key: NeedPart; state: AwayState; title: string }[] 
 
 /** A prompt's text as `<p>`s:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none. */
 function promptHTML(prompt: string | null | undefined): string {
-  return PlanMarkup.paragraphs(prompt)
+  return withPictures(PlanMarkup.paragraphs(prompt), prompt ?? "")
 }
+
+/**
+ * `html`, made from the person's typed `words`, with each picture's words in it (`![IMG2](pictures/kickoff-...png)`,
+ * epic `epic-engine` P75) a labelled `<epic-picture>`, its label as `words` name it.
+ */
+function withPictures(html: string, words: string): string {
+  const pictures = Pictures.picturesOf(words)
+  let index = 0
+  return html.replace(PROMPT_PICTURE, (_, path: string) => {
+    const label = pictures[index++]?.label ?? ""
+    const named = PlanMarkup.attribute(label)
+    return `<epic-picture label="${named}"><img src="${PlanMarkup.attribute(path)}" alt="${named}"></epic-picture>`
+  })
+}
+
+/** A picture's words in a prompt, as `PlanMarkup.paragraphs()` leaves them:  its path captured. */
+const PROMPT_PICTURE = /!\[(?:IMG\d+|picture)\]\(([^)\s<]+)\)/g
 
 /** The doc pass's phase, by its name:  `Doc Review` (epic `epic-engine` P33:  it floats to the end). */
 const DOC_REVIEW = /^doc review$/i

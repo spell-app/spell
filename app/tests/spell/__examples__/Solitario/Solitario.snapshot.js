@@ -101,7 +101,7 @@ export class Carta extends TwoSidedView {
   }
 
   async onClick(event) {
-    if (this.isFaceDirection("up") || this.pila === solitario.reserva) await this.jugar()
+    if (this.isFaceDirection("up") || this.pila === solitario.reserva) core.answered(await this.jugar())
   }
 
   static draggable = true
@@ -523,6 +523,15 @@ export class Solitario extends App {
         h("test-project-columna", { id: "C6" }),
         h("test-project-columna", { id: "C7" })
       ),
+      h("es-modal", { id: "ganaste", encabezado: "ganaste" },
+        h("ui-content",
+          h("es-texto", { tamano: "grande" }, "¡Felicidades!"),
+          h("es-texto", "Tus puntos:  ", () => this.puntuación)
+        ),
+        h("ui-actions",
+          core.drawAction(this, "reiniciarElJuego", { title: "Juego nuevo", answer: "reiniciar el juego", "in-dialog": true })
+        )
+      ),
       core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"])
     ]
   }
@@ -646,7 +655,7 @@ export class Solitario extends App {
       const fundación = core.filter(core.everyThing(Fundación), (pila) => pila.palo === candidata.palo).firstItem
       if (core.canTake(fundación, candidata)) {
         huboCambios = true
-        await candidata.jugar()
+        core.answered(await candidata.jugar())
         await core.pauseFor(100, "msec")
       }
     })
@@ -676,10 +685,7 @@ export class Solitario extends App {
   }
 
   async onPuntuaciónChange(event) {
-    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) {
-      await core.alert("¡Ganaste!", "Juego nuevo")
-      await this.reiniciarElJuego()
-    }
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) await core.showDrawn("ganaste")
   }
 }
 export const solitario = new Solitario()

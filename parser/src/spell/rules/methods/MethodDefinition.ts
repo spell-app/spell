@@ -56,6 +56,9 @@ export class MethodDefinition<
    */
   declare cancelable: boolean
   @proto static cancelable = false
+  /** `true` when each method it makes calls a server, `operation_at`'s:  its failure steps end with the app's (epic `data` P50). */
+  declare callsServer: boolean
+  @proto static callsServer = false
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: MethodDefinitionProps
 
@@ -807,6 +810,7 @@ export class MethodDefinition<
     if (details.undoneAs) description.undone_as = details.undoneAs
     if (details.replacesLast) description.replaces_last = true
     if (this.cancels(match)) description.cancels = true
+    if (this.callsServer) description.calls_server = true
     // its title as written:  plain, it IS the title;  with a fill-in, a getter whose text is its title now
     let title: string | undefined
     if (details.title) {
@@ -825,7 +829,7 @@ export class MethodDefinition<
       } else description.title = title
     }
     // its undo:  an action is one step by itself (Q60), named by its title, unless it `can't be undone`
-    const undo = MethodDefinition.undoOf(details, isAction, description.title as string)
+    const undo = this.undoOfAction(details, isAction, description.title as string)
     if (undo && "cantBeUndone" in undo) {
       delete description.undone_as
       description.cant_be_undone = undo.cantBeUndone
@@ -860,8 +864,16 @@ export class MethodDefinition<
       details.title && !(details.title.data as { fillIns?: unknown }).fillIns
         ? ActionDetail.textOf(details.title)
         : undefined
-    const undo = MethodDefinition.undoOf(details, isAction, plainTitle ?? this.titleOf(match))
+    const undo = this.undoOfAction(details, isAction, plainTitle ?? this.titleOf(match))
     return undo && this.cancels(match) ? { ...undo, cancels: true } : undo
+  }
+
+  /**
+   * How the action this rule makes meets undo:  as `undoOf()` says, unless the rule knows better --
+   * a server's action can't be undone, whatever it says (`operation_at`).
+   */
+  protected undoOfAction(details: ActionDetails, isAction: boolean, title: string): P.ASTActionUndo | undefined {
+    return MethodDefinition.undoOf(details, isAction, title)
   }
 
   /**
@@ -969,7 +981,7 @@ type MethodDefinitionData = {
 const NOT_STEPS = [P.ASTBlankLine, P.ASTComment, P.ASTParseError]
 
 /** What an action that `can't be undone` does to the history:  the steps before it stay (`core.describeAction()`). */
-const CANT_BE_UNDONE = "keeps history"
+export const CANT_BE_UNDONE = "keeps history"
 
 /** The hooks a type's method may be, and the word rule that says each:  see `MethodDefinition.hookOf()`. */
 const HOOKS = [

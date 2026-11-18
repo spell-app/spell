@@ -6,13 +6,16 @@ exports[`testing spell module methods, in Spanish > rule group specs > match sna
   "action_modifier": "title?|icon?|keys?|undoable?|cantBeUndone?|undoneAs?",
   "after_hook": "signature|body?",
   "bare_type_arg": "type",
+  "before_hook": "signature|body?",
   "cancel_this_action": "when?|condition?",
   "create_animation": "signature|body?",
   "create_hook": "signature|body?",
+  "failure_hook": "signature|body?",
   "quoted_type_expression": "type|signature|body?",
   "to_do_something": "asTest?|signature|modifiers?|body?",
   "type_method_arg": "type",
   "typed_method_arg": "identifier|type",
   "valued_var_method_arg": "identifier|value",
+  "while_hook": "signature|body?",
 }
 `;

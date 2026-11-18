@@ -324,6 +324,24 @@ export class ASTNothingLiteral extends ASTLiteral {
   }
 }
 
+/**
+ * MemberNameLiteral -- a member's name as text, named as the writer names members (epic `data` P50):
+ * spell's `move_to_$queue` is javascript's `"moveToQueue"`, Python's `"move_to_queue"`.
+ * - What `core.callPlace()` is told, to find the operation `core.place()`'s `operations` names the same way.
+ */
+export type ASTMemberNameLiteralProps = Prettify<{ name: string }>
+
+export class ASTMemberNameLiteral extends ASTLiteral {
+  declare name: string
+  /*@readonly*/ /*@proto*/ get datatype(): string {
+    return "text"
+  }
+  constructor(match: P.AnyMatch, props: ASTMemberNameLiteralProps) {
+    super(match, props)
+    this.assertType("name", "string")
+  }
+}
+
 /** SelfLiteral -- the thing a method runs on, e.g. the card in a card's `turn over`.  `JSWriter` writes `this`. */
 export class ASTSelfLiteral extends ASTLiteral {}
 
@@ -1420,9 +1438,10 @@ export class ASTStatementBlock extends ASTNode {
   constructor(match: P.AnyMatch, props?: ASTStatementBlockProps) {
     super(match, props)
     this.assertArrayType("statements", [ASTStatement, ASTExpression, ASTComment, ASTBlankLine], OPTIONAL)
-    // Unwind any single nested StatementGroups
-    while (this.statements?.length === 1 && this.statements[0] instanceof ASTStatementGroup) {
-      this.statements = this.statements[0].statements
+    // Unwind any single nested StatementGroups:  a plain one, never a `try` (a group of its own kind, with no
+    // `statements`), which unwound to nothing (epic `data` I102)
+    while (this.statements?.length === 1 && this.statements[0]?.constructor === ASTStatementGroup) {
+      this.statements = (this.statements[0] as ASTStatementGroup).statements
     }
   }
   /** Default: wrap once there's more than 1 statement.  Override via constructor or setter. */
@@ -1834,38 +1853,46 @@ export class ASTPropertyRules extends ASTStatement {
  * - `describes` (required):  `"action"`, `"event"` or `"menu"` (epic `elemental-spell` P10:
  *   `core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"] })`);
  *   or `"after"`, an after hook of an action (epic `language` P56):
- *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`.
- * - `name` (required):  an action's METHOD, by spell's name (`turn_over`), which each writer names its own way;
+ *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`;
+ *   or `"hook"`, any other of an action's hooks (epic `data` P50):
+ *   `core.addActionHook(Job, "complete", { moment: "before", hook: "beforeComplete", level: "api" })`.
+ *   or `"timer"`, steps its things run every so often (epic `language` T159):
+ *   `core.addTimer(Clock, "everySecond", { seconds: 1, until: "everySecondUntil", times: 10 })`.
+ * - `name` (required):  an action's (or a timer's) METHOD, by spell's name (`turn_over`), which each writer names its own way;
  *   an event's name as text (`flipped`).
  * - `description` (required):  its fields by spell's names (`enabled_when`), each writer naming them its own way:
  *   - text, or a list of text, e.g. `title`, `shortcuts`
+ *   - a number, e.g. a timer's `seconds`
  *   - a MEMBER of the class (`{ member: "turn_over_is_enabled" }`), named as the writer names members
  *   - a map of text to text, e.g. an event's `params`
  *   - a list of MEMBERS (`{ members: ["deal", "-", "undo"] }`), each named as the writer names members, `-` kept:
  *     a menu's items
+ *   - a TYPE, by spell's name (`{ type: "JobsPage" }`), written as a function giving the class (`() => JobsPage`), as it may be declared after the line:  a page hook's page
  * - Always written from outside its class, after it, as `ASTPropertyRules` is:  NOT a ClassMember.
  */
 export type ASTTypeDescriptionProps = Prettify<{
   type: string | ASTTypeExpression
-  describes: "action" | "event" | "menu" | "after"
+  describes: "action" | "event" | "menu" | "after" | "hook" | "timer"
   name: string
   description: Record<string, ASTDescriptionValue>
   /** An action's title as written (`- titled "Turn Over"`), fill-ins as typed:  for its declaration, never written. */
   title?: string
 }>
 
-/** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
+/** One field of an `ASTTypeDescription`'s description:  text, a number, a list of text, a member, or a map of text. */
 export type ASTDescriptionValue =
   | true
+  | number
   | string
   | string[]
   | { member: string }
   | { members: string[] }
+  | { type: string }
   | Record<string, string>
 
 export class ASTTypeDescription extends ASTStatement {
   declare type: ASTTypeExpression
-  declare describes: "action" | "event" | "menu" | "after"
+  declare describes: "action" | "event" | "menu" | "after" | "hook" | "timer"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
   declare title?: string
@@ -1875,7 +1902,7 @@ export class ASTTypeDescription extends ASTStatement {
     this.assertType("type", ASTTypeExpression)
     this.assertType("name", "string")
     this.assert(
-      ["action", "event", "menu", "after"].includes(this.describes),
+      ["action", "event", "menu", "after", "hook", "timer"].includes(this.describes),
       `ASTTypeDescription: unknown kind '${this.describes}'`
     )
   }
@@ -2317,6 +2344,7 @@ export const CORE_CALLS_THAT_WAIT = new Set([
   "savedThings",
   "savedThingAt",
   "savedThingWithId",
+  "savedThingOrMissing",
   "inOneGo",
   "callPlace"
 ])

@@ -7,6 +7,7 @@ import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { DraftSaver } from "spell/epic/answers"
 import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, pickLabel, type InboxMark } from "spell/epic/review"
+import { PictureWords } from "spell/epic/components/epic-picture/PictureWords"
 
 import { CountdownRing } from "spell/epic/components/epic-send-buttons/CountdownRing"
 
@@ -36,6 +37,7 @@ import {
   SAID_EDIT,
   SAID_NOTE,
   SAID_PICTURE,
+  SAID_PICTURES,
   SAID_TAKEN,
   SAID_WHAT,
   SAID_WHO,
@@ -76,10 +78,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - a judgement call's or todo's EMPTY box gets "do it", selected, Revisit turning on with it (Owen, 2026-10-19,
  *     2026-10-22)
  * - Typing in the note box turns Revisit on, and never closes it (`ReviewClient.saveTyped()`;  epic `epic-engine` P20).
- * - A PICTURE in the note box (epic `epic-engine` P51;  Owen, 2026-10-29:  tests answered inline, "screenshots"):
- *   pasted (⌘V) or dropped on the box, or chosen with its picture button;  saved beside the page (`POST shot`) and
- *   put in the note's mark (`ReviewClient.attachShot()`), a thumbnail under the words that opens full size;  the
- *   marked note shows it too
+ * - PICTURES in the note box (epic `epic-engine` P51;  several, in its words, since P75):  pasted (⌘V) or dropped on
+ *   the box, or chosen with its picture button;  each saved beside the page (`POST shot`) and written into the note as
+ *   `![IMG2](<path>)` (`Pictures.putAllInto()`), so the mark carries them in its words;  a strip of labelled
+ *   thumbnails under the words, each with its x, which renumbers the later ones while the note isn't sent yet
+ *   (choice B);  the marked note shows them too.  A mark's old one picture (`shot`, before P75) still shows
  * - A manual test's x says "no longer applies":  `inbox apply` cancels the test (P51, as a test run's Skip did).
  * - A button that chose an action (a review button, a note box button) sends `epic-chosen`:
  *   `<epic-item>` folds, so Owen moves on to the next (Owen, 2026-10-10).
@@ -449,9 +452,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
       <div
         class={NOTE_BOX}
         part={this.partForName("base")}
-        onPaste={(event: ClipboardEvent) => this.onPicturePasted(event)}
+        onPaste={(event: ClipboardEvent) => this.onPicturesGiven(event)}
         onDragOver={(event: DragEvent) => event.preventDefault()}
-        onDrop={(event: DragEvent) => this.onPictureDropped(event)}
+        onDrop={(event: DragEvent) => this.onPicturesGiven(event)}
       >
         <span class={NOTE_TEXT}>
           <span class={NOTE_FIELD}>
@@ -481,6 +484,10 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
               {this.pictureButton()}
             </span>
           </span>
+          {PictureWords.stripOf(
+            () => this.boxWords,
+            (label) => this.removePicture(label)
+          )}
           <Show when={this.picture()}>{(src) => this.pictureRow(src)}</Show>
         </span>
       </div>
@@ -492,6 +499,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   private readonly onNoteDrawn = (note: NoteField) => {
     this.noteInput = note
     note.value = this.review.typed()
+    this.boxWords = note.value
   }
 
   /** What's typed in its note box, by the inbox's client:  `onTypedElsewhere()` follows it. */
@@ -514,6 +522,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
       (!text && value === (this.review.takenNote()?.note ?? "").trim()) ||
       (!!released && value.startsWith(released) && value.slice(released.length).trim() === text)
     if (!note.value || !note.matches(":focus") || taken) note.value = text
+    this.boxWords = note.value
     if (taken) this.saved = undefined
   }
 
@@ -540,7 +549,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   private onInput() {
     const client = this.review.client
     const id = this.review.id()
-    const text = this.noteInput!.value
+    const text = this.closedGap(this.noteInput!.value)
+    this.boxWords = text
     client?.type(id, text)
     this.drafts.changed()
     const made = client?.typedMark(id, text)
@@ -612,25 +622,24 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   }
 
   ////////////////
-  // ## A picture in the note (epic `epic-engine` P51)
+  // ## Pictures in the note (epic `epic-engine` P51, P75)
   ////////////////
 
-  /** A picture pasted or dropped, shown while it saves:  its data URL. */
-  @E.state accessor pastedPicture: string | undefined = undefined
+  /** The note's words as typed:  what its strip of pictures follows (the field's own value isn't reactive). */
+  @E.state accessor boxWords = ""
 
   /**
-   * The note box's picture:  one on its way, else its mark's (`shot`);  none while the marked note above the box shows
-   * it (`said()`), nor a test answer's (an older run's).
+   * A mark's OLD picture, kept apart from its words (`shot`, before P75):  shown under the words until taken out;
+   * none while the marked note above the box shows it (`said()`), nor a test answer's (an older run's).
    */
   readonly picture = (): string | undefined => {
     const mark = this.review.ownMark()
-    if (this.pastedPicture) return this.pastedPicture
     return mark?.action === "test" || this.review.noted() ? undefined : mark?.shot
   }
 
   /**
-   * The picture button, in the field's lower right corner, beside the Saved floppy:  a file chooser (VS Code's side bar never lets a file dragged in
-   * reach the page), its tooltip saying a paste or a drop works too.
+   * The picture button, in the field's lower right corner, beside the Saved floppy:  a file chooser taking several
+   * (VS Code's side bar never lets a file dragged in reach the page), its tooltip saying a paste or a drop works too.
    */
   private pictureButton(): JSX.Element {
     return (
@@ -649,88 +658,106 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         <input
           type="file"
           accept="image/*"
+          multiple
           hidden
-          onChange={(event: Event) => this.onPictureChosen(event.currentTarget as HTMLInputElement)}
+          onChange={(event: Event) => this.onPicturesChosen(event.currentTarget as HTMLInputElement)}
         />
       </>
     )
   }
 
-  /** The picture under the words:  its thumbnail (a click opens it full size), "saving…" while it saves, its ✕. */
+  /** A mark's old picture under the words:  its thumbnail (a click opens it full size), its x. */
   private pictureRow(src: () => string): JSX.Element {
-    const saving = () => this.pastedPicture === src()
     return (
-      <span class={NOTE_PICTURE} data-saving={saving() ? "" : undefined}>
+      <span class={NOTE_PICTURE}>
         <img
           src={src()}
           alt={this.translationForKey("pictureZoom")}
           title={this.translationForKey("pictureZoom")}
           onClick={(event: MouseEvent) => EpicReview.zoom(event)}
         />
-        <Show when={saving()}>
-          <span>{this.translationForKey("pictureSaving")}</span>
-        </Show>
-        <Show when={!saving()}>
-          <button
-            type="button"
-            title={this.translationForKey("pictureRemove")}
-            aria-label={this.translationForKey("pictureRemove")}
-            onClick={() => void this.review.client?.attachShot(this.review.id(), undefined)}
-          >
-            <ui-icon name="xmark" />
-          </button>
-        </Show>
+        <button
+          type="button"
+          title={this.translationForKey("pictureRemove")}
+          aria-label={this.translationForKey("pictureRemove")}
+          onClick={() => void this.review.client?.attachShot(this.review.id(), undefined)}
+        >
+          <ui-icon name="xmark" />
+        </button>
       </span>
     )
   }
 
-  /** A paste in the note box:  a picture in it is the note's (text pastes as usual). */
+  /** A paste or a drop on the note box:  every picture in it goes into the words (text pastes as usual). */
   @E.untracked
-  private onPicturePasted(event: ClipboardEvent) {
-    const file = Pictures.fileOf(event)
-    if (!file) return
+  private onPicturesGiven(event: ClipboardEvent | DragEvent) {
+    const files = Pictures.filesOf(event)
+    if (!files.length) return
     event.preventDefault()
-    void this.takePicture(file)
+    void this.takePictures(files)
   }
 
-  /** A file dropped on the note box. */
+  /** Files chosen with the picture button. */
   @E.untracked
-  private onPictureDropped(event: DragEvent) {
-    const file = Pictures.fileOf(event)
-    if (!file) return
-    event.preventDefault()
-    void this.takePicture(file)
-  }
-
-  /** A file chosen with the picture button. */
-  @E.untracked
-  private onPictureChosen(input: HTMLInputElement) {
-    const file = input.files?.[0]
+  private onPicturesChosen(input: HTMLInputElement) {
+    const files = Array.from(input.files ?? [])
     input.value = ""
-    if (file) void this.takePicture(file)
+    if (files.length) void this.takePictures(files)
   }
 
   /**
-   * Take `file` as the note's picture:  shown at once, saved beside the page (`ReviewClient.saveShot()`), then put in
-   * the note's mark (`attachShot()`), with what's typed:  Revisit turns on with it, as with words.
+   * Take `files` into the note:  each saved beside the page (`ReviewClient.saveShot()`) and written into the words at
+   * the cursor, `![IMG2](<path>)`, in order (`Pictures.putAllInto()`);  the words' `input` saves the note, so Revisit
+   * turns on with them, as with words.
    * - not a picture, or over 8 MB:  a notice says so
-   * - NEVER throws:  a failed save is the client's own notice, and the picture goes
+   * - NEVER throws:  a failed save is the client's own notice
    */
   @E.untracked
-  private async takePicture(file: File) {
+  private async takePictures(files: readonly File[]) {
     const client = this.review.client
-    if (!client) return
-    const problem = Pictures.problemOf(file)
-    if (problem) return client.notify(this.translationForKey(problem))
-    const png = await Pictures.pngOf(file).catch(() => undefined)
-    if (!png) return client.notify(this.translationForKey("notImage"))
+    const field = EpicReview.nativeField(this.noteInput)
+    if (!client || !field) return
     const id = this.review.id()
-    this.pastedPicture = png
-    // what's typed goes into the mark the picture joins
-    if (this.noteInput) client.type(id, this.noteInput.value)
-    const shot = await client.saveShot(id, png)
-    if (shot) await client.attachShot(id, shot)
-    if (this.pastedPicture === png) this.pastedPicture = undefined
+    await Pictures.putAllInto(field, files, {
+      save: (png) => client.saveShot(id, png),
+      notify: (problem) => client.notify(this.translationForKey(problem))
+    })
+    // a picture is a decision, not a key:  saved now, as one was before (`attachShot()`), never 10s later
+    this.flush()
+  }
+
+  /**
+   * A picture's x in the strip:  its words taken out of the note, and saved;  while the note isn't sent, the later
+   * labels move down one, in the words that name them too (P75's choice B);  once sent, a gap stays.
+   */
+  @E.untracked
+  private removePicture(label: string) {
+    const note = this.noteInput
+    if (!note) return
+    note.value = Pictures.without(note.value, label, { renumber: this.isTyping })
+    // already renumbered:  nothing for `closedGap()` to find
+    this.boxWords = note.value
+    this.onInput()
+    this.flush()
+  }
+
+  /**
+   * `text` with a gap closed:  a picture's whole link deleted by hand while the note isn't sent moves the later labels
+   * down (`Pictures.closeGap()`), the field following;  anything else, `text` as it is.
+   */
+  private closedGap(text: string): string {
+    if (!this.isTyping) return text
+    const closed = Pictures.closeGap(this.boxWords, text)
+    if (closed !== text && this.noteInput) this.noteInput.value = closed
+    return closed
+  }
+
+  /**
+   * The note is still being typed:  its mark not sent, so its labels may renumber (P75's choice B).
+   * - a sent note changed is unsent again, and renumbers again:  the inbox keeps no copy of what went
+   */
+  get isTyping(): boolean {
+    return !this.review.isSent()
   }
 
   /** A click on a note's picture:  full size, in the page's `<ui-zoom>`. */
@@ -780,7 +807,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             aria-label={this.translationForKey("you")}
           >
             <span class={SAID_WHO}>{this.translationForKey("saidTaken", { time: clockOf(mark().at) })} ·</span>
-            <p class={SAID_NOTE}>{mark().note}</p>
+            <p class={SAID_NOTE}>{Pictures.labelled(mark().note ?? "")}</p>
+            {this.saidPictures(mark().note)}
             <Show when={mark().shot}>
               {(shot) => (
                 <img
@@ -805,7 +833,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         {(mark) => (
           <div class={SAID} part={this.partForName("base")} aria-label={this.translationForKey("you")}>
             <ui-icon name="comment" />
-            <p class={SAID_NOTE}>{mark().note}</p>
+            <p class={SAID_NOTE}>{Pictures.labelled(mark().note ?? "")}</p>
+            {this.saidPictures(mark().note)}
             <Show when={mark().shot}>
               {(shot) => (
                 <img
@@ -830,6 +859,15 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           </div>
         )}
       </Show>
+    )
+  }
+
+  /** A marked note's pictures (P75):  small labelled thumbnails after its one line, which names them by label. */
+  private saidPictures(note: string | undefined): JSX.Element {
+    return (
+      <For each={Pictures.picturesOf(note ?? "")}>
+        {(picture) => <span class={SAID_PICTURES}>{PictureWords.pictureOf(picture.path, picture.label)}</span>}
+      </For>
     )
   }
 

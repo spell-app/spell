@@ -77,6 +77,12 @@ export const MENU_ROW_TAG = "ui-action"
 export const IN_MENU_ATTRIBUTE = "in-menu"
 
 /**
+ * The core's own mark on an action's button in a modal's actions, `<modal><actions><action "deal the cards"/>`
+ * (epic `language` T155):  its click runs the action, then closes the modal, as a dialog's buttons do.
+ */
+export const IN_DIALOG_ATTRIBUTE = "in-dialog"
+
+/**
  * The word rule holding spell's own JSX ATTRIBUTE words, each meaning the web's attribute it becomes.
  * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot|(hidden:oculto|oculta)|hidden)`:
  *   `<h3 in="header">` / `<h3 en="header">` => `<h3 slot="header">`, "put me in the frame's `header` children".
@@ -194,6 +200,17 @@ export type JSXMatchData = {
    * - The attribute the word also fills, in the drawing's language (`heading`, `encabezado`);  `""` for none.
    */
   named?: string
+  /**
+   * (`jsxElement`) A modal whose drawing names none of its parts (epic `language` T155):
+   * what it holds goes in its content part, its actions' buttons in its actions part (`SpellJSX.dialogChildren()`).
+   */
+  dialogParts?: boolean
+  /**
+   * (`jsxElement`) A modal named by its quoted word, `<modal "edit card">`:  that name.
+   * Inside it, `it` is what it's shown with (`show "edit card" with the card`, epic `language` P64):
+   * its children compile inside `core.drawShown()` (`SpellJSX.shownInScope()`).
+   */
+  shownIn?: string
   /** (`jsxElement`) Its right-click menu's attribute in the language's own word, `menú-contextual`:  written as `context-menu` (T156). */
   contextMenuAttribute?: P.JSXAttributeToken
   /** (`jsxElement`) A chain branch's kind, `<if ...>` ... -- see `SpellJSX`, "An if-chain inside markup". */

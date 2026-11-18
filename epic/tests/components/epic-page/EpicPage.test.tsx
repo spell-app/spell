@@ -205,8 +205,10 @@ describe("<epic-page>", () => {
     expect([p1, p2].map((phase) => phase.shadowRoot!.querySelector("button.git"))).toEqual([null, null])
     const entries = (phase: Element) =>
       Array.from(phase.shadowRoot!.querySelectorAll(".gear ui-item"), (item) => item.textContent!.trim())
+    // the gears drawn once they come near the screen (`NearScreen`, epic `epic-engine` I333):  their section open
+    p1.closest("epic-section")!.setAttribute("open", "")
+    await vi.waitFor(() => expect(entries(p1)).toContain("Show this phase's commits"))
     expect(entries(p2)).not.toContain("Show this phase's commits")
-    expect(entries(p1)).toContain("Show this phase's commits")
     const commit = host.querySelector("epic-commit")!
     expect(getComputedStyle(commit).display).toBe("none")
     const pick = async () => {
@@ -1831,6 +1833,8 @@ describe("<epic-page> stages", () => {
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
     // on the title row, before the gear:  there while the section is folded
     const stageHost = section.shadowRoot!.querySelector('[part~="stage-button"]')!
+    // drawn once it comes near the screen (`NearScreen`, epic `epic-engine` I333)
+    await vi.waitFor(() => expect(section.shadowRoot!.querySelector('[part~="gear"]')).not.toBeNull())
     const gear = section.shadowRoot!.querySelector('[part~="gear"]')!
     expect(stageHost.compareDocumentPosition(gear) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(section.hasAttribute("open")).toBe(false)

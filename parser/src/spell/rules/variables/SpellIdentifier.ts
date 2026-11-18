@@ -95,6 +95,12 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
     return scopeVar === NONE ? undefined : scopeVar?.datatype
   }
 
+  /** What the variable it named measures, if anything:  `set left to the next weekend - now` (`SP.measureOf()`). */
+  getMeasure(match: P.MatchFor<this>): P.Measure | undefined {
+    const { scopeVar } = match.data
+    return scopeVar === NONE ? undefined : scopeVar?.measure
+  }
+
   /**
    * Build `P.ASTVariableExpression`, resolving `match.value` to the scope variable it named when parsed, if any.
    * - A name that means the thing a method runs on (`it` in a card's method, or the method's own `(a card)`):

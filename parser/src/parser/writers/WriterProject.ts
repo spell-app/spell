@@ -186,6 +186,11 @@ export class WriterProject {
       coreCallWaits: (call: P.ASTScopedMethodInvocation) => boolean
       /** Does "not yet" pass through a plain getter over a value that waits? */
       readsThroughSolid: boolean
+      /**
+       * Does every action and handler wait, so it can be held between its lines?  A debugging build's, see `P.DebugSteps`.
+       * - Getters, drawings, `create()` and tests still answer at once:  `canWait` says so.
+       */
+      actionsWait?: boolean
     }
   ): void {
     this.hasFoundWaiting = true
@@ -230,13 +235,19 @@ export class WriterProject {
       }
     }
     const readWaits = (node: P.ASTNode) => this.readsWaitingValue(node)
+    // a debugging build's:  every action and handler, so each can stop between its lines
+    const actions = how.actionsWait ? actionNamesIn(files) : undefined
+    const isAction = (method: P.ASTMethodDefinition, name: string | undefined) =>
+      !!actions &&
+      !getters.has(method) &&
+      (!!method.action || (!!name && (actions.has(name) || HANDLER_NAME.test(name))))
     let changed = true
     while (changed) {
       changed = false
       for (const [method, name] of named) {
         if (this.waitingMethods.has(method) || !allowed.get(method)) continue
         const byName = !!name && this.waitingNames.has(name)
-        if (byName || method.isAsync || this.callsWaiting(method, callWaits)) {
+        if (byName || method.isAsync || isAction(method, name) || this.callsWaiting(method, callWaits)) {
           mark(method, name)
           changed = true
         } else if (!DRAWING_NAME.test(name ?? "") && this.callsWaiting(method, readWaits)) {
@@ -1053,6 +1064,21 @@ const DRAWN_LOOPS = new Set(["drawEach", "drawRead"])
 
 /** What `findWaiting()` calls such a function:  a name `DRAWING_NAME` knows, so it never waits. */
 const DRAWN_LOOP_FUNCTION_NAME = "drawEach"
+
+/**
+ * A handler's name, by spell's name:  `on_click`, `whenCardDroppedOn`, `after_move_to_$pile`.
+ * - Not `while...DraggedOver`:  it runs as the mouse moves.
+ */
+const HANDLER_NAME = /^(?:on|when|after)(?:_|[A-Z])/
+
+/** The names of the actions `files` describe, by spell's name:  `move_to_$pile` for `to "move a card to a pile"`. */
+function actionNamesIn(files: P.ASTNode[][]): Set<string> {
+  const names = new Set<string>()
+  forEachNode(files, (node) => {
+    if (node instanceof P.ASTTypeDescription && node.describes === "action") names.add(node.name)
+  })
+  return names
+}
 
 export const DRAWING_NAME = /^draw(?:$|[A-Z]|_each_item$|_its_placeholder$)/
 

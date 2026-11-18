@@ -40,6 +40,11 @@ solitario es una aplicación
 			<columna "C6"/>
 			<columna "C7"/>
 		</contenedor>
+		<modal "ganaste">
+			<texto tamano="grande">¡Felicidades!</>
+			<texto>Tus puntos:  <número "puntuación" /></>
+			<acción "reiniciar el juego" title="Juego nuevo" />
+		</>
 		<menú-contextual>
 			<acción "jugar solo"/>
 			<acción "hacer trampa"/>
@@ -156,8 +161,7 @@ solitario es una aplicación
 	cuando su puntuación cambia
 		si el número de cartas en las fundaciones es 52
 			reproducir "ganar"
-			avisar "¡Ganaste!" con "Juego nuevo"
-			reiniciar el juego
+			mostrar "ganaste"
 
 una carta		-- jugar la carta al pulsarla, si es un movimiento válido
 	cuando se pulsa

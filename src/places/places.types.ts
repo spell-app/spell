@@ -805,7 +805,8 @@ export const WhyNotWritables = [
   "taken down",
   "full",
   "not listed",
-  "used up"
+  "used up",
+  "signed out"
 ] as const
 /**
  * Why a write isn't allowed:
@@ -818,6 +819,8 @@ export const WhyNotWritables = [
  * - `"full"`:  a sign-up sheet's place is taken:  someone got the last one first (epic `atmosphere` P27)
  * - `"not listed"`:  a sign-up sheet takes rows only from the people its list names, and you aren't one (P27, J101)
  * - `"used up"`:  you've asked for every row your allowance gives you, every invitation you have (P31)
+ * - `"signed out"`:  nobody's signed in, and the place needs someone:  a server's 401 (epic `data` P50), which a
+ *   program's failure step names `"not authorized"`, to let them sign in
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 

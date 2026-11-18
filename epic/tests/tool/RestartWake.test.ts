@@ -90,11 +90,19 @@ test("the hook:  a line goes to stderr with exit 2 (asyncRewake wakes the sessio
     spawnSync(process.execPath, [HOOK], {
       input: JSON.stringify({ cwd, source: "resume" }),
       encoding: "utf8",
-      env: { ...process.env, SPELL_EPIC_HOME: epicHome, CLAUDE_CONFIG_DIR: claudeHome }
+      // attended, as a panel session:  run inside `claude -p` (an agent's tests), the hook would stand down (I319)
+      env: {
+        ...process.env,
+        SPELL_EPIC_HOME: epicHome,
+        CLAUDE_CONFIG_DIR: claudeHome,
+        CLAUDE_CODE_SESSION_ATTENDED: "1"
+      }
     })
   const quiet = run(big)
   expect([quiet.status, quiet.stderr]).toEqual([0, ""])
-  listAgents(LISTED)
+  // the hook reads the real clock:  agents started an hour before NOW, not before the fixed NOW (2 days' leftovers stay out)
+  const anHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  listAgents(LISTED.map((agent) => ({ ...agent, started: anHourAgo })))
   const woken = run(big)
   expect(woken.status).toBe(2)
   expect(woken.stderr).toContain("📬 big:  the restart cut off 2 agents")

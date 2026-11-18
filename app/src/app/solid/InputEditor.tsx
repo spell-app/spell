@@ -7,6 +7,7 @@ import type { SpellCodeMirror } from "spell/app/app/solid/codemirror"
 import { ErrorBoundary, tracked } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { CodeSettings, CodeSettingsPanel } from "./CodeSettings"
+import { Debugger } from "./Debugger"
 import { FileTabs } from "./FileTabs"
 import { LazyCodeMirror } from "./LazyCodeMirror"
 import { PageLoading } from "./PageLoading"
@@ -15,7 +16,8 @@ import "./InputEditor.css"
 
 /****************
  * ### `<InputRoot>`
- * The code column of `SpellEditor`:  the project's files as tabs (`<FileTabs>`), over the code (`<InputEditor>`).
+ * The code column of `SpellEditor`:  the project's files as tabs (`<FileTabs>`), over the code (`<InputEditor>`);
+ * between them while debugging, the step debugger (`<Debugger>`).
  * - Its actions (Save, Revert Changes, New File, the line numbers, the code editor's settings)
  *   are the top bar's menus (epic `debut` P32).
  ****************/
@@ -25,6 +27,7 @@ export function InputRoot(props: InputRootProps) {
       <Show when={props.showToolbar ?? true}>
         <FileTabs />
       </Show>
+      <Debugger />
       <InputEditor showError={editor.showError} />
     </div>
   )

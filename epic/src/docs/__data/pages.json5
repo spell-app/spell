@@ -9,6 +9,7 @@
         "epic-overview",
         "epic-summary",
         "epic-prompt",
+        "epic-kickoff",
         "epic-section",
         "epic-state-filter",
         "epic-hidden-note",

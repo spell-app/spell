@@ -88,6 +88,11 @@ describe("add with the person's pictures", () => {
     const item = FILES.read(file).findItem("i1")!
     expect(item.querySelector(":scope > p")?.textContent).toBe("It does.")
     expect(item.querySelector("epic-picture img")?.getAttribute("alt")).toBe("one.png")
+    // labelled in order, so the person can name one in words (epic `epic-engine` P75)
+    expect([...item.querySelectorAll("epic-picture")].map((each) => each.getAttribute("label"))).toEqual([
+      "IMG1",
+      "IMG2"
+    ])
   })
 
   test("--pasted 2:  the two pictures pasted LAST, oldest first;  with --start, after the person's words", async () => {
@@ -232,7 +237,11 @@ describe("POST delete-picture", () => {
     expect(picturesOf("i1")).toEqual([second])
     expect(existsSync(join(folder, answer.body.deleted))).toBe(false)
     expect(existsSync(join(root, second!))).toBe(true)
-    expect(FILES.read(file).section("log").textContent).toMatch(/I1: +picture deleted from the page, pictures\/i1-/)
+    expect(FILES.read(file).section("log").textContent).toMatch(
+      /I1: +picture IMG1 deleted from the page, pictures\/i1-/
+    )
+    // its label goes with it:  the other keeps IMG2, a gap left (P75's choice B)
+    expect(FILES.read(file).findItem("i1")!.querySelector("epic-picture")?.getAttribute("label")).toBe("IMG2")
   })
 
   test("refused:  a src outside pictures/ (400), a picture the item doesn't show (404), no token (403)", async () => {

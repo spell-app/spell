@@ -5,7 +5,8 @@
  * - Node only;  loaded when the command runs, as it loads all of spell.
  * - The read through the Spell runs `core` here, by itself, in this process:  `readThroughSpell()`.
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { homedir } from "node:os"
 import { basename, dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -19,6 +20,7 @@ import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
   IngestStopped,
   type AskSomeone,
+  type Deployment,
   type IngestFiles,
   type IngestResult,
   type PlaceDescription,
@@ -53,6 +55,14 @@ export type PlaceIngestOptions = {
   keyInAddress?: string
   signedIn?: string
   docs?: string
+  /** `--spec <address>`:  its OpenAPI description, read whole as the source (epic `data` P49). */
+  spec?: string
+  /** `--token-from <address>`:  where a token is made from its key, which is then what's sent (epic `data` P49). */
+  tokenFrom?: string
+  /** `--no-examples`:  its data is private, its rows kept in `~/.spell/places/<name>` (epic `data` P49). */
+  examples?: boolean
+  /** `--examples-into <folder>`:  its data is private, its rows kept there. */
+  examplesInto?: string
   collections?: string
   samples?: string
   pictures?: string
@@ -66,13 +76,31 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, signedIn, docs, collections, samples, pictures, tryWrites, ai = true } = options
+  const {
+    kind,
+    into,
+    name,
+    keySecret,
+    signedIn,
+    docs,
+    spec,
+    tokenFrom,
+    collections,
+    samples,
+    pictures,
+    tryWrites,
+    ai = true,
+    examples = true,
+    examplesInto
+  } = options
+  const dataIsPrivateIn = examplesInto ?? (examples ? undefined : "")
   const keyGoes = keyGoesFrom(options)
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(ai, !!signedIn)
     const result = await ingest.add({
       address,
-      ...withValues({ kind, into, name, keySecret, signedIn, docs }),
+      ...withValues({ kind, into, name, keySecret, signedIn, docs, spec, tokenFrom }),
+      ...(dataIsPrivateIn !== undefined && { dataIsPrivateIn }),
       ...(keyGoes && { keyGoes }),
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
@@ -115,6 +143,37 @@ export async function placeUpdate(
     const result = await ingest.update(file, withValues({ movedTo: address }))
     printUpdate(result)
     return result.couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+  })
+}
+
+/**
+ * `spell place verify <file>`:  try the place described beside it against a running server (epic `data` P49).
+ * Its exit code.
+ * - The deployment:  `--deployment`, else `SPELL_DEPLOYMENT`, else the first the project's file lists.
+ * - `EXIT.ERRORS` when anything failed, or it couldn't change a line for someone.
+ * - throws `CliError` for whatever stopped it, having written nothing
+ */
+export async function placeVerify(
+  file: string,
+  { deployment = process.env.SPELL_DEPLOYMENT || undefined, tryWrites }: { deployment?: string; tryWrites?: boolean }
+): Promise<number> {
+  return stoppedAsCliError(async () => {
+    const ingest = await ingestFor(false, describesSession(file))
+    const result = await ingest.verify(file, {
+      ...(deployment && { deployment }),
+      ...(tryWrites && { triesWrites: true })
+    })
+    const { description, descriptionPath, changes, couldntChange } = result
+    CLI.out(`Verified ${description.about.name}, for ${file}.  Its description:  ${descriptionPath}`)
+    printList("What changed:", changes.length ? changes : ["Nothing."])
+    if (couldntChange.length) printList("What it couldn't change for you:", couldntChange)
+    const failed = Object.entries(description.collections).filter(([, { state }]) => state?.is === "failed")
+    if (failed.length)
+      printList(
+        "What failed:",
+        failed.map(([name, { state }]) => `${name}:  ${state!.reason}`)
+      )
+    return failed.length || couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
   })
 }
 
@@ -211,6 +270,11 @@ export function fetchWithFiles(fetch: typeof globalThis.fetch): typeof globalThi
 export const diskFiles: IngestFiles = {
   read: async (path) => (existsSync(path) ? readFileSync(path, "utf8") : undefined),
   write: async (path, text) => writeFileSync(path, text),
+  writeAway: async (path, text) => {
+    const real = path.replace(/^~(?=\/|$)/, homedir())
+    mkdirSync(dirname(real), { recursive: true })
+    writeFileSync(real, text)
+  },
   readDescription: async (path) =>
     existsSync(path) ? (JSON5.parse(readFileSync(path, "utf8")) as PlaceDescriptionOnDisk) : undefined,
   writeDescription: async (path, description) => {
@@ -229,6 +293,14 @@ export const diskFiles: IngestFiles = {
     if (apis.some((each) => basename(each) === named)) return
     project.development = { ...project.development, apis: [...apis, named] }
     writeFileSync(projectFile, json5Edited(text, project))
+  },
+  deploymentsOf: async (file, place) => {
+    const projectFile = join(dirname(file), PROJECT_FILE)
+    if (!existsSync(projectFile)) return undefined
+    const project = JSON5.parse(readFileSync(projectFile, "utf8")) as {
+      places?: Record<string, Record<string, Deployment>>
+    }
+    return project.places?.[place]
   },
   otherSpellBeside: async (path) =>
     filesBeside(path)
@@ -432,8 +504,8 @@ function printDescription(
   const reads = Object.entries(collections)
     .filter(([, { leftOut }]) => !leftOut)
     .map(
-      ([name, { readThrough }]) =>
-        `${name}:  ${readThrough?.rows ?? 0} rows${readThrough?.readByTheLook ? ", by the look itself" : ""}${readThrough?.problem ? ` -- ${readThrough.problem}` : ""}`
+      ([name, { state }]) =>
+        `${name}:  ${state?.rows ?? 0} rows${state?.readByTheLook ? ", by the look itself" : ""}${state?.reason ? ` -- ${state.reason}` : ""}`
     )
   printList("A read through the Spell found:", reads)
   if (spellCantSay.length) printList("What Spell can't say about it:", spellCantSay)

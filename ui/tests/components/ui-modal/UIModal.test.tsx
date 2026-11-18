@@ -706,6 +706,17 @@ describe("UI.modals", () => {
     expect(await answer).toBe(true)
   })
 
+  it("prompt():  `markdown` draws its message above the input, in its label (epic `language` P64)", async () => {
+    const answer = UI.modals.prompt({ message: "Your **name**?", markdown: true, value: "Ann" })
+    const host = await current()
+    const label = host.querySelector("label")!
+    const markdown = label.querySelector<HTMLElement>("ui-markdown")!
+    await expect.poll(() => markdown.shadowRoot?.querySelector("strong")?.textContent).toBe("name")
+    expect(label.querySelector("input")!.value).toBe("Ann")
+    host.querySelector<HTMLElement>(".approve")!.click()
+    expect(await answer).toBe("Ann")
+  })
+
   it("uses the translated ok / cancel texts", async () => {
     UI.i18n.register("fr", { ok: "D'accord", cancel: "Annuler" })
     const locale = UI.i18n.locale

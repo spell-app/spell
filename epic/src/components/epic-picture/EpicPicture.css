@@ -2,6 +2,7 @@
  * `<epic-picture>` (`EpicPicture.tsx`):  a picture the person gave an item, a thumbnail with a trash at its corner.
  * - Public tokens (`--epic-picture-*`) are never declared here:  read through private aliases.
  *   - `--epic-picture-width`, `--epic-picture-height`:  the thumbnail's largest size (320px by 240px)
+ * - Its label's chip (P75) is dark with white text whatever the scheme:  it sits on the picture, not on the page.
  */
 
 @layer ui.components.epic-picture.types;
@@ -31,8 +32,25 @@
     border-radius: 4px;
     cursor: zoom-in;
   }
-  /* the trash:  over the picture's top right corner, inset 4px */
-  [part~="delete"] {
+  /* its label's chip, IMG2:  over the picture's top left corner, inset 4px, small and dark so it reads on any picture */
+  [part~="label"] {
+    position: absolute;
+    inset-block-start: 4px;
+    inset-inline-start: 4px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 0.7);
+    color: white;
+    font:
+      600 11px/16px ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      monospace;
+    pointer-events: none;
+  }
+  /* the trash, or a box's x:  over the picture's top right corner, inset 4px */
+  [part~="delete"],
+  [part~="remove"] {
     position: absolute;
     inset-block-start: 4px;
     inset-inline-end: 4px;

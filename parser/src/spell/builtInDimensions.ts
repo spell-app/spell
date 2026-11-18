@@ -130,12 +130,42 @@ export function unitNamed(dimension: P.TypeScope, said: string): P.DimensionUnit
 /**
  * What `match` measures, if it's a measure:  a property read whose property says (`its height`, `the height of the
  * character`), or a written one (`172 cm`) -- `undefined` for anything else.
- * - Reads only `match.data`, as noted while parsing.
+ * - Or a rule that works it out from its parts says, by its `getMeasure()`:  a date minus a date is a duration
+ *   (`now - its added`), and parentheses change nothing (epic `language` P63).
+ * - Reads only `match.data` and its parts, as noted while parsing.
  */
-export function measureOf(match: P.Match | undefined): P.Measure | undefined {
+export function measureOf(match: P.AnyMatch | undefined): P.Measure | undefined {
   const data = match?.data as { member?: unknown; measure?: P.Measure } | undefined
   if (data?.measure) return data.measure
-  return data?.member instanceof P.ScopeVariable ? data.member.measure : undefined
+  if (data?.member instanceof P.ScopeVariable) return data.member.measure
+  const rule = match?.rule as { getMeasure?(match: P.AnyMatch): P.Measure | undefined } | undefined
+  return rule?.getMeasure?.(match!)
+}
+
+/**
+ * Is `ast` a date:  its match's datatype, or what it was built as -- a chain's step, `now + 2 days`, whose match is
+ * only its suffix (epic `language` P63).
+ */
+export function isDateAST(ast: P.ASTExpression): boolean {
+  return ast.match.datatype === "date" || ast.datatype === "date"
+}
+
+/** A duration counted in seconds:  what a date minus a date is (epic `language` P63). */
+export const SECONDS: P.Measure = { dimension: "Duration", unit: "second" }
+
+/**
+ * `ast`, `match`'s value, in seconds:  a duration measured in another unit converted (`core.convertMeasure()`), anything
+ * else as it is, a plain number taken as seconds (epic `language` P63).
+ */
+export function durationInSeconds(match: P.AnyMatch | undefined, ast: P.ASTExpression): P.ASTExpression {
+  const measure = measureOf(match)
+  if (!match || measure?.dimension !== DURATION || measure.unit === "second") return ast
+  const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
+  return new P.ASTCoreMethodInvocation(match, {
+    datatype: "number",
+    methodName: "convertMeasure",
+    args: [ast, text(DURATION), text(measure.unit), text("second")]
+  })
 }
 
 /**

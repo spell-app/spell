@@ -11,6 +11,7 @@ import { Negatable } from "spell/parser/spell/rules/expressions"
 import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { EveryTimer } from "./EveryTimer"
 import { Meanwhile } from "./Meanwhile"
 import { Pause } from "./Pause"
 import { StartProcess } from "./StartProcess"
@@ -21,7 +22,7 @@ import { WithoutWaiting } from "./WithoutWaiting"
 export const asyncEs = new SpellParser({ module: "async" })
 
 asyncEs.addRule(Await, {
-  syntax: "esperar a? :? {expression}?",
+  syntax: "esperar a? (:|,)? {expression}?",
   tests: [
     {
       compileAs: "statement",
@@ -80,8 +81,16 @@ asyncEs.addRule(Pause, {
   ]
 })
 
+// steps a thing runs every so often while the program runs, in its type's outline (epic `language` T159)
+asyncEs.addRule(EveryTimer, {
+  syntax: "cada {interval:measure_literal} (hasta {until:expression}|{times:number} veces)? (:|,)? {statement_body}?"
+})
+asyncEs.addRule(EveryTimer, {
+  syntax: "cada {unit:unit_words} (hasta {until:expression}|{times:number} veces)? (:|,)? {statement_body}?"
+})
+
 asyncEs.addRule(AtTheSameTime, {
-  syntax: "al mismo tiempo :? {statement_body}?",
+  syntax: "al mismo tiempo (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -102,7 +111,7 @@ asyncEs.addRule(AtTheSameTime, {
 })
 
 asyncEs.addRule(Meanwhile, {
-  syntax: "mientras tanto :? {statement_body}?",
+  syntax: "mientras tanto (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",

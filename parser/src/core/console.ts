@@ -3,8 +3,12 @@ import { untrackCells } from "spell/util/reactive"
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 
-/** Kind of console line -- matches native `console.*` method names, plus `groupEnd` to close a group. */
-export type ConsoleLevel = "debug" | "info" | "warn" | "error" | "group" | "groupEnd"
+/**
+ * Kind of console line -- matches native `console.*` method names, plus `groupEnd` to close a group.
+ * - `typed` and `answer`:  a line someone typed into the editor's Spell Console, and what it gave
+ *   (epic `editor` P32) -- see `SpellConsole.typed()`.
+ */
+export type ConsoleLevel = "debug" | "info" | "warn" | "error" | "group" | "groupEnd" | "typed" | "answer"
 
 /** One logged line (or group), as tracked by `core.console`. */
 export type ConsoleLine = {
@@ -161,6 +165,25 @@ export class SpellConsole extends Observable<Record<string, unknown>, { lines: C
     // oxlint-disable-next-line typescript/no-misused-spread
     if (group) core.trigger("console-log", { ...group, level: "groupEnd" })
     console.groupEnd()
+  }
+
+  /**
+   * Log a line of Spell someone typed into the console, as they typed it:  its `answer()` or its `error()` follows.
+   * - The editor's Spell Console (epic `editor` P32);  not mirrored to the native console, which never saw it typed.
+   */
+  typed(text: string): void {
+    this._addLogLine({ message: [text], level: "typed" })
+  }
+
+  /**
+   * Log what a typed line gave (`typed()`):  its value, shown as a logged value is.
+   * - Nothing for `undefined`:  a line that only did something, e.g. `turn over the next card`, has no answer.
+   */
+  answer(value: unknown): void {
+    if (value === undefined) return
+    this._addLogLine({ message: [value], level: "answer" })
+    if (isPlainValue(value)) console.log(value)
+    else this.printDump(value)
   }
 
   /** Clear all `lines` and `groups`, and fire a `console-clear` event. */

@@ -400,6 +400,14 @@ export type ArticleAgreement = {
   article(kind: ArticleKind, noun: string, type: P.TypeScope | undefined): string
 }
 
+/**
+ * The answers each language has words for, `<action ok />`:  `the result` once a modal's button closed it
+ * (epic `language` T155).
+ * - A button's own word (`<action discard />`, P64) is the program's, not the language's:
+ *   it's its own answer, as written (`action_button`'s `answerOf()`), and the core keeps whatever answer a button gives.
+ */
+export type DialogAnswer = "ok" | "cancel"
+
 /** A language's small words, the tables spell's rules read while parsing -- English's in `languages/en/words.ts`. */
 export type LanguageWords = {
   /** Words which may never be a one-word name, so they stay spell's own, e.g. English's `is`, `the`. */
@@ -424,6 +432,19 @@ export type LanguageWords = {
    * - See `after_hook`.
    */
   verbsForDoing?: (doing: string) => string[]
+  /**
+   * The verbs an action's words may start with, given how a `while` hook says it (epic `data` P50, Q94):
+   * Spanish's `mientras se completa un trabajo`, `completa` => `completar`, `completer`, `completir` (the hook takes the
+   * one an action has);  none:  as `verbsForDoing` says, English's `while completing a job`.
+   * - See `while_hook`.
+   */
+  verbsForDuring?: (word: string) => string[]
+  /**
+   * The names a failure step tests an error by, as written in quotes, and the core's name each means
+   * (epic `data` Q95):  English's `"not found"`, Spanish's `"no encontrado"`, both the core's `"not found"`.
+   * - See `error_is`, `core.errorIs()`.
+   */
+  errorNames?: Record<string, string>
   /**
    * Little words an action's title writes in lower case, unless first:  `Put Card on Pile` (epic `language` J156).
    * - Its articles, conjunctions and short prepositions:  English's `a`, `the`, `and`, `on`;  Spanish's `la`, `y`, `en`.
@@ -455,6 +476,19 @@ export type LanguageWords = {
    * - Read without accents too:  `sólo-icono` ~== `solo-icono`.
    */
   iconOnlyAttribute: string
+  /**
+   * `<action>`'s own attribute in a modal's actions, a button that leaves the modal open (epic `language` T155):
+   * English's `keep-open`, Spanish's `mantener-abierto` -- see `SpellJSX.markDialog()`.
+   * - Read without accents too.
+   */
+  keepOpenAttribute: string
+  /**
+   * The words that say which answer a modal's button gives, `<action ok />`, and that `the result` is compared to,
+   * `if the result is ok` (epic `language` T155):  each word => its answer, `ok` or `cancel`.
+   * - English's `{ ok: "ok", cancel: "cancel" }`, Spanish's `{ aceptar: "ok", cancelar: "cancel" }`.
+   * - English's are read in every language too, as `keep-open` is;  case never matters.
+   */
+  answerWords: Record<string, DialogAnswer>
   /**
    * The tag of an example on a page, in a drawing (epic `elemental-spell` P16):
    * English's `<example "one counter">`, Spanish's `<ejemplo "un contador">`.

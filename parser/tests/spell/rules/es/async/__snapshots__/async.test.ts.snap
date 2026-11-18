@@ -5,6 +5,7 @@ exports[`testing spell module async, in Spanish > rule group specs > match snaps
   "at_the_same_time": "body?",
   "await": "expression?",
   "check_process": "name|operator",
+  "every_timer": "interval?|until?|times?|body?|unit?",
   "meanwhile": "body?",
   "pause": "duration|unit?",
   "start_process": "operator?|name",

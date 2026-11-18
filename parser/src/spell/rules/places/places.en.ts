@@ -25,6 +25,8 @@ import { KeyGoesInAddress } from "./KeyGoesInAddress"
 import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
+import { TokenFrom } from "./TokenFrom"
+import { DataIsPrivate } from "./DataIsPrivate"
 import { KeyWritten } from "./KeyWritten"
 import { ListsUnder } from "./ListsUnder"
 import { LoadThings } from "./LoadThings"
@@ -70,6 +72,10 @@ import { ListsGiveOnly } from "./ListsGiveOnly"
 import { PageSizeIs } from "./PageSizeIs"
 import { SaveDraft } from "./SaveDraft"
 import { KeepsNoTimes } from "./KeepsNoTimes"
+import { EnabledOperations, OPERATION_MEANINGS } from "./EnabledOperations"
+import { OperationName } from "./OperationName"
+import { OperationNames } from "./OperationNames"
+import { TypeVerified } from "./TypeVerified"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
@@ -81,6 +87,11 @@ import { SearchedAt } from "./SearchedAt"
 import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
+import { AnyServerCallFails } from "./AnyServerCallFails"
+import { ErrorIs } from "./ErrorIs"
+import { Nevermind, PassTheError } from "./FailureWords"
+import { ThingById } from "./ThingById"
+import { CallTheServer, WrapperAction } from "./WrapperAction"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
@@ -112,6 +123,11 @@ const KINDS_AT = [
  */
 function addPost(scope: P.Scope) {
   ;(scope as P.RootScope).types.add({ name: "Post" })
+}
+
+/** A rule test's web server, for a type's lines about what it lets be done (`EnabledOperations`, epic `data` P49). */
+function addNetbox(scope: P.Scope) {
+  scope.compile('netbox is a web server at "https://demo.netbox.dev"', "block")
 }
 
 /** A rule test's private sign-up sheet, in a space, for a projection of it (`ProjectionOf`). */
@@ -397,7 +413,7 @@ places.addRule(RowsAllowedEach, {
 })
 places.addRule(ConfirmedJoin, { syntax: "confirmed {collection:identifier} join {address:text}" })
 
-places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
+places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text} {nested_statements}?" })
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
 places.addRule(SearchedAt, { syntax: "{collection:plural_type} are searched at {path:text}" })
 places.addRule(PictureAt, {
@@ -410,6 +426,63 @@ places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:mem
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
 places.addRule(KeyIfSet, { syntax: "{type:subject_its} optional key is the secret {name:text}" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
+places.addRule(TokenFrom, {
+  syntax: "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'acme is a web server at "https://acme.test"\n\tits token comes from "https://auth.acme.test/api-keys/{key id}/token", made with the secret "ACME_API_KEY"',
+          [
+            "export class Acme extends Place {}",
+            "export const acme = core.place(new Acme(), {",
+            '  name: "acme",',
+            '  kind: "web server",',
+            '  at: "https://acme.test",',
+            '  keyNamed: "ACME_API_KEY",',
+            '  tokenFrom: "https://auth.acme.test/api-keys/{key id}/token"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(DataIsPrivate, {
+  syntax: "{type:subject_its} data is private (,? located in {path:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'netbox is a web server at "https://demo.netbox.dev"\n\tits data is private, located in "~/.spell/places/netbox"',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  privateDataIn: "~/.spell/places/netbox"',
+            "})"
+          ]
+        ],
+        [
+          'netbox is a web server at "https://demo.netbox.dev"\n\tits data is private',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  privateDataIn: ""',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(KeyGoesInHeader, {
   syntax: "{type:subject_its} key goes in its {name:text} header",
@@ -930,8 +1003,309 @@ places.addRule(SavedInPlace, { syntax: "{type:subject_implied} (is saved|lives) 
 places.addRule(KeepsNoTimes, { syntax: "{type:subject_it} keeps no times" })
 places.addRule(KeepsNoTimes, { syntax: "(a|an) {type:known_type} keeps no times" })
 
-places.addRule(WhileWaiting, { syntax: "while (waiting|loading) :? {statement_body}?" })
-places.addRule(IfThereAreNone, { syntax: "if there are none :? {statement_body}?" })
+// what a place lets be done to a type's things (epic `data` P49):  `enabled operations are add, change`
+places.addRule(Wording.specialize({ ruleName: "operation_word", meanings: [...OPERATION_MEANINGS] }), {
+  syntax: "((read:read)|(add:add)|(change:change)|(delete:delete)|(all:all))"
+})
+places.addRule(OperationName, {
+  tests: [
+    {
+      tests: [["add", "add"], { title: "a name starts lowercase", input: "Add", js: undefined }]
+    }
+  ]
+})
+places.addRule(OperationNames, { syntax: "[{operation_name} (,|and|or)]" })
+places.addRule(EnabledOperations, {
+  syntax: "enabled operations? are? :? {operations:operation_names}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addNetbox,
+      tests: [
+        [
+          'a "job" is a thing\n\tit lives in netbox\n\tenabled operations are add, change, complete',
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"],',
+            "    operations: [",
+            '      "add",',
+            '      "change",',
+            '      "complete"',
+            "    ], select: [] }",
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}"
+          ],
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"],',
+            "    operations: [",
+            '      "add",',
+            '      "change",',
+            '      "complete"',
+            "    ], select: [] }",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'a "job" is a thing\n\tit lives in netbox\n\tenabled: read,delete',
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"],',
+            '    operations: ["read", "delete"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}"
+          ],
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"],',
+            '    operations: ["read", "delete"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'a "job" is a thing\n\tit lives in netbox\n\tenabled operations are all',
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"],',
+            '    operations: ["all"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}"
+          ],
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"],',
+            '    operations: ["all"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'netbox is a web server at "https://demo.netbox.dev"\n\tjobs live at "/api/jobs"\n\t\tenabled operations are read, add',
+          [
+            "export class Netbox extends Place {}",
+            "export const netbox = core.place(new Netbox(), {",
+            '  name: "netbox",',
+            '  kind: "web server",',
+            '  at: "https://demo.netbox.dev",',
+            '  collections: { jobs: { at: "/api/jobs", operations: ["read", "add"] } }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(EnabledOperations, {
+  syntax: "all operations are disabled",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addNetbox,
+      tests: [
+        [
+          'a "job session" is a thing\n\tit lives in netbox\n\tall operations are disabled',
+          [
+            "export class JobSession extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "job_sessions",',
+            '    times: ["created", "modified"],',
+            "    operations: [], select: [] }",
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}"
+          ],
+          [
+            "export class JobSession extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "job_sessions",',
+            '    times: ["created", "modified"],',
+            "    operations: [], select: [] }",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+
+// whether a type read from an API's description was tried against its server (epic `data` P49):  `this type is verified`
+places.addRule(Wording.specialize({ ruleName: "verify_state", meanings: ["verified", "failed", "unverified"] }), {
+  syntax: "((verified:verified)|(failed:failed)|(unverified:unverified))"
+})
+places.addRule(TypeVerified, {
+  syntax: "this? type is? {state:verify_state}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addNetbox,
+      tests: [
+        [
+          'a "job" is a thing\n\tit lives in netbox\n\tthis type is verified',
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}"
+          ],
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}"
+          ]
+        ],
+        [
+          'a "job" is a thing\n\tit lives in netbox\n\ttype unverified',
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in netbox",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}"
+          ],
+          [
+            "export class Job extends Thing {",
+            "  static savedIn = {",
+            '    place: "netbox",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"], select: [] }',
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in netbox",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+
+places.addRule(WhileWaiting, { syntax: "while (waiting|loading) (:|,)? {statement_body}?" })
+places.addRule(IfThereAreNone, { syntax: "if there are none (:|,)? {statement_body}?" })
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })
 places.addRule(ShowThemPaged, { syntax: "show them in pages" })
 places.addRule(ShowThemAll, { syntax: "show them all" })
@@ -953,10 +1327,10 @@ places.addRule(ShowThemAtATime, {
 })
 places.addRule(ShowThemIn, { syntax: "show them in :? {statement_body}?" })
 places.addRule(ShowItAllIn, { syntax: "show it all in :? {statement_body}?" })
-places.addRule(IfThatFails, { syntax: "if that fails :? {statement_body}?" })
+places.addRule(IfThatFails, { syntax: "if that fails (:|,)? {statement_body}?" })
 
 places.addRule(InOneGo, {
-  syntax: "in one go :? {statement_body}?",
+  syntax: "in one go (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "statement",
@@ -977,6 +1351,316 @@ places.addRule(TryAgain, {
   tests: [{ compileAs: "statement", tests: [["try again", "core.reloadSaved()"]] }]
 })
 
+// a server's actions (epic `data` P50):  by id, wrapped, and the steps when one fails
+places.addRule(ThingById, {
+  syntax: "{type:known_type} {id:number}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a job is a thing",
+            'work is a web server at "https://jobs.test":',
+            '\t- to complete a job is at "/jobs/{id}/complete"',
+            "a job:",
+            "\t- it lives in work",
+            "to finish",
+            "\tcomplete job 7151"
+          ],
+          js: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})",
+            "export async function finish() {",
+            '  return core.asAction({ undoneAs: "Finish" }, async () => await (await core.savedThingOrMissing(Job, 7151)).complete())',
+            "}"
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})",
+            "export async function finish() {",
+            '  return core.asAction({ undoneAs: "Finish" }, async () => await (await core.savedThingOrMissing(Job, 7151)).complete())',
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+places.addRule(WrapperAction, {
+  roles: { band: "action", signature: "declaration" },
+  syntax: "to {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a job is a thing",
+            'work is a web server at "https://jobs.test":',
+            '\t- to complete a job is at "/jobs/{id}/complete"',
+            "a job:",
+            "\t- it lives in work",
+            "to complete a job",
+            '\tprint "about to"',
+            "\tcall work",
+            '\tprint "done"'
+          ],
+          js: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  async aroundComplete(serverCall) {",
+            '    core.console.log("about to")',
+            "    await serverCall()",
+            '    core.console.log("done")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  async aroundComplete(serverCall: any /* spell: type unknown */) {",
+            '    core.console.log("about to")',
+            "    await serverCall()",
+            '    core.console.log("done")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ]
+        },
+        {
+          title: "never calling the server warns",
+          input: [
+            "a job is a thing",
+            'work is a web server at "https://jobs.test":',
+            '\t- to complete a job is at "/jobs/{id}/complete"',
+            "a job:",
+            "\t- it lives in work",
+            "to complete a job",
+            '\tprint "never sent"'
+          ],
+          js: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  aroundComplete(serverCall) {",
+            '    core.console.log("never sent")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  aroundComplete(serverCall: any /* spell: type unknown */) {",
+            '    core.console.log("never sent")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+places.addRule(CallTheServer, { syntax: "call (the server|{place:identifier})" })
+places.addRule(ErrorIs, { syntax: "the error is {name:text}" })
+places.addRule(Nevermind, { syntax: "(nevermind|never mind)" })
+places.addRule(PassTheError, { syntax: "pass the error" })
+places.addRule(AnyServerCallFails, {
+  syntax: "(when|if) any server call fails (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "when any server call fails",
+            '\tif the error is "not authorized"',
+            '\t\tprint "sign in"',
+            '\totherwise if the error is "limit"',
+            "\t\tpass the error",
+            "\totherwise",
+            "\t\tdo nothing"
+          ],
+          js: [
+            "core.addServerFailureStep((error) => {",
+            '  if (core.errorIs(error, "not authorized")) core.console.log("sign in")',
+            '  else if (core.errorIs(error, "limit")) return core.passTheError()',
+            "  else core.doNothing()",
+            "})"
+          ]
+        },
+        {
+          title: "a last if with no otherwise passes on what it didn't catch",
+          input: ["if any server call fails", '\tif the error is "not found"', "\t\tnevermind"],
+          js: [
+            "core.addServerFailureStep((error) => {",
+            '  if (core.errorIs(error, "not found")) return',
+            "  return core.passTheError()",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
 places.addRule(ThingWithId, { syntax: "the {type:known_type} whose id is {id:expression}" })
 places.addRule(EveryThingMatching, {
   syntax: "every {type:known_type} (matching|which matches) {words:expression}",

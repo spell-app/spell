@@ -48,6 +48,21 @@ const VIEW_ID_ATTRIBUTE = "id"
  */
 /** The attribute naming the menu a right click on an element shows, as the page reads it:  `context-menu="game menu"`. */
 const CONTEXT_MENU_ATTRIBUTE = "context-menu"
+/** Spell UI's modal:  its actions close it, and what it holds goes in its parts (epic `language` T155). */
+const DIALOG_TAG = "ui-modal"
+
+/** The scope a named modal's contents are drawn in, where `it` is what it's shown with (epic `language` P64). */
+const SHOWN_SCOPE = "shown"
+
+/** What `it` compiles to inside a named modal:  `core.drawShown()`'s callback's argument. */
+const SHOWN_IT = "it"
+/** The parts a modal lays out (`ownsParts`):  a drawing that names one lays its modal out itself. */
+const DIALOG_PART_TAGS = ["ui-header", "ui-content", "ui-description", "ui-actions"]
+/** Where a modal's drawing goes, when it names none of its parts:  its content, then its actions' buttons. */
+const DIALOG_CONTENT_TAG = "ui-content"
+const DIALOG_ACTIONS_TAG = "ui-actions"
+/** A modal's attribute saying it's drawn as written, see-through:  `<modal transparent>` (epic `language` J245). */
+const DIALOG_TRANSPARENT_ATTRIBUTE = "transparent"
 const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
   "ui-modal": { title: "heading" },
   "ui-menu": {},
@@ -156,10 +171,16 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (takesShortcuts && element instanceof P.JSXElementToken && SpellJSX.isLoop(scope, element)) {
       return SpellJSX.parseLoop(scope, match, element)
     }
+    // a modal named by its quoted word:  inside it, `it` is what it's shown with (epic `language` P64)
+    const shownIn =
+      takesShortcuts && element instanceof P.JSXElementToken ? SpellJSX.shownInScope(scope, element) : undefined
+    if (shownIn) match.data.shownIn = textOf((element as P.JSXElementToken).quotedWord!.value).trim()
+    const childScope = shownIn ?? scope
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
     // call `scope.parser.parse()` directly instead, as `SpellCSSFile.parse()` does.
     match.data.children = element.children?.map(
-      (child) => scope.parser?.parse(child, "jsxChild", scope) || scope.parser?.parse(child, "parse_error", scope)
+      (child) =>
+        scope.parser?.parse(child, "jsxChild", childScope) || scope.parser?.parse(child, "parse_error", childScope)
     )
     SpellJSX.claimBranches(scope, match)
     // a fragment (`jsxFragment`) has no tag and no attributes
@@ -210,6 +231,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
     // a Spell UI menu or toolbar, in any language:  its actions and dividers are its rows (epic `editor` P29)
     if (SpellJSX.isMenu(scope, match.data.tagName)) SpellJSX.markMenuRows(scope, match)
+    // a modal:  its actions close it, and what it holds goes in its parts (epic `language` T155)
+    if (SpellJSX.canonicalTagOf(scope, match.data.tagName) === DIALOG_TAG) SpellJSX.markDialog(scope, match, element)
     // a modal, menu or popup its quoted word names, `<modal "you won">` (P61):  never one of the project's own views
     if (element.quotedWord && !match.data.view && !match.data.laterView) {
       match.data.named = SpellJSX.namedTagTitle(scope, match.data.tagName)
@@ -475,12 +498,62 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
     if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
-    const children = this.childASTs(match)
+    const laidOut = match.data.dialogParts ? SpellJSX.dialogChildren(match) : this.childASTs(match)
+    const children =
+      match.data.shownIn !== undefined && readsIt(laidOut) ? SpellJSX.drawnShown(match, laidOut) : laidOut
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
       children: view ? SpellJSX.withSlotNames(view, children) : children
     })
+  }
+
+  ////////////////
+  // ## What a modal is shown with (epic `language` P64)
+  ////////////////
+
+  /**
+   * The scope a modal named by its quoted word draws its contents in, `<modal "edit card">`:
+   * one where `it` is what the modal is shown with, `show "edit card" with the card` (`show_drawn`).
+   * - Owen, 2026-11-17:  "Inside the modal's drawing, the thing is what it draws."
+   *   So `{its name}`, `<input value={its name}/>` inside it read and edit the card itself.
+   * - Never shown with anything, `it` is the thing whose drawing it's in, as before (`core.drawShown()`).
+   * - What `it` is isn't known where it's drawn:  a `show` naming it may come later in the program.
+   * - `undefined` for any other tag.
+   */
+  private static shownInScope(scope: P.Scope, element: P.JSXElementToken): P.BlockScope | undefined {
+    if (!element.quotedWord || element.chain) return undefined
+    const tag = SpellJSX.componentTagFor(scope, element.tagName)
+    if (!tag || SpellJSX.canonicalTagOf(scope, tag) !== DIALOG_TAG) return undefined
+    const shown = new P.BlockScope({ name: SHOWN_SCOPE, parentScope: scope })
+    shown.variables.add({ name: "it", output: SHOWN_IT })
+    return shown
+  }
+
+  /**
+   * A named modal's `children`, drawn with what it's shown with:  `core.drawShown("edit card", this, (it) => [...])`
+   * -- see `shownInScope()`.
+   * - Only when they read `it` (`readsIt()`):  one that doesn't, `<modal "you won">`, draws as it always did.
+   */
+  private static drawnShown(
+    match: P.MatchFor<SpellJSX>,
+    children: P.ASTJSXElementProps["children"]
+  ): P.ASTJSXElementProps["children"] {
+    const name = match.data.shownIn!
+    const draw = new P.ASTMethodDefinition(match, {
+      args: [new P.ASTVariableExpression(match, { name: SHOWN_IT })],
+      body: new P.ASTJSXFragment(match, { children }),
+      inline: true
+    })
+    const shown = new P.ASTCoreMethodInvocation(match, {
+      methodName: "drawShown",
+      args: [
+        new P.ASTStringLiteral(match, { value: name, quote: '"', raw: JSON.stringify(name) }),
+        new P.ASTSelfLiteral(match, { value: "this", raw: "" }),
+        draw
+      ]
+    })
+    return [new P.ASTJSXExpression(match, { expression: shown })]
   }
 
   /**
@@ -750,6 +823,81 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
+   * A modal's drawing (epic `language` T155;  Owen, 2026-11-17:  "only for buttons in the modal's actions section"):
+   * - naming none of its parts (`DIALOG_PART_TAGS`), nor an if-chain at its top:  ALWAYS laid out in them as it
+   *   compiles (`dialogChildren()`), each `<action>` at its top going to its actions (epic `language` J245)
+   *   - `transparent` (Spanish's `transparente`) opts out:  drawn as written, see-through (StarWars' crawl)
+   * - each `<action "...">` in its ACTIONS, the row of buttons at its bottom, closes it once its click has run the
+   *   action, as a dialog's own buttons do (`action_button`'s `inDialog`):
+   *   - written in its `<actions>` (Spell UI's `<ui-actions>`, Spanish's `<acciones>`), however deep;
+   *     or at its top, when it's laid out for you
+   *   - not one that says `keep-open` (Spanish's `mantener-abierto`), nor a menu's row
+   *   - an action anywhere else in it (its content) runs, and leaves it open
+   */
+  private static markDialog(scope: P.Scope, dialog: P.MatchFor<SpellJSX>, element: P.JSXElementToken) {
+    const closes = (action: P.MatchFor<ActionButton>) => {
+      if (!action.data.inMenu && action.data.keepOpenAt === undefined) action.data.inDialog = true
+    }
+    const markAll = (holder: P.Match) => {
+      for (const child of (holder.data as JSXMatchData).children ?? []) {
+        if (child?.is(ActionButton)) closes(child)
+        else if (child?.is(SpellJSX) && !SpellJSX.isMenu(scope, child.data.tagName)) markAll(child)
+      }
+    }
+    const children = dialog.data.children ?? []
+    let laidOut = false
+    for (const child of children) {
+      if (!child?.is(SpellJSX)) continue
+      const tag = SpellJSX.canonicalTagOf(scope, child.data.tagName) ?? ""
+      if (child.data.chain || DIALOG_PART_TAGS.includes(tag)) laidOut = true
+      if (tag === DIALOG_ACTIONS_TAG) markAll(child)
+    }
+    // `<modal transparent>` keeps its drawing as written, as StarWars' crawl, whose words are placed over the page
+    if (laidOut || SpellJSX.isTransparent(scope, dialog.data.tagName ?? element.tagName, element)) return
+    const actions = children.filter((child): child is P.MatchFor<ActionButton> => !!child?.is(ActionButton))
+    dialog.data.dialogParts = true
+    for (const action of actions) closes(action)
+  }
+
+  /**
+   * Does `element`, a modal drawn as `tag` (`ui-modal`, `es-modal`), say `transparent` (Spanish's `transparente`, the pack's name for it):
+   * drawn as written, with no box around it (epic `language` J245)?
+   */
+  private static isTransparent(scope: P.Scope, tag: string, element: P.JSXElementToken): boolean {
+    const local = SP.ComponentPacks.attributeNameFor(
+      tag,
+      DIALOG_TRANSPARENT_ATTRIBUTE,
+      SP.Language.of(scope).lang,
+      SpellJSX.packsFor(scope)
+    )
+    const names = [DIALOG_TRANSPARENT_ATTRIBUTE, local]
+    return !!element.attributes?.some((attribute) => names.includes(attribute.name))
+  }
+
+  /**
+   * A modal's children, laid out in its parts:  what it holds in `<ui-content>`, the `<action>`s at its top after, in
+   * `<ui-actions>` -- so it's drawn as a modal is, with room around it, its buttons on their own line, closing it.
+   * - Spell UI's English tags in every language, as an action's `<ui-button>` is:  they're the page's own, not written.
+   */
+  private static dialogChildren(match: P.MatchFor<SpellJSX>): P.ASTJSXElementProps["children"] {
+    const actions: P.ASTJSXElementProps["children"] = []
+    const content: P.ASTJSXElementProps["children"] = []
+    for (const child of match.data.children ?? []) {
+      if (SpellJSX.drawsNothing(child)) continue
+      const ast = SpellJSX.childAST(child)
+      if (ast) (child?.is(ActionButton) ? actions : content).push(ast)
+    }
+    const part = (tagName: string, children: P.ASTJSXElementProps["children"]) =>
+      new P.ASTJSXElement(match, { tagName, attrs: [], children })
+    // blank text alone isn't content
+    const hasContent = content.some((ast) => !(ast instanceof P.ASTJSXText) || ast.value.trim())
+    return [
+      ...(hasContent ? [part(DIALOG_CONTENT_TAG, content)] : []),
+      ...(actions.length ? [part(DIALOG_ACTIONS_TAG, actions)] : [])
+    ]
+  }
+
+  /**
    * `context-menu="game menu"` on an element (Spanish's `menú-contextual="..."`):  a right click on it shows the menu of
    * that name, a template's (`its "game menu" is a menu of ...`) or one the program drew, `<menu "game menu">`
    * (epic `language` T156;  Owen, 2026-11-17).
@@ -769,6 +917,13 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const menu = attribute.value.innerText.trim()
     const message = SP.Language.of(scope).parserMessage("unknown-menu-attribute", { attribute: attribute.name, menu })
     SP.SpellWarnings.refuseIf(match, message, () => !hasMenuNamed(scope, menu))
+  }
+
+  /** The pack's own (English) tag `tag` stands for in `scope`'s language:  `es-modal` => `ui-modal`;  itself if none. */
+  private static canonicalTagOf(scope: P.Scope, tag: string | undefined): string | undefined {
+    if (!tag) return undefined
+    const lang = SP.Language.of(scope).lang
+    return SP.ComponentPacks.canonicalTagFor(tag, lang, SpellJSX.packsFor(scope)) ?? tag
   }
 
   /**
@@ -994,6 +1149,22 @@ function oneWordText(text: P.TextToken): P.TextToken {
 }
 
 /** A quoted word's text, without its quotes:  `T1` for `"T1"`. */
+/**
+ * Does `node`, a named modal's contents as compiled, read `it`, what the modal is shown with (`SHOWN_IT`, P64)?
+ * - Walks every field of every node, as `if`'s `replaceNode()` does.
+ */
+function readsIt(node: unknown): boolean {
+  if (!node || typeof node !== "object") return false
+  if (Array.isArray(node)) return node.some(readsIt)
+  if (!(node instanceof P.ASTNode)) return false
+  if (node instanceof P.ASTVariableExpression && node.name === SHOWN_IT) return true
+  const fields = node as unknown as Record<string, unknown>
+  for (const key in fields) {
+    if (key !== "match" && Object.hasOwn(fields, key) && readsIt(fields[key])) return true
+  }
+  return false
+}
+
 function textOf(word: P.JSXAttributeValue): string {
   return word instanceof P.TextToken ? word.innerText : `${word.raw ?? ""}`.trim()
 }

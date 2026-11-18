@@ -39,6 +39,10 @@ class SpellRuntime(Eventful):
         self.pages: list[object] = []
         # the property changes still to send -- see `core.note_property_change()`
         self.changes_waiting: list[Callable[[], object]] = []
+        # its timers running, `every second` (`timers.py`):  each task takes itself out as it ends
+        self.timers: set[asyncio.Task[None]] = set()
+        # its timers made while no loop ran:  each starts its task -- see `core.start_waiting_timers()`
+        self.timers_waiting: list[Callable[[], None]] = []
 
 
 class RuntimeMethods:
@@ -82,7 +86,13 @@ class RuntimeMethods:
 
         - Its undo history titles its steps in the program's language (`message()`),
           and puts the app in the page's next patch as it changes (`history_changed()`).
+        - SIDE EFFECT:  the last run's timers stop (`every second`, `timers.py`).
         """
+        last = getattr(self, "RUNTIME", None)
+        if last is not None:
+            for task in list(last.timers):
+                task.cancel()
+            last.timers_waiting.clear()
         self.RUNTIME = SpellRuntime(UndoHistory(title_for=self._undo_title, on_change=self._history_changed))
         self.before_pause: list[Callable[[], Awaitable[None] | None]] = []
 

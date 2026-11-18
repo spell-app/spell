@@ -19,6 +19,8 @@ import containerCSS from "./UIToast.container.css?inline"
  * - `class` words sort themselves:  a `type` word, a hue (`color`) or `inverted`.
  *   Every word also stays on the `<ui-toast>`,
  *   so a page can theme one toast by its own class (the `--ui-toast-*` tokens).
+ * - `markdown`, and the message has Markdown in it (`hasMarkdown()`, `spell/util/string`):
+ *   a `<ui-markdown sanitized breaks>` in its body instead of its `message`, its family imported the first time.
  * - Actions become `<ui-button slot="actions">`s:
  *   Fomantic's `class` on the button (so `.positive` / `.deny` … still approve / deny),
  *   its button words and hue as attributes.
@@ -74,9 +76,11 @@ export class ToastStack implements E.ToastProvider {
     toast.id = id
     const showIcon = options.showIcon ?? true
     // keys checked against the vocabulary
+    // its message as Markdown, where it has some (epic `language` P64):  a `<ui-markdown>` in its body, after the heading
+    const markdown = options.markdown && options.message && E.hasMarkdown(options.message) ? options.message : undefined
     const attributes: Partial<Record<E.AttributeNameOf<Vocabulary>, string>> = {
       heading: options.title,
-      message: options.message,
+      message: markdown ? undefined : options.message,
       "display-time": String(options.displayTime ?? DEFAULT_DISPLAY_TIME),
       icon: showIcon === true ? "" : showIcon || undefined,
       progress: options.showProgress || undefined,
@@ -97,8 +101,26 @@ export class ToastStack implements E.ToastProvider {
     for (const [name, value] of Object.entries(attributes)) if (value !== undefined) toast.setAttribute(name, value)
     // every word stays on the DOM element too (Fomantic's `class`):  the page themes this one toast by it
     if (words.length) toast.className = words.join(" ")
+    if (markdown) toast.append(this.markdownFor(markdown))
     if (options.actions?.length) toast.append(this.actionsFor(options.actions, options.classActions ?? ""))
     return toast
+  }
+
+  /**
+   * `message` as a `<ui-markdown sanitized breaks>`, the toast's own content:  its family imported the first time.
+   * - `sanitized`:  the message may hold what someone typed, so raw HTML in it goes through DOMPurify.
+   * - `breaks`:  each `\n` a line break, as the plain message has.
+   * - Its text is the element's text content, never markup.
+   */
+  private markdownFor(message: string): HTMLElement {
+    void import("spell/ui/components/ui-markdown").catch((error: unknown) =>
+      E.Warnings.warn("UI.toast()", "can't load <ui-markdown> for a Markdown message", error)
+    )
+    const markdown = this.document.createElement(MARKDOWN_TAG)
+    markdown.toggleAttribute(SANITIZED, true)
+    markdown.toggleAttribute(BREAKS, true)
+    markdown.textContent = message
+    return markdown
   }
 
   /**
@@ -311,3 +333,12 @@ const CONTAINER_CLASS = "toast-container"
 
 /** Text key of the containers' name. */
 const NOTIFICATIONS = "notifications"
+
+/** What draws a Markdown message:  Spell UI's `<ui-markdown>`, its page tag in every language. */
+const MARKDOWN_TAG = "ui-markdown"
+
+/** `<ui-markdown>`'s attribute:  its markup through DOMPurify. */
+const SANITIZED = "sanitized"
+
+/** `<ui-markdown>`'s attribute:  each line break in the text a line break on the page. */
+const BREAKS = "breaks"

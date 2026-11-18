@@ -146,6 +146,18 @@ export class ActionQueue {
     )
   }
 
+  /**
+   * SIDE EFFECT:  the action running now goes on beside the queue, and the next one may run:
+   * one waiting on a modal it showed (`show "you won"`), whose button's action would otherwise wait behind it for good
+   * (epic `language` T155).
+   * - It still ends as it would, its `finished` too;  the queue no longer waits for it.
+   */
+  letNextRun(): void {
+    if (!this.running) return
+    this.running = undefined
+    if (!this.isBusy) this.startNext()
+  }
+
   /** When action `name` on `thing`, running or waiting its turn, ends or is dropped;  `undefined` if neither. */
   finishing(thing: unknown, name: string): Promise<void> | undefined {
     for (const entry of [this.running, this.waiting]) {
@@ -169,7 +181,8 @@ export class ActionQueue {
     }
     this.running = entry
     const end = () => {
-      this.running = undefined
+      // one that went on beside the queue (`letNextRun()`) leaves what runs now alone
+      if (this.running === entry) this.running = undefined
       entry.finish()
       if (!this.isBusy) this.startNext()
     }

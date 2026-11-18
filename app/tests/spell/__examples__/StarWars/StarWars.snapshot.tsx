@@ -373,7 +373,7 @@ export class Film extends Thing {
 
   drawCrawl() {
     return (
-      <ui-modal class="crawl" visible={true} overlay={true} fullscreen={true} on-ui-closed={async () => await this.end()} aria-label={`The opening of ${this.title}`} part="crawl">
+      <ui-modal class="crawl" transparent={true} visible={true} overlay={true} fullscreen={true} on-ui-closed={async () => await this.end()} aria-label={`The opening of ${this.title}`} part="crawl">
         <ui-text class="long-ago" size="big">A long time ago in a galaxy far, far away....</ui-text>
         <ui-segment class="stage" appearance="basic">
           <ui-segment class="words" appearance="basic">

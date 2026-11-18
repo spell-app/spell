@@ -3,7 +3,7 @@ import { dirname, join } from "node:path"
 import { compactTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
-import { InboxError } from "./ReviewInbox"
+import { InboxError, KICKOFF_ID } from "./ReviewInbox"
 
 /****************
  * ### `TestShots`
@@ -35,11 +35,15 @@ export class TestShots {
    * - `now`:  the time it's stamped with, local, to the minute
    * - a test's (Owen's test run), or the holder of an option set's (an item, a phase, a standing set:  a picture for an
    *   option he adds, epic `epic-engine` P50)
+   * - the kickoff box's (`kickoff`, epic `epic-engine` P75):  in `pictures/`, `pictures/kickoff-20261117-2301.png`,
+   *   where the Kickoff prompt's pictures stay
    * - throws an `InboxError` for any other id (the summary, the stage, a new item's key)
    * - SIDE EFFECT:  writes the file (and `tests/`), never over one
    */
   static async saveShot(file: string, id: string, bytes: Buffer, now = new Date()): Promise<string> {
     const key = id.toLowerCase()
+    // the kickoff box's (epic `epic-engine` P75):  kept with the page's pictures, as the Kickoff prompt shows them
+    if (key === KICKOFF_ID) return TestShots.savePicture(file, `${PICTURES}/${key}`, bytes, now)
     if (!SHOT_ID.test(key)) throw new InboxError(`only a test or an option set's holder takes a screenshot:  ${id}`)
     return TestShots.savePicture(file, `${TEST_SHOTS}/${key}`, bytes, now)
   }
@@ -65,6 +69,9 @@ export class TestShots {
     }
   }
 }
+
+/** The folder of the pictures the person gives a page, beside it:  `ItemPictures`' `PICTURES`, written out here. */
+const PICTURES = "pictures"
 
 /** The folder of an epic's test screenshots, beside its page:  `epics/<epic>/tests/`. */
 export const TEST_SHOTS = "tests"

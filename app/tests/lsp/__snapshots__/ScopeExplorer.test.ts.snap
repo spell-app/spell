@@ -45,9 +45,10 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "method move a card to a pile",
   "property last pile",
   "property pile",
-  "method is on top of its pile",
+  "method is on top",
+  "method is on bottom",
   "method play a card",
-  "method the points for (a card) on (a pile)",
+  "method the points for a card on a pile",
   "property direction",
   "enumeration Directions",
   "property thumbnail",
@@ -109,8 +110,30 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     method (a text) as upper case
   type Date
     property year (number)
+    property years (number)
+    property short year (number)
+    property month (text)
+    property short month (text)
+    property month number (number)
     property day (number)
+    property days (number)
     property hour (number)
+    property hours (number)
+    property minute (number)
+    property minutes (number)
+    property second (number)
+    property seconds (number)
+    property week (number)
+    property weekday (text)
+    property day of the week (text)
+    property short weekday (text)
+    property short day of the week (text)
+    property weekday number (number)
+    property day of the week number (number)
+    property AM or PM (text)
+    property AMPM (text)
+    property meridiem (text)
+    property meridian (text)
     property short date (text)
     property long date (text)
     property abbreviated date (text)
@@ -197,8 +220,30 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     method (a text) as upper case
   type Date
     property year (number)
+    property years (number)
+    property short year (number)
+    property month (text)
+    property short month (text)
+    property month number (number)
     property day (number)
+    property days (number)
     property hour (number)
+    property hours (number)
+    property minute (number)
+    property minutes (number)
+    property second (number)
+    property seconds (number)
+    property week (number)
+    property weekday (text)
+    property day of the week (text)
+    property short weekday (text)
+    property short day of the week (text)
+    property weekday number (number)
+    property day of the week number (number)
+    property AM or PM (text)
+    property AMPM (text)
+    property meridiem (text)
+    property meridian (text)
     property short date (text)
     property long date (text)
     property abbreviated date (text)

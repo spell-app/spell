@@ -12,6 +12,12 @@ const { isCoreCall } = P.jsShapes
  */
 const CORE_COROUTINES = new Set([...P.CORE_CALLS_THAT_WAIT].filter((name) => name !== "pauseFor"))
 
+/**
+ * `core`'s calls that wait only where the program says so, awaited only where it does:
+ * `notify ... and wait`, and `show "you won"` (not `... without waiting`;  epic `language` T155).
+ */
+const AWAITED_AS_WRITTEN = new Set(["notify", "showDrawn"])
+
 /****************
  * ### `PyWriter`
  * Writes a spell tree as Python, on `asyncio`:  the `py` target's writer (epic `python-target`;  one target since P22).
@@ -46,6 +52,12 @@ export class PyWriter extends PyBaseWriter {
 
   /** Writing the module's top level, where Python can't `await` -- see `statement()`. */
   protected atTopLevel = false
+
+  /**
+   * Is the statement being written one of the module's top level?  A group of statements it is (`statementLines()`)
+   * is then the top level's too;  inside a function, the function's.
+   */
+  protected statementAtTop = true
 
   /** The steps lifted out of the top level, for a name each -- see `topLevelStep()`. */
   protected steps = 0
@@ -135,12 +147,13 @@ export class PyWriter extends PyBaseWriter {
 
   /**
    * What it waits for, which says its own `await` -- see the calls above.
-   * - But `notify ... and wait`:  `await core.notify(...)`, as `core.notify()` waits only when awaited.
+   * - But `notify ... and wait`:  `await core.notify(...)`, as `core.notify()` waits only when awaited;
+   *   and `show "you won"`, `await core.show_drawn(...)`, which waits until the modal closes (epic `language` T155).
    */
   ASTAwaitExpression(node: P.ASTAwaitExpression): string {
     const written = this.loop(node.expression) ?? String(this.write(node.expression))
     const inner = node.expression
-    return isCoreCall(inner) && (inner as P.ASTScopedMethodInvocation).methodName === "notify"
+    return isCoreCall(inner) && AWAITED_AS_WRITTEN.has((inner as P.ASTScopedMethodInvocation).methodName)
       ? `await ${written}`
       : written
   }
@@ -155,10 +168,14 @@ export class PyWriter extends PyBaseWriter {
   // ## The top level
   ////////////////
 
-  /** As `PyBaseWriter`'s, noting when it's the module's own top level -- see `statement()`. */
+  /**
+   * As `PyBaseWriter`'s, noting when it's the module's own top level -- see `statement()`.
+   * - A group of statements inside a function (`ASTStatementGroup()` passes `topLevel`) is the function's:
+   *   its lines may `await` (`show "edit card" with the card`, epic `language` P64).
+   */
   statementLines(statements: P.ASTNode[], topLevel = false): string {
     const previous = this.atTopLevel
-    this.atTopLevel = topLevel
+    this.atTopLevel = topLevel && this.statementAtTop
     try {
       return super.statementLines(statements, topLevel)
     } finally {
@@ -175,12 +192,15 @@ export class PyWriter extends PyBaseWriter {
    */
   statement(statement: P.ASTNode): string {
     const atTop = this.atTopLevel
+    const outerAtTop = this.statementAtTop
     this.atTopLevel = false
+    this.statementAtTop = atTop
     let written: string
     try {
       written = super.statement(statement)
     } finally {
       this.atTopLevel = atTop
+      this.statementAtTop = outerAtTop
     }
     if (!atTop || !/\bawait /.test(written)) return written
     const call = /^await ([^\n]*)$/.exec(written)

@@ -146,6 +146,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       }
       if (statement) {
         lineStatement = statement
+        // a call on its own line:  what it gives back is `the result` (epic `language` P64)
+        SpellStatement.noteRunAsStatement(statement)
         matched.push(statement)
         unparsed.splice(0, statement.length)
       }

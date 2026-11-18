@@ -41,6 +41,8 @@ import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
 import { DraftSaver, PAGE_COMMENTS_ATTRIBUTE, PAGE_COMMENTS_EVENT } from "spell/epic/answers"
 import { Pictures, ServerLink } from "spell/epic/review"
+// plain DOM:  the epic items' own watch for coming near the screen, alone
+import { NearScreen } from "spell/epic/components/epic-item/NearScreen"
 import {
   addBlockAction,
   BLOCK_ROW,
@@ -952,15 +954,21 @@ class PageComments {
         : block.matches(TITLE_ROW_BLOCKS)
           ? "title"
           : "block"
-    const button = iconButton("bullhorn", tip)
-    const mark = el("span", { class: `spell-comment-mark at-${where}`, "data-spell-added": true }, button)
+    const mark = el("span", { class: `spell-comment-mark at-${where}`, "data-spell-added": true })
     bullhornBlocks.set(mark, block)
-    button.addEventListener("click", (event) => {
-      event.stopPropagation()
-      // where it is NOW:  a kept bullhorn's block may have moved since it was drawn (an anchor is its place)
-      const now = this.placeOf(block)
-      this.openBox({ key: now.anchor, place: now }, event.currentTarget.getBoundingClientRect())
-    })
+    // its button made once its block comes near the screen (epic `epic-engine` I333):  an epic page's 800 items each
+    // drew a `<ui-button>` up front, most of them in folded sections;  a section's and the page's straight away
+    const drawButton = () => {
+      if (mark.firstChild) return
+      const button = iconButton("bullhorn", tip)
+      button.addEventListener("click", (event) => {
+        event.stopPropagation()
+        // where it is NOW:  a kept bullhorn's block may have moved since it was drawn (an anchor is its place)
+        const now = this.placeOf(block)
+        this.openBox({ key: now.anchor, place: now }, event.currentTarget.getBoundingClientRect())
+      })
+      mark.append(button)
+    }
     if (where === "section" || where === "title") {
       mark.slot = "actions"
       block.append(mark)
@@ -970,6 +978,8 @@ class PageComments {
       if (head) addHeadTool(head, mark, "comment")
       else block.append(mark)
     } else addBlockAction(block, mark, "comment")
+    if (where === "section" || where === "page") drawButton()
+    else NearScreen.once(mark, drawButton)
   }
 
   /** Where `block` is, as a comment on it is saved:  `{ anchor, kind, label, excerpt }` (`BlockAnchors.js`). */
@@ -1275,7 +1285,8 @@ class PageComments {
       "aria-label": how === "edit" ? "Your comment" : "Your reply"
     })
     const replying = { id, how, box: field, field, floppy: null }
-    takesPictures(field)
+    // a reply is new words, still typed:  its labels renumber;  a saved comment edited keeps its gaps (P75's choice B)
+    takesPictures(field, { renumber: how !== "edit" })
     this.wireReply(replying, saved)
     return replying
   }
@@ -1602,7 +1613,7 @@ class PageComments {
       field
     ))
     pane.near = near ? { left: near.left, top: near.top, bottom: near.bottom } : undefined
-    takesPictures(field)
+    takesPictures(field, { renumber: true })
     this.wirePane(pane, field, open)
     this.main.append(pane)
     void drawn(pane).then(() => {
@@ -1992,24 +2003,29 @@ async function drawn(element) {
 
 /** The floppy's tooltip once saved:  `Saved 14:02 · waiting for Claude`. */
 /**
- * SIDE EFFECT:  a picture pasted or dropped in comment field `field` is saved beside the page (`POST picture`), and
- * `![picture](<path>)` goes into its words (`Pictures.intoWords()`;  epic `epic-engine` I267):  the field's own saver
- * saves them, and the thread draws the picture.
+ * SIDE EFFECT:  every picture pasted or dropped in comment field `field` is saved beside the page (`POST picture`), and
+ * its words go into the field, labelled, `![IMG2](<path>)` (`Pictures.intoWords()`;  epic `epic-engine` I267, P75):
+ * the field's own saver saves them, and the thread draws each picture with its label.
+ * - `renumber`:  a new comment or a reply, still typed:  a picture's whole link deleted closes its gap (choice B)
  */
-function takesPictures(field) {
-  Pictures.intoWords(field, {
-    save: async (png) => {
-      try {
-        const answer = await ServerLink.forPage().post(PICTURE_API, { page: location.pathname, png })
-        if (typeof answer?.picture === "string") return answer.picture
-        noteToast("The page server kept no picture", "error")
-      } catch (failure) {
-        noteToast(`Couldn't save the picture:  ${failure?.message ?? failure}`, "error")
-      }
-      return undefined
+function takesPictures(field, { renumber = false } = {}) {
+  Pictures.intoWords(
+    field,
+    {
+      save: async (png) => {
+        try {
+          const answer = await ServerLink.forPage().post(PICTURE_API, { page: location.pathname, png })
+          if (typeof answer?.picture === "string") return answer.picture
+          noteToast("The page server kept no picture", "error")
+        } catch (failure) {
+          noteToast(`Couldn't save the picture:  ${failure?.message ?? failure}`, "error")
+        }
+        return undefined
+      },
+      notify: (problem) => noteToast(PICTURE_PROBLEMS[problem], "error")
     },
-    notify: (problem) => noteToast(PICTURE_PROBLEMS[problem], "error")
-  })
+    { renumber }
+  )
 }
 
 function savedTip() {

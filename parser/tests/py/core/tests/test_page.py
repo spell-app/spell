@@ -1,5 +1,6 @@
 """A program's side of its page (`page.py`):  the state it starts from, each message run, answered by a patch."""
 
+import asyncio
 import json
 import subprocess
 import sys
@@ -34,6 +35,10 @@ clicks = []
 def switch_all_on():
     for lamp in room:
         lamp.switch(True)
+
+
+def peek():
+    core.keep_open()
 
 
 @core.on("lamp-click")
@@ -104,6 +109,28 @@ def test_a_call_on_a_thing_by_reference(session: PageSession) -> None:
     assert session.handle({"call": "switch", "on": "Lamp#1", "args": [True]}) == [
         {"$type": "Lamp", "$id": "2", "is_on": True}
     ]
+
+
+def test_a_modal_buttons_call_hides_the_modal_once_it_has_run(session: PageSession) -> None:
+    # epic `language` T155:  the call says what it closes;  `... without closing` (`core.keep_open()`) leaves it open
+    session.state()
+    asked: list[tuple[str, list[object]]] = []
+
+    async def ask(method: str, args: list[object]) -> None:
+        asked.append((method, args))
+
+    async def run() -> None:
+        closes = {"name": "you-won", "answer": "ok"}
+        await session.handle_async({"call": "switch_all_on", "args": [], "closes": closes})
+        await session.handle_async({"call": "peek", "args": [], "closes": closes})
+        await asyncio.sleep(0)
+
+    core.ask_page = ask
+    try:
+        asyncio.run(run())
+    finally:
+        core.ask_page = None
+    assert asked == [("hideDrawn", ["you-won", "ok"])]
 
 
 def test_what_isnt_there_throws(session: PageSession) -> None:

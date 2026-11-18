@@ -938,20 +938,20 @@ classesEs.addRule(DragAndDrop, {
 
 // in a list type's outline body:  `- cuando una carta se suelta sobre ella:`
 classesEs.addRule(DragHandler, {
-  syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+  syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
 })
 // sin artículo, un tipo que conoce (épica `debut` P27, Q47):  `- al carta se suelta:`, "sobre ella" se entiende
 classesEs.addRule(DragHandler, {
-  syntax: "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+  syntax: "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
 })
-classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?" })
+classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?" })
 classesEs.addRule(DragHandler, {
-  syntax: "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
+  syntax: "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) (:|,)? {statement_body}?"
 })
 classesEs.addRule(DragHandler, {
-  syntax: "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? :? {statement_body}?"
+  syntax: "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
 })
-classesEs.addRule(DragHandler, { syntax: "mientras algo se {over:drag_moment} (él|ella|ello) :? {statement_body}?" })
+classesEs.addRule(DragHandler, { syntax: "mientras algo se {over:drag_moment} (él|ella|ello) (:|,)? {statement_body}?" })
 // `- sus elementos se pueden reordenar`:  English's `- its items can be reordered`
 classesEs.addRule(ItemsReordered, {
   syntax:

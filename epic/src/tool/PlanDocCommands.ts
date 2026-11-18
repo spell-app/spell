@@ -308,7 +308,9 @@ export class PlanDocCommands {
           const requestId = need(rest[1], "a request id")
           const filed = await this.edit(file, (plan) => {
             const named = pictures.length ? ItemPictures.named(file, todo, pictures) : []
-            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named)}`)
+            // labelled on from the todo's own pictures (epic `epic-engine` P75):  IMG3 after its IMG2
+            const first = ItemPictures.nextNumber(plan.findItem(todo))
+            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named, first)}`)
             return { title, named: title === undefined ? [] : named }
           })
           ItemPictures.save(file, filed.named)
@@ -1643,10 +1645,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
-  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested]
+  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested] [--loud]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
-                                                   wouldn't surprise you, grey (a call) or yellow (an issue) rather than red
+                                                   wouldn't surprise you, grey (a call) or yellow (an issue) rather than red;
+                                                   --loud:  a todo red until reviewed, a reminder (T94)
   add <name> issue "title" --requested --start "<his words>" [--agent <name>]
                                                    an issue filed from the person's words and taken up at
                                                    once:  his words its body, an Underway card, the spinner
@@ -1671,7 +1674,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    orange once Claude closes them, until they review them
                                                    (--requested on add)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow), as the page's
-                                                   id chip does;  --loud (last):  urgent (red) again
+                                                   id chip does;  --loud (last):  urgent (red) again;
+                                                   a todo too, red as a reminder until reviewed (T94)
   failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"
                                                    on its line, a Noted card linking it, the test left open;
                                                    off takes the mark off (closing the test does too)

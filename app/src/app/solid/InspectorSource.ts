@@ -314,7 +314,8 @@ function opensBody(place: SP.SpellDeclarationPlace, lines: readonly string[]): b
   const line = lines[place.line] ?? ""
   if (line.trimEnd().endsWith(":")) return true
   const under = lines.slice(place.line + 1, place.endLine + 1).map((it) => it.trim())
-  const code = under.filter((it) => it && !it.startsWith("//") && !it.startsWith("#"))
+  // a comment, either kind (`--` or `//`), or a heading, is no code
+  const code = under.filter((it) => it && !it.startsWith("//") && !it.startsWith("--") && !it.startsWith("#"))
   if (!PLAIN_ONE_OF.test(line.slice(place.column))) return code.length > 0
   return code.some((it) => !MEMBER_LINE.test(it))
 }

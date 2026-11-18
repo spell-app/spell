@@ -8,6 +8,8 @@ import { ReviewClient } from "spell/epic/review"
 // NOT `epic-item`:  the options read only their item's attributes, so an undefined `<epic-item>` does
 import "spell/epic/components/epic-choices"
 import "spell/epic/components/epic-item"
+// `<epic-text-box>`'s field:  a page's `<ui-root>` loads it
+import "spell/ui/components/ui-input"
 
 ////////////////
 // ## Fakes
@@ -24,6 +26,7 @@ type FakeMark = {
   note?: string
   when?: string
   removed?: string[]
+  added?: unknown[]
   at: string
 }
 
@@ -56,9 +59,13 @@ class FakeRoutes {
       else delete this.inbox.marks[id]
     }
     if (route === "send") this.inbox.sent = new Date(Date.now() + 1000).toISOString()
+    if (route === "shot") return Response.json({ shot: SAVED_SHOT })
     return Response.json(this.inbox)
   })
 }
+
+/** The path the fake `POST shot` answers:  an option's picture, beside the page. */
+const SAVED_SHOT = "tests/q1-20261117-1200.png"
 
 /** A reviewing page:  the fake routes, and the page's client on them (`ReviewClient.forPage()` returns it). */
 async function reviewing(routes = new FakeRoutes()) {
@@ -73,6 +80,17 @@ async function reviewing(routes = new FakeRoutes()) {
   ReviewClient.adopt(client)
   return { routes, client }
 }
+
+/** An option form's one box (`<epic-text-box>`):  its `value`, and its native `textarea`. */
+function wordsOf(form: Element): HTMLElement & { value: string; textarea?: HTMLTextAreaElement } {
+  return form.shadowRoot!.querySelector("epic-text-box")!
+}
+
+/** A 1×1 PNG, as a paste carries it. */
+const PNG_BYTES = Uint8Array.from(
+  atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="),
+  (char) => char.charCodeAt(0)
+)
 
 /** `option`'s Choose pill, if it has one. */
 function pillOf(option: Element): HTMLButtonElement | null {
@@ -535,8 +553,7 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     await settle()
     const form = inShadow(host, "epic-option-form")!
     await ElementFixture.settle()
-    const title = form.shadowRoot!.querySelector<HTMLInputElement>("[part~='title']")!
-    title.value = "Both"
+    wordsOf(form).value = "Both"
     form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
     await settle()
     expect(markOf(routes, "q1")).toEqual({
@@ -554,6 +571,50 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     card.querySelectorAll("ui-button")[1]!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
     await settle()
     expect(routes.inbox.marks.q1).toBe(undefined)
+  })
+
+  test("Add choice's one box (I334):  the first line the title, the rest the note;  a pasted picture goes into the words", async () => {
+    const { routes } = await reviewing()
+    const { host } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    inShadow<HTMLButtonElement>(host, "[part~='add']")!.click()
+    await settle()
+    const form = inShadow(host, "epic-option-form")!
+    await ElementFixture.settle()
+    const box = wordsOf(form)
+    expect(form.shadowRoot!.querySelectorAll("input:not([type=file]), [part~='picture']")).toHaveLength(0)
+    expect(box.textarea).toBeInstanceOf(HTMLTextAreaElement)
+    // only a picture on its first line:  no title, not saved
+    box.value = `![picture](${SAVED_SHOT})\nwhy`
+    form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
+    await settle()
+    expect(routes.inbox.marks.q1).toBe(undefined)
+    // a picture pasted at the end
+    box.value = "Both\nOne place for all of it."
+    box.textarea!.setSelectionRange(box.value.length, box.value.length)
+    const pasted = new DataTransfer()
+    pasted.items.add(new File([PNG_BYTES], "shot.png", { type: "image/png" }))
+    box.textarea!.dispatchEvent(new ClipboardEvent("paste", { clipboardData: pasted, bubbles: true, composed: true }))
+    // labelled (P75):  the box's first picture, IMG1;  shown in the strip under the box
+    await vi.waitFor(() => expect(box.value).toContain(`![IMG1](${SAVED_SHOT})`))
+    expect(routes.posts.find(([route]) => route === "shot")?.[1].id).toBe("q1")
+    await vi.waitFor(() =>
+      expect(form.shadowRoot!.querySelector(".pictures epic-picture")?.getAttribute("label")).toBe("IMG1")
+    )
+    form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
+    await settle()
+    expect(markOf(routes, "q1").added).toEqual([
+      { key: "+1", title: "Both", note: `One place for all of it.\n![IMG1](${SAVED_SHOT})` }
+    ])
+    const card = inShadow(host, "[part~='added']")!
+    const picture = card.querySelector("epic-picture")
+    expect([picture?.getAttribute("label"), picture?.querySelector("img")?.getAttribute("src")]).toEqual([
+      "IMG1",
+      SAVED_SHOT
+    ])
+    expect(card.textContent).not.toContain("![IMG1]")
   })
 
   test("`fixed`:  no Add choice;  `closed`:  drawn answered, no pills, no switch, no pencils", async () => {
@@ -585,9 +646,9 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     await settle()
     const form = inShadow(options[0], "epic-option-form")!
     await ElementFixture.settle()
-    const title = form.shadowRoot!.querySelector<HTMLInputElement>("[part~='title']")!
-    expect(title.value).toBe("A named palette")
-    title.value = "A palette of six"
+    // ONE box (I334):  the title on its first line, the note under it
+    expect(wordsOf(form).value).toBe("A named palette\nshort")
+    wordsOf(form).value = "A palette of six\nshort"
     form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
     await settle()
     expect(markOf(routes, "q1")).toEqual({

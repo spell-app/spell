@@ -726,6 +726,8 @@ export type DeclaredSaved = {
   collection: string
   /** `- it keeps no times`:  it has no `created` or `modified` (epic `data` T57). */
   keepsNoTimes?: boolean
+  /** What its place lets be done to its things, by its line:  see `P.TypeScope.enabledOperations` (epic `data` P49). */
+  enabledOperations?: string[]
 }
 
 /**

@@ -653,6 +653,42 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
 - A project's declarations carry a dimension's `units` and a property's `measure` (T34):  an importer reads a library's
   own dimension as its own.
 
+## Dates and times:  `the minute of now as two digits` (epic `language` P63)
+
+- A date's PARTS and NAMES are members of the built-in `date` type (`datePart()` in [builtinTypes.ts](builtinTypes.ts)),
+  each read through the core, `core.minuteOf({it})`:
+  - numbers, no leading zero:  `year`, `short year`, `month number`, `day`, `hour` (0-23 always), `minute`, `second`,
+    `week` (ISO's), `weekday number` (1-7 from the person's first day of the week)
+  - names, in the program's language:  `month`, `short month`, `weekday`, `short weekday`, `AM or PM`
+  - aliases, each its own member:  the plurals (`the seconds of now`), `day of the week`, `AMPM`, `meridiem`, `meridian`;
+    member words are read in any case
+  - Spanish's words:  its `builtInMembers` (`el número del mes`, `el día de la semana`)
+  - On a date the type is known, so `the second of now` is its second;  `the second of the deck` is still an item.
+- Rules in [expressions/](rules/expressions/):
+  - suffixes:  `as two digits` / `with a leading zero` (`as_two_digits`), `is PM` (`is_meridiem`), `as a duration`
+    (`as_a_duration`, its `short` / `long` and `in <unit>`), `is a weekend day`, `is before` / `is after`,
+    `is the same day as`, `is today` / `is tomorrow` / `is yesterday`
+  - `as a duration in months and days` (J253):  its units are `duration_unit`'s words, a list joined by `and` or
+    commas, said biggest first whatever their order;  years, months, weeks, days, hours, minutes, seconds
+  - `is in the morning`, `is at night`, `is this afternoon` (`is_day_part`, J252):  `day_part`'s words, Owen's hours in
+    core's `DAY_PARTS`
+    - Spanish's part needs its `la` or `por`:  `es la mañana`, `es por la mañana`;  `es mañana` is tomorrow
+  - times today (J252):  `noon`, `midnight` (`time_of_day`);  `9am`, `9:30 PM` (`time_literal`, its own `parse()`:
+    the `:` touches its numbers);  Spanish's `21:30` too
+  - operands:  `the next weekend`, `the days until` / `since`, `the start of the day of`, `the days in the month of`,
+    `the hours of <a duration>` (`duration_part`:  only of a measured duration)
+  - `the time zone`, `the short time zone`, `the long time zone`:  `the_date`'s
+  - `"2026-12-25" as a date`, `the weekday of now as a number`:  `as_a_type`'s
+- Date arithmetic is `+` and `-`'s ([dateMath.ts](rules/math/dateMath.ts)):  a date and a MEASURED duration move the date,
+  `core.addToDate(date, 2, "day")`;  a date minus a date is the seconds between them.
+- A date minus a date MEASURES a duration (`SP.SECONDS`), so its parts and `as a duration` know it:
+  - `SP.measureOf()` asks a rule's `getMeasure()` when the match has none of its own:  a chain of one precedence asks its
+    last suffix (`resultMeasure()`), parentheses and variables pass theirs on
+  - a variable `set` to one, and a property whose inline value is one (`its "time left" is the next weekend - now`),
+    keep it
+- What they compile to, and the region's formats:  core's [dates.ts](../core/dates.ts), "Overview" in
+  [core's AGENTS.md](../core/AGENTS.md).
+
 ## Membership:  `a card belongs to one pile`
 
 - [`belongs_to_one`](rules/classes/BelongsToOne.ts):  `a card belongs to one pile`.
@@ -870,6 +906,13 @@ A kind that says so is saved in a file of its own.
     - The statement takes a nested body only when it matched (`takesNestedBody()`).
   - Inline body:  after its sequence matches, `parse()` parses the rest of the line in `nestedScope`.
     - It does NOT change scope:  this runs for every candidate, winners AND losers.
+    - A comma works as `:` does after a block opener (epic `language` J269):  its syntax says `(:|,)?`,
+      `if the result is ok, set the name of the baby to it`.
+      - Only before a `{statement_body}`:  never after a definition (`... is :? {expression_body}`)
+        or a list's header (`where:`), where a comma still means a list.
+      - A line that read with words left over, holding a comma, is read again at each comma, left to right
+        (`parseAtComma()`):  the words up to it whole as the opener, the rest whole as its statement.
+        So `if its rank is one of 1, 2, 3, print it` keeps its list, though the list first read on over `print`.
   - The inline statement OR nested block is recorded as `match.data.body`.
     - Read it with `rule.getBody(match)`, NEVER by group name.
   - Anything that parses a `"statement"` on its own, and keeps it, MUST commit it:
@@ -1183,6 +1226,16 @@ a line of the built-in types table, a built-in template, or a project's own `one
       know they're in a handler (`inHandler()`), and refuse to parse elsewhere.
   - A WHILE handler, `- while the mouse is down:` (`while_handler`), is a method too, `whileMouseDown()`:
     the page starts it and puts back what it set, through core's `startWhile()` / `endWhile()`.
+  - A TIMER, `every second` and its steps under it (`every_timer`, [EveryTimer](rules/async/EveryTimer.ts);
+    epic `language` T159):  each thing of the type runs them while the program runs, adding no undo step.
+    - How often is a duration, as a place's `check it every` reads one:  `every 5 minutes`, or a unit alone, `every day`.
+    - Then, if it likes, when it stops:  `until its end` (a moment, read again before each run), or `10 times`.
+    - Spanish:  `cada segundo`, `cada 5 minutos hasta su fin`, `cada segundo 10 veces`.
+    - A method named by its words in English, whatever the language (`everySecond()`, `everySecond10Times()`),
+      an `until` getter (`everySecondUntil`), and after the class `core.addTimer(Clock, "everySecond", { seconds: 1 })`
+      (`P.ASTTypeDescription`, `describes: "timer"`):  core's [timers.ts](../core/timers.ts) starts each thing's
+      once it's made, and stops them when the program ends.
+    - A Python program's page draws with no timer:  Python runs them (`PY.ElementsWriter`).
   - `send flipped` (`Send`) inside a template's method sends from `this`, and to `this` when it names no target:
     `parse()` finds the method's scope (`mapItTo === "this"`) into `match.data`.
     - An event whose name is still happening, by the language's `ongoingEventName`
@@ -1713,10 +1766,51 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Only on a tag that's none of the project's views, in any language:  Spanish's `<modal "ganaste">` is
     `<es-modal id="ganaste" encabezado="ganaste">`, the heading's name the pack's (`SP.ComponentPacks.attributeNameFor()`).
   - On any other tag a quoted word is still unreadable.
+  - A MODAL'S DRAWING (T155;  `SpellJSX.markDialog()`;  Owen:  "only for buttons in the modal's actions section"):
+    - An `<action "...">` in its ACTIONS, `<actions>` (Spanish's `<acciones>`, Spell UI's `<ui-actions>`), closes it once
+      its click has run the action, as a dialog's own buttons do (`in-dialog`:  the core closes it, `closeDialogOf()`);
+      `keep-open` (Spanish's `mantener-abierto`, `LanguageWords.keepOpenAttribute`) leaves it open.
+    - Anywhere else in it (its content, a menu's row), an action runs and the modal stays.
+    - A modal naming none of its parts is ALWAYS laid out for you (`dialogChildren()`;  epic `language` J245):  what it
+      holds in `<ui-content>`, the `<action>`s at its top after it in `<ui-actions>`, so they're its actions and close it.
+      `<modal transparent>` (Spanish's `transparente`) keeps its drawing as written, see-through, with no box or padding
+      (StarWars' crawl places its words over the modal itself).
+    - A button's ANSWER, a bare word on it (`LanguageWords.answerWords`):  `<action ok />`, `<action "save the thing" ok />`,
+      `<action cancel />` (Spanish's `aceptar`, `cancelar`), compiled as the core's `answer="ok"`.
+      - With no quoted word, the word names the action:  the program's `ok` if it has one;  if not, the button just
+        closes, labelled OK / Cancel in the program's language (`dialog-ok`), and is never refused.
+      - A modal's button with neither word answers its action's name as written:  `answer="save the thing"`.
+    - `<statement> without closing`, `... without closing the modal` (`without_closing`, Spanish's `sin cerrar`,
+      `sin cerrar el modal`):  `core.keepOpen()`, then the statement, so the modal stays open after this run.
+      Only a call, as `without_waiting` takes.
   - `show "you won"`, `hide "you won"` (`show_drawn`, [ShowDrawn.ts](rules/UI/ShowDrawn.ts)):  a quoted name, nothing
     else;  Spanish's `mostrar "ganaste"`, `ocultar "ganaste"`.
-    - Compiled to `core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page or
-      inside a view's shadow root, its `visible` set.  Python's `core.show_drawn()` asks its page to (`page.ts`).
+    - Compiled to `await core.showDrawn("you won")`, `core.hideDrawn(...)`:  the element with that id, in the app's page
+      or inside a view's shadow root, its `visible` set.  Python's `core.show_drawn()` asks its page to (`page.ts`).
+    - `show` waits until a modal closes, as `alert` does (T155);  `show "you won" without waiting` doesn't
+      (`without_waiting`);  `hide` never waits.
+    - `the result` (`the_result`, Spanish's `el resultado`):  what closed the last dialog, `core.result()`:
+      a button's answer, `cancel` for Escape and the dimmer;  `ok` after `alert`, `ok` / `cancel` after `confirm` and
+      `prompt` (epic `language` P64).
+      - `the result is ok` compiles to `core.resultIs("ok")` (`is_equal`):  `ok` / `cancel` (`aceptar` / `cancelar`)
+        read as its answers, unquoted, and text compares with no regard to case.
+      - Any other bare word is a button's own answer, `the result is discard` (P64;  `answer_word`, [AnswerWord.ts](rules/UI/AnswerWord.ts)),
+        unless it's a variable.
+      - What an action gives back, run as a statement (`deal the cards` on its own line, or as an inline body):
+        `core.answered(this.dealTheCards())` (`SpellStatement.noteRunAsStatement()`, `DynamicMethodRule`;  Q70).
+        Used as a value, or as its action's last line, it isn't:  `the result` stays as it was.
+    - `prompt "Name?"` (P64):  the text typed is a NEW `it`, as `get` makes, `const it = await core.prompt("Name?")`;
+      empty text after a cancel.  `confirm` leaves `it` alone.
+    - `show "edit card" with the card` (`show_drawn_with`, Spanish's `mostrar ... con ...`;  P64):
+      `const it = this.card`, then `await core.showDrawn("edit card", it)`.
+      - Inside `<modal "edit card">`, `it` is what it's shown with, the thing itself (`SpellJSX.shownInScope()`):
+        a modal whose contents read `it` compiles them as `core.drawShown("edit card", this, (it) => [...])`,
+        `it` the drawing's own thing until it's shown with one.
+      - Its own rule, as it declares an `it`:  so it can't go `without waiting`.
+    - A button's own answer, `<action discard title="Discard your changes" />` (P64):  a bare word, FIRST on an
+      `<action>` with no quoted word, not `keep-open` / `icon-only` nor a word Spell UI's button takes bare
+      (`ActionButton.answerOf()`);  it just closes, labelled by its title, else `Discard`.
+      - A program's own `result` wins:  a variable of those words, or a property of the action's thing.
     - A program's own `to show (word as text)` still wins:  its method's rule reads `show "fizz"` first.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.

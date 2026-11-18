@@ -3281,6 +3281,110 @@
       ]
     },
     {
+      "tag": "epic-kickoff",
+      "name": "epic-kickoff",
+      "folder": "epic-kickoff",
+      "mainTag": "epic-kickoff",
+      "main": true,
+      "page": true,
+      "href": "epic-kickoff.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "kickoff",
+        "kickoff box",
+        "start an epic",
+        "what to do",
+        "prompt box",
+        "new epic"
+      ],
+      "description": "The kickoff box (epic `epic-engine` P75;  Owen, 2026-11-17:  \"start with an empty-ish epic doc and a field where I can type in what i want to do, rather than typing it in chat\"):  drawn by `<epic-overview>` at its top while the epic has no kickoff prompt and no phases, and the page is reviewed;  never written in a doc.  A lead line, then ONE box that grows as it's typed (`<epic-text-box>`), taking several pictures pasted, dropped or chosen, each written into the words labelled (`![IMG2](<path>)`) and shown in a strip under the box, with its x.  What's typed is saved as typed, a `kickoff` mark in the review inbox;  the header's Send hands it over, and `epic inbox apply` writes it as the Kickoff prompt, its pictures labelled.",
+      "noun": "kickoff box",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The box around it:  your violet card."
+        },
+        {
+          "name": "lead",
+          "description": "Its first line:  What should this epic do?"
+        },
+        {
+          "name": "words",
+          "description": "Its one box, an `<epic-text-box>` that grows as it's typed, up to a third of the window."
+        },
+        {
+          "name": "hint",
+          "description": "Under it:  how pictures are named, and that Send hands it to Claude."
+        },
+        {
+          "name": "choose",
+          "description": "The picture button, a small round one:  picture files into the words."
+        },
+        {
+          "name": "saved",
+          "description": "When it was last saved, or why not, after the hint."
+        }
+      ],
+      "states": [
+        {
+          "name": "saving",
+          "description": "A picture is being saved."
+        }
+      ],
+      "texts": [
+        {
+          "key": "lead",
+          "text": "What should this epic do?",
+          "description": "Its first line."
+        },
+        {
+          "key": "placeholder",
+          "text": "Describe what you want this epic to do. Write as much as you like, and paste or drop pictures in too.",
+          "description": "The box's grey hint while it's empty."
+        },
+        {
+          "key": "label",
+          "text": "What this epic should do",
+          "description": "The box's name for a screen reader."
+        },
+        {
+          "key": "hint",
+          "text": "Each picture gets a name, like IMG1. Type that name to talk about it, for example: make it look like IMG2.\nPress Send at the top of the page when you're done. Claude reads it and writes a plan for you to look over. Nothing is built until you say go.",
+          "description": "Under the box:  how pictures are named, and what Send does.  A new line splits it."
+        },
+        {
+          "key": "choose",
+          "text": "Add pictures from your computer",
+          "description": "The picture button's tooltip and name."
+        },
+        {
+          "key": "saved",
+          "text": "Saved {time}",
+          "description": "After the hint, once saved:  `{time}`, when."
+        },
+        {
+          "key": "notSaved",
+          "text": "Not saved:  {why}",
+          "description": "After the hint, when a save failed:  `{why}`."
+        },
+        {
+          "key": "notImage",
+          "text": "That file isn't a picture. Choose a PNG or JPG instead.",
+          "description": "A notice:  a file pasted, dropped or chosen isn't a picture."
+        },
+        {
+          "key": "tooBig",
+          "text": "That picture is too big. Choose one smaller than 8 MB.",
+          "description": "A notice:  a picture over 8 MB."
+        }
+      ]
+    },
+    {
       "tag": "epic-link",
       "name": "epic-link",
       "folder": "epic-link",
@@ -3979,6 +4083,11 @@
           "description": "Tooltip of its fold button while folded."
         },
         {
+          "key": "zoomTip",
+          "text": "Show it full size",
+          "description": "A picture in an edit not applied yet:  its tooltip."
+        },
+        {
           "key": "recommended",
           "text": "Recommended",
           "description": "The thumbs-up after the recommended option's title:  its label and tooltip."
@@ -4191,7 +4300,7 @@
         "introduction",
         "kickoff"
       ],
-      "description": "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row (Make Todo, Revisit), keyed `summary` in the review inbox.",
+      "description": "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row (Make Todo, Revisit), keyed `summary` in the review inbox.  A new epic's, with no prompt and no phases yet, draws the kickoff box first (`<epic-kickoff>`, epic `epic-engine` P75):  you type what the epic should do there.",
       "noun": "overview",
       "attributes": [
         {
@@ -4286,6 +4395,10 @@
         {
           "name": "estimate",
           "description": "The estimate line."
+        },
+        {
+          "name": "kickoff",
+          "description": "The kickoff box (`<epic-kickoff>`, epic `epic-engine` P75), first in its body:  only while the page is reviewed and the epic has no Kickoff prompt and no phases.  What the epic should do, typed on its page, pictures and all;  Send makes it the Kickoff prompt."
         },
         {
           "name": "stage-button",
@@ -5466,16 +5579,33 @@
         "pasted picture",
         "attachment"
       ],
-      "description": "A picture the person gave an item (epic `epic-engine` T87;  Owen, 2026-11-16:  \"when I paste a picture into chat which gets logged as an issue or todo, include the picture in the epic doc.  Make it so I can delete those pictures from the epic page, which deletes the files\"):  its `<img>`, a thumbnail a click opens full size, saved beside the page in `pictures/`.  While the page is reviewed, a trash at its corner deletes it:  gone at once, with Undo in the page's notices for 6 seconds, then taken out of the item and its file deleted by the page server.  The epic tool writes it (`epic add <epic>#I --picture <file>`, `--pasted <n>`), never a person.",
+      "description": "A picture the person gave an item (epic `epic-engine` T87;  Owen, 2026-11-16:  \"when I paste a picture into chat which gets logged as an issue or todo, include the picture in the epic doc.  Make it so I can delete those pictures from the epic page, which deletes the files\"):  its `<img>`, a thumbnail a click opens full size, saved beside the page in `pictures/`.  While the page is reviewed, a trash at its corner deletes it:  gone at once, with Undo in the page's notices for 6 seconds, then taken out of the item and its file deleted by the page server.  The epic tool writes it (`epic add <epic>#I --picture <file>`, `--pasted <n>`), never a person.  Labelled (epic `epic-engine` P75):  IMG1, IMG2 ... a chip on its corner, so the person can name it in words;  the comment threads, a note box's strip, the kickoff box and the quoted kickoff prompt draw their pictures through it too.",
       "noun": "picture",
-      "attributes": [],
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "Its label, `IMG2`, drawn as a small chip on the thumbnail's top left corner (epic `epic-engine` P75):  what the person writes to name it (\"IMG2 is wrong\").  The epic tool writes an item's, in order;  a box's strip and a comment's words draw theirs from the words.  None:  no chip."
+        },
+        {
+          "name": "removable",
+          "kind": "boolean",
+          "description": "Drawn in a box still being written (a note box's strip, the kickoff box, an option's form):  an x at its top right corner sends `epic-picture-removed`, and the box takes the picture's words out.  Never with the trash."
+        }
+      ],
       "slots": [
         {
           "name": "",
           "description": "Its `<img src alt>`:  the picture, found by the page with no script too."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "epic-picture-removed",
+          "detail": "{ label: string, src: string }",
+          "description": "Its x pressed (`removable`):  its label and its picture's address, for the box to take it out."
+        }
+      ],
       "parts": [
         {
           "name": "base",
@@ -5484,6 +5614,14 @@
         {
           "name": "delete",
           "description": "The trash, at its top right corner, drawn only while the page is reviewed."
+        },
+        {
+          "name": "label",
+          "description": "Its label's chip, `IMG2`, at its top left corner."
+        },
+        {
+          "name": "remove",
+          "description": "The x at its top right corner, drawn only when `removable`."
         }
       ],
       "states": [],
@@ -5502,6 +5640,16 @@
           "key": "undo",
           "text": "Undo",
           "description": "The notice's button, which puts the picture back."
+        },
+        {
+          "key": "removeTip",
+          "text": "Take {label} out",
+          "description": "The x's tooltip and name (`removable`):  `{label}`, its label, else `this picture`."
+        },
+        {
+          "key": "thisPicture",
+          "text": "this picture",
+          "description": "What the x's tooltip names when it has no label."
         }
       ]
     },
@@ -8397,6 +8545,18 @@
       "docs": false,
       "tags": [
         "epic-item"
+      ],
+      "tokens": []
+    },
+    "epic-kickoff": {
+      "folder": "epic-kickoff",
+      "mainTag": "epic-kickoff",
+      "title": "<epic-kickoff>",
+      "summary": "The <epic-kickoff> element: the box at the top of a new epic's Overview, where you type what the epic should do, pictures and all.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-kickoff"
       ],
       "tokens": []
     },

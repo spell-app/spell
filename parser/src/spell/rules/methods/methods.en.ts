@@ -12,6 +12,9 @@ import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
 import { ActionDetail } from "./ActionDetail"
 import { AfterHook } from "./AfterHook"
+import { BeforeHook } from "./BeforeHook"
+import { FailureHook } from "./FailureHook"
+import { WhileHook } from "./WhileHook"
 import { CancelThisAction } from "./CancelThisAction"
 import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
@@ -1419,7 +1422,7 @@ methods.addRule(QuotedTypeExpression, {
 // also `- when created:` and `- when creating it:` (epic `spanish` P28)
 methods.addRule(CreateHook, {
   roles: { band: "action", signature: "declaration" },
-  syntax: "when {signature:method_signature} :? {statement_body}?",
+  syntax: "when {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1986,7 +1989,7 @@ methods.addRule(CancelThisAction, {
 
 methods.addRule(AfterHook, {
   roles: { band: "action", signature: "declaration" },
-  syntax: "after {signature:method_signature} :? {statement_body}?",
+  syntax: "after {signature:method_signature} (:|,)? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -2069,6 +2072,231 @@ methods.addRule(AfterHook, {
             "}",
             '/* PARSE ERROR: "after putting a card on a pile" runs after an action, but no action above it reads that way:  as in "after putting a card on a pile", for "to put a card on a pile" */',
             '/* PARSE ERROR: Don\'t understand "print the card" */'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// the steps around an action (epic `data` P50):  before it, while it runs, and when it fails
+methods.addRule(BeforeHook, {
+  roles: { band: "action", signature: "declaration" },
+  syntax: "before {signature:method_signature} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "steps before an action's own:  cancel stops it",
+          input: [
+            "a job is a thing",
+            '\tits "status" is text',
+            "to complete a job",
+            '\tset the job\'s status to "done"',
+            "before completing a job",
+            '\tcancel if the job\'s status is "done"'
+          ],
+          js: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  static { this.declareProp("status", { type: "text" }) }',
+            '  get status() { return this.getProp("status") }',
+            '  set status(value) { this.setProp("status", value) }',
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  beforeComplete() {",
+            '    if (this.status === "done") core.cancel()',
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "before", hook: "beforeComplete", level: "app" })'
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  @prop({ type: "text" })',
+            "  accessor status!: string",
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  beforeComplete() {",
+            '    if (this.status === "done") core.cancel()',
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "before", hook: "beforeComplete", level: "app" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+methods.addRule(WhileHook, {
+  roles: { band: "action", signature: "declaration" },
+  syntax: "while {signature:method_signature} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "steps as an action starts, put back when it ends",
+          input: [
+            "a job is a thing",
+            '\tits "status" is text',
+            "to complete a job",
+            '\tset the job\'s status to "done"',
+            "while completing a job",
+            '\tset the job\'s status to "busy"'
+          ],
+          js: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  static { this.declareProp("status", { type: "text" }) }',
+            '  get status() { return this.getProp("status") }',
+            '  set status(value) { this.setProp("status", value) }',
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  whileComplete() {",
+            '    this.status = "busy"',
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "while", hook: "whileComplete", level: "app" })'
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  @prop({ type: "text" })',
+            "  accessor status!: string",
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  whileComplete() {",
+            '    this.status = "busy"',
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "while", hook: "whileComplete", level: "app" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+methods.addRule(FailureHook, {
+  syntax: "(if|when) {signature:method_signature} fails (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "steps when an action fails:  its last if passes on what no branch caught",
+          input: [
+            "a job is a thing",
+            '\tits "status" is text',
+            "to complete a job",
+            '\tset the job\'s status to "done"',
+            "if completing a job fails",
+            '\tif the error is "not found"',
+            "\t\tnevermind",
+            '\totherwise if the error is "offline"',
+            "\t\tpass the error"
+          ],
+          js: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  static { this.declareProp("status", { type: "text" }) }',
+            '  get status() { return this.getProp("status") }',
+            '  set status(value) { this.setProp("status", value) }',
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  failedComplete(error) {",
+            '    if (core.errorIs(error, "not found")) return',
+            '    else if (core.errorIs(error, "offline")) return core.passTheError()',
+            "    return core.passTheError()",
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "failed", hook: "failedComplete", level: "app" })'
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  @prop({ type: "text" })',
+            "  accessor status!: string",
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  failedComplete(error: any /* spell: type unknown */) {",
+            '    if (core.errorIs(error, "not found")) return',
+            '    else if (core.errorIs(error, "offline")) return core.passTheError()',
+            "    return core.passTheError()",
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "failed", hook: "failedComplete", level: "app" })'
+          ]
+        },
+        {
+          title: "when ... fails reads the same",
+          input: [
+            "a job is a thing",
+            '\tits "status" is text',
+            "to complete a job",
+            '\tset the job\'s status to "done"',
+            "when completing a job fails",
+            "\tprint the error"
+          ],
+          js: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  static { this.declareProp("status", { type: "text" }) }',
+            '  get status() { return this.getProp("status") }',
+            '  set status(value) { this.setProp("status", value) }',
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  failedComplete(error) {",
+            "    core.console.log(error)",
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "failed", hook: "failedComplete", level: "app" })'
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            '  // - its "status" is text',
+            '  @prop({ type: "text" })',
+            "  accessor status!: string",
+            "",
+            "  complete() {",
+            '    this.status = "done"',
+            "  }",
+            "",
+            "  failedComplete(error: any /* spell: type unknown */) {",
+            "    core.console.log(error)",
+            "  }",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
+            'core.addActionHook(Job, "complete", { moment: "failed", hook: "failedComplete", level: "app" })'
           ]
         }
       ]

@@ -838,7 +838,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <Show when={this.hasPill()}>{this.pill()}</Show>
         {this.isSaga ? this.sagaMetaLines() : this.metaLines()}
         <Show when={this.future}>{this.futureNotice()}</Show>
-        <Show when={this.planning()}>{this.hungNotice()}</Show>
+        {/* hidden until there's a prompt to copy:  a new epic starts in its kickoff box (epic `epic-engine` P75) */}
+        <Show when={this.planning() && this.prompt()}>{this.hungNotice()}</Show>
         <Show when={this.seeAlso.length}>{this.seeAlsoBox()}</Show>
         <slot />
         <Show when={this.review.reviewing()}>{this.focusMode()}</Show>
@@ -1556,7 +1557,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     this.isFocusOpen = event.detail.open
   }
 
-  /** A doc still planning:  the folded `Plan hung?` aside -- how to restart the session, and the prompt to copy. */
+  /**
+   * A doc still planning, with a kickoff prompt:  the folded `Plan hung?` aside -- how to restart the session, and the
+   * prompt to copy.  None before there's a prompt (epic `epic-engine` P75):  the kickoff box is where it starts.
+   */
   private hungNotice(): JSX.Element {
     return (
       <details class={HUNG} part={this.partForName("hung")}>
@@ -1778,13 +1782,21 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return signals
   }
 
-  /** `element`'s text as typed:  white space as one space, a `<br>` as a line break. */
+  /** A prompt's picture as its words were typed:  `![IMG2](<path>)`;  `""` without its `<img>`. */
+  private static pictureWords(picture: Element): string {
+    const src = picture.querySelector("img")?.getAttribute("src")
+    return src ? `![${picture.getAttribute("label") ?? "picture"}](${src})` : ""
+  }
+
+  /** `element`'s text as typed:  white space as one space, a `<br>` as a line break, a picture its words. */
   private static textOf(element: Element): string {
     let text = ""
     for (const node of element.childNodes) {
       // the source's own line breaks and indents are layout, not text:  one space
       if (node.nodeType === Node.TEXT_NODE) text += (node.textContent ?? "").replace(/\s+/g, " ")
       else if ((node as Element).localName === "br") text += "\n"
+      // a picture of the prompt's (epic `epic-engine` P75):  its words, as typed, so the copy names it too
+      else if ((node as Element).localName === "epic-picture") text += EpicPage.pictureWords(node as Element)
       else if (node.nodeType === Node.ELEMENT_NODE) text += EpicPage.textOf(node as Element)
     }
     return text

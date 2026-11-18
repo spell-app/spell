@@ -624,7 +624,7 @@
           "ruleNames": ["parenthesized_expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/ParenthesizedExpression.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "`(expression)` -- parenthesized sub-expression.",
           "syntaxes": [
             {
@@ -676,7 +676,7 @@
           "ruleNames": ["the_date"],
           "internal": false,
           "file": "src/spell/rules/expressions/TheDate.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
           "syntaxes": [
             {
@@ -717,6 +717,188 @@
                 },
                 "py": {
                   "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DurationPart",
+          "ruleNames": ["duration_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DurationPart.ts",
+          "line": 17,
+          "purpose": "One part of a duration, a whole number -- `the hours of its time left`, for a countdown (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "(los|las) {part:duration_part_name} (de|del) {expression:operand}",
+              "example": "las horas de 5400 segundos",
+              "outputs": {
+                "js": {
+                  "code": "core.durationPartOf(5400, \"hours\")"
+                },
+                "ts": {
+                  "code": "core.durationPartOf(5400, \"hours\")"
+                },
+                "py": {
+                  "code": "core.duration_part_of(5400, \"hours\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "NextWeekend",
+          "ruleNames": ["next_weekend"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/NextWeekend.ts",
+          "line": 14,
+          "purpose": "When the next weekend starts, a date -- `the next weekend - now` is how long until it (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "el (próximo|proximo) fin de semana",
+              "example": "el próximo fin de semana",
+              "outputs": {
+                "js": {
+                  "code": "core.nextWeekend()"
+                },
+                "ts": {
+                  "code": "core.nextWeekend()"
+                },
+                "py": {
+                  "code": "core.next_weekend()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TimeOfDay",
+          "ruleNames": ["time_of_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeOfDay.ts",
+          "line": 13,
+          "purpose": "Noon or midnight today, as a date -- `if now is after noon`, `antes de la medianoche` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? ((noon:mediodía|mediodia)|(midnight:medianoche))",
+              "example": "mediodía",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(12)"
+                },
+                "ts": {
+                  "code": "core.todayAt(12)"
+                },
+                "py": {
+                  "code": "core.today_at(12)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TimeLiteral",
+          "ruleNames": ["time_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TimeLiteral.ts",
+          "line": 23,
+          "purpose": "A time today, written as people write it -- `9am`, `9:30am`, `9 am`, `9:30 PM`, any case; `if now is after 9am` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{number} (: {number})? (am|pm)?",
+              "example": "9am",
+              "outputs": {
+                "js": {
+                  "code": "core.todayAt(9)"
+                },
+                "ts": {
+                  "code": "core.todayAt(9)"
+                },
+                "py": {
+                  "code": "core.today_at(9)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DaysUntil",
+          "ruleNames": ["days_until"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DaysUntil.ts",
+          "line": 13,
+          "purpose": "How many days until a date, or since one, counting midnights -- `the days until its due`, `the days since its added` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "los (días|dias) ((until:hasta)|(since:desde)) {expression:operand}",
+              "example": "los días hasta due",
+              "outputs": {
+                "js": {
+                  "code": "core.daysUntil(due)"
+                },
+                "ts": {
+                  "code": "core.daysUntil(due)"
+                },
+                "py": {
+                  "code": "core.days_until(due)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "StartOfTheDay",
+          "ruleNames": ["start_of_the_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/StartOfTheDay.ts",
+          "line": 12,
+          "purpose": "The moment a date's day starts or ends -- `the start of the day of now` (midnight), `the end of the day of its due` (11:59:59 PM) (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "el ((start:inicio|comienzo)|(end:fin)) del (día|dia) (de|del) {expression:operand}",
+              "example": "el inicio del día de ahora",
+              "outputs": {
+                "js": {
+                  "code": "core.startOfDay(core.now())"
+                },
+                "ts": {
+                  "code": "core.startOfDay(core.now())"
+                },
+                "py": {
+                  "code": "core.start_of_day(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "DaysInTheMonth",
+          "ruleNames": ["days_in_the_month"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/DaysInTheMonth.ts",
+          "line": 12,
+          "purpose": "How many days a date's month has, 28 to 31 -- `the days in the month of now`, for a calendar (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "los (días|dias) del mes (de|del) {expression:operand}",
+              "example": "los días del mes de ahora",
+              "outputs": {
+                "js": {
+                  "code": "core.daysInMonth(core.now())"
+                },
+                "ts": {
+                  "code": "core.daysInMonth(core.now())"
+                },
+                "py": {
+                  "code": "core.days_in_month(core.now())"
                 }
               }
             }
@@ -1402,6 +1584,214 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "AsTwoDigits",
+          "ruleNames": ["as_two_digits"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsTwoDigits.ts",
+          "line": 12,
+          "purpose": "A whole number in two digits, as text, for a clock or a countdown: `the minute of now as two digits` is `05` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "(como dos (dígitos|digitos)|con un cero delante)",
+              "example": "el minuto de ahora como dos dígitos",
+              "outputs": {
+                "js": {
+                  "code": "core.twoDigits(core.minuteOf(core.now()))"
+                },
+                "ts": {
+                  "code": "core.twoDigits(core.minuteOf(core.now()))"
+                },
+                "py": {
+                  "code": "core.two_digits(core.minute_of(core.now()))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsMeridiem",
+          "ruleNames": ["is_meridiem"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsMeridiem.ts",
+          "line": 11,
+          "purpose": "Is a date's time before noon or after -- `if now is PM`, `if its start is AM` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((am:am|AM|Am)|(pm:pm|PM|Pm))",
+              "example": "ahora es pm",
+              "outputs": {
+                "js": {
+                  "code": "core.isPM(core.now())"
+                },
+                "ts": {
+                  "code": "core.isPM(core.now())"
+                },
+                "py": {
+                  "code": "core.is_pm(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADuration",
+          "ruleNames": ["as_a_duration"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADuration.ts",
+          "line": 25,
+          "purpose": "How long ago a date was, or how long until it is, as text -- `its added as a duration`, `30 minutes ago`, `in 2 days`, `tomorrow` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "como (una)? (duración|duracion) {style:duration_style}? (en [units:{unit:duration_unit} (,|y)])?",
+              "example": "due como duración",
+              "outputs": {
+                "js": {
+                  "code": "core.timeFromNow(due)"
+                },
+                "ts": {
+                  "code": "core.timeFromNow(due)"
+                },
+                "py": {
+                  "code": "core.time_from_now(due)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsWeekendDay",
+          "ruleNames": ["is_weekend_day"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsWeekendDay.ts",
+          "line": 11,
+          "purpose": "Is a date on the weekend -- `if now is a weekend day` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} (un (día|dia) de)? fin de semana",
+              "example": "ahora es fin de semana",
+              "outputs": {
+                "js": {
+                  "code": "core.isWeekendDay(core.now())"
+                },
+                "ts": {
+                  "code": "core.isWeekendDay(core.now())"
+                },
+                "py": {
+                  "code": "core.is_weekend_day(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsBeforeOrAfter",
+          "ruleNames": ["is_before_or_after"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsBeforeOrAfter.ts",
+          "line": 14,
+          "purpose": "Is one date earlier or later than another -- `if its due is before now`, `if its start is after its end` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((before:antes)|(after:después|despues)) (de|del) {expression:operand}",
+              "example": "due es antes de ahora",
+              "outputs": {
+                "js": {
+                  "code": "core.isBefore(due, core.now())"
+                },
+                "ts": {
+                  "code": "core.isBefore(due, core.now())"
+                },
+                "py": {
+                  "code": "core.is_before(due, core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsSameDayAs",
+          "ruleNames": ["is_same_day_as"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsSameDayAs.ts",
+          "line": 11,
+          "purpose": "Are two dates on the same day, whatever their times -- `if its due is the same day as now` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} el mismo (día|dia) que {expression:operand}",
+              "example": "due es el mismo día que ahora",
+              "outputs": {
+                "js": {
+                  "code": "core.isSameDay(due, core.now())"
+                },
+                "ts": {
+                  "code": "core.isSameDay(due, core.now())"
+                },
+                "py": {
+                  "code": "core.is_same_day(due, core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayFromToday",
+          "ruleNames": ["is_day_from_today"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayFromToday.ts",
+          "line": 11,
+          "purpose": "Is a date today, tomorrow or yesterday, whatever its time -- `if its due is tomorrow` (epic `language` P63).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:hoy)|(tomorrow:mañana|manana)|(yesterday:ayer))",
+              "example": "due es hoy",
+              "outputs": {
+                "js": {
+                  "code": "core.isDaysFromToday(due, 0)"
+                },
+                "ts": {
+                  "code": "core.isDaysFromToday(due, 0)"
+                },
+                "py": {
+                  "code": "core.is_days_from_today(due, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsDayPart",
+          "ruleNames": ["is_day_part"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsDayPart.ts",
+          "line": 16,
+          "purpose": "Is a date's time in a part of its day -- `if now is in the morning`, `if its due is at night`, Spanish `si ahora es por la mañana` (epic `language` J252).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} ((today:esta|este)|(por|en|de|a) (la|el)?|la|el|al) {part:day_part}",
+              "example": "due es la mañana",
+              "outputs": {
+                "js": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "ts": {
+                  "code": "core.isDayPart(due, \"morning\")"
+                },
+                "py": {
+                  "code": "core.is_day_part(due, \"morning\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1484,11 +1874,11 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
-              "syntax": "como (un|una) (type:cadena|número|numero|fracción|fraccion|entero)",
+              "syntax": "como (un|una)? (type:cadena|número|numero|fracción|fraccion|entero|fecha)",
               "example": "1 como una cadena",
               "outputs": {
                 "js": {
@@ -1646,6 +2036,10 @@
             "date_form",
             "date_or_time",
             "date_style",
+            "duration_style",
+            "duration_unit",
+            "duration_part_name",
+            "day_part",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1678,6 +2072,8 @@
             "clock_zone",
             "size_unit",
             "numbers_or_names",
+            "operation_word",
+            "verify_state",
             "there_are_how_many",
             "site_top_bar",
             "site_main_layout",
@@ -1706,10 +2102,22 @@
               "syntax": "((short:corta)|(long:larga)|(abbreviated:abreviada))"
             },
             {
-              "syntax": "((date:fecha)|(time:hora)|(timestamp:marca de tiempo))"
+              "syntax": "((date:fecha)|(time:hora)|(timestamp:marca de tiempo)|(time_zone:zona horaria))"
             },
             {
               "syntax": "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(date_and_time:fecha y hora)|(timestamp:marca de tiempo))"
+            },
+            {
+              "syntax": "((short:corta)|(long:larga))"
+            },
+            {
+              "syntax": "((year:años|año|anos|ano)|(month:meses|mes)|(week:semanas|semana)|(day:días|dias|día|dia)|(hour:horas|hora)|(minute:minutos|minuto)|(second:segundos|segundo))"
+            },
+            {
+              "syntax": "((days:días|dias)|(hours:horas)|(minutes:minutos)|(seconds:segundos))"
+            },
+            {
+              "syntax": "((morning:mañana|manana)|(afternoon:tarde)|(earlyEvening:atardecer)|(evening:anochecer)|(lateEvening:primera hora de la noche)|(night:noche))"
             },
             {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"
@@ -1806,6 +2214,12 @@
             },
             {
               "syntax": "((numbers:los números)|(names:los nombres))"
+            },
+            {
+              "syntax": "((read:leer)|(add:añadir)|(change:cambiar)|(delete:borrar)|(all:todas))"
+            },
+            {
+              "syntax": "((verified:verificado)|(failed:falló|fallido)|(unverified:sin verificar))"
             },
             {
               "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
@@ -2073,7 +2487,7 @@
           "ruleNames": ["plus"],
           "internal": false,
           "file": "src/spell/rules/math/Plus.ts",
-          "line": 8,
+          "line": 9,
           "purpose": "`plus` / `+`, e.g. `price + tax` -- `Precedence.sum`: tighter than comparisons, looser than `*` `/`.",
           "syntaxes": [
             {
@@ -2099,7 +2513,7 @@
           "ruleNames": ["minus"],
           "internal": false,
           "file": "src/spell/rules/math/Minus.ts",
-          "line": 10,
+          "line": 14,
           "purpose": "`minus` / `-`, e.g. `price - tax`.",
           "syntaxes": [
             {
@@ -2827,7 +3241,7 @@
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
-              "syntax": "al evento? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "al evento? {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "al card-click",
               "outputs": {
                 "js": {
@@ -2842,7 +3256,7 @@
               }
             },
             {
-              "syntax": "al evento? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+              "syntax": "al evento? {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?",
               "example": "al card click",
               "outputs": {
                 "js": {
@@ -2857,7 +3271,7 @@
               }
             },
             {
-              "syntax": "cuando {passive:passive_event} :? {statement_body}?",
+              "syntax": "cuando {passive:passive_event} (:|,)? {statement_body}?",
               "example": "una carta es una vista donde:\n\t- cuando se pulsa dos veces imprimir 1",
               "outputs": {
                 "js": {
@@ -2872,7 +3286,7 @@
               }
             },
             {
-              "syntax": "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) :? {statement_body}?",
+              "syntax": "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) (:|,)? {statement_body}?",
               "example": "un juego es una cosa donde:\n\t- su \"puntuación\" es un número\n\t- cuando su puntuación cambia imprimir su puntuación",
               "outputs": {
                 "js": {
@@ -2887,13 +3301,13 @@
               }
             },
             {
-              "syntax": "al cambiar (su|sus|el|la)? {changed:changed_property} :? {statement_body}?"
+              "syntax": "al cambiar (su|sus|el|la)? {changed:changed_property} (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cuando {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "cuando {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cuando {eventName:event_words} {props:with_props_arg}? :? {statement_body}?"
+              "syntax": "cuando {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -2907,7 +3321,7 @@
           "purpose": "Run this when any thing of a saved type changes, whoever changed it, this page included (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "cuando cambia (un|una) {type:known_type} :? {statement_body}?",
+              "syntax": "cuando cambia (un|una) {type:known_type} (:|,)? {statement_body}?",
               "example": "cuando cambia una receta:\n\timprimir el título de la receta",
               "outputs": {
                 "js": {
@@ -3005,7 +3419,7 @@
           "purpose": "Run this when someone other than this page changes this thing (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "cuando otra persona (lo|la) cambia :? {statement_body}?"
+              "syntax": "cuando otra persona (lo|la) cambia (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3019,10 +3433,10 @@
           "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
           "syntaxes": [
             {
-              "syntax": "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? :? {statement_body}?"
+              "syntax": "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) :? {statement_body}?"
+              "syntax": "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -3689,7 +4103,7 @@
           "purpose": "Repeat an action `N` times, e.g. `repeat 3 times: print the number`.",
           "syntaxes": [
             {
-              "syntax": "repetir {number:expression} (vez|veces) :? {statement_body}?",
+              "syntax": "repetir {number:expression} (vez|veces) (:|,)? {statement_body}?",
               "example": "repetir 1 vez:",
               "outputs": {
                 "js": {
@@ -3715,7 +4129,7 @@
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {item:singular_identifier} ((y|e|,) {position:singular_identifier})? (en|de|del) {list:expression} :? {statement_body}?",
+              "syntax": "(para|por) cada? {item:singular_identifier} ((y|e|,) {position:singular_identifier})? (en|de|del) {list:expression} (:|,)? {statement_body}?",
               "example": "para cada card en deck:",
               "outputs": {
                 "js": {
@@ -3730,7 +4144,7 @@
               }
             },
             {
-              "syntax": "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
+              "syntax": "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} (:|,)? {statement_body}?",
               "example": "para cada rango de carta en rangos de carta: imprimir rango de carta",
               "outputs": {
                 "js": {
@@ -3756,7 +4170,7 @@
           "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {list:each_item_where} :? {statement_body}?",
+              "syntax": "(para|por) cada? {list:each_item_where} (:|,)? {statement_body}?",
               "example": "para cada carta del mazo que no está en la reserva: imprimir eso",
               "outputs": {
                 "js": {
@@ -3782,10 +4196,10 @@
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {list:expression} :? {statement_body}?"
+              "syntax": "(para|por) cada? {list:expression} (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(para|por) {list:each_thing} :? {statement_body}?",
+              "syntax": "(para|por) {list:each_thing} (:|,)? {statement_body}?",
               "example": "para cada columna: imprimir eso",
               "outputs": {
                 "js": {
@@ -4542,7 +4956,7 @@
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
-              "syntax": "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
+              "syntax": "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} (:|,)? {statement_body}?",
               "example": "para cada number de 1 a 10:",
               "outputs": {
                 "js": {
@@ -4592,6 +5006,57 @@
     {
       "module": "UI",
       "rules": [
+        {
+          "className": "TheResult",
+          "ruleNames": ["the_result"],
+          "internal": false,
+          "file": "src/spell/rules/UI/TheResult.ts",
+          "line": 18,
+          "purpose": "What closed the last dialog, e.g. which button closed a modal (epic `language` T155).",
+          "syntaxes": [
+            {
+              "syntax": "el resultado",
+              "example": "el resultado",
+              "outputs": {
+                "js": {
+                  "code": "core.result()"
+                },
+                "ts": {
+                  "code": "core.result()"
+                },
+                "py": {
+                  "code": "core.result()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "AnswerWord",
+          "ruleNames": ["answer_word"],
+          "internal": false,
+          "file": "src/spell/rules/UI/AnswerWord.ts",
+          "line": 17,
+          "purpose": "A button's own answer, a bare word, compared with `the result` (epic `language` P64).",
+          "syntaxes": [
+            {
+              "example": "el resultado no es descartar",
+              "outputs": {
+                "js": {
+                  "code": "(!core.resultIs(\"descartar\"))"
+                },
+                "ts": {
+                  "code": "(!core.resultIs(\"descartar\"))"
+                },
+                "py": {
+                  "code": "(not core.result_is(\"descartar\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
         {
           "className": "OpenPrinting",
           "ruleNames": ["open_printing"],
@@ -4701,7 +5166,7 @@
           "ruleNames": ["show_drawn"],
           "internal": false,
           "file": "src/spell/rules/UI/ShowDrawn.ts",
-          "line": 15,
+          "line": 25,
           "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
           "syntaxes": [
             {
@@ -4709,13 +5174,80 @@
               "example": "mostrar \"ganaste\"",
               "outputs": {
                 "js": {
-                  "code": "core.showDrawn(\"ganaste\")"
+                  "code": "await core.showDrawn(\"ganaste\")"
                 },
                 "ts": {
-                  "code": "core.showDrawn(\"ganaste\")"
+                  "code": "await core.showDrawn(\"ganaste\")"
                 },
                 "py": {
-                  "code": "core.show_drawn(\"ganaste\")"
+                  "code": "await core.show_drawn(\"ganaste\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "ShowDrawnWith",
+          "ruleNames": ["show_drawn_with"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 58,
+          "purpose": "`show \"edit card\" with the card` -- `show_drawn`, shown with a thing (epic `language` P64).",
+          "syntaxes": [
+            {
+              "syntax": "mostrar {name:text} con {thing:expression}",
+              "example": "mostrar \"editar carta\" con carta",
+              "outputs": {
+                "js": {
+                  "code": "const it = carta\nawait core.showDrawn(\"editar carta\", it)"
+                },
+                "ts": {
+                  "code": "const it = carta\nawait core.showDrawn(\"editar carta\", it)"
+                },
+                "py": {
+                  "code": "it = carta\nasyncio.run(core.show_drawn(\"editar carta\", it))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "WithoutClosing",
+          "ruleNames": ["without_closing"],
+          "internal": false,
+          "file": "src/spell/rules/UI/WithoutClosing.ts",
+          "line": 19,
+          "purpose": "Runs a statement, and leaves the modal open after the action it's in: `deal the cards without closing`, `deal the cards without closing the modal` (epic `language` T155).",
+          "syntaxes": [
+            {
+              "syntax": "{call:statement} sin cerrar",
+              "example": "imprimir 1 sin cerrar",
+              "outputs": {
+                "js": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "ts": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "py": {
+                  "code": "core.keep_open()\nprint(1)"
+                }
+              }
+            },
+            {
+              "syntax": "{call:statement} sin cerrar el modal",
+              "example": "imprimir 1 sin cerrar el modal",
+              "outputs": {
+                "js": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "ts": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "py": {
+                  "code": "core.keep_open()\nprint(1)"
                 }
               }
             }
@@ -4935,21 +5467,21 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "line": 19,
+          "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
               "syntax": "preguntar {message:expression} (con {defaultValue:expression})?",
               "example": "preguntar \"¿Nombre para el bebé?\"",
               "outputs": {
                 "js": {
-                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "const it = await core.prompt(\"¿Nombre para el bebé?\")"
                 },
                 "ts": {
-                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "const it = await core.prompt(\"¿Nombre para el bebé?\")"
                 },
                 "py": {
-                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "it = await core.prompt(\"¿Nombre para el bebé?\")"
                 }
               }
             }
@@ -6560,7 +7092,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 51,
+          "line": 52,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -7145,22 +7677,22 @@
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
+              "syntax": "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? :? {statement_body}?"
+              "syntax": "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? (:|,)? {statement_body}?"
             },
             {
-              "syntax": "mientras algo se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
+              "syntax": "mientras algo se {over:drag_moment} (él|ella|ello) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -7420,10 +7952,10 @@
           "purpose": "RETIRED words for waiting, as spell waits by itself (epic `language` P13, Q9): `await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
-              "syntax": "esperar a? :? {expression:operand}?"
+              "syntax": "esperar a? (:|,)? {expression:operand}?"
             },
             {
-              "syntax": "esperar a? :? {expression}?",
+              "syntax": "esperar a? (:|,)? {expression}?",
               "example": "esperar",
               "outputs": {
                 "js": {
@@ -7501,7 +8033,7 @@
           "purpose": "Runs its lines together, and carries on once they've all ended.",
           "syntaxes": [
             {
-              "syntax": "al mismo tiempo :? {statement_body}?",
+              "syntax": "al mismo tiempo (:|,)? {statement_body}?",
               "example": "para do something\n\tal mismo tiempo:\n\t\timprimir 1\n\t\timprimir 2",
               "outputs": {
                 "js": {
@@ -7527,7 +8059,7 @@
           "purpose": "Starts something and carries on, with no waiting for it: `meanwhile deal the cards`.",
           "syntaxes": [
             {
-              "syntax": "mientras tanto :? {statement_body}?",
+              "syntax": "mientras tanto (:|,)? {statement_body}?",
               "example": "para do something\n\tmientras tanto imprimir 1",
               "outputs": {
                 "js": {
@@ -7592,6 +8124,23 @@
                   "code": "core.stop_process(\"dealing\")"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EveryTimer",
+          "ruleNames": ["every_timer"],
+          "internal": false,
+          "file": "src/spell/rules/async/EveryTimer.ts",
+          "line": 28,
+          "purpose": "Steps a thing or an app runs again and again while its program runs, e.g. a clock's `every second`, then `set its time to now` under it (epic `language` T159; Owen, 2026-11-17).",
+          "syntaxes": [
+            {
+              "syntax": "cada {interval:measure_literal} (hasta {until:expression}|{times:number} veces)? (:|,)? {statement_body}?"
+            },
+            {
+              "syntax": "cada {unit:unit_words} (hasta {until:expression}|{times:number} veces)? (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -7679,7 +8228,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 100,
+          "line": 106,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7733,6 +8282,46 @@
             }
           ],
           "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ThingById",
+          "ruleNames": ["thing_by_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThingById.ts",
+          "line": 19,
+          "purpose": "One thing of a saved type, by its id, a number (epic `data` P50, Q77, Q91).",
+          "syntaxes": [
+            {
+              "syntax": "{type:known_type} {id:number}",
+              "example": "una tarea es una cosa\ntrabajo es un servidor web en \"https://jobs.test\":\n\t- para completar una tarea está en \"/tareas/{id}/completar\"\nuna tarea:\n\t- se guarda en trabajo\npara terminar\n\tcompletar tarea 7151",
+              "outputs": {
+                "js": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})\nexport async function terminar() {\n  return core.asAction({ undoneAs: \"Terminar\" }, async () => await (await core.savedThingOrMissing(Tarea, 7151)).completar())\n}"
+                },
+                "ts": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})\nexport async function terminar() {\n  return core.asAction({ undoneAs: \"Terminar\" }, async () => await (await core.savedThingOrMissing(Tarea, 7151)).completar())\n}"
+                },
+                "py": {
+                  "code": "class Tarea(Thing):\n    async def completar(self) -> Any:\n        return await core.call_place(\"trabajo\", \"completar\", self)\n\n    saved_in = {\"place\": \"trabajo\", \"collection\": \"tareas\", \"times\": [\"created\", \"modified\"]}\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")\n\ncore.describe_action(Tarea, \"completar\", {\"title\": \"Completar Tarea\", \"calls_server\": True, \"cant_be_undone\": \"keeps history\"})\n\nclass Trabajo(Place):\n    pass\n\ntrabajo = core.place(\n    Trabajo(),\n    {\n        \"name\": \"trabajo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jobs.test\",\n        \"operations\": {\"completar\": \"/tareas/{id}/completar\"},\n        \"unclear_numbers\": \",\",\n    },\n)\n\n@core.as_action({\"undone_as\": \"Terminar\"})\nasync def terminar() -> Any:\n    return await (await core.saved_thing_or_missing(Tarea, 7151)).completar()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ErrorIs",
+          "ruleNames": ["error_is"],
+          "internal": false,
+          "file": "src/spell/rules/places/ErrorIs.ts",
+          "line": 19,
+          "purpose": "Does what went wrong have this name, in Spell's words (epic `data` P50, Q95)?",
+          "syntaxes": [
+            {
+              "syntax": "el error es {name:text}"
+            }
+          ],
+          "aliases": ["expression"]
         },
         {
           "className": "ThingWithId",
@@ -8159,6 +8748,58 @@
           "aliases": ["statement"]
         },
         {
+          "className": "TokenFrom",
+          "ruleNames": ["token_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/TokenFrom.ts",
+          "line": 15,
+          "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}",
+              "example": "acme es un servidor web en \"https://acme.test\"\n\tsu token viene de \"https://auth.acme.test/api-keys/{key id}/token\", hecho con el secreto \"ACME_API_KEY\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DataIsPrivate",
+          "ruleNames": ["data_is_private"],
+          "internal": false,
+          "file": "src/spell/rules/places/DataIsPrivate.ts",
+          "line": 13,
+          "purpose": "A place's real rows stay on this machine, out of the project (epic `data` P49, Q55 C).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} datos son privados (,? guardados en {path:text})?",
+              "example": "netbox es un servidor web en \"https://demo.netbox.dev\"\n\tsus datos son privados, guardados en \"~/.spell/places/netbox\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Netbox extends Place {}\nexport const netbox = core.place(new Netbox(), {\n  name: \"netbox\",\n  kind: \"web server\",\n  at: \"https://demo.netbox.dev\",\n  privateDataIn: \"~/.spell/places/netbox\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Netbox(Place):\n    pass\n\nnetbox = core.place(\n    Netbox(),\n    {\n        \"name\": \"netbox\",\n        \"kind\": \"web server\",\n        \"at\": \"https://demo.netbox.dev\",\n        \"private_data_in\": \"~/.spell/places/netbox\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeyGoesInHeader",
           "ruleNames": ["key_goes_in_header"],
           "internal": false,
@@ -8570,6 +9211,98 @@
           "aliases": ["statement"]
         },
         {
+          "className": "OperationName",
+          "ruleNames": ["operation_name"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationName.ts",
+          "line": 10,
+          "purpose": "One operation a place may let be done, in an `enabled operations are ...` line (epic `data` P49).",
+          "syntaxes": [
+            {
+              "example": "añadir",
+              "outputs": {
+                "js": {
+                  "code": "añadir"
+                },
+                "ts": {
+                  "code": "añadir"
+                },
+                "py": {
+                  "error": "writes itself, in javascript:  no Python writer"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "EnabledOperations",
+          "ruleNames": ["enabled_operations"],
+          "internal": false,
+          "file": "src/spell/rules/places/EnabledOperations.ts",
+          "line": 36,
+          "purpose": "What a place lets be done to a type's things (epic `data` P49, Q47 / J264 D, Q57-Q63).",
+          "syntaxes": [
+            {
+              "syntax": "(las)? operaciones activas (son)? :? {operations:operation_names}",
+              "example": "un \"trabajo\" es una cosa\n\tvive en netbox\n\toperaciones activas: añadir, cambiar, completar",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"completar\"\n    ], select: [] }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"],\n    operations: [\n      \"add\",\n      \"change\",\n      \"completar\"\n    ], select: [] }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"trabajos\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [\"add\", \"change\", \"completar\"],\n    }\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")"
+                }
+              }
+            },
+            {
+              "syntax": "todas las operaciones están desactivadas",
+              "example": "una \"sesión\" es una cosa\n\tvive en netbox\n\ttodas las operaciones están desactivadas",
+              "outputs": {
+                "js": {
+                  "code": "export class Sesión extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"sesiones\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Sesión extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"sesiones\",\n    times: [\"created\", \"modified\"],\n    operations: [], select: [] }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}"
+                },
+                "py": {
+                  "code": "class Sesión(Thing):\n    saved_in = {\n        \"place\": \"netbox\",\n        \"collection\": \"sesiones\",\n        \"times\": [\"created\", \"modified\"],\n        \"operations\": [],\n    }\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TypeVerified",
+          "ruleNames": ["type_verified"],
+          "internal": false,
+          "file": "src/spell/rules/places/TypeVerified.ts",
+          "line": 15,
+          "purpose": "Whether a type read from an API's description was tried against a running server (epic `data` P49, Q56 C, Q62 B).",
+          "syntaxes": [
+            {
+              "syntax": "este? tipo (está|es)? {state:verify_state}",
+              "example": "un \"trabajo\" es una cosa\n\tvive en netbox\n\teste tipo está verificado",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  static savedIn = {\n    place: \"netbox\",\n    collection: \"trabajos\",\n    times: [\"created\", \"modified\"], select: [] }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    saved_in = {\"place\": \"netbox\", \"collection\": \"trabajos\", \"times\": [\"created\", \"modified\"]}\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ShowThemAtATime",
           "ruleNames": ["show_them_at_a_time"],
           "internal": false,
@@ -8604,7 +9337,7 @@
           "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "de una vez :? {statement_body}?",
+              "syntax": "de una vez (:|,)? {statement_body}?",
               "example": "de una vez: imprimir 1",
               "outputs": {
                 "js": {
@@ -8615,6 +9348,58 @@
                 },
                 "py": {
                   "code": "await core.in_one_go(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WrapperAction",
+          "ruleNames": ["wrapper_action"],
+          "internal": false,
+          "file": "src/spell/rules/places/WrapperAction.ts",
+          "line": 32,
+          "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
+          "syntaxes": [
+            {
+              "syntax": "para {signature:method_signature} :? {statement_body}?",
+              "example": "una tarea es una cosa\ntrabajo es un servidor web en \"https://jobs.test\":\n\t- para completar una tarea está en \"/tareas/{id}/completar\"\nuna tarea:\n\t- se guarda en trabajo\npara completar una tarea\n\timprimir \"antes\"\n\tllamar a trabajo",
+              "outputs": {
+                "js": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  async aroundCompletar(serverCall) {\n    core.console.log(\"antes\")\n    await serverCall()\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  static { this.declareProp(\"creado\", { type: \"date\", storedAs: \"created\" }) }\n  get creado() { return this.getProp(\"creado\") }\n  set creado(value) { this.setProp(\"creado\", value) }\n\n  static { this.declareProp(\"modificado\", { type: \"date\", storedAs: \"modified\" }) }\n  get modificado() { return this.getProp(\"modificado\") }\n  set modificado(value) { this.setProp(\"modificado\", value) }\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\ncore.addActionHook(Tarea, \"completar\", { moment: \"around\", hook: \"aroundCompletar\", level: \"app\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Tarea extends Thing {\n  async completar() {\n    return await core.callPlace(\"trabajo\", \"completar\", this)\n  }\n\n  async aroundCompletar(serverCall: any ) {\n    core.console.log(\"antes\")\n    await serverCall()\n  }\n\n  static savedIn = {\n    place: \"trabajo\",\n    collection: \"tareas\",\n    times: [\"created\", \"modified\"]\n  }\n\n  @prop({ type: \"date\", storedAs: \"created\" })\n  accessor creado!: any\n\n  @prop({ type: \"date\", storedAs: \"modified\" })\n  accessor modificado!: any\n}\ncore.describeAction(Tarea, \"completar\", { title: \"Completar Tarea\", callsServer: true, cantBeUndone: \"keeps history\" })\ncore.addActionHook(Tarea, \"completar\", { moment: \"around\", hook: \"aroundCompletar\", level: \"app\" })\nexport class Trabajo extends Place {}\nexport const trabajo = core.place(new Trabajo(), {\n  name: \"trabajo\",\n  kind: \"web server\",\n  at: \"https://jobs.test\",\n  operations: { completar: \"/tareas/{id}/completar\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Tarea(Thing):\n    async def completar(self) -> Any:\n        return await core.call_place(\"trabajo\", \"completar\", self)\n\n    async def around_completar(self, server_call: Any) -> None:\n        print(\"antes\")\n        server_call()\n\n    saved_in = {\"place\": \"trabajo\", \"collection\": \"tareas\", \"times\": [\"created\", \"modified\"]}\n\n    creado = prop(type=\"date\", stored_as=\"created\")\n\n    modificado = prop(type=\"date\", stored_as=\"modified\")\n\ncore.describe_action(Tarea, \"completar\", {\"title\": \"Completar Tarea\", \"calls_server\": True, \"cant_be_undone\": \"keeps history\"})\ncore.add_action_hook(Tarea, \"completar\", {\"moment\": \"around\", \"hook\": \"around_completar\", \"level\": \"app\"})\n\nclass Trabajo(Place):\n    pass\n\ntrabajo = core.place(\n    Trabajo(),\n    {\n        \"name\": \"trabajo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jobs.test\",\n        \"operations\": {\"completar\": \"/tareas/{id}/completar\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AnyServerCallFails",
+          "ruleNames": ["any_server_call_fails"],
+          "internal": false,
+          "file": "src/spell/rules/places/AnyServerCallFails.ts",
+          "line": 26,
+          "purpose": "The app's own steps for every server action that fails, run last (epic `data` P50, Q90, Q93).",
+          "syntaxes": [
+            {
+              "syntax": "(cuando|si) falla cualquier llamada al servidor (:|,)? {statement_body}?",
+              "example": "cuando falla cualquier llamada al servidor\n\tsi el error es \"sin autorizar\"\n\t\timprimir \"inicia sesión\"\n\tsi no\n\t\tno hacer nada",
+              "outputs": {
+                "js": {
+                  "code": "core.addServerFailureStep((error) => {\n  if (core.errorIs(error, \"not authorized\")) core.console.log(\"inicia sesión\")\n  else core.doNothing()\n})"
+                },
+                "ts": {
+                  "code": "core.addServerFailureStep((error) => {\n  if (core.errorIs(error, \"not authorized\")) core.console.log(\"inicia sesión\")\n  else core.doNothing()\n})"
+                },
+                "py": {
+                  "code": "def _each_1(error: Any) -> None:\n    if core.error_is(error, \"not authorized\"):\n        print(\"inicia sesión\")\n    else:\n        core.do_nothing()\n\ncore.add_server_failure_step(_each_1)"
                 }
               }
             }
@@ -8724,11 +9509,11 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 12,
+          "line": 15,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
-              "syntax": "(el|la|los|las) {collection:plural_type} están en {path:text}"
+              "syntax": "(el|la|los|las) {collection:plural_type} están en {path:text} {nested_statements}?"
             },
             {
               "syntax": "(el|la|los|las) {collection:plural_type} se encuentran en {path:text}"
@@ -9008,7 +9793,7 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 38,
+          "line": 39,
           "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
@@ -9022,7 +9807,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
@@ -9063,7 +9848,7 @@
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "mientras (espera|carga) :? {statement_body}?"
+              "syntax": "mientras (espera|carga) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9077,7 +9862,7 @@
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "si no hay (ninguno|ninguna|nada) :? {statement_body}?"
+              "syntax": "si no hay (ninguno|ninguna|nada) (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9161,7 +9946,7 @@
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "si falla :? {statement_body}?"
+              "syntax": "si falla (:|,)? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9223,6 +10008,48 @@
           "aliases": ["statement"]
         },
         {
+          "className": "CallTheServer",
+          "ruleNames": ["call_the_server"],
+          "internal": false,
+          "file": "src/spell/rules/places/WrapperAction.ts",
+          "line": 99,
+          "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
+          "syntaxes": [
+            {
+              "syntax": "llamar (al servidor|a {place:identifier})"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Nevermind",
+          "ruleNames": ["nevermind"],
+          "internal": false,
+          "file": "src/spell/rules/places/FailureWords.ts",
+          "line": 17,
+          "purpose": "In a failure step, the error is caught, and nothing more is done (epic `data` P50, Q88).",
+          "syntaxes": [
+            {
+              "syntax": "no importa"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PassTheError",
+          "ruleNames": ["pass_the_error"],
+          "internal": false,
+          "file": "src/spell/rules/places/FailureWords.ts",
+          "line": 37,
+          "purpose": "In a failure step, send the error on, to the next step and in the end Spell's notice (epic `data` P50, Q87), as `pass event` does an event.",
+          "syntaxes": [
+            {
+              "syntax": "pasar el error"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "HelpfulWord",
           "ruleNames": ["helpful_word"],
           "internal": false,
@@ -9269,6 +10096,20 @@
           "syntaxes": [
             {
               "syntax": "[{identifier} (,|y|e)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "OperationNames",
+          "ruleNames": ["operation_names"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationNames.ts",
+          "line": 9,
+          "purpose": "The operations an `enabled operations are ...` line names, e.g. `add, change and delete` (epic `data` P49).",
+          "syntaxes": [
+            {
+              "syntax": "[{operation_name} (,|y|e|o|u)]"
             }
           ],
           "aliases": []
@@ -9514,7 +10355,7 @@
           "ruleNames": ["action_button"],
           "internal": false,
           "file": "src/spell/rules/JSX/ActionButton.ts",
-          "line": 52,
+          "line": 73,
           "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
           "syntaxes": [
             {
@@ -9564,7 +10405,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 106,
+          "line": 121,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -10105,7 +10946,7 @@
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
-              "syntax": "(si no|sino|de lo contrario) si {condition:expression} (entonces|:)? {statement_body}?",
+              "syntax": "(si no|sino|de lo contrario) si {condition:expression} (entonces|:|,)? {statement_body}?",
               "example": "si no si x",
               "outputs": {
                 "js": {
@@ -10131,7 +10972,7 @@
           "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
-              "syntax": "(si no|sino|de lo contrario) :? {statement_body}?",
+              "syntax": "(si no|sino|de lo contrario) (:|,)? {statement_body}?",
               "example": "si no",
               "outputs": {
                 "js": {
@@ -10157,7 +10998,7 @@
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
-              "syntax": "si {condition:expression} (entonces|:)? {statement_body}?",
+              "syntax": "si {condition:expression} (entonces|:|,)? {statement_body}?",
               "example": "si x",
               "outputs": {
                 "js": {
@@ -10457,7 +11298,7 @@
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {
-              "syntax": "al {signature:method_signature} :? {statement_body}?",
+              "syntax": "al {signature:method_signature} (:|,)? {statement_body}?",
               "example": "una tarea es una cosa donde:\n\t- al crearla (con título como texto, hecha como una opción):\n\t\timprimir el título",
               "outputs": {
                 "js": {
@@ -10598,7 +11439,7 @@
           "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
           "syntaxes": [
             {
-              "syntax": "(después|despues) de {signature:method_signature} :? {statement_body}?",
+              "syntax": "(después|despues) de {signature:method_signature} (:|,)? {statement_body}?",
               "example": "una carta es una cosa\nuna pila es una lista de cartas\npara poner una carta en una pila\n\tagregar la carta a la pila\ndespués de poner una carta en una pila\n\timprimir la carta",
               "outputs": {
                 "js": {
@@ -10609,6 +11450,84 @@
                 },
                 "py": {
                   "code": "class Carta(Thing):\n    def poner_en_pila(self, pila: Pila) -> None:\n        pila.append(self)\n\n    def after_poner_en_pila(self, pila: Pila) -> None:\n        core.console.log(self)\n\ncore.describe_action(Carta, \"poner_en_pila\", {\"title\": \"Poner Carta en Pila\", \"undone_as\": \"Poner Carta en Pila\"})\ncore.add_after_hook(Carta, \"poner_en_pila\", {\"hook\": \"after_poner_en_pila\"})\n\nclass Pila(List):\n    item_type = Carta"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "BeforeHook",
+          "ruleNames": ["before_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/BeforeHook.ts",
+          "line": 15,
+          "purpose": "Steps that run before an action's own, from any file (epic `data` P50, Q81).",
+          "syntaxes": [
+            {
+              "syntax": "antes de {signature:method_signature} (:|,)? {statement_body}?",
+              "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nantes de completar un trabajo\n\tcancelar si el estado del trabajo es \"hecho\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static { this.declareProp(\"estado\", { type: \"text\" }) }\n  get estado() { return this.getProp(\"estado\") }\n  set estado(value) { this.setProp(\"estado\", value) }\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  beforeCompletar() {\n    if (this.estado === \"hecho\") core.cancel()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"before\", hook: \"beforeCompletar\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  @prop({ type: \"text\" })\n  accessor estado!: string\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  beforeCompletar() {\n    if (this.estado === \"hecho\") core.cancel()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"before\", hook: \"beforeCompletar\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def before_completar(self) -> None:\n        if self.estado == \"hecho\":\n            core.cancel()\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"before\", \"hook\": \"before_completar\", \"level\": \"app\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhileHook",
+          "ruleNames": ["while_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/WhileHook.ts",
+          "line": 17,
+          "purpose": "Steps that run as an action starts, whose changes are put back when it ends, worked or failed (epic `data` P50, Q94).",
+          "syntaxes": [
+            {
+              "syntax": "mientras se {signature:method_signature} (:|,)? {statement_body}?",
+              "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nmientras se completa un trabajo\n\tponer el estado del trabajo a \"ocupado\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static { this.declareProp(\"estado\", { type: \"text\" }) }\n  get estado() { return this.getProp(\"estado\") }\n  set estado(value) { this.setProp(\"estado\", value) }\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  whileCompletar() {\n    this.estado = \"ocupado\"\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"while\", hook: \"whileCompletar\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  @prop({ type: \"text\" })\n  accessor estado!: string\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  whileCompletar() {\n    this.estado = \"ocupado\"\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"while\", hook: \"whileCompletar\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def while_completar(self) -> None:\n        self.estado = \"ocupado\"\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"while\", \"hook\": \"while_completar\", \"level\": \"app\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FailureHook",
+          "ruleNames": ["failure_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/FailureHook.ts",
+          "line": 31,
+          "purpose": "Steps that run when an action fails, from any file (epic `data` P50, Q82, Q87-Q89).",
+          "syntaxes": [
+            {
+              "syntax": "(si|cuando) falla al {signature:method_signature} (:|,)? {statement_body}?",
+              "example": "un trabajo es una cosa\n\tsu \"estado\" es texto\npara completar un trabajo\n\tponer el estado del trabajo a \"hecho\"\nsi falla al completar un trabajo\n\tsi el error es \"no encontrado\"\n\t\tno importa\n\tsi no si el error es \"sin conexión\"\n\t\tpasar el error",
+              "outputs": {
+                "js": {
+                  "code": "export class Trabajo extends Thing {\n  static { this.declareProp(\"estado\", { type: \"text\" }) }\n  get estado() { return this.getProp(\"estado\") }\n  set estado(value) { this.setProp(\"estado\", value) }\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  failedCompletar(error) {\n    if (core.errorIs(error, \"not found\")) return\n    else if (core.errorIs(error, \"offline\")) return core.passTheError()\n    return core.passTheError()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"failed\", hook: \"failedCompletar\", level: \"app\" })"
+                },
+                "ts": {
+                  "code": "export class Trabajo extends Thing {\n  @prop({ type: \"text\" })\n  accessor estado!: string\n\n  completar() {\n    this.estado = \"hecho\"\n  }\n\n  failedCompletar(error: any ) {\n    if (core.errorIs(error, \"not found\")) return\n    else if (core.errorIs(error, \"offline\")) return core.passTheError()\n    return core.passTheError()\n  }\n}\ncore.describeAction(Trabajo, \"completar\", { title: \"Completar Trabajo\", undoneAs: \"Completar Trabajo\" })\ncore.addActionHook(Trabajo, \"completar\", { moment: \"failed\", hook: \"failedCompletar\", level: \"app\" })"
+                },
+                "py": {
+                  "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def failed_completar(self, error: Any) -> Any:\n        if core.error_is(error, \"not found\"):\n            return\n        elif core.error_is(error, \"offline\"):\n            return core.pass_the_error()\n        return core.pass_the_error()\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"failed\", \"hook\": \"failed_completar\", \"level\": \"app\"})"
                 }
               }
             }

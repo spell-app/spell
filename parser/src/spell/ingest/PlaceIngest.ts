@@ -1,5 +1,6 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
+import { tokenServiceMint } from "spell/places/PlaceToken"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -7,16 +8,30 @@ import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 import {
   IngestStopped,
   type CollectionDescription,
+  type CollectionLook,
+  type Deployment,
+  type FieldDescription,
   type IngestAsk,
   type IngestResult,
   type IngestSettings,
   type PlaceDescription,
-  type PlaceDescriptionOnDisk,
-  type PlaceLook
+  type PlaceLook,
+  type PlaceState,
+  type VerifyAsk
 } from "./ingest.types"
+import { descriptionFromDisk, descriptionOnDisk, stateOfRead } from "./PlaceOnDisk"
 import { agentRead, renameCollections } from "./PlaceReading"
-import { answersUnder, IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
-import { checkSecondsWithin, describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
+import {
+  answersUnder,
+  IS_WEB_ADDRESS,
+  jsonOf,
+  KINDS_IT_CAN_LOOK_AT,
+  kindFoundAt,
+  kindReadFrom,
+  lookAtPlace,
+  messageOf
+} from "./PlaceLook"
+import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
 import { partsInLanguageOf } from "./PlaceInLanguage"
 import {
   isSearchedApart,
@@ -34,6 +49,9 @@ import { writesTried, writeWordsFor } from "./WritesTried"
 
 /** How many times it leaves out a line Spell can't read, and tries again. */
 const MOST_COMPILES = 12
+
+/** How many times, for a place read whole from its OpenAPI description (epic `data` P49). */
+const MOST_COMPILES_OF_A_SPEC = 60
 
 /** What a compile says of a line:  `3:12 ...`. */
 const ERROR_LINE = /^(\d+):\d+ (.*)$/s
@@ -104,7 +122,7 @@ export class PlaceIngest {
     const existing = (await files.read(file)) ?? ""
     const already = placeLineAt(existing, address)
     if (already) return this.alreadyThere(file, already, existing)
-    const reader = this.readerFor(ask.keySecret, ask.signedIn, ask.keyGoes)
+    const reader = await this.readerFor(ask.keySecret, ask.signedIn, ask.keyGoes, ask.tokenFrom)
     const kind = await this.kindFor(address, ask.kind, reader, ask)
     this.say(`A ${kind}.  Looking at what it holds ...`)
     const look = await lookAtPlace(kind, {
@@ -112,6 +130,7 @@ export class PlaceIngest {
       reader,
       ...withDefined({
         docs: ask.docs,
+        spec: ask.spec,
         collections: ask.collections,
         samples: ask.samples,
         namesInFolder: files.namesInFolder
@@ -130,16 +149,21 @@ export class PlaceIngest {
     })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
     if (ask.keyGoes) description.about.keyGoes = ask.keyGoes
-    if (ask.keySecret) await this.noteKeyIfSet(description, look)
+    if (ask.keySecret && !look.specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
+    if (ask.tokenFrom !== undefined) description.about.tokenFrom = ask.tokenFrom
+    if (ask.dataIsPrivateIn !== undefined)
+      description.about.privateDataIn = ask.dataIsPrivateIn || privateFolderFor(description)
+    if (look.specAt) noteFromSpec(description)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
     awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
+    await this.keepPrivate(description, look, file)
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
-    await this.readThroughIt(description, reader, ask.keySecret)
+    if (!look.specAt) await this.readThroughIt(description, reader, ask.keySecret)
     noteKeepingACopy(description, existing)
     await this.finish(description)
     const spell = spellTextOf(partsInLanguageOf(file, spellPartsFor(description))).trimEnd()
@@ -176,9 +200,9 @@ export class PlaceIngest {
     movedTo?: string
   ): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, keySecret, keyGoes, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
+    const { name, kind, keySecret, keyGoes, signedIn, docsAt, specAt, collectionsAsked, picturesAsked } = old.about
     const address = movedTo === undefined ? old.about.address : addressFrom(movedTo)
-    const reader = this.readerFor(keySecret, signedIn, keyGoes)
+    const reader = await this.readerFor(keySecret, signedIn, keyGoes, old.about.tokenFrom)
     this.say(`Looking again at ${address} ...`)
     // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
     const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
@@ -193,6 +217,7 @@ export class PlaceIngest {
       collections,
       addListed: !collectionsAsked,
       ...withDefined({
+        spec: specAt,
         docs: docsAt,
         samples: samples.length ? samples : undefined,
         namesInFolder: files.namesInFolder
@@ -201,8 +226,11 @@ export class PlaceIngest {
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
     if (keyGoes) description.about.keyGoes = keyGoes
-    if (keySecret) await this.noteKeyIfSet(description, look)
+    if (keySecret && !specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
+    if (old.about.tokenFrom !== undefined) description.about.tokenFrom = old.about.tokenFrom
+    if (old.about.privateDataIn !== undefined) description.about.privateDataIn = old.about.privateDataIn
+    if (specAt) noteFromSpec(description)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     await this.notePictures(description, picturesAsked, reader)
     // the agent's notes stay, as it isn't asked again;  everything else, this look says afresh
@@ -219,6 +247,7 @@ export class PlaceIngest {
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
     }
     if (old.about.triesWrites) await this.noteWrites(description, look, reader)
+    await this.keepPrivate(description, look, file)
     // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
     this.compileLeavingOut(description, file)
     // each in the file's language:  the same line in, the same line out
@@ -230,7 +259,7 @@ export class PlaceIngest {
     const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
-    await this.readThroughIt(description, reader, keySecret)
+    if (!specAt) await this.readThroughIt(description, reader, keySecret)
     noteKeepingACopy(description, merge.text)
     await this.finish(description)
     await files.write(file, merge.text)
@@ -245,6 +274,176 @@ export class PlaceIngest {
       couldntChange: merge.couldnt,
       warnings
     }
+  }
+
+  /**
+   * Try the place described beside `file` against a running server:  `spell place verify` (epic `data` P49, J254).
+   * - Reads each list, and one thing of it by its id;  each collection's `state` says how it went, when, and on which
+   *   deployment:  `verified` with its rows, or `failed` with its status and why.
+   * - A list no schema typed (`untyped`) gets its fields from what it read.
+   * - Its Spell says only each type's `this type is verified` or `failed`;  everything else stays in the description.
+   * - A route that answers `Deprecation` or `Sunset` is noted, with its successor (J251).
+   * - NEVER writes to the server unless asked (`triesWrites`), and never on a read only deployment.
+   * - Keeps what a person wrote, as `update()` does (`mergedSpell()`).
+   * - throws `IngestStopped`:  no description, a deployment nobody listed, writes asked of a read only one
+   */
+  async verify(file: string, { deployment: named, triesWrites }: VerifyAsk = {}): Promise<IngestResult> {
+    const { files } = this.settings
+    const descriptionPath = descriptionPathFor(file)
+    const onDisk = await files.readDescription(descriptionPath)
+    if (!onDisk) {
+      throw new IngestStopped(
+        `${file} has no description beside it, ${descriptionPath}, so there's nothing to verify:  spell place ingest <address> --into ${file}`
+      )
+    }
+    const old = descriptionFromDisk(onDisk)
+    const description = descriptionFromDisk(structuredClone(onDisk))
+    const { keySecret, signedIn, keyGoes, tokenFrom } = description.about
+    const deployment = await this.deploymentFor(file, description, named)
+    if (triesWrites) refuseWritesOn(deployment)
+    const address = deployment?.at ?? description.about.address
+    const reader = await this.readerFor(
+      deployment?.key ?? keySecret,
+      signedIn,
+      keyGoes,
+      deployment?.tokenFrom ?? tokenFrom
+    )
+    this.say(`Verifying ${address}${deployment ? `, its ${deployment.name} deployment` : ""} ...`)
+    const changes: string[] = []
+    const read: CollectionLook[] = []
+    for (const [name, collection] of Object.entries(description.collections)) {
+      if (collection.leftOut || collection.state?.is === "disabled" || !isListed(collection)) continue
+      // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
+      reader.startAgain()
+      const was = collection.state?.is
+      const { state, rows } = await this.verifyCollection(address, collection, reader, deployment?.name)
+      collection.state = state
+      if (rows.length) read.push({ name, at: collection.at, rows, paging: "none", pagesRead: 1, hasMore: false })
+      if (state.is !== was) {
+        changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
+      }
+    }
+    // only because the person said it may, and never on a read only deployment (above)
+    if (triesWrites) {
+      const seen = await writesTried(address, read, reader)
+      if (seen) description.canDo.write = writeWordsFor(seen)
+    }
+    await this.keepPrivate(description, { address, collections: read, headers: {}, notes: [] }, file)
+    description.about.fingerprint = await fingerprintOf(description)
+    description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
+    const before = partsInLanguageOf(file, writtenOf(spellPartsFor(old), old.spell))
+    const after = partsInLanguageOf(file, spellPartsFor(description))
+    const text = (await files.read(file)) ?? ""
+    const others = await files.otherSpellBeside(file)
+    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
+    const warnings = this.checkFileCompiles(text, merge.text, file)
+    await files.write(file, merge.text)
+    await this.writeDescription(file, descriptionPath, description)
+    return {
+      file,
+      descriptionPath,
+      description,
+      wrote: true,
+      spell: merge.text,
+      changes: [...changes, ...merge.changed],
+      couldntChange: merge.couldnt,
+      warnings
+    }
+  }
+
+  /**
+   * One collection tried:  its first page, then its first thing by its id.
+   * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
+   */
+  private async verifyCollection(
+    address: string,
+    collection: CollectionDescription,
+    reader: PoliteReader,
+    deployment: string | undefined
+  ): Promise<{ state: PlaceState; rows: Array<Record<string, unknown>> }> {
+    const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
+    const failed = (reason: string, status?: number) => ({
+      state: { is: "failed" as const, ...tried, ...(status !== undefined && { status }), reason },
+      rows: []
+    })
+    const url = `${address}${collection.at}`
+    let answer: Awaited<ReturnType<PoliteReader["read"]>>
+    try {
+      answer = await reader.read(url)
+    } catch (error) {
+      if (error instanceof IngestStopped && !reader.hasRoom) throw error
+      return failed(`it didn't answer:  ${messageOf(error)}`)
+    }
+    if (answer.status >= 400) return failed(`it answered ${answer.status}${detailOf(answer.text)}`, answer.status)
+    const body = jsonOf(answer.text)
+    const list =
+      collection.rowsAt === undefined ? body : (body as Record<string, unknown> | undefined)?.[collection.rowsAt]
+    if (!Array.isArray(list)) {
+      return failed(`its answer holds no list${collection.rowsAt ? ` in "${collection.rowsAt}"` : ""}`, answer.status)
+    }
+    const rows = list.filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
+    const deprecated = deprecationOf(answer.headers)
+    if (deprecated) collection.about = [collection.about, deprecated].filter(Boolean).join("  ")
+    // no schema said its fields:  what it read does
+    if (!Object.keys(collection.fields).length && rows.length) {
+      collection.fields = fieldsOf(rows)
+      const id = idFieldOf(rows, collection.fields)
+      if (id !== undefined) collection.idField = id
+    }
+    const missing = Object.entries(collection.fields)
+      .filter(([field, { isRequired }]) => isRequired && rows.length && rows.every((row) => !(field in row)))
+      .map(([field]) => field)
+    if (missing.length)
+      return failed(`its rows don't hold ${missing.join(", ")}, which its description says each has`, answer.status)
+    const byId = await this.thingById(address, collection, rows[0], reader)
+    if (byId) return failed(byId)
+    return { state: { is: "verified", ...tried, status: answer.status, rows: rows.length }, rows }
+  }
+
+  /** Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none. */
+  private async thingById(
+    address: string,
+    { at, idField = "id", operations }: CollectionDescription,
+    row: Record<string, unknown> | undefined,
+    reader: PoliteReader
+  ): Promise<string | undefined> {
+    const id = row?.[idField]
+    if (typeof id !== "string" && typeof id !== "number") return undefined
+    const template =
+      operations?.change?.at ?? operations?.delete?.at ?? `${at.replace(/\/+$/, "")}/{id}${at.endsWith("/") ? "/" : ""}`
+    const url = `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
+    try {
+      const { status } = await reader.read(url)
+      return status >= 400 ? `its thing ${id}, read by its id at ${url}, answered ${status}` : undefined
+    } catch (error) {
+      if (error instanceof IngestStopped && !reader.hasRoom) throw error
+      return `its thing ${id}, read by its id at ${url}, didn't answer`
+    }
+  }
+
+  /**
+   * The deployment to work on, from the project's file:  `named`, else the first listed;  none listed and none named:
+   * `undefined`, its own address.
+   * - throws `IngestStopped` for one named that isn't listed
+   */
+  private async deploymentFor(
+    file: string,
+    description: PlaceDescription,
+    named: string | undefined
+  ): Promise<(Deployment & { name: string }) | undefined> {
+    const place = description.about.name
+    const listed = await this.settings.files.deploymentsOf?.(file, place)
+    const names = Object.keys(listed ?? {})
+    if (!names.length) {
+      if (named === undefined) return undefined
+      throw new IngestStopped(
+        `${file}'s project lists no deployments of ${place}, so there's no "${named}" to pick:  list them in its "places"`
+      )
+    }
+    const picked = named ?? names[0]!
+    const deployment = listed![picked]
+    if (!deployment) throw new IngestStopped(`${place} has no deployment "${picked}":  ${names.join(", ")}`)
+    return { name: picked, ...deployment }
   }
 
   ////////////////
@@ -264,9 +463,11 @@ export class PlaceIngest {
     address: string,
     named: string | undefined,
     reader: PoliteReader,
-    { collections, samples }: Pick<IngestAsk, "collections" | "samples"> = {}
+    { collections, samples, spec }: Pick<IngestAsk, "collections" | "samples" | "spec"> = {}
   ): Promise<string> {
     if (named) return kindNamed(named)
+    // an OpenAPI description is a web server's (epic `data` P49)
+    if (spec) return "web server"
     const read = kindReadFrom(address)
     if (read) return read
     const tried: string[] = []
@@ -286,15 +487,26 @@ export class PlaceIngest {
     )
   }
 
-  /** A reader for this place, with its key and session.  - throws `IngestStopped` for one that isn't there, or has ended */
-  private readerFor(keySecret: string | undefined, signedIn?: string, keyGoes?: KeyGoes): PoliteReader {
+  /**
+   * A reader for this place, with its key and session.
+   * - `tokenFrom`:  the key sent is a token made there from the key (epic `data` P49), the same way a program's is
+   *   (`tokenServiceMint()`).
+   * - throws `IngestStopped` for a key or session that isn't there, or has ended, or a token service that says no
+   */
+  private async readerFor(
+    keySecret: string | undefined,
+    signedIn?: string,
+    keyGoes?: KeyGoes,
+    tokenFrom?: string
+  ): Promise<PoliteReader> {
     const { fetch, sleep, keyNamed, sessionNamed, Socket } = this.settings
-    const key = keySecret ? keyNamed?.(keySecret) : undefined
-    if (keySecret && key === undefined) {
+    const secret = keySecret ? keyNamed?.(keySecret) : undefined
+    if (keySecret && secret === undefined) {
       throw new IngestStopped(
         `the key named ${keySecret} isn't in the environment:  set it, and it's sent, never written down`
       )
     }
+    const key = secret !== undefined && tokenFrom !== undefined ? await tokenMadeFrom(secret, tokenFrom, fetch) : secret
     const session = signedIn ? sessionNamed?.(signedIn) : undefined
     if (signedIn && !session) {
       throw new IngestStopped(`${signedIn} hasn't been signed in to:  spell place sign-in ${signedIn} <address>`)
@@ -388,6 +600,42 @@ export class PlaceIngest {
     }
   }
 
+  /**
+   * SIDE EFFECT:  a place whose data is private keeps no real value in its description, and the rows it read go in its
+   * folder, one samples file a collection, as `spell place read-page` writes them (epic `data` P49, J249, J259).
+   * - Nothing to write them with:  said, and they're dropped.
+   * - NEVER throws for a file it couldn't write:  said.
+   */
+  private async keepPrivate(description: PlaceDescription, look: PlaceLook, file: string): Promise<void> {
+    const folder = description.about.privateDataIn
+    if (folder === undefined) return
+    for (const collection of Object.values(description.collections)) withoutExamples(collection.fields)
+    const { writeAway } = this.settings.files
+    const read = look.collections.filter(({ rows }) => rows.length)
+    if (!read.length) return
+    if (!writeAway) {
+      description.notes.push(
+        `Its data is private, and nothing here can write its rows to ${folder}:  they're not kept.`
+      )
+      return
+    }
+    const stem = file.slice(file.lastIndexOf("/") + 1).replace(/(?:\.[a-z]{2})?(?:\.api)?\.spell$/, "")
+    const readAt = this.nowISO()
+    for (const { at, rows } of read) {
+      const [name] = Object.entries(description.collections).find(([, each]) => each.at === at) ?? []
+      if (!name) continue
+      const path = `${folder.replace(/\/+$/, "")}/${stem}.${name.replace(/\W+/g, "-")}.samples.json`
+      const page = `${description.about.address}${at}`
+      try {
+        await writeAway(path, `${JSON.stringify({ page, readAt, rows }, null, 2)}\n`)
+      } catch (error) {
+        description.notes.push(
+          `${name}'s rows couldn't be kept in ${path}:  ${error instanceof Error ? error.message : error}`
+        )
+      }
+    }
+  }
+
   /** The place is already in the file:  nothing changes. */
   private async alreadyThere(file: string, name: string, text: string): Promise<IngestResult> {
     const { files } = this.settings
@@ -431,9 +679,11 @@ export class PlaceIngest {
    * - throws `IngestStopped` for an error on any other line:  the place's own, say
    */
   private compileLeavingOut(description: PlaceDescription, file: string): string[] {
+    // a whole description has many more lines to leave out
+    const most = description.about.specAt ? MOST_COMPILES_OF_A_SPEC : MOST_COMPILES
     // the English it wrote:  whatever language the file is in, that's checked after
     const englishFile = file.replace(/\.[a-z]{2}\.spell$/, ".spell")
-    for (let round = 0; round < MOST_COMPILES; round++) {
+    for (let round = 0; round < most; round++) {
       const parts = spellPartsFor(description)
       const text = spellTextOf(parts)
       const { errors, warnings } = compile(text, englishFile)
@@ -487,7 +737,8 @@ export class PlaceIngest {
     const { kind, address } = description.about
     // an Airtable is reached through a server side, which holds its key:  there's none here to read through
     if (kind === "airtable" && !isPlaceServerAddress(address)) {
-      for (const collection of shown) collection.readThrough = { rows: collection.rowsSeen, readByTheLook: true }
+      for (const collection of shown)
+        collection.state = { is: "verified", at: this.nowISO(), rows: collection.rowsSeen, readByTheLook: true }
       description.notes.push(
         "It wasn't read through the Spell:  a program reaches an Airtable through a server side that holds its key, and there's none here.  Its rows came straight from Airtable."
       )
@@ -553,13 +804,13 @@ export class PlaceIngest {
     })
     for (const collection of shown) {
       const read = byType[collection.type]
-      if (read) collection.readThrough = read
+      if (read) collection.state = stateOfRead(read, this.nowISO())
     }
     // each said once
     description.notes = [...new Set([...description.notes, ...complaints])]
-    const rows = shown.reduce((sum, { readThrough: read }) => sum + (read?.rows ?? 0), 0)
+    const rows = shown.reduce((sum, { state }) => sum + (state?.rows ?? 0), 0)
     if (!rows) {
-      const why = shown.map(({ type, readThrough: read }) => `${type}:  ${read?.problem ?? "no rows"}`).join("\n")
+      const why = shown.map(({ type, state }) => `${type}:  ${state?.reason ?? "no rows"}`).join("\n")
       throw new IngestStopped(`a read through the Spell returned no rows, so nothing was written:\n${why}\n\n${spell}`)
     }
   }
@@ -577,6 +828,11 @@ export class PlaceIngest {
     const { files } = this.settings
     await files.writeDescription(path, descriptionOnDisk(description))
     await files.listInProject?.(file, path)
+  }
+
+  /** What time it is, in ISO:  a test's clock. */
+  private nowISO(): string {
+    return (this.settings.now?.() ?? new Date()).toISOString()
   }
 
   /** Say how it's going. */
@@ -634,55 +890,70 @@ function refuseSecondServer(file: string, existing: string): void {
 }
 
 ////////////////
-// ## On disk
+// ## Helpers
 ////////////////
 
-/** A collection's settings that are often the same in every one, written once in `allCollections` when they are. */
-const SHARED_SETTINGS = ["idField", "idIsAnAddress", "paging", "rowsAt", "nextAt", "listsGive"] as const
-
 /**
- * `description` as it's written:  what every collection agrees on, once, in `allCollections`;  each collection only what differs.
- * - Only for two collections or more:  one has nothing to share.
+ * A read only deployment takes no writes:  the ONE check, for `--try-writes` and `verify`'s, beside `noteWrites()`
+ * (epic `data` P49, J258).
+ * - throws `IngestStopped` for one marked read only
  */
-export function descriptionOnDisk(description: PlaceDescription): PlaceDescriptionOnDisk {
-  const { collections, ...rest } = description
-  const each = Object.values(collections)
-  const allCollections: Partial<CollectionDescription> = {}
-  if (each.length > 1) {
-    for (const setting of SHARED_SETTINGS) {
-      const values = new Set(each.map((collection) => JSON.stringify(collection[setting])))
-      const [only] = values
-      if (values.size === 1 && only !== undefined) Object.assign(allCollections, { [setting]: JSON.parse(only) })
-    }
-  }
-  const shared = Object.keys(allCollections)
-  const own = Object.fromEntries(
-    Object.entries(collections).map(([name, collection]) => [
-      name,
-      Object.fromEntries(Object.entries(collection).filter(([key]) => !shared.includes(key)))
-    ])
+function refuseWritesOn(deployment: { name: string; readOnly?: boolean } | undefined): void {
+  if (!deployment?.readOnly) return
+  throw new IngestStopped(
+    `its ${deployment.name} deployment is read only, so nothing is written there:  try writes on another, --deployment <name>`
   )
-  // what it is and what it holds first, as a person reads it;  the rest after
-  const { about, canDo, ...after } = rest
-  return {
-    about,
-    canDo,
-    ...(shared.length && { allCollections }),
-    collections: own,
-    ...after
-  } as PlaceDescriptionOnDisk
 }
 
-/** A description as it's read:  each collection with what `allCollections` says, its own settings winning. */
-export function descriptionFromDisk({
-  allCollections,
-  collections,
-  ...rest
-}: PlaceDescriptionOnDisk): PlaceDescription {
-  const each = Object.entries(collections).map(([name, collection]) => [name, { ...allCollections, ...collection }])
-  // the lines it wrote, each bare:  an older version bulleted them, `- its "url" is text` (epic `language` P46)
-  const spell = rest.spell?.map((line) => line.replace(/^(\t*)- /, "$1"))
-  return { ...rest, ...(spell ? { spell } : {}), collections: Object.fromEntries(each) } as PlaceDescription
+/** Can a collection be read as a list:  not one found by name, only by a search, or asked for by a query? */
+function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription): boolean {
+  return !/\{[^{}/]*\}/.test(at) && !searchedOnly && !askedBy && !samples
+}
+
+/** What an error answer says, short:  NetBox's `{ "detail": "..." }`. */
+function detailOf(text: string): string {
+  const body = jsonOf(text) as { detail?: unknown; error?: unknown; message?: unknown } | undefined
+  const said = body?.detail ?? body?.error ?? body?.message
+  return typeof said === "string" ? `:  ${said.slice(0, 200).replace(/\.+$/, "")}` : ""
+}
+
+/** What its answer says of its going away, `Deprecation`, `Sunset` and its successor (J251):  `undefined` for nothing. */
+function deprecationOf(headers: Headers): string | undefined {
+  const deprecation = headers.get("deprecation")
+  const sunset = headers.get("sunset")
+  if (!deprecation && !sunset) return undefined
+  const successor = /<([^>]+)>\s*;[^,]*\brel="?successor-version"?/.exec(headers.get("link") ?? "")?.[1]
+  return ["It says it's going away", sunset ? `on ${sunset}` : "", successor ? `:  use ${successor} instead` : ""]
+    .filter(Boolean)
+    .join(" ")
+    .concat(".")
+}
+
+/** Where a private place's rows go when nothing says:  `~/.spell/places/netbox`. */
+function privateFolderFor({ about }: PlaceDescription): string {
+  return `~/.spell/places/${about.name.toLowerCase().replace(/[^\p{L}\d]+/gu, "-")}`
+}
+
+/** SIDE EFFECT:  no field, nor any inside one, keeps a real value. */
+function withoutExamples(fields: Record<string, FieldDescription>): void {
+  for (const field of Object.values(fields)) {
+    delete field.example
+    if (field.inside) withoutExamples(field.inside)
+  }
+}
+
+/**
+ * A token made from `secret` at `tokenFrom`, for a look.
+ * - throws `IngestStopped` when the token service says no, or doesn't answer
+ */
+async function tokenMadeFrom(secret: string, tokenFrom: string, fetch: typeof globalThis.fetch): Promise<string> {
+  try {
+    return (await tokenServiceMint(tokenFrom, fetch)(secret)).token
+  } catch (error) {
+    throw new IngestStopped(
+      `no token could be made at ${tokenFrom}:  ${error instanceof Error ? error.message : error}`
+    )
+  }
 }
 
 /** The class a type's words compile to:  `life form` => `LifeForm`. */
@@ -735,6 +1006,13 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
     }
     if (held && kind === "lives") return leaveOutCollection(description, collection, reason)
     if (kind === "inside") return leaveOutInside(description, parts, collection, field!, reason)
+    // an action route Spell can't name:  its description keeps it, disabled
+    const action = held && kind === "action" ? held.operations?.[field!] : undefined
+    if (action) {
+      action.state = { is: "disabled", reason }
+      description.notes.push(`Left out ${collection}'s action "${field}":  ${reason}`)
+      return true
+    }
   }
   const type = parts.types.find(({ header }) => header === line)
   return !!type && leaveOutCollection(description, type.collection, reason)
@@ -857,6 +1135,8 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
       ...collection,
       type: oldCollection.type,
       ...(oldCollection.about && { about: oldCollection.about }),
+      // what was tried stays, till it's tried again:  a look at a description tries nothing
+      ...(oldCollection.state && collection.state?.is === "unverified" && { state: oldCollection.state }),
       ...(oldCollection.idField && oldCollection.idField in collection.fields && { idField: oldCollection.idField }),
       fields: collection.fields
     }
@@ -998,6 +1278,17 @@ function writtenOf(parts: SpellParts, written: readonly string[] | undefined): S
     placeLines: kept(parts.placeLines),
     types: parts.types.map((type) => ({ ...type, lines: kept(type.lines) }))
   }
+}
+
+/**
+ * SIDE EFFECT:  a place read from its description says so (epic `data` P49):  nothing was read from the server, so
+ * every list, write and action route is unverified until `spell place verify` tries it.
+ */
+function noteFromSpec(description: PlaceDescription): void {
+  description.canDo.read = "Its description says so:  never read yet."
+  description.notes.push(
+    "Read from its OpenAPI description only:  every list, write and action route is unverified until `spell place verify` tries it against a running server."
+  )
 }
 
 /** SIDE EFFECT:  `description` says which session it was read as, by name, never its values. */

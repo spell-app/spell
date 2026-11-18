@@ -463,6 +463,8 @@ export class ReviewInbox {
     if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
     if (checked && (checked.action === "prepare") !== (key === TESTS_ID))
       throw new InboxError(`only the Manual tests section is prepared, and it takes nothing else:  ${key}`)
+    if (checked && (checked.action === "kickoff") !== (key === KICKOFF_ID))
+      throw new InboxError(`only the kickoff box takes a kickoff prompt, and it takes nothing else:  ${key}`)
     if (checked) checkChangeMark(key, checked)
     if (checked) checkSeenMark(key, checked)
     if (!checked || !ReviewInbox.isImmediate(checked)) this.now = this.now.filter((each) => each.id !== key)
@@ -1025,8 +1027,9 @@ export class ReviewInbox {
   /**
    * Is `mark` a revisit's note to TALK OVER, which Claude answers as a comment (epic `epic-engine` I200)?
    * - a plain revisit, later, with words
-   * - NOT one with a pick ("pick B, but ..."), Owen's comments in its text (I140:  they're threads already), or a
-   *   picture (a comment holds none):  those are talked over as before, their notes kept in the item
+   * - NOT one with a pick ("pick B, but ..."), Owen's comments in its text (I140:  they're threads already), or an
+   *   old picture apart from its words (`shot`):  those are talked over as before, their notes kept in the item
+   *   - pictures IN its words (epic `epic-engine` P75) go with them:  a comment draws them, labelled, as its own
    * - NOT a revisit now (Do Now):  a request an agent takes, not a thread
    */
   static isNoteToTalkOver(mark: CheckedMark): boolean {
@@ -1213,6 +1216,12 @@ export class ReviewInbox {
     const { action, when = "soon", note = "", pick } = mark as Record<string, unknown>
     if (action === "new") return toNewItem(mark as Record<string, unknown>)
     if (action === "test") return toTestAnswer(mark as Record<string, unknown>)
+    // the kickoff box's words (epic `epic-engine` P75):  what the epic should do, its pictures' words in them
+    if (action === "kickoff") {
+      if (typeof note !== "string" || !note.trim()) throw new InboxError("a kickoff prompt is words:  what to do")
+      if (note.length > MAX_KICKOFF) throw new InboxError(`a kickoff prompt is ${MAX_KICKOFF} characters at most`)
+      return { action, note: note.trim() }
+    }
     if (!isAction(action)) throw new InboxError(`no such action:  ${action} (${ACTIONS.join(" | ")})`)
     if (action === "revisit") {
       if (!REVISIT_WHEN.includes(when as RevisitWhen))
@@ -1280,8 +1289,8 @@ export class ReviewInbox {
    */
   static toItemId(this: void, id: unknown): string {
     const key = typeof id === "string" ? id.toLowerCase() : ""
-    if (!isMarkKey(key) && key !== SUMMARY_ID && key !== STAGE_ID && key !== TESTS_ID && !NEW_ID.test(key))
-      throw new InboxError(`not an item id:  ${id}`)
+    const own = [SUMMARY_ID, STAGE_ID, TESTS_ID, KICKOFF_ID]
+    if (!isMarkKey(key) && !own.includes(key) && !NEW_ID.test(key)) throw new InboxError(`not an item id:  ${id}`)
     return key
   }
 
@@ -1325,6 +1334,8 @@ export class ReviewInbox {
    *   skeleton's:  its body, a part, may not be in `html`), or an `<epic-change id>` not `accepted` in `html` itself
    * - every STANDING option set not closed (`<epic-choices id="s-upgrades" standing>`, epic `epic-engine` P50)
    * - the Manual tests section, `tests` (`TESTS_ID`):  its Start testing (epic `epic-engine` P51)
+   * - the kickoff box, `kickoff` (`KICKOFF_ID`, epic `epic-engine` P75), while the page (an `<epic-page>`) has no
+   *   phases:  still planning
    * - every update block not seen (`up3`, epic `epic-engine` I168):  listed in its host's `to-see` (`up3@<at>`), or
    *   an `<epic-update id>` without `seen` in `html` itself
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
@@ -1345,6 +1356,9 @@ export class ReviewInbox {
   /** What takes a mark among the rows of an epic page's list (`EpicPageFormat.listIn()`). */
   private static itemIdsIn(rows: readonly PlaceRow[]): Set<string> {
     const ids = new Set<string>()
+    // the kickoff box (epic `epic-engine` P75):  an epic page, no phases yet, still being planned
+    const tags = new Set(rows.map((row) => EpicPageFormat.tagOf(row)))
+    if (tags.has("epic-page") && !tags.has("epic-phase")) ids.add(KICKOFF_ID)
     for (const row of rows) {
       const name = EpicPageFormat.tagOf(row)
       const id = row.id as string | undefined
@@ -1649,6 +1663,8 @@ export const INBOX_VERSION = 1
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
  * - `hold`:  an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan waits for Accept again
+ * - `kickoff`:  the kickoff box's words (`<epic-kickoff>`, epic `epic-engine` P75), under `KICKOFF_ID`:  `inbox apply`
+ *   writes them as the Kickoff prompt, and the session plans from them
  */
 export const ACTIONS = [
   "approve",
@@ -1667,7 +1683,8 @@ export const ACTIONS = [
   "move",
   "reopen",
   "seen",
-  "hold"
+  "hold",
+  "kickoff"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
@@ -1690,6 +1707,15 @@ export type TestResult = (typeof TEST_RESULTS)[number]
 
 /** The summary's key in the inbox:  `<epic-summary>` has no id of its own (epic `airplane` P2). */
 export const SUMMARY_ID = "summary"
+
+/**
+ * The kickoff box's key in the inbox (`<epic-kickoff>`, epic `epic-engine` P75):  what the epic should do, typed on its
+ * page, a `kickoff` mark, and only that;  markable while the page has no phases (`itemIds()`).
+ */
+export const KICKOFF_ID = "kickoff"
+
+/** The longest kickoff prompt the inbox takes:  pages of words, not a log. */
+const MAX_KICKOFF = 50_000
 
 /**
  * The Manual tests section's key in the inbox (`<epic-section id="tests" kind="tests">`, epic `epic-engine` P51):  its
@@ -1795,7 +1821,7 @@ const MAX_TITLE = 300
 
 /**
  * The items Owen may call urgent or not (`setUrgency()`):
- * judgement calls, issues and todos (a follow-up's), the kinds red while open and not reviewed.
+ * judgement calls, issues and todos (a follow-up's, or one flagged `--loud`:  T94), the kinds red while open and not reviewed.
  * - `PlanReader.itemState()`, the same rule:  `CALM_ID` in `planDoc.types.ts`, plus `urgent` todos
  */
 const URGENCY_ID = /^[ijt]\d+$/

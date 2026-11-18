@@ -1,9 +1,8 @@
 ==== /Card.spell
 [thing create_type L0]
-| a «"card"» is a **draggable two sided view** 			⟦-- A playing card⟧
-|   ⟦-- A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.⟧
-|   ⟦-- It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.⟧
-|   ⟦-- On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.⟧
+| a «"card"» is a **draggable two sided view**
+|   ⟦-- A standard playing card with rank, suit and color.⟧
+|   ⟦-- You can drag cards around and drop them on piles if the game allows.⟧
 |   [plain group define_group L1]
 |   | group «"Card Rank & Suit"»
 |   |   ⟦-- Ace is low:  ace = 1 ... king = 13⟧
@@ -20,11 +19,13 @@
 |   | group «"Aliases"»
 |   |   ⟦-- Spell for identifying cards⟧
 |   |   [property quoted_type_expression L2]
-|   |   | it «"is a face card"» if its **rank** is _jack_, _queen_ or _king_  ⟦-- e.g. "the card is a face card"⟧    ‾value(its rank)
+|   |   | it «"is a face card"» if its **rank** is _jack_, _queen_ or _king_    ‾value(its rank)
+|   |   |   ⟦-- e.g. "the card is a face card"⟧
 |   |   [property quoted_type_expression L2]
 |   |   | it «"is a number card"» if it is not a face card    ‾question(it is not a face card)
 |   |   [property quoted_property_formula L2]
-|   |   | it «"is the (rank) of (suit)"»  ⟦-- e.g. the card is the two of spades⟧
+|   |   | it «"is the (rank) of (suit)"»
+|   |   |   ⟦-- e.g. "the card is the two of spades"⟧
 
 |   [plain group define_group L1]
 |   | group «"Names"» 								⟦-- identifying a card⟧
@@ -152,22 +153,23 @@
 ==== /Pile.spell
 [thing create_viewable_list_type L0]
 | a «"pile"» is a **viewable**, **droppable list of cards**
-|   ⟦-- A pile of cards, e.g. in a game like solitaire⟧
-|   ⟦-- A card can only be in one pile at a time⟧
+|   ⟦-- A pile of cards, e.g. in a game like solitaire.⟧
+|   ⟦-- A card can only be in one pile at a time.⟧
 |   [property define_property_has L1]
 |   | its «"layout"» is one of ‹stacked› or ‹vertical›
-|   |   ⟦// How its cards lie:  on top of each other, or down a column -- styles.css⟧
+|   |   ⟦-- stacked = on top of each other⟧
+|   |   ⟦-- vertical = spread down in a column⟧
 |   [property property_value_getter L1]
-|   | its «"color"» is
+|   | a **pile's** «"color"» is
 |   |   _"none"_ if it is empty    ‾question(it is empty)
 |   |   the **color** of its last **card** otherwise    ‾value(the color of its last card)
 |   [property property_value_getter L1]
-|   | its «"value"» is
+|   | a **pile's** «"value"» is
 |   |   _0_ if it is empty    ‾question(it is empty)
 |   |   otherwise the **value** of its last **card**    ‾value(the value of its last card)
 |   [property property_value_getter L1]
 |   | its «"shorthand"» is
-|   |   ⟦// Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓⟧
+|   |   ⟦-- Its id, then its cards' shorthands:  stock: Q♠↑ 7♥↓⟧
 |   |   set **summary** to its **id** + _":"_    ‾value(summary) ‾value(its id)
 |   |   [control list_iteration L2]
 |   |   | for **card** in the **pile**    ‾value(the pile)
@@ -180,22 +182,28 @@
 
 |   [action to_do_something L1]
 |   | to «move a card to a pile»    ‾value(a card) ‾value(a pile) bold(card) bold(pile)
-|   |   ⟦// The card, and every card on it, onto the pile, if the piles' rules let it go and take it⟧
-|   |   ⟦// - refused, nothing moves, and there's nothing to undo⟧
-|   |   ⟦// - a game adds its own steps after it:  `after moving a card to a pile`⟧
-|   |   cancel if the **card's pile** cannot give it up    ‾question(the card's pile cannot give it up)
-|   |     or the **pile** cannot take it    ‾question(the pile cannot take it)
+|   |   ⟦-- Move the card, and every card on top of it, onto the pile.⟧
+|   |   ⟦-- The card's current pile can refuse to let go of it.⟧
+|   |   ⟦-- The new pile may refuse to take it.⟧
+|   |   ⟦-- If either of those is the case, the card doesn't move.⟧
+|   |   ⟦-- A game can add its own steps after it:⟧
+|   |     ⟦-- see `after moving a card to a pile` in Solitaire.spell⟧
+|   |   cancel if the **card's pile** cannot give the **card** up    ‾question(the card's pile cannot give the card up)
+|   |     or the **pile** cannot take the **card**    ‾question(the pile cannot take the card)
 |   |   [control list_iteration L2]
-|   |   | for **card** in **cards** in the **card's pile** starting with the **card**    ‾value(cards in the card's pile starting with the card)
+|   |   | for each **card** in **cards** in the **card's pile** starting with the **card**    ‾value(cards in the card's pile starting with the card)
 |   |   |   add it to the **pile**    ‾value(it) ‾value(the pile)
 
 [thing reopen_type L0]
 | a **card**
-|   ⟦// a card is in one pile at a time:  moving it to another pile takes it off this one⟧
+|   ⟦-- A card can be in only one pile at a time:  moving it to another pile removes it.⟧
 |   [property belongs_to_one L1]
 |   | belongs to one **pile**
+|   ⟦-- OWEN: was `is on top of its pile`;  `is on bottom` is new, for auto play's king line⟧
 |   [property quoted_type_expression L1]
-|   | it «"is on top of its pile"» if it is the top **card** of its **pile**		⟦-- the card the next one goes on⟧    ‾value(it) ‾value(the top card of its pile)
+|   | a **card** «"is on top"» if it is the top **card** of its **pile**    ‾value(it) ‾value(the top card of its pile)
+|   [property quoted_type_expression L1]
+|   | a **card** «"is on bottom"» if it is the first **card** of its **pile**    ‾value(it) ‾value(the first card of its pile)
 
 [action to_do_something L0]
 | to «test piles»
@@ -208,7 +216,7 @@
 |   **stock's value** should be _7_    ‾value(stock's value)
 |   **stock's shorthand** should be _"stock: Q♠↑ 7♥↓"_    ‾value(stock's shorthand)
 
-|   ⟦// a card is in one pile at a time⟧
+|   ⟦-- a card is in one pile at a time⟧
 |   set the **discards** to **a new pile** with **id** _"discards"_    ‾value(the discards) ‾value(a new pile with id "discards")
 |   get the top **card** of the **stock**    ‾value(the top card of the stock)
 |   add it to the **discards**    ‾value(it) ‾value(the discards)
@@ -218,22 +226,20 @@
 
 ==== /Deck.spell
 [thing create_viewable_list_type L0]
-| a «"deck"» is a **viewable list of cards** ⟦-- a deck of playing cards⟧
+| a «"deck"» is a **viewable list of cards**
+|   ⟦-- A deck of 52 playing cards.⟧
 |   [action create_hook L1]
 |   | when «creating a deck»    ‾value(a deck) bold(deck)
-|   |   ⟦// Create one of each card, ace of clubs first⟧
+|   |   ⟦-- Create one card of each rank and suit, and add it to the deck.⟧
 |   |   [control list_iteration L2]
 |   |   | for **rank** in **card ranks**    ‾value(card ranks)
 |   |   |   [control list_iteration L3]
 |   |   |   | for **suit** in **card suits**    ‾value(card suits)
 |   |   |   |   add **a new card** with **rank** and **suit** to the **deck**    ‾value(a new card with rank and suit) ‾value(the deck)
 |   [property property_value_getter L1]
-|   | its «"shorthand"» is ⟦-- its card names, top to bottom⟧
-|   |   set **card names** to a new list of **text**    ‾value(card names) ‾value(a new list of text)
-|   |   [control list_iteration L2]
-|   |   | for **card** in the **deck**    ‾value(the deck)
-|   |   |   add the **shorthand** of the **card** to **card names**    ‾value(the shorthand of the card) ‾value(card names)
-|   |   return _"deck: "_ + **card names**    ‾value(card names)
+|   | its «"shorthand"» is
+|   |   ⟦-- Names of all of the cards in the deck, in the shuffled order.⟧
+|   |   return _"deck: "_ + the **shorthand** of each **card** in the **deck**    ‾value(the shorthand of each card in the deck)
 
 |   [action to_do_something L1]
 |   | to «test a new deck»
@@ -248,31 +254,28 @@
 ==== /Solitaire.spell
 [thing create_one_of_a_kind L0]
 | «solitaire» is an **app**
+|   ⟦-- A fully playable game in 300 lines of code!⟧
 |   ⟦-- See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules⟧
 |   [action create_hook L1]
 |   | when «creating solitaire»    ‾value(solitaire) bold(solitaire)
 |   |   add each **card** in the **deck** to the **stock**    ‾value(each card in the deck) ‾value(the stock)
-|   |   restart the game    ‾call(restart the game)
-|   
+|   |   deal the cards    ‾call(deal the cards)
+
 |   [action to_do_something L1]
 |   | to **draw solitaire**
-|   |   <⟨deck⟩ «"deck"»hidden />    declares@0
+|   |   ⟦-- Use magical HTML tags to draw the game.⟧
+|   |   ⟦-- Parts in purple are "views" which can be used in the program.⟧
+|   |   <⟨deck⟩ «"deck"» hidden />    declares@0
 |   |   <⟨segment⟩ inverted attach-to=«"top"»>
-|   |     <⟨toolbar⟩
-|   |       class=«"GameBar"»
-|   |       appearance=«"pills"»
-|   |       inverted
-|   |       size=«"small"»
-|   |       shrinkable
-|   |     >
+|   |     <⟨toolbar⟩ size=«"small"» appearance=«"pills"» inverted shrinkable>
 |   |       <⟨text⟩ size=«"big"» slot=«"title"» heavy>Spell Solitaire</>
 |   |       <⟨action⟩ «"auto play"»/>
 |   |       <⟨action⟩ «"cheat"»/>
-|   |       <⟨action⟩ «"restart the game"» title=«"Restart"» />
+|   |       <⟨action⟩ «"deal the cards"» title=«"Restart"» />
 |   |       <⟨spacer⟩/>
 |   |       <⟨action⟩ «"undo"» icon-only />
 |   |       <⟨action⟩ «"redo"» icon-only />
-|   |       <⟨text⟩ slot=«"right"»>Score: <⟨number⟩ «"score"» /></>    declares@26
+|   |       <⟨text⟩ slot=«"right"»><⟨b⟩>Score</⟨b⟩>: <⟨number⟩ «"score"» /></>    declares@33
 |   |     </>
 |   |   </>
 |   |   <⟨container⟩ columns=«"7"» padding=«"small"» spacing=«"xs"»>
@@ -291,10 +294,15 @@
 |   |     <⟨column⟩ «"C6"»/>    declares@0
 |   |     <⟨column⟩ «"C7"»/>    declares@0
 |   |   </⟨container⟩>
+|   |   <⟨modal⟩ «"you won"»>
+|   |     <⟨text⟩ size=«"big"»>Congratulations!</>
+|   |     <⟨text⟩>Your score:  <⟨number⟩ «"score"» /></>    declares@19
+|   |     <⟨action⟩ «"deal the cards"» title=«"New game"» />
+|   |   </>
 |   |   <⟨context-menu⟩>
 |   |     <⟨action⟩ «"auto play"»/>
 |   |     <⟨action⟩ «"cheat"»/>
-|   |     <⟨action⟩ «"restart the game"»/>
+|   |     <⟨action⟩ «"deal the cards"»/>
 |   |     <⟨divider⟩/>
 |   |     <⟨action⟩ «"undo"»  />
 |   |     <⟨action⟩ «"redo"»  />
@@ -303,7 +311,7 @@
 |   [plain group define_group L1]
 |   | group «"Dealing & the Stock Pile"»
 |   |   [action to_do_something L2]
-|   |   | to «"restart the game"» with shortcut «"R"», icon «"sync alternate"»
+|   |   | to «"deal the cards"» with shortcut «"R"», icon «"sync alternate"»
 |   |   |   clear the **score**    ‾value(the score)
 |   |   |   [control list_iteration L3]
 |   |   |   | for each **card** in the **deck**    ‾value(the deck)
@@ -324,31 +332,28 @@
 |   |   |   |   |   | if **column** is the same as **row**    ‾value(column) ‾value(row)
 |   |   |   |   |   |   turn the last **card** of (item **column** of the **columns**) face up    ‾value(the last card of (item column of the columns))
 |   |   |   turn over the next card    ‾call(turn over the next card)
-|   |   
+
 |   |   [action to_do_something L2]
 |   |   | to «"turn over the next card"», undoable as «"Turn Card"»
-|   |   |   ⟦-- Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty⟧
-|   |   |   ⟦-- - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game⟧
 |   |   |   [control if L3]
 |   |   |   | if the **stock** is empty    ‾question(the stock is empty)
-|   |   |   |   reset the stock    ‾call(reset the stock)
+|   |   |   |   reset the stock pile    ‾call(reset the stock pile)
 |   |   |   set the **next card** to the top **card** of the **stock**    ‾value(the next card) ‾value(the top card of the stock)
 |   |   |   turn the **next card** face up    ‾value(the next card)
 |   |   |   ⟦-- as long as its flip takes (styles.css), so it turns over before it moves⟧
 |   |   |   pause for _300_ msec    ‾quantity(300 msec)
 |   |   |   add the **next card** to the **discard pile**    ‾value(the next card) ‾value(the discard pile)
-|   |   
+
 |   |   [action to_do_something L2]
-|   |   | to «"reset the stock"»
-|   |   |   ⟦-- The discard pile, turned over, back into the stock⟧
-|   |   |   set **cards** to a copy of list (the **discard pile**) as a **pile**    ‾value(cards) ‾value(a copy of list (the discard pile) as a pile)
+|   |   | to «"reset the stock pile"»
+|   |   |   set **cards** to a copy of list the **discard pile** as a **pile**    ‾value(cards) ‾value(a copy of list the discard pile as a pile)
 |   |   |   reverse the **cards**    ‾value(the cards)
 |   |   |   add each **card** in the **cards** to the **stock**    ‾value(each card in the cards) ‾value(the stock)
 |   |   |   turn each **card** in the **stock** face down    ‾value(each card in the stock)
 
 |   [plain group define_group L1]
 |   | group «"Game Play"»
-|   |   
+
 |   |   [action to_do_something L2]
 |   |   | to «"play a card"»    ‾value(a card) bold(card)
 |   |   |   [control if L3]
@@ -370,56 +375,64 @@
 
 |   |   [action to_do_something L2]
 |   |   | to «"auto play"» with shortcut «"A"», icon «"play"»
-|   |   |   ⟦-- Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column⟧
-|   |   |   set **played** to the last **card** in the **discard pile** where it can play the **card**    ‾value(played) ‾value(the last card in the discard pile where it can play the card)
-|   |   |     or the first **card** in the **columns** where it is the top **card** of its **pile** and (the first **pile** in every **pile** where it can take the **card**) is a **foundation** and can play the **card**    ‾value(the first card in the columns where it is the top card of its pile and (the first pile in every pile where it can take the card) is a foundation and can play the card)
-|   |   |     or the first **card** in the **columns** where (it is not a _king_ or it is not the first **card** of its **pile**) and it is (the first **card** in its **pile** which is face up) and can play the **card**    ‾value(the first card in the columns where (it is not a king or it is not the first card of its pile) and it is (the first card in its pile which is face up) and can play the card)
-|   |   |   [control if L3]
-|   |   |   | if **played** exists    ‾question(played exists)
-|   |   |   |   pause for _300_ msec    ‾quantity(300 msec)
-|   |   |   |   auto play    ‾call(auto play)
+|   |   |   ⟦-- Play one card that can go somewhere, then the next, until none can.⟧
+|   |   |   set **candidates** to **cards** in the **discard pile** where the **card** is on top    ‾value(candidates) ‾value(cards in the discard pile where the card is on top)
+|   |   |     and the last **card** of each **column**    ‾value(the last card of each column)
+|   |   |     and the first **card** of each **column** where the **card** is face up    ‾value(the first card of each column where the card is face up)
+
+|   |   |   ⟦--  Remove kings directly on the board so they don't switch back and forth⟧
+|   |   |   remove **cards** in **candidates** where it is a _king_ and it is on bottom    ‾value(candidates) ‾question(it is a king) ‾question(it is on bottom)
+
+|   |   |   [control list_iteration L3]
+|   |   |   | for each **card** in **candidates**    ‾value(candidates)
+|   |   |   |   set **pile** to the first **pile** in the **piles** which can take the **card**    ‾value(pile) ‾value(the first pile in the piles which can take the card)
+|   |   |   |     and the **pile** is not the **last pile** of the **card**    ‾value(and the pile is not the last pile of the card)
+|   |   |   |   
+|   |   |   |   [control if L4]
+|   |   |   |   | if the **pile** exists    ‾question(the pile exists)
+|   |   |   |   |   play the **card**    ‾call(play the card)
+|   |   |   |   |   ⟦-- wait a bit so it doesn't play too fast⟧
+|   |   |   |   |   pause for _500_ msec    ‾quantity(500 msec)
+|   |   |   |   |   return auto play    ‾call(auto play)
 |   |   
 |   |   [action to_do_something L2]
 |   |   | to «"cheat"» with shortcut «"C"», icon «"eye"»
-|   |   |   ⟦-- Turn up a face-down card from a column, at random, onto the discard pile⟧
-|   |   |   set **remaining piles** to **piles** in the **columns** where it is not empty and its first **card** is face down    ‾value(remaining piles) ‾value(piles in the columns where it is not empty and its first card is face down)
-|   |   |   if **remaining piles** is empty return    ‾question(remaining piles is empty)
-|   |   |   set the **pile** to a random **pile** in **remaining piles**    ‾value(the pile) ‾value(a random pile in remaining piles)
-|   |   |   set the **card** to a random **card** in (the **cards** in the **pile** where the **card** is face down)    ‾value(the card) ‾value(a random card in (the cards in the pile where the card is face down))
-|   |   |   ⟦-- turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile⟧
-|   |   |   add the **card** to the **discard pile**    ‾value(the card) ‾value(the discard pile)
-|   |   |   turn the **card** face up    ‾value(the card)
+|   |   |   ⟦-- Turn up a face-down card from a column, at random and play on the discard pile.⟧
+|   |   |   set the **card** to a random **card** in the **columns** where it is face down    ‾value(the card) ‾value(a random card in the columns where it is face down)
+|   |   |   [control if L3]
+|   |   |   | if the **card** exists    ‾question(the card exists)
+|   |   |   |   add the **card** to the **discard pile**    ‾value(the card) ‾value(the discard pile)
+|   |   |   |   turn the **card** face up    ‾value(the card)
 
 |   |   [action to_do_something L2]
-|   |   | to «"the points for (a card) on (a pile)"»    ‾value(a card) ‾value(a pile) bold(card) bold(pile)
-|   |   |   ⟦-- What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing⟧
+|   |   | to get «"the points for a card on a pile"»    ‾value(a card) ‾value(a pile) bold(card) bold(pile)
 |   |   |   return _10_ if the **pile** is a **foundation**    ‾question(the pile is a foundation)
 |   |   |   return _5_ if the **card's last pile** is the **discard pile**    ‾value(the card's last pile) ‾value(the discard pile)
 |   |   |   return _0_
-|   |   
+
 |   |   [action on L2]
 |   |   | when the **score** changes
 |   |   |   [control if L3]
 |   |   |   | if the number of **cards** in the **foundations** is _52_    ‾value(the number of cards in the foundations)
-|   |   |   |   alert _"You won!"_ with _"New game"_
-|   |   |   |   restart the game    ‾call(restart the game)
+|   |   |   |   show _"you won"_
 
 [thing reopen_type L0]
-| a **card**		⟦-- play the card on click if it is a legal move⟧
+| a **card**
+|   ⟦-- play the card when clicked if it is a legal move⟧
 |   [action on L1]
-|   | on click
+|   | when clicked
 |   |   [control if L2]
 |   |   | if it is face up or its **pile** is **solitaire's stock**    ‾question(it is face up) ‾value(its pile) ‾value(solitaire's stock)
 |   |   |   play the **card**    ‾call(play the card)
 
 [plain group define_group L0]
-| group «"The piles"»
+| group «"Different kinds of piles"»
 |   ⟦-- Each kind of pile, what it may take or give up, and how it lies.⟧
-|   ⟦-- While one's empty, it shows its placeholder, if it has one.⟧
+|   ⟦-- An empty pile shows its placeholder, if it has one.⟧
 
 |   [thing create_type L1]
 |   | a «"stock pile"» is a **pile** with **layout** «"stacked"»
-|   |   ⟦-- The cards not played yet, face down:  a click turns the next one over, so none can be taken from it⟧
+|   |   ⟦-- The cards not played yet, face down.⟧
 |   |   [property list_guard L2]
 |   |   | it can never take a **card**
 |   |   [property list_guard L2]
@@ -432,14 +445,15 @@
 |   |   |   turn over the next card    ‾call(turn over the next card)
 
 |   [thing create_type L1]
-|   | a «"discard pile"» is a **pile** with **layout** «"stacked"»		⟦-- Where the stock's cards go as they're turned over⟧
+|   | a «"discard pile"» is a **pile** with **layout** «"stacked"»	⟦-- Where the stock's cards go as they're turned over⟧
 |   |   [property list_guard L2]
 |   |   | it can never take a **card**
 |   |   [property list_guard L2]
 |   |   | its **cards** are **draggable** when the **card** is its last **card**    ‾value(the card) ‾value(its last card)
 
 |   [thing create_type L1]
-|   | a «"foundation"» is a **pile** with **layout** «"stacked"»		⟦-- Where a suit is built up, ace to king, one card at a time⟧
+|   | a «"foundation"» is a **pile** with **layout** «"stacked"»
+|   |   ⟦-- Where a suit is built up, ace to king, one card at a time⟧
 |   |   [property define_property_has L2]
 |   |   | its «"suit"» is a **card suit**
 |   |   [property list_guard L2]
@@ -448,7 +462,7 @@
 |   |   | it is **droppable** when
 |   |   |   the **pile's suit** is the **card's suit**    ‾value(the pile's suit) ‾value(the card's suit)
 |   |   |     and the **pile's value** is the **card's value** - _1_    ‾value(the pile's value) ‾value(the card's value)
-|   |   |     and the **card** is on top of its pile    ‾question(the card is on top of its pile)
+|   |   |     and the **card** is on top    ‾question(the card is on top)
 |   |   [action draw_it L2]
 |   |   | to **draw** its **placeholder**
 |   |   |   ⟦-- a light grey ace of its suit, face up⟧
@@ -468,7 +482,7 @@
 
 |   [action to_do_something L1]
 |   | to «test the moves»
-|   |   set the **column** to **a new column** with **id** _"T1"_    ‾value(the column) ‾value(a new column with id "T1")
+|   |   set the **column** to **a new column** with **id** _"Test1"_    ‾value(the column) ‾value(a new column with id "Test1")
 |   |   set the **king** to **a new card** whose **rank** is _king_, **suit** is _spades_ and **direction** is _up_    ‾value(the king) ‾value(a new card whose rank is king, suit is spades and direction is up)
 |   |   set the **queen** to **a new card** whose **rank** is _queen_, **suit** is _hearts_ and **direction** is _up_    ‾value(the queen) ‾value(a new card whose rank is queen, suit is hearts and direction is up)
 |   |   set the **jack** to **a new card** whose **rank** is _jack_, **suit** is _clubs_ and **direction** is _up_    ‾value(the jack) ‾value(a new card whose rank is jack, suit is clubs and direction is up)
@@ -480,21 +494,19 @@
 |   |   the **column** can take the **jack** should be _no_    ‾question(the column can take the jack)
 |   |   the **column** can take the **queen** should be _yes_    ‾question(the column can take the queen)
 |   |   add the **queen** to the **column**    ‾value(the queen) ‾value(the column)
-|   |   the **shorthand** of the **column** should be _"T1: K♠↑ Q♥↑"_    ‾value(the shorthand of the column)
+|   |   the **shorthand** of the **column** should be _"Test1: K♠↑ Q♥↑"_    ‾value(the shorthand of the column)
 |   |   the **column** can give up the **queen** should be _yes_    ‾question(the column can give up the queen)
 |   |   turn the **queen** face down    ‾value(the queen)
 |   |   the **column** can give up the **queen** should be _no_    ‾question(the column can give up the queen)
 
-|   |   ⟦-- a foundation takes its suit, ace first, then one higher:  each the last card of its pile⟧
+|   |   ⟦-- a foundation takes its suit, ace first, then one higher⟧
 |   |   set the **foundation** to **a new foundation** with **suit** = _hearts_    ‾value(the foundation) ‾value(a new foundation with suit = hearts)
 |   |   set the **two** to **a new card** whose **rank** is _2_, **suit** is _hearts_ and **direction** is _up_    ‾value(the two) ‾value(a new card whose rank is 2, suit is hearts and direction is up)
 |   |   set the **ace** to **a new card** whose **rank** is _ace_, **suit** is _hearts_ and **direction** is _up_    ‾value(the ace) ‾value(a new card whose rank is ace, suit is hearts and direction is up)
-|   |   set the **column** to **a new column** with **id** _"T2"_    ‾value(the column) ‾value(a new column with id "T2")
 |   |   add the **two** to the **column**    ‾value(the two) ‾value(the column)
 |   |   add the **ace** to the **column**    ‾value(the ace) ‾value(the column)
 |   |   the **foundation** can take the **two** should be _no_    ‾question(the foundation can take the two)
 |   |   the **foundation** can take the **ace** should be _yes_    ‾question(the foundation can take the ace)
 |   |   move the **ace** to the **foundation**    ‾call(move the ace to the foundation)
 |   |   the **foundation** can take the **two** should be _yes_    ‾question(the foundation can take the two)
-|   |   add the **queen** to the **column**    ‾value(the queen) ‾value(the column)
 |   |   the **foundation** can take the **queen** should be _no_    ‾question(the foundation can take the queen)
