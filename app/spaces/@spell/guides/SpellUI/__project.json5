@@ -364,6 +364,22 @@
       "active": true
     },
     {
+      "path": "/Dial/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/Dial/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/Dial/API.spell",
+      "active": true
+    },
+    {
+      "path": "/Dial/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/Dimension/Usage.spell",
       "active": true
     },
