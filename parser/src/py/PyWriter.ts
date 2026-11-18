@@ -53,6 +53,12 @@ export class PyWriter extends PyBaseWriter {
   /** Writing the module's top level, where Python can't `await` -- see `statement()`. */
   protected atTopLevel = false
 
+  /**
+   * Is the statement being written one of the module's top level?  A group of statements it is (`statementLines()`)
+   * is then the top level's too;  inside a function, the function's.
+   */
+  protected statementAtTop = true
+
   /** The steps lifted out of the top level, for a name each -- see `topLevelStep()`. */
   protected steps = 0
 
@@ -162,10 +168,14 @@ export class PyWriter extends PyBaseWriter {
   // ## The top level
   ////////////////
 
-  /** As `PyBaseWriter`'s, noting when it's the module's own top level -- see `statement()`. */
+  /**
+   * As `PyBaseWriter`'s, noting when it's the module's own top level -- see `statement()`.
+   * - A group of statements inside a function (`ASTStatementGroup()` passes `topLevel`) is the function's:
+   *   its lines may `await` (`show "edit card" with the card`, epic `language` P64).
+   */
   statementLines(statements: P.ASTNode[], topLevel = false): string {
     const previous = this.atTopLevel
-    this.atTopLevel = topLevel
+    this.atTopLevel = topLevel && this.statementAtTop
     try {
       return super.statementLines(statements, topLevel)
     } finally {
@@ -182,12 +192,15 @@ export class PyWriter extends PyBaseWriter {
    */
   statement(statement: P.ASTNode): string {
     const atTop = this.atTopLevel
+    const outerAtTop = this.statementAtTop
     this.atTopLevel = false
+    this.statementAtTop = atTop
     let written: string
     try {
       written = super.statement(statement)
     } finally {
       this.atTopLevel = atTop
+      this.statementAtTop = outerAtTop
     }
     if (!atTop || !/\bawait /.test(written)) return written
     const call = /^await ([^\n]*)$/.exec(written)

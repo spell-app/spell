@@ -56,7 +56,7 @@ def test_confirm_says_yes_and_prints_so() -> None:
 def test_prompt_answers_its_starting_text() -> None:
     a_core, out = printing()
     assert asyncio.run(a_core.prompt("Your name?", "Ann")) == "Ann"
-    assert asyncio.run(a_core.prompt("Your age?")) is None
+    assert asyncio.run(a_core.prompt("Your age?")) == ""
     assert out.getvalue() == "Your name? (Ann)\nYour age? ()\n"
 
 
@@ -123,9 +123,10 @@ def test_a_dialog_with_options_and_no_page_prints_its_message() -> None:
     assert out.getvalue() == "You won!\n"
 
 
-def test_a_prompt_cancelled_on_the_page_answers_none() -> None:
+def test_a_prompt_cancelled_on_the_page_answers_empty_text_and_the_result_is_cancel() -> None:
     a_core, _ = asking({"prompt": None})
-    assert asyncio.run(a_core.prompt("Your name?")) is None
+    assert asyncio.run(a_core.prompt("Your name?")) == ""
+    assert a_core.result() == "cancel"
 
 
 def test_a_toast_on_the_page_goes_on_by_itself_and_and_wait_waits_for_it() -> None:
@@ -185,6 +186,19 @@ def test_the_result_after_alert_confirm_and_prompt() -> None:
     asyncio.run(run())
 
 
+def test_a_prompt_typed_into_answers_ok_and_its_text_is_the_value() -> None:
+    a_core, _ = asking({"prompt": "Bob"})
+    assert asyncio.run(a_core.prompt("Name?")) == "Bob"
+    assert a_core.result() == "ok"
+
+
+def test_answered_keeps_an_actions_value_as_the_result_and_gives_it_back() -> None:
+    a_core, _ = printing()
+    assert a_core.answered(3) == 3
+    assert a_core.result() == 3
+    assert a_core.result_is(3)
+
+
 def test_keep_open_is_asked_once() -> None:
     a_core, _ = printing()
     a_core.keep_open()
@@ -241,3 +255,22 @@ def test_compiled_python_finds_each_on_core(method: str) -> None:
     from spell_core import core
 
     assert callable(getattr(core, method))
+
+
+def test_show_with_a_thing_draws_it_in_the_modal_and_sends_it_to_the_page_by_its_id() -> None:
+    # language P64:  `show "edit card" with the card`
+    a_core, asked = asking({"showDrawn": "ok"})
+    card = object()
+    a_core.refer_to_thing = lambda thing: {"$id": "3"}
+    assert a_core.draw_shown("edit card", "game", lambda it: it) == "game"
+    assert asyncio.run(a_core.show_drawn("edit card", card)) == "ok"
+    assert asked == [("showDrawn", ["edit card", {"$id": "3"}])]
+    assert a_core.shown_in("edit card") is card
+    assert a_core.draw_shown("edit card", "game", lambda it: it) is card
+
+
+def test_show_with_a_thing_and_no_page_still_draws_it() -> None:
+    a_core, _ = printing()
+    card = object()
+    assert asyncio.run(a_core.show_drawn("edit card", card)) is None
+    assert a_core.draw_shown("edit card", "game", lambda it: it) is card

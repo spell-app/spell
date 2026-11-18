@@ -1,5 +1,5 @@
 import { after, soon } from "spell/util/timing"
-import { schemaOf, type Schema } from "spell/util/reactive"
+import { Cell, schemaOf, type Schema } from "spell/util/reactive"
 
 import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -156,7 +156,7 @@ export const uiMethods = defineCoreModule({
    * - `options`, from the clauses written after the message:  `NotifyOptions`
    *   - e.g. `notify success "Saved!" at the top right for 5 seconds` =>
    *     `core.notify("Saved!", { class: "success", position: "top right", time: 5, units: "seconds" })`
-   * - Shown once Spell UI's runtime has loaded.
+   * - Shown once Spell UI's runtime has loaded;  its message read as Markdown where it has some (`toastOptionsFor()`).
    * - Returns a promise of the toast being gone:  `notify "..." for 5 seconds` waits for it, plain `notify` doesn't.
    *   - One that stays until it's closed answers at once, so nothing waits on it for good.
    * - No Spell UI:  printed on the console, and gone at once.
@@ -220,17 +220,20 @@ export const uiMethods = defineCoreModule({
   },
 
   /**
-   * Ask for some text in a dialog:  what was typed, or `undefined` if cancelled.
-   * - Compiled from `prompt "Name?" with "Untitled"` (`await`ed), `value` its starting text.
-   * - No Spell UI:  `value`, printed with the question.
+   * Ask for some text in a dialog:  what was typed -- compiled from `prompt "Name?" with "Untitled"` (`await`ed),
+   * `value` its starting text, into a new `it` (spell's `prompt` rule).
+   * - HyperTalk's way (epic `language` P64):  the text typed is the value, empty text if they cancel;
+   *   `the result` is the button that closed it, `ok` or `cancel`.
+   * - Its message is read as Markdown where it has some, as `alert`'s is (`dialogFor()`).
+   * - No Spell UI:  `value`, printed with the question, and `ok`.
    */
-  async prompt(message: unknown, value?: string): Promise<string | undefined> {
+  async prompt(message: unknown, value?: string): Promise<string> {
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
-    if (!ui) return (core.console.info(`${String(message)} (${value ?? ""})`), keepResult(value), value)
-    const typed = await (await ui.load()).modals.prompt({ message: String(message), value })
-    keepResult(typed ?? CANCEL)
-    return typed
+    if (!ui) return (core.console.info(`${String(message)} (${value ?? ""})`), keepResult(OK), value ?? "")
+    const typed = await (await ui.load()).modals.prompt({ ...dialogFor(message), value })
+    keepResult(typed === undefined ? CANCEL : OK)
+    return typed ?? ""
   },
 
   ////////////////
@@ -248,9 +251,12 @@ export const uiMethods = defineCoreModule({
    *   - nothing for `hide "you won"`, which leaves `the result` as it was
    *   - `show "you won"` awaits it:  the lines after it run once it closes;  `... without waiting` doesn't.
    * - Anything else, or under node with no page:  ends at once, with nothing.
+   * - `thing`:  what it's shown with, `show "edit card" with the card` (epic `language` P64), which the modal draws
+   *   and edits ITSELF, not a copy (`core.drawShown()`):  so its Cancel doesn't undo what was changed in it.
    * - throws `TypeError` when nothing drawn has that name
    */
-  showDrawn(name: string): Promise<unknown> {
+  showDrawn(name: string, thing?: unknown): Promise<unknown> {
+    if (thing !== undefined) showIn(name, thing)
     const element = setDrawnVisible("showDrawn", name, true)
     if (!element || !isDialog(element)) return Promise.resolve(undefined)
     return whileShowing(element)
@@ -281,11 +287,24 @@ export const uiMethods = defineCoreModule({
   /**
    * What closed the last dialog:  what `the result` compiles to (epic `language` T155).
    * - A modal's (`showDrawn()`):  `ok`, `cancel`, or its button's action's name, `save the thing`
-   * - `alert`, `warn`:  `ok`;  `confirm`:  `ok` or `cancel`;  `prompt`:  the text typed, or `cancel`
+   * - `alert`, `warn`:  `ok`;  `confirm`, `prompt`:  `ok` or `cancel` (`prompt`'s text is `it`, epic `language` P64)
+   * - What an action gives back, when it runs as a statement (`deal the cards`, P64;  `keepResult()`)
    * - Nothing, before any has closed.
    */
   result(): unknown {
     return resultBox().value
+  },
+
+  /**
+   * `the result` is `value` from now on, and give it back:  what an action that gives back a value compiles to,
+   * run as a statement on its own line (epic `language` P64, Q70).
+   * - `deal the cards`, then `if the result is ...`:  `core.answered(this.dealTheCards())`
+   * - Used as a value (`set x to the score of the game`), a call isn't wrapped:  `the result` stays as it was.
+   * - A promise (an action that waits):  the compiler awaits it first, `core.answered(await this.deal())`.
+   */
+  answered<T>(value: T): T {
+    keepResult(value)
+    return value
   },
 
   /**
@@ -617,6 +636,52 @@ export function drawnMenuItemsOf(name: string): MenuItem[] | undefined {
 const MENU_ROW_TAG = "ui-action"
 const MENU_DIVIDER = "divider"
 
+////////////////
+// ## What a modal is shown with (epic `language` P64)
+//
+// `show "edit card" with the card`:  the modal draws the card itself (`core.drawShown()`), and edits it in place.
+////////////////
+
+/** What each modal was last shown with, by its id (`drawnIdOf()`), and how its drawing hears it change. */
+type ShownThing = { thing: unknown; changed: Cell }
+
+/** Each modal's `ShownThing`, by its id:  this run's (`core.getRuntimeState()`). */
+function shownThings(): Map<string, ShownThing> {
+  return core.getRuntimeState("shownThings", () => new Map<string, ShownThing>())
+}
+
+/** The modal `name`'s `ShownThing`, made the first time it's asked for. */
+function shownThingOf(name: string): ShownThing {
+  const id = drawnIdOf(name)
+  const things = shownThings()
+  let shown = things.get(id)
+  if (!shown) things.set(id, (shown = { thing: undefined, changed: new Cell() }))
+  return shown
+}
+
+/** SIDE EFFECT:  modal `name` is shown with `thing` from now on:  its drawing draws it (`shownIn()`). */
+function showIn(name: string, thing: unknown): void {
+  const shown = shownThingOf(name)
+  if (shown.thing === thing) return
+  shown.thing = thing
+  shown.changed.changed()
+}
+
+/**
+ * What modal `name` was last shown with, `show "edit card" with the card` -- `undefined` if it never was.
+ * - Read in a drawing, it draws again when the modal is shown with something else (`core.drawShown()`).
+ */
+export function shownIn(name: string): unknown {
+  const shown = shownThingOf(name)
+  shown.changed.read()
+  return shown.thing
+}
+
+/** The id the program's drawing gives what it named `name`:  its words joined by `-`, `you-won` for `"you won"`. */
+function drawnIdOf(name: string): string {
+  return name.trim().split(/\s+/).join("-")
+}
+
 /**
  * What the program drew and named `name`:  the element whose id is its words joined by `-`, `you-won` for
  * `"you won"` -- `undefined` for none.
@@ -624,7 +689,7 @@ const MENU_DIVIDER = "divider"
  *   a view draws in a shadow root of its own, which `getElementById()` can't see into.
  */
 function drawnNamed(name: string): Element | undefined {
-  const id = name.trim().split(/\s+/).join("-")
+  const id = drawnIdOf(name)
   const roots: Array<Document | ShadowRoot> = [core.domRoot()]
   for (const root of roots) {
     const found = root.getElementById(id)
@@ -905,7 +970,7 @@ type PageUI = {
   modals: {
     alert(options: PageDialog): Promise<void>
     confirm(options: PageDialog): Promise<boolean>
-    prompt(options: { message: string; value?: string }): Promise<string | undefined>
+    prompt(options: PageDialog & { value?: string }): Promise<string | undefined>
   }
   /** the page's keyboard shortcuts:  `UI.keyboard`;  `register()` answers how to stop */
   keyboard: {
@@ -946,7 +1011,7 @@ type PageDialog = {
 }
 
 /**
- * The dialog `alert`, `warn` and `confirm` ask the page for:  `message` as text, and their buttons' words,
+ * The dialog `alert`, `warn`, `confirm` and `prompt` ask the page for:  `message` as text, and their buttons' words,
  * passed one by one (`okText`, `cancelText`) or as `DialogOptions`.
  * - Its message is read as Markdown (epic `language` T145):  `alert "# You won!"` draws a heading, `**42**` bold.
  *   Spell UI draws it sanitized, and only where it has Markdown in it:  a plain message looks as it always did.
@@ -996,11 +1061,17 @@ export type NotifyAction = {
 /** What core hands Spell UI's `UI.toast()`:  a copy of the part of its `ToastOptions` that `notify` uses. */
 type PageToastOptions = Omit<NotifyOptions, "time" | "units" | "button" | "actions"> & {
   message: string
+  /** read the message as Markdown where it has some:  always, for a Spell program's toasts (epic `language` P64) */
+  markdown?: boolean
   displayTime?: number | "auto"
   actions?: { text: string; click?: () => void }[]
 }
 
-/** `notify`'s message and options as Spell UI's toast options:  its time in milliseconds, its button an action. */
+/**
+ * `notify`'s message and options as Spell UI's toast options:  its time in milliseconds, its button an action.
+ * - Its message is read as Markdown, as a dialog's is (epic `language` P64):  Spell UI draws it sanitized, and only
+ *   where it has Markdown in it.
+ */
 function toastOptionsFor(message: string, options: NotifyOptions): PageToastOptions {
   const { time, units = "seconds", button, actions: pressed = [], ...toastOptions } = options
   const actions = [...pressed, ...(button ? [{ text: button }] : [])]
@@ -1009,7 +1080,7 @@ function toastOptionsFor(message: string, options: NotifyOptions): PageToastOpti
     : time === undefined
       ? "auto"
       : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
-  return { ...toastOptions, message, displayTime, ...(actions.length ? { actions } : {}) }
+  return { ...toastOptions, message, markdown: true, displayTime, ...(actions.length ? { actions } : {}) }
 }
 
 /** Does a toast stay until it's closed?  It has a button, or a time of 0. */

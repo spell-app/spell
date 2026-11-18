@@ -10,8 +10,9 @@ import { type Vocabulary } from "./UIModal.types"
  * - Markup:  `<ui-modal size="tiny" closedby="closerequest" closable heading="title">` holding
  *   - a `<ui-content>`:  the message as a `<p>`, or for `prompt()` a `<label>` around it and an `<input>`
  *     - `size`:  the message's text size (`ui-font-size-big`), the title and buttons keeping theirs
- *     - `markdown`, and the message has Markdown in it (`hasMarkdown()`):
- *       a `<ui-markdown sanitized breaks>` instead of the `<p>`, its family imported the first time one is needed;
+ *     - `markdown`, and the message has Markdown in it (`hasMarkdown()`, `spell/util/string`):
+ *       a `<ui-markdown sanitized breaks>` instead of the `<p>` (`prompt()`'s, above its input, in its label),
+ *       its family imported the first time one is needed;
  *       the dialog shows once it has drawn, so it never opens on a half-drawn message
  *   - `<ui-actions>`:  a deny button (`cancel`, first:  it takes the initial focus, the least destructive choice)
  *     and a primary approve button.
@@ -58,7 +59,7 @@ export class ModalDialogs implements E.ModalProvider {
    * - Throws when the parts or `<ui-button>` aren't registered (`tagFor()`).
    */
   private run<T>(options: E.ModalOptions, flags: DialogFlags, result: (isApproved: boolean, value: string) => T) {
-    if (flags.input === undefined && options.markdown && ModalDialogs.hasMarkdown(options.message)) {
+    if (options.markdown && E.hasMarkdown(options.message)) {
       return this.markdown(options).then((message) => this.open(options, flags, result, message))
     }
     return this.open(options, flags, result)
@@ -82,7 +83,7 @@ export class ModalDialogs implements E.ModalProvider {
     else modal.setAttribute("aria-label", options.message)
     const content = this.document.createElement(ModalDialogs.tagFor(UIT.CONTENT))
     const field = input === undefined ? undefined : this.input(input)
-    content.append(field ? this.label(options.message, field) : (message ?? this.paragraph(options)))
+    content.append(field ? this.label(options.message, field, message) : (message ?? this.paragraph(options)))
     const actions = this.document.createElement(ModalDialogs.tagFor(ACTIONS))
     if (canDeny) actions.append(this.button(options.cancelText ?? UI.i18n.t(CANCEL), CANCEL))
     const approve = this.button(options.okText ?? UI.i18n.t(OK), APPROVE_CLASS)
@@ -148,15 +149,6 @@ export class ModalDialogs implements E.ModalProvider {
   }
 
   /**
-   * Whether `message` has Markdown in it:  a heading, a list, a quote, a fence, bold or italic, code, a link.
-   * - So a plain message stays a plain `<p>`, drawn exactly as before `markdown` was asked for.
-   * - Static:  pure text.
-   */
-  static hasMarkdown(message: string): boolean {
-    return MARKDOWN_MARKS.some((mark) => mark.test(message))
-  }
-
-  /**
    * Resolves once `markdown` has drawn (`ui-drawn`), or after `DRAW_WAIT` seconds whatever happened:
    * a message that can't draw still opens, showing its error.
    */
@@ -183,14 +175,20 @@ export class ModalDialogs implements E.ModalProvider {
     return input
   }
 
-  /** The message as the input's `<label>`, in the opt-in native look (`native.css`). */
-  private label(message: string, input: HTMLInputElement): HTMLLabelElement {
+  /**
+   * The message as the input's `<label>`, in the opt-in native look (`native.css`).
+   * - `markdown`:  the message drawn as Markdown (`markdown()`), in place of its plain words.
+   */
+  private label(message: string, input: HTMLInputElement, markdown?: HTMLElement): HTMLLabelElement {
     const label = this.document.createElement("label")
     label.className = NATIVE_LOOK
     label.style.cssText = LABEL_LAYOUT
-    const words = this.document.createElement("span")
-    words.style.whiteSpace = MESSAGE_LINES
-    words.textContent = message
+    let words = markdown
+    if (!words) {
+      words = this.document.createElement("span")
+      words.style.whiteSpace = MESSAGE_LINES
+      words.textContent = message
+    }
     label.append(words, input)
     return label
   }
@@ -264,24 +262,6 @@ const DRAWN_EVENT = "ui-drawn"
 
 /** The longest a Markdown message holds its dialog back while it draws, in seconds. */
 const DRAW_WAIT = 1
-
-/**
- * What makes a message Markdown:  any one of them.
- * - a heading (`# Won`), a list item (`- one`, `1. one`), a quote (`> said`), a fence (```` ``` ````)
- * - bold or italic (`**big**`, `__big__`, `*so*`, `_so_`), code (`` `x` ``), a link (`[here](/x)`)
- * - Italic needs a mark against a word on both sides, so `5 * 3 * 2` and `snake_case_name` stay plain.
- */
-const MARKDOWN_MARKS = [
-  /^#{1,6}\s/m,
-  /^\s*(?:[-*+]|\d+[.)])\s+\S/m,
-  /^>\s?/m,
-  /^```/m,
-  /(\*\*|__)\S(?:.*?\S)?\1/,
-  /(?<![\w*])\*[^\s*](?:[^*]*[^\s*])?\*(?![\w*])/,
-  /(?<!\w)_[^\s_](?:[^_]*[^\s_])?_(?!\w)/,
-  /`[^`\n]+`/,
-  /\[[^\]\n]+\]\([^)\s]+\)/
-]
 
 /** Class noun of the actions part (`<ui-actions>`). */
 const ACTIONS = "actions"

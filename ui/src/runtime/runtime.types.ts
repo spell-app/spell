@@ -403,6 +403,11 @@ export const TEMPORAL_POLYFILL = "temporal-polyfill"
 export type ToastOptions = {
   /** body text */
   message?: string
+  /**
+   * read the message as Markdown (headings, bold, lists, links), sanitized:  a `<ui-markdown sanitized>` in its body
+   * - only a message with Markdown in it:  plain text is drawn exactly as without it (epic `language` P64)
+   */
+  markdown?: boolean
   /** bold first line */
   title?: string
   /** consequence word:  `"info"`, `"success"`, `"warning"`, `"error"`, `"neutral"` (default) */
@@ -491,7 +496,7 @@ export type ModalOptions = {
   /**
    * read the message as Markdown (headings, bold, lists, links), sanitized:  `<ui-markdown sanitized>`
    * - only a message with Markdown in it:  plain text is drawn exactly as without it
-   * - `alert()` and `confirm()`;  `prompt()`'s message stays plain, as its input's label
+   * - `alert()`, `confirm()` and `prompt()` (its message above its input, in its label)
    */
   markdown?: boolean
   /** approve button text;  default `I18n` `ok` */

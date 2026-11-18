@@ -38,6 +38,7 @@ describe("priority and precedence", () => {
         "add_new_thing:  Priority.overridable",
         "after_hook:  Priority.specific",
         "and:  Precedence.and",
+        "answer_word:  Priority.overridable",
         "any_server_call_fails:  Priority.mostSpecific",
         "as_a_date:  Precedence.comparison",
         "as_a_duration:  Precedence.comparison",

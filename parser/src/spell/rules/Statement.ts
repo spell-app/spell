@@ -305,6 +305,18 @@ export class SpellStatement<
   }
 
   /**
+   * SIDE EFFECT:  `match`, a call that gives back a value (`givesValue`), runs as a statement, not as a value:
+   * on its own line, or as an inline body (`if ..., deal the cards`).
+   * - So what it gives back is `the result` (epic `language` P64, Q70):  `match.data.runAsStatement`.
+   * - Anything else:  nothing.
+   */
+  static noteRunAsStatement(match: P.Match): void {
+    if (match.rule instanceof SpellStatement && match.rule.givesValue) {
+      ;(match.data as { runAsStatement?: boolean }).runAsStatement = true
+    }
+  }
+
+  /**
    * Attempt to parse `unparsed` tokens from end of the line as our inline body, in `statement.nestedScope`.
    * - Returns inline statement match if successful.
    * - SIDE EFFECT: on success, adds it to `statement.groups` as `body`,
@@ -322,6 +334,7 @@ export class SpellStatement<
     )
     const inlineStatement = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
     if (inlineStatement) {
+      if (parseAs === "statement") SpellStatement.noteRunAsStatement(inlineStatement)
       statement.addMatch(inlineStatement, "body")
       // the subjects `withWhichSubject()` put back aren't on the line:  we're as long as the words we read
       if (tokens !== unparsed) {
@@ -618,6 +631,8 @@ export class SpellStatement<
     if (lineStatement && !asks) {
       if (!(lineStatement.rule instanceof SpellStatement) || !lineStatement.rule.givesValue) return undefined
       block.data.returnsLast = lineStatement
+      // its value goes where it's written, as the body's:  `the result` stays as it was (epic `language` Q70)
+      delete (lineStatement.data as { runAsStatement?: boolean }).runAsStatement
       return block
     }
     // a line nothing read:  read as an expression, the whole of it

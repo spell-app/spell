@@ -4947,6 +4947,31 @@
           "aliases": ["expression"]
         },
         {
+          "className": "AnswerWord",
+          "ruleNames": ["answer_word"],
+          "internal": false,
+          "file": "src/spell/rules/UI/AnswerWord.ts",
+          "line": 17,
+          "purpose": "A button's own answer, a bare word, compared with `the result` (epic `language` P64).",
+          "syntaxes": [
+            {
+              "example": "the result is not discard",
+              "outputs": {
+                "js": {
+                  "code": "(!core.resultIs(\"discard\"))"
+                },
+                "ts": {
+                  "code": "(!core.resultIs(\"discard\"))"
+                },
+                "py": {
+                  "code": "(not core.result_is(\"discard\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "OpenPrinting",
           "ruleNames": ["open_printing"],
           "internal": false,
@@ -5055,7 +5080,7 @@
           "ruleNames": ["show_drawn"],
           "internal": false,
           "file": "src/spell/rules/UI/ShowDrawn.ts",
-          "line": 18,
+          "line": 25,
           "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
           "syntaxes": [
             {
@@ -5070,6 +5095,32 @@
                 },
                 "py": {
                   "code": "await core.show_drawn(\"you won\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "ShowDrawnWith",
+          "ruleNames": ["show_drawn_with"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDrawn.ts",
+          "line": 58,
+          "purpose": "`show \"edit card\" with the card` -- `show_drawn`, shown with a thing (epic `language` P64).",
+          "syntaxes": [
+            {
+              "syntax": "show {name:text} with {thing:expression}",
+              "example": "show \"edit card\" with card",
+              "outputs": {
+                "js": {
+                  "code": "const it = card\nawait core.showDrawn(\"edit card\", it)"
+                },
+                "ts": {
+                  "code": "const it = card\nawait core.showDrawn(\"edit card\", it)"
+                },
+                "py": {
+                  "code": "it = card\nasyncio.run(core.show_drawn(\"edit card\", it))"
                 }
               }
             }
@@ -5330,21 +5381,21 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "line": 19,
+          "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
               "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
               "example": "prompt \"Name for the new baby?\"",
               "outputs": {
                 "js": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
+                  "code": "const it = await core.prompt(\"Name for the new baby?\")"
                 },
                 "ts": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
+                  "code": "const it = await core.prompt(\"Name for the new baby?\")"
                 },
                 "py": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
+                  "code": "it = await core.prompt(\"Name for the new baby?\")"
                 }
               }
             }
@@ -10255,7 +10306,7 @@
           "ruleNames": ["action_button"],
           "internal": false,
           "file": "src/spell/rules/JSX/ActionButton.ts",
-          "line": 70,
+          "line": 73,
           "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
           "syntaxes": [
             {
@@ -10305,7 +10356,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 113,
+          "line": 119,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

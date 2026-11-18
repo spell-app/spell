@@ -141,7 +141,7 @@ export class Piece extends View {
     if (checkers.table !== undefined) board.shareInTable(checkers.table)
     if (checkers.opponent === "computer" && board.turn === "red" && !board.isOver) {
       await core.pauseFor(600, "msec")
-      board.playForTheComputerOnBoard()
+      core.answered(board.playForTheComputerOnBoard())
     }
   }
 
@@ -767,7 +767,7 @@ export function testTheComputerJumps() {
     core.echoTestAction(`put a "black" "man" at 7 and 2 on board`)
     board.putASideRankAtRowAndColumnOnBoard("black", "man", 7, 2)
     core.echoTestAction(`play for the computer on board`)
-    board.playForTheComputerOnBoard()
+    core.answered(board.playForTheComputerOnBoard())
     core.expect(core.isEmpty(board.theSquareAtRowAndColumnOnBoard(4, 5)), `the square at 4 and 5 on board is empty`, true, `yes`)
     core.expect(board.theSquareAtRowAndColumnOnBoard(5, 6).piece !== undefined, `the piece of (the square at 5 and 6 on board) exists`, true, `yes`)
   })
@@ -793,7 +793,7 @@ export function testTheComputerKeepsItsPiecesSafe() {
     core.expect(man.wouldBeSafeOnSquare(board.theSquareAtRowAndColumnOnBoard(4, 5)), `man would be safe on (the square at 4 and 5 on board)`, false, `no`)
     core.expect(man.wouldBeSafeOnSquare(board.theSquareAtRowAndColumnOnBoard(4, 3)), `man would be safe on (the square at 4 and 3 on board)`, true, `yes`)
     core.echoTestAction(`play for the computer on board`)
-    board.playForTheComputerOnBoard()
+    core.answered(board.playForTheComputerOnBoard())
     core.expect(board.theSquareAtRowAndColumnOnBoard(4, 3).piece !== undefined, `the piece of (the square at 4 and 3 on board) exists`, true, `yes`)
   })
 }

@@ -582,6 +582,20 @@ describe("UI.toast()", () => {
     expect(window.innerWidth - box.right).toBeCloseTo(12, 0)
   })
 
+  it("`markdown`:  a message with Markdown in it is a sanitized <ui-markdown> in its body;  a plain one stays its message (P64)", async () => {
+    const handle = UI.toast({ message: "Saved **3** cards", markdown: true, displayTime: 0 })
+    const element = handle.element as Toast
+    expect(element.hasAttribute("message")).toBe(false)
+    const markdown = element.querySelector<HTMLElement>("ui-markdown")!
+    expect(markdown.hasAttribute("sanitized")).toBe(true)
+    await expect.poll(() => markdown.shadowRoot?.querySelector("strong")?.textContent).toBe("3")
+    UI.toasts.dismiss(handle.id)
+    const plain = UI.toast({ message: "Saved 3 cards", markdown: true, displayTime: 0 })
+    expect(plain.element!.getAttribute("message")).toBe("Saved 3 cards")
+    expect(plain.element!.querySelector("ui-markdown")).toBeNull()
+    UI.toasts.dismiss(plain.id)
+  })
+
   it("`showIcon: false` shows none", () => {
     const handle = UI.toast({ message: "Bare", showIcon: false, displayTime: 0 })
     expect(handle.element!.hasAttribute("icon")).toBe(false)

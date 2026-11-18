@@ -332,3 +332,11 @@ def test_a_modal_button_draws_as_a_button_its_page_closes_the_modal_with(core: C
 def test_ok_with_no_action_of_that_name_is_a_button_labelled_ok(core: Core) -> None:
     assert str(core.draw_action(Dealer(), "ok", {"answer": "ok", "in-dialog": True})) == "<ui-button>OK</ui-button>"
     assert str(core.draw_action(Dealer(), "cancel", {"answer": "cancel"})) == "<ui-button>Cancel</ui-button>"
+
+
+def test_a_buttons_own_answer_with_no_action_of_that_name_is_a_button_labelled_by_its_title_or_word(core: Core) -> None:
+    # language P64:  `<action discard title="Discard your changes" />`
+    discard = {"answer": "discard", "in-dialog": True}
+    assert str(core.draw_action(Dealer(), "discard", discard)) == "<ui-button>Discard</ui-button>"
+    titled = {**discard, "title": "Discard your changes"}
+    assert str(core.draw_action(Dealer(), "discard", titled)) == "<ui-button>Discard your changes</ui-button>"

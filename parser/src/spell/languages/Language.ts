@@ -401,9 +401,10 @@ export type ArticleAgreement = {
 }
 
 /**
- * What a modal's button answers by a word on it, `the result` once it's closed by it (epic `language` T155).
- * - `ok` and `cancel` so far;  a button's own word (`<action discard />`, T160) is meant to join them:
- *   `answerWords` reads any word it lists, and the core keeps whatever answer a button gives.
+ * The answers each language has words for, `<action ok />`:  `the result` once a modal's button closed it
+ * (epic `language` T155).
+ * - A button's own word (`<action discard />`, P64) is the program's, not the language's:
+ *   it's its own answer, as written (`action_button`'s `answerOf()`), and the core keeps whatever answer a button gives.
  */
 export type DialogAnswer = "ok" | "cancel"
 

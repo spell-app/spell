@@ -91,14 +91,16 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
   })
 })
 
-describe("core.alert() / warn() / confirm():  the dialog the page's Spell UI is asked for (epic `language` T143-T145)", () => {
+describe("core.alert() / warn() / confirm() / prompt():  the dialog the page's Spell UI is asked for (epic `language` T143-T145)", () => {
   /** A stand-in for the page's Spell UI runtime:  what its dialogs were asked for. */
   function stubPageUI() {
     const asked: { method: string; options: unknown }[] = []
     const modals = {
       alert: (options: unknown) => (asked.push({ method: "alert", options }), Promise.resolve()),
-      confirm: (options: unknown) => (asked.push({ method: "confirm", options }), Promise.resolve(true))
+      confirm: (options: unknown) => (asked.push({ method: "confirm", options }), Promise.resolve(true)),
+      prompt: (options: unknown) => (asked.push({ method: "prompt", options }), Promise.resolve(typed.shift()))
     }
+    const typed: Array<string | undefined> = ["Bob", undefined]
     const page = { load: () => Promise.resolve(page), modals }
     const key = Symbol.for("spell-ui:runtime")
     ;(globalThis as Record<symbol, unknown>)[key] = page
@@ -132,6 +134,17 @@ describe("core.alert() / warn() / confirm():  the dialog the page's Spell UI is 
         options: { title: "Solitaire", okText: "Deal", cancelText: "Not now", message: "Deal?", markdown: true }
       }
     ])
+  })
+
+  test("`prompt`:  its Markdown message;  the text typed is its value, `the result` ok or cancel (P64)", async () => {
+    const asked = stubPageUI()
+    core.resetRuntime()
+    onTestFinished(() => void core.resetRuntime())
+    expect(await core.prompt("Your **name**?", "Ann")).toBe("Bob")
+    expect(core.result()).toBe("ok")
+    expect(await core.prompt("Again?")).toBe("")
+    expect(core.result()).toBe("cancel")
+    expect(asked[0]).toEqual({ method: "prompt", options: { message: "Your **name**?", markdown: true, value: "Ann" } })
   })
 })
 
@@ -274,15 +287,21 @@ describe("a modal's buttons, and `the result` (epic `language` T155)", () => {
     expect(ran).toEqual(["deal", "won:  deal the cards"])
   })
 
-  test("`alert` answers ok, `confirm` ok or cancel, `prompt` the text typed, with no Spell UI", async () => {
+  test("`alert` answers ok, `confirm` and `prompt` ok or cancel, with no Spell UI;  `prompt` gives its text", async () => {
     vi.stubGlobal("document", undefined)
     vi.spyOn(core.console, "info").mockImplementation(() => undefined)
     core.resetRuntime()
     await core.alert("You won!")
     expect(core.result()).toBe("ok")
-    await core.prompt("Name?", "Ann")
-    expect(core.result()).toBe("Ann")
+    expect(await core.prompt("Name?", "Ann")).toBe("Ann")
+    expect(core.result()).toBe("ok")
     await core.confirm("Deal again?")
     expect(core.result()).toBe("ok")
+  })
+
+  test("`core.answered()`:  an action's value, run as a statement, is `the result`, and given back (P64)", () => {
+    core.resetRuntime()
+    expect(core.answered(3)).toBe(3)
+    expect(core.result()).toBe(3)
   })
 })

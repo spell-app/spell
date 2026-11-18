@@ -34,7 +34,7 @@ describe("Python on asyncio", () => {
   // waits since `move a card to a pile` is Pile.spell's, epic `language` P56)
   test("a handler that calls one that waits is `async def` too", () => {
     expect(cards).toMatch(
-      /\n {4}async def on_click\(self, event: ClickEvent\) -> None:\n(?:.*\n){1,3}? {12}await self\.play\(\)\n/
+      /\n {4}async def on_click\(self, event: ClickEvent\) -> None:\n(?:.*\n){1,3}? {12}core\.answered\(await self\.play\(\)\)\n/
     )
   })
 

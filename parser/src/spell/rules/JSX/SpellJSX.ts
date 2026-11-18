@@ -50,6 +50,12 @@ const VIEW_ID_ATTRIBUTE = "id"
 const CONTEXT_MENU_ATTRIBUTE = "context-menu"
 /** Spell UI's modal:  its actions close it, and what it holds goes in its parts (epic `language` T155). */
 const DIALOG_TAG = "ui-modal"
+
+/** The scope a named modal's contents are drawn in, where `it` is what it's shown with (epic `language` P64). */
+const SHOWN_SCOPE = "shown"
+
+/** What `it` compiles to inside a named modal:  `core.drawShown()`'s callback's argument. */
+const SHOWN_IT = "it"
 /** The parts a modal lays out (`ownsParts`):  a drawing that names one lays its modal out itself. */
 const DIALOG_PART_TAGS = ["ui-header", "ui-content", "ui-description", "ui-actions"]
 /** Where a modal's drawing goes, when it names none of its parts:  its content, then its actions' buttons. */
@@ -163,10 +169,16 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (takesShortcuts && element instanceof P.JSXElementToken && SpellJSX.isLoop(scope, element)) {
       return SpellJSX.parseLoop(scope, match, element)
     }
+    // a modal named by its quoted word:  inside it, `it` is what it's shown with (epic `language` P64)
+    const shownIn =
+      takesShortcuts && element instanceof P.JSXElementToken ? SpellJSX.shownInScope(scope, element) : undefined
+    if (shownIn) match.data.shownIn = textOf((element as P.JSXElementToken).quotedWord!.value).trim()
+    const childScope = shownIn ?? scope
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
     // call `scope.parser.parse()` directly instead, as `SpellCSSFile.parse()` does.
     match.data.children = element.children?.map(
-      (child) => scope.parser?.parse(child, "jsxChild", scope) || scope.parser?.parse(child, "parse_error", scope)
+      (child) =>
+        scope.parser?.parse(child, "jsxChild", childScope) || scope.parser?.parse(child, "parse_error", childScope)
     )
     SpellJSX.claimBranches(scope, match)
     // a fragment (`jsxFragment`) has no tag and no attributes
@@ -484,12 +496,62 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
     if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
-    const children = match.data.dialogParts ? SpellJSX.dialogChildren(match) : this.childASTs(match)
+    const laidOut = match.data.dialogParts ? SpellJSX.dialogChildren(match) : this.childASTs(match)
+    const children =
+      match.data.shownIn !== undefined && readsIt(laidOut) ? SpellJSX.drawnShown(match, laidOut) : laidOut
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
       children: view ? SpellJSX.withSlotNames(view, children) : children
     })
+  }
+
+  ////////////////
+  // ## What a modal is shown with (epic `language` P64)
+  ////////////////
+
+  /**
+   * The scope a modal named by its quoted word draws its contents in, `<modal "edit card">`:
+   * one where `it` is what the modal is shown with, `show "edit card" with the card` (`show_drawn`).
+   * - Owen, 2026-11-17:  "Inside the modal's drawing, the thing is what it draws."
+   *   So `{its name}`, `<input value={its name}/>` inside it read and edit the card itself.
+   * - Never shown with anything, `it` is the thing whose drawing it's in, as before (`core.drawShown()`).
+   * - What `it` is isn't known where it's drawn:  a `show` naming it may come later in the program.
+   * - `undefined` for any other tag.
+   */
+  private static shownInScope(scope: P.Scope, element: P.JSXElementToken): P.BlockScope | undefined {
+    if (!element.quotedWord || element.chain) return undefined
+    const tag = SpellJSX.componentTagFor(scope, element.tagName)
+    if (!tag || SpellJSX.canonicalTagOf(scope, tag) !== DIALOG_TAG) return undefined
+    const shown = new P.BlockScope({ name: SHOWN_SCOPE, parentScope: scope })
+    shown.variables.add({ name: "it", output: SHOWN_IT })
+    return shown
+  }
+
+  /**
+   * A named modal's `children`, drawn with what it's shown with:  `core.drawShown("edit card", this, (it) => [...])`
+   * -- see `shownInScope()`.
+   * - Only when they read `it` (`readsIt()`):  one that doesn't, `<modal "you won">`, draws as it always did.
+   */
+  private static drawnShown(
+    match: P.MatchFor<SpellJSX>,
+    children: P.ASTJSXElementProps["children"]
+  ): P.ASTJSXElementProps["children"] {
+    const name = match.data.shownIn!
+    const draw = new P.ASTMethodDefinition(match, {
+      args: [new P.ASTVariableExpression(match, { name: SHOWN_IT })],
+      body: new P.ASTJSXFragment(match, { children }),
+      inline: true
+    })
+    const shown = new P.ASTCoreMethodInvocation(match, {
+      methodName: "drawShown",
+      args: [
+        new P.ASTStringLiteral(match, { value: name, quote: '"', raw: JSON.stringify(name) }),
+        new P.ASTSelfLiteral(match, { value: "this", raw: "" }),
+        draw
+      ]
+    })
+    return [new P.ASTJSXExpression(match, { expression: shown })]
   }
 
   /**
@@ -1071,6 +1133,22 @@ function oneWordText(text: P.TextToken): P.TextToken {
 }
 
 /** A quoted word's text, without its quotes:  `T1` for `"T1"`. */
+/**
+ * Does `node`, a named modal's contents as compiled, read `it`, what the modal is shown with (`SHOWN_IT`, P64)?
+ * - Walks every field of every node, as `if`'s `replaceNode()` does.
+ */
+function readsIt(node: unknown): boolean {
+  if (!node || typeof node !== "object") return false
+  if (Array.isArray(node)) return node.some(readsIt)
+  if (!(node instanceof P.ASTNode)) return false
+  if (node instanceof P.ASTVariableExpression && node.name === SHOWN_IT) return true
+  const fields = node as unknown as Record<string, unknown>
+  for (const key in fields) {
+    if (key !== "match" && Object.hasOwn(fields, key) && readsIt(fields[key])) return true
+  }
+  return false
+}
+
 function textOf(word: P.JSXAttributeValue): string {
   return word instanceof P.TextToken ? word.innerText : `${word.raw ?? ""}`.trim()
 }

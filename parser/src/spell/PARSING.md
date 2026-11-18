@@ -1775,10 +1775,26 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - `show` waits until a modal closes, as `alert` does (T155);  `show "you won" without waiting` doesn't
       (`without_waiting`);  `hide` never waits.
     - `the result` (`the_result`, Spanish's `el resultado`):  what closed the last dialog, `core.result()`:
-      a button's answer, `cancel` for Escape and the dimmer;  `ok` after `alert`, `ok` / `cancel` after `confirm`,
-      the text typed after `prompt`.
+      a button's answer, `cancel` for Escape and the dimmer;  `ok` after `alert`, `ok` / `cancel` after `confirm` and
+      `prompt` (epic `language` P64).
       - `the result is ok` compiles to `core.resultIs("ok")` (`is_equal`):  `ok` / `cancel` (`aceptar` / `cancelar`)
         read as its answers, unquoted, and text compares with no regard to case.
+      - Any other bare word is a button's own answer, `the result is discard` (P64;  `answer_word`, [AnswerWord.ts](rules/UI/AnswerWord.ts)),
+        unless it's a variable.
+      - What an action gives back, run as a statement (`deal the cards` on its own line, or as an inline body):
+        `core.answered(this.dealTheCards())` (`SpellStatement.noteRunAsStatement()`, `DynamicMethodRule`;  Q70).
+        Used as a value, or as its action's last line, it isn't:  `the result` stays as it was.
+    - `prompt "Name?"` (P64):  the text typed is a NEW `it`, as `get` makes, `const it = await core.prompt("Name?")`;
+      empty text after a cancel.  `confirm` leaves `it` alone.
+    - `show "edit card" with the card` (`show_drawn_with`, Spanish's `mostrar ... con ...`;  P64):
+      `const it = this.card`, then `await core.showDrawn("edit card", it)`.
+      - Inside `<modal "edit card">`, `it` is what it's shown with, the thing itself (`SpellJSX.shownInScope()`):
+        a modal whose contents read `it` compiles them as `core.drawShown("edit card", this, (it) => [...])`,
+        `it` the drawing's own thing until it's shown with one.
+      - Its own rule, as it declares an `it`:  so it can't go `without waiting`.
+    - A button's own answer, `<action discard title="Discard your changes" />` (P64):  a bare word, FIRST on an
+      `<action>` with no quoted word, not `keep-open` / `icon-only` nor a word Spell UI's button takes bare
+      (`ActionButton.answerOf()`);  it just closes, labelled by its title, else `Discard`.
       - A program's own `result` wins:  a variable of those words, or a property of the action's thing.
     - A program's own `to show (word as text)` still wins:  its method's rule reads `show "fizz"` first.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
