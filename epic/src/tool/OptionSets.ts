@@ -624,7 +624,8 @@ function nextLetter(set: Element, count: number): string | undefined {
 /** A note from the command line as HTML:  as it is when it starts with a tag, else plain text's paragraphs. */
 /**
  * A note Owen typed in an option's form, as HTML:  `PlanMarkup.paragraphs()`, and a picture's words in it
- * (`![picture](tests/q52-20261029-1432.png)`, epic `epic-engine` I334) an `<img>`, its `alt` the option's `title`.
+ * (`![IMG1](tests/q52-20261029-1432.png)`, epic `epic-engine` I334, labelled since P75;  an older
+ * `![picture](...)` too) an `<img>`, its `alt` the option's `title`.
  * - only an option's picture, saved beside the page (`OPTION_SHOT`):  any other path stays words
  * - `""` for no note
  */
@@ -634,7 +635,7 @@ function typedHTML(note: string | undefined, title: string): string {
 }
 
 /** A picture's words in a typed note (`Pictures.wordsFor()`), its path an option's picture (`OPTION_SHOT`). */
-const TYPED_PICTURE = new RegExp(`!\\[picture\\]\\((${OPTION_SHOT.source.slice(1, -1)})\\)`, "g")
+const TYPED_PICTURE = new RegExp(`!\\[(?:picture|IMG\\d+)\\]\\((${OPTION_SHOT.source.slice(1, -1)})\\)`, "g")
 
 function noteHTML(note: string | undefined): string | undefined {
   if (note === undefined || !note.trim()) return undefined

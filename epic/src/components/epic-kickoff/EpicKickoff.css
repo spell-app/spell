@@ -1,0 +1,93 @@
+/*
+ * `<epic-kickoff>` (`EpicKickoff.tsx`, epic `epic-engine` P75):  the kickoff box at the top of a new epic's Overview.
+ * - the person's own words:  their violet, as `<epic-option-form>`'s and `<epic-new-item>`'s forms (`EpicOptionForm.css`,
+ *   whose private tokens it shares by value)
+ * - its hint keeps its line break (`pre-line`):  one idea a line
+ */
+
+@layer ui.components.epic-kickoff;
+
+@layer ui.components.epic-kickoff {
+  :host {
+    --_epic-kickoff-rule: var(--epic-rule, var(--ui-border-color, GrayText));
+    --_epic-kickoff-muted: var(--ui-text-muted, GrayText);
+    --_epic-kickoff-red: var(--ui-red-text, var(--ui-red, #db2828));
+    --_epic-kickoff-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
+    --_epic-kickoff-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
+    --_epic-kickoff-focus: var(--ui-focus-color, Highlight);
+    display: block;
+    margin: 0 0 16px;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  /* the card:  its lead, its one box, the strip of pictures, then the hint with the picture button at its end */
+  .kickoff {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid color-mix(in oklab, var(--_epic-kickoff-person-ink) 30%, transparent);
+    border-radius: 8px;
+    background: var(--_epic-kickoff-person);
+  }
+  .lead {
+    margin: 0;
+    color: var(--_epic-kickoff-person-ink);
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+  .pictures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pictures epic-picture {
+    --epic-picture-width: 240px;
+    --epic-picture-height: 160px;
+    margin: 0;
+  }
+  .foot {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .hint {
+    flex: 1 1 auto;
+    margin: 0;
+    color: var(--_epic-kickoff-muted);
+    font-size: 0.88em;
+    white-space: pre-line;
+  }
+  .saved[data-failed] {
+    color: var(--_epic-kickoff-red);
+  }
+  /* the picture button:  small and round, at the hint's end */
+  .choose {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ui-background, Canvas);
+    box-shadow: inset 0 0 0 1px var(--_epic-kickoff-rule);
+    color: var(--_epic-kickoff-person-ink);
+    cursor: pointer;
+  }
+  .choose:focus-visible {
+    outline: 2px solid var(--_epic-kickoff-focus);
+    outline-offset: 0;
+  }
+  .choose ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+}

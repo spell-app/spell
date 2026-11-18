@@ -1285,7 +1285,8 @@ class PageComments {
       "aria-label": how === "edit" ? "Your comment" : "Your reply"
     })
     const replying = { id, how, box: field, field, floppy: null }
-    takesPictures(field)
+    // a reply is new words, still typed:  its labels renumber;  a saved comment edited keeps its gaps (P75's choice B)
+    takesPictures(field, { renumber: how !== "edit" })
     this.wireReply(replying, saved)
     return replying
   }
@@ -1612,7 +1613,7 @@ class PageComments {
       field
     ))
     pane.near = near ? { left: near.left, top: near.top, bottom: near.bottom } : undefined
-    takesPictures(field)
+    takesPictures(field, { renumber: true })
     this.wirePane(pane, field, open)
     this.main.append(pane)
     void drawn(pane).then(() => {
@@ -2002,24 +2003,29 @@ async function drawn(element) {
 
 /** The floppy's tooltip once saved:  `Saved 14:02 · waiting for Claude`. */
 /**
- * SIDE EFFECT:  a picture pasted or dropped in comment field `field` is saved beside the page (`POST picture`), and
- * `![picture](<path>)` goes into its words (`Pictures.intoWords()`;  epic `epic-engine` I267):  the field's own saver
- * saves them, and the thread draws the picture.
+ * SIDE EFFECT:  every picture pasted or dropped in comment field `field` is saved beside the page (`POST picture`), and
+ * its words go into the field, labelled, `![IMG2](<path>)` (`Pictures.intoWords()`;  epic `epic-engine` I267, P75):
+ * the field's own saver saves them, and the thread draws each picture with its label.
+ * - `renumber`:  a new comment or a reply, still typed:  a picture's whole link deleted closes its gap (choice B)
  */
-function takesPictures(field) {
-  Pictures.intoWords(field, {
-    save: async (png) => {
-      try {
-        const answer = await ServerLink.forPage().post(PICTURE_API, { page: location.pathname, png })
-        if (typeof answer?.picture === "string") return answer.picture
-        noteToast("The page server kept no picture", "error")
-      } catch (failure) {
-        noteToast(`Couldn't save the picture:  ${failure?.message ?? failure}`, "error")
-      }
-      return undefined
+function takesPictures(field, { renumber = false } = {}) {
+  Pictures.intoWords(
+    field,
+    {
+      save: async (png) => {
+        try {
+          const answer = await ServerLink.forPage().post(PICTURE_API, { page: location.pathname, png })
+          if (typeof answer?.picture === "string") return answer.picture
+          noteToast("The page server kept no picture", "error")
+        } catch (failure) {
+          noteToast(`Couldn't save the picture:  ${failure?.message ?? failure}`, "error")
+        }
+        return undefined
+      },
+      notify: (problem) => noteToast(PICTURE_PROBLEMS[problem], "error")
     },
-    notify: (problem) => noteToast(PICTURE_PROBLEMS[problem], "error")
-  })
+    { renumber }
+  )
 }
 
 function savedTip() {

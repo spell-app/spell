@@ -4,8 +4,9 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 import { PlanDates } from "spell/epic/dates"
-import { Pictures, ReviewClient, pickedLetters, setLetter, type AddedOption, type SetPick } from "spell/epic/review"
+import { ReviewClient, pickedLetters, setLetter, type AddedOption, type SetPick } from "spell/epic/review"
 import { Fold } from "spell/epic/components/epic-item/Fold"
+import { PictureWords } from "spell/epic/components/epic-picture/PictureWords"
 // Spell UI's page zoom:  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>` (as `<epic-field>`'s)
 import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
@@ -477,7 +478,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
           </div>
           <Show when={option.note || option.shot}>
             <div class={BODY}>
-              {EpicChoices.noteOf(option.note ?? "", { alt: option.title, tip: this.translationForKey("zoomTip") })}
+              {EpicChoices.noteOf(option.note ?? "")}
               <Show when={option.shot}>
                 {(shot) => (
                   <img
@@ -612,28 +613,12 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
 
   /**
    * A note Owen typed in an option's form, as paragraphs (a blank line splits them);  a picture's words in it
-   * (`![picture](<path>)`, epic `epic-engine` I334) its thumbnail, a click showing it full size.
-   * - `alt`:  the pictures' alt text, the option's title;  `tip`:  their tooltip;  `paragraphClass`:  each `<p>`'s
-   * - REFACTOR:  `<epic-thread>`'s `paragraphsOf()` draws a comment's words much the same way;  one shared drawer
+   * (`![IMG1](<path>)`, epic `epic-engine` I334, P75) its labelled thumbnail, a click showing it full size:
+   * `PictureWords`, the one drawer of typed words.
+   * - `paragraphClass`:  each `<p>`'s
    */
-  static noteOf(note: string, { alt, tip, paragraphClass }: { alt: string; tip: string; paragraphClass?: string }) {
-    return (
-      <For each={note.split(/\n{2,}/).filter((paragraph) => paragraph.trim())}>
-        {(paragraph) => (
-          <p class={paragraphClass}>
-            <For each={Pictures.piecesOf(paragraph.trim())}>
-              {(piece) =>
-                typeof piece === "string" ? (
-                  piece
-                ) : (
-                  <img class={THUMB} src={piece.picture} alt={alt} title={tip} onClick={EpicChoices.zoom} />
-                )
-              }
-            </For>
-          </p>
-        )}
-      </For>
-    )
+  static noteOf(note: string, { paragraphClass }: { paragraphClass?: string } = {}): JSX.Element {
+    return PictureWords.wordsOf(note, { paragraphClass })
   }
 
   /**

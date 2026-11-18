@@ -4,6 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/element"
 
 import { Pictures, ReviewClient, type PictureSaver } from "spell/epic/review"
+import { PictureWords } from "spell/epic/components/epic-picture/PictureWords"
 import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/EpicTextBox"
 
 import { epicOptionFormVocabulary } from "./EpicOptionForm.en"
@@ -21,9 +22,12 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - ONE box that grows as it's typed (`<epic-text-box type="note">`;  epic `epic-engine` I334, Owen:  "Change this to
  *     be a single textarea"), which takes the focus as it's drawn:
  *     - its first line is the option's title, the rest its note
- *     - a picture pasted or dropped in it is saved through the page server at once (`ReviewClient.saveShot()`,
- *       `POST shot`, under the set's mark id `for`), and its words go in at the cursor, `![picture](<path>)`
- *       (`Pictures.intoWords()`, as a comment's field takes one);  the note carries them from there
+ *     - every picture pasted or dropped in it is saved through the page server at once (`ReviewClient.saveShot()`,
+ *       `POST shot`, under the set's mark id `for`), and its words go in at the cursor, labelled, `![IMG2](<path>)`
+ *       (`Pictures.intoWords()`, as a comment's field takes them;  several since epic `epic-engine` P75);  the note
+ *       carries them from there
+ *     - under it, a strip of their labelled thumbnails, each with its x:  the form is never sent, so taking one out
+ *       renumbers the later ones, in the words that name them too (P75's choice B)
  *   - Save (Ctrl / Cmd + Enter), Cancel (Escape), and a small picture button, for a file the page can't be handed
  *     by a paste or a drop (VS Code's side bar never lets a dragged file reach the page)
  * - It saves nothing itself:  `epic-option-saved` hands the element drawing it the title and the note, which go into
@@ -53,13 +57,16 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
   /** The form's one box, as drawn. */
   private wordsBox: DOMTextBoxElement | undefined
 
+  /** The box's words as typed:  what its strip of pictures follows. */
+  @E.state accessor words = ""
+
   /**
    * While connected:  a picture pasted or dropped in its box goes into its words (heard on the element:  both events
    * cross shadow roots);  the box takes the focus.
    */
   @E.whileConnected
   protected startForm() {
-    const stop = Pictures.intoWords(this.domElement, this.pictureSaver)
+    const stop = Pictures.intoWords(this.domElement, this.pictureSaver, { renumber: true })
     E.afterSolidUpdate(() => {
       if (this.wordsBox) void this.focusBox(this.wordsBox)
     })
@@ -87,6 +94,7 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
           ref={(element: HTMLElement) => {
             this.wordsBox = element as DOMTextBoxElement
             this.wordsBox.value = this.startWords
+            this.words = this.startWords
           }}
           part={this.partForName("words")}
           type="note"
@@ -94,6 +102,10 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
           placeholder={this.translationForKey("words")}
           label={this.translationForKey("wordsLabel")}
         />
+        {PictureWords.stripOf(
+          () => this.words,
+          (label) => this.removePicture(label)
+        )}
         <span class="actions" part={this.partForName("actions")}>
           <button type="submit" data-color="green" disabled={this.isSaving} title={this.translationForKey("saveTip")}>
             <ui-icon name="check" />
@@ -120,6 +132,7 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
           <input
             type="file"
             accept="image/*"
+            multiple
             hidden
             onChange={(event: Event) => this.onChoose(event.currentTarget as HTMLInputElement)}
           />
@@ -133,9 +146,16 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
    * (`shot`, from before I334) as its words at the end.
    */
   private get startWords(): string {
-    const shot = this.shot ? Pictures.wordsFor(this.shot) : ""
-    const note = [this.note?.trim(), shot].filter(Boolean).join("\n\n")
+    const typed = this.note?.trim() ?? ""
+    const shot = this.shot ? Pictures.wordsFor(this.shot, Pictures.nextLabel(typed)) : ""
+    const note = [typed, shot].filter(Boolean).join("\n\n")
     return [this.optionTitle?.trim() ?? "", note].filter(Boolean).join("\n")
+  }
+
+  /** A key typed, or a picture put in:  the strip follows the box's native field, which changes first. */
+  @E.on("input")
+  protected onTyped() {
+    this.words = this.wordsBox?.textarea?.value ?? this.wordsBox?.value ?? ""
   }
 
   /** Its box's field takes the focus, once the box and its `<ui-textarea>` have drawn.  NEVER rejects. */
@@ -191,20 +211,30 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
     this.send("epic-option-canceled", {})
   }
 
-  /** A file chosen with the picture button:  saved, its words where the box's cursor is. */
+  /** Files chosen with the picture button:  saved, their words where the box's cursor is, in order. */
   @E.untracked
   private onChoose(input: HTMLInputElement) {
-    const file = input.files?.[0]
+    const files = Array.from(input.files ?? [])
     input.value = ""
     const textarea = this.wordsBox?.textarea
-    if (file && textarea) void Pictures.putInto(textarea, file, this.pictureSaver)
+    if (files.length && textarea) void Pictures.putAllInto(textarea, files, this.pictureSaver)
+  }
+
+  /**
+   * A picture's x in the strip:  its words taken out of the box, the later labels moved down one (the form is never
+   * sent:  P75's choice B);  the box's field says it changed, as a key would.
+   */
+  @E.untracked
+  private removePicture(label: string) {
+    const textarea = this.wordsBox?.textarea
+    if (!textarea) return
+    textarea.value = Pictures.without(textarea.value, label, { renumber: true })
+    textarea.dispatchEvent(new Event("input", { bubbles: true, composed: true }))
   }
 
   /**
    * How the box's pictures are saved:  beside the epic page, under the set's mark id (`POST shot`), so the path is an
    * option's picture (`tests/q52-20261029-1432.png`), what `inbox apply` takes;  Save waits meanwhile.
-   * - NOTE:  epic `epic-engine` P75 moves every picture box to words labelled `![IMGn](<path>)`:  the label is
-   *   `Pictures.wordsFor()`'s alone, so this form follows it with no change here
    */
   private readonly pictureSaver: PictureSaver = {
     save: async (png) => {

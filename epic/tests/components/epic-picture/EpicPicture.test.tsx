@@ -141,3 +141,34 @@ describe("<epic-picture>", () => {
     await vi.waitFor(() => expect(isDeleted(again)).toBe(true))
   })
 })
+
+// epic `epic-engine` P75:  labelled, so the person can name one in words;  a box's x in place of the trash
+describe("<epic-picture> labels and the x", () => {
+  test("its label is a chip on its corner;  none, no chip", async () => {
+    const host = await ElementFixture.render(
+      `<div><epic-picture label="IMG2"><img src="${SRC}" alt="IMG2" /></epic-picture>` +
+        `<epic-picture><img src="${SRC}" alt="x" /></epic-picture></div>`
+    )
+    await ElementFixture.settle()
+    const [labelled, plain] = [...host.querySelectorAll("epic-picture")]
+    expect(labelled!.shadowRoot!.querySelector('[part~="label"]')?.textContent).toBe("IMG2")
+    expect(plain!.shadowRoot!.querySelector('[part~="label"]')).toBe(null)
+  })
+
+  test("`removable`:  an x (no trash, even in an item being reviewed) that hands its label to the box", async () => {
+    await adoptClient(new FakeRoutes())
+    const item = await ElementFixture.render(
+      `<epic-item id="t9" title="a todo" status="open"><epic-picture label="IMG3" removable><img src="${SRC}" alt="IMG3" /></epic-picture></epic-item>`
+    )
+    await ElementFixture.settle()
+    const picture = item.querySelector("epic-picture")!
+    expect(trashOf(picture)).toBe(null)
+    const removed: unknown[] = []
+    picture.addEventListener("epic-picture-removed", (event) => removed.push((event as CustomEvent).detail))
+    const x = picture.shadowRoot!.querySelector<HTMLElement>('[part~="remove"]')!
+    expect(x.getAttribute("title")).toBe("Take IMG3 out")
+    x.click()
+    expect(removed).toEqual([{ label: "IMG3", src: SRC }])
+    await expectAccessible(picture)
+  })
+})

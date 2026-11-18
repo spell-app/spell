@@ -324,7 +324,7 @@
     width: auto;
     margin: 0;
   }
-  /* a picture pasted or dropped in the note:  its thumbnail, a click opening it full size, then its x */
+  /* a mark's one old picture, apart from its words (before P75):  its thumbnail, a click opening it full size, its x */
   .note-picture {
     display: flex;
     align-items: flex-start;
@@ -342,9 +342,6 @@
     background: var(--_epic-act-paper);
     object-fit: contain;
     cursor: zoom-in;
-  }
-  .note-picture[data-saving] > img {
-    opacity: 0.6;
   }
   .note-picture > button {
     display: inline-grid;
@@ -366,6 +363,29 @@
   }
   .note-picture ui-icon::part(icon) {
     width: auto;
+    margin: 0;
+  }
+  /* the pictures in the note's words (epic `epic-engine` P75):  a row of labelled thumbnails under the field, each
+     with its x (`PictureWords.stripOf()`) */
+  .pictures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .pictures epic-picture {
+    --epic-picture-width: 240px;
+    --epic-picture-height: 96px;
+    margin: 0;
+  }
+  /* a marked note's pictures in its words:  small labelled thumbnails, beside its one line */
+  .said-pictures {
+    flex: none;
+    align-self: center;
+  }
+  .said-pictures epic-picture {
+    --epic-picture-width: 96px;
+    --epic-picture-height: 40px;
     margin: 0;
   }
   /* a marked note's picture:  small, beside its words */

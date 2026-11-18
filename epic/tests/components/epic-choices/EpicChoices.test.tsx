@@ -597,16 +597,24 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     const pasted = new DataTransfer()
     pasted.items.add(new File([PNG_BYTES], "shot.png", { type: "image/png" }))
     box.textarea!.dispatchEvent(new ClipboardEvent("paste", { clipboardData: pasted, bubbles: true, composed: true }))
-    await vi.waitFor(() => expect(box.value).toContain(`![picture](${SAVED_SHOT})`))
+    // labelled (P75):  the box's first picture, IMG1;  shown in the strip under the box
+    await vi.waitFor(() => expect(box.value).toContain(`![IMG1](${SAVED_SHOT})`))
     expect(routes.posts.find(([route]) => route === "shot")?.[1].id).toBe("q1")
+    await vi.waitFor(() =>
+      expect(form.shadowRoot!.querySelector(".pictures epic-picture")?.getAttribute("label")).toBe("IMG1")
+    )
     form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
     await settle()
     expect(markOf(routes, "q1").added).toEqual([
-      { key: "+1", title: "Both", note: `One place for all of it.\n![picture](${SAVED_SHOT})` }
+      { key: "+1", title: "Both", note: `One place for all of it.\n![IMG1](${SAVED_SHOT})` }
     ])
     const card = inShadow(host, "[part~='added']")!
-    expect(card.querySelector("img.thumb")?.getAttribute("src")).toBe(SAVED_SHOT)
-    expect(card.textContent).not.toContain("![picture]")
+    const picture = card.querySelector("epic-picture")
+    expect([picture?.getAttribute("label"), picture?.querySelector("img")?.getAttribute("src")]).toEqual([
+      "IMG1",
+      SAVED_SHOT
+    ])
+    expect(card.textContent).not.toContain("![IMG1]")
   })
 
   test("`fixed`:  no Add choice;  `closed`:  drawn answered, no pills, no switch, no pencils", async () => {

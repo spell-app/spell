@@ -555,6 +555,11 @@
   .body > p {
     margin-block: 0.35em;
   }
+  /* an option's typed pictures (`PictureWords`, epic `epic-engine` P75):  labelled, as small as an old one's */
+  epic-picture {
+    --epic-picture-width: 200px;
+    --epic-picture-height: 140px;
+  }
   .thumb {
     display: block;
     max-width: min(200px, 100%);

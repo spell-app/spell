@@ -730,6 +730,37 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
   expect(ReviewInbox.read(inboxFile).marks).toEqual({})
 })
 
+// epic `epic-engine` P75:  the kickoff box's words, sent from a new epic's page
+test("the kickoff box:  wait prints its words and each picture's file by label;  apply makes it the Kickoff prompt", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const phase of plan.document.querySelectorAll("epic-phase")) phase.remove()
+  plan.setPrompt("")
+  writeFileSync(file, plan.toString())
+  const note =
+    "A list page.\n![IMG1](pictures/kickoff-20261117-2300.png)\n![IMG2](pictures/kickoff-20261117-2301.png)\nLike IMG2."
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("kickoff", { action: "kickoff", note }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
+  const work = printed.join("\n")
+  expect(work).toContain("kickoff, what the epic should do, typed on its page")
+  expect(work).toContain(`        IMG1:  ${join(root, "epics", "x", "pictures", "kickoff-20261117-2300.png")}`)
+  expect(work).toContain(`        IMG2:  ${join(root, "epics", "x", "pictures", "kickoff-20261117-2301.png")}`)
+  printed = []
+  await commands().inbox.run("x", file, ["apply"], {})
+  expect(printed.join("\n")).toContain("Kickoff prompt written from the page, 2 pictures")
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  const prompt = after.document.querySelector("epic-overview > epic-prompt")!
+  expect(prompt.textContent).toContain("A list page.")
+  expect([...prompt.querySelectorAll("epic-picture")].map((each) => each.getAttribute("label"))).toEqual([
+    "IMG1",
+    "IMG2"
+  ])
+  expect(prompt.querySelector("epic-picture img")?.getAttribute("src")).toBe("pictures/kickoff-20261117-2300.png")
+  expect(ReviewInbox.read(inboxFile).marks).toEqual({})
+})
+
 // epic `epic-engine` I44:  a failure's screenshot in its new issue, in a split page's part, as the part reads it
 test("a failed test's issue on a split page:  its screenshot written into the part as its root path", async () => {
   const files = new PlanDocFiles({ root })

@@ -58,7 +58,8 @@ describe("ReviewInbox marks", () => {
     expect(inbox.cancelNow("tests", M2)).toEqual({ action: "prepare", at: M2, told: true })
     const page =
       '<epic-page epic="x"><epic-section id="tests" kind="tests"><epic-item id="m1"></epic-item></epic-section></epic-page>'
-    expect([...ReviewInbox.itemIds(page)].sort()).toEqual(["m1", "tests"])
+    // no phases yet:  the kickoff box takes a mark too (P75)
+    expect([...ReviewInbox.itemIds(page)].sort()).toEqual(["kickoff", "m1", "tests"])
     const shot = "tests/j3-20261029-1432.png"
     expect(ReviewInbox.toMark({ action: "revisit", note: "x", shot })).toEqual({
       action: "revisit",
@@ -68,6 +69,24 @@ describe("ReviewInbox marks", () => {
     })
     expect(ReviewInbox.toMark({ action: "skip", shot })).toEqual({ action: "skip", shot })
     expect(() => ReviewInbox.toMark({ action: "revisit", shot: "../x.png" })).toThrow(InboxError)
+  })
+
+  test("the kickoff box (P75):  a `kickoff` mark of words, only under `kickoff`, markable while there are no phases", () => {
+    const inbox = new ReviewInbox()
+    const note = "Make a list page.\n![IMG1](pictures/kickoff-20261117-2300.png)\nLike IMG1."
+    expect(inbox.setMark("kickoff", { action: "kickoff", note: `  ${note}  ` }, M1)).toEqual({
+      action: "kickoff",
+      note,
+      at: M1
+    })
+    expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["kickoff"])
+    expect(() => inbox.setMark("kickoff", { action: "approve" })).toThrow(InboxError)
+    expect(() => inbox.setMark("j1", { action: "kickoff", note })).toThrow(InboxError)
+    expect(() => ReviewInbox.toMark({ action: "kickoff", note: "  " })).toThrow(InboxError)
+    const overview = '<epic-page epic="x"><epic-overview id="overview"></epic-overview>'
+    expect([...ReviewInbox.itemIds(`${overview}</epic-page>`)]).toEqual(["kickoff"])
+    const planned = `${overview}<epic-section id="phases" kind="phases"><epic-phase id="p-one"></epic-phase></epic-section></epic-page>`
+    expect([...ReviewInbox.itemIds(planned)]).toEqual(["p-one"])
   })
 
   test("set, replace, remove;  ids lower-cased", () => {

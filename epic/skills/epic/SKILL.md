@@ -192,12 +192,21 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
       Its prompt, decided questions and review page are kept;  the meta lines name the branch and worktree.
     - "3. Plan" starts from its kickoff prompt, its decided questions and its review page.
       The page is `epics/<name>/details/analysis.html`;  its answers, from `epic ask answer <name>/analysis`.
-- Name and nothing after it, nothing saved (and not mid-session):
-  the user sends the plan in the NEXT prompt, in the new window.
+- Name and nothing after it, nothing saved (and not mid-session):  the person writes the plan ON THE PAGE
+  (epic `epic-engine` P75;  Owen, 2026-11-17:  "start with an empty-ish epic doc and a field where I can type in what
+  i want to do, rather than typing it in chat").
   - Do "2. Session" now anyway:  a stub doc with no prompt, then the move.
-    Its last line asks for the plan.
-  - That next message is the kickoff prompt:
-    `epic prompt <name> --file <file>` first, then "3. Plan".
+  - The stub page's Overview opens with the KICKOFF BOX (`<epic-kickoff>`):  a growing box the person types into,
+    pasting or dropping several pictures, each labelled in the words (`![IMG2](pictures/kickoff-...png)`).
+  - Once the page shows, LISTEN:  `epic inbox listen <name>`, then `epic inbox wait <name>` in the background.
+    - In Codex:  run `epic inbox wait <name>` and wait for it.
+  - The last line says where:  "type what this epic should do in the kickoff box on its page, and Send".
+  - The Send wakes the session:  `wait` prints a `kickoff` mark, its words and a line per picture,
+    `IMG2:  <its file>`.  Then `epic inbox apply <name>` (it becomes the Kickoff prompt, pictures and all), then
+    "3. Plan", opening each picture's file.
+  - The person types the plan in the chat instead (the NEXT prompt):  that's the kickoff prompt as before,
+    `epic prompt <name> --file <file>` first, then "3. Plan";  the kickoff box gives way to it.
+  - Pictures pasted into the chat with `/epic <name> ...` stay in the chat:  the page can't take them (a later todo).
 
 ## Mid-session
 
@@ -303,6 +312,8 @@ All in the FIRST turn, in this order, then the turn ends.
      until the person's Accept Overview ("3. Plan").
    - The prompt is quoted at the top of the Overview, and in the "Plan hung?" notice above it.
      That notice has a copy button and restart steps;  it goes once P1 starts.
+   - No prompt (a name alone):  the Overview opens with the kickoff box instead, and no "Plan hung?" notice until
+     there's a prompt to copy (epic `epic-engine` P75;  "1. Name").
    - Then delete the prompt file.
    - Reusing a doc:
      - its prompt missing:  `epic prompt <name> --file <file>`
@@ -329,14 +340,15 @@ All in the FIRST turn, in this order, then the turn ends.
      Why:  only a PENDING move defers it;  before the handoff, it shows in THIS window's side bar, the one being left.
 6. Isolate "Start", step 6:  END THE TURN.
    - Last line:  "moving to `⎇ <name>`:  press enter on `continue` there".
-   - No plan yet:  "send the plan there".
+   - No plan yet:  "type what this epic should do in the kickoff box on its page there, and Send".
 7. Next turn, in the new window:  isolate's "Continue" step 1 (old tab), then "3. Plan".
+   - No plan yet:  listen ("1. Name":  `epic inbox listen`, `wait` in the background);  its Send starts "3. Plan".
 
 Staying in this window (step 0):  skip steps 4 and 6.
 - `epic window stay <name>` instead:  the window titled `⎇ <name>`, tinted (isolate's "Stay", step 0).
 - Step 5's `epic open` shows the doc in THIS window's side bar, at once.
 - Then go straight on to "3. Plan", in this turn.
-  No plan yet:  the last line asks for it, here.
+  No plan yet:  listen instead ("1. Name"), the last line pointing at the kickoff box on the page.
 
 ## 3. Plan:  the Overview, on the page
 
@@ -359,6 +371,8 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  2026-10-24).
     (once for symptom/goals, once for plan) is slowing things down.  Collapse them into one").
 
 1. Explore (read-only):  the code, the docs, the kickoff prompt.
+   - Its pictures (typed on the page, epic `epic-engine` P75):  open each file `wait` printed (`IMG2:  <file>`);  the
+     words name them by label ("like IMG2"), and so may the Overview.
    - Agents:  up to 5, don't ask.
      Unless the user said "watch token budget":  then one question is "How many agents can I use for this?".
    - One of them, always, the COHERENCE review (epic `coherence` P4, its Q3):  a `coherence` agent, named and listed
