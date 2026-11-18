@@ -961,7 +961,7 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
     const refused = await place.apply([deleting], {}).catch((error: unknown) => error)
     expect(refused).toBeInstanceOf(PlaceError)
     expect((refused as PlaceError).message).toBe(
-      "recipes can't delete here:  its enabled operations are read, add, change."
+      "Recipes can't be deleted here.\nHere you can look at recipes, add new ones and change them.\nTo do more, ask whoever looks after this data."
     )
     expect((refused as PlaceError).cause).toMatchObject({ kind: "refused", whyNot: "place" })
     expect(box.recipes.has("r-1")).toBe(true)
@@ -976,7 +976,7 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
     expect(place.canWrite({ collection: "recipes", kind: "insert" })).toMatchObject({ canWrite: false })
     place.limitOperations("recipes", [])
     await expect(place.list("recipes", {}, {})).rejects.toThrow(
-      "recipes can't read here:  all its operations are disabled."
+      "Nothing can be done with recipes here:  even looking at them is turned off."
     )
   })
 
@@ -988,7 +988,9 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
     await expect(place.call("star", { id: "r 1", title: "Soup" }, {}, "recipes")).resolves.toEqual({ starred: 1 })
     expect(box.starred).toEqual([{ id: "r 1", method: "PATCH" }])
     place.limitOperations("recipes", ["read", "publish"])
-    await expect(place.call("star", { id: "r-1" }, {}, "recipes")).rejects.toThrow("recipes can't star here")
+    await expect(place.call("star", { id: "r-1" }, {}, "recipes")).rejects.toThrow(
+      '"Star" isn\'t allowed for recipes here.\nHere you can look at recipes and publish them.\nTo do more, ask whoever looks after this data.'
+    )
     await expect(place.call("publish", { id: "r-1" }, {}, "recipes")).resolves.toEqual({ published: 1 })
   })
 })

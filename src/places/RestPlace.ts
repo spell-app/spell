@@ -35,6 +35,22 @@ const READ_OPERATION = "read"
 /** Each kind of write, as the operation a list of enabled ones names it. */
 const OPERATION_OF_WRITE: Readonly<Record<WriteKind, string>> = { insert: "add", update: "change", delete: "delete" }
 
+/** What a refusal says can be done, by operation:  "look at jobs", "add new ones". */
+const CAN_DO: Readonly<Record<string, (things: string) => string>> = {
+  read: (things) => `look at ${things}`,
+  add: () => "add new ones",
+  change: () => "change them",
+  delete: () => "delete them"
+}
+
+/** What a refusal says can't be done, by operation:  "Jobs can't be deleted here." */
+const PAST_OF: Readonly<Record<string, string>> = {
+  read: "looked at",
+  add: "added",
+  change: "changed",
+  delete: "deleted"
+}
+
 /** How many rows it asks for at a time on a place that pages, when nobody says. */
 const REST_PAGE_SIZE = 100
 
@@ -242,16 +258,23 @@ export class RestPlace extends WebPlace implements Place {
     return this.enabled.get(collection)?.has(operation) ?? true
   }
 
-  /** - throws `PlaceError` `"refused"` when `collection` doesn't take `operation`, saying which it does */
+  /**
+   * - throws `PlaceError` `"refused"` when `collection` doesn't take `operation`, saying what can be done instead,
+   *   in short lines for people:  "Jobs can't be deleted here.\nHere you can look at jobs, add new ones and change them."
+   */
   private refuseUnlessEnabled(collection: string, operation: string): void {
     if (this.isEnabled(collection, operation)) return
+    const things = wordsOf(collection)
     const enabled = [...(this.enabled.get(collection) ?? [])]
-    const which = enabled.length
-      ? `its enabled operations are ${enabled.join(", ")}`
-      : "all its operations are disabled"
-    throw new PlaceError(`${collection} can't ${operation} here:  ${which}.`, {
-      cause: { kind: "refused", whyNot: "place" }
-    })
+    const can = enabled.map((each) => CAN_DO[each]?.(things) ?? `${wordsOf(each)} them`)
+    const what = PAST_OF[operation]
+    const refused = what
+      ? `${capitalized(things)} can't be ${what} here.`
+      : `"${capitalized(wordsOf(operation))}" isn't allowed for ${things} here.`
+    const message = can.length
+      ? `${refused}\nHere you can ${listed(can)}.\nTo do more, ask whoever looks after this data.`
+      : `Nothing can be done with ${things} here:  even looking at them is turned off.`
+    throw new PlaceError(message, { cause: { kind: "refused", whyNot: "place" } })
   }
 
   ////////////////
@@ -778,6 +801,24 @@ export type RestCollection = {
    * - `users are searched with "q" at "/search/users"`
    */
   searches?: RestSearch
+}
+
+/** A name as words:  `tenant_groups` => `tenant groups`, `renderConfig` => `render config`. */
+function wordsOf(name: string): string {
+  return name
+    .replace(/(\p{Ll})(\p{Lu})/gu, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .toLowerCase()
+}
+
+/** `text` with its first letter a capital. */
+function capitalized(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+/** Several things as a person lists them:  `a, b and c`. */
+function listed(items: readonly string[]): string {
+  return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
 }
 
 /** The one list in an answer that's an object:  a search's rows, `{ total_count, items: [...] }`.  `undefined` for none, or several. */
