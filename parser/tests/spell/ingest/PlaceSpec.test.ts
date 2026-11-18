@@ -277,3 +277,26 @@ describe("spell place verify (epic `data` P49)", () => {
     )
   })
 })
+
+describe("spell place update, on a place read from its description (epic `data` P49)", () => {
+  test("reads it again whole:  nothing new, nothing changes, and each state stays", async () => {
+    const { files, texts, descriptions } = memoryFiles()
+    const ingest = new PlaceIngest({
+      fetch: specFetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
+    const written = texts.get("NetBox.api.spell")!
+    // as a person would:  a line of their own
+    texts.set("NetBox.api.spell", `${written}\n// mine\n`)
+    const result = await ingest.update("NetBox.api.spell")
+    expect(result.couldntChange).toEqual([])
+    expect(texts.get("NetBox.api.spell")).toBe(`${written}\n// mine\n`)
+    expect(descriptions.get("NetBox.api.json5")!.collections.tenants!.state).toEqual({ is: "unverified" })
+    expect(result.changes).toEqual([])
+  })
+})
