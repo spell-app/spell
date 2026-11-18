@@ -599,6 +599,7 @@ const APP_TEXTS_ES: AppTextPack = {
   // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
   homeSpanishTitle: "En español",
   homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeSpellUILine: "Los botones, menús y otras piezas de las que están hechas tus apps.",
   homeRearrange: "Reorganizar la pantalla de inicio",
   homeRearrangeDone: "Listo",
   homeRearrangeReset: "Restablecer",

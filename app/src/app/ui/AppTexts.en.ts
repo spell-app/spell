@@ -492,6 +492,7 @@ export const APP_TEXTS = {
   // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
   homeSpanishTitle: "En español",
   homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeSpellUILine: "The buttons, menus and other parts your apps are made of.",
   homeRearrange: "Rearrange Home Screen",
   homeRearrangeDone: "Done",
   homeRearrangeReset: "Reset to Default",
