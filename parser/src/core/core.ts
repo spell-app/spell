@@ -165,6 +165,16 @@ export function whileReading<T>(read: () => T): T {
  */
 export function noteMade(thing: object): void {
   madeThings.add(thing)
+  madeListener?.(thing)
+}
+
+/**
+ * Hear each thing as it's made (`noteMade()`), once its starting values are set:  a copy too (`withoutCreate()`).
+ * - ONE listener:  the timers' (`timers.ts`), which start the thing's `every second` steps.
+ *   It lives there, not here:  this module can't import timers', which reads `core` as it loads.
+ */
+export function onMade(listener: (thing: object) => void): void {
+  madeListener = listener
 }
 
 /**
@@ -184,6 +194,9 @@ export type PropertyChangeListener = (target: object, property: string, was: unk
 /** The things whose starting values are set -- see `noteMade()`. */
 const madeThings = new WeakSet<object>()
 onThingMade(noteMade)
+
+/** Who hears a thing being made -- see `onMade()`. */
+let madeListener: ((thing: object) => void) | undefined
 
 /** Who hears a property's change -- see `onPropertyChange()`. */
 let changeListener: PropertyChangeListener | undefined

@@ -1856,10 +1856,13 @@ export class ASTPropertyRules extends ASTStatement {
  *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`;
  *   or `"hook"`, any other of an action's hooks (epic `data` P50):
  *   `core.addActionHook(Job, "complete", { moment: "before", hook: "beforeComplete", level: "api" })`.
- * - `name` (required):  an action's METHOD, by spell's name (`turn_over`), which each writer names its own way;
+ *   or `"timer"`, steps its things run every so often (epic `language` T159):
+ *   `core.addTimer(Clock, "everySecond", { seconds: 1, until: "everySecondUntil", times: 10 })`.
+ * - `name` (required):  an action's (or a timer's) METHOD, by spell's name (`turn_over`), which each writer names its own way;
  *   an event's name as text (`flipped`).
  * - `description` (required):  its fields by spell's names (`enabled_when`), each writer naming them its own way:
  *   - text, or a list of text, e.g. `title`, `shortcuts`
+ *   - a number, e.g. a timer's `seconds`
  *   - a MEMBER of the class (`{ member: "turn_over_is_enabled" }`), named as the writer names members
  *   - a map of text to text, e.g. an event's `params`
  *   - a list of MEMBERS (`{ members: ["deal", "-", "undo"] }`), each named as the writer names members, `-` kept:
@@ -1869,16 +1872,17 @@ export class ASTPropertyRules extends ASTStatement {
  */
 export type ASTTypeDescriptionProps = Prettify<{
   type: string | ASTTypeExpression
-  describes: "action" | "event" | "menu" | "after" | "hook"
+  describes: "action" | "event" | "menu" | "after" | "hook" | "timer"
   name: string
   description: Record<string, ASTDescriptionValue>
   /** An action's title as written (`- titled "Turn Over"`), fill-ins as typed:  for its declaration, never written. */
   title?: string
 }>
 
-/** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
+/** One field of an `ASTTypeDescription`'s description:  text, a number, a list of text, a member, or a map of text. */
 export type ASTDescriptionValue =
   | true
+  | number
   | string
   | string[]
   | { member: string }
@@ -1888,7 +1892,7 @@ export type ASTDescriptionValue =
 
 export class ASTTypeDescription extends ASTStatement {
   declare type: ASTTypeExpression
-  declare describes: "action" | "event" | "menu" | "after" | "hook"
+  declare describes: "action" | "event" | "menu" | "after" | "hook" | "timer"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
   declare title?: string
@@ -1898,7 +1902,7 @@ export class ASTTypeDescription extends ASTStatement {
     this.assertType("type", ASTTypeExpression)
     this.assertType("name", "string")
     this.assert(
-      ["action", "event", "menu", "after", "hook"].includes(this.describes),
+      ["action", "event", "menu", "after", "hook", "timer"].includes(this.describes),
       `ASTTypeDescription: unknown kind '${this.describes}'`
     )
   }

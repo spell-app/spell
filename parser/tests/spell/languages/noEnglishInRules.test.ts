@@ -27,7 +27,8 @@ describe("rule code reads no English words", () => {
         })
     }
     expect(found).toEqual([])
-  })
+    // every rule file, every line:  about 5 seconds alone, more beside the other tests (epic `language` P63)
+  }, 20_000)
 })
 
 /**

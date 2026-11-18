@@ -17,6 +17,18 @@ import { WithCommas } from "./WithCommas"
 import { Joined } from "./Joined"
 import { Now } from "./Now"
 import { AsADate } from "./AsADate"
+import { AsADuration } from "./AsADuration"
+import { AsTwoDigits } from "./AsTwoDigits"
+import { DaysInTheMonth } from "./DaysInTheMonth"
+import { DaysUntil } from "./DaysUntil"
+import { DurationPart } from "./DurationPart"
+import { IsBeforeOrAfter } from "./IsBeforeOrAfter"
+import { IsDayFromToday } from "./IsDayFromToday"
+import { IsMeridiem } from "./IsMeridiem"
+import { IsSameDayAs } from "./IsSameDayAs"
+import { IsWeekendDay } from "./IsWeekendDay"
+import { NextWeekend } from "./NextWeekend"
+import { StartOfTheDay } from "./StartOfTheDay"
 import { TheDate } from "./TheDate"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
@@ -666,9 +678,10 @@ expressions.addRule(Joined, {
 expressions.addRule(Wording.specialize({ ruleName: "date_form", meanings: ["short", "long", "abbreviated"] }), {
   syntax: "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
 })
-expressions.addRule(Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time", "timestamp"] }), {
-  syntax: "((date:date)|(time:time)|(timestamp:timestamp))"
-})
+expressions.addRule(
+  Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time", "timestamp", "time_zone"] }),
+  { syntax: "((date:date)|(time_zone:time zone)|(time:time)|(timestamp:timestamp))" }
+)
 expressions.addRule(TheDate, {
   syntax: "the {form:date_form}? {what:date_or_time}",
   tests: [
@@ -680,7 +693,10 @@ expressions.addRule(TheDate, {
         ["the abbrev date", "core.abbreviatedDate(core.now())"],
         ["the time", "core.shortTime(core.now())"],
         ["the long time", "core.longTime(core.now())"],
-        ["the timestamp", "core.timestamp(core.now())"]
+        ["the timestamp", "core.timestamp(core.now())"],
+        ["the time zone", 'core.timeZone("city")'],
+        ["the short time zone", 'core.timeZone("short")'],
+        ["the long time zone", 'core.timeZone("long")']
       ]
     }
   ]
@@ -722,10 +738,165 @@ expressions.addRule(Now, {
       compileAs: "expression",
       tests: [
         ["now", "core.now()"],
-        ["the hour of now", "core.now().getHours()"]
+        ["the hour of now", "core.hourOf(core.now())"]
       ]
     }
   ]
+})
+
+////////////////
+// ## Date and time words (epic `language` P63)
+////////////////
+
+/** A date variable `due`, in the scope of a test of the date words. */
+function addDue(scope: P.Scope) {
+  scope.variables?.add({ name: "due", datatype: "date" })
+}
+
+expressions.addRule(AsTwoDigits, {
+  roles: { match: "value" },
+  syntax: "(as two digits|with a leading zero)",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["the minute of now as two digits", "core.twoDigits(core.minuteOf(core.now()))"],
+        ["5 with a leading zero", "core.twoDigits(5)"]
+      ]
+    }
+  ]
+})
+expressions.addRule(IsMeridiem, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not} ((am:am|AM|Am)|(pm:pm|PM|Pm))",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["now is PM", "core.isPM(core.now())"],
+        ["now is not am", "!core.isAM(core.now())"]
+      ]
+    }
+  ]
+})
+// How a duration is said:  `as a short duration`
+expressions.addRule(Wording.specialize({ ruleName: "duration_style", meanings: ["short", "long"] }), {
+  syntax: "((short:short)|(long:long))"
+})
+expressions.addRule(AsADuration, {
+  roles: { match: "value" },
+  syntax: "as (a|an)? {style:duration_style}? duration (in {unit:unit_words})?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["due as a duration", "core.timeFromNow(due)"],
+        ["due as a short duration", 'core.timeFromNow(due, "short")'],
+        ["due as a long duration", 'core.timeFromNow(due, "long")'],
+        ["due as a duration in days", 'core.timeFromNow(due, "normal", "day")'],
+        ["90 seconds as a duration", "core.durationText(90)"],
+        ["(due - now) as a short duration", 'core.durationText(core.secondsBetween(due, core.now()), "short")']
+      ]
+    }
+  ]
+})
+// A part of a duration:  `the hours of its time left`
+expressions.addRule(
+  Wording.specialize({ ruleName: "duration_part_name", meanings: ["days", "hours", "minutes", "seconds"] }),
+  { syntax: "((days:days)|(hours:hours)|(minutes:minutes)|(seconds:seconds))" }
+)
+expressions.addRule(DurationPart, {
+  syntax: "the {part:duration_part_name} of {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["the hours of 5400 seconds", 'core.durationPartOf(5400, "hours")'],
+        ["the seconds of (due - now)", 'core.durationPartOf(core.secondsBetween(due, core.now()), "seconds")'],
+        ["the seconds of due", "core.secondOf(due)"]
+      ]
+    }
+  ]
+})
+expressions.addRule(IsWeekendDay, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not} a weekend day",
+  tests: [{ compileAs: "expression", tests: [["now is a weekend day", "core.isWeekendDay(core.now())"]] }]
+})
+expressions.addRule(NextWeekend, {
+  syntax: "the next weekend",
+  tests: [{ compileAs: "expression", tests: [["the next weekend", "core.nextWeekend()"]] }]
+})
+expressions.addRule(IsBeforeOrAfter, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not} ((before:before)|(after:after)) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["due is before now", "core.isBefore(due, core.now())"],
+        ["due is not after now", "!core.isAfter(due, core.now())"]
+      ]
+    }
+  ]
+})
+expressions.addRule(IsSameDayAs, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not} the same day as {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [["due is the same day as now", "core.isSameDay(due, core.now())"]]
+    }
+  ]
+})
+expressions.addRule(IsDayFromToday, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not} ((today:today)|(tomorrow:tomorrow)|(yesterday:yesterday))",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["due is today", "core.isDaysFromToday(due, 0)"],
+        ["due is tomorrow", "core.isDaysFromToday(due, 1)"],
+        ["due isn't yesterday", "!core.isDaysFromToday(due, -1)"]
+      ]
+    }
+  ]
+})
+expressions.addRule(DaysUntil, {
+  syntax: "the days ((until:until)|(since:since)) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach: addDue,
+      tests: [
+        ["the days until due", "core.daysUntil(due)"],
+        ["the days since due", "core.daysSince(due)"]
+      ]
+    }
+  ]
+})
+expressions.addRule(StartOfTheDay, {
+  syntax: "the ((start:start)|(end:end)) of the day of {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["the start of the day of now", "core.startOfDay(core.now())"],
+        ["the end of the day of now", "core.endOfDay(core.now())"]
+      ]
+    }
+  ]
+})
+expressions.addRule(DaysInTheMonth, {
+  syntax: "the days in the month of {expression:operand}",
+  tests: [{ compileAs: "expression", tests: [["the days in the month of now", "core.daysInMonth(core.now())"]] }]
 })
 
 expressions.addRule(WithCommas, {
@@ -762,7 +933,7 @@ expressions.addRule(AsTitleCase, {
 
 expressions.addRule(AsAType, {
   roles: { match: "value" },
-  syntax: "as (a|an) (type:string|number|fraction|integer)",
+  syntax: "as (a|an) (type:string|number|fraction|integer|date)",
   tests: [
     {
       compileAs: "expression",
@@ -772,6 +943,8 @@ expressions.addRule(AsAType, {
         ["1 as a number", "parseFloat(1)"],
         ["1.3 as a fraction", "parseFloat(1.3)"],
         ["1.4 as an integer", "parseInt(1.4)"],
+        [`"2026-12-25" as a date`, `core.dateFrom("2026-12-25")`],
+        ["the weekday of now as a number", "core.weekdayNumberOf(core.now())"],
         [`"foo" as a number`, `parseFloat("foo")`]
       ]
     }

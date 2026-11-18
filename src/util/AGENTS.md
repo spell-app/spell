@@ -51,7 +51,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `measures/` -- numbers with units (epic `language` P23, P24):  `Dimension` converts a measure and writes it for
     people, from the table compiled from Spell's `dimensions.spell` (`dimensions.generated.ts`, the parser's
     `yarn core:gen:templates`);  `MeasureSystem`, how the reader measures, metric or US:  their choice
-    (`spell-site:units`), else their region's.  Taken by file, in no barrel:  the core and `<ui-dimension>` use it
+    (`spell-site:units`), else their region's;  `CalendarSettings`, how they read dates (epic `language` P63):  their
+    region, first day of the week (`spell-site:week-start`), clock (`spell-site:clock`) and weekend.  Taken by file, in
+    no barrel:  the core and `<ui-dimension>` use them
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
     `copyText()` (the clipboard, with the fallback VS Code's side bar needs)
   - `util.types.ts` -- `Constructor`, `AbstractClass`, `Prettify`

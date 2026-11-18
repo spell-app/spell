@@ -130,8 +130,13 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
       const scopeVar = variables.get(varName)
       match.data.isNewVariable = !scopeVar || scopeVar.isAlias
       // define a new variable in `scope` if not already defined, or redefine an alias as a real one
-      if (!scopeVar) variables.add({ name: varName, datatype, declaredBy: match })
-      else if (scopeVar.isAlias) variables.replace({ name: scopeVar.name, datatype, declaredBy: match })
+      // what it measures too, a duration (epic `language` P63)
+      const measure = SP.measureOf(value)
+      if (!scopeVar) variables.add({ name: varName, datatype, ...(measure && { measure }), declaredBy: match })
+      else if (scopeVar.isAlias)
+        variables.replace({ name: scopeVar.name, datatype, ...(measure && { measure }), declaredBy: match })
+      // one a scan declared ahead, with nothing known of it
+      else if (measure && !scopeVar.measure) P.ParseJournal.assign(scope.parser?.journal, scopeVar, { measure })
       // Remember the original scopeVar for `getAST()` below
       match.data.originalVar = scopeVar
       if (match.data.isNewVariable) MemberReadExpression.warnIfHidesProperty(match, identifier)

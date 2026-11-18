@@ -1515,6 +1515,527 @@
     },
     {
       "kind": "method",
+      "name": "yearOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's year, e.g. `2026`:  `the year of now`."
+    },
+    {
+      "kind": "method",
+      "name": "shortYearOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's year in two digits' worth, e.g. `26`, `5` for 2005:  `the short year of now`."
+    },
+    {
+      "kind": "method",
+      "name": "monthNumberOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's month, counting January as 1:  `the month number of now`."
+    },
+    {
+      "kind": "method",
+      "name": "dayOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's day of the month, 1 to 31:  `the day of now`."
+    },
+    {
+      "kind": "method",
+      "name": "hourOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's hour, 0 to 23, whatever clock the person reads:  `the hour of now`."
+    },
+    {
+      "kind": "method",
+      "name": "minuteOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's minute, 0 to 59:  `the minute of now`."
+    },
+    {
+      "kind": "method",
+      "name": "secondOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's second, 0 to 59:  `the second of now`."
+    },
+    {
+      "kind": "method",
+      "name": "weekOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's week of the year, ISO's way, the same for everyone:  `the week of now`, 1 to 53."
+    },
+    {
+      "kind": "method",
+      "name": "weekdayNumberOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  numbers",
+      "description": "A date's day of the week as a number, 1 to 7, counted from the person's first day of the week: `the weekday number of now`, Tuesday is 3 in the US and 2 in Spain."
+    },
+    {
+      "kind": "method",
+      "name": "monthOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "A date's month, by name in the program's language:  `November`, `noviembre` -- `the month of now`."
+    },
+    {
+      "kind": "method",
+      "name": "shortMonthOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "A date's month, its name cut short:  `Nov`, `nov` -- `the short month of now`."
+    },
+    {
+      "kind": "method",
+      "name": "weekdayOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "A date's day of the week, by name:  `Tuesday`, `martes` -- `the weekday of now`, `the day of the week of now`."
+    },
+    {
+      "kind": "method",
+      "name": "shortWeekdayOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "A date's day of the week, its name cut short:  `Tue`, `mar` -- `the short weekday of now`."
+    },
+    {
+      "kind": "method",
+      "name": "meridiemOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "Whether a date's time is before noon or after, `AM` or `PM` (Spanish `a. m.`, `p. m.`):  `the meridiem of now`."
+    },
+    {
+      "kind": "method",
+      "name": "isAM",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "Is a date's time before noon:  `if now is AM`."
+    },
+    {
+      "kind": "method",
+      "name": "isPM",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Parts:  names",
+      "description": "Is a date's time noon or after:  `if now is PM`."
+    },
+    {
+      "kind": "method",
+      "name": "timeZone",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "form"
+        }
+      ],
+      "section": "The time zone",
+      "description": "The person's time zone, said one of three ways:"
+    },
+    {
+      "kind": "method",
+      "name": "twoDigits",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "number"
+        }
+      ],
+      "section": "Leading zeros",
+      "description": "A whole number in at least two digits, as text:  `5` is `05`, `12` stays `12` -- `the minute of now as two digits`, `with a leading zero`."
+    },
+    {
+      "kind": "method",
+      "name": "timeFromNow",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "style"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "section": "How long ago, or from now",
+      "description": "`date` said as how long ago it was or how long until it is:  `<date> as a duration`."
+    },
+    {
+      "kind": "method",
+      "name": "durationText",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "seconds"
+        },
+        {
+          "name": "style"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "section": "How long ago, or from now",
+      "description": "A duration said as text:  `(its due - now) as a duration`, `2 days, 3 hours`."
+    },
+    {
+      "kind": "method",
+      "name": "addToDate",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "amount"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "`date` moved by `amount` of duration unit `unit`:  `now + 2 days`, `its due - 1 hour` (`amount` negative)."
+    },
+    {
+      "kind": "method",
+      "name": "subtractFromDate",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "amount"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "`date` moved back by `amount` of duration unit `unit`:  `its due - 1 hour` -- see `addToDate()`."
+    },
+    {
+      "kind": "method",
+      "name": "secondsBetween",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "later"
+        },
+        {
+          "name": "earlier"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "How long from `earlier` to `later`, in seconds:  `the next weekend - now`, a duration."
+    },
+    {
+      "kind": "method",
+      "name": "durationPartOf",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "seconds"
+        },
+        {
+          "name": "part"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "One part of a duration of `seconds`, a whole number:  `the hours of its time left`."
+    },
+    {
+      "kind": "method",
+      "name": "isWeekendDay",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "Is `date` a day of the person's region's weekend:  `if now is a weekend day`."
+    },
+    {
+      "kind": "method",
+      "name": "nextWeekend",
+      "of": "core",
+      "module": "dates",
+      "section": "Working with dates",
+      "description": "When the next weekend starts:  the midnight its first day begins, after today -- `the next weekend`."
+    },
+    {
+      "kind": "method",
+      "name": "isBefore",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "other"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "Is `date` earlier than `other`:  `if its due is before now`."
+    },
+    {
+      "kind": "method",
+      "name": "isAfter",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "other"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "Is `date` later than `other`:  `if its due is after now`."
+    },
+    {
+      "kind": "method",
+      "name": "isSameDay",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "other"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "Are `date` and `other` on the same day, whatever their times:  `if its due is the same day as now`."
+    },
+    {
+      "kind": "method",
+      "name": "isDaysFromToday",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "offset"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "Is `date` `offset` days from today:  `is today` (0), `is tomorrow` (1), `is yesterday` (-1)."
+    },
+    {
+      "kind": "method",
+      "name": "daysUntil",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "How many days until `date`, counting midnights:  11 PM to 1 AM is 1 -- `the days until its due`."
+    },
+    {
+      "kind": "method",
+      "name": "daysSince",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "How many days since `date`, counting midnights -- `the days since its added`."
+    },
+    {
+      "kind": "method",
+      "name": "startOfDay",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "The midnight `date`'s day starts at:  `the start of the day of now`."
+    },
+    {
+      "kind": "method",
+      "name": "endOfDay",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "The last moment of `date`'s day, 11:59:59.999 PM:  `the end of the day of now`."
+    },
+    {
+      "kind": "method",
+      "name": "daysInMonth",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "How many days `date`'s month has, 28 to 31:  `the days in the month of now`."
+    },
+    {
+      "kind": "method",
+      "name": "dateFrom",
+      "of": "core",
+      "module": "dates",
+      "params": [
+        {
+          "name": "text"
+        }
+      ],
+      "section": "Working with dates",
+      "description": "`text` read as a date:  `\"2026-12-25\" as a date`."
+    },
+    {
+      "kind": "method",
+      "name": "dateLocale",
+      "of": "core",
+      "module": "dates",
+      "section": "Formats",
+      "description": "The locale dates are said in:  the program's language in the person's region, `en-US`, `es-ES`, `es-US`"
+    },
+    {
+      "kind": "method",
+      "name": "clockOptions",
+      "of": "core",
+      "module": "dates",
+      "section": "Formats",
+      "description": "`Intl`'s options for a time of day on the person's clock:  `hourCycle` `h23` for a 24-hour clock, else `h12`."
+    },
+    {
+      "kind": "method",
       "name": "scrollToTop",
       "of": "core",
       "module": "ui",
@@ -3417,6 +3938,42 @@
         }
       ],
       "description": "The answer of `thing`'s member `name`, once it has one:  what an action writes for reading what waits."
+    },
+    {
+      "kind": "method",
+      "name": "addTimer",
+      "of": "core",
+      "module": "timers",
+      "params": [
+        {
+          "name": "type"
+        },
+        {
+          "name": "method"
+        },
+        {
+          "name": "description"
+        }
+      ],
+      "description": "Each thing of `type` runs its method `method` every `description.seconds`, from when it's made until its program ends:  what `every second` in a type's outline compiles to, after its class."
+    },
+    {
+      "kind": "method",
+      "name": "every",
+      "of": "core",
+      "module": "timers",
+      "params": [
+        {
+          "name": "seconds"
+        },
+        {
+          "name": "run"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "Run `run` every `seconds` while the program runs:  a thing's timer, `every second`."
     },
     {
       "kind": "method",

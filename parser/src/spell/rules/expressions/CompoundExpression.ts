@@ -104,6 +104,33 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
   }
 
   /**
+   * What the expression measures, if anything -- read by `SP.measureOf()`:  its LAST suffix's `resultMeasure()`, given
+   * what each side is, e.g. a date minus a date is a duration in seconds (epic `language` P63).
+   * - Only a chain of one precedence, which reads left to right (`now + 2 days - now`):  the left side's datatype is
+   *   each suffix's result in turn.  A mix measures nothing yet.
+   */
+  getMeasure(match: P.MatchFor<this>): P.Measure | undefined {
+    const { lhs, rhsChain } = match.groups
+    const suffixes = (rhsChain?.matched ?? []) as P.Match[]
+    const last = suffixes.at(-1)
+    if (
+      !last ||
+      suffixes.some(
+        (suffix) => (suffix.rule as InfixOperatorSuffix).precedence !== (last.rule as InfixOperatorSuffix).precedence
+      )
+    ) {
+      return undefined
+    }
+    const rhsOf = (suffix: P.Match) => (suffix.groups.expression as P.Match | undefined)?.datatype
+    let left = (lhs as P.Match).datatype
+    for (const suffix of suffixes.slice(0, -1)) {
+      left = (suffix.rule as InfixOperatorSuffix).getResultDatatype(suffix as never, left, rhsOf(suffix))
+    }
+    const rule = last.rule as { resultMeasure?(lhs?: P.Datatype, rhs?: P.Datatype): P.Measure | undefined }
+    return rule.resultMeasure?.(left, rhsOf(last))
+  }
+
+  /**
    * Runs shunting-yard over `rhsChain` to combine `lhs` with each suffix, by `precedence`.
    * - `compile()` normalizes a matched sub-`Match`/array down to plain `ASTNode`(s).
    * - `applyOperatorToRule()` calls the matched suffix rule's own `compileAST()`.

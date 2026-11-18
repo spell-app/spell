@@ -46,6 +46,7 @@ import { coreMethods } from "./core"
 import { collectionCoreMethods } from "./collection-core"
 import { collectionOtherMethods } from "./collection-other"
 import { stringMethods } from "./string"
+import { dateMethods } from "./dates"
 import { uiMethods } from "./ui"
 import { drawingMethods } from "./drawing"
 import { elementsMethods } from "./elements"
@@ -63,6 +64,7 @@ import { describedMethods } from "./described"
 import { sendingMethods, send } from "./sending"
 import { actingMethods } from "./acting"
 import { waitingMethods } from "./waiting"
+import { timerMethods } from "./timers"
 import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
 import { dimensionMethods } from "./dimensions"
@@ -78,6 +80,7 @@ const CORE_MODULES: Record<string, object> = {
   "collection-core": collectionCoreMethods,
   "collection-other": collectionOtherMethods,
   string: stringMethods,
+  dates: dateMethods,
   ui: uiMethods,
   drawing: drawingMethods,
   elements: elementsMethods,
@@ -95,6 +98,7 @@ const CORE_MODULES: Record<string, object> = {
   sending: sendingMethods,
   acting: actingMethods,
   waiting: waitingMethods,
+  timers: timerMethods,
   saved: savedMethods,
   abilities: abilityMethods,
   dimensions: dimensionMethods,
