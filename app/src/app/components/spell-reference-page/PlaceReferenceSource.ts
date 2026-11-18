@@ -143,7 +143,8 @@ export class PlaceReferenceSource implements ReferenceSource {
     const { say } = this
     const { about } = description
     const counts = stateCounts(description)
-    const sections: ReferenceSection[] = [this.deploymentsSection(description)]
+    // where it runs, when the project names servers:  else it's the address on its line
+    const sections: ReferenceSection[] = this.place.deployments ? [this.deploymentsSection(description)] : []
     for (const tag of tagsOf(description, say("lists"))) {
       sections.push({
         id: `tag:${tag.name}`,
@@ -157,7 +158,7 @@ export class PlaceReferenceSource implements ReferenceSource {
         id: "agent-notes",
         label: say("agentNotes"),
         badge: String(description.agentNotes.length),
-        notes: description.agentNotes
+        notes: [...new Set(description.agentNotes)]
       })
     }
     if (description.notes.length) {
@@ -215,7 +216,7 @@ export class PlaceReferenceSource implements ReferenceSource {
   private listSection(key: string, collection: CollectionDescription): ReferenceSection {
     const { say } = this
     const operations = Object.entries(collection.operations ?? {}).map(([name, operation]) =>
-      this.operationItem(key, name, operation)
+      this.operationItem(key, name, operation, collection.state)
     )
     const fields = Object.entries(collection.fields).map(([field, about]) =>
       this.fieldItem(key, field, about, field === collection.idField)
@@ -238,23 +239,36 @@ export class PlaceReferenceSource implements ReferenceSource {
       ...(this.wordsFile && { wordsKey: typeKey(key) }),
       lines: [
         ...(collection.about ? [{ text: collection.about }] : []),
-        ...(collection.state ? [{ text: this.stateLine(collection.state), title: collection.state.reason ?? "" }] : []),
+        // its label is the section's badge:  the line says only when and where, and what happened
+        ...(collection.state
+          ? [{ text: this.stateDetail(collection.state), title: collection.state.reason ?? "" }]
+          : []),
         ...(collection.leftOut ? [{ text: say("listLeftOut", { why: collection.leftOut }) }] : [])
       ],
       sections
     }
   }
 
-  /** A list's change:  its name, method and address, what it takes, how trying it went. */
-  private operationItem(list: string, name: string, operation: OperationDescription): ReferenceItem {
+  /**
+   * A list's change:  its name, method and address, what it takes;
+   * how trying it went, only when that isn't how its list went (`listState`), said already as the list's badge.
+   */
+  private operationItem(
+    list: string,
+    name: string,
+    operation: OperationDescription,
+    listState: PlaceState | undefined
+  ): ReferenceItem {
     const params = Object.entries(operation.params ?? {})
       .map(([param, kind]) => `${param} (${kind})`)
       .join(", ")
+    const isAsItsList = (operation.state?.is ?? "unverified") === (listState?.is ?? "unverified")
     return {
       id: `change:${list}:${name}`,
       name,
-      says: [`${operation.method} ${operation.at}`, ...(params ? [this.say("takes", { params })] : [])],
-      state: this.stateOf(operation.state)
+      code: `${operation.method} ${operation.at}`,
+      says: params ? [this.say("takes", { params })] : [],
+      ...(!isAsItsList && { state: this.stateOf(operation.state) })
     }
   }
 
@@ -311,6 +325,16 @@ export class PlaceReferenceSource implements ReferenceSource {
             ? state.reason
             : say(look.why)
     return said ? `${line}\n${said}` : line
+  }
+
+  /**
+   * A state's line without its label, which a badge beside it says:  when and where it was tried, then what happened.
+   * - `Tried on dev, Nov 17, 2026, 9:31 PM` / `3 rows read`;  never tried, why.
+   */
+  private stateDetail(state: PlaceState): string {
+    const [first = "", ...rest] = this.stateLine(state).split("\n")
+    const when = first.slice(this.say(STATE_LOOKS[state.is].words).length).replace(/^,\s*/, "")
+    return [when && when[0]!.toUpperCase() + when.slice(1), ...rest].filter(Boolean).join("\n")
   }
 
   /**

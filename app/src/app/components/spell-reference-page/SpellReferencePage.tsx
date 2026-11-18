@@ -12,6 +12,7 @@ import type {
   ReferenceSection,
   ReferenceSource,
   ReferenceState,
+  ReferenceTable,
   ReferenceWords
 } from "./SpellReferencePage.types"
 
@@ -149,8 +150,12 @@ export class SpellReferencePage extends E.UIComponent<typeof spellReferencePageV
     return (
       <article class="SpellReferencePage" part={this.partForName("base")}>
         <Show when={this.source !== undefined} fallback={<p class={["quiet", "loading"]}>{this.say("loading")}</p>}>
-          <Show when={this.source} fallback={<p class="quiet">{this.say("notFound", { path: this.src ?? "" })}</p>}>
-            {(source) => this.drawReference(source().reference)}
+          <Show
+            when={this.source}
+            keyed
+            fallback={<p class="quiet">{this.say("notFound", { path: this.src ?? "" })}</p>}
+          >
+            {(source) => this.drawReference(source.reference)}
           </Show>
         </Show>
       </article>
@@ -209,52 +214,59 @@ export class SpellReferencePage extends E.UIComponent<typeof spellReferencePageV
               </p>
             )}
           </For>
-          <Show when={section.empty}>{(empty) => <p class="quiet">{empty()}</p>}</Show>
-          <Show when={section.table}>
-            {(table) => (
-              <ui-table class="ReferenceTable" celled="" unstackable="" size="small">
-                <table>
-                  <thead>
-                    <tr>
-                      <For each={table().columns}>{(column) => <th>{column}</th>}</For>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <For each={table().rows}>
-                      {(row) => (
-                        <tr>
-                          <For each={row}>
-                            {(cell, index) =>
-                              table().codeColumns?.includes(index()) ? (
-                                <td class={["single", "line"]}>
-                                  <code>{cell}</code>
-                                </td>
-                              ) : (
-                                <td>{cell}</td>
-                              )
-                            }
-                          </For>
-                        </tr>
-                      )}
-                    </For>
-                  </tbody>
-                </table>
-              </ui-table>
-            )}
-          </Show>
-          <Show when={section.items?.length}>
+          {section.empty && <p class="quiet">{section.empty}</p>}
+          {section.table && this.drawTable(section.table)}
+          {section.items?.length ? (
             <div class="items">
               <For each={section.items}>{(item) => this.drawItem(item)}</For>
             </div>
-          </Show>
-          <Show when={section.notes?.length}>
+          ) : undefined}
+          {section.notes?.length ? (
             <ul class="notes">
               <For each={section.notes}>{(note) => <li>{note}</li>}</For>
             </ul>
-          </Show>
+          ) : undefined}
           <For each={section.sections ?? []}>{(inside) => this.drawSection(inside, inner)}</For>
         </Fold>
       </spell-reference-section>
+    )
+  }
+
+  /**
+   * A section's small table, in `<ui-table>`:  a native table, so a cell can be in the code face.
+   * - Never squeezed:  on a phone it scrolls sideways.
+   */
+  private drawTable(table: ReferenceTable): JSX.Element {
+    const rows = table.rows.map((row) => row.map((text, at) => ({ text, isCode: !!table.codeColumns?.includes(at) })))
+    return (
+      <ui-table class="ReferenceTable" celled="" unstackable="" size="small">
+        <table>
+          <thead>
+            <tr>
+              <For each={table.columns}>{(column) => <th>{column}</th>}</For>
+            </tr>
+          </thead>
+          <tbody>
+            <For each={rows}>
+              {(row) => (
+                <tr>
+                  <For each={row}>
+                    {(cell) =>
+                      cell.isCode ? (
+                        <td class={["single", "line"]}>
+                          <code>{cell.text}</code>
+                        </td>
+                      ) : (
+                        <td>{cell.text}</td>
+                      )
+                    }
+                  </For>
+                </tr>
+              )}
+            </For>
+          </tbody>
+        </table>
+      </ui-table>
     )
   }
 
@@ -269,8 +281,9 @@ export class SpellReferencePage extends E.UIComponent<typeof spellReferencePageV
       >
         <div class="head">
           <code class="name">{item.name}</code>
+          {item.code && <code class="address">{item.code}</code>}
           <span class="says">{item.says.join(" · ")}</span>
-          <Show when={item.state}>{(state) => this.drawState(state())}</Show>
+          {item.state && this.drawState(item.state)}
           <For each={item.wordsKey ? (this.words[item.wordsKey]?.marks ?? []) : []}>
             {(mark) => this.drawState(this.markState(mark))}
           </For>
@@ -284,7 +297,7 @@ export class SpellReferencePage extends E.UIComponent<typeof spellReferencePageV
   private drawState(state: ReferenceState, slot?: "badge"): JSX.Element {
     return (
       <spell-reference-state part={this.partForName("state")} slot={slot}>
-        <ui-label size="mini" color={state.color} title={state.title}>
+        <ui-label size="tiny" color={state.color} title={state.title}>
           {state.label}
         </ui-label>
       </spell-reference-state>

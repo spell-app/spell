@@ -211,7 +211,8 @@ describe("<spell-reference-page>", () => {
     const failure = [...jobs.querySelectorAll("p.quiet")].find(
       (line) => line.getAttribute("title") === "it answered 403"
     )!
-    expect(failure.textContent).toMatch(/^Failed, tried .*\nThe real server didn't accept the key/)
+    // its label is its badge:  the line says only when, and what its answer means
+    expect(failure.textContent).toMatch(/^Tried .*\nThe real server didn't accept the key/)
     const inner = [...jobs.querySelectorAll("spell-reference-section > ui-section")]
     expect(inner.map((fold) => [fold.getAttribute("label"), fold.getAttribute("badge")])).toEqual([
       ["What it can change", "1"],
@@ -219,7 +220,9 @@ describe("<spell-reference-page>", () => {
     ])
     expect(jobs.querySelector("spell-reference-item")).toBeNull()
     const changes = await opened(root, "What it can change")
-    expect(itemsOf(changes)).toEqual([["enqueue", "POST /core/jobs/{id}/enqueue/ · takes id (number)"]])
+    expect(itemsOf(changes)).toEqual([["enqueue", "takes id (number)"]])
+    expect(changes.querySelector("spell-reference-item .address")!.textContent).toBe("POST /core/jobs/{id}/enqueue/")
+    // not tried, though its list failed:  its own label
     expect(changes.querySelector("spell-reference-item spell-reference-state")!.textContent).toBe("Not tried yet")
     await opened(root, "tenancy")
     const tenants = await opened(root, "tenants")

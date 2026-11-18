@@ -85,6 +85,8 @@ export type ReferenceItem = {
   id: string
   /** Its name, in the code face:  `status`. */
   name: string
+  /** Its address, in the code face after its name:  a change's `POST /api/jobs/`. */
+  code?: string
   /** What it is, a phrase each:  `text`, `one of pending or done`, `required`. */
   says: string[]
   /** How trying it went:  a change's. */

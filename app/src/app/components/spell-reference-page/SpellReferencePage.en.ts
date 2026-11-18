@@ -119,8 +119,8 @@ export const spellReferencePageVocabulary = {
     {
       key: "unverifiedWhy",
       text:
-        "Spell has only read about this list, and hasn't tested it on the real server.\n" +
-        "Run spell place verify to test it.",
+        "Spell knows this list only from the data source's description:  it hasn't been tested on the real server yet.\n" +
+        "To test it, run spell place verify in your terminal.",
       description: "Why it's not tried yet."
     },
     { key: "tried", text: "tried {date}", description: "When it was tried." },

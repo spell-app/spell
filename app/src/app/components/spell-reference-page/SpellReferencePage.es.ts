@@ -34,7 +34,7 @@ export const spellReferencePageEs = {
       "Tu archivo de Spell desactiva esta lista, así que nunca se prueba.\nQuita esa línea para volver a activarla.",
     unverified: "Sin probar",
     unverifiedWhy:
-      "Spell solo ha leído sobre esta lista, y no la ha probado en el servidor real.\nEjecuta spell place verify para probarla.",
+      "Spell conoce esta lista solo por la descripción de la fuente de datos:  todavía no se ha probado en el servidor real.\nPara probarla, ejecuta spell place verify en tu terminal.",
     tried: "probada el {date}",
     triedOn: "probada en {deployment}, el {date}",
     rows: "{count} filas leídas",

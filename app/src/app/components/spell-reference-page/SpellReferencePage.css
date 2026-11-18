@@ -30,6 +30,7 @@
 
   h1 {
     margin: 0;
+    line-height: 32px;
     text-transform: capitalize;
   }
   p {
@@ -53,14 +54,20 @@ spell-reference-section {
   display: block;
   margin-bottom: 8px;
 
-  /* a list under its tag, and a list's changes and fields under it:  set in, so each reads as its parent's */
-  spell-reference-section {
-    margin-left: 20px;
-  }
-
   p {
     margin: 0 0 8px 0;
   }
+}
+
+/* what's in a fold starts under its title's text, not its chevron:  its hint, its words, the folds inside it */
+.Fold::part(content),
+.Fold::part(subhead) {
+  padding-left: 20px;
+}
+
+/* room under an open fold's last box, so its clip never cuts the box's shadow */
+.Fold:not(:state(collapsed))::part(content) {
+  padding-bottom: 8px;
 }
 
 /* a fold whose badge is a state's label:  the label alone, no second pill around it */
@@ -96,21 +103,25 @@ code {
   font-size: 0.9em;
 }
 
-/* a list's fields and changes:  a line each, on the theme's raised surface, a shadow between them and the page */
+/* a list's fields and changes:  a line each, on the theme's raised surface, a shadow between them and the page;
+   on dark paper a light ring too, as a black shadow doesn't show there */
 .items {
   display: flex;
   flex-direction: column;
   margin: 0 0 8px 0;
   border-radius: 4px;
-  box-shadow: var(--ui-shadow-raised);
+  box-shadow:
+    0 0 0 1px light-dark(transparent, rgb(255 255 255 / 0.08)),
+    var(--ui-shadow-raised);
 }
 
 spell-reference-item {
   display: block;
   padding: 8px 12px;
+  line-height: 20px;
 
   & + spell-reference-item {
-    box-shadow: 0 -1px 0 var(--ui-border-color-subtle, rgb(0 0 0 / 0.06));
+    box-shadow: 0 -1px 0 light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08));
   }
 
   .head {
@@ -122,12 +133,16 @@ spell-reference-item {
   .name {
     font-weight: 600;
   }
+  /* its state at the row's right end, wherever its facts wrap to */
+  spell-reference-state {
+    margin-left: auto;
+  }
   .says {
     color: var(--ui-text-muted);
     overflow-wrap: anywhere;
   }
   .words {
-    margin-top: 4px;
+    margin: 4px 0 0 0;
   }
 }
 
@@ -157,6 +172,14 @@ spell-reference-state {
   opacity: 0.6;
 }
 
+/* on a phone:  folds set in less, so a list's rows keep their width */
+@media (max-width: 480px) {
+  .Fold::part(content),
+  .Fold::part(subhead) {
+    padding-left: 12px;
+  }
+}
+
 /* the box words are made clearer in:  growing with its words */
 .WordsBox {
   display: flex;
@@ -177,6 +200,12 @@ spell-reference-state {
     background: var(--ui-input-background, var(--ui-background));
     box-shadow: var(--ui-shadow-raised);
     resize: vertical;
+  }
+  /* 16px on a touch screen, so a phone doesn't zoom in as it's tapped */
+  @media (pointer: coarse) {
+    textarea {
+      font-size: 16px;
+    }
   }
   textarea:focus {
     outline: 2px solid var(--ui-focus-color, var(--ui-primary-color));
