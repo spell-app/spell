@@ -20,6 +20,14 @@
 			  - wide, it switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`;
 			    to `full` a frame later, so the column widens from where it was
 			- The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
+			- `drawer-hides`:  its button hides the whole drawer (`drawer="hidden"`) and shows it again,
+			  never its icons only:  for a navigation with no icons.
+			- `right="hidden"` (or `left`) hides a side bar;  `toggleSidebar("right")`,
+			  what a `<ui-site-nav-button toggles="right">` calls, switches it and sends `ui-toggle`,
+			  `{ region: "right", newState, oldState }`, each `hidden` or `shown`.
+			  Narrow, a side bar with such a button hides behind it, and slides over the page while it's open.
+			- `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them,
+			  over the page's own ground;  a `<ui-toc>` in a side bar is headed by a band, as the editor's panels are.
 		</>
 		<markdown>
 			```js
@@ -41,7 +49,11 @@
 			- Its main layout is a page layout, in a file of its own;  each slot it fills is a drawing.
 			- The drawer holds the site's navigation, and the page menu its tabs, unless the layout draws them.
 			- A page picks another layout on its own line (`, in the bare layout`), or none (`, no layout`).
-			- The site remembers each person's choice of a compact drawer, per site and layout.
+			- The site remembers each person's choice of a compact or hidden drawer, and of a side bar hidden,
+			  per site and layout.
+			- A `<ui-defaults>` block gives its layouts their look, e.g. Spell UI's own site:
+			  `<ui-page-layout floating drawer-hides />`.
+			- A `<toc>` in a side bar lists the page shown, headed by its title.
 
 			```spell
 			main layout is a page layout
@@ -56,7 +68,7 @@
 
 	<section label="Keyboard">
 		<markdown>
-			Escape closes the drawer open over the page.
+			Escape closes the drawer, or a side bar, open over the page.
 
 			- The keyboard's focus coming into a compact drawer opens it at once, and closes it as it leaves.
 			- Inside, the side navigation's own keys walk its pages.

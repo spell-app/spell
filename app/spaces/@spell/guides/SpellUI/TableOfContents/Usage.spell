@@ -11,6 +11,10 @@
 
 			- `for`:  the id of what it lists;  without it, the page's `<main>`, else `<body>`.
 			  A `<ui-tabs>` lists its SHOWN pane, and follows the tabs as they switch.
+			- In a side bar of a `<ui-page-layout>`, with no `for`, it lists the layout's page, as the site shows another:
+			  it follows the box the layout scrolls in, heads itself with the page's title (its level 1 heading),
+			  and scrolls to a section itself, leaving the address as it is.
+			  Spell UI's own site draws its contents so, a bare `<toc>` in its right side bar.
 			- What it lists:  level 2 headings and top-level `<ui-section>`s are sections;
 			  the examples with a `heading`, level 3 headings and nested `<ui-section>`s are entries under them.
 			- A heading without an `id` gets one (a slug of its text), so every link works.

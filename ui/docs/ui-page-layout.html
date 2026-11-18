@@ -137,7 +137,10 @@
                   - `left`, `right`:  side bars either side of the page;  `footer`:  across the bottom.
                   - A region with nothing in it takes no room at all.
                   - `drawer="compact"` shows only the drawer's icons:  the layout sets `collapsed` on each `<ui-site-nav>` in it.
-                  - `toggleDrawer()`, what a `<ui-site-nav-button>` calls:  narrow, slides the drawer in or out;  wide, switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`;  to `full` a frame later, so the column widens from where it was.  The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
+                  - `toggleDrawer()`, what a `<ui-site-nav-button>` calls:  narrow, slides the drawer in or out;  wide, switches `drawer` and sends `ui-toggle`, `{ region, newState, oldState }`, each `compact` or `full`;  to `full` a frame later, so the column widens from where it was.  The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
+                  - `drawer-hides`:  its button hides the whole drawer (`drawer="hidden"`) and shows it again, never its icons only:  for a navigation with no icons.
+                  - `right="hidden"` (or `left`) hides a side bar;  `toggleSidebar("right")`, what a `<ui-site-nav-button toggles="right">` calls, switches it and sends `ui-toggle` with `region: "right"`, `hidden` or `shown`.  Narrow, a side bar with such a button hides behind it, and slides over the page while it's open.
+                  - `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them, over the page's own ground;  a `<ui-toc>` in a side bar is headed by a band, as the editor's panels are.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -153,7 +156,7 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Escape closes the drawer open over the page.  The keyboard's focus coming into a compact drawer opens it at once, and closes it as it leaves.  Inside, the side navigation's own keys walk its pages.
+                  Escape closes the drawer, or a side bar, open over the page.  The keyboard's focus coming into a compact drawer opens it at once, and closes it as it leaves.  Inside, the side navigation's own keys walk its pages.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -217,7 +220,7 @@
                     current="#api"
                     pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
                   ></ui-site-nav>
-                  <p>The page goes here.  Going to another page redraws only this part.</p>
+                  <p>The page goes here. Going to another page redraws only this part.</p>
                   <ui-text slot="footer" color="grey">Made with Spell</ui-text>
                 </ui-page-layout>
                 <!-- playground:end -->

@@ -91,7 +91,8 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Put it at the start of the top bar of a `<ui-page-layout>`, in its `menu` slot:  it finds the layout around it, across shadow roots, and calls its `toggleDrawer()`.
-                  - It takes no attributes of its own:  an item's, for its look in a menu (its `icon`, `aria-label` and `title` replace its own).
+                  - `toggles="right"` (or `left`):  it shows and hides that side bar of the layout instead, `toggleSidebar()`, and says so in its words;  narrow, the layout hides that side bar behind it.  Put one at the end of the top bar, and one with `icon="close"` in the side bar itself.
+                  - Its other attributes are an item's, for its look in a menu (its `icon`, `aria-label` and `title` replace its own).
                   - With one inside it, the layout draws no menu button of its own at a narrow width.
                   - Outside a menu, it's a small basic button with the same icon.
                 </script>
@@ -165,7 +166,7 @@
                     current="#home"
                     pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Films", "href": "#films", "icon": "film" }]'
                   ></ui-site-nav>
-                  <p>Press the button:  the drawer shows only its icons, or all of it again.</p>
+                  <p>Press the button: the drawer shows only its icons, or all of it again.</p>
                 </ui-page-layout>
                 <!-- playground:end -->
               </ui-docs-tokens>

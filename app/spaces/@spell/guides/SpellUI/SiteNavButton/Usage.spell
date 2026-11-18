@@ -11,7 +11,10 @@
 			it finds the layout around it, across shadow roots, and calls its `toggleDrawer()`.
 			A Spell site's page layout writes a bare `<site-nav-button slot="start" />` in its app menu.
 
-			- It takes no attributes of its own:  an item's, for its look in a menu
+			- `toggles="right"` (or `left`):  it shows and hides that side bar of the layout instead, `toggleSidebar()`,
+			  and says so in its words;  narrow, the layout hides that side bar behind it.
+			  Spell UI's own site puts one at its app menu's end, and one with `icon="close"` in the contents' header.
+			- Its other attributes are an item's, for its look in a menu
 			  (its `icon`, `aria-label` and `title` replace its own).
 			- With one inside it, the layout draws no menu button of its own at a narrow width.
 			- Outside a menu, it's a small basic button with the same icon.
