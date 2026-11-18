@@ -54,6 +54,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Negative positions count from the end either way:  `-1` is the last item.
 - The console sends a DUMP (a thing, a spell list ...) through `core.console.printDump()`:
   the page's console by default, stderr under `spell run`.
+- The step debugger's runtime half is [stepping.ts](stepping.ts) (epic `editor` P33):  `core._stepper`, ONE `Stepper`
+  per runtime copy, what a debugging build's lines ask (`P.DebugSteps`) and the editor drives.
+  - It holds a line by making its action wait:  breakpoints by file and line, Continue, Step Over / Into / Out,
+    and each frame's thing, inputs, values so far and callers.
+  - The `_` keeps it out of the core contract:  only the editor's runtime steps, so Python's core has none.
+  - `resetRuntime()` forgets what it held of the last run.
 - Depends only on `spell/util`.
   NEVER import `spell/parser/spell` / `spell/parser/parser`, or anything above.
 - Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
