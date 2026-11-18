@@ -87,6 +87,11 @@ import { SearchedAt } from "./SearchedAt"
 import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
+import { AnyServerCallFails } from "./AnyServerCallFails"
+import { ErrorIs } from "./ErrorIs"
+import { Nevermind, PassTheError } from "./FailureWords"
+import { ThingById } from "./ThingById"
+import { CallTheServer, WrapperAction } from "./WrapperAction"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
@@ -1346,6 +1351,316 @@ places.addRule(TryAgain, {
   tests: [{ compileAs: "statement", tests: [["try again", "core.reloadSaved()"]] }]
 })
 
+// a server's actions (epic `data` P50):  by id, wrapped, and the steps when one fails
+places.addRule(ThingById, {
+  syntax: "{type:known_type} {id:number}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a job is a thing",
+            'work is a web server at "https://jobs.test":',
+            '\t- to complete a job is at "/jobs/{id}/complete"',
+            "a job:",
+            "\t- it lives in work",
+            "to finish",
+            "\tcomplete job 7151"
+          ],
+          js: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})",
+            "export async function finish() {",
+            '  return core.asAction({ undoneAs: "Finish" }, async () => await (await core.savedThingOrMissing(Job, 7151)).complete())',
+            "}"
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})",
+            "export async function finish() {",
+            '  return core.asAction({ undoneAs: "Finish" }, async () => await (await core.savedThingOrMissing(Job, 7151)).complete())',
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+places.addRule(WrapperAction, {
+  roles: { band: "action", signature: "declaration" },
+  syntax: "to {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a job is a thing",
+            'work is a web server at "https://jobs.test":',
+            '\t- to complete a job is at "/jobs/{id}/complete"',
+            "a job:",
+            "\t- it lives in work",
+            "to complete a job",
+            '\tprint "about to"',
+            "\tcall work",
+            '\tprint "done"'
+          ],
+          js: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  async aroundComplete(serverCall) {",
+            '    core.console.log("about to")',
+            "    await serverCall()",
+            '    core.console.log("done")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  async aroundComplete(serverCall: any /* spell: type unknown */) {",
+            '    core.console.log("about to")',
+            "    await serverCall()",
+            '    core.console.log("done")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ]
+        },
+        {
+          title: "never calling the server warns",
+          input: [
+            "a job is a thing",
+            'work is a web server at "https://jobs.test":',
+            '\t- to complete a job is at "/jobs/{id}/complete"',
+            "a job:",
+            "\t- it lives in work",
+            "to complete a job",
+            '\tprint "never sent"'
+          ],
+          js: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  aroundComplete(serverCall) {",
+            '    core.console.log("never sent")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("created", { type: "date" }) }',
+            '  get created() { return this.getProp("created") }',
+            '  set created(value) { this.setProp("created", value) }',
+            "",
+            "  // - it lives in work",
+            '  static { this.declareProp("modified", { type: "date" }) }',
+            '  get modified() { return this.getProp("modified") }',
+            '  set modified(value) { this.setProp("modified", value) }',
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ],
+          ts: [
+            "export class Job extends Thing {",
+            "  async complete() {",
+            '    return await core.callPlace("work", "complete", this)',
+            "  }",
+            "",
+            "  aroundComplete(serverCall: any /* spell: type unknown */) {",
+            '    core.console.log("never sent")',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "work",',
+            '    collection: "jobs",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor created!: any /* spell: type unknown */",
+            "",
+            "  // - it lives in work",
+            '  @prop({ type: "date" })',
+            "  accessor modified!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Job, "complete", { title: "Complete Job", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Job, "complete", { moment: "around", hook: "aroundComplete", level: "app" })',
+            "export class Work extends Place {}",
+            "export const work = core.place(new Work(), {",
+            '  name: "work",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { complete: "/jobs/{id}/complete" }',
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+places.addRule(CallTheServer, { syntax: "call (the server|{place:identifier})" })
+places.addRule(ErrorIs, { syntax: "the error is {name:text}" })
+places.addRule(Nevermind, { syntax: "(nevermind|never mind)" })
+places.addRule(PassTheError, { syntax: "pass the error" })
+places.addRule(AnyServerCallFails, {
+  syntax: "(when|if) any server call fails :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "when any server call fails",
+            '\tif the error is "not authorized"',
+            '\t\tprint "sign in"',
+            '\totherwise if the error is "limit"',
+            "\t\tpass the error",
+            "\totherwise",
+            "\t\tdo nothing"
+          ],
+          js: [
+            "core.addServerFailureStep((error) => {",
+            '  if (core.errorIs(error, "not authorized")) core.console.log("sign in")',
+            '  else if (core.errorIs(error, "limit")) return core.passTheError()',
+            "  else core.doNothing()",
+            "})"
+          ]
+        },
+        {
+          title: "a last if with no otherwise passes on what it didn't catch",
+          input: ["if any server call fails", '\tif the error is "not found"', "\t\tnevermind"],
+          js: [
+            "core.addServerFailureStep((error) => {",
+            '  if (core.errorIs(error, "not found")) return',
+            "  return core.passTheError()",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
 places.addRule(ThingWithId, { syntax: "the {type:known_type} whose id is {id:expression}" })
 places.addRule(EveryThingMatching, {
   syntax: "every {type:known_type} (matching|which matches) {words:expression}",

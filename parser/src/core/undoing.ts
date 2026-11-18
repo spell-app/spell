@@ -40,7 +40,7 @@
  */
 import { CanceledError, schemaOf, UndoStack, type UndoRecord } from "spell/util"
 
-import { core, recordingChanges } from "./core"
+import { core, recordingChanges, type ChangesMade } from "./core"
 
 /** What an action that can't be undone does to the history:  `ActionInfo.cantBeUndone`. */
 export const CantBeUndoneModes = ["keeps history", "clears history"] as const
@@ -63,6 +63,8 @@ export type ActionInfo = {
    * - See `runActing()`.
    */
   cancels?: boolean
+  /** It's a server's action (epic `data` P50):  when it fails, the app's steps for every server call run last. */
+  callsServer?: boolean
 }
 
 /**
@@ -70,6 +72,35 @@ export type ActionInfo = {
  * - A `CanceledError`, so if one ever escapes an action nothing reports it.
  */
 export class ActionCanceled extends CanceledError {}
+
+/** When a hook runs in its action (epic `data` P50):  see `runActing()`. */
+export type HookMoment = "before" | "while" | "after" | "failed" | "around"
+
+/** Which file a hook comes from:  a `.api.spell` file, the app's, or a page's (epic `data` Q84, Q96). */
+export type HookLevel = "api" | "app" | "page"
+
+/** One hook of an action:  the member it runs, its file's level, and its page's class for a page's. */
+export type ActionHook = { hook: string; level: HookLevel; page?: () => Function }
+
+/** An action's hooks, by moment:  `core.addAfterHook()`, `core.addActionHook()`. */
+export type ActionHooks = Record<HookMoment, ActionHook[]>
+
+/** What runs around an action's own steps:  see `runActing()`. */
+export type ActingSteps = {
+  /** It may `cancel`. */
+  cancels?: boolean
+  /** It's a server's:  `core.addServerFailureStep()`'s steps run last, when it fails. */
+  callsServer?: boolean
+  /** Why the thing it's on isn't there:  only the failure steps run. */
+  missing?: Error
+  before?: (() => unknown)[]
+  during?: (() => unknown)[]
+  after: (() => unknown)[]
+  /** Each given the error:  gives back `PASSED` to send it on. */
+  failed?: ((error: unknown) => unknown)[]
+  /** Each given what it wraps, to run when it says. */
+  around?: ((inner: () => unknown) => unknown)[]
+}
 
 /**
  * What the Edit menu shows of an undo history:  what `App`'s `canUndo`, `undoTitle` ... read.
@@ -309,12 +340,14 @@ export class UndoHistory extends UndoStack {
  * - SIDE EFFECT:  replaces the method on `Class.prototype`
  *   with one that runs it through the history (`UndoHistory.run()`).
  *   - A subclass that overrides it declares it again;  its `super.turnOver()` joins its step.
- * - `info.cancels`:  it may `cancel`;  `after`:  the members of `Class` that run after it, its after hooks, in order --
- *   a live list, so a hook added later runs too (`core.addAfterHook()`).  See `runActing()`.
+ * - `info.cancels`:  it may `cancel`;  `hooks`:  the members of `Class` that run around it, by moment and level --
+ *   live lists, so a hook added later runs too (`core.addAfterHook()`, `core.addActionHook()`).  See `runActing()`.
+ *   - Called on a stand-in for a thing that isn't there (`core.savedThingOrMissing()`):  its failure steps alone run,
+ *     with the place's "not found" (epic `data` P50).
  * - No program running:  the method just runs.
  * - throws `TypeError` if `name` isn't a method of `Class`, or `info` says neither kind, or both
  */
-export function declareAction(Class: Function, name: string, info: ActionInfo, after: readonly string[] = []): void {
+export function declareAction(Class: Function, name: string, info: ActionInfo, hooks?: ActionHooks): void {
   const method = (Class.prototype as Record<string, unknown>)[name]
   if (typeof method !== "function") {
     throw new TypeError(
@@ -337,8 +370,15 @@ export function declareAction(Class: Function, name: string, info: ActionInfo, a
   // named for the method, so a stack trace still says `turnOver`
   const action = {
     [name](this: object, ...args: unknown[]): unknown {
-      const hooks = after.map((member) => () => (this as Record<string, Function>)[member]!(...args))
-      const act = () => runActing(() => method.apply(this, args), { cancels: info.cancels, after: hooks })
+      const steps = hooks ? stepsOf(this, hooks, args) : { after: [] }
+      const missing = missingThings.get(this)
+      const act = () =>
+        runActing(() => method.apply(this, args), {
+          cancels: info.cancels,
+          callsServer: info.callsServer,
+          missing,
+          ...steps
+        })
       const history = core.RUNTIME?.history
       return history ? history.run(info, act) : act()
     }
@@ -352,44 +392,184 @@ export function declareAction(Class: Function, name: string, info: ActionInfo, a
 }
 
 /**
- * Run `act`, an action's steps, then its after hooks (`after`), in order, as ONE action that may be called off
- * (epic `language` P56).  Returns what `act` gives back.
- * - `cancel` in its steps or a hook (`ActionCanceled`) calls it off:
+ * Run `act`, an action's steps, with the steps around it, as ONE action that may be called off
+ * (epic `language` P56;  epic `data` P50).  Returns what `act` gives back.
+ * - In order:
+ *   1. `during`, the while steps:  what they change is put back when the action ends, worked or failed
+ *   2. `before`, the before steps
+ *   3. `act`, inside each of `around`, the first outermost:  each runs what's inside it when it says (`call the server`)
+ *   4. `after`, the after steps
+ * - `cancel` in any of them (`ActionCanceled`) calls it off:
  *   - every change it made so far is put back as it was:  props, lists, kept values (`recordingChanges()`)
  *   - so it leaves no undo step:  what it recorded is dropped from the open one (`dropUnchangedRecords()`)
- *   - its after hooks don't run, or stop where they are
+ *   - the steps after it don't run, or stop where they are
  *   - it answers no:  `if put the card on the pile` reads false
  * - Done, an action that may cancel (`cancels`) answers yes, unless it gave back something else.
+ * - Any other failure goes through `failed`, the failure steps, in order, then, for a server's action (`callsServer`),
+ *   each of `core.addServerFailureStep()`'s:
+ *   - a step that catches it (it ends without `pass the error`) ends the action:  it answers no if it may cancel
+ *   - nobody catches it:  the notice it held shows (`holdNotice()`), and it goes on to the caller as it was
+ *   - nothing is put back but what a while step changed
+ * - `missing`:  the action is on a thing that isn't there:  nothing runs but the failure steps, with this error.
  * - Run inside its undo step (`UndoHistory.run()`):  what its hooks change is the same step.
- * - Waits:  a hook runs once the steps before it have ended;  the action ends when the last hook has.
- * - Neither to do:  `act` just runs, and costs nothing more.
- * - Any other failure goes on to the caller as it was, nothing put back.
+ * - Waits:  a step runs once the steps before it have ended;  the action ends when the last has.
+ * - Nothing around it:  `act` just runs, and costs nothing more.
  */
-export function runActing(
-  act: () => unknown,
-  { cancels, after }: { cancels?: boolean; after: (() => unknown)[] }
-): unknown {
-  if (!cancels && !after.length) return act()
+export function runActing(act: () => unknown, steps: ActingSteps): unknown {
+  const { cancels, before = [], during = [], after, failed = [], around = [], callsServer, missing } = steps
+  const isPlain = !before.length && !during.length && !failed.length && !around.length && !callsServer && !missing
+  if (!cancels && !after.length && isPlain) return act()
   const changes = recordingChanges()
-  const done = (value: unknown) => {
+  let duringChanges: ChangesMade | undefined
+  const endDuring = () => {
+    duringChanges?.putBack()
+    duringChanges = undefined
+  }
+  let value: unknown
+  const done = () => {
+    endDuring()
     changes.close()
     return cancels && value === undefined ? true : value
   }
-  const calledOff = (error: unknown) => {
+  const ended = (error: unknown) => {
+    endDuring()
     if (!(error instanceof ActionCanceled)) {
       changes.close()
-      throw error
+      return afterFailing(error, failed, { cancels, callsServer })
     }
     changes.putBack()
     core.RUNTIME?.history.dropUnchangedRecords()
     return false
   }
+  if (missing) return ended(missing)
+  const call = around.reduceRight<() => unknown>((inner, wrap) => () => wrap(inner), act)
+  const sequence = [
+    ...(during.length
+      ? [() => void (duringChanges = recordingChanges()), ...during, () => duringChanges?.close()]
+      : []),
+    ...before,
+    () => thenDo(call(), (settled) => void (value = settled)),
+    ...after
+  ]
   try {
-    const result = thenEach(act(), after)
-    return isPromise(result) ? result.then(done, calledOff) : done(result)
+    const result = thenEach(undefined, sequence)
+    return isPromise(result) ? result.then(done, ended) : done()
   } catch (error) {
-    return calledOff(error)
+    return ended(error)
   }
+}
+
+/**
+ * The failure steps' turn, for `error`, in order:  see `runActing()`.
+ * - A step gives back `PASSED` (`core.passTheError()`) to send it on;  anything else, it caught it.
+ */
+function afterFailing(
+  error: unknown,
+  failed: readonly ((error: unknown) => unknown)[],
+  { cancels, callsServer }: Pick<ActingSteps, "cancels" | "callsServer">
+): unknown {
+  const steps = [...failed, ...(callsServer ? SERVER_FAILURE_STEPS : [])]
+  const caught = () => (cancels ? false : undefined)
+  const next = (at: number): unknown => {
+    for (; at < steps.length; at++) {
+      const answer = steps[at]!(error)
+      if (isPromise(answer)) return answer.then((settled) => (settled === PASSED ? next(at + 1) : caught()))
+      if (answer !== PASSED) return caught()
+    }
+    HELD_NOTICES.get(error as object)?.()
+    throw error
+  }
+  return next(0)
+}
+
+/** What a failure step gives back to send its error on:  `pass the error`. */
+export const PASSED = Symbol("passed")
+
+/** The steps for every server action that fails, the app's own:  `core.addServerFailureStep()`. */
+export const SERVER_FAILURE_STEPS: ((error: unknown) => unknown)[] = []
+
+/** A failed call's notice, held until the failure steps say nobody caught it:  `holdNotice()`. */
+const HELD_NOTICES = new WeakMap<object, () => void>()
+
+/**
+ * SIDE EFFECT:  `show`, the notice for `error`, waits until its action's failure steps have had their turn:
+ * shown only if none caught it (`runActing()`).  What a place's call does instead of showing its notice at once.
+ */
+export function holdNotice(error: object, show: () => void): void {
+  HELD_NOTICES.set(error, show)
+}
+
+/**
+ * SIDE EFFECT:  `thing`, a stand-in for one that isn't there, fails each action called on it with `error`, and runs
+ * only its failure steps (`declareAction()`):  `core.savedThingOrMissing()`'s.
+ */
+export function failsAsMissing(thing: object, error: Error): void {
+  missingThings.set(thing, error)
+}
+
+/** Each stand-in's error:  `failsAsMissing()`. */
+const missingThings = new WeakMap<object, Error>()
+
+/**
+ * What runs around an action, for `thing`'s call with `args`, from `hooks`:  each hook a call of `thing`'s member.
+ * - Before and while steps, and wrappers, from the page in to the API file;  after and failure steps, the other way.
+ * - A page's before and while steps and its wrappers only while the page is shown (`isShowing()`);  its after and
+ *   failure steps even once it's left.
+ */
+function stepsOf(thing: object, hooks: ActionHooks, args: unknown[]): Omit<ActingSteps, "cancels"> {
+  const member = (hook: string) => (thing as Record<string, Function>)[hook]!
+  const shown = (each: ActionHook) => each.level !== "page" || !each.page || isShowing(each.page)
+  const outsideIn = (list: ActionHook[]) => byLevel(list, LEVELS_OUTSIDE_IN).filter(shown)
+  const insideOut = (list: ActionHook[]) => byLevel(list, [...LEVELS_OUTSIDE_IN].reverse())
+  return {
+    during: outsideIn(hooks.while).map(
+      ({ hook }) =>
+        () =>
+          member(hook).apply(thing, args)
+    ),
+    before: outsideIn(hooks.before).map(
+      ({ hook }) =>
+        () =>
+          member(hook).apply(thing, args)
+    ),
+    around: outsideIn(hooks.around).map(
+      ({ hook }) =>
+        (inner: () => unknown) =>
+          member(hook).apply(thing, [...args, inner])
+    ),
+    after: insideOut(hooks.after).map(
+      ({ hook }) =>
+        () =>
+          member(hook).apply(thing, args)
+    ),
+    failed: insideOut(hooks.failed).map(
+      ({ hook }) =>
+        (error: unknown) =>
+          member(hook).apply(thing, [...args, error])
+    )
+  }
+}
+
+/** The levels a hook comes from, the page outermost (epic `data` Q84). */
+const LEVELS_OUTSIDE_IN: readonly HookLevel[] = ["page", "app", "api"]
+
+/** `list`, by `levels`' order, each level's in the order added. */
+function byLevel(list: readonly ActionHook[], levels: readonly HookLevel[]): ActionHook[] {
+  return levels.flatMap((level) => list.filter((each) => each.level === level))
+}
+
+/**
+ * Is a page of class `Page` shown?  One made in this run, so far:  moving from page to page isn't built yet
+ * (`Page`), so a page made is a page shown.
+ */
+function isShowing(pageClass: () => Function): boolean {
+  const Page = pageClass()
+  return !!core.RUNTIME?.pages.some((page) => page instanceof Page)
+}
+
+/** `value`, then `next` given it, waited on if it waits. */
+function thenDo(value: unknown, next: (settled: unknown) => unknown): unknown {
+  return isPromise(value) ? value.then(next) : next(value)
 }
 
 /** `value`, once each of `next` has run in turn, each waited on if it waits:  a promise if any of it waits. */

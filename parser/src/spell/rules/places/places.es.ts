@@ -75,6 +75,11 @@ import { SearchedAt } from "./SearchedAt"
 import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
+import { AnyServerCallFails } from "./AnyServerCallFails"
+import { ErrorIs } from "./ErrorIs"
+import { Nevermind, PassTheError } from "./FailureWords"
+import { ThingById } from "./ThingById"
+import { CallTheServer, WrapperAction } from "./WrapperAction"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
@@ -1284,6 +1289,221 @@ placesEs.addRule(TryAgain, {
   tests: [{ compileAs: "statement", tests: [["reintentar", "core.reloadSaved()"]] }]
 })
 
+// las acciones de un servidor (epic `data` P50):  por identificador, envueltas, y los pasos cuando una falla
+placesEs.addRule(ThingById, {
+  syntax: "{type:known_type} {id:number}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "una tarea es una cosa",
+            'trabajo es un servidor web en "https://jobs.test":',
+            '\t- para completar una tarea está en "/tareas/{id}/completar"',
+            "una tarea:",
+            "\t- se guarda en trabajo",
+            "para terminar",
+            "\tcompletar tarea 7151"
+          ],
+          js: [
+            "export class Tarea extends Thing {",
+            "  async completar() {",
+            '    return await core.callPlace("trabajo", "completar", this)',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "trabajo",',
+            '    collection: "tareas",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // se guarda en trabajo",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // se guarda en trabajo",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}",
+            'core.describeAction(Tarea, "completar", { title: "Completar Tarea", callsServer: true, cantBeUndone: "keeps history" })',
+            "export class Trabajo extends Place {}",
+            "export const trabajo = core.place(new Trabajo(), {",
+            '  name: "trabajo",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { completar: "/tareas/{id}/completar" },',
+            '  unclearNumbers: ","',
+            "})",
+            "export async function terminar() {",
+            '  return core.asAction({ undoneAs: "Terminar" }, async () => await (await core.savedThingOrMissing(Tarea, 7151)).completar())',
+            "}"
+          ],
+          ts: [
+            "export class Tarea extends Thing {",
+            "  async completar() {",
+            '    return await core.callPlace("trabajo", "completar", this)',
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "trabajo",',
+            '    collection: "tareas",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // se guarda en trabajo",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // se guarda en trabajo",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Tarea, "completar", { title: "Completar Tarea", callsServer: true, cantBeUndone: "keeps history" })',
+            "export class Trabajo extends Place {}",
+            "export const trabajo = core.place(new Trabajo(), {",
+            '  name: "trabajo",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { completar: "/tareas/{id}/completar" },',
+            '  unclearNumbers: ","',
+            "})",
+            "export async function terminar() {",
+            '  return core.asAction({ undoneAs: "Terminar" }, async () => await (await core.savedThingOrMissing(Tarea, 7151)).completar())',
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+placesEs.addRule(WrapperAction, {
+  syntax: "para {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "una tarea es una cosa",
+            'trabajo es un servidor web en "https://jobs.test":',
+            '\t- para completar una tarea está en "/tareas/{id}/completar"',
+            "una tarea:",
+            "\t- se guarda en trabajo",
+            "para completar una tarea",
+            '\timprimir "antes"',
+            "\tllamar a trabajo"
+          ],
+          js: [
+            "export class Tarea extends Thing {",
+            "  async completar() {",
+            '    return await core.callPlace("trabajo", "completar", this)',
+            "  }",
+            "",
+            "  async aroundCompletar(serverCall) {",
+            '    core.console.log("antes")',
+            "    await serverCall()",
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "trabajo",',
+            '    collection: "tareas",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // se guarda en trabajo",
+            '  static { this.declareProp("creado", { type: "date", storedAs: "created" }) }',
+            '  get creado() { return this.getProp("creado") }',
+            '  set creado(value) { this.setProp("creado", value) }',
+            "",
+            "  // se guarda en trabajo",
+            '  static { this.declareProp("modificado", { type: "date", storedAs: "modified" }) }',
+            '  get modificado() { return this.getProp("modificado") }',
+            '  set modificado(value) { this.setProp("modificado", value) }',
+            "}",
+            'core.describeAction(Tarea, "completar", { title: "Completar Tarea", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Tarea, "completar", { moment: "around", hook: "aroundCompletar", level: "app" })',
+            "export class Trabajo extends Place {}",
+            "export const trabajo = core.place(new Trabajo(), {",
+            '  name: "trabajo",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { completar: "/tareas/{id}/completar" },',
+            '  unclearNumbers: ","',
+            "})"
+          ],
+          ts: [
+            "export class Tarea extends Thing {",
+            "  async completar() {",
+            '    return await core.callPlace("trabajo", "completar", this)',
+            "  }",
+            "",
+            "  async aroundCompletar(serverCall: any /* spell: type unknown */) {",
+            '    core.console.log("antes")',
+            "    await serverCall()",
+            "  }",
+            "",
+            "  static savedIn = {",
+            '    place: "trabajo",',
+            '    collection: "tareas",',
+            '    times: ["created", "modified"]',
+            "  }",
+            "",
+            "  // se guarda en trabajo",
+            '  @prop({ type: "date", storedAs: "created" })',
+            "  accessor creado!: any /* spell: type unknown */",
+            "",
+            "  // se guarda en trabajo",
+            '  @prop({ type: "date", storedAs: "modified" })',
+            "  accessor modificado!: any /* spell: type unknown */",
+            "}",
+            'core.describeAction(Tarea, "completar", { title: "Completar Tarea", callsServer: true, cantBeUndone: "keeps history" })',
+            'core.addActionHook(Tarea, "completar", { moment: "around", hook: "aroundCompletar", level: "app" })',
+            "export class Trabajo extends Place {}",
+            "export const trabajo = core.place(new Trabajo(), {",
+            '  name: "trabajo",',
+            '  kind: "web server",',
+            '  at: "https://jobs.test",',
+            '  operations: { completar: "/tareas/{id}/completar" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+placesEs.addRule(CallTheServer, { syntax: "llamar (al servidor|a {place:identifier})" })
+placesEs.addRule(ErrorIs, { syntax: "el error es {name:text}" })
+placesEs.addRule(Nevermind, { syntax: "no importa" })
+placesEs.addRule(PassTheError, { syntax: "pasar el error" })
+placesEs.addRule(AnyServerCallFails, {
+  syntax: "(cuando|si) falla cualquier llamada al servidor :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "cuando falla cualquier llamada al servidor",
+            '\tsi el error es "sin autorizar"',
+            '\t\timprimir "inicia sesión"',
+            "\tsi no",
+            "\t\tno hacer nada"
+          ],
+          js: [
+            "core.addServerFailureStep((error) => {",
+            '  if (core.errorIs(error, "not authorized")) core.console.log("inicia sesión")',
+            "  else core.doNothing()",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
 placesEs.addRule(ThingWithId, { syntax: "(el|la) {type:known_type} cuyo identificador es {id:expression}" })
 placesEs.addRule(EveryThingMatching, {
   syntax: "(cada|todo|toda) {type:known_type} que (coincide|coincida) con {words:expression}",

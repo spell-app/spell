@@ -23,6 +23,9 @@ const TRY_AGAIN_STATUSES = new Set([408, 425, 429])
 /** The answers that mean the thing isn't there. */
 const GONE_STATUSES = new Set([404, 410])
 
+/** Who asked isn't signed in:  a refusal, `whyNot` `"signed out"` (epic `data` P50). */
+const UNAUTHORIZED = 401
+
 /** The longest a request waits by itself for a server's limit to pass:  past that, it says when, and isn't sent. */
 const LONGEST_WAIT_MS = 15_000
 
@@ -190,7 +193,8 @@ export abstract class WebPlace {
       if (!this.isAnAnswer(error.status) || isOutOfRequests(error)) throw error
       const kind = this.errorKindFor(error.status!)
       const message = await this.messageOf(error)
-      const whyNot = kind === "refused" ? await this.whyNotOf(error) : undefined
+      const whyNot =
+        kind !== "refused" ? undefined : error.status === UNAUTHORIZED ? "signed out" : await this.whyNotOf(error)
       const needs = kind === "refused" ? await this.needsOf(error) : undefined
       throw new PlaceError(message, { cause: { kind, ...(whyNot && { whyNot }), ...(needs && { needs }) } })
     }

@@ -69,7 +69,8 @@ const DESCRIBERS = {
   action: "describeAction",
   event: "describeEvent",
   menu: "describeMenu",
-  after: "addAfterHook"
+  after: "addAfterHook",
+  hook: "addActionHook"
 } as const
 
 export class JSWriter extends ProgramWriter {
@@ -1629,6 +1630,11 @@ export class JSWriter extends ProgramWriter {
    * `core.describeEvent(Card, "flipped", { params: { side: "direction" } })`.
    * - Fields and members by our names:  `enabledWhen: "turnOverIsEnabled"`.
    */
+  /** A member's name as text, as this writer names it:  `"moveToQueue"`. */
+  ASTMemberNameLiteral(node: P.ASTMemberNameLiteral): string {
+    return this.quoted(this.nameOf(node.name))
+  }
+
   ASTTypeDescription(node: P.ASTTypeDescription): string {
     const method = DESCRIBERS[node.describes]
     const name = this.quoted(node.describes === "event" ? node.name : this.nameOf(node.name))
@@ -1638,7 +1644,7 @@ export class JSWriter extends ProgramWriter {
     const description = fields.length ? `{ ${fields.join(", ")} }` : "{}"
     const code = `core.${method}(${this.write(node.type)}, ${name}, ${description})`
     // an event's and a menu's one line says it;  an action's spell, and an after hook's, is the method just above
-    return node.describes === "action" || node.describes === "after" ? code : this.withSpell(node, code)
+    return node.describes === "event" || node.describes === "menu" ? this.withSpell(node, code) : code
   }
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
@@ -1650,6 +1656,7 @@ export class JSWriter extends ProgramWriter {
       return `[${value.members.map((item) => this.quoted(item === "-" ? item : this.nameOf(item))).join(", ")}]`
     }
     if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))
+    if ("type" in value && typeof value.type === "string") return `() => ${this.typeNameOf(value.type)}`
     const entries = Object.entries(value as Record<string, string>).map(([key, text]) => {
       const written = jsText.isLegalIdentifier(key) ? key : this.quoted(key)
       return `${written}: ${this.quoted(text)}`
