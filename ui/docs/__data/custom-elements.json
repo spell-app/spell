@@ -8451,7 +8451,7 @@
           "cssProperties": [
             {
               "name": "--ui-dial-size",
-              "default": "10em"
+              "default": "round(10em, var(--ui-grid, 4px))"
             },
             {
               "name": "--ui-dial-track-width",
@@ -8491,7 +8491,7 @@
             },
             {
               "name": "--ui-dial-label-gap",
-              "default": "0.75em"
+              "default": "round(0.75em, var(--ui-grid, 4px))"
             },
             {
               "name": "--ui-dial-focus-width",

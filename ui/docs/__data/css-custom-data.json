@@ -1664,7 +1664,7 @@
       "name": "--ui-dial-size",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-dial>`'s token.  Default:  `10em`"
+        "value": "`<ui-dial>`'s token.  Default:  `round(10em, var(--ui-grid, 4px))`"
       }
     },
     {
@@ -1734,7 +1734,7 @@
       "name": "--ui-dial-label-gap",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-dial>`'s token.  Default:  `0.75em`"
+        "value": "`<ui-dial>`'s token.  Default:  `round(0.75em, var(--ui-grid, 4px))`"
       }
     },
     {

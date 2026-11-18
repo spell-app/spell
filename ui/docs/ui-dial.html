@@ -72,12 +72,12 @@
               </ui-section>
               <ui-section id="examples-types-a-row-of-dials" label="A row of dials" sticky="stack" collapsible dividing>
                 <ui-example description="A font's settings, each dial its own `color`:  the first with `ticks`, its value drawn at its own weight (`--ui-dial-value-font-weight`), the last two with `unit=&quot;%&quot;`.">
-                  <div class="ui-cluster" style="gap: 48px">
-                    <ui-dial label="Weight" color="orange" min="100" max="900" value="777" ticks style="--ui-dial-value-font-weight: 777"></ui-dial>
-                    <ui-dial label="Roundness" color="teal" value="50"></ui-dial>
-                    <ui-dial label="Size" color="blue" max="250" value="104"></ui-dial>
-                    <ui-dial label="Line height" color="red" min="80" max="200" value="98" unit="%"></ui-dial>
-                    <ui-dial label="Spacing" color="yellow" min="-20" max="50" value="0" unit="%"></ui-dial>
+                  <div class="ui-cluster" style="gap: 24px">
+                    <ui-dial size="small" label="Weight" color="orange" min="100" max="900" value="777" ticks style="--ui-dial-value-font-weight: 777"></ui-dial>
+                    <ui-dial size="small" label="Roundness" color="teal" value="50"></ui-dial>
+                    <ui-dial size="small" label="Size" color="blue" max="250" value="104"></ui-dial>
+                    <ui-dial size="small" label="Line height" color="red" min="80" max="200" value="98" unit="%"></ui-dial>
+                    <ui-dial size="small" label="Spacing" color="yellow" min="-20" max="50" value="0" unit="%"></ui-dial>
                   </div>
                 </ui-example>
               </ui-section>
@@ -85,7 +85,7 @@
             <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section id="examples-content-ticks" label="Ticks" sticky="stack" collapsible dividing>
                 <ui-example description="`ticks` draws dots round the inside of the ring:  9 alone (a dot every eighth), or `ticks=&quot;12&quot;` for 12 gaps.  They're only a look:  values still snap to `step`.">
-                  <div class="ui-cluster" style="gap: 48px">
+                  <div class="ui-cluster" style="gap: 24px">
                     <ui-dial label="Eighths" color="green" value="50" ticks></ui-dial>
                     <ui-dial label="Hours" color="green" max="12" value="3" ticks="12"></ui-dial>
                   </div>
@@ -93,7 +93,7 @@
               </ui-section>
               <ui-section id="examples-content-unit" label="Unit" sticky="stack" collapsible dividing>
                 <ui-example description="`unit` is written right after the number:  `%` and `°` hug it, a leading space keeps it apart (`unit=&quot; px&quot;`).">
-                  <div class="ui-cluster" style="gap: 48px">
+                  <div class="ui-cluster" style="gap: 24px">
                     <ui-dial label="Opacity" color="violet" value="85" unit="%"></ui-dial>
                     <ui-dial label="Hue" color="violet" max="360" value="250" unit="°"></ui-dial>
                     <ui-dial label="Padding" color="violet" max="64" step="4" value="16" unit=" px"></ui-dial>

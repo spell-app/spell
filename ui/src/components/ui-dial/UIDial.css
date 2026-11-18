@@ -23,6 +23,7 @@
  * - Colours by remap:  the arc and the handle take `--ui-color`;  uncoloured, the theme's primary colour.
  *   The ring, disc and ticks are the ink at low alpha, so they follow the scheme (light / dark).
  * - Sizes:  `--ui-scale` (from `sizes.css`) scales the whole dial;  `--ui-dial-size` sets its width outright.
+ *   Its width, the label's gap and line are rounded to the 4px grid (`--ui-grid`), so the dial's box is too.
  *   The value's type follows the dial's width (container units), so a small dial keeps it in its disc.
  * - Focus:  keyboard focus rings the handle (`:focus-visible`), for WCAG 2.4.7.
  * - Public tokens (`--ui-dial-*`) are NEVER declared here:  the token block reads each through a private alias
@@ -48,7 +49,7 @@
 
   /* Tokens:  each the private alias of its public token (never declare the public one:  it would block inherited values). */
   .ui.dial {
-    --_ui-dial-size: var(--ui-dial-size, 10em);
+    --_ui-dial-size: var(--ui-dial-size, round(10em, var(--ui-grid, 4px)));
     --_ui-dial-track-width: var(--ui-dial-track-width, 4.5);
     --_ui-dial-track-color: var(--ui-dial-track-color, oklch(from var(--ui-ink) l c h / 0.16));
     --_ui-dial-fill-color: var(--ui-dial-fill-color, var(--ui-primary));
@@ -58,7 +59,7 @@
     --_ui-dial-value-font-size: var(--ui-dial-value-font-size, 15cqi);
     --_ui-dial-value-font-weight: var(--ui-dial-value-font-weight, 400);
     --_ui-dial-label-color: var(--ui-dial-label-color, var(--ui-text-color));
-    --_ui-dial-label-gap: var(--ui-dial-label-gap, 0.75em);
+    --_ui-dial-label-gap: var(--ui-dial-label-gap, round(0.75em, var(--ui-grid, 4px)));
     --_ui-dial-focus-width: var(--ui-dial-focus-width, 2);
     --_ui-dial-focus-color: var(--ui-dial-focus-color, var(--ui-focus-color));
     --_ui-dial-disabled-opacity: var(--ui-dial-disabled-opacity, 0.45);
@@ -147,8 +148,10 @@
     white-space: nowrap;
   }
 
+  /* Its line on the 4px grid, so the whole dial is too. */
   .ui.dial .label {
     max-width: 100%;
+    line-height: round(1.25em, var(--ui-grid, 4px));
     color: var(--_ui-dial-label-color);
     text-align: center;
   }
