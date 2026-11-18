@@ -48,7 +48,14 @@ import {
   type TestResult
 } from "spell/parser/core"
 import type { SiteHost } from "spell/parser/core/core.types"
-import { runCompiled, appIsMounted, linkModule, unmountApp, type RunCompiledOptions } from "./runCompiled"
+import {
+  runCompiled,
+  runLine as runLineOn,
+  appIsMounted,
+  linkModule,
+  unmountApp,
+  type RunCompiledOptions
+} from "./runCompiled"
 import { installSpellElements } from "./SpellElement"
 import { E as UIElements, SpellElement } from "./spellElements"
 
@@ -120,6 +127,43 @@ export function runApp(
   core.siteHost = siteHost
   core.projectFolder = options.projectId ? `/spaces/${encodeURI(options.projectId)}` : undefined
   return runCompiled(compiled, options)
+}
+
+/**
+ * Run a line of compiled Spell on the program running in this copy, its things kept, as the browser's console does
+ * (the editor's Spell Console, epic `editor` P32) -- see `runCompiled.ts`'s `runLine()`.
+ * - It reads by name what compiled Spell imports from `@spell/core`:  this module's exports.
+ * - Answers its value;  throws what it throws.
+ */
+export function runLine(javascript: string): Promise<unknown> {
+  return runLineOn(javascript, PROGRAM_NAMES)
+}
+
+/** What compiled Spell imports from `@spell/core` by name, for a line run on its own (`runLine()`). */
+const PROGRAM_NAMES: Record<string, unknown> = {
+  core,
+  Thing,
+  List,
+  App,
+  View,
+  ViewableList,
+  Page,
+  Place,
+  TwoSidedView,
+  SiteBase,
+  Site,
+  PageLayout,
+  h,
+  css,
+  on,
+  off,
+  once,
+  trigger,
+  positionOf,
+  position,
+  spellPosition,
+  endPosition,
+  withSpellPositions
 }
 
 /**

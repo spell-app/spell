@@ -49,6 +49,10 @@ epic pages link <page> --show     # the page's links, to give the person
 ## plan -- Plan an epic
 
 1. A new epic:  `epic create <epic> --title "Title" --prompt "what was asked"`.
+   - Nothing asked yet (a name alone):  `epic create <epic> --title "Title"`, no prompt.  The page's Overview opens with
+     a kickoff box:  the person types what the epic should do there, pastes or drops pictures, and presses Send.
+     Run `epic inbox wait <epic>`:  it prints the `kickoff` mark, its words and `IMG2:  <file>` for each picture;
+     `epic inbox apply <epic>` makes it the Kickoff prompt.  Then plan from it, opening each picture's file.
 2. Write the Overview into its parts:  what's asked, the questions to settle, the choices.
    - A question:  `epic add <epic>#Q "title" --details "<p>...</p>"`;  the person answers on the page.
 3. Once the person accepts the Overview, add the phases:
@@ -155,7 +159,8 @@ Then, for what it printed:
    A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
 4. Comments:  `epic inbox working <epic>#C3 on`, answer into the item it's on,
    then `epic inbox done <epic>#C3 --file answer.html`.
-   Words holding `![picture](<path>)` are a picture they pasted:  look at `$(epic config contentFolder)<path>` first.
+   Words holding `![IMG2](<path>)` (or an older `![picture](<path>)`) are a picture they pasted, labelled:  `wait`
+   prints each one's file under the words (`IMG2:  <file>`);  look at it first.  "IMG2" in their words means that one.
 5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again, unless they said stop.
 
 ## turn -- End every turn

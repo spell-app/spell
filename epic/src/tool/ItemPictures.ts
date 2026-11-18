@@ -21,7 +21,8 @@ import { PlanMarkup } from "./PlanMarkup"
  *     (`~/.claude/projects/<slug>/<session>.jsonl`), which `Requests.pastedImages()` reads, as `epic send --images` does
  * - Kept:  beside the page, `pictures/<item>-<time>.<ext>` (`PICTURES`), as a comment's pictures are
  *   (`TestShots.savePicture()`), never over a file
- * - Shown:  an `<epic-picture>` each at the end of the item's details, around its `<img>`
+ * - Shown:  an `<epic-picture>` each at the end of the item's details, around its `<img>`, labelled in order, IMG1,
+ *   IMG2 ... (epic `epic-engine` P75);  a picture deleted leaves a gap, the others keep their labels (choice B)
  * - Deleted from the page (`<epic-picture>`'s trash):  the review routes' `POST delete-picture`, `remove()`
  * - node only;  the review routes load it lazily, as `InstantMarks`:  it brings `PlanDoc`
  ****************/
@@ -84,14 +85,30 @@ export class ItemPictures {
     })
   }
 
-  /** The markup that shows `pictures` in an item's details:  an `<epic-picture>` around each `<img>`;  `""` for none. */
-  static html(pictures: readonly NamedPicture[]): string {
+  /**
+   * The markup that shows `pictures` in an item's details:  an `<epic-picture>` around each `<img>`, labelled in
+   * order, `label="IMG1"` ... (epic `epic-engine` P75);  `""` for none.
+   * - `first`:  the first one's number, for pictures after others.  Default:  1
+   */
+  static html(pictures: readonly NamedPicture[], first = 1): string {
     return pictures
       .map(
-        ({ path, alt }) =>
-          `<epic-picture><img src="${PlanMarkup.attribute(path)}" alt="${PlanMarkup.attribute(alt)}" /></epic-picture>`
+        ({ path, alt }, index) =>
+          `<epic-picture label="IMG${first + index}"><img src="${PlanMarkup.attribute(path)}" ` +
+          `alt="${PlanMarkup.attribute(alt)}" /></epic-picture>`
       )
       .join("")
+  }
+
+  /**
+   * The number the next picture `item` shows gets:  one past its highest label (`IMG2` => 3), 1 for none;  a picture
+   * deleted leaves a gap, the others keeping their labels (P75's choice B).
+   */
+  static nextNumber(item: Element | null | undefined): number {
+    const labels = Array.from(item?.querySelectorAll("epic-picture[label]") ?? []).map((picture) =>
+      Number(/^IMG(\d+)$/.exec(picture.getAttribute("label") ?? "")?.[1] ?? 0)
+    )
+    return Math.max(0, ...labels) + 1
   }
 
   /**
@@ -123,8 +140,10 @@ export class ItemPictures {
         return !!img && ItemPictures.pathOrNone(img) === path
       })
       if (!shown.length) throw new SRV.HttpError(404, `${id.toUpperCase()} shows no picture ${path}`)
+      // its label goes with it, the others keep theirs:  a gap, so what was said about the next one stays true (P75)
+      const label = shown[0]!.getAttribute("label")
       for (const picture of shown) picture.remove()
-      plan.log(`${id.toUpperCase()}:  picture deleted from the page, ${path}`)
+      plan.log(`${id.toUpperCase()}:  picture ${label ? `${label} ` : ""}deleted from the page, ${path}`)
     })
     rmSync(join(dirname(file), path), { force: true })
     return path

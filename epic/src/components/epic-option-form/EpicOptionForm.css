@@ -92,4 +92,16 @@
     width: auto;
     margin: 0;
   }
+
+  /* the pictures in its words (epic `epic-engine` P75):  a row of labelled thumbnails, each with its x */
+  .pictures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pictures epic-picture {
+    --epic-picture-width: 200px;
+    --epic-picture-height: 120px;
+    margin: 0;
+  }
 }

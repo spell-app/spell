@@ -56,6 +56,27 @@
     &.group {
       font-weight: bold;
     }
+
+    /* the Spell Console's:  a line typed, then its answer (epic `editor` P32) */
+    &.typed,
+    &.answer {
+      position: relative;
+    }
+    &.typed::before,
+    &.answer::before {
+      position: absolute;
+      left: 6px;
+      color: var(--ui-text-color-muted, var(--ui-text-color));
+    }
+    &.typed::before {
+      content: "›";
+    }
+    &.typed {
+      color: var(--ui-blue-text);
+    }
+    &.answer::before {
+      content: "‹";
+    }
   }
 
   .ConsoleGroupIcon {

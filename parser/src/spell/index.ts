@@ -77,6 +77,7 @@ export * from "./hoistClassMembers"
 export * from "./targets"
 export * from "./highlight"
 export * from "./languages/Language"
+export * from "./SpellLines"
 
 // The language packs:  English first, the default
 export { english } from "./languages/en"

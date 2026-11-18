@@ -45,13 +45,18 @@
             size.
           </p>
           <p>
+            Each picture has a label, IMG1, IMG2 and so on, in a small chip on its top left corner. Write "IMG2 is wrong"
+            in a comment or a note, and Claude knows which file you mean. Every place on a page that takes pictures draws
+            them this way: a comment, a note, an option's form, a new epic's kickoff box.
+          </p>
+          <p>
             On an epic page being reviewed, a trash sits at its top right corner. One click deletes it: it goes at once,
             with Undo in the page's notices for 6 seconds; then the page server takes it out of the item and deletes its
             file.
           </p>
           <p class="meta">
             For anyone reviewing an epic page.<br />
-            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> T87), its own
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> T87, labelled in P75), its own
             <a href="/epic/src/components/epic-picture/" target="src-spell-epic-src-components-epic-picture"><code title="epic/src/components/epic-picture/">epic-picture</code></a> family.<br />
             Its vocabulary: <a href="/epic/src/components/epic-picture/EpicPicture.en.ts" target="src-spell-epic-src-components-epic-picture-epicpicture-en-ts"><code title="epic/src/components/epic-picture/EpicPicture.en.ts">EpicPicture.en.ts</code></a><br />
             Its component: <a href="/epic/src/components/epic-picture/EpicPicture.tsx" target="src-spell-epic-src-components-epic-picture-epicpicture-tsx"><code title="epic/src/components/epic-picture/EpicPicture.tsx">EpicPicture.tsx</code></a>.
@@ -64,7 +69,7 @@
               <epic-section id="issues" kind="issues" open>
                 <epic-item id="i9" title="The popup covers its button" status="open"
                   ><p>Owen: “the popup covers the button, see the picture”</p
-                  ><epic-picture><img src="/components/ui/images/new_popup_alignment.png" alt="Picture pasted in the chat" /></epic-picture
+                  ><epic-picture label="IMG1"><img src="/components/ui/images/new_popup_alignment.png" alt="Picture pasted in the chat" /></epic-picture
                 ></epic-item>
               </epic-section>
             </div>
@@ -75,7 +80,7 @@
                   ><script type="text/plain">
                     <epic-item id="i9" title="The popup covers its button" status="open">
                       <p>Owen: “the popup covers the button, see the picture”</p>
-                      <epic-picture><img src="pictures/i9-20261116-1302.png" alt="Picture pasted in the chat" /></epic-picture>
+                      <epic-picture label="IMG1"><img src="pictures/i9-20261116-1302.png" alt="Picture pasted in the chat" /></epic-picture>
                     </epic-item>
                   </script></ui-code
                 >
@@ -99,6 +104,15 @@
                 page sooner sends the delete at once.
               </li>
               <li>Undo puts it back, and nothing changes on disk.</li>
+              <li>
+                Deleting one renumbers nothing: after IMG2 goes, the next one is still IMG3, so what was said about IMG3
+                stays true.
+              </li>
+              <li>
+                In a box still being written (a note, the kickoff box, an option's form), an x takes the trash's place.
+                It takes the picture's words out of the box, and the later labels move down one, in the words that name
+                them too: IMG3 becomes IMG2.
+              </li>
             </ul>
           </ui-section>
 
@@ -112,7 +126,10 @@
               </li>
               <li>The files go beside the page, in <code>pictures/</code>, named for the item and the minute:
                 <code>pictures/i9-20261116-1302.png</code>.</li>
-              <li>It holds one <code>&lt;img src alt&gt;</code>, and has no attributes of its own.</li>
+              <li>It holds one <code>&lt;img src alt&gt;</code>.</li>
+              <li><code>label</code>: its label, <code>IMG2</code>, written by the epic tool in the item's order.</li>
+              <li><code>removable</code>: an x in place of the trash, for a box still being written; its
+                <code>epic-picture-removed</code> event hands the box its label.</li>
             </ul>
             <ui-section id="epic-picture-parts" label="Parts" sticky="stack" collapsible dividing open="false">
               <ui-table celled padding="compact" appearance="striped" unstackable>
@@ -123,6 +140,8 @@
                   <tbody>
                     <tr><td><code>base</code></td><td>The box around the picture.</td></tr>
                     <tr><td><code>delete</code></td><td>The trash, at its top right corner, while the page is reviewed.</td></tr>
+                    <tr><td><code>label</code></td><td>Its label's chip, at its top left corner.</td></tr>
+                    <tr><td><code>remove</code></td><td>The x, at its top right corner, when <code>removable</code>.</td></tr>
                   </tbody>
                 </table>
               </ui-table>
@@ -131,7 +150,7 @@
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-11-16 against branch <code>epic-engine</code> (T87).</p>
+            <p class="meta">Last checked 2026-11-17 against branch <code>epic-engine</code> (T87, P75).</p>
           </footer>
         </article>
       </ui-container>

@@ -47,12 +47,17 @@ class FakeRoutes {
     doing: null
   }
   posts: [string, Record<string, unknown>][] = []
+  /** How many pictures `POST shot` saved. */
+  shots = 0
 
   readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
     const route = input.replace("/api/epics/review/", "").replace(/\?.*/, "")
     if (route !== "inbox") this.answer(route, JSON.parse(init!.body as string) as Record<string, unknown>)
-    if (route === "shot")
-      return new Response(JSON.stringify({ shot: SHOT }), { headers: { "content-type": "application/json" } })
+    // each picture its own file:  the first SHOT, then `-2` ... (P75:  several at once)
+    if (route === "shot") {
+      const shot = this.shots++ ? SHOT.replace(".png", `-${this.shots}.png`) : SHOT
+      return new Response(JSON.stringify({ shot }), { headers: { "content-type": "application/json" } })
+    }
     return new Response(JSON.stringify(this.inbox), { headers: { "content-type": "application/json" } })
   })
 
@@ -1040,19 +1045,51 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
 
 // epic `epic-engine` P51:  a picture in any note box;  a test's x
 describe("<epic-review> note pictures", () => {
-  test("a picture pasted in the note box:  saved, a revisit carrying it, its thumbnail shown;  its x takes it out", async () => {
+  // epic `epic-engine` P75:  several at once, each written into the note's words, labelled;  choice B's renumbering
+  test("two pictures pasted in the note box:  saved, written into its words as IMG1 and IMG2, a revisit;  an x renumbers", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="j9" title="A call" status="open" open><p>Text</p></epic-item>`)
     const box = deep(host).querySelector<HTMLElement>("[part~='details'] [part~='note-box'] >>> .note-box")!
     const data = new DataTransfer()
-    data.items.add(new File([PNG_BYTES], "shot.png", { type: "image/png" }))
+    data.items.add(new File([PNG_BYTES], "one.png", { type: "image/png" }))
+    data.items.add(new File([PNG_BYTES], "two.png", { type: "image/png" }))
     box.dispatchEvent(
       new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true, cancelable: true })
     )
-    await vi.waitFor(() => expect(routes.inbox.marks.j9).toMatchObject({ action: "revisit", shot: SHOT }))
+    const second = SHOT.replace(".png", "-2.png")
+    await vi.waitFor(() =>
+      expect(routes.inbox.marks.j9).toMatchObject({ action: "revisit", note: `![IMG1](${SHOT})\n![IMG2](${second})` })
+    )
     await ElementFixture.tick()
     const shotPost = routes.posts.find(([route]) => route === "shot")!
     expect([shotPost[1].id, String(shotPost[1].png).startsWith("data:image/png;base64,")]).toEqual(["j9", true])
+    const strip = () => [
+      ...deep(host).querySelectorAll<HTMLElement>("[part~='details'] [part~='note-box'] >>> .pictures epic-picture")
+    ]
+    await vi.waitFor(() =>
+      expect(
+        strip().map((each) => [each.getAttribute("label"), each.querySelector("img")?.getAttribute("src")])
+      ).toEqual([
+        ["IMG1", SHOT],
+        ["IMG2", second]
+      ])
+    )
+    // not sent yet:  taking IMG1 out makes IMG2 IMG1
+    strip()[0]!.dispatchEvent(
+      new CustomEvent("epic-picture-removed", { detail: { label: "IMG1", src: SHOT }, bubbles: true, composed: true })
+    )
+    await settle()
+    await vi.waitFor(() => expect(routes.inbox.marks.j9?.note).toBe(`![IMG1](${second})`))
+  })
+
+  test("a mark's one picture from before P75 (`shot`):  still shown under the words;  its x takes it out", async () => {
+    await adoptClient()
+    routes.inbox.marks.j9 = { action: "revisit", when: "soon", note: "", shot: SHOT, at: new Date().toISOString() }
+    const host = await render(`<epic-item id="j9" title="A call" status="open" open><p>Text</p></epic-item>`)
+    const client = ReviewClient.forPage()
+    await client.refresh()
+    client.openBox("j9")
+    await settle()
     const thumb = () =>
       deep(host).querySelector<HTMLImageElement>("[part~='details'] [part~='note-box'] >>> .note-picture img")
     await vi.waitFor(() => expect(thumb()?.getAttribute("src")).toBe(SHOT))
@@ -1060,14 +1097,14 @@ describe("<epic-review> note pictures", () => {
       .querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-picture button")!
       .click()
     await settle()
-    expect(routes.inbox.marks.j9).toBeUndefined()
+    expect(routes.inbox.marks.j9?.shot).toBeUndefined()
   })
 
   test("the picture button chooses a file", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="m4" title="A test" status="open" open><p>Step</p></epic-item>`)
     const pick = deep(host).querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-pick")!
-    expect(pick.title).toMatch(/^Add a picture:  paste one/)
+    expect(pick.title).toMatch(/^Add pictures:  paste them/)
   })
 })
 

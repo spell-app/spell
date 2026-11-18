@@ -378,13 +378,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           hidden={this.canFold ? this.fold.hidden() : undefined}
         >
           <Show when={this.pendingEdit?.note} fallback={<slot />}>
-            {(note) =>
-              EpicChoices.noteOf(note(), {
-                alt: this.pendingEdit?.title ?? this.title ?? "",
-                tip: this.translationForKey("zoomTip"),
-                paragraphClass: NEW_TEXT
-              })
-            }
+            {(note) => EpicChoices.noteOf(note(), { paragraphClass: NEW_TEXT })}
           </Show>
           <Show when={this.pickedOn}>
             <p class={DRAFT_LINE}>{this.translationForKey("pickedOn", { date: PlanDates.format(this.pickedOn) })}</p>

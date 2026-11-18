@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  4671b6769c350be8
+// sources:  48b7160826c98b59
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -27,6 +27,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-focus": {"folder":"epic-focus","attributes":["for"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
   "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","requested","urgent","unmerged","fixed","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
+  "epic-kickoff": {"folder":"epic-kickoff","skeleton":{"height":"4em"},"attributes":[]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
   "epic-mark": {"folder":"epic-mark","attributes":["item","link"]},
@@ -41,7 +42,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","away-read","away-seen","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
   "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","span","unmerged","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
-  "epic-picture": {"folder":"epic-picture","attributes":[]},
+  "epic-picture": {"folder":"epic-picture","attributes":["label","removable"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","agent","at","re"]},

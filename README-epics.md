@@ -51,6 +51,7 @@ What it costs:
 1. **Ask.**
    In a Claude Code session in your repo:  `/epic <name> <what to plan>`.
    The page opens in VS Code's right side bar, and fills as the agent reads your code.
+   Or `/epic <name>` alone, then type the plan in the kickoff box at the top of the page, pictures and all, and Send.
 2. **Answer its questions, on the page.**
    Press Choose on the option you want, or leave a note.
 3. **Agree the plan.**

@@ -75,6 +75,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     marks `Writer.write()` puts in, taken out again once the code is finished;
     see "Compile" in [PARSING.md](../spell/PARSING.md)
   - `P.SourceMapLines`:  a source map read back, by line, either way
+  - `P.DebugSteps` (epic `editor` P33):  a DEBUGGING build, `P.WriterOptions.debugging`, which the editor runs while
+    its step debugger is on, never what ships
+    - every action and handler waits (`findWaiting()`'s `actionsWait`), so the program can stop between its lines
+      while the page around it keeps going
+    - each of their lines asks the core first, `if (frame$.at(25)) await frame$.held()`;
+      each opens a frame as it starts, and is done however it ends
+    - getters, drawings, questions, `create()` and tests answer at once:  no steps in them
   - `P.jsText`:  javascript's and TypeScript's punctuation
 - No UI framework, no JSX, no DOM.
   - Node tools run the parser's SOURCE through `tsx` / esbuild / Vite's oxc,

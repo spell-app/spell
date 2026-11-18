@@ -308,7 +308,9 @@ export class PlanDocCommands {
           const requestId = need(rest[1], "a request id")
           const filed = await this.edit(file, (plan) => {
             const named = pictures.length ? ItemPictures.named(file, todo, pictures) : []
-            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named)}`)
+            // labelled on from the todo's own pictures (epic `epic-engine` P75):  IMG3 after its IMG2
+            const first = ItemPictures.nextNumber(plan.findItem(todo))
+            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named, first)}`)
             return { title, named: title === undefined ? [] : named }
           })
           ItemPictures.save(file, filed.named)

@@ -26,6 +26,7 @@ import type { LSP } from "spell/app/lsp"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
+import { CodeMirrorDebug } from "./CodeMirrorDebug"
 import { CodeMirrorHeadings } from "./CodeMirrorHeadings"
 import { CodeMirrorHovers } from "./CodeMirrorHovers"
 import { CodeMirrorLanguage } from "./CodeMirrorLanguage"
@@ -457,6 +458,8 @@ export class FileStates {
           CodeMirrorValues.extension(language.attributeValuesAt),
           CodeMirrorHovers.extension(),
           CodeMirrorHeadings.extension(),
+          // breakpoints in the margin, and the line the program's stopped on (epic `editor` P33)
+          CodeMirrorDebug.extension(file.path),
           language.extensions(),
           CodeMirrorLook.extension((isBubbly) =>
             isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)

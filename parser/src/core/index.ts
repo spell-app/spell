@@ -7,7 +7,7 @@
  *   as a top-level side effect when its file first loads -- see `defineCoreModule()` in `core.types.ts`.
  *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `messages`, `tests`,
  *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`, `described`, `acting`, `waiting`,
- *     `abilities`, `dimensions`, `sending`, `sites`,
+ *     `abilities`, `dimensions`, `sending`, `sites`, `stepping` (its `_stepper`, outside the core contract),
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
  *   importing this barrel (or anything that transitively imports `spell/parser/core`) is what triggers the assembly.
@@ -44,10 +44,13 @@ import "./saved"
 import "./abilities"
 import "./dimensions"
 import "./sites"
+// a debugging build's steps, `core._stepper`:  outside the core contract
+import "./stepping"
 import { send } from "./sending"
 
 export { core, assert, SpellEvent, Eventful }
 export type { SentEvent } from "./sending"
+export type { Stepper, DebugFrame, StepMode, StepperListener } from "./stepping"
 // Events, imported by name:  `trigger("card-click", { card: this })`.
 // Compiled JavaScript and TypeScript both say it so, since epic `output-targets` P19;
 // `core.trigger(...)`, which javascript compiled before then says, is the same function.

@@ -514,6 +514,8 @@ export const NOTE_PICK = "note-pick"
 export const NOTE_TOOLS = "note-tools"
 export const NOTE_PICTURE = "note-picture"
 export const SAID_PICTURE = "said-picture"
+/** A marked note's pictures in its words (epic `epic-engine` P75):  each a small labelled `<epic-picture>`. */
+export const SAID_PICTURES = "said-pictures"
 export const SAID = "said"
 export const SAID_WHAT = "said-what"
 export const SAID_EDIT = "said-edit"
@@ -795,11 +797,14 @@ export const REVIEW_TEXTS = [
   { key: "noteLabel", text: "{id}:  your note", description: "The note box, for a screen reader." },
   {
     key: "pictureAdd",
-    text: "Add a picture:  paste one (⌘V) or drop it in the box, or choose a file",
-    description: "The note box's picture button (epic `epic-engine` P51):  its tooltip."
+    text: "Add pictures:  paste them (⌘V) or drop them in the box, or choose files",
+    description: "The note box's picture button (epic `epic-engine` P51;  several since P75):  its tooltip."
   },
-  { key: "pictureSaving", text: "saving…", description: "A pasted picture on its way to the page server." },
-  { key: "pictureRemove", text: "Take the picture out", description: "The ✕ on a note's picture." },
+  {
+    key: "pictureRemove",
+    text: "Take the picture out",
+    description: "The ✕ on a note's one old picture, kept apart from its words (before P75)."
+  },
   { key: "pictureZoom", text: "Your picture:  click to see it full size", description: "A note's picture." },
   { key: "notImage", text: "That isn't a picture", description: "Something else dropped or pasted in the note." },
   { key: "tooBig", text: "That picture is over 8 MB", description: "A picture too big for the page server." },

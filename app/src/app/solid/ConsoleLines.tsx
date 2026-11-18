@@ -207,8 +207,8 @@ type ShownThing = Pick<ConsoleValueProps, "type" | "display" | "observable">
 
 /**
  * How to show logged `thing`, asking `inspector` first about objects it might know.
- * - NOTE: as React did, `true` / `false` / `undefined` show as NOTHING:  JSX draws no text for them.
- *   See `agents/SUSPECTED-BUGS.md`, "app".
+ * - NOTE: as React did, `undefined` shows as NOTHING:  JSX draws no text for it.
+ *   `true` / `false` show as text since epic `editor` P32.  See `agents/SUSPECTED-BUGS.md`, "app".
  */
 function showThing(thing: unknown, inspector: ConsoleInspector): ShownThing {
   if (thing === null) return { type: "null", display: "null" }
@@ -216,8 +216,10 @@ function showThing(thing: unknown, inspector: ConsoleInspector): ShownThing {
     case "undefined":
     case "string":
     case "number":
-    case "boolean":
       return { type: typeof thing, display: thing as JSX.Element }
+    // as text:  JSX draws nothing for a boolean, and a console line's answer may be one (epic `editor` P32)
+    case "boolean":
+      return { type: typeof thing, display: String(thing) }
     case "function":
       return { type: "function", display: "ƒ {...}", observable: thing }
     default: {

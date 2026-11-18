@@ -138,6 +138,8 @@ api.post("/people/local", peopleRoutes.request_saveLocal)
 api.post("/changes", changesRoutes.request_askForChange)
 api.post("/changes/start", changesRoutes.request_startClaude)
 api.get("/changes", changesRoutes.request_getChange)
+// What a piece of Spell does, in plain words, by Claude Code on this machine:  Explain This (epic `editor` P32)
+api.post("/explain", changesRoutes.request_explain)
 
 // Save into Spell UI, a Spell admin's -- see `themesRoutes.ts` (epic `debut` P25)
 api.get("/themes/spell-ui", themesRoutes.request_canSaveIntoSpellUi)

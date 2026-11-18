@@ -26,6 +26,13 @@ import pictureCSS from "./EpicPicture.css?inline"
  *   - once Undo has had its 6 seconds, the page server takes it out of the item and deletes its file
  *     (`PictureDeletes`, `POST delete-picture`);  the page's live update then carries the item without it
  * - Its item:  the `<epic-item>` it's written in (`closest()`).
+ * - LABELLED (epic `epic-engine` P75):  `label="IMG2"` draws a small chip on the thumbnail's top left corner, so the
+ *   person can name it in words ("IMG2 is wrong");  the epic tool writes an item's, in order (`ItemPictures`)
+ * - Every picture the person gives a page draws through it (P75):  a comment's words (`<epic-thread>`), a note box's
+ *   strip (`<epic-review>`), the kickoff box (`<epic-kickoff>`), the quoted kickoff prompt (`<epic-prompt>`)
+ *   - in a box still being written, `removable` draws an x in place of the trash:  `epic-picture-removed` hands the
+ *     box its label, and the box takes its words out (`Pictures.without()`)
+ *   - in a shadow root it has no item (`closest()` stops there), so no trash
  ****************/
 export class EpicPicture extends E.UIComponent<typeof epicPictureVocabulary> {
   @E.proto static vocabulary = epicPictureVocabulary
@@ -64,9 +71,19 @@ export class EpicPicture extends E.UIComponent<typeof epicPictureVocabulary> {
     return this.isDeleted
   }
 
-  /** The trash shows:  in an item, the page reviewed (served, so it can post). */
+  /**
+   * The trash shows:  in an item, one of its `pictures/` (the page server deletes no other:  a note's kept picture is
+   * in `tests/`), the page reviewed (served, so it can post);  never with the x (`removable`).
+   */
   get canDelete(): boolean {
-    return !!this.itemId && this.review.reviewing()
+    return !this.removable && !!this.itemId && ITEM_PICTURE.test(this.src ?? "") && this.review.reviewing()
+  }
+
+  /** The x pressed (`removable`):  `epic-picture-removed`, the box takes its words out. */
+  readonly remove = (event: MouseEvent): void => {
+    event.preventDefault()
+    event.stopPropagation()
+    this.send("epic-picture-removed", { label: this.label ?? "", src: this.src ?? "" })
   }
 
   /**
@@ -90,10 +107,31 @@ export class EpicPicture extends E.UIComponent<typeof epicPictureVocabulary> {
     })
   }
 
+  /** The x's tooltip and name:  `Take IMG2 out`. */
+  get removeTip(): string {
+    return this.translationForKey("removeTip", { label: this.label || this.translationForKey("thisPicture") })
+  }
+
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
         <slot />
+        <Show when={this.label}>
+          <span class="label" part={this.partForName("label")} aria-hidden="true">
+            {this.label}
+          </span>
+        </Show>
+        <Show when={this.removable}>
+          <ui-button
+            appearance="circular basic"
+            size="mini"
+            icon="xmark"
+            part={this.partForName("remove")}
+            title={this.removeTip}
+            aria-label={this.removeTip}
+            onClick={this.remove}
+          />
+        </Show>
         <Show when={this.canDelete}>
           <ui-button
             appearance="circular basic"
@@ -109,6 +147,9 @@ export class EpicPicture extends E.UIComponent<typeof epicPictureVocabulary> {
     )
   }
 }
+
+/** A picture the trash may delete:  one in the page's `pictures/` folder (`ItemPictures`' `PICTURE_SRC`). */
+const ITEM_PICTURE = /(?:^|\/)pictures\/[\w.-]+$/
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicPicture extends E.AttributeValues<typeof epicPictureVocabulary> {}

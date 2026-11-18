@@ -1011,6 +1011,11 @@
       "types": "./epic/dist-types/src/components/epic-picture/index.d.ts",
       "default": "./epic/src/components/epic-picture/index.ts"
     },
+    "./epic/components/epic-kickoff": {
+      "spell-source": "./epic/src/components/epic-kickoff/index.ts",
+      "types": "./epic/dist-types/src/components/epic-kickoff/index.d.ts",
+      "default": "./epic/src/components/epic-kickoff/index.ts"
+    },
     "./epic/components/epic-overview": {
       "spell-source": "./epic/src/components/epic-overview/index.ts",
       "types": "./epic/dist-types/src/components/epic-overview/index.d.ts",
