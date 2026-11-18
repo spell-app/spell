@@ -17,7 +17,7 @@ import {
  * A page's LINK to the page server:  EVERY read, write and poll of the epic pages and the docs pages goes through one
  * (epic `coherence` C9).
  * - the review inbox's (`ReviewClient`), the running agents' (`AgentsClient`), the answer pages' forms (`AnswerForm`,
- *   `ChoicesForm`, `RunForm`), the epic page's own reads, the docs pages' comments, and the data pages' files
+ *   `ChoicesForm`, `RunForm`), the epic page's own reads, the docs pages' comments, and the reference pages' files
  *   (the commands page, the core reference, the syntax page:  `getFile()`)
  * - served?  `isServed`:  a page the page server served, with its token, never from `file://`;
  *   `ServerLink.isServed()` for a page with no link of its own

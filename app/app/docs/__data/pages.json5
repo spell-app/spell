@@ -39,6 +39,12 @@
       "status": "done",
       "group": "web components"
     },
+    "spell-reference-page": {
+      "title": "<spell-reference-page>",
+      "summary": "A reference page, made from its source, whose words you make clearer with an option-click.",
+      "status": "done",
+      "group": "web components"
+    },
     "SpellPage": {
       "title": "SpellPage",
       "summary": "A whole page's box:  its look, and its children laid out down or across it.",

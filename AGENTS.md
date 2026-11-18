@@ -369,7 +369,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - Each kind of page has ONE name (Owen, 2026-10-14, epic `epic-workflow` P14).
   - Write these, in docs, skills, comments, labels and messages:
     epic page, saga page, details page, review page, choice page, run page, guide, cheatsheet, commands page,
-    components page, components guide, brand page, home page, list page, changelog, template.
+    components page, components guide, reference page, brand page, home page, list page, changelog, template.
   - What each one is, and where it lives:  "Page kinds" in [spell-epic's AGENTS.md](epic/src/AGENTS.md).
 - Owen still says the older words.  Read them as the new ones, but write the new ones:
   - "plan doc", "epic doc" -- the epic page

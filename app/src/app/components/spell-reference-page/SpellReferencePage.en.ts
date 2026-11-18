@@ -176,34 +176,32 @@ export const spellReferencePageVocabulary = {
     { key: "markNew", text: "New since {date}", description: "Something the last look found new." },
     {
       key: "markNewWhy",
-      text: "Spell found this when it last read the data source, on {date}.",
+      text: "This appeared in the data source when Spell last looked, on {date}.",
       description: "Why it's marked new."
     },
     { key: "markGone", text: "Gone since {date}", description: "Something the last look couldn't find." },
     {
       key: "markGoneWhy",
-      text:
-        "Spell couldn't find this when it last read the data source, on {date}.\n" +
-        "Your program still uses it, so it's kept until you remove it.",
+      text: "This is no longer in the data source (checked {date}).\nYour program still uses it, so it stays here until you remove it from your program.",
       description: "Why it's marked gone."
     },
     {
       key: "editTip",
-      text: "Option-click to make the words about this clearer",
+      text: "Option-click to edit its description",
       description: "The tooltip of something whose words can be edited."
     },
-    { key: "editLabel", text: "Words about {name}", description: "The edit box's name, for a screen reader." },
+    { key: "editLabel", text: "Description of {name}", description: "The edit box's name, for a screen reader." },
     { key: "save", text: "Save", description: "Saves the words." },
     { key: "cancel", text: "Cancel", description: "Closes the box, keeping the words as they were." },
-    { key: "editKeys", text: "⌘-Enter saves.  Esc cancels.", description: "Under the edit box." },
+    { key: "editKeys", text: "Press ⌘-Enter to save, or Esc to cancel.", description: "Under the edit box." },
     {
       key: "notSaved",
-      text: "Your words weren't saved, because this page can't change files.\nOpen the reference from the editor's Data tab to change them.",
+      text: "Your text wasn't saved, because this page can only be read.\nTo edit it, open this page from the Data tab in the editor, then try again.",
       description: "Nothing on the page saves words."
     },
     {
       key: "saveFailed",
-      text: "Your words weren't saved.\n{error}",
+      text: "Your text wasn't saved.\n{error}",
       description: "Saving the words failed."
     }
   ]

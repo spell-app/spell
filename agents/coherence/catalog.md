@@ -615,7 +615,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **It is:**  `ServerLink` (`epic/src/review/ServerLink.ts`):  the page's token, a stale token's retry,
   and every read, write and poll
   - `isServed()`, `canRead()`, `get()` (on `$fetch()`, JSON or its text), `post()`, `forPage()`
-  - a data page's file (the commands page's, the core reference's, the syntax page's):  `getFile()`, by its name now or
+  - a reference page's file (the commands page's, the core reference's, the syntax page's):  `getFile()`, by its name now or
     its old one, `.json` for `.json5` (`dataFileNames()`:  the ONE old-name rule, reading and watching alike);
     its `file://` notice is `drawThenBoot()`'s, in the docs helpers (epic `coherence` P22)
   - the static `watch(window, files, refresh, { every, polls })`, with a path test:
@@ -623,7 +623,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Use it when:**  an epic element, form or docs page reads or writes through the page server.
 - **Flag:**  `SPELL_SERVER\?\.token|protocol !== "file:"`
 - **Score:**  `SPELL_SERVER\?\.token|protocol !== "file:"` · home `epic/src/review/ServerLink.ts`
-- **Copies:**  `--` since epic `coherence` P9 (the data pages' reads since P22);  only the parked `goals-live.js` keeps
+- **Copies:**  `--` since epic `coherence` P9 (the reference pages' reads since P22);  only the parked `goals-live.js` keeps
   its own
 
 ### A page's store the elements follow

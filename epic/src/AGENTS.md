@@ -1236,8 +1236,9 @@ In `tools/`:
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the epic folder's `goals/`.
     - their look, and their live buttons:  PARKED since 2026-10-11, each says "TODO:  this will ..." (`parked()`)
     - `goals.css` holds every rule the saga pages took from `plan-doc.css`, which they no longer link.
-  - The DATA PAGES' scripts (epic `coherence` C12):  `commands.entry.js` -> `commands.js`,
-    `core-reference.entry.js` -> `core-reference.js`, `spell-syntax.entry.js` -> `spell-syntax.js`.
+  - The REFERENCE PAGES' scripts (epic `coherence` C12;  "data pages" until epic `data` Q104):
+    `commands.entry.js` -> `commands.js`, `core-reference.entry.js` -> `core-reference.js`,
+    `spell-syntax.entry.js` -> `spell-syntax.js`.
     - BUNDLED by [bundle-spell-ui.js](tools/bundle-spell-ui.js) (`--data-pages`:  only them), classic scripts with no
       Spell UI in them, as the comments' own;  edit the entries, NEVER the bundles.
     - They import what exists instead of copying it:  the docs helpers' `el()`, `titleInside()`, notice, section
@@ -1827,6 +1828,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
 | components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-ui's `docs/`, spell-epic's `src/docs/`, spell-app's `app/docs/`, spell-brand's `docs/` | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
 | components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | beside its components pages | [component-set-docs.html](../templates/component-set-docs.html) |
+| reference page | made from its source each time, with a person's words about each thing:  a place's (`<spell-reference-page>`, epic `data` P53), the commands pages, the core reference page, the syntax guide | a place's:  the editor's `/place/<description>`;  the others in `guides/` | none:  drawn from its source |
 | brand page | Claude Design's brand pages, and their Spell UI copies | `brand/` | none:  Claude Design's exports |
 | home page | the docs' front page:  a card per area | `pages/index.html` | none:  `epic pages index` writes its cards |
 | list page | a card per page of one area:  each top-bar tab's own page | `<area>/index.html` | none:  `epic pages index` writes it |

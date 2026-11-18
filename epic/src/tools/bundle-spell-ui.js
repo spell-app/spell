@@ -48,7 +48,7 @@
  * - A classic script (IIFE) with NO Spell UI and no Solid in it, and no global of its own:  it runs beside the page's
  *   Spell UI, never with a second one (`checkNoSpellUI()`)
  *
- * The DATA PAGES' own scripts (epic `coherence` C12), built after the comments':  each `_assets/<name>.entry.js` into
+ * The REFERENCE PAGES' own scripts (epic `coherence` C12;  "data pages" until epic `data` Q104), built after the comments':  each `_assets/<name>.entry.js` into
  * `_assets/<name>.js` (`DATA_PAGES`:  the commands page, the core reference, the syntax page)
  *
  *   node tools/bundle-spell-ui.js --data-pages     (only them:  they need no UI build)
@@ -100,9 +100,9 @@ const COMMENTS_ONLY = args.includes("--comments")
 /** The comments' own script:  its entry, and the classic script it's built into. */
 const COMMENTS_ENTRY = join(ASSETS, "spell-comments.entry.js")
 const COMMENTS_OUT = join(ASSETS, "spell-comments.js")
-/** Building ONLY the data pages' own scripts (`--data-pages`). */
+/** Building ONLY the reference pages' own scripts (`--data-pages`). */
 const DATA_PAGES_ONLY = args.includes("--data-pages")
-/** The data pages' scripts, by name:  `_assets/<name>.entry.js` into `_assets/<name>.js`. */
+/** The reference pages' scripts, by name:  `_assets/<name>.entry.js` into `_assets/<name>.js`. */
 const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
 /**
  * What the runtime takes from UI's SOURCE, never `dist/` (`spellUiResolver()`):  the doc-only families' leaves (no lib
@@ -410,7 +410,7 @@ async function bundleComments() {
 }
 
 /**
- * Bundles `entry` into `outfile`, a script that runs BESIDE the page's Spell UI (the comments', a data page's), then
+ * Bundles `entry` into `outfile`, a script that runs BESIDE the page's Spell UI (the comments', a reference page's), then
  * checks it has no Spell UI or Solid in it and runs as a classic script.
  * - no `globalName`:  `window.SpellUI` stays the page's
  * - Returns esbuild's warnings, as text.
@@ -641,7 +641,7 @@ function checkNoElementSource(metafile) {
 }
 
 /**
- * Fails if `outfile` (the comments' own script, a data page's) took in any of Spell UI, spell-element or Solid:  the
+ * Fails if `outfile` (the comments' own script, a reference page's) took in any of Spell UI, spell-element or Solid:  the
  * page it runs on has its own,
  * and two copies handle every event twice (epic `epic-engine` I18).
  */

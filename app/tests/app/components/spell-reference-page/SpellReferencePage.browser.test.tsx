@@ -280,7 +280,7 @@ describe("<spell-reference-page>", () => {
     const tenants = await opened(root, "tenants")
     const fields = await opened(tenants, "Fields")
     const status = fields.querySelectorAll("spell-reference-item")[2]!
-    expect(status.getAttribute("title")).toBe("Option-click to make the words about this clearer")
+    expect(status.getAttribute("title")).toBe("Option-click to edit its description")
     optionClick(status)
     await ElementFixture.tick()
     const box = status.querySelector("textarea")!
@@ -312,7 +312,7 @@ describe("<spell-reference-page>", () => {
     const box = root.querySelector("textarea")!
     box.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", metaKey: true, bubbles: true }))
     await vi.waitFor(() => expect(root.querySelector(".WordsBox .error")).not.toBeNull())
-    expect(root.querySelector(".WordsBox .error")!.textContent).toMatch(/^Your words weren't saved, because/)
+    expect(root.querySelector(".WordsBox .error")!.textContent).toMatch(/^Your text wasn't saved, because/)
     box.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
     await ElementFixture.tick()
     expect(root.querySelector("textarea")).toBeNull()

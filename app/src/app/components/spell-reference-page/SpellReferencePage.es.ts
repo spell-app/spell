@@ -65,17 +65,17 @@ export const spellReferencePageEs = {
     oneOf: "uno de {choices}",
     leftOut: "fuera del Spell",
     markNew: "Nuevo desde el {date}",
-    markNewWhy: "Spell encontró esto la última vez que leyó la fuente de datos, el {date}.",
+    markNewWhy: "Esto apareció en la fuente de datos cuando Spell la miró por última vez, el {date}.",
     markGone: "No está desde el {date}",
     markGoneWhy:
-      "Spell no encontró esto la última vez que leyó la fuente de datos, el {date}.\nTu programa todavía lo usa, así que se queda hasta que lo quites.",
-    editTip: "Haz clic con Opción para aclarar lo que dice de esto",
-    editLabel: "Lo que dice de {name}",
+      "Esto ya no está en la fuente de datos (revisada el {date}).\nTu programa todavía lo usa, así que se queda aquí hasta que lo quites de tu programa.",
+    editTip: "Haz clic con Opción para editar su descripción",
+    editLabel: "Descripción de {name}",
     save: "Guardar",
     cancel: "Cancelar",
-    editKeys: "⌘-Intro guarda.  Esc cancela.",
+    editKeys: "Pulsa ⌘-Intro para guardar, o Esc para cancelar.",
     notSaved:
-      "No se guardó lo que escribiste, porque esta página no puede cambiar archivos.\nAbre la referencia desde la pestaña Datos del editor para cambiarlo.",
-    saveFailed: "No se guardó lo que escribiste.\n{error}"
+      "No se guardó tu texto, porque esta página solo se puede leer.\nPara editarlo, abre esta página desde la pestaña Datos del editor, y vuelve a intentarlo.",
+    saveFailed: "No se guardó tu texto.\n{error}"
   }
 } as const satisfies AppTagTexts<typeof spellReferencePageVocabulary>

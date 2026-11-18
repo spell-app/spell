@@ -226,6 +226,16 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Score:**  `(?i)\b(plan doc|epic doc|durable doc|docs index)\b`
 - **Decided:**  the kit's `AGENTS.md`, "Words" (Owen, 2026-10-14, epic `epic-workflow` P14).
 
+### reference page
+
+- **Say:**  reference page, for every kind:  a page made from its source each time, with a person's words about each
+  thing;  a place's, the language's, an app's.  The element:  `<spell-reference-page>`.
+  - The editor's tab that lists a project's declarations keeps its name, "Spell Reference".
+- **Not:**  data page (the commands pages', the core reference page's and the syntax guide's scripts, which draw a
+  page from its data:  the same kind).
+- **Score:**  `(?i)\bdata pages?\b`
+- **Decided:**  epic `data` Q104 (Owen, 2026-11-18, the reference pages page's Q7:  A).
+
 ## Themes
 
 One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 2026-10-25:  "One word each").
