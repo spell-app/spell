@@ -104,6 +104,16 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
     expect(String(warn.mock.calls[0]![0])).toContain("no sound called")
   })
 
+  test("a test plays no sounds:  a program's tests run as it loads, before anyone clicks (epic `mockup` P28)", () => {
+    vi.stubGlobal("Audio", FakeAudio)
+    vi.spyOn(core.console, "groupCollapsed").mockImplementation(() => {})
+    vi.spyOn(core.console, "groupEnd").mockImplementation(() => {})
+    core.test("test counting", () => core.play("https://example.com/click.ogg"))
+    expect(FakeAudio.made).toHaveLength(0)
+    core.play("https://example.com/click.ogg")
+    expect(FakeAudio.made[0]).toMatchObject({ plays: 1 })
+  })
+
   test("a built-in sound's name on a page without Spell UI:  said, nothing plays, and a later play tries again", () => {
     vi.stubGlobal("Audio", FakeAudio)
     const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})

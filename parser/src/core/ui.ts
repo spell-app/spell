@@ -66,9 +66,12 @@ export const uiMethods = defineCoreModule({
    *   click (Safari, phones) lets it.
    * - Playing it again while it plays starts it over.
    * - No address:  nothing.
+   * - Silent while a test runs (`core.ACTIVE_TEST`):  a program's tests run as it loads,
+   *   and Counter's `to test counting` would click twice before anyone clicked (epic `mockup` P28).
    * - NEVER throws:  a sound the browser refuses, or can't load, is said on the program's console.
    */
   play(sound: string | undefined): void {
+    if (core.ACTIVE_TEST) return
     const player = soundPlayerFor(sound)
     if (!player) return
     player.currentTime = 0
