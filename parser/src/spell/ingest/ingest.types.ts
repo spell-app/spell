@@ -144,6 +144,11 @@ export type IngestAsk = {
   /** An address to read its docs at, over those it finds by itself. */
   docs?: string
   /**
+   * Its OpenAPI description, an address or a file's `file:` address (epic `data` P49):  read whole as the source,
+   * every list, write and action route from its schemas, none read until `spell place verify` tries them.
+   */
+  spec?: string
+  /**
    * Its collections' paths under the address, for a source that doesn't list them.
    * - `name=path` names one:  `wiki pages=/page/summary/{name}`.
    * - A path with a name in braces is a collection found by name, with no list:  read by `samples`.
@@ -267,6 +272,17 @@ export type CollectionLook = {
   ids?: Array<string | number>
   /** Its answer was too big to read whole:  a list of ids, read as far as it was. */
   isCut?: boolean
+  /**
+   * Its fields, from its OpenAPI description's schema (epic `data` P49):  read from the spec, not guessed from rows.
+   * - Its `rows` may then be none:  a look at a spec reads none.
+   */
+  fields?: Record<string, FieldDescription>
+  /** Where its things' schema is in the description:  `#/components/schemas/Tenant`. */
+  schemaAt?: string
+  /** What its description says can be done to it besides reading:  writes and action routes, by name. */
+  operations?: Record<string, OperationDescription>
+  /** The tag its description files it under:  `tenancy`. */
+  tag?: string
 }
 
 /** Everything a look at a place found. */
@@ -293,6 +309,8 @@ export type PlaceLook = {
   nameSuggested?: string
   /** What the look had to say. */
   notes: string[]
+  /** Where its OpenAPI description was, when the look was read from it whole (epic `data` P49). */
+  specAt?: string
 }
 
 /**
@@ -423,6 +441,68 @@ export type FieldDescription = {
    * - Tried on a value, which answered a picture.
    */
   pictureAt?: string
+  /** Every thing has one, its schema says:  `required text`.  Never a field the server writes itself. */
+  isRequired?: boolean
+  /** The server writes it, and takes no write of it:  its schema's `readOnly`. */
+  isReadOnly?: boolean
+  /** Its only legal values, by its schema:  `one of active, planned or retired`. */
+  choices?: string[]
+  /** Its least length, in letters. */
+  minLetters?: number
+  /** Its most length, in letters. */
+  maxLetters?: number
+  /** A number's least. */
+  minimum?: number
+  /** A number's most. */
+  maximum?: number
+  /** Its schema's format, when it says more than its kind:  `date-time`, `uuid`, `uri`. */
+  format?: string
+  /**
+   * Where its schema is in the place's OpenAPI description:  `#/components/schemas/Tenant/properties/name`.
+   * - NOT `$ref`, which is Spell's own reference key in saved data.
+   */
+  schemaAt?: string
+}
+
+/**
+ * Whether something of a place was tried against a running server, and how it went (epic `data` P49, J254):
+ * kept only in the description, never in the Spell.
+ */
+export type PlaceState = {
+  /**
+   * - `unverified`:  from the description only, never tried
+   * - `untyped`:  no schema said its fields:  a read fills them
+   * - `verified`:  tried, and it answered as described
+   * - `failed`:  tried, and it didn't
+   * - `disabled`:  its thing's line turns it off, so it's never tried
+   */
+  is: "unverified" | "untyped" | "verified" | "failed" | "disabled"
+  /** When it was tried, in ISO. */
+  at?: string
+  /** The deployment it was tried on:  `dev`. */
+  deployment?: string
+  /** The status it answered with. */
+  status?: number
+  /** Why it failed, in words for people. */
+  reason?: string
+  /** How many rows a read found. */
+  rows?: number
+  /** Nothing here can read it through the Spell:  its rows are the look's own (see `ReadOfType`). */
+  readByTheLook?: boolean
+}
+
+/** A write or an action route its description offers, on one collection (epic `data` P49). */
+export type OperationDescription = {
+  /** Its method:  `POST`, `PATCH`, `DELETE`. */
+  method: string
+  /** Its address under the place's, the thing's id in braces:  `/api/core/background-tasks/{id}/enqueue/`. */
+  at: string
+  /** What it takes, each brace and body field, its kind from the schema:  `{ id: "number" }`. */
+  params?: Record<string, FieldKind>
+  /** Where its body's schema is in the description. */
+  bodyAt?: string
+  /** Whether it was tried, and how it went. */
+  state?: PlaceState
 }
 
 /** One collection of a place. */
@@ -476,8 +556,17 @@ export type CollectionDescription = {
   listsUnder?: Record<string, string>
   /** Why the Spell leaves it out. */
   leftOut?: string
-  /** What a read through the Spell found. */
-  readThrough?: ReadOfType
+  /**
+   * Whether it was tried, and how it went (epic `data` P49):  a read through the Spell, or `spell place verify`.
+   * - It was `readThrough`, which an older description still says:  read as this (`descriptionFromDisk()`).
+   */
+  state?: PlaceState
+  /** Where its things' schema is in the place's OpenAPI description. */
+  schemaAt?: string
+  /** The tag its description files it under:  a large place's types go in a file per tag. */
+  tag?: string
+  /** What else can be done to it, by name:  `add`, `change`, `delete`, and each action route's verb, `enqueue`. */
+  operations?: Record<string, OperationDescription>
   /** Each field, by the source's name for it. */
   fields: Record<string, FieldDescription>
 }
@@ -510,6 +599,8 @@ export type PlaceDescription = {
     readBy: string
     /** Where its docs were. */
     docsAt?: string
+    /** Where its OpenAPI description was, when the place was read from it whole (epic `data` P49). */
+    specAt?: string
     /** The collections it was asked to look at, `--collections` as given:  looking again looks at only these. */
     collectionsAsked?: string[]
     /** The fields it was told hold a picture's id, `--pictures` as given:  looking again tries them again. */

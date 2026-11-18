@@ -1,3 +1,4 @@
+import { kindWordsOf, oneOfWords } from "spell/parser/core/schemaWords"
 import { P } from "spell/parser/parser"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
@@ -499,7 +500,7 @@ function typeLines(
   const own = new Set(Object.values(collections).map(({ type }) => type))
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
-    const what = typeWordsFor(about, collections, description.type, own, place)
+    const what = schemaWordsFor(about, typeWordsFor(about, collections, description.type, own, place))
     const line = `its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
@@ -579,6 +580,26 @@ function typeWordsFor(
   if (type === "list of links" || type === "list of text") return `a list of ${collectionWords(target)}`
   return SPELL_TYPES[type]!
 }
+
+/**
+ * What a schema says of a field, on its line, in the lexicon reader's words (epic `data` P49, J252):
+ * `required text, with maximum length 100`, `one of active, planned or retired`.
+ * - Only on a plain kind:  a link, a list or a type of the place's own says what it is, and nothing more.
+ */
+function schemaWordsFor({ type, isRequired, choices, minLetters, maxLetters }: FieldDescription, what: string): string {
+  if (!PLAIN_KINDS.has(what)) return what
+  const isText = type === "text"
+  const kind = (isText && choices && oneOfWords(choices)) || what
+  return kindWordsOf({
+    kind,
+    ...(isRequired && { isRequired }),
+    ...(isText && minLetters !== undefined && { minLetters }),
+    ...(isText && maxLetters !== undefined && { maxLetters })
+  }).said
+}
+
+/** The kinds a schema's words go on:  see `schemaWordsFor()`. */
+const PLAIN_KINDS: ReadonlySet<string> = new Set(["text", "a number", "a date"])
 
 /**
  * A number's words for none, as the source writes them:  ` or "unknown"`, ` or "n/a" or "unknown"`.

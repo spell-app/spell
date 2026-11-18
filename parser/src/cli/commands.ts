@@ -287,6 +287,12 @@ export default function languageCommands(spell: Command): void {
     )
     .option("--docs <address>", "where its docs are, over those it finds by itself")
     .option(
+      "--spec <address>",
+      "its OpenAPI description, an address or a file, in JSON:  read whole as the source -- every list, field, write " +
+        "and action route from its schemas, with no cap -- each unverified until spell place verify tries it;  " +
+        'NetBox\'s is "https://demo.netbox.dev/api/schema/?format=json"'
+    )
+    .option(
       "--collections <paths>",
       "its collections' paths, comma-separated, for a source that doesn't list them;  name=path names one, and a " +
         'name in braces is found by name, with no list:  "wiki pages=/page/summary/{name}";  one asked with a search ' +

@@ -12,7 +12,9 @@ import {
   type IngestSettings,
   type PlaceDescription,
   type PlaceDescriptionOnDisk,
-  type PlaceLook
+  type PlaceLook,
+  type PlaceState,
+  type ReadOfType
 } from "./ingest.types"
 import { agentRead, renameCollections } from "./PlaceReading"
 import { answersUnder, IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
@@ -34,6 +36,9 @@ import { writesTried, writeWordsFor } from "./WritesTried"
 
 /** How many times it leaves out a line Spell can't read, and tries again. */
 const MOST_COMPILES = 12
+
+/** How many times, for a place read whole from its OpenAPI description (epic `data` P49). */
+const MOST_COMPILES_OF_A_SPEC = 60
 
 /** What a compile says of a line:  `3:12 ...`. */
 const ERROR_LINE = /^(\d+):\d+ (.*)$/s
@@ -112,6 +117,7 @@ export class PlaceIngest {
       reader,
       ...withDefined({
         docs: ask.docs,
+        spec: ask.spec,
         collections: ask.collections,
         samples: ask.samples,
         namesInFolder: files.namesInFolder
@@ -130,8 +136,9 @@ export class PlaceIngest {
     })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
     if (ask.keyGoes) description.about.keyGoes = ask.keyGoes
-    if (ask.keySecret) await this.noteKeyIfSet(description, look)
+    if (ask.keySecret && !look.specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
+    if (look.specAt) noteFromSpec(description)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
@@ -139,7 +146,7 @@ export class PlaceIngest {
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
-    await this.readThroughIt(description, reader, ask.keySecret)
+    if (!look.specAt) await this.readThroughIt(description, reader, ask.keySecret)
     noteKeepingACopy(description, existing)
     await this.finish(description)
     const spell = spellTextOf(partsInLanguageOf(file, spellPartsFor(description))).trimEnd()
@@ -176,7 +183,7 @@ export class PlaceIngest {
     movedTo?: string
   ): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, keySecret, keyGoes, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
+    const { name, kind, keySecret, keyGoes, signedIn, docsAt, specAt, collectionsAsked, picturesAsked } = old.about
     const address = movedTo === undefined ? old.about.address : addressFrom(movedTo)
     const reader = this.readerFor(keySecret, signedIn, keyGoes)
     this.say(`Looking again at ${address} ...`)
@@ -193,6 +200,7 @@ export class PlaceIngest {
       collections,
       addListed: !collectionsAsked,
       ...withDefined({
+        spec: specAt,
         docs: docsAt,
         samples: samples.length ? samples : undefined,
         namesInFolder: files.namesInFolder
@@ -201,8 +209,9 @@ export class PlaceIngest {
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
     if (keyGoes) description.about.keyGoes = keyGoes
-    if (keySecret) await this.noteKeyIfSet(description, look)
+    if (keySecret && !specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
+    if (specAt) noteFromSpec(description)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     await this.notePictures(description, picturesAsked, reader)
     // the agent's notes stay, as it isn't asked again;  everything else, this look says afresh
@@ -230,7 +239,7 @@ export class PlaceIngest {
     const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
-    await this.readThroughIt(description, reader, keySecret)
+    if (!specAt) await this.readThroughIt(description, reader, keySecret)
     noteKeepingACopy(description, merge.text)
     await this.finish(description)
     await files.write(file, merge.text)
@@ -264,9 +273,11 @@ export class PlaceIngest {
     address: string,
     named: string | undefined,
     reader: PoliteReader,
-    { collections, samples }: Pick<IngestAsk, "collections" | "samples"> = {}
+    { collections, samples, spec }: Pick<IngestAsk, "collections" | "samples" | "spec"> = {}
   ): Promise<string> {
     if (named) return kindNamed(named)
+    // an OpenAPI description is a web server's (epic `data` P49)
+    if (spec) return "web server"
     const read = kindReadFrom(address)
     if (read) return read
     const tried: string[] = []
@@ -431,9 +442,11 @@ export class PlaceIngest {
    * - throws `IngestStopped` for an error on any other line:  the place's own, say
    */
   private compileLeavingOut(description: PlaceDescription, file: string): string[] {
+    // a whole description has many more lines to leave out
+    const most = description.about.specAt ? MOST_COMPILES_OF_A_SPEC : MOST_COMPILES
     // the English it wrote:  whatever language the file is in, that's checked after
     const englishFile = file.replace(/\.[a-z]{2}\.spell$/, ".spell")
-    for (let round = 0; round < MOST_COMPILES; round++) {
+    for (let round = 0; round < most; round++) {
       const parts = spellPartsFor(description)
       const text = spellTextOf(parts)
       const { errors, warnings } = compile(text, englishFile)
@@ -487,7 +500,8 @@ export class PlaceIngest {
     const { kind, address } = description.about
     // an Airtable is reached through a server side, which holds its key:  there's none here to read through
     if (kind === "airtable" && !isPlaceServerAddress(address)) {
-      for (const collection of shown) collection.readThrough = { rows: collection.rowsSeen, readByTheLook: true }
+      for (const collection of shown)
+        collection.state = { is: "verified", at: this.nowISO(), rows: collection.rowsSeen, readByTheLook: true }
       description.notes.push(
         "It wasn't read through the Spell:  a program reaches an Airtable through a server side that holds its key, and there's none here.  Its rows came straight from Airtable."
       )
@@ -553,13 +567,13 @@ export class PlaceIngest {
     })
     for (const collection of shown) {
       const read = byType[collection.type]
-      if (read) collection.readThrough = read
+      if (read) collection.state = stateOfRead(read, this.nowISO())
     }
     // each said once
     description.notes = [...new Set([...description.notes, ...complaints])]
-    const rows = shown.reduce((sum, { readThrough: read }) => sum + (read?.rows ?? 0), 0)
+    const rows = shown.reduce((sum, { state }) => sum + (state?.rows ?? 0), 0)
     if (!rows) {
-      const why = shown.map(({ type, readThrough: read }) => `${type}:  ${read?.problem ?? "no rows"}`).join("\n")
+      const why = shown.map(({ type, state }) => `${type}:  ${state?.reason ?? "no rows"}`).join("\n")
       throw new IngestStopped(`a read through the Spell returned no rows, so nothing was written:\n${why}\n\n${spell}`)
     }
   }
@@ -577,6 +591,11 @@ export class PlaceIngest {
     const { files } = this.settings
     await files.writeDescription(path, descriptionOnDisk(description))
     await files.listInProject?.(file, path)
+  }
+
+  /** What time it is, in ISO:  a test's clock. */
+  private nowISO(): string {
+    return (this.settings.now?.() ?? new Date()).toISOString()
   }
 
   /** Say how it's going. */
@@ -679,10 +698,36 @@ export function descriptionFromDisk({
   collections,
   ...rest
 }: PlaceDescriptionOnDisk): PlaceDescription {
-  const each = Object.entries(collections).map(([name, collection]) => [name, { ...allCollections, ...collection }])
+  const each = Object.entries(collections).map(([name, collection]) => [
+    name,
+    withState({ ...allCollections, ...collection })
+  ])
   // the lines it wrote, each bare:  an older version bulleted them, `- its "url" is text` (epic `language` P46)
   const spell = rest.spell?.map((line) => line.replace(/^(\t*)- /, "$1"))
   return { ...rest, ...(spell ? { spell } : {}), collections: Object.fromEntries(each) } as PlaceDescription
+}
+
+/** A read through the Spell, as a collection's state:  verified with the rows it found, or failed with why. */
+function stateOfRead({ rows, problem, readByTheLook }: ReadOfType, at: string): PlaceState {
+  return {
+    is: problem ? "failed" : "verified",
+    at,
+    rows,
+    ...(problem !== undefined && { reason: problem }),
+    ...(readByTheLook && { readByTheLook })
+  }
+}
+
+/**
+ * A collection as it's read, its older `readThrough` as its `state` (epic `data` P49):  a description written before
+ * says what a read through the Spell found there.
+ */
+function withState(
+  collection: Partial<CollectionDescription> & { readThrough?: ReadOfType }
+): Partial<CollectionDescription> {
+  const { readThrough, ...rest } = collection
+  if (!readThrough || rest.state) return rest
+  return { ...rest, state: stateOfRead(readThrough, "") }
 }
 
 /** The class a type's words compile to:  `life form` => `LifeForm`. */
@@ -857,6 +902,8 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
       ...collection,
       type: oldCollection.type,
       ...(oldCollection.about && { about: oldCollection.about }),
+      // what was tried stays, till it's tried again:  a look at a description tries nothing
+      ...(oldCollection.state && collection.state?.is === "unverified" && { state: oldCollection.state }),
       ...(oldCollection.idField && oldCollection.idField in collection.fields && { idField: oldCollection.idField }),
       fields: collection.fields
     }
@@ -998,6 +1045,17 @@ function writtenOf(parts: SpellParts, written: readonly string[] | undefined): S
     placeLines: kept(parts.placeLines),
     types: parts.types.map((type) => ({ ...type, lines: kept(type.lines) }))
   }
+}
+
+/**
+ * SIDE EFFECT:  a place read from its description says so (epic `data` P49):  nothing was read from the server, so
+ * every list, write and action route is unverified until `spell place verify` tries it.
+ */
+function noteFromSpec(description: PlaceDescription): void {
+  description.canDo.read = "Its description says so:  never read yet."
+  description.notes.push(
+    "Read from its OpenAPI description only:  every list, write and action route is unverified until `spell place verify` tries it against a running server."
+  )
 }
 
 /** SIDE EFFECT:  `description` says which session it was read as, by name, never its values. */

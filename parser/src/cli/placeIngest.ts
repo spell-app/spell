@@ -53,6 +53,8 @@ export type PlaceIngestOptions = {
   keyInAddress?: string
   signedIn?: string
   docs?: string
+  /** `--spec <address>`:  its OpenAPI description, read whole as the source (epic `data` P49). */
+  spec?: string
   collections?: string
   samples?: string
   pictures?: string
@@ -66,13 +68,26 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, signedIn, docs, collections, samples, pictures, tryWrites, ai = true } = options
+  const {
+    kind,
+    into,
+    name,
+    keySecret,
+    signedIn,
+    docs,
+    spec,
+    collections,
+    samples,
+    pictures,
+    tryWrites,
+    ai = true
+  } = options
   const keyGoes = keyGoesFrom(options)
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(ai, !!signedIn)
     const result = await ingest.add({
       address,
-      ...withValues({ kind, into, name, keySecret, signedIn, docs }),
+      ...withValues({ kind, into, name, keySecret, signedIn, docs, spec }),
       ...(keyGoes && { keyGoes }),
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
@@ -432,8 +447,8 @@ function printDescription(
   const reads = Object.entries(collections)
     .filter(([, { leftOut }]) => !leftOut)
     .map(
-      ([name, { readThrough }]) =>
-        `${name}:  ${readThrough?.rows ?? 0} rows${readThrough?.readByTheLook ? ", by the look itself" : ""}${readThrough?.problem ? ` -- ${readThrough.problem}` : ""}`
+      ([name, { state }]) =>
+        `${name}:  ${state?.rows ?? 0} rows${state?.readByTheLook ? ", by the look itself" : ""}${state?.reason ? ` -- ${state.reason}` : ""}`
     )
   printList("A read through the Spell found:", reads)
   if (spellCantSay.length) printList("What Spell can't say about it:", spellCantSay)
