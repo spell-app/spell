@@ -44,10 +44,11 @@ export class BuiltInSounds {
   /**
    * The address of the built-in sound called `name`, `undefined` if there's none.
    * - Against `BuiltInSounds.base`, or `base` when given.
+   * - `undefined` too with no base:  a classic-script bundle (the docs pages') has no `import.meta.url`.
    */
   static url(name: string, base: string = BuiltInSounds.base): string | undefined {
     const sound = BuiltInSounds.find(name)
-    if (!sound) return undefined
+    if (!sound || !base) return undefined
     return new URL(`${SOUND_LIBRARY}/${BuiltInSounds.fileOf(sound)}`, base).href
   }
 

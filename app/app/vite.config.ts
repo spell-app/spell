@@ -10,12 +10,13 @@ import { appConfig, pageServerProxy } from "./vite.shared.ts"
 const RUNTIME_ENTRY = "spell-runtime"
 
 /** Plugins, dedupe and CSS:  `appConfig()`, with `spell-ui`'s icon packs. */
-const APP_CONFIG = appConfig({ iconPacks: true })
+const APP_CONFIG = appConfig({ builtInFiles: true })
 
 /**
  * The editor app:  `yarn start:dev` / `yarn build` => `dist/`.
  * - Plugins, dedupe and CSS:  `appConfig()`;  in dev, `repoSourceInDev()` too.
- * - `iconPacks`:  `spell-ui`'s built-in icon packs go beside the chunk holding `BuiltInPacks` (`assets/`), where
+ * - `builtInFiles`:  `spell-ui`'s built-in icon packs and sounds go beside the chunks holding `BuiltInPacks` and
+ *   `BuiltInSounds` (`assets/`), where
  *   it looks;  the app's Solid UI draws Fomantic names from them (`spell/app/app/solid`'s `loadUI.ts`).
  * - ONE page, so it bundles its own Solid and `ui`:  `spell-solid.js` is the elements' and the runner's.
  */

@@ -317,6 +317,14 @@ describe("runner builds", () => {
     )
     expect(builtIns).toEqual(["spell-solid.js"])
   })
+
+  test("the built-in sounds beside the chunk holding `BuiltInSounds` (epic `mockup` P28)", () => {
+    for (const dir of [element, runner]) {
+      const soundCode = chunks(dir).filter((file) => sources(dir, file).some((source) => BUILT_IN_SOUNDS.test(source)))
+      expect(soundCode, dir).toHaveLength(1)
+      expect(existsSync(join(dir, dirname(soundCode[0]!), "sound-library", "card-slide.ogg")), dir).toBe(true)
+    }
+  })
 })
 
 /** Modules of each package a test asks about, as they appear in a sourcemap's `sources`. */
@@ -353,6 +361,9 @@ const SHARED_SPECIFIERS = /^const specifiers = (.+)$/m
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside its own chunk. */
 const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
+
+/** `ui`'s `BuiltInSounds`, which looks for the sounds beside its own chunk. */
+const BUILT_IN_SOUNDS = /\/ui\/src\/sounds\/BuiltInSounds\.ts$/
 
 /**
  * Does chunk `file` export `name`, and import `name` from `spell-solid-shared.js`:  the page's copy, drawn with?
