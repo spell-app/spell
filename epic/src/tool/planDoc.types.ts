@@ -230,7 +230,7 @@ export const QUESTION_ID = /^q\d+$/
 /**
  * The items red while open and not reviewed (`PlanReader.itemState()`), so the ones `calm` makes blue:
  * judgement calls and issues (`i3`, `j7`).
- * - a todo marked `urgent` is too (`PlanDoc.followUp()`), whatever its id
+ * - a todo marked `urgent` is too (`PlanDoc.followUp()`, or `epic update <epic>#T3 --loud`:  T94), whatever its id
  * - and the kinds Owen's Do this leaves in place (`PlanDoc.doThis()`, I232):  `urgent` keeps them red after a review
  * - `ReviewInbox`'s and `<epic-item>`'s `CALM_ID`, the same rule
  */
@@ -405,7 +405,7 @@ export type AddItemOptions = {
   titleHTML?: boolean
   /** not urgent (`calm`):  a judgement call or issue that wouldn't surprise Owen;  `--calm` */
   calm?: boolean
-  /** a todo that asks Owen to act:  red until reviewed (`PlanDoc.followUp()`) */
+  /** a todo that asks Owen to act:  red until reviewed (`PlanDoc.followUp()`;  `epic add ... todo --loud`, T94) */
   urgent?: boolean
   /**
    * an issue or todo filed from Owen's own words (`--requested`;  a todo since epic `epic-engine` T88):

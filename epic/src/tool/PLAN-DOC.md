@@ -430,7 +430,7 @@ As `plan-doc.md`, "Ids":
     | `requested` | light orange | an issue or todo filed from the person's own words (`requested`;  a todo since epic `epic-engine` T88), closed done, not reviewed:  their turn to see it (P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
-    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
+    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up, or a todo flagged red as a reminder:  `epic update <epic>#T3 --loud`, `epic add <epic>#T ... --loud`;  epic `epic-engine` T94) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
     | `handed`    | blue, outlined | a judgement call or issue the person pressed Do this on (`urgent`), Claude hasn't started (epic `epic-engine` P63) |
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
@@ -825,7 +825,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 
 | colour | means                                    | where                                                                  |
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
-| red    | needs the person                               | `attention` chips;  the rail's count (only what needs them)             |
+| red    | needs the person                               | `attention` chips;  the rail's count (only what needs them);  a todo the person flagged red as a reminder (`--loud`, T94), its buttons still a todo's (plane, revisit, x) |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
