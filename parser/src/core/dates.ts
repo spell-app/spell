@@ -52,11 +52,13 @@ const DAY_PARTS: Readonly<Record<DayPart, readonly [number, number]>> = {
 /** A part of a day:  `if now is in the morning`. */
 export type DayPart = "morning" | "afternoon" | "earlyEvening" | "evening" | "lateEvening" | "night"
 
-/** How a date or a duration is said as text:  `as a duration`, `as a short duration`, `as a long duration`. */
 /** `core.twoDigits()`'s answer:  text for a number, anything else as it came. */
 export type TwoDigits<T> = T extends number ? string : T
-/** `core.durationPartOf()`'s answer:  a number for a number, anything else as it came. */
-export type NumberOr<T> = T extends number ? number : T
+/** What a core method working on a number gives back:  `R` for a number, anything else as it came. */
+export type NumberOr<T, R = number> = T extends number ? R : T
+/** What a core method working on a date gives back:  `R` for a date, anything else as it came. */
+export type DateOr<T, R> = T extends Date ? R : T
+/** How a date or a duration is said as text:  `as a duration`, `as a short duration`, `as a long duration`. */
 export type DurationStyle = "normal" | "short" | "long"
 
 /** Milliseconds in a day. */
@@ -82,48 +84,48 @@ export const dateMethods = defineCoreModule({
   ////////////////
 
   /** A date's year, e.g. `2026`:  `the year of now`. */
-  yearOf(date: unknown): unknown {
-    return isDate(date) ? date.getFullYear() : date
+  yearOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getFullYear() : date) as DateOr<T, number>
   },
   /** A date's year in two digits' worth, e.g. `26`, `5` for 2005:  `the short year of now`. */
-  shortYearOf(date: unknown): unknown {
-    return isDate(date) ? date.getFullYear() % 100 : date
+  shortYearOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getFullYear() % 100 : date) as DateOr<T, number>
   },
   /** A date's month, counting January as 1:  `the month number of now`. */
-  monthNumberOf(date: unknown): unknown {
-    return isDate(date) ? date.getMonth() + 1 : date
+  monthNumberOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getMonth() + 1 : date) as DateOr<T, number>
   },
   /** A date's day of the month, 1 to 31:  `the day of now`. */
-  dayOf(date: unknown): unknown {
-    return isDate(date) ? date.getDate() : date
+  dayOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getDate() : date) as DateOr<T, number>
   },
   /** A date's hour, 0 to 23, whatever clock the person reads:  `the hour of now`. */
-  hourOf(date: unknown): unknown {
-    return isDate(date) ? date.getHours() : date
+  hourOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getHours() : date) as DateOr<T, number>
   },
   /** A date's minute, 0 to 59:  `the minute of now`. */
-  minuteOf(date: unknown): unknown {
-    return isDate(date) ? date.getMinutes() : date
+  minuteOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getMinutes() : date) as DateOr<T, number>
   },
   /** A date's second, 0 to 59:  `the second of now`. */
-  secondOf(date: unknown): unknown {
-    return isDate(date) ? date.getSeconds() : date
+  secondOf<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? date.getSeconds() : date) as DateOr<T, number>
   },
   /** A date's week of the year, ISO's way, the same for everyone:  `the week of now`, 1 to 53. */
-  weekOf(date: unknown): unknown {
-    if (!isDate(date)) return date
+  weekOf<T>(date: T): DateOr<T, number> {
+    if (!isDate(date)) return date as DateOr<T, number>
     // the week's Thursday says the year it's in
     const thursday = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 4 - isoWeekday(date))
     const yearStart = new Date(thursday.getFullYear(), 0, 1)
-    return Math.floor(daysBetween(yearStart, thursday) / 7) + 1
+    return (Math.floor(daysBetween(yearStart, thursday) / 7) + 1) as DateOr<T, number>
   },
   /**
    * A date's day of the week as a number, 1 to 7, counted from the person's first day of the week:
    * `the weekday number of now`, Tuesday is 3 in the US and 2 in Spain.
    */
-  weekdayNumberOf(date: unknown): unknown {
-    if (!isDate(date)) return date
-    return ((isoWeekday(date) - CalendarSettings.firstDay + 7) % 7) + 1
+  weekdayNumberOf<T>(date: T): DateOr<T, number> {
+    if (!isDate(date)) return date as DateOr<T, number>
+    return (((isoWeekday(date) - CalendarSettings.firstDay + 7) % 7) + 1) as DateOr<T, number>
   },
 
   ////////////////
@@ -131,26 +133,28 @@ export const dateMethods = defineCoreModule({
   ////////////////
 
   /** A date's month, by name in the program's language:  `November`, `noviembre` -- `the month of now`. */
-  monthOf(date: unknown): unknown {
-    return isDate(date) ? formatted(date, { month: "long" }) : date
+  monthOf<T>(date: T): DateOr<T, string> {
+    return (isDate(date) ? formatted(date, { month: "long" }) : date) as DateOr<T, string>
   },
   /** A date's month, its name cut short:  `Nov`, `nov` -- `the short month of now`. */
-  shortMonthOf(date: unknown): unknown {
-    return isDate(date) ? formatted(date, { month: "short" }) : date
+  shortMonthOf<T>(date: T): DateOr<T, string> {
+    return (isDate(date) ? formatted(date, { month: "short" }) : date) as DateOr<T, string>
   },
   /** A date's day of the week, by name:  `Tuesday`, `martes` -- `the weekday of now`, `the day of the week of now`. */
-  weekdayOf(date: unknown): unknown {
-    return isDate(date) ? formatted(date, { weekday: "long" }) : date
+  weekdayOf<T>(date: T): DateOr<T, string> {
+    return (isDate(date) ? formatted(date, { weekday: "long" }) : date) as DateOr<T, string>
   },
   /** A date's day of the week, its name cut short:  `Tue`, `mar` -- `the short weekday of now`. */
-  shortWeekdayOf(date: unknown): unknown {
-    return isDate(date) ? formatted(date, { weekday: "short" }) : date
+  shortWeekdayOf<T>(date: T): DateOr<T, string> {
+    return (isDate(date) ? formatted(date, { weekday: "short" }) : date) as DateOr<T, string>
   },
   /** Whether a date's time is before noon or after, `AM` or `PM` (Spanish `a. m.`, `p. m.`):  `the meridiem of now`. */
-  meridiemOf(date: unknown): unknown {
-    if (!isDate(date)) return date
+  meridiemOf<T>(date: T): DateOr<T, string> {
+    if (!isDate(date)) return date as DateOr<T, string>
     const parts = new Intl.DateTimeFormat(dateLocale(), { hour: "numeric", hourCycle: "h12" }).formatToParts(date)
-    return spaced(parts.find((part) => part.type === "dayPeriod")?.value ?? (date.getHours() < 12 ? "AM" : "PM"))
+    return spaced(
+      parts.find((part) => part.type === "dayPeriod")?.value ?? (date.getHours() < 12 ? "AM" : "PM")
+    ) as DateOr<T, string>
   },
   /** Is a date's time before noon:  `if now is AM`. */
   isAM(date: unknown): boolean {
@@ -230,24 +234,26 @@ export const dateMethods = defineCoreModule({
    *   - several, biggest first:  `in 1 month, 3 days` (`as a duration in months and days`, epic `language` J253)
    *   - months and years by the calendar:  November 17 to January 20 is 2 months, 3 days
    */
-  timeFromNow(date: unknown, style: DurationStyle = "normal", unit?: string | string[]): unknown {
-    if (!isDate(date)) return date
+  timeFromNow<T>(date: T, style: DurationStyle = "normal", unit?: string | string[]): DateOr<T, string> {
+    if (!isDate(date)) return date as DateOr<T, string>
     const seconds = (date.getTime() - Date.now()) / 1000
     const units = typeof unit === "string" ? [unit] : unit
-    if (units?.length === 1 && !(units[0]! in CALENDAR_MONTHS)) return relativeIn(seconds, units[0]!)
+    if (units?.length === 1 && !(units[0]! in CALENDAR_MONTHS))
+      return relativeIn(seconds, units[0]!) as DateOr<T, string>
     if (units?.length) {
       const parts = calendarParts(new Date(), date, units)
-      if (!parts.length) return relativeIn(seconds, "second")
-      if (parts.length > 1) return saidIn(parts, seconds < 0, true)
+      if (!parts.length) return relativeIn(seconds, "second") as DateOr<T, string>
+      if (parts.length > 1) return saidIn(parts, seconds < 0, true) as DateOr<T, string>
       // one unit, a month or a year:  `next month`, `in 3 months`
       const [[said, amount]] = parts as [[string, number]]
-      return relative(seconds < 0 ? -amount : amount, said as Intl.RelativeTimeFormatUnit)
+      return relative(seconds < 0 ? -amount : amount, said as Intl.RelativeTimeFormatUnit) as DateOr<T, string>
     }
-    if (style === "short" || Math.abs(seconds) >= 26 * PART_SECONDS.days) return roughlyFromNow(date, seconds)
+    if (style === "short" || Math.abs(seconds) >= 26 * PART_SECONDS.days)
+      return roughlyFromNow(date, seconds) as DateOr<T, string>
     const parts = partsOf(Math.abs(seconds), style === "long" ? 4 : 2)
-    if (parts.length < 2) return roughlyFromNow(date, seconds)
+    if (parts.length < 2) return roughlyFromNow(date, seconds) as DateOr<T, string>
     const key = seconds < 0 ? "duration-ago" : "duration-from-now"
-    return core.message(key, { time: durationWords(parts) })
+    return core.message(key, { time: durationWords(parts) }) as DateOr<T, string>
   },
 
   /**
@@ -257,13 +263,14 @@ export const dateMethods = defineCoreModule({
    *   `unit`, in that unit (`in days`:  `3 days`), or several, biggest first (`in hours and minutes`:  `1 hour, 30
    *   minutes`;  epic `language` J253) -- a month 30 days, a year 365.
    */
-  durationText(seconds: unknown, style: DurationStyle = "normal", unit?: string | string[]): unknown {
-    if (typeof seconds !== "number" || !Number.isFinite(seconds)) return seconds
+  durationText<T>(seconds: T, style: DurationStyle = "normal", unit?: string | string[]): NumberOr<T, string> {
+    if (typeof seconds !== "number" || !Number.isFinite(seconds)) return seconds as NumberOr<T, string>
     const sign = seconds < 0 ? "-" : ""
     const units = typeof unit === "string" ? [unit] : unit
-    if (units?.some((each) => each in SAID_UNIT_SECONDS)) return sign + saidIn(fixedParts(Math.abs(seconds), units))
+    if (units?.some((each) => each in SAID_UNIT_SECONDS))
+      return (sign + saidIn(fixedParts(Math.abs(seconds), units))) as NumberOr<T, string>
     const parts = partsOf(Math.abs(seconds), style === "long" ? 4 : style === "short" ? 1 : 2)
-    return sign + durationWords(parts.length ? parts : [["seconds", 0]])
+    return (sign + durationWords(parts.length ? parts : [["seconds", 0]])) as NumberOr<T, string>
   },
 
   ////////////////
@@ -274,19 +281,19 @@ export const dateMethods = defineCoreModule({
    * `date` moved by `amount` of duration unit `unit`:  `now + 2 days`, `its due - 1 hour` (`amount` negative).
    * - Days move the calendar, so a day is still a day across a change of clocks;  the rest move the time.
    */
-  addToDate(date: unknown, amount: unknown, unit: string = "second"): unknown {
-    if (!isDate(date) || typeof amount !== "number") return date
+  addToDate<T>(date: T, amount: unknown, unit: string = "second"): DateOr<T, Date> {
+    if (!isDate(date) || typeof amount !== "number") return date as DateOr<T, Date>
     const moved = new Date(date.getTime())
     if (unit === "day" && Number.isInteger(amount)) moved.setDate(moved.getDate() + amount)
     else moved.setTime(moved.getTime() + amount * (UNIT_SECONDS[unit] ?? 1) * 1000)
-    return moved
+    return moved as DateOr<T, Date>
   },
   /** `date` moved back by `amount` of duration unit `unit`:  `its due - 1 hour` -- see `addToDate()`. */
-  subtractFromDate(date: unknown, amount: unknown, unit: string = "second"): unknown {
-    return typeof amount === "number" ? dateMethods.addToDate(date, -amount, unit) : date
+  subtractFromDate<T>(date: T, amount: unknown, unit: string = "second"): DateOr<T, Date> {
+    return (typeof amount === "number" ? dateMethods.addToDate(date, -amount, unit) : date) as DateOr<T, Date>
   },
   /** How long from `earlier` to `later`, in seconds:  `the next weekend - now`, a duration. */
-  secondsBetween(later: unknown, earlier: unknown): unknown {
+  secondsBetween(later: unknown, earlier: unknown): number | undefined {
     if (!isDate(later) || !isDate(earlier)) return undefined
     return (later.getTime() - earlier.getTime()) / 1000
   },
@@ -337,24 +344,26 @@ export const dateMethods = defineCoreModule({
     return isDate(date) && daysBetween(startOf(new Date()), startOf(date)) === offset
   },
   /** How many days until `date`, counting midnights:  11 PM to 1 AM is 1 -- `the days until its due`. */
-  daysUntil(date: unknown): unknown {
-    return isDate(date) ? daysBetween(startOf(new Date()), startOf(date)) : date
+  daysUntil<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? daysBetween(startOf(new Date()), startOf(date)) : date) as DateOr<T, number>
   },
   /** How many days since `date`, counting midnights -- `the days since its added`. */
-  daysSince(date: unknown): unknown {
-    return isDate(date) ? daysBetween(startOf(date), startOf(new Date())) : date
+  daysSince<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? daysBetween(startOf(date), startOf(new Date())) : date) as DateOr<T, number>
   },
   /** The midnight `date`'s day starts at:  `the start of the day of now`. */
-  startOfDay(date: unknown): unknown {
-    return isDate(date) ? startOf(date) : date
+  startOfDay<T>(date: T): DateOr<T, Date> {
+    return (isDate(date) ? startOf(date) : date) as DateOr<T, Date>
   },
   /** The last moment of `date`'s day, 11:59:59.999 PM:  `the end of the day of now`. */
-  endOfDay(date: unknown): unknown {
-    return isDate(date) ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999) : date
+  endOfDay<T>(date: T): DateOr<T, Date> {
+    return (
+      isDate(date) ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999) : date
+    ) as DateOr<T, Date>
   },
   /** How many days `date`'s month has, 28 to 31:  `the days in the month of now`. */
-  daysInMonth(date: unknown): unknown {
-    return isDate(date) ? new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() : date
+  daysInMonth<T>(date: T): DateOr<T, number> {
+    return (isDate(date) ? new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() : date) as DateOr<T, number>
   },
   /**
    * `text` read as a date:  `"2026-12-25" as a date`.
