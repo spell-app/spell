@@ -171,13 +171,15 @@ export class TestCommands {
     kind = kindNamed(kind)
     if (flags.limit && kind === "todo") kind = "limit"
     else if (flags.limit && kind !== "limit") throw new PlanDocError(`--limit is a todo's (T), not a ${kind}'s`)
+    // a todo flagged red as Owen's reminder (epic `epic-engine` T94):  `urgent`, as `epic update #T3 --loud` makes it
+    if (flags.loud && kind !== "todo") throw new PlanDocError(`--loud is a todo's (T), not a ${kind}'s`)
     const nextId = plan.nextId(kind)
     const { html, example } = this.fieldsOf(nextId, flags)
     // the person's pictures, after the words (epic `epic-engine` T87):  named for the item, saved once it's written
     const named = file && pictures.length ? ItemPictures.named(file, nextId, pictures) : []
     const given = stringFlag(flags.details) ?? ""
     const details = `${html}${given}${ItemPictures.html(named)}${itemOptions(kind, flags)}`
-    const id = plan.addItem(kind, title, { ...flags, details })
+    const id = plan.addItem(kind, title, { ...flags, details, ...(flags.loud && { urgent: true }) })
     return { id, example, pictures: named }
   }
 }

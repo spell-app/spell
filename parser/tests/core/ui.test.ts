@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach, onTestFinished, vi } from "vite-plus
 import { parseHTML } from "linkedom"
 
 import { core } from "spell/parser/core"
+import { closeDialogOf } from "spell/parser/core/ui"
 
 /** A stand-in for the browser's `Audio`:  what each player was told. */
 class FakeAudio {
@@ -160,7 +161,7 @@ describe('core.showDrawn() / hideDrawn():  `show "you won"`, by its name (epic `
   test("finds it by its words joined by -, and shows and hides it by its `visible`", () => {
     const document = pageWith('<ui-modal id="you-won"></ui-modal>')
     const modal = modalIn(document, "you-won")
-    core.showDrawn("you won")
+    void core.showDrawn("you won")
     expect(modal.visible).toBe(true)
     core.hideDrawn("you won")
     expect(modal.visible).toBe(false)
@@ -169,7 +170,7 @@ describe('core.showDrawn() / hideDrawn():  `show "you won"`, by its name (epic `
   test("drawn inside a view's own shadow root too", () => {
     const document = pageWith("", '<ui-modal id="you-won"></ui-modal>')
     const modal = modalIn(document, "you-won")
-    core.showDrawn("you won")
+    void core.showDrawn("you won")
     expect(modal.visible).toBe(true)
   })
 
@@ -180,6 +181,108 @@ describe('core.showDrawn() / hideDrawn():  `show "you won"`, by its name (epic `
 
   test("no page, as under node:  nothing", () => {
     vi.stubGlobal("document", undefined)
-    expect(() => core.showDrawn("you won")).not.toThrow()
+    expect(() => void core.showDrawn("you won")).not.toThrow()
+  })
+})
+
+describe("a modal's buttons, and `the result` (epic `language` T155)", () => {
+  /** A page holding a modal, `you won`, with a button in it:  the modal, the button and the page's document. */
+  function modalWithButton() {
+    const page = parseHTML(
+      '<!doctype html><html><body><ui-modal id="you-won"><ui-actions><ui-button></ui-button></ui-actions></ui-modal></body></html>'
+    )
+    vi.stubGlobal("document", page.document)
+    core.resetRuntime()
+    onTestFinished(() => void core.resetRuntime())
+    const modal = page.document.getElementById("you-won") as unknown as Element & { visible?: boolean }
+    modal.visible = false
+    return { modal, button: modal.querySelector("ui-button")!, document: page.document }
+  }
+
+  /** A game with an action, `dealTheCards`, which says `... without closing` when `keepsOpen`;  and how often it ran. */
+  function gameWith({ keepsOpen = false, waits = false } = {}) {
+    const ran: string[] = []
+    const game = {
+      dealTheCards: async () => {
+        if (waits) await new Promise((resolve) => setTimeout(resolve, 5))
+        if (keepsOpen) core.keepOpen()
+        ran.push("deal")
+      }
+    }
+    const action = { thing: game, name: "dealTheCards", run: () => core.runAction(game, "dealTheCards", "click") }
+    return { ran, action }
+  }
+
+  test("`show` waits until a button closes it, once its action has run:  `the result` is its answer", async () => {
+    const { modal, button } = modalWithButton()
+    const { ran, action } = gameWith({ waits: true })
+    const shown = core.showDrawn("you won")
+    expect(modal.visible).toBe(true)
+    closeDialogOf(button, "deal the cards", action)
+    expect(modal.visible).toBe(true)
+    expect(await shown).toBe("deal the cards")
+    expect(ran).toEqual(["deal"])
+    expect(modal.visible).toBe(false)
+    expect(core.result()).toBe("deal the cards")
+    expect(core.resultIs("Deal the Cards")).toBe(true)
+    expect(core.resultIs("ok")).toBe(false)
+  })
+
+  test("`... without closing` in its action leaves it open", async () => {
+    const { modal, button } = modalWithButton()
+    const { ran, action } = gameWith({ keepsOpen: true })
+    void core.showDrawn("you won")
+    closeDialogOf(button, "ok", action)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(ran).toEqual(["deal"])
+    expect(modal.visible).toBe(true)
+  })
+
+  test("`<action ok />` with no action of that name just closes it, answering ok", async () => {
+    const { modal, button } = modalWithButton()
+    const shown = core.showDrawn("you won")
+    closeDialogOf(button, "ok")
+    expect(await shown).toBe("ok")
+    expect(modal.visible).toBe(false)
+    expect(core.resultIs("OK")).toBe(true)
+  })
+
+  test("Escape, the dimmer or its close icon (Spell UI's `ui-closed`) answer cancel;  `hide` leaves the result", async () => {
+    const { modal, document } = modalWithButton()
+    const shown = core.showDrawn("you won")
+    modal.dispatchEvent(new document.defaultView!.CustomEvent("ui-closed", { detail: { reason: "escape" } }))
+    expect(await shown).toBe("cancel")
+    const again = core.showDrawn("you won")
+    core.hideDrawn("you won")
+    expect(await again).toBeUndefined()
+    expect(core.result()).toBe("cancel")
+  })
+
+  test("a `show` waiting inside an action lets a button's action run, rather than holding it behind itself", async () => {
+    const { modal, button } = modalWithButton()
+    const { ran, action } = gameWith()
+    const game = {
+      win: async () => {
+        await core.showDrawn("you won")
+        ran.push(`won:  ${String(core.result())}`)
+      }
+    }
+    core.runAction(game, "win", "click")
+    expect(modal.visible).toBe(true)
+    closeDialogOf(button, "deal the cards", action)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(ran).toEqual(["deal", "won:  deal the cards"])
+  })
+
+  test("`alert` answers ok, `confirm` ok or cancel, `prompt` the text typed, with no Spell UI", async () => {
+    vi.stubGlobal("document", undefined)
+    vi.spyOn(core.console, "info").mockImplementation(() => undefined)
+    core.resetRuntime()
+    await core.alert("You won!")
+    expect(core.result()).toBe("ok")
+    await core.prompt("Name?", "Ann")
+    expect(core.result()).toBe("Ann")
+    await core.confirm("Deal again?")
+    expect(core.result()).toBe("ok")
   })
 })

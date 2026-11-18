@@ -39,7 +39,7 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     const edit = service.renameActionAt(file, positionOf(text, 'to "auto play"', "auto play"), "play all")
     const renamed = applied(text, edit.changes![uri]!)
     expect(renamed).toContain('to "play all" with shortcut "A"')
-    expect(renamed).toContain("\t\tif played exists\n\t\t\tpause for 300 msec\n\t\t\tplay all")
+    expect(renamed).toContain("\t\t\t\tpause for 500 msec\n\t\t\t\treturn play all")
     expect(renamed).not.toContain('<action "auto play"/>')
     // the renamed project still parses, with no new error
     const errors = async (text: string) => {
@@ -54,16 +54,16 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
 
   test("renames every call, the one in `when creating solitaire` too, and back again (I170)", async () => {
     await workspace.update(uri, text)
-    const calls = text.match(/^\s*restart the game$/gm)!.length
-    expect(calls).toBeGreaterThanOrEqual(2)
+    const calls = text.match(/^\s*deal the cards$/gm)!.length
+    expect(calls).toBeGreaterThanOrEqual(1)
     const edit = service.renameActionAt(
       workspace.fileFor(uri)!,
-      positionOf(text, 'to "restart the game"', "restart the game"),
-      "restart ze game"
+      positionOf(text, 'to "deal the cards"', "deal the cards"),
+      "deal ze cards"
     )
     const renamed = applied(text, edit.changes![uri]!)
-    expect(renamed).not.toContain("restart the game")
-    expect(renamed.match(/^\s*restart ze game$/gm)?.length).toBe(calls)
+    expect(renamed).not.toContain("deal the cards")
+    expect(renamed.match(/^\s*deal ze cards$/gm)?.length).toBe(calls)
     // the renamed text parses at once, its call above the definition too:  no reload (an edit, not a fresh parse)
     await workspace.update(uri, renamed)
     const errors = service.diagnostics(workspace.fileFor(uri)!).filter(({ severity }) => severity === 1)
@@ -71,8 +71,8 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     // and back, from the renamed text
     const back = service.renameActionAt(
       workspace.fileFor(uri)!,
-      positionOf(renamed, 'to "restart ze game"', "restart ze game"),
-      "restart the game"
+      positionOf(renamed, 'to "deal ze cards"', "deal ze cards"),
+      "deal the cards"
     )
     expect(applied(renamed, back.changes![uri]!)).toBe(text)
   })
@@ -98,7 +98,7 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(kindOf(() => service.renameActionAt(file, cheat, "score"))).toBe("taken")
     expect(kindOf(() => service.renameActionAt(file, cheat, "Cheat"))).toBeUndefined()
     expect(kindOf(() => service.renameActionAt(file, cheat, "a/b"))).toBe("not-words")
-    expect(kindOf(() => service.renameActionAt(file, positionOf(text, 'to "the points for', "the points"), "x"))).toBe(
+    expect(kindOf(() => service.renameActionAt(file, positionOf(text, '"the points for', "the points"), "x"))).toBe(
       "not-an-action"
     )
     // and the editor's own rename, F2, says no rather than throwing

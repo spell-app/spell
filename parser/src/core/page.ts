@@ -38,11 +38,12 @@ import { App } from "./classes/App"
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
 import { HISTORY_KEY, ID_KEY, StateMirror } from "./state"
+import { closingCallNow } from "./ui"
 import type { ShownHistory } from "./undoing"
 
 /** What a page sends:  a call, an event, or its answer to a question -- see the file's docs. */
 export type PageMessage =
-  | { call: string; on?: PageMessageThing; args: unknown[] }
+  | { call: string; on?: PageMessageThing; args: unknown[]; closes?: { name: string; answer: unknown } }
   | { trigger: string; target?: PageMessageThing | PageMessageThing[]; details: Record<string, unknown> }
   | { answer: number; value: unknown }
 
@@ -175,13 +176,21 @@ const REMOTE: RemoteProgram = {
 /**
  * SIDE EFFECT:  ask the program to run its `name`, e.g. `play_from_the_stock_pile`, with `args`:
  * a thing's method when it's `on` one.
+ * - Sent by a modal's button (`core.drawAction()`'s `in-dialog`):  with what it `closes`, the modal's name and the
+ *   button's answer, `{ "call": "deal_the_cards", "closes": { "name": "you-won", "answer": "ok" } }` (epic `language` T155).
  * - What a stand-in in `<Project>.elements.spell.js` calls, and a handler's call of a thing's method.
  */
 export function sendCall(name: string, args: unknown[], on?: Thing | List): void {
   if (!current) return
   const { mirror, send } = current
-  const message: PageMessage = { call: name, args: args.map((arg) => byReference(arg, mirror)) as unknown[] }
+  const message: Extract<PageMessage, { call: string }> = {
+    call: name,
+    args: args.map((arg) => byReference(arg, mirror)) as unknown[]
+  }
   if (on) message.on = byReference(on, mirror) as PageMessageThing
+  // a modal's button:  the program hides the modal once the call has run, with the button's answer (epic `language` T155)
+  const closes = closingCallNow()
+  if (closes) message.closes = closes
   send(message)
 }
 

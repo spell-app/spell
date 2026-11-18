@@ -35,7 +35,7 @@ import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
-import { listenForTableEdits, listenForUndoKeys } from "./ui"
+import { closeDialogOf, listenForTableEdits, listenForUndoKeys } from "./ui"
 import { standInFor } from "./waiting"
 
 /**
@@ -187,6 +187,12 @@ export const drawingMethods = defineCoreModule({
    *     (`<action "restart the game" title="Restart"/>`;  Owen, 2026-11-14)
    *   - `icon-only`:  no text, its title its name for a screen reader and its tooltip (`aria-label`)
    *   - `in-menu`:  a Spell UI menu holds it, so it's a menu's ROW (epic `editor` P29), not a button:  see below
+   *   - `in-dialog`:  a modal's actions hold it (epic `language` T155), so its click closes the modal once the action
+   *     has run, as a dialog's own buttons do -- unless the action said `... without closing` (`closeDialogOf()`)
+   *   - `answer`:  what `the result` is once its click has closed the modal, `ok` or `cancel` (`<action ok />`);
+   *     the compiler gives a modal's button with neither its action's name, `save the thing`
+   * - `<action ok />` with no action of that name (`answer`, nothing up the chain):  a button that just closes the modal,
+   *   labelled in the program's language, OK or Cancel (`dialog-ok`, `dialog-cancel`), its `title` instead if it has one.
    * - An action nobody up the chain has:  a disabled button (or row) of its name, and a warning;
    *   the compiler said so already.
    * - Knows nothing of Spell UI but its tags:  the page draws them.
@@ -199,11 +205,17 @@ export const drawingMethods = defineCoreModule({
    *   still folded into a `shrinkable` toolbar's `…` menu with the rest.
    */
   drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
-    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, title, ...given } = props
+    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, [IN_DIALOG]: inDialog, [ANSWER]: answer, title, ...given } = props
     const found = core.actionOf(thing as object | undefined, name)
     // a `title` the tag gives is what it shows, over the action's own:  `<action "restart the game" title="Restart"/>`
     const action =
       found && typeof title === "string" ? (Object.create(found, { title: { value: title } }) as typeof found) : found
+    // `<action ok />` with no action of that name:  it just closes the modal (epic `language` T155)
+    if (!action && (answer === OK || answer === CANCEL) && !inMenu) {
+      const closes = (event: Event) => closeDialogOf(event, answer)
+      const text = children.length ? children : [title ?? core.message(answer === OK ? "dialog-ok" : "dialog-cancel")]
+      return h(BUTTON_TAG, { onClick: closes, ...given }, ...text) as unknown as Drawing
+    }
     if (!action) {
       console.warn(`<action>:  nothing here has an action \`${name}\``)
       const tag = inMenu ? MENU_ROW_TAG : BUTTON_TAG
@@ -228,6 +240,12 @@ export const drawingMethods = defineCoreModule({
       onClick: () => action.run("click")
     }
     if (iconOnly) own["aria-label"] = () => action.title
+    // a modal's button:  the modal closes once its click has run the action, as for its own OK
+    if (inDialog) {
+      const run = () => action.run("click")
+      own.onClick = (event: Event) =>
+        closeDialogOf(event, answer ?? name, { thing: action.thing, name: action.name, run })
+    }
     const text = iconOnly || children.length ? children : [() => action.title]
     return h(BUTTON_TAG, { ...own, ...given }, ...text) as unknown as Drawing
   },
@@ -795,6 +813,13 @@ const ICON_ONLY = "icon-only"
 
 /** `<action>`'s own attribute, which the compiler sets on one a Spell UI menu holds:  it draws a menu's row. */
 const IN_MENU = "in-menu"
+/** The core's own mark on an action in a modal's actions, `in-dialog`:  see `drawAction()`. */
+const IN_DIALOG = "in-dialog"
+/** `<action>`'s answer, the core's own, as the compiler writes it:  `answer="ok"` (epic `language` T155). */
+const ANSWER = "answer"
+/** The answers a modal's button may say it gives, `<action ok />`. */
+const OK = "ok"
+const CANCEL = "cancel"
 
 /** What a menu's row is:  Spell UI's action, which the page defines. */
 const MENU_ROW_TAG = "ui-action"

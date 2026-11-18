@@ -86,6 +86,21 @@ class ActionQueue:
             canceled = True
         return canceled
 
+    def let_next_run(self, task: "asyncio.Task[object] | None") -> None:
+        """SIDE EFFECT:  the action running as `task` goes on beside the queue, and the next one may run.
+
+        - One waiting on a modal it showed, whose button's call would otherwise wait behind it for good
+          (epic `language` T155).
+
+        - Anything else running, or nothing:  nothing.
+        - It still ends as it would, telling who's waiting;  the queue no longer waits for it.
+        """
+        if task is None or self._task is not task:
+            return
+        self.running = None
+        self._task = None
+        self._start_next()
+
     def _cancel_running(self) -> None:
         """Stop the running action at its next wait."""
         if self._task:
@@ -108,8 +123,10 @@ class ActionQueue:
             pass  # a cancel aborts silently
         except Exception as failed:
             error = failed
-        self.running = None
-        self._task = None
-        self._start_next()
+        # one that went on beside the queue (`let_next_run()`) leaves what runs now alone
+        if self.running is entry:
+            self.running = None
+            self._task = None
+            self._start_next()
         if entry.ended:
             await entry.ended(error)

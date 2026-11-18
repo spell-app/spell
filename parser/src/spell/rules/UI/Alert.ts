@@ -12,7 +12,7 @@ import { dialogArguments } from "./UI.shared"
  * - The message is read as Markdown where it has some (`# You won!`, `**42**`):  the core asks for it.
  * - Returns a promise which resolves when they click `ok`.
  * - NOTE: we'll `await` the promise!
- * - TODO: `the result = await ...` ?
+ * - What closed it is `the result` after (`core.result()`, epic `language` T155).
  */
 export class Alert extends SpellStatement<"message|title?|size?|okButton?"> {
   @proto static alias = ["statement", "async"]

@@ -230,6 +230,7 @@ describe("priority and precedence", () => {
         "stored_in_memory:  Priority.aboveDeclaration",
         "stored_on_this_device:  Priority.aboveDeclaration",
         "the_date:  Priority.overridable",
+        "the_result:  Priority.overridable",
         "their_field:  Priority.specific",
         "they_are:  Precedence.equality",
         "times:  Precedence.product",
@@ -251,6 +252,7 @@ describe("priority and precedence", () => {
         "when_thing_changes:  Priority.specific",
         "while_waiting:  Priority.declaration",
         "with_commas:  Precedence.comparison",
+        "without_closing:  Priority.specific",
         "without_waiting:  Priority.specific",
         "writes_like:  Priority.declaration",
       ]

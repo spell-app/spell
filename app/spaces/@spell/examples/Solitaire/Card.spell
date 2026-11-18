@@ -1,9 +1,8 @@
-a "card" is a draggable two sided view 			-- A playing card
-	-- A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-	-- It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
-	-- On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
+a "card" is a draggable two sided view
+	-- A standard playing card with rank, suit and color.
+	-- You can drag cards around and drop them on piles if the game allows.
 	group "Card Rank & Suit"
-		-- Ace is low:  ace = 1 ... king = 13
+	-- Ace is low:  ace = 1 ... king = 13
 	its "rank" is one of ace, 2 ... 10, jack, queen, king
 	its "suit" is one of clubs, diamonds, hearts or spades
 	its "color" is one of red, black
@@ -11,10 +10,12 @@ a "card" is a draggable two sided view 			-- A playing card
 		black otherwise
 
 	group "Aliases"
-		-- Spell for identifying cards
-	it "is a face card" if its rank is jack, queen or king  -- e.g. "the card is a face card"
+	-- Spell for identifying cards
+	it "is a face card" if its rank is jack, queen or king
+		-- e.g. "the card is a face card"
 	it "is a number card" if it is not a face card
-	it "is the (rank) of (suit)"  -- e.g. the card is the two of spades
+	it "is the (rank) of (suit)"
+		-- e.g. "the card is the two of spades"
 
 	group "Names" 								-- identifying a card
 	its "name" is its rank && "of" && its suit

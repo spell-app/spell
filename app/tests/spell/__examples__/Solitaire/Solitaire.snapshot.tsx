@@ -1,14 +1,14 @@
 import { core, List, App, View, TwoSidedView, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, type SentEvent } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
-/** A card says what its rank, suit and color are:  a deck, a pile or the game only reads them. */
-// A playing card
 export type Rank = (typeof Card.Ranks)[number]
 export type Suit = (typeof Card.Suits)[number]
 
+/** A standard playing card with rank, suit and color. */
 export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
+  /** Ace is low:  ace = 1 ... king = 13 */
   // - its "rank" is one of ace, 2 ... 10, jack, queen, king
   static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"] as const
   @prop({ oneOf: () => Card.Ranks })
@@ -28,6 +28,7 @@ export class Card extends TwoSidedView {
     return "black"
   }
 
+  // Spell for identifying cards
   /** e.g. "the card is a face card" */
   get isAFaceCard() {
     return core.includes(["jack", "queen", "king"], this.rank)
@@ -37,7 +38,7 @@ export class Card extends TwoSidedView {
     return !this.isAFaceCard
   }
 
-  /** e.g. the card is the two of spades */
+  /** e.g. "the card is the two of spades" */
   isTheRankOfSuit(rank: Rank, suit: Suit) {
     return this.rank === rank && this.suit === suit
   }
@@ -72,17 +73,24 @@ export class Card extends TwoSidedView {
     return <test-project-card-image direction={"down"} part="back" />
   }
 
-  /** The card, and every card on it, onto the pile, if the piles' rules let it go and take it */
+  /** Move the card, and every card on top of it, onto the pile. */
   moveToPile(pile: Pile) {
-    // - refused, nothing moves, and there's nothing to undo
-    // - a game adds its own steps after it:  `after moving a card to a pile`
+    // The card's current pile can refuse to let go of it.
+    // The new pile may refuse to take it.
+    // If either of those is the case, the card doesn't move.
+    // A game can add its own steps after it:
+    // see `after moving a card to a pile` in Solitaire.spell
     if (!core.canGiveUp(this.pile, this) || !core.canTake(pile, this)) core.cancel()
     this.pile.startingWith(this).forEach((card) => pile.append(card))
   }
 
-  /** the card the next one goes on */
-  get isOnTopOfItsPile() {
+  /** OWEN: was `is on top of its pile`;  `is on bottom` is new, for auto play's king line */
+  get isOnTop() {
     return this === this.pile.lastItem
+  }
+
+  get isOnBottom() {
+    return this === this.pile.firstItem
   }
 
   async play() {
@@ -101,20 +109,20 @@ export class Card extends TwoSidedView {
     if (it2 instanceof Column && !it2.isEmpty) it2.lastItem?.turnFaceUp()
   }
 
-  /** What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing */
   thePointsForCardOnPile(pile: Pile) {
     if (pile instanceof Foundation) return 10
     if (this.lastPile === solitaire.discardPile) return 5
     return 0
   }
 
+  /** play the card when clicked if it is a legal move */
   async onClick(event: ClickEvent) {
     if (this.isFaceDirection("up") || this.pile === solitaire.stock) await this.play()
   }
 
   static draggable = true
 
-  /** a card is in one pile at a time:  moving it to another pile takes it off this one */
+  /** A card can be in only one pile at a time:  moving it to another pile removes it. */
   get pile() {
     return Pile.ownerOf(this)!
   }
@@ -172,11 +180,7 @@ core.useElement(Card, CardElement)
 core.describeAction(Card, "moveToPile", { title: "Move Card to Pile", cancels: true, undoneAs: "Move Card to Pile" })
 core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })
 core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })
-// It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
-// Ace is low:  ace = 1 ... king = 13
-
-// Spell for identifying cards
+// You can drag cards around and drop them on piles if the game allows.
 
 // identifying a card
 
@@ -232,7 +236,7 @@ export class CardImage extends View {
   get picture() {
     // see https://www.compart.com/en/unicode/block/U+1F0A0
     if (this.isFaceDirection("down")) return "🂠"
-    let column = this.card?.value
+    const column = this.card?.value
     if (this.card?.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
     if (this.card?.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
     if (this.card?.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
@@ -334,17 +338,20 @@ export function testCardImages() {
 // -----------
 export type Layout = (typeof Pile.Layouts)[number]
 
-/** A pile of cards, e.g. in a game like solitaire */
+/** A pile of cards, e.g. in a game like solitaire. */
 export class Pile extends ViewableList<Card> {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
-  // A card can only be in one pile at a time
-  /** How its cards lie:  on top of each other, or down a column -- styles.css */
+  // A card can only be in one pile at a time.
+  /** stacked = on top of each other */
   // - its "layout" is one of stacked or vertical
+  //   -- stacked = on top of each other
+  //   -- vertical = spread down in a column
   static Layouts = ["stacked", "vertical"] as const
   @prop({ oneOf: () => Pile.Layouts })
   accessor layout!: Layout
+  // vertical = spread down in a column
 
   get color() {
     if (this.isEmpty) return "none"
@@ -428,22 +435,20 @@ export function testPiles() {
   })
 }
 // -----------
-/** a deck of playing cards */
+/** A deck of 52 playing cards. */
 @thing
 export class Deck extends ViewableList<Card> {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
-  /** Create one of each card, ace of clubs first */
+  /** Create one card of each rank and suit, and add it to the deck. */
   create() {
     Card.Ranks.forEach((rank: Rank) => Card.Suits.forEach((suit: Suit) => this.append(new Card({ rank: rank, suit: suit }))))
   }
 
-  /** its card names, top to bottom */
+  /** Names of all of the cards in the deck, in the shuffled order. */
   @derived get shorthand() {
-    const cardNames = new List<string>({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shorthand))
-    return `deck: ${cardNames}`
+    return `deck: ${core.mapToList(this, (card: Card) => card.shorthand)}`
   }
 }
 
@@ -477,7 +482,7 @@ export function testANewDeck() {
   })
 }
 // -----------
-/** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
+/** The cards not played yet, face down. */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   get layout(): Layout {
@@ -586,7 +591,7 @@ export class Foundation extends Pile {
   }
 
   canTake(card: Card) {
-    return this.suit === card.suit && this.value === card.value - 1 && card.isOnTopOfItsPile
+    return this.suit === card.suit && this.value === card.value - 1 && card.isOnTop
   }
 
   static droppable = true
@@ -656,29 +661,36 @@ export class ColumnElement extends SpellElement<Column> {
 }
 core.useElement(Column, ColumnElement)
 
-/** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
+/** A fully playable game in 300 lines of code! */
 @thing
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
+  /** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
   create() {
     this.deck.forEach((card) => this.stock.append(card))
-    core.holdWhile(() => this.restartTheGame())
+    core.holdWhile(() => this.dealTheCards())
   }
 
+  /** Use magical HTML tags to draw the game. */
   @drawn draw() {
+    // Parts in purple are "views" which can be used in the program.
     return (
       <>
         <ui-segment inverted={true} attach-to="top">
-          <ui-toolbar class="GameBar" appearance="pills" inverted={true} size="small" shrinkable={true}>
+          <ui-toolbar size="small" appearance="pills" inverted={true} shrinkable={true}>
             <ui-text size="big" slot="title" heavy={true}>Spell Solitaire</ui-text>
             {core.drawAction(this, "autoPlay", { "in-menu": true })}
             {core.drawAction(this, "cheat", { "in-menu": true })}
-            {core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true })}
+            {core.drawAction(this, "dealTheCards", { title: "Restart", "in-menu": true })}
             <spacer />
             {core.drawAction(this, "undo", { "icon-only": true, "in-menu": true })}
             {core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })}
-            <ui-text slot="right">Score: {this.score}</ui-text>
+            <ui-text slot="right">
+              <b>Score</b>
+              {": "}
+              {this.score}
+            </ui-text>
           </ui-toolbar>
         </ui-segment>
         <ui-container columns="7" padding="small" spacing="xs">
@@ -697,11 +709,20 @@ export class Solitaire extends App {
           <test-project-column id="C6" />
           <test-project-column id="C7" />
         </ui-container>
-        {core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])}
+        <ui-modal id="you-won" heading="you won">
+          <ui-content>
+            <ui-text size="big">Congratulations!</ui-text>
+            <ui-text>{"Your score:  "}{this.score}</ui-text>
+          </ui-content>
+          <ui-actions>
+            {core.drawAction(this, "dealTheCards", { title: "New game", answer: "deal the cards", "in-dialog": true })}
+          </ui-actions>
+        </ui-modal>
+        {core.drawContextMenu(this, ["autoPlay", "cheat", "dealTheCards", "-", "undo", "redo"])}
       </>
     )
   }
-  // <deck "deck"hidden />
+  // <deck "deck" hidden />
   @prop({ init: () => new Deck({ id: "deck" }), early: true })
   accessor deck!: Deck
   // <number "score" />
@@ -747,7 +768,7 @@ export class Solitaire extends App {
   @prop({ init: () => new Column({ id: "C7" }), early: true })
   accessor C7!: Column
 
-  async restartTheGame() {
+  async dealTheCards() {
     this.score = 0
     this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     await core.forEachSequential(core.filter(core.everyThing(Card), (card: Card) => card.pile !== this.stock), async (card: Card) => {
@@ -766,10 +787,8 @@ export class Solitaire extends App {
     await this.turnOverTheNextCard()
   }
 
-  /** Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty */
   async turnOverTheNextCard() {
-    // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
-    if (this.stock.isEmpty) this.resetTheStock()
+    if (this.stock.isEmpty) this.resetTheStockPile()
     const nextCard = this.stock.lastItem
     nextCard?.turnFaceUp()
     // as long as its flip takes (styles.css), so it turns over before it moves
@@ -777,39 +796,48 @@ export class Solitaire extends App {
     this.discardPile.append(nextCard!)
   }
 
-  /** The discard pile, turned over, back into the stock */
-  resetTheStock() {
+  resetTheStockPile() {
     const cards = this.discardPile.clone()
     cards.reverse()
     cards.forEach((card) => this.stock.append(card))
     this.stock.forEach((card) => card.turnFaceDown())
   }
 
-  /** Play one card that can go somewhere, then the next, until none can:  the discard pile's top card, a column's top card onto its foundation, or a column's face-up cards onto another column */
+  /** Play one card that can go somewhere, then the next, until none can. */
   async autoPlay() {
-    const played = await core.itemWhereInTurn(this.discardPile, async (card: Card) => await card.play(), -1) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card: Card) => card === card.pile.lastItem && core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, card)).firstItem instanceof Foundation && (await card.play()), 0) || await core.itemWhereInTurn(core.mergeLists(core.everyThing(Column)), async (card: Card) => (card.rank !== "king" || card !== card.pile.firstItem) && card === card.pile.filter((card) => card.isFaceDirection("up")).firstItem && (await card.play()), 0)
-    if (played !== undefined) {
-      await core.pauseFor(300, "msec")
-      await this.autoPlay()
+    const candidates = core.mergeLists([
+      this.discardPile.filter((card) => card.isOnTop),
+      core.pickFromEach(core.everyThing(Column), (column: Column) => column.lastItem),
+      core.pickFromEach(core.everyThing(Column), (column: Column) => column.filter((card) => card.isFaceDirection("up")).firstItem)
+    ], List) as boolean
+
+    //  Remove kings directly on the board so they don't switch back and forth
+    candidates.removeWhere((card) => card.rank === "king" && card.isOnBottom)
+
+    for (const card of candidates) {
+      const pile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, card) && pile !== card.lastPile).firstItem
+
+      if (pile !== undefined) {
+        await card.play()
+        // wait a bit so it doesn't play too fast
+        await core.pauseFor(500, "msec")
+        await this.autoPlay()
+        return
+      }
     }
   }
 
-  /** Turn up a face-down card from a column, at random, onto the discard pile */
+  /** Turn up a face-down card from a column, at random and play on the discard pile. */
   cheat() {
-    const remainingPiles = core.filter(core.everyThing(Column), (pile: Column) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
-    if (core.isEmpty(remainingPiles)) return
-    const pile = core.randomItemOf<Column>(remainingPiles)
-    const card = pile?.filter((card) => card.isFaceDirection("down"))?.randomItem()
-    // turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
-    this.discardPile.append(card!)
-    card?.turnFaceUp()
+    const card = core.randomItemOf<Card>(core.filter(core.mergeLists(core.everyThing(Column)), (card: Card) => card.isFaceDirection("down")))
+    if (card !== undefined) {
+      this.discardPile.append(card!)
+      card?.turnFaceUp()
+    }
   }
 
   async onScoreChange(event: ScoreChangeEvent) {
-    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) {
-      await core.alert("You won!", "New game")
-      await this.restartTheGame()
-    }
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) await core.showDrawn("you won")
   }
 }
 
@@ -842,16 +870,16 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     return this.currentThing?.create()
   }
 
-  restartTheGame() {
-    return this.currentThing?.restartTheGame()
+  dealTheCards() {
+    return this.currentThing?.dealTheCards()
   }
 
   turnOverTheNextCard() {
     return this.currentThing?.turnOverTheNextCard()
   }
 
-  resetTheStock() {
-    return this.currentThing?.resetTheStock()
+  resetTheStockPile() {
+    return this.currentThing?.resetTheStockPile()
   }
 
   autoPlay() {
@@ -868,25 +896,23 @@ export class SolitaireElement extends SpellElement<Solitaire> {
 }
 core.useElement(Solitaire, SolitaireElement)
 export const solitaire = new Solitaire()
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart the Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart the Game" })
+core.describeAction(Solitaire, "dealTheCards", { title: "Deal the Cards", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Deal the Cards" })
 core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over the Next Card", undoneAs: "Turn Card" })
-core.describeAction(Solitaire, "resetTheStock", { title: "Reset the Stock", undoneAs: "Reset the Stock" })
+core.describeAction(Solitaire, "resetTheStockPile", { title: "Reset the Stock Pile", undoneAs: "Reset the Stock Pile" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })
 
-// play the card on click if it is a legal move
-
-core.heading("The piles")
-///////////////
-// ## The piles
-///////////////
+core.heading("Different kinds of piles")
+//////////////////////////////
+// ## Different kinds of piles
+//////////////////////////////
 // Each kind of pile, what it may take or give up, and how it lies.
-// While one's empty, it shows its placeholder, if it has one.
+// An empty pile shows its placeholder, if it has one.
 
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {
-    core.echoTestAction(`set the column to a new column with id "T1"`)
-    let column = new Column({ id: "T1" })
+    core.echoTestAction(`set the column to a new column with id "Test1"`)
+    const column = new Column({ id: "Test1" })
     core.echoTestAction(`set the king to a new card whose rank is king, suit is spades and direction is up`)
     const king = new Card({
       rank: "king",
@@ -915,13 +941,13 @@ export function testTheMoves() {
     core.expect(core.canTake(column, queen), `the column can take the queen`, true, `yes`)
     core.echoTestAction(`add the queen to the column`)
     column.append(queen)
-    core.expect(column.shorthand, `the shorthand of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
+    core.expect(column.shorthand, `the shorthand of the column`, "Test1: K♠↑ Q♥↑", `"Test1: K♠↑ Q♥↑"`)
     core.expect(core.canGiveUp(column, queen), `the column can give up the queen`, true, `yes`)
     core.echoTestAction(`turn the queen face down`)
     queen.turnFaceDown()
     core.expect(core.canGiveUp(column, queen), `the column can give up the queen`, false, `no`)
 
-    /** a foundation takes its suit, ace first, then one higher:  each the last card of its pile */
+    /** a foundation takes its suit, ace first, then one higher */
     const foundation = new Foundation({ suit: "hearts" })
     core.echoTestAction(`set the two to a new card whose rank is 2, suit is hearts and direction is up`)
     const two = new Card({
@@ -935,8 +961,6 @@ export function testTheMoves() {
       suit: "hearts",
       direction: "up"
     })
-    core.echoTestAction(`set the column to a new column with id "T2"`)
-    column = new Column({ id: "T2" })
     core.echoTestAction(`add the two to the column`)
     column.append(two)
     core.echoTestAction(`add the ace to the column`)
@@ -946,8 +970,6 @@ export function testTheMoves() {
     core.echoTestAction(`move the ace to the foundation`)
     ace.moveToPile(foundation)
     core.expect(core.canTake(foundation, two), `the foundation can take the two`, true, `yes`)
-    core.echoTestAction(`add the queen to the column`)
-    column.append(queen)
     core.expect(core.canTake(foundation, queen), `the foundation can take the queen`, false, `no`)
   })
 }

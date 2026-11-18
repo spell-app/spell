@@ -4921,6 +4921,32 @@
       "module": "UI",
       "rules": [
         {
+          "className": "TheResult",
+          "ruleNames": ["the_result"],
+          "internal": false,
+          "file": "src/spell/rules/UI/TheResult.ts",
+          "line": 18,
+          "purpose": "What closed the last dialog, e.g. which button closed a modal (epic `language` T155).",
+          "syntaxes": [
+            {
+              "syntax": "el resultado",
+              "example": "el resultado",
+              "outputs": {
+                "js": {
+                  "code": "core.result()"
+                },
+                "ts": {
+                  "code": "core.result()"
+                },
+                "py": {
+                  "code": "core.result()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "OpenPrinting",
           "ruleNames": ["open_printing"],
           "internal": false,
@@ -5029,7 +5055,7 @@
           "ruleNames": ["show_drawn"],
           "internal": false,
           "file": "src/spell/rules/UI/ShowDrawn.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "Show, or hide, something the program drew and named, by its name (epic `language` P61).",
           "syntaxes": [
             {
@@ -5037,13 +5063,54 @@
               "example": "mostrar \"ganaste\"",
               "outputs": {
                 "js": {
-                  "code": "core.showDrawn(\"ganaste\")"
+                  "code": "await core.showDrawn(\"ganaste\")"
                 },
                 "ts": {
-                  "code": "core.showDrawn(\"ganaste\")"
+                  "code": "await core.showDrawn(\"ganaste\")"
                 },
                 "py": {
-                  "code": "core.show_drawn(\"ganaste\")"
+                  "code": "await core.show_drawn(\"ganaste\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "WithoutClosing",
+          "ruleNames": ["without_closing"],
+          "internal": false,
+          "file": "src/spell/rules/UI/WithoutClosing.ts",
+          "line": 19,
+          "purpose": "Runs a statement, and leaves the modal open after the action it's in: `deal the cards without closing`, `deal the cards without closing the modal` (epic `language` T155).",
+          "syntaxes": [
+            {
+              "syntax": "{call:statement} sin cerrar",
+              "example": "imprimir 1 sin cerrar",
+              "outputs": {
+                "js": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "ts": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "py": {
+                  "code": "core.keep_open()\nprint(1)"
+                }
+              }
+            },
+            {
+              "syntax": "{call:statement} sin cerrar el modal",
+              "example": "imprimir 1 sin cerrar el modal",
+              "outputs": {
+                "js": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "ts": {
+                  "code": "core.keepOpen()\ncore.console.log(1)"
+                },
+                "py": {
+                  "code": "core.keep_open()\nprint(1)"
                 }
               }
             }
@@ -10017,7 +10084,7 @@
           "ruleNames": ["action_button"],
           "internal": false,
           "file": "src/spell/rules/JSX/ActionButton.ts",
-          "line": 52,
+          "line": 70,
           "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
           "syntaxes": [
             {
@@ -10067,7 +10134,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 106,
+          "line": 113,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

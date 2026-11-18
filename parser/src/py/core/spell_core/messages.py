@@ -23,6 +23,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
 | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
 | `confirm-default` | `confirm` with no page, e.g. `spell run`:  the question and its answer | `question` |
+| `dialog-ok`, `dialog-cancel` | a modal's button that just closes it, `<action ok />`:  the page's | |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo | |
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`) | `step` |
@@ -78,6 +79,8 @@ MESSAGES: dict[str, str] = {
     "cant-draw": "⚠ {type} can't draw",
     "waiting": "…",
     "confirm-default": "{question} (yes)",
+    "dialog-ok": "OK",
+    "dialog-cancel": "Cancel",
     "drop-event": "{thing}-drop",
     "undo": "Undo",
     "undo-step": "Undo {step}",

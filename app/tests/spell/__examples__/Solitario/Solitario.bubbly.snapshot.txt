@@ -295,6 +295,11 @@
 |   |     <⟨columna⟩ «"C6"»/>    declares@0
 |   |     <⟨columna⟩ «"C7"»/>    declares@0
 |   |   </⟨contenedor⟩>
+|   |   <⟨modal⟩ «"ganaste"»>
+|   |     <⟨texto⟩ tamano=«"grande"»>¡Felicidades!</>
+|   |     <⟨texto⟩>Tus puntos:  <⟨n⟩úmero «"puntuación"» /></>    declares@20
+|   |     <⟨acci⟩ón «"reiniciar el juego"» title=«"Juego nuevo"» />
+|   |   </>
 |   |   <⟨men⟩ú-contextual>
 |   |     <⟨acci⟩ón «"jugar solo"»/>
 |   |     <⟨acci⟩ón «"hacer trampa"»/>
@@ -436,8 +441,7 @@
 |   |   | cuando su **puntuación** cambia
 |   |   |   [control if L3]
 |   |   |   | si el número de **cartas** en las **fundaciones** es _52_    ‾value(el número de cartas en las fundaciones)
-|   |   |   |   avisar _"¡Ganaste!"_ con _"Juego nuevo"_
-|   |   |   |   reiniciar el juego    ‾call(reiniciar el juego)
+|   |   |   |   mostrar _"ganaste"_
 
 [thing reopen_type L0]
 | una **carta**		⟦-- jugar la carta al pulsarla, si es un movimiento válido⟧
