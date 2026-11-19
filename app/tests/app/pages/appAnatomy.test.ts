@@ -280,9 +280,8 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
         (selector) => getComputedStyle(document.querySelector(selector)!).backgroundColor
       )
     )
-    // the dim:  the page's colour, 90% opaque, not black (T121)
-    expect(behind[0]).toMatch(/ \/ 0\.9\)$|, 0\.9\)$/)
-    expect(behind[0]).not.toMatch(/^rgba\(0, 0, 0/)
+    // the dim:  dark in every theme, 90% opaque (T121, J234)
+    expect(behind[0]).toBe("rgba(0, 0, 0, 0.9)")
     expect(behind.slice(1)).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
     await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.toggleFullWindow())
     await page.waitForTimeout(300)
