@@ -46,11 +46,17 @@ beforeEach(async () => {
 })
 
 describe("<ui-json> value", () => {
-  test("parses its own text;  draws nothing", async () => {
+  test("parses its own text, and draws it as an outline", async () => {
     const element = await json(`<ui-json>{ "a": [1, 2, { "b": "[not a fill-in]" }] }</ui-json>`)
     expect(element.value).toEqual({ a: [1, 2, { b: "[not a fill-in]" }] })
+    expect(getComputedStyle(element).display).toBe("block")
+    expect(element.shadowRoot!.querySelector("[part~=viewer]")).not.toBeNull()
+  })
+
+  test("`hidden` shows nothing", async () => {
+    const element = await json(`<ui-json hidden>{ "a": 1 }</ui-json>`)
     expect(getComputedStyle(element).display).toBe("none")
-    expect(element.shadowRoot!.childElementCount).toBe(0)
+    expect(element.value).toEqual({ a: 1 })
   })
 
   test("reads a script child too:  the safe way to hold a `<` in a page", async () => {
@@ -107,7 +113,7 @@ describe("<ui-json> errors", () => {
     expect(element.matches(":state(error)")).toBe(false)
   })
 
-  test("a `source` that fails warns too:  nothing else would show it", async () => {
+  test("a `source` that fails warns too:  a `<ui-json>` is often unseen", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     onTestFinished(() => warn.mockRestore())
     const element = await ElementFixture.render<DOMJsonElement>(`<ui-json source="/no/such/file.json"></ui-json>`)
@@ -133,6 +139,14 @@ describe("<ui-json> source", () => {
 })
 
 describe("<ui-tree-diagram> reading a <ui-json> child", () => {
+  test("its data child stays unseen", async () => {
+    const diagram = await ElementFixture.render(
+      `<ui-tree-diagram><ui-json>{ "label": "Data" }</ui-json></ui-tree-diagram>`
+    )
+    await ElementFixture.settle()
+    expect(diagram.querySelector("ui-json")!.checkVisibility()).toBe(false)
+  })
+
   test("draws its text, and follows it", async () => {
     const diagram = await ElementFixture.render(
       `<ui-tree-diagram><ui-json>{ "label": "Before" }</ui-json></ui-tree-diagram>`

@@ -1,9 +1,171 @@
 /*
- * The style sheet of `<ui-json>`:  it draws nothing, so nothing shows, not even its text.
+ * The style sheet of `<ui-json>`:  ours, not Fomantic's.
+ * - It styles the component's shadow DOM:  `<div class="ui json" part="viewer">` holding its
+ *   `<div class="header">` (two `<ui-button>`s) and `<div class="body">`, a `<div class="row" style="--level: n">`
+ *   per line;  an object's or array's line is also `.container`, with a `<button class="toggle">` (a chevron
+ *   `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
+ *   - Text spans:  `.key`, `.string`, `.number`, `.boolean`, `.null`, `.punct`;  the clickable ones also `.link`.
+ *   - Editing (`editable`):  a `<ui-input>`, `<ui-select>` or `<ui-checkbox>`, `.edit`, in a key's or value's place.
+ *   - Before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`.
+ * - The gutter:  one fixed column at the start of every row, whatever its indent, holding the toggles.
+ * - Two spaces per level:  `--level` times `2ch`, after the gutter.
+ * - Colours:  the theme's code tokens (`--ui-code-*`), so light and dark follow the theme;  `--ui-json-*` override them.
+ * - Public tokens are NEVER declared here:  each is read through its private alias.
+ * - `hidden` hides it;  a diagram that reads it as its data hides it in its own sheet.
  */
+
+@layer ui.components.json.types;
 
 @layer ui.components.json.types {
   :host {
+    display: block;
+  }
+
+  :host([hidden]) {
     display: none;
+  }
+
+  .ui.json {
+    --_ui-json-font-family: var(--ui-json-font-family, var(--ui-font-family-mono, ui-monospace, monospace));
+    --_ui-json-font-size: var(--ui-json-font-size, 0.875em);
+    --_ui-json-line-height: var(--ui-json-line-height, 1.5);
+    --_ui-json-color: var(--ui-json-color, var(--ui-code-color, var(--ui-text-color)));
+    --_ui-json-key-color: var(--ui-json-key-color, var(--ui-code-attr, light-dark(#b8322a, #e06c75)));
+    --_ui-json-string-color: var(--ui-json-string-color, var(--ui-code-string, light-dark(#387a37, #98c379)));
+    --_ui-json-number-color: var(
+      --ui-json-number-color,
+      var(--ui-code-number, var(--ui-code-constant, light-dark(#986801, #d19a66)))
+    );
+    --_ui-json-keyword-color: var(--ui-json-keyword-color, var(--ui-code-keyword, light-dark(#a626a4, #c678dd)));
+    --_ui-json-punctuation-color: var(--ui-json-punctuation-color, var(--ui-text-muted));
+    --_ui-json-muted-color: var(--ui-json-muted-color, var(--ui-text-muted));
+    --_ui-json-hover-background: var(--ui-json-hover-background, var(--ui-surface-muted, transparent));
+    --_ui-json-focus-color: var(--ui-json-focus-color, var(--ui-focus-color, var(--ui-primary)));
+    --_json-gutter: 1.5em;
+
+    position: relative;
+    font-family: var(--_ui-json-font-family);
+    font-size: var(--_ui-json-font-size);
+    line-height: var(--_ui-json-line-height);
+    color: var(--_ui-json-color);
+    tab-size: 2;
+  }
+
+  .row {
+    position: relative;
+    padding-inline-start: calc(var(--_json-gutter) + var(--level, 0) * 2ch);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border-radius: 0.25em;
+  }
+
+  /* a closed line stays one line:  the preview gives way */
+  .row.container {
+    display: flex;
+    align-items: baseline;
+    white-space: pre;
+  }
+  .row.container > * {
+    flex: none;
+  }
+  .row.container > .preview {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row.container:hover {
+    background: var(--_ui-json-hover-background);
+  }
+
+  /* at the start:  a box's top end is where a host's own buttons sit (an example's code button) */
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.25em;
+    padding-block-end: 0.25em;
+    margin-block-end: 0.25em;
+    border-block-end: 1px solid var(--ui-border-color, transparent);
+    font-family: var(--ui-font-family, system-ui);
+  }
+  .header ui-button {
+    margin: 0;
+  }
+
+  /* the gutter:  every toggle in one column at the start of its row, whatever the indent */
+  .toggle {
+    all: unset;
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    width: var(--_json-gutter);
+    height: calc(var(--_ui-json-line-height) * 1em);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--_ui-json-muted-color);
+    border-radius: 0.25em;
+  }
+  .toggle ui-icon {
+    margin: 0;
+    font-size: 0.875em;
+  }
+  .toggle:hover {
+    color: var(--_ui-json-color);
+  }
+  .toggle:focus-visible {
+    outline: 2px solid var(--_ui-json-focus-color);
+    outline-offset: -1px;
+  }
+
+  .key {
+    color: var(--_ui-json-key-color);
+  }
+  .string {
+    color: var(--_ui-json-string-color);
+  }
+  .number {
+    color: var(--_ui-json-number-color);
+  }
+  .boolean,
+  .null {
+    color: var(--_ui-json-keyword-color);
+  }
+  .punct {
+    color: var(--_ui-json-punctuation-color);
+  }
+
+  /* keys and values:  a click sends `ui-navigating` */
+  .link {
+    cursor: pointer;
+  }
+  .link:hover {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    text-underline-offset: 0.2em;
+  }
+
+  /* an editor sits in the line, as wide as its text */
+  .edit {
+    margin: 0;
+    vertical-align: baseline;
+    font-family: var(--_ui-json-font-family);
+  }
+  ui-input.edit {
+    width: calc(var(--edit-chars, 8) * 1ch + 2em);
+    max-width: 100%;
+  }
+
+  .empty {
+    color: var(--_ui-json-muted-color);
+    font-style: italic;
+  }
+
+  /* ten `0`s, measured for how many characters fit on a line */
+  .probe {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
   }
 }

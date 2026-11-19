@@ -1,7 +1,7 @@
 "json examples" is a notebook page
 	<header level="1">
 		JSON data
-		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
+		<header>JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.</>
 	</>
 	<section>
 		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
@@ -9,10 +9,18 @@
 		</>
 	</>
 
-	<!-- EXAMPLES:  it draws nothing, so each example shows it read by a tree diagram. -->
+	<!-- EXAMPLES:  the outline first, then data a tree diagram reads. -->
 	<section label="Types">
+		<section label="An outline" sticky="stack" collapsible dividing>
+			<example "An outline" description="The data is the element's text, drawn as an outline whose objects and arrays open and close.  Double-click a value to edit it.">
+				<json depth="2" editable>
+					{ "lamp": { "name": "desk", "watts": 60, "on": false, "bought": "2026-11-18" }, "tags": ["home", "office"] }
+				</json>
+			</example>
+		</>
+
 		<section label="Its own text" sticky="stack" collapsible dividing>
-			<example "Its own text" description="The data is the element's text, its braces kept as written.  It draws nothing itself:  here a tree diagram reads the `<json>` inside it.">
+			<example "Its own text" description="The data is the element's text, its braces kept as written.  Inside a tree diagram it's the diagram's data, and doesn't show itself.">
 				<tree-diagram>
 					<json>
 						{
