@@ -8,10 +8,6 @@
  * - Handlers split the URL as it arrived, by its group and project, before any path on disk is made
  *   (`SP.SpellUrls.split()`).
  */
-
-import chalk from "chalk"
-import JSON5 from "json5"
-
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import * as peopleRoutes from "spell/app/spaces/server/node/people/peopleRoutes"
@@ -61,29 +57,7 @@ function compilerCode(): string[] {
   ]
 }
 
-// The compile cache, ahead of the request log below:  its entries are big, and of no interest there
 api.use("/compiles", compileCache.router())
-
-/** Stringify `object` as indented `JSON5`, re-indenting continuation lines to line up under `indent`. */
-function stringify(object: any, indent: string) {
-  const result = JSON5.stringify(object, null, "  ")
-  return result.split("\n").join(`\n${indent.substring(2)}`)
-}
-
-// Log every api request -- dev-time visibility only, not auth/audit logging.
-api.use((request, _response, next) => {
-  const info = responseUtils.getRequestDetails(request)
-
-  console.warn("\n\n==========================================================")
-  console.warn(` ${info.method}: ${info.url}`)
-  console.warn("----------------------------------------------------------")
-
-  if (info.query) console.warn(chalk.grey(` query: ${stringify(info.query, "      ")}`))
-  if (info.params) console.warn(chalk.grey(` params: ${stringify(info.params, "       ")}`))
-  if (info.body) console.warn(chalk.grey(` body: ${stringify(info.body, "     ")}`))
-
-  next()
-})
 
 ////////////////
 // ## Project manipulation

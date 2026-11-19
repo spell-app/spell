@@ -152,7 +152,6 @@ export function sendJSON(response: Response, json: any) {
  */
 export function sendJSONFile(response: Response, path: string) {
   response.set("Content-Type", "application/json")
-  console.warn("Sending JSON file:\n  ", path)
   return response.sendFile(path)
 }
 
@@ -190,27 +189,4 @@ export function sendError(
       }
     ]
   })
-}
-
-////////////////
-// ## Request utilities
-////////////////
-
-/**
- * Return a POJO with relevant details from `request`:
- * - `url` -- URL called.
- * - `method` -- `"GET"`, `"POST"`, etc.
- * - `params` -- clone of named request params from router, if any provided.
- * - `query` -- clone of query params from URL string, if any provided.
- * - `body` -- body as string, or CLONE of body object, if any provided.
- */
-export function getRequestDetails(request: Request) {
-  const { query, params, body } = request
-  return {
-    method: request.method,
-    url: request.originalUrl,
-    query: Object.keys(query).length ? { ...query } : undefined,
-    params: Object.keys(params).length ? { ...params } : undefined,
-    body: typeof body === "string" ? body : Object.keys(body).length ? { ...body } : undefined
-  }
 }

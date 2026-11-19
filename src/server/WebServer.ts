@@ -8,7 +8,15 @@ import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell/serv
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Guard } from "./Guard"
 import { toListener } from "./listener"
-import { holdRevealScript, liveClientScript, type LiveVersions, type ServerConfig } from "./liveClient"
+import {
+  holdRevealScript,
+  LIVE_EVENTS,
+  LIVE_SCRIPT,
+  LIVE_VERSIONS,
+  liveClientScript,
+  type LiveVersions,
+  type ServerConfig
+} from "./liveClient"
 import { LiveReload } from "./LiveReload"
 import { type ListenOptions, listenPreferred } from "./ports"
 import { underPrefix } from "./proxy"
@@ -236,33 +244,6 @@ export type WebServerProps = {
 
 /** Answers a websocket upgrade:  takes over `socket`. */
 export type UpgradeHandler = (raw: IncomingMessage, socket: Duplex, head: Buffer) => unknown
-
-/**
- * The page server's own calls, under `/api/` like every call (epic `people-and-orgs`, P16).
- * - `GET /api/server`:  the page server's `ServerInfo` (which checkout, branch and port)
- *   - what the openers ask
- *   - `PageServer` answers it;  a plain `WebServer` doesn't
- * - `/api/server/live` (`LIVE_EVENTS`) and `/api/server/live.js` (`LIVE_SCRIPT`):  live reload, on any live `WebServer`
- * - `/api/server/versions` (`LIVE_VERSIONS`):  what a page's scripts hold now, on any live `WebServer`
- */
-export const SERVER_API = "/api/server"
-
-/** Where a live page opens its live-reload websocket (`LiveReload.events`). */
-export const LIVE_EVENTS = `${SERVER_API}/live`
-
-/** Where a live page loads its live client from (`liveClientScript()`). */
-export const LIVE_SCRIPT = `${SERVER_API}/live.js`
-
-/**
- * Where a live page asks what its scripts hold now (`WebServer.versionsOf()`), and the server's run and write token
- * (`LiveVersions`):  `GET /api/server/versions?path=/a.js&path=/b.js` =>
- * `{ versions: { "/a.js": "<sha1>", "/b.js": null }, run, token }`.
- * - after the server restarts, a page takes the new token, and reloads only when one of ITS scripts changed
- *   (epic `epic-engine` I293)
- * - the token as every page it serves carries it:  a page of another origin can't read the answer, and the host check
- *   turns away every other host
- */
-export const LIVE_VERSIONS = `${SERVER_API}/versions`
 
 /** the most paths one `LIVE_VERSIONS` call hashes:  an epic page loads a few hundred files */
 const MAX_VERSIONS = 1000

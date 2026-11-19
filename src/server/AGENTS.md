@@ -59,6 +59,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `LiveReload` + [liveClient.ts](liveClient.ts) -- live reload over a websocket, and the page-side client.
     - The client:  `/api/server/live.js` (`editPage()`).
     - Its websocket:  `/api/server/live`.
+    - Its addresses (`SERVER_API`, `LIVE_EVENTS`, `LIVE_SCRIPT`, `LIVE_VERSIONS`) are in liveClient.ts, not `WebServer`:
+      a page joins the channel by them.
+    - A page the page server didn't serve joins through its proxy with `joinLiveChannel()`:  the editor, served by vite
+      (epic `from-console` P17).  Browser code takes it by file, `spell/server/liveClient`, never the `spell/server` barrel.
+      - It sets `window.SPELL_SERVER` itself (no write token, no `run`) and loads the client;  `isLiveChannelOpen()` says
+        whether its socket is open, for a page that polls slowly only while it isn't.
     - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins):  accept, send, ping;  and read what a page sends
       (`onText`, for a `Referee`), which live reload doesn't ask for, so its pages stay as they were.
     - NEVER an `EventSource`, or any other request held open:

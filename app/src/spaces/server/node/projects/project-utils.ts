@@ -68,9 +68,7 @@ Object.defineProperty(SP.SpellLocation.prototype, "serverPath", {
     )
     const path = [isBuiltFile(this) ? buildFolderFor(projectFolder) : projectFolder]
     if (this.filePath) path.push(...this.filePath.split("/"))
-    const serverPath = fileUtils.normalizePath(...path.filter(Boolean))
-    console.warn(`Server path for path '${this.path}' => '${serverPath}'`)
-    return serverPath
+    return fileUtils.normalizePath(...path.filter(Boolean))
   }
 })
 
