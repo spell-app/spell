@@ -20,10 +20,12 @@ _An epic page:  everything on it has a short id, and buttons for answering it._
 ## Contents
 
 - On this page:  [why you'd want it](#why-youd-want-it) · [how you'll use it](#how-youll-use-it) · [try it](#try-it)
+- [How epics work](epic/README-how-it-works.md):  sagas, epics and guides;  the workflow;  the page, in pictures
 - [Setting it up](epic/README-setup.md):  every step, on GitHub or **[GitLab](epic/README-setup.md#on-gitlab)**,
   and [when main takes only pull or merge requests](epic/README-setup.md#when-main-takes-only-pull-requests)
 - [With a team, or Codex](epic/README-teams.md):  joining, syncing, two people on one page
 - [Settings, and what's still rough](epic/README-config.md):  the config file, worktrees, the local server
+- [With superpowers](epic/README-superpowers.md):  what each plugin does, and how they share a session
 - [The method, in depth](epic/README.md):  how a page works, and why
 
 ## Why you'd want it

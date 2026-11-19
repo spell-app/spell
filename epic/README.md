@@ -457,6 +457,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | Page | What's on it |
 | --- | --- |
 | [README.md](README.md) | <ul><li>this page:  a decision made and kept, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
+| [README-how-it-works.md](README-how-it-works.md) | <ul><li>sagas, epics and guides:  how each holds the next</li><li>the workflow:  two Accepts, then it builds</li><li>the page in annotated pictures:  header, items, "While you were out", the Review tab</li></ul> |
 | [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
 | [README-skills.md](README-skills.md) | <ul><li>twenty-two skills you type, fourteen hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
@@ -465,6 +466,8 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-setup.md](README-setup.md) | <ul><li>every step of setting a repo up;  the extension</li><li>on GitLab;  when main takes only pull or merge requests</li><li>the plans live beside your repo;  what your AGENTS.md adds</li></ul> |
 | [README-teams.md](README-teams.md) | <ul><li>joining, who you are, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
 | [README-config.md](README-config.md) | <ul><li>the epic folder;  your settings;  every key of the config file</li><li>worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
+| [README-superpowers.md](README-superpowers.md) | <ul><li>epics beside the superpowers plugin:  who plans, who finishes</li><li>the stand-aside words, and where they reach a session</li><li>a live trial;  common clashes and their fixes</li></ul> |
+| [README-faq.md](README-faq.md) | <ul><li>when something goes wrong:  what you see, why, and the fix</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 
